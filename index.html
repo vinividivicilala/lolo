@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>📝 Noted</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #f9fafb;
+      padding: 50px 20px;
+      color: #111827;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+      font-size: 28px;
+      font-weight: 600;
+      color: #111827;
+    }
+	
+        input[type="text"] {
+            flex: 1;
+            padding: 14px 18px;
+            border: 1px solid #d1d5db;
+            border-radius: 12px;
+            font-size: 16px;
+            background: #fff;
+            transition: border 0.3s ease;
+        }
+        input[type="text"]:focus {
+            border-color: #3b82f6;
+            outline: none;
+        }
+        button {
+            background-color: #3b82f6;
+            padding: 14px 20px;
+            border-radius: 12px;
+            color: white;
+            font-weight: 600;
+            font-size: 15px;
+            border: none;
+            cursor: pointer;
+            transition: background 0.3s ease, transform 0.2s;
+        }
+        button:hover {
+            background-color: #2563eb;
+            transform: scale(1.03);
+        }
+        .note-card {
+            background: white;
+            max-width: 640px;
+            margin: 0 auto 20px;
+            border-radius: 14px;
+            padding: 20px 24px 20px 60px;
+            display: flex;
+            align-items: center;
+            position: relative;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.04);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .note-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.06);
+        }
+        .note-card::before {
+            content: '';
+            position: absolute;
+            left: 30px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: #e5e7eb;
+        }
+        .timeline-dot {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            border: 3px solid #9ca3af;
+            background: #f3f4f6;
+            position: absolute;
+            left: 23px;
+            top: 22px;
+            z-index: 1;
+            transition: all 0.3s ease;
+        }
+        .timeline-dot.active {
+            background: #3b82f6;
+            border-color: #3b82f6;
+            animation: blink 1.2s infinite;
+        }
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .note-text {
+            flex: 1;
+            font-size: 16px;
+            line-height: 1.6;
+            color: #1f2937;
+            word-break: break-word;
+            white-space: pre-wrap;
+        }
+        .arrow {
+            margin-left: 12px;
+            opacity: 0.5;
+        }
+        .arrow svg {
+            width: 20px;
+            height: 20px;
+        }
+        .popup {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #10b981;
+            color: white;
+            padding: 14px 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            font-weight: 500;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.4s ease;
+            z-index: 1000;
+        }
+        .popup.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .topic-filter {
+            display: flex;
+            max-width: 640px;
+            margin: 0 auto 20px;
+            gap: 10px;
+            overflow-x: auto; /* Jika topik terlalu banyak */
+        }
+        .topic-button {
+            background-color: #e5e7eb;
+            color: #374151;
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        .topic-button.active {
+            background-color: #3b82f6;
+            color: white;
+        }
+        .topic-button:hover {
+            background-color: #d1d5db;
+        }
+        .note-group {
+            margin-bottom: 30px;
+        }
+        .note-group h2 {
+            font-size: 20px;
+            font-weight: 600;
+            color: #111827;
+            margin-bottom: 10px;
+            border-bottom: 2px solid #e5e7eb;
+            padding-bottom: 5px;
+        }
+        .empty-topic {
+            text-align: center;
+            color: #6b7280;
+            font-style: italic;
+            margin-top: 20px;
+        }
+        .guide-popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+            z-index: 1001;
+            max-width: 500px;
+            text-align: center;
+        }
+        .guide-popup h3 {
+            margin-top: 0;
+            color: #3b82f6;
+            margin-bottom: 10px;
+        }
+        .guide-popup p {
+            line-height: 1.6;
+            color: #4b5563;
+            margin-bottom: 15px;
+        }
+        .guide-popup a {
+            color: #2563eb;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .guide-popup button {
+            background-color: #6b7280;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s ease;
+        }
+        .guide-popup button:hover {
+            background-color: #4b5563;
+        }
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            display: none;
+        }
+        .guide-popup, .overlay {
+            display: none; /* Initially hidden */
+        }
+        .guide-popup.show, .overlay.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <h1>📝 Noted</h1>
+
+    <div class="note-input">
+        <input type="text" id="noteInput" placeholder="Tulis catatanmu di sini..." />
+        <button id="saveBtn">Simpan</button>
+    </div>
+
+    <div class="topic-filter">
+        <button class="topic-button active" data-topic="semua">Semua</button>
+    </div>
+
+    <div id="noteList"></div>
+    <div id="popup" class="popup">Catatan berhasil disimpan!</div>
+
+    <div id="guidePopup" class="guide-popup">
+        <h3>Panduan Topik</h3>
+        <p id="guideText"></p>
+        <p><a id="guideLink" href="#" target="_blank">Pelajari Lebih Lanjut</a></p>
+        <button id="closeGuideBtn">Tutup</button>
+    </div>
+    <div id="overlay" class="overlay"></div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp, query, orderBy } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCYbxo8n1zn-Y3heCIn_PmrsK44_OrdEw4",
+            authDomain: "noted-a3498.firebaseapp.com",
+            projectId: "noted-a3498",
+            storageBucket: "noted-a3498.appspot.com",
+            messagingSenderId: "1077214793842",
+            appId: "1:1077214793842:web:a70cc3643eceb53e3932eb",
+            measurementId: "G-SENDQS5Y7K"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const notesRef = collection(db, "notes");
+
+        const noteInput = document.getElementById("noteInput");
+        const noteList = document.getElementById("noteList");
+        const popup = document.getElementById("popup");
+        const saveBtn = document.getElementById("saveBtn");
+        const topicFilter = document.querySelector(".topic-filter");
+        const guidePopup = document.getElementById("guidePopup");
+        const guideText = document.getElementById("guideText");
+        const guideLink = document.getElementById("guideLink");
+        const closeGuideBtn = document.getElementById("closeGuideBtn");
+        const overlay = document.getElementById("overlay");
+        let currentFilter = "semua";
+
+        // Definisi kata kunci dan panduan topik
+        const topicKeywords = {
+            makanan: {
+                keywords: ["makan", "sarapan", "siang", "malam", "restoran", "kafe", "masak", "nasi", "roti", "buah", "sayur", "daging", "ikan", "minum", "kopi", "teh", "lezat", "enak", "lapar", "kenyang"],
+                guide: "Catat semua hal yang berkaitan dengan makanan di sini. Mulai dari resep, daftar belanja, hingga ulasan restoran favoritmu.",
+                link: "https://id.wikipedia.org/wiki/Makanan"
+            },
+            belajar: {
+                keywords: ["belajar", "kuliah", "sekolah", "ujian", "buku", "catatan", "materi", "soal", "paham", "mengerti", "ilmu", "edukasi", "kursus", "pelajaran", "guru", "dosen"],
+                guide: "Gunakan topik ini untuk mencatat materi pelajaran, tugas, atau ide-ide saat belajar.",
+                link: "https://id.wikipedia.org/wiki/Pendidikan"
+            },
+            pekerjaan: {
+                keywords: ["kerja", "kantor", "meeting", "proyek", "deadline", "tugas", "karir", "gaji", "bos", "rekan kerja", "laporan", "presentasi", "wawancara", "promosi", "bisnis"],
+                guide: "Catat semua hal terkait pekerjaanmu, seperti ide proyek, catatan rapat, atau daftar tugas.",
+                link: "https://id.wikipedia.org/wiki/Pekerjaan"
+            },
+            hiburan: {
+                keywords: ["nonton", "film", "musik", "konser", "game", "buku", "komik", "liburan", "jalan-jalan", "pesta", "tertawa", "senang", "bahagia", "santai"],
+                guide: "Tempat untuk mencatat ide film, buku yang ingin dibaca, atau rencana liburanmu.",
+                link: "https://id.wikipedia.org/wiki/Hiburan"
+            },
+            kesehatan: {
+                keywords: ["sehat", "sakit", "dokter", "obat", "olahraga", "bugar", "istirahat", "tidur", "vitamin", "diet", "alergi", "demam", "flu", "stres"],
+                guide: "Catat informasi kesehatan penting, jadwal olahraga, atau gejala yang kamu rasakan.",
+                link: "https://id.wikipedia.org/wiki/Kesehatan"
+            },
+            cinta: {
+                keywords: ["cinta", "sayang", "pacar", "hubungan", "hati", "perasaan", "rindu", "kangen", "putus", "nikah", "kasih", "mesra", "romantis"],
+                guide: "Curahkan isi hatimu dan catatan tentang hubunganmu di sini.",
+                link: "https://id.wikipedia.org/wiki/Cinta"
+            },
+            lainlain: {
+                keywords: [],
+                guide: "Catatan yang tidak termasuk dalam kategori lain akan dikumpulkan di sini.",
+                link: "#"
+            }
+        };
+
+        function categorizeNote(text) {
+            const lowerCaseText = text.toLowerCase();
+            for (const topic in topicKeywords) {
+                if (topicKeywords[topic].keywords.some(keyword => lowerCaseText.includes(keyword))) {
+                    return topic;
+                }
+            }
+            return "lainlain";
+        }
+
+        async function addNote() {
+            const text = noteInput.value.trim();
+            if (!text) return;
+
+            const topic = categorizeNote(text);
+
+            try {
+                await addDoc(notesRef, { text, topic, createdAt: serverTimestamp() });
+                noteInput.value = "";
+                showPopup();
+            } catch (error) {
+                alert("Gagal menyimpan: " + error.message);
+                console.error(error);
+            }
+        }
+
+        function showPopup() {
+            popup.classList.add("show");
+            setTimeout(() => popup.classList.remove("show"), 2000);
+        }
+
+        function renderNote(doc, isLatest = false) {
+            const noteEl = document.createElement("div");
+            noteEl.className = "note-card";
+
+         noteEl.innerHTML = `
+    <div class="timeline-dot ${isLatest ? 'active' : ''}"></div>
+    <div class="note-text">${doc.data().text}</div>
+    <div class="arrow">
+        <svg fill="none" stroke="#6b7280" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M5 12h14M12 5l7 7-7 7"/>
+        </svg>
+    </div>
+`;
+            return noteEl;
+        }
+
+        function displayNotes(notes) {
+            noteList.innerHTML = "";
+            const groupedNotes = {};
+
+            notes.forEach(doc => {
+                const topic = doc.data().topic || "lainlain";
+                if (!groupedNotes[topic]) {
+                    groupedNotes[topic] = [];
+                }
+                groupedNotes[topic].push(doc);
+            });
+
+            for (const topic in groupedNotes) {
+                const topicDiv = document.createElement("div");
+                topicDiv.className = "note-group";
+                const heading = document.createElement("h2");
+                heading.textContent = topic.charAt(0).toUpperCase() + topic.slice(1);
+                topicDiv.appendChild(heading);
+
+                const notesInTopic = groupedNotes[topic];
+                notesInTopic.forEach((doc, idx) => {
+                    const isLatest = idx === notesInTopic.length - 1 && Object.keys(groupedNotes).indexOf(topic) === Object.keys(groupedNotes).length - 1;
+                    topicDiv.appendChild(renderNote(doc, isLatest));
+                });
+                noteList.appendChild(topicDiv);
+                if (notesInTopic.length === 0) {
+                    const emptyMessage = document.createElement("p");
+                    emptyMessage.className = "empty-topic";
+                    emptyMessage.textContent = "Belum ada catatan untuk topik ini.";
+                    topicDiv.appendChild(emptyMessage);
+                }
+            }
+
+            if (Object.keys(groupedNotes).length === 0) {
+                const emptyAllMessage = document.createElement("p");
+                emptyAllMessage.className = "empty-topic";
+                emptyAllMessage.textContent = "Belum ada catatan.";
+                noteList.appendChild(emptyAllMessage);
+            }
+        }
+
+        const q = query(notesRef, orderBy("createdAt"));
+        onSnapshot(q, snapshot => {
+            const allNotes = snapshot.docs;
+            const uniqueTopics = ["semua"];
+            for (const topic in topicKeywords) {
+                if (!uniqueTopics.includes(topic)) {
+                    uniqueTopics.push(topic);
+                }
+            }
+
+            // Render tombol filter topik
+            topicFilter.innerHTML = '<button class="topic-button active" data-topic="semua">Semua</button>';
+            uniqueTopics.slice(1).forEach(topic => {
+                const button = document.createElement("button");
+                button.className = "topic-button";
+                button.dataset.topic = topic;
+                button.textContent = topic.charAt(0).toUpperCase() + topic.slice(1);
+                topicFilter.appendChild(button);
+            });
+
+            const filteredNotes = currentFilter === "semua" ? allNotes : allNotes.filter(doc => (doc.data().topic || "lainlain").toLowerCase() === currentFilter);
+            displayNotes(filteredNotes);
+        });
+
+        saveBtn.addEventListener("click", addNote);
+        noteInput.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") addNote();
+        });
+
+        topicFilter.addEventListener("click", (event) => {
+            if (event.target.classList.contains("topic-button")) {
+                document.querySelectorAll(".topic-button").forEach(btn => btn.classList.remove("active"));
+                event.target.classList.add("active");
+                currentFilter = event.target.dataset.topic;
+                const q = query(notesRef, orderBy("createdAt"));
+                onSnapshot(q, snapshot => {
+                    const allNotes = snapshot.docs;
+                    const filteredNotes = currentFilter === "semua" ? allNotes : allNotes.filter(doc => (doc.data().topic || "lainlain").toLowerCase() === currentFilter);
+                    displayNotes(filteredNotes);
+                });
+
+                // Tampilkan panduan topik yang sesuai
+                const selectedTopic = event.target.dataset.topic;
+                if (topicKeywords[selectedTopic] && selectedTopic !== 'semua') {
+                    guideText.textContent = topicKeywords[selectedTopic].guide;
+                    guideLink.href = topicKeywords[selectedTopic].link || '#';
+                    guidePopup.classList.add("show");
+                    overlay.classList.add("show");
+                } else {
+                    guidePopup.classList.remove("show");
+                    overlay.classList.remove("show");
+                }
+            }
+        });
+
+        closeGuideBtn.addEventListener("click", () => {
+            guidePopup.classList.remove("show");
+            overlay.classList.remove("show");
+        });
+
+        overlay.addEventListener("click", () => {
+            guidePopup.classList.remove("show");
+            overlay.classList.remove("show");
+        });
+    </script>
+</body>
+</html>
