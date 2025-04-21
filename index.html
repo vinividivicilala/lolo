@@ -232,6 +232,44 @@
         .guide-popup.show, .overlay.show {
             display: block;
         }
+		
+		
+	.modal-content {
+    background: white;
+    padding: 30px; /* Tambah atau sesuaikan padding */
+    border-radius: 16px; /* Sesuaikan radius sudut */
+    max-width: 700px; /* Perbesar lebar maksimum */
+    width: 90%; /* Atau gunakan persentase untuk responsif */
+    text-align: left;
+    position: relative;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.3); /* Efek bayangan lebih kuat untuk menonjol */
+    transform: scale(1.05); /* Sedikit diperbesar saat muncul */
+    transition: transform 0.3s ease-in-out; /* Animasi halus saat muncul */
+}
+
+/* Tambahkan style untuk overlay jika belum ada */
+.modal-overlay {
+    display: flex; /* Menggunakan flex agar konten di tengah */
+    justify-content: center; /* Tengah horizontal */
+    align-items: center; /* Tengah vertikal */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.6); /* Latar belakang lebih gelap jika diinginkan */
+    z-index: 1002;
+}	
+		
+		
+.close-btn {
+  position: absolute;
+  top: 10px; right: 15px;
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+}
     </style>
 </head>
 <body>
@@ -249,119 +287,156 @@
     <div id="noteList"></div>
     <div id="popup" class="popup">Catatan berhasil disimpan!</div>
 
-    <div id="guidePopup" class="guide-popup">
-        <h3>Panduan Topik</h3>
-        <p id="guideText"></p>
-        <p><a id="guideLink" href="#" target="_blank">Pelajari Lebih Lanjut</a></p>
-        <button id="closeGuideBtn">Tutup</button>
-    </div>
+    
+	
+	
+<div id="guidePopup" class="guide-popup">
+        <h3>Panduan Topik</h3>
+        <div id="guideContent">
+            <p id="guideText"></p>
+            <p><a id="learnMoreLink" href="#" target="_blank">Pelajari Lebih Lanjut</a></p>
+        </div>
+        <button id="closeGuideBtn">Tutup</button>
+    </div>
+	
+
     <div id="overlay" class="overlay"></div>
+	<div class="modal-overlay" id="termsModal">
+  <div class="modal-content">
+    <button class="close-btn" id="closeTermsModal">&times;</button>
+    <div style="background-color: #E0F7FA; padding: 15px; border-radius: 8px; margin-bottom: 10px; text-align: left;">
+      <div style="display: flex; align-items: center; margin-bottom: 5px;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 20px; height: 20px; margin-right: 8px;"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="13 2 13 9 20 9"></polyline></svg>
+        <h2 style="font-size: 1.2em; margin: 0;">Ketentuan</h2>
+      </div>
+      <ol style="padding-left: 20px; margin-top: 5px;">
+        <li>Website ini disediakan sebagai platform pembelajaran pemrograman untuk pemula dan menengah.</li>
+        <li style="background-color: #FFF9C4; padding: 10px; border-radius: 6px; margin-top: 8px; list-style: none;">2. ...</li>
+        <li style="background-color: #FFD54F; padding: 10px; border-radius: 6px; margin-top: 8px; list-style: none;">3. ...</li>
+        <li style="background-color: #FFAB91; padding: 10px; border-radius: 6px; margin-top: 8px; list-style: none;">4. ...</li>
+      </ol>
+    </div>
+    <div style="background-color: #FCE4EC; padding: 10px; border-radius: 6px; margin-bottom: 10px; text-align: left; font-size: 0.9em;">
+      <span style="color: #E91E63;">: Halaman Ketentuan</span>
+    </div>
+    <div style="display: flex; align-items: center; font-size: 0.8em; color: #757575;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 16px; height: 16px; margin-right: 5px;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+      <span>Terakhir diperbarui: 19 April 2025</span>
+    </div>
+  </div>
+</div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
-        import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp, query, orderBy } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
+<script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp, query, orderBy } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyCYbxo8n1zn-Y3heCIn_PmrsK44_OrdEw4",
-            authDomain: "noted-a3498.firebaseapp.com",
-            projectId: "noted-a3498",
-            storageBucket: "noted-a3498.appspot.com",
-            messagingSenderId: "1077214793842",
-            appId: "1:1077214793842:web:a70cc3643eceb53e3932eb",
-            measurementId: "G-SENDQS5Y7K"
-        };
+        const firebaseConfig = {
+            apiKey: "AIzaSyCYbxo8n1zn-Y3heCIn_PmrsK44_OrdEw4",
+            authDomain: "noted-a3498.firebaseapp.com",
+            projectId: "noted-a3498",
+            storageBucket: "noted-a3498.appspot.com",
+            messagingSenderId: "1077214793842",
+            appId: "1:1077214793842:web:a70cc3643eceb53e3932eb",
+            measurementId: "G-SENDQS5Y7K"
+        };
 
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const notesRef = collection(db, "notes");
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const notesRef = collection(db, "notes");
 
-        const noteInput = document.getElementById("noteInput");
-        const noteList = document.getElementById("noteList");
-        const popup = document.getElementById("popup");
-        const saveBtn = document.getElementById("saveBtn");
-        const topicFilter = document.querySelector(".topic-filter");
-        const guidePopup = document.getElementById("guidePopup");
-        const guideText = document.getElementById("guideText");
-        const guideLink = document.getElementById("guideLink");
-        const closeGuideBtn = document.getElementById("closeGuideBtn");
-        const overlay = document.getElementById("overlay");
-        let currentFilter = "semua";
+        const noteInput = document.getElementById("noteInput");
+        const noteList = document.getElementById("noteList");
+        const popup = document.getElementById("popup");
+        const saveBtn = document.getElementById("saveBtn");
+        const topicFilter = document.querySelector(".topic-filter");
+        const guidePopup = document.getElementById("guidePopup");
+        const guideText = document.getElementById("guideText");
+        const guideLink = document.getElementById("guideLink");
+        const closeGuideBtn = document.getElementById("closeGuideBtn");
+        const overlay = document.getElementById("overlay");
+        let currentFilter = "semua";
 
-        // Definisi kata kunci dan panduan topik
-        const topicKeywords = {
-            makanan: {
-                keywords: ["makan", "sarapan", "siang", "malam", "restoran", "kafe", "masak", "nasi", "roti", "buah", "sayur", "daging", "ikan", "minum", "kopi", "teh", "lezat", "enak", "lapar", "kenyang"],
-                guide: "Catat semua hal yang berkaitan dengan makanan di sini. Mulai dari resep, daftar belanja, hingga ulasan restoran favoritmu.",
-                link: "https://id.wikipedia.org/wiki/Makanan"
-            },
-            belajar: {
-                keywords: ["belajar", "kuliah", "sekolah", "ujian", "buku", "catatan", "materi", "soal", "paham", "mengerti", "ilmu", "edukasi", "kursus", "pelajaran", "guru", "dosen"],
-                guide: "Gunakan topik ini untuk mencatat materi pelajaran, tugas, atau ide-ide saat belajar.",
-                link: "https://id.wikipedia.org/wiki/Pendidikan"
-            },
-            pekerjaan: {
-                keywords: ["kerja", "kantor", "meeting", "proyek", "deadline", "tugas", "karir", "gaji", "bos", "rekan kerja", "laporan", "presentasi", "wawancara", "promosi", "bisnis"],
-                guide: "Catat semua hal terkait pekerjaanmu, seperti ide proyek, catatan rapat, atau daftar tugas.",
-                link: "https://id.wikipedia.org/wiki/Pekerjaan"
-            },
-            hiburan: {
-                keywords: ["nonton", "film", "musik", "konser", "game", "buku", "komik", "liburan", "jalan-jalan", "pesta", "tertawa", "senang", "bahagia", "santai"],
-                guide: "Tempat untuk mencatat ide film, buku yang ingin dibaca, atau rencana liburanmu.",
-                link: "https://id.wikipedia.org/wiki/Hiburan"
-            },
-            kesehatan: {
-                keywords: ["sehat", "sakit", "dokter", "obat", "olahraga", "bugar", "istirahat", "tidur", "vitamin", "diet", "alergi", "demam", "flu", "stres"],
-                guide: "Catat informasi kesehatan penting, jadwal olahraga, atau gejala yang kamu rasakan.",
-                link: "https://id.wikipedia.org/wiki/Kesehatan"
-            },
-            cinta: {
-                keywords: ["cinta", "sayang", "pacar", "hubungan", "hati", "perasaan", "rindu", "kangen", "putus", "nikah", "kasih", "mesra", "romantis"],
-                guide: "Curahkan isi hatimu dan catatan tentang hubunganmu di sini.",
-                link: "https://id.wikipedia.org/wiki/Cinta"
-            },
-            lainlain: {
-                keywords: [],
-                guide: "Catatan yang tidak termasuk dalam kategori lain akan dikumpulkan di sini.",
-                link: "#"
-            }
-        };
+        // Definisi kata kunci dan panduan topik
+         const topicKeywords = {
+            makanan: {
+                keywords: ["makan", "sarapan", "siang", "malam", "restoran", "kafe", "masak", "nasi", "roti", "buah", "sayur", "daging", "ikan", "minum", "kopi", "teh", "lezat", "enak", "lapar", "kenyang"],
+                guide: "Catat semua hal yang berkaitan dengan makanan di sini. Mulai dari resep, daftar belanja, hingga ulasan restoran favoritmu.",
+                link: "https://id.wikipedia.org/wiki/Makanan", // Tambahkan koma di sini
+                 termsContent: [
+            "Ketentuan terkait topik makanan:...",
+            "[gambar]images/5.jpg", // Indikasi gambar dan path
+            "Informasi tambahan tentang makanan:...",
+            "Tips dan trik untuk catatan makanan:..."
+        ]
+            },
+            belajar: {
+                keywords: ["belajar", "kuliah", "sekolah", "ujian", "buku", "catatan", "materi", "soal", "paham", "mengerti", "ilmu", "edukasi", "kursus", "pelajaran", "guru", "dosen"],
+                guide: "Gunakan topik ini untuk mencatat materi pelajaran, tugas, atau ide-ide saat belajar.",
+                link: "https://id.wikipedia.org/wiki/Pendidikan" // Tambahkan koma jika ada properti setelahnya
+            },
+            pekerjaan: {
+                keywords: ["kerja", "kantor", "meeting", "proyek", "deadline", "tugas", "karir", "gaji", "bos", "rekan kerja", "laporan", "presentasi", "wawancara", "promosi", "bisnis"],
+                guide: "Catat semua hal terkait pekerjaanmu, seperti ide proyek, catatan rapat, atau daftar tugas.",
+                link: "https://id.wikipedia.org/wiki/Pekerjaan"
+            },
+            hiburan: {
+                keywords: ["nonton", "film", "musik", "konser", "game", "buku", "komik", "liburan", "jalan-jalan", "pesta", "tertawa", "senang", "bahagia", "santai"],
+                guide: "Tempat untuk mencatat ide film, buku yang ingin dibaca, atau rencana liburanmu.",
+                link: "https://id.wikipedia.org/wiki/Hiburan"
+            },
+            kesehatan: {
+                keywords: ["sehat", "sakit", "dokter", "obat", "olahraga", "bugar", "istirahat", "tidur", "vitamin", "diet", "alergi", "demam", "flu", "stres"],
+                guide: "Catat informasi kesehatan penting, jadwal olahraga, atau gejala yang kamu rasakan.",
+                link: "https://id.wikipedia.org/wiki/Kesehatan"
+            },
+            cinta: {
+                keywords: ["cinta", "sayang", "pacar", "hubungan", "hati", "perasaan", "rindu", "kangen", "putus", "nikah", "kasih", "mesra", "romantis"],
+                guide: "Curahkan isi hatimu dan catatan tentang hubunganmu di sini.",
+                link: "https://id.wikipedia.org/wiki/Cinta"
+            },
+            lainlain: {
+                keywords: [],
+                guide: "Catatan yang tidak termasuk dalam kategori lain akan dikumpulkan di sini.",
+                link: "#"
+            }
+        };
 
-        function categorizeNote(text) {
-            const lowerCaseText = text.toLowerCase();
-            for (const topic in topicKeywords) {
-                if (topicKeywords[topic].keywords.some(keyword => lowerCaseText.includes(keyword))) {
-                    return topic;
-                }
-            }
-            return "lainlain";
-        }
+        function categorizeNote(text) {
+            const lowerCaseText = text.toLowerCase();
+            for (const topic in topicKeywords) {
+                if (topicKeywords[topic].keywords.some(keyword => lowerCaseText.includes(keyword))) {
+                    return topic;
+                }
+            }
+            return "lainlain";
+        }
 
-        async function addNote() {
-            const text = noteInput.value.trim();
-            if (!text) return;
+        async function addNote() {
+            const text = noteInput.value.trim();
+            if (!text) return;
 
-            const topic = categorizeNote(text);
+            const topic = categorizeNote(text);
 
-            try {
-                await addDoc(notesRef, { text, topic, createdAt: serverTimestamp() });
-                noteInput.value = "";
-                showPopup();
-            } catch (error) {
-                alert("Gagal menyimpan: " + error.message);
-                console.error(error);
-            }
-        }
+            try {
+                await addDoc(notesRef, { text, topic, createdAt: serverTimestamp() });
+                noteInput.value = "";
+                showPopup();
+            } catch (error) {
+                alert("Gagal menyimpan: " + error.message);
+                console.error(error);
+            }
+        }
 
-        function showPopup() {
-            popup.classList.add("show");
-            setTimeout(() => popup.classList.remove("show"), 2000);
-        }
+        function showPopup() {
+            popup.classList.add("show");
+            setTimeout(() => popup.classList.remove("show"), 2000);
+        }
 
-        function renderNote(doc, isLatest = false) {
-            const noteEl = document.createElement("div");
-            noteEl.className = "note-card";
+        function renderNote(doc, isLatest = false) {
+            const noteEl = document.createElement("div");
+            noteEl.className = "note-card";
 
-         noteEl.innerHTML = `
+noteEl.innerHTML = `
     <div class="timeline-dot ${isLatest ? 'active' : ''}"></div>
     <div class="note-text">${doc.data().text}</div>
     <div class="arrow">
@@ -370,114 +445,217 @@
         </svg>
     </div>
 `;
-            return noteEl;
-        }
 
-        function displayNotes(notes) {
-            noteList.innerHTML = "";
-            const groupedNotes = {};
+            return noteEl;
+        }
 
-            notes.forEach(doc => {
-                const topic = doc.data().topic || "lainlain";
-                if (!groupedNotes[topic]) {
-                    groupedNotes[topic] = [];
-                }
-                groupedNotes[topic].push(doc);
-            });
+        function displayNotes(notes) {
+            noteList.innerHTML = "";
+            const groupedNotes = {};
 
-            for (const topic in groupedNotes) {
-                const topicDiv = document.createElement("div");
-                topicDiv.className = "note-group";
-                const heading = document.createElement("h2");
-                heading.textContent = topic.charAt(0).toUpperCase() + topic.slice(1);
-                topicDiv.appendChild(heading);
+            notes.forEach(doc => {
+                const topic = doc.data().topic || "lainlain";
+                if (!groupedNotes[topic]) {
+                    groupedNotes[topic] = [];
+                }
+                groupedNotes[topic].push(doc);
+            });
 
-                const notesInTopic = groupedNotes[topic];
-                notesInTopic.forEach((doc, idx) => {
-                    const isLatest = idx === notesInTopic.length - 1 && Object.keys(groupedNotes).indexOf(topic) === Object.keys(groupedNotes).length - 1;
-                    topicDiv.appendChild(renderNote(doc, isLatest));
-                });
-                noteList.appendChild(topicDiv);
-                if (notesInTopic.length === 0) {
-                    const emptyMessage = document.createElement("p");
-                    emptyMessage.className = "empty-topic";
-                    emptyMessage.textContent = "Belum ada catatan untuk topik ini.";
-                    topicDiv.appendChild(emptyMessage);
-                }
-            }
+            for (const topic in groupedNotes) {
+                const topicDiv = document.createElement("div");
+                topicDiv.className = "note-group";
+                const heading = document.createElement("h2");
+                heading.textContent = topic.charAt(0).toUpperCase() + topic.slice(1);
+                topicDiv.appendChild(heading);
 
-            if (Object.keys(groupedNotes).length === 0) {
-                const emptyAllMessage = document.createElement("p");
-                emptyAllMessage.className = "empty-topic";
-                emptyAllMessage.textContent = "Belum ada catatan.";
-                noteList.appendChild(emptyAllMessage);
-            }
-        }
+                const notesInTopic = groupedNotes[topic];
+                notesInTopic.forEach((doc, idx) => {
+                    const isLatest = idx === notesInTopic.length - 1 && Object.keys(groupedNotes).indexOf(topic) === Object.keys(groupedNotes).length - 1;
+                    topicDiv.appendChild(renderNote(doc, isLatest));
+                });
+                noteList.appendChild(topicDiv);
+                if (notesInTopic.length === 0) {
+                    const emptyMessage = document.createElement("p");
+                    emptyMessage.className = "empty-topic";
+                    emptyMessage.textContent = "Belum ada catatan untuk topik ini.";
+topicDiv.appendChild(emptyMessage);
+                }
+            }
 
+            if (Object.keys(groupedNotes).length === 0) {
+                const emptyAllMessage = document.createElement("p");
+                emptyAllMessage.className = "empty-topic";
+                emptyAllMessage.textContent = "Belum ada catatan.";
+                noteList.appendChild(emptyAllMessage);
+            }
+        }
+
+        const q = query(notesRef, orderBy("createdAt"));
+        onSnapshot(q, snapshot => {
+            const allNotes = snapshot.docs;
+            const uniqueTopics = ["semua"];
+            for (const topic in topicKeywords) {
+                if (!uniqueTopics.includes(topic)) {
+                    uniqueTopics.push(topic);
+                }
+            }
+
+            // Render tombol filter topik
+            topicFilter.innerHTML = '<button class="topic-button active" data-topic="semua">Semua</button>';
+            uniqueTopics.slice(1).forEach(topic => {
+                const button = document.createElement("button");
+                button.className = "topic-button";
+                button.dataset.topic = topic;
+                button.textContent = topic.charAt(0).toUpperCase() + topic.slice(1);
+                topicFilter.appendChild(button);
+            });
+
+            const filteredNotes = currentFilter === "semua" ? allNotes : allNotes.filter(doc => (doc.data().topic || "lainlain").toLowerCase() === currentFilter);
+            displayNotes(filteredNotes);
+        });
+
+        saveBtn.addEventListener("click", addNote);
+        noteInput.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") addNote();
+        });
+
+topicFilter.addEventListener("click", (event) => {
+    if (event.target.classList.contains("topic-button")) {
+        document.querySelectorAll(".topic-button").forEach(btn => btn.classList.remove("active"));
+        event.target.classList.add("active");
+        currentFilter = event.target.dataset.topic;
         const q = query(notesRef, orderBy("createdAt"));
         onSnapshot(q, snapshot => {
             const allNotes = snapshot.docs;
-            const uniqueTopics = ["semua"];
-            for (const topic in topicKeywords) {
-                if (!uniqueTopics.includes(topic)) {
-                    uniqueTopics.push(topic);
-                }
-            }
-
-            // Render tombol filter topik
-            topicFilter.innerHTML = '<button class="topic-button active" data-topic="semua">Semua</button>';
-            uniqueTopics.slice(1).forEach(topic => {
-                const button = document.createElement("button");
-                button.className = "topic-button";
-                button.dataset.topic = topic;
-                button.textContent = topic.charAt(0).toUpperCase() + topic.slice(1);
-                topicFilter.appendChild(button);
-            });
-
             const filteredNotes = currentFilter === "semua" ? allNotes : allNotes.filter(doc => (doc.data().topic || "lainlain").toLowerCase() === currentFilter);
             displayNotes(filteredNotes);
         });
 
-        saveBtn.addEventListener("click", addNote);
-        noteInput.addEventListener("keydown", (e) => {
-            if (e.key === "Enter") addNote();
-        });
+        // Tampilkan panduan topik yang sesuai
+        const selectedTopic = event.target.dataset.topic;
+        if (topicKeywords[selectedTopic] && selectedTopic !== 'semua') {
+            const guideContent = document.getElementById('guideContent');
+            guideContent.innerHTML = `
+                <p id="guideText">${topicKeywords[selectedTopic].guide}</p>
+                <p><a id="learnMoreLink" href="#" data-topic="${selectedTopic}">Pelajari Lebih Lanjut</a></p>
+            `;
+            guidePopup.classList.add("show");
+            overlay.classList.add("show");
 
-        topicFilter.addEventListener("click", (event) => {
-            if (event.target.classList.contains("topic-button")) {
-                document.querySelectorAll(".topic-button").forEach(btn => btn.classList.remove("active"));
-                event.target.classList.add("active");
-                currentFilter = event.target.dataset.topic;
-                const q = query(notesRef, orderBy("createdAt"));
-                onSnapshot(q, snapshot => {
-                    const allNotes = snapshot.docs;
-                    const filteredNotes = currentFilter === "semua" ? allNotes : allNotes.filter(doc => (doc.data().topic || "lainlain").toLowerCase() === currentFilter);
-                    displayNotes(filteredNotes);
+            // Tambahkan event listener untuk tombol "Pelajari Lebih Lanjut" di panduan
+            const learnMoreBtn = document.getElementById('learnMoreLink');
+            if (learnMoreBtn) {
+                learnMoreBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const currentTopic = e.target.dataset.topic;
+                    showTermsModal(currentTopic);
                 });
-
-                // Tampilkan panduan topik yang sesuai
-                const selectedTopic = event.target.dataset.topic;
-                if (topicKeywords[selectedTopic] && selectedTopic !== 'semua') {
-                    guideText.textContent = topicKeywords[selectedTopic].guide;
-                    guideLink.href = topicKeywords[selectedTopic].link || '#';
-                    guidePopup.classList.add("show");
-                    overlay.classList.add("show");
-                } else {
-                    guidePopup.classList.remove("show");
-                    overlay.classList.remove("show");
-                }
             }
-        });
-
-        closeGuideBtn.addEventListener("click", () => {
+        } else {
             guidePopup.classList.remove("show");
             overlay.classList.remove("show");
-        });
+        }
+    }
+});
+        closeGuideBtn.addEventListener("click", () => {
+            guidePopup.classList.remove("show");
+            overlay.classList.remove("show");
+        });
 
-        overlay.addEventListener("click", () => {
-            guidePopup.classList.remove("show");
-            overlay.classList.remove("show");
+        overlay.addEventListener("click", () => {
+            guidePopup.classList.remove("show");
+            overlay.classList.remove("show");
+        });
+const termsModal = document.getElementById('termsModal');
+const closeTermsModalBtn = document.getElementById('closeTermsModal');
+const learnMoreLinkOutside = document.getElementById('learnMoreLink');
+
+
+closeTermsModalBtn.addEventListener('click', () => {
+  termsModal.style.display = 'none';
+  overlay.style.display = 'none';
+});
+
+window.addEventListener('click', (e) => {
+  if (e.target === termsModal) {
+    termsModal.style.display = 'none';
+    overlay.style.display = 'none';
+  }
+});
+
+function showTermsModal(topic) {
+    const termsModal = document.getElementById('termsModal');
+    const termsContentDiv = termsModal.querySelector('.modal-content');
+    termsContentDiv.innerHTML = `
+        <button class="close-btn" id="closeTermsModal">&times;</button>
+        <div style="background-color: #E0F7FA; padding: 15px; border-radius: 8px; margin-bottom: 10px; text-align: left;">
+            <div style="display: flex; align-items: center; margin-bottom: 5px;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 20px; height: 20px; margin-right: 8px;"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="13 2 13 9 20 9"></polyline></svg>
+                <h2 style="font-size: 1.2em; margin: 0;">Ketentuan</h2>
+            </div>
+            <ol id="termsNumberedList" style="padding-left: 20px; margin-top: 10px;"></ol>
+        </div>
+        <div style="background-color: #FCE4EC; padding: 10px; border-radius: 6px; margin-bottom: 10px; text-align: left; font-size: 0.9em;">
+            <span style="color: #E91E63;">: Halaman Ketentuan</span>
+        </div>
+        <div style="display: flex; align-items: center; font-size: 29px; color: #757575;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 39px; height: 39px; margin-right: 5px;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+            <span>Terakhir diperbarui: 21 April 2025</span>
+        </div>
+    `;
+
+    const termsNumberedList = document.getElementById('termsNumberedList');
+    const closeBtn = termsModal.querySelector('#closeTermsModal');
+
+    if (topicKeywords[topic] && topicKeywords[topic].termsContent) {
+        topicKeywords[topic].termsContent.forEach(content => {
+            const li = document.createElement('li');
+            if (content.startsWith('[gambar]')) {
+                const imagePath = content.substring('[gambar]'.length).trim();
+                const img = document.createElement('img');
+                img.src = imagePath;
+                img.style.maxWidth = '100%';
+                img.style.height = 'auto';
+                img.style.marginBottom = '10px';
+                li.appendChild(img);
+            } else {
+                li.textContent = content;
+            }
+            termsNumberedList.appendChild(li);
         });
+        termsModal.style.display = 'flex';
+        overlay.style.display = 'block';
+        guidePopup.classList.remove('show');
+
+        closeBtn.addEventListener('click', () => {
+            termsModal.style.display = 'none';
+            overlay.style.display = 'none';
+        });
+    } else {
+        termsNumberedList.innerHTML = '<li>Tidak ada informasi lebih lanjut untuk topik ini.</li>';
+        termsModal.style.display = 'flex';
+        overlay.style.display = 'block';
+        guidePopup.classList.remove('show');
+
+        closeBtn.addEventListener('click', () => {
+            termsModal.style.display = 'none';
+            overlay.style.display = 'none';
+        });
+    }
+}
+
+overlay.addEventListener('click', (e) => {
+    const termsModal = document.getElementById('termsModal');
+    const guidePopup = document.getElementById('guidePopup');
+    if (e.target === overlay) {
+        termsModal.style.display = 'none';
+        guidePopup.classList.remove('show');
+        overlay.style.display = 'none';
+    }
+});
+
+
+
     </script>
 </body>
 </html>
