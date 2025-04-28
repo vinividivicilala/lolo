@@ -270,15 +270,338 @@
   font-size: 20px;
   cursor: pointer;
 }
+
+    .info-card-container {
+      display: flex;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .info-card {
+      width: 400px;
+      height: 100px;
+      padding: 1rem;
+      border-radius: 28px;
+      color: white;
+      position: relative;
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.1);
+      transition: transform 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .info-card:hover {
+      transform: translateY(-6px);
+    }
+
+    .info-arrow-icon {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      width: 80px;
+      height: 80px;
+      fill: black;
+    }
+
+    .info-icon {
+	   font-size: 39px;
+    }
+
+    .info-ketentuan { background-color: #007BFF; }
+    .info-tentang { background-color: #28a745; }
+    .info-privasi { background-color: #dc3545; }
+
+    .info-popup {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.65);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .info-popup-content {
+      background: #fff;
+      border-radius: 12px;
+      max-width: 650px;
+      width: 90%;
+      padding: 2rem;
+      position: relative;
+      max-height: 85vh;
+      overflow-y: auto;
+      animation: fadeIn 0.3s ease;
+      scroll-behavior: smooth;
+      font-size: 29px;
+    }
+
+    .info-popup-content h2 {
+      margin-top: 0;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+	      color: black;
+	     text-align: left;
+    }
+
+    .info-content-block {
+      padding: 1rem;
+      border-radius: 10px;
+      margin-bottom: 1rem;
+    }
+
+    .info-blue-block { background: #e3f2fd; }
+    .info-yellow-block { background: #fff3cd; }
+    .info-red-block { background: #f8d7da; }
+    .info-green-block { background: #e6f4ea; }
+    .info-pink-block { background: #fdecef; }
+
+    .info-content-block p {
+      margin: 0.5rem 0;
+	      color: black;
+	     text-align: left;
+    }
+
+    .info-content-block img {
+      max-width: 100%;
+      border-radius: 8px;
+      margin: 1rem 0;
+    }
+	  .info-close-btn {
+      position: absolute;
+      top: 12px;
+      right: 16px;
+      font-size: 22px;
+      cursor: pointer;
+      color: #999;
+    }
+
+    .info-close-btn:hover {
+      color: #000;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    a {
+      color: #007bff;
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+	  ::-webkit-scrollbar-thumb {
+      background: #bbb;
+      border-radius: 4px;
+    }
+
+.user-card {
+  padding: 15px;
+  margin-bottom: 15px;
+  border-radius: 10px;
+  box-shadow: 0 0 4px rgba(0,0,0,0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: sans-serif;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.admin-border {
+  border-left: 6px solid #e74c3c;
+}
+
+.kontributor-border {
+  border-left: 6px solid #f39c12;
+}
+
+.member-border {
+  border-left: 6px solid #3498db;
+}
+
+/* Badge */
+.badge {
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: bold;
+  color: #fff;
+  cursor: pointer;
+}
+
+.admin { background-color: #e74c3c; }
+.kontributor { background-color: #f39c12; }
+.member { background-color: #3498db; }
+
+/* Role Popup */
+.role-popup-overlay {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.5);
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.role-popup-overlay.show {
+  display: flex;
+}
+
+.role-popup-box {
+  background: #fff;
+  padding: 20px 30px;
+  border-radius: 12px;
+  max-width: 400px;
+  text-align: center;
+  box-shadow: 0 0 25px rgba(0,0,0,0.2);
+}
+
+.role-popup-box .close-btn {
+  margin-top: 15px;
+  padding: 6px 14px;
+  border: none;
+  background-color: #eee;
+  cursor: pointer;
+  border-radius: 6px;
+  font-weight: bold;
+}
+
+
+    .activity-table {
+        border-collapse: collapse;
+        font-family: sans-serif;
+        font-size: 11px;
+    }
+
+    .activity-table th, .activity-table td {
+        border: 1px solid #eee;
+        padding: 2px;
+        text-align: center;
+    }
+
+    .activity-legend {
+        margin-top: 5px;
+        font-size: 10px;
+        color: #586069;
+    }
+
+    .activity-legend span {
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        border: 1px solid #eee;
+        margin: 0 5px;
+    }
+	
+	.activity-new {
+    background-color: #ccf2ff; /* Biru muda */
+}
+
+.activity-completed {
+    background-color: #aaff80; /* Hijau muda */
+}
+
+.activity-revision {
+    background-color: #ffdd99; /* Kuning muda */
+}
+
+.note-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 5px;
+}
+
+.save-individual-note {
+    padding: 5px 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: red;
+    cursor: pointer;
+    font-size: 0.8em;
+}
+
+.save-individual-note:hover {
+    background-color: green;
+}
+
+
+
+#saveBtn {
+    padding: 10px 15px;
+    border: none;
+    background-color: #007bff;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em;
+}
+
+#saveBtn:hover {
+    background-color: #0056b3;
+}
+
+.voice-icon-btn {
+    padding: 8px;
+    border: none;
+    background-color: transparent; /* Latar belakang transparan */
+    cursor: pointer;
+}
+
+.voice-icon-btn:hover {
+    opacity: 0.8; /* Efek hover sedikit memudar */
+}
+
+/* Gaya tambahan untuk ikon SVG (jika diperlukan) */
+.voice-icon-btn svg {
+    display: block; /* Agar SVG berperilaku seperti elemen blok */
+}
+
+.pin-button {
+    background-color: transparent;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 5px 10px;
+    cursor: pointer;
+    font-size: 0.8em;
+}
+
+.pin-button:hover {
+    background-color: #eee;
+}
+
+
+
+
     </style>
 </head>
 <body>
     <h1>📝 Noted</h1>
 
-    <div class="note-input">
-        <input type="text" id="noteInput" placeholder="Tulis catatanmu di sini..." />
-        <button id="saveBtn">Simpan</button>
-    </div>
+    <div class="note-input-container">
+    <input type="text" id="noteInput" placeholder="Tulis catatan di sini...">
+    <button id="saveBtn">Simpan</button>
+    <button id="voiceInputBtn" class="voice-icon-btn">
+        <svg viewBox="0 0 24 24" fill="currentColor" style="width: 24px; height: 24px;">
+            <path fill="none" d="M0 0h24v24H0z"/>
+            <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.48 6-3.3 6-6.72h-1.7z"/>
+        </svg>
+    </button>
+</div>
 
     <div class="topic-filter">
         <button class="topic-button active" data-topic="semua">Semua</button>
@@ -286,6 +609,12 @@
 
     <div id="noteList"></div>
     <div id="popup" class="popup">Catatan berhasil disimpan!</div>
+	
+	<div class="activity-filter" style="margin-bottom: 10px; text-align: right;">
+    <label for="activityYear" style="font-size: 12px; margin-right: 5px;">Tahun:</label>
+    <select id="activityYear" style="padding: 5px; border-radius: 5px; border: 1px solid #ccc; font-size: 12px;">
+        </select>
+</div>
 
     
 	
@@ -310,8 +639,8 @@
         <h2 style="font-size: 1.2em; margin: 0;">Ketentuan</h2>
       </div>
       <ol style="padding-left: 20px; margin-top: 5px;">
-        <li>Website ini disediakan sebagai platform pembelajaran pemrograman untuk pemula dan menengah.</li>
-        <li style="background-color: #FFF9C4; padding: 10px; border-radius: 6px; margin-top: 8px; list-style: none;">2. ...</li>
+        <li>Pengguna diharapkan menggunakan platform ini, untuk tujuan catatan yang positif dan efektif..</li>
+        <li style="background-color: #FFF9C4; padding: 10px; border-radius: 6px; margin-top: 8px; list-style: none;">2. Pengembang bertanggung jawab atas kesalahan pribadi pengguna yg disengaja/ga sengaja</li>
         <li style="background-color: #FFD54F; padding: 10px; border-radius: 6px; margin-top: 8px; list-style: none;">3. ...</li>
         <li style="background-color: #FFAB91; padding: 10px; border-radius: 6px; margin-top: 8px; list-style: none;">4. ...</li>
       </ol>
@@ -321,14 +650,90 @@
     </div>
     <div style="display: flex; align-items: center; font-size: 0.8em; color: #757575;">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 16px; height: 16px; margin-right: 5px;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-      <span>Terakhir diperbarui: 19 April 2025</span>
+      <span>Terakhir diperbarui: 28 April 2025 Jam 21.30</span>
     </div>
   </div>
 </div>
 
+<div class="info-popup" id="info-popup">
+    <div class="info-popup-content" id="info-popup-text">
+        <button class="info-close-btn" onclick="closeInfoPopup()">×</button>
+        </div>
+</div>
+<div class="info-card info-ketentuan" data-type="ketentuan">
+    <div class="info-icon">📜</div>
+    <h3>Ketentuan</h3>
+    <svg class="info-arrow-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+        <path d="M14 3h7v7h-2V6.41l-9.29 9.3-1.42-1.42L17.59 5H14V3z"/>
+    </svg>
+</div>
+<div class="info-card info-tentang" data-type="tentang">
+    <div class="info-icon">ℹ️</div>
+    <h3>Tentang Kami</h3>
+    <svg class="info-arrow-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+        <path d="M14 3h7v7h-2V6.41l-9.29 9.3-1.42-1.42L17.59 5H14V3z"/>
+    </svg>
+</div>
+<div class="info-card info-privasi" data-type="privasi">
+    <div class="info-icon">🔒</div>
+    <h3>Kebijakan Privasi</h3>
+    <svg class="info-arrow-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+        <path d="M14 3h7v7h-2V6.41l-9.29 9.3-1.42-1.42L17.59 5H14V3z"/>
+    </svg>
+</div>
+
+
+  <div class="user-card admin-border">
+  <strong>Farid Ardiansyah</strong>
+  <span class="badge admin">Admin</span>
+</div>
+
+<div class="user-card kontributor-border">
+  <strong>Farid Ardiansyah</strong>
+  <span class="badge kontributor">Kontributor</span>
+</div>
+
+<div class="user-card member-border">
+  <strong>Farid Ardiansyah</strong>
+  <span class="badge member">Member</span>
+</div>
+
+<!-- Popup untuk Role -->
+<div id="role-popup-overlay" class="role-popup-overlay">
+  <div class="role-popup-box">
+    <span id="role-popup-badge" class="badge"></span>
+    <p id="role-popup-desc"></p>
+    <button class="close-btn">Tutup</button>
+  </div>
+</div>
+
+<div id="activity-popup-overlay" class="role-popup-overlay">
+    <div class="role-popup-box">
+        <h3 id="activity-popup-title"></h3>
+        <p id="activity-popup-details"></p>
+        <button class="close-btn" id="close-activity-popup">Tutup</button>
+    </div>
+</div>
+
+
+<div style="margin-bottom: 10px;">
+    <button id="showSavedNotesBtn" class="bulk-save-button">Lihat Catatan Tersimpan</button>
+</div>
+
+<div id="savedNotesModal" class="saved-notes-modal-overlay" style="display: none;">
+    <div class="saved-notes-modal-content">
+        <button class="modal-close-button" id="closeSavedNotesModal">&times;</button>
+        <h2>Catatan yang Anda Simpan</h2>
+        <div id="savedNotesContainer">
+            </div>
+        <button id="saveAllToFirebaseBtn" style="margin-top: 15px;">Simpan Semua ke Database</button>
+    </div>
+</div>
+  
+  
 <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
-        import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp, query, orderBy } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp, query, orderBy, getDoc, doc, updateDoc, where, getDocs, documentId } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCYbxo8n1zn-Y3heCIn_PmrsK44_OrdEw4",
@@ -353,14 +758,18 @@
         const guideText = document.getElementById("guideText");
         const guideLink = document.getElementById("guideLink");
         const closeGuideBtn = document.getElementById("closeGuideBtn");
+const voiceInputBtn = document.getElementById("voiceInputBtn"); // Dapatkan referensi tombol mikrofon
         const overlay = document.getElementById("overlay");
         let currentFilter = "semua";
+		let recognition; // Variabel untuk SpeechRecognition
+		let isListening = false; // Status apakah sedang mendengarkan
 
         // Definisi kata kunci dan panduan topik
          const topicKeywords = {
             makanan: {
                 keywords: ["makan", "sarapan", "siang", "malam", "restoran", "kafe", "masak", "nasi", "roti", "buah", "sayur", "daging", "ikan", "minum", "kopi", "teh", "lezat", "enak", "lapar", "kenyang"],
                 guide: "Catat semua hal yang berkaitan dengan makanan di sini. Mulai dari resep, daftar belanja, hingga ulasan restoran favoritmu.",
+activity: {}, // Tambahkan data aktivitas jika ada
                 link: "https://id.wikipedia.org/wiki/Makanan", // Tambahkan koma di sini
                  termsContent: [
             "Ketentuan terkait topik makanan:...",
@@ -372,31 +781,63 @@
             belajar: {
                 keywords: ["belajar", "kuliah", "sekolah", "ujian", "buku", "catatan", "materi", "soal", "paham", "mengerti", "ilmu", "edukasi", "kursus", "pelajaran", "guru", "dosen"],
                 guide: "Gunakan topik ini untuk mencatat materi pelajaran, tugas, atau ide-ide saat belajar.",
-                link: "https://id.wikipedia.org/wiki/Pendidikan" // Tambahkan koma jika ada properti setelahnya
+activity: {
+            Jan: [
+                { day: "Mon", status: "baru", date: "2025-01-06" },
+                { day: "Wed", status: "selesai", date: "2025-01-08" }
+                // ... data lain di bulan Januari
+            ],
+            Feb: [
+                { day: "Fri", status: "selesai", date: "2025-02-14" }
+                // ... data lain di bulan Februari
+            ],
+            // ... bulan-bulan lain
+			Mar: [
+                { day: "Fri", status: "selesai", date: "2025-03-14" }
+                // ... data lain di bulan Februari
+            ],
+            // ... bulan-bulan lain
+			Apr: [
+                { day: "Fri", status: "revisi", date: "2025-04-14" },
+				{ day: "Fri", status: "selesai", date: "2025-04-25" }
+                // ... data lain di bulan Februari
+            ],
+            // ... bulan-bulan lain
+        },
+ 
+                link: "https://id.wikipedia.org/wiki/Pendidikan"
             },
+
+                
             pekerjaan: {
                 keywords: ["kerja", "kantor", "meeting", "proyek", "deadline", "tugas", "karir", "gaji", "bos", "rekan kerja", "laporan", "presentasi", "wawancara", "promosi", "bisnis"],
                 guide: "Catat semua hal terkait pekerjaanmu, seperti ide proyek, catatan rapat, atau daftar tugas.",
+activity: {}, // Tambahkan data aktivitas jika ada
                 link: "https://id.wikipedia.org/wiki/Pekerjaan"
+
             },
             hiburan: {
                 keywords: ["nonton", "film", "musik", "konser", "game", "buku", "komik", "liburan", "jalan-jalan", "pesta", "tertawa", "senang", "bahagia", "santai"],
                 guide: "Tempat untuk mencatat ide film, buku yang ingin dibaca, atau rencana liburanmu.",
+activity: {}, // Tambahkan data aktivitas jika ada
                 link: "https://id.wikipedia.org/wiki/Hiburan"
             },
             kesehatan: {
                 keywords: ["sehat", "sakit", "dokter", "obat", "olahraga", "bugar", "istirahat", "tidur", "vitamin", "diet", "alergi", "demam", "flu", "stres"],
                 guide: "Catat informasi kesehatan penting, jadwal olahraga, atau gejala yang kamu rasakan.",
+activity: {}, // Tambahkan data aktivitas jika ada
                 link: "https://id.wikipedia.org/wiki/Kesehatan"
             },
             cinta: {
                 keywords: ["cinta", "sayang", "pacar", "hubungan", "hati", "perasaan", "rindu", "kangen", "putus", "nikah", "kasih", "mesra", "romantis"],
                 guide: "Curahkan isi hatimu dan catatan tentang hubunganmu di sini.",
+activity: {}, // Tambahkan data aktivitas jika ada
                 link: "https://id.wikipedia.org/wiki/Cinta"
             },
             lainlain: {
                 keywords: [],
                 guide: "Catatan yang tidak termasuk dalam kategori lain akan dikumpulkan di sini.",
+activity: {}, // Tambahkan data aktivitas jika ada
                 link: "#"
             }
         };
@@ -412,83 +853,141 @@
         }
 
         async function addNote() {
-            const text = noteInput.value.trim();
-            if (!text) return;
+    const text = noteInput.value.trim();
+    if (!text) return;
 
-            const topic = categorizeNote(text);
+    const topic = categorizeNote(text);
 
-            try {
-                await addDoc(notesRef, { text, topic, createdAt: serverTimestamp() });
-                noteInput.value = "";
-                showPopup();
-            } catch (error) {
-                alert("Gagal menyimpan: " + error.message);
-                console.error(error);
-            }
-        }
+    try {
+        const newNoteRef = await addDoc(notesRef, { text, topic, createdAt: serverTimestamp() });
+        noteInput.value = "";
+        showPopup();
+
+        // Dapatkan timestamp catatan baru
+        const noteDoc = await getDoc(newNoteRef);
+        const createdAt = noteDoc.data().createdAt.toDate();
+        const year = createdAt.getFullYear();
+        const month = new Intl.DateTimeFormat('en', { month: 'short' }).format(createdAt);
+        const day = String(createdAt.getDate()).padStart(2, '0');
+        const dateString = `${year}-${String(createdAt.getMonth() + 1).padStart(2, '0')}-${day}`;
+
+        // Perbarui data aktivitas (ini adalah contoh sederhana, perlu disesuaikan dengan struktur data Anda)
+        if (topicKeywords[topic] && topicKeywords[topic].activity && topicKeywords[topic].activity[month]) {
+            const existingActivity = topicKeywords[topic].activity[month].find(item => item.date === dateString);
+            if (!existingActivity) {
+                topicKeywords[topic].activity[month].push({ date: dateString, status: 'new' });
+                // Anda mungkin perlu cara untuk menandai ini sebagai 'updated' agar tampilan di-refresh
+            }
+            // Refresh tampilan catatan untuk topik ini (perlu implementasi yang lebih baik)
+            const q = query(notesRef, orderBy("createdAt"));
+            onSnapshot(q, snapshot => {
+                const allNotes = snapshot.docs;
+                const filteredNotes = currentFilter === "semua" ? allNotes : allNotes.filter(doc => (doc.data().topic || "lainlain").toLowerCase() === currentFilter);
+                displayNotes(filteredNotes, document.querySelector(`#activityYear-${topic}`).value); // Pertahankan tahun yang dipilih
+            });
+
+        }
+
+    } catch (error) {
+        alert("Gagal menyimpan: " + error.message);
+        console.error(error);
+    }
+}
 
         function showPopup() {
             popup.classList.add("show");
             setTimeout(() => popup.classList.remove("show"), 2000);
         }
 
-        function renderNote(doc, isLatest = false) {
-            const noteEl = document.createElement("div");
-            noteEl.className = "note-card";
+        
+function displayNotes(notes) {
+    noteList.innerHTML = "";
+    const groupedNotes = {};
+    const topicCounts = {};
 
-noteEl.innerHTML = `
-    <div class="timeline-dot ${isLatest ? 'active' : ''}"></div>
-    <div class="note-text">${doc.data().text}</div>
-    <div class="arrow">
-        <svg fill="none" stroke="#6b7280" stroke-width="2" viewBox="0 0 24 24">
-            <path d="M5 12h14M12 5l7 7-7 7"/>
-        </svg>
-    </div>
-`;
+    notes.forEach(doc => {
+        const topic = doc.data().topic || "lainlain";
+        if (!groupedNotes[topic]) {
+            groupedNotes[topic] = [];
+        }
+        groupedNotes[topic].push(doc);
+        topicCounts[topic] = (topicCounts[topic] || 0) + 1;
+    });
 
-            return noteEl;
-        }
+    const sortedTopics = Object.keys(groupedNotes).sort((a, b) => (topicCounts[b] || 0) - (topicCounts[a] || 0));
+    const mostFrequentTopic = sortedTopics[0];
 
-        function displayNotes(notes) {
-            noteList.innerHTML = "";
-            const groupedNotes = {};
+    const recentNotes = notes.slice().sort((a, b) => b.data().createdAt - a.data().createdAt).slice(0, 5);
+    if (recentNotes.length > 0) {
+        const recentNotesDiv = document.createElement("div");
+        recentNotesDiv.className = "note-group";
+        const heading = document.createElement("h2");
+        heading.textContent = "Catatan Terbaru";
+        recentNotesDiv.appendChild(heading);
+        recentNotes.forEach((doc, index) => {
+            recentNotesDiv.appendChild(renderNote(doc, index === 0));
+        });
+        noteList.appendChild(recentNotesDiv);
+    }
 
-            notes.forEach(doc => {
-                const topic = doc.data().topic || "lainlain";
-                if (!groupedNotes[topic]) {
-                    groupedNotes[topic] = [];
-                }
-                groupedNotes[topic].push(doc);
-            });
+    sortedTopics.forEach(topic => {
+        const topicDiv = document.createElement("div");
+        topicDiv.className = "note-group";
+        const heading = document.createElement("h2");
+        const topicName = topic.charAt(0).toUpperCase() + topic.slice(1);
+        const count = topicCounts[topic] || 0;
+        heading.textContent = `${topicName} (${count}) ${topic === mostFrequentTopic && Object.keys(groupedNotes).length > 1 ? '⭐' : ''}`; // Tambahkan jumlah di sini
+        topicDiv.appendChild(heading);
 
-            for (const topic in groupedNotes) {
-                const topicDiv = document.createElement("div");
-                topicDiv.className = "note-group";
-                const heading = document.createElement("h2");
-                heading.textContent = topic.charAt(0).toUpperCase() + topic.slice(1);
-                topicDiv.appendChild(heading);
+        if (topic !== "lainlain" && topicKeywords[topic] && topicKeywords[topic].activity) {
+            const activityTitle = document.createElement("h3");
+            activityTitle.style.fontSize = "16px";
+            activityTitle.style.fontWeight = "bold";
+            activityTitle.style.marginTop = "10px";
+            activityTitle.textContent = "Aktivitas";
+            topicDiv.appendChild(activityTitle);
+            const currentYear = new Date().getFullYear();
+            topicDiv.innerHTML += renderActivity(topicKeywords[topic].activity, currentYear);
+        }
 
-                const notesInTopic = groupedNotes[topic];
-                notesInTopic.forEach((doc, idx) => {
-                    const isLatest = idx === notesInTopic.length - 1 && Object.keys(groupedNotes).indexOf(topic) === Object.keys(groupedNotes).length - 1;
-                    topicDiv.appendChild(renderNote(doc, isLatest));
-                });
-                noteList.appendChild(topicDiv);
-                if (notesInTopic.length === 0) {
-                    const emptyMessage = document.createElement("p");
-                    emptyMessage.className = "empty-topic";
-                    emptyMessage.textContent = "Belum ada catatan untuk topik ini.";
-topicDiv.appendChild(emptyMessage);
-                }
-            }
+        const notesInTopic = groupedNotes[topic];
+        notesInTopic.forEach((doc, idx) => {
+            const isLatest = idx === notesInTopic.length - 1 && topic === sortedTopics[sortedTopics.length - 1];
+            topicDiv.appendChild(renderNote(doc, isLatest));
+        });
+        noteList.appendChild(topicDiv);
+        if (notesInTopic.length === 0) {
+            const emptyMessage = document.createElement("p");
+            emptyMessage.className = "empty-topic";
+            emptyMessage.textContent = "Belum ada catatan untuk topik ini.";
+            topicDiv.appendChild(emptyMessage);
+        }
+    });
 
-            if (Object.keys(groupedNotes).length === 0) {
-                const emptyAllMessage = document.createElement("p");
-                emptyAllMessage.className = "empty-topic";
-                emptyAllMessage.textContent = "Belum ada catatan.";
-                noteList.appendChild(emptyAllMessage);
-            }
-        }
+    if (Object.keys(groupedNotes).length === 0) {
+        const emptyAllMessage = document.createElement("p");
+        emptyAllMessage.className = "empty-topic";
+        emptyAllMessage.textContent = "Belum ada catatan.";
+        noteList.appendChild(emptyAllMessage);
+    }
+
+    // Perbarui juga tombol filter topik dengan jumlah catatan
+    const topicFilterButtons = document.querySelectorAll('.topic-filter .topic-button');
+    topicFilterButtons.forEach(button => {
+        const topic = button.dataset.topic;
+        if (topic === 'semua') {
+            const allCount = notes.length;
+            button.textContent = `Semua (${allCount})`;
+        } else {
+            const count = topicCounts[topic] || 0;
+            const topicName = topic.charAt(0).toUpperCase() + topic.slice(1);
+            button.textContent = `${topicName} (${count})`;
+        }
+    });
+}
+
+// Pastikan Anda mengganti 'noteList' dengan ID yang benar untuk tempat Anda menampilkan daftar topik
+const topicList = document.getElementById("noteList"); // Asumsi ID-nya adalah 'noteList'
 
         const q = query(notesRef, orderBy("createdAt"));
         onSnapshot(q, snapshot => {
@@ -655,6 +1154,463 @@ overlay.addEventListener('click', (e) => {
 });
 
 
+const infoPopup = document.getElementById('info-popup');
+const infoPopupText = document.getElementById('info-popup-text');
+const infoCards = document.querySelectorAll('.info-card');
+
+const infoContents = {
+    ketentuan: `
+        <h2><span class="info-icon">📜</span>Ketentuan</h2>
+        <div class="info-content-block info-blue-block">
+            <p><strong>1.</strong>.</p>
+        </div>
+        <div class="info-content-block info-yellow-block">
+            <p><strong>2.</strong> Pengguna diharapkan menggunakan platform ini, untuk tujuan catatan yang positif dan efektif.</p>
+        </div>
+        <div class="info-content-block info-red-block">
+            <p><strong>3.</strong> .</p>
+            <p><strong>4.</strong> Pengembang bertanggung jawab atas kesalahan pribadi pengguna yg disengaja/ga sengaja .</p>
+            <img src="images/5.jpg" alt=""/>
+            <p>: <a href="" target="_blank">Halaman Ketentuan</a></p>
+        </div>
+        <p style="text-align:right; color: black; text-align: left; margin-top:1rem;">📅 Terakhir diperbarui: 28 April 2025 Jam 21.30</p>
+    `,
+    tentang: `
+        <h2><span class="info-icon">ℹ️</span>Tentang Kami</h2>
+        <div class="info-content-block info-green-block">
+            <p><strong>1.</strong> Noted adalah platform catatan sederhana yang dirancang untuk membantu Anda mencatat ide, tugas, dan informasi penting lainnya.</p>
+            <p><strong>2.</strong> Kami berkomitmen untuk menyediakan antarmuka yang bersih dan mudah digunakan agar pengalaman mencatat Anda menjadi lebih efisien.</p>
+            <p><strong>3.</strong> Noted adalah inisiatif pribadi untuk belajar dan berbagi pengetahuan di bidang pengembangan web.</p>
+            <img src="images/5.jpg" alt="Tentang Kami"/>
+            <p>: <a href="" target="_blank">Halaman Tentang Kami</a></p>
+        </div>
+        <p style="text-align:right; color: black; text-align: left; margin-top:1rem;">📅 Terakhir diperbarui: 28 April 2025 Jam 21.30</p>
+    `,
+    privasi: `
+        <h2><span class="info-icon">🔒</span>Kebijakan Privasi</h2>
+        <div class="info-content-block info-pink-block">
+            <p><strong>1.</strong> Kami tidak mengumpulkan informasi pribadi Anda kecuali yang Anda masukkan secara sukarela ke dalam catatan.</p>
+            <p><strong>2.</strong> Catatan Anda disimpan secara database online di perangkat website noted dan tidak dibagikan dengan pihak ketiga tanpa izin eksplisit Anda.</p>
+            <p><strong>3.</strong> Kami menghormati privasi Anda dan berkomitmen untuk melindungi informasi yang Anda simpan di platform ini.</p>
+            <p><strong>4.</strong> Untuk detail lebih lanjut mengenai bagaimana data Anda ditangani, silakan merujuk ke kebijakan privasi lengkap kami.</p>
+            <img src="images/5.jpg" alt="Privasi"/>
+            <p>Lihat kebijakan privasi lengkap: <a href="" target="_blank">Kebijakan Privasi</a>.</p>
+        </div>
+        <p style="text-align:right; color: black; text-align: left; margin-top:1rem;">📅 Terakhir diperbarui: 28 April 2025 Jam 21.30</p>
+    `
+};
+
+function openInfoPopup(type) {
+    if (infoContents[type]) {
+        infoPopupText.innerHTML = `
+            <button class="info-close-btn" onclick="closeInfoPopup()">×</button>
+            ${infoContents[type]}
+        `;
+        infoPopup.style.display = 'flex';
+    }
+}
+
+function closeInfoPopup() {
+    infoPopup.style.display = 'none';
+}
+
+infoCards.forEach(card => {
+    card.addEventListener('click', function() {
+        const type = this.dataset.type;
+        openInfoPopup(type);
+    });
+});
+
+infoPopup.addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeInfoPopup();
+    }
+});
+
+  
+  document.addEventListener("DOMContentLoaded", function () {
+    const roleDescriptions = {
+      admin: {
+        label: "Admin",
+        desc: "Admin memiliki akses penuh terhadap sistem, termasuk manajemen user dan kontrol konten.",
+        colorClass: "admin"
+      },
+      kontributor: {
+        label: "Kontributor",
+        desc: "Kontributor dapat menambah atau mengedit konten namun tidak memiliki kontrol admin.",
+        colorClass: "kontributor"
+      },
+      member: {
+        label: "Member",
+        desc: "Member adalah pengguna biasa yang bisa melihat konten dan memberikan komentar.",
+        colorClass: "member"
+      }
+    };
+
+    document.querySelectorAll(".badge").forEach(badge => {
+      badge.addEventListener("click", function () {
+        let role = null;
+        if (this.classList.contains("admin")) role = "admin";
+        if (this.classList.contains("kontributor")) role = "kontributor";
+        if (this.classList.contains("member")) role = "member";
+
+        if (!role) return;
+
+        const popupOverlay = document.getElementById("role-popup-overlay");
+        const popupBadge = document.getElementById("role-popup-badge");
+        const popupDesc = document.getElementById("role-popup-desc");
+
+        const data = roleDescriptions[role];
+        popupBadge.textContent = data.label;
+        popupBadge.className = `badge ${data.colorClass}`;
+        popupDesc.textContent = data.desc;
+
+        popupOverlay.classList.add("show");
+      });
+    });
+
+    // Close popup
+    document.getElementById("role-popup-overlay").addEventListener("click", function (e) {
+      if (e.target === this || e.target.classList.contains("close-btn")) {
+        this.classList.remove("show");
+      }
+    });
+  });
+  
+function renderNote(doc, isLatest = false) {
+    const noteEl = document.createElement("div");
+    noteEl.className = "note-card";
+    const role = doc.data().role || "member";
+
+    noteEl.innerHTML = `
+        <div class="timeline-dot ${isLatest ? 'active' : ''}"></div>
+        <div class="note-text">${doc.data().text}</div>
+        <div class="note-actions">
+            <button class="save-individual-note" data-id="${doc.id}">Simpan</button>
+            <div class="arrow">
+                <svg fill="none" stroke="#6b7280" stroke-width="2" viewBox="0 0 24 24">
+                    <path d="M5 12h14M12 5l7 7-7 7"/>
+                </svg>
+            </div>
+        </div>
+        <span class="badge ${role}" data-role="${role}">${role}</span>
+    `;
+
+    const badgeElement = noteEl.querySelector('.badge');
+    if (badgeElement) {
+        badgeElement.addEventListener('click', () => {
+            showRolePopup(role);
+        });
+    }
+
+    return noteEl;
+}
+
+function showRolePopup(role) {
+  const rolePopupOverlay = document.getElementById('role-popup-overlay');
+  const rolePopupBadge = document.getElementById('role-popup-badge');
+  const rolePopupDesc = document.getElementById('role-popup-desc');
+
+  // Tentukan deskripsi peran berdasarkan peran
+  let description = "";
+  switch (role) {
+    case "admin":
+      description = "Administrator memiliki akses penuh ke semua fitur dan pengelolaan catatan.";
+      break;
+    case "moderator":
+      description = "Moderator dapat mengelola dan memoderasi catatan dalam topik tertentu.";
+      break;
+    case "member":
+      description = "Member adalah pengguna biasa yang dapat melihat dan membuat catatan.";
+      break;
+    default:
+      description = "Peran tidak diketahui.";
+  }
+
+  rolePopupBadge.className = `badge ${role}`;
+  rolePopupBadge.textContent = role;
+  rolePopupDesc.textContent = description;
+  rolePopupOverlay.classList.add('show');
+}
+
+// Pastikan Anda memiliki event listener untuk menutup popup
+const rolePopupOverlay = document.getElementById('role-popup-overlay');
+if (rolePopupOverlay) {
+  const closeButton = rolePopupOverlay.querySelector('.close-btn');
+  if (closeButton) {
+    closeButton.addEventListener('click', () => {
+      rolePopupOverlay.classList.remove('show');
+    });
+  }
+}
+
+function renderActivity(activityData, year) {
+    const monthsOrder = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const daysInWeek = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+    let activityHTML = '<div style="overflow-x: auto;"><table style="border-collapse: collapse; font-family: sans-serif; font-size: 11px;">';
+
+    // Header Bulan
+    activityHTML += '<thead><tr><th></th>';
+    monthsOrder.forEach(month => {
+        const daysInMonth = getDaysInMonth(new Date(year, monthsOrder.indexOf(month), 1));
+        activityHTML += `<th colspan="${daysInMonth}" style="padding: 8px; text-align: center;">${month}</th>`; // Padding lebih besar
+    });
+    activityHTML += '</tr></thead>';
+
+    activityHTML += '<tbody>';
+    daysInWeek.forEach(day => {
+        activityHTML += `<tr><th style="padding-right: 8px; text-align: left;">${day}</th>`;
+        monthsOrder.forEach(month => {
+            const daysInMonth = getDaysInMonth(new Date(year, monthsOrder.indexOf(month), 1));
+            for (let i = 1; i <= daysInMonth; i++) {
+                const dateString = `${year}-${String(monthsOrder.indexOf(month) + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
+                const activity = activityData[month]?.find(item => item.date === dateString);
+                let backgroundColor = '#000'; // Belum pernah berwarna hitam
+                let tooltipText = `Belum ada aktivitas pada ${dateString}`;
+
+                if (activity) {
+                    if (activity.status === 'selesai') {
+                        backgroundColor = '#40c463'; // Selesai berwarna hijau
+                        tooltipText = `Selesai pada ${dateString}`;
+                    } else if (activity.status === 'revisi') {
+                        backgroundColor = '#ff0000'; // Revisi berwarna merah
+                        tooltipText = `Direvisi pada ${dateString}`;
+                    } else if (activity.status === 'baru') {
+                        backgroundColor = 'yellow'; // Baru berwarna kuning (sebelumnya 'new')
+                        tooltipText = `Aktivitas baru pada ${dateString}`;
+                    }
+                }
+
+                activityHTML += `<td
+                    style="width: 16px; height: 16px; border: 1px solid #eee; background-color: ${backgroundColor}; cursor: pointer;"
+                    title="${tooltipText}"
+                    data-has-activity="${activity ? 'true' : 'false'}"
+                    data-status="${activity ? activity.status : ''}"
+                    data-date="${dateString}"
+                ></td>`;
+            }
+        });
+        activityHTML += '</tr>';
+    });
+
+    activityHTML += '</tbody></table>';
+    activityHTML += '<div style="margin-top: 5px; font-size: 10px; color: #586069;">Belum Pernah <span style="width: 10px; height: 10px; display: inline-block; background-color: #000; border: 1px solid #eee; margin: 0 5px;"></span> Baru <span style="width: 10px; height: 10px; display: inline-block; background-color: yellow; border: 1px solid #eee; margin: 0 5px;"></span> Selesai <span style="width: 10px; height: 10px; display: inline-block; background-color: #40c463; border: 1px solid #eee; margin: 0 5px;"></span> Revisi <span style="width: 10px; height: 10px; display: inline-block; background-color: #ff0000; border: 1px solid #eee; margin: 0 5px;"></span></div>';
+    activityHTML += '</div>';
+    return activityHTML;
+}
+
+function getDaysInMonth(date) {
+    return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
+}
+document.getElementById('noteList').addEventListener('click', function(event) {
+    const target = event.target;
+    if (target.tagName === 'TD') {
+        const hasActivity = target.dataset.hasActivity === 'true';
+        const status = target.dataset.status;
+        const date = target.dataset.date;
+
+        console.log("Sel diklik - hasActivity:", hasActivity, "status:", status, "date:", date); // Tambahkan ini
+
+        let day = '';
+        let monthName = '';
+        let year = '';
+
+        if (date) {
+            const [y, m, d] = date.split('-');
+            year = y;
+            const monthIndex = parseInt(m) - 1;
+            const dateObject = new Date(year, monthIndex, parseInt(d));
+            monthName = new Intl.DateTimeFormat('id-ID', { month: 'long' }).format(dateObject);
+            day = d;
+        }
+
+        document.getElementById('activity-popup-title').textContent = `Ketentuan`;
+        let detailsHTML = '';
+        const imageUrl = 'images/5.jpg'; // Sumber gambar
+
+        if (hasActivity) {
+            let bgColor = '';
+            let activityText = '';
+            let linkHref = '';
+            let linkText = '';
+
+            if (status === 'selesai') {
+                bgColor = '#aaff80';
+                activityText = `Selamat! Catatan pada tanggal ${day} ${monthName} ${year} telah selesai.`;
+                linkHref = 'https://example.com/selesai';
+                linkText = 'Lihat catatan yang selesai';
+            } else if (status === 'revisi') {
+                bgColor = '#ffdd99';
+                activityText = `Perhatian! Catatan pada tanggal ${day} ${monthName} ${year} memerlukan revisi.`;
+                linkHref = 'https://example.com/revisi';
+                linkText = 'Lihat catatan yang perlu direvisi';
+            } else if (status === 'baru') {
+                bgColor = '#ccf2ff';
+                activityText = `Catatan baru ditambahkan pada tanggal ${day} ${monthName} ${year}.`;
+                linkHref = 'https://example.com/baru';
+                linkText = 'Lihat catatan baru';
+            }
+
+            detailsHTML = `
+                <div style="background-color: ${bgColor}; padding: 15px; border-radius: 8px;">
+                    <h3>${status ? status.charAt(0).toUpperCase() + status.slice(1) : 'Aktivitas'}</h3>
+                    <p>${activityText}</p>
+                    <img src="${imageUrl}" alt="${status || 'Aktivitas'}" style="max-width: 100%; margin-top: 10px;">
+                    ${linkHref ? `<p><a href="${linkHref}" target="_blank">${linkText}</a></p>` : ''}
+                </div>
+            `;
+        } else {
+            detailsHTML = `
+                <div style="background-color: #f0f0f0; padding: 15px; border-radius: 8px;">
+                    <h3>Tidak Ada Aktivitas</h3>
+                    <p>Belum ada aktivitas pada tanggal ${day} ${monthName} ${year}.</p>
+                    <img src="${imageUrl}" alt="Tidak ada aktivitas" style="max-width: 100%; margin-top: 10px;">
+                    <p><a href="https://example.com/tidak-ada" target="_blank">Pelajari lebih lanjut</a></p>
+                </div>
+            `;
+        }
+
+        document.getElementById('activity-popup-details').innerHTML = detailsHTML;
+        document.getElementById('activity-popup-overlay').classList.add('show');
+    }
+});
+
+
+// ... kode inisialisasi dan elemen DOM lainnya ...
+
+const showSavedNotesBtn = document.getElementById("showSavedNotesBtn");
+const savedNotesModal = document.getElementById("savedNotesModal");
+const closeSavedNotesModalBtn = document.getElementById("closeSavedNotesModal");
+const savedNotesContainer = document.getElementById("savedNotesContainer");
+const showAllSavedInPopupBtn = document.getElementById("showAllSavedInPopupBtn"); // Dapatkan referensi tombol baru
+
+async function toggleSaveNote(noteId, isCurrentlySaved) {
+    const noteRef = doc(db, "notes", noteId);
+    try {
+        await updateDoc(noteRef, {
+            isSaved: !isCurrentlySaved
+        });
+        console.log(`Catatan dengan ID ${noteId} status simpan diperbarui.`);
+    } catch (error) {
+        console.error("Error updating saved status: ", error);
+        alert("Gagal memperbarui status simpan.");
+    }
+}
+
+noteList.addEventListener("click", async (event) => {
+    if (event.target.classList.contains("save-individual-note")) {
+        const noteId = event.target.dataset.id;
+        const isCurrentlySaved = event.target.classList.contains("saved");
+        await toggleSaveNote(noteId, isCurrentlySaved);
+        // UI akan diperbarui secara otomatis karena onSnapshot
+    }
+});
+
+async function displaySavedNotesPopup() {
+    savedNotesContainer.innerHTML = "";
+    const q = query(notesRef, where("isSaved", "==", true));
+    try {
+        const querySnapshot = await getDocs(q);
+        if (!querySnapshot.empty) {
+            const ul = document.createElement("ul");
+            querySnapshot.forEach((doc) => {
+                const li = document.createElement("li");
+                li.textContent = doc.data().text;
+                ul.appendChild(li);
+            });
+            savedNotesContainer.appendChild(ul);
+        } else {
+            savedNotesContainer.textContent = "Tidak ada catatan yang Anda simpan.";
+        }
+        savedNotesModal.style.display = "flex";
+    } catch (error) {
+        console.error("Error getting saved notes: ", error);
+        savedNotesContainer.textContent = "Gagal mengambil catatan yang disimpan.";
+        savedNotesModal.style.display = "flex";
+    }
+}
+
+showSavedNotesBtn.addEventListener("click", () => {
+    displaySavedNotesPopup();
+});
+
+// Event listener untuk tombol "Lihat Semua Catatan yang Disimpan" di dalam pop-up
+showAllSavedInPopupBtn.addEventListener("click", () => {
+    // Panggil fungsi yang sama untuk menampilkan catatan yang disimpan
+    displaySavedNotesPopup();
+});
+
+closeSavedNotesModalBtn.addEventListener("click", () => {
+    savedNotesModal.style.display = "none";
+});
+
+window.addEventListener("click", (event) => {
+    if (event.target === savedNotesModal) {
+        savedNotesModal.style.display = "none";
+    }
+});
+
+ // Cek apakah SpeechRecognition API tersedia di browser
+if ('webkitSpeechRecognition' in window) {
+    recognition = new webkitSpeechRecognition();
+    recognition.continuous = true; // Tetap true agar bisa terus mendengarkan
+    recognition.interimResults = true; // Dapatkan hasil sementara
+    recognition.lang = 'id-ID'; // Set bahasa ke Bahasa Indonesia
+
+    recognition.onresult = function(event) {
+        let finalTranscript = '';
+        let interimTranscript = '';
+
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+            if (event.results[i].isFinal) {
+                finalTranscript += event.results[i][0].transcript;
+            } else {
+                interimTranscript += event.results[i][0].transcript;
+            }
+        }
+        noteInput.value = finalTranscript + interimTranscript;
+    };
+
+    recognition.onerror = function(event) {
+        console.error('Speech recognition error', event);
+        alert('Terjadi kesalahan pada fitur suara. Pastikan mikrofon Anda berfungsi.');
+        isListening = false;
+        updateVoiceButtonUI();
+    };
+
+    recognition.onend = function() {
+        isListening = false;
+        updateVoiceButtonUI();
+    };
+} else {
+    console.log('SpeechRecognition API tidak didukung di browser ini.');
+    voiceInputBtn.style.display = 'none'; // Sembunyikan tombol jika tidak didukung
+}
+
+// Fungsi untuk memperbarui UI tombol suara berdasarkan status mendengarkan
+function updateVoiceButtonUI() {
+    if (isListening) {
+        voiceInputBtn.classList.add('listening'); // Tambahkan kelas CSS saat mendengarkan
+        // Anda bisa mengubah ikon atau warna tombol di sini
+    } else {
+        voiceInputBtn.classList.remove('listening'); // Hapus kelas CSS saat tidak mendengarkan
+        // Kembalikan ikon atau warna tombol ke semula
+    }
+}
+
+// Event listener untuk tombol mikrofon (ubah dari mousedown/mouseup menjadi click)
+if (recognition && voiceInputBtn) {
+    voiceInputBtn.addEventListener('click', function() {
+        if (!isListening) {
+            recognition.start();
+            isListening = true;
+        } else {
+            recognition.stop();
+            isListening = false;
+        }
+        updateVoiceButtonUI();
+    });
+}
 
     </script>
 </body>
