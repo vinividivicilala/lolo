@@ -758,7 +758,7 @@
         const guideText = document.getElementById("guideText");
         const guideLink = document.getElementById("guideLink");
         const closeGuideBtn = document.getElementById("closeGuideBtn");
-const voiceInputBtn = document.getElementById("voiceInputBtn"); // Dapatkan referensi tombol mikrofon
+const voiceInputBtn = document.getElementById("voiceInputBtn"); // Tetap gunakan tombol visual sebagai indikator/kontrol
         const overlay = document.getElementById("overlay");
         let currentFilter = "semua";
 		let recognition; // Variabel untuk SpeechRecognition
@@ -1476,7 +1476,6 @@ document.getElementById('noteList').addEventListener('click', function(event) {
 });
 
 
-// ... kode inisialisasi dan elemen DOM lainnya ...
 
 const showSavedNotesBtn = document.getElementById("showSavedNotesBtn");
 const savedNotesModal = document.getElementById("savedNotesModal");
@@ -1553,8 +1552,9 @@ window.addEventListener("click", (event) => {
  // Cek apakah SpeechRecognition API tersedia di browser
 if ('webkitSpeechRecognition' in window) {
     recognition = new webkitSpeechRecognition();
-    recognition.continuous = true; // Tetap true agar bisa terus mendengarkan
+    recognition.continuous = true; // Tetap true untuk mendengarkan terus menerus
     recognition.interimResults = true; // Dapatkan hasil sementara
+
     recognition.lang = 'id-ID'; // Set bahasa ke Bahasa Indonesia
 
     recognition.onresult = function(event) {
@@ -1564,53 +1564,110 @@ if ('webkitSpeechRecognition' in window) {
         for (let i = event.resultIndex; i < event.results.length; ++i) {
             if (event.results[i].isFinal) {
                 finalTranscript += event.results[i][0].transcript;
+                // Di sini Anda bisa memutuskan kapan "mengirim" teks ke catatan
+                // Misalnya, setelah ada jeda yang cukup lama dalam ucapan
+                // Atau, Anda bisa menambahkan tombol "Kirim" terpisah
+                noteInput.value = finalTranscript; // Tampilkan hasil final di input
+                // Anda mungkin ingin langsung memproses dan menambahkan ke catatan di sini
+                // const topic = categorizeNote(finalTranscript);
+                // addNoteToTopic(finalTranscript, topic);
             } else {
                 interimTranscript += event.results[i][0].transcript;
+                noteInput.value = finalTranscript + interimTranscript; // Update tampilan real-time
             }
         }
-        noteInput.value = finalTranscript + interimTranscript;
     };
-
-    recognition.onerror = function(event) {
+ recognition.onerror = function(event) {
         console.error('Speech recognition error', event);
         alert('Terjadi kesalahan pada fitur suara. Pastikan mikrofon Anda berfungsi.');
         isListening = false;
         updateVoiceButtonUI();
+        stopListening(); // Pastikan berhenti jika ada error
     };
 
     recognition.onend = function() {
+        console.log('Speech recognition ended.');
         isListening = false;
         updateVoiceButtonUI();
+        // Anda bisa memutuskan apakah ingin memulai mendengarkan lagi secara otomatis di sini
+        // startListening();
     };
 } else {
     console.log('SpeechRecognition API tidak didukung di browser ini.');
     voiceInputBtn.style.display = 'none'; // Sembunyikan tombol jika tidak didukung
 }
 
-// Fungsi untuk memperbarui UI tombol suara berdasarkan status mendengarkan
-function updateVoiceButtonUI() {
-    if (isListening) {
-        voiceInputBtn.classList.add('listening'); // Tambahkan kelas CSS saat mendengarkan
-        // Anda bisa mengubah ikon atau warna tombol di sini
-    } else {
-        voiceInputBtn.classList.remove('listening'); // Hapus kelas CSS saat tidak mendengarkan
-        // Kembalikan ikon atau warna tombol ke semula
+// Fungsi untuk memulai mendengarkan
+function startListening() {
+    if (recognition && !isListening) {
+        try {
+            recognition.start();
+            isListening = true;
+            updateVoiceButtonUI();
+            console.log('Listening started.');
+        } catch (error) {
+            console.error('Error starting speech recognition:', error);
+            alert('Gagal memulai fitur suara.');
+            isListening = false;
+            updateVoiceButtonUI();
+        }
     }
 }
 
-// Event listener untuk tombol mikrofon (ubah dari mousedown/mouseup menjadi click)
+// Fungsi untuk menghentikan mendengarkan
+function stopListening() {
+    if (recognition && isListening) {
+        recognition.stop();
+        isListening = false;
+        updateVoiceButtonUI();
+        console.log('Listening stopped.');
+    }
+}
+
+// Fungsi untuk memperbarui UI tombol suara berdasarkan status mendengarkan
+function updateVoiceButtonUI() {
+    if (isListening) {
+        voiceInputBtn.classList.add('listening');
+        // Tambahkan logika perubahan ikon/warna saat mendengarkan
+    } else {
+        voiceInputBtn.classList.remove('listening');
+        // Kembalikan tampilan semula
+    }
+}
+
+// Event listener untuk tombol mikrofon (sebagai kontrol manual)
 if (recognition && voiceInputBtn) {
     voiceInputBtn.addEventListener('click', function() {
         if (!isListening) {
-            recognition.start();
-            isListening = true;
+            startListening();
         } else {
-            recognition.stop();
-            isListening = false;
+            stopListening();
         }
-        updateVoiceButtonUI();
     });
 }
+
+// Memulai mendengarkan secara otomatis saat halaman dimuat (setelah izin diberikan)
+document.addEventListener('DOMContentLoaded', function() {
+    // Anda mungkin perlu meminta izin mikrofon terlebih dahulu sebelum memulai otomatis
+    // Browser modern biasanya akan meminta izin saat recognition.start() dipanggil pertama kali
+    startListening();
+});
+
+// Fungsi untuk menambahkan catatan ke topik (perlu implementasi lebih lanjut)
+async function addNoteToTopic(text, topic) {
+    if (text.trim()) {
+        try {
+            await addDoc(notesRef, { text, topic, createdAt: serverTimestamp() });
+            noteInput.value = ""; // Bersihkan input setelah ditambahkan
+            showPopup();
+            // Refresh tampilan catatan (mungkin perlu memanggil fungsi displayNotes lagi)
+        } catch (error) {
+            alert("Gagal menyimpan catatan suara: " + error.message);
+            console.error(error);
+        }
+    }
+}
+
 
     </script>
 </body>
