@@ -555,21 +555,27 @@
     background-color: #0056b3;
 }
 
+
 .voice-icon-btn {
+    /* Gaya dasar tombol */
     padding: 8px;
     border: none;
-    background-color: transparent; /* Latar belakang transparan */
+    background-color: transparent;
     cursor: pointer;
 }
 
-.voice-icon-btn:hover {
-    opacity: 0.8; /* Efek hover sedikit memudar */
+.voice-icon-btn svg {
+    display: block; /* Membuat SVG berperilaku seperti blok */
+    width: 24px;
+    height: 24px;
+    fill: currentColor; /* Menggunakan warna teks tombol */
 }
 
-/* Gaya tambahan untuk ikon SVG (jika diperlukan) */
-.voice-icon-btn svg {
-    display: block; /* Agar SVG berperilaku seperti elemen blok */
+/* Anda bisa mengatur warna teks tombol jika perlu */
+.voice-icon-btn {
+    color: #333; /* Contoh warna teks */
 }
+
 
 .pin-button {
     background-color: transparent;
