@@ -763,6 +763,98 @@ const voiceInputBtn = document.getElementById("voiceInputBtn"); // Tetap gunakan
         let currentFilter = "semua";
 		let recognition; // Variabel untuk SpeechRecognition
 		let isListening = false; // Status apakah sedang mendengarkan
+		let finalTranscript = ''; // Untuk menyimpan transkripsi final
+		
+		
+		// Cek apakah SpeechRecognition API tersedia di browser
+        if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+            recognition = new (window.webkitSpeechRecognition || window.SpeechRecognition)();
+            recognition.continuous = false; // Ubah menjadi false agar berhenti setelah selesai bicara
+            recognition.interimResults = false;
+            recognition.lang = 'id-ID';
+
+            recognition.onresult = function(event) {
+                const transcript = event.results[0][0].transcript.trim();
+                noteInput.value = transcript;
+                finalTranscript = transcript; // Simpan transkripsi final
+                stopListening(); // Otomatis berhenti setelah mendapatkan hasil
+                addNoteFromVoice(); // Otomatis kirim catatan
+            };
+
+            recognition.onerror = function(event) {
+                console.error('Speech recognition error', event);
+                alert('Terjadi kesalahan pada fitur suara. Pastikan mikrofon Anda berfungsi.');
+                isListening = false;
+                updateVoiceButtonUI();
+            };
+
+            recognition.onend = function() {
+                console.log('Speech recognition ended.');
+                isListening = false;
+                updateVoiceButtonUI();
+            };
+        } else {
+            console.log('SpeechRecognition API tidak didukung di browser ini.');
+            if (voiceInputBtn) {
+                voiceInputBtn.style.display = 'none'; // Sembunyikan tombol jika tidak didukung
+            }
+        }
+
+        function startListening() {
+            if (recognition && !isListening) {
+                try {
+                    recognition.start();
+                    isListening = true;
+                    updateVoiceButtonUI();
+                    console.log('Listening started.');
+                } catch (error) {
+                    console
+					.error('Error starting speech recognition:', error);
+                    alert('Tidak dapat memulai fitur suara. Pastikan izin mikrofon telah diberikan.');
+                    isListening = false;
+                    updateVoiceButtonUI();
+                }
+            }
+        }
+
+        function stopListening() {
+            if (recognition && isListening) {
+                recognition.stop();
+                console.log('Listening stopped.');
+                isListening = false;
+                updateVoiceButtonUI();
+            }
+        }
+
+        function updateVoiceButtonUI() {
+            if (voiceInputBtn) {
+                voiceInputBtn.classList.toggle('active', isListening);
+                // Tambahkan logika perubahan ikon atau gaya visual lain jika diperlukan
+            }
+        }
+
+        function addNoteFromVoice() {
+            const text = finalTranscript.trim();
+            if (!text) return;
+
+            const topic = categorizeNote(text);
+
+            addNoteToFirebase(text, topic);
+            finalTranscript = ''; // Reset transkripsi final
+        }
+ if (voiceInputBtn) {
+            voiceInputBtn.addEventListener('click', () => {
+                if (!isListening) {
+                    startListening();
+                } else {
+                    stopListening();
+                }
+            });
+        }
+				
+				
+				
+
 
         // Definisi kata kunci dan panduan topik
          const topicKeywords = {
@@ -1549,125 +1641,59 @@ window.addEventListener("click", (event) => {
     }
 });
 
- // Cek apakah SpeechRecognition API tersedia di browser
-if ('webkitSpeechRecognition' in window) {
-    recognition = new webkitSpeechRecognition();
-    recognition.continuous = true; // Tetap true untuk mendengarkan terus menerus
-    recognition.interimResults = true; // Dapatkan hasil sementara
+  
 
-    recognition.lang = 'id-ID'; // Set bahasa ke Bahasa Indonesia
-
-    recognition.onresult = function(event) {
-        let finalTranscript = '';
-        let interimTranscript = '';
-
-        for (let i = event.resultIndex; i < event.results.length; ++i) {
-            if (event.results[i].isFinal) {
-                finalTranscript += event.results[i][0].transcript;
-                // Di sini Anda bisa memutuskan kapan "mengirim" teks ke catatan
-                // Misalnya, setelah ada jeda yang cukup lama dalam ucapan
-                // Atau, Anda bisa menambahkan tombol "Kirim" terpisah
-                noteInput.value = finalTranscript; // Tampilkan hasil final di input
-                // Anda mungkin ingin langsung memproses dan menambahkan ke catatan di sini
-                // const topic = categorizeNote(finalTranscript);
-                // addNoteToTopic(finalTranscript, topic);
-            } else {
-                interimTranscript += event.results[i][0].transcript;
-                noteInput.value = finalTranscript + interimTranscript; // Update tampilan real-time
+ // Inisialisasi tahun pada filter aktivitas
+        function populateActivityYears() {
+            const yearSelect = document.getElementById('activityYear');
+            const currentYear = new Date().getFullYear();
+            for (let i = currentYear + 5; i >= 2020; i--) {
+                const option = document.createElement('option');
+                option.value = i;
+                option.textContent = i;
+                if (i === currentYear) {
+                    option.selected = true;
+                }
+                yearSelect.appendChild(option);
             }
         }
-    };
- recognition.onerror = function(event) {
-        console.error('Speech recognition error', event);
-        alert('Terjadi kesalahan pada fitur suara. Pastikan mikrofon Anda berfungsi.');
-        isListening = false;
-        updateVoiceButtonUI();
-        stopListening(); // Pastikan berhenti jika ada error
-    };
 
-    recognition.onend = function() {
-        console.log('Speech recognition ended.');
-        isListening = false;
-        updateVoiceButtonUI();
-        // Anda bisa memutuskan apakah ingin memulai mendengarkan lagi secara otomatis di sini
-        // startListening();
-    };
-} else {
-    console.log('SpeechRecognition API tidak didukung di browser ini.');
-    voiceInputBtn.style.display = 'none'; // Sembunyikan tombol jika tidak didukung
-}
+        populateActivityYears();
 
-// Fungsi untuk memulai mendengarkan
-function startListening() {
-    if (recognition && !isListening) {
-        try {
-            recognition.start();
-            isListening = true;
-            updateVoiceButtonUI();
-            console.log('Listening started.');
-        } catch (error) {
-            console.error('Error starting speech recognition:', error);
-            alert('Gagal memulai fitur suara.');
-            isListening = false;
-            updateVoiceButtonUI();
-        }
-    }
-}
+        // Event listener untuk perubahan tahun pada filter aktivitas (perlu diimplementasikan logika pemfilteran)
+        document.addEventListener('change', function(event) {
+            if (event.target && event.target.id.startsWith('activityYear-')) {
+                const topic = event.target.id.split('-')[1];
+                const selectedYear = parseInt(event.target.value);
+                const q = query(notesRef, orderBy("createdAt"));
+                onSnapshot(q, snapshot => {
+                    const allNotes = snapshot.docs;
+                    const filteredNotes = currentFilter === "semua" ? allNotes : allNotes.filter(doc => (doc.data().topic || "lainlain").toLowerCase() === currentFilter);
+                    displayNotes(filteredNotes); // Refresh tampilan catatan
+                });
+                // Di sini Anda perlu memanggil fungsi untuk merender ulang aktivitas berdasarkan tahun yang dipilih
+                const topicDiv = document.querySelector(`.note-group h2:contains("${topic.charAt(0).toUpperCase() + topic.slice(1)}")`)?.parentNode;
+                if (topicDiv && topicKeywords[topic] && topicKeywords[topic].activity) {
+                    const activityTitle = topicDiv.querySelector('h3');
+                    if (activityTitle && activityTitle.textContent === 'Aktivitas') {
+                        // Bersihkan bagian aktivitas sebelum merender ulang
+                        let nextSibling = activityTitle.nextElementSibling;
+                        while (nextSibling && nextSibling.tagName !== 'H2') {
+                            const temp = nextSibling.nextElementSibling;
+                            topicDiv.removeChild(nextSibling);
+                            nextSibling = temp;
+                        }
+                        topicDiv.innerHTML += renderActivity(topicKeywords[topic].activity, selectedYear, topic);
+                    }
+                }
+            }
+        });
 
-// Fungsi untuk menghentikan mendengarkan
-function stopListening() {
-    if (recognition && isListening) {
-        recognition.stop();
-        isListening = false;
-        updateVoiceButtonUI();
-        console.log('Listening stopped.');
-    }
-}
-
-// Fungsi untuk memperbarui UI tombol suara berdasarkan status mendengarkan
-function updateVoiceButtonUI() {
-    if (isListening) {
-        voiceInputBtn.classList.add('listening');
-        // Tambahkan logika perubahan ikon/warna saat mendengarkan
-    } else {
-        voiceInputBtn.classList.remove('listening');
-        // Kembalikan tampilan semula
-    }
-}
-
-// Event listener untuk tombol mikrofon (sebagai kontrol manual)
-if (recognition && voiceInputBtn) {
-    voiceInputBtn.addEventListener('click', function() {
-        if (!isListening) {
-            startListening();
-        } else {
-            stopListening();
-        }
-    });
-}
-
-// Memulai mendengarkan secara otomatis saat halaman dimuat (setelah izin diberikan)
-document.addEventListener('DOMContentLoaded', function() {
-    // Anda mungkin perlu meminta izin mikrofon terlebih dahulu sebelum memulai otomatis
-    // Browser modern biasanya akan meminta izin saat recognition.start() dipanggil pertama kali
-    startListening();
-});
-
-// Fungsi untuk menambahkan catatan ke topik (perlu implementasi lebih lanjut)
-async function addNoteToTopic(text, topic) {
-    if (text.trim()) {
-        try {
-            await addDoc(notesRef, { text, topic, createdAt: serverTimestamp() });
-            noteInput.value = ""; // Bersihkan input setelah ditambahkan
-            showPopup();
-            // Refresh tampilan catatan (mungkin perlu memanggil fungsi displayNotes lagi)
-        } catch (error) {
-            alert("Gagal menyimpan catatan suara: " + error.message);
-            console.error(error);
-        }
-    }
-}
-
+        // Polyfill for :contains pseudo-class (karena tidak didukung di semua browser)
+        jQuery.expr[':'].contains = function(a, i, m) {
+            return jQuery(a).text().toUpperCase()
+                .indexOf(m[3].toUpperCase()) >= 0;
+        };
 
     </script>
 </body>
