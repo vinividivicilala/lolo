@@ -606,6 +606,14 @@
     border-radius: 5px; /* Opsional */
     line-height: 1.5; /* Opsional */
   }
+  
+  .cookie-list-number {
+    color: #fff; /* Warna teks nomor menjadi putih agar kontras dengan latar belakang */
+    padding: 2px 6px;
+    border-radius: 4px; /* Membuat sudut sedikit melengkung */
+    margin-right: 5px; /* Memberikan sedikit jarak antara nomor dan teks */
+    font-weight: bold; /* Membuat nomor lebih tebal */
+}
 
 
 
@@ -754,8 +762,34 @@
     </div>
 </div>
 
+<div id="cookieExplanation" class="modal-overlay" style="display: none;">
+    <div class="modal-content">
+        <button class="close-btn" id="closeCookieExplanation">&times;</button>
+		
+		<li style="background-color: #7FFF00; padding: 10px; border-radius: 8px; margin-bottom: 8px;">
+                <strong>Penjelasan Cookies website note farid.
+            </li>
+		
+        <h3>Penjelasan Lebih Lanjut tentang Cookie</h3>
+        <p>Cookie adalah file teks kecil yang ditempatkan di perangkat Anda untuk membantu situs web mengingat informasi tentang kunjungan Anda. Kami menggunakan cookie untuk:</p>
+        <ul style="padding-left: 0; list-style: none;">
+            <li style="background-color: #e0f7fa; padding: 10px; border-radius: 8px; margin-bottom: 8px;">
+                <strong>1.</strong> Mengingat preferensi Anda (misalnya, bahasa, tema).
+            </li>
+            <li style="background-color: #fff9c4; padding: 10px; border-radius: 8px; margin-bottom: 8px;">
+                <strong>2.</strong> Menganalisis bagaimana Anda menggunakan situs kami untuk meningkatkan pengalaman.
+            </li>
+            <li style="background-color: #ffcdd2; padding: 10px; border-radius: 8px; margin-bottom: 8px;">
+                <strong>3.</strong> Mendukung fungsionalitas penting situs.
+            </li>
+			<li style="background-color: yellow; padding: 10px; border-radius: 8px; margin-bottom: 8px;">
+                <strong>4.</strong> Dengan menyetujui, Anda mengizinkan kami menggunakan cookie sesuai dengan kebijakan kami.
+            </li>
+        </ul>
+        <button id="acceptFromExplanation" style="background-color: #007bff; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer;">Terima dan Tutup</button>
+    </div>
+</div>
 
-  
   
 <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
@@ -968,6 +1002,40 @@ const voiceInputBtn = document.getElementById("voiceInputBtn"); // Tetap gunakan
 
   // Terapkan tema dari cookie saat halaman dimuat
   applyThemeFromCookie();
+  
+  const readMoreLink = document.getElementById('readMoreCookies');
+const cookieExplanationModal = document.getElementById('cookieExplanation');
+const closeCookieExplanationBtn = document.getElementById('closeCookieExplanation');
+const acceptFromExplanationBtn = document.getElementById('acceptFromExplanation');
+const cookieNotification = document.querySelector('.cookie-notification'); // Ambil notifikasi cookie
+
+if (readMoreLink) {
+    readMoreLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        cookieExplanationModal.style.display = 'flex';
+    });
+}
+
+if (closeCookieExplanationBtn) {
+    closeCookieExplanationBtn.addEventListener('click', () => {
+        cookieExplanationModal.style.display = 'none';
+    });
+}
+
+if (acceptFromExplanationBtn && cookieNotification) {
+    acceptFromExplanationBtn.addEventListener('click', () => {
+        setCookie(cookieNameConsent, 'accepted', cookieExpiryDays);
+        cookieExplanationModal.style.display = 'none';
+        cookieNotification.remove(); // Hilangkan notifikasi setelah menerima dari penjelasan
+    });
+}
+
+// Pastikan modal tertutup saat area di luar modal diklik
+window.addEventListener('click', (event) => {
+    if (event.target === cookieExplanationModal) {
+        cookieExplanationModal.style.display = 'none';
+    }
+});
 
   
 
