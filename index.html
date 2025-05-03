@@ -592,6 +592,25 @@
 
 
 
+
+  .cookie-notification {
+    position: fixed;
+    bottom: 20px; /* Ubah dari 'bottom: 0' menjadi 'bottom: 20px' (atau nilai lain sesuai keinginan) */
+    left: 0;
+    background-color: #222;
+    color: #fff;
+    padding: 10px;
+    text-align: center;
+    z-index: 1000;
+    display: inline-block; /* Atau fit-content */
+    border-radius: 5px; /* Opsional */
+    line-height: 1.5; /* Opsional */
+  }
+
+
+
+
+
     </style>
 </head>
 <body>
@@ -860,7 +879,13 @@ const voiceInputBtn = document.getElementById("voiceInputBtn"); // Tetap gunakan
             });
         }
 		
-		function setCookie(name, value, days) {
+
+  const cookieNameConsent = 'cookieConsent';
+  const cookieNameTheme = 'themePreference';
+  const cookieExpiryDays = 30; // Masa berlaku cookie (dalam hari)
+
+  // Fungsi untuk mengatur cookie
+  function setCookie(name, value, days) {
     let expires = "";
     if (days) {
       const date = new Date();
@@ -871,6 +896,7 @@ const voiceInputBtn = document.getElementById("voiceInputBtn"); // Tetap gunakan
     console.log('Cookie diatur:', name, '=', value);
   }
 
+  // Fungsi untuk mendapatkan cookie
   function getCookie(name) {
     const nameEQ = name + "=";
     const ca = document.cookie.split(';');
@@ -883,17 +909,18 @@ const voiceInputBtn = document.getElementById("voiceInputBtn"); // Tetap gunakan
     return null;
   }
 
+  function applyThemeFromCookie() {
+    const theme = getCookie(cookieNameTheme);
+    if (theme) {
+      document.body.classList.toggle('dark-theme', theme === 'dark');
+      // Lakukan tindakan lain untuk menerapkan tema sesuai nilai cookie
+      console.log('Tema diterapkan dari cookie:', theme);
+    }
+  }
+
   function showCookieNotification() {
     const cookieNotification = document.createElement('div');
-    cookieNotification.style.position = 'fixed';
-    cookieNotification.style.bottom = '0';
-    cookieNotification.style.left = '0';
-    cookieNotification.style.width = '100%';
-    cookieNotification.style.backgroundColor = '#222';
-    cookieNotification.style.color = '#fff';
-    cookieNotification.style.padding = '10px';
-    cookieNotification.style.textAlign = 'center';
-    cookieNotification.style.zIndex = '1000';
+    cookieNotification.className = 'cookie-notification';
     cookieNotification.innerHTML = `
       <p style="margin: 0;">Situs ini menggunakan cookies. <a href="#" id="readMoreCookies" style="color: #eee; text-decoration: underline;">Baca lebih lanjut</a> <button id="acceptCookies" style="background-color: #007bff; color: white; border: none; padding: 8px 15px; margin-left: 10px; border-radius: 5px; cursor: pointer;">Terima</button> <button id="rejectCookies" style="background-color: transparent; color: #ccc; border: none; padding: 8px 15px; margin-left: 10px; cursor: pointer;">Tolak</button></p>
     `;
@@ -905,12 +932,12 @@ const voiceInputBtn = document.getElementById("voiceInputBtn"); // Tetap gunakan
     const readMoreLink = document.getElementById('readMoreCookies');
 
     acceptButton.addEventListener('click', () => {
-      setCookie('cookieConsent', 'accepted', 30);
+      setCookie(cookieNameConsent, 'accepted', cookieExpiryDays);
       cookieNotification.remove();
     });
 
     rejectButton.addEventListener('click', () => {
-      setCookie('cookieConsent', 'rejected', 1);
+      setCookie(cookieNameConsent, 'rejected', 1);
       cookieNotification.remove();
       alert('Anda telah menolak penggunaan cookies. Beberapa fitur mungkin tidak berfungsi dengan baik.');
     });
@@ -921,14 +948,28 @@ const voiceInputBtn = document.getElementById("voiceInputBtn"); // Tetap gunakan
     });
   }
 
-  console.log('Memeriksa cookie consent:', getCookie('cookieConsent'));
-  if (!getCookie('cookieConsent')) {
+  // Cek dan tampilkan notifikasi cookie saat halaman dimuat jika belum ada persetujuan
+  console.log('Memeriksa cookie consent:', getCookie(cookieNameConsent));
+  if (!getCookie(cookieNameConsent)) {
     showCookieNotification();
-  } else if (getCookie('cookieConsent') === 'accepted') {
+  } else if (getCookie(cookieNameConsent) === 'accepted') {
     console.log('Cookie consent diterima.');
-  } else if (getCookie('cookieConsent') === 'rejected') {
+    // Lakukan tindakan lain jika cookie consent sudah diterima
+  } else if (getCookie(cookieNameConsent) === 'rejected') {
     console.log('Cookie consent ditolak.');
+    // Lakukan tindakan lain jika cookie consent ditolak (misalnya, batasi fitur tertentu)
   }
+
+  // Contoh penyimpanan preferensi tema (misalnya, saat tombol tema diubah)
+  function saveThemePreference(theme) {
+    setCookie(cookieNameTheme, theme, cookieExpiryDays);
+    applyThemeFromCookie(); // Terapkan tema segera
+  }
+
+  // Terapkan tema dari cookie saat halaman dimuat
+  applyThemeFromCookie();
+
+  
 
 
 
