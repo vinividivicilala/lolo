@@ -592,7 +592,6 @@
 
 
 
-
     </style>
 </head>
 <body>
@@ -735,6 +734,8 @@
         <button id="saveAllToFirebaseBtn" style="margin-top: 15px;">Simpan Semua ke Database</button>
     </div>
 </div>
+
+
   
   
 <script type="module">
@@ -770,6 +771,7 @@ const voiceInputBtn = document.getElementById("voiceInputBtn"); // Tetap gunakan
 		let recognition; // Variabel untuk SpeechRecognition
 		let isListening = false; // Status apakah sedang mendengarkan
 		let finalTranscript = ''; // Untuk menyimpan transkripsi final
+	
 		
 		
 		// Cek apakah SpeechRecognition API tersedia di browser
@@ -857,9 +859,77 @@ const voiceInputBtn = document.getElementById("voiceInputBtn"); // Tetap gunakan
                 }
             });
         }
-				
-				
-				
+		
+		function setCookie(name, value, days) {
+    let expires = "";
+    if (days) {
+      const date = new Date();
+      date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+      expires = "; expires=" + date.toUTCString();
+    }
+    document.cookie = name + "=" + (value || "") + expires + "; path=/";
+    console.log('Cookie diatur:', name, '=', value);
+  }
+
+  function getCookie(name) {
+    const nameEQ = name + "=";
+    const ca = document.cookie.split(';');
+    for (let i = 0; i < ca.length; i++) {
+      let c = ca[i];
+      while (c.charAt(0) === ' ') c = c.substring(1, c.length);
+      if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
+    }
+    console.log('Cookie tidak ditemukan:', name);
+    return null;
+  }
+
+  function showCookieNotification() {
+    const cookieNotification = document.createElement('div');
+    cookieNotification.style.position = 'fixed';
+    cookieNotification.style.bottom = '0';
+    cookieNotification.style.left = '0';
+    cookieNotification.style.width = '100%';
+    cookieNotification.style.backgroundColor = '#222';
+    cookieNotification.style.color = '#fff';
+    cookieNotification.style.padding = '10px';
+    cookieNotification.style.textAlign = 'center';
+    cookieNotification.style.zIndex = '1000';
+    cookieNotification.innerHTML = `
+      <p style="margin: 0;">Situs ini menggunakan cookies. <a href="#" id="readMoreCookies" style="color: #eee; text-decoration: underline;">Baca lebih lanjut</a> <button id="acceptCookies" style="background-color: #007bff; color: white; border: none; padding: 8px 15px; margin-left: 10px; border-radius: 5px; cursor: pointer;">Terima</button> <button id="rejectCookies" style="background-color: transparent; color: #ccc; border: none; padding: 8px 15px; margin-left: 10px; cursor: pointer;">Tolak</button></p>
+    `;
+    document.body.appendChild(cookieNotification);
+    console.log('Notifikasi cookie ditampilkan.');
+
+    const acceptButton = document.getElementById('acceptCookies');
+    const rejectButton = document.getElementById('rejectCookies');
+    const readMoreLink = document.getElementById('readMoreCookies');
+
+    acceptButton.addEventListener('click', () => {
+      setCookie('cookieConsent', 'accepted', 30);
+      cookieNotification.remove();
+    });
+
+    rejectButton.addEventListener('click', () => {
+      setCookie('cookieConsent', 'rejected', 1);
+      cookieNotification.remove();
+      alert('Anda telah menolak penggunaan cookies. Beberapa fitur mungkin tidak berfungsi dengan baik.');
+    });
+
+    readMoreLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      alert('Ini adalah informasi lebih lanjut tentang bagaimana kami menggunakan cookies...');
+    });
+  }
+
+  console.log('Memeriksa cookie consent:', getCookie('cookieConsent'));
+  if (!getCookie('cookieConsent')) {
+    showCookieNotification();
+  } else if (getCookie('cookieConsent') === 'accepted') {
+    console.log('Cookie consent diterima.');
+  } else if (getCookie('cookieConsent') === 'rejected') {
+    console.log('Cookie consent ditolak.');
+  }
+
 
 
         // Definisi kata kunci dan panduan topik
@@ -1700,7 +1770,12 @@ window.addEventListener("click", (event) => {
             return jQuery(a).text().toUpperCase()
                 .indexOf(m[3].toUpperCase()) >= 0;
         };
-
+		
+		
+  
+  
+  
+		
     </script>
 </body>
 </html>
