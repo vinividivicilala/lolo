@@ -615,6 +615,150 @@
     font-weight: bold; /* Membuat nomor lebih tebal */
 }
 
+        .filter-container {
+            margin-bottom: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        label {
+            margin-right: 10px;
+        }
+
+        select {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+        }
+
+
+#notificationPopup {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: none;
+    z-index: 1000;
+    overflow-y: auto;
+}
+
+#notificationPopup > div {
+    background-color: white;
+    width: 90%;
+    max-width: 500px;
+    border-radius: 8px;
+    margin: 50px auto;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    position: relative;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+#notificationPopup .header {
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+    font-weight: bold;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#notificationPopup .header span {
+    font-size: 1.2em;
+}
+
+#notificationPopup #closeNotificationPopup {
+    border: none;
+    background: none;
+    font-size: 1.5em;
+    cursor: pointer;
+    color: #888;
+}
+
+#notificationPopup #closeNotificationPopup:hover {
+    color: #333;
+}
+
+#notificationListItems li {
+    padding: 15px;
+    border-bottom: 1px solid #eee;
+    cursor: pointer;
+    font-size: 0.9em;
+}
+
+#notificationListItems li:last-child {
+    border-bottom: none;
+}
+
+#notificationListItems li:hover {
+    background-color: #f9f9f9;
+}
+
+.notification-item {
+    padding: 15px;
+    border-bottom: 1px solid #eee;
+    cursor: pointer;
+    font-size: 0.9em;
+    display: flex;
+    align-items: center;
+    flex-direction: column; /* Stack title and content vertically */
+    align-items: flex-start; /* Align items to the start (left) */
+}
+
+.notification-item:last-child {
+    border-bottom: none;
+}
+
+.notification-item:hover {
+    background-color: #f9f9f9;
+}
+
+.notification-category {
+    margin-right: 5px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.8em;
+    font-weight: bold;
+}
+
+.notification-title {
+    font-size: 1em;
+    font-weight: bold;
+    margin-bottom: 5px; /* Add some space between title and content */
+    color: #333; /* Make title color darker */
+    display: block; /* Ensure it takes full width */
+    text-align: left; /* Align title to the left */
+}
+
+.notification-content {
+    font-size: 0.9em;
+    color: #555; /* Lighter color for content */
+    display: block;
+    text-align: left; /* Align content to the left */
+}
+
+
+#markAllRead {
+    background-color: #f0f0f0;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.9em;
+}
+
+#markAllRead:hover {
+    background-color: #e0e0e0;
+}
+
+#notificationFullContent {
+    display: none;
+    padding: 15px;
+    border-top: 1px solid #eee;
+}
 
 
 
@@ -623,6 +767,8 @@
 </head>
 <body>
     <h1>📝 Noted</h1>
+	
+
 
     <div class="note-input-container">
     <input type="text" id="noteInput" placeholder="Tulis catatan di sini...">
@@ -634,6 +780,41 @@
         </svg>
     </button>
 </div>
+
+
+
+
+<div id="notificationIcon" style="position: relative; margin-left: 15px; cursor: pointer;">
+    🔔
+    <span id="notificationCount" style="...">0</span>
+</div>
+
+<div id="notificationPopup" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); display: none; z-index: 1000;">
+    <div style="background-color: white; width: 90%; max-width: 500px; border-radius: 8px; margin: 50px auto; box-shadow: 0 2px 10px rgba(0,0,0,0.1); position: relative;">
+        <div style="padding: 10px; border-bottom: 1px solid #eee; font-weight: bold; display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-size: 1.2em;">Info Pengumuman</span>
+            <button id="closeNotificationPopup" style="border: none; background: none; font-size: 1.5em; cursor: pointer; color: #888;">&times;</button>
+        </div>
+        <ul id="notificationListItems" style="list-style: none; padding: 0; margin: 0;">
+            <li style="padding: 15px; border-bottom: 1px solid #eee;">Tidak ada notifikasi baru</li>
+        </ul>
+        <div id="notificationFullContent" style="padding: 15px; display: none; border-top: 1px solid #eee;">
+            </div>
+        <div style="padding: 10px; text-align: center;">
+            <button id="markAllRead" style="...">Tandai Semua Sudah Dibaca</button>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+
+
+
+
 
     <div class="topic-filter">
         <button class="topic-button active" data-topic="semua">Semua</button>
@@ -648,6 +829,11 @@
         </select>
 </div>
 
+<div class="activity-table-container">
+    </div>
+
+
+ 
     
 	
 	
@@ -790,6 +976,9 @@
     </div>
 </div>
 
+<div class="activity-calendar"></div>
+
+
   
 <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
@@ -808,6 +997,8 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const notesRef = collection(db, "notes");
+const activityRef = collection(db, "activities");
+
 
         const noteInput = document.getElementById("noteInput");
         const noteList = document.getElementById("noteList");
@@ -819,11 +1010,18 @@
         const guideLink = document.getElementById("guideLink");
         const closeGuideBtn = document.getElementById("closeGuideBtn");
 const voiceInputBtn = document.getElementById("voiceInputBtn"); // Tetap gunakan tombol visual sebagai indikator/kontrol
+const activityYearSelect = document.getElementById("activityYear");
+const activityCalendarContainer = document.querySelector(".activity-calendar");
         const overlay = document.getElementById("overlay");
         let currentFilter = "semua";
 		let recognition; // Variabel untuk SpeechRecognition
 		let isListening = false; // Status apakah sedang mendengarkan
 		let finalTranscript = ''; // Untuk menyimpan transkripsi final
+		let currentYear = new Date().getFullYear();
+let activitiesData = [];
+
+		
+
 	
 		
 		
@@ -1037,27 +1235,339 @@ window.addEventListener('click', (event) => {
     }
 });
 
-  
+
+document.getElementById('activityYear').addEventListener('change', function (event) {
+    const selectedYear = parseInt(event.target.value);
+
+    // Asumsikan data aktivitas manual Anda ada dalam variabel bernama 'activityDataManual'
+    const rawData = activity; // Ganti dengan nama variabel data manual Anda
+    const filteredData = {};
+
+    Object.keys(rawData).forEach(month => {
+        filteredData[month] = rawData[month]?.filter(entry => {
+            return new Date(entry.date).getFullYear() === selectedYear;
+        });
+    });
+
+    // Render ulang kalender
+    const calendarHTML = renderActivity(filteredData, selectedYear);
+    const activityCalendarContainer = document.querySelector('.activity-calendar');
+    if (activityCalendarContainer) {
+        activityCalendarContainer.innerHTML = calendarHTML;
+    }
+});
+
+
+function populateYearOptions() {
+    const startYear = 2023; // Atau tahun awal data Anda
+    const endYear = new Date().getFullYear() + 1;
+    const selectElement = document.getElementById('activityYear'); // Pastikan Anda memiliki elemen select dengan ID ini
+    if (selectElement) {
+        for (let i = startYear; i <= endYear; i++) {
+            const option = document.createElement('option');
+            option.value = i;
+            option.textContent = i;
+            option.selected = i === new Date().getFullYear();
+            selectElement.appendChild(option);
+        }
+    }
+}
+
+const activity = {
+    Jan: [
+        { day: "Mon", status: "baru", date: "2025-01-06" },
+        { day: "Wed", status: "selesai", date: "2025-01-08" },
+        // Tambahkan data aktivitas lainnya untuk bulan Januari di sini
+    ],
+    Feb: [
+        { day: "Fri", status: "selesai", date: "2025-02-14" },
+        // Tambahkan data aktivitas lainnya untuk bulan Februari di sini
+    ],
+    Mar: [
+        { day: "Fri", status: "selesai", date: "2025-03-14" },
+        // Tambahkan data aktivitas lainnya untuk bulan Maret di sini
+    ],
+    Apr: [
+        { day: "Fri", status: "revisi", date: "2025-04-14" },
+        { day: "Fri", status: "selesai", date: "2025-04-25" },
+        // Tambahkan data aktivitas lainnya untuk bulan April di sini
+    ],
+    May: [],
+    Jun: [],
+    Jul: [],
+    Aug: [],
+    Sep: [],
+    Oct: [],
+    Nov: [],
+    Dec: []
+    // Anda bisa menambahkan data untuk bulan-bulan lainnya di sini
+};
+
+           
+document.addEventListener('DOMContentLoaded', () => {
+    populateYearOptions();
+    const currentYear = new Date().getFullYear();
+    const initialActivitiesForYear = {};
+    const rawData = activity; // Gunakan variabel 'activity' yang berisi data bulanan
+    for (const month in rawData) {
+        initialActivitiesForYear[month] = rawData[month]?.filter(item => { // Gunakan 'item' sebagai parameter filter
+            return new Date(item.date).getFullYear() === currentYear;
+        });
+    }
+    const activityCalendarContainer = document.querySelector('.activity-calendar');
+    if (activityCalendarContainer) {
+        activityCalendarContainer.innerHTML = renderActivity(initialActivitiesForYear, currentYear);
+    }
+});
 
 
 
-        // Definisi kata kunci dan panduan topik
-         const topicKeywords = {
-            makanan: {
-                keywords: ["makan", "sarapan", "siang", "malam", "restoran", "kafe", "masak", "nasi", "roti", "buah", "sayur", "daging", "ikan", "minum", "kopi", "teh", "lezat", "enak", "lapar", "kenyang"],
-                guide: "Catat semua hal yang berkaitan dengan makanan di sini. Mulai dari resep, daftar belanja, hingga ulasan restoran favoritmu.",
+const notificationIconDiv = document.getElementById('notificationIcon');
+const notificationPopupDiv = document.getElementById('notificationPopup');
+const notificationListItemsUl = document.getElementById('notificationListItems');
+const markAllReadButton = document.getElementById('markAllRead');
+const notificationCountSpan = document.getElementById('notificationCount');
+const closeNotificationPopup = document.getElementById('closeNotificationPopup');
+const notificationFullContentDiv = document.getElementById('notificationFullContent');
+const fullNotificationPopupDiv = document.createElement('div');
+fullNotificationPopupDiv.id = 'fullNotificationPopup';
+fullNotificationPopupDiv.style.cssText = `
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    display: none;
+    z-index: 1001;
+    overflow-y: auto;
+`;
+const fullNotificationContentDiv = document.createElement('div');
+fullNotificationContentDiv.style.cssText = `
+    background-color: white;
+    width: 90%;
+    max-width: 500px;
+    border-radius: 8px;
+    margin: 50px auto;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    position: relative;
+    padding: 15px;
+`;
+const fullNotificationCloseButton = document.createElement('button');
+fullNotificationCloseButton.innerHTML = '&times;';
+fullNotificationCloseButton.style.cssText = `
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    border: none;
+    background: none;
+    font-size: 1.5em;
+    cursor: pointer;
+    color: #888;
+`;
+
+fullNotificationContentDiv.appendChild(fullNotificationCloseButton);
+fullNotificationPopupDiv.appendChild(fullNotificationContentDiv);
+document.body.appendChild(fullNotificationPopupDiv);
+
+let unreadNotifications = 0;
+let notifications = [];
+let currentNotificationIndex = null;
+
+function updateNotificationCount() {
+    notificationCountSpan.textContent = unreadNotifications;
+    notificationCountSpan.style.display = unreadNotifications > 0 ? 'inline-block' : 'none';
+}
+
+function addNotification(notification) {
+    notifications.unshift(notification);
+    if (!notification.read) { // Hanya hitung jika belum dibaca
+        unreadNotifications++;
+        updateNotificationCount();
+    }
+    updateNotificationDisplay();
+}
+
+function updateNotificationDisplay() {
+    notificationListItemsUl.innerHTML = '';
+    if (notifications.length === 0) {
+        const emptyMessage = document.createElement('li');
+        emptyMessage.textContent = 'Tidak ada notifikasi baru';
+        notificationListItemsUl.appendChild(emptyMessage);
+    } else {
+        notifications.forEach((notif, index) => {
+            const listItem = document.createElement('li');
+            listItem.className = 'notification-item';
+            listItem.style.cursor = 'pointer';
+
+            const categorySpan = document.createElement('span');
+            categorySpan.className = 'notification-category';
+
+            if (notif.type === 'transaksi') {
+                categorySpan.textContent = '[Transaksi]';
+                categorySpan.style.backgroundColor = '#ffe082';
+                categorySpan.style.color = '#7a5206';
+            } else if (notif.type === 'event') {
+                categorySpan.textContent = '[Event & Hadiah]';
+                categorySpan.style.backgroundColor = '#b2ebf2';
+                categorySpan.style.color = '#006064';
+            } else {
+                categorySpan.textContent = '[Info Umum]';
+                categorySpan.style.backgroundColor = '#d1c4e9';
+                categorySpan.style.color = '#311b92';
+            }
+
+            const titleSpan = document.createElement('span');
+            titleSpan.className = 'notification-title';
+            titleSpan.textContent = notif.title || 'No Title';
+            titleSpan.style.display = 'block';
+            titleSpan.style.textAlign = 'left';
+
+            listItem.appendChild(categorySpan);
+            listItem.appendChild(titleSpan);
+
+            listItem.addEventListener('click', (event) => { // Tambahkan event
+                showFullNotificationPopup(index);
+                markNotificationAsRead(index); // Mark as read on click
+                event.stopPropagation();
+            });
+
+            notificationListItemsUl.appendChild(listItem);
+        });
+    }
+}
+
+function markNotificationAsRead(index) {
+    if (notifications[index] && !notifications[index].read) {
+        notifications[index].read = true;
+        unreadNotifications--;
+        updateNotificationCount();
+        const listItem = notificationListItemsUl.children[index];
+        if (listItem) {
+            // Anda bisa menambahkan perubahan visual saat notifikasi dibaca di sini
+        }
+    }
+}
+
+function markAllNotificationsAsRead() {
+    notifications.forEach(notif => {
+        if (!notif.read) {
+            notif.read = true;
+        }
+    });
+    unreadNotifications = 0;
+    updateNotificationCount();
+    updateNotificationDisplay();
+}
+
+notificationIconDiv.addEventListener('click', (event) => {
+    event.stopPropagation();
+    notificationPopupDiv.style.display = 'block';
+    fullNotificationPopupDiv.style.display = 'none';
+    currentNotificationIndex = null;
+    // JANGAN mark all read di sini.
+});
+
+document.addEventListener('click', (event) => {
+    if (!notificationIconDiv.contains(event.target) && !notificationPopupDiv.contains(event.target) && !fullNotificationPopupDiv.contains(event.target)) {
+        notificationPopupDiv.style.display = 'none';
+        fullNotificationPopupDiv.style.display = 'none';
+        currentNotificationIndex = null;
+    }
+});
+
+closeNotificationPopup.addEventListener('click', (event) => {
+    notificationPopupDiv.style.display = 'none';
+    fullNotificationPopupDiv.style.display = 'none';
+    currentNotificationIndex = null;
+    event.stopPropagation();
+});
+
+fullNotificationCloseButton.addEventListener('click', (event) => {
+    fullNotificationPopupDiv.style.display = 'none';
+    event.stopPropagation();
+});
+
+markAllReadButton.addEventListener('click', (event) => {
+    markAllNotificationsAsRead();
+    event.stopPropagation();
+});
+
+function addNoteToFirebase(text, topic) {
+    addNotification({
+        title: `Catatan baru: ${text.substring(0, 20)}...`,
+        message: `Isi lengkap catatan: ${text}`,
+        read: false,
+        type: topic === 'transaksi' ? 'transaksi' : topic === 'event' ? 'event' : 'umum',
+        fullText: text
+    });
+}
+
+function showFullNotification(index) {
+    // Fungsi ini tidak lagi digunakan untuk menampilkan di div yang sama
+}
+
+function showFullNotificationPopup(index) {
+    const notif = notifications[index];
+    if (notif) {
+        fullNotificationContentDiv.innerHTML = `
+            <h3>${notif.title || 'Tidak Ada Judul'}</h3>
+            <p>${notif.fullText || notif.message}</p>
+        `;
+        fullNotificationPopupDiv.style.display = 'block';
+        currentNotificationIndex = index;
+        // markNotificationAsRead(index); // Sudah dipindahkan ke event listener listItem
+    }
+}
+
+// Contoh penambahan notifikasi
+addNotification({
+    type: 'uji coba',
+    title: 'uji coba',
+    message: 'uji coba!',
+    fullText: `
+        <h3>uji coba!</h3>
+        <p>07 Mei  2025 pukul 12:50</p>
+        <p>Halo uji coba! 👋</p>
+        <p>Saat ini uji coba .</p>
+        
+    `,
+    read: false
+});
+addNotification({
+    type: 'uji coba',
+    title: 'Pengumuman Penting Lainnya',
+    message: 'Informasi terbaru terkait uji coba kami.',
+    fullText: 'Detail lengkap mengenai pengumuman penting uji coba kami adalah sebagai berikut: ...',
+    read: false
+});
+
+updateNotificationDisplay();
+updateNotificationCount();
+
+
+
+
+
+
+
+// Definisi kata kunci dan panduan topik
+         const topicKeywords = {
+            makanan: {
+                keywords: ["makan", "sarapan", "siang", "malam", "restoran", "kafe", "masak", "nasi", "roti", "buah", "sayur", "daging", "ikan", "minum", "kopi", "teh", "lezat", "enak", "lapar", "kenyang"],
+                guide: "Catat semua hal yang berkaitan dengan makanan di sini. Mulai dari resep, daftar belanja, hingga ulasan restoran favoritmu.",
 activity: {}, // Tambahkan data aktivitas jika ada
-                link: "https://id.wikipedia.org/wiki/Makanan", // Tambahkan koma di sini
-                 termsContent: [
+                link: "https://id.wikipedia.org/wiki/Makanan", // Tambahkan koma di sini
+                 termsContent: [
             "Ketentuan terkait topik makanan:...",
             "[gambar]images/5.jpg", // Indikasi gambar dan path
             "Informasi tambahan tentang makanan:...",
             "Tips dan trik untuk catatan makanan:..."
         ]
-            },
-            belajar: {
-                keywords: ["belajar", "kuliah", "sekolah", "ujian", "buku", "catatan", "materi", "soal", "paham", "mengerti", "ilmu", "edukasi", "kursus", "pelajaran", "guru", "dosen"],
-                guide: "Gunakan topik ini untuk mencatat materi pelajaran, tugas, atau ide-ide saat belajar.",
+            },
+            belajar: {
+                keywords: ["belajar", "kuliah", "sekolah", "ujian", "buku", "catatan", "materi", "soal", "paham", "mengerti", "ilmu", "edukasi", "kursus", "pelajaran", "guru", "dosen"],
+                guide: "Gunakan topik ini untuk mencatat materi pelajaran, tugas, atau ide-ide saat belajar.",
 activity: {
             Jan: [
                 { day: "Mon", status: "baru", date: "2025-01-06" },
@@ -1082,42 +1592,70 @@ activity: {
             // ... bulan-bulan lain
         },
  
-                link: "https://id.wikipedia.org/wiki/Pendidikan"
-            },
+                link: "https://id.wikipedia.org/wiki/Pendidikan"
+            },
 
-                
-            pekerjaan: {
-                keywords: ["kerja", "kantor", "meeting", "proyek", "deadline", "tugas", "karir", "gaji", "bos", "rekan kerja", "laporan", "presentasi", "wawancara", "promosi", "bisnis"],
-                guide: "Catat semua hal terkait pekerjaanmu, seperti ide proyek, catatan rapat, atau daftar tugas.",
+                
+            pekerjaan: {
+                keywords: ["kerja", "kantor", "meeting", "proyek", "deadline", "tugas", "karir", "gaji", "bos", "rekan kerja", "laporan", "presentasi", "wawancara", "promosi", "bisnis"],
+                guide: "Catat semua hal terkait pekerjaanmu, seperti ide proyek, catatan rapat, atau daftar tugas.",
+activity: {
+            Jan: [
+                { day: "Mon", status: "baru", date: "2026-01-06" },
+                { day: "Wed", status: "selesai", date: "2026-01-08" }
+                // ... data lain di bulan Januari
+            ],
+            Feb: [
+                { day: "Fri", status: "selesai", date: "2026-02-14" }
+                // ... data lain di bulan Februari
+            ],
+            // ... bulan-bulan lain
+			Mar: [
+                { day: "Fri", status: "selesai", date: "2026-03-14" }
+                // ... data lain di bulan Februari
+            ],
+            // ... bulan-bulan lain
+			Apr: [
+                { day: "Fri", status: "revisi", date: "2026-04-14" },
+				{ day: "Fri", status: "selesai", date: "2026-04-25" }
+                // ... data lain di bulan Februari
+            ],
+            // ... bulan-bulan lain
+        },
+ 
+                link: "https://id.wikipedia.org/wiki/Pendidikan"
+            },
+			
+			
+            hiburan: {
+                keywords: ["nonton", "film", "musik", "konser", "game", "buku", "komik", "liburan", "jalan-jalan", "pesta", "tertawa", "senang", "bahagia", "santai"],
+                guide: "Tempat untuk mencatat ide film, buku yang ingin dibaca, atau rencana liburanmu.",
 activity: {}, // Tambahkan data aktivitas jika ada
-                link: "https://id.wikipedia.org/wiki/Pekerjaan"
+                link: "https://id.wikipedia.org/wiki/Hiburan"
+            },
+            kesehatan: {
+                keywords: ["sehat", "sakit", "dokter", "obat", "olahraga", "bugar", "istirahat", "tidur", "vitamin", "diet", "alergi", "demam", "flu", "stres"],
+                guide: "Catat informasi kesehatan penting, jadwal olahraga, atau gejala yang kamu rasakan.",
+activity: {}, // Tambahkan data aktivitas jika ada
+                link: "https://id.wikipedia.org/wiki/Kesehatan"
+            },
+            cinta: {
+                keywords: ["cinta", "sayang", "pacar", "hubungan", "hati", "perasaan", "rindu", "kangen", "putus", "nikah", "kasih", "mesra", "romantis"],
+                guide: "Curahkan isi hatimu dan catatan tentang hubunganmu di sini.",
+activity: {}, // Tambahkan data aktivitas jika ada
+                link: "https://id.wikipedia.org/wiki/Cinta"
+            },
+            lainlain: {
+                keywords: [],
+                guide: "Catatan yang tidak termasuk dalam kategori lain akan dikumpulkan di sini.",
+activity: {}, // Tambahkan data aktivitas jika ada
+                link: "#"
+            }
+        };
 
-            },
-            hiburan: {
-                keywords: ["nonton", "film", "musik", "konser", "game", "buku", "komik", "liburan", "jalan-jalan", "pesta", "tertawa", "senang", "bahagia", "santai"],
-                guide: "Tempat untuk mencatat ide film, buku yang ingin dibaca, atau rencana liburanmu.",
-activity: {}, // Tambahkan data aktivitas jika ada
-                link: "https://id.wikipedia.org/wiki/Hiburan"
-            },
-            kesehatan: {
-                keywords: ["sehat", "sakit", "dokter", "obat", "olahraga", "bugar", "istirahat", "tidur", "vitamin", "diet", "alergi", "demam", "flu", "stres"],
-                guide: "Catat informasi kesehatan penting, jadwal olahraga, atau gejala yang kamu rasakan.",
-activity: {}, // Tambahkan data aktivitas jika ada
-                link: "https://id.wikipedia.org/wiki/Kesehatan"
-            },
-            cinta: {
-                keywords: ["cinta", "sayang", "pacar", "hubungan", "hati", "perasaan", "rindu", "kangen", "putus", "nikah", "kasih", "mesra", "romantis"],
-                guide: "Curahkan isi hatimu dan catatan tentang hubunganmu di sini.",
-activity: {}, // Tambahkan data aktivitas jika ada
-                link: "https://id.wikipedia.org/wiki/Cinta"
-            },
-            lainlain: {
-                keywords: [],
-                guide: "Catatan yang tidak termasuk dalam kategori lain akan dikumpulkan di sini.",
-activity: {}, // Tambahkan data aktivitas jika ada
-                link: "#"
-            }
-        };
+
+
+       
 
         function categorizeNote(text) {
             const lowerCaseText = text.toLowerCase();
@@ -1826,65 +2364,10 @@ window.addEventListener("click", (event) => {
     }
 });
 
-  
 
- // Inisialisasi tahun pada filter aktivitas
-        function populateActivityYears() {
-            const yearSelect = document.getElementById('activityYear');
-            const currentYear = new Date().getFullYear();
-            for (let i = currentYear + 5; i >= 2020; i--) {
-                const option = document.createElement('option');
-                option.value = i;
-                option.textContent = i;
-                if (i === currentYear) {
-                    option.selected = true;
-                }
-                yearSelect.appendChild(option);
-            }
-        }
 
-        populateActivityYears();
 
-        // Event listener untuk perubahan tahun pada filter aktivitas (perlu diimplementasikan logika pemfilteran)
-        document.addEventListener('change', function(event) {
-            if (event.target && event.target.id.startsWith('activityYear-')) {
-                const topic = event.target.id.split('-')[1];
-                const selectedYear = parseInt(event.target.value);
-                const q = query(notesRef, orderBy("createdAt"));
-                onSnapshot(q, snapshot => {
-                    const allNotes = snapshot.docs;
-                    const filteredNotes = currentFilter === "semua" ? allNotes : allNotes.filter(doc => (doc.data().topic || "lainlain").toLowerCase() === currentFilter);
-                    displayNotes(filteredNotes); // Refresh tampilan catatan
-                });
-                // Di sini Anda perlu memanggil fungsi untuk merender ulang aktivitas berdasarkan tahun yang dipilih
-                const topicDiv = document.querySelector(`.note-group h2:contains("${topic.charAt(0).toUpperCase() + topic.slice(1)}")`)?.parentNode;
-                if (topicDiv && topicKeywords[topic] && topicKeywords[topic].activity) {
-                    const activityTitle = topicDiv.querySelector('h3');
-                    if (activityTitle && activityTitle.textContent === 'Aktivitas') {
-                        // Bersihkan bagian aktivitas sebelum merender ulang
-                        let nextSibling = activityTitle.nextElementSibling;
-                        while (nextSibling && nextSibling.tagName !== 'H2') {
-                            const temp = nextSibling.nextElementSibling;
-                            topicDiv.removeChild(nextSibling);
-                            nextSibling = temp;
-                        }
-                        topicDiv.innerHTML += renderActivity(topicKeywords[topic].activity, selectedYear, topic);
-                    }
-                }
-            }
-        });
-
-        // Polyfill for :contains pseudo-class (karena tidak didukung di semua browser)
-        jQuery.expr[':'].contains = function(a, i, m) {
-            return jQuery(a).text().toUpperCase()
-                .indexOf(m[3].toUpperCase()) >= 0;
-        };
-		
-		
-  
-  
-  
-		
+     
     </script>
 </body>
 </html>
