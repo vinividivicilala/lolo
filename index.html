@@ -3017,6 +3017,8 @@ let activitiesData = [];
 	
 
 
+// ... (Your existing imports and Firebase initialization) ...
+
 document.addEventListener('DOMContentLoaded', () => {
     // Ambil semua elemen DOM di awal untuk menghindari null checks berulang
     const loginForm = document.getElementById('loginForm');
@@ -3031,13 +3033,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const savedNotesModal = document.getElementById("savedNotesModal");
     const savedNotesContainer = document.getElementById("savedNotesContainer");
     const topicFilter = document.getElementById("topicFilter");
-    const googleLoginButton = document.querySelector(".google-login-button"); // Tambahkan ini
+    const googleLoginButton = document.querySelector(".google-login-button");
+    const closeSavedNotesModalBtn = document.getElementById("closeSavedNotesModalBtn"); // Make sure this is also retrieved
 
-    let unsubscribeNotes; // Variabel untuk menyimpan fungsi unsubscribe listener Firestore
-    let topics = new Set(); // Set untuk menyimpan topik unik
+    let unsubscribeNotes;
+    let topics = new Set();
 
     // --- Helper function untuk menampilkan/menyembunyikan elemen dengan animasi ---
     function animateTransition(elementToShow, elementToHide, initialDelay = 0, hideDelay = 500) {
+        // Ensure elements exist before trying to manipulate them
         if (elementToHide) {
             elementToHide.classList.remove("slide-in");
             elementToHide.classList.add("slide-out");
@@ -3049,7 +3053,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }, hideDelay);
         } else if (elementToShow) {
-            // Jika hanya ingin menampilkan tanpa menyembunyikan yang lain
             setTimeout(() => {
                 elementToShow.classList.remove("hidden");
                 elementToShow.classList.add("slide-in");
@@ -3068,12 +3071,11 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // Disable button saat proses login
         if (googleLoginButton) {
             googleLoginButton.disabled = true;
-            googleLoginButton.textContent = "Memproses..."; // Memberi umpan balik
+            googleLoginButton.textContent = "Memproses...";
         }
-        if (errorMessage) errorMessage.classList.add("hidden"); // Sembunyikan pesan error sebelumnya
+        if (errorMessage) errorMessage.classList.add("hidden");
 
         try {
             const provider = new GoogleAuthProvider();
@@ -3082,19 +3084,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const displayName = user.displayName || "Pengguna Google 👋";
 
-            // Transisi UI setelah login berhasil
             if (loginForm && greetingDiv && dashboardDiv && userGreetingElement && dashboardGreetingName) {
-                animateTransition(null, loginForm, 0, 1000); // Sembunyikan loginForm
+                animateTransition(null, loginForm, 0, 1000);
                 setTimeout(() => {
-                    greetingDiv.classList.remove("hidden");
-                    greetingDiv.classList.add("slide-in");
-                    userGreetingElement.textContent = `Halo ${displayName} 👋`;
-                }, 1000); // Munculkan greeting setelah loginForm hilang
+                    // Make sure greetingDiv is available here
+                    if (greetingDiv) {
+                        greetingDiv.classList.remove("hidden");
+                        greetingDiv.classList.add("slide-in");
+                        if (userGreetingElement) userGreetingElement.textContent = `Halo ${displayName} 👋`;
+                    }
+                }, 1000);
 
                 setTimeout(() => {
-                    animateTransition(dashboardDiv, greetingDiv); // Sembunyikan greeting, munculkan dashboard
-                    dashboardGreetingName.textContent = `Halo, ${displayName}!`;
-                }, 3000); // Setelah greeting muncul dan durasi 2 detik
+                    // Make sure dashboardDiv and greetingDiv are available here
+                    if (dashboardDiv && greetingDiv) {
+                        animateTransition(dashboardDiv, greetingDiv);
+                        if (dashboardGreetingName) dashboardGreetingName.textContent = `Halo, ${displayName}!`;
+                    }
+                }, 3000);
             }
 
         } catch (error) {
@@ -3105,12 +3112,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 } else if (error.code === 'auth/popup-blocked') {
                     errorMessage.textContent = "Login gagal: Pop-up diblokir. Izinkan pop-up untuk situs ini.";
                 } else {
-                    errorMessage.textContent = `Login gagal: ${error.message}`;
+                    errorMessage.textContent = `Login gagal: ${error.message}. Coba lagi atau periksa koneksi internet Anda.`;
                 }
                 errorMessage.classList.remove("hidden");
             }
         } finally {
-            // Enable button kembali
             if (googleLoginButton) {
                 googleLoginButton.disabled = false;
                 googleLoginButton.innerHTML = `<img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google icon" style="width: 20px; height: 20px; vertical-align: middle; margin-right: 8px;"> Masuk dengan Google`;
@@ -3126,18 +3132,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         signOut(auth)
             .then(() => {
-                // UI transition for logout
                 if (dashboardDiv && loginForm) {
-                    animateTransition(loginForm, dashboardDiv); // Sembunyikan dashboard, munculkan loginForm
-
-                    // Clear input fields (optional, but good practice)
+                    animateTransition(loginForm, dashboardDiv);
                     if (emailInput) emailInput.value = "";
                     if (passwordInput) passwordInput.value = "";
                 }
             })
             .catch((error) => {
                 console.error("Logout error:", error);
-                // Optionally display an error message to the user
                 if (errorMessage) {
                     errorMessage.textContent = `Logout gagal: ${error.message}`;
                     errorMessage.classList.remove("hidden");
@@ -3145,226 +3147,249 @@ document.addEventListener('DOMContentLoaded', () => {
             });
     }
 
-
-  // --- Authentication State Change Listener ---
-  function onAuthStateChangedHandler() {
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        // User is signed in
-        const displayName = user.displayName || user.email.split("@")[0] || "Pengguna";
-
-        loginForm.classList.add("hidden");
-        greetingDiv.classList.add("hidden");
-        dashboardDiv.classList.remove("hidden");
-        dashboardDiv.classList.add("slide-in");
-        dashboardGreetingName.textContent = `Halo, ${displayName}!`;
-
-        setupSavedNotesListener();
-      } else {
-        // User is signed out
-        loginForm.classList.remove("hidden");
-        // Ensure other divs are hidden when logged out
-        greetingDiv.classList.add("hidden");
-        dashboardDiv.classList.add("hidden");
-
-        // Stop listening to notes if user logs out
-        if (unsubscribeNotes) {
-          unsubscribeNotes();
-          unsubscribeNotes = null; // Clear the unsubscribe function
+    // --- Authentication State Change Listener ---
+    function onAuthStateChangedHandler() {
+        if (!auth || !onAuthStateChanged) {
+            console.error("Firebase Auth onAuthStateChanged module is not loaded.");
+            return;
         }
-      }
-    });
-  }
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                // User is signed in
+                const displayName = user.displayName || user.email.split("@")[0] || "Pengguna";
 
-  // --- Placeholder for fetchAndDisplayNotes (as per your original code) ---
-  async function fetchAndDisplayNotes(userId, filter = "semua") {
-    const notesList = document.getElementById("notesList");
-    if (!notesList) return;
+                // Ensure all elements exist before manipulating their classList or content
+                if (loginForm) loginForm.classList.add("hidden");
+                if (greetingDiv) greetingDiv.classList.add("hidden");
+                if (dashboardDiv) {
+                    dashboardDiv.classList.remove("hidden");
+                    dashboardDiv.classList.add("slide-in");
+                }
+                if (dashboardGreetingName) dashboardGreetingName.textContent = `Halo, ${displayName}!`;
 
-    notesList.innerHTML = `
-      <p style="text-align: center; color: gray;">
-        Catatan hanya muncul ketika disimpan dan ditampilkan lewat popup.
-      </p>
-    `;
-  }
+                setupSavedNotesListener();
+            } else {
+                // User is signed out
+                // Ensure all elements exist before manipulating their classList
+                if (loginForm) loginForm.classList.remove("hidden");
+                if (greetingDiv) greetingDiv.classList.add("hidden");
+                if (dashboardDiv) dashboardDiv.classList.add("hidden");
 
-  // --- Toggle Save Note (Firestore operations) ---
-  async function toggleSaveNote(noteId, isCurrentlySaved, noteData) {
-    const userId = auth.currentUser?.uid;
-    if (!userId) return;
-
-    const noteRef = doc(db, "users", userId, "notes", noteId);
-
-    try {
-      if (!isCurrentlySaved) {
-        await setDoc(noteRef, { ...noteData, isSaved: true, savedAt: serverTimestamp() });
-        showSuccessMessage("Catatan disimpan!");
-      } else {
-        await updateDoc(noteRef, { isSaved: false }); // Only update isSaved to false
-        showSuccessMessage("Catatan dibatalkan penyimpanannya.");
-      }
-    } catch (err) {
-      console.error("Toggle save note error:", err);
+                if (unsubscribeNotes) {
+                    unsubscribeNotes();
+                    unsubscribeNotes = null;
+                }
+            }
+        });
     }
-  }
 
-  // --- Filter Notes by Topic ---
-  function filterNotesByTopic(selectedTopic) {
-    const notes = savedNotesContainer.querySelectorAll(".note");
-    notes.forEach((note) => {
-      const noteTopic = note.dataset.topic || "";
-      note.style.display = (selectedTopic === "all" || selectedTopic === "" || noteTopic === selectedTopic.toLowerCase())
-        ? "block"
-        : "none";
-    });
-  }
+    // --- Placeholder for fetchAndDisplayNotes (as per your original code) ---
+    // This function seems unused in the current flow, but keeping it if other parts rely on it.
+    async function fetchAndDisplayNotes(userId, filter = "semua") {
+        const notesList = document.getElementById("notesList"); // Assuming this exists in your HTML dashboard
+        if (!notesList) return;
 
-  // --- Display Saved Notes in Popup ---
-  function displaySavedNotesPopup(savedNotes = []) {
-    if (!savedNotesModal || !savedNotesContainer || !topicFilter) return;
-    savedNotesContainer.innerHTML = ""; // Clear previous notes
-
-    if (savedNotes.length === 0) {
-      savedNotesContainer.innerHTML = "Belum ada catatan yang tersimpan.";
-      topicFilter.value = "all";
-      filterNotesByTopic("all");
-    } else {
-      savedNotes.forEach((doc) => {
-        const data = doc.data();
-        const topic = (data.topic || data.temaTopik || "").toLowerCase();
-
-        // --- Render Note Element (adjust based on your actual renderNote function) ---
-        const noteEl = document.createElement('div');
-        noteEl.innerHTML = `
-          <h3>${data.title || 'No Title'}</h3>
-          <p>${data.content || 'No Content'}</p>
-          <p>Topic: ${data.topic || 'N/A'}</p>
-          <button onclick="toggleSaveNote('${doc.id}', true, ${JSON.stringify(data).replace(/"/g, '&quot;')})">Batalkan Simpan</button>
+        notesList.innerHTML = `
+            <p style="text-align: center; color: gray;">
+                Catatan hanya muncul ketika disimpan dan ditampilkan lewat popup.
+            </p>
         `;
-        noteEl.classList.add("note");
-        noteEl.dataset.topic = topic; // Store topic for filtering
-        savedNotesContainer.appendChild(noteEl);
-      });
-
-      topicFilter.value = "all"; // Reset filter
-      filterNotesByTopic("all");
     }
 
-    savedNotesModal.style.display = "flex"; // Show the modal
+    // --- Toggle Save Note (Firestore operations) ---
+    async function toggleSaveNote(noteId, isCurrentlySaved, noteData) {
+        const userId = auth.currentUser?.uid;
+        if (!userId) {
+            showSuccessMessage("Anda perlu login untuk menyimpan catatan.");
+            return;
+        }
+        if (!db || !doc || !setDoc || !updateDoc || !serverTimestamp) {
+            console.error("Firestore modules are not loaded for saving notes.");
+            showSuccessMessage("Error: Database tidak tersedia.");
+            return;
+        }
 
-    // Attach filter change listener if not already attached
-    if (topicFilter && !topicFilter.dataset.listenerAttached) {
-      topicFilter.addEventListener("change", () => {
-        filterNotesByTopic(topicFilter.value);
-      });
-      topicFilter.dataset.listenerAttached = "true";
+        const noteRef = doc(db, "users", userId, "notes", noteId);
+
+        try {
+            if (!isCurrentlySaved) {
+                // Use merge: true to avoid overwriting other fields if they exist
+                await setDoc(noteRef, { ...noteData, isSaved: true, savedAt: serverTimestamp() }, { merge: true });
+                showSuccessMessage("Catatan disimpan!");
+            } else {
+                await updateDoc(noteRef, { isSaved: false });
+                showSuccessMessage("Catatan dibatalkan penyimpanannya.");
+            }
+        } catch (err) {
+            console.error("Toggle save note error:", err);
+            showSuccessMessage("Gagal mengubah status simpan catatan.");
+        }
     }
-  }
 
-  // --- Setup Real-time Listener for Saved Notes ---
-  function setupSavedNotesListener() {
-    if (!auth.currentUser) return; // Only listen if user is logged in
-
-    const userId = auth.currentUser.uid;
-    const q = query(
-      collection(db, "users", userId, "notes"),
-      where("isSaved", "==", true)
-    );
-
-    // Unsubscribe from previous listener if it exists to avoid multiple listeners
-    if (unsubscribeNotes) unsubscribeNotes();
-
-    unsubscribeNotes = onSnapshot(q, (snapshot) => {
-      const savedNotes = snapshot.docs;
-      topics.clear(); // Clear existing topics
-
-      if (topicFilter) {
-        topicFilter.innerHTML = '<option value="all">Semua Topik</option>'; // Reset topic filter options
-      }
-
-      savedNotes.forEach((doc) => {
-        const data = doc.data();
-        if (data.topic) topics.add(data.topic.toLowerCase());
-      });
-
-      // Populate topic filter with unique topics
-      topics.forEach((topic) => {
-        const option = document.createElement("option");
-        option.value = topic;
-        option.textContent = topic.charAt(0).toUpperCase() + topic.slice(1); // Capitalize first letter
-        topicFilter.appendChild(option);
-      });
-
-      displaySavedNotesPopup(savedNotes); // Display notes in the modal
-    });
-  }
-
-  // --- Event Listener for "Show Saved Notes" Button ---
-  if (showSavedNotesBtn) {
-    showSavedNotesBtn.addEventListener("click", () => {
-      setupSavedNotesListener(); // Triggers the listener to get data and open the modal
-    });
-  }
-
-  // --- Success Message Popup ---
-  function showSuccessMessage(message) {
-    let popup = document.getElementById("success-popup") || createSuccessPopup();
-    popup.textContent = message;
-    popup.classList.add("show");
-    setTimeout(() => popup.classList.remove("show"), 3000);
-  }
-
-  function createSuccessPopup() {
-    const popup = document.createElement("div");
-    popup.id = "success-popup";
-    popup.className = "popup";
-    popup.style.cssText = `
-      position: fixed; top: 20px; right: 20px;
-      background-color: #10b981; color: white;
-      padding: 14px 20px; border-radius: 10px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-      font-weight: 500; opacity: 0; pointer-events: none;
-      transition: all 0.4s ease; z-index: 1000;
-    `;
-    document.body.appendChild(popup);
-    return popup;
-  }
-
-  // --- Modal Close Button ---
-  const closeSavedNotesModalBtn = document.getElementById("closeSavedNotesModalBtn");
-  if (closeSavedNotesModalBtn) {
-    closeSavedNotesModalBtn.addEventListener("click", () => {
-      savedNotesModal.style.display = "none";
-      // Optionally unsubscribe from notes listener when modal is closed
-      if (unsubscribeNotes) {
-          unsubscribeNotes();
-          unsubscribeNotes = null;
-      }
-    });
-  }
-
-  // --- Close Modal on Outside Click ---
-  window.addEventListener("click", (event) => {
-    if (event.target === savedNotesModal) {
-      savedNotesModal.style.display = "none";
-      // Optionally unsubscribe from notes listener when modal is closed
-      if (unsubscribeNotes) {
-          unsubscribeNotes();
-          unsubscribeNotes = null;
-      }
+    // --- Filter Notes by Topic ---
+    function filterNotesByTopic(selectedTopic) {
+        if (!savedNotesContainer) return; // Ensure container exists
+        const notes = savedNotesContainer.querySelectorAll(".note");
+        notes.forEach((note) => {
+            const noteTopic = note.dataset.topic || "";
+            note.style.display = (selectedTopic === "all" || selectedTopic === "" || noteTopic === selectedTopic.toLowerCase())
+                ? "block"
+                : "none";
+        });
     }
-  });
 
-  // --- Expose functions to the global scope for inline HTML event handlers ---
-  window.loginWithGoogle = loginWithGoogle;
-  window.logoutGoogle = logoutGoogle; // Keep this
-  window.displaySavedNotesPopup = displaySavedNotesPopup;
-  window.toggleSaveNote = toggleSaveNote;
+    // --- Display Saved Notes in Popup ---
+    function displaySavedNotesPopup(savedNotes = []) {
+        if (!savedNotesModal || !savedNotesContainer || !topicFilter) {
+            console.warn("One or more modal elements are missing. Cannot display saved notes popup.");
+            return;
+        }
 
-  // --- Initialize auth state listener ---
-  onAuthStateChangedHandler();
+        savedNotesContainer.innerHTML = "";
+        topics.clear();
+
+        if (savedNotes.length === 0) {
+            savedNotesContainer.innerHTML = "<p style='text-align: center; padding: 20px;'>Belum ada catatan yang tersimpan.</p>";
+            topicFilter.value = "all";
+            // Ensure topicFilter is reset and then filtered
+            topicFilter.innerHTML = '<option value="all">Semua Topik</option>';
+            filterNotesByTopic("all");
+        } else {
+            savedNotes.forEach((docSnap) => {
+                const data = docSnap.data();
+                const topic = (data.topic || data.temaTopik || "").toLowerCase();
+                if (topic) topics.add(topic);
+
+                const noteEl = document.createElement('div');
+                noteEl.classList.add("note");
+                noteEl.dataset.topic = topic;
+
+                // Escape HTML entities for the JSON string in onclick to prevent breaking
+                const noteDataSafe = JSON.stringify(data).replace(/"/g, '&quot;');
+
+                noteEl.innerHTML = `
+                    <h3>${data.title || 'Tidak Ada Judul'}</h3>
+                    <p>${data.content || 'Tidak Ada Konten'}</p>
+                    <p style="font-size: 0.9em; color: #666;">Topik: ${data.topic || 'N/A'}</p>
+                    <button class="save-toggle-btn" onclick="toggleSaveNote('${docSnap.id}', true, ${noteDataSafe})">Batalkan Simpan</button>
+                `;
+                savedNotesContainer.appendChild(noteEl);
+            });
+
+            topicFilter.innerHTML = '<option value="all">Semua Topik</option>';
+            topics.forEach((topic) => {
+                const option = document.createElement("option");
+                option.value = topic;
+                option.textContent = topic.charAt(0).toUpperCase() + topic.slice(1);
+                topicFilter.appendChild(option);
+            });
+
+            topicFilter.value = "all";
+            filterNotesByTopic("all");
+        }
+
+        savedNotesModal.style.display = "flex";
+
+        // Separate function for listener to facilitate removal
+        function topicFilterChangeListener() {
+            filterNotesByTopic(topicFilter.value);
+        }
+        topicFilter.removeEventListener("change", topicFilterChangeListener);
+        topicFilter.addEventListener("change", topicFilterChangeListener);
+    }
+
+    // --- Setup Real-time Listener for Saved Notes ---
+    function setupSavedNotesListener() {
+        if (!auth.currentUser) return;
+        if (!db || !collection || !query || !where || !onSnapshot) {
+            console.error("Firestore real-time listener modules are not loaded.");
+            showSuccessMessage("Error: Listener catatan tidak tersedia.");
+            return;
+        }
+
+        const userId = auth.currentUser.uid;
+        const q = query(
+            collection(db, "users", userId, "notes"),
+            where("isSaved", "==", true)
+        );
+
+        if (unsubscribeNotes) unsubscribeNotes();
+
+        unsubscribeNotes = onSnapshot(q, (snapshot) => {
+            const savedNotes = snapshot.docs;
+            displaySavedNotesPopup(savedNotes);
+        }, (error) => {
+            console.error("Error fetching saved notes:", error);
+            showSuccessMessage("Gagal memuat catatan tersimpan.");
+        });
+    }
+
+    // --- Event Listener for "Show Saved Notes" Button ---
+    if (showSavedNotesBtn) {
+        showSavedNotesBtn.addEventListener("click", () => {
+            if (auth.currentUser) {
+                setupSavedNotesListener();
+            } else {
+                showSuccessMessage("Anda perlu login untuk melihat catatan tersimpan.");
+            }
+        });
+    }
+
+    // --- Success Message Popup ---
+    function showSuccessMessage(message) {
+        let popup = document.getElementById("success-popup") || createSuccessPopup();
+        popup.textContent = message;
+        popup.classList.add("show");
+        setTimeout(() => popup.classList.remove("show"), 3000);
+    }
+
+    function createSuccessPopup() {
+        const popup = document.createElement("div");
+        popup.id = "success-popup";
+        popup.className = "popup";
+        popup.style.cssText = `
+            position: fixed; top: 20px; right: 20px;
+            background-color: #10b981; color: white;
+            padding: 14px 20px; border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            font-weight: 500; opacity: 0; pointer-events: none;
+            transition: all 0.4s ease; z-index: 1000;
+        `;
+        document.body.appendChild(popup);
+        return popup;
+    }
+
+    // --- Modal Close Button ---
+    // Ensure closeSavedNotesModalBtn is retrieved at the top
+    if (closeSavedNotesModalBtn) {
+        closeSavedNotesModalBtn.addEventListener("click", () => {
+            if (savedNotesModal) savedNotesModal.style.display = "none";
+            if (unsubscribeNotes) {
+                unsubscribeNotes();
+                unsubscribeNotes = null;
+            }
+        });
+    }
+
+    // --- Close Modal on Outside Click ---
+    window.addEventListener("click", (event) => {
+        if (savedNotesModal && event.target === savedNotesModal) {
+            savedNotesModal.style.display = "none";
+            if (unsubscribeNotes) {
+                unsubscribeNotes();
+                unsubscribeNotes = null;
+            }
+        }
+    });
+
+    // --- Expose functions to the global scope for inline HTML event handlers ---
+    window.loginWithGoogle = loginWithGoogle;
+    window.logoutGoogle = logoutGoogle;
+    window.toggleSaveNote = toggleSaveNote; // Necessary for inline HTML buttons
+
+    // --- Initialize auth state listener ---
+    onAuthStateChangedHandler();
 });
-
 
 
 
