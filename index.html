@@ -16,6 +16,12 @@
       background: #f9fafb;
       padding: 50px 20px;
       color: #111827;
+	  background-image: 
+    linear-gradient(to right, #eee 1px, transparent 1px),
+    linear-gradient(to bottom, #eee 1px, transparent 1px);
+  background-size: 30px 30px;
+  background-color: #fafafa;
+
     }
     h1 {
       text-align: center;
@@ -23,6 +29,8 @@
       font-size: 28px;
       font-weight: 600;
       color: #111827;
+	  margin-top: 30px;
+	  
     }
 	
         input[type="text"] {
@@ -759,15 +767,1677 @@
     padding: 15px;
     border-top: 1px solid #eee;
 }
+      .blog-title {
+        font-size: 35px;
+        font-weight: bold;
+        color: #1f2937;
+        margin-bottom: 6px;
+        margin-top: 0;
+        line-height: 1.4;
+        cursor: pointer;
+        font-family: 'Poppins', sans-serif;
+      }
+
+      .blog-category-title {
+        font-size: 24px;
+        font-weight: bold;
+        color: #111827;
+        margin-bottom: 10px;
+        text-align: left;
+        margin-top: 40px;
+      }
+
+      .blog-category {
+        font-size: 12px;
+        color: #6b7280;
+        margin-bottom: 0;
+        text-transform: uppercase;
+        font-weight: 700;
+        margin-left: 0;
+      }
+
+      .blog-arrow {
+        opacity: 0.7;
+      }
+
+      .blog-arrow svg {
+        width: 20px;
+        height: 20px;
+      }
+
+	  .blog-content-main-title {
+  font-size: 39px; /* Ukuran font lebih besar */
+  font-weight: bold; /* Teks tebal (hitam) */
+  color: black; /* Warna teks hitam atau abu-abu gelap */
+  margin-bottom: 0.5em; /* Jarak bawah dari judul */
+}
+
+.blog-content-meta {
+  font-size: 15px; /* Ukuran font untuk meta informasi */
+  color: black; /* Warna teks abu-abu */
+  margin-bottom: 1em; /* Jarak bawah dari meta informasi */
+}
+
+.blog-content-meta span {
+  margin-right: 1em; /* Jarak antar tanggal dan sumber */
+}
+
+.blog-content-text {
+  color: black; /* Warna teks isi konten */
+  line-height: 1.6; /* Jarak antar baris untuk keterbacaan */
+}
+
+      #closeBlogContent {
+        background-color: transparent;
+        color: black;
+        padding: 10px 15px;
+        border-radius: 8px;
+        border: none;
+        cursor: pointer;
+        font-size: 29px;
+        margin-top: 15px;
+      }
+
+      #closeBlogContent:hover {
+        background-color: transparent;
+      }
+
+      .category-container {
+        display: flex;
+        flex-direction: row;
+        align-items: baseline;
+        width: 100%;
+        justify-content: space-between;
+        margin-bottom: 0;
+      }
+
+      .category-divider {
+        border-top: 1px solid #e5e7eb;
+        margin-top: 20px;
+        padding-top: 20px;
+      }
+
+      .article-list {
+        margin-bottom: 20px;
+      }
+
+      .article-item {
+        margin-bottom: 20px;
+        padding-bottom: 0;
+        border-bottom: none;
+      }
+
+      .article-item:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+        padding-bottom: 0;
+      }
+      .blog-date{
+        color: #6b7280;
+        font-size: 14px;
+      }
+      .blog-source{
+        color: #6b7280;
+        font-size: 12px;
+      }
+
+      /* Pagination Styles */
+      .pagination {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 20px;
+        padding: 0 10px;
+      }
+
+      .pagination-list {
+        display: flex;
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+
+      .pagination-item {
+        margin: 0 5px;
+      }
+
+      .pagination-link {
+        display: block;
+        padding: 8px 12px;
+        text-decoration: none;
+        color: #1f2937;
+        border-radius: 4px;
+        transition:  0.3s ease;
+      }
+
+      .pagination-link:hover {
+        background-color: #f3f4f6;
+      }
+
+      .pagination-item.active .pagination-link {
+        color: #6b7280;
+        font-weight: bold;
+        text-decoration: underline;
+      }
+
+      .pagination-next {
+        margin-left: auto;
+      }
+
+      .pagination-next-link {
+        display: block;
+        padding: 8px 12px;
+        text-decoration: none;
+        color: #1f2937;
+        border-radius: 4px;
+        transition:  0.3s ease;
+        font-weight: bold;
+        text-decoration: underline;
+      }
+
+      .pagination-next-link:hover {
+        background-color: #transparent;
+      }
 
 
 
 
+
+#quoraPopup {
+    /* Style dasar popup sudah ada di HTML */
+    width: 80%; /* Lebar popup */
+    max-width: 500px;
+    border-radius: 8px;
+}
+
+#quoraPopup h2 {
+    color: #333;
+    margin-top: 0;
+    margin-bottom: 15px;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 8px;
+}
+
+#quoraPopup ul {
+    list-style-type: none; /* Hilangkan bullet points */
+    padding: 0;
+    margin-bottom: 15px;
+}
+
+#quoraPopup ul li {
+    padding: 8px 0;
+    border-bottom: 1px dashed #ddd;
+}
+
+#quoraPopup ul li:last-child {
+    border-bottom: none;
+}
+
+#quoraPopup button#closeQuoraPopup {
+    background-color: #f44336; /* Warna merah untuk tombol tutup */
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em;
+    transition: background-color 0.3s ease;
+}
+
+#quoraPopup button#closeQuoraPopup:hover {
+    background-color: #d32f2f; /* Warna merah lebih gelap saat hover */
+}
+
+#quoraPopup ul li h3 a:hover {
+    text-decoration: underline; /* Tambahkan garis bawah saat hover pada judul tautan */
+}
+
+/* Gaya untuk Placeholder Video */
+#youtube-placeholder {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #333;
+    color: #fff;
+    cursor: pointer;
+    border-radius: 5px;
+    margin-top: 10px;
+}
+
+#youtube-placeholder svg {
+    width: 60px;
+    height: 40px;
+    fill: white;
+    filter: drop-shadow(0 0 6px rgba(0,0,0,0.6));
+}
+
+#youtube-placeholder:hover {
+    opacity: 0.9;
+}
+
+   
+            #app {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            max-width: 800px;
+            background: #7FFF00;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            transition: max-width 0.5s ease;
+        }
+
+        #loginForm {
+            padding: 2rem;
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.5s ease, transform 0.5s ease;
+            opacity: 1;
+            transform: translateX(0);
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        #loginForm h2 {
+            margin-bottom: 1.5rem;
+            color: #1a202c;
+            font-weight: 600;
+            font-size: 1.875rem;
+        }
+
+        .input-group {
+            margin-bottom: 1rem;
+            width: 100%;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #4a5568;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .input-group input {
+            width: calc(100% - 2rem);
+            padding: 0.75rem 1rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.375rem;
+            font-size: 1rem;
+            transition: border-color 0.2s ease;
+            box-sizing: border-box;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #4299e1;
+            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.15);
+        }
+
+        #errorMessage {
+            margin-top: 1rem;
+            color: #e53e3e;
+            font-size: 0.875rem;
+            padding: 0.5rem;
+            background-color: #fed7d7;
+            border-radius: 0.375rem;
+            border: 1px solid #fecaca;
+            display: none;
+        }
+
+        #loginForm button {
+            padding: 0.75rem 1.5rem;
+            background-color: #4299e1;
+            color: white;
+            border: none;
+            border-radius: 0.375rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s ease, transform 0.2s ease;
+            width: 100%;
+            margin-top: 0.5rem;
+        }
+
+        #loginForm button:hover {
+            background-color: #3182ce;
+            transform: translateY(-2px);
+        }
+
+#greetingDiv {
+    padding: 2rem;
+    background-color: rgba(255, 255, 255, 0.8);
+    border-radius: 10px;
+    text-align: center;
+    transition: all 0.5s ease;
+    width: 100%;
+    box-sizing: border-box;
+    opacity: 0; /* Tetap 0 secara default */
+    transform: translateX(100%); /* Tetap di luar layar default */
+}
+
+
+        #greetingDiv h2 {
+            margin-bottom: 1rem;
+            color: #1a202c;
+            font-size: 1.875rem;
+            font-weight: 600;
+        }
+
+        #greetingDiv p {
+            color: #4a5568;
+            font-size: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        #greetingDiv button {
+            padding: 0.75rem 1.5rem;
+            background-color: #e53e3e;
+            color: white;
+            border: none;
+            border-radius: 0.375rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s ease, transform 0.2s ease;
+            margin-top: 0.5rem;
+        }
+
+        #greetingDiv button:hover {
+            background-color: #c53030;
+            transform: translateY(-2px);
+        }
+
+        .dashboard-container {
+    padding: 2rem;
+    background-color: rgba(255, 255, 255, 0.8);
+    border-radius: 10px;
+    text-align: left;
+    transition: all 0.5s ease;
+    width: 100%;
+    box-sizing: border-box;
+    opacity: 0; /* Tetap 0 secara default */
+    transform: translateY(20px); /* Tetap di bawah default */
+}
+        .dashboard-container h2 {
+            margin-bottom: 1.5rem;
+            color: black;
+            font-size: 1.875rem;
+            font-weight: 600;
+        }
+
+        .dashboard-greeting {
+            font-size: 1.25rem;
+            color: black;
+            margin-bottom: 1rem;
+            font-weight: 500;
+        }
+
+        .help-section {
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .help-section h3 {
+            font-size: 1.125rem;
+            color: black;
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+        .help-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .help-list li {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.75rem;
+            color: black;
+        }
+
+        .help-list li svg {
+            margin-right: 0.75rem;
+            width: 1.25rem;
+            height: 1.25rem;
+            color: #4299e1;
+        }
+		
+		@media (min-width: 768px) {
+    #app {
+        max-width: 800px;
+        flex-direction: row;
+    }
+
+    #loginForm,
+    #greetingDiv,
+    .dashboard-container {
+        width: 50%;
+        margin: 0;
+    }
+
+    #loginForm {
+        border-radius: 10px 0 0 10px;
+    }
+
+    #greetingDiv,
+    .dashboard-container {
+        border-radius: 0 10px 10px 0;
+    }
+}
+
+      
+
+.slide-in {
+    animation: slideIn 0.5s ease forwards;
+}
+
+
+
+.slide-out {
+    animation: slideOut 0.5s ease forwards;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(100%); /* Untuk greetingDiv */
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Tambahkan keyframes khusus untuk slide-in dashboard dari bawah */
+@keyframes slideInDashboard {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.dashboard-container.slide-in { /* Terapkan animasi slideInDashboard ke dashboard */
+    animation: slideInDashboard 0.5s ease forwards;
+}
+
+.slide-out {
+    animation: slideOut 0.5s ease forwards;
+}
+
+@keyframes slideOut {
+    from {
+        opacity: 1;
+        transform: translateX(0); /* Untuk greetingDiv */
+    }
+    to {
+        opacity: 0;
+        transform: translateX(-100%);
+    }
+}
+
+.dashboard-container.slide-out { /* Atur animasi slideOut untuk dashboard */
+    from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+}
+
+.hidden {
+    visibility: hidden;
+    opacity: 0;
+    position: absolute;
+    left: -9999px;
+}
+
+
+    /* Note Favorit */
+    #notesArea input[type="text"] {
+      width: calc(100% - 90px);
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      margin-right: 10px;
+    }
+    #notesArea button {
+      padding: 10px 15px;
+      background: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .note-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px;
+      border-bottom: 1px solid #eee;
+    }
+    .favorite-icon {
+      cursor: pointer;
+      font-size: 20px;
+    }
+
+    /* Kotak Pesan */
+    #messageBox {
+      max-height: 200px;
+      overflow-y: auto;
+      border: 1px solid #ccc;
+      padding: 10px;
+      border-radius: 6px;
+      margin-top: 10px;
+      background: #fafafa;
+    }
+    #messageInput {
+      width: calc(100% - 70px);
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      margin-right: 10px;
+    }
+    #sendMessageBtn {
+      padding: 10px 15px;
+      background: #2196F3;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    /* Pengaturan */
+    .setting-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    /* Dark Mode */
+    body.dark-mode {
+      background: #1e1e1e;
+      color: #f1f1f1;
+    }
+    body.dark-mode .section {
+      background: #2d2d2d;
+      color: #f1f1f1;
+    }
+    body.dark-mode .note-item,
+    body.dark-mode #messageBox {
+      background: #3a3a3a;
+    }
+	.section {
+      background: white;
+      border-radius: 10px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 0 8px rgba(0,0,0,0.1);
+    }
+	
+	 ul {
+      list-style-type: none;
+      padding-left: 0;
+    }
+
+    li {
+      padding: 10px 0;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    li:last-child {
+      border-bottom: none;
+    }
+
+    .icon {
+      margin-right: 10px;
+      font-size: 18px;
+      color: #6b7280;
+    }
+	
+	#app {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 800px;
+    background: #7FFF00;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    transition: max-width 0.5s ease;
+    margin: 20px auto; /* Agar app berada di tengah dan ada margin atas bawah */
+}
+
+#loginForm {
+    padding: 2rem;
+    background-color: rgba(255, 255, 255, 0.8);
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.5s ease, transform 0.5s ease;
+    opacity: 1;
+    transform: translateX(0);
+    width: 100%;
+    box-sizing: border-box;
+}
+
+#loginForm h2 {
+    margin-bottom: 1.5rem;
+    color: #1a202c;
+    font-weight: 600;
+    font-size: 1.875rem;
+}
+
+.input-group {
+    margin-bottom: 1rem;
+    width: 100%;
+}
+
+.input-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #4a5568;
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.input-group input {
+    width: calc(100% - 2rem);
+    padding: 0.75rem 1rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.375rem;
+    font-size: 1rem;
+    transition: border-color 0.2s ease;
+    box-sizing: border-box;
+}
+
+.input-group input:focus {
+    outline: none;
+    border-color: #4299e1;
+    box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.15);
+}
+
+#errorMessage {
+    margin-top: 1rem;
+    color: #e53e3e;
+    font-size: 0.875rem;
+    padding: 0.5rem;
+    background-color: #fed7d7;
+    border-radius: 0.375rem;
+    border: 1px solid #fecaca;
+    display: none;
+}
+
+#loginForm button {
+    padding: 0.75rem 1.5rem;
+    background-color: #4299e1;
+    color: white;
+    border: none;
+    border-radius: 0.375rem;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+    width: 100%;
+    margin-top: 0.5rem;
+}
+
+#loginForm button:hover {
+    background-color: #3182ce;
+    transform: translateY(-2px);
+}
+
+#greetingDiv {
+    padding: 2rem;
+    background-color: rgba(255, 255, 255, 0.8);
+    border-radius: 10px;
+    text-align: center;
+    transition: all 0.5s ease;
+    width: 100%;
+    box-sizing: border-box;
+    opacity: 0; /* Tetap 0 secara default */
+    transform: translateX(100%); /* Tetap di luar layar default */
+}
+
+#greetingDiv h2 {
+    margin-bottom: 1rem;
+    color: #1a202c;
+    font-size: 1.875rem;
+    font-weight: 600;
+}
+
+#greetingDiv p {
+    color: #4a5568;
+    font-size: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+#greetingDiv button {
+    padding: 0.75rem 1.5rem;
+    background-color: #e53e3e;
+    color: white;
+    border: none;
+    border-radius: 0.375rem;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+    margin-top: 0.5rem;
+}
+
+#greetingDiv button:hover {
+    background-color: #c53030;
+    transform: translateY(-2px);
+}
+
+.dashboard-container {
+    padding: 2rem;
+    background-color: rgba(255, 255, 255, 0.8);
+    border-radius: 10px;
+    text-align: left;
+    transition: all 0.5s ease;
+    width: 100%;
+    box-sizing: border-box;
+    opacity: 0; /* Tetap 0 secara default */
+    transform: translateY(20px); /* Tetap di bawah default */
+}
+
+.dashboard-container h2 {
+    margin-bottom: 1.5rem;
+    color: black;
+    font-size: 1.875rem;
+    font-weight: 600;
+    cursor: pointer; /* Tambahkan cursor pointer agar terlihat bisa diklik */
+}
+
+.dashboard-greeting {
+    font-size: 1.25rem;
+    color: black;
+    margin-bottom: 1rem;
+    font-weight: 500;
+}
+
+.help-section {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #e2e8f0;
+}
+
+.help-section h3 {
+    font-size: 1.125rem;
+    color: black;
+    margin-bottom: 1rem;
+    font-weight: 600;
+}
+
+.help-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.help-list li {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.75rem;
+    color: black;
+}
+
+.help-list li svg {
+    margin-right: 0.75rem;
+    width: 1.25rem;
+    height: 1.25rem;
+    color: #4299e1;
+}
+
+@media (min-width: 768px) {
+    #app {
+        max-width: 800px;
+        flex-direction: row;
+    }
+
+    #loginForm,
+    #greetingDiv,
+    .dashboard-container {
+        width: 50%;
+        margin: 0;
+    }
+
+    #loginForm {
+        border-radius: 10px 0 0 10px;
+    }
+
+    #greetingDiv,
+    .dashboard-container {
+        border-radius: 0 10px 10px 0;
+    }
+}
+
+.slide-in {
+    animation: slideIn 0.5s ease forwards;
+}
+
+.slide-out {
+    animation: slideOut 0.5s ease forwards;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(100%); /* Untuk greetingDiv */
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Tambahkan keyframes khusus untuk slide-in dashboard dari bawah */
+@keyframes slideInDashboard {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.dashboard-container.slide-in { /* Terapkan animasi slideInDashboard ke dashboard */
+    animation: slideInDashboard 0.5s ease forwards;
+}
+
+.slide-out {
+    animation: slideOut 0.5s ease forwards;
+}
+
+@keyframes slideOut {
+    from {
+        opacity: 1;
+        transform: translateX(0); /* Untuk greetingDiv */
+    }
+    to {
+        opacity: 0;
+        transform: translateX(-100%);
+    }
+}
+
+.dashboard-container.slide-out { /* Atur animasi slideOut untuk dashboard */
+    from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+}
+
+.hidden {
+    visibility: hidden;
+    opacity: 0;
+    position: absolute;
+    left: -9999px;
+}
+
+/* Note Favorit */
+#noteText {
+    width: calc(100% - 90px);
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    margin-right: 10px;
+    box-sizing: border-box; /* Pastikan padding dan border termasuk dalam lebar */
+    margin-bottom: 10px; /* Tambahkan margin bawah */
+}
+
+#dashboardDiv .section > button { /* Gaya tombol Simpan di bagian Catatan Favorit */
+    padding: 10px 15px;
+    background: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-bottom: 15px; /* Tambahkan margin bawah */
+}
+
+.note-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.favorite-icon {
+    cursor: pointer;
+    font-size: 20px;
+    color: #e53e3e; /* Warna ikon hapus */
+}
+
+.favorite-icon:hover {
+    color: #c53030;
+}
+
+/* Kotak Pesan */
+#messageBox {
+    max-height: 200px;
+    overflow-y: auto;
+    border: 1px solid #ccc;
+    padding: 10px;
+    border-radius: 6px;
+    margin-top: 10px;
+    background: #fafafa;
+}
+
+#messageInput {
+    width: calc(100% - 70px);
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    margin-right: 10px;
+    box-sizing: border-box;
+    margin-bottom: 10px;
+}
+
+#sendMessageBtn {
+    padding: 10px 15px;
+    background: #2196F3;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+/* Pengaturan */
+.setting-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+/* Dark Mode */
+body.dark-mode {
+    background: #1e1e1e;
+    color: #f1f1f1;
+}
+
+body.dark-mode .section {
+    background: #2d2d2d;
+    color: #f1f1f1;
+    box-shadow: 0 0 8px rgba(255,255,255,0.1);
+}
+
+body.dark-mode .note-item,
+body.dark-mode #messageBox {
+    background: #3a3a3a;
+    border-color: #555;
+}
+
+body.dark-mode #noteText,
+body.dark-mode #messageInput {
+    background: #444;
+    color: #f1f1f1;
+    border-color: #555;
+}
+
+body.dark-mode #noteText::placeholder,
+body.dark-mode #messageInput::placeholder {
+    color: #ccc;
+}
+
+.section {
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 0 8px rgba(0,0,0,0.1);
+}
+
+ul {
+    list-style-type: none;
+    padding-left: 0;
+}
+
+li {
+    padding: 10px 0;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+li:last-child {
+    border-bottom: none;
+}
+
+.icon {
+    margin-right: 10px;
+    font-size: 18px;
+    color: #6b7280;
+}
+
+/* Gaya Pop-up Catatan Favorit */
+#topicNotesContainer {
+    margin-top: 15px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    background-color: #f9f9f9;
+}
+
+#topicNotesContainer ul {
+    padding-left: 20px;
+}
+
+#topicNotesContainer li {
+    padding: 5px 0;
+    border-bottom: 1px dotted #eee;
+}
+
+#topicNotesContainer li:last-child {
+    border-bottom: none;
+}
+
+/* Gaya Tombol di Pop-up */
+#app > div > div[style*="position: fixed"] button {
+    padding: 8px 12px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-right: 5px;
+    transition: background-color 0.2s ease;
+}
+
+#app > div > div[style*="position: fixed"] button:hover {
+    background-color: #0056b3;
+}
+
+#app > div > div[style*="position: fixed"] h3 {
+    margin-bottom: 15px;
+    color: #333;
+}
+
+
+.saved-notes-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5); /* Semi transparan background */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.saved-notes-modal-content {
+  background-color: white;
+  width: 90%;
+  max-width: 600px;
+  max-height: 90vh; /* Hindari overflow layar */
+  overflow: hidden; /* Jangan biarkan seluruh modal scroll */
+  border-radius: 8px;
+  padding: 20px;
+  position: relative;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+}
+
+#savedNotesContainer {
+  flex: 1;
+  overflow-y: auto;
+  margin-top: 10px;
+  max-height: 60vh; /* Bagian inilah yang scroll, bukan modalnya */
+  padding-right: 8px;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.modal-close-button {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.modal-close-button:hover,
+.modal-close-button:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+
+.save-individual-note.saved {
+    background-color: #3b82f6;
+    color: white;
+    font-weight: bold;
+}
+
+.saved-note-card {
+  background: white;
+  max-width: 640px;
+  margin: 0 auto 20px;
+  border-radius: 14px;
+  padding: 20px 24px; /* Kurangi padding kiri karena ::before dihilangkan */
+  display: flex;
+  align-items: center;
+  position: relative;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.04);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.saved-note-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 24px rgba(0,0,0,0.06);
+}
+
+.saved-note-card::before {
+  content: none; /* Hilangkan garis vertikal */
+}
+
+.saved-note-card .note-body {
+  display: flex;
+  align-items: center; /* Pastikan elemen di dalamnya juga center */
+  width: 100%; /* Ambil seluruh lebar yang tersedia */
+}
+
+.saved-note-card .note-text {
+  flex-grow: 1; /* Biarkan teks mengambil ruang sebanyak mungkin */
+  margin-right: 15px; /* Beri jarak dengan elemen aksi */
+}
+
+.saved-note-card .note-actions {
+  /* Gaya untuk tombol dan ikon aksi */
+}
+
+.saved-note-card .badge {
+  /* Gaya untuk badge */
+  margin-left: 15px; /* Beri jarak dengan elemen aksi atau teks */
+}
+
+ 
+ .info-bar-container {
+            background-color: transparent;
+            color: black;
+            padding: 20px;
+            text-align: center;
+            width: 100%;
+            box-sizing: border-box;
+            border-bottom: 1px solid #4a5d73;
+            font-size: 1.1em;
+            position: absolute;
+            top: 0;
+            left: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .info-bar-container:hover {
+            background-color: transparent;
+        }
+
+        .icon-text-group {
+            display: flex;
+            align-items: center;
+            white-space: nowrap;
+			colour: black;
+        }
+
+        .info-icon {
+            font-size: 1.5em;
+            margin-right: 8px;
+            display: inline-block;
+        }
+
+        .announcement-icon {
+            color: #ffc107;
+            animation: shake 0.82s cubic-bezier(.36,.07,.19,.97) both infinite;
+            transform: translate3d(0, 0, 0);
+            backface-visibility: hidden;
+            perspective: 1000px;
+        }
+
+        .birthday-icon {
+            color: #28a745;
+            animation: bounce 2s infinite;
+        }
+
+        .countdown-icon {
+            color: #dc3545;
+        }
+
+        .countdown-text {
+            font-weight: bold;
+            color: black;
+        }
+
+        @keyframes shake {
+            10%, 90% {
+                transform: translate3d(-1px, 0, 0);
+            }
+            20%, 80% {
+                transform: translate3d(2px, 0, 0);
+            }
+            30%, 50%, 70% {
+                transform: translate3d(-4px, 0, 0);
+            }
+            40%, 60% {
+                transform: translate3d(4px, 0, 0);
+            }
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0);
+            }
+            40% {
+                transform: translateY(-10px);
+            }
+            60% {
+                transform: translateY(-5px);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .info-bar-container {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+
+        .perjalanan-hidup-modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+        }
+
+        .perjalanan-hidup-modal.perjalanan-hidup-modal-show {
+            display: flex;
+            opacity: 1;
+        }
+
+        .perjalanan-hidup-modal-content {
+            background-color: #ffffff;
+            color: #333;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+            position: relative;
+            width: 90%;
+            max-width: 800px;
+            transform: translateY(-50px);
+            transition: transform 0.3s ease-in-out;
+            overflow-y: auto; /* Tambahkan scrollbar jika konten melampaui tinggi maksimal */
+            max-height: 90vh; /* Tinggi maksimal modal content */
+        }
+
+        .perjalanan-hidup-modal.perjalanan-hidup-modal-show .perjalanan-hidup-modal-content {
+            transform: translateY(0);
+        }
+
+        .perjalanan-hidup-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .perjalanan-hidup-modal-header h2 {
+            margin: 0;
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+
+        .perjalanan-hidup-close-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 2em;
+            color: #aaa;
+            cursor: pointer;
+            border: none;
+            background: none;
+            padding: 0;
+            line-height: 1;
+            opacity: 0.7;
+            transition: opacity 0.2s ease;
+        }
+
+        .perjalanan-hidup-close-button:hover {
+            color: #555;
+            opacity: 1;
+        }
+
+        .perjalanan-hidup-timeline {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .perjalanan-hidup-timeline li {
+            margin-bottom: 15px;
+            position: relative;
+            padding-left: 40px;
+        }
+
+        .timeline-icon {
+            position: absolute;
+            left: 0;
+            top: 5px;
+            font-size: 1.2em;
+            color: #007bff;
+        }
+
+        .timeline-date {
+            font-size: 0.9em;
+            color: #888;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .timeline-title {
+            font-size: 1.1em;
+            font-weight: bold;
+            margin-bottom: 5px;
+            display: inline-block;
+            padding: 5px 0;
+        }
+
+        .timeline-content {
+            font-size: 1em;
+            line-height: 1.5;
+            color: #555;
+        }
+
+        .timeline-content img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin-top: 10px;
+            display: block;
+        }
+
+        .timeline-link {
+            display: inline-block;
+            margin-top: 10px;
+            color: #007bff;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .timeline-link:hover {
+            text-decoration: underline;
+        }
+
+        .timeline li:before {
+            content: '';
+            position: absolute;
+            left: 15px;
+            top: 0;
+            bottom: 0;
+            border-left: 2px solid #007bff;
+            margin-top: 10px;
+        }
+
+        .number-title {
+            font-weight: bold;
+            margin-right: 5px;
+            color: #007bff;
+        }
+
+        .highlight-block {
+            background-color: #7FFF00;
+            padding: 10px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border: 1px solid #b2ebf2;
+        }
+
+        @media (max-width: 768px) {
+            .perjalanan-hidup-modal-content {
+                width: 95%;
+                max-width: 95%;
+                margin: 20px auto;
+            }
+            .perjalanan-hidup-timeline li {
+                padding-left: 30px;
+            }
+            .perjalanan-hidup-timeline li:before {
+                left: 10px;
+            }
+             .info-bar-container {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+
+        .perjalanan-hidup-modal-content {
+          animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+          }
+          to {
+            opacity: 1;
+          }
+        }
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
     </style>
 </head>
 <body>
-    <h1>📝 Noted</h1>
+
+ <div class="info-bar-container" id="infoBar">
+        <div class="icon-text-group">
+            <span class="info-icon announcement-icon">📢</span>
+            <span>Pengumuman:</span>
+        </div>
+        <div class="icon-text-group">
+            <span class="info-icon birthday-icon">🎉</span>
+            <span>Selamat Ulang Tahun Farid Ardiansyah!</span>
+        </div>
+        <div class="icon-text-group">
+            <span class="info-icon countdown-icon">⏳</span>
+            <span class="countdown-text" id="countdown"></span>
+        </div>
+    </div>
 	
+	
+
+
+    <div class="perjalanan-hidup-modal" id="myModal">
+        <div class="perjalanan-hidup-modal-content">
+            <div class="perjalanan-hidup-modal-header">
+                <h2>Perjalanan Hidup</h2>
+                <button class="perjalanan-hidup-close-button" id="closeModalBtn">&times;</button>
+            </div>
+            <ul class="perjalanan-hidup-timeline">
+                <li>
+                    <div class="timeline-icon">👶</div>
+                    <div class="timeline-date"><span class="hari">Selasa </span>, 29 Mei 2001 <span class="pukul">xx:xx WIB</span></div>
+                    <h3 class="timeline-title"><span class="number-title">1.</span> Kelahiran</h3>
+                    <div class="timeline-content">
+                        <p>Farid Ardiansyah lahir di Jakarta Utara, Jakarta.  Anak pertama dari pasangan [Nama Ayah] dan [Nama Ibu].</p>
+                        <img src="images/2001.jpg" alt="Foto Kelahiran Farid" width="400" height="300">
+                    </div>
+                </li>
+				
+                <li>
+                    <div class="timeline-date"><span class="hari">x</span>, xx x 2013 <span class="pukul">xx:xx WIB</span></div>
+                    <h3 class="timeline-title"><span class="number-title">2.</span> Lulus MI</h3>
+                    <div class="timeline-content">
+                        <p>Meraih lulus dari sekolah MI, melanjutkan ke MTSN 2013.</p>
+						 <img src="images/5.jpg" alt="" width="400" height="300">
+                        <div class="highlight-block">
+                            <p>"Menurut saya, lulus dari sekolah Mi dengan NEM baik, buat melanjutkan masuk sekolah MTSN."</p>
+                        </div>
+						</div>
+                </li>
+				<li>
+                    <div class="timeline-date"><span class="hari">x</span>, xx x 2016 <span class="pukul">xx:xx WIB</span></div>
+                    <h3 class="timeline-title"><span class="number-title">3.</span> Lulus MTSN</h3>
+                    <div class="timeline-content">
+                        <p>Meraih lulus dari sekolah MTSN, melanjutkan ke SMKN 2016.</p>
+						                       <img src="images/5.jpg" alt="" width="400" height="300">
+                        <div class="highlight-block">
+                            <p>"Menurut saya, lulus dari sekolah MTSN dengan Test masuk baik, buat melanjutkan masuk sekolah SMKN."</p>
+                        </div>
+						 </div>
+						 </li>
+                 
+				<li>
+                      <div class="timeline-date"><span class="hari">x</span>, xx x 2019 <span class="pukul">xx:xx WIB</span></div>
+                    <h3 class="timeline-title"><span class="number-title">4.</span> Lulus SMKN</h3>
+                    <div class="timeline-content">
+                        <p>Meraih lulus dari sekolah SMKN, melanjutkan ke Universitas Gunadarma 2019.</p>
+						                       <img src="images/5.jpg" alt="" width="400" height="300">
+                        <div class="highlight-block">
+                            <p>"Menurut saya, lulus dari sekolah SMKN, lumayan sulit banyak kegiatan seperti PKL, USBN, UN, US, UPRAK, dst. dengan Test masuk baik sampai 1000 soal pg lebih, buat melanjutkan masuk kuliah Universitas Gunadarma 2019."</p>
+                        </div>
+						</div>
+                </li>
+				<li>
+                    
+					
+					
+					Coming Soon
+					
+					
+					
+					
+					
+                </li>
+				
+				
+                <li>
+                    <div class="timeline-icon">💼</div>
+                    <div class="timeline-date"><span class="hari">Coming Soon</span>, Coming Soon <span class="pukul">Coming Soon WIB</span></div>
+                    <h3 class="timeline-title"><span class="number-title">5.</span> Karier Pertama Coming Soon</h3>
+                    <div class="timeline-content">
+                        <p>Coming Soon.</p>
+						 <img src="images/5.jpg" alt="" width="400" height="300">
+                        <p>Kunjungi <a href="https://www.example.com" target="_blank" rel="noopener noreferrer" class="timeline-link">website perusahaan</a> untuk informasi lebih lanjut.</p>
+                    </div>
+                </li>
+				
+				
+                 <li>
+                    <div class="timeline-icon">🚀</div>
+                    <div class="timeline-date"><span class="hari">Coming Soon</span>, Coming Soon <span class="pukul">Coming Soon WIB</span></div>
+                    <h3 class="timeline-title"><span class="number-title">6.</span> Pencapaian Coming Soon</h3>
+                    <div class="timeline-content">
+                        <p>Coming Soon.</p>
+						 <img src="images/5.jpg" alt="" width="400" height="300">
+                    </div>
+                </li>
+				
+				 <li>
+                    <div class="timeline-icon">🚀</div>
+                    <div class="timeline-date"><span class="hari">Coming Soon</span>, Coming Soon Umur 30 an <span class="pukul">Coming Soon WIB</span></div>
+                    <h3 class="timeline-title"><span class="number-title">7.</span> Istri Pertama Coming Soon</h3>
+                    <div class="timeline-content">
+                        <p>Coming Soon.</p>
+						 <img src="images/5.jpg" alt="" width="400" height="300">
+                    </div>
+                </li>
+				
+				 <li>
+                    <div class="timeline-icon">🚀</div>
+                    <div class="timeline-date"><span class="hari">Coming Soon</span>, Coming Soon <span class="pukul">Coming Soon WIB</span></div>
+                    <h3 class="timeline-title"><span class="number-title">8.</span> Anak Pertama Coming Soon</h3>
+                    <div class="timeline-content">
+                        <p>Coming Soon.</p>
+						 <img src="images/5.jpg" alt="" width="400" height="300">
+                    </div>
+                </li>
+				
+                <li>
+                    <div class="timeline-icon">🌍</div>
+                    <div class="timeline-date"><span class="hari">Coming Soon</span>, Coming Soon<span class="pukul">Coming Soon WIB</span></div>
+                    <h3 class="timeline-title"><span class="number-title">9.</span> Kontribusi volunteer Coming Soon</h3>
+                    <div class="timeline-content">
+                        <p>Menjadi kontributor aktif dalam proyek open source <a href="https://github.com/example/open-source-project" target="_blank" rel="noopener noreferrer" class="timeline-link">Coming Soon</a>. Coming Soon.</p>
+						 <img src="images/5.jpg" alt="" width="400" height="300">
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+
+
+    <h1>📝 Noted</h1>
 
 
     <div class="note-input-container">
@@ -781,9 +2451,201 @@
     </button>
 </div>
 
+ 
+   <div id="app">
+  <div class="login-container slide-in" id="loginForm">
+    <h2>Login</h2>
+    <div class="input-group">
+      <label for="email">Email (Optional):</label>
+      <input type="email" id="email" name="email">
+    </div>
+    <div class="input-group">
+      <label for="password">Password (Optional):</label>
+      <input type="password" id="password" name="password">
+    </div>
+    <button onclick="loginWithGoogle()" class="google-login-button">
+      <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google icon" style="width: 20px; height: 20px; vertical-align: middle; margin-right: 8px;">
+      Masuk dengan Google
+    </button>
+    <p id="errorMessage" class="error-message hidden"></p>
+  </div>
 
+        <button onclick="logoutGoogle()">Logout</button>
+    </div>
 
+    <div class="dashboard-container hidden" id="dashboardDiv">
+        <h2>Dashboard Akun</h2>
+        <p class="dashboard-greeting" id="dashboardGreetingName">Halo, Pengguna👋</p>
+        <div class="section">
+            <h2>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor">
+                    <path d="M17 3H7c-1.1 0-1.99.9-1.99 2L5 21l7-3 7 3V5c0-1.1-.9-2-2-2z"/>
+                </svg>
+                Catatan Favorit
+            </h2>
+            <div style="margin-bottom: 10px;">
+                <button id="showSavedNotesBtn" class="bulk-save-button">Lihat Catatan Tersimpan</button>
+            </div>
+            <div id="notesList"></div>
+        </div>
+    </div>
 
+    <div id="savedNotesModal" class="saved-notes-modal-overlay" style="display: none;">
+    <div class="saved-notes-modal-content">
+        <button class="modal-close-button" id="closeSavedNotesModal">&times;</button>
+        <h2>Catatan yang Anda Simpan</h2>
+        <label for="topicFilter">Filter Berdasarkan Topik:</label>
+        <select id="topicFilter">
+            <option value="">Semua Topik</option>
+            <option value="makanan">Makanan</option>
+            <option value="belajar">Belajar</option>
+            <option value="pekerjaan">Pekerjaan</option>
+            <option value="hiburan">Hiburan</option>
+            <option value="kesehatan">Kesehatan</option>
+            <option value="cinta">Cinta</option>
+            <option value="lain-lain">Lain-lain</option>
+        </select>
+        <div id="savedNotesContainer">
+        </div>
+</div>
+</div>
+
+        <div class="section">
+            <h2>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor">
+                    <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H4V8l8 5 8-5v10zm-8-5l-8-5H4l8 5 8-5h-8z"/>
+                </svg>
+                Pesan
+            </h2>
+            <input type="text" id="messageInput" placeholder="Ketik pesan..." />
+            <button onclick="sendMessage()">Kirim</button>
+            <div id="messageBox"></div>
+        </div>
+
+        <div class="section">
+            <h2>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-1.41 1.41C12.99 13.46 12 14 12 16h-2v-.5c0-1.99 1.51-3.49 3.57-3.49 1.41 0 2.54.83 3.02 2.08l1.41-1.41C16.81 10.24 14.49 9 12 9c-1.86 0-3.47 1.27-3.9 3.01L6.23 13.16c.47 1.74 2.14 3.09 3.9 3.09 2.31 0 4.2-1.71 4.2-4.09 0-1.53-.88-2.89-2.13-3.59z"/>
+                </svg>
+                Bantuan
+            </h2>
+            <ul>
+                <li>
+                    <a href="#" onclick="showHelp('faq')">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-1.41 1.41C12.99 13.46 12 14 12 16h-2v-.5c0-1.99 1.51-3.49 3.57-3.49 1.41 0 2.54.83 3.02 2.08l1.41-1.41C16.81 10.24 14.49 9 12 9c-1.86 0-3.47 1.27-3.9 3.01L6.23 13.16c.47 1.74 2.14 3.09 3.9 3.09 2.31 0 4.2-1.71 4.2-4.09 0-1.53-.88-2.89-2.13-3.59z"/>
+                        </svg>
+                        FAQ
+                    </a>
+                </li>
+                <li>
+                    <a href="#" onclick="showHelp('guide')">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor">
+                            <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14h-2v-2h2v2zm2-4h-4V6h4v6z"/>
+                        </svg>
+                        Panduan
+                    </a>
+                </li>
+                <li>
+                    <a href="#" onclick="showHelp('contact')">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor">
+                            <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-7 9h-2V5h2v6zm0 4h-2v-2h2v2z"/>
+                        </svg>
+                        Kontak
+                    </a>
+                </li>
+            </ul>
+            <div id="helpContent"></div>
+        </div>
+
+        <div class="section">
+            <h2>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor">
+                    <path d="M19.43 12.98c.04-.32.07-.64.07-.98s-.03-.66-.07-.98l2.11-1.81c.19-.17.2-.5.03-.69l-2.8-4.83c-.17-.3-.5-.32-.7-.15l-2.42 2.08c-.51-.26-1.03-.48-1.58-.65l-.31-2.59c-.03-.34-.32-.6-.67-.6h-3.3c-.35 0-.64.26-.67.6l-.31 2.59c-.55.17-1.07.39-1.58.65L6.46 4.66c-.2-.17-.53-.15-.7.15l-2.8 4.83c-.17.19-.18.5-.03.69l2.11 1.81c-.04.32-.07.65-.07.98s.03.66.07.98l-2.11 1.81c-.19.17-.2.5-.03.69l2.8 4.83c.17.3.5.32.7.15l2.42-2.08c.51.26 1.03.48 1.58.65l.31 2.59c.03.34.32.6.67.6h3.3c.35 0 .64-.26.67-.6l.31-2.59c.55-.17 1.07-.39 1.58-.65l2.42 2.08c.2.17.53.15.7-.15l2.8-4.83c.17-.19.18-.5.03-.69l-2.11-1.81zM12 15.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z"/>
+                </svg>
+                Pengaturan
+            </h2>
+            <label><input type="checkbox" onchange="toggleDarkMode()" /> Mode Gelap</label><br>
+            <label><input type="checkbox" onchange="toggleNotifications()" /> Notifikasi</label>
+        </div>
+
+        <div class="section">
+            <h2>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor">
+                    <path d="M16 11c1.66 0 2.99-1.34 2.99-3S19.66 5 18 5c-1.66 0-2.99 1.34-2.99 3S16.34 11 18 11zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-3.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62-.06-.94-.16 1.64-1.03 2.89-2.79 2.89-4.69 0-1.9-1.25-3.66-2.89-4.69.32-.1.65-.16.94-.16 2.33 0 7 1.17 7 3.5V19h-14v-3.5c0-2.33 4.67-3.5 7-3.5z"/>
+                </svg>
+                Komunitas
+            </h2>
+            <ul>
+                <li>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor">
+                        <path d="M20.5 2H3.5c-.83 0-1.5.67-1.5 1.5S2.67 5 3.5 5h17c.83 0 1.5-.67 1.5-1.5S21.33 2 20.5 2zm0 4H3.5c-.83 0-1.5.67-1.5 1.5S2.67 9 3.5 9h17c.83 0 1.5-.67 1.5-1.5S21.33 6 20.5 6zm0 4H3.5c-.83 0-1.5.67-1.5 1.5s.67 1.5 1.5 1.5h17c.83 0 1.5-.67 1.5-1.5s-.67-1.5-1.5-1.5zM3.5 16h17c.83 0 1.5-.67 1.5-1.5S21.33 13 20.5 13H3.5c-.83 0-1.5.67-1.5 1.5s.67 1.5 1.5 1.5z"/>
+                    </svg>
+                 Komunitas
+                </li>
+                <li>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor">
+                        <path d="M20 2H4c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 18H4V4h16v16zM6 14h4v-4H6v4zm8 0h4v-4h-4v4z"/>
+                    </svg>
+                    Blog
+                </li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zM10 10v4h4v-4h-4zm2-4c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/>
+                </svg>
+                Tentang Kami
+            </h2>
+            <ul>
+                <li>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zM10 10v4h4v-4h-4zm2-4c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/>
+                    </svg>
+                    Tentang Note Farid
+                </li>
+                <li>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zM9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>
+                    </svg>
+                    Identitas Brand
+                </li>
+                <li>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor">
+                        <path d="M20 15.5c-1.66 0-3.17-.67-4.22-1.78L12 12.5 7.78 13.72C6.73 14.83 5.22 15.5 3.5 15.5V5c0-1.1.9-2 2-2h15c1.1 0 2 .9 2 2v10.5c-1.72 0-3.23-.67-4.28-1.78L16 12.5l4.22-1.22C20.27 10.67 21.78 10 23.5 10V15.5c-1.72 0-3.23.67-4.28 1.78L16 17.5l-4.22-1.22C10.73 15.67 9.22 15 7.5 15V5h1v10.5c1.66 0 3.17.67 4.22 1.78L12 12.5l4.22 1.22C17.27 11.67 18.78 11 20.5 11V5h1v10.5c1.72 0 3.23.67 4.28 1.78L16 17.5l-4.22 1.22C10.73 15.67 9.22 15 7.5 15V15.5z"/>
+                    </svg>
+                    Hubungi Kami
+                </li>
+                <li>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor">
+                        <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14h-2v-2h2v2zm2-4h-4V6h4v6z"/>
+                    </svg>
+                    Aturan Penggunaan
+                </li>
+                <li>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor">
+                        <path d="M12 4a4 4 0 0 1 4 4 4 4 0 0 1-4 4 4 4 0 0 1-4-4 4 4 0 0 1 4-4m0 10c4.42 0 8 1.79 8 4v2H4v-2c0-2.21 3.58-4 8-4z"/>
+                    </svg>
+                    Karir
+                </li>
+            </ul>
+        </div>
+<button onclick="logoutFirebase()" style="margin-top: 1rem;">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor">
+                <path d="M10.09 15.59L11.5 17l5-5-5-5-1.41 1.41L10.09 13H3v2h7.09zM21 3h-6v2h4v16h-4v2h6c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"/>
+            </svg>
+            Keluar
+        </button>
+    </div>
+</div>
+   
+   
+  
+   
+	
+	
 <div id="notificationIcon" style="position: relative; margin-left: 15px; cursor: pointer;">
     🔔
     <span id="notificationCount" style="...">0</span>
@@ -805,14 +2667,6 @@
         </div>
     </div>
 </div>
-
-
-
-
-
-
-
-
 
 
 
@@ -934,20 +2788,6 @@
 </div>
 
 
-<div style="margin-bottom: 10px;">
-    <button id="showSavedNotesBtn" class="bulk-save-button">Lihat Catatan Tersimpan</button>
-</div>
-
-<div id="savedNotesModal" class="saved-notes-modal-overlay" style="display: none;">
-    <div class="saved-notes-modal-content">
-        <button class="modal-close-button" id="closeSavedNotesModal">&times;</button>
-        <h2>Catatan yang Anda Simpan</h2>
-        <div id="savedNotesContainer">
-            </div>
-        <button id="saveAllToFirebaseBtn" style="margin-top: 15px;">Simpan Semua ke Database</button>
-    </div>
-</div>
-
 <div id="cookieExplanation" class="modal-overlay" style="display: none;">
     <div class="modal-content">
         <button class="close-btn" id="closeCookieExplanation">&times;</button>
@@ -979,23 +2819,86 @@
 <div class="activity-calendar"></div>
 
 
+ <h2 class="text-center mt-10 mb-5 text-2xl font-semibold text-gray-800 margin-top: 30px;">
+  Artikel Blog
+</h2>
+<div id="blogList" class="container mx-auto">
+</div>
+<div id="blogContentArea" class="container mx-auto bg-white rounded-lg shadow-md p-6">
+  <h3 id="blogContentTitle" class="text-xl font-semibold text-gray-800 mb-4"></h3>
+  <div id="blogContent" class="text-lg text-gray-700">
+  </div>
+  <button id="closeBlogContent" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded mt-4">Tutup Artikel</button>
+</div>
+
+<nav id="pagination" class="pagination">
+  <ul class="pagination-list">
+  </ul>
+  <a href="#" class="pagination-next-link" onclick="nextPage()">Next Page</a>
+</nav>
+
+
+    <div id="filter-button-container">
+        <button id="showQuoraTitles">Tampilkan Judul Quora</button>
+    </div>
+
+    <div id="blogList">
+        </div>
+
+    <div id="quoraPopup" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: white; padding: 20px; border: 1px solid #ccc; box-shadow: 0 4px 8px rgba(0,0,0,0.2); z-index: 10;">
+        <h2>Judul dari Sumber: Quora</h2>
+        <ul id="quoraTitleList">
+            </ul>
+        <button id="closeQuoraPopup">Tutup</button>
+    </div>
+
+<div class="blog-tags-container" style="display: flex; gap: 10px; margin-bottom: 20px;">
+    <span class="blog-tag" data-tag="Elon Musk" style="background-color: green; color: white; padding: 5px 10px; border-radius: 15px; cursor: pointer;"></span>
+    <span class="blog-tag" data-tag="Kolonisasi Mars" style="background-color: red; color: white; padding: 5px 10px; border-radius: 15px; cursor: pointer;"></span>
+    <span class="blog-tag" data-tag="Planet Mars" style="background-color: yellow; padding: 5px 10px; border-radius: 15px; cursor: pointer; color: black;"></span>
+    </div>
+
+<div id="tagFilterPopup" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: white; padding: 20px; border: 1px solid #ccc; box-shadow: 0 4px 8px rgba(0,0,0,0.2); z-index: 10; width: 80%; max-width: 500px;">
+    <h2 id="tagFilterTitle">Artikel dengan Tag:</h2>
+    <ul id="tagArticleList" style="list-style: none; padding: 0;">
+        </ul>
+    <button id="closeTagFilter" style="margin-top: 15px; padding: 8px 15px; background-color: #dc3545; color: white; border: none; border-radius: 5px; cursor: pointer;">Tutup</button>
+</div>
+
+
+
+
+   
+
+ 
+
+
+
+
+
+
+
   
 <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
-        import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp, query, orderBy, getDoc, doc, updateDoc, where, getDocs, documentId } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
+    import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp, query, orderBy, getDoc, setDoc, doc, updateDoc, where, getDocs, documentId } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
+import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged,  GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js"; // Pastikan semua fungsi auth yang Anda butuhkan diimpor
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyCYbxo8n1zn-Y3heCIn_PmrsK44_OrdEw4",
-            authDomain: "noted-farid.netlify.app",
-            projectId: "noted-a3498",
-            storageBucket: "noted-a3498.appspot.com",
-            messagingSenderId: "1077214793842",
-            appId: "1:1077214793842:web:a70cc3643eceb53e3932eb",
-            measurementId: "G-SENDQS5Y7K"
-        };
 
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
+    const firebaseConfig = {
+        apiKey: "AIzaSyCYbxo8n1zn-Y3heCIn_PmrsK44_OrdEw4",
+        authDomain: "noted-farid.netlify.app",
+        projectId: "noted-a3498",
+        storageBucket: "noted-a3498.appspot.com",
+        messagingSenderId: "1077214793842",
+        appId: "1:1077214793842:web:a70cc3643eceb53e3932eb",
+        measurementId: "G-SENDQS5Y7K"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app); // Gunakan getAuth() untuk mendapatkan instance auth
+
         const notesRef = collection(db, "notes");
 const activityRef = collection(db, "activities");
 
@@ -1018,10 +2921,10 @@ const activityCalendarContainer = document.querySelector(".activity-calendar");
 		let isListening = false; // Status apakah sedang mendengarkan
 		let finalTranscript = ''; // Untuk menyimpan transkripsi final
 		let currentYear = new Date().getFullYear();
+		let topics = new Set(); // Initialize the topics Set
 let activitiesData = [];
 
-		
-
+		 
 	
 		
 		
@@ -1110,6 +3013,328 @@ let activitiesData = [];
                 }
             });
         }
+		
+	
+
+
+
+document.addEventListener('DOMContentLoaded', () => {
+  const loginForm = document.getElementById('loginForm');
+  const greetingDiv = document.getElementById('greetingDiv');
+  const userGreetingElement = document.getElementById('userGreeting');
+  const dashboardDiv = document.getElementById('dashboardDiv');
+  const dashboardGreetingName = document.getElementById('dashboardGreetingName');
+  const emailInput = document.getElementById('email');
+  const passwordInput = document.getElementById('password');
+  const errorMessage = document.getElementById('errorMessage');
+  const showSavedNotesBtn = document.getElementById("showSavedNotesBtn");
+  const savedNotesModal = document.getElementById("savedNotesModal");
+  const savedNotesContainer = document.getElementById("savedNotesContainer");
+  const topicFilter = document.getElementById("topicFilter");
+
+  
+
+  let unsubscribeNotes;
+  let topics = new Set();
+
+  // --- Login with Google ---
+  async function loginWithGoogle() {
+    try {
+      const provider = new GoogleAuthProvider();
+      const userCredential = await signInWithPopup(auth, provider);
+      const user = userCredential.user;
+
+      const displayName = user.displayName || "Pengguna Google 👋";
+
+      loginForm.classList.remove("slide-in");
+      loginForm.classList.add("slide-out");
+
+      setTimeout(() => {
+        loginForm.classList.add("hidden");
+
+        greetingDiv.classList.remove("hidden");
+        greetingDiv.classList.add("slide-in");
+        userGreetingElement.textContent = `Halo ${displayName} 👋`;
+
+        setTimeout(() => {
+          greetingDiv.classList.remove("slide-in");
+          greetingDiv.classList.add("slide-out");
+
+          setTimeout(() => {
+            greetingDiv.classList.add("hidden");
+            dashboardDiv.classList.remove("hidden");
+            dashboardDiv.classList.add("slide-in");
+            dashboardGreetingName.textContent = `Halo, ${displayName}!`;
+          }, 500);
+        }, 2000);
+      }, 1000);
+
+      errorMessage.classList.add("hidden");
+    } catch (error) {
+      errorMessage.textContent = error.message;
+      errorMessage.classList.remove("hidden");
+      console.error("Google login error:", error);
+    }
+  }
+
+  // --- Logout Function ---
+  function logoutGoogle() {
+    signOut(auth)
+      .then(() => {
+        // --- UI transition for logout ---
+        dashboardDiv.classList.remove("slide-in");
+        dashboardDiv.classList.add("slide-out");
+
+        setTimeout(() => {
+          dashboardDiv.classList.add("hidden");
+          loginForm.classList.remove("hidden");
+          loginForm.classList.add("slide-in");
+
+          setTimeout(() => {
+            loginForm.classList.remove("slide-in");
+          }, 500);
+
+          // Clear input fields (optional, but good practice)
+          if (emailInput && passwordInput) {
+            emailInput.value = "";
+            passwordInput.value = "";
+          }
+        }, 500);
+      })
+      .catch((error) => {
+        console.error("Logout error:", error);
+        // Optionally display an error message to the user
+      });
+  }
+
+  // --- Authentication State Change Listener ---
+  function onAuthStateChangedHandler() {
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        // User is signed in
+        const displayName = user.displayName || user.email.split("@")[0] || "Pengguna";
+
+        loginForm.classList.add("hidden");
+        greetingDiv.classList.add("hidden");
+        dashboardDiv.classList.remove("hidden");
+        dashboardDiv.classList.add("slide-in");
+        dashboardGreetingName.textContent = `Halo, ${displayName}!`;
+
+        setupSavedNotesListener();
+      } else {
+        // User is signed out
+        loginForm.classList.remove("hidden");
+        // Ensure other divs are hidden when logged out
+        greetingDiv.classList.add("hidden");
+        dashboardDiv.classList.add("hidden");
+
+        // Stop listening to notes if user logs out
+        if (unsubscribeNotes) {
+          unsubscribeNotes();
+          unsubscribeNotes = null; // Clear the unsubscribe function
+        }
+      }
+    });
+  }
+
+  // --- Placeholder for fetchAndDisplayNotes (as per your original code) ---
+  async function fetchAndDisplayNotes(userId, filter = "semua") {
+    const notesList = document.getElementById("notesList");
+    if (!notesList) return;
+
+    notesList.innerHTML = `
+      <p style="text-align: center; color: gray;">
+        Catatan hanya muncul ketika disimpan dan ditampilkan lewat popup.
+      </p>
+    `;
+  }
+
+  // --- Toggle Save Note (Firestore operations) ---
+  async function toggleSaveNote(noteId, isCurrentlySaved, noteData) {
+    const userId = auth.currentUser?.uid;
+    if (!userId) return;
+
+    const noteRef = doc(db, "users", userId, "notes", noteId);
+
+    try {
+      if (!isCurrentlySaved) {
+        await setDoc(noteRef, { ...noteData, isSaved: true, savedAt: serverTimestamp() });
+        showSuccessMessage("Catatan disimpan!");
+      } else {
+        await updateDoc(noteRef, { isSaved: false }); // Only update isSaved to false
+        showSuccessMessage("Catatan dibatalkan penyimpanannya.");
+      }
+    } catch (err) {
+      console.error("Toggle save note error:", err);
+    }
+  }
+
+  // --- Filter Notes by Topic ---
+  function filterNotesByTopic(selectedTopic) {
+    const notes = savedNotesContainer.querySelectorAll(".note");
+    notes.forEach((note) => {
+      const noteTopic = note.dataset.topic || "";
+      note.style.display = (selectedTopic === "all" || selectedTopic === "" || noteTopic === selectedTopic.toLowerCase())
+        ? "block"
+        : "none";
+    });
+  }
+
+  // --- Display Saved Notes in Popup ---
+  function displaySavedNotesPopup(savedNotes = []) {
+    if (!savedNotesModal || !savedNotesContainer || !topicFilter) return;
+    savedNotesContainer.innerHTML = ""; // Clear previous notes
+
+    if (savedNotes.length === 0) {
+      savedNotesContainer.innerHTML = "Belum ada catatan yang tersimpan.";
+      topicFilter.value = "all";
+      filterNotesByTopic("all");
+    } else {
+      savedNotes.forEach((doc) => {
+        const data = doc.data();
+        const topic = (data.topic || data.temaTopik || "").toLowerCase();
+
+        // --- Render Note Element (adjust based on your actual renderNote function) ---
+        const noteEl = document.createElement('div');
+        noteEl.innerHTML = `
+          <h3>${data.title || 'No Title'}</h3>
+          <p>${data.content || 'No Content'}</p>
+          <p>Topic: ${data.topic || 'N/A'}</p>
+          <button onclick="toggleSaveNote('${doc.id}', true, ${JSON.stringify(data).replace(/"/g, '&quot;')})">Batalkan Simpan</button>
+        `;
+        noteEl.classList.add("note");
+        noteEl.dataset.topic = topic; // Store topic for filtering
+        savedNotesContainer.appendChild(noteEl);
+      });
+
+      topicFilter.value = "all"; // Reset filter
+      filterNotesByTopic("all");
+    }
+
+    savedNotesModal.style.display = "flex"; // Show the modal
+
+    // Attach filter change listener if not already attached
+    if (topicFilter && !topicFilter.dataset.listenerAttached) {
+      topicFilter.addEventListener("change", () => {
+        filterNotesByTopic(topicFilter.value);
+      });
+      topicFilter.dataset.listenerAttached = "true";
+    }
+  }
+
+  // --- Setup Real-time Listener for Saved Notes ---
+  function setupSavedNotesListener() {
+    if (!auth.currentUser) return; // Only listen if user is logged in
+
+    const userId = auth.currentUser.uid;
+    const q = query(
+      collection(db, "users", userId, "notes"),
+      where("isSaved", "==", true)
+    );
+
+    // Unsubscribe from previous listener if it exists to avoid multiple listeners
+    if (unsubscribeNotes) unsubscribeNotes();
+
+    unsubscribeNotes = onSnapshot(q, (snapshot) => {
+      const savedNotes = snapshot.docs;
+      topics.clear(); // Clear existing topics
+
+      if (topicFilter) {
+        topicFilter.innerHTML = '<option value="all">Semua Topik</option>'; // Reset topic filter options
+      }
+
+      savedNotes.forEach((doc) => {
+        const data = doc.data();
+        if (data.topic) topics.add(data.topic.toLowerCase());
+      });
+
+      // Populate topic filter with unique topics
+      topics.forEach((topic) => {
+        const option = document.createElement("option");
+        option.value = topic;
+        option.textContent = topic.charAt(0).toUpperCase() + topic.slice(1); // Capitalize first letter
+        topicFilter.appendChild(option);
+      });
+
+      displaySavedNotesPopup(savedNotes); // Display notes in the modal
+    });
+  }
+
+  // --- Event Listener for "Show Saved Notes" Button ---
+  if (showSavedNotesBtn) {
+    showSavedNotesBtn.addEventListener("click", () => {
+      setupSavedNotesListener(); // Triggers the listener to get data and open the modal
+    });
+  }
+
+  // --- Success Message Popup ---
+  function showSuccessMessage(message) {
+    let popup = document.getElementById("success-popup") || createSuccessPopup();
+    popup.textContent = message;
+    popup.classList.add("show");
+    setTimeout(() => popup.classList.remove("show"), 3000);
+  }
+
+  function createSuccessPopup() {
+    const popup = document.createElement("div");
+    popup.id = "success-popup";
+    popup.className = "popup";
+    popup.style.cssText = `
+      position: fixed; top: 20px; right: 20px;
+      background-color: #10b981; color: white;
+      padding: 14px 20px; border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      font-weight: 500; opacity: 0; pointer-events: none;
+      transition: all 0.4s ease; z-index: 1000;
+    `;
+    document.body.appendChild(popup);
+    return popup;
+  }
+
+  // --- Modal Close Button ---
+  const closeSavedNotesModalBtn = document.getElementById("closeSavedNotesModalBtn");
+  if (closeSavedNotesModalBtn) {
+    closeSavedNotesModalBtn.addEventListener("click", () => {
+      savedNotesModal.style.display = "none";
+      // Optionally unsubscribe from notes listener when modal is closed
+      if (unsubscribeNotes) {
+          unsubscribeNotes();
+          unsubscribeNotes = null;
+      }
+    });
+  }
+
+  // --- Close Modal on Outside Click ---
+  window.addEventListener("click", (event) => {
+    if (event.target === savedNotesModal) {
+      savedNotesModal.style.display = "none";
+      // Optionally unsubscribe from notes listener when modal is closed
+      if (unsubscribeNotes) {
+          unsubscribeNotes();
+          unsubscribeNotes = null;
+      }
+    }
+  });
+
+  // --- Expose functions to the global scope for inline HTML event handlers ---
+  window.loginWithGoogle = loginWithGoogle;
+  window.logoutGoogle = logoutGoogle; // Keep this
+  window.displaySavedNotesPopup = displaySavedNotesPopup;
+  window.toggleSaveNote = toggleSaveNote;
+
+  // --- Initialize auth state listener ---
+  onAuthStateChangedHandler();
+});
+
+
+
+
+
+
+
+
+
+
 		
 
   const cookieNameConsent = 'cookieConsent';
@@ -1321,7 +3546,6 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 
-
 const notificationIconDiv = document.getElementById('notificationIcon');
 const notificationPopupDiv = document.getElementById('notificationPopup');
 const notificationListItemsUl = document.getElementById('notificationListItems');
@@ -1345,13 +3569,13 @@ fullNotificationPopupDiv.style.cssText = `
 const fullNotificationContentDiv = document.createElement('div');
 fullNotificationContentDiv.style.cssText = `
     background-color: white;
-    width: 90%;
-    max-width: 500px;
+    width: 80%;
+    max-width: 600px;
     border-radius: 8px;
     margin: 50px auto;
     box-shadow: 0 2px 10px rgba(0,0,0,0.1);
     position: relative;
-    padding: 15px;
+    padding: 20px;
 `;
 const fullNotificationCloseButton = document.createElement('button');
 fullNotificationCloseButton.innerHTML = '&times;';
@@ -1381,7 +3605,7 @@ function updateNotificationCount() {
 
 function addNotification(notification) {
     notifications.unshift(notification);
-    if (!notification.read) { // Hanya hitung jika belum dibaca
+    if (!notification.read) {
         unreadNotifications++;
         updateNotificationCount();
     }
@@ -1399,16 +3623,23 @@ function updateNotificationDisplay() {
             const listItem = document.createElement('li');
             listItem.className = 'notification-item';
             listItem.style.cursor = 'pointer';
+            listItem.style.padding = '10px';
+            listItem.style.borderBottom = '1px solid #eee';
 
             const categorySpan = document.createElement('span');
             categorySpan.className = 'notification-category';
+            categorySpan.style.borderRadius = '4px';
+            categorySpan.style.padding = '5px 8px';
+            categorySpan.style.fontSize = '0.8em';
+            categorySpan.style.fontWeight = 'bold';
+            categorySpan.style.marginRight = '8px';
 
-            if (notif.type === 'transaksi') {
-                categorySpan.textContent = '[Transaksi]';
+            if (notif.type === 'maintenance') {
+                categorySpan.textContent = '[maintenance]';
                 categorySpan.style.backgroundColor = '#ffe082';
                 categorySpan.style.color = '#7a5206';
-            } else if (notif.type === 'event') {
-                categorySpan.textContent = '[Event & Hadiah]';
+            } else if (notif.type === 'blog') {
+                categorySpan.textContent = '[blog & note]';
                 categorySpan.style.backgroundColor = '#b2ebf2';
                 categorySpan.style.color = '#006064';
             } else {
@@ -1422,13 +3653,15 @@ function updateNotificationDisplay() {
             titleSpan.textContent = notif.title || 'No Title';
             titleSpan.style.display = 'block';
             titleSpan.style.textAlign = 'left';
+            titleSpan.style.fontWeight = 'bold';
+            titleSpan.style.marginBottom = '5px';
 
             listItem.appendChild(categorySpan);
             listItem.appendChild(titleSpan);
 
-            listItem.addEventListener('click', (event) => { // Tambahkan event
+            listItem.addEventListener('click', (event) => {
                 showFullNotificationPopup(index);
-                markNotificationAsRead(index); // Mark as read on click
+                markNotificationAsRead(index);
                 event.stopPropagation();
             });
 
@@ -1442,10 +3675,6 @@ function markNotificationAsRead(index) {
         notifications[index].read = true;
         unreadNotifications--;
         updateNotificationCount();
-        const listItem = notificationListItemsUl.children[index];
-        if (listItem) {
-            // Anda bisa menambahkan perubahan visual saat notifikasi dibaca di sini
-        }
     }
 }
 
@@ -1465,7 +3694,6 @@ notificationIconDiv.addEventListener('click', (event) => {
     notificationPopupDiv.style.display = 'block';
     fullNotificationPopupDiv.style.display = 'none';
     currentNotificationIndex = null;
-    // JANGAN mark all read di sini.
 });
 
 document.addEventListener('click', (event) => {
@@ -1498,52 +3726,622 @@ function addNoteToFirebase(text, topic) {
         title: `Catatan baru: ${text.substring(0, 20)}...`,
         message: `Isi lengkap catatan: ${text}`,
         read: false,
-        type: topic === 'transaksi' ? 'transaksi' : topic === 'event' ? 'event' : 'umum',
+        type: topic === 'maintenance' ? 'maintenance' : topic === 'blog' ? 'blog' : 'umum',
         fullText: text
     });
 }
 
-function showFullNotification(index) {
-    // Fungsi ini tidak lagi digunakan untuk menampilkan di div yang sama
-}
+
 
 function showFullNotificationPopup(index) {
     const notif = notifications[index];
     if (notif) {
+        let categoryText = '';
+        let categoryColor = '';
+        let textColor = '';
+
+        if (notif.type === 'maintenance') {
+            categoryText = '[maintenance]';
+            categoryColor = '#ffe082';
+            textColor = '#7a5206';
+        } else if (notif.type === 'blog') {
+            categoryText = '[blog & note]';
+            categoryColor = '#b2ebf2';
+            textColor = '#006064';
+        } else {
+            categoryText = '[Info Umum]';
+            categoryColor = '#d1c4e9';
+            textColor = '#311b92';
+        }
+
+        const fullTextWithLinks = notif.fullText
+            .replace(/(https?:\/\/[^\s]+)/g, `<a href="$1" style="color: blue; text-decoration: underline;">$1</a>`);
+
+        // Fungsi untuk membuat blok warna
+        const createColoredBlock = (title, content, color) => {
+            return `<div style="background-color: ${color}; padding: 10px; border-radius: 4px; margin-bottom: 10px;">
+                        <h4 style="margin-top: 0; margin-bottom: 5px; font-weight: bold;">${title}</h4>
+                        <p style="margin-bottom: 0;">${content}</p>
+                    </div>`;
+        };
+
+        let fullTextContent = '';
+        if (notif.title) {
+            fullTextContent += createColoredBlock("Title", notif.title, '#f0f4c3');
+        }
+        if (notif.message) {
+            fullTextContent += createColoredBlock("Message", notif.message, '#e0f7fa');
+        }
+        if (notif.tanggal) {
+            fullTextContent += createColoredBlock("Tanggal", notif.tanggal, '#f8bbd0');
+        }
+        if (notif.deskripsi) {
+            fullTextContent += createColoredBlock("Deskripsi", notif.deskripsi, '#d1c4e9');
+        }
+        if (notif.link) {
+            fullTextContent += `<div style="margin-top: 10px; font-size: 0.9em;">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-right-circle-fill" viewBox="0 0 16 16" style="margin-right: 5px; vertical-align: middle; display: inline-block; transform: rotate(45deg);">
+                                        <path d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0zm3.964 8.56l-5.146 2.573a.5.5 0 0 1-.72-.488v-5.146a.5.5 0 0 1 .72-.487l5.146 2.573z"/>
+                                    </svg>
+                                    <a href="${notif.link}" style="color: blue; text-decoration: underline;">${notif.linkText || 'Pelajari Selengkapnya'}</a>
+                                </div>`;
+        }
+
+
         fullNotificationContentDiv.innerHTML = `
-            <h3>${notif.title || 'Tidak Ada Judul'}</h3>
-            <p>${notif.fullText || notif.message}</p>
+            <div style="position: relative;">
+                <div style="background-color: ${categoryColor}; color: ${textColor}; padding: 8px; border-radius: 4px; margin-bottom: 10px; font-weight: bold; text-align: center;">
+                    ${categoryText}
+                </div>
+                <h3 style="color: ${textColor}; margin-bottom: 10px;">${notif.title || 'Tidak Ada Judul'}</h3>
+                <div style="text-align: left;">
+                    ${fullTextContent}
+                    ${notif.imageUrl ? `<div style="margin-top: 10px;"><img src="${notif.imageUrl}" alt="Notification Image" style="max-width: 100%; border-radius: 8px;"></div>` : ''}
+                </div>
+                <button style="position: absolute; top: 10px; right: 10px; border: none; background: none; font-size: 1.5em; cursor: pointer; color: #888;" onclick="this.parentNode.parentNode.style.display='none';">×</button>
+            </div>
         `;
         fullNotificationPopupDiv.style.display = 'block';
         currentNotificationIndex = index;
-        // markNotificationAsRead(index); // Sudah dipindahkan ke event listener listItem
     }
 }
 
 // Contoh penambahan notifikasi
 addNotification({
-    type: 'uji coba',
-    title: 'uji coba',
-    message: 'uji coba!',
+    type: 'maintenance',
+    title: 'Transaksi Berhasil',
+    message: 'Pembayaran Anda telah berhasil diproses.',
+    tanggal: '07 Mei 2025 pukul 13:00 WIB',
+    deskripsi: 'Status: Berhasil',
     fullText: `
-        <h3>uji coba!</h3>
-        <p>07 Mei  2025 pukul 12:50</p>
-        <p>Halo uji coba! 👋</p>
-        <p>Saat ini uji coba .</p>
         
+        <p>Terima kasih telah melakukan transaksi.</p>
     `,
-    read: false
+    read: false,
+    imageUrl: 'https://placehold.co/600x400/EEE/31343C',
 });
 addNotification({
-    type: 'uji coba',
-    title: 'Pengumuman Penting Lainnya',
-    message: 'Informasi terbaru terkait uji coba kami.',
-    fullText: 'Detail lengkap mengenai pengumuman penting uji coba kami adalah sebagai berikut: ...',
-    read: false
+    type: 'blog',
+    title: 'Pengumuman Event Seru!',
+    message: 'Jangan lewatkan event mingguan kami dengan hadiah menarik.',
+    tanggal: 'Setiap hari Sabtu',
+    deskripsi: 'Dapatkan kesempatan memenangkan hadiah menarik!',
+    fullText: `
+        
+        <p>Segera daftarkan diri Anda!</p>
+    `,
+    read: false,
+    imageUrl: 'https://placehold.co/600x400/EEE/31343C',
+});
+addNotification({
+    type: 'umum',
+    title: 'Informasi Pemeliharaan Sistem',
+    message: 'Sistem akan dalam pemeliharaan pada tanggal 9 Mei 2025.',
+    tanggal: '9 Mei 2025, 22:00 - 23:00 WIB',
+    deskripsi: 'Mohon maaf atas ketidaknyamanannya.',
+    fullText: `
+        
+    `,
+    read: false,
+    imageUrl: 'https://placehold.co/600x400/EEE/31343C',
+});
+addNotification({
+    type: 'maintenance',
+    title: 'Transaksi Uji Coba',
+    message: 'Ini adalah pesan uji coba transaksi.',
+    tanggal: '10 Mei 2025',
+    deskripsi: 'Waktu: 14:00 WIB',
+    fullText: `
+        
+        <p>Terima kasih telah melakukan uji coba transaksi.</p>
+        
+    `,
+    read: false,
+    imageUrl: 'https://placehold.co/600x400/EEE/31343C',
+});
+
+addNotification({
+    type: 'blog',
+    title: 'Event Uji Coba',
+    message: 'Ini adalah pesan uji coba event.',
+    tanggal: '12 Mei 2025',
+    deskripsi: 'Deskripsi: Ini adalah event uji coba yang menarik.',
+    fullText: `
+        
+        <p>Jangan lewatkan kesempatan untuk berpartisipasi dalam event uji coba ini.</p>
+        
+    `,
+    read: false,
+    imageUrl: 'https://placehold.co/600x400/EEE/31343C',
 });
 
 updateNotificationDisplay();
 updateNotificationCount();
+
+
+    
+     
+
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+
+
+
+
+const blogListDiv = document.getElementById("blogList");
+const blogContentArea = document.getElementById("blogContentArea");
+const blogContentTitle = document.getElementById("blogContentTitle");
+const blogContent = document.getElementById("blogContent");
+const closeBlogContentBtn = document.getElementById("closeBlogContent");
+const paginationList = document.querySelector(".pagination-list");
+const paginationNext = document.querySelector(".pagination-next-link");
+const showQuoraTitlesBtn = document.getElementById("showQuoraTitles");
+
+
+let currentPage = 1;
+const articlesPerPage = 5;
+let totalPages = 0;
+let currentDisplayedArticles = []; // Untuk menyimpan artikel yang sedang ditampilkan
+
+
+const blogArticles = [
+    {
+        id: "blog-1",
+        title: "Siapa Farid Ardiansyah?",
+        content: `.
+
+        <ul>
+            <li></li>
+            <li></li>
+            <li></li>
+        </ul>
+
+        ....
+
+        .
+
+        .
+
+        Seperti jawaban <a href="" style="text-decoration: underline; text-color: black; "></a>  <a href="" style="text-decoration: underline;"></a> .
+
+        <div style="background-color: yellow; padding: 15px; border-left: 4px solid black; margin: 10px 0;">
+            .
+        </div>
+
+        .
+
+      
+
+        <div style="text-align: center;">
+            <img src="images/5.jpg" alt="Elon Musk on Mars" style="width: 80%; max-width: 500px;">
+        </div>
+
+        .
+        .
+
+        .
+
+        <div style="position: relative; display: inline-block; margin-top: 10px;">
+           <iframe width="560" height="315" 
+  src="https://www.youtube.com/embed/cTPYUox41bU" 
+  title="YouTube video player" 
+  frameborder="0" 
+  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+  allowfullscreen>
+</iframe>
+
+            <a href="https://www.youtube.com/watch?v=cTPYUox41bU&t=2s" target="_blank" style="position: absolute; left: 50%; top: 100%; transform: translateX(-50%); margin-top: 5px; color: #000; font-size: 0.7em;">Tonton di YouTube</a>
+        </div>
+
+        <div style="background-color: yellow; padding: 15px; border-left: 4px solid red; margin: 10px 0;">
+            .
+        </div>
+
+        .
+
+        .
+
+        .
+		
+		
+		 <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; margin-bottom: 10px;">
+            <span style="background-color: green; padding: 5px 10px; border-radius: 15px; font-size: 29px;"></span>
+            <span style="background-color: red; padding: 5px 10px; border-radius: 15px; font-size: 29px;"></span>
+            <span style="background-color: yellow; padding: 5px 10px; border-radius: 15px; font-size: 29px;"></span>
+        </div>
+
+
+        <a href="#" style="text-decoration: underline; color: #000; font-size: 29px; ">Previous : ?</a>`,
+        category: "Self",
+        date: "May 08, 2025",
+        source: "Quora"
+    },
+    {
+        id: "blog-2",
+        title: "Coming Soon",
+        content: "Coming Soon.",
+        category: "Self",
+        date: "May 08, 2025",
+        source: "Quora"
+    },
+    {
+        id: "blog-3",
+        title: "Coming Soon",
+        content: "Coming Soon.",
+        category: "Arduino",
+        date: "May 08, 2025",
+        source: "Quora"
+    },
+    {
+        id: "blog-4",
+        title: "Coming Soon",
+        content: "Coming Soon.",
+        category: "IoT",
+        date: "May 08,  2025",
+        source: "Quora"
+    },
+    {
+        id: "blog-5",
+        title: "Coming Soon?",
+        content: "Coming Soon.",
+        category: "Others",
+        date: "May 08, 2025",
+        source: "Quora"
+    },
+    {
+        id: "blog-6",
+        title: "Coming Soon?",
+        content: "Coming Soon.",
+        category: "Others",
+        date: "May 08, 2025",
+        source: "Quora"
+    },
+];
+
+	
+	function displayArticles(page, articlesToDisplay = blogArticles) {
+    blogListDiv.innerHTML = '';
+    const startIndex = (page - 1) * articlesPerPage;
+    const endIndex = startIndex + articlesPerPage;
+    const currentArticles = articlesToDisplay.slice(startIndex, endIndex);
+    currentDisplayedArticles = articlesToDisplay; // Update artikel yang sedang ditampilkan
+
+    const categories = ["Self", "Arduino", "IoT", "Others"];
+
+    categories.forEach(category => {
+        const categoryArticles = currentArticles.filter(article => article.category === category);
+
+        if (categoryArticles.length > 0) {
+            const categoryTitle = document.createElement('h2');
+            categoryTitle.classList.add('blog-category-title');
+            categoryTitle.textContent = category;
+            // blogListDiv.appendChild(categoryTitle); // Kategori tidak ditampilkan
+
+            const articleList = document.createElement('div');
+            articleList.classList.add('article-list');
+
+            categoryArticles.forEach(article => {
+                const articleItem = document.createElement('div');
+                articleItem.classList.add('article-item');
+                articleItem.innerHTML = `
+                    <div class="category-container">
+                        <h3 class="blog-title" data-blog-id="${article.id}">${article.title}</h3>
+                        <div style="display: flex; flex-direction: column; align-items: flex-end;">
+                            <span class="blog-date">${article.date}</span>
+                            <span class="blog-source">${article.source}</span>
+                        </div>
+                    </div>
+                `;
+                articleList.appendChild(articleItem);
+            });
+            blogListDiv.appendChild(articleList);
+
+            const categoryDivider = document.createElement('div');
+            categoryDivider.classList.add('category-divider');
+            blogListDiv.appendChild(categoryDivider);
+        }
+    });
+
+    // Event listener untuk menampilkan konten blog saat judul diklik
+    blogListDiv.addEventListener('click', function (event) {
+        const target = event.target;
+        if (target.classList.contains('blog-title')) { // Pastikan yang diklik adalah judul
+            const blogId = target.dataset.blogId;
+            const selectedArticle = blogArticles.find(article => article.id === blogId);
+            if (selectedArticle) {
+                // ... (kode untuk menampilkan popup konten) ...
+            }
+        }
+    });
+}
+
+    // Event listener untuk menampilkan konten blog saat judul diklik
+    blogListDiv.addEventListener('click', function (event) {
+        const target = event.target;
+        if (target.classList.contains('blog-title')) { // Pastikan yang diklik adalah judul
+            const blogId = target.dataset.blogId;
+            const selectedArticle = blogArticles.find(article => article.id === blogId);
+            if (selectedArticle) {
+                // Gunakan innerHTML untuk memasukkan judul, tanggal, sumber, dan konten
+                blogContentArea.innerHTML = `
+                    <div id="blog-content-popup" style="display:none;
+                        position: fixed;
+                        top: 50%;
+                        left: 50%;
+                        transform: translate(-50%, -50%);
+                        background-color: white;
+                        padding: 20px;
+                        border: 1px solid #ccc;
+                        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+                        z-index: 10;
+                        width: 90%;  /* Increased width */
+                        max-width: 90vw; /* Ensure it doesn't overflow */
+                        height: auto; /* Let height adjust to content */
+                        max-height: 90vh; /* Added max-height for very large screens */
+                        overflow-y: auto;">
+                        <h2 class="blog-content-main-title">${selectedArticle.title}</h2>
+                        <div class="blog-content-meta">
+                            <span class="blog-content-date">${selectedArticle.date}</span>
+                            <span class="blog-content-source">Sumber: ${selectedArticle.source}</span>
+                        </div>
+                        <div class="blog-content-text">${selectedArticle.content}</div>
+                        <button id="close-popup" style="margin-top: 15px;">Tutup</button>
+                    </div>
+                `;
+
+                // Tambahkan ini ke body, bukan ke blogContentArea
+                document.body.appendChild(blogContentArea);
+
+                const popup = document.getElementById('blog-content-popup');
+                const closePopupBtn = document.getElementById('close-popup');
+                const youtubePlaceholder = document.getElementById('youtube-placeholder');
+
+
+                popup.style.display = 'block';
+
+                closePopupBtn.addEventListener('click', () => {
+                    popup.style.display = 'none';
+                    // Bersihkan konten video saat popup ditutup.
+                    if (youtubePlaceholder) {
+                        youtubePlaceholder.innerHTML = `<svg style="width: 60px; height: 40px; fill: white; filter: drop-shadow(0 0 6px rgba(0,0,0,0.6));" viewBox="0 0 68 48"><path d="M66.52 7.74c-.78-2.93-2.49-5.41-5.42-6.19C55.79.13 34 0 34 0S12.21.13 6.9 1.55c-2.93.78-4.64 3.26-5.42 6.19C.06 13.05 0 24 0 24s.06 10.95 1.48 16.26c.78 2.93 2.49 5.41 5.42 6.19C12.21 47.87 34 48 34 48s21.79-.13 27.1-1.55c2.93-.78 4.64-3.26 5.42-6.19C67.94 34.95 68 24 68 24s-.06-10.95-1.48-16.26z"></path><path d="M27 33.7v-22.18c0-1.16.96-2.08 2.16-1.44l24.32 11.09c1.2 0.55 1.2 1.91 0 2.46L29.16 35.14c-1.2 0.62-2.16-.3-2.16-1.44z"></path></svg>`;
+                    }
+                });
+
+                youtubePlaceholder.addEventListener('click', () => {
+                    youtubePlaceholder.innerHTML = `<iframe width="100%" height="100%" src="https://www.youtube.com/embed/dQw4w9WgXcQ" frameborder="0" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>`;
+                });
+            }
+        }
+    });
+
+
+function updatePagination() {
+    paginationList.innerHTML = '';
+    totalPages = Math.ceil(currentDisplayedArticles.length / articlesPerPage); // Gunakan artikel yang sedang ditampilkan
+
+    if (totalPages <= 1) {
+        paginationNext.style.display = 'none';
+        return; // No pagination needed if there's only one page
+    } else {
+        paginationNext.style.display = 'block';
+    }
+
+    for (let i = 1; i <= totalPages; i++) {
+        const pageItem = document.createElement('li');
+        pageItem.classList.add('pagination-item');
+        if (i === currentPage) {
+            pageItem.classList.add('active');
+        }
+        const pageLink = document.createElement('a');
+        pageLink.classList.add('pagination-link');
+        pageLink.href = '#';
+        pageLink.textContent = i;
+        pageLink.style.color = '#000';
+        pageLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            currentPage = i;
+            displayArticles(currentPage, currentDisplayedArticles); // Pass artikel yang sedang ditampilkan
+            updatePagination();
+        });
+        pageItem.appendChild(pageLink);
+        paginationList.appendChild(pageItem);
+    }
+
+
+    // Disable "Next Page" button if on the last page
+    if (currentPage === totalPages) {
+        paginationNext.classList.add('disabled');
+        paginationNext.onclick = function (e) {
+            e.preventDefault();
+        };
+    } else {
+        paginationNext.classList.remove('disabled');
+        paginationNext.onclick = function () {
+            nextPage();
+        };
+    }
+}
+
+function nextPage() {
+    if (currentPage < totalPages) {
+        currentPage++;
+        displayArticles(currentPage, currentDisplayedArticles); // Pass artikel yang sedang ditampilkan
+        updatePagination();
+    }
+}
+
+const quoraPopup = document.getElementById('quoraPopup');
+const quoraTitleList = document.getElementById('quoraTitleList');
+const closeQuoraPopupBtn = document.getElementById('closeQuoraPopup');
+
+function showQuoraTitles() {
+    console.log('showQuoraTitles dijalankan');
+    const quoraArticles = blogArticles.filter(article => article.source.toLowerCase() === "quora");
+    console.log('Jumlah artikel Quora:', quoraArticles.length);
+    console.log('Isi artikel Quora:', quoraArticles);
+
+    // Bersihkan daftar sebelumnya
+    quoraTitleList.innerHTML = '';
+
+    // Tambahkan judul Quora ke dalam daftar
+    quoraArticles.forEach(article => {
+        const listItem = document.createElement('li');
+        listItem.innerHTML = `
+            <h3 class="blog-title-popup" data-blog-id="${article.id}" style="font-size: 1.2em; margin-bottom: 5px; cursor: pointer;">
+                ${article.title}
+            </h3>
+            <div style="font-size: 0.8em; color: #777; margin-bottom: 8px;">
+                ${article.date} — in ${article.source}
+            </div>
+            ${article.id === 'blog-1' ? `<div style="margin-top: 5px; font-size: 0.9em; color: #777;">${blogArticles.find(item => item.id === 'blog-1').content.substring(0, 100)}...</div>` : ''}
+        `;
+        quoraTitleList.appendChild(listItem);
+    });
+
+    // Tampilkan popup
+    quoraPopup.style.display = 'block';
+}
+
+// Event listener untuk menutup popup (tetap sama)
+closeQuoraPopupBtn.addEventListener('click', () => {
+    quoraPopup.style.display = 'none';
+});
+
+// Event listener untuk tombol "Tampilkan Judul Quora" (tetap sama)
+showQuoraTitlesBtn.addEventListener('click', showQuoraTitles);
+
+// Event listener untuk menampilkan konten blog saat judul diklik (baik di daftar utama maupun di popup)
+blogListDiv.addEventListener('click', handleTitleClick);
+quoraTitleList.addEventListener('click', handleTitleClick);
+
+function handleTitleClick(event) {
+    const target = event.target;
+    if (target.classList.contains('blog-title') || target.classList.contains('blog-title-popup')) {
+        const blogId = target.dataset.blogId;
+        const selectedArticle = blogArticles.find(article => article.id === blogId);
+        if (selectedArticle) {
+            // Gunakan innerHTML untuk memasukkan judul, tanggal, sumber, dan konten ke dalam blogContentArea
+            blogContentArea.innerHTML = `
+                <div id="blog-content-popup" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: white; padding: 20px; border: 1px solid #ccc; box-shadow: 0 4px 8px rgba(0,0,0,0.2); z-index: 10; width: 90%; max-width: 90vw; height: auto; max-height: 90vh; overflow-y: auto;">
+                    <h2 class="blog-content-main-title">${selectedArticle.title}</h2>
+                    <div class="blog-content-meta">
+                        <span class="blog-content-date">${selectedArticle.date}</span>
+                        <span class="blog-content-source">Sumber: ${selectedArticle.source}</span>
+                    </div>
+                    <div class="blog-content-text">${selectedArticle.content}</div>
+                    <button id="close-popup" style="margin-top: 15px;">Tutup</button>
+                </div>
+            `;
+
+            // Tambahkan popup konten ke body
+            document.body.appendChild(blogContentArea);
+
+            const popup = document.getElementById('blog-content-popup');
+            const closePopupBtn = document.getElementById('close-popup');
+
+            popup.style.display = 'block';
+
+            closePopupBtn.addEventListener('click', () => {
+                popup.style.display = 'none';
+            });
+        }
+    }
+}
+
+
+const tagFilterPopup = document.getElementById('tagFilterPopup');
+const tagFilterTitle = document.getElementById('tagFilterTitle');
+const tagArticleList = document.getElementById('tagArticleList');
+const closeTagFilter = document.getElementById('closeTagFilter');
+const blogTagElements = document.querySelectorAll('.blog-tag');
+
+blogTagElements.forEach(tagElement => {
+    tagElement.addEventListener('click', function() {
+        const selectedTag = this.dataset.tag;
+        const filteredArticles = filterArticlesByTagForPopup(selectedTag);
+        displayFilteredArticlesInPopup(selectedTag, filteredArticles);
+        tagFilterPopup.style.display = 'block';
+    });
+});
+
+closeTagFilter.addEventListener('click', () => {
+    tagFilterPopup.style.display = 'none';
+});
+
+function filterArticlesByTagForPopup(tag) {
+    return blogArticles.filter(article =>
+        article.content.toLowerCase().includes(tag.toLowerCase()) ||
+        article.title.toLowerCase().includes(tag.toLowerCase())
+        // Anda bisa menambahkan kondisi pencarian lain di sini jika perlu,
+        // misalnya mencari di array tags jika Anda menambahkannya ke objek artikel.
+    );
+}
+
+function displayFilteredArticlesInPopup(tag, articles) {
+    tagFilterTitle.textContent = `Artikel dengan Tag: ${tag}`;
+    tagArticleList.innerHTML = '';
+    if (articles.length === 0) {
+        tagArticleList.innerHTML = '<p>Tidak ada artikel dengan tag ini.</p>';
+        return;
+    }
+    articles.forEach(article => {
+        const listItem = document.createElement('li');
+        listItem.style.marginBottom = '10px';
+        listItem.innerHTML = `
+            <h3 class="blog-title-popup" data-blog-id="${article.id}" style="font-size: 1.2em; margin-bottom: 5px; cursor: pointer;">
+                ${article.title}
+            </h3>
+            <div style="font-size: 0.8em; color: #777;">
+                ${article.date} — in ${article.source}
+            </div>
+            ${article.id === 'blog-1' ? `<div style="margin-top: 5px; font-size: 0.9em; color: #777;">${blogArticles.find(item => item.id === 'blog-1').content.substring(0, 100)}...</div>` : ''}
+        `;
+        listItem.addEventListener('click', (event) => {
+            handleTitleClick(event); // Gunakan fungsi yang sama untuk menampilkan konten blog
+            tagFilterPopup.style.display = 'none'; // Tutup popup filter setelah artikel diklik
+        });
+        tagArticleList.appendChild(listItem);
+    });
+}
+
+
+
+
+// Initial display (tetap menampilkan berdasarkan kategori)
+displayArticles(currentPage);
+updatePagination();
+
 
 
 
@@ -2092,34 +4890,94 @@ infoPopup.addEventListener('click', function(e) {
     });
   });
   
-function renderNote(doc, isLatest = false) {
+  
+function renderNote(docOrData, isLatest = false) {
+    let noteData;
+    let noteId;
+
+    if (docOrData && typeof docOrData.data === 'function') {
+        noteData = docOrData.data();
+        noteId = docOrData.id;
+    } else if (docOrData && typeof docOrData === 'object') {
+        noteData = docOrData;
+        noteId = docOrData.id;
+    } else {
+        console.warn("renderNote dipanggil dengan input yang tidak valid. Mengembalikan placeholder.");
+        return document.createElement('div');
+    }
+
+    const role = noteData.role || "member";
+    const isSaved = noteData.isSaved || false;
+    const noteText = noteData.text || "Catatan kosong";
+    const saveButtonText = isSaved ? "Disimpan" : "Simpan";
+    const saveButtonClass = isSaved ? "save-individual-note saved" : "save-individual-note";
+    const temaTopik = noteData.temaTopik || "lain-lain";
+
     const noteEl = document.createElement("div");
-    noteEl.className = "note-card";
-    const role = doc.data().role || "member";
+    noteEl.className = `note-card`;
+    noteEl.dataset.topic = temaTopik.toLowerCase(); // Set data-topic, gunakan temaTopik
 
     noteEl.innerHTML = `
-        <div class="timeline-dot ${isLatest ? 'active' : ''}"></div>
-        <div class="note-text">${doc.data().text}</div>
-        <div class="note-actions">
-            <button class="save-individual-note" data-id="${doc.id}">Simpan</button>
-            <div class="arrow">
+        <div class="timeline-dot ${isLatest ? "active" : ""}"></div>
+        <div class="note-body">
+            <div class="note-text">${noteText}</div>
+            <div class="note-actions">
+                <button class="${saveButtonClass}" data-id="${noteId}">
+                ${saveButtonText}
+                </button>
+                <div class="arrow">
                 <svg fill="none" stroke="#6b7280" stroke-width="2" viewBox="0 0 24 24">
-                    <path d="M5 12h14M12 5l7 7-7 7"/>
+                    <path d="M5 12h14M12 5l7 7-7 7" />
                 </svg>
+                </div>
             </div>
+            <span class="badge ${role}" data-role="${role}">${role}</span>
         </div>
-        <span class="badge ${role}" data-role="${role}">${role}</span>
     `;
 
-    const badgeElement = noteEl.querySelector('.badge');
+    const saveButton = noteEl.querySelector(".save-individual-note");
+    if (saveButton) {
+        saveButton.addEventListener("click", async (event) => {
+        const clickedButton = event.target;
+        const noteId = clickedButton.dataset.id;
+        const isCurrentlySaved = clickedButton.classList.contains("saved");
+
+        try {
+            await toggleSaveNote(noteId, isCurrentlySaved, noteData);
+            clickedButton.classList.toggle("saved", !isCurrentlySaved);
+            clickedButton.textContent = !isCurrentlySaved ? "Disimpan" : "Simpan";
+            if (savedNotesModal?.style?.display === "flex") {
+            displaySavedNotesPopup();
+            }
+        } catch (error) {
+            console.error("Error toggling save state:", error);
+            alert("Failed to save note. Please try again.");
+        }
+        });
+    }
+
+    const badgeElement = noteEl.querySelector(".badge");
     if (badgeElement) {
-        badgeElement.addEventListener('click', () => {
-            showRolePopup(role);
+        badgeElement.addEventListener("click", () => {
+        showRolePopup(role);
         });
     }
 
     return noteEl;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 function showRolePopup(role) {
   const rolePopupOverlay = document.getElementById('role-popup-overlay');
@@ -2290,79 +5148,90 @@ document.getElementById('noteList').addEventListener('click', function(event) {
     }
 });
 
+   
+   // Tanggal saat ini (auto-updates)
+        const today = new Date();
 
+        // Tanggal target: 29 Mei tahun ini
+        const targetDate = new Date(today.getFullYear(), 4, 29); // Bulan 4 adalah Mei (0-indeks)
 
-const showSavedNotesBtn = document.getElementById("showSavedNotesBtn");
-const savedNotesModal = document.getElementById("savedNotesModal");
-const closeSavedNotesModalBtn = document.getElementById("closeSavedNotesModal");
-const savedNotesContainer = document.getElementById("savedNotesContainer");
-const showAllSavedInPopupBtn = document.getElementById("showAllSavedInPopupBtn"); // Dapatkan referensi tombol baru
-
-async function toggleSaveNote(noteId, isCurrentlySaved) {
-    const noteRef = doc(db, "notes", noteId);
-    try {
-        await updateDoc(noteRef, {
-            isSaved: !isCurrentlySaved
-        });
-        console.log(`Catatan dengan ID ${noteId} status simpan diperbarui.`);
-    } catch (error) {
-        console.error("Error updating saved status: ", error);
-        alert("Gagal memperbarui status simpan.");
-    }
-}
-
-noteList.addEventListener("click", async (event) => {
-    if (event.target.classList.contains("save-individual-note")) {
-        const noteId = event.target.dataset.id;
-        const isCurrentlySaved = event.target.classList.contains("saved");
-        await toggleSaveNote(noteId, isCurrentlySaved);
-        // UI akan diperbarui secara otomatis karena onSnapshot
-    }
-});
-
-async function displaySavedNotesPopup() {
-    savedNotesContainer.innerHTML = "";
-    const q = query(notesRef, where("isSaved", "==", true));
-    try {
-        const querySnapshot = await getDocs(q);
-        if (!querySnapshot.empty) {
-            const ul = document.createElement("ul");
-            querySnapshot.forEach((doc) => {
-                const li = document.createElement("li");
-                li.textContent = doc.data().text;
-                ul.appendChild(li);
-            });
-            savedNotesContainer.appendChild(ul);
-        } else {
-            savedNotesContainer.textContent = "Tidak ada catatan yang Anda simpan.";
+        // Jika tanggal target sudah lewat di tahun ini, atur ke tahun depan
+        if (targetDate.getTime() < today.getTime()) {
+            targetDate.setFullYear(today.getFullYear() + 1);
         }
-        savedNotesModal.style.display = "flex";
-    } catch (error) {
-        console.error("Error getting saved notes: ", error);
-        savedNotesContainer.textContent = "Gagal mengambil catatan yang disimpan.";
-        savedNotesModal.style.display = "flex";
-    }
-}
 
-showSavedNotesBtn.addEventListener("click", () => {
-    displaySavedNotesPopup();
-});
+        const countdownElement = document.getElementById('countdown');
 
-// Event listener untuk tombol "Lihat Semua Catatan yang Disimpan" di dalam pop-up
-showAllSavedInPopupBtn.addEventListener("click", () => {
-    // Panggil fungsi yang sama untuk menampilkan catatan yang disimpan
-    displaySavedNotesPopup();
-});
+        function updateCountdown() {
+            const now = new Date().getTime();
+            const distance = targetDate.getTime() - now;
 
-closeSavedNotesModalBtn.addEventListener("click", () => {
-    savedNotesModal.style.display = "none";
-});
+            // Jika hitungan mundur selesai
+            if (distance < 0) {
+                countdownElement.innerHTML = "Happy Birthday!"; // Atau pesan lain
+                clearInterval(countdownInterval);
+                return;
+            }
 
-window.addEventListener("click", (event) => {
-    if (event.target === savedNotesModal) {
-        savedNotesModal.style.display = "none";
-    }
-});
+            // Perhitungan waktu
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+            // Tampilkan hasil
+            countdownElement.innerHTML = `${days} hari ${hours} jam ${minutes} menit ${seconds} detik lagi`;
+        }
+
+        // Panggil fungsi updateCountdown segera setelah dimuat dan setiap detik
+        updateCountdown();
+        const countdownInterval = setInterval(updateCountdown, 1000);
+
+            // --- FUNGSI UNTUK POPUP (Tidak berubah, ini hanya disertakan untuk kelengkapan) ---
+
+        const infoBar = document.getElementById('infoBar');
+
+        const modal = document.getElementById('myModal');
+
+        const closeModalBtn = document.getElementById('closeModalBtn');
+
+
+
+        if (infoBar && modal && closeModalBtn) { // Pastikan elemen ada sebelum menambahkan event listener
+
+            infoBar.addEventListener('click', () => {
+
+                modal.classList.add('perjalanan-hidup-modal-show');
+
+                document.body.style.overflow = 'hidden';
+
+            });
+
+
+
+            closeModalBtn.addEventListener('click', () => {
+
+                modal.classList.remove('perjalanan-hidup-modal-show');
+
+                document.body.style.overflow = '';
+
+            });
+
+
+
+            window.addEventListener('click', (event) => {
+
+                if (event.target === modal) {
+
+                    modal.classList.remove('perjalanan-hidup-modal-show');
+
+                    document.body.style.overflow = '';
+
+                }
+
+            });
+
+        }
 
 
 
