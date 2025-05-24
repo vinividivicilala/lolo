@@ -2281,7 +2281,20 @@ li:last-child {
         }
  
  
- 
+ .google-login-button {
+  padding: 10px 20px;
+  background-color: white;
+  color: #673AB7; /* Warna biru tua Google */
+  border: none;
+  border-radius: 5px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.google-login-button:hover {
+  background-color: #f5f5f5;
+}
  
  
  
@@ -2463,10 +2476,10 @@ li:last-child {
       <label for="password">Password (Optional):</label>
       <input type="password" id="password" name="password">
     </div>
-    <button onclick="loginWithGoogle()" class="google-login-button">
-      <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google icon" style="width: 20px; height: 20px; vertical-align: middle; margin-right: 8px;">
-      Masuk dengan Google
-    </button>
+ <button id="googleLoginBtn" class="google-login-button">
+  <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg " alt="Google icon" style="width: 24px; height: 24px; vertical-align: middle; margin-right: 8px;">
+  Login dengan Google
+</button>
     <p id="errorMessage" class="error-message hidden"></p>
   </div>
 
@@ -3090,119 +3103,127 @@ document.addEventListener('DOMContentLoaded', () => {
         return popup;
     }
 
-   // --- Login with Google ---
-    async function loginWithGoogle() {
-        // Cek apakah modul Firebase yang dibutuhkan sudah dimuat
-        if (typeof auth === 'undefined' || typeof GoogleAuthProvider === 'undefined' || typeof signInWithPopup === 'undefined') {
-            console.error("Firebase Auth modules are not loaded or defined. Please ensure Firebase is initialized and its auth modules are imported correctly.");
-            if (errorMessage) {
-                errorMessage.textContent = "Error: Modul autentikasi tidak tersedia. Silakan periksa konfigurasi Firebase Anda.";
-                errorMessage.classList.remove("hidden");
-            }
-            return;
-        }
-
-        // Disable tombol dan tampilkan pesan loading
-        if (googleLoginButton) {
-            googleLoginButton.disabled = true;
-            googleLoginButton.textContent = "Memproses..."; // Teks sementara
-        }
-        if (errorMessage) errorMessage.classList.add("hidden"); // Sembunyikan error sebelumnya
-
-        try {
-            const provider = new GoogleAuthProvider();
-            const userCredential = await signInWithPopup(auth, provider);
-            const user = userCredential.user;
-
-            const displayName = user.displayName || "Pengguna Google 👋";
-
-            // Transisi UI setelah login berhasil
-            if (loginForm && greetingDiv && dashboardDiv && userGreetingElement && dashboardGreetingName) {
-                animateTransition(null, loginForm, 0, 1000); // Sembunyikan form login
-                setTimeout(() => {
-                    if (greetingDiv) {
-                        greetingDiv.classList.remove("hidden");
-                        greetingDiv.classList.add("slide-in");
-                        if (userGreetingElement) userGreetingElement.textContent = `Halo ${displayName} 👋`;
-                    }
-                }, 1000); // Tampilkan greeting setelah form login tersembunyi
-                setTimeout(() => {
-                    if (dashboardDiv && greetingDiv) {
-                        animateTransition(dashboardDiv, greetingDiv); // Transisi dari greeting ke dashboard
-                        if (dashboardGreetingName) dashboardGreetingName.textContent = `Halo, ${displayName}!`;
-                    }
-                }, 3000); // Tampilkan dashboard setelah greeting
-            } else {
-                console.warn("Salah satu elemen UI utama untuk transisi (loginForm, greetingDiv, dashboardDiv, userGreetingElement, dashboardGreetingName) tidak ditemukan. Transisi UI mungkin tidak berjalan mulus.");
-                // Jika elemen penting tidak ditemukan, setidaknya sembunyikan login dan tampilkan dashboard jika ada
-                if (loginForm) loginForm.classList.add("hidden");
-                if (dashboardDiv) {
-                    dashboardDiv.classList.remove("hidden");
-                    dashboardDiv.classList.add("slide-in");
-                    if (dashboardGreetingName) dashboardGreetingName.textContent = `Halo, ${displayName}!`;
-                }
-            }
-
-            // Setelah login berhasil, pastikan listener catatan diatur
-            setupSavedNotesListener();
-
-        } catch (error) {
-            console.error("Google login error:", error);
-            if (errorMessage) {
-                // Pesan error yang lebih spesifik untuk pengguna
-                if (error.code === 'auth/cancelled-popup-request' || error.code === 'auth/popup-closed-by-user') {
-                    errorMessage.textContent = "Login dibatalkan. Pastikan Anda tidak menutup jendela login atau memblokir pop-up.";
-                } else if (error.code === 'auth/popup-blocked') {
-                    errorMessage.textContent = "Login gagal: Pop-up diblokir oleh browser. Izinkan pop-up untuk situs ini.";
-                } else if (error.code === 'auth/network-request-failed') {
-                    errorMessage.textContent = "Login gagal: Periksa koneksi internet Anda.";
-                } else {
-                    errorMessage.textContent = `Login gagal: ${error.message}. Silakan coba lagi.`;
-                }
-                errorMessage.classList.remove("hidden"); // Tampilkan pesan error
-            }
-        } finally {
-            // Selalu aktifkan kembali tombol dan kembalikan teks aslinya
-            if (googleLoginButton) {
-                googleLoginButton.disabled = false;
-                googleLoginButton.innerHTML = `<img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google icon" style="width: 20px; height: 20px; vertical-align: middle; margin-right: 8px;"> Masuk dengan Google`;
-            }
-        }
+  async function loginWithGoogle() {
+  try {
+    // Cek apakah modul Firebase Auth sudah dimuat
+    if (!auth || !GoogleAuthProvider || !signInWithPopup) {
+      throw new Error("Firebase Auth modules are not loaded or defined.");
     }
 
-    // ... 
-    // --- Logout Function ---
-    function logoutGoogle() {
-        if (typeof auth === 'undefined' || typeof signOut === 'undefined') {
-            console.error("Firebase Auth signOut module is not loaded or defined.");
-            showSuccessMessage("Error: Fitur logout tidak tersedia.");
-            return;
-        }
-        signOut(auth)
-            .then(() => {
-                if (dashboardDiv && loginForm) {
-                    animateTransition(loginForm, dashboardDiv); // Transisi kembali ke login
-                    // Reset input fields setelah logout
-                    if (emailInput) emailInput.value = "";
-                    if (passwordInput) passwordInput.value = "";
-                }
-                if (errorMessage) errorMessage.classList.add("hidden"); // Sembunyikan pesan error
-                showSuccessMessage("Anda telah berhasil logout.");
-
-                // Hentikan listener catatan saat logout
-                if (unsubscribeNotes) {
-                    unsubscribeNotes();
-                    unsubscribeNotes = null;
-                }
-            })
-            .catch((error) => {
-                console.error("Logout error:", error);
-                if (errorMessage) {
-                    errorMessage.textContent = `Logout gagal: ${error.message}`;
-                    errorMessage.classList.remove("hidden");
-                }
-            });
+    // Disable tombol dan tampilkan pesan loading
+    const googleLoginButton = document.getElementById("googleLoginBtn");
+    if (googleLoginButton) {
+      googleLoginButton.disabled = true;
+      googleLoginButton.textContent = "Memproses...";
     }
+
+    // Inisialisasi provider Google
+    const provider = new GoogleAuthProvider();
+
+    // Melakukan login dengan popup
+    const userCredential = await signInWithPopup(auth, provider);
+
+    // Mendapatkan data pengguna
+    const user = userCredential.user;
+    const displayName = user.displayName || "Pengguna Google 👋";
+
+    // Transisi UI setelah login berhasil
+    if (document.getElementById("loginForm")) {
+      document.getElementById("loginForm").classList.add("hidden");
+    }
+
+    if (document.getElementById("greetingDiv")) {
+      document.getElementById("greetingDiv").classList.remove("hidden");
+      document.getElementById("userGreeting").textContent = `Halo ${displayName} 👋`;
+    }
+
+    if (document.getElementById("dashboardDiv")) {
+      document.getElementById("dashboardDiv").classList.remove("hidden");
+      document.getElementById("dashboardGreetingName").textContent = `Halo, ${displayName}!`;
+    }
+
+    // Setelah login berhasil, pastikan listener catatan diatur
+    setupSavedNotesListener();
+  } catch (error) {
+    console.error("Google login error:", error);
+
+    // Tampilkan pesan error kepada pengguna
+    const errorMessage = document.getElementById("errorMessage");
+    if (errorMessage) {
+      errorMessage.textContent = `Login gagal: ${error.message}. Silakan coba lagi.`;
+      errorMessage.classList.remove("hidden");
+    }
+  } finally {
+    // Selalu aktifkan kembali tombol dan kembalikan teks aslinya
+    const googleLoginButton = document.getElementById("googleLoginBtn");
+    if (googleLoginButton) {
+      googleLoginButton.disabled = false;
+      googleLoginButton.textContent = "Login dengan Google";
+    }
+  }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  const googleLoginButton = document.getElementById("googleLoginBtn");
+  if (googleLoginButton) {
+    googleLoginButton.addEventListener("click", loginWithGoogle);
+  } else {
+    console.warn("Tombol 'Login dengan Google' tidak ditemukan di DOM.");
+  }
+});
+
+    
+	
+async function logoutGoogle() {
+  try {
+    if (!auth || !signOut) {
+      throw new Error("Firebase Auth signOut module is not loaded or defined.");
+    }
+
+    await signOut(auth);
+
+    // Reset UI
+    document.getElementById("loginForm")?.classList.remove("hidden");
+    document.getElementById("greetingDiv")?.classList.add("hidden");
+    document.getElementById("dashboardDiv")?.classList.add("hidden");
+
+    // Hentikan listener catatan jika ada
+    if (unsubscribeNotes) {
+      unsubscribeNotes();
+      unsubscribeNotes = null;
+    }
+
+    showSuccessMessage("Anda telah berhasil logout.");
+  } catch (error) {
+    console.error("Logout error:", error);
+    showErrorMessage("Terjadi kesalahan saat logout. Silakan coba lagi.");
+  }
+}	
+	
+	
+	
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	
 
     // --- Placeholder for fetchAndDisplayNotes (seems unused in this flow) ---
     // Fungsi ini tampak tidak digunakan secara langsung dalam alur UI Anda untuk menampilkan catatan di halaman utama.
