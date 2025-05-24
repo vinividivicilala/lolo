@@ -3071,12 +3071,13 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        if (googleLoginButton) {
-            googleLoginButton.disabled = true;
-            googleLoginButton.textContent = "Memproses...";
-        }
-        if (errorMessage) errorMessage.classList.add("hidden");
-
+        
+// Contoh: Tambahkan event listener untuk tombol login Google
+if (googleLoginButton) {
+    googleLoginButton.addEventListener('click', loginWithGoogle);
+} else {
+    console.error("Elemen 'googleLoginButton' tidak ditemukan di DOM.");
+}
         try {
             const provider = new GoogleAuthProvider();
             const userCredential = await signInWithPopup(auth, provider);
