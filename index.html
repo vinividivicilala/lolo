@@ -3018,6 +3018,7 @@ let activitiesData = [];
 
 
 
+
 document.addEventListener('DOMContentLoaded', () => {
     // Ambil semua elemen DOM di awal untuk menghindari null checks berulang
     // Pastikan ID ini sesuai dengan yang ada di HTML Anda!
@@ -3033,7 +3034,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const savedNotesModal = document.getElementById("savedNotesModal");
     const savedNotesContainer = document.getElementById("savedNotesContainer");
     const topicFilter = document.getElementById("topicFilter");
-    const googleLoginButton = document.querySelector(".google-login-button");
+    const googleLoginButton = document.querySelector(".google-login-button"); // Menggunakan querySelector karena class
     const closeSavedNotesModalBtn = document.getElementById("closeSavedNotesModalBtn");
     const logoutButton = document.getElementById('logoutButton');
 
@@ -3042,11 +3043,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Helper function untuk menampilkan/menyembunyikan elemen dengan animasi ---
     function animateTransition(elementToShow, elementToHide, initialDelay = 0, hideDelay = 500) {
+        // Tambahkan cek keberadaan elemen agar tidak error jika elemen tidak ada
         if (elementToHide) {
             elementToHide.classList.remove("slide-in");
             elementToHide.classList.add("slide-out");
             setTimeout(() => {
                 elementToHide.classList.add("hidden");
+                // Reset slide-out setelah transisi selesai untuk penggunaan selanjutnya
+                elementToHide.classList.remove("slide-out");
                 if (elementToShow) {
                     elementToShow.classList.remove("hidden");
                     elementToShow.classList.add("slide-in");
@@ -3065,6 +3069,7 @@ document.addEventListener('DOMContentLoaded', () => {
         let popup = document.getElementById("success-popup") || createSuccessPopup();
         popup.textContent = message;
         popup.classList.add("show");
+        // Gunakan setTimeout untuk menghilangkan popup setelah beberapa detik
         setTimeout(() => popup.classList.remove("show"), 3000);
     }
 
@@ -3072,6 +3077,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const popup = document.createElement("div");
         popup.id = "success-popup";
         popup.className = "popup";
+        // Inline styles untuk popup
         popup.style.cssText = `
             position: fixed; top: 20px; right: 20px;
             background-color: #10b981; color: white;
@@ -3086,6 +3092,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Login with Google ---
     async function loginWithGoogle() {
+        // Cek apakah modul Firebase yang dibutuhkan sudah dimuat
         if (typeof auth === 'undefined' || typeof GoogleAuthProvider === 'undefined' || typeof signInWithPopup === 'undefined') {
             console.error("Firebase Auth modules are not loaded or defined. Please ensure Firebase is initialized and its auth modules are imported correctly.");
             if (errorMessage) {
@@ -3095,11 +3102,12 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        // Disable tombol dan tampilkan pesan loading
         if (googleLoginButton) {
             googleLoginButton.disabled = true;
-            googleLoginButton.textContent = "Memproses...";
+            googleLoginButton.textContent = "Memproses..."; // Teks sementara
         }
-        if (errorMessage) errorMessage.classList.add("hidden");
+        if (errorMessage) errorMessage.classList.add("hidden"); // Sembunyikan error sebelumnya
 
         try {
             const provider = new GoogleAuthProvider();
@@ -3108,23 +3116,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const displayName = user.displayName || "Pengguna Google 👋";
 
+            // Transisi UI setelah login berhasil
             if (loginForm && greetingDiv && dashboardDiv && userGreetingElement && dashboardGreetingName) {
-                animateTransition(null, loginForm, 0, 1000);
+                animateTransition(null, loginForm, 0, 1000); // Sembunyikan form login
                 setTimeout(() => {
                     if (greetingDiv) {
                         greetingDiv.classList.remove("hidden");
                         greetingDiv.classList.add("slide-in");
                         if (userGreetingElement) userGreetingElement.textContent = `Halo ${displayName} 👋`;
                     }
-                }, 1000);
+                }, 1000); // Tampilkan greeting setelah form login tersembunyi
                 setTimeout(() => {
                     if (dashboardDiv && greetingDiv) {
-                        animateTransition(dashboardDiv, greetingDiv);
+                        animateTransition(dashboardDiv, greetingDiv); // Transisi dari greeting ke dashboard
                         if (dashboardGreetingName) dashboardGreetingName.textContent = `Halo, ${displayName}!`;
                     }
-                }, 3000);
+                }, 3000); // Tampilkan dashboard setelah greeting
             } else {
                 console.warn("Salah satu elemen UI utama untuk transisi (loginForm, greetingDiv, dashboardDiv, userGreetingElement, dashboardGreetingName) tidak ditemukan. Transisi UI mungkin tidak berjalan mulus.");
+                // Jika elemen penting tidak ditemukan, setidaknya sembunyikan login dan tampilkan dashboard jika ada
                 if (loginForm) loginForm.classList.add("hidden");
                 if (dashboardDiv) {
                     dashboardDiv.classList.remove("hidden");
@@ -3133,19 +3143,26 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
 
+            // Setelah login berhasil, pastikan listener catatan diatur
+            setupSavedNotesListener();
+
         } catch (error) {
             console.error("Google login error:", error);
             if (errorMessage) {
+                // Pesan error yang lebih spesifik untuk pengguna
                 if (error.code === 'auth/cancelled-popup-request' || error.code === 'auth/popup-closed-by-user') {
                     errorMessage.textContent = "Login dibatalkan. Pastikan Anda tidak menutup jendela login atau memblokir pop-up.";
                 } else if (error.code === 'auth/popup-blocked') {
-                    errorMessage.textContent = "Login gagal: Pop-up diblokir. Izinkan pop-up untuk situs ini.";
+                    errorMessage.textContent = "Login gagal: Pop-up diblokir oleh browser. Izinkan pop-up untuk situs ini.";
+                } else if (error.code === 'auth/network-request-failed') {
+                    errorMessage.textContent = "Login gagal: Periksa koneksi internet Anda.";
                 } else {
-                    errorMessage.textContent = `Login gagal: ${error.message}. Coba lagi atau periksa koneksi internet Anda.`;
+                    errorMessage.textContent = `Login gagal: ${error.message}. Silakan coba lagi.`;
                 }
-                errorMessage.classList.remove("hidden");
+                errorMessage.classList.remove("hidden"); // Tampilkan pesan error
             }
         } finally {
+            // Selalu aktifkan kembali tombol dan kembalikan teks aslinya
             if (googleLoginButton) {
                 googleLoginButton.disabled = false;
                 googleLoginButton.innerHTML = `<img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google icon" style="width: 20px; height: 20px; vertical-align: middle; margin-right: 8px;"> Masuk dengan Google`;
@@ -3157,16 +3174,25 @@ document.addEventListener('DOMContentLoaded', () => {
     function logoutGoogle() {
         if (typeof auth === 'undefined' || typeof signOut === 'undefined') {
             console.error("Firebase Auth signOut module is not loaded or defined.");
+            showSuccessMessage("Error: Fitur logout tidak tersedia.");
             return;
         }
         signOut(auth)
             .then(() => {
                 if (dashboardDiv && loginForm) {
-                    animateTransition(loginForm, dashboardDiv);
+                    animateTransition(loginForm, dashboardDiv); // Transisi kembali ke login
+                    // Reset input fields setelah logout
                     if (emailInput) emailInput.value = "";
                     if (passwordInput) passwordInput.value = "";
                 }
-                if (errorMessage) errorMessage.classList.add("hidden");
+                if (errorMessage) errorMessage.classList.add("hidden"); // Sembunyikan pesan error
+                showSuccessMessage("Anda telah berhasil logout.");
+
+                // Hentikan listener catatan saat logout
+                if (unsubscribeNotes) {
+                    unsubscribeNotes();
+                    unsubscribeNotes = null;
+                }
             })
             .catch((error) => {
                 console.error("Logout error:", error);
@@ -3178,12 +3204,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- Placeholder for fetchAndDisplayNotes (seems unused in this flow) ---
+    // Fungsi ini tampak tidak digunakan secara langsung dalam alur UI Anda untuk menampilkan catatan di halaman utama.
+    // Catatan ditampilkan melalui displaySavedNotesPopup. Jadi, fungsi ini bisa dihapus atau disesuaikan jika ada kebutuhan di masa depan.
     async function fetchAndDisplayNotes(userId, filter = "semua") {
         const notesList = document.getElementById("notesList");
         if (!notesList) return;
 
         notesList.innerHTML = `
-            <p style="text-align: center; color: gray;">
+            <p style="text-align: center; color: gray; padding: 20px;">
                 Catatan hanya muncul ketika disimpan dan ditampilkan lewat popup.
             </p>
         `;
@@ -3196,6 +3224,7 @@ document.addEventListener('DOMContentLoaded', () => {
             showSuccessMessage("Anda perlu login untuk menyimpan catatan.");
             return;
         }
+        // Cek apakah modul Firestore sudah dimuat
         if (typeof db === 'undefined' || typeof doc === 'undefined' || typeof setDoc === 'undefined' || typeof updateDoc === 'undefined' || typeof serverTimestamp === 'undefined') {
             console.error("Firestore modules are not loaded for saving notes.");
             showSuccessMessage("Error: Database tidak tersedia.");
@@ -3206,6 +3235,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         try {
             if (!isCurrentlySaved) {
+                // Pastikan noteData memiliki properti yang diperlukan dan merge true
                 await setDoc(noteRef, { ...noteData, isSaved: true, savedAt: serverTimestamp() }, { merge: true });
                 showSuccessMessage("Catatan disimpan!");
             } else {
@@ -3224,6 +3254,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const notes = savedNotesContainer.querySelectorAll(".note");
         notes.forEach((note) => {
             const noteTopic = note.dataset.topic || "";
+            // Pastikan perbandingan topic case-insensitive
             note.style.display = (selectedTopic === "all" || selectedTopic === "" || noteTopic === selectedTopic.toLowerCase())
                 ? "block"
                 : "none";
@@ -3237,25 +3268,32 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        savedNotesContainer.innerHTML = "";
-        topics.clear();
+        savedNotesContainer.innerHTML = ""; // Bersihkan kontainer sebelum menambahkan catatan baru
+        topics.clear(); // Bersihkan daftar topik
 
         if (savedNotes.length === 0) {
-            savedNotesContainer.innerHTML = "<p style='text-align: center; padding: 20px;'>Belum ada catatan yang tersimpan.</p>";
+            savedNotesContainer.innerHTML = "<p style='text-align: center; padding: 20px; color: #666;'>Belum ada catatan yang tersimpan.</p>";
             topicFilter.value = "all";
             topicFilter.innerHTML = '<option value="all">Semua Topik</option>';
-            filterNotesByTopic("all");
+            filterNotesByTopic("all"); // Pastikan filter disetel ke "all"
         } else {
             savedNotes.forEach((docSnap) => {
                 const data = docSnap.data();
-                const topic = (data.topic || data.temaTopik || "").toLowerCase();
-                if (topic) topics.add(topic);
+                // Gunakan properti yang lebih konsisten atau berikan fallback yang kuat
+                const topic = (data.topic || data.temaTopik || "tanpa topik").toLowerCase(); // Fallback to "tanpa topik"
+                if (topic && topic !== "tanpa topik") topics.add(topic); // Hanya tambahkan topik yang valid
 
                 const noteEl = document.createElement('div');
                 noteEl.classList.add("note");
-                noteEl.dataset.topic = topic;
+                noteEl.dataset.topic = topic; // Simpan topik di dataset untuk filtering
 
-                const noteDataSafe = JSON.stringify(data).replace(/"/g, '&quot;');
+                // Escape string JSON untuk onclik yang aman
+                const noteDataSafe = JSON.stringify({
+                    title: data.title || 'Tidak Ada Judul',
+                    content: data.content || 'Tidak Ada Konten',
+                    topic: data.topic || 'N/A', // Pastikan properti ini ada jika diperlukan
+                    // Tambahkan properti lain yang mungkin perlu dikembalikan ke toggleSaveNote
+                }).replace(/"/g, '&quot;');
 
                 noteEl.innerHTML = `
                     <h3>${data.title || 'Tidak Ada Judul'}</h3>
@@ -3266,30 +3304,41 @@ document.addEventListener('DOMContentLoaded', () => {
                 savedNotesContainer.appendChild(noteEl);
             });
 
+            // Isi ulang filter topik
             topicFilter.innerHTML = '<option value="all">Semua Topik</option>';
-            topics.forEach((topic) => {
+            Array.from(topics).sort().forEach((topic) => { // Urutkan topik secara alfabetis
                 const option = document.createElement("option");
                 option.value = topic;
                 option.textContent = topic.charAt(0).toUpperCase() + topic.slice(1);
                 topicFilter.appendChild(option);
             });
 
-            topicFilter.value = "all";
-            filterNotesByTopic("all");
+            topicFilter.value = "all"; // Atur kembali ke "all" setiap kali notes diperbarui
+            filterNotesByTopic("all"); // Tampilkan semua catatan secara default
         }
 
-        savedNotesModal.style.display = "flex";
+        savedNotesModal.style.display = "flex"; // Tampilkan modal
 
+        // Pastikan event listener hanya ditambahkan sekali
+        // Hapus listener sebelumnya sebelum menambahkan yang baru untuk menghindari duplikasi
+        // Ini adalah pattern yang lebih baik jika fungsi displaySavedNotesPopup dipanggil berulang
+        // Namun, jika topicFilterChangeListener tidak mengakses state yang berubah,
+        // lebih baik listener hanya ditambahkan sekali di DOMContentLoaded.
+        // Untuk saat ini, asumsikan displaySavedNotesPopup mungkin dipanggil ulang:
         function topicFilterChangeListener() {
             filterNotesByTopic(topicFilter.value);
         }
-        topicFilter.removeEventListener("change", topicFilterChangeListener);
-        topicFilter.addEventListener("change", topicFilterChangeListener);
+        topicFilter.removeEventListener("change", topicFilterChangeListener); // Hapus listener sebelumnya
+        topicFilter.addEventListener("change", topicFilterChangeListener); // Tambahkan listener baru
     }
 
     // --- Setup Real-time Listener for Saved Notes ---
     function setupSavedNotesListener() {
-        if (!auth.currentUser) return;
+        if (!auth.currentUser) {
+            console.log("Tidak ada pengguna yang login, tidak dapat mengatur listener catatan.");
+            return;
+        }
+        // Cek apakah modul Firestore sudah dimuat
         if (typeof db === 'undefined' || typeof collection === 'undefined' || typeof query === 'undefined' || typeof where === 'undefined' || typeof onSnapshot === 'undefined') {
             console.error("Firestore real-time listener modules are not loaded.");
             showSuccessMessage("Error: Listener catatan tidak tersedia.");
@@ -3302,15 +3351,20 @@ document.addEventListener('DOMContentLoaded', () => {
             where("isSaved", "==", true)
         );
 
-        if (unsubscribeNotes) unsubscribeNotes();
+        // Hentikan listener yang ada sebelum membuat yang baru
+        if (unsubscribeNotes) {
+            unsubscribeNotes();
+            console.log("Listener catatan sebelumnya telah dihentikan.");
+        }
 
         unsubscribeNotes = onSnapshot(q, (snapshot) => {
             const savedNotes = snapshot.docs;
-            displaySavedNotesPopup(savedNotes);
+            displaySavedNotesPopup(savedNotes); // Perbarui tampilan catatan
         }, (error) => {
             console.error("Error fetching saved notes:", error);
             showSuccessMessage("Gagal memuat catatan tersimpan.");
         });
+        console.log("Listener catatan tersimpan telah diatur.");
     }
 
     // --- Authentication State Change Listener ---
@@ -3323,23 +3377,28 @@ document.addEventListener('DOMContentLoaded', () => {
             if (user) {
                 const displayName = user.displayName || user.email.split("@")[0] || "Pengguna";
 
+                // Sembunyikan elemen login dan tampilkan dashboard
                 if (loginForm) loginForm.classList.add("hidden");
-                if (greetingDiv) greetingDiv.classList.add("hidden");
+                if (greetingDiv) greetingDiv.classList.add("hidden"); // Pastikan greeting juga tersembunyi
                 if (dashboardDiv) {
                     dashboardDiv.classList.remove("hidden");
                     dashboardDiv.classList.add("slide-in");
                 }
                 if (dashboardGreetingName) dashboardGreetingName.textContent = `Halo, ${displayName}!`;
 
+                // Panggil setupSavedNotesListener di sini setelah user terautentikasi
                 setupSavedNotesListener();
             } else {
+                // Jika tidak ada user, tampilkan form login
                 if (loginForm) loginForm.classList.remove("hidden");
                 if (greetingDiv) greetingDiv.classList.add("hidden");
                 if (dashboardDiv) dashboardDiv.classList.add("hidden");
 
+                // Hentikan listener catatan saat logout atau tidak ada user
                 if (unsubscribeNotes) {
                     unsubscribeNotes();
                     unsubscribeNotes = null;
+                    console.log("Listener catatan telah dihentikan karena tidak ada pengguna.");
                 }
             }
         });
@@ -3354,8 +3413,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (showSavedNotesBtn) {
         showSavedNotesBtn.addEventListener('click', () => {
-            if (auth && auth.currentUser) { // Check if auth and currentUser exist
+            if (auth && auth.currentUser) {
+                // Memanggil setupSavedNotesListener di sini akan memastikan data terbaru dimuat
                 setupSavedNotesListener();
+                // Jika modal tidak terbuka secara otomatis oleh listener, buka di sini:
+                if (savedNotesModal && savedNotesModal.style.display === "none") {
+                    savedNotesModal.style.display = "flex";
+                }
             } else {
                 showSuccessMessage("Anda perlu login untuk melihat catatan tersimpan.");
             }
@@ -3367,6 +3431,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (closeSavedNotesModalBtn) {
         closeSavedNotesModalBtn.addEventListener('click', () => {
             if (savedNotesModal) savedNotesModal.style.display = "none";
+            // Penting: Hentikan listener saat modal ditutup untuk menghindari kebocoran memori
             if (unsubscribeNotes) {
                 unsubscribeNotes();
                 unsubscribeNotes = null;
@@ -3386,6 +3451,7 @@ document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener("click", (event) => {
         if (savedNotesModal && event.target === savedNotesModal) {
             savedNotesModal.style.display = "none";
+            // Penting: Hentikan listener saat modal ditutup dari luar
             if (unsubscribeNotes) {
                 unsubscribeNotes();
                 unsubscribeNotes = null;
@@ -3394,22 +3460,38 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // --- Expose functions to the global scope for inline HTML event handlers ---
+    // Pastikan Firebase SDK sudah diimpor sebelum ini!
     window.loginWithGoogle = loginWithGoogle;
     window.logoutGoogle = logoutGoogle;
     window.toggleSaveNote = toggleSaveNote;
 
     // --- Initialize auth state listener ---
-    // This should be called once when the DOM is ready to manage UI based on initial auth state
+    // Ini harus dipanggil sekali ketika DOM siap untuk mengelola UI berdasarkan status auth awal
     onAuthStateChangedHandler();
-});
+});	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 	
-
-
-
-
-
-
-
 
 		
 
