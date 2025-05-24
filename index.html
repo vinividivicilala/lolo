@@ -3051,6 +3051,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const closeSavedNotesModalBtn = document.getElementById("closeSavedNotesModalBtn");
     const logoutButton = document.getElementById('logoutButton');
 
+	
+// Expose auth and db globally if needed (not recommended for production but helps with quick testing)
+ window.auth = auth;
+window.db = db;
+window.GoogleAuthProvider = GoogleAuthProvider;
+ window.signInWithPopup = signInWithPopup;
+window.onAuthStateChanged = onAuthStateChanged;
+window.signOut = signOut;
+
     let unsubscribeNotes;
     let topics = new Set();
 
