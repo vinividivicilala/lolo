@@ -3073,7 +3073,6 @@ const activityRef = collection(db, "activities");
         const guideText = document.getElementById("guideText");
         const guideLink = document.getElementById("guideLink");
         const closeGuideBtn = document.getElementById("closeGuideBtn");
-const voiceInputBtn = document.getElementById("voiceInputBtn"); // Tetap gunakan tombol visual sebagai indikator/kontrol
 const activityYearSelect = document.getElementById("activityYear");
 const activityCalendarContainer = document.querySelector(".activity-calendar");
         const overlay = document.getElementById("overlay");
@@ -3346,7 +3345,11 @@ let activitiesData = [];
 
     // --- Logika Pengiriman Catatan (tanpa Firebase) ---
     function addNoteFromVoice() {
-        const text = finalTranscript.trim();
+    const text = noteInput.value.trim();
+	const audioUrl = URL.createObjectURL(audioBlob);
+const audioElement = document.createElement('audio');
+audioElement.src = audioUrl;
+audioElement.controls = true;
         if (!text) {
             console.log('Tidak ada transkripsi untuk ditambahkan sebagai catatan.');
             return;
@@ -3362,10 +3365,11 @@ let activitiesData = [];
         if (notesList.querySelector('p')) {
             notesList.querySelector('p').remove();
         }
-
-        const newNoteText = document.createElement('p');
-        newNoteText.innerHTML = `<strong>Catatan Terbaru:</strong> "${text}"`;
-        notesList.appendChild(newNoteText);
+		
+const newNote = document.createElement('div');
+newNote.innerHTML = `<strong>Catatan:</strong> "${text}"`;
+newNote.appendChild(audioElement);
+notesList.appendChild(newNote);
 
         // Reset untuk catatan berikutnya
         finalTranscript = '';
