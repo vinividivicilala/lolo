@@ -2605,6 +2605,7 @@ li:last-child {
     <canvas id="waveformCanvas" width="300" height="80"></canvas>
     <div id="voicePlaybackContainer"></div>
 
+
     <div id="notesList" class="note-display">
         <p>Tekan ikon mikrofon untuk memulai catatan suara.</p>
     </div>
@@ -3075,31 +3076,35 @@ const activityRef = collection(db, "activities");
 const voiceInputBtn = document.getElementById("voiceInputBtn"); // Tetap gunakan tombol visual sebagai indikator/kontrol
 const activityYearSelect = document.getElementById("activityYear");
 const activityCalendarContainer = document.querySelector(".activity-calendar");
-const waveformCanvas = document.getElementById('waveformCanvas');
-const voicePlaybackContainer = document.getElementById('voicePlaybackContainer');
-const canvasContext = waveformCanvas.getContext('2d');
         const overlay = document.getElementById("overlay");
         let currentFilter = "semua";
-		let recognition; // Variabel untuk SpeechRecognition
-		let isListening = false; // Status apakah sedang mendengarkan
-// Variabel Perekaman Audio
-let mediaRecorder;
-let audioChunks = [];
-let audioBlob;
-let audioContext;
-let analyser;
-let dataArray;
-let bufferLength;
-let animationFrameId; // Untuk mengontrol loop animasi gelombang suara
-let currentStream; // Untuk menyimpan stream mikrofon
-		let finalTranscript = ''; // Untuk menyimpan transkripsi final
 		let currentYear = new Date().getFullYear();
 		let topics = new Set(); // Initialize the topics Set
 let activitiesData = [];
 
 		 
 	
-		
+	document.addEventListener('DOMContentLoaded', (event) => {
+    // --- Deklarasi Variabel Global (pindahkan semua deklarasi const/let di sini) ---
+    const noteInput = document.getElementById('noteInput'); 
+    const voiceInputBtn = document.getElementById('voiceInputBtn');
+    const notesList = document.getElementById('notesList');
+    const voicePlaybackContainer = document.getElementById('voicePlaybackContainer');
+    const waveformCanvas = document.getElementById('waveformCanvas');
+    const canvasContext = waveformCanvas ? waveformCanvas.getContext('2d') : null;
+
+    let recognition;
+    let isListening = false;
+    let finalTranscript = '';
+    let mediaRecorder;
+    let audioChunks = [];
+    let audioBlob = null;
+    let currentStream = null;
+    let audioContext;
+    let analyser;
+    let bufferLength;
+    let dataArray;
+    let animationFrameId;
 		
 // --- Setup Pengenalan Suara ---
 if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
