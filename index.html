@@ -564,94 +564,25 @@
 }
 
 
-  .voice-icon-btn {
-            /* Gaya dasar tombol */
-            padding: 10px;
-            border: none;
-            background-color: transparent;
-            cursor: pointer;
-            outline: none; /* Hapus outline saat fokus */
-            transition: transform 0.2s ease-in-out, color 0.2s ease-in-out;
-            font-size: 0; /* Sembunyikan teks default jika ada */
-        }
+.voice-icon-btn {
+    /* Gaya dasar tombol */
+    padding: 8px;
+    border: none;
+    background-color: transparent;
+    cursor: pointer;
+}
 
-        .voice-icon-btn svg {
-            display: block; /* Membuat SVG berperilaku seperti blok */
-            width: 32px; /* Ukuran ikon lebih besar */
-            height: 32px;
-            fill: #3498db; /* Warna ikon standar */
-        }
+.voice-icon-btn svg {
+    display: block; /* Membuat SVG berperilaku seperti blok */
+    width: 24px;
+    height: 24px;
+    fill: currentColor; /* Menggunakan warna teks tombol */
+}
 
-        .voice-icon-btn.active {
-            transform: scale(1.1);
-            color: red; /* Indikasi sedang mendengarkan */
-            fill: red; /* Warna ikon saat aktif */
-        }
-
-        #noteInput {
-            margin-top: 20px;
-            padding: 10px;
-            width: 80%;
-            max-width: 400px;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            font-size: 16px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        #waveformCanvas {
-            margin-top: 15px;
-            border: 1px solid #ddd;
-            background-color: #e9e9e9;
-            display: block; /* Memastikan mengambil baris sendiri */
-            border-radius: 8px;
-        }
-
-        #voicePlaybackContainer {
-            margin-top: 15px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 40px; /* Beri ruang bahkan saat kosong */
-            width: 100%;
-        }
-
-        #voicePlaybackContainer audio {
-            width: 100%;
-            max-width: 350px; /* Ukuran audio player */
-            border-radius: 5px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-        }
-
-        .note-display {
-            margin-top: 25px;
-            padding: 15px;
-            background-color: #fff;
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-            width: 80%;
-            max-width: 500px;
-            text-align: center;
-            color: #555;
-            word-wrap: break-word; /* Memastikan teks tidak meluber */
-        }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+/* Anda bisa mengatur warna teks tombol jika perlu */
+.voice-icon-btn {
+    color: #333; /* Contoh warna teks */
+}
 
 
 .pin-button {
@@ -2595,20 +2526,12 @@ li:last-child {
     <div class="note-input-container">
     <input type="text" id="noteInput" placeholder="Tulis catatan di sini...">
     <button id="saveBtn">Simpan</button>
-    <button id="voiceInputBtn" class="voice-icon-btn" title="Mulai/Berhenti Rekaman Suara">
-        <svg viewBox="0 0 24 24" fill="currentColor">
+    <button id="voiceInputBtn" class="voice-icon-btn">
+        <svg viewBox="0 0 24 24" fill="currentColor" style="width: 24px; height: 24px;">
             <path fill="none" d="M0 0h24v24H0z"/>
             <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.48 6-3.3 6-6.72h-1.7z"/>
         </svg>
     </button>
-
-    <canvas id="waveformCanvas" width="300" height="80"></canvas>
-    <div id="voicePlaybackContainer"></div>
-
-
-    <div id="notesList" class="note-display">
-        <p>Tekan ikon mikrofon untuk memulai catatan suara.</p>
-    </div>
 </div>
 
  
@@ -3073,86 +2996,97 @@ const activityRef = collection(db, "activities");
         const guideText = document.getElementById("guideText");
         const guideLink = document.getElementById("guideLink");
         const closeGuideBtn = document.getElementById("closeGuideBtn");
+const voiceInputBtn = document.getElementById("voiceInputBtn"); // Tetap gunakan tombol visual sebagai indikator/kontrol
 const activityYearSelect = document.getElementById("activityYear");
 const activityCalendarContainer = document.querySelector(".activity-calendar");
         const overlay = document.getElementById("overlay");
         let currentFilter = "semua";
+		let recognition; // Variabel untuk SpeechRecognition
+		let isListening = false; // Status apakah sedang mendengarkan
+		let finalTranscript = ''; // Untuk menyimpan transkripsi final
 		let currentYear = new Date().getFullYear();
 		let topics = new Set(); // Initialize the topics Set
 let activitiesData = [];
 
 		 
 	
-	
-	
-	
-	
-	document.addEventListener('DOMContentLoaded', (event) => {
-    // --- Deklarasi Variabel Global (pindahkan semua deklarasi const/let di sini) ---
-    const noteInput = document.getElementById('noteInput'); // Pastikan noteInput dideklarasikan
-    const voiceInputBtn = document.getElementById('voiceInputBtn'); // Pastikan voiceInputBtn dideklarasikan
-    const voicePlaybackContainer = document.getElementById('voicePlaybackContainer');
-    const waveformCanvas = document.getElementById('waveformCanvas');
-    const notesList = document.getElementById('notesList'); // Pastikan notesList dideklarasikan
-    const canvasContext = waveformCanvas ? waveformCanvas.getContext('2d') : null;
-
-    let recognition;
-    let isListening = false;
-    let finalTranscript = '';
-    let mediaRecorder;
-    let audioChunks = [];
-    let audioBlob = null;
-    let currentStream = null;
-    let audioContext;
-    let analyser;
-    let bufferLength;
-    let dataArray;
-    let animationFrameId;
 		
-    // --- Setup Pengenalan Suara ---
+		  // Cek apakah SpeechRecognition API tersedia di browser
     if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
         recognition = new (window.webkitSpeechRecognition || window.SpeechRecognition)();
-        recognition.continuous = false; // Akan berhenti setelah jeda bicara
-        recognition.interimResults = false; // Hanya memberikan hasil final
-        recognition.lang = 'id-ID'; // Bahasa Indonesia
+        recognition.continuous = false; // Hentikan setelah satu ucapan
+        recognition.interimResults = false;
+        recognition.lang = 'id-ID';
 
         recognition.onresult = function(event) {
             const transcript = event.results[0][0].transcript.trim();
-            noteInput.value = transcript; // Mengisi kolom input dengan transkripsi
-            finalTranscript = transcript;
-            console.log('Transkripsi: ', transcript);
-            // Tidak perlu memanggil stopListening di sini karena onend akan dipicu
-            // dan di sana kita akan memanggil addNoteFromVoice.
+            noteInput.value = transcript;
+            finalTranscript = transcript; // Simpan transkripsi final
+            stopListening(); // Berhenti otomatis
+            addNoteFromVoice(); // Simpan otomatis ke Firebase
         };
 
         recognition.onerror = function(event) {
-            console.error('Terjadi kesalahan pengenalan suara', event);
-            alert('Terjadi kesalahan pada fitur suara. Pastikan mikrofon Anda berfungsi dan izin telah diberikan.');
+            console.error('Speech recognition error:', event);
+            alert('Terjadi kesalahan pada fitur suara. Pastikan mikrofon Anda berfungsi.');
             isListening = false;
             updateVoiceButtonUI();
-            stopRecording(); // Juga hentikan perekaman jika ada error
-            stopStream(); // Hentikan stream mikrofon jika ada error
         };
 
         recognition.onend = function() {
-            console.log('Pengenalan suara berakhir.');
+            console.log('Speech recognition ended.');
             isListening = false;
             updateVoiceButtonUI();
-            stopRecording(); // Pastikan perekaman berhenti saat pengenalan suara berakhir
-            stopStream(); // Hentikan stream mikrofon
-            cancelAnimationFrame(animationFrameId); // Hentikan animasi gelombang suara
-            clearWaveform(); // Bersihkan kanvas
-            addNoteFromVoice(); // *** Panggil ini di akhir pengenalan suara untuk mengirim catatan otomatis ***
         };
     } else {
-        console.log('API SpeechRecognition tidak didukung di browser ini.');
+        console.log('SpeechRecognition API tidak didukung di browser ini.');
         if (voiceInputBtn) {
-            voiceInputBtn.style.display = 'none'; // Sembunyikan tombol jika tidak didukung
+            voiceInputBtn.style.display = 'none';
         }
-        alert('Browser Anda tidak mendukung fitur pengenalan suara.');
     }
 
-    // --- Logika Tombol Suara ---
+    function startListening() {
+        if (recognition && !isListening) {
+            try {
+                recognition.start();
+                isListening = true;
+                updateVoiceButtonUI();
+                console.log('Listening started.');
+            } catch (error) {
+                console.error('Error starting speech recognition:', error);
+                alert('Tidak dapat memulai fitur suara. Pastikan izin mikrofon telah diberikan.');
+                isListening = false;
+                updateVoiceButtonUI();
+            }
+        }
+    }
+
+    function stopListening() {
+        if (recognition && isListening) {
+            recognition.stop();
+            console.log('Listening stopped.');
+            isListening = false;
+            updateVoiceButtonUI();
+        }
+    }
+
+    function updateVoiceButtonUI() {
+        if (voiceInputBtn) {
+            voiceInputBtn.classList.toggle('active', isListening);
+            // Tambahkan logika perubahan ikon/gaya jika diperlukan
+        }
+    }
+
+    function addNoteFromVoice() {
+        const text = finalTranscript.trim();
+        if (!text) return;
+
+        const topic = categorizeNote(text); // Asumsikan kamu punya fungsi ini
+        addNoteToFirebase(text, topic); // Pastikan fungsi ini bekerja sesuai kebutuhan
+        finalTranscript = ''; // Reset untuk transkripsi selanjutnya
+    }
+
+    // Tambahkan event listener pada tombol
     if (voiceInputBtn) {
         voiceInputBtn.addEventListener('click', () => {
             if (!isListening) {
@@ -3163,258 +3097,6 @@ let activitiesData = [];
         });
     }
 
-    function updateVoiceButtonUI() {
-        if (voiceInputBtn) {
-            voiceInputBtn.classList.toggle('active', isListening);
-        }
-    }
-
-    function stopStream() {
-        if (currentStream) {
-            currentStream.getTracks().forEach(track => track.stop()); // Hentikan stream mikrofon
-            currentStream = null;
-        }
-    }
-
-    // --- Fungsi Gabungan Mulai/Berhenti Mendengarkan & Merekam ---
-    async function startListening() {
-        if (recognition && !isListening) {
-            try {
-                // Meminta akses mikrofon untuk pengenalan suara dan perekaman audio
-                currentStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                console.log('Akses mikrofon diberikan.');
-
-                // Mulai pengenalan suara
-                recognition.start();
-                isListening = true;
-                updateVoiceButtonUI();
-                console.log('Mendengarkan dimulai.');
-
-                // Mulai perekaman audio
-                startRecording(currentStream);
-
-                // Setup dan mulai visualisasi gelombang suara
-                setupWaveform(currentStream);
-
-            } catch (error) {
-                console.error('Kesalahan saat memulai pengenalan suara atau mengakses mikrofon:', error);
-                alert('Tidak dapat memulai fitur suara. Pastikan izin mikrofon telah diberikan.');
-                isListening = false;
-                updateVoiceButtonUI();
-                stopRecording(); // Pastikan perekaman tidak menggantung
-                stopStream(); // Pastikan stream dihentikan
-            }
-        }
-    }
-
-    function stopListening() {
-        if (recognition && isListening) {
-            recognition.stop();
-            // recognition.onend akan menangani sisa logika penghentian dan pengiriman
-        }
-    }
-
-    // --- Fungsi Perekaman Audio ---
-    function startRecording(stream) {
-        audioChunks = []; // Bersihkan chunk sebelumnya
-        audioBlob = null; // Bersihkan blob sebelumnya
-
-        mediaRecorder = new MediaRecorder(stream);
-
-        mediaRecorder.ondataavailable = event => {
-            audioChunks.push(event.data);
-        };
-
-        mediaRecorder.onstop = () => {
-            // Buat satu blob dari semua chunk
-            audioBlob = new Blob(audioChunks, { type: 'audio/webm' }); // Format umum
-            console.log('Audio direkam:', audioBlob);
-            playRecordedAudio(); // Putar segera setelah perekaman berhenti
-        };
-
-        mediaRecorder.onerror = event => {
-            console.error('Kesalahan MediaRecorder:', event);
-            alert('Terjadi kesalahan saat merekam audio.');
-            stopListening(); // Hentikan semuanya jika ada error
-        };
-
-        mediaRecorder.start();
-        console.log('Perekaman dimulai.');
-    }
-
-    function stopRecording() {
-        if (mediaRecorder && mediaRecorder.state === 'recording') {
-            mediaRecorder.stop();
-            // Event handler onstop akan dipicu, yang kemudian memanggil playRecordedAudio()
-        }
-    }
-
-    // --- Fungsi Pemutaran Audio ---
-    function playRecordedAudio() {
-        voicePlaybackContainer.innerHTML = ''; // Bersihkan audio player sebelumnya
-        if (audioBlob) {
-            const audioUrl = URL.createObjectURL(audioBlob);
-            const audioElement = document.createElement('audio');
-            audioElement.controls = true; // Tampilkan kontrol (putar/jeda, volume)
-            audioElement.src = audioUrl;
-            voicePlaybackContainer.appendChild(audioElement);
-            console.log('Memutar audio yang direkam.');
-
-            // Bersihkan URL saat elemen audio tidak lagi diperlukan
-            audioElement.onended = () => {
-                URL.revokeObjectURL(audioUrl);
-                console.log('URL audio dicabut (setelah selesai).');
-            };
-            audioElement.onpause = () => {
-                // Opsional: cabut URL saat dijeda jika tidak akan diputar lagi
-                // URL.revokeObjectURL(audioUrl);
-                // console.log('URL audio dicabut (saat dijeda).');
-            };
-            audioElement.onplay = () => {
-                // Pastikan URL sudah dibuat saat diputar
-                if (!audioElement.src || !audioElement.src.startsWith('blob:')) {
-                    audioElement.src = URL.createObjectURL(audioBlob);
-                }
-            };
-        } else {
-            console.warn('Tidak ada audio yang direkam untuk diputar.');
-        }
-    }
-
-    // --- Fungsi Visualisasi Gelombang Suara ---
-    function setupWaveform(stream) {
-        // Pastikan hanya ada satu AudioContext aktif
-        if (audioContext) {
-            audioContext.close(); // Tutup konteks sebelumnya jika ada
-        }
-        audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        const source = audioContext.createMediaStreamSource(stream);
-        analyser = audioContext.createAnalyser();
-        analyser.fftSize = 2048; // Sesuaikan untuk detail vs. performa (harus pangkat 2)
-        bufferLength = analyser.frequencyBinCount; // Setengah dari fftSize
-        dataArray = new Uint8Array(bufferLength); // Data untuk domain waktu (gelombang suara)
-
-        source.connect(analyser);
-        // analyser.connect(audioContext.destination); // Hapus komentar ini jika ingin mendengar input mikrofon langsung
-
-        // Mulai loop menggambar
-        drawWaveform();
-    }
-
-    function drawWaveform() {
-        animationFrameId = requestAnimationFrame(drawWaveform); // Loop animasi
-
-        if (!analyser || !dataArray || !canvasContext) { // Tambahkan pengecekan canvasContext
-            return; // Keluar jika belum diinisialisasi
-        }
-
-        analyser.getByteTimeDomainData(dataArray); // Dapatkan data gelombang suara
-
-        // Bersihkan kanvas untuk menggambar ulang
-        canvasContext.clearRect(0, 0, waveformCanvas.width, waveformCanvas.height);
-
-        canvasContext.lineWidth = 2;
-        canvasContext.strokeStyle = '#3498db'; // Warna garis gelombang suara
-        canvasContext.beginPath();
-
-        const sliceWidth = waveformCanvas.width * 1.0 / bufferLength;
-        let x = 0;
-
-        for (let i = 0; i < bufferLength; i++) {
-            const v = dataArray[i] / 128.0; // Normalisasi data (0-255 menjadi 0-2)
-            const y = v * waveformCanvas.height / 2; // Petakan ke tinggi kanvas
-
-            if (i === 0) {
-                canvasContext.moveTo(x, y);
-            } else {
-                canvasContext.lineTo(x, y);
-            }
-
-            x += sliceWidth;
-        }
-
-        canvasContext.lineTo(waveformCanvas.width, waveformCanvas.height / 2); // Sambungkan ke ujung
-        canvasContext.stroke();
-    }
-
-    function clearWaveform() {
-        if (canvasContext) { // Pastikan canvasContext ada sebelum membersihkan
-            canvasContext.clearRect(0, 0, waveformCanvas.width, waveformCanvas.height);
-        }
-    }
-
-function addNoteFromVoice() {
-    const text = noteInput.value.trim();
-    if (!text) {
-        console.log('Tidak ada transkripsi untuk ditambahkan sebagai catatan.');
-        return;
-    }
-
-    console.log('Catatan Suara (Teks):', text);
-    console.log('Catatan Suara (Blob Audio):', audioBlob);
-
-    // Hapus pesan default jika ada
-    const defaultMessage = notesList.querySelector('p');
-    if (defaultMessage) {
-        defaultMessage.remove();
-    }
-
-    // Buat elemen catatan baru
-    const newNote = document.createElement('div');
-    newNote.className = 'note-item'; // opsional untuk styling
-    newNote.innerHTML = `<strong>Catatan:</strong> "${text}"`;
-
-    // Jika ada audio yang direkam, tambahkan player
-    if (audioBlob) {
-        const audioUrl = URL.createObjectURL(audioBlob);
-        const audioElement = document.createElement('audio');
-        audioElement.controls = true;
-        audioElement.src = audioUrl;
-        newNote.appendChild(document.createElement('br'));
-        newNote.appendChild(audioElement);
-    }
-
-    notesList.appendChild(newNote);
-
-    // Reset input dan transkrip
-    finalTranscript = '';
-    noteInput.value = '';
-    audioBlob = null;
-}
-
-
-    // Bersihkan kanvas gelombang suara saat halaman dimuat
-    clearWaveform();
-});
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-		
 
 document.addEventListener('DOMContentLoaded', () => {
     // Ambil semua elemen DOM di awal untuk menghindari null checks berulang
@@ -6058,8 +5740,13 @@ document.getElementById('noteList').addEventListener('click', function(event) {
                 }
 
             });
-      }
-    
+
+        }
+
+
+
+
+     
     </script>
 </body>
 </html>
