@@ -564,25 +564,94 @@
 }
 
 
-.voice-icon-btn {
-    /* Gaya dasar tombol */
-    padding: 8px;
-    border: none;
-    background-color: transparent;
-    cursor: pointer;
-}
+  .voice-icon-btn {
+            /* Gaya dasar tombol */
+            padding: 10px;
+            border: none;
+            background-color: transparent;
+            cursor: pointer;
+            outline: none; /* Hapus outline saat fokus */
+            transition: transform 0.2s ease-in-out, color 0.2s ease-in-out;
+            font-size: 0; /* Sembunyikan teks default jika ada */
+        }
 
-.voice-icon-btn svg {
-    display: block; /* Membuat SVG berperilaku seperti blok */
-    width: 24px;
-    height: 24px;
-    fill: currentColor; /* Menggunakan warna teks tombol */
-}
+        .voice-icon-btn svg {
+            display: block; /* Membuat SVG berperilaku seperti blok */
+            width: 32px; /* Ukuran ikon lebih besar */
+            height: 32px;
+            fill: #3498db; /* Warna ikon standar */
+        }
 
-/* Anda bisa mengatur warna teks tombol jika perlu */
-.voice-icon-btn {
-    color: #333; /* Contoh warna teks */
-}
+        .voice-icon-btn.active {
+            transform: scale(1.1);
+            color: red; /* Indikasi sedang mendengarkan */
+            fill: red; /* Warna ikon saat aktif */
+        }
+
+        #noteInput {
+            margin-top: 20px;
+            padding: 10px;
+            width: 80%;
+            max-width: 400px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 16px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        #waveformCanvas {
+            margin-top: 15px;
+            border: 1px solid #ddd;
+            background-color: #e9e9e9;
+            display: block; /* Memastikan mengambil baris sendiri */
+            border-radius: 8px;
+        }
+
+        #voicePlaybackContainer {
+            margin-top: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 40px; /* Beri ruang bahkan saat kosong */
+            width: 100%;
+        }
+
+        #voicePlaybackContainer audio {
+            width: 100%;
+            max-width: 350px; /* Ukuran audio player */
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .note-display {
+            margin-top: 25px;
+            padding: 15px;
+            background-color: #fff;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            width: 80%;
+            max-width: 500px;
+            text-align: center;
+            color: #555;
+            word-wrap: break-word; /* Memastikan teks tidak meluber */
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 .pin-button {
@@ -2281,22 +2350,92 @@ li:last-child {
         }
  
  
- .google-login-button {
-  padding: 10px 20px;
-  background-color: white;
-  color: #673AB7; /* Warna biru tua Google */
-  border: none;
-  border-radius: 5px;
-  font-size: 16px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
+ .message-container {
+        display: flex;
+        margin-bottom: 10px;
+        align-items: flex-end;
+    }
+    .message-bubble {
+        padding: 10px 15px;
+        border-radius: 18px;
+        max-width: 70%;
+        position: relative;
+        word-wrap: break-word;
+    }
+    .message-bubble::before {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        width: 0;
+        height: 0;
+        border: 10px solid transparent;
+    }
 
-.google-login-button:hover {
-  background-color: #f5f5f5;
-}
- 
- 
+    /* Styles for sender's messages */
+    .sent .message-bubble {
+        background-color: #dcf8c6; /* Light green for sender */
+        color: #333;
+        margin-left: auto; /* Push to the right */
+        border-bottom-right-radius: 2px; /* Sharpen corner for sender */
+    }
+    .sent .message-bubble::before {
+        left: auto;
+        right: -7px;
+        border-left-color: #dcf8c6;
+        border-bottom-color: #dcf8c6;
+    }
+    .sent .message-container {
+        justify-content: flex-end; /* Align messages to the right */
+    }
+
+
+    /* Styles for receiver's messages */
+    .received .message-bubble {
+        background-color: #e0e0e0; /* Light grey for receiver */
+        color: #333;
+        border-bottom-left-radius: 2px; /* Sharpen corner for receiver */
+    }
+    .received .message-bubble::before {
+        left: -7px;
+        border-right-color: #e0e0e0;
+        border-bottom-color: #e0e0e0;
+    }
+    .received .message-container {
+        justify-content: flex-start; /* Align messages to the left */
+    }
+
+    .message-info {
+        font-size: 0.75em;
+        color: #777;
+        margin-top: 5px;
+        text-align: right; /* Default for sender */
+    }
+    .received .message-info {
+        text-align: left; /* Adjust for receiver */
+    }
+
+    .message-sender {
+        font-weight: bold;
+        margin-bottom: 2px;
+        font-size: 0.85em;
+    }
+    .profile-pic {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background-color: #66bb6a; /* Default color, could be dynamic */
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.8em;
+        font-weight: bold;
+        margin: 0 8px;
+        flex-shrink: 0; /* Prevent shrinking */
+    }
+    .received .profile-pic {
+        order: -1; /* Place profile pic before message bubble for receiver */
+    }
  
  
  
@@ -2456,36 +2595,46 @@ li:last-child {
     <div class="note-input-container">
     <input type="text" id="noteInput" placeholder="Tulis catatan di sini...">
     <button id="saveBtn">Simpan</button>
-    <button id="voiceInputBtn" class="voice-icon-btn">
-        <svg viewBox="0 0 24 24" fill="currentColor" style="width: 24px; height: 24px;">
+    <button id="voiceInputBtn" class="voice-icon-btn" title="Mulai/Berhenti Rekaman Suara">
+        <svg viewBox="0 0 24 24" fill="currentColor">
             <path fill="none" d="M0 0h24v24H0z"/>
             <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.48 6-3.3 6-6.72h-1.7z"/>
         </svg>
     </button>
+
+    <canvas id="waveformCanvas" width="300" height="80"></canvas>
+    <div id="voicePlaybackContainer"></div>
+
+    <input type="text" id="noteInput" placeholder="Catatan suara Anda akan muncul di sini..." readonly>
+
+    <div id="notesList" class="note-display">
+        <p>Tekan ikon mikrofon untuk memulai catatan suara.</p>
+    </div>
 </div>
 
  
    <div id="app">
-  <div class="login-container slide-in" id="loginForm">
-    <h2>Login</h2>
-    <div class="input-group">
-      <label for="email">Email (Optional):</label>
-      <input type="email" id="email" name="email">
-    </div>
-    <div class="input-group">
-      <label for="password">Password (Optional):</label>
-      <input type="password" id="password" name="password">
-    </div>
- <button id="googleLoginBtn" class="google-login-button">
-  <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg " alt="Google icon" style="width: 24px; height: 24px; vertical-align: middle; margin-right: 8px;">
-  Login dengan Google
-</button>
-    <p id="errorMessage" class="error-message hidden"></p>
-  </div>
+    <div class="login-container slide-in" id="loginForm">
+        <h2>Login</h2>
+        <div class="input-group">
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" required>
+        </div>
+        <div class="input-group">
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" required>
+        </div>
 
-        <button onclick="logoutGoogle()">Logout</button>
+        <button id="emailLoginBtn" class="primary-button">Login</button>
+        <p id="errorMessage" class="error-message hidden"></p>
     </div>
 
+    <div class="greeting-container hidden" id="greetingDiv">
+        <h2 id="userGreeting">Halo Pengguna 👋</h2>
+        <button onclick="logoutFirebase()">Keluar</button>
+    </div>
+</div>
+        
     <div class="dashboard-container hidden" id="dashboardDiv">
         <h2>Dashboard Akun</h2>
         <p class="dashboard-greeting" id="dashboardGreetingName">Halo, Pengguna👋</p>
@@ -2523,17 +2672,17 @@ li:last-child {
 </div>
 </div>
 
-        <div class="section">
-            <h2>
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor">
-                    <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H4V8l8 5 8-5v10zm-8-5l-8-5H4l8 5 8-5h-8z"/>
-                </svg>
-                Pesan
-            </h2>
-            <input type="text" id="messageInput" placeholder="Ketik pesan..." />
-            <button onclick="sendMessage()">Kirim</button>
-            <div id="messageBox"></div>
-        </div>
+       <div class="section">
+    <h2>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor">
+            <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H4V8l8 5 8-5v10zm-8-5l-8-5H4l8 5 8-5h-8z"/>
+        </svg>
+        Pesan
+    </h2>
+    <div id="messageBox" style="height: 300px; overflow-y: scroll; border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; border-radius: 8px; background-color: #f9f9f9;"></div>
+    <input type="text" id="messageInput" placeholder="Ketik pesan..." style="width: calc(100% - 70px); padding: 10px; border: 1px solid #ddd; border-radius: 5px; margin-right: 5px;" />
+    <button onclick="sendMessage()" style="padding: 10px 15px; background-color: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer;">Kirim</button>
+</div>
 
         <div class="section">
             <h2>
@@ -2895,7 +3044,7 @@ li:last-child {
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
     import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp, query, orderBy, getDoc, setDoc, doc, updateDoc, where, getDocs, documentId } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
-import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js"; // Pastikan semua fungsi auth yang Anda butuhkan diimpor
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword , signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js"; // Pastikan semua fungsi auth yang Anda butuhkan diimpor
 
 
     const firebaseConfig = {
@@ -2928,10 +3077,23 @@ const activityRef = collection(db, "activities");
 const voiceInputBtn = document.getElementById("voiceInputBtn"); // Tetap gunakan tombol visual sebagai indikator/kontrol
 const activityYearSelect = document.getElementById("activityYear");
 const activityCalendarContainer = document.querySelector(".activity-calendar");
+const waveformCanvas = document.getElementById('waveformCanvas');
+const voicePlaybackContainer = document.getElementById('voicePlaybackContainer');
+const canvasContext = waveformCanvas.getContext('2d');
         const overlay = document.getElementById("overlay");
         let currentFilter = "semua";
 		let recognition; // Variabel untuk SpeechRecognition
 		let isListening = false; // Status apakah sedang mendengarkan
+// Variabel Perekaman Audio
+let mediaRecorder;
+let audioChunks = [];
+let audioBlob;
+let audioContext;
+let analyser;
+let dataArray;
+let bufferLength;
+let animationFrameId; // Untuk mengontrol loop animasi gelombang suara
+let currentStream; // Untuk menyimpan stream mikrofon
 		let finalTranscript = ''; // Untuk menyimpan transkripsi final
 		let currentYear = new Date().getFullYear();
 		let topics = new Set(); // Initialize the topics Set
@@ -2941,103 +3103,274 @@ let activitiesData = [];
 	
 		
 		
-		// Cek apakah SpeechRecognition API tersedia di browser
-        if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-            recognition = new (window.webkitSpeechRecognition || window.SpeechRecognition)();
-            recognition.continuous = false; // Ubah menjadi false agar berhenti setelah selesai bicara
-            recognition.interimResults = false;
-            recognition.lang = 'id-ID';
+// --- Setup Pengenalan Suara ---
+if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+    recognition = new (window.webkitSpeechRecognition || window.SpeechRecognition)();
+    recognition.continuous = false; // Akan berhenti setelah jeda bicara
+    recognition.interimResults = false; // Hanya memberikan hasil final
+    recognition.lang = 'id-ID'; // Bahasa Indonesia
 
-            recognition.onresult = function(event) {
-                const transcript = event.results[0][0].transcript.trim();
-                noteInput.value = transcript;
-                finalTranscript = transcript; // Simpan transkripsi final
-                stopListening(); // Otomatis berhenti setelah mendapatkan hasil
-                addNoteFromVoice(); // Otomatis kirim catatan
-            };
+    recognition.onresult = function(event) {
+        const transcript = event.results[0][0].transcript.trim();
+        noteInput.value = transcript;
+        finalTranscript = transcript;
+        console.log('Transkripsi: ', transcript);
+        stopListening(); // Secara otomatis menghentikan mendengarkan
+        addNoteFromVoice(); // Secara otomatis mengirim catatan
+    };
 
-            recognition.onerror = function(event) {
-                console.error('Speech recognition error', event);
-                alert('Terjadi kesalahan pada fitur suara. Pastikan mikrofon Anda berfungsi.');
-                isListening = false;
-                updateVoiceButtonUI();
-            };
+    recognition.onerror = function(event) {
+        console.error('Terjadi kesalahan pengenalan suara', event);
+        alert('Terjadi kesalahan pada fitur suara. Pastikan mikrofon Anda berfungsi dan izin telah diberikan.');
+        isListening = false;
+        updateVoiceButtonUI();
+        stopRecording(); // Juga hentikan perekaman jika ada error
+    };
 
-            recognition.onend = function() {
-                console.log('Speech recognition ended.');
-                isListening = false;
-                updateVoiceButtonUI();
-            };
+    recognition.onend = function() {
+        console.log('Pengenalan suara berakhir.');
+        isListening = false;
+        updateVoiceButtonUI();
+        stopRecording(); // Pastikan perekaman berhenti saat pengenalan suara berakhir
+    };
+} else {
+    console.log('API SpeechRecognition tidak didukung di browser ini.');
+    if (voiceInputBtn) {
+        voiceInputBtn.style.display = 'none'; // Sembunyikan tombol jika tidak didukung
+    }
+    alert('Browser Anda tidak mendukung fitur pengenalan suara.');
+}
+
+// --- Logika Tombol Suara ---
+if (voiceInputBtn) {
+    voiceInputBtn.addEventListener('click', () => {
+        if (!isListening) {
+            startListening();
         } else {
-            console.log('SpeechRecognition API tidak didukung di browser ini.');
-            if (voiceInputBtn) {
-                voiceInputBtn.style.display = 'none'; // Sembunyikan tombol jika tidak didukung
+            stopListening();
+        }
+    });
+}
+
+function updateVoiceButtonUI() {
+    if (voiceInputBtn) {
+        voiceInputBtn.classList.toggle('active', isListening);
+    }
+}
+
+// --- Fungsi Gabungan Mulai/Berhenti Mendengarkan & Merekam ---
+async function startListening() {
+    if (recognition && !isListening) {
+        try {
+            // Meminta akses mikrofon untuk pengenalan suara dan perekaman audio
+            currentStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            console.log('Akses mikrofon diberikan.');
+
+            // Mulai pengenalan suara
+            recognition.start();
+            isListening = true;
+            updateVoiceButtonUI();
+            console.log('Mendengarkan dimulai.');
+
+            // Mulai perekaman audio
+            startRecording(currentStream);
+
+            // Setup dan mulai visualisasi gelombang suara
+            setupWaveform(currentStream);
+
+        } catch (error) {
+            console.error('Kesalahan saat memulai pengenalan suara atau mengakses mikrofon:', error);
+            alert('Tidak dapat memulai fitur suara. Pastikan izin mikrofon telah diberikan.');
+            isListening = false;
+            updateVoiceButtonUI();
+            stopRecording(); // Pastikan perekaman tidak menggantung
+        }
+    }
+}
+
+function stopListening() {
+    if (recognition && isListening) {
+        recognition.stop();
+        console.log('Mendengarkan dihentikan.');
+        isListening = false;
+        updateVoiceButtonUI();
+        stopRecording(); // Hentikan perekaman audio
+        cancelAnimationFrame(animationFrameId); // Hentikan animasi gelombang suara
+        clearWaveform(); // Bersihkan kanvas
+        if (currentStream) {
+            currentStream.getTracks().forEach(track => track.stop()); // Hentikan stream mikrofon
+            currentStream = null;
+        }
+    }
+}
+
+// --- Fungsi Perekaman Audio ---
+function startRecording(stream) {
+    audioChunks = []; // Bersihkan chunk sebelumnya
+    audioBlob = null; // Bersihkan blob sebelumnya
+
+    mediaRecorder = new MediaRecorder(stream);
+
+    mediaRecorder.ondataavailable = event => {
+        audioChunks.push(event.data);
+    };
+
+    mediaRecorder.onstop = () => {
+        // Buat satu blob dari semua chunk
+        audioBlob = new Blob(audioChunks, { type: 'audio/webm' }); // Format umum
+        console.log('Audio direkam:', audioBlob);
+        playRecordedAudio(); // Putar segera setelah perekaman berhenti
+    };
+
+    mediaRecorder.onerror = event => {
+        console.error('Kesalahan MediaRecorder:', event);
+        alert('Terjadi kesalahan saat merekam audio.');
+        stopListening(); // Hentikan semuanya jika ada error
+    };
+
+    mediaRecorder.start();
+    console.log('Perekaman dimulai.');
+}
+
+function stopRecording() {
+    if (mediaRecorder && mediaRecorder.state === 'recording') {
+        mediaRecorder.stop();
+        // Event handler onstop akan dipicu, yang kemudian memanggil playRecordedAudio()
+    }
+}
+
+// --- Fungsi Pemutaran Audio ---
+function playRecordedAudio() {
+    voicePlaybackContainer.innerHTML = ''; // Bersihkan audio player sebelumnya
+    if (audioBlob) {
+        const audioUrl = URL.createObjectURL(audioBlob);
+        const audioElement = document.createElement('audio');
+        audioElement.controls = true; // Tampilkan kontrol (putar/jeda, volume)
+        audioElement.src = audioUrl;
+        voicePlaybackContainer.appendChild(audioElement);
+        console.log('Memutar audio yang direkam.');
+
+        // Bersihkan URL saat elemen audio tidak lagi diperlukan
+        audioElement.onended = () => {
+            URL.revokeObjectURL(audioUrl);
+            console.log('URL audio dicabut (setelah selesai).');
+        };
+        audioElement.onpause = () => {
+            // Opsional: cabut URL saat dijeda jika tidak akan diputar lagi
+            // URL.revokeObjectURL(audioUrl);
+            // console.log('URL audio dicabut (saat dijeda).');
+        };
+        audioElement.onplay = () => {
+            // Pastikan URL sudah dibuat saat diputar
+            if (!audioElement.src || !audioElement.src.startsWith('blob:')) {
+                 audioElement.src = URL.createObjectURL(audioBlob);
             }
+        };
+    } else {
+        console.warn('Tidak ada audio yang direkam untuk diputar.');
+    }
+}
+
+// --- Fungsi Visualisasi Gelombang Suara ---
+function setupWaveform(stream) {
+    // Pastikan hanya ada satu AudioContext aktif
+    if (audioContext) {
+        audioContext.close(); // Tutup konteks sebelumnya jika ada
+    }
+    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    const source = audioContext.createMediaStreamSource(stream);
+    analyser = audioContext.createAnalyser();
+    analyser.fftSize = 2048; // Sesuaikan untuk detail vs. performa (harus pangkat 2)
+    bufferLength = analyser.frequencyBinCount; // Setengah dari fftSize
+    dataArray = new Uint8Array(bufferLength); // Data untuk domain waktu (gelombang suara)
+
+    source.connect(analyser);
+    // analyser.connect(audioContext.destination); // Hapus komentar ini jika ingin mendengar input mikrofon langsung
+
+    // Mulai loop menggambar
+    drawWaveform();
+}
+
+function drawWaveform() {
+    animationFrameId = requestAnimationFrame(drawWaveform); // Loop animasi
+
+    if (!analyser || !dataArray) {
+        return; // Keluar jika belum diinisialisasi
+    }
+
+    analyser.getByteTimeDomainData(dataArray); // Dapatkan data gelombang suara
+
+    // Bersihkan kanvas untuk menggambar ulang
+    canvasContext.clearRect(0, 0, waveformCanvas.width, waveformCanvas.height);
+
+    canvasContext.lineWidth = 2;
+    canvasContext.strokeStyle = '#3498db'; // Warna garis gelombang suara
+    canvasContext.beginPath();
+
+    const sliceWidth = waveformCanvas.width * 1.0 / bufferLength;
+    let x = 0;
+
+    for (let i = 0; i < bufferLength; i++) {
+        const v = dataArray[i] / 128.0; // Normalisasi data (0-255 menjadi 0-2)
+        const y = v * waveformCanvas.height / 2; // Petakan ke tinggi kanvas
+
+        if (i === 0) {
+            canvasContext.moveTo(x, y);
+        } else {
+            canvasContext.lineTo(x, y);
         }
 
-        function startListening() {
-            if (recognition && !isListening) {
-                try {
-                    recognition.start();
-                    isListening = true;
-                    updateVoiceButtonUI();
-                    console.log('Listening started.');
-                } catch (error) {
-                    console
-					.error('Error starting speech recognition:', error);
-                    alert('Tidak dapat memulai fitur suara. Pastikan izin mikrofon telah diberikan.');
-                    isListening = false;
-                    updateVoiceButtonUI();
-                }
-            }
-        }
+        x += sliceWidth;
+    }
 
-        function stopListening() {
-            if (recognition && isListening) {
-                recognition.stop();
-                console.log('Listening stopped.');
-                isListening = false;
-                updateVoiceButtonUI();
-            }
-        }
+    canvasContext.lineTo(waveformCanvas.width, waveformCanvas.height / 2); // Sambungkan ke ujung
+    canvasContext.stroke();
+}
 
-        function updateVoiceButtonUI() {
-            if (voiceInputBtn) {
-                voiceInputBtn.classList.toggle('active', isListening);
-                // Tambahkan logika perubahan ikon atau gaya visual lain jika diperlukan
-            }
-        }
+function clearWaveform() {
+    canvasContext.clearRect(0, 0, waveformCanvas.width, waveformCanvas.height);
+}
 
-        function addNoteFromVoice() {
-            const text = finalTranscript.trim();
-            if (!text) return;
+// --- Logika Pengiriman Catatan (tanpa Firebase) ---
+function addNoteFromVoice() {
+    const text = finalTranscript.trim();
+    if (!text) {
+        console.log('Tidak ada transkripsi untuk ditambahkan sebagai catatan.');
+        return;
+    }
 
-            const topic = categorizeNote(text);
+    // Karena kita tidak menggunakan Firebase, catatan ini hanya akan ditampilkan di UI.
+    // Anda bisa menyimpan catatan ini ke LocalStorage atau mengirimkannya ke backend lain jika perlu.
+    console.log('Catatan Suara (Teks):', text);
+    console.log('Catatan Suara (Blob Audio - hanya sisi klien):', audioBlob);
 
-            addNoteToFirebase(text, topic);
-            finalTranscript = ''; // Reset transkripsi final
-        }
- if (voiceInputBtn) {
-            voiceInputBtn.addEventListener('click', () => {
-                if (!isListening) {
-                    startListening();
-                } else {
-                    stopListening();
-                }
-            });
-        }
+    // Contoh: Tampilkan catatan di UI
+    // Hapus pesan default
+    if (notesList.querySelector('p')) {
+        notesList.querySelector('p').remove();
+    }
+
+    const newNoteText = document.createElement('p');
+    newNoteText.innerHTML = `<strong>Catatan Terbaru:</strong> "${text}"`;
+    notesList.appendChild(newNoteText);
+
+    // Reset untuk catatan berikutnya
+    finalTranscript = '';
+    noteInput.value = '';
+}
+
+// Bersihkan kanvas gelombang suara saat halaman dimuat
+clearWaveform();
+		
+		
 		
 	
-
-
-
+		
+		
 
 document.addEventListener('DOMContentLoaded', () => {
     // Ambil semua elemen DOM di awal untuk menghindari null checks berulang
-    // Pastikan ID ini sesuai dengan yang ada di HTML Anda!
     const loginForm = document.getElementById('loginForm');
-    const greetingDiv = document.getElementById('greetingDiv');
-    const userGreetingElement = document.getElementById('userGreeting');
     const dashboardDiv = document.getElementById('dashboardDiv');
     const dashboardGreetingName = document.getElementById('dashboardGreetingName');
     const emailInput = document.getElementById('email');
@@ -3047,38 +3380,37 @@ document.addEventListener('DOMContentLoaded', () => {
     const savedNotesModal = document.getElementById("savedNotesModal");
     const savedNotesContainer = document.getElementById("savedNotesContainer");
     const topicFilter = document.getElementById("topicFilter");
-    const googleLoginButton = document.querySelector(".google-login-button"); // Menggunakan querySelector karena class
     const closeSavedNotesModalBtn = document.getElementById("closeSavedNotesModalBtn");
     const logoutButton = document.getElementById('logoutButton');
+	// --- Pesan (Chat) Feature ---
+const messageInput = document.getElementById('messageInput');
+const messageBox = document.getElementById('messageBox');
 
-	
-// Expose auth and db globally if needed (not recommended for production but helps with quick testing)
- window.auth = auth;
-window.db = db;
-window.GoogleAuthProvider = GoogleAuthProvider;
- window.signInWithPopup = signInWithPopup;
-window.onAuthStateChanged = onAuthStateChanged;
-window.signOut = signOut;
+    // Elemen untuk otentikasi email/kata sandi
+    const emailLoginButton = document.getElementById('emailLoginBtn');
+    const emailSignupButton = document.getElementById('emailSignupBtn');
+    // New: Elemen untuk otentikasi anonim
+    const anonymousLoginBtn = document.getElementById('anonymousLoginBtn'); 
 
-    let unsubscribeNotes;
-    let topics = new Set();
+    let unsubscribeNotes; // Variabel untuk menyimpan fungsi unsubscribe listener Firestore
+    let topics = new Set(); // Set untuk menyimpan topik unik
+	let unsubscribeMessages; // To store the unsubscribe function for the message listener
+
 
     // --- Helper function untuk menampilkan/menyembunyikan elemen dengan animasi ---
     function animateTransition(elementToShow, elementToHide, initialDelay = 0, hideDelay = 500) {
-        // Tambahkan cek keberadaan elemen agar tidak error jika elemen tidak ada
-        if (elementToHide) {
+        if (elementToHide && !elementToHide.classList.contains("hidden")) {
             elementToHide.classList.remove("slide-in");
             elementToHide.classList.add("slide-out");
             setTimeout(() => {
                 elementToHide.classList.add("hidden");
-                // Reset slide-out setelah transisi selesai untuk penggunaan selanjutnya
                 elementToHide.classList.remove("slide-out");
                 if (elementToShow) {
                     elementToShow.classList.remove("hidden");
                     elementToShow.classList.add("slide-in");
                 }
             }, hideDelay);
-        } else if (elementToShow) {
+        } else if (elementToShow && elementToShow.classList.contains("hidden")) {
             setTimeout(() => {
                 elementToShow.classList.remove("hidden");
                 elementToShow.classList.add("slide-in");
@@ -3091,7 +3423,6 @@ window.signOut = signOut;
         let popup = document.getElementById("success-popup") || createSuccessPopup();
         popup.textContent = message;
         popup.classList.add("show");
-        // Gunakan setTimeout untuk menghilangkan popup setelah beberapa detik
         setTimeout(() => popup.classList.remove("show"), 3000);
     }
 
@@ -3099,7 +3430,6 @@ window.signOut = signOut;
         const popup = document.createElement("div");
         popup.id = "success-popup";
         popup.className = "popup";
-        // Inline styles untuk popup
         popup.style.cssText = `
             position: fixed; top: 20px; right: 20px;
             background-color: #10b981; color: white;
@@ -3112,152 +3442,224 @@ window.signOut = signOut;
         return popup;
     }
 
-  async function loginWithGoogle() {
-  try {
-    // Cek apakah modul Firebase Auth sudah dimuat
-    if (!auth || !GoogleAuthProvider || !signInWithPopup) {
-      throw new Error("Firebase Auth modules are not loaded or defined.");
+    // --- Common UI Update after successful login ---
+    function updateUIOnLoginSuccess(user) {
+        // Fallback untuk display name jika tidak tersedia (misal: hanya login email atau anonim)
+        const displayName = user.displayName || (user.isAnonymous ? "Tamu" : (user.email ? user.email.split("@")[0] : "Pengguna"));
+
+        if (loginForm) {
+            loginForm.classList.add("hidden");
+        }
+        // Pastikan dashboardDiv muncul dan animasi slide-in
+        if (dashboardDiv) {
+            dashboardDiv.classList.remove("hidden");
+            dashboardDiv.classList.add("slide-in");
+        }
+        // Assuming greetingDiv is meant to be the main greeting display, not dashboardDiv
+        const greetingDiv = document.getElementById('greetingDiv'); 
+        if (greetingDiv) {
+            greetingDiv.classList.remove("hidden");
+            greetingDiv.classList.add("slide-in");
+        }
+        if (document.getElementById('userGreeting')) { // Corrected ID to userGreeting as in HTML
+            document.getElementById('userGreeting').textContent = `Halo, ${displayName}!`;
+        }
+        if (errorMessage) {
+            errorMessage.classList.add("hidden"); // Sembunyikan pesan error sebelumnya
+        }
+        // Panggil setupSavedNotesListener di sini agar listener aktif setelah login
+        setupSavedNotesListener();
     }
 
-    // Disable tombol dan tampilkan pesan loading
-    const googleLoginButton = document.getElementById("googleLoginBtn");
-    if (googleLoginButton) {
-      googleLoginButton.disabled = true;
-      googleLoginButton.textContent = "Memproses...";
+    // --- Email/Password Signup Function ---
+    async function signupWithEmail() {
+        const email = emailInput.value;
+        const password = passwordInput.value;
+
+        if (!email || !password) {
+            errorMessage.textContent = "Email dan password tidak boleh kosong.";
+            errorMessage.classList.remove("hidden");
+            return;
+        }
+
+        // Pastikan modul Firebase Auth tersedia
+        if (typeof auth === 'undefined' || typeof createUserWithEmailAndPassword === 'undefined') {
+            console.error("Firebase Auth modules (createUserWithEmailAndPassword) tidak dimuat atau tidak terdefinisi.");
+            errorMessage.textContent = "Error: Fitur pendaftaran tidak tersedia. Pastikan Firebase Auth sudah diinisialisasi.";
+            errorMessage.classList.remove("hidden");
+            return;
+        }
+
+        try {
+            // Nonaktifkan tombol dan tampilkan pesan loading
+            if (emailSignupButton) {
+                emailSignupButton.disabled = true;
+                emailSignupButton.textContent = "Mendaftar...";
+            }
+            if (emailLoginButton) emailLoginButton.disabled = true;
+            if (anonymousLoginBtn) anonymousLoginBtn.disabled = true; // Disable anonymous button too
+
+            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+            updateUIOnLoginSuccess(userCredential.user);
+            showSuccessMessage("Pendaftaran berhasil! Selamat datang.");
+        } catch (error) {
+            console.error("Email signup error:", error);
+            let userMessage = "Pendaftaran gagal. Silakan coba lagi.";
+            if (error.code === 'auth/email-already-in-use') {
+                userMessage = "Email sudah terdaftar. Silakan login atau gunakan email lain.";
+            } else if (error.code === 'auth/invalid-email') {
+                userMessage = "Format email tidak valid.";
+            } else if (error.code === 'auth/weak-password') {
+                userMessage = "Kata sandi terlalu lemah (minimal 6 karakter).";
+            }
+            errorMessage.textContent = `Pendaftaran gagal: ${userMessage}`;
+            errorMessage.classList.remove("hidden");
+        } finally {
+            // Aktifkan kembali tombol
+            if (emailSignupButton) {
+                emailSignupButton.disabled = false;
+                emailSignupButton.textContent = "Daftar";
+            }
+            if (emailLoginButton) emailLoginButton.disabled = false;
+            if (anonymousLoginBtn) anonymousLoginBtn.disabled = false; // Re-enable anonymous button
+        }
     }
 
-    // Inisialisasi provider Google
-    const provider = new GoogleAuthProvider();
+    // --- Email/Password Login Function ---
+    async function loginWithEmail() {
+        const email = emailInput.value;
+        const password = passwordInput.value;
 
-    // Melakukan login dengan popup
-    const userCredential = await signInWithPopup(auth, provider);
+        if (!email || !password) {
+            errorMessage.textContent = "Email dan password tidak boleh kosong.";
+            errorMessage.classList.remove("hidden");
+            return;
+        }
 
-    // Mendapatkan data pengguna
-    const user = userCredential.user;
-    const displayName = user.displayName || "Pengguna Google 👋";
+        // Pastikan modul Firebase Auth tersedia
+        if (typeof auth === 'undefined' || typeof signInWithEmailAndPassword === 'undefined') {
+            console.error("Firebase Auth modules (signInWithEmailAndPassword) tidak dimuat atau tidak terdefinisi.");
+            errorMessage.textContent = "Error: Fitur login tidak tersedia. Pastikan Firebase Auth sudah diinisialisasi.";
+            errorMessage.classList.remove("hidden");
+            return;
+        }
 
-    // Transisi UI setelah login berhasil
-    if (document.getElementById("loginForm")) {
-      document.getElementById("loginForm").classList.add("hidden");
+        try {
+            // Nonaktifkan tombol dan tampilkan pesan loading
+            if (emailLoginButton) {
+                emailLoginButton.disabled = true;
+                emailLoginButton.textContent = "Masuk...";
+            }
+            if (emailSignupButton) emailSignupButton.disabled = true;
+            if (anonymousLoginBtn) anonymousLoginBtn.disabled = true; // Disable anonymous button
+
+            const userCredential = await signInWithEmailAndPassword(auth, email, password);
+            updateUIOnLoginSuccess(userCredential.user);
+            showSuccessMessage("Login berhasil! Selamat datang kembali.");
+        } catch (error) {
+            console.error("Email login error:", error);
+            let userMessage = "Login gagal. Silakan coba lagi.";
+            if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
+                userMessage = "Email atau kata sandi salah.";
+            } else if (error.code === 'auth/invalid-email') {
+                userMessage = "Format email tidak valid.";
+            }
+            errorMessage.textContent = `Login gagal: ${userMessage}`;
+            errorMessage.classList.remove("hidden");
+        } finally {
+            // Aktifkan kembali tombol
+            if (emailLoginButton) {
+                emailLoginButton.disabled = false;
+                emailLoginButton.textContent = "Login";
+            }
+            if (emailSignupButton) emailSignupButton.disabled = false;
+            if (anonymousLoginBtn) anonymousLoginBtn.disabled = false; // Re-enable anonymous button
+        }
     }
 
-    if (document.getElementById("greetingDiv")) {
-      document.getElementById("greetingDiv").classList.remove("hidden");
-      document.getElementById("userGreeting").textContent = `Halo ${displayName} 👋`;
+    // --- Anonymous Sign-in Function (NEW) ---
+    async function signInAnonymouslyFirebase() {
+        // Pastikan modul Firebase Auth tersedia
+        if (typeof auth === 'undefined' || typeof signInAnonymously === 'undefined') {
+            console.error("Firebase Auth module (signInAnonymously) tidak dimuat atau tidak terdefinisi.");
+            errorMessage.textContent = "Error: Fitur login anonim tidak tersedia. Pastikan Firebase Auth sudah diinisialisasi.";
+            errorMessage.classList.remove("hidden");
+            return;
+        }
+
+        try {
+            // Nonaktifkan tombol dan tampilkan pesan loading
+            if (anonymousLoginBtn) {
+                anonymousLoginBtn.disabled = true;
+                anonymousLoginBtn.textContent = "Masuk...";
+            }
+            if (emailLoginButton) emailLoginButton.disabled = true;
+            if (emailSignupButton) emailSignupButton.disabled = true;
+
+            const userCredential = await signInAnonymously(auth);
+            updateUIOnLoginSuccess(userCredential.user);
+            showSuccessMessage("Berhasil masuk sebagai tamu.");
+        } catch (error) {
+            console.error("Anonymous sign-in error:", error);
+            errorMessage.textContent = `Gagal masuk sebagai tamu: ${error.message}`;
+            errorMessage.classList.remove("hidden");
+        } finally {
+            // Aktifkan kembali tombol
+            if (anonymousLoginBtn) {
+                anonymousLoginBtn.disabled = false;
+                anonymousLoginBtn.textContent = "Masuk Sebagai Tamu";
+            }
+            if (emailLoginButton) emailLoginButton.disabled = false;
+            if (emailSignupButton) emailSignupButton.disabled = false;
+        }
     }
 
-    if (document.getElementById("dashboardDiv")) {
-      document.getElementById("dashboardDiv").classList.remove("hidden");
-      document.getElementById("dashboardGreetingName").textContent = `Halo, ${displayName}!`;
+    // --- Fungsi Logout ---
+    function logout() {
+        // Pastikan modul Firebase Auth tersedia
+        if (typeof auth === 'undefined' || typeof signOut === 'undefined') {
+            console.error("Firebase Auth signOut module tidak dimuat atau tidak terdefinisi.");
+            showSuccessMessage("Error: Fitur logout tidak tersedia.");
+            return;
+        }
+        signOut(auth)
+            .then(() => {
+                const greetingDiv = document.getElementById('greetingDiv'); // Get greetingDiv here
+                if (greetingDiv && loginForm) { // Animate transition from greetingDiv to loginForm
+                    animateTransition(loginForm, greetingDiv); 
+                    // Reset input fields after logout
+                    if (emailInput) emailInput.value = "";
+                    if (passwordInput) passwordInput.value = "";
+                }
+                if (errorMessage) errorMessage.classList.add("hidden"); // Sembunyikan pesan error
+                showSuccessMessage("Anda telah berhasil logout.");
+
+                // Hentikan listener catatan saat logout
+                if (unsubscribeNotes) {
+                    unsubscribeNotes();
+                    unsubscribeNotes = null;
+                    console.log("Listener catatan sebelumnya telah dihentikan.");
+                }
+            })
+            .catch((error) => {
+                console.error("Logout error:", error);
+                if (errorMessage) {
+                    errorMessage.textContent = `Logout gagal: ${error.message}`;
+                    errorMessage.classList.remove("hidden");
+                }
+            });
     }
 
-    // Setelah login berhasil, pastikan listener catatan diatur
-    setupSavedNotesListener();
-  } catch (error) {
-    console.error("Google login error:", error);
-
-    // Tampilkan pesan error kepada pengguna
-    const errorMessage = document.getElementById("errorMessage");
-    if (errorMessage) {
-      errorMessage.textContent = `Login gagal: ${error.message}. Silakan coba lagi.`;
-      errorMessage.classList.remove("hidden");
-    }
-  } finally {
-    // Selalu aktifkan kembali tombol dan kembalikan teks aslinya
-    const googleLoginButton = document.getElementById("googleLoginBtn");
-    if (googleLoginButton) {
-      googleLoginButton.disabled = false;
-      googleLoginButton.textContent = "Login dengan Google";
-    }
-  }
-}
-
-document.addEventListener("DOMContentLoaded", () => {
-  const googleLoginButton = document.getElementById("googleLoginBtn");
-  if (googleLoginButton) {
-    googleLoginButton.addEventListener("click", loginWithGoogle);
-  } else {
-    console.warn("Tombol 'Login dengan Google' tidak ditemukan di DOM.");
-  }
-});
-
-    
-	
-async function logoutGoogle() {
-  try {
-    if (!auth || !signOut) {
-      throw new Error("Firebase Auth signOut module is not loaded or defined.");
-    }
-
-    await signOut(auth);
-
-    // Reset UI
-    document.getElementById("loginForm")?.classList.remove("hidden");
-    document.getElementById("greetingDiv")?.classList.add("hidden");
-    document.getElementById("dashboardDiv")?.classList.add("hidden");
-
-    // Hentikan listener catatan jika ada
-    if (unsubscribeNotes) {
-      unsubscribeNotes();
-      unsubscribeNotes = null;
-    }
-
-    showSuccessMessage("Anda telah berhasil logout.");
-  } catch (error) {
-    console.error("Logout error:", error);
-    showErrorMessage("Terjadi kesalahan saat logout. Silakan coba lagi.");
-  }
-}	
-	
-	
-	
-	
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-	
-
-    // --- Placeholder for fetchAndDisplayNotes (seems unused in this flow) ---
-    // Fungsi ini tampak tidak digunakan secara langsung dalam alur UI Anda untuk menampilkan catatan di halaman utama.
-    // Catatan ditampilkan melalui displaySavedNotesPopup. Jadi, fungsi ini bisa dihapus atau disesuaikan jika ada kebutuhan di masa depan.
-    async function fetchAndDisplayNotes(userId, filter = "semua") {
-        const notesList = document.getElementById("notesList");
-        if (!notesList) return;
-
-        notesList.innerHTML = `
-            <p style="text-align: center; color: gray; padding: 20px;">
-                Catatan hanya muncul ketika disimpan dan ditampilkan lewat popup.
-            </p>
-        `;
-    }
-
-    // --- Toggle Save Note (Firestore operations) ---
+    // --- Toggle Save Note (Operasi Firestore) ---
     async function toggleSaveNote(noteId, isCurrentlySaved, noteData) {
         const userId = auth.currentUser?.uid;
         if (!userId) {
             showSuccessMessage("Anda perlu login untuk menyimpan catatan.");
             return;
         }
-        // Cek apakah modul Firestore sudah dimuat
+        // Pastikan modul Firestore tersedia
         if (typeof db === 'undefined' || typeof doc === 'undefined' || typeof setDoc === 'undefined' || typeof updateDoc === 'undefined' || typeof serverTimestamp === 'undefined') {
-            console.error("Firestore modules are not loaded for saving notes.");
+            console.error("Firestore modules tidak dimuat untuk menyimpan catatan.");
             showSuccessMessage("Error: Database tidak tersedia.");
             return;
         }
@@ -3279,99 +3681,106 @@ async function logoutGoogle() {
         }
     }
 
-    // --- Filter Notes by Topic ---
+    // --- Filter Catatan berdasarkan Topik ---
     function filterNotesByTopic(selectedTopic) {
         if (!savedNotesContainer) return;
         const notes = savedNotesContainer.querySelectorAll(".note");
         notes.forEach((note) => {
             const noteTopic = note.dataset.topic || "";
-            // Pastikan perbandingan topic case-insensitive
+            // Perbandingan topik case-insensitive
             note.style.display = (selectedTopic === "all" || selectedTopic === "" || noteTopic === selectedTopic.toLowerCase())
                 ? "block"
                 : "none";
         });
     }
 
-    // --- Display Saved Notes in Popup ---
+    // --- Tampilkan Catatan Tersimpan di Popup ---
     function displaySavedNotesPopup(savedNotes = []) {
         if (!savedNotesModal || !savedNotesContainer || !topicFilter) {
-            console.warn("One or more modal elements are missing. Cannot display saved notes popup.");
+            console.warn("Satu atau lebih elemen modal tidak ditemukan. Tidak dapat menampilkan popup catatan tersimpan.");
             return;
         }
 
-        savedNotesContainer.innerHTML = ""; // Bersihkan kontainer sebelum menambahkan catatan baru
-        topics.clear(); // Bersihkan daftar topik
+        savedNotesContainer.innerHTML = ""; // Clear the container before adding new notes
+        topics.clear(); // Clear the topic list (assuming 'topics' is a Set or similar global/scoped variable)
 
         if (savedNotes.length === 0) {
             savedNotesContainer.innerHTML = "<p style='text-align: center; padding: 20px; color: #666;'>Belum ada catatan yang tersimpan.</p>";
             topicFilter.value = "all";
             topicFilter.innerHTML = '<option value="all">Semua Topik</option>';
-            filterNotesByTopic("all"); // Pastikan filter disetel ke "all"
+            // If no notes, ensure the filter reflects this.
         } else {
             savedNotes.forEach((docSnap) => {
                 const data = docSnap.data();
-                // Gunakan properti yang lebih konsisten atau berikan fallback yang kuat
-                const topic = (data.topic || data.temaTopik || "tanpa topik").toLowerCase(); // Fallback to "tanpa topik"
-                if (topic && topic !== "tanpa topik") topics.add(topic); // Hanya tambahkan topik yang valid
+
+                // Prioritize content, then text if title/content are not explicitly set
+                // For 'susah' type of input, 'content' is the primary field.
+                const title = data.title || 'Tidak Ada Judul'; // Default title if not explicitly saved
+                const content = data.content || data.text || 'Tidak Ada Konten'; // Use data.content or data.text (if raw input is saved as 'text')
+
+                // Ensure topic defaults to 'lainlain' as shown in your design
+                const topic = (data.topic || data.temaTopik || "lainlain").toLowerCase();
+
+                // Only add unique topics to the filter, excluding the default 'lainlain' if it's not a specific topic
+                if (topic && topic !== "lainlain") {
+                    topics.add(topic);
+                }
 
                 const noteEl = document.createElement('div');
                 noteEl.classList.add("note");
-                noteEl.dataset.topic = topic; // Simpan topik di dataset untuk filtering
+                noteEl.dataset.topic = topic; // Store topic in dataset for filtering
 
-                // Escape string JSON untuk onclik yang aman
-                const noteDataSafe = JSON.stringify({
-                    title: data.title || 'Tidak Ada Judul',
-                    content: data.content || 'Tidak Ada Konten',
-                    topic: data.topic || 'N/A', // Pastikan properti ini ada jika diperlukan
-                    // Tambahkan properti lain yang mungkin perlu dikembalikan ke toggleSaveNote
+                // Prepare data for the toggleSaveNote function
+                const noteDataForToggle = JSON.stringify({
+                    title: title,
+                    content: content,
+                    topic: topic,
+                    id: docSnap.id
                 }).replace(/"/g, '&quot;');
 
+
                 noteEl.innerHTML = `
-                    <h3>${data.title || 'Tidak Ada Judul'}</h3>
-                    <p>${data.content || 'Tidak Ada Konten'}</p>
-                    <p style="font-size: 0.9em; color: #666;">Topik: ${data.topic || 'N/A'}</p>
-                    <button class="save-toggle-btn" onclick="toggleSaveNote('${docSnap.id}', true, ${noteDataSafe})">Batalkan Simpan</button>
+                    <h3>${title}</h3>
+                    <p>${content}</p>
+                    <p style="font-size: 0.9em; color: #666;">Topik: ${topic.charAt(0).toUpperCase() + topic.slice(1)}</p>
+                    <button class="save-toggle-btn" onclick="toggleSaveNote('${docSnap.id}', true, ${noteDataForToggle})">Batalkan Simpan</button>
                 `;
                 savedNotesContainer.appendChild(noteEl);
             });
 
-            // Isi ulang filter topik
+            // Repopulate topic filter
             topicFilter.innerHTML = '<option value="all">Semua Topik</option>';
-            Array.from(topics).sort().forEach((topic) => { // Urutkan topik secara alfabetis
+            Array.from(topics).sort().forEach((topic) => {
                 const option = document.createElement("option");
                 option.value = topic;
                 option.textContent = topic.charAt(0).toUpperCase() + topic.slice(1);
                 topicFilter.appendChild(option);
             });
 
-            topicFilter.value = "all"; // Atur kembali ke "all" setiap kali notes diperbarui
-            filterNotesByTopic("all"); // Tampilkan semua catatan secara default
+            topicFilter.value = "all"; // Reset to "all" every time notes are updated
+            filterNotesByTopic("all"); // Display all notes by default
         }
 
-        savedNotesModal.style.display = "flex"; // Tampilkan modal
+        savedNotesModal.style.display = "flex"; // Show the modal
 
-        // Pastikan event listener hanya ditambahkan sekali
-        // Hapus listener sebelumnya sebelum menambahkan yang baru untuk menghindari duplikasi
-        // Ini adalah pattern yang lebih baik jika fungsi displaySavedNotesPopup dipanggil berulang
-        // Namun, jika topicFilterChangeListener tidak mengakses state yang berubah,
-        // lebih baik listener hanya ditambahkan sekali di DOMContentLoaded.
-        // Untuk saat ini, asumsikan displaySavedNotesPopup mungkin dipanggil ulang:
+        // Ensure event listener for topic filter is only added once
         function topicFilterChangeListener() {
             filterNotesByTopic(topicFilter.value);
         }
-        topicFilter.removeEventListener("change", topicFilterChangeListener); // Hapus listener sebelumnya
-        topicFilter.addEventListener("change", topicFilterChangeListener); // Tambahkan listener baru
+        topicFilter.removeEventListener("change", topicFilterChangeListener);
+        topicFilter.addEventListener("change", topicFilterChangeListener);
     }
 
-    // --- Setup Real-time Listener for Saved Notes ---
+
+    // --- Setup Real-time Listener untuk Catatan Tersimpan ---
     function setupSavedNotesListener() {
         if (!auth.currentUser) {
             console.log("Tidak ada pengguna yang login, tidak dapat mengatur listener catatan.");
             return;
         }
-        // Cek apakah modul Firestore sudah dimuat
+        // Pastikan modul Firestore tersedia
         if (typeof db === 'undefined' || typeof collection === 'undefined' || typeof query === 'undefined' || typeof where === 'undefined' || typeof onSnapshot === 'undefined') {
-            console.error("Firestore real-time listener modules are not loaded.");
+            console.error("Firestore real-time listener modules tidak dimuat.");
             showSuccessMessage("Error: Listener catatan tidak tersedia.");
             return;
         }
@@ -3400,30 +3809,30 @@ async function logoutGoogle() {
 
     // --- Authentication State Change Listener ---
     function onAuthStateChangedHandler() {
+        // Pastikan modul Firebase Auth tersedia
         if (typeof auth === 'undefined' || typeof onAuthStateChanged === 'undefined') {
-            console.error("Firebase Auth onAuthStateChanged module is not loaded or defined.");
+            console.error("Firebase Auth onAuthStateChanged module tidak dimuat atau tidak terdefinisi.");
             return;
         }
         onAuthStateChanged(auth, (user) => {
+            const greetingDiv = document.getElementById('greetingDiv'); // Get greetingDiv here
             if (user) {
-                const displayName = user.displayName || user.email.split("@")[0] || "Pengguna";
-
-                // Sembunyikan elemen login dan tampilkan dashboard
-                if (loginForm) loginForm.classList.add("hidden");
-                if (greetingDiv) greetingDiv.classList.add("hidden"); // Pastikan greeting juga tersembunyi
-                if (dashboardDiv) {
-                    dashboardDiv.classList.remove("hidden");
-                    dashboardDiv.classList.add("slide-in");
-                }
-                if (dashboardGreetingName) dashboardGreetingName.textContent = `Halo, ${displayName}!`;
-
-                // Panggil setupSavedNotesListener di sini setelah user terautentikasi
-                setupSavedNotesListener();
+                // Pengguna masuk.
+                updateUIOnLoginSuccess(user);
             } else {
-                // Jika tidak ada user, tampilkan form login
-                if (loginForm) loginForm.classList.remove("hidden");
-                if (greetingDiv) greetingDiv.classList.add("hidden");
-                if (dashboardDiv) dashboardDiv.classList.add("hidden");
+                // Pengguna keluar.
+                // Animasikan kembali ke login form jika dashboard atau greetingDiv terlihat
+                if ((dashboardDiv && !dashboardDiv.classList.contains("hidden")) || (greetingDiv && !greetingDiv.classList.contains("hidden"))) {
+                    // Decide which one to hide based on which is visible
+                    const elementToHide = dashboardDiv && !dashboardDiv.classList.contains("hidden") ? dashboardDiv : greetingDiv;
+                    animateTransition(loginForm, elementToHide);
+                } else if (loginForm) {
+                    loginForm.classList.remove("hidden");
+                }
+                
+                // Reset input fields setelah logout
+                if (emailInput) emailInput.value = "";
+                if (passwordInput) passwordInput.value = "";
 
                 // Hentikan listener catatan saat logout atau tidak ada user
                 if (unsubscribeNotes) {
@@ -3435,20 +3844,35 @@ async function logoutGoogle() {
         });
     }
 
-    // --- Event Listener Assignments ---
-    if (googleLoginButton) {
-        googleLoginButton.addEventListener('click', loginWithGoogle);
+    // --- Penugasan Event Listener ---
+    // Tombol login email
+    if (emailLoginButton) {
+        emailLoginButton.addEventListener('click', loginWithEmail);
     } else {
-        console.warn("Elemen dengan class 'google-login-button' tidak ditemukan di DOM. Tombol login Google tidak akan berfungsi.");
+        console.warn("Elemen 'emailLoginBtn' tidak ditemukan di DOM. Tombol login email tidak akan berfungsi.");
     }
 
+    // Tombol daftar email
+    if (emailSignupButton) {
+        emailSignupButton.addEventListener('click', signupWithEmail);
+    } else {
+        console.warn("Elemen 'emailSignupBtn' tidak ditemukan di DOM. Tombol daftar email tidak akan berfungsi.");
+    }
+
+    // New: Tombol login anonim
+    if (anonymousLoginBtn) {
+        anonymousLoginBtn.addEventListener('click', signInAnonymouslyFirebase);
+    } else {
+        console.warn("Elemen 'anonymousLoginBtn' tidak ditemukan di DOM. Tombol login anonim tidak akan berfungsi.");
+    }
+
+    // Tombol tampilkan catatan tersimpan
     if (showSavedNotesBtn) {
         showSavedNotesBtn.addEventListener('click', () => {
             if (auth && auth.currentUser) {
-                // Memanggil setupSavedNotesListener di sini akan memastikan data terbaru dimuat
-                setupSavedNotesListener();
-                // Jika modal tidak terbuka secara otomatis oleh listener, buka di sini:
-                if (savedNotesModal && savedNotesModal.style.display === "none") {
+                // Karena setupSavedNotesListener sudah dipanggil di updateUIOnLoginSuccess,
+                // kita hanya perlu menampilkan modal di sini.
+                if (savedNotesModal) {
                     savedNotesModal.style.display = "flex";
                 }
             } else {
@@ -3459,26 +3883,29 @@ async function logoutGoogle() {
         console.warn("Elemen 'showSavedNotesBtn' tidak ditemukan di DOM. Tombol tampilkan catatan tidak akan berfungsi.");
     }
 
+    // Tombol tutup modal catatan tersimpan
     if (closeSavedNotesModalBtn) {
         closeSavedNotesModalBtn.addEventListener('click', () => {
             if (savedNotesModal) savedNotesModal.style.display = "none";
-            // Penting: Hentikan listener saat modal ditutup untuk menghindari kebocoran memori
+            // Penting: Hentikan listener saat modal ditutup untuk mencegah kebocoran memori
             if (unsubscribeNotes) {
                 unsubscribeNotes();
                 unsubscribeNotes = null;
+                console.log("Listener catatan telah dihentikan saat modal ditutup.");
             }
         });
     } else {
         console.warn("Elemen 'closeSavedNotesModalBtn' tidak ditemukan di DOM. Tombol tutup modal catatan tidak akan berfungsi.");
     }
 
+    // Tombol logout
     if (logoutButton) {
-        logoutButton.addEventListener('click', logoutGoogle);
+        logoutButton.addEventListener('click', logout);
     } else {
         console.warn("Elemen 'logoutButton' tidak ditemukan di DOM. Tombol logout tidak akan berfungsi.");
     }
 
-    // Close Modal on Outside Click
+    // Tutup Modal saat Klik di Luar
     window.addEventListener("click", (event) => {
         if (savedNotesModal && event.target === savedNotesModal) {
             savedNotesModal.style.display = "none";
@@ -3486,43 +3913,207 @@ async function logoutGoogle() {
             if (unsubscribeNotes) {
                 unsubscribeNotes();
                 unsubscribeNotes = null;
+                console.log("Listener catatan telah dihentikan saat modal ditutup dari luar.");
             }
         }
     });
-
-    // --- Expose functions to the global scope for inline HTML event handlers ---
-    // Pastikan Firebase SDK sudah diimpor sebelum ini!
-    window.loginWithGoogle = loginWithGoogle;
-    window.logoutGoogle = logoutGoogle;
-    window.toggleSaveNote = toggleSaveNote;
-
-    // --- Initialize auth state listener ---
-    // Ini harus dipanggil sekali ketika DOM siap untuk mengelola UI berdasarkan status auth awal
-    onAuthStateChangedHandler();
-});	
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 	
+	
+// Function to generate a simple profile picture initial
+function getProfilePicInitial(displayName) {
+    if (displayName) {
+        return displayName.charAt(0).toUpperCase();
+    }
+    return '?';
+}
+
+// Function to send a message
+async function sendMessage() {
+    const user = auth.currentUser;
+    if (!user) {
+        showSuccessMessage("Anda perlu login untuk mengirim pesan.");
+        return;
+    }
+    const messageText = messageInput.value.trim();
+    if (messageText === "") {
+        return;
+    }
+
+    // Ensure Firestore modules are available
+    if (typeof db === 'undefined' || typeof collection === 'undefined' || typeof addDoc === 'undefined' || typeof serverTimestamp === 'undefined') {
+        console.error("Firebase Firestore modules tidak dimuat untuk mengirim pesan.");
+        showSuccessMessage("Error: Fitur pesan tidak tersedia.");
+        return;
+    }
+
+    try {
+        const displayName = user.displayName || (user.email ? user.email.split('@')[0] : 'Anonim');
+        await addDoc(collection(db, "messages"), {
+            uid: user.uid,
+            sender: displayName,
+            text: messageText,
+            timestamp: serverTimestamp()
+        });
+        messageInput.value = ""; // Clear input after sending
+        messageBox.scrollTop = messageBox.scrollHeight; // Scroll to bottom
+    } catch (error) {
+        console.error("Error sending message:", error);
+        showSuccessMessage("Gagal mengirim pesan: " + error.message);
+    }
+}
+
+// Function to listen for real-time messages
+function setupMessageListener() {
+    // Ensure Firestore modules are available
+    if (typeof db === 'undefined' || typeof collection === 'undefined' || typeof query === 'undefined' || typeof orderBy === 'undefined' || typeof onSnapshot === 'undefined') {
+        console.error("Firebase Firestore real-time message listener modules tidak dimuat.");
+        return;
+    }
+
+    // Stop any existing listener before creating a new one
+    if (unsubscribeMessages) {
+        unsubscribeMessages();
+        console.log("Previous message listener has been stopped.");
+    }
+
+    const messagesRef = collection(db, "messages");
+    const q = query(messagesRef, orderBy("timestamp", "asc"));
+
+    unsubscribeMessages = onSnapshot(q, (snapshot) => {
+        messageBox.innerHTML = ""; // Clear existing messages
+        snapshot.forEach((doc) => {
+            const message = doc.data();
+            const user = auth.currentUser;
+            const isSender = user && message.uid === user.uid;
+
+            const messageContainer = document.createElement('div');
+            messageContainer.classList.add('message-container');
+            messageContainer.classList.add(isSender ? 'sent' : 'received');
+
+            const profilePicDiv = document.createElement('div');
+            profilePicDiv.classList.add('profile-pic');
+            profilePicDiv.textContent = getProfilePicInitial(message.sender);
+
+            const messageBubble = document.createElement('div');
+            messageBubble.classList.add('message-bubble');
+
+            const senderNameEl = document.createElement('div');
+            senderNameEl.classList.add('message-sender');
+            senderNameEl.textContent = message.sender;
+
+            const messageTextEl = document.createElement('p');
+            messageTextEl.textContent = message.text;
+
+            const messageInfoEl = document.createElement('div');
+            messageInfoEl.classList.add('message-info');
+
+            // Format timestamp
+            let timeString = '';
+            if (message.timestamp) {
+                const date = message.timestamp.toDate();
+                timeString = date.toLocaleString('id-ID', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric'
+                });
+            }
+            messageInfoEl.textContent = timeString;
+
+            messageBubble.appendChild(senderNameEl);
+            messageBubble.appendChild(messageTextEl);
+            messageBubble.appendChild(messageInfoEl);
+
+            if (isSender) {
+                messageContainer.appendChild(messageBubble);
+                messageContainer.appendChild(profilePicDiv); // Profile pic on the right for sender
+            } else {
+                messageContainer.appendChild(profilePicDiv); // Profile pic on the left for receiver
+                messageContainer.appendChild(messageBubble);
+            }
+            
+            messageBox.appendChild(messageContainer);
+        });
+        messageBox.scrollTop = messageBox.scrollHeight; // Scroll to bottom on new message
+    }, (error) => {
+        console.error("Error listening to messages:", error);
+        showSuccessMessage("Gagal memuat percakapan.");
+    });
+    console.log("Message listener has been set up.");
+}
+
+// Modify onAuthStateChangedHandler to start/stop message listener
+function onAuthStateChangedHandler() {
+    if (typeof auth === 'undefined' || typeof onAuthStateChanged === 'undefined') {
+        console.error("Firebase Auth onAuthStateChanged module tidak dimuat atau tidak terdefinisi.");
+        return;
+    }
+    onAuthStateChanged(auth, (user) => {
+        const greetingDiv = document.getElementById('greetingDiv');
+        if (user) {
+            updateUIOnLoginSuccess(user);
+            setupMessageListener(); // Start message listener when user logs in
+        } else {
+            if ((dashboardDiv && !dashboardDiv.classList.contains("hidden")) || (greetingDiv && !greetingDiv.classList.contains("hidden"))) {
+                const elementToHide = dashboardDiv && !dashboardDiv.classList.contains("hidden") ? dashboardDiv : greetingDiv;
+                animateTransition(loginForm, elementToHide);
+            } else if (loginForm) {
+                loginForm.classList.remove("hidden");
+            }
+            
+            if (emailInput) emailInput.value = "";
+            if (passwordInput) passwordInput.value = "";
+
+            if (unsubscribeNotes) {
+                unsubscribeNotes();
+                unsubscribeNotes = null;
+                console.log("Listener catatan telah dihentikan karena tidak ada pengguna.");
+            }
+            // Stop message listener when user logs out
+            if (unsubscribeMessages) {
+                unsubscribeMessages();
+                unsubscribeMessages = null;
+                console.log("Listener pesan telah dihentikan karena tidak ada pengguna.");
+            }
+            messageBox.innerHTML = ""; // Clear messages on logout
+        }
+    });
+}
+
+    // --- Expose functions to the global scope for inline HTML event handlers (jika diperlukan) ---
+    window.logoutFirebase = logout; 
+    window.toggleSaveNote = toggleSaveNote;
+    window.loginWithEmail = loginWithEmail;
+    window.signupWithEmail = signupWithEmail;
+    window.signInAnonymouslyFirebase = signInAnonymouslyFirebase; // Expose new function
+	// Ensure the sendMessage function is globally accessible for the button's onclick
+window.sendMessage = sendMessage;
+
+
+    // --- Inisialisasi listener status otentikasi ---
+    onAuthStateChangedHandler();
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 		
 
