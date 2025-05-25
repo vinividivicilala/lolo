@@ -3343,38 +3343,45 @@ let activitiesData = [];
         }
     }
 
-    // --- Logika Pengiriman Catatan (tanpa Firebase) ---
-    function addNoteFromVoice() {
+function addNoteFromVoice() {
     const text = noteInput.value.trim();
-	const audioUrl = URL.createObjectURL(audioBlob);
-const audioElement = document.createElement('audio');
-audioElement.src = audioUrl;
-audioElement.controls = true;
-        if (!text) {
-            console.log('Tidak ada transkripsi untuk ditambahkan sebagai catatan.');
-            return;
-        }
-
-        // Karena kita tidak menggunakan Firebase, catatan ini hanya akan ditampilkan di UI.
-        // Anda bisa menyimpan catatan ini ke LocalStorage atau mengirimkannya ke backend lain jika perlu.
-        console.log('Catatan Suara (Teks):', text);
-        console.log('Catatan Suara (Blob Audio - hanya sisi klien):', audioBlob);
-
-        // Contoh: Tampilkan catatan di UI
-        // Hapus pesan default
-        if (notesList.querySelector('p')) {
-            notesList.querySelector('p').remove();
-        }
-		
-const newNote = document.createElement('div');
-newNote.innerHTML = `<strong>Catatan:</strong> "${text}"`;
-newNote.appendChild(audioElement);
-notesList.appendChild(newNote);
-
-        // Reset untuk catatan berikutnya
-        finalTranscript = '';
-        noteInput.value = '';
+    if (!text) {
+        console.log('Tidak ada transkripsi untuk ditambahkan sebagai catatan.');
+        return;
     }
+
+    console.log('Catatan Suara (Teks):', text);
+    console.log('Catatan Suara (Blob Audio):', audioBlob);
+
+    // Hapus pesan default jika ada
+    const defaultMessage = notesList.querySelector('p');
+    if (defaultMessage) {
+        defaultMessage.remove();
+    }
+
+    // Buat elemen catatan baru
+    const newNote = document.createElement('div');
+    newNote.className = 'note-item'; // opsional untuk styling
+    newNote.innerHTML = `<strong>Catatan:</strong> "${text}"`;
+
+    // Jika ada audio yang direkam, tambahkan player
+    if (audioBlob) {
+        const audioUrl = URL.createObjectURL(audioBlob);
+        const audioElement = document.createElement('audio');
+        audioElement.controls = true;
+        audioElement.src = audioUrl;
+        newNote.appendChild(document.createElement('br'));
+        newNote.appendChild(audioElement);
+    }
+
+    notesList.appendChild(newNote);
+
+    // Reset input dan transkrip
+    finalTranscript = '';
+    noteInput.value = '';
+    audioBlob = null;
+}
+
 
     // Bersihkan kanvas gelombang suara saat halaman dimuat
     clearWaveform();
