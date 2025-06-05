@@ -2978,32 +2978,13 @@ li:last-child {
     background-color: #f0f0f0;
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+.message-status {
+    display: inline-block;
+    font-size: 14px;
+    margin-left: 8px;
+    vertical-align: middle;
+    cursor: help;
+}
 
 
     </style>
@@ -4329,40 +4310,7 @@ window.toggleSaveNote = toggleSaveNote;
    
    
    
-   
-   
-   
-   
-   
-   
-   
-	
-	function setupMessageStatusListener(roomId, messageId) {
-    return onSnapshot(doc(db, 'chat_rooms', roomId, 'messages', messageId), (doc) => {
-        const message = doc.data();
-        const messageElement = document.querySelector(`.message-container[data-message-id="${messageId}"]`);
-        
-        if (messageElement) {
-            // Update status pesan di UI
-            const statusElement = messageElement.querySelector('.message-status');
-            if (statusElement) {
-                if (message.readBy && Object.keys(message.readBy).length > 1) {
-                    statusElement.innerHTML = '✓✓';
-                    statusElement.style.color = 'blue';
-                    statusElement.title = 'Dibaca';
-                } else if (message.delivered) {
-                    statusElement.innerHTML = '✓';
-                    statusElement.style.color = 'green';
-                    statusElement.title = 'Terkirim';
-                } else {
-                    statusElement.innerHTML = '✓';
-                    statusElement.style.color = 'gray';
-                    statusElement.title = 'Mengirim...';
-                }
-            }
-        }
-    });
-}
+
 
 
     // --- Setup Real-time Listener untuk Catatan Tersimpan ---
@@ -4794,35 +4742,6 @@ function updateUnreadMessageCount(contactId, count) {
 }
 
 
-
-async function markMessagesAsRead(roomId, userId) {
-    try {
-        const messagesRef = collection(db, 'chat_rooms', roomId, 'messages');
-        const q = query(
-            messagesRef,
-            where('senderId', '!=', userId),
-            where(`readBy.${userId}`, '==', false)
-        );
-        
-        const batch = writeBatch(db);
-        const unreadMessages = await getDocs(q);
-        
-        unreadMessages.forEach(doc => {
-            batch.update(doc.ref, {
-                [`readBy.${userId}`]: true,
-                readAt: serverTimestamp()
-            });
-        });
-        
-        await batch.commit();
-        
-        // Update unread count
-        await updateUnreadCounts();
-        
-    } catch (error) {
-        console.error("Error marking messages as read:", error);
-    }
-}
    
 // Fungsi untuk memuat dan memperbarui jumlah pesan yang belum dibaca
 async function loadAndUpdateUnreadCounts() {
@@ -5039,24 +4958,6 @@ async function updateUnreadCounts() {
 }
 
 
-async function markMessagesAsRead(roomId, userId) {
-  try {
-    const messagesRef = collection(db, 'chat_rooms', roomId, 'messages');
-    const q = query(
-      messagesRef,
-      where('senderId', '!=', userId),
-      where(`readBy.${userId}`, '==', false) // Fixed the syntax here
-    );
-    const batch = writeBatch(db);
-    const unreadMessages = await getDocs(q);
-    unreadMessages.forEach(doc => {
-      batch.update(doc.ref, { [`readBy.${userId}`]: true });
-    });
-    await batch.commit();
-  } catch (error) {
-    console.error("Error marking messages as read:", error);
-  }
-}
 
 
 async function initializeUnreadCounts() {
@@ -5719,41 +5620,35 @@ function initializeChat() {
     }
 }
 
+async function startChatWithUser(userId, userName, roomId) {
+    const user = auth.currentUser;
+    if (!user) return;
 
+    try {
+        currentRoomId = roomId;
+        currentChatWith = userId;
 
+        // Update UI
+        currentChatWithSpan.textContent = userName;
+        currentChatInfo.style.display = 'block';
+        messageInput.disabled = false;
+        sendMessageBtn.disabled = false;
 
+        // Tandai semua pesan sebagai dibaca saat membuka chat
+        await markMessagesAsRead(currentRoomId, user.uid);
+
+        // Load chat history
+        await displayChatHistory(currentRoomId);
+
+        // Setup listener untuk pesan baru
+        setupMessageListener(currentRoomId);
+    } catch (error) {
+        console.error("Error starting chat:", error);
+        showSuccessMessage("Gagal memulai chat");
+    }
+}
  
 
-async function startChatWithUser(userId, userName, roomId) {
-  const user = auth.currentUser;
-  if (!user) return;
-
-  try {
-    currentRoomId = roomId;
-    currentChatWith = userId;
-
-    // Reset unread count for this contact
-    resetUnreadCount(roomId, userId);
-
-    // Update UI
-    currentChatWithSpan.textContent = userName;
-    currentChatInfo.style.display = 'block';
-    messageInput.disabled = false;
-    sendMessageBtn.disabled = false;
-
-    // Mark messages as read
-    await markMessagesAsRead(currentRoomId, user.uid);
-
-    // Load chat history
-    await displayChatHistory(currentRoomId);
-
-    // Setup listener for new messages
-    setupMessageListener(currentRoomId);
-  } catch (error) {
-    console.error("Error starting chat:", error);
-    showSuccessMessage("Gagal memulai chat");
-  }
-}
 
  async function findOrCreateChatRoom(userId1, userId2) {
     const participants = [userId1, userId2].sort();
@@ -5849,35 +5744,61 @@ function updateUnreadBadge(contactId, count) {
 }
 
 
-  async function markMessagesAsRead(roomId, userId) {
-    try {
-        const messagesRef = collection(db, 'chat_rooms', roomId, 'messages');
-        const unreadQuery = query(
-            messagesRef,
-            where('senderId', '!=', userId),
-            where(`readBy.${userId}`, '==', false)
-        );
-        
-        const batch = writeBatch(db);
-        const unreadMessages = await getDocs(unreadQuery);
-        
-        unreadMessages.forEach(doc => {
-            batch.update(doc.ref, {
-                [`readBy.${userId}`]: true
-            });
-        });
-        
-        await batch.commit();
-        
-    } catch (error) {
-        console.error("Error marking messages as read:", error);
+
+async function markMessagesAsRead(roomId, userId) {
+  try {
+    const messagesRef = collection(db, 'chat_rooms', roomId, 'messages');
+    const snapshot = await getDocs(
+      query(messagesRef, where('senderId', '!=', userId))
+    );
+
+    const unreadMessages = snapshot.docs.filter(doc => {
+      const data = doc.data();
+      return !data.readBy || data.readBy[userId] !== true;
+    });
+
+    if (unreadMessages.length === 0) {
+      console.log("Tidak ada pesan yang perlu ditandai sebagai dibaca.");
+      return;
     }
+
+    const batch = writeBatch(db);
+    unreadMessages.forEach(doc => {
+      batch.update(doc.ref, {
+        [`readBy.${userId}`]: true,
+        readAt: serverTimestamp()
+      });
+    });
+
+    await batch.commit();
+    console.log("Berhasil menandai semua pesan sebagai dibaca.");
+  } catch (error) {
+    console.error("Error marking messages as read:", error);
+  }
 }
+
+
 
 // Call this periodically to update unread counts
 setInterval(updateUnreadCounts, 30000); // Update every 30 seconds
     
    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 function displayMessage(message, isSender, messageCount = 0) {
     const messageBox = document.getElementById('messageBox');
@@ -5885,6 +5806,8 @@ function displayMessage(message, isSender, messageCount = 0) {
 
     const messageContainer = document.createElement('div');
     messageContainer.className = `message-container ${isSender ? 'sent' : 'received'}`;
+	    messageContainer.dataset.messageId = message.id; // Tambahkan ID pesan untuk tracking
+
 
     const messageBubble = document.createElement('div');
     messageBubble.className = 'message-bubble';
@@ -5915,28 +5838,35 @@ function displayMessage(message, isSender, messageCount = 0) {
         messageContent.appendChild(countBadge);
     }
 
-    // Status pesan (hanya untuk pesan keluar)
+     // Status element setup
+    const messageStatus = document.createElement('div');
+    messageStatus.className = 'message-status';
+    
+    // Status pesan - bagian yang diperbaiki
     if (isSender) {
         const messageStatus = document.createElement('div');
         messageStatus.className = 'message-status';
-
+        
         if (message.readBy && Object.keys(message.readBy).length > 1) {
+            // ✓✓ Biru - sudah dibaca oleh penerima
             messageStatus.innerHTML = '✓✓';
             messageStatus.style.color = 'blue';
             messageStatus.title = 'Dibaca';
         } else if (message.delivered) {
+            // ✓ Hijau - terkirim ke server
             messageStatus.innerHTML = '✓';
             messageStatus.style.color = 'green';
             messageStatus.title = 'Terkirim';
         } else {
+            // ✓ Abu-abu - sedang mengirim
             messageStatus.innerHTML = '✓';
             messageStatus.style.color = 'gray';
             messageStatus.title = 'Mengirim...';
         }
-
+        
         messageContent.appendChild(messageStatus);
     }
-
+	
     // Avatar untuk pesan masuk
     if (!isSender) {
         const avatar = document.createElement('div');
@@ -5978,6 +5908,7 @@ function displayMessage(message, isSender, messageCount = 0) {
 }
 
 
+
 function setupMessageStatusListener(roomId, messageId) {
     return onSnapshot(doc(db, 'chat_rooms', roomId, 'messages', messageId), (doc) => {
         const message = doc.data();
@@ -6004,7 +5935,6 @@ function setupMessageStatusListener(roomId, messageId) {
         }
     });
 }
-
 
 
 
@@ -6159,6 +6089,8 @@ function addSaveButton(messageElement, message) {
     }
 
 
+
+
 async function sendPersonalMessage() {
     const messageText = messageInput.value.trim();
     if (!messageText) {
@@ -6173,29 +6105,31 @@ async function sendPersonalMessage() {
     }
 
     try {
-        // Buat pesan awal dengan status "mengirim"
         const message = {
             text: messageText,
             senderId: user.uid,
             senderName: user.displayName || user.email || "Anonymous",
             timestamp: serverTimestamp(),
-            readBy: { [user.uid]: true }, // Pengirim sudah membaca pesannya sendiri
-            delivered: false,
-            status: 'sending'
+            readBy: { 
+                [user.uid]: true // Pengirim sudah membaca pesannya sendiri
+            },
+            delivered: true
         };
 
-        // Kirim pesan ke Firestore
+        // Tambahkan pesan ke Firestore
         const messageRef = await addDoc(
             collection(db, 'chat_rooms', currentRoomId, 'messages'),
             message
         );
 
-        // Update status menjadi "terkirim" setelah berhasil dikirim
+        // Setup listener untuk status pesan
+        setupMessageStatusListener(currentRoomId, messageRef.id);
+        
+        // Update pesan dengan ID
         await updateDoc(messageRef, {
-            delivered: true,
-            status: 'delivered'
+            id: messageRef.id
         });
-
+        
         // Update last message di room
         await updateDoc(doc(db, 'chat_rooms', currentRoomId), {
             lastMessageAt: serverTimestamp(),
@@ -6207,10 +6141,7 @@ async function sendPersonalMessage() {
         messageInput.value = "";
         
         // Update UI
-        await updateLastMessagePreview(currentRoomId, {
-            ...message,
-            delivered: true
-        });
+        await updateLastMessagePreview(currentRoomId, message);
         
         // Refresh kontak
         await fetchContacts();
@@ -6218,15 +6149,25 @@ async function sendPersonalMessage() {
     } catch (error) {
         console.error("Error sending message:", error);
         showSuccessMessage("Gagal mengirim pesan");
-        
-        // Jika gagal, update status menjadi "gagal"
-        if (messageRef) {
-            await updateDoc(messageRef, {
-                status: 'failed'
-            });
-        }
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -6304,37 +6245,45 @@ function showTypingIndicator(userId) {
 
 
 
-  // Fungsi untuk menampilkan riwayat chat
+  // In displayChatHistory
 async function displayChatHistory(roomId) {
     const messageBox = document.getElementById('messageBox');
     if (!messageBox) return;
-    
+
     try {
         const messagesQuery = query(
             collection(db, 'chat_rooms', roomId, 'messages'),
             orderBy('timestamp', 'asc')
         );
-        
+
         const querySnapshot = await getDocs(messagesQuery);
         messageBox.innerHTML = '';
-        
+
         if (querySnapshot.empty) {
             messageBox.innerHTML = '<div class="no-messages">Belum ada pesan</div>';
             return;
         }
-        
+
         querySnapshot.forEach((doc) => {
             const message = doc.data();
             const isSender = message.senderId === auth.currentUser?.uid;
             displayMessage(message, isSender);
-            
-            // Tandai sebagai dibaca jika penerima
-            if (!isSender && (!message.readBy || !message.readBy[auth.currentUser.uid])) {
-                markMessageAsRead(roomId, doc.id);
-            }
+
+            // Mark as read if receiver and not already read
+            // The markMessagesAsRead function handles marking all unread messages in a batch.
+            // No need to call it per message here, as it will be called for the room if any unread.
         });
-        
+
         messageBox.scrollTop = messageBox.scrollHeight;
+
+        // After displaying all messages, if there's a current user and unread messages,
+        // mark them as read. This needs to be handled by the onSnapshot listener for real-time.
+        // For initial load, you might want to call it here if needed, but consider the real-time listener below.
+        if (auth.currentUser?.uid) {
+            await markMessagesAsRead(roomId, auth.currentUser.uid);
+        }
+
+
     } catch (error) {
         console.error("Error loading chat history:", error);
         messageBox.innerHTML = '<div class="error-loading">Gagal memuat riwayat chat</div>';
@@ -6433,31 +6382,75 @@ function updateUnreadCountForContact(contactId, count) {
   }
 }
 
+
+
+
+
 function setupMessageListener(roomId) {
     if (unsubscribeMessages) unsubscribeMessages();
+    
+    const user = auth.currentUser;
+    if (!user) return;
+
     const messagesQuery = query(
         collection(db, 'chat_rooms', roomId, 'messages'),
         orderBy('timestamp', 'asc')
     );
+    
     unsubscribeMessages = onSnapshot(messagesQuery, async (snapshot) => {
         messageBox.innerHTML = '';
-        let hasUnread = false;
+        let hasUnreadForCurrentUser = false;
+        
         snapshot.forEach((doc) => {
             const message = doc.data();
-            const isSender = message.senderId === auth.currentUser?.uid;
-            displayMessage(message, isSender); // Pastikan count ditampilkan
-            if (!isSender && (!message.readBy || !message.readBy[auth.currentUser.uid])) {
-                markMessageAsRead(roomId, doc.id);
-                hasUnread = true;
+            const isSender = message.senderId === user.uid;
+            
+            // Tambahkan ID pesan ke data message untuk tracking
+            const messageWithId = { ...message, id: doc.id };
+            displayMessage(messageWithId, isSender);
+
+            // Check jika pesan belum dibaca oleh penerima
+            if (!isSender && (!message.readBy || !message.readBy[user.uid])) {
+                hasUnreadForCurrentUser = true;
             }
         });
+        
         messageBox.scrollTop = messageBox.scrollHeight;
-        if (hasUnread) {
+
+        // Jika ada pesan yang belum dibaca, tandai sebagai sudah dibaca
+        if (hasUnreadForCurrentUser) {
+            await markMessagesAsRead(roomId, user.uid);
+            
+            // Perbarui daftar kontak untuk menghilangkan notifikasi unread
             const contacts = await fetchContacts();
             displayContacts(contacts);
         }
     });
 }
+
+function updateMessageStatus(messageId, updatedMessage) {
+    const messageElement = document.querySelector(`.message-container[data-message-id="${messageId}"]`);
+    if (!messageElement) return;
+
+    const statusElement = messageElement.querySelector('.message-status');
+    if (!statusElement) return;
+
+    if (updatedMessage.readBy && Object.keys(updatedMessage.readBy).length > 1) {
+        statusElement.innerHTML = '✓✓';
+        statusElement.style.color = 'blue';
+        statusElement.title = 'Dibaca';
+    } else if (updatedMessage.delivered) {
+        statusElement.innerHTML = '✓';
+        statusElement.style.color = 'green';
+        statusElement.title = 'Terkirim';
+    } else {
+        statusElement.innerHTML = '✓';
+        statusElement.style.color = 'gray';
+        statusElement.title = 'Mengirim...';
+    }
+}
+
+
 
 
 
@@ -6689,23 +6682,6 @@ async function showSavedMessages() {
         showSuccessMessage("Gagal memuat pesan tersimpan.");
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
     function updateCurrentChatInfo(userId, userName) {
