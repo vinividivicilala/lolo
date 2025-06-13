@@ -2264,6 +2264,90 @@ li:last-child {
  
 
 
+/* Style untuk badge pesan belum dibaca */
+.unread-badge {
+    display: none;
+    background-color: #ff3b30;
+    color: white;
+    border-radius: 10px;
+    padding: 2px 6px;
+    font-size: 12px;
+    margin-left: 8px;
+    vertical-align: middle;
+}
+
+.has-unread {
+    background-color: #f0f8ff;
+    font-weight: bold;
+}
+
+/* Style untuk notifikasi */
+.message-notification {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    padding: 12px;
+    display: flex;
+    align-items: center;
+    max-width: 300px;
+    z-index: 1000;
+    animation: slideIn 0.3s ease-out;
+}
+
+.notification-avatar {
+    background: #007aff;
+    color: white;
+    width: 36px;
+    height: 36px;
+    border-radius: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 12px;
+    font-weight: bold;
+}
+
+.notification-content {
+    flex: 1;
+}
+
+.notification-name {
+    font-weight: bold;
+    margin-bottom: 4px;
+}
+
+.notification-message {
+    color: #666;
+    font-size: 14px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.fade-out {
+    animation: fadeOut 0.3s ease-out forwards;
+}
+
+@keyframes slideIn {
+    from { transform: translateY(100px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes fadeOut {
+    to { opacity: 0; transform: translateY(20px); }
+}
+
+
+
+
+
+
+
+
+
 /* Layout Utama */
 #chatContainer {
     display: flex;
@@ -6007,24 +6091,6 @@ function updateUnreadMessageCount(contactId, count) {
 
 
 
-
-// Fungsi untuk menghitung pesan yang belum dibaca
-async function countUnreadMessages(roomId, userId) {
-    try {
-        const messagesRef = collection(db, 'chat_rooms', roomId, 'messages');
-        const q = query(
-            messagesRef,
-            where('senderId', '!=', userId),
-            where(`readBy.${userId}`, '==', false)
-        );
-        const snapshot = await getCountFromServer(q);
-        return snapshot.data().count;
-    } catch (error) {
-        console.error("Error counting unread messages:", error);
-        return 0;
-    }
-}
-
 function updateContactUnreadCount(contactId, count) {
     const contactItem = document.querySelector(`.contact-item[data-uid="${contactId}"]`);
     if (!contactItem) return;
@@ -6101,16 +6167,35 @@ async function countUnreadMessages(roomId, userId) {
         const messagesRef = collection(db, 'chat_rooms', roomId, 'messages');
         const q = query(
             messagesRef,
-            where('senderId', '!=', userId),
-            where(`readBy.${userId}`, '==', false)
+            where('senderId', '!=', userId) // Only messages from others
         );
-        const snapshot = await getCountFromServer(q);
-        return snapshot.data().count;
+        const snapshot = await getDocs(q); // Use getDocs to fetch documents
+        let unreadCount = 0;
+        snapshot.forEach(doc => {
+            const message = doc.data();
+            if (!message.readBy || !message.readBy[userId]) {
+                unreadCount++;
+            }
+        });
+        return unreadCount;
     } catch (error) {
         console.error("Error counting unread messages:", error);
         return 0;
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 function monitorContactStatuses() {
@@ -6178,6 +6263,176 @@ function formatLastSeen(timestamp) {
     
     return timestamp.toLocaleDateString();
 }
+
+
+
+function updateUnreadCountUI(contactId, count) {
+    const contactItem = document.querySelector(`.contact-item[data-uid="${contactId}"]`);
+    if (!contactItem) return;
+
+    // Hapus badge yang ada
+    const existingBadge = contactItem.querySelector('.unread-badge');
+    if (existingBadge) existingBadge.remove();
+
+    // Tambahkan badge baru jika ada pesan belum dibaca
+    if (count > 0) {
+        const badge = document.createElement('span');
+        badge.className = 'unread-badge';
+        badge.textContent = count;
+        
+        const lastMessageDiv = contactItem.querySelector('.contact-last-message');
+        if (lastMessageDiv) {
+            lastMessageDiv.appendChild(badge);
+        }
+        
+        contactItem.classList.add('has-unread');
+    } else {
+        contactItem.classList.remove('has-unread');
+    }
+}
+
+
+
+async function loadContactsAndUnreadCounts() {
+    const user = auth.currentUser;
+    if (!user) return;
+
+    try {
+        const contacts = await fetchContacts();
+        displayContacts(contacts);
+        
+        // Hitung pesan yang belum dibaca untuk setiap kontak
+        for (const contact of contacts) {
+            if (contact.roomId) {
+                const unreadCount = await countUnreadMessages(contact.roomId, user.uid);
+                updateUnreadCountUI(contact.uid, unreadCount);
+            }
+        }
+    } catch (error) {
+        console.error("Error loading contacts and unread counts:", error);
+    }
+}
+
+
+// Fungsi untuk memantau pesan masuk secara real-time
+function setupIncomingMessageListener() {
+    const user = auth.currentUser;
+    if (!user) return;
+
+    if (unsubscribeMessages) unsubscribeMessages();
+
+    // Listener untuk semua chat rooms dimana user adalah participant
+    const roomsQuery = query(
+        collection(db, 'chat_rooms'),
+        where('participants', 'array-contains', user.uid)
+    );
+
+    unsubscribeRooms = onSnapshot(roomsQuery, async (roomsSnapshot) => {
+        roomsSnapshot.docChanges().forEach(async (roomChange) => {
+            const roomId = roomChange.doc.id;
+            const roomData = roomChange.doc.data();
+            const otherUserId = roomData.participants.find(id => id !== user.uid);
+
+            if (otherUserId) {
+                // Setup listener untuk pesan di room ini
+                const messagesQuery = query(
+                    collection(db, 'chat_rooms', roomId, 'messages'),
+                    orderBy('timestamp', 'desc'),
+                    limit(1)
+                );
+
+                onSnapshot(messagesQuery, (messagesSnapshot) => {
+                    messagesSnapshot.docChanges().forEach(async (change) => {
+                        if (change.type === 'added') {
+                            const message = change.doc.data();
+                            
+                            // Jika pesan baru dari pengirim lain dan belum dibaca
+                            if (message.senderId !== user.uid && 
+                                (!message.readBy || !message.readBy[user.uid])) {
+                                
+                                // Update unread count
+                                const unreadCount = await countUnreadMessages(roomId, user.uid);
+                                updateUnreadCountUI(otherUserId, unreadCount);
+                                
+                                // Tampilkan notifikasi jika chat tidak aktif
+                                if (currentChatWith !== otherUserId) {
+                                    showNotification(otherUserId, message.text);
+                                }
+                            }
+                        }
+                    });
+                });
+            }
+        });
+    });
+}
+
+
+
+function updateUnreadCountUI(contactId, count) {
+    const contactItem = document.querySelector(`.contact-item[data-uid="${contactId}"]`);
+    if (!contactItem) return;
+
+    // Hapus badge yang ada
+    let unreadBadge = contactItem.querySelector('.unread-badge');
+    
+    // Jika belum ada badge, buat yang baru
+    if (!unreadBadge && count > 0) {
+        unreadBadge = document.createElement('span');
+        unreadBadge.className = 'unread-badge';
+        contactItem.querySelector('.contact-info').appendChild(unreadBadge);
+    }
+
+    // Update tampilan
+    if (count > 0) {
+        unreadBadge.textContent = count;
+        unreadBadge.style.display = 'inline-block';
+        contactItem.classList.add('has-unread');
+    } else if (unreadBadge) {
+        unreadBadge.style.display = 'none';
+        contactItem.classList.remove('has-unread');
+    }
+}
+
+
+function showNotification(contactId, messageText) {
+    const contactItem = document.querySelector(`.contact-item[data-uid="${contactId}"]`);
+    if (!contactItem) return;
+
+    const contactName = contactItem.querySelector('.contact-name').textContent;
+    
+    // Buat elemen notifikasi
+    const notification = document.createElement('div');
+    notification.className = 'message-notification';
+    notification.innerHTML = `
+        <div class="notification-avatar">${contactName.charAt(0)}</div>
+        <div class="notification-content">
+            <div class="notification-name">${contactName}</div>
+            <div class="notification-message">${messageText}</div>
+        </div>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    // Hilangkan notifikasi setelah 5 detik
+    setTimeout(() => {
+        notification.classList.add('fade-out');
+        setTimeout(() => notification.remove(), 300);
+    }, 5000);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
