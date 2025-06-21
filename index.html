@@ -4308,10 +4308,11 @@ button:hover {
     </button>
 </div>
 
-	<button id="googleLoginBtn" style="background-color:#4285F4; color:white; padding:12px 20px; border:none; border-radius:6px; display:flex; align-items:center; gap:10px; cursor:pointer;">
-  <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="20" height="20" alt="G"> 
-  Login with Google
-</button>
+	<div id="authSection" style="text-align: center; margin-top: 20px;">
+  <button id="googleLoginBtn">Login dengan Google</button>
+  <button id="logoutBtn" style="display: none;">Logout</button>
+  <h2 id="greeting" style="margin-top: 20px;"></h2>
+</div>
 
 	
 
@@ -5166,6 +5167,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const closeProfileModal = document.getElementById('closeProfileModal');
     const newMessageBadge = document.getElementById('newMessageBadge');
 	const unreadCounts = {};
+  const loginBtn = document.getElementById("googleLoginBtn");
+  const logoutBtn = document.getElementById("logoutBtn");
+  const greeting = document.getElementById("greeting");
 
 
 
@@ -5250,32 +5254,45 @@ let profileRef = null;
 
 
 
-   // Fungsi login dengan Google
-    async function signInWithGoogle() {
-      const provider = new GoogleAuthProvider();
-      provider.setCustomParameters({
-        prompt: 'select_account'  // Tampilkan popup akun Gmail
-      });
+    // Ucapan otomatis berdasarkan waktu
+  function getGreetingTime() {
+    const hour = new Date().getHours();
+    if (hour < 11) return "Selamat pagi";
+    else if (hour < 15) return "Selamat siang";
+    else if (hour < 18) return "Selamat sore";
+    else return "Selamat malam";
+  }
 
-      try {
-        const result = await signInWithPopup(auth, provider);
-        alert("✅ Berhasil login sebagai: " + result.user.displayName);
-        // ➕ Tambahkan redirect atau logika tambahan di sini jika diperlukan
-      } catch (error) {
-        console.error("❌ Login error:", error.message);
-        alert("Login gagal: " + error.message);
-      }
-    }
+  // Saat login sukses
+  auth.onAuthStateChanged(user => {
+    if (user) {
+      const name = user.displayName;
+      greeting.innerText = `${getGreetingTime()}, ${name}`;
+      loginBtn.style.display = "none";
+      logoutBtn.style.display = "inline-block";
 
-    // Pasang event listener ke tombol login
-    const loginBtn = document.getElementById("googleLoginBtn");
-    if (loginBtn) {
-      loginBtn.addEventListener("click", signInWithGoogle);
+      // TODO: bisa di sini juga aktifkan fitur grup chat, pesan pribadi, dll.
     } else {
-      console.error("⚠️ Tombol login tidak ditemukan di halaman!");
+      greeting.innerText = "";
+      loginBtn.style.display = "inline-block";
+      logoutBtn.style.display = "none";
     }
+  });
 
+  // Login dengan Google
+  loginBtn.addEventListener("click", async () => {
+    const provider = new firebase.auth.GoogleAuthProvider();
+    try {
+      await auth.signInWithPopup(provider);
+    } catch (error) {
+      alert("Login gagal: " + error.message);
+    }
+  });
 
+  // Logout
+  logoutBtn.addEventListener("click", async () => {
+    await auth.signOut();
+  });
  
 
 
