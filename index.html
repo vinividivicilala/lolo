@@ -4112,6 +4112,42 @@ button:hover {
   bottom: 40px;
 }
 
+#auth-container .button {
+    background: white;
+    color: red;
+    border: none;
+    padding: 12px 24px;
+    font-size: 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+#auth-container .button:hover {
+    background: white;
+}
+
+
+.google-login-btn {
+  padding: 10px 20px;
+  font-size: 16px;
+  border-radius: 8px;
+  background: #fff;
+  border: 1px solid #ccc;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.google-login-button:hover {
+  background: #f5f5f5;
+}
+
+.google-login-btn img {
+  width: 16px;
+  height: 16px;
+}
 
 
  
@@ -4271,6 +4307,12 @@ button:hover {
         </svg>
     </button>
 </div>
+
+	<button id="googleLoginBtn" style="background-color:#4285F4; color:white; padding:12px 20px; border:none; border-radius:6px; display:flex; align-items:center; gap:10px; cursor:pointer;">
+  <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="20" height="20" alt="G"> 
+  Login with Google
+</button>
+
 
  
    <div id="app">
