@@ -5245,26 +5245,33 @@ let selectedUsersToAddForGroup = [];
 
 
 
-	const loginButton = document.getElementById("googleLoginBtn");
+
   const greetingDiv = document.getElementById("greetingDiv");
+  const googleLoginBtn = document.getElementById("googleLoginBtn");
 
-  loginButton.addEventListener("click", async () => {
-    const provider = new GoogleAuthProvider();
-    provider.setCustomParameters({ prompt: "select_account" }); // tampilkan pilihan akun
+  googleLoginBtn.addEventListener("click", () => {
+    const provider = new firebase.auth.GoogleAuthProvider();
 
-    try {
-      const result = await signInWithPopup(auth, provider);
-      const user = result.user;
+    // Force popup untuk menampilkan semua akun Gmail
+    provider.setCustomParameters({ prompt: "select_account" });
 
-      // Tampilkan salam setelah login
-      loginForm.style.display = "none";
-      greetingDiv.innerHTML = `<h2>Selamat datang, ${user.displayName}</h2><p>${user.email}</p>`;
-      greetingDiv.style.opacity = "1";
-      greetingDiv.style.transform = "translateX(0)";
-    } catch (error) {
-      alert("Login gagal: " + error.message);
-    }
+    auth.signInWithPopup(provider)
+      .then((result) => {
+        const user = result.user;
+        alert(`Login berhasil sebagai ${user.displayName}`);
+        // Tampilkan halaman dashboard atau greeting
+        document.getElementById("loginForm").style.display = "none";
+        document.getElementById("greetingDiv").style.opacity = 1;
+        document.getElementById("greetingDiv").style.transform = "translateX(0)";
+        document.getElementById("greetingDiv").innerHTML = `<h2>Selamat datang, ${user.displayName}</h2><p>Email: ${user.email}</p>`;
+      })
+      .catch((error) => {
+        alert("Login gagal: " + error.message);
+      });
   });
+	
+	
+	
 	
 
  async function updateUIOnLoginSuccess(user) {
