@@ -4313,6 +4313,9 @@ button:hover {
   Login with Google
 </button>
 
+	
+
+
 
  
    <div id="app">
@@ -5247,59 +5250,41 @@ let profileRef = null;
 
 
 
-  // Define the Google provider
-const googleProvider = new GoogleAuthProvider();
-
-// Function to handle Google login
-async function signInWithGoogle() {
-  try {
-    // Disable the button while processing
-    const googleLoginBtn = document.getElementById("googleLoginBtn");
-    if (googleLoginBtn) {
-      googleLoginBtn.disabled = true;
-      googleLoginBtn.textContent = "Masuk...";
-    }
-
-    // Trigger the Google sign-in popup
-    const result = await signInWithPopup(auth, googleProvider);
-
-    // Get the user data from the result
-    const user = result.user;
-
-    // Update UI after successful login
-    updateUIOnLoginSuccess(user);
-    showSuccessMessage("Login berhasil! Selamat datang kembali.");
-
-    // Re-enable the button
-    if (googleLoginBtn) {
-      googleLoginBtn.disabled = false;
-      googleLoginBtn.textContent = "Login dengan Google";
-    }
-  } catch (error) {
-    console.error("Error during Google sign-in:", error);
-
-    let errorMessage = "Login gagal. Silakan coba lagi.";
-    if (error.code === "auth/popup-closed-by-user") {
-      errorMessage = "Pengguna menutup jendela pop-up.";
-    } else if (error.code === "auth/cancelled-popup-request") {
-      errorMessage = "Permintaan pop-up dibatalkan.";
-    }
-
-    showErrorMessage(errorMessage);
-
-    // Re-enable the button
-    if (googleLoginBtn) {
-      googleLoginBtn.disabled = false;
-      googleLoginBtn.textContent = "Login dengan Google";
+  async function signInWithGoogle() {
+    const provider = new GoogleAuthProvider();
+    try {
+      const result = await signInWithPopup(auth, provider);
+      alert("Berhasil login sebagai " + result.user.displayName);
+    } catch (error) {
+      console.error("Error:", error.message);
+      alert("Login gagal: " + error.message);
     }
   }
-}
 
-// Attach the event listener to the Google login button
-document.addEventListener("DOMContentLoaded", () => {
-  document.getElementById("googleLoginBtn").addEventListener("click", signInWithGoogle);
-});
+  document.addEventListener("DOMContentLoaded", function () {
+    const btn = document.getElementById("googleLoginBtn");
+    if (btn) {
+      btn.addEventListener("click", signInWithGoogle);
+    } else {
+      console.error("Tombol login tidak ditemukan!");
+    }
+  });
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	
 
  async function updateUIOnLoginSuccess(user) {
     const displayName = user.displayName || (user.isAnonymous ? "Guest" : (user.email ? user.email.split("@")[0] : "User"));
