@@ -5250,28 +5250,30 @@ let profileRef = null;
 
 
 
- // Fungsi login Google
-  async function signInWithGoogle() {
-    const provider = new GoogleAuthProvider();
-    provider.setCustomParameters({ prompt: 'select_account' }); // Paksa tampilkan pilihan akun
+   // Fungsi login dengan Google
+    async function signInWithGoogle() {
+      const provider = new GoogleAuthProvider();
+      provider.setCustomParameters({
+        prompt: 'select_account'  // Tampilkan popup akun Gmail
+      });
 
-    try {
-      const result = await signInWithPopup(auth, provider);
-      alert("Berhasil login sebagai " + result.user.displayName);
-      // Lanjutkan ke halaman / logika Anda setelah login di sini
-    } catch (error) {
-      console.error("Login error:", error.message);
-      alert("Login gagal: " + error.message);
+      try {
+        const result = await signInWithPopup(auth, provider);
+        alert("✅ Berhasil login sebagai: " + result.user.displayName);
+        // ➕ Tambahkan redirect atau logika tambahan di sini jika diperlukan
+      } catch (error) {
+        console.error("❌ Login error:", error.message);
+        alert("Login gagal: " + error.message);
+      }
     }
-  }
 
-  // Event listener tombol login
-  document.addEventListener("DOMContentLoaded", () => {
-    const btn = document.getElementById("googleLoginBtn");
-    if (btn) {
-      btn.addEventListener("click", signInWithGoogle);
+    // Pasang event listener ke tombol login
+    const loginBtn = document.getElementById("googleLoginBtn");
+    if (loginBtn) {
+      loginBtn.addEventListener("click", signInWithGoogle);
+    } else {
+      console.error("⚠️ Tombol login tidak ditemukan di halaman!");
     }
-  });
 
 
  
