@@ -1,4 +1,4 @@
 [[redirects]]
-  from = "/*"
-  to = "/index.html"
+  from = "/__/auth/handler"
+  to = "/"
   status = 200
