@@ -4999,12 +4999,12 @@ button:hover {
     import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp, query, orderBy, deleteDoc, getDoc, writeBatch, setDoc, doc, updateDoc, where, getDocs, documentId, limit, increment, getCountFromServer,  arrayUnion, 
     arrayRemove } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword , signInWithPopup, signOut, onAuthStateChanged, GoogleAuthProvider,  setPersistence,
-  browserLocalPersistence, signInWithRedirect, getRedirectResult   } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js"; // Pastikan semua fungsi auth yang Anda butuhkan diimpor
+  browserLocalPersistence  } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js"; // Pastikan semua fungsi auth yang Anda butuhkan diimpor
 
 
     const firebaseConfig = {
         apiKey: "AIzaSyCYbxo8n1zn-Y3heCIn_PmrsK44_OrdEw4",
-        authDomain: "noted-farid.netlify.app",
+        authDomain:"noted-a3498.firebaseapp.com",
         projectId: "noted-a3498",
         storageBucket: "noted-a3498.appspot.com",
         messagingSenderId: "1077214793842",
@@ -5251,43 +5251,39 @@ let profileRef = null;
 
 
  
+const provider = new GoogleAuthProvider();
+provider.setCustomParameters({
+  prompt: 'select_account' // Selalu tampilkan pilihan akun Gmail
+});
 
-
-
-
-
- // Handle redirect result when user returns to your site
-    getRedirectResult(auth)
-        .then((result) => {
-            if (result) {
-                alert("Berhasil login sebagai " + result.user.displayName);
-            }
-        })
-        .catch((error) => {
-            console.error("Error:", error.message);
-            alert("Login gagal: " + error.message);
-        });
-
-    async function signInWithGoogle() {
-        const provider = new GoogleAuthProvider();
-        try {
-            await signInWithRedirect(auth, provider);
-        } catch (error) {
-            console.error("Error:", error.message);
-            alert("Login gagal: " + error.message);
-        }
-    }
-
-    document.addEventListener("DOMContentLoaded", function () {
-        const btn = document.getElementById("googleLoginBtn");
-        if (btn) {
-            btn.addEventListener("click", signInWithGoogle);
-        } else {
-            console.error("Tombol login tidak ditemukan!");
-        }
+sync function signInWithGoogle() {
+    const provider = new GoogleAuthProvider();
+    provider.setCustomParameters({
+      prompt: 'select_account'  // Inilah bagian penting agar popup pemilihan akun muncul
     });
 
+    try {
+      const result = await signInWithPopup(auth, provider);
+      alert("Berhasil login sebagai " + result.user.displayName);
+    } catch (error) {
+      console.error("Error:", error.message);
+      alert("Login gagal: " + error.message);
+    }
+  }
 
+  document.addEventListener("DOMContentLoaded", function () {
+    const btn = document.getElementById("googleLoginBtn");
+    if (btn) {
+      btn.addEventListener("click", signInWithGoogle);
+    } else {
+      console.error("Tombol login tidak ditemukan!");
+    }
+  });	
+
+
+
+
+ 
 
 
 
