@@ -5246,25 +5246,19 @@ let selectedUsersToAddForGroup = [];
 
 
 
-   const loginButton = document.getElementById("googleLoginBtn");
-  const greetingDiv = document.getElementById("greetingDiv");
+ const provider = new GoogleAuthProvider();
+provider.setCustomParameters({ prompt: "select_account" });
 
-  loginButton.addEventListener("click", async () => {
-    const provider = new GoogleAuthProvider();
-    provider.setCustomParameters({ prompt: "select_account" });
-
-    try {
-      const result = await signInWithPopup(auth, provider);
+document.getElementById("googleLoginBtn").addEventListener("click", () => {
+  signInWithPopup(auth, provider)
+    .then((result) => {
       const user = result.user;
-
-      loginForm.style.display = "none";
-      greetingDiv.innerHTML = `<h2>Selamat datang, ${user.displayName}</h2><p>Email: ${user.email}</p>`;
-      greetingDiv.style.opacity = 1;
-      greetingDiv.style.transform = "translateX(0)";
-    } catch (error) {
-      alert("Login gagal: " + error.message);
-    }
-  });
+      alert("Selamat datang, " + user.displayName);
+    })
+    .catch((error) => {
+      console.error(error);
+    });
+});
 	
 	
 
