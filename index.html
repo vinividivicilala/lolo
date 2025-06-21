@@ -5245,22 +5245,27 @@ let selectedUsersToAddForGroup = [];
 
 
 
+  const provider = new GoogleAuthProvider();
+  provider.setCustomParameters({ prompt: "select_account" });
 
- const provider = new GoogleAuthProvider();
-provider.setCustomParameters({ prompt: "select_account" });
-
-document.getElementById("googleLoginBtn").addEventListener("click", () => {
-  signInWithPopup(auth, provider)
-    .then((result) => {
-      const user = result.user;
-      alert("Selamat datang, " + user.displayName);
-    })
-    .catch((error) => {
-      console.error(error);
+  // Tunggu sampai tombol siap di DOM
+  window.addEventListener("DOMContentLoaded", () => {
+    const loginBtn = document.getElementById("googleLoginBtn");
+    loginBtn.addEventListener("click", () => {
+      signInWithPopup(auth, provider)
+        .then((result) => {
+          const user = result.user;
+          alert("Selamat datang, " + user.displayName);
+        })
+        .catch((error) => {
+          console.error("Login error:", error.message);
+        });
     });
-});
-	
-	
+  });
+</script>
+
+
+
 
  async function updateUIOnLoginSuccess(user) {
     const displayName = user.displayName || (user.isAnonymous ? "Guest" : (user.email ? user.email.split("@")[0] : "User"));
