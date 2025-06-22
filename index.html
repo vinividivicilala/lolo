@@ -5256,53 +5256,59 @@ let profileRef = null;
 
 
 
-// Fungsi ucapan otomatis
-function getGreetingTime() {
-  const hour = new Date().getHours();
-  if (hour < 11) return "Selamat pagi";
-  else if (hour < 15) return "Selamat siang";
-  else if (hour < 18) return "Selamat sore";
-  else return "Selamat malam";
-}
+  loginBtn.addEventListener("click", async () => {
+    const provider = new GoogleAuthProvider();
+    try {
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
 
-// Status login
-onAuthStateChanged(auth, (user) => {
-  if (user) {
-    const name = user.displayName || user.email;
-    greeting.innerText = `${getGreetingTime()}, ${name}`;
-    loginBtn.style.display = "none";
-    logoutBtn.style.display = "inline-block";
+      // Simpan user ke Firestore jika belum ada
+      const userRef = doc(db, "users", user.uid);
+      const userSnap = await getDoc(userRef);
+      if (!userSnap.exists()) {
+        await setDoc(userRef, {
+          name: user.displayName,
+          email: user.email,
+          photo: user.photoURL,
+          uid: user.uid
+        });
+      }
+    } catch (error) {
+      console.error("Login gagal:", error);
+    }
+  });
 
-    // ✅ Aktifkan fitur-fitur tambahan di sini kalau perlu
-  } else {
-    greeting.innerText = "";
-    loginBtn.style.display = "inline-block";
-    logoutBtn.style.display = "none";
+  logoutBtn.addEventListener("click", () => {
+    signOut(auth);
+  });
+
+  // Deteksi status login
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      document.getElementById("greeting").innerText =
+        `${getGreetingTime()}, ${user.displayName}`;
+      loginBtn.style.display = "none";
+      logoutBtn.style.display = "inline-block";
+
+      // 👇 AKTIFKAN FITUR PESAN & GRUP CHAT DI SINI
+      document.getElementById("chatContainer").style.display = "flex";
+    } else {
+      loginBtn.style.display = "inline-block";
+      logoutBtn.style.display = "none";
+      document.getElementById("greeting").innerText = "";
+
+      // 👇 SEMBUNYIKAN FITUR PESAN & GRUP CHAT SAAT LOGOUT
+      document.getElementById("chatContainer").style.display = "none";
+    }
+  });
+
+  function getGreetingTime() {
+    const hour = new Date().getHours();
+    if (hour < 11) return "Selamat pagi";
+    else if (hour < 15) return "Selamat siang";
+    else if (hour < 18) return "Selamat sore";
+    else return "Selamat malam";
   }
-});
-
-// Login Google
-loginBtn.addEventListener("click", async () => {
-  try {
-    await setPersistence(auth, browserLocalPersistence); // agar tetap login saat reload
-    await signInWithPopup(auth, provider);
-  } catch (error) {
-    alert("Login gagal: " + error.message);
-  }
-});
-
-// Logout
-logoutBtn.addEventListener("click", async () => {
-  try {
-    await signOut(auth);
-    console.log("Berhasil logout");
-  } catch (error) {
-    console.error("Gagal logout:", error);
-  }
-});
-
-
-
 
 
 	
