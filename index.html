@@ -5277,12 +5277,42 @@ onAuthStateChanged(auth, (user) => {
     logoutBtn.style.display = "inline-block";
 
     // ✅ Aktifkan fitur-fitur tambahan di sini kalau perlu
+// Tampilkan fitur chat, profil, grup chat
+  const fiturIDs = ["chatContainer", "profileSection", "groupChatContainer"];
+  fiturIDs.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = "block";
+  });
+
+  // Tampilkan ucapan
+  const greetingText = getGreetingTime() + ", " + (user.displayName || user.email);
+  const greeting = document.getElementById("greeting");
+  if (greeting) greeting.innerText = greetingText;
+
+  // Simpan pengguna global
+  window.currentUser = user;
+
+  // Aktifkan fungsi yang sudah kamu punya
+  if (typeof loadUserContacts === "function") loadUserContacts(user.uid);
+  if (typeof loadUserProfile === "function") loadUserProfile(user.uid);
+  if (typeof enableMessageSending === "function") enableMessageSending(user.uid);
+
+	  
   } else {
+
+ const fiturIDs = ["chatContainer", "profileSection", "groupChatContainer"];
+  fiturIDs.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = "none";
+  });  
     greeting.innerText = "";
     loginBtn.style.display = "inline-block";
     logoutBtn.style.display = "none";
   }
 });
+
+
+	
 
 // Login Google
 loginBtn.addEventListener("click", async () => {
