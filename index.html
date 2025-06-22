@@ -5291,6 +5291,15 @@ loginBtn.addEventListener("click", async () => {
   }
 });
 
+// Logout
+logoutBtn.addEventListener("click", async () => {
+  try {
+    await signOut(auth);
+    console.log("Berhasil logout");
+  } catch (error) {
+    console.error("Gagal logout:", error);
+  }
+});
 
 
 
