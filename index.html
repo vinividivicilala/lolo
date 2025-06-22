@@ -5259,30 +5259,40 @@ let profileRef = null;
 
 
 
+// Fungsi ucapan otomatis
+function getGreetingTime() {
+  const hour = new Date().getHours();
+  if (hour < 11) return "Selamat pagi";
+  else if (hour < 15) return "Selamat siang";
+  else if (hour < 18) return "Selamat sore";
+  else return "Selamat malam";
+}
 
- loginBtn.addEventListener("click", async () => {
-    const provider = new GoogleAuthProvider();
-    try {
-	 await setPersistence(auth, browserLocalPersistence); // agar tetap login saat reload
-    await signInWithPopup(auth, provider);    
-      const result = await signInWithPopup(auth, provider);
-      const user = result.user;
+// Status login
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    const name = user.displayName || user.email;
+    greeting.innerText = `${getGreetingTime()}, ${name}`;
+    loginBtn.style.display = "none";
+    logoutBtn.style.display = "inline-block";
 
-      // Simpan user ke Firestore jika belum ada
-      const userRef = doc(db, "users", user.uid);
-      const userSnap = await getDoc(userRef);
-      if (!userSnap.exists()) {
-        await setDoc(userRef, {
-          name: user.displayName,
-          email: user.email,
-          photo: user.photoURL,
-          uid: user.uid
-        });
-      }
-    } catch (error) {
-      console.error("Login gagal:", error);
-    }
-  });
+    // ✅ Aktifkan fitur-fitur tambahan di sini kalau perlu
+  } else {
+    greeting.innerText = "";
+    loginBtn.style.display = "inline-block";
+    logoutBtn.style.display = "none";
+  }
+});
+
+// Login Google
+loginBtn.addEventListener("click", async () => {
+  try {
+    await setPersistence(auth, browserLocalPersistence); // agar tetap login saat reload
+    await signInWithPopup(auth, provider);
+  } catch (error) {
+    alert("Login gagal: " + error.message);
+  }
+});
 
 // Logout
 logoutBtn.addEventListener("click", async () => {
@@ -5293,59 +5303,6 @@ logoutBtn.addEventListener("click", async () => {
     console.error("Gagal logout:", error);
   }
 });
-
-
-
-onAuthStateChanged(auth, (user) => {
-	 if (user) {
-    const name = user.displayName || user.email;
-    greeting.innerText = `${getGreetingTime()}, ${name}`;
-    loginBtn.style.display = "none";
-    logoutBtn.style.display = "inline-block";
-
-    // ✅ Jika login Gmail berhasil
-    console.log("Login Gmail berhasil:", user.email);
-
-    // Ucapan waktu otomatis
-    const greeting = getGreetingTime() + ", " + (user.displayName || user.email);
-    document.getElementById("greeting").innerText = greeting;
-
-    // ✅ Tampilkan fitur-fitur
-    const fiturIDs = ["chatContainer", "profileSection", "groupChatContainer"];
-    fiturIDs.forEach(id => {
-      const el = document.getElementById(id);
-      if (el) el.style.display = "block";
-    });
-
-    // ✅ Simpan info pengguna global (opsional digunakan di fitur chat)
-    window.currentUser = user;
-
-    // ✅ Aktifkan fungsi chat & profil
-    if (typeof loadUserContacts === "function") loadUserContacts(user.uid);
-    if (typeof loadUserProfile === "function") loadUserProfile(user.uid);
-    if (typeof enableMessageSending === "function") enableMessageSending(user.uid);
-
-  } else {
-    // ❌ Jika logout, sembunyikan fitur-fitur
-    const fiturIDs = ["chatContainer", "profileSection", "groupChatContainer"];
-    fiturIDs.forEach(id => {
-      const el = document.getElementById(id);
-      if (el) el.style.display = "none";
-    });
-
-    document.getElementById("greeting").innerText = "";
-  }
-});
-
-function getGreetingTime() {
-  const hour = new Date().getHours();
-  if (hour < 11) return "Selamat pagi";
-  else if (hour < 15) return "Selamat siang";
-  else if (hour < 18) return "Selamat sore";
-  else return "Selamat malam";
-}
-
-
 
 
 	
