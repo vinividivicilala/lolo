@@ -5268,39 +5268,24 @@ function getGreetingTime() {
   else return "Selamat malam";
 }
 
-onAuthStateChanged(auth, (user) => {
-  const greeting = document.getElementById("greeting"); // ⬅️ pindah ke atas
 
+
+// Status login
+onAuthStateChanged(auth, (user) => {
   if (user) {
     const name = user.displayName || user.email;
-    if (greeting) greeting.innerText = `${getGreetingTime()}, ${name}`;
-
+    greeting.innerText = `${getGreetingTime()}, ${name}`;
     loginBtn.style.display = "none";
     logoutBtn.style.display = "inline-block";
+	  // Set online saat login
+        setDoc(doc(db, "users", user.uid), { status: "online" }, { merge: true });
 
-    // Tampilkan fitur chat, profil, grup chat
-    const fiturIDs = ["chatContainer", "profileSection", "groupChatContainer"];
-    fiturIDs.forEach(id => {
-      const el = document.getElementById(id);
-      if (el) el.style.display = "block";
-    });
+        // Perbarui UI
+        updateUIOnLoginSuccess(user);
 
-    // Simpan pengguna global
-    window.currentUser = user;
-
-    // Aktifkan fungsi
-    if (typeof loadUserContacts === "function") loadUserContacts(user.uid);
-    if (typeof loadUserProfile === "function") loadUserProfile(user.uid);
-    if (typeof enableMessageSending === "function") enableMessageSending(user.uid);
-
+    // ✅ Aktifkan fitur-fitur tambahan di sini kalau perlu
   } else {
-    const fiturIDs = ["chatContainer", "profileSection", "groupChatContainer"];
-    fiturIDs.forEach(id => {
-      const el = document.getElementById(id);
-      if (el) el.style.display = "none";
-    });
-
-    if (greeting) greeting.innerText = "";
+    greeting.innerText = "";
     loginBtn.style.display = "inline-block";
     logoutBtn.style.display = "none";
   }
@@ -5309,35 +5294,51 @@ onAuthStateChanged(auth, (user) => {
 
 
 
-
-
-
-
-
-
-
-
-
 	
 
-// Login Google
-loginBtn.addEventListener("click", async () => {
-  try {
-    await setPersistence(auth, browserLocalPersistence); // agar tetap login saat reload
-    await signInWithPopup(auth, provider);
-  } catch (error) {
-    alert("Login gagal: " + error.message);
-  }
+
+
+document.getElementById("googleLoginBtn")?.addEventListener("click", async () => {
+    try {
+        const result = await signInWithPopup(auth, provider);
+        const user = result.user;
+
+        // Simpan atau perbarui profil pengguna di Firestore
+        const userRef = doc(db, "users", user.uid);
+        const userSnap = await getDoc(userRef);
+
+        if (!userSnap.exists()) {
+            await setDoc(userRef, {
+                name: user.displayName,
+                email: user.email,
+                photoURL: user.photoURL || "",
+                bio: "Halo! Saya pengguna baru.",
+                status: "online",
+                createdAt: new Date(),
+            });
+        } else {
+            await setDoc(userRef, { status: "online" }, { merge: true });
+        }
+
+        updateUIOnLoginSuccess(user); // Update UI setelah login berhasil
+    } catch (error) {
+        console.error("Login gagal:", error);
+        alert("Login dengan Google gagal.");
+    }
 });
 
-// Logout
-logoutBtn.addEventListener("click", async () => {
-  try {
-    await signOut(auth);
-    console.log("Berhasil logout");
-  } catch (error) {
-    console.error("Gagal logout:", error);
-  }
+
+document.getElementById("logoutBtn")?.addEventListener("click", async () => {
+    try {
+        const user = auth.currentUser;
+        if (user) {
+            await setDoc(doc(db, "users", user.uid), { status: "offline" }, { merge: true });
+        }
+        await signOut(auth);
+        window.location.reload(); // Reload halaman setelah logout
+    } catch (error) {
+        console.error("Logout gagal:", error);
+    }
 });
 
 
