@@ -5268,48 +5268,54 @@ function getGreetingTime() {
   else return "Selamat malam";
 }
 
-// Status login
 onAuthStateChanged(auth, (user) => {
+  const greeting = document.getElementById("greeting"); // ⬅️ pindah ke atas
+
   if (user) {
     const name = user.displayName || user.email;
-    greeting.innerText = `${getGreetingTime()}, ${name}`;
+    if (greeting) greeting.innerText = `${getGreetingTime()}, ${name}`;
+
     loginBtn.style.display = "none";
     logoutBtn.style.display = "inline-block";
 
-    // ✅ Aktifkan fitur-fitur tambahan di sini kalau perlu
-// Tampilkan fitur chat, profil, grup chat
-  const fiturIDs = ["chatContainer", "profileSection", "groupChatContainer"];
-  fiturIDs.forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.style.display = "block";
-  });
+    // Tampilkan fitur chat, profil, grup chat
+    const fiturIDs = ["chatContainer", "profileSection", "groupChatContainer"];
+    fiturIDs.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.style.display = "block";
+    });
 
-  // Tampilkan ucapan
-  const greetingText = getGreetingTime() + ", " + (user.displayName || user.email);
-  const greeting = document.getElementById("greeting");
-  if (greeting) greeting.innerText = greetingText;
+    // Simpan pengguna global
+    window.currentUser = user;
 
-  // Simpan pengguna global
-  window.currentUser = user;
+    // Aktifkan fungsi
+    if (typeof loadUserContacts === "function") loadUserContacts(user.uid);
+    if (typeof loadUserProfile === "function") loadUserProfile(user.uid);
+    if (typeof enableMessageSending === "function") enableMessageSending(user.uid);
 
-  // Aktifkan fungsi yang sudah kamu punya
-  if (typeof loadUserContacts === "function") loadUserContacts(user.uid);
-  if (typeof loadUserProfile === "function") loadUserProfile(user.uid);
-  if (typeof enableMessageSending === "function") enableMessageSending(user.uid);
-
-	  
   } else {
+    const fiturIDs = ["chatContainer", "profileSection", "groupChatContainer"];
+    fiturIDs.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.style.display = "none";
+    });
 
- const fiturIDs = ["chatContainer", "profileSection", "groupChatContainer"];
-  fiturIDs.forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.style.display = "none";
-  });  
-    greeting.innerText = "";
+    if (greeting) greeting.innerText = "";
     loginBtn.style.display = "inline-block";
     logoutBtn.style.display = "none";
   }
 });
+
+
+
+
+
+
+
+
+
+
+
 
 
 	
