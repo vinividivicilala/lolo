@@ -5170,6 +5170,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const loginBtn = document.getElementById("googleLoginBtn");
   const logoutBtn = document.getElementById("logoutBtn");
   const greeting = document.getElementById("greeting");
+	const provider = new GoogleAuthProvider();
+
 
 
 
@@ -5254,47 +5256,40 @@ let profileRef = null;
 
 
 
-    // Ucapan otomatis berdasarkan waktu
-  function getGreetingTime() {
-    const hour = new Date().getHours();
-    if (hour < 11) return "Selamat pagi";
-    else if (hour < 15) return "Selamat siang";
-    else if (hour < 18) return "Selamat sore";
-    else return "Selamat malam";
+// Fungsi ucapan otomatis
+function getGreetingTime() {
+  const hour = new Date().getHours();
+  if (hour < 11) return "Selamat pagi";
+  else if (hour < 15) return "Selamat siang";
+  else if (hour < 18) return "Selamat sore";
+  else return "Selamat malam";
+}
+
+// Status login
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    const name = user.displayName || user.email;
+    greeting.innerText = `${getGreetingTime()}, ${name}`;
+    loginBtn.style.display = "none";
+    logoutBtn.style.display = "inline-block";
+
+    // ✅ Aktifkan fitur-fitur tambahan di sini kalau perlu
+  } else {
+    greeting.innerText = "";
+    loginBtn.style.display = "inline-block";
+    logoutBtn.style.display = "none";
   }
+});
 
-  // Saat login sukses
-  auth.onAuthStateChanged(user => {
-    if (user) {
-      const name = user.displayName;
-      greeting.innerText = `${getGreetingTime()}, ${name}`;
-      loginBtn.style.display = "none";
-      logoutBtn.style.display = "inline-block";
-
-      // TODO: bisa di sini juga aktifkan fitur grup chat, pesan pribadi, dll.
-    } else {
-      greeting.innerText = "";
-      loginBtn.style.display = "inline-block";
-      logoutBtn.style.display = "none";
-    }
-  });
-
-  // Login dengan Google
-  loginBtn.addEventListener("click", async () => {
-    const provider = new firebase.auth.GoogleAuthProvider();
-    try {
-      await auth.signInWithPopup(provider);
-    } catch (error) {
-      alert("Login gagal: " + error.message);
-    }
-  });
-
-  // Logout
-  logoutBtn.addEventListener("click", async () => {
-    await auth.signOut();
-  });
- 
-
+// Login Google
+loginBtn.addEventListener("click", async () => {
+  try {
+    await setPersistence(auth, browserLocalPersistence); // agar tetap login saat reload
+    await signInWithPopup(auth, provider);
+  } catch (error) {
+    alert("Login gagal: " + error.message);
+  }
+});
 
 
 
