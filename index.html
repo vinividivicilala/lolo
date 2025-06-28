@@ -4112,6 +4112,1284 @@ button:hover {
   bottom: 40px;
 }
 
+
+
+   /* Styles for the Search Header Section */
+        .search-header {
+            width: 100%;
+            background-color: green;
+            padding: 60px 20px 80px;
+            color: #ffffff;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .search-header::before,
+        .search-header::after {
+            content: '';
+            position: absolute;
+            background-image: url('data:image/svg+xml;charset=UTF-8,%3Csvg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"%3E%3Crect x="2" y="2" width="20" height="20" rx="3" fill="%232e7c3e"/%3E%3C/svg%3E');
+            background-repeat: repeat;
+            opacity: 0.1;
+            pointer-events: none;
+        }
+
+        .search-header::before {
+            top: 0;
+            left: 0;
+            width: 100px;
+            height: 100px;
+            transform: rotate(45deg) translate(-50%, -50%);
+            transform-origin: top left;
+        }
+
+        .search-header::after {
+            bottom: 0;
+            right: 0;
+            width: 150px;
+            height: 150px;
+            transform: rotate(135deg) translate(50%, 50%);
+            transform-origin: bottom right;
+        }
+
+
+        .search-header h1 {
+            font-size: 2.5em;
+            margin-bottom: 30px;
+            font-weight: 600;
+            position: relative;
+            z-index: 1;
+        }
+		
+		 .search-container {
+            position: relative;
+            width: 100%;
+            max-width: 700px;
+        }
+        
+        .search-input {
+            width: 100%;
+            padding: 15px 25px;
+            border: 2px solid #5ab06b;
+            border-radius: 50px;
+            font-size: 1.1em;
+            background-color: white;
+            color: black;
+            outline: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .search-input:focus {
+            border-color: #7aff8d;
+            box-shadow: 0 0 0 3px rgba(122, 255, 141, 0.3);
+        }
+        
+        .search-input::placeholder {
+            color: #a0a0a0;
+            opacity: 0.8;
+        }
+        
+        .search-results-container {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            width: 100%;
+            background: white;
+            border-radius: 0 0 12px 12px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+            z-index: 100;
+            max-height: 400px;
+            overflow-y: auto;
+            margin-top: 5px;
+            border: 1px solid #e0e0e0;
+            border-top: none;
+        }
+        
+        .search-results-container.show {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .search-result-item {
+            padding: 12px 20px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .search-result-item:hover {
+            background: #f8f9fa;
+        }
+        
+        .search-result-category {
+            font-size: 0.8em;
+            color: #666;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .search-result-category svg {
+            margin-right: 8px;
+            width: 14px;
+            height: 14px;
+            fill: #666;
+        }
+        
+        .search-result-title {
+            font-weight: 500;
+            color: #333;
+            margin-bottom: 4px;
+        }
+        
+        .search-result-content {
+            font-size: 0.9em;
+            color: #666;
+            line-height: 1.4;
+        }
+        
+        .highlight {
+            background-color: #fff9c4;
+            color: #333;
+            padding: 0 2px;
+            border-radius: 3px;
+            font-weight: 500;
+        }
+        
+        .no-results {
+            padding: 20px;
+            text-align: center;
+            color: #666;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .search-button {
+            position: absolute;
+            right: 5px;
+            top: 5px;
+            padding: 10px 20px;
+            background-color: #8ce199;
+            color: #0d2836;
+            border: none;
+            border-radius: 50px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .search-button:hover {
+            background-color: #79d084;
+            transform: translateY(-1px);
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .search-container {
+                flex-direction: column;
+            }
+            
+            .search-input {
+                padding: 12px 20px;
+                font-size: 1em;
+            }
+            
+            .search-button {
+                position: relative;
+                width: 100%;
+                margin-top: 10px;
+                top: auto;
+                right: auto;
+            }
+        }
+
+     .like-button.liked {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.follow-button.following {
+    background-color: #2196F3;
+    color: white;
+}
+
+button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+      
+        /* Main Help Section Container */
+        .help-section {
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+            width: 100%;
+            max-width: 900px;
+            overflow: hidden;
+            border: 1px solid #e0e0e0;
+            margin-top: -50px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .help-title {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 25px 20px;
+            background-color: #007bff;
+            color: #ffffff;
+            margin: 0;
+            font-size: 1.8em;
+            font-weight: 600;
+            border-bottom: 1px solid #0056b3;
+        }
+
+        .help-title svg {
+            margin-right: 15px;
+            font-size: 1.5em;
+        }
+
+        .help-nav {
+            display: flex;
+            border-bottom: 1px solid #e0e0e0;
+            background-color: #f8f9fa;
+        }
+
+        .help-tab {
+            flex: 1;
+            padding: 18px 20px;
+            border: none;
+            background-color: transparent;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: 500;
+            color: #555;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            position: relative;
+            outline: none;
+        }
+
+        .help-tab:hover {
+            color: #007bff;
+            background-color: #e9ecef;
+        }
+
+        .help-tab.active {
+            color: #007bff;
+            background-color: #ffffff;
+            border-bottom: 3px solid #007bff;
+            font-weight: 600;
+        }
+
+        .help-tab svg {
+            font-size: 1.2em;
+        }
+
+        .help-content {
+            padding: 30px;
+            background-color: #ffffff;
+        }
+
+        .help-panel {
+            display: none;
+        }
+
+        .help-panel.active {
+            display: block;
+        }
+
+        /* Styling for Topic Cards (FAQ section) */
+        .faq-panel-heading {
+            font-size: 1.5em;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 25px;
+            text-align: left;
+        }
+
+        .topic-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            padding: 0;
+        }
+
+        .topic-card {
+            background-color: #fdfdfd;
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 25px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            text-decoration: none;
+            color: inherit;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+            cursor: pointer;
+        }
+
+        .topic-card:hover {
+            border-color: #28a745;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+            transform: translateY(-3px);
+        }
+
+        .topic-card-icon {
+            flex-shrink: 0;
+            width: 38px;
+            height: 38px;
+            background-color: #e6f7ea;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .topic-card-icon svg {
+            width: 24px;
+            height: 24px;
+            fill: #28a745;
+            transition: fill 0.3s ease;
+        }
+
+        .topic-card:hover .topic-card-icon svg {
+             fill: #228b22;
+        }
+
+        .topic-card-title {
+            font-size: 1.1em;
+            font-weight: 500;
+            color: #333;
+            margin: 0;
+        }
+        
+        /* Guide Styling */
+        .guide-step {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 25px;
+            padding: 20px;
+            background-color: #fdfdfd;
+            border-left: 5px solid #28a745;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .step-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #28a745;
+            margin-right: 20px;
+            flex-shrink: 0;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: 2px solid #28a745;
+            border-radius: 50%;
+        }
+
+        .step-content h3 {
+            margin-top: 0;
+            margin-bottom: 8px;
+            color: #333;
+            font-size: 1.3em;
+        }
+
+        .step-content p {
+            margin: 0;
+            color: #666;
+            line-height: 1.5;
+        }
+
+        /* Contact Styling */
+        .contact-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            padding: 30px 20px;
+            margin-bottom: 20px;
+            background-color: #fdfdfd;
+            border-radius: 12px;
+            border: 1px solid #e0e0e0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .contact-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+        }
+
+        .contact-icon {
+            background-color: #007bff;
+            border-radius: 50%;
+            padding: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .contact-icon svg {
+            color: #ffffff;
+            font-size: 2.2em;
+        }
+
+        .contact-card h3 {
+            margin-top: 0;
+            margin-bottom: 10px;
+            color: #333;
+            font-size: 1.4em;
+        }
+
+        .contact-card p {
+            margin-bottom: 20px;
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .contact-btn {
+            display: inline-block;
+            background-color: #007bff;
+            color: #ffffff;
+            padding: 12px 25px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: background-color 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .contact-btn:hover {
+            background-color: #0056b3;
+        }
+		
+		
+.hidden-page {
+    display: none;
+    width: 100%;
+    max-width: 900px;
+    margin: 20px auto;
+    padding: 30px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+.hidden-page.active {
+    display: block;
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Pastikan z-index cukup tinggi */
+.hidden-page {
+    position: relative;
+    z-index: 100;
+}
+
+        
+        /* Breadcrumbs Styling */
+        .breadcrumbs {
+            font-size: 0.9em;
+            color: #666;
+            display: flex;
+            align-items: center;
+        }
+
+        .breadcrumbs .breadcrumb-link {
+            color: #007bff;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .breadcrumbs .breadcrumb-link:hover {
+            text-decoration: underline;
+        }
+
+        .breadcrumbs span {
+            margin: 0 5px;
+            color: #aaa; /* Lighter color for separator */
+        }
+
+        /* Specific Search Bar for Sub-Pages */
+        .maintenance-search-container {
+            position: relative;
+            width: 250px;
+        }
+
+        .maintenance-search-input {
+            width: 100%;
+            padding: 8px 10px 8px 35px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 0.9em;
+            outline: none;
+            box-sizing: border-box;
+        }
+
+        .maintenance-search-input:focus {
+            border-color: #007bff;
+        }
+
+        .maintenance-search-container .search-icon {
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 20px;
+            height: 20px;
+            fill: #888;
+        }
+
+        /* Refined Maintenance Page Styling (Image 1) */
+        #maintenance-page {
+             /* Use general .hidden-page styles */
+             padding: 30px; /* Override to ensure good padding */
+        }
+
+        #maintenance-page .maintenance-header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+
+        #maintenance-page .maintenance-main-title {
+            font-size: 2em;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 20px; /* Reduced for tighter spacing */
+            text-align: left; /* Ensure left alignment */
+        }
+
+        #maintenance-page .maintenance-links {
+            display: flex;
+            flex-direction: column;
+            gap: 10px; /* Tighter spacing between links */
+            padding-left: 15px; /* Indent as in image */
+        }
+
+        #maintenance-page .maintenance-link {
+            font-size: 1em; /* Smaller font size as in image */
+            color: #007bff;
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        #maintenance-page .maintenance-link:hover {
+            color: #0056b3;
+            text-decoration: underline;
+        }
+
+
+        /* NEW: Maintenance Detail Page Styling (Image 2) */
+        .maintenance-detail-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px; /* Space between header and content */
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .maintenance-detail-content-wrapper {
+            display: flex;
+            gap: 30px;
+            padding-top: 20px;
+        }
+
+        .maintenance-detail-sidebar {
+            width: 250px;
+            flex-shrink: 0; /* Prevent shrinking */
+        }
+
+        .sidebar-title {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .sidebar-links {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .sidebar-item {
+            margin-bottom: 8px;
+        }
+
+        .sidebar-link {
+            text-decoration: none;
+            color: #555;
+            font-size: 1em;
+            display: block;
+            padding: 5px 0;
+            transition: color 0.2s ease;
+        }
+
+        .sidebar-link:hover {
+            color: #007bff;
+        }
+
+        .sidebar-link.active-link {
+            color: #007bff;
+            font-weight: bold;
+        }
+
+        .sidebar-link.inactive {
+            color: #999; /* Greyed out as in image */
+        }
+
+        .maintenance-detail-main {
+            flex-grow: 1;
+        }
+
+        .maintenance-detail-title {
+            font-size: 2em;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .detail-meta {
+            font-size: 0.9em;
+            color: #777;
+            margin-bottom: 15px;
+        }
+
+        .follow-button {
+            background-color: #e9ecef;
+            color: #495057;
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+            padding: 8px 15px;
+            font-size: 0.9em;
+            cursor: pointer;
+            transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+            margin-bottom: 20px;
+            float: right; /* Position to the right */
+            margin-top: -45px; /* Adjust vertical position */
+            position: relative; /* For z-index if needed */
+        }
+
+        .follow-button:hover {
+            background-color: #d4d8da;
+            border-color: #adb5bd;
+        }
+
+        .article-content {
+            clear: both; /* Clear float from follow-button */
+        }
+
+        .article-content p {
+            line-height: 1.6;
+            margin-bottom: 15px;
+            font-size: 1em;
+            color: #333;
+        }
+
+        .article-content p strong {
+            font-weight: 600;
+        }
+
+        .article-content a {
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        .article-content a:hover {
+            text-decoration: underline;
+        }
+
+        /* Added "Was this article helpful?" section based on Image 3 */
+        .article-feedback {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            text-align: center;
+        }
+
+        .article-feedback h3 {
+            font-size: 1.1em;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .feedback-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 10px;
+        }
+
+        .feedback-btn {
+            background-color: #f0f2f5;
+            color: #333;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 8px 20px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: background-color 0.2s ease, border-color 0.2s ease;
+        }
+
+        .feedback-btn:hover {
+            background-color: #e0e2e5;
+            border-color: #ccc;
+        }
+
+        .feedback-count {
+            font-size: 0.85em;
+            color: #777;
+            margin-top: 10px;
+        }
+
+        .article-navigation {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            text-align: center;
+        }
+
+        .article-navigation .nav-link {
+            color: #007bff;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .article-navigation .nav-link:hover {
+            text-decoration: underline;
+        }
+
+        .related-articles {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+
+        .related-articles h3 {
+            font-size: 1.1em;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .related-articles ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .related-articles li {
+            margin-bottom: 10px;
+        }
+
+        .related-articles .related-link {
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        .related-articles .related-link:hover {
+            text-decoration: underline;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .search-container {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .search-input, .search-button {
+                width: 100%;
+                box-sizing: border-box;
+            }
+
+            .search-header h1 {
+                font-size: 2em;
+            }
+
+            .help-title {
+                font-size: 1.5em;
+            }
+
+            .help-tab {
+                font-size: 1em;
+                padding: 15px 10px;
+            }
+
+            .topic-grid {
+                grid-template-columns: 1fr;
+            }
+
+            /* Responsive for Maintenance page */
+            #maintenance-page .maintenance-header-top {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+            #maintenance-page .maintenance-search-container {
+                width: 100%;
+            }
+            #maintenance-page .maintenance-main-title {
+                font-size: 1.6em;
+            }
+            .hidden-page {
+                padding: 20px;
+            }
+
+            /* Responsive for Maintenance Detail page */
+            .maintenance-detail-content-wrapper {
+                flex-direction: column;
+                gap: 20px;
+            }
+            .maintenance-detail-sidebar {
+                width: 100%;
+                margin-bottom: 20px;
+            }
+            .sidebar-title {
+                font-size: 1.1em;
+            }
+            .sidebar-link {
+                font-size: 0.95em;
+            }
+            .maintenance-detail-title {
+                font-size: 1.6em;
+            }
+            .article-content p {
+                font-size: 0.95em;
+            }
+            .follow-button {
+                float: none; /* Remove float on small screens */
+                margin-top: 15px; /* Adjust margin */
+                width: fit-content;
+            }
+        }
+
+        @media (min-width: 769px) {
+            .contact-content {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+                gap: 25px;
+            }
+        }
+
+
+
+/* Style untuk feedback buttons */
+.feedback-btn {
+  padding: 8px 20px;
+  border-radius: 20px;
+  border: 1px solid #ddd;
+  background-color: #f8f9fa;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin: 0 5px;
+}
+
+.feedback-btn:hover {
+  background-color: #e9ecef;
+}
+
+.feedback-btn.voted {
+  background-color: #28a745;
+  color: white;
+  border-color: #28a745;
+}
+
+/* Style untuk social media links */
+.article-social {
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 1px solid #eee;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.sidebar-link.active {
+  font-weight: bold;
+  color: #0066ff;
+}
+
+
+.social-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #333;
+  text-decoration: none;
+  padding: 8px 12px;
+  border-radius: 5px;
+  transition: background-color 0.2s ease;
+}
+
+.social-link:hover {
+  background-color: #f8f9fa;
+}
+
+.social-icon {
+  width: 20px;
+  height: 20px;
+}
+
+.external-icon {
+  width: 16px;
+  height: 16px;
+  opacity: 0.7;
+}
+
+
+/* Style untuk feedback buttons */
+.feedback-btn {
+  padding: 8px 20px;
+  border-radius: 20px;
+  border: 1px solid #ddd;
+  background-color: #f8f9fa;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin: 0 5px;
+}
+
+.feedback-btn:hover {
+  background-color: #e9ecef;
+}
+
+.feedback-btn.voted {
+  background-color: #28a745;
+  color: white;
+  border-color: #28a745;
+}
+
+/* Gaya dasar untuk tombol Ikuti (dari sebelumnya, bisa Anda sesuaikan) */
+.follow-button {
+    background-color: red; /* Warna abu-abu default */
+    color: white;
+    padding: 8px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.follow-button:hover {
+    background-color: #5a6268;
+}
+
+.follow-button.following {
+    background-color: #28a745; /* Warna hijau untuk status mengikuti */
+}
+
+.follow-button.following:hover {
+    background-color: #218838;
+}
+
+/* KONTEN BARU/PERBAIKAN UNTUK ANGKA PENGHITUNG */
+.follow-count {
+    /* Menghilangkan garis bawah yang terlihat di gambar */
+    text-decoration: none; 
+    
+    font-size: 29px; /* Tetap ukuran yang sedikit lebih kecil */
+    font-weight: 900; /* Sedikit lebih tebal dari normal untuk keterbacaan */
+    color: #6c757d; /* Warna abu-abu yang serasi dengan tombol non-aktif */
+    
+    /* Jarak dan penataan */
+    margin-left: 5px; /* Jarak dari tombol */
+    /* Untuk memastikan penempatan vertikal yang baik jika tombol dan angka berada dalam flex container */
+    align-self: center; /* Memastikan angka di tengah vertikal di dalam flex container */
+    
+    /* Opsional: gaya untuk membuatnya terlihat sedikit lebih 'pop' atau menonjol */
+    /* background-color: #f0f0f0;  Contoh: latar belakang abu-abu sangat muda */
+    /* padding: 2px 6px; */       /* Contoh: sedikit padding di sekitar angka */
+    /* border-radius: 3px; */     /* Contoh: sedikit border radius */
+}
+
+/* Container untuk tombol dan angka (penting untuk penataan) */
+.follow-section {
+    display: flex; /* Menggunakan flexbox */
+    align-items: center; /* Pusatkan item secara vertikal */
+    gap: 5px; /* Memberikan jarak antar tombol dan angka */
+    /* Tambahan gaya sesuai kebutuhan */
+    /* margin-top: 10px; */
+    /* justify-content: flex-start; */ /* Atau center, flex-end */
+}
+
+/* Jika Anda ingin angka tersebut berubah warna ketika tombol di-follow */
+.follow-button.following + .follow-count {
+    color: #28a745; /* Ubah warna angka menjadi hijau juga */
+    /* Atau warna lain yang serasi dengan latar belakang hijau tombol */
+}
+
+/* Style untuk like button */
+.like-button {
+  padding: 8px 15px;
+  border-radius: 5px;
+  border: 1px solid #dc3545;
+  background-color: white;
+  color: #dc3545;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.like-button:hover {
+  background-color: #f8f9fa;
+}
+
+.like-button.liked {
+  background-color: #dc3545;
+  color: white;
+}
+
+/* Style untuk social media links */
+.article-social {
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 1px solid #eee;
+}
+
+.article-social h4 {
+  margin-bottom: 15px;
+  color: #333;
+}
+
+.social-links {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.social-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #333;
+  text-decoration: none;
+  padding: 8px 12px;
+  border-radius: 5px;
+  transition: background-color 0.2s ease;
+}
+
+.social-link:hover {
+  background-color: #f8f9fa;
+}
+
+.social-icon {
+  width: 20px;
+  height: 20px;
+}
+
+.external-icon {
+  width: 16px;
+  height: 16px;
+  opacity: 0.7;
+}
+
+/* Style untuk like button di daftar topik */
+.topic-card .like-button {
+  margin-left: auto;
+  padding: 4px 8px;
+  font-size: 0.8em;
+}
+
+.maintenance-links {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.maintenance-link {
+    display: block;
+    padding: 15px;
+    background: #f8f8f8;
+    border-radius: 8px;
+    color: #333;
+    text-decoration: none;
+    transition: background 0.2s;
+    border-left: 4px solid #4CAF50;
+}
+
+.maintenance-link:hover {
+    background: #e8e8e8;
+}
+
+.no-articles {
+    color: #666;
+    font-style: italic;
+    padding: 20px;
+    text-align: center;
+}
+
+
+.hidden-page {
+    display: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.hidden-page.active {
+    opacity: 1;
+}
+
+/* Maintenance Links */
+.maintenance-link-item {
+    padding: 12px 16px;
+    border-bottom: 1px solid #eee;
+    transition: background-color 0.2s;
+}
+
+.maintenance-link-item:hover {
+    background-color: #f8f8f8;
+}
+
+.maintenance-link {
+    font-weight: 500;
+    color: #333;
+    text-decoration: none;
+    display: block;
+    margin-bottom: 4px;
+}
+
+.maintenance-link-meta {
+    display: flex;
+    gap: 12px;
+    font-size: 0.85rem;
+    color: #666;
+}
+
+.article-category {
+    background-color: #e1f5fe;
+    color: #0288d1;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+}
+
+/* Search Results */
+.search-result-item {
+    padding: 12px;
+    border-bottom: 1px solid #eee;
+    cursor: pointer;
+}
+
+.search-result-item:hover {
+    background-color: #f5f5f5;
+}
+
+.search-result-title {
+    font-weight: 500;
+    margin-bottom: 4px;
+}
+
+.search-result-content {
+    color: #666;
+    font-size: 0.9rem;
+    margin-bottom: 6px;
+}
+
+.search-result-meta {
+    display: flex;
+    gap: 12px;
+    font-size: 0.8rem;
+    color: #999;
+}
+
+.search-result-category-badge {
+    background-color: #e8f5e9;
+    color: #388e3c;
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+/* Sidebar Articles */
+.sidebar-section-title {
+    font-size: 1rem;
+    margin: 0 0 12px 0;
+    padding: 0 12px;
+    color: #333;
+}
+
+.sidebar-articles-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.sidebar-article-item {
+    padding: 8px 12px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.sidebar-article-link {
+    display: block;
+    color: #333;
+    text-decoration: none;
+    margin-bottom: 2px;
+}
+
+.sidebar-article-link:hover {
+    color: #0277bd;
+}
+
+.sidebar-article-link.active {
+    color: #01579b;
+    font-weight: 500;
+}
+
+.sidebar-article-meta {
+    display: block;
+    font-size: 0.75rem;
+    color: #757575;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	  
+
 #auth-container .button {
     background: white;
     color: red;
@@ -4633,47 +5911,764 @@ button:hover {
 
 
 
+<div class="search-header">
+    <h1>Hai! Apakah kamu butuh saya?</h1>
+    <div class="search-container">
+        <input type="text" class="search-input" placeholder="Cari jawaban dari pertanyaanmu di sini" id="mainSearchInput">
+        <button class="search-button">Cari</button>
+        <div class="search-results-container" id="searchResults">
+        </div>
+    </div>
+</div>
 
-
-
-
-
-
-        <div class="section">
-            <h2>
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor">
-                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-1.41 1.41C12.99 13.46 12 14 12 16h-2v-.5c0-1.99 1.51-3.49 3.57-3.49 1.41 0 2.54.83 3.02 2.08l1.41-1.41C16.81 10.24 14.49 9 12 9c-1.86 0-3.47 1.27-3.9 3.01L6.23 13.16c.47 1.74 2.14 3.09 3.9 3.09 2.31 0 4.2-1.71 4.2-4.09 0-1.53-.88-2.89-2.13-3.59z"/>
-                </svg>
-                Bantuan
-            </h2>
-            <ul>
-                <li>
-                    <a href="#" onclick="showHelp('faq')">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor">
+<div id="main-help-section" class="help-section">
+    <h2 class="help-title">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-1.41 1.41C12.99 13.46 12 14 12 16h-2v-.5c0-1.99 1.51-3.49 3.57-3.49 1.41 0 2.54.83 3.02 2.08l1.41-1.41C16.81 10.24 14.49 9 12 9c-1.86 0-3.47 1.27-3.9 3.01L6.23 13.16c.47 1.74 2.14 3.09 3.9 3.09 2.31 0 4.2-1.71 4.2-4.09 0-1.53-.88-2.89-2.13-3.59z"/>
+        </svg>
+        Bantuan
+    </h2>
+    
+    <div class="help-nav">
+        <button class="help-tab active" data-tab="faq">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-1.41 1.41C12.99 13.46 12 14 12 16h-2v-.5c0-1.99 1.51-3.49 3.57-3.49 1.41 0 2.54.83 3.02 2.08l1.41-1.41C16.81 10.24 14.49 9 12 9c-1.86 0-3.47 1.27-3.9 3.01L6.23 13.16c.47 1.74 2.14 3.09 3.9 3.09 2.31 0 4.2-1.71 4.2-4.09 0-1.53-.88-2.89-2.13-3.59z"/>
+            </svg>
+            FAQ
+        </button>
+        <button class="help-tab" data-tab="guide">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor">
+                <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14h-2v-2h2v2zm2-4h-4V6h4v6z"/>
+            </svg>
+            Panduan
+        </button>
+        <button class="help-tab" data-tab="contact">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor">
+                <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-7 9h-2V5h2v6zm0 4h-2v-2h2v2z"/>
+            </svg>
+            Kontak
+        </button>
+    </div>
+    
+    <div class="help-content">
+        <div id="faq-content" class="help-panel active">
+            <h3 class="faq-panel-heading">Cari berdasarkan topik</h3>
+            <div class="topic-grid">
+                <a href="#" class="topic-card animate__animated animate__fadeIn" data-target-page="maintenance-page">
+                    <div class="topic-card-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M19.43 12.98c.04-.32.07-.64.07-.98s-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.09-.76-1.71-1.06L14 2.81c-.04-.24-.24-.41-.48-.41h-4c-.24 0-.44.17-.48.41L8.03 5.07c-.62.3-1.19.66-1.71 1.06l-2.49-1c-.22-.08-.49 0-.61.22l-2 3.46c-.12.22-.07.49.12.64l2.11 1.65c-.04.32-.07.64-.07.98s.03.66.07.98l-2.11 1.65c-.19.15-.24.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.09-.76 1.71 1.06L9.52 21.19c.04.24.24.41.48.41h4c.24 0 .44-.17.48-.41l.48-2.52c.62-.3 1.19-.66 1.71-1.06l2.49 1c.22.08.49 0 .61-.22l2-3.46c.12.22.07-.49-.12-.64l-2.11-1.65zm-2.07-1.43c.33.67.53 1.39.53 2.15s-.2 1.48-.53 2.15l.15.29.98.77-.92 1.59-1.14-.45-.4.81c-.42.84-.96 1.6-1.6 2.22l-.1.19-.77.98-1.59-.92-.45 1.14-.81.4c-.84.42-1.6.96-2.22 1.6l-.19.1-.98-.77-1.59.92.45-1.14-.81-.4c-.84-.42-1.6-.96-2.22-1.6L4.01 16.32l-.77-.98.92-1.59 1.14.45.4-.81c.42-.84.96-1.6 1.6-2.22l-.1.19.77-.98 1.59.92.45-1.14.81-.4c.84-.42 1.6.96 2.22 1.6l.19-.1.98-.77 1.59-.92-.45 1.14.81.4c.84-.42 1.6.96 2.22 1.6zM12 15.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z"/>
+                        </svg>
+                    </div>
+                    <p class="topic-card-title">Maintenance</p>
+                </a>
+                
+                <a href="#" class="topic-card animate__animated animate__fadeIn">
+                    <div class="topic-card-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
                             <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-1.41 1.41C12.99 13.46 12 14 12 16h-2v-.5c0-1.99 1.51-3.49 3.57-3.49 1.41 0 2.54.83 3.02 2.08l1.41-1.41C16.81 10.24 14.49 9 12 9c-1.86 0-3.47 1.27-3.9 3.01L6.23 13.16c.47 1.74 2.14 3.09 3.9 3.09 2.31 0 4.2-1.71 4.2-4.09 0-1.53-.88-2.89-2.13-3.59z"/>
                         </svg>
-                        FAQ
-                    </a>
-                </li>
-                <li>
-                    <a href="#" onclick="showHelp('guide')">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor">
-                            <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14h-2v-2h2v2zm2-4h-4V6h4v6z"/>
+                    </div>
+                    <p class="topic-card-title">Tentang Note Farid</p>
+                </a>
+                <a href="#" class="topic-card animate__animated animate__fadeIn">
+                    <div class="topic-card-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M18 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-1 16H7v-1.5h10V18zm0-3.5H7V13h10v1.5zm0-3.5H7V9.5h10V11z"/>
                         </svg>
-                        Panduan
-                    </a>
-                </li>
-                <li>
-                    <a href="#" onclick="showHelp('contact')">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor">
-                            <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-7 9h-2V5h2v6zm0 4h-2v-2h2v2z"/>
+                    </div>
+                    <p class="topic-card-title">Panduan Awal</p>
+                </a>
+                <a href="#" class="topic-card animate__animated animate__fadeIn">
+                    <div class="topic-card-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
                         </svg>
-                        Kontak
-                    </a>
-                </li>
-            </ul>
-            <div id="helpContent"></div>
+                    </div>
+                    <p class="topic-card-title">Akun Saya</p>
+                </a>
+                <a href="#" class="topic-card animate__animated animate__fadeIn">
+                    <div class="topic-card-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M21 18v1c0 1.1-.9 2-2 2H5c-1.11 0-2-.9-2-2V5c0-1.11.89-2 2-2h14c1.1 0 2 .9 2 2v1h-9c-1.11 0-2 .9-2 2v8c0 1.1.89 2 2 2h9zm-9-2c0-.55-.45-1-1-1H7c-.55 0-1 .45-1 1s.45 1 1 1h4c.55 0 1-.45 1-1zm0-3c0-.55-.45-1-1-1H7c-.55 0-1 .45-1 1s.45 1 1 1h4c.55 0 1-.45 1-1zm0-3c0-.55-.45-1-1-1H7c-.55 0-1 .45-1 1s.45 1 1 1h4c.55 0 1-.45 1-1zm8-7H5c-.55 0-1-.45-1-1V5h16v.01c0 .55-.45.99-1 .99z"/>
+                        </svg>
+                    </div>
+                    <p class="topic-card-title">Update website farid</p>
+                </a>
+                <a href="#" class="topic-card animate__animated animate__fadeIn">
+                    <div class="topic-card-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/>
+                        </svg>
+                    </div>
+                    <p class="topic-card-title">Tidak tersedia</p>
+                </a>
+                <a href="#" class="topic-card animate__animated animate__fadeIn">
+                    <div class="topic-card-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11H7v-2h10v2z"/>
+                        </svg>
+                    </div>
+                    <p class="topic-card-title">Tidak tersedia</p>
+                </a>
+                <a href="#" class="topic-card animate__animated animate__fadeIn">
+                    <div class="topic-card-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M21 18v1c0 1.1-.9 2-2 2H5c-1.11 0-2-.9-2-2V5c0-1.11.89-2 2-2h14c1.1 0 2 .9 2 2v1h-9c-1.11 0-2 .9-2 2v8c0 1.1.89 2 2 2h9zm-9-2c0-.55-.45-1-1-1H7c-.55 0-1 .45-1 1s.45 1 1 1h4c.55 0 1-.45 1-1zm0-3c0-.55-.45-1-1-1H7c-.55 0-1 .45-1 1s.45 1 1 1h4c.55 0 1-.45 1-1zm0-3c0-.55-.45-1-1-1H7c-.55 0-1 .45-1 1s.45 1 1 1h4c.55 0 1-.45 1-1zm8-7H5c-.55 0-1-.45-1-1V5h16v.01c0 .55-.45.99-1 .99z"/>
+                        </svg>
+                    </div>
+                    <p class="topic-card-title">Tidak tersedia</p>
+                </a>
+                <a href="#" class="topic-card animate__animated animate__fadeIn">
+                    <div class="topic-card-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm-8 7h2.24l-2.04 2.04.71.71 2.59-2.59H12v-2H5.41l2.59-2.59-.71-.71L4 7.41V4H2v3.41l2 2V15zm16 0V7.41l-2-2V4h2v3.41l2 2V15h-2.24l2.04-2.04-.71-.71-2.59 2.59H12v2h6.59l-2.59 2.59.71.71 3.29-3.29V15h-2z"/>
+                        </svg>
+                    </div>
+                    <p class="topic-card-title">Tidak tersedia</p>
+                </a>
+                <a href="#" class="topic-card animate__animated animate__fadeIn">
+                    <div class="topic-card-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 5.9c1.16 0 2.1.94 2.1 2.1s-.94 2.1-2.1 2.1S9.9 9.16 9.9 8s.94-2.1 2.1-2.1m0 9c2.97 0 6.1 1.46 6.1 2.1v1.1H5.9V17c0-.64 3.13-2.1 6.1-2.1M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-2.65 0-5.9-1.23-5.9-3s3.95-3 5.9-3 5.9 1.23 5.9 3-3.25 3-5.9 3zm0-8c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3z"/>
+                        </svg>
+                    </div>
+                    <p class="topic-card-title">Pendaftaran Akun</p>
+                </a>
+                <a href="#" class="topic-card animate__animated animate__fadeIn">
+                    <div class="topic-card-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-4 0c1.66 0 2.99-1.34 2.99-3S13.66 5 12 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-4 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm8 4c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3zm-4 0c1.66 0 2.99-1.34 2.99-3S13.66 12 12 12c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-4 0c1.66 0 2.99-1.34 2.99-3S9.66 12 8 12C6.34 12 5 13.34 5 15s1.34 3 3 3z"/>
+                        </svg>
+                    </div>
+                    <p class="topic-card-title">Tidak tersedia Note Farid</p>
+                </a>
+                <a href="#" class="topic-card animate__animated animate__fadeIn">
+                    <div class="topic-card-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3z"/>
+                        </svg>
+                    </div>
+                    <p class="topic-card-title">Keamanan</p>
+                </a>
+                <a href="#" class="topic-card animate__animated animate__fadeIn">
+                    <div class="topic-card-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93h2c0 3.31 2.69 6 6 6v2.07zm4-.93V17c3.31 0 6-2.69 6-6h2c0 4.08-3.05 7.44-7 7.93zM12 13c-1.1 0-2-.9-2-2V7c0-.55-.45-1-1-1s-1 .45-1 1v4c0 2.21 1.79 4 4 4h4c.55 0 1-.45 1-1s-.45-1-1-1h-4zm0-6c-.55 0-1-.45-1-1V4c0-.55.45-1 1-1s1 .45 1 1v2c0 .55-.45 1-1 1z"/>
+                        </svg>
+                    </div>
+                    <p class="topic-card-title">Kendala dan Bantuan</p>
+                </a>
+            </div>
         </div>
+        
+        <div id="guide-content" class="help-panel">
+            <div class="guide-step animate__animated animate__fadeInLeft">
+                <div class="step-number">1</div>
+                <div class="step-content">
+                    <h3>Pendaftaran Akun</h3>
+                    <p>Isi formulir pendaftaran dengan data yang valid. Pastikan email yang digunakan aktif untuk verifikasi.</p>
+                </div>
+            </div>
+            <div class="guide-step animate__animated animate__fadeInLeft">
+                <div class="step-number">2</div>
+                <div class="step-content">
+                    <h3>Verifikasi Email</h3>
+                    <p>Cek inbox email Anda dan klik link verifikasi yang kami kirimkan untuk mengaktifkan akun.</p>
+                </div>
+            </div>
+            <div class="guide-step animate__animated animate__fadeInLeft">
+                <div class="step-number">3</div>
+                <div class="step-content">
+                    <h3>Mulai Menggunakan Layanan</h3>
+                    <p>Setelah verifikasi, login ke akun Anda dan jelajahi semua fitur yang tersedia.</p>
+                </div>
+            </div>
+        </div>
+        
+        <div id="contact-content" class="help-panel">
+            <div class="contact-card animate__animated animate__zoomIn">
+                <div class="contact-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
+                    </svg>
+                </div>
+                <h3>Email</h3>
+                <p>bantuan@Tidak tersedia.com</p>
+                <a href="mailto:bantuan@Tidak tersedia.com" class="contact-btn">Kirim Email</a>
+            </div>
+            <div class="contact-card animate__animated animate__zoomIn">
+                <div class="contact-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M20.01 15.38c-1.23 0-2.42-.2-3.53-.56-.35-.12-.74-.03-1.01.24l-1.57 1.97c-2.83-1.35-5.48-3.9-6.89-6.83l1.95-1.66c.27-.28.35-.67.24-1.02-.37-1.11-.56-2.3-.56-3.53 0-.54-.45-.99-.99-.99H4.19C3.65 3 3 3.24 3 3.99 3 13.28 10.73 21 20.01 21c.71 0 .99-.63.99-1.18v-3.45c0-.54-.45-.99-.99-.99z"/>
+                    </svg>
+                </div>
+                <h3>Telepon</h3>
+                <p>Tidak tersedia</p>
+                <a href="tel:+621234567890" class="contact-btn">Hubungi Kami</a>
+            </div>
+            <div class="contact-card animate__animated animate__zoomIn">
+                <div class="contact-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                    </svg>
+                </div>
+                <h3>Alamat</h3>
+                <p>Tidak tersedia</p>
+                <a href="https://maps.app.goo.gl/YourActualLocation" target="_blank" class="contact-btn">Lihat Peta</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="maintenance-page" class="hidden-page">
+    <div class="maintenance-header-top">
+        <div class="breadcrumbs">
+            <a href="#" class="breadcrumb-link" data-target-page="main-help-section">Note Farid</a>
+            <span>></span>
+            <span>Maintenance</span>
+        </div>
+        <div class="maintenance-search-container">
+            <input type="text" class="maintenance-search-input" placeholder="Cari">
+            <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+            </svg>
+        </div>
+    </div>
+    <div class="maintenance-content-wrapper">
+        <h2 class="maintenance-main-title">Maintenance</h2>
+        <div class="maintenance-links" id="maintenance-links-container">
+            </div>
+    </div>
+</div>
+
+
+<!-- Artikel 1: Informasi Pemeliharaan Sistem note farid (sudah ada) -->
+<div id="maintenance-info-page" class="hidden-page">
+    <div class="maintenance-detail-header">
+        <div class="breadcrumbs">
+            <a href="#" class="breadcrumb-link" data-target-page="main-help-section">Note Farid</a>
+            <span>></span>
+            <a href="#" class="breadcrumb-link" data-target-page="maintenance-page">Maintenance</a>
+            <span>></span>
+            <span>Informasi Pemeliharaan Sistem Note Farid</span>
+        </div>
+        
+        
+        <div class="maintenance-search-container">
+            <input type="text" class="maintenance-search-input" placeholder="Cari">
+            <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+            </svg>
+        </div>
+    </div>
+	
+	 <div class="note-actions">
+    <button class="like-button" disabled>❤️ 0</button>
+    <button class="follow-button" disabled>👤 0</button>
+  </div>
+    
+    <div class="maintenance-detail-content-wrapper">
+        <div class="maintenance-detail-sidebar">
+            <h3 class="sidebar-title">Artikel dalam bagian ini</h3>
+            <ul class="sidebar-links" id="sidebar-links-container">
+                <li><a href="#" class="sidebar-link" data-article-id="maintenance-info-page">Informasi Pemeliharaan Sistem Note Farid</a></li>
+                <li><a href="#" class="sidebar-link" data-article-id="general-maintenance">Maintenance Umum & Tips Sistem Note Farid</a></li>
+                <li><a href="#" class="sidebar-link" data-article-id="mitra-info">Informasi pengguna  Terbaru</a></li>
+            </ul>
+        </div>
+        
+        <div class="maintenance-detail-main">
+            <h2 class="maintenance-detail-title">Informasi Pemeliharaan Sistem Note Farid</h2>
+            <p class="detail-meta">Diperbarui:  yang lalu</p>
+            
+            <div class="article-content">
+                <p>Hi manusia belajar Note Farid,</p>
+                <p>Kami ingin menginformasikan bahwa pada <strong>Sabtu, 28 Juni 2025 pukul 07.45 WIB hingga Rabu, 31 Desember 2025 pukul 00.00 WIB</strong>, akan dilakukan perbaikan, pembaruan dan pemeliharaan tampilan website farid yang kurang baik untuk digunakan.</p>
+                <p>Jangan khawatir, selama website masih bisa gunakan  <strong>Anda tetap dapat melakukan aktivitas sesuai anda lakukan</strong> selama proses perbaikan, pembaruan dan pemeliharaan tampilan website farid .</p>
+                <p>Kami sangat menghargai pengertian Anda dan mohon maaf apabila terdapat kendala selama proses pemulihan berlangsung.</p>
+            </div>   
+		
+
+<div class="article-feedback">
+    <h3>Apakah artikel ini membantu?</h3>
+    <div class="feedback-buttons">
+        <button class="feedback-btn yes">Ya</button>
+        <button class="feedback-btn no">Tidak</button>
+    </div>
+	</div>
+    <p class="feedback-count">0 dari 0 menganggap ini berguna</p>
+</div>
+            
+            <div class="article-navigation">
+                <a href="#" class="nav-link">Ada pertanyaan lagi? Kirim permintaan</a>
+            </div>
+        <!-- Social media links akan ditambahkan secara otomatis -->
+</div>
+
+            <div class="article-navigation">
+                <a href="#" class="nav-link">Ada pertanyaan lagi? Kirim permintaan</a>
+            </div>
+            <div class="related-articles">
+                <h3>Artikel yang dilihat baru-baru ini</h3>
+                <ul>
+                    <li><a href="#" class="related-link">Tidak tersedia</a></li>
+                    <li><a href="#" class="related-link">Tidak tersedia</a></li>
+                </ul>
+                <h3>Artikel terkait</h3>
+                <ul>
+                    <li><a href="#" class="related-link">Tidak tersedia</a></li>
+                    <li><a href="#" class="related-link">Tidak tersedia</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- Artikel 2: Maintenance Umum & Tips Sistem Note Farid -->
+<div id="general-maintenance" class="hidden-page">
+    <div class="maintenance-detail-header">
+        <div class="breadcrumbs">
+            <a href="#" class="breadcrumb-link" data-target-page="main-help-section">Note Farid</a>
+            <span>></span>
+            <a href="#" class="breadcrumb-link" data-target-page="maintenance-page">Maintenance</a>
+            <span>></span>
+            <span>Maintenance Umum & Tips Sistem Note Farid</span>
+        </div>
+		
+		 <div class="note-actions">
+    <button class="like-button" disabled>❤️ 0</button>
+    <button class="follow-button" disabled>👤 0</button>
+  </div>
+        
+        
+        
+        <div class="maintenance-search-container">
+            <input type="text" class="maintenance-search-input" placeholder="Cari">
+            <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+            </svg>
+        </div>
+    </div>
+    
+    <div class="maintenance-detail-content-wrapper">
+        <div class="maintenance-detail-sidebar">
+            <h3 class="sidebar-title">Artikel dalam bagian ini</h3>
+            <ul class="sidebar-links" id="sidebar-links-container">
+                <li><a href="#" class="sidebar-link" data-article-id="maintenance-info-page">Informasi Pemeliharaan Sistem Note Farid</a></li>
+                <li><a href="#" class="sidebar-link" data-article-id="general-maintenance">Maintenance Umum & Tips Sistem Note Farid</a></li>
+                <li><a href="#" class="sidebar-link" data-article-id="mitra-info">Informasi pengguna  Terbaru</a></li>
+            </ul>
+        </div>
+        
+        <div class="maintenance-detail-main">
+            <h2 class="maintenance-detail-title">Maintenance Umum & Tips Sistem Note Farid</h2>
+            <p class="detail-meta">Diperbarui: 1 hari yang lalu</p>
+            
+            <div class="article-content">
+                <p>Berikut beberapa tips untuk maintenance sistem:</p>
+                <ol>
+                    <li>Lakukan pengecekkan website secara berkala</li>
+                    
+                </ol>
+                <p>Dengan melakukan maintenance rutin, sistem akan berjalan lebih optimal.</p>
+            </div>
+            
+            <div class="article-feedback">
+                <h3>Apakah artikel ini membantu?</h3>
+                <div class="feedback-buttons">
+                    <button class="feedback-btn yes">Ya</button>
+                    <button class="feedback-btn no">Tidak</button>
+                </div>
+                <p class="feedback-count">0 dari 0 menganggap ini berguna</p>
+            </div>
+            
+            <div class="article-navigation">
+                <a href="#" class="nav-link">Ada pertanyaan lagi? Kirim permintaan</a>
+            </div>
+			<div class="related-articles">
+                <h3>Artikel yang dilihat baru-baru ini</h3>
+                <ul>
+                    <li><a href="#" class="related-link">Tidak tersedia</a></li>
+                    <li><a href="#" class="related-link">Tidak tersedia</a></li>
+                </ul>
+                <h3>Artikel terkait</h3>
+                <ul>
+                    <li><a href="#" class="related-link">Tidak tersedia</a></li>
+                    <li><a href="#" class="related-link">Tidak tersedia</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+			
+			
+        
+<!-- Artikel 3: Informasi pengguna Terbaru -->
+<div id="mitra-info" class="hidden-page">
+    <div class="maintenance-detail-header">
+        <div class="breadcrumbs">
+            <a href="#" class="breadcrumb-link" data-target-page="main-help-section">Note Farid</a>
+            <span>></span>
+            <a href="#" class="breadcrumb-link" data-target-page="maintenance-page">Maintenance</a>
+            <span>></span>
+            <span>Informasi pengguna Terbaru</span>
+        </div>
+        
+        <div class="maintenance-search-container">
+            <input type="text" class="maintenance-search-input" placeholder="Cari">
+            <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+            </svg>
+        </div>
+    </div>
+	
+	 <div class="note-actions">
+    <button class="like-button" disabled>❤️ 0</button>
+    <button class="follow-button" disabled>👤 0</button>
+  </div>
+    
+    <div class="maintenance-detail-content-wrapper">
+        <div class="maintenance-detail-sidebar">
+            <h3 class="sidebar-title">Artikel dalam bagian ini</h3>
+            <ul class="sidebar-links" id="sidebar-links-container">
+                <li><a href="#" class="sidebar-link" data-article-id="maintenance-info-page">Informasi Pemeliharaan Sistem Note Farid</a></li>
+                <li><a href="#" class="sidebar-link" data-article-id="general-maintenance">Maintenance Umum & Tips Sistem Note Farid</a></li>
+                <li><a href="#" class="sidebar-link" data-article-id="mitra-info">Informasi pengguna Terbaru</a></li>
+            </ul>
+        </div>
+        
+        <div class="maintenance-detail-main">
+            <h2 class="maintenance-detail-title">Informasi pengguna Terbaru</h2>
+            <p class="detail-meta">Diperbarui: 2 hari yang lalu</p>
+            
+            <div class="article-content">
+                <p>Informasi terbaru seputar pengguna Note Farid:</p>
+                <ul>
+                    <li>fitur terbaru website farid</li>
+                    <li>bisa digunakan email manual/ login gmail</li>
+                    <li>diupdate secara berkala</li>
+                    <li>tanpa diketahui oleh orng lain pengirim note</li>
+                </ul>
+                <p>Segera daftarkan diri Anda untuk mendapatkan manfaat ini.</p>
+            </div>
+			
+
+            
+            <div class="article-feedback">
+                <h3>Apakah artikel ini membantu?</h3>
+                <div class="feedback-buttons">
+                    <button class="feedback-btn yes">Ya</button>
+                    <button class="feedback-btn no">Tidak</button>
+                </div>
+                <p class="feedback-count">0 dari 0 menganggap ini berguna</p>
+            </div>
+            
+            <div class="article-navigation">
+                <a href="#" class="nav-link">Ada pertanyaan lagi? Kirim permintaan</a>
+            </div>
+			<div class="related-articles">
+                <h3>Artikel yang dilihat baru-baru ini</h3>
+                <ul>
+                    <li><a href="#" class="related-link">Tidak tersedia</a></li>
+                    <li><a href="#" class="related-link">Tidak tersedia</a></li>
+                </ul>
+                <h3>Artikel terkait</h3>
+                <ul>
+                    <li><a href="#" class="related-link">Tidak tersedia</a></li>
+                    <li><a href="#" class="related-link">Tidak tersedia</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+        
+
+
+<!-- Artikel 4: informasi-umum -->
+<div id="informasi-umum" class="hidden-page">
+    <div class="maintenance-detail-header">
+        <div class="breadcrumbs">
+            <a href="#" class="breadcrumb-link" data-target-page="main-help-section">Note Farid</a>
+            <span>></span>
+            <a href="#" class="breadcrumb-link" data-target-page="maintenance-page">Maintenance</a>
+            <span>></span>
+            <span>Informasi Penting Lainnya</span>
+        </div>
+        
+        
+        <div class="maintenance-search-container">
+            <input type="text" class="maintenance-search-input" placeholder="Cari">
+            <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+            </svg>
+        </div>
+    </div>
+	
+	
+	 <div class="note-actions">
+    <button class="like-button" disabled>❤️ 0</button>
+    <button class="follow-button" disabled>👤 0</button>
+  </div>
+    
+    <div class="maintenance-detail-content-wrapper">
+        <div class="maintenance-detail-sidebar">
+            <h3 class="sidebar-title">Artikel dalam bagian ini</h3>
+            <ul class="sidebar-links" id="sidebar-links-container">
+                <li><a href="#" class="sidebar-link" data-article-id="maintenance-info-page">Informasi Pemeliharaan Sistem Note Farid</a></li>
+                <li><a href="#" class="sidebar-link" data-article-id="general-maintenance">Maintenance Umum & Tips Sistem Note Farid</a></li>
+                <li><a href="#" class="sidebar-link" data-article-id="mitra-info">Informasi pengguuna Terbaru</a></li>
+            </ul>
+        </div>
+        
+        <div class="maintenance-detail-main">
+            <h2 class="maintenance-detail-title">Informasi Penting Lainnya</h2>
+            <p class="detail-meta">Diperbarui: 2 hari yang lalu</p>
+            
+            <div class="article-content">
+                <p>Pengumuman penting untuk semua pengguna:</p>
+                <ul>
+                   <li>perbaikan website maintenance jadwal setiap hari</li>
+                    <li>Fitur baru akan segera diluncurkan</li>
+                    <li>Perubahan kebijakan privasi dan ketentuan</li>
+                    <li>Panduan keamanan akun terbaru</li>
+                </ul>
+            </div>
+			
+			
+
+            
+            <div class="article-feedback">
+                <h3>Apakah artikel ini membantu?</h3>
+                <div class="feedback-buttons">
+                    <button class="feedback-btn yes">Ya</button>
+                    <button class="feedback-btn no">Tidak</button>
+                </div>
+                <p class="feedback-count">0 dari 0 menganggap ini berguna</p>
+            </div>
+            
+            <div class="article-navigation">
+                <a href="#" class="nav-link">Ada pertanyaan lagi? Kirim permintaan</a>
+            </div>
+			<div class="related-articles">
+                <h3>Artikel yang dilihat baru-baru ini</h3>
+                <ul>
+                    <li><a href="#" class="related-link">Tidak tersedia</a></li>
+                    <li><a href="#" class="related-link">Tidak tersedia</a></li>
+                </ul>
+                <h3>Artikel terkait</h3>
+                <ul>
+                    <li><a href="#" class="related-link">Tidak tersedia</a></li>
+                    <li><a href="#" class="related-link">Tidak tersedia</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+       
+
+
+
+
+
+
+
+
+
+
+<!-- Artikel 5: Panduan Penggunaan Sistem -->
+<div id="panduan-penggunaan" class="hidden-page">
+    <div class="maintenance-detail-header">
+        <div class="breadcrumbs">
+            <a href="#" class="breadcrumb-link" data-target-page="main-help-section">Note Farid</a>
+            <span>></span>
+            <a href="#" class="breadcrumb-link" data-target-page="guides-page">Panduan</a>
+            <span>></span>
+            <span>Panduan Penggunaan Sistem</span>
+        </div>
+        
+        
+        
+        <div class="maintenance-search-container">
+            <input type="text" class="maintenance-search-input" placeholder="Cari">
+            <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+            </svg>
+        </div>
+    </div>
+	
+	
+	 <div class="note-actions">
+    <button class="like-button" disabled>❤️ 0</button>
+    <button class="follow-button" disabled>👤 0</button>
+  </div>
+    
+    <div class="maintenance-detail-content-wrapper">
+        <div class="maintenance-detail-sidebar">
+            <h3 class="sidebar-title">Artikel dalam bagian ini</h3>
+            <ul class="sidebar-links" id="sidebar-links-container">
+                <li><a href="#" class="sidebar-link" data-article-id="panduan-penggunaan">Panduan Penggunaan Sistem</a></li>
+                <li><a href="#" class="sidebar-link" data-article-id="faq-umum">FAQ - Pertanyaan Umum</a></li>
+                <li><a href="#" class="sidebar-link" data-article-id="panduan-awal">Panduan Awal untuk Pemula</a></li>
+            </ul>
+        </div>
+		
+		
+        
+        <div class="maintenance-detail-main">
+            <h2 class="maintenance-detail-title">Panduan Penggunaan Sistem</h2>
+            <p class="detail-meta">Diperbarui: 3 hari yang lalu</p>
+            
+            <div class="article-content">
+                <p>Berikut panduan lengkap penggunaan sistem:</p>
+                <ol>
+                    <li><strong>Cara login dan verifikasi akun</strong>: Gunakan email dan password yang telah terdaftar</li>
+                    <li><strong>Navigasi menu utama</strong>: Jelajahi fitur melalui menu sidebar</li>
+                    <li><strong>Fitur-fitur penting</strong>: Pelajari fitur unggulan kami</li>
+                    <li><strong>Pengaturan notifikasi</strong>: Atur preferensi notifikasi Anda</li>
+                    <li><strong>Manajemen profil</strong>: Perbarui informasi profil Anda</li>
+                </ol>
+            </div>
+			
+			
+
+            
+            <div class="article-feedback">
+                <h3>Apakah artikel ini membantu?</h3>
+                <div class="feedback-buttons">
+                    <button class="feedback-btn yes">Ya</button>
+                    <button class="feedback-btn no">Tidak</button>
+                </div>
+                <p class="feedback-count">0 dari 0 menganggap ini berguna</p>
+            </div>
+            
+            <div class="article-navigation">
+                <a href="#" class="nav-link">Ada pertanyaan lagi? Kirim permintaan</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Artikel 6: FAQ - Pertanyaan Umum -->
+<div id="faq-umum" class="hidden-page">
+    <div class="maintenance-detail-header">
+        <div class="breadcrumbs">
+            <a href="#" class="breadcrumb-link" data-target-page="main-help-section">Note Farid</a>
+            <span>></span>
+            <a href="#" class="breadcrumb-link" data-target-page="faq-page">FAQ</a>
+            <span>></span>
+            <span>Pertanyaan Umum</span>
+        </div>
+     
+        
+        <div class="maintenance-search-container">
+            <input type="text" class="maintenance-search-input" placeholder="Cari">
+            <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+            </svg>
+        </div>
+    </div>
+	
+	 <div class="note-actions">
+    <button class="like-button" disabled>❤️ 0</button>
+    <button class="follow-button" disabled>👤 0</button>
+  </div>
+    
+    <div class="maintenance-detail-content-wrapper">
+        <div class="maintenance-detail-sidebar">
+            <h3 class="sidebar-title">Artikel dalam bagian ini</h3>
+            <ul class="sidebar-links" id="sidebar-links-container">
+                <li><a href="#" class="sidebar-link" data-article-id="faq-umum">FAQ - Pertanyaan Umum</a></li>
+                <li><a href="#" class="sidebar-link" data-article-id="faq-teknis">FAQ - Masalah Teknis</a></li>
+                <li><a href="#" class="sidebar-link" data-article-id="faq-keamanan">FAQ - Keamanan Akun</a></li>
+            </ul>
+        </div>
+        
+        <div class="maintenance-detail-main">
+            <h2 class="maintenance-detail-title">FAQ - Pertanyaan Umum</h2>
+            <p class="detail-meta">Diperbarui: 1 minggu yang lalu</p>
+            
+            <div class="article-content">
+                <div class="faq-item">
+                    <h4>Bagaimana cara reset password?</h4>
+                    <p>Klik "Lupa Password" di halaman login dan ikuti instruksi yang dikirim ke email Anda.</p>
+                </div>
+                
+                <div class="faq-item">
+                    <h4>Bagaimana cara menghubungi support?</h4>
+                    <p>Anda bisa menghubungi melalui email support@notefarid.com atau chat langsung di aplikasi.</p>
+                </div>
+                
+                <div class="faq-item">
+                    <h4>Apakah ada biaya untuk menggunakan layanan ini?</h4>
+                    <p>Layanan dasar kami gratis, tetapi terdapat fitur premium dengan biaya tertentu.</p>
+                </div>
+            </div>
+			
+			
+
+            
+            <div class="article-feedback">
+                <h3>Apakah artikel ini membantu?</h3>
+                <div class="feedback-buttons">
+                    <button class="feedback-btn yes">Ya</button>
+                    <button class="feedback-btn no">Tidak</button>
+                </div>
+                <p class="feedback-count">0 dari 0 menganggap ini berguna</p>
+            </div>
+            
+            <div class="article-navigation">
+                <a href="#" class="nav-link">Ada pertanyaan lagi? Kirim permintaan</a>
+            </div>
+			<div class="related-articles">
+                <h3>Artikel yang dilihat baru-baru ini</h3>
+                <ul>
+                    <li><a href="#" class="related-link">Tidak tersedia</a></li>
+                    <li><a href="#" class="related-link">Tidak tersedia</a></li>
+                </ul>
+                <h3>Artikel terkait</h3>
+                <ul>
+                    <li><a href="#" class="related-link">Tidak tersedia</a></li>
+                    <li><a href="#" class="related-link">Tidak tersedia</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+       
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	    
 
         <div class="section">
             <h2>
@@ -13252,6 +15247,1751 @@ document.getElementById('noteList').addEventListener('click', function(event) {
             });
 
         }
+
+
+
+
+
+
+
+document.addEventListener('DOMContentLoaded', function () {
+    // Deklarasi semua elemen DOM
+    const mainHelpSection = document.getElementById('main-help-section');
+    const maintenancePage = document.getElementById('maintenance-page');
+    const maintenanceInfoPage = document.getElementById('maintenance-info-page');
+    const sidebarLinksContainer = document.getElementById('sidebar-links-container');
+    const searchInput = document.getElementById('mainSearchInput');
+    const searchButton = document.querySelector('.search-button');
+    const searchResultsContainer = document.getElementById('searchResults');
+    const maintenanceLinksContainer = document.getElementById('maintenance-links-container');
+    const articlesSectionContainer = document.getElementById('articles-section-container');
+	
+	const likeListeners = {};
+const followListeners = {};
+
+    
+    // Deklarasi variabel global
+    let currentUser = null;
+    let articlesData = []; // Akan diisi nanti
+	let currentUserId = null; // Tambahkan ini sebagai global juga jika Anda menggunakannya secara luas
+	let allMainSections = [];
+
+	
+	
+
+
+
+
+
+function setupArticleLinkClicks() {
+  document.querySelectorAll('.article-link').forEach(link => {
+    link.addEventListener('click', e => {
+      e.preventDefault();
+      const articleId = link.dataset.articleId;
+      const targetPage = document.getElementById(articleId);
+      if (targetPage) {
+        showPage(targetPage, articleId);
+      } else {
+        console.warn("❌ Halaman artikel tidak ditemukan:", articleId);
+      }
+    });
+  });
+}
+
+
+
+function getTimestampMillis(ts) {
+  if (!ts) return Date.now();
+  if (typeof ts.toDate === 'function') return ts.toDate().getTime();
+  if (ts instanceof Date) return ts.getTime();
+  if (typeof ts === 'number') return ts;
+  const parsed = Date.parse(ts);
+  return isNaN(parsed) ? Date.now() : parsed;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+function renderArticleContent(articleId) {
+    const articleData = articlesData.find(a => a.id === articleId);
+    const pageElement = document.getElementById(articleId);
+
+    if (!articleData || !pageElement) {
+        console.warn(`❌ Artikel '${articleId}' tidak ditemukan.`);
+        return;
+    }
+
+    // Isi konten artikel
+    const titleElement = pageElement.querySelector('.maintenance-detail-title');
+    const metaElement = pageElement.querySelector('.detail-meta');
+    const contentElement = pageElement.querySelector('.article-content');
+
+    if (titleElement) titleElement.textContent = articleData.title;
+    if (metaElement) metaElement.textContent = `Diperbarui: ${getTimeAgoString(articleData.lastUpdateTimestamp || new Date())}`;
+    if (contentElement) contentElement.innerHTML = articleData.content;
+
+    console.log(`✅ Konten artikel '${articleId}' telah ditampilkan`);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+document.addEventListener('click', function (e) {
+  const articleLink = 
+    e.target.closest('.article-link') || 
+    e.target.closest('.maintenance-link') || 
+    e.target.closest('.sidebar-link') || 
+    e.target.closest('[data-article-id]') || 
+    e.target.closest('[data-target-page]');
+
+  if (!articleLink) return;
+
+  const articleId = articleLink.dataset.articleId || articleLink.dataset.targetPage;
+  const targetPage = document.getElementById(articleId);
+
+  console.log('[Klik] Link ditemukan:', articleLink);
+  console.log('[Klik] Article ID:', articleId);
+  console.log('[Klik] Target Page:', targetPage);
+
+  if (targetPage) {
+    showPage(targetPage, articleId);
+    populateDetailPage(articleId);
+  } else {
+    console.warn('❌ Artikel tidak ditemukan:', articleId);
+  }
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// Modifikasi fungsi showPage
+function showPage(pageElement, articleId = null) {
+    // Simpan posisi scroll sebelum perubahan
+    const scrollPosition = window.scrollY;
+    
+    document.querySelectorAll('.hidden-page, #main-help-section, #maintenance-page').forEach(page => {
+        page.style.display = 'none';
+        page.classList.remove('active');
+    });
+
+    pageElement.style.display = 'block';
+    setTimeout(() => {
+        pageElement.classList.add('active');
+        // Kembalikan posisi scroll
+        window.scrollTo(0, scrollPosition);
+    }, 10);
+
+    if (articleId) {
+        const articleData = articlesData.find(a => a.id === articleId);
+        if (articleData) {
+            const titleElement = pageElement.querySelector('.maintenance-detail-title');
+            const contentElement = pageElement.querySelector('.article-content');
+            const metaElement = pageElement.querySelector('.detail-meta');
+
+            if (titleElement) titleElement.textContent = articleData.title;
+            if (contentElement) contentElement.innerHTML = articleData.content;
+            if (metaElement) metaElement.innerHTML = `Diperbarui ${getTimeAgoString(articleData.lastUpdateTimestamp || new Date())}`;
+        }
+    }
+}
+
+
+
+
+
+
+document.querySelectorAll('.article-link').forEach(link => {
+    link.addEventListener('click', e => {
+        e.preventDefault();
+        const articleId = link.dataset.articleId;
+        const targetPage = document.getElementById(articleId);
+        if (targetPage) {
+            showPage(targetPage, articleId);
+        } else {
+            console.warn("🔍 Halaman target tidak ditemukan:", articleId);
+        }
+    });
+});
+
+
+
+
+onAuthStateChanged(auth, (user) => {
+  currentUser = user;
+  if (user) {
+    document.querySelectorAll('.like-button, .follow-button').forEach(btn => btn.disabled = false);
+    setupRealtimeListeners();
+  } else {
+    document.querySelectorAll('.like-button, .follow-button').forEach(btn => btn.disabled = true);
+  }
+});
+
+document.addEventListener('click', function(e) {
+  if (e.target.closest('.like-button')) {
+    e.preventDefault();
+    e.stopPropagation();
+    const articleId = e.target.closest('.hidden-page')?.id;
+    if (currentUser && articleId) toggleLike(articleId);
+  }
+  if (e.target.closest('.follow-button')) {
+    e.preventDefault();
+    e.stopPropagation();
+    const articleId = e.target.closest('.hidden-page')?.id;
+    if (currentUser && articleId) toggleFollow(articleId);
+  }
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+function getTimeAgoString(timestamp) {
+    if (!timestamp) return 'Baru saja';
+
+    let updateDate;
+
+    // ✅ Tangani semua tipe input timestamp
+    if (timestamp instanceof Date) {
+        updateDate = timestamp;
+    } else if (typeof timestamp === 'object' && typeof timestamp.toDate === 'function') {
+        updateDate = timestamp.toDate();
+    } else if (typeof timestamp === 'number' || typeof timestamp === 'string') {
+        updateDate = new Date(timestamp);
+    } else {
+        return 'Baru saja';
+    }
+
+    const now = new Date();
+    const diffTime = now - updateDate;
+    if (isNaN(diffTime)) return 'Baru saja';
+
+    const minute = 60 * 1000;
+    const hour = 60 * minute;
+    const day = 24 * hour;
+    const week = 7 * day;
+    const month = 30 * day;
+    const year = 365 * day;
+
+    if (diffTime < minute) return 'Baru saja';
+    if (diffTime < hour) return `${Math.floor(diffTime / minute)} menit yang lalu`;
+    if (diffTime < day) return `${Math.floor(diffTime / hour)} jam yang lalu`;
+    if (diffTime < week) return `${Math.floor(diffTime / day)} hari yang lalu`;
+    if (diffTime < month) return `${Math.floor(diffTime / week)} minggu yang lalu`;
+    if (diffTime < year) return `${Math.floor(diffTime / month)} bulan yang lalu`;
+    return `${Math.floor(diffTime / year)} tahun yang lalu`;
+}
+
+
+
+
+
+
+
+
+	
+	// Fungsi untuk highlight teks pencarian
+    function highlightText(text, query) {
+        if (!query.trim()) return text;
+        const escapedQuery = query.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const regex = new RegExp(`(${escapedQuery})`, 'gi');
+        return text.replace(regex, '<span class="highlight">$1</span>');
+    }
+	
+	
+	
+	function setupRealtimeListeners() {
+  document.querySelectorAll('.hidden-page').forEach(page => {
+    const articleId = page.id;
+    const articleRef = doc(db, "articles", articleId);
+
+    if (likeListeners[articleId]) likeListeners[articleId]();
+    likeListeners[articleId] = onSnapshot(articleRef, (docSnap) => {
+      if (docSnap.exists()) {
+        updateLikeUI(articleId, docSnap.data().likes);
+      }
+    });
+
+    if (followListeners[articleId]) followListeners[articleId]();
+    followListeners[articleId] = onSnapshot(articleRef, (docSnap) => {
+      if (docSnap.exists()) {
+        updateFollowUI(articleId, docSnap.data().followers);
+      }
+    });
+  });
+}
+	
+	
+	
+	
+	
+	
+	function renderHiddenArticlePages() {
+    if (!Array.isArray(articlesData) || articlesData.length === 0) return;
+
+    articlesData.forEach(article => {
+        if (document.getElementById(article.id)) {
+            console.log(`Skip render: ${article.id} sudah ada`);
+            return;
+        }
+
+        const div = document.createElement('div');
+        div.id = article.id;
+        div.className = 'hidden-page';
+        div.innerHTML = `
+            <div class="content">
+                <a href="#" onclick="showPage(document.getElementById('main-help-section'))">&larr; Kembali</a>
+                <h2 class="maintenance-detail-title">${article.title}</h2>
+                <p class="timestamp detail-meta">
+                    ${getTimeAgoString(article.lastUpdateTimestamp || new Date())}
+                </p>
+                <div class="article-content">
+                    ${article.content}
+                </div>
+            </div>
+        `;
+        document.body.appendChild(div);
+        console.log(`✅ Rendered article page: ${article.id}`);
+    });
+}
+
+	
+	
+	function validateArticlesData() {
+    const seenIds = new Set();
+    const seenTitles = new Set();
+
+    articlesData.forEach(article => {
+        if (!article.id || !article.title || !article.content) {
+            console.warn("❗ Artikel tidak lengkap:", article);
+        }
+        if (seenIds.has(article.id)) {
+            console.warn("❗ Duplikat ID ditemukan:", article.id);
+        }
+        if (seenTitles.has(article.title)) {
+            console.warn("❗ Duplikat judul ditemukan:", article.title);
+        }
+        seenIds.add(article.id);
+        seenTitles.add(article.title);
+    });
+}
+
+	
+	
+	
+	
+	function updateAllMainSections() {
+  allMainSections = [
+    document.getElementById('main-help-section'),
+    ...document.querySelectorAll('.hidden-page')
+  ];
+  console.log("🔄 allMainSections berisi:", allMainSections.map(el => el.id));
+}
+
+	
+	
+	
+	
+	
+	
+
+
+// Improved timestamp function with real-time updates
+function setupRealtimeTimestampUpdates() {
+    // Update all timestamps immediately
+    updateAllTimestamps();
+    
+    // Set up interval to update every minute
+    setInterval(updateAllTimestamps, 60000);
+    
+    // Listen for article updates in real-time
+    articlesData.forEach(article => {
+        const articleRef = doc(db, "articles", article.id);
+        onSnapshot(articleRef, (doc) => {
+            if (doc.exists()) {
+                updateTimestampForArticle(doc.id, doc.data().lastUpdateTimestamp);
+            }
+        });
+    });
+}
+
+function updateAllTimestamps() {
+    articlesData.forEach(article => {
+        const articleElement = document.getElementById(article.id);
+        if (articleElement) {
+            const timestampElement = articleElement.querySelector('.timestamp');
+            if (timestampElement) {
+                const timestamp = parseInt(timestampElement.dataset.timestamp);
+                if (!isNaN(timestamp)) {
+                    timestampElement.textContent = getTimeAgoString(new Date(timestamp));
+                }
+            }
+        }
+    });
+}
+
+
+function updateTimestampForArticle(articleId, timestamp) {
+    const articleElement = document.getElementById(articleId);
+    if (!articleElement) return;
+
+    const timestampElement = articleElement.querySelector('.timestamp');
+    if (!timestampElement) return;
+
+    const timeMillis = getTimestampMillis(timestamp);
+
+    timestampElement.dataset.timestamp = timeMillis;
+    timestampElement.textContent = getTimeAgoString(timeMillis);
+}
+
+
+
+
+
+
+
+
+
+	
+    // Initialize all real-time listeners
+    function initializeRealtimeUpdates() {
+        setupRealtimeTimestampUpdates();
+        
+        // Initialize listeners for all articles
+        articlesData.forEach(article => {
+            if (!window.likeListeners) window.likeListeners = {};
+            if (!window.likeListeners[article.id]) {
+                setupRealtimeLikeUpdates(article.id);
+            }
+            
+            if (!window.followListeners) window.followListeners = {};
+            if (!window.followListeners[article.id]) {
+                setupRealtimeFollowUpdates(article.id);
+            }
+            
+            if (!window.feedbackListeners) window.feedbackListeners = {};
+            if (!window.feedbackListeners[article.id]) {
+                setupRealtimeFeedbackUpdates(article.id);
+            }
+        });
+    }
+
+    // Call this in your init function
+    initializeRealtimeUpdates();
+	
+	
+	
+	
+	
+	function setupRealtimeFollowUpdates(articleId) {
+    const articleRef = doc(db, "articles", articleId);
+    onSnapshot(articleRef, (snapshot) => {
+        if (snapshot.exists()) {
+            const data = snapshot.data();
+            updateFollowUI(articleId, data.followers);
+        }
+    });
+}
+
+
+   
+ 
+   
+   
+   
+   async function setupFirestoreListeners() {
+    // Listen for all articles updates
+    const articlesRef = collection(db, "articles");
+    onSnapshot(articlesRef, (snapshot) => {
+        snapshot.docChanges().forEach(change => {
+            if (change.type === "modified") {
+                const articleId = change.doc.id;
+                const data = change.doc.data();
+                
+                // Update local data
+                const articleIndex = articlesData.findIndex(a => a.id === articleId);
+                if (articleIndex !== -1) {
+                    articlesData[articleIndex] = {
+                        ...articlesData[articleIndex],
+                        ...data
+                    };
+                }
+                
+                // Update UI
+                updateLikeUI(articleId, data.likes);
+                updateFollowUI(articleId, data.followers);
+                updateFeedbackUI(articleId, data.helpful);
+                
+                // Update timestamp if this article is currently displayed
+                const currentPage = Array.from(allMainSections).find(s => s.classList.contains('active'));
+                if (currentPage && currentPage.id === articleId) {
+                    const metaElement = currentPage.querySelector('.detail-meta');
+                    if (metaElement) {
+                        metaElement.innerHTML = `
+                            <span class="timestamp" data-timestamp="${data.lastUpdateTimestamp?.toDate?.()?.getTime() || new Date().getTime()}">
+                                Diperbarui ${getTimeAgoString(data.lastUpdateTimestamp || new Date())}
+                            </span>
+                        `;
+                    }
+                }
+            }
+        });
+    });
+}
+   
+   
+   
+   
+   
+   
+  
+  
+  async function bulkUploadArticlesToFirestore() {
+    if (typeof db === 'undefined') {
+        console.error("Firebase Firestore belum diinisialisasi.");
+        return;
+    }
+
+    if (!Array.isArray(articlesData) || articlesData.length === 0) {
+        console.warn("Tidak ada data artikel yang tersedia untuk di-upload.");
+        return;
+    }
+
+    try {
+        const batch = writeBatch(db); // gunakan batch agar cepat & aman
+        for (const article of articlesData) {
+            const articleRef = doc(db, "articles", article.id);
+            batch.set(articleRef, {
+                title: article.title,
+                content: article.content,
+                category: article.category || '',
+                type: article.type || '',
+               lastUpdateTimestamp: serverTimestamp(), // gunakan waktu server agar selalu up-to-date
+                likes: article.likes || {},
+                followers: article.followers || {},
+                helpful: article.helpful || {},
+                createdAt: serverTimestamp()
+            }, { merge: true });
+        }
+
+        await batch.commit();
+        console.log("✅ Semua artikel berhasil di-upload ke Firestore");
+    } catch (error) {
+        console.error("❌ Gagal meng-upload artikel ke Firestore:", error);
+    }
+}
+
+
+   
+   
+   
+   function loadArticlesData() {
+    // 1. Definisikan data artikel terlebih dahulu
+    articlesData = [
+        {
+            id: 'maintenance-info-page',
+            title: 'Informasi Pemeliharaan Sistem Note Farid',
+            content: `<p>Hi manusia belajar Note Farid,</p>
+                <p>Kami ingin menginformasikan bahwa pada <strong>Sabtu, 28 Juni 2025 pukul 07.45 WIB hingga Rabu, 31 Desember 2025 pukul 00.00 WIB</strong>, akan dilakukan perbaikan, pembaruan dan pemeliharaan tampilan website farid yang kurang baik untuk digunakan.</p>
+                <p>Jangan khawatir, selama website masih bisa gunakan <strong>Anda tetap dapat melakukan aktivitas sesuai anda lakukan</strong> selama proses perbaikan, pembaruan dan pemeliharaan tampilan website farid .</p>
+                <p>Kami sangat menghargai pengertian Anda dan mohon maaf apabila terdapat kendala selama proses pemulihan berlangsung.</p>
+saya pribadi terus berusaha segera mengembalikan layanan ke kondisi normal.</p>
+                <p>Terima kasih atas kesabaran dan dukungan Anda.</p>`,
+            type: 'maintenance-detail',
+            category: 'Pemeliharaan',
+            likes: {},
+            followers: {},
+            helpful: {}
+        },
+        {
+            id: 'general-maintenance',
+            title: 'Maintenance Umum & Tips Sistem Note Farid',
+            content: `<p>Berikut beberapa tips untuk maintenance sistem:</p>
+                <ol>
+                    <li>Lakukan pengecekkan website secara berkala</li>
+                </ol>
+                <p>Dengan melakukan maintenance rutin, sistem akan berjalan lebih optimal.</p>`,
+            type: 'maintenance-general',
+            category: 'Pemeliharaan',
+            likes: {},
+            followers: {},
+            helpful: {}
+        },
+        {
+            id: 'mitra-info',
+            title: 'Informasi pengguna Terbaru',
+            content: `<p>Informasi terbaru seputar pengguna Note Farid:</p>
+                <ul>
+                    <li>fitur terbaru website farid</li>
+                    <li>bisa digunakan email manual/ login gmail</li>
+                    <li>diupdate secara berkala</li>
+                    <li>tanpa diketahui oleh orng lain pengirim note</li>
+                </ul>`,
+            type: 'general',
+            category: 'Informasi',
+            likes: {},
+            followers: {},
+            helpful: {}
+        },
+        {
+            id: 'informasi-umum',
+            title: 'Informasi Penting Lainnya',
+            content: `<p>Pengumuman penting untuk semua pengguna:</p>
+                <ul>
+                    <li>Server maintenance jadwal setiap hari</li>
+                    <li>Fitur baru akan segera diluncurkan</li>
+                    <li>Perubahan kebijakan privasi dan ketentuan</li>
+                    <li>Panduan keamanan akun terbaru</li>
+                </ul>`,
+            type: 'general',
+            category: 'Informasi',
+            likes: {},
+            followers: {},
+            helpful: {}
+        },
+        {
+            id: 'panduan-penggunaan',
+            title: 'Panduan Penggunaan Sistem',
+            content: `<p>Berikut panduan lengkap penggunaan sistem:</p>
+                <ol>
+                    <li>Cara login dan verifikasi akun</li>
+                    <li>Navigasi menu utama</li>
+                    <li>Fitur-fitur penting</li>
+                    <li>Pengaturan notifikasi</li>
+                    <li>Manajemen profil</li>
+                </ol>`,
+            type: 'guide',
+            category: 'Panduan',
+            likes: {},
+            followers: {},
+            helpful: {}
+        },
+        {
+            id: 'faq-umum',
+            title: 'FAQ - Pertanyaan Umum',
+            content: `<p>Pertanyaan yang sering diajukan:</p>
+                <div class="faq-item">
+                    <h4>Bagaimana cara reset password?</h4>
+                    <p>Klik lupa password di halaman login dan ikuti instruksi yang dikirim ke email Anda.</p>
+                </div>
+                <div class="faq-item">
+                    <h4>Bagaimana cara menghubungi support?</h4>
+                    <p>Anda bisa menghubungi melalui email support@notefarid.com atau chat langsung.</p>
+                </div>`,
+            type: 'faq',
+            category: 'Panduan',
+            likes: {},
+            followers: {},
+            helpful: {}
+        }
+    ];
+
+    // 2. Setelah data diisi, render halaman tersembunyi
+    renderHiddenArticlePages();
+    
+    // 3. Update daftar section utama
+    updateAllMainSections();
+    
+    // 4. Kembalikan data artikel (opsional)
+    return articlesData;
+}
+   
+   
+   
+  
+
+
+document.addEventListener('click', function (e) {
+    const link = e.target.closest('.maintenance-link') || 
+                 e.target.closest('.sidebar-article-link') || 
+                 e.target.closest('.search-result-item');
+
+    if (link) {
+        e.preventDefault();
+        const articleId = link.dataset.articleId;
+        if (!articleId) return;
+
+        const articlePage = document.getElementById(articleId);
+        if (articlePage) {
+            showPage(articlePage, articleId);
+        }
+    }
+});
+
+
+
+
+
+
+
+async function initComponents() {
+    await loadArticlesData();
+    renderHiddenArticlePages();
+    updateAllMainSections();
+    
+    // Inisialisasi konten untuk 5 artikel utama
+    const mainArticles = [
+        'maintenance-info-page',
+        'general-maintenance', 
+        'mitra-info',
+        'informasi-umum',
+        'panduan-penggunaan'
+    ];
+    
+    mainArticles.forEach(id => {
+        if (!document.getElementById(id)) {
+            const div = document.createElement('div');
+            div.id = id;
+            div.className = 'hidden-page';
+            document.body.appendChild(div);
+        }
+        populateArticleContent(id);
+    });
+    
+ 
+    // Setup Firestore listeners
+    setupFirestoreListeners();
+    
+    // Setup UI components
+    setupEventListeners();
+    showPage(mainHelpSection);
+    populateArticlesSection();
+    
+    // Start real-time updates
+    setupRealtimeTimestampUpdates();
+	
+	populateMaintenanceLinks(); // ⬅️ Tambahkan ini
+	
+	performSearch("pemeliharaan"); // tes pencarian awal
+	
+	validateArticlesData(); // pastikan data lengkap
+
+
+
+}
+  
+   // Inisialisasi komponen
+    initComponents();
+   
+
+
+
+
+ 
+   
+   
+   function setupEventListeners() {
+    // Event listeners untuk pencarian
+    searchInput.addEventListener('input', (e) => performSearch(e.target.value));
+    searchButton.addEventListener('click', () => performSearch(searchInput.value));
+    searchInput.addEventListener('focus', () => {
+        if (searchInput.value.trim()) performSearch(searchInput.value);
+    });
+
+    // Tutup hasil pencarian saat klik di luar
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('.search-container')) {
+            searchResultsContainer.classList.remove('show');
+        }
+    });
+
+    // Event delegation untuk elemen dinamis
+    document.addEventListener('click', function(e) {
+        // Like button
+        if (e.target.closest('.like-button')) {
+            const articleId = e.target.closest('.hidden-page').id;
+            toggleLike(articleId);
+            return;
+        }
+
+        // Follow button
+        if (e.target.closest('.follow-button')) {
+            const articleId = e.target.closest('.hidden-page').id;
+            toggleFollow(articleId);
+            return;
+        }
+
+        // Feedback Yes
+        if (e.target.closest('.feedback-btn.yes')) {
+            const articleId = e.target.closest('.hidden-page').id;
+            submitFeedback(articleId, true);
+            return;
+        }
+
+        // Feedback No
+        if (e.target.closest('.feedback-btn.no')) {
+            const articleId = e.target.closest('.hidden-page').id;
+            submitFeedback(articleId, false);
+            return;
+        }
+    }); // ← PENUTUP UNTUK eventListener klik
+
+    // Tab functionality
+    const helpTabs = document.querySelectorAll('.help-tab');
+    const helpPanels = document.querySelectorAll('.help-panel');
+
+    helpTabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            const targetTab = tab.dataset.tab;
+            helpTabs.forEach(t => t.classList.remove('active'));
+            helpPanels.forEach(p => p.classList.remove('active'));
+            tab.classList.add('active');
+            document.getElementById(`${targetTab}-content`).classList.add('active');
+        });
+    });
+} // ← PENUTUP UNTUK setupEventListeners
+
+   
+   
+   
+   function performSearch(query) {
+    if (!query || !query.trim()) {
+        searchResultsContainer.classList.remove('show');
+        return;
+    }
+
+    const lowerQuery = query.toLowerCase().trim();
+
+    const results = articlesData.filter(article => {
+        const title = article.title || '';
+        const content = article.content || '';
+
+        const titleMatch = title.toLowerCase().includes(lowerQuery);
+        const contentMatch = content.toLowerCase().includes(lowerQuery);
+
+        return titleMatch || contentMatch;
+    });
+
+    displaySearchResults(results, query);
+}
+
+   
+   
+   
+   // Fungsi untuk sync data dari Firestore
+async function syncArticleInteractionsFromFirestore(userId) {
+    try {
+        const articlesSnapshot = await getDocs(collection(db, "articles"));
+        
+        articlesSnapshot.forEach(docSnap => {
+            const data = docSnap.data();
+            const articleIndex = articlesData.findIndex(a => a.id === docSnap.id);
+            
+            if (articleIndex !== -1) {
+                // Update data lokal
+                articlesData[articleIndex] = {
+                    ...articlesData[articleIndex],
+                    likes: data.likes || {},
+                    followers: data.followers || {},
+                    helpful: data.helpful || {},
+                    lastUpdateTimestamp: data.lastUpdateTimestamp
+                };
+                
+                // Update UI
+                updateLikeUI(docSnap.id, data.likes);
+                updateFollowUI(docSnap.id, data.followers);
+                updateFeedbackUI(docSnap.id, data.helpful);
+            }
+        });
+    } catch (error) {
+        console.error("Error syncing from Firestore:", error);
+    }
+}
+   
+   
+
+	
+	
+	
+	
+	function validateArticlesData() {
+    const seenTitles = new Set();
+    const seenIds = new Set();
+
+    articlesData.forEach(article => {
+        if (!article.id || !article.title || !article.content) {
+            console.warn("Artikel tidak lengkap:", article);
+        }
+
+        if (seenTitles.has(article.title)) {
+            console.warn("Duplikat judul artikel ditemukan:", article.title);
+        }
+
+        if (seenIds.has(article.id)) {
+            console.warn("Duplikat ID artikel ditemukan:", article.id);
+        }
+
+        seenTitles.add(article.title);
+        seenIds.add(article.id);
+    });
+}
+
+// Panggil di awal setelah load
+validateArticlesData();
+
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+function displaySearchResults(results, query) {
+    searchResultsContainer.innerHTML = '';
+
+    if (results.length === 0) {
+        searchResultsContainer.innerHTML = '<div class="no-results">Tidak ditemukan hasil untuk pencarian Anda</div>';
+        searchResultsContainer.classList.add('show');
+        return;
+    }
+
+    // Group by category
+    const resultsByCategory = {};
+    results.forEach(result => {
+        const category = result.category || 'Lainnya';
+        if (!resultsByCategory[category]) {
+            resultsByCategory[category] = [];
+        }
+        resultsByCategory[category].push(result);
+    });
+
+    // Display results
+    for (const category in resultsByCategory) {
+        const categoryHeader = document.createElement('div');
+        categoryHeader.className = 'search-result-category';
+        categoryHeader.textContent = category;
+        searchResultsContainer.appendChild(categoryHeader);
+
+        resultsByCategory[category].forEach(result => {
+            const resultItem = document.createElement('div');
+            resultItem.className = 'search-result-item';
+            resultItem.dataset.articleId = result.id;
+
+           const highlightedTitle = highlightText(result.title, query);
+const contentPreview = result.content.replace(/<[^>]*>/g, '').substring(0, 150) + '...';
+const highlightedContent = highlightText(contentPreview, query);
+
+
+            resultItem.innerHTML = `
+                <div class="search-result-title">${highlightedTitle}</div>
+                <div class="search-result-content">${highlightedContent}</div>
+                <div class="search-result-meta">
+                    <span class="search-result-category-badge">${result.category}</span>
+					<span class="timestamp">Diperbarui ${getTimeAgoString(getTimestampMillis(result.lastUpdateTimestamp))}</span>
+                </div>
+            `;
+
+            searchResultsContainer.appendChild(resultItem);
+        });
+    }
+
+    searchResultsContainer.classList.add('show');
+}
+   
+   
+
+
+ // Perbaikan fungsi populateMaintenanceLinks
+function populateMaintenanceLinks() {
+    if (!maintenanceLinksContainer) return;
+
+    maintenanceLinksContainer.innerHTML = '';
+    
+    // Urutkan berdasarkan timestamp terbaru
+    const sortedArticles = [...articlesData].sort((a, b) => {
+       const aTime = getTimestampMillis(a.lastUpdateTimestamp);
+const bTime = getTimestampMillis(b.lastUpdateTimestamp);
+        return bTime - aTime;
+    });
+
+    sortedArticles.forEach(article => {
+        const linkItem = document.createElement('div');
+        linkItem.className = 'maintenance-link-item';
+        
+        linkItem.innerHTML = `
+            <a href="#" class="maintenance-link" data-article-id="${article.id}">
+                ${article.title}
+            </a>
+            <span class="maintenance-link-meta">
+               <span class="timestamp">
+  ${getTimeAgoString(getTimestampMillis(article.lastUpdateTimestamp))}
+</span>
+                <span class="article-category">${article.category}</span>
+            </span>
+        `;
+        
+        maintenanceLinksContainer.appendChild(linkItem);
+    });
+}
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ function populateSidebarLinks(currentPageId) {
+    if (!sidebarLinksContainer) return;
+
+    sidebarLinksContainer.innerHTML = '';
+
+    const currentArticle = articlesData.find(a => a.id === currentPageId);
+    const currentCategory = currentArticle?.category || null;
+
+    const allArticles = [...articlesData];
+
+    if (allArticles.length === 0) {
+        sidebarLinksContainer.innerHTML = '<p class="no-related-articles">Tidak ada artikel tersedia</p>';
+        return;
+    }
+
+    const categoryHeader = document.createElement('h4');
+    categoryHeader.className = 'sidebar-section-title';
+    categoryHeader.textContent = currentCategory 
+        ? `Semua Artikel (Kategori: ${currentCategory})` 
+        : 'Semua Artikel';
+    sidebarLinksContainer.appendChild(categoryHeader);
+
+    const articlesList = document.createElement('ul');
+    articlesList.className = 'sidebar-articles-list';
+
+    allArticles.forEach(article => {
+        const listItem = document.createElement('li');
+        listItem.className = 'sidebar-article-item';
+
+        const link = document.createElement('a');
+        link.href = '#';
+        link.className = 'sidebar-article-link sidebar-link';
+        link.textContent = article.title;
+        link.dataset.articleId = article.id;
+
+        if (article.id === currentPageId) {
+            link.classList.add('active');
+        }
+
+        const meta = document.createElement('span');
+        meta.className = 'sidebar-article-meta';
+        meta.innerHTML = `
+		<span class="timestamp" data-timestamp="${getTimestampMillis(article.lastUpdateTimestamp)}">
+                ${getTimeAgoString(article.lastUpdateTimestamp || new Date())}
+            </span>
+        `;
+
+        listItem.appendChild(link);
+        listItem.appendChild(meta);
+        articlesList.appendChild(listItem);
+    });
+
+    sidebarLinksContainer.appendChild(articlesList);
+}
+
+
+
+
+function populateDetailPage(articleId) {
+    const article = articlesData.find(a => a.id === articleId);
+    if (!article) {
+        console.warn("❌ Artikel tidak ditemukan:", articleId);
+        return;
+    }
+
+    // Ambil elemen halaman berdasarkan ID artikel
+    const pageElement = document.getElementById(articleId);
+    if (!pageElement) {
+        console.warn("❌ Elemen halaman tidak ditemukan di DOM untuk:", articleId);
+        return;
+    }
+
+    const titleElement = pageElement.querySelector('.maintenance-detail-title');
+    const contentElement = pageElement.querySelector('.article-content');
+    const metaElement = pageElement.querySelector('.detail-meta');
+
+    // Isi elemen dengan data artikel
+    if (titleElement) titleElement.textContent = article.title;
+    if (contentElement) contentElement.innerHTML = article.content;
+    if (metaElement) {
+        metaElement.innerHTML = `
+            <span class="timestamp" data-timestamp="${article.lastUpdateTimestamp?.toDate?.()?.getTime() || new Date().getTime()}">
+                Diperbarui ${getTimeAgoString(article.lastUpdateTimestamp || new Date())}
+            </span>
+        `;
+    }
+
+    // Inisialisasi fitur interaksi
+    updateLikeUI(articleId);
+    updateFollowUI(articleId);
+    updateFeedbackUI(articleId);
+    addSocialMediaLinks(articleId);
+    populateSidebarLinks(articleId);
+
+    // Listener real-time untuk timestamp update
+    const articleRef = doc(db, "articles", articleId);
+    onSnapshot(articleRef, (docSnap) => {
+        if (docSnap.exists()) {
+            const data = docSnap.data();
+			const newTimestamp = getTimestampMillis(data.lastUpdateTimestamp);
+            if (metaElement) {
+                metaElement.innerHTML = `
+                    <span class="timestamp" data-timestamp="${newTimestamp}">
+                        Diperbarui ${getTimeAgoString(newTimestamp)}
+                    </span>
+                `;
+            }
+        }
+    });
+}
+
+
+
+
+
+
+
+
+// Fungsi untuk menampilkan artikel terkait
+function populateRelatedArticles(articleId) {
+    const relatedContainer = document.getElementById(`related-articles-${articleId}`);
+    if (!relatedContainer) return;
+
+    // Ambil 3 artikel acak dari kategori yang sama (kecuali artikel saat ini)
+    const currentArticle = articlesData.find(a => a.id === articleId);
+    const relatedArticles = articlesData
+        .filter(a => a.id !== articleId && a.category === currentArticle.category)
+        .slice(0, 3);
+
+    if (relatedArticles.length === 0) {
+        relatedContainer.innerHTML = '<li>Tidak ada artikel terkait</li>';
+        return;
+    }
+
+    relatedArticles.forEach(article => {
+        const li = document.createElement('li');
+        li.innerHTML = `<a href="#" class="related-link" data-article-id="${article.id}">${article.title}</a>`;
+        relatedContainer.appendChild(li);
+    });
+}
+
+
+
+
+
+
+
+
+
+
+	
+function populateArticlesSection() {
+    if (!articlesSectionContainer) return;
+
+    articlesSectionContainer.innerHTML = '';
+
+    // Kelompokkan artikel berdasarkan kategori
+    const articlesByCategory = {};
+    articlesData.forEach(article => {
+        const category = article.category || 'Lainnya';
+        if (!articlesByCategory[category]) {
+            articlesByCategory[category] = [];
+        }
+        articlesByCategory[category].push(article);
+    });
+
+    // Buat tampilan tiap kategori
+    for (const category in articlesByCategory) {
+        const categorySection = document.createElement('div');
+        categorySection.className = 'articles-category-section';
+
+        const categoryTitle = document.createElement('h3');
+        categoryTitle.textContent = category;
+        categorySection.appendChild(categoryTitle);
+
+        const articlesList = document.createElement('div');
+        articlesList.className = 'articles-list';
+
+        articlesByCategory[category].forEach(article => {
+            const contentPreview = article.content.replace(/<[^>]*>/g, '').substring(0, 200);
+
+            const articleItem = document.createElement('div');
+            articleItem.className = 'article-item';
+
+            articleItem.innerHTML = `
+                <a href="#" class="article-link" data-article-id="${article.id}">
+                    <h4>${article.title}</h4>
+                    <p class="article-excerpt">${contentPreview}...</p>
+					<span class="article-meta">Diperbarui ${getTimeAgoString(getTimestampMillis(article.lastUpdateTimestamp))}</span>
+                </a>
+            `;
+            articlesList.appendChild(articleItem);
+        });
+
+        categorySection.appendChild(articlesList);
+        articlesSectionContainer.appendChild(categorySection);
+    }
+}
+
+
+
+
+
+function populateArticleContent(articleId) {
+    const article = articlesData.find(a => a.id === articleId);
+    if (!article) return;
+
+    const articlePage = document.getElementById(articleId);
+    if (!articlePage) return;
+
+    // Update konten utama
+    const titleElement = articlePage.querySelector('.maintenance-detail-title');
+    const contentElement = articlePage.querySelector('.article-content');
+    const metaElement = articlePage.querySelector('.detail-meta');
+
+    if (titleElement) titleElement.textContent = article.title;
+    if (contentElement) contentElement.innerHTML = article.content;
+    if (metaElement) {
+        metaElement.innerHTML = `Diperbarui ${getTimeAgoString(article.lastUpdateTimestamp || new Date())}`;
+    }
+
+    // Update interaksi
+    updateLikeUI(articleId);
+    updateFollowUI(articleId);
+    updateFeedbackUI(articleId);
+    
+    // Update sidebar dan related articles
+    populateSidebarLinks(articleId);
+    populateRelatedArticles(articleId);
+    
+    // Tambahkan social media links
+    addSocialMediaLinks(articleId);
+}
+
+
+
+
+
+
+	
+	
+	
+	
+	
+	
+	
+
+
+    // Fungsi untuk menambahkan social media links
+    function addSocialMediaLinks(articleId) {
+        const socialLinks = [
+            {
+                name: "Facebook",
+                url: "https://facebook.com/notefarid",
+                icon: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#1877F2"><path d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z"/></svg>`
+            },
+            {
+                name: "Twitter",
+                url: "https://twitter.com/notefarid",
+                icon: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#1DA1F2"><path d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84"/></svg>`
+            },
+            {
+                name: "Instagram",
+                url: "https://instagram.com/notefarid",
+                icon: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#E4405F"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>`
+            }
+        ];
+
+        const articleContent = document.querySelector(`#${articleId} .article-content`);
+        if (!articleContent) return;
+
+        // Hapus social media links yang sudah ada sebelumnya
+        const existingSocial = articleContent.querySelector('.article-social');
+        if (existingSocial) {
+            existingSocial.remove();
+        }
+
+        let socialHTML = `<div class="article-social">
+            <h4>Bagikan artikel ini:</h4>
+            <div class="social-links">`;
+        
+        socialLinks.forEach(link => {
+            socialHTML += `
+                <a href="${link.url}" target="_blank" class="social-link">
+                    <div class="social-icon">${link.icon}</div>
+                    <span>${link.name}</span>
+                    <svg class="external-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M19 19H5V5h7V3H5a2 2 0 00-2 2v14a2 2 0 002 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/>
+                    </svg>
+                </a>`;
+        });
+
+        socialHTML += `</div></div>`;
+        articleContent.insertAdjacentHTML('beforeend', socialHTML);
+    }
+
+
+
+
+
+
+
+
+function updateAllUIAfterLogin() {
+    articlesData.forEach(article => {
+        updateLikeUI(article.id);
+        updateFollowUI(article.id);
+        updateFeedbackUI(article.id);
+        
+        const articleElement = document.getElementById(article.id);
+        if (!articleElement) return;
+
+        const buttons = articleElement.querySelectorAll('.like-button, .follow-button, .feedback-btn');
+        buttons.forEach(btn => btn.disabled = false);
+    });
+}
+
+function updateAllUIAfterLogout() {
+    articlesData.forEach(article => {
+        updateLikeUI(article.id);
+        updateFollowUI(article.id);
+        updateFeedbackUI(article.id);
+        
+        const articleElement = document.getElementById(article.id);
+        if (!articleElement) return;
+
+        const buttons = articleElement.querySelectorAll('.like-button, .follow-button, .feedback-btn');
+        buttons.forEach(btn => btn.disabled = true);
+    });
+}
+
+   
+   
+     // Real-time like updates
+    function setupRealtimeLikeUpdates(articleId) {
+        const articleRef = doc(db, "articles", articleId);
+        window.likeListeners[articleId] = onSnapshot(articleRef, (snapshot) => {
+            if (snapshot.exists()) {
+                const data = snapshot.data();
+                updateLikeUI(articleId, data.likes);
+            }
+        });
+    }
+
+   
+   
+   
+   function toggleLike(articleId) {
+  const ref = doc(db, "articles", articleId);
+  runTransaction(db, async (transaction) => {
+    const docSnap = await transaction.get(ref);
+    const data = docSnap.exists() ? docSnap.data() : {};
+    const likes = data.likes || {};
+    const userLiked = likes[currentUser.uid];
+    if (userLiked) delete likes[currentUser.uid];
+    else likes[currentUser.uid] = true;
+    transaction.update(ref, { likes });
+  });
+}
+   
+   
+   
+   
+   
+function updateLikeUI(articleId, likes) {
+  const count = likes ? Object.keys(likes).length : 0;
+  const button = document.querySelector(`#${articleId} .like-button`);
+  if (button) button.innerHTML = `❤️ ${count}`;
+}
+
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   // Improved toggleFollow function
+async function toggleFollow(articleId) {
+    if (!currentUser) {
+        alert("Silakan login untuk mengikuti artikel");
+        return;
+    }
+
+    try {
+        const articleRef = doc(db, "articles", articleId);
+        await runTransaction(db, async (transaction) => {
+            const articleSnap = await transaction.get(articleRef);
+            
+            if (!articleSnap.exists()) {
+                // Create new document if doesn't exist
+                transaction.set(articleRef, {
+                    title: articlesData.find(a => a.id === articleId)?.title || '',
+                    content: articlesData.find(a => a.id === articleId)?.content || '',
+                    followers: { [currentUser.uid]: true },
+                    lastUpdateTimestamp: serverTimestamp(),
+                    createdAt: serverTimestamp()
+                });
+                return;
+            }
+
+            const currentFollowers = articleSnap.data().followers || {};
+            const newFollowers = {...currentFollowers};
+            
+            if (newFollowers[currentUser.uid]) {
+                delete newFollowers[currentUser.uid]; // Unfollow
+            } else {
+                newFollowers[currentUser.uid] = true; // Follow
+            }
+
+            transaction.update(articleRef, { 
+                followers: newFollowers,
+                lastUpdateTimestamp: serverTimestamp() 
+            });
+        });
+        
+        console.log("Follow status updated successfully");
+    } catch (error) {
+        console.error("Error updating follow:", error);
+        alert("Terjadi kesalahan saat memproses permintaan");
+    }
+}
+
+
+
+
+
+
+
+function updateFollowUI(articleId, followers) {
+  const count = followers ? Object.keys(followers).length : 0;
+  const button = document.querySelector(`#${articleId} .follow-button`);
+  if (button) button.innerHTML = `👤 ${count}`;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+async function submitFeedback(articleId, isHelpful) {
+    if (!currentUser) {
+        alert("Silakan login untuk memberikan feedback");
+        return;
+    }
+
+    const articleRef = doc(db, "articles", articleId);
+    
+    try {
+        await runTransaction(db, async (transaction) => {
+            const articleSnap = await transaction.get(articleRef);
+            if (!articleSnap.exists()) {
+                transaction.set(articleRef, {
+                    title: articlesData.find(a => a.id === articleId)?.title || '',
+                    content: articlesData.find(a => a.id === articleId)?.content || '',
+                    helpful: { [currentUser.uid]: isHelpful ? "yes" : "no" },
+                    lastUpdateTimestamp: serverTimestamp(),
+                    createdAt: serverTimestamp()
+                });
+                return;
+            }
+
+            const currentFeedback = articleSnap.data().helpful || {};
+            const newFeedback = {...currentFeedback};
+            
+            newFeedback[currentUser.uid] = isHelpful ? "yes" : "no";
+
+            transaction.update(articleRef, { 
+                helpful: newFeedback,
+                lastUpdateTimestamp: serverTimestamp() 
+            });
+        });
+    } catch (error) {
+        console.error("Error submitting feedback:", error);
+    }
+}
+
+
+
+
+
+
+// Update the event listeners for interaction buttons
+document.addEventListener('click', function(e) {
+    // Like button
+    if (e.target.closest('.like-button')) {
+        const articleId = e.target.closest('.hidden-page').id;
+        toggleLike(articleId);
+        return;
+    }
+
+    // Follow button
+    if (e.target.closest('.follow-button')) {
+        const articleId = e.target.closest('.hidden-page').id;
+        toggleFollow(articleId);
+        return;
+    }
+
+    // Feedback Yes
+    if (e.target.closest('.feedback-btn.yes')) {
+        const articleId = e.target.closest('.hidden-page').id;
+        submitFeedback(articleId, true);
+        return;
+    }
+
+    // Feedback No
+    if (e.target.closest('.feedback-btn.no')) {
+        const articleId = e.target.closest('.hidden-page').id;
+        submitFeedback(articleId, false);
+        return;
+    }
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    // Real-time feedback updates
+    function setupRealtimeFeedbackUpdates(articleId) {
+        const articleRef = doc(db, "articles", articleId);
+        window.feedbackListeners[articleId] = onSnapshot(articleRef, (snapshot) => {
+            if (snapshot.exists()) {
+                const data = snapshot.data();
+                updateFeedbackUI(articleId, data.helpful);
+            }
+        });
+    }
+
+    // Improved updateFeedbackUI function
+    async function updateFeedbackUI(articleId, helpfulData = null) {
+        let helpful = {};
+        
+        if (helpfulData) {
+            helpful = helpfulData;
+        } else {
+            const articleRef = doc(db, "articles", articleId);
+            const snapshot = await getDoc(articleRef);
+            if (snapshot.exists()) {
+                helpful = snapshot.data().helpful || {};
+            }
+        }
+
+        const yesButton = document.querySelector(`#${articleId} .feedback-btn.yes`);
+        const noButton = document.querySelector(`#${articleId} .feedback-btn.no`);
+        const feedbackCount = document.querySelector(`#${articleId} .feedback-count`);
+        
+        if (yesButton && noButton && feedbackCount) {
+            const yesCount = Object.values(helpful).filter(v => v === "yes").length;
+            const noCount = Object.values(helpful).filter(v => v === "no").length;
+            const totalCount = yesCount + noCount;
+
+            feedbackCount.textContent = totalCount > 0 ? 
+                `${yesCount} dari ${totalCount} menganggap ini berguna` : 
+                'Jadilah yang pertama memberikan feedback';
+
+            if (currentUser) {
+                if (helpful[currentUser.uid] === "yes") {
+                    yesButton.classList.add('voted');
+                    noButton.classList.remove('voted');
+                } else if (helpful[currentUser.uid] === "no") {
+                    noButton.classList.add('voted');
+                    yesButton.classList.remove('voted');
+                } else {
+                    yesButton.classList.remove('voted');
+                    noButton.classList.remove('voted');
+                }
+            }
+        }
+    }
+
+
+
+
+
+
+
+
+	
+async function ensureArticleExists(articleId) {
+    const articleRef = doc(db, "articles", articleId);
+    const snapshot = await getDoc(articleRef);
+    if (!snapshot.exists()) {
+        // Create the document with initial data
+        await setDoc(articleRef, {
+            likes: {},
+            followers: {},
+            helpful: {},
+            createdAt: serverTimestamp()
+        });
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    // Setup auth state change listener
+    if (typeof auth !== 'undefined') {
+        auth.onAuthStateChanged(user => {
+            currentUser = user;
+            console.log("Status Auth Berubah. User:", user ? user.uid : "null");
+
+            // Perbarui semua UI yang bergantung pada status login
+            articlesData.forEach(article => {
+                updateFeedbackUI(article.id);
+                updateLikeUI(article.id);
+                updateFollowUI(article.id);
+            });
+        });
+    } else {
+        console.warn("Firebase auth tidak tersedia");
+        // Simulasikan user login untuk pengembangan
+        currentUser = { uid: 'test-user' };
+        articlesData.forEach(article => {
+            updateFeedbackUI(article.id);
+            updateLikeUI(article.id);
+            updateFollowUI(article.id);
+        });
+    }
+});
+
+function toggleTombolInteraksi(disabled) {
+    document.querySelectorAll('.article-item').forEach(articleElement => {
+        const buttons = articleElement.querySelectorAll('.like-button, .follow-button, .feedback-btn');
+        buttons.forEach(btn => btn.disabled = disabled);
+    });
+}
+
+  loadArticlesData();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	
      
     </script>
 </body>
