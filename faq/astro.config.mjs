@@ -2,9 +2,9 @@
 import { defineConfig } from 'astro/config';
 
 export default defineConfig({
-  output: 'static',             // build jadi HTML statis
+  output: 'static',
   build: {
-    outDir: '../public/faq',    // hasil build masuk ke public/faq
+    outDir: '../public/faq',   // hasil build masuk ke public/faq
   },
-  site: 'https://life-is-what-it-is-learn.netlify.app',
+  site: 'https://noted-farid.netlify.app',
 });
