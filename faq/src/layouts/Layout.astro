@@ -1,0 +1,29 @@
+---
+const { title = "FAQ Page", description = "Halaman FAQ dengan Astro" } = Astro.props;
+---
+
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <nav>
+        <a href="/">🏠 Home</a>
+        <a href="/faq">❓ FAQ</a>
+      </nav>
+    </header>
+
+    <main>
+      <slot />
+    </main>
+
+    <footer>
+      <p>© {new Date().getFullYear()} | Dibuat dengan Astro 🚀</p>
+    </footer>
+  </body>
+</html>
