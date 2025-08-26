@@ -1,7 +1,3 @@
----
-import FAQItem from '../components/FAQItem.astro';
----
-
 <html lang="id">
   <head>
     <meta charset="UTF-8" />
@@ -9,6 +5,10 @@ import FAQItem from '../components/FAQItem.astro';
     <meta name="description" content="Halaman FAQ dengan animasi, gambar, dan icon." />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="/styles.css" />
+    <script type="module">
+      import FAQItem from '../components/FAQItem.astro';
+      window.FAQItem = FAQItem; // export ke global supaya bisa pakai di HTML
+    </script>
   </head>
   <body>
     <header>
@@ -23,44 +23,22 @@ import FAQItem from '../components/FAQItem.astro';
 
       <img src="/images/5.jpg" alt="Ilustrasi FAQ" class="faq-image" />
 
-      <FAQItem icon="🚀" question="Apa itu Astro?">
+      <!-- Komponen dipanggil langsung lewat slot/HTML -->
+      <div is="FAQItem" icon="🚀" question="Apa itu Astro?">
         Astro adalah framework modern untuk membangun website statis dan hybrid yang super cepat.
-      </FAQItem>
+      </div>
 
-      <FAQItem icon="📂" question="Di mana letak gambar?">
+      <div is="FAQItem" icon="📂" question="Di mana letak gambar?">
         Gambar disimpan di folder /public/images. Contohnya di sini: /images/5.jpg
-      </FAQItem>
+      </div>
 
-      <FAQItem icon="🔗" question="Apakah ada tautan ke luar?">
+      <div is="FAQItem" icon="🔗" question="Apakah ada tautan ke luar?">
         <a href="https://astro.build" target="_blank">Buka dokumentasi Astro</a>
-      </FAQItem>
-
-      <FAQItem icon="✨" question="Apakah ada animasi?">
-        Ya! Komponen ini punya efek hover animasi, dan gambar di atas juga bisa diberi animasi fade-in.
-      </FAQItem>
+      </div>
     </main>
 
     <footer>
       <p>© 2025 | Dibuat dengan Astro 🚀</p>
     </footer>
-
-    <style>
-    h1 {
-      text-align: center;
-      margin-bottom: 2rem;
-    }
-    .faq-image {
-      display: block;
-      margin: 0 auto 2rem;
-      max-width: 400px;
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-      animation: fadeIn 1s ease;
-    }
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    </style>
   </body>
 </html>
