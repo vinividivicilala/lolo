@@ -1,9 +1,9 @@
 [build]
-  base = "faq"                # jalankan perintah dari folder faq
+  base = "faq"          # Netlify masuk ke folder astro
   command = "npm run build"
-  publish = "public"          # publish root/public (bukan ../public)
+  publish = "dist"      # Deploy hasil build astro
 
 [[redirects]]
-  from = "/__/auth/handler"
-  to = "/"
+  from = "/*"
+  to = "/index.html"
   status = 200
