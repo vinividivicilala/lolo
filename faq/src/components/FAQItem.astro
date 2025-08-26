@@ -1,16 +1,12 @@
-<html>
-  <body>
-    <div class="faq-item">
-      <div class="faq-icon">{Astro.props.icon || "❓"}</div>
-      <div>
-        <h2>{Astro.props.question}</h2>
-        <div class="faq-answer">
-          <slot>{Astro.props.answer}</slot>
-        </div>
-      </div>
+<div class="faq-item">
+  <div class="faq-icon">{Astro.props.icon || "❓"}</div>
+  <div>
+    <h2>{Astro.props.question}</h2>
+    <div class="faq-answer">
+      <slot>{Astro.props.answer}</slot>
     </div>
-  </body>
-</html>
+  </div>
+</div>
 
 <style>
 .faq-item {
