@@ -1,12 +1,9 @@
 [build]
-  base = "faq"
+  base = "faq"                # jalankan perintah dari folder faq
   command = "npm run build"
-  publish = "../public"   # publish root/public
-
+  publish = "public"          # publish root/public (bukan ../public)
 
 [[redirects]]
   from = "/__/auth/handler"
   to = "/"
   status = 200
-
-
