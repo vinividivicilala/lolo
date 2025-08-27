@@ -11,7 +11,9 @@ import FAQItem from '../components/FAQItem.astro';
     Last update: <span id="currentDate"></span>
   </div>
 
-  <img src="/images/5.jpg" alt="Ilustrasi FAQ" class="faq-image" />
+  <div class="image-container">
+    <img src="/images/5.jpg" alt="Ilustrasi FAQ" class="faq-image" />
+  </div>
 
   <div class="faq-container">
     <FAQItem index="1" icon="🚀" question="Apa itu Astro?">
@@ -48,7 +50,12 @@ import FAQItem from '../components/FAQItem.astro';
   </div>
   
   <div class="note-section">
-    <h2><i class="fas fa-sticky-note"></i> Catatan Penting</h2>
+    <h2>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 11V16M12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12C21 16.9706 16.9706 21 12 21Z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+      Catatan Penting
+    </h2>
     <div class="note-content">
       <p>FAQ ini akan diperbarui secara berkala sesuai dengan perkembangan Astro. Pastikan untuk selalu memeriksa dokumentasi resmi untuk informasi terbaru.</p>
       <p>Jika Anda memiliki pertanyaan yang belum terjawab di sini, silakan kunjungi Discord komunitas Astro untuk bantuan lebih lanjut.</p>
@@ -75,12 +82,18 @@ import FAQItem from '../components/FAQItem.astro';
     font-style: italic;
   }
   
-  .faq-image {
-    width: 100%;
-    max-height: 300px;
-    object-fit: cover;
-    border-radius: 10px;
+  .image-container {
+    display: flex;
+    justify-content: center;
     margin-bottom: 30px;
+  }
+  
+  .faq-image {
+    max-width: 100%;
+    height: auto;
+    max-height: 400px;
+    object-fit: contain;
+    border-radius: 10px;
     box-shadow: 0 5px 15px rgba(255, 255, 255, 0.1);
     border: 1px solid #444;
   }
