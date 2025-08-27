@@ -6,7 +6,12 @@ const { icon, question, index } = Astro.props;
   <div class="faq-number">{index}</div>
   <div class="faq-icon">{icon || "❓"}</div>
   <div class="faq-content">
-    <h2><span class="arrow-icon">↗</span> {question}</h2>
+    <h2>
+      <svg class="arrow-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      {question}
+    </h2>
     <div class="faq-answer">
       <slot />
     </div>
@@ -62,7 +67,9 @@ const { icon, question, index } = Astro.props;
 }
 
 .arrow-icon {
-  font-size: 1.5rem;
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
 }
 
 .faq-answer {
@@ -72,14 +79,30 @@ const { icon, question, index } = Astro.props;
 }
 
 .faq-answer a {
-  color: #9ec5ff;
+  color: #ffffff;
   text-decoration: none;
-  border-bottom: 1px dotted #9ec5ff;
+  border-bottom: 1px dotted #ffffff;
   transition: all 0.2s;
+  font-weight: 500;
 }
 
 .faq-answer a:hover {
-  color: #ffffff;
-  border-bottom: 1px solid #ffffff;
+  color: #9ec5ff;
+  border-bottom: 1px solid #9ec5ff;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .faq-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  
+  .faq-content h2 {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+  }
 }
 </style>
