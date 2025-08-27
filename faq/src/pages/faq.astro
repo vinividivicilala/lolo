@@ -49,7 +49,7 @@ import FAQItem from '../components/FAQItem.astro';
     </FAQItem>
   </div>
   
-  <div class="note-section">
+  <div id="note" class="note-section">
     <h2>
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path d="M12 11V16M12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12C21 16.9706 16.9706 21 12 21Z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
@@ -59,6 +59,16 @@ import FAQItem from '../components/FAQItem.astro';
     <div class="note-content">
       <p>FAQ ini akan diperbarui secara berkala sesuai dengan perkembangan Astro. Pastikan untuk selalu memeriksa dokumentasi resmi untuk informasi terbaru.</p>
       <p>Jika Anda memiliki pertanyaan yang belum terjawab di sini, silakan kunjungi Discord komunitas Astro untuk bantuan lebih lanjut.</p>
+      
+      <div class="note-highlight">
+        <h3>Hal-hal penting yang perlu diingat:</h3>
+        <ul>
+          <li>Selalu periksa versi terbaru Astro sebelum memulai proyek baru</li>
+          <li>Gunakan Astro Islands untuk optimasi performa</li>
+          <li>Manfaatkan fitur SSR untuk konten dinamis</li>
+          <li>Gunakan Image Component untuk optimasi gambar otomatis</li>
+        </ul>
+      </div>
     </div>
   </div>
 </Layout>
@@ -137,27 +147,59 @@ import FAQItem from '../components/FAQItem.astro';
   
   .note-section {
     background: linear-gradient(to right, #16a085, #1abc9c);
-    padding: 20px;
+    padding: 25px;
     border-radius: 10px;
     margin-top: 40px;
+    scroll-margin-top: 20px;
   }
   
   .note-section h2 {
     display: flex;
     align-items: center;
     gap: 10px;
-    margin-bottom: 15px;
+    margin-bottom: 20px;
     font-family: 'Montserrat', sans-serif;
+    font-size: 1.8rem;
   }
   
   .note-content {
     line-height: 1.6;
   }
   
+  .note-highlight {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 20px;
+    border-radius: 8px;
+    margin-top: 20px;
+  }
+  
+  .note-highlight h3 {
+    margin-top: 0;
+    color: #fff;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    padding-bottom: 10px;
+  }
+  
+  .note-highlight ul {
+    padding-left: 20px;
+  }
+  
+  .note-highlight li {
+    margin-bottom: 8px;
+  }
+  
   /* Responsive design */
   @media (max-width: 768px) {
     h1 {
       font-size: 2rem;
+    }
+    
+    .note-section {
+      padding: 20px;
+    }
+    
+    .note-section h2 {
+      font-size: 1.5rem;
     }
   }
 </style>
