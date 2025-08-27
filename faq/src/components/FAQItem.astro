@@ -1,9 +1,14 @@
+---
+const { icon, question, index } = Astro.props;
+---
+
 <div class="faq-item">
-  <div class="faq-icon">{Astro.props.icon || "❓"}</div>
-  <div>
-    <h2>{Astro.props.question}</h2>
+  <div class="faq-number">{index}</div>
+  <div class="faq-icon">{icon || "❓"}</div>
+  <div class="faq-content">
+    <h2><span class="arrow-icon">↗</span> {question}</h2>
     <div class="faq-answer">
-      <slot>{Astro.props.answer}</slot>
+      <slot />
     </div>
   </div>
 </div>
@@ -12,27 +17,69 @@
 .faq-item {
   display: flex;
   align-items: flex-start;
-  gap: 12px;
+  gap: 15px;
   margin: 20px 0;
-  padding: 15px;
+  padding: 20px;
   border-radius: 10px;
-  background: white;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
+  background: linear-gradient(to right, var(--faq-bg-color-1), var(--faq-bg-color-2));
 }
+
 .faq-item:hover {
   transform: translateY(-3px);
-  box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+  box-shadow: 0 6px 12px rgba(255, 255, 255, 0.1);
 }
+
+.faq-number {
+  background: rgba(255, 255, 255, 0.1);
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  flex-shrink: 0;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
 .faq-icon {
   font-size: 1.8rem;
+  flex-shrink: 0;
 }
-h2 {
-  margin: 0;
-  font-size: 1.2rem;
+
+.faq-content {
+  flex-grow: 1;
 }
+
+.faq-content h2 {
+  margin: 0 0 10px 0;
+  font-size: 1.3rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: 'Montserrat', sans-serif;
+}
+
+.arrow-icon {
+  font-size: 1.5rem;
+}
+
 .faq-answer {
-  margin-top: 6px;
-  color: #555;
+  margin-top: 10px;
+  color: #e0e0e0;
+  line-height: 1.6;
+}
+
+.faq-answer a {
+  color: #9ec5ff;
+  text-decoration: none;
+  border-bottom: 1px dotted #9ec5ff;
+  transition: all 0.2s;
+}
+
+.faq-answer a:hover {
+  color: #ffffff;
+  border-bottom: 1px solid #ffffff;
 }
 </style>
