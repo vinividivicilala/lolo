@@ -16,7 +16,7 @@
         --text-color: #fff;
         --border-color: #333;
         --note-color: #1abc9c;
-        --footer-green: #16a085;
+        --footer-red: #e74c3c;
       }
       
       * {
@@ -51,7 +51,18 @@
         text-align: center;
         padding: 20px 0;
         margin-bottom: 30px;
-        border-bottom: 1px solid var(--border-color);
+      }
+      
+      .header-line {
+        height: 1px;
+        background-color: var(--border-color);
+        width: 100vw;
+        position: relative;
+        left: 50%;
+        right: 50%;
+        margin-left: -50vw;
+        margin-right: -50vw;
+        margin-bottom: 30px;
       }
       
       .site-header nav {
@@ -91,29 +102,36 @@
       main {
         width: 100%;
         margin: 0 auto 40px auto;
+        text-align: center;
       }
       
       .main-footer {
         text-align: center;
         padding: 20px;
-        border-top: 1px solid var(--border-color);
         color: #bbb;
         font-size: 0.9rem;
         background: var(--bg-color);
         width: 100%;
       }
       
-      /* Footer dengan background hijau full width */
-      .green-footer {
-        background-color: var(--footer-green);
-        padding: 60px 20px;
-        width: 100%;
-        margin-top: auto;
+      .footer-line {
+        height: 1px;
+        background-color: var(--border-color);
+        width: 100vw;
+        position: relative;
+        left: 50%;
+        right: 50%;
+        margin-left: -50vw;
+        margin-right: -50vw;
+        margin-bottom: 20px;
       }
       
-      .footer-content {
-        max-width: 1200px;
-        margin: 0 auto;
+      /* Footer dengan background merah full width */
+      .red-footer {
+        background-color: var(--footer-red);
+        padding: 80px 20px;
+        width: 100%;
+        margin-top: auto;
       }
     </style>
   </head>
@@ -133,18 +151,22 @@
         </nav>
       </header>
 
+      <div class="header-line"></div>
+
       <main>
         <slot />
       </main>
 
+      <div class="footer-line"></div>
+
       <footer class="main-footer">
-        <p>© 2025 | Dibuat dengan Astro 🚀 | Last update: <span id="footerDate"></span></p>
+        <!-- Teks dihapus sesuai permintaan -->
       </footer>
     </div>
 
-    <!-- Footer dengan background hijau full width -->
-    <div class="green-footer">
-      <!-- Hanya background hijau, tanpa teks -->
+    <!-- Footer dengan background merah full width -->
+    <div class="red-footer">
+      <!-- Hanya background merah, tanpa teks -->
     </div>
     
     <script>
@@ -160,7 +182,9 @@
           minute: '2-digit'
         };
         const dateTimeStr = now.toLocaleDateString('id-ID', options);
-        document.getElementById('footerDate').textContent = dateTimeStr;
+        if (document.getElementById('footerDate')) {
+          document.getElementById('footerDate').textContent = dateTimeStr;
+        }
       });
     </script>
   </body>
