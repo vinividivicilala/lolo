@@ -26,6 +26,8 @@
         padding: 20px;
         min-height: 100vh;
         background-image: linear-gradient(to bottom right, #0d0d0d, #1a1a1a);
+        display: flex;
+        flex-direction: column;
       }
       
       .site-header {
@@ -72,6 +74,7 @@
       main {
         max-width: 800px;
         margin: 0 auto 40px auto;
+        flex: 1;
       }
       
       footer {
@@ -81,6 +84,20 @@
         border-top: 1px solid var(--border-color);
         color: #bbb;
         font-size: 0.9rem;
+      }
+      
+      /* Footer dengan background hijau */
+      .faq-footer {
+        background-color: #16a085;
+        padding: 40px 20px;
+        margin-top: 60px;
+        border-radius: 10px 10px 0 0;
+      }
+      
+      .faq-footer-content {
+        max-width: 800px;
+        margin: 0 auto;
+        text-align: center;
       }
     </style>
   </head>
@@ -102,6 +119,11 @@
     <main>
       <slot />
     </main>
+
+    <!-- Footer dengan background hijau -->
+    <div class="faq-footer">
+      <!-- Hanya background hijau, tanpa teks -->
+    </div>
 
     <footer>
       <p>© 2025 | Dibuat dengan Astro 🚀 | Last update: <span id="footerDate"></span></p>
