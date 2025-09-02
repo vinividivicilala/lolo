@@ -37,6 +37,7 @@
         flex-direction: column;
         min-height: 100vh;
         background-image: linear-gradient(to bottom right, #0d0d0d, #1a1a1a);
+        position: relative;
       }
       
       .site-wrapper {
@@ -45,6 +46,8 @@
         width: 100%;
         max-width: 1200px;
         margin: 0 auto;
+        position: relative;
+        z-index: 1;
       }
       
       .site-header {
@@ -112,6 +115,8 @@
         font-size: 0.9rem;
         background: var(--bg-color);
         width: 100%;
+        position: relative;
+        z-index: 1;
       }
       
       .footer-line {
@@ -126,45 +131,58 @@
         margin-bottom: 20px;
       }
       
-      /* Footer dengan background merah full width */
+      /* Footer dengan background merah full width dan height */
       .red-footer {
         background-color: var(--footer-red);
-        padding: 80px 20px;
+        position: absolute;
+        bottom: 0;
+        left: 0;
         width: 100%;
-        margin-top: auto;
+        height: 60vh; /* Tinggi footer merah */
+        z-index: 0;
+      }
+      
+      /* Container untuk konten di atas footer merah */
+      .content-above-footer {
+        position: relative;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
       }
     </style>
   </head>
   <body>
-    <div class="site-wrapper">
-      <header class="site-header">
-        <h1>Astro FAQ</h1>
-        <nav>
-          <a href="/">🏠 Home</a>
-          <a href="/faq">❓ FAQ</a>
-          <a href="#note" class="note-link">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12 11V16M12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12C21 16.9706 16.9706 21 12 21Z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-            </svg>
-            Note
-          </a>
-        </nav>
-      </header>
+    <div class="content-above-footer">
+      <div class="site-wrapper">
+        <header class="site-header">
+          <h1>Astro FAQ</h1>
+          <nav>
+            <a href="/">🏠 Home</a>
+            <a href="/faq">❓ FAQ</a>
+            <a href="#note" class="note-link">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 11V16M12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12C21 16.9706 16.9706 21 12 21Z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+              Note
+            </a>
+          </nav>
+        </header>
 
-      <div class="header-line"></div>
+        <div class="header-line"></div>
 
-      <main>
-        <slot />
-      </main>
+        <main>
+          <slot />
+        </main>
 
-      <div class="footer-line"></div>
+        <div class="footer-line"></div>
 
-      <footer class="main-footer">
-        <!-- Teks dihapus sesuai permintaan -->
-      </footer>
+        <footer class="main-footer">
+          <!-- Teks dihapus sesuai permintaan -->
+        </footer>
+      </div>
     </div>
 
-    <!-- Footer dengan background merah full width -->
+    <!-- Footer dengan background merah full width dan height -->
     <div class="red-footer">
       <!-- Hanya background merah, tanpa teks -->
     </div>
