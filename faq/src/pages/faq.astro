@@ -49,25 +49,40 @@ import FAQItem from '../components/FAQItem.astro';
     </FAQItem>
   </div>
   
-  <div id="note" class="note-section">
-    <h2>
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M12 11V16M12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12C21 16.9706 16.9706 21 12 21Z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-      </svg>
-      Catatan Penting
-    </h2>
-    <div class="note-content">
-      <p>FAQ ini akan diperbarui secara berkala sesuai dengan perkembangan Astro. Pastikan untuk selalu memeriksa dokumentasi resmi untuk informasi terbaru.</p>
-      <p>Jika Anda memiliki pertanyaan yang belum terjawab di sini, silakan kunjungi Discord komunitas Astro untuk bantuan lebih lanjut.</p>
+  <div id="note" class="note-farid-section">
+    <div class="note-header">
+      <h2>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 11V16M12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12C21 16.9706 16.9706 21 12 21Z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        Note Farid
+      </h2>
+      <button class="note-toggle" id="noteToggle">+</button>
+    </div>
+    
+    <div class="note-content" id="noteContent">
+      <p>Halo! Saya Farid, seorang web developer yang passionate dalam membuat pengalaman digital yang menarik dan fungsional.</p>
       
       <div class="note-highlight">
-        <h3>Hal-hal penting yang perlu diingat:</h3>
+        <h3>Keahlian dan Fokus:</h3>
         <ul>
-          <li>Selalu periksa versi terbaru Astro sebelum memulai proyek baru</li>
-          <li>Gunakan Astro Islands untuk optimasi performa</li>
-          <li>Manfaatkan fitur SSR untuk konten dinamis</li>
-          <li>Gunakan Image Component untuk optimasi gambar otomatis</li>
+          <li>Frontend Development (React, Vue, Astro)</li>
+          <li>UI/UX Design</li>
+          <li>Responsive Web Design</li>
+          <li>Performance Optimization</li>
         </ul>
+      </div>
+      
+      <div class="note-contact">
+        <h3>Hubungi Saya:</h3>
+        <p>Email: farid@example.com</p>
+        <p>Portfolio: www.fariddev.com</p>
+        
+        <div class="social-links">
+          <a href="#" class="social-link">GitHub</a>
+          <a href="#" class="social-link">LinkedIn</a>
+          <a href="#" class="social-link">Twitter</a>
+        </div>
       </div>
     </div>
   </div>
@@ -145,32 +160,80 @@ import FAQItem from '../components/FAQItem.astro';
     --faq-bg-color-2: #3498db;
   }
   
-  .note-section {
+  /* Note Farid Section */
+  .note-farid-section {
     background: linear-gradient(to right, #16a085, #1abc9c);
     padding: 25px;
     border-radius: 10px;
     margin-top: 40px;
     scroll-margin-top: 20px;
+    position: relative;
+    overflow: hidden;
   }
   
-  .note-section h2 {
+  .note-farid-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(45deg, rgba(255,255,255,0.1) 0%, transparent 100%);
+    pointer-events: none;
+  }
+  
+  .note-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+  }
+  
+  .note-header h2 {
     display: flex;
     align-items: center;
     gap: 10px;
-    margin-bottom: 20px;
     font-family: 'Montserrat', sans-serif;
     font-size: 1.8rem;
+    margin: 0;
+  }
+  
+  .note-toggle {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    font-size: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  
+  .note-toggle:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: rotate(90deg);
   }
   
   .note-content {
     line-height: 1.6;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.5s ease;
+  }
+  
+  .note-farid-section.expanded .note-content {
+    max-height: 1000px;
   }
   
   .note-highlight {
     background: rgba(255, 255, 255, 0.1);
     padding: 20px;
     border-radius: 8px;
-    margin-top: 20px;
+    margin: 20px 0;
   }
   
   .note-highlight h3 {
@@ -188,18 +251,55 @@ import FAQItem from '../components/FAQItem.astro';
     margin-bottom: 8px;
   }
   
+  .note-contact {
+    margin-top: 25px;
+    padding-top: 15px;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+  }
+  
+  .note-contact h3 {
+    margin-bottom: 15px;
+    color: #fff;
+  }
+  
+  .social-links {
+    display: flex;
+    gap: 15px;
+    margin-top: 15px;
+    flex-wrap: wrap;
+  }
+  
+  .social-link {
+    background: rgba(255, 255, 255, 0.15);
+    color: white;
+    padding: 8px 15px;
+    border-radius: 20px;
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: all 0.3s;
+  }
+  
+  .social-link:hover {
+    background: rgba(255, 255, 255, 0.25);
+    transform: translateY(-2px);
+  }
+  
   /* Responsive design */
   @media (max-width: 768px) {
     h1 {
       font-size: 2rem;
     }
     
-    .note-section {
+    .note-farid-section {
       padding: 20px;
     }
     
-    .note-section h2 {
+    .note-header h2 {
       font-size: 1.5rem;
+    }
+    
+    .social-links {
+      justify-content: center;
     }
   }
 </style>
@@ -218,5 +318,22 @@ import FAQItem from '../components/FAQItem.astro';
     };
     const dateTimeStr = now.toLocaleDateString('id-ID', options);
     document.getElementById('currentDate').textContent = dateTimeStr;
+    
+    // Toggle untuk Note Farid section
+    const noteToggle = document.getElementById('noteToggle');
+    const noteSection = document.querySelector('.note-farid-section');
+    const noteContent = document.getElementById('noteContent');
+    
+    if (noteToggle && noteSection) {
+      noteToggle.addEventListener('click', function() {
+        noteSection.classList.toggle('expanded');
+        
+        if (noteSection.classList.contains('expanded')) {
+          noteToggle.textContent = '-';
+        } else {
+          noteToggle.textContent = '+';
+        }
+      });
+    }
   });
 </script>
