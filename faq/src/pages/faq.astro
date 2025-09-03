@@ -1,339 +1,180 @@
 ---
-// faq.astro
-import Layout from '../layouts/Layout.astro';
-import FAQItem from '../components/FAQItem.astro';
+const { icon, question, index } = Astro.props;
 ---
 
-<Layout title="FAQ | Astro Example" description="Halaman FAQ dengan animasi, gambar, dan icon.">
-  <h1>❓ Frequently Asked Questions</h1>
-  
-  <div class="update-info">
-    Last update: <span id="currentDate"></span>
-  </div>
-
-  <div class="image-container">
-    <img src="/images/5.jpg" alt="Ilustrasi FAQ" class="faq-image" />
-  </div>
-
-  <div class="faq-container">
-    <FAQItem index="1" icon="🚀" question="Apa itu Astro?">
-      Astro adalah framework modern untuk membangun website statis dan hybrid yang super cepat. Astro memungkinkan developer menggunakan berbagai framework UI (seperti React, Vue, Svelte) dalam satu proyek.
-    </FAQItem>
-
-    <FAQItem index="2" icon="📂" question="Di mana letak gambar?">
-      Gambar disimpan di folder /public/images. Contohnya di sini: /images/5.jpg. Pastikan untuk mengoptimalkan gambar sebelum menggunakannya di website untuk performa yang lebih baik.
-    </FAQItem>
-
-    <FAQItem index="3" icon="🔗" question="Apakah ada tautan ke luar?">
-      Ya, berikut adalah beberapa tautan penting:
-      <br><br>
-      <a href="https://astro.build" target="_blank">📄 Dokumentasi Astro</a><br>
-      <a href="https://github.com/withastro/astro" target="_blank">💻 GitHub Repository</a><br>
-      <a href="https://astro.build/integrations/" target="_blank">🔌 Integrasi Astro</a>
-    </FAQItem>
-    
-    <FAQItem index="4" icon="⚙️" question="Bagaimana cara instalasi Astro?">
-      Untuk menginstall Astro, Anda dapat menggunakan perintah berikut:
-      <br><br>
-      <code>npm create astro@latest</code>
-      <br><br>
-      Ikuti petunjuk di command line untuk menyelesaikan proses instalasi.
-    </FAQItem>
-    
-    <FAQItem index="5" icon="🌐" question="Apakah Astro mendukung SSR?">
-      Ya, Astro mendukung Server-Side Rendering (SSR) melalui adapter. Anda dapat menambahkan SSR ke proyek Astro dengan menginstall adapter untuk deployment target Anda (seperti Netlify, Vercel, atau Node.js).
-    </FAQItem>
-    
-    <FAQItem index="6" icon="📱" question="Apakah Astro responsive?">
-      Ya, Astro menghasilkan website yang fully responsive. Developer dapat dengan mudah membuat layout yang responsive dengan menggunakan CSS biasa atau framework CSS seperti Tailwind.
-    </FAQItem>
-  </div>
-  
-  <div id="note" class="note-farid-section">
-    <div class="note-header">
-      <h2>
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M12 11V16M12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12C21 16.9706 16.9706 21 12 21Z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+<div class="faq-item">
+  <div class="faq-number">{index}</div>
+  <div class="faq-icon">{icon || "❓"}</div>
+  <div class="faq-content">
+    <h2>
+      <button class="faq-toggle" aria-expanded="false">
+        <svg class="arrow-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
-        Note Farid
-      </h2>
-      <button class="note-toggle" id="noteToggle">+</button>
-    </div>
-    
-    <div class="note-content" id="noteContent">
-      <p>Halo! Saya Farid, seorang web developer yang passionate dalam membuat pengalaman digital yang menarik dan fungsional.</p>
-      
-      <div class="note-highlight">
-        <h3>Keahlian dan Fokus:</h3>
-        <ul>
-          <li>Frontend Development (React, Vue, Astro)</li>
-          <li>UI/UX Design</li>
-          <li>Responsive Web Design</li>
-          <li>Performance Optimization</li>
-        </ul>
-      </div>
-      
-      <div class="note-contact">
-        <h3>Hubungi Saya:</h3>
-        <p>Email: farid@example.com</p>
-        <p>Portfolio: www.fariddev.com</p>
-        
-        <div class="social-links">
-          <a href="#" class="social-link">GitHub</a>
-          <a href="#" class="social-link">LinkedIn</a>
-          <a href="#" class="social-link">Twitter</a>
-        </div>
-      </div>
+      </button>
+      {question}
+    </h2>
+    <div class="faq-answer">
+      <slot />
     </div>
   </div>
-</Layout>
+</div>
 
 <style>
-  h1 {
-    text-align: center;
-    margin-bottom: 30px;
-    font-size: 2.5rem;
-    font-weight: 700;
-    text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
-    font-family: 'Montserrat', sans-serif;
-    letter-spacing: 1px;
-  }
-  
-  .update-info {
-    text-align: right;
-    margin-bottom: 20px;
-    font-size: 0.9rem;
-    color: #bbb;
-    font-style: italic;
-  }
-  
-  .image-container {
-    display: flex;
-    justify-content: center;
-    margin-bottom: 30px;
-  }
-  
-  .faq-image {
-    max-width: 100%;
-    height: auto;
-    max-height: 400px;
-    object-fit: contain;
-    border-radius: 10px;
-    box-shadow: 0 5px 15px rgba(255, 255, 255, 0.1);
-    border: 1px solid #444;
-  }
-  
-  .faq-container {
-    display: flex;
+.faq-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 15px;
+  margin: 20px 0;
+  padding: 20px;
+  border-radius: 10px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  background: linear-gradient(to right, var(--faq-bg-color-1), var(--faq-bg-color-2));
+  position: relative;
+  overflow: hidden;
+}
+
+.faq-item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(45deg, rgba(255,255,255,0.1) 0%, transparent 100%);
+  pointer-events: none;
+}
+
+.faq-item:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 12px rgba(255, 255, 255, 0.1);
+}
+
+.faq-number {
+  background: rgba(255, 255, 255, 0.1);
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  flex-shrink: 0;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.faq-icon {
+  font-size: 1.8rem;
+  flex-shrink: 0;
+}
+
+.faq-content {
+  flex-grow: 1;
+}
+
+.faq-content h2 {
+  margin: 0 0 10px 0;
+  font-size: 1.3rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: 'Montserrat', sans-serif;
+  cursor: pointer;
+}
+
+.faq-toggle {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.3s ease;
+}
+
+.faq-toggle[aria-expanded="true"] {
+  transform: rotate(90deg);
+}
+
+.arrow-icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  transition: transform 0.3s ease;
+}
+
+.faq-answer {
+  margin-top: 10px;
+  color: #e0e0e0;
+  line-height: 1.6;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.5s ease, opacity 0.3s ease;
+  opacity: 0;
+}
+
+.faq-item.active .faq-answer {
+  max-height: 500px;
+  opacity: 1;
+}
+
+.faq-answer a {
+  color: #ffffff;
+  text-decoration: none;
+  border-bottom: 1px dotted #ffffff;
+  transition: all 0.2s;
+  font-weight: 500;
+}
+
+.faq-answer a:hover {
+  color: #9ec5ff;
+  border-bottom: 1px solid #9ec5ff;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .faq-item {
     flex-direction: column;
-    gap: 20px;
-  }
-  
-  /* Warna berbeda untuk setiap FAQ */
-  .faq-item:nth-child(6n+1) {
-    --faq-bg-color-1: #2c3e50;
-    --faq-bg-color-2: #4a6491;
-  }
-  
-  .faq-item:nth-child(6n+2) {
-    --faq-bg-color-1: #662e8e;
-    --faq-bg-color-2: #8e44ad;
-  }
-  
-  .faq-item:nth-child(6n+3) {
-    --faq-bg-color-1: #c0392b;
-    --faq-bg-color-2: #e74c3c;
-  }
-  
-  .faq-item:nth-child(6n+4) {
-    --faq-bg-color-1: #27ae60;
-    --faq-bg-color-2: #2ecc71;
-  }
-  
-  .faq-item:nth-child(6n+5) {
-    --faq-bg-color-1: #d35400;
-    --faq-bg-color-2: #e67e22;
-  }
-  
-  .faq-item:nth-child(6n+6) {
-    --faq-bg-color-1: #2980b9;
-    --faq-bg-color-2: #3498db;
-  }
-  
-  /* Note Farid Section */
-  .note-farid-section {
-    background: linear-gradient(to right, #16a085, #1abc9c);
-    padding: 25px;
-    border-radius: 10px;
-    margin-top: 40px;
-    scroll-margin-top: 20px;
-    position: relative;
-    overflow: hidden;
-  }
-  
-  .note-farid-section::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(45deg, rgba(255,255,255,0.1) 0%, transparent 100%);
-    pointer-events: none;
-  }
-  
-  .note-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 15px;
-  }
-  
-  .note-header h2 {
-    display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 10px;
-    font-family: 'Montserrat', sans-serif;
-    font-size: 1.8rem;
-    margin: 0;
   }
   
-  .note-toggle {
-    background: rgba(255, 255, 255, 0.2);
-    border: none;
-    color: white;
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    font-size: 1.5rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.3s ease;
+  .faq-content h2 {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
   }
-  
-  .note-toggle:hover {
-    background: rgba(255, 255, 255, 0.3);
-    transform: rotate(90deg);
-  }
-  
-  .note-content {
-    line-height: 1.6;
-    max-height: 0;
-    overflow: hidden;
-    transition: max-height 0.5s ease;
-  }
-  
-  .note-farid-section.expanded .note-content {
-    max-height: 1000px;
-  }
-  
-  .note-highlight {
-    background: rgba(255, 255, 255, 0.1);
-    padding: 20px;
-    border-radius: 8px;
-    margin: 20px 0;
-  }
-  
-  .note-highlight h3 {
-    margin-top: 0;
-    color: #fff;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-    padding-bottom: 10px;
-  }
-  
-  .note-highlight ul {
-    padding-left: 20px;
-  }
-  
-  .note-highlight li {
-    margin-bottom: 8px;
-  }
-  
-  .note-contact {
-    margin-top: 25px;
-    padding-top: 15px;
-    border-top: 1px solid rgba(255, 255, 255, 0.2);
-  }
-  
-  .note-contact h3 {
-    margin-bottom: 15px;
-    color: #fff;
-  }
-  
-  .social-links {
-    display: flex;
-    gap: 15px;
-    margin-top: 15px;
-    flex-wrap: wrap;
-  }
-  
-  .social-link {
-    background: rgba(255, 255, 255, 0.15);
-    color: white;
-    padding: 8px 15px;
-    border-radius: 20px;
-    text-decoration: none;
-    font-size: 0.9rem;
-    transition: all 0.3s;
-  }
-  
-  .social-link:hover {
-    background: rgba(255, 255, 255, 0.25);
-    transform: translateY(-2px);
-  }
-  
-  /* Responsive design */
-  @media (max-width: 768px) {
-    h1 {
-      font-size: 2rem;
-    }
-    
-    .note-farid-section {
-      padding: 20px;
-    }
-    
-    .note-header h2 {
-      font-size: 1.5rem;
-    }
-    
-    .social-links {
-      justify-content: center;
-    }
-  }
+}
 </style>
 
 <script>
-  // Menampilkan tanggal dan waktu terbaru
-  document.addEventListener('DOMContentLoaded', function() {
-    const now = new Date();
-    const options = { 
-      weekday: 'long', 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    };
-    const dateTimeStr = now.toLocaleDateString('id-ID', options);
-    document.getElementById('currentDate').textContent = dateTimeStr;
+// Script untuk toggle FAQ
+document.addEventListener('DOMContentLoaded', function() {
+  const faqItems = document.querySelectorAll('.faq-item');
+  
+  faqItems.forEach(item => {
+    const toggle = item.querySelector('.faq-toggle');
+    const answer = item.querySelector('.faq-answer');
     
-    // Toggle untuk Note Farid section
-    const noteToggle = document.getElementById('noteToggle');
-    const noteSection = document.querySelector('.note-farid-section');
-    const noteContent = document.getElementById('noteContent');
+    if (toggle && answer) {
+      toggle.addEventListener('click', function() {
+        const isExpanded = toggle.getAttribute('aria-expanded') === 'true';
+        toggle.setAttribute('aria-expanded', !isExpanded);
+        item.classList.toggle('active');
+      });
+    }
     
-    if (noteToggle && noteSection) {
-      noteToggle.addEventListener('click', function() {
-        noteSection.classList.toggle('expanded');
-        
-        if (noteSection.classList.contains('expanded')) {
-          noteToggle.textContent = '-';
-        } else {
-          noteToggle.textContent = '+';
+    // Juga bisa diklik pada judul
+    const heading = item.querySelector('h2');
+    if (heading) {
+      heading.addEventListener('click', function() {
+        const toggle = item.querySelector('.faq-toggle');
+        if (toggle) {
+          toggle.click();
         }
       });
     }
   });
+});
 </script>
