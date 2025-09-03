@@ -1,66 +1,82 @@
 ---
-// Layout.astro
+const { title = "Note Farid", description = "" } = Astro.props;
 ---
 
 <html lang="id">
   <head>
     <meta charset="UTF-8" />
-    <title>
-      <slot name="title">Maintenance Mode</slot>
-    </title>
+    <title>{title}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="<slot name='description' />" />
     <style>
-      :root {
-        --maintenance-bg: #ff6b6b;
-      }
-
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-      }
-
-      html, body {
-        height: 100%;
-        font-family: 'Poppins', sans-serif;
-      }
-
+      * { margin: 0; padding: 0; box-sizing: border-box; }
       body {
         background-color: #000;
-        display: flex;
-        justify-content: center;
-        align-items: center;
+        color: white;
+        font-family: 'Poppins', sans-serif;
         min-height: 100vh;
       }
 
-      /* Maintenance Banner */
-      .maintenance-banner {
-        background-color: var(--maintenance-bg);
-        color: white;
-        padding: 20px 40px;
-        text-align: center;
-        border-radius: 12px;
-        font-weight: 500;
-        font-size: 1.2rem;
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+      /* Judul Website */
+      .site-header {
         display: flex;
         align-items: center;
-        gap: 15px;
-        max-width: 600px;
-        width: 90%;
+        justify-content: center;
+        gap: 12px;
+        padding: 20px;
+        font-size: 1.8rem;
+        font-weight: 700;
+        letter-spacing: 1px;
+      }
+      .site-header img {
+        width: 35px;
+        height: 35px;
       }
 
-      .maintenance-banner span {
+      /* Banner Baru */
+      .custom-banner {
+        background: #A0D2EB;
+        color: #000;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 15px;
+        padding: 15px 25px;
+        margin: 0 auto 20px;
+        border-radius: 12px;
+        max-width: 700px;
+        font-weight: 500;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+      }
+      .custom-banner .left {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 1.1rem;
+      }
+      .custom-banner button {
+        background: none;
+        border: none;
         font-size: 1.5rem;
+        cursor: pointer;
+        color: #000;
       }
     </style>
   </head>
   <body>
-    <!-- Maintenance Banner -->
-    <div class="maintenance-banner" id="maintenanceBanner">
-      <span>🚧</span>
-      <p>Website ini sedang dalam pemeliharaan (maintenance)</p>
+    <!-- Judul Website -->
+    <header class="site-header">
+      <img src="/images/logo.png" alt="Logo Note Farid" />
+      <span>Note Farid</span>
+    </header>
+
+    <!-- Banner -->
+    <div class="custom-banner" id="customBanner">
+      <div class="left">👀 Note Farid</div>
+      <button onclick="document.getElementById('customBanner').style.display='none'">✖</button>
     </div>
+
+    <main>
+      <slot />
+    </main>
   </body>
 </html>
