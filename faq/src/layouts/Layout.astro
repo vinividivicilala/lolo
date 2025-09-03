@@ -17,6 +17,7 @@
         --border-color: #333;
         --note-color: #1abc9c;
         --footer-green: #16a085;
+        --maintenance-bg: #ff6b6b;
       }
       
       * {
@@ -37,6 +38,35 @@
         flex-direction: column;
         min-height: 100vh;
         background-image: linear-gradient(to bottom right, #0d0d0d, #1a1a1a);
+      }
+      
+      /* Maintenance Banner */
+      .maintenance-banner {
+        background-color: var(--maintenance-bg);
+        color: white;
+        padding: 12px 0;
+        text-align: center;
+        position: relative;
+        width: 100vw;
+        margin-left: calc(-50vw + 50%);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 15px;
+      }
+      
+      .maintenance-banner p {
+        margin: 0;
+        font-weight: 500;
+      }
+      
+      .close-maintenance {
+        background: transparent;
+        border: none;
+        color: white;
+        font-size: 1.2rem;
+        cursor: pointer;
+        padding: 0 10px;
       }
       
       .site-wrapper {
@@ -126,59 +156,108 @@
         margin-bottom: 20px;
       }
       
-      /* Footer dengan background hijau seperti di gambar */
-      .bg-footer {
-        background-color: var(--footer-green);
-        padding: 40px 20px;
+      /* Footer dengan background merah modern */
+      .modern-footer {
+        background: linear-gradient(135deg, #ff6b6b 0%, #ff3838 100%);
+        padding: 50px 20px;
         width: 100%;
         text-align: center;
         margin-top: 40px;
-      }
-      
-      .bg-footer-content {
-        max-width: 800px;
-        margin: 0 auto;
         color: white;
       }
       
-      .bg-footer h1 {
-        font-size: 2.5rem;
+      .modern-footer-content {
+        max-width: 1000px;
+        margin: 0 auto;
+      }
+      
+      .modern-footer h2 {
+        font-size: 2.2rem;
         font-weight: bold;
+        margin-bottom: 20px;
+        font-family: 'Montserrat', sans-serif;
+      }
+      
+      .modern-footer p {
+        font-size: 1.1rem;
+        margin-bottom: 30px;
+        max-width: 600px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+      
+      .social-media {
+        display: flex;
+        justify-content: center;
+        gap: 25px;
+        margin-bottom: 30px;
+        flex-wrap: wrap;
+      }
+      
+      .social-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-decoration: none;
+        color: white;
+        transition: transform 0.3s;
+      }
+      
+      .social-item:hover {
+        transform: translateY(-5px);
+      }
+      
+      .social-icon {
+        width: 50px;
+        height: 50px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         margin-bottom: 10px;
-        font-family: 'Montserrat', sans-serif;
+        font-size: 1.5rem;
       }
       
-      .kreate-footer h2 {
-        font-size: 1.8rem;
-        font-weight: 600;
-        margin-bottom: 30px;
-        font-family: 'Montserrat', sans-serif;
-      }
-      
-      .bg-footer p {
-        font-size: 1.2rem;
-        margin-bottom: 30px;
+      .social-name {
         font-weight: 500;
+        font-size: 0.9rem;
       }
       
-      .bg-footer .contact-info {
-        margin-bottom: 30px;
+      .footer-links {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
       }
       
-      .bg-footer .contact-info h3 {
-        font-size: 1.2rem;
-        margin-bottom: 15px;
-        font-weight: 600;
+      .footer-links a {
+        color: white;
+        text-decoration: none;
+        font-weight: 500;
+        transition: opacity 0.3s;
       }
       
-      .bg-footer .legal {
+      .footer-links a:hover {
+        opacity: 0.8;
+      }
+      
+      .copyright {
         margin-top: 30px;
         font-size: 0.9rem;
-        opacity: 0.8;
+        opacity: 0.9;
       }
     </style>
   </head>
   <body>
+    <!-- Maintenance Banner -->
+    <div class="maintenance-banner" id="maintenanceBanner">
+      <span>🚧</span>
+      <p>Website ini sedang dalam pemeliharaan (maintenance)</p>
+      <button class="close-maintenance" id="closeMaintenance">×</button>
+    </div>
+
     <div class="site-wrapper">
       <header class="site-header">
         <h1>Astro FAQ</h1>
@@ -189,7 +268,7 @@
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M12 11V16M12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12C21 16.9706 16.9706 21 12 21Z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
             </svg>
-            Note
+            Note Farid
           </a>
         </nav>
       </header>
@@ -207,23 +286,45 @@
       </footer>
     </div>
 
-    <!-- Footer dengan design seperti di gambar -->
-    <div class="bg-footer">
-      <div class="bg-footer-content">
-        <h1></h1>
-        <h2>BARENG ?</h2>
+    <!-- Footer Modern dengan Background Merah -->
+    <div class="modern-footer">
+      <div class="modern-footer-content">
+        <h2>Terhubung Dengan Kami</h2>
+        <p>Ikuti kami di media sosial untuk mendapatkan update terbaru dan informasi menarik lainnya.</p>
         
-        <p>Gulung Staff ?</p>
-        
-        <div class="contact-info">
-          <h3>CONTACT</h3>
-          <p>Instagram @</p>
-          <p>WhatsApp @</p>
+        <div class="social-media">
+          <a href="#" class="social-item">
+            <div class="social-icon">📘</div>
+            <span class="social-name">Facebook</span>
+          </a>
+          <a href="#" class="social-item">
+            <div class="social-icon">📸</div>
+            <span class="social-name">Instagram</span>
+          </a>
+          <a href="#" class="social-item">
+            <div class="social-icon">🐦</div>
+            <span class="social-name">Twitter</span>
+          </a>
+          <a href="#" class="social-item">
+            <div class="social-icon">📽️</div>
+            <span class="social-name">YouTube</span>
+          </a>
+          <a href="#" class="social-item">
+            <div class="social-icon">💼</div>
+            <span class="social-name">LinkedIn</span>
+          </a>
         </div>
         
-        <div class="legal">
-          <p>PRIVACY POLICY | TERMS AND CONDITIONS</p>
-          <p>© 2025 .</p>
+        <div class="footer-links">
+          <a href="#">Tentang Kami</a>
+          <a href="#">Kebijakan Privasi</a>
+          <a href="#">Syarat & Ketentuan</a>
+          <a href="#">Kontak</a>
+          <a href="#">Bantuan</a>
+        </div>
+        
+        <div class="copyright">
+          <p>© 2025 Farid's Project. All rights reserved.</p>
         </div>
       </div>
     </div>
@@ -244,8 +345,17 @@
         if (document.getElementById('footerDate')) {
           document.getElementById('footerDate').textContent = dateTimeStr;
         }
+
+        // Fungsi untuk menutup maintenance banner
+        const closeButton = document.getElementById('closeMaintenance');
+        const maintenanceBanner = document.getElementById('maintenanceBanner');
+        
+        if (closeButton && maintenanceBanner) {
+          closeButton.addEventListener('click', function() {
+            maintenanceBanner.style.display = 'none';
+          });
+        }
       });
     </script>
   </body>
 </html>
-
