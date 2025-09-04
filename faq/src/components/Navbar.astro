@@ -1,0 +1,138 @@
+---
+const { currentPage = 'faq' } = Astro.props;
+---
+
+<nav class="navbar">
+  <div class="nav-container">
+    <div class="nav-logo">
+      <a href="/">Note Farid</a>
+    </div>
+    <ul class="nav-menu">
+      <li class="nav-item">
+        <a href="/" class={`nav-link ${currentPage === 'home' ? 'active' : ''}`}>Home</a>
+      </li>
+      <li class="nav-item">
+        <a href="/faq" class={`nav-link ${currentPage === 'faq' ? 'active' : ''}`}>FAQ</a>
+      </li>
+      <li class="nav-item">
+        <a href="/blog" class={`nav-link ${currentPage === 'blog' ? 'active' : ''}`}>Blog</a>
+      </li>
+    </ul>
+    <div class="hamburger">
+      <span class="bar"></span>
+      <span class="bar"></span>
+      <span class="bar"></span>
+    </div>
+  </div>
+</nav>
+
+<style>
+  .navbar {
+    background: #000;
+    padding: 1rem 0;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  }
+  
+  .nav-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .nav-logo a {
+    color: white;
+    font-size: 1.8rem;
+    font-weight: 700;
+    text-decoration: none;
+    font-family: 'Montserrat', sans-serif;
+  }
+  
+  .nav-menu {
+    display: flex;
+    list-style: none;
+    gap: 2rem;
+  }
+  
+  .nav-link {
+    color: white;
+    text-decoration: none;
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+  }
+  
+  .nav-link:hover, .nav-link.active {
+    background: rgba(255, 255, 255, 0.1);
+  }
+  
+  .hamburger {
+    display: none;
+    flex-direction: column;
+    cursor: pointer;
+  }
+  
+  .bar {
+    width: 25px;
+    height: 3px;
+    background: white;
+    margin: 3px 0;
+    transition: 0.3s;
+  }
+  
+  @media (max-width: 768px) {
+    .hamburger {
+      display: flex;
+    }
+    
+    .nav-menu {
+      position: fixed;
+      left: -100%;
+      top: 70px;
+      flex-direction: column;
+      background: #000;
+      width: 100%;
+      text-align: center;
+      transition: 0.3s;
+      box-shadow: 0 10px 27px rgba(0,0,0,0.05);
+      padding: 2rem 0;
+      gap: 0;
+    }
+    
+    .nav-menu.active {
+      left: 0;
+    }
+    
+    .nav-item {
+      margin: 1.5rem 0;
+    }
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const hamburger = document.querySelector('.hamburger');
+    const navMenu = document.querySelector('.nav-menu');
+    
+    if (hamburger) {
+      hamburger.addEventListener('click', function() {
+        hamburger.classList.toggle('active');
+        navMenu.classList.toggle('active');
+      });
+    }
+    
+    // Close menu when clicking on a link
+    document.querySelectorAll('.nav-link').forEach(link => {
+      link.addEventListener('click', () => {
+        hamburger.classList.remove('active');
+        navMenu.classList.remove('active');
+      });
+    });
+  });
+</script>
