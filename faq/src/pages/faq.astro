@@ -2,7 +2,6 @@
 import Layout from '../layouts/Layout.astro';
 import FAQItem from '../components/FAQItem.astro';
 
-// Data FAQ
 const faqData = [
   {
     index: "1",
@@ -14,7 +13,7 @@ const faqData = [
     index: "2",
     icon: "📂",
     question: "Di mana letak gambar?",
-    answer: "Gambar disimpan di folder /public/images. Contohnya di sini: /images/5.jpg. Pastikan untuk mengoptimalkan gambar sebelum menggunakannya di website untuk performa yang lebih baik."
+    answer: "Gambar disimpan di folder <code>/public/images</code>. Contohnya di sini: <code>/images/5.jpg</code>. Pastikan untuk mengoptimalkan gambar sebelum menggunakannya di website untuk performa yang lebih baik."
   },
   {
     index: "3",
@@ -213,23 +212,19 @@ const faqData = [
     }
 
     // Animasi dengan Intersection Observer
-    const observerOptions = {
-      threshold: 0.1,
-      rootMargin: '0px 0px -50px 0px'
-    };
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
           entry.target.classList.add('animated');
         }
       });
-    }, observerOptions);
+    }, { threshold: 0.1 });
 
     document.querySelectorAll('[data-framer]').forEach(el => {
       observer.observe(el);
     });
 
-    // Animasi gambar
+    // Animasi gambar & judul
     const image = document.querySelector('.faq-image');
     if (image) {
       image.style.opacity = '0';
@@ -241,7 +236,6 @@ const faqData = [
       }, 300);
     }
 
-    // Animasi judul
     const title = document.querySelector('.page-title');
     if (title) {
       title.style.opacity = '0';
