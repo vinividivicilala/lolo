@@ -2,6 +2,54 @@
 // faq.astro
 import Layout from '../layouts/Layout.astro';
 import FAQItem from '../components/FAQItem.astro';
+
+// Data FAQ untuk memudahkan iterasi
+const faqData = [
+  {
+    index: "1",
+    icon: "🚀",
+    question: "Apa itu Astro?",
+    answer: "Astro adalah framework modern untuk membangun website statis dan hybrid yang super cepat. Astro memungkinkan developer menggunakan berbagai framework UI (seperti React, Vue, Svelte) dalam satu proyek."
+  },
+  {
+    index: "2",
+    icon: "📂",
+    question: "Di mana letak gambar?",
+    answer: "Gambar disimpan di folder /public/images. Contohnya di sini: /images/5.jpg. Pastikan untuk mengoptimalkan gambar sebelum menggunakannya di website untuk performa yang lebih baik."
+  },
+  {
+    index: "3",
+    icon: "🔗",
+    question: "Apakah ada tautan ke luar?",
+    answer: `Ya, berikut adalah beberapa tautan penting:
+      <br><br>
+      <a href="https://astro.build" target="_blank">📄 Dokumentasi Astro</a><br>
+      <a href="https://github.com/withastro/astro" target="_blank">💻 GitHub Repository</a><br>
+      <a href="https://astro.build/integrations/" target="_blank">🔌 Integrasi Astro</a>`
+  },
+  {
+    index: "4",
+    icon: "⚙️",
+    question: "Bagaimana cara instalasi Astro?",
+    answer: `Untuk menginstall Astro, Anda dapat menggunakan perintah berikut:
+      <br><br>
+      <code>npm create astro@latest</code>
+      <br><br>
+      Ikuti petunjuk di command line untuk menyelesaikan proses instalasi.`
+  },
+  {
+    index: "5",
+    icon: "🌐",
+    question: "Apakah Astro mendukung SSR?",
+    answer: "Ya, Astro mendukung Server-Side Rendering (SSR) melalui adapter. Anda dapat menambahkan SSR ke proyek Astro dengan menginstall adapter untuk deployment target Anda (seperti Netlify, Vercel, atau Node.js)."
+  },
+  {
+    index: "6",
+    icon: "📱",
+    question: "Apakah Astro responsive?",
+    answer: "Ya, Astro menghasilkan website yang fully responsive. Developer dapat dengan mudah membuat layout yang responsive dengan menggunakan CSS biasa atau framework CSS seperti Tailwind."
+  }
+];
 ---
 
 <Layout>
@@ -24,60 +72,64 @@ import FAQItem from '../components/FAQItem.astro';
           </div>
 
           <div class="faq-container">
-            <FAQItem index="1" icon="🚀" question="Apa itu Astro?">
-              Astro adalah framework modern untuk membangun website statis dan hybrid yang super cepat. Astro memungkinkan developer menggunakan berbagai framework UI (seperti React, Vue, Svelte) dalam satu proyek.
-            </FAQItem>
-
-            <FAQItem index="2" icon="📂" question="Di mana letak gambar?">
-              Gambar disimpan di folder /public/images. Contohnya di sini: /images/5.jpg. Pastikan untuk mengoptimalkan gambar sebelum menggunakannya di website untuk performa yang lebih baik.
-            </FAQItem>
-
-            <FAQItem index="3" icon="🔗" question="Apakah ada tautan ke luar?">
-              Ya, berikut adalah beberapa tautan penting:
-              <br><br>
-              <a href="https://astro.build" target="_blank">📄 Dokumentasi Astro</a><br>
-              <a href="https://github.com/withastro/astro" target="_blank">💻 GitHub Repository</a><br>
-              <a href="https://astro.build/integrations/" target="_blank">🔌 Integrasi Astro</a>
-            </FAQItem>
-            
-            <FAQItem index="4" icon="⚙️" question="Bagaimana cara instalasi Astro?">
-              Untuk menginstall Astro, Anda dapat menggunakan perintah berikut:
-              <br><br>
-              <code>npm create astro@latest</code>
-              <br><br>
-              Ikuti petunjuk di command line untuk menyelesaikan proses instalasi.
-            </FAQItem>
-            
-            <FAQItem index="5" icon="🌐" question="Apakah Astro mendukung SSR?">
-              Ya, Astro mendukung Server-Side Rendering (SSR) melalui adapter. Anda dapat menambahkan SSR ke proyek Astro dengan menginstall adapter untuk deployment target Anda (seperti Netlify, Vercel, atau Node.js).
-            </FAQItem>
-            
-            <FAQItem index="6" icon="📱" question="Apakah Astro responsive?">
-              Ya, Astro menghasilkan website yang fully responsive. Developer dapat dengan mudah membuat layout yang responsive dengan menggunakan CSS biasa atau framework CSS seperti Tailwind.
-            </FAQItem>
+            {faqData.map((faq, index) => (
+              <FAQItem 
+                index={faq.index} 
+                icon={faq.icon} 
+                question={faq.question}
+                isLast={index === faqData.length - 1}
+              >
+                {@html faq.answer}
+              </FAQItem>
+            ))}
           </div>
           
-          <!-- Bagian Media Sosial Full Width -->
-          <div class="social-fullwidth">
-            <div class="social-container">
+          <!-- Bagian Media Sosial Full Width yang Diperbesar -->
+          <div class="social-fullwidth-expanded">
+            <div class="social-container-expanded">
               <h2>Follow Me On Social Media</h2>
-              <div class="social-icons">
-                <a href="#" class="social-icon">
+              <p class="social-subtitle">Stay connected and get the latest updates</p>
+              
+              <div class="social-icons-expanded">
+                <a href="#" class="social-icon-expanded">
                   <i data-lucide="github"></i>
                   <span>GitHub</span>
+                  <p>Check out my projects and code</p>
                 </a>
-                <a href="#" class="social-icon">
+                <a href="#" class="social-icon-expanded">
                   <i data-lucide="linkedin"></i>
                   <span>LinkedIn</span>
+                  <p>Connect professionally</p>
                 </a>
-                <a href="#" class="social-icon">
+                <a href="#" class="social-icon-expanded">
                   <i data-lucide="twitter"></i>
                   <span>Twitter</span>
+                  <p>Follow for quick updates</p>
                 </a>
-                <a href="#" class="social-icon">
+                <a href="#" class="social-icon-expanded">
                   <i data-lucide="instagram"></i>
                   <span>Instagram</span>
+                  <p>See behind the scenes</p>
                 </a>
+                <a href="#" class="social-icon-expanded">
+                  <i data-lucide="youtube"></i>
+                  <span>YouTube</span>
+                  <p>Watch tutorials and demos</p>
+                </a>
+                <a href="#" class="social-icon-expanded">
+                  <i data-lucide="message-circle"></i>
+                  <span>Discord</span>
+                  <p>Join the community</p>
+                </a>
+              </div>
+              
+              <div class="newsletter-section">
+                <h3>Subscribe to Newsletter</h3>
+                <p>Get the latest updates directly to your inbox</p>
+                <form class="newsletter-form">
+                  <input type="email" placeholder="Enter your email address" required />
+                  <button type="submit">Subscribe</button>
+                </form>
               </div>
             </div>
           </div>
@@ -141,67 +193,140 @@ import FAQItem from '../components/FAQItem.astro';
   .faq-container {
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 40px;
+    position: relative;
   }
   
-  /* Social Media Full Width Section */
-  .social-fullwidth {
-    background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 100%);
-    margin: 40px calc(-50vw + 50%);
-    padding: 40px 20px;
+  /* Social Media Full Width Section - Diperbesar */
+  .social-fullwidth-expanded {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    margin: 60px calc(-50vw + 50%);
+    padding: 60px 20px;
     width: 100vw;
     position: relative;
     left: 50%;
     right: 50%;
     transform: translateX(-50%);
+    color: white;
   }
   
-  .social-container {
+  .social-container-expanded {
     max-width: 1200px;
     margin: 0 auto;
     text-align: center;
   }
   
-  .social-container h2 {
-    color: #333;
-    margin-bottom: 30px;
-    font-size: 2rem;
+  .social-container-expanded h2 {
+    color: white;
+    margin-bottom: 15px;
+    font-size: 2.5rem;
+    font-weight: 700;
   }
   
-  .social-icons {
-    display: flex;
-    justify-content: center;
+  .social-subtitle {
+    margin-bottom: 40px;
+    font-size: 1.2rem;
+    opacity: 0.9;
+  }
+  
+  .social-icons-expanded {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
     gap: 30px;
-    flex-wrap: wrap;
+    margin-bottom: 50px;
   }
   
-  .social-icon {
+  .social-icon-expanded {
     display: flex;
     flex-direction: column;
     align-items: center;
     text-decoration: none;
-    color: #333;
+    color: white;
     transition: all 0.3s ease;
-    padding: 15px;
-    border-radius: 10px;
-    background: rgba(255, 255, 255, 0.3);
+    padding: 30px 20px;
+    border-radius: 15px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
   }
   
-  .social-icon:hover {
-    transform: translateY(-5px);
-    background: rgba(255, 255, 255, 0.5);
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  .social-icon-expanded:hover {
+    transform: translateY(-8px);
+    background: rgba(255, 255, 255, 0.2);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
   }
   
-  .social-icon i {
-    width: 40px;
-    height: 40px;
+  .social-icon-expanded i {
+    width: 60px;
+    height: 60px;
+    margin-bottom: 20px;
+    color: white;
+  }
+  
+  .social-icon-expanded span {
+    font-weight: 700;
+    font-size: 1.4rem;
     margin-bottom: 10px;
-    color: #333;
   }
   
-  .social-icon span {
+  .social-icon-expanded p {
+    opacity: 0.8;
+    font-size: 0.95rem;
+    margin: 0;
+  }
+  
+  .newsletter-section {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 40px;
+    border-radius: 15px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    max-width: 600px;
+    margin: 0 auto;
+  }
+  
+  .newsletter-section h3 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    font-size: 1.8rem;
+  }
+  
+  .newsletter-section p {
+    margin-bottom: 25px;
+    opacity: 0.9;
+  }
+  
+  .newsletter-form {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  
+  .newsletter-form input {
+    flex-grow: 1;
+    min-width: 250px;
+    padding: 15px 20px;
+    border: none;
+    border-radius: 50px;
+    background: rgba(255, 255, 255, 0.9);
+    font-size: 1rem;
+  }
+  
+  .newsletter-form button {
+    padding: 15px 30px;
+    border: none;
+    border-radius: 50px;
+    background: #ff6b6b;
+    color: white;
     font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+  
+  .newsletter-form button:hover {
+    background: #ff5252;
+    transform: translateY(-2px);
   }
   
   /* Animasi Framer Motion */
@@ -222,17 +347,26 @@ import FAQItem from '../components/FAQItem.astro';
       font-size: 2rem;
     }
     
-    .social-icons {
-      gap: 15px;
+    .social-icons-expanded {
+      grid-template-columns: 1fr;
     }
     
-    .social-icon {
-      padding: 10px;
+    .social-icon-expanded {
+      padding: 20px 15px;
     }
     
-    .social-icon i {
-      width: 30px;
-      height: 30px;
+    .social-icon-expanded i {
+      width: 50px;
+      height: 50px;
+    }
+    
+    .newsletter-form {
+      flex-direction: column;
+    }
+    
+    .newsletter-form input,
+    .newsletter-form button {
+      width: 100%;
     }
   }
 </style>
