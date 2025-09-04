@@ -1,0 +1,263 @@
+---
+// blog.astro
+import Layout from '../layouts/Layout.astro';
+
+// Data blog posts
+const blogPosts = [
+  {
+    id: 1,
+    title: "Memulai dengan Astro",
+    date: "15 Maret 2023",
+    excerpt: "Pelajari cara memulai pembuatan website dengan Astro, framework modern yang cepat dan efisien.",
+    image: "/images/blog1.jpg",
+    category: "Tutorial"
+  },
+  {
+    id: 2,
+    title: "Optimasi Performa Website",
+    date: "22 Maret 2023",
+    excerpt: "Tips dan trik untuk mengoptimalkan performa website Anda dengan teknik-teknik terbaru.",
+    image: "/images/blog2.jpg",
+    category: "Tips"
+  },
+  {
+    id: 3,
+    title: "Menggunakan Component di Astro",
+    date: "5 April 2023",
+    excerpt: "Panduan lengkap tentang cara membuat dan menggunakan component dalam proyek Astro.",
+    image: "/images/blog3.jpg",
+    category: "Tutorial"
+  },
+  {
+    id: 4,
+    title: "Deploy Website ke Vercel",
+    date: "18 April 2023",
+    excerpt: "Langkah-langkah mudah untuk mendeploy website Astro Anda ke Vercel dengan gratis.",
+    image: "/images/blog4.jpg",
+    category: "Deployment"
+  },
+  {
+    id: 5,
+    title: "Best Practices SEO untuk Astro",
+    date: "2 Mei 2023",
+    excerpt: "Cara mengoptimalkan SEO website Astro Anda untuk peringkat yang lebih baik di mesin pencari.",
+    image: "/images/blog5.jpg",
+    category: "SEO"
+  },
+  {
+    id: 6,
+    title: "Membuat Dark Mode di Astro",
+    date: "15 Mei 2023",
+    excerpt: "Implementasi dark mode yang elegan pada website Astro dengan CSS variables dan JavaScript.",
+    image: "/images/blog6.jpg",
+    category: "UI/UX"
+  }
+];
+---
+
+<Layout title="Blog | Note Farid" description="Artikel dan tutorial tentang development web dan Astro." currentPage="blog">
+  <div class="container">
+    <main>
+      <h1 class="page-title">📝 Blog</h1>
+      
+      <div class="blog-intro">
+        <p>Selamat datang di blog saya! Di sini saya berbagi tutorial, tips, dan pemikiran tentang development web, Astro, dan teknologi terkini.</p>
+      </div>
+
+      <div class="blog-grid">
+        {blogPosts.map(post => (
+          <article class="blog-card" data-framer>
+            <div class="blog-image">
+              <img src={post.image} alt={post.title} />
+              <span class="blog-category">{post.category}</span>
+            </div>
+            <div class="blog-content">
+              <h2 class="blog-title">{post.title}</h2>
+              <p class="blog-date">{post.date}</p>
+              <p class="blog-excerpt">{post.excerpt}</p>
+              <a href={`/blog/${post.id}`} class="blog-read-more">Baca selengkapnya →</a>
+            </div>
+          </article>
+        ))}
+      </div>
+    </main>
+  </div>
+</Layout>
+
+<style>
+  body {
+    background: #f8f9fa;
+    color: #333;
+    min-height: 100vh;
+    padding: 0;
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+  
+  .page-title {
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 2.5rem;
+    font-weight: 700;
+    text-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    font-family: 'Montserrat', sans-serif;
+    letter-spacing: 1px;
+    color: #333;
+  }
+  
+  .blog-intro {
+    text-align: center;
+    margin-bottom: 40px;
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
+    font-size: 1.1rem;
+    line-height: 1.6;
+    color: #666;
+  }
+  
+  .blog-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 30px;
+    margin-top: 40px;
+  }
+  
+  .blog-card {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  
+  .blog-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+  }
+  
+  .blog-image {
+    position: relative;
+    height: 200px;
+    overflow: hidden;
+  }
+  
+  .blog-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+  }
+  
+  .blog-card:hover .blog-image img {
+    transform: scale(1.05);
+  }
+  
+  .blog-category {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: #667eea;
+    color: white;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+  }
+  
+  .blog-content {
+    padding: 25px;
+  }
+  
+  .blog-title {
+    font-size: 1.4rem;
+    margin: 0 0 10px 0;
+    color: #333;
+    font-family: 'Montserrat', sans-serif;
+  }
+  
+  .blog-date {
+    color: #666;
+    font-size: 0.9rem;
+    margin: 0 0 15px 0;
+  }
+  
+  .blog-excerpt {
+    color: #555;
+    line-height: 1.6;
+    margin: 0 0 20px 0;
+  }
+  
+  .blog-read-more {
+    color: #667eea;
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.3s ease;
+  }
+  
+  .blog-read-more:hover {
+    color: #5a67d8;
+  }
+  
+  /* Animasi Framer Motion */
+  [data-framer] {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+  
+  [data-framer].animated {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  
+  /* Responsive design */
+  @media (max-width: 768px) {
+    .page-title {
+      font-size: 2rem;
+    }
+    
+    .blog-grid {
+      grid-template-columns: 1fr;
+    }
+    
+    .blog-intro {
+      font-size: 1rem;
+      padding: 0 10px;
+    }
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Inisialisasi Lucide icons
+    if (typeof lucide !== 'undefined') {
+      lucide.createIcons();
+    }
+
+    // Animasi dengan Intersection Observer
+    const observerOptions = {
+      threshold: 0.1,
+      rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('animated');
+        }
+      });
+    }, observerOptions);
+
+    // Amati semua elemen dengan data-framer
+    document.querySelectorAll('[data-framer]').forEach(el => {
+      observer.observe(el);
+    });
+  });
+</script>
