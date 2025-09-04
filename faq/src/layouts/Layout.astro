@@ -1,5 +1,6 @@
 ---
-const { title = "Note Farid", description = "" } = Astro.props;
+const { title = "Note Farid", description = "", currentPage = 'home' } = Astro.props;
+import Navbar from '../components/Navbar.astro';
 ---
 
 <html lang="id">
@@ -7,6 +8,7 @@ const { title = "Note Farid", description = "" } = Astro.props;
     <meta charset="UTF-8" />
     <title>{title}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content={description} />
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <style>
       * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -16,6 +18,8 @@ const { title = "Note Farid", description = "" } = Astro.props;
         font-family: 'Poppins', sans-serif;
         min-height: 100vh;
       }
+
+      /* Banner Baru */
       .custom-banner {
         background: #f8f9fa;
         color: #333;
@@ -47,17 +51,13 @@ const { title = "Note Farid", description = "" } = Astro.props;
     </style>
   </head>
   <body>
+    <Navbar currentPage={currentPage} />
+    
+    <!-- Banner -->
     <div class="custom-banner" id="customBanner">
       <div class="left">👀 Note Farid</div>
       <button onclick="document.getElementById('customBanner').style.display='none'">✖</button>
     </div>
-
-    <header>
-      <nav class="site-nav">
-        <a href="/faq" class="nav-link">FAQ</a>
-        <a href="/blog" class="nav-link">Blog</a>
-      </nav>
-    </header>
 
     <main>
       <slot />
