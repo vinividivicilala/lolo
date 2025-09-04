@@ -1,5 +1,5 @@
 ---
-const { icon, question, index } = Astro.props;
+const { icon, question, index, isLast } = Astro.props;
 ---
 
 <div class="faq-item" data-framer>
@@ -18,6 +18,14 @@ const { icon, question, index } = Astro.props;
       <slot />
     </div>
   </div>
+  
+  {/* Garis penghubung antar FAQ */}
+  {!isLast && (
+    <div class="faq-connector">
+      <div class="connector-line"></div>
+      <div class="connector-dot"></div>
+    </div>
+  )}
 </div>
 
 <style>
@@ -31,7 +39,7 @@ const { icon, question, index } = Astro.props;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
   background: #000000;
   position: relative;
-  overflow: hidden;
+  overflow: visible;
   border: 1px solid #333;
 }
 
@@ -44,6 +52,8 @@ const { icon, question, index } = Astro.props;
   height: 100%;
   background: linear-gradient(45deg, rgba(255,255,255,0.1) 0%, transparent 100%);
   pointer-events: none;
+  border-radius: 10px;
+  z-index: 1;
 }
 
 .faq-item:hover {
@@ -63,15 +73,21 @@ const { icon, question, index } = Astro.props;
   flex-shrink: 0;
   border: 1px solid rgba(255, 255, 255, 0.2);
   color: white;
+  position: relative;
+  z-index: 2;
 }
 
 .faq-icon {
   font-size: 1.8rem;
   flex-shrink: 0;
+  position: relative;
+  z-index: 2;
 }
 
 .faq-content {
   flex-grow: 1;
+  position: relative;
+  z-index: 2;
 }
 
 .faq-content h2 {
@@ -156,6 +172,33 @@ const { icon, question, index } = Astro.props;
   transform: translateY(-2px);
 }
 
+/* Garis penghubung antar FAQ */
+.faq-connector {
+  position: absolute;
+  bottom: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 1;
+}
+
+.connector-line {
+  width: 2px;
+  height: 20px;
+  background: linear-gradient(to bottom, rgba(255,255,255,0.5), transparent);
+  border-left: 1px dashed rgba(255, 255, 255, 0.3);
+}
+
+.connector-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.5);
+  border: 1px dashed rgba(255, 255, 255, 0.3);
+}
+
 /* Responsive design */
 @media (max-width: 768px) {
   .faq-item {
@@ -168,6 +211,11 @@ const { icon, question, index } = Astro.props;
     flex-direction: column;
     align-items: flex-start;
     gap: 5px;
+  }
+  
+  .faq-connector {
+    left: 30px;
+    transform: none;
   }
 }
 </style>
