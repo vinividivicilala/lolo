@@ -16,8 +16,6 @@ const { title = "Note Farid", description = "" } = Astro.props;
         font-family: 'Poppins', sans-serif;
         min-height: 100vh;
       }
-
-      /* Banner Baru */
       .custom-banner {
         background: #f8f9fa;
         color: #333;
@@ -49,11 +47,17 @@ const { title = "Note Farid", description = "" } = Astro.props;
     </style>
   </head>
   <body>
-    <!-- Banner -->
     <div class="custom-banner" id="customBanner">
       <div class="left">👀 Note Farid</div>
       <button onclick="document.getElementById('customBanner').style.display='none'">✖</button>
     </div>
+
+    <header>
+      <nav class="site-nav">
+        <a href="/faq" class="nav-link">FAQ</a>
+        <a href="/blog" class="nav-link">Blog</a>
+      </nav>
+    </header>
 
     <main>
       <slot />
