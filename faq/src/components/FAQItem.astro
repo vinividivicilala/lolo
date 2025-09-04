@@ -29,9 +29,10 @@ const { icon, question, index } = Astro.props;
   padding: 20px;
   border-radius: 10px;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
-  background: linear-gradient(to right, var(--faq-bg-color-1), var(--faq-bg-color-2));
+  background: #000000;
   position: relative;
   overflow: hidden;
+  border: 1px solid #333;
 }
 
 .faq-item::before {
@@ -61,6 +62,7 @@ const { icon, question, index } = Astro.props;
   font-weight: bold;
   flex-shrink: 0;
   border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
 }
 
 .faq-icon {
@@ -80,6 +82,7 @@ const { icon, question, index } = Astro.props;
   gap: 10px;
   font-family: 'Montserrat', sans-serif;
   cursor: pointer;
+  color: white;
 }
 
 .faq-toggle {
@@ -102,6 +105,7 @@ const { icon, question, index } = Astro.props;
   height: 20px;
   flex-shrink: 0;
   transition: transform 0.3s ease;
+  color: white;
 }
 
 .faq-answer {
@@ -120,16 +124,36 @@ const { icon, question, index } = Astro.props;
 }
 
 .faq-answer a {
-  color: #ffffff;
   text-decoration: none;
-  border-bottom: 1px dotted #ffffff;
+  border-bottom: 1px dotted;
   transition: all 0.2s;
   font-weight: 500;
 }
 
+/* Warna berbeda untuk setiap link */
+.faq-answer a:nth-child(1) {
+  color: #FF6B6B;
+  border-bottom-color: #FF6B6B;
+}
+
+.faq-answer a:nth-child(2) {
+  color: #4ECDC4;
+  border-bottom-color: #4ECDC4;
+}
+
+.faq-answer a:nth-child(3) {
+  color: #FFE66D;
+  border-bottom-color: #FFE66D;
+}
+
+.faq-answer a:nth-child(4) {
+  color: #6A0572;
+  border-bottom-color: #6A0572;
+}
+
 .faq-answer a:hover {
-  color: #9ec5ff;
-  border-bottom: 1px solid #9ec5ff;
+  opacity: 0.8;
+  transform: translateY(-2px);
 }
 
 /* Responsive design */
