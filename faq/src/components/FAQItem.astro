@@ -2,7 +2,7 @@
 const { icon, question, index } = Astro.props;
 ---
 
-<div class="faq-item">
+<div class="faq-item" data-framer>
   <div class="faq-number">{index}</div>
   <div class="faq-icon">{icon || "❓"}</div>
   <div class="faq-content">
