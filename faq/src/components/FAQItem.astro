@@ -1,5 +1,5 @@
 ---
-const { icon, question, index } = Astro.props;
+const { icon, question, index, answer } = Astro.props;
 ---
 
 <div class="faq-item" data-framer>
@@ -16,7 +16,7 @@ const { icon, question, index } = Astro.props;
         {question}
       </h2>
       <div class="faq-answer">
-        <slot />
+        {answer && <Fragment set:html={answer} />}
       </div>
     </div>
   </div>
@@ -140,7 +140,6 @@ const { icon, question, index } = Astro.props;
   font-weight: 500;
 }
 
-/* Warna berbeda untuk setiap link */
 .faq-answer a:nth-child(1) {
   color: #FF6B6B;
   border-bottom-color: #FF6B6B;
@@ -166,7 +165,6 @@ const { icon, question, index } = Astro.props;
   transform: translateY(-2px);
 }
 
-/* Responsive design */
 @media (max-width: 768px) {
   .faq-content-wrapper {
     flex-direction: column;
@@ -183,7 +181,6 @@ const { icon, question, index } = Astro.props;
 </style>
 
 <script>
-// Script untuk toggle FAQ
 document.addEventListener('DOMContentLoaded', function() {
   const faqItems = document.querySelectorAll('.faq-item');
   
@@ -199,7 +196,6 @@ document.addEventListener('DOMContentLoaded', function() {
       });
     }
     
-    // Juga bisa diklik pada judul
     const heading = item.querySelector('h2');
     if (heading) {
       heading.addEventListener('click', function() {
