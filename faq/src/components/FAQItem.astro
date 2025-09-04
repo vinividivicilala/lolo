@@ -1,8 +1,10 @@
 ---
-const { icon, question, index } = Astro.props;
+const { icon, question, index, isLast } = Astro.props;
 ---
 
 <div class="faq-item" data-framer>
+  <div class="faq-connector-top"></div>
+  
   <div class="faq-content-wrapper">
     <div class="faq-number">{index}</div>
     <div class="faq-icon">{icon || "❓"}</div>
@@ -20,6 +22,8 @@ const { icon, question, index } = Astro.props;
       </div>
     </div>
   </div>
+  
+  {!isLast && <div class="faq-connector-bottom"></div>}
 </div>
 
 <style>
@@ -27,7 +31,7 @@ const { icon, question, index } = Astro.props;
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin: 20px 0;
+  margin: 10px 0;
   position: relative;
 }
 
@@ -43,6 +47,7 @@ const { icon, question, index } = Astro.props;
   overflow: hidden;
   border: 1px solid #333;
   width: 100%;
+  z-index: 2;
 }
 
 .faq-content-wrapper::before {
@@ -166,6 +171,25 @@ const { icon, question, index } = Astro.props;
   transform: translateY(-2px);
 }
 
+/* Garis penghubung antar FAQ */
+.faq-connector-top,
+.faq-connector-bottom {
+  width: 2px;
+  background: linear-gradient(to bottom, transparent, rgba(255, 255, 255, 0.5), transparent);
+  border-left: 1px dashed rgba(255, 255, 255, 0.3);
+}
+
+.faq-connector-top {
+  height: 20px;
+  margin-bottom: 5px;
+}
+
+.faq-connector-bottom {
+  height: 30px;
+  margin-top: 5px;
+  flex-shrink: 0;
+}
+
 /* Responsive design */
 @media (max-width: 768px) {
   .faq-content-wrapper {
@@ -178,6 +202,12 @@ const { icon, question, index } = Astro.props;
     flex-direction: column;
     align-items: flex-start;
     gap: 5px;
+  }
+  
+  .faq-connector-top,
+  .faq-connector-bottom {
+    margin-left: 35px;
+    align-self: flex-start;
   }
 }
 </style>
