@@ -7,11 +7,12 @@ const { title = "Note Farid", description = "" } = Astro.props;
     <meta charset="UTF-8" />
     <title>{title}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://unpkg.com/framer-motion@10.16.4/dist/framer-motion.js"></script>
     <style>
       * { margin: 0; padding: 0; box-sizing: border-box; }
       body {
-        background-color: #000;
-        color: white;
+        background-color: #fff;
+        color: #333;
         font-family: 'Poppins', sans-serif;
         min-height: 100vh;
       }
@@ -26,6 +27,7 @@ const { title = "Note Farid", description = "" } = Astro.props;
         font-size: 1.8rem;
         font-weight: 700;
         letter-spacing: 1px;
+        background: white;
       }
       .site-header img {
         width: 35px;
@@ -34,8 +36,8 @@ const { title = "Note Farid", description = "" } = Astro.props;
 
       /* Banner Baru */
       .custom-banner {
-        background: #A0D2EB;
-        color: #000;
+        background: #f8f9fa;
+        color: #333;
         display: flex;
         align-items: center;
         justify-content: space-between;
@@ -45,7 +47,8 @@ const { title = "Note Farid", description = "" } = Astro.props;
         border-radius: 12px;
         max-width: 700px;
         font-weight: 500;
-        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        border-left: 4px solid #A0D2EB;
       }
       .custom-banner .left {
         display: flex;
@@ -58,7 +61,7 @@ const { title = "Note Farid", description = "" } = Astro.props;
         border: none;
         font-size: 1.5rem;
         cursor: pointer;
-        color: #000;
+        color: #333;
       }
     </style>
   </head>
