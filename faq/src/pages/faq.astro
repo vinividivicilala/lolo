@@ -9,20 +9,9 @@ import FAQItem from '../components/FAQItem.astro';
     <head>
       <title>FAQ | Astro Example</title>
       <meta name="description" content="Halaman FAQ dengan animasi, gambar, dan icon." />
+      <script src="https://unpkg.com/framer-motion@10.16.4/dist/framer-motion.js"></script>
     </head>
     <body>
-      <!-- Banner baru dengan warna #A0D2EB -->
-      <div class="info-banner" id="infoBanner">
-        <div class="banner-content">
-          <span class="banner-emoji">👀</span>
-          <div class="banner-text">
-            <h3>Note from Farid</h3>
-            <p>Selamat datang di halaman FAQ! Jangan ragu untuk menghubungi saya jika ada pertanyaan.</p>
-          </div>
-          <button class="close-banner" id="closeBanner">×</button>
-        </div>
-      </div>
-
       <div class="container">
         <header class="website-header">
           <div class="logo">
@@ -31,7 +20,7 @@ import FAQItem from '../components/FAQItem.astro';
               <path d="M2 17L12 22L22 17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
               <path d="M2 12L12 17L22 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
-            <h1>FaridDev</h1>
+            <h1>FAQ Center</h1>
           </div>
         </header>
 
@@ -92,6 +81,14 @@ import FAQItem from '../components/FAQItem.astro';
             </div>
             
             <div class="note-content" id="noteContent">
+              <div class="profile-container">
+                <img src="/images/profile.jpg" alt="Foto Farid" class="profile-image" />
+                <div class="profile-info">
+                  <h3>Farid Developer</h3>
+                  <p>Web Developer & UI/UX Designer</p>
+                </div>
+              </div>
+              
               <p>Halo! Saya Farid, seorang web developer yang passionate dalam membuat pengalaman digital yang menarik dan fungsional.</p>
               
               <div class="note-highlight">
@@ -110,10 +107,44 @@ import FAQItem from '../components/FAQItem.astro';
                 <p>Portfolio: www.fariddev.com</p>
                 
                 <div class="social-links">
-                  <a href="#" class="social-link">GitHub</a>
-                  <a href="#" class="social-link">LinkedIn</a>
-                  <a href="#" class="social-link">Twitter</a>
+                  <a href="#" class="social-link github">GitHub</a>
+                  <a href="#" class="social-link linkedin">LinkedIn</a>
+                  <a href="#" class="social-link twitter">Twitter</a>
+                  <a href="#" class="social-link instagram">Instagram</a>
                 </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bagian Media Sosial Full Width -->
+          <div class="social-fullwidth">
+            <div class="social-container">
+              <h2>Follow Me On Social Media</h2>
+              <div class="social-icons">
+                <a href="#" class="social-icon">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                  </svg>
+                  <span>GitHub</span>
+                </a>
+                <a href="#" class="social-icon">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                  </svg>
+                  <span>LinkedIn</span>
+                </a>
+                <a href="#" class="social-icon">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/>
+                  </svg>
+                  <span>Twitter</span>
+                </a>
+                <a href="#" class="social-icon">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+                  </svg>
+                  <span>Instagram</span>
+                </a>
               </div>
             </div>
           </div>
@@ -125,8 +156,8 @@ import FAQItem from '../components/FAQItem.astro';
 
 <style>
   body {
-    background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
-    color: #fff;
+    background: #fff;
+    color: #333;
     min-height: 100vh;
     padding: 0;
     margin: 0;
@@ -139,64 +170,6 @@ import FAQItem from '../components/FAQItem.astro';
     padding: 20px;
   }
 
-  /* Info Banner */
-  .info-banner {
-    background-color: #A0D2EB;
-    color: #2c3e50;
-    padding: 15px 0;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    position: relative;
-  }
-
-  .banner-content {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 20px;
-    position: relative;
-  }
-
-  .banner-emoji {
-    font-size: 24px;
-    margin-right: 15px;
-  }
-
-  .banner-text h3 {
-    margin: 0 0 5px 0;
-    font-size: 18px;
-  }
-
-  .banner-text p {
-    margin: 0;
-    font-size: 14px;
-  }
-
-  .close-banner {
-    background: none;
-    border: none;
-    font-size: 24px;
-    cursor: pointer;
-    color: #2c3e50;
-    position: absolute;
-    right: 20px;
-    top: 50%;
-    transform: translateY(-50%);
-    padding: 0;
-    width: 30px;
-    height: 30px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    transition: background-color 0.3s;
-  }
-
-  .close-banner:hover {
-    background-color: rgba(0, 0, 0, 0.1);
-  }
-
   /* Website Header */
   .website-header {
     display: flex;
@@ -204,7 +177,7 @@ import FAQItem from '../components/FAQItem.astro';
     align-items: center;
     padding: 20px 0;
     margin-bottom: 30px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
   }
 
   .logo {
@@ -232,16 +205,17 @@ import FAQItem from '../components/FAQItem.astro';
     margin-bottom: 30px;
     font-size: 2.5rem;
     font-weight: 700;
-    text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+    text-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     font-family: 'Montserrat', sans-serif;
     letter-spacing: 1px;
+    color: #333;
   }
   
   .update-info {
     text-align: right;
     margin-bottom: 20px;
     font-size: 0.9rem;
-    color: #bbb;
+    color: #666;
     font-style: italic;
   }
   
@@ -257,8 +231,8 @@ import FAQItem from '../components/FAQItem.astro';
     max-height: 400px;
     object-fit: contain;
     border-radius: 10px;
-    box-shadow: 0 5px 15px rgba(255, 255, 255, 0.1);
-    border: 1px solid #444;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    border: 1px solid #ddd;
   }
   
   .faq-container {
@@ -267,46 +241,16 @@ import FAQItem from '../components/FAQItem.astro';
     gap: 20px;
   }
   
-  /* Warna berbeda untuk setiap FAQ */
-  .faq-item:nth-child(6n+1) {
-    --faq-bg-color-1: #2c3e50;
-    --faq-bg-color-2: #4a6491;
-  }
-  
-  .faq-item:nth-child(6n+2) {
-    --faq-bg-color-1: #662e8e;
-    --faq-bg-color-2: #8e44ad;
-  }
-  
-  .faq-item:nth-child(6n+3) {
-    --faq-bg-color-1: #c0392b;
-    --faq-bg-color-2: #e74c3c;
-  }
-  
-  .faq-item:nth-child(6n+4) {
-    --faq-bg-color-1: #27ae60;
-    --faq-bg-color-2: #2ecc71;
-  }
-  
-  .faq-item:nth-child(6n+5) {
-    --faq-bg-color-1: #d35400;
-    --faq-bg-color-2: #e67e22;
-  }
-  
-  .faq-item:nth-child(6n+6) {
-    --faq-bg-color-1: #2980b9;
-    --faq-bg-color-2: #3498db;
-  }
-  
   /* Note Farid Section */
   .note-farid-section {
-    background: linear-gradient(to right, #16a085, #1abc9c);
+    background: linear-gradient(135deg, #6A11CB 0%, #2575FC 100%);
     padding: 25px;
     border-radius: 10px;
     margin-top: 40px;
     scroll-margin-top: 20px;
     position: relative;
     overflow: hidden;
+    color: white;
   }
   
   .note-farid-section::before {
@@ -318,6 +262,31 @@ import FAQItem from '../components/FAQItem.astro';
     height: 100%;
     background: linear-gradient(45deg, rgba(255,255,255,0.1) 0%, transparent 100%);
     pointer-events: none;
+  }
+  
+  .profile-container {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 20px;
+  }
+  
+  .profile-image {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+  }
+  
+  .profile-info h3 {
+    margin: 0 0 5px 0;
+    font-size: 1.5rem;
+  }
+  
+  .profile-info p {
+    margin: 0;
+    opacity: 0.9;
   }
   
   .note-header {
@@ -422,30 +391,65 @@ import FAQItem from '../components/FAQItem.astro';
     transform: translateY(-2px);
   }
   
+  /* Social Media Full Width Section */
+  .social-fullwidth {
+    background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 100%);
+    margin: 40px -20px -20px;
+    padding: 40px 20px;
+    width: calc(100% + 40px);
+  }
+  
+  .social-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    text-align: center;
+  }
+  
+  .social-container h2 {
+    color: #333;
+    margin-bottom: 30px;
+    font-size: 2rem;
+  }
+  
+  .social-icons {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    flex-wrap: wrap;
+  }
+  
+  .social-icon {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-decoration: none;
+    color: #333;
+    transition: all 0.3s ease;
+    padding: 15px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.3);
+  }
+  
+  .social-icon:hover {
+    transform: translateY(-5px);
+    background: rgba(255, 255, 255, 0.5);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  }
+  
+  .social-icon svg {
+    width: 40px;
+    height: 40px;
+    margin-bottom: 10px;
+  }
+  
+  .social-icon span {
+    font-weight: 600;
+  }
+  
   /* Responsive design */
   @media (max-width: 768px) {
     h1 {
       font-size: 2rem;
-    }
-    
-    .info-banner {
-      padding: 10px 0;
-    }
-    
-    .banner-content {
-      flex-direction: column;
-      text-align: center;
-      gap: 10px;
-    }
-    
-    .banner-emoji {
-      margin-right: 0;
-    }
-    
-    .close-banner {
-      position: static;
-      transform: none;
-      margin-top: 10px;
     }
     
     .website-header {
@@ -462,8 +466,26 @@ import FAQItem from '../components/FAQItem.astro';
       font-size: 1.5rem;
     }
     
+    .profile-container {
+      flex-direction: column;
+      text-align: center;
+    }
+    
     .social-links {
       justify-content: center;
+    }
+    
+    .social-icons {
+      gap: 15px;
+    }
+    
+    .social-icon {
+      padding: 10px;
+    }
+    
+    .social-icon svg {
+      width: 30px;
+      height: 30px;
     }
   }
 </style>
@@ -499,15 +521,44 @@ import FAQItem from '../components/FAQItem.astro';
         }
       });
     }
-    
-    // Close banner functionality
-    const closeBanner = document.getElementById('closeBanner');
-    const infoBanner = document.getElementById('infoBanner');
-    
-    if (closeBanner && infoBanner) {
-      closeBanner.addEventListener('click', function() {
-        infoBanner.style.display = 'none';
+  });
+
+  // Inisialisasi Framer Motion animations
+  document.addEventListener('DOMContentLoaded', function() {
+    // Animasi untuk elemen header
+    if (typeof motion !== 'undefined') {
+      motion.container.animate({
+        opacity: [0, 1],
+        y: [20, 0]
+      }, {
+        duration: 800,
+        easing: 'ease-out'
       });
+      
+      // Animasi untuk setiap FAQ item
+      document.querySelectorAll('.faq-item').forEach((item, index) => {
+        motion.animate(item, {
+          opacity: [0, 1],
+          x: [-20, 0]
+        }, {
+          delay: index * 100,
+          duration: 500,
+          easing: 'ease-out'
+        });
+      });
+      
+      // Animasi untuk Note Farid section
+      const noteSection = document.querySelector('.note-farid-section');
+      if (noteSection) {
+        motion.animate(noteSection, {
+          opacity: [0, 1],
+          scale: [0.95, 1]
+        }, {
+          delay: 300,
+          duration: 600,
+          easing: 'ease-out'
+        });
+      }
     }
   });
 </script>
