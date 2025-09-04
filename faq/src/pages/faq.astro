@@ -1,5 +1,4 @@
 ---
-// faq.astro
 import Layout from '../layouts/Layout.astro';
 import FAQItem from '../components/FAQItem.astro';
 
@@ -66,14 +65,13 @@ const faqData = [
       </div>
 
       <div class="faq-container">
-        {faqData.map((faq, index) => (
+        {faqData.map((faq) => (
           <FAQItem 
             index={faq.index} 
             icon={faq.icon} 
             question={faq.question}
-          >
-            {@html faq.answer}
-          </FAQItem>
+            answer={faq.answer}
+          />
         ))}
       </div>
     </main>
@@ -158,7 +156,6 @@ const faqData = [
 </style>
 
 <script>
-  // Menampilkan tanggal dan waktu terbaru
   document.addEventListener('DOMContentLoaded', function() {
     const now = new Date();
     const options = { 
@@ -172,12 +169,7 @@ const faqData = [
     const dateTimeStr = now.toLocaleDateString('id-ID', options);
     document.getElementById('currentDate').textContent = dateTimeStr;
 
-    // Inisialisasi Lucide icons
-    if (typeof lucide !== 'undefined') {
-      lucide.createIcons();
-    }
-
-    // Animasi dengan Intersection Observer
+    // Animasi scroll (Framer Motion style)
     const observerOptions = {
       threshold: 0.1,
       rootMargin: '0px 0px -50px 0px'
@@ -191,12 +183,10 @@ const faqData = [
       });
     }, observerOptions);
 
-    // Amati semua elemen dengan data-framer
     document.querySelectorAll('[data-framer]').forEach(el => {
       observer.observe(el);
     });
 
-    // Animasi untuk gambar
     const image = document.querySelector('.faq-image');
     if (image) {
       image.style.opacity = '0';
@@ -209,7 +199,6 @@ const faqData = [
       }, 300);
     }
 
-    // Animasi untuk judul
     const title = document.querySelector('.page-title');
     if (title) {
       title.style.opacity = '0';
