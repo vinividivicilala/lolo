@@ -1,9 +1,8 @@
 ---
-// faq.astro
 import Layout from '../layouts/Layout.astro';
 import FAQItem from '../components/FAQItem.astro';
 
-// Data FAQ untuk memudahkan iterasi
+// Data FAQ
 const faqData = [
   {
     index: "1",
@@ -55,22 +54,24 @@ const faqData = [
 <Layout>
   <html lang="id">
     <head>
-      <title>FAQ | Astro Example</title>
+      <title>FAQ | Note Farid</title>
       <meta name="description" content="Halaman FAQ dengan animasi, gambar, dan icon." />
     </head>
     <body>
       <div class="container">
         <main>
+          <nav class="navigation">
+            <a href="/faq" class="nav-link active">FAQ</a>
+            <a href="/blog" class="nav-link">Blog</a>
+          </nav>
+
           <h1 class="page-title">❓ Frequently Asked Questions</h1>
-          
           <div class="update-info">
             Last update: <span id="currentDate"></span>
           </div>
-
           <div class="image-container">
             <img src="/images/5.jpg" alt="Ilustrasi FAQ" class="faq-image" />
           </div>
-
           <div class="faq-container">
             {faqData.map((faq, index) => (
               <FAQItem 
@@ -82,81 +83,6 @@ const faqData = [
                 {@html faq.answer}
               </FAQItem>
             ))}
-          </div>
-          
-          <!-- Bagian Media Sosial Full Width & Height -->
-          <div class="social-fullsize">
-            <div class="social-fullsize-container">
-              <h2>Follow Me On Social Media</h2>
-              <p class="social-subtitle">Stay connected and get the latest updates</p>
-              
-              <div class="social-grid">
-                <a href="#" class="social-card">
-                  <div class="social-icon-wrapper">
-                    <i data-lucide="github"></i>
-                  </div>
-                  <h3>GitHub</h3>
-                  <p>Check out my projects and code repositories</p>
-                  <span class="social-cta">Explore Projects →</span>
-                </a>
-                
-                <a href="#" class="social-card">
-                  <div class="social-icon-wrapper">
-                    <i data-lucide="linkedin"></i>
-                  </div>
-                  <h3>LinkedIn</h3>
-                  <p>Connect with me professionally</p>
-                  <span class="social-cta">Connect Now →</span>
-                </a>
-                
-                <a href="#" class="social-card">
-                  <div class="social-icon-wrapper">
-                    <i data-lucide="twitter"></i>
-                  </div>
-                  <h3>Twitter</h3>
-                  <p>Follow for quick updates and thoughts</p>
-                  <span class="social-cta">Follow Me →</span>
-                </a>
-                
-                <a href="#" class="social-card">
-                  <div class="social-icon-wrapper">
-                    <i data-lucide="instagram"></i>
-                  </div>
-                  <h3>Instagram</h3>
-                  <p>See behind the scenes and daily updates</p>
-                  <span class="social-cta">See Photos →</span>
-                </a>
-                
-                <a href="#" class="social-card">
-                  <div class="social-icon-wrapper">
-                    <i data-lucide="youtube"></i>
-                  </div>
-                  <h3>YouTube</h3>
-                  <p>Watch tutorials and project demos</p>
-                  <span class="social-cta">Watch Videos →</span>
-                </a>
-                
-                <a href="#" class="social-card">
-                  <div class="social-icon-wrapper">
-                    <i data-lucide="message-circle"></i>
-                  </div>
-                  <h3>Discord</h3>
-                  <p>Join the community and chat with us</p>
-                  <span class="social-cta">Join Server →</span>
-                </a>
-              </div>
-              
-              <div class="newsletter-section">
-                <div class="newsletter-content">
-                  <h3>Subscribe to My Newsletter</h3>
-                  <p>Get the latest updates, tutorials, and resources directly to your inbox</p>
-                  <form class="newsletter-form">
-                    <input type="email" placeholder="Enter your email address" required />
-                    <button type="submit">Subscribe Now</button>
-                  </form>
-                </div>
-              </div>
-            </div>
           </div>
         </main>
       </div>
@@ -173,13 +99,33 @@ const faqData = [
     margin: 0;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   }
-
   .container {
     max-width: 1200px;
     margin: 0 auto;
     padding: 20px;
   }
-  
+  .navigation {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 30px;
+    justify-content: center;
+  }
+  .nav-link {
+    text-decoration: none;
+    color: #333;
+    font-weight: 600;
+    padding: 10px 20px;
+    border-radius: 5px;
+    transition: all 0.3s ease;
+  }
+  .nav-link.active {
+    background: #667eea;
+    color: white;
+  }
+  .nav-link:hover:not(.active) {
+    background: #e0e0e0;
+    color: #333;
+  }
   .page-title {
     text-align: center;
     margin-bottom: 30px;
@@ -190,7 +136,6 @@ const faqData = [
     letter-spacing: 1px;
     color: #333;
   }
-  
   .update-info {
     text-align: right;
     margin-bottom: 20px;
@@ -198,13 +143,11 @@ const faqData = [
     color: #666;
     font-style: italic;
   }
-  
   .image-container {
     display: flex;
     justify-content: center;
     margin-bottom: 30px;
   }
-  
   .faq-image {
     max-width: 100%;
     height: auto;
@@ -214,7 +157,6 @@ const faqData = [
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
     border: 1px solid #ddd;
   }
-  
   .faq-container {
     display: flex;
     flex-direction: column;
@@ -223,220 +165,35 @@ const faqData = [
     position: relative;
     margin-bottom: 60px;
   }
-  
-  /* Social Media Full Size Section */
-  .social-fullsize {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    margin: 0 calc(-50vw + 50%);
-    padding: 80px 20px;
-    width: 100vw;
-    position: relative;
-    left: 50%;
-    right: 50%;
-    transform: translateX(-50%);
-    color: white;
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-  }
-  
-  .social-fullsize-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    text-align: center;
-    width: 100%;
-  }
-  
-  .social-fullsize-container h2 {
-    color: white;
-    margin-bottom: 15px;
-    font-size: 3rem;
-    font-weight: 700;
-  }
-  
-  .social-subtitle {
-    margin-bottom: 60px;
-    font-size: 1.3rem;
-    opacity: 0.9;
-    max-width: 600px;
-    margin-left: auto;
-    margin-right: auto;
-  }
-  
-  .social-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 30px;
-    margin-bottom: 80px;
-  }
-  
-  .social-card {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-decoration: none;
-    color: white;
-    transition: all 0.4s ease;
-    padding: 40px 30px;
-    border-radius: 20px;
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    height: 100%;
-  }
-  
-  .social-card:hover {
-    transform: translateY(-10px) scale(1.02);
-    background: rgba(255, 255, 255, 0.15);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-  }
-  
-  .social-icon-wrapper {
-    width: 80px;
-    height: 80px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(255, 255, 255, 0.2);
-    margin-bottom: 25px;
-  }
-  
-  .social-icon-wrapper i {
-    width: 40px;
-    height: 40px;
-    color: white;
-  }
-  
-  .social-card h3 {
-    font-size: 1.8rem;
-    margin: 0 0 15px 0;
-    font-weight: 600;
-  }
-  
-  .social-card p {
-    opacity: 0.9;
-    margin-bottom: 20px;
-    flex-grow: 1;
-  }
-  
-  .social-cta {
-    font-weight: 600;
-    opacity: 0.8;
-    transition: opacity 0.3s;
-  }
-  
-  .social-card:hover .social-cta {
-    opacity: 1;
-  }
-  
-  .newsletter-section {
-    background: rgba(255, 255, 255, 0.1);
-    padding: 60px 40px;
-    border-radius: 20px;
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    max-width: 800px;
-    margin: 0 auto;
-  }
-  
-  .newsletter-content h3 {
-    margin-top: 0;
-    margin-bottom: 15px;
-    font-size: 2.2rem;
-  }
-  
-  .newsletter-content p {
-    margin-bottom: 30px;
-    opacity: 0.9;
-    font-size: 1.1rem;
-    max-width: 500px;
-    margin-left: auto;
-    margin-right: auto;
-  }
-  
-  .newsletter-form {
-    display: flex;
-    gap: 15px;
-    justify-content: center;
-    flex-wrap: wrap;
-  }
-  
-  .newsletter-form input {
-    flex-grow: 1;
-    min-width: 300px;
-    padding: 18px 25px;
-    border: none;
-    border-radius: 50px;
-    background: rgba(255, 255, 255, 0.9);
-    font-size: 1.1rem;
-  }
-  
-  .newsletter-form button {
-    padding: 18px 35px;
-    border: none;
-    border-radius: 50px;
-    background: #ff6b6b;
-    color: white;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s;
-    font-size: 1.1rem;
-  }
-  
-  .newsletter-form button:hover {
-    background: #ff5252;
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-  }
-  
-  /* Animasi Framer Motion */
+
+  /* Animasi Framer */
   [data-framer] {
     opacity: 0;
     transform: translateY(20px);
     transition: opacity 0.6s ease, transform 0.6s ease;
   }
-  
   [data-framer].animated {
     opacity: 1;
     transform: translateY(0);
   }
-  
-  /* Responsive design */
+
+  /* Responsive */
   @media (max-width: 768px) {
+    .navigation {
+      flex-direction: column;
+      align-items: center;
+    }
+    .nav-link {
+      width: 100%;
+      text-align: center;
+    }
     .page-title {
       font-size: 2rem;
-    }
-    
-    .social-fullsize-container h2 {
-      font-size: 2.2rem;
-    }
-    
-    .social-grid {
-      grid-template-columns: 1fr;
-    }
-    
-    .social-card {
-      padding: 30px 20px;
-    }
-    
-    .newsletter-form {
-      flex-direction: column;
-    }
-    
-    .newsletter-form input,
-    .newsletter-form button {
-      width: 100%;
-    }
-    
-    .social-fullsize {
-      padding: 60px 20px;
     }
   }
 </style>
 
 <script>
-  // Menampilkan tanggal dan waktu terbaru
   document.addEventListener('DOMContentLoaded', function() {
     const now = new Date();
     const options = { 
@@ -460,7 +217,6 @@ const faqData = [
       threshold: 0.1,
       rootMargin: '0px 0px -50px 0px'
     };
-
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
@@ -469,31 +225,28 @@ const faqData = [
       });
     }, observerOptions);
 
-    // Amati semua elemen dengan data-framer
     document.querySelectorAll('[data-framer]').forEach(el => {
       observer.observe(el);
     });
 
-    // Animasi untuk gambar
+    // Animasi gambar
     const image = document.querySelector('.faq-image');
     if (image) {
       image.style.opacity = '0';
       image.style.transform = 'scale(0.9)';
       image.style.transition = 'opacity 0.8s ease, transform 0.8s ease';
-      
       setTimeout(() => {
         image.style.opacity = '1';
         image.style.transform = 'scale(1)';
       }, 300);
     }
 
-    // Animasi untuk judul
+    // Animasi judul
     const title = document.querySelector('.page-title');
     if (title) {
       title.style.opacity = '0';
       title.style.transform = 'translateY(-20px)';
       title.style.transition = 'opacity 0.8s ease, transform 0.8s ease';
-      
       setTimeout(() => {
         title.style.opacity = '1';
         title.style.transform = 'translateY(0)';
