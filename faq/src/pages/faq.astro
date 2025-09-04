@@ -13,17 +13,6 @@ import FAQItem from '../components/FAQItem.astro';
     </head>
     <body>
       <div class="container">
-        <header class="website-header">
-          <div class="logo">
-            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              <path d="M2 17L12 22L22 17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              <path d="M2 12L12 17L22 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-            <h1>FAQ Center</h1>
-          </div>
-        </header>
-
         <main>
           <h1 class="page-title">❓ Frequently Asked Questions</h1>
           
@@ -168,36 +157,6 @@ import FAQItem from '../components/FAQItem.astro';
     max-width: 1200px;
     margin: 0 auto;
     padding: 20px;
-  }
-
-  /* Website Header */
-  .website-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 20px 0;
-    margin-bottom: 30px;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-  }
-
-  .logo {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-
-  .logo svg {
-    color: #A0D2EB;
-  }
-
-  .logo h1 {
-    margin: 0;
-    font-size: 2rem;
-    font-weight: 700;
-    background: linear-gradient(45deg, #A0D2EB, #7FDBDA);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
   }
   
   .page-title {
@@ -394,9 +353,13 @@ import FAQItem from '../components/FAQItem.astro';
   /* Social Media Full Width Section */
   .social-fullwidth {
     background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 100%);
-    margin: 40px -20px -20px;
+    margin: 40px calc(-50vw + 50%);
     padding: 40px 20px;
-    width: calc(100% + 40px);
+    width: 100vw;
+    position: relative;
+    left: 50%;
+    right: 50%;
+    transform: translateX(-50%);
   }
   
   .social-container {
@@ -446,16 +409,22 @@ import FAQItem from '../components/FAQItem.astro';
     font-weight: 600;
   }
   
+  /* Animasi Framer Motion */
+  [data-framer] {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+  
+  [data-framer].animated {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  
   /* Responsive design */
   @media (max-width: 768px) {
     h1 {
       font-size: 2rem;
-    }
-    
-    .website-header {
-      flex-direction: column;
-      text-align: center;
-      gap: 15px;
     }
     
     .note-farid-section {
@@ -521,44 +490,50 @@ import FAQItem from '../components/FAQItem.astro';
         }
       });
     }
-  });
 
-  // Inisialisasi Framer Motion animations
-  document.addEventListener('DOMContentLoaded', function() {
-    // Animasi untuk elemen header
-    if (typeof motion !== 'undefined') {
-      motion.container.animate({
-        opacity: [0, 1],
-        y: [20, 0]
-      }, {
-        duration: 800,
-        easing: 'ease-out'
+    // Animasi dengan Intersection Observer
+    const observerOptions = {
+      threshold: 0.1,
+      rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('animated');
+        }
       });
+    }, observerOptions);
+
+    // Amati semua elemen dengan data-framer
+    document.querySelectorAll('[data-framer]').forEach(el => {
+      observer.observe(el);
+    });
+
+    // Animasi untuk gambar
+    const image = document.querySelector('.faq-image');
+    if (image) {
+      image.style.opacity = '0';
+      image.style.transform = 'scale(0.9)';
+      image.style.transition = 'opacity 0.8s ease, transform 0.8s ease';
       
-      // Animasi untuk setiap FAQ item
-      document.querySelectorAll('.faq-item').forEach((item, index) => {
-        motion.animate(item, {
-          opacity: [0, 1],
-          x: [-20, 0]
-        }, {
-          delay: index * 100,
-          duration: 500,
-          easing: 'ease-out'
-        });
-      });
+      setTimeout(() => {
+        image.style.opacity = '1';
+        image.style.transform = 'scale(1)';
+      }, 300);
+    }
+
+    // Animasi untuk judul
+    const title = document.querySelector('.page-title');
+    if (title) {
+      title.style.opacity = '0';
+      title.style.transform = 'translateY(-20px)';
+      title.style.transition = 'opacity 0.8s ease, transform 0.8s ease';
       
-      // Animasi untuk Note Farid section
-      const noteSection = document.querySelector('.note-farid-section');
-      if (noteSection) {
-        motion.animate(noteSection, {
-          opacity: [0, 1],
-          scale: [0.95, 1]
-        }, {
-          delay: 300,
-          duration: 600,
-          easing: 'ease-out'
-        });
-      }
+      setTimeout(() => {
+        title.style.opacity = '1';
+        title.style.transform = 'translateY(0)';
+      }, 100);
     }
   });
 </script>
