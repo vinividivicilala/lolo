@@ -1,0 +1,251 @@
+---
+// index.astro
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="Home | Note Farid" description="Website pribadi Farid dengan blog dan FAQ tentang development web." currentPage="home">
+  <div class="container">
+    <main class="home-container">
+      <section class="hero-section">
+        <h1 class="hero-title">Selamat Datang di Note Farid</h1>
+        <p class="hero-subtitle">Tempat berbagi pengetahuan tentang development web, Astro, dan teknologi terkini.</p>
+        <div class="hero-actions">
+          <a href="/faq" class="btn btn-primary">Lihat FAQ</a>
+          <a href="/blog" class="btn btn-secondary">Baca Blog</a>
+        </div>
+      </section>
+
+      <section class="features-section">
+        <h2 class="section-title">Apa yang Anda Temukan di Sini?</h2>
+        <div class="features-grid">
+          <div class="feature-card" data-framer>
+            <div class="feature-icon">❓</div>
+            <h3>FAQ</h3>
+            <p>Jawaban untuk pertanyaan-pertanyaan umum seputar Astro dan development web.</p>
+            <a href="/faq" class="feature-link">Jelajahi FAQ →</a>
+          </div>
+          
+          <div class="feature-card" data-framer>
+            <div class="feature-icon">📝</div>
+            <h3>Blog</h3>
+            <p>Artikel dan tutorial tentang development web, tips, dan best practices.</p>
+            <a href="/blog" class="feature-link">Baca Blog →</a>
+          </div>
+          
+          <div class="feature-card" data-framer>
+            <div class="feature-icon">🚀</div>
+            <h3>Astro</h3>
+            <p>Informasi terkini tentang Astro, framework modern untuk website yang cepat.</p>
+            <a href="/faq" class="feature-link">Pelajari Astro →</a>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+</Layout>
+
+<style>
+  body {
+    background: #f8f9fa;
+    color: #333;
+    min-height: 100vh;
+    padding: 0;
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+  
+  .home-container {
+    padding: 40px 0;
+  }
+  
+  .hero-section {
+    text-align: center;
+    padding: 80px 0;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 15px;
+    margin-bottom: 60px;
+  }
+  
+  .hero-title {
+    font-size: 3rem;
+    font-weight: 700;
+    margin-bottom: 20px;
+    font-family: 'Montserrat', sans-serif;
+  }
+  
+  .hero-subtitle {
+    font-size: 1.3rem;
+    max-width: 600px;
+    margin: 0 auto 40px;
+    opacity: 0.9;
+  }
+  
+  .hero-actions {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  
+  .btn {
+    padding: 15px 30px;
+    border-radius: 50px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+  }
+  
+  .btn-primary {
+    background: white;
+    color: #667eea;
+  }
+  
+  .btn-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+  }
+  
+  .btn-secondary {
+    background: transparent;
+    color: white;
+    border: 2px solid white;
+  }
+  
+  .btn-secondary:hover {
+    background: white;
+    color: #667eea;
+    transform: translateY(-3px);
+  }
+  
+  .features-section {
+    margin-bottom: 60px;
+  }
+  
+  .section-title {
+    text-align: center;
+    font-size: 2.2rem;
+    margin-bottom: 50px;
+    color: #333;
+    font-family: 'Montserrat', sans-serif;
+  }
+  
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
+  }
+  
+  .feature-card {
+    background: white;
+    padding: 40px 30px;
+    border-radius: 15px;
+    text-align: center;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  
+  .feature-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+  }
+  
+  .feature-icon {
+    font-size: 3rem;
+    margin-bottom: 20px;
+  }
+  
+  .feature-card h3 {
+    font-size: 1.5rem;
+    margin: 0 0 15px 0;
+    color: #333;
+  }
+  
+  .feature-card p {
+    color: #666;
+    line-height: 1.6;
+    margin: 0 0 20px 0;
+  }
+  
+  .feature-link {
+    color: #667eea;
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.3s ease;
+  }
+  
+  .feature-link:hover {
+    color: #5a67d8;
+  }
+  
+  /* Animasi Framer Motion */
+  [data-framer] {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+  
+  [data-framer].animated {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  
+  /* Responsive design */
+  @media (max-width: 768px) {
+    .hero-title {
+      font-size: 2.2rem;
+    }
+    
+    .hero-subtitle {
+      font-size: 1.1rem;
+    }
+    
+    .hero-actions {
+      flex-direction: column;
+      align-items: center;
+    }
+    
+    .btn {
+      width: 200px;
+      text-align: center;
+    }
+    
+    .features-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Inisialisasi Lucide icons
+    if (typeof lucide !== 'undefined') {
+      lucide.createIcons();
+    }
+
+    // Animasi dengan Intersection Observer
+    const observerOptions = {
+      threshold: 0.1,
+      rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('animated');
+        }
+      });
+    }, observerOptions);
+
+    // Amati semua elemen dengan data-framer
+    document.querySelectorAll('[data-framer]').forEach(el => {
+      observer.observe(el);
+    });
+  });
+</script>
