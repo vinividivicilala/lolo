@@ -53,12 +53,6 @@ const faqData = [
 ---
 
 <Layout title="FAQ | Astro Example" description="Halaman FAQ dengan animasi, gambar, dan icon." currentPage="faq">
-  <!-- Tambahkan Daisy UI CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.10/dist/full.min.css" rel="stylesheet" type="text/css" />
-  
-  <!-- Tambahkan Framer Motion -->
-  <script src="https://cdn.jsdelivr.net/npm/framer-motion@11.0.31/dist/framer-motion.min.js"></script>
-  
   <div class="container mx-auto px-4 max-w-4xl py-8">
     <main class="space-y-8">
       <!-- Teks Berjalan (Marquee) dengan Typography dan Blok Warna -->
@@ -146,6 +140,177 @@ const faqData = [
     transform: translateY(0);
   }
   
+  /* Container utilities */
+  .container {
+    width: 100%;
+    margin-right: auto;
+    margin-left: auto;
+  }
+  
+  @media (min-width: 640px) {
+    .container {
+      max-width: 640px;
+    }
+  }
+  
+  @media (min-width: 768px) {
+    .container {
+      max-width: 768px;
+    }
+  }
+  
+  @media (min-width: 1024px) {
+    .container {
+      max-width: 1024px;
+    }
+  }
+  
+  @media (min-width: 1280px) {
+    .container {
+      max-width: 1280px;
+    }
+  }
+  
+  @media (min-width: 1536px) {
+    .container {
+      max-width: 1536px;
+    }
+  }
+  
+  .mx-auto {
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  .px-4 {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  
+  .max-w-4xl {
+    max-width: 56rem;
+  }
+  
+  .py-8 {
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+  }
+  
+  .space-y-8 > * + * {
+    margin-top: 2rem;
+  }
+  
+  .space-y-4 > * + * {
+    margin-top: 1rem;
+  }
+  
+  .text-center {
+    text-align: center;
+  }
+  
+  .bg-gradient-to-r {
+    background-image: linear-gradient(to right, var(--tw-gradient-stops));
+  }
+  
+  .from-primary {
+    --tw-gradient-from: hsl(var(--p));
+    --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, hsl(var(--p) / 0));
+  }
+  
+  .to-secondary {
+    --tw-gradient-to: hsl(var(--s));
+  }
+  
+  .rounded-lg {
+    border-radius: 0.5rem;
+  }
+  
+  .text-white {
+    color: white;
+  }
+  
+  .font-bold {
+    font-weight: 700;
+  }
+  
+  .text-xl {
+    font-size: 1.25rem;
+    line-height: 1.75rem;
+  }
+  
+  .text-4xl {
+    font-size: 2.25rem;
+    line-height: 2.5rem;
+  }
+  
+  .bg-clip-text {
+    -webkit-background-clip: text;
+    background-clip: text;
+  }
+  
+  .text-transparent {
+    color: transparent;
+  }
+  
+  .from-blue-600 {
+    --tw-gradient-from: #2563eb;
+    --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgb(37 99 235 / 0));
+  }
+  
+  .to-purple-600 {
+    --tw-gradient-to: #9333ea;
+  }
+  
+  .text-sm {
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+  }
+  
+  .text-gray-600 {
+    color: #4b5563;
+  }
+  
+  .italic {
+    font-style: italic;
+  }
+  
+  .font-semibold {
+    font-weight: 600;
+  }
+  
+  .flex {
+    display: flex;
+  }
+  
+  .justify-center {
+    justify-content: center;
+  }
+  
+  .rounded-xl {
+    border-radius: 0.75rem;
+  }
+  
+  .shadow-lg {
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  }
+  
+  .border {
+    border-width: 1px;
+    border-style: solid;
+  }
+  
+  .border-gray-200 {
+    border-color: #e5e7eb;
+  }
+  
+  .w-full {
+    width: 100%;
+  }
+  
+  .max-w-md {
+    max-width: 28rem;
+  }
+  
   /* Responsive design */
   @media (max-width: 768px) {
     .marquee-content {
@@ -159,6 +324,11 @@ const faqData = [
     
     h1 {
       font-size: 2rem;
+    }
+    
+    .py-8 {
+      padding-top: 1.5rem;
+      padding-bottom: 1.5rem;
     }
   }
 </style>
