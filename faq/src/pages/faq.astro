@@ -59,28 +59,30 @@ const faqData = [
   <!-- Tambahkan Framer Motion -->
   <script src="https://cdn.jsdelivr.net/npm/framer-motion@11.0.31/dist/framer-motion.min.js"></script>
   
-  <div class="container mx-auto px-4">
-    <main>
+  <div class="container mx-auto px-4 max-w-4xl py-8">
+    <main class="space-y-8">
       <!-- Teks Berjalan (Marquee) dengan Typography dan Blok Warna -->
-      <div class="marquee-container bg-gradient-to-r from-primary to-secondary py-4 mb-8 rounded-lg shadow-lg">
-        <div class="marquee-content text-white font-bold text-2xl md:text-3xl">
+      <div class="marquee-container bg-gradient-to-r from-primary to-secondary py-3 rounded-lg shadow-lg">
+        <div class="marquee-content text-white font-bold text-xl">
           ❓ Tanya Jawab Seputar Astro & Development Web • 🚀 Tips & Trik Terbaru • 📚 Sumber Belajar Terpercaya •
         </div>
       </div>
       
-      <h1 class="page-title text-5xl font-extrabold text-center mb-8 font-montserrat bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-        ❓ Frequently Asked Questions
-      </h1>
-      
-      <div class="update-info text-right mb-6 text-gray-600 italic">
-        Last update: <span id="currentDate" class="font-semibold"></span>
+      <div class="text-center space-y-4">
+        <h1 class="text-4xl font-bold font-montserrat bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+          ❓ Frequently Asked Questions
+        </h1>
+        
+        <div class="text-sm text-gray-600 italic">
+          Last update: <span id="currentDate" class="font-semibold"></span>
+        </div>
       </div>
 
-      <div class="image-container flex justify-center mb-8">
-        <img src="/images/5.jpg" alt="Ilustrasi FAQ" class="faq-image max-w-full h-auto max-h-96 object-contain rounded-xl shadow-xl border border-gray-200" />
+      <div class="flex justify-center">
+        <img src="/images/5.jpg" alt="Ilustrasi FAQ" class="faq-image rounded-xl shadow-lg border border-gray-200 w-full max-w-md" />
       </div>
 
-      <div class="faq-container flex flex-col gap-6">
+      <div class="space-y-4">
         {faqData.map((faq, index) => (
           <div data-framer data-index={index}>
             <FAQItem 
@@ -101,11 +103,9 @@ const faqData = [
   @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Poppins:wght@300;400;500;600;700&display=swap');
   
   body {
-    background: #fff;
-    color: #333;
+    background: #f8fafc;
+    color: #334155;
     min-height: 100vh;
-    padding: 0;
-    margin: 0;
     font-family: 'Poppins', sans-serif;
   }
 
@@ -134,10 +134,6 @@ const faqData = [
     font-weight: 700;
   }
   
-  .page-title {
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  }
-  
   /* Animasi Framer Motion */
   [data-framer] {
     opacity: 0;
@@ -153,12 +149,16 @@ const faqData = [
   /* Responsive design */
   @media (max-width: 768px) {
     .marquee-content {
-      font-size: 1.5rem;
+      font-size: 1rem;
       animation-duration: 15s;
     }
     
-    .page-title {
-      font-size: 2.5rem;
+    .container {
+      padding: 1rem;
+    }
+    
+    h1 {
+      font-size: 2rem;
     }
   }
 </style>
@@ -228,7 +228,7 @@ const faqData = [
     }
 
     // Animasi judul dengan Framer Motion jika tersedia
-    const title = document.querySelector('.page-title');
+    const title = document.querySelector('h1');
     if (title) {
       if (window.framerMotion) {
         framerMotion.animate(title, {
