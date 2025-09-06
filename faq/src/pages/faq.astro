@@ -1,4 +1,5 @@
 ---
+// faq.astro
 import Layout from '../layouts/Layout.astro';
 import FAQItem from '../components/FAQItem.astro';
 
@@ -52,26 +53,43 @@ const faqData = [
 ---
 
 <Layout title="FAQ | Astro Example" description="Halaman FAQ dengan animasi, gambar, dan icon." currentPage="faq">
-  <div class="container">
+  <!-- Tambahkan Daisy UI CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.10/dist/full.min.css" rel="stylesheet" type="text/css" />
+  
+  <!-- Tambahkan Framer Motion -->
+  <script src="https://cdn.jsdelivr.net/npm/framer-motion@11.0.31/dist/framer-motion.min.js"></script>
+  
+  <div class="container mx-auto px-4">
     <main>
-      <h1 class="page-title">❓ Frequently Asked Questions</h1>
+      <!-- Teks Berjalan (Marquee) dengan Typography dan Blok Warna -->
+      <div class="marquee-container bg-gradient-to-r from-primary to-secondary py-4 mb-8 rounded-lg shadow-lg">
+        <div class="marquee-content text-white font-bold text-2xl md:text-3xl">
+          ❓ Tanya Jawab Seputar Astro & Development Web • 🚀 Tips & Trik Terbaru • 📚 Sumber Belajar Terpercaya •
+        </div>
+      </div>
       
-      <div class="update-info">
-        Last update: <span id="currentDate"></span>
+      <h1 class="page-title text-5xl font-extrabold text-center mb-8 font-montserrat bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+        ❓ Frequently Asked Questions
+      </h1>
+      
+      <div class="update-info text-right mb-6 text-gray-600 italic">
+        Last update: <span id="currentDate" class="font-semibold"></span>
       </div>
 
-      <div class="image-container">
-        <img src="/images/5.jpg" alt="Ilustrasi FAQ" class="faq-image" />
+      <div class="image-container flex justify-center mb-8">
+        <img src="/images/5.jpg" alt="Ilustrasi FAQ" class="faq-image max-w-full h-auto max-h-96 object-contain rounded-xl shadow-xl border border-gray-200" />
       </div>
 
-      <div class="faq-container">
-        {faqData.map((faq) => (
-          <FAQItem 
-            index={faq.index} 
-            icon={faq.icon} 
-            question={faq.question}
-            answer={faq.answer}
-          />
+      <div class="faq-container flex flex-col gap-6">
+        {faqData.map((faq, index) => (
+          <div data-framer data-index={index}>
+            <FAQItem 
+              index={faq.index} 
+              icon={faq.icon} 
+              question={faq.question}
+              answer={faq.answer}
+            />
+          </div>
         ))}
       </div>
     </main>
@@ -79,60 +97,45 @@ const faqData = [
 </Layout>
 
 <style>
+  /* Import Google Fonts untuk typography yang lebih baik */
+  @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Poppins:wght@300;400;500;600;700&display=swap');
+  
   body {
     background: #fff;
     color: #333;
     min-height: 100vh;
     padding: 0;
     margin: 0;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: 'Poppins', sans-serif;
   }
 
-  .container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 20px;
+  /* Styling untuk teks berjalan */
+  .marquee-container {
+    overflow: hidden;
+    position: relative;
+    width: 100%;
+  }
+  
+  .marquee-content {
+    white-space: nowrap;
+    display: inline-block;
+    padding-left: 100%;
+    animation: marquee 20s linear infinite;
+  }
+  
+  @keyframes marquee {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-100%); }
+  }
+  
+  /* Typography improvements */
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 700;
   }
   
   .page-title {
-    text-align: center;
-    margin-bottom: 30px;
-    font-size: 2.5rem;
-    font-weight: 700;
-    text-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    font-family: 'Montserrat', sans-serif;
-    letter-spacing: 1px;
-    color: #333;
-  }
-  
-  .update-info {
-    text-align: right;
-    margin-bottom: 20px;
-    font-size: 0.9rem;
-    color: #666;
-    font-style: italic;
-  }
-  
-  .image-container {
-    display: flex;
-    justify-content: center;
-    margin-bottom: 30px;
-  }
-  
-  .faq-image {
-    max-width: 100%;
-    height: auto;
-    max-height: 400px;
-    object-fit: contain;
-    border-radius: 10px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-    border: 1px solid #ddd;
-  }
-  
-  .faq-container {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   }
   
   /* Animasi Framer Motion */
@@ -149,14 +152,20 @@ const faqData = [
   
   /* Responsive design */
   @media (max-width: 768px) {
-    h1 {
-      font-size: 2rem;
+    .marquee-content {
+      font-size: 1.5rem;
+      animation-duration: 15s;
+    }
+    
+    .page-title {
+      font-size: 2.5rem;
     }
   }
 </style>
 
 <script>
   document.addEventListener('DOMContentLoaded', function() {
+    // Tanggal pembaruan
     const now = new Date();
     const options = { 
       weekday: 'long', 
@@ -169,7 +178,7 @@ const faqData = [
     const dateTimeStr = now.toLocaleDateString('id-ID', options);
     document.getElementById('currentDate').textContent = dateTimeStr;
 
-    // Animasi scroll (Framer Motion style)
+    // Animasi scroll dengan Intersection Observer
     const observerOptions = {
       threshold: 0.1,
       rootMargin: '0px 0px -50px 0px'
@@ -179,6 +188,16 @@ const faqData = [
       entries.forEach(entry => {
         if (entry.isIntersecting) {
           entry.target.classList.add('animated');
+          
+          // Gunakan Framer Motion jika tersedia
+          if (window.framerMotion) {
+            const index = entry.target.getAttribute('data-index');
+            framerMotion.animate(entry.target, {
+              opacity: 1,
+              y: 0,
+              transition: { duration: 0.6, delay: index * 0.1 }
+            });
+          }
         }
       });
     }, observerOptions);
@@ -187,28 +206,46 @@ const faqData = [
       observer.observe(el);
     });
 
+    // Animasi gambar dengan Framer Motion jika tersedia
     const image = document.querySelector('.faq-image');
     if (image) {
-      image.style.opacity = '0';
-      image.style.transform = 'scale(0.9)';
-      image.style.transition = 'opacity 0.8s ease, transform 0.8s ease';
-      
-      setTimeout(() => {
-        image.style.opacity = '1';
-        image.style.transform = 'scale(1)';
-      }, 300);
+      if (window.framerMotion) {
+        framerMotion.animate(image, {
+          opacity: 1,
+          scale: 1,
+          transition: { duration: 0.8, delay: 0.3 }
+        });
+      } else {
+        image.style.opacity = '0';
+        image.style.transform = 'scale(0.9)';
+        image.style.transition = 'opacity 0.8s ease, transform 0.8s ease';
+        
+        setTimeout(() => {
+          image.style.opacity = '1';
+          image.style.transform = 'scale(1)';
+        }, 300);
+      }
     }
 
+    // Animasi judul dengan Framer Motion jika tersedia
     const title = document.querySelector('.page-title');
     if (title) {
-      title.style.opacity = '0';
-      title.style.transform = 'translateY(-20px)';
-      title.style.transition = 'opacity 0.8s ease, transform 0.8s ease';
-      
-      setTimeout(() => {
-        title.style.opacity = '1';
-        title.style.transform = 'translateY(0)';
-      }, 100);
+      if (window.framerMotion) {
+        framerMotion.animate(title, {
+          opacity: 1,
+          y: 0,
+          transition: { duration: 0.8, delay: 0.1 }
+        });
+      } else {
+        title.style.opacity = '0';
+        title.style.transform = 'translateY(-20px)';
+        title.style.transition = 'opacity 0.8s ease, transform 0.8s ease';
+        
+        setTimeout(() => {
+          title.style.opacity = '1';
+          title.style.transform = 'translateY(0)';
+        }, 100);
+      }
     }
   });
 </script>
