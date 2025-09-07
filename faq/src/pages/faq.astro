@@ -62,22 +62,25 @@ const faqData = [
         </div>
       </div>
       
-      <div class="text-center">
-        <!-- Judul Stylish dan Modern -->
-        <div class="modern-title">
+      <!-- Layout Typografi Kiri -->
+      <div class="typography-left-layout">
+        <div class="title-section">
           <div class="title-accent">QUESTIONS</div>
           <h1 class="page-title">
-            FREQUENTLY ASKED
+            FREQUENTLY<br>ASKED
           </h1>
           <div class="title-line"></div>
         </div>
         
-        <div class="typography-description">
-          <p>Eksplorasi lengkap seputar Astro dan pengembangan web modern. Temukan jawaban atas pertanyaan paling umum yang diajukan oleh developer.</p>
-        </div>
-        
-        <div class="update-info">
-          LAST UPDATE: <span id="currentDate"></span>
+        <div class="description-section">
+          <p class="typography-description">
+            Eksplorasi lengkap seputar Astro dan pengembangan web modern. 
+            Temukan jawaban atas pertanyaan paling umum yang diajukan oleh developer.
+          </p>
+          
+          <div class="update-info">
+            LAST UPDATE: <span id="currentDate"></span>
+          </div>
         </div>
       </div>
 
@@ -117,7 +120,7 @@ const faqData = [
   /* Terapkan Space Mono ke semua elemen teks */
   body, .marquee-content-large, .page-title, .update-info, 
   .typography-description, .color-block-extra-large h2, 
-  .color-block-extra-large p, .cta-button-large, .modern-title {
+  .color-block-extra-large p, .cta-button-large, .title-accent {
     font-family: 'Space Mono', monospace !important;
   }
   
@@ -167,15 +170,18 @@ const faqData = [
     100% { transform: translateX(-100%); }
   }
   
-  /* Judul halaman yang modern dan stylish */
-  .text-center {
-    text-align: center;
+  /* Layout Typografi Kiri */
+  .typography-left-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 60px;
+    align-items: start;
     margin-bottom: 60px;
   }
   
-  .modern-title {
-    margin-bottom: 30px;
-    position: relative;
+  /* Bagian Judul - Rata Kiri */
+  .title-section {
+    text-align: left;
   }
   
   .title-accent {
@@ -184,37 +190,42 @@ const faqData = [
     color: #3b82f6;
     text-transform: uppercase;
     letter-spacing: 3px;
-    margin-bottom: 10px;
+    margin-bottom: 15px;
   }
   
   .page-title {
-    font-size: 3.5rem;
+    font-size: 4.5rem;
     font-weight: 700;
     color: #000;
-    margin: 0;
+    margin: 0 0 20px 0;
     text-transform: uppercase;
-    letter-spacing: -1px;
+    letter-spacing: -2px;
     line-height: 1.1;
+    text-align: left;
   }
   
   .title-line {
     width: 100px;
     height: 4px;
     background: #3b82f6;
-    margin: 20px auto;
+    margin: 20px 0;
+  }
+  
+  /* Bagian Deskripsi - Rata Kiri */
+  .description-section {
+    text-align: left;
+    padding-top: 20px;
   }
   
   .typography-description {
-    max-width: 700px;
-    margin: 30px auto;
-    font-size: 1.1rem;
+    font-size: 1.3rem;
     line-height: 1.6;
-    color: #64748b;
-    font-style: italic;
+    color: #334155;
+    margin-bottom: 30px;
   }
   
   .update-info {
-    color: #94a3b8;
+    color: #64748b;
     font-size: 0.9rem;
     text-transform: uppercase;
     letter-spacing: 1px;
@@ -309,6 +320,21 @@ const faqData = [
   }
   
   /* Responsive design */
+  @media (max-width: 968px) {
+    .typography-left-layout {
+      grid-template-columns: 1fr;
+      gap: 40px;
+    }
+    
+    .page-title {
+      font-size: 3.5rem;
+    }
+    
+    .description-section {
+      padding-top: 0;
+    }
+  }
+  
   @media (max-width: 768px) {
     .container {
       padding: 0 15px;
@@ -324,7 +350,7 @@ const faqData = [
     }
     
     .page-title {
-      font-size: 2.5rem;
+      font-size: 2.8rem;
     }
     
     .title-accent {
@@ -332,8 +358,7 @@ const faqData = [
     }
     
     .typography-description {
-      font-size: 1rem;
-      padding: 0 15px;
+      font-size: 1.1rem;
     }
     
     .color-block-extra-large {
@@ -360,11 +385,16 @@ const faqData = [
     }
     
     .page-title {
-      font-size: 2rem;
+      font-size: 2.2rem;
+      letter-spacing: -1px;
     }
     
     .title-accent {
       font-size: 0.9rem;
+    }
+    
+    .typography-description {
+      font-size: 1rem;
     }
     
     .color-block-extra-large h2 {
