@@ -6,18 +6,27 @@ import FAQItem from '../components/FAQItem.astro';
 // Data FAQ untuk memudahkan iterasi
 const faqData = [
   {
+    id: 1,
     index: "1",
     icon: "🚀",
     question: "Apa itu Astro?",
-    answer: "Astro adalah framework modern untuk membangun website statis dan hybrid yang super cepat. Astro memungkinkan developer menggunakan berbagai framework UI (seperti React, Vue, Svelte) dalam satu proyek."
+    answer: "Astro adalah framework modern untuk membangun website statis dan hybrid yang super cepat. Astro memungkinkan developer menggunakan berbagai framework UI (seperti React, Vue, Svelte) dalam satu proyek.",
+    fullDescription: "Astro adalah framework web all-in-one yang dirancang untuk membuat website yang cepat dan efisien. Dibangun dengan konsep 'island architecture', Astro memungkinkan Anda menggunakan komponen dari berbagai framework UI (React, Vue, Svelte, dll) dalam satu proyek, sambil tetap menghasilkan HTML statis yang optimal. Astro juga mendukung server-side rendering (SSR) melalui adapter, memberikan fleksibilitas dalam deployment.",
+    category: "Pengenalan",
+    lastUpdated: "15 November 2023, 14:30 WIB"
   },
   {
+    id: 2,
     index: "2",
     icon: "📂",
     question: "Di mana letak gambar?",
-    answer: "Gambar disimpan di folder /public/images. Contohnya di sini: /images/5.jpg. Pastikan untuk mengoptimalkan gambar sebelum menggunakannya di website untuk performa yang lebih baik."
+    answer: "Gambar disimpan di folder /public/images. Contohnya di sini: /images/5.jpg. Pastikan untuk mengoptimalkan gambar sebelum menggunakannya di website untuk performa yang lebih baik.",
+    fullDescription: "Dalam proyek Astro, semua aset statis seperti gambar, font, dan file lainnya disimpan dalam folder /public. Folder ini secara langsung dipetakan ke root website Anda. Untuk gambar, disarankan menyimpannya di /public/images. Sebelum menggunakan gambar, pastikan untuk mengoptimalkannya dengan kompresi dan format yang tepat (WebP untuk browser modern, JPEG/PNG untuk kompatibilitas) untuk meningkatkan performa loading website.",
+    category: "Struktur Proyek",
+    lastUpdated: "12 November 2023, 09:15 WIB"
   },
   {
+    id: 3,
     index: "3",
     icon: "🔗",
     question: "Apakah ada tautan ke luar?",
@@ -25,9 +34,19 @@ const faqData = [
       <br><br>
       <a href="https://astro.build" target="_blank">📄 Dokumentasi Astro</a><br>
       <a href="https://github.com/withastro/astro" target="_blank">💻 GitHub Repository</a><br>
-      <a href="https://astro.build/integrations/" target="_blank">🔌 Integrasi Astro</a>`
+      <a href="https://astro.build/integrations/" target="_blank">🔌 Integrasi Astro</a>`,
+    fullDescription: `Website ini menyediakan berbagai tautan eksternal yang berguna untuk pengembangan dengan Astro. Tautan-tautan tersebut termasuk:
+    
+    • Dokumentasi resmi Astro - sumber informasi terlengkap tentang semua fitur Astro
+    • Repository GitHub - tempat Anda dapat berkontribusi atau melaporkan issues
+    • Halaman integrasi - menampilkan semua plugin dan adapter yang tersedia
+    • Komunitas Discord - tempat berinteraksi dengan developer Astro lainnya
+    • Blog Astro - tutorial dan pengumuman terbaru`,
+    category: "Sumber Daya",
+    lastUpdated: "10 November 2023, 16:45 WIB"
   },
   {
+    id: 4,
     index: "4",
     icon: "⚙️",
     question: "Bagaimana cara instalasi Astro?",
@@ -35,19 +54,70 @@ const faqData = [
       <br><br>
       <code>npm create astro@latest</code>
       <br><br>
-      Ikuti petunjuk di command line untuk menyelesaikan proses instalasi.`
+      Ikuti petunjuk di command line untuk menyelesaikan proses instalasi.`,
+    fullDescription: `Instalasi Astro sangat mudah dan dapat dilakukan dalam beberapa langkah:
+
+    1. Pastikan Anda telah menginstall Node.js versi 16 atau lebih tinggi
+    2. Jalankan perintah: npm create astro@latest
+    3. Ikuti prompt yang muncul untuk mengkonfigurasi proyek
+    4. Masuk ke direktori proyek: cd nama-proyek-anda
+    5. Install dependencies: npm install
+    6. Jalankan server development: npm run dev
+
+    Anda juga dapat membuat proyek Astro dengan template tertentu menggunakan perintah:
+    npm create astro@latest -- --template nama-template
+
+    Beberapa template populer termasuk blog, dokumentasi, dan portfolio.`,
+    category: "Instalasi",
+    lastUpdated: "8 November 2023, 11:20 WIB"
   },
   {
+    id: 5,
     index: "5",
     icon: "🌐",
     question: "Apakah Astro mendukung SSR?",
-    answer: "Ya, Astro mendukung Server-Side Rendering (SSR) melalui adapter. Anda dapat menambahkan SSR ke proyek Astro dengan menginstall adapter untuk deployment target Anda (seperti Netlify, Vercel, atau Node.js)."
+    answer: "Ya, Astro mendukung Server-Side Rendering (SSR) melalui adapter. Anda dapat menambahkan SSR ke proyek Astro dengan menginstall adapter untuk deployment target Anda (seperti Netlify, Vercel, atau Node.js).",
+    fullDescription: `Astro memang mendukung Server-Side Rendering (SSR) melalui sistem adapter. Fitur ini memungkinkan Anda untuk:
+
+    • Menghalaman konten dinamis pada server
+    • Mengimplementasikan API routes
+    • Menangani autentikasi pengguna
+    • Mengelola data real-time
+
+    Untuk mengaktifkan SSR, Anda perlu menginstall adapter yang sesuai dengan platform deployment Anda. Beberapa adapter yang tersedia:
+
+    • @astrojs/netlify - untuk deploy ke Netlify
+    • @astrojs/vercel - untuk deploy ke Vercel
+    • @astrojs/node - untuk deploy ke lingkungan Node.js
+    • @astrojs/cloudflare - untuk deploy ke Cloudflare Pages
+
+    Setelah menginstall adapter, Anda perlu mengkonfigurasinya dalam file astro.config.mjs.`,
+    category: "Fitur",
+    lastUpdated: "5 November 2023, 13:10 WIB"
   },
   {
+    id: 6,
     index: "6",
     icon: "📱",
     question: "Apakah Astro responsive?",
-    answer: "Ya, Astro menghasilkan website yang fully responsive. Developer dapat dengan mudah membuat layout yang responsive dengan menggunakan CSS biasa atau framework CSS seperti Tailwind."
+    answer: "Ya, Astro menghasilkan website yang fully responsive. Developer dapat dengan mudah membuat layout yang responsive dengan menggunakan CSS biasa atau framework CSS seperti Tailwind.",
+    fullDescription: `Astro sendiri tidak menentukan bagaimana Anda membuat website responsive - itu sepenuhnya tergantung pada implementasi CSS Anda. Namun, Astro memberikan kebebasan penuh untuk menggunakan:
+
+    • CSS vanilla dengan media queries
+    • Framework CSS seperti Tailwind, Bootstrap, atau Bulma
+    • CSS-in-JS libraries seperti styled-components
+    • CSS modules untuk scoped styling
+
+    Karena Astro menghasilkan HTML statis, performa website biasanya sangat baik untuk perangkat mobile. Anda dapat dengan mudah mengimplementasikan responsive design patterns seperti:
+
+    • Mobile-first design
+    • Flexible grid layouts
+    • Responsive images dengan elemen picture atau srcset
+    • Conditional loading komponen berdasarkan breakpoint
+
+    Astro juga mendukung pengelolaan asset yang cerdas, termasuk generating responsive images pada build time.`,
+    category: "Responsivitas",
+    lastUpdated: "3 November 2023, 17:30 WIB"
   }
 ];
 ---
@@ -90,7 +160,7 @@ const faqData = [
 
       <div class="faq-items">
         {faqData.map((faq, index) => (
-          <div data-framer data-index={index}>
+          <div data-framer data-index={index} class="faq-item-wrapper" onclick={`openFAQModal(${faq.id})`}>
             <FAQItem 
               index={faq.index} 
               icon={faq.icon} 
@@ -109,6 +179,14 @@ const faqData = [
       <h2>STILL HAVE QUESTIONS?</h2>
       <p>Jangan ragu untuk menghubungi kami melalui email atau media sosial. Tim support kami siap membantu Anda dengan segala pertanyaan terkait Astro dan pengembangan web.</p>
       <a href="/contact" class="cta-button-large">CONTACT US NOW</a>
+    </div>
+  </div>
+
+  <!-- Modal untuk Detail FAQ -->
+  <div id="faqModal" class="modal">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <div id="modalContent"></div>
     </div>
   </div>
 </Layout>
@@ -254,6 +332,15 @@ const faqData = [
     margin-bottom: 80px;
   }
   
+  .faq-item-wrapper {
+    cursor: pointer;
+    transition: transform 0.2s ease;
+  }
+  
+  .faq-item-wrapper:hover {
+    transform: translateY(-2px);
+  }
+  
   /* Animasi Framer Motion */
   [data-framer] {
     opacity: 0;
@@ -319,6 +406,189 @@ const faqData = [
     box-shadow: 0 5px 15px rgba(37, 99, 235, 0.3);
   }
   
+  /* Modal Styles */
+  .modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.6);
+  }
+  
+  .modal-content {
+    background-color: #fff;
+    margin: 5% auto;
+    padding: 0;
+    border: none;
+    width: 90%;
+    max-width: 800px;
+    border-radius: 8px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    position: relative;
+    max-height: 80vh;
+    overflow-y: auto;
+  }
+  
+  .close {
+    color: #aaa;
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    font-size: 28px;
+    font-weight: bold;
+    z-index: 10;
+    cursor: pointer;
+  }
+  
+  .close:hover,
+  .close:focus {
+    color: #000;
+    text-decoration: none;
+  }
+  
+  /* Styling untuk konten modal */
+  .modal-faq-content {
+    padding: 40px;
+  }
+  
+  .modal-header {
+    border-bottom: 2px dashed #e2e8f0;
+    padding-bottom: 20px;
+    margin-bottom: 25px;
+    position: relative;
+  }
+  
+  .modal-category {
+    display: inline-block;
+    background: #3b82f6;
+    color: white;
+    padding: 5px 12px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 15px;
+  }
+  
+  .modal-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #000;
+    margin: 0 0 15px 0;
+    line-height: 1.3;
+    position: relative;
+    padding-left: 20px;
+  }
+  
+  .modal-title::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 8px;
+    height: 80%;
+    background: #3b82f6;
+    border-radius: 2px;
+  }
+  
+  .modal-meta {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    color: #64748b;
+    font-size: 0.9rem;
+  }
+  
+  .modal-update {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  
+  .modal-status {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    background: #10b981;
+    color: white;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 700;
+  }
+  
+  .modal-body {
+    padding: 20px 0;
+  }
+  
+  .modal-description {
+    font-size: 1.1rem;
+    line-height: 1.8;
+    color: #334155;
+    margin-bottom: 30px;
+    position: relative;
+    padding-left: 20px;
+    border-left: 2px dotted #3b82f6;
+  }
+  
+  .modal-timeline {
+    position: relative;
+    padding-left: 30px;
+    margin: 25px 0;
+  }
+  
+  .modal-timeline::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: repeating-linear-gradient(
+      to bottom,
+      transparent,
+      transparent 5px,
+      #cbd5e1 5px,
+      #cbd5e1 10px
+    );
+  }
+  
+  .timeline-item {
+    margin-bottom: 20px;
+    position: relative;
+  }
+  
+  .timeline-item::before {
+    content: "";
+    position: absolute;
+    left: -30px;
+    top: 8px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #3b82f6;
+    border: 2px solid white;
+    box-shadow: 0 0 0 2px #3b82f6;
+  }
+  
+  .timeline-title {
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: #000;
+    font-size: 1.1rem;
+  }
+  
+  .timeline-content {
+    color: #64748b;
+    line-height: 1.6;
+  }
+  
   /* Responsive design */
   @media (max-width: 968px) {
     .typography-left-layout {
@@ -377,6 +647,19 @@ const faqData = [
       padding: 14px 30px;
       font-size: 1rem;
     }
+    
+    .modal-content {
+      width: 95%;
+      margin: 10% auto;
+    }
+    
+    .modal-faq-content {
+      padding: 25px;
+    }
+    
+    .modal-title {
+      font-size: 1.6rem;
+    }
   }
 
   @media (max-width: 480px) {
@@ -405,10 +688,132 @@ const faqData = [
       padding: 12px 25px;
       font-size: 0.9rem;
     }
+    
+    .modal-meta {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 10px;
+    }
   }
 </style>
 
 <script>
+  // Data FAQ untuk modal
+  const faqData = [
+    {
+      id: 1,
+      index: "1",
+      icon: "🚀",
+      question: "Apa itu Astro?",
+      answer: "Astro adalah framework modern untuk membangun website statis dan hybrid yang super cepat. Astro memungkinkan developer menggunakan berbagai framework UI (seperti React, Vue, Svelte) dalam satu proyek.",
+      fullDescription: "Astro adalah framework web all-in-one yang dirancang untuk membuat website yang cepat dan efisien. Dibangun dengan konsep 'island architecture', Astro memungkinkan Anda menggunakan komponen dari berbagai framework UI (React, Vue, Svelte, dll) dalam satu proyek, sambil tetap menghasilkan HTML statis yang optimal. Astro juga mendukung server-side rendering (SSR) melalui adapter, memberikan fleksibilitas dalam deployment.",
+      category: "Pengenalan",
+      lastUpdated: "15 November 2023, 14:30 WIB",
+      isNew: true
+    },
+    {
+      id: 2,
+      index: "2",
+      icon: "📂",
+      question: "Di mana letak gambar?",
+      answer: "Gambar disimpan di folder /public/images. Contohnya di sini: /images/5.jpg. Pastikan untuk mengoptimalkan gambar sebelum menggunakannya di website untuk performa yang lebih baik.",
+      fullDescription: "Dalam proyek Astro, semua aset statis seperti gambar, font, dan file lainnya disimpan dalam folder /public. Folder ini secara langsung dipetakan ke root website Anda. Untuk gambar, disarankan menyimpannya di /public/images. Sebelum menggunakan gambar, pastikan untuk mengoptimalkannya dengan kompresi dan format yang tepat (WebP untuk browser modern, JPEG/PNG untuk kompatibilitas) untuk meningkatkan performa loading website.",
+      category: "Struktur Proyek",
+      lastUpdated: "12 November 2023, 09:15 WIB",
+      isNew: false
+    },
+    {
+      id: 3,
+      index: "3",
+      icon: "🔗",
+      question: "Apakah ada tautan ke luar?",
+      answer: `Ya, berikut adalah beberapa tautan penting:`,
+      fullDescription: `Website ini menyediakan berbagai tautan eksternal yang berguna untuk pengembangan dengan Astro. Tautan-tautan tersebut termasuk:
+      
+      • Dokumentasi resmi Astro - sumber informasi terlengkap tentang semua fitur Astro
+      • Repository GitHub - tempat Anda dapat berkontribusi atau melaporkan issues
+      • Halaman integrasi - menampilkan semua plugin dan adapter yang tersedia
+      • Komunitas Discord - tempat berinteraksi dengan developer Astro lainnya
+      • Blog Astro - tutorial dan pengumuman terbaru`,
+      category: "Sumber Daya",
+      lastUpdated: "10 November 2023, 16:45 WIB",
+      isNew: true
+    },
+    {
+      id: 4,
+      index: "4",
+      icon: "⚙️",
+      question: "Bagaimana cara instalasi Astro?",
+      answer: `Untuk menginstall Astro, Anda dapat menggunakan perintah berikut:`,
+      fullDescription: `Instalasi Astro sangat mudah dan dapat dilakukan dalam beberapa langkah:
+
+      1. Pastikan Anda telah menginstall Node.js versi 16 atau lebih tinggi
+      2. Jalankan perintah: npm create astro@latest
+      3. Ikuti prompt yang muncul untuk mengkonfigurasi proyek
+      4. Masuk ke direktori proyek: cd nama-proyek-anda
+      5. Install dependencies: npm install
+      6. Jalankan server development: npm run dev
+
+      Anda juga dapat membuat proyek Astro dengan template tertentu menggunakan perintah:
+      npm create astro@latest -- --template nama-template
+
+      Beberapa template populer termasuk blog, dokumentasi, dan portfolio.`,
+      category: "Instalasi",
+      lastUpdated: "8 November 2023, 11:20 WIB",
+      isNew: false
+    },
+    {
+      id: 5,
+      index: "5",
+      icon: "🌐",
+      question: "Apakah Astro mendukung SSR?",
+      answer: "Ya, Astro mendukung Server-Side Rendering (SSR) melalui adapter. Anda dapat menambahkan SSR ke proyek Astro dengan menginstall adapter untuk deployment target Anda (seperti Netlify, Vercel, atau Node.js).",
+      fullDescription: `Astro memang mendukung Server-Side Rendering (SSR) melalui sistem adapter. Fitur ini memungkinkan Anda untuk:
+
+      • Menghalaman konten dinamis pada server
+      • Mengimplementasikan API routes
+      • Menangani autentikasi pengguna
+      • Mengelola data real-time
+
+      Untuk mengaktifkan SSR, Anda perlu menginstall adapter yang sesuai dengan platform deployment Anda. Beberapa adapter yang tersedia:
+
+      • @astrojs/netlify - untuk deploy ke Netlify
+      • @astrojs/vercel - untuk deploy ke Vercel
+      • @astrojs/node - untuk deploy ke lingkungan Node.js
+      • @astrojs/cloudflare - untuk deploy ke Cloudflare Pages
+
+      Setelah menginstall adapter, Anda perlu mengkonfigurasinya dalam file astro.config.mjs.`,
+      category: "Fitur",
+      lastUpdated: "5 November 2023, 13:10 WIB",
+      isNew: true
+    },
+    {
+      id: 6,
+      index: "6",
+      icon: "📱",
+      question: "Apakah Astro responsive?",
+      answer: "Ya, Astro menghasilkan website yang fully responsive. Developer dapat dengan mudah membuat layout yang responsive dengan menggunakan CSS biasa atau framework CSS seperti Tailwind.",
+      fullDescription: `Astro sendiri tidak menentukan bagaimana Anda membuat website responsive - itu sepenuhnya tergantung pada implementasi CSS Anda. Namun, Astro memberikan kebebasan penuh untuk menggunakan:
+
+      • CSS vanilla dengan media queries
+      • Framework CSS seperti Tailwind, Bootstrap, atau Bulma
+      • CSS-in-JS libraries seperti styled-components
+      • CSS modules untuk scoped styling
+
+      Karena Astro menghasilkan HTML statis, performa website biasanya sangat baik untuk perangkat mobile. Anda dapat dengan mudah mengimplementasikan responsive design patterns seperti:
+
+      • Mobile-first design
+      • Flexible grid layouts
+      • Responsive images dengan elemen picture atau srcset
+      • Conditional loading komponen berdasarkan breakpoint
+
+      Astro juga mendukung pengelolaan asset yang cerdas, termasuk generating responsive images pada build time.`,
+      category: "Responsivitas",
+      lastUpdated: "3 November 2023, 17:30 WIB",
+      isNew: false
+    }
+  ];
+
   document.addEventListener('DOMContentLoaded', function() {
     // Tanggal pembaruan
     const now = new Date();
@@ -466,5 +871,68 @@ const faqData = [
         title.style.transform = 'translateY(0)';
       }, 100);
     }
+
+    // Modal functionality
+    const modal = document.getElementById("faqModal");
+    const closeBtn = document.getElementsByClassName("close")[0];
+
+    closeBtn.onclick = function() {
+      modal.style.display = "none";
+    }
+
+    window.onclick = function(event) {
+      if (event.target == modal) {
+        modal.style.display = "none";
+      }
+    }
   });
+
+  // Fungsi untuk membuka modal FAQ
+  function openFAQModal(id) {
+    const faq = faqData.find(item => item.id === id);
+    if (!faq) return;
+    
+    const modal = document.getElementById("faqModal");
+    const modalContent = document.getElementById("modalContent");
+    
+    modalContent.innerHTML = `
+      <div class="modal-faq-content">
+        <div class="modal-header">
+          <span class="modal-category">${faq.category}</span>
+          <h2 class="modal-title">${faq.question}</h2>
+          <div class="modal-meta">
+            <div class="modal-update">
+              <span>🕒 ${faq.lastUpdated}</span>
+            </div>
+            ${faq.isNew ? '<div class="modal-status">🆕 BARU</div>' : ''}
+          </div>
+        </div>
+        
+        <div class="modal-body">
+          <div class="modal-description">
+            ${faq.fullDescription.replace(/\n/g, '<br>')}
+          </div>
+          
+          <div class="modal-timeline">
+            <div class="timeline-item">
+              <div class="timeline-title">Keuntungan Menggunakan Astro</div>
+              <div class="timeline-content">Astro menawarkan performa luar biasa dengan mengirimkan HTML statis yang minimal ke client.</div>
+            </div>
+            
+            <div class="timeline-item">
+              <div class="timeline-title">Kompatibilitas Framework</div>
+              <div class="timeline-content">Dukung multiple framework UI dalam satu proyek tanpa konflik.</div>
+            </div>
+            
+            <div class="timeline-item">
+              <div class="timeline-title">Optimasi Built-in</div>
+              <div class="timeline-content">Astro secara otomatis mengoptimalkan gambar, CSS, dan JavaScript untuk performa terbaik.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+    
+    modal.style.display = "block";
+  }
 </script>
