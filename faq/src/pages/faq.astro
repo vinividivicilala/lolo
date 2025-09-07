@@ -58,17 +58,26 @@ const faqData = [
       <!-- Teks Berjalan (Marquee) - MEMENUHI LAYAR -->
       <div class="marquee-fullwidth">
         <div class="marquee-content-large">
-          ❓ Tanya Jawab Seputar Astro & Development Web • 🚀 Tips & Trik Terbaru • 📚 Sumber Belajar Terpercaya •
+          ❓ TANYA JAWAB SEPUTAR ASTRO & DEVELOPMENT WEB • 🚀 TIPS & TRIK TERBARU • 📚 SUMBER BELAJAR TERPERCAYA •
         </div>
       </div>
       
       <div class="text-center">
-        <h1 class="page-title">
-          ❓ Frequently Asked Questions
-        </h1>
+        <!-- Judul Stylish dan Modern -->
+        <div class="modern-title">
+          <div class="title-accent">QUESTIONS</div>
+          <h1 class="page-title">
+            FREQUENTLY ASKED
+          </h1>
+          <div class="title-line"></div>
+        </div>
+        
+        <div class="typography-description">
+          <p>Eksplorasi lengkap seputar Astro dan pengembangan web modern. Temukan jawaban atas pertanyaan paling umum yang diajukan oleh developer.</p>
+        </div>
         
         <div class="update-info">
-          Last update: <span id="currentDate"></span>
+          LAST UPDATE: <span id="currentDate"></span>
         </div>
       </div>
 
@@ -91,25 +100,31 @@ const faqData = [
     </main>
   </div>
 
-  <!-- Blok Warna Besar di Bagian Bawah - DIPERBESAR LAGI -->
+  <!-- Blok Warna Besar di Bagian Bawah -->
   <div class="color-block-extra-large">
     <div class="color-block-content">
-      <h2>Masih Punya Pertanyaan?</h2>
-      <p>Jangan ragu untuk menghubungi kami melalui email atau media sosial. Tim support kami siap membantu Anda dengan segala pertanyaan terkait Astro dan pengembangan web. Kami berkomitmen untuk memberikan respon terbaik dalam waktu 24 jam.</p>
-      <a href="/contact" class="cta-button-large">Hubungi Kami Sekarang</a>
+      <h2>STILL HAVE QUESTIONS?</h2>
+      <p>Jangan ragu untuk menghubungi kami melalui email atau media sosial. Tim support kami siap membantu Anda dengan segala pertanyaan terkait Astro dan pengembangan web.</p>
+      <a href="/contact" class="cta-button-large">CONTACT US NOW</a>
     </div>
   </div>
 </Layout>
 
 <style>
-  /* Import Google Fonts untuk typography yang lebih modern */
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+  /* Import Google Fonts - Space Mono */
+  @import url('https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+  
+  /* Terapkan Space Mono ke semua elemen teks */
+  body, .marquee-content-large, .page-title, .update-info, 
+  .typography-description, .color-block-extra-large h2, 
+  .color-block-extra-large p, .cta-button-large, .modern-title {
+    font-family: 'Space Mono', monospace !important;
+  }
   
   body {
     background: #f8fafc;
     color: #334155;
     min-height: 100vh;
-    font-family: 'Inter', sans-serif;
     margin: 0;
     padding: 0;
   }
@@ -132,6 +147,7 @@ const faqData = [
     margin-left: calc(-50vw + 50%);
     padding: 30px 0;
     margin-bottom: 60px;
+    background: #000; /* Latar belakang hitam */
   }
   
   .marquee-content-large {
@@ -139,9 +155,11 @@ const faqData = [
     display: inline-block;
     padding-left: 100%;
     animation: marquee 18s linear infinite;
-    font-size: 3rem; /* Font lebih besar */
-    font-weight: 800;
-    color: #000; /* Warna hitam */
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: #fff; /* Warna putih */
+    text-transform: uppercase;
+    letter-spacing: 1px;
   }
   
   @keyframes marquee {
@@ -149,37 +167,71 @@ const faqData = [
     100% { transform: translateX(-100%); }
   }
   
-  /* Judul halaman */
+  /* Judul halaman yang modern dan stylish */
   .text-center {
     text-align: center;
-    margin-bottom: 40px;
+    margin-bottom: 60px;
+  }
+  
+  .modern-title {
+    margin-bottom: 30px;
+    position: relative;
+  }
+  
+  .title-accent {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #3b82f6;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    margin-bottom: 10px;
   }
   
   .page-title {
-    font-size: 2.8rem;
-    font-weight: 800;
-    color: #1e293b;
-    margin-bottom: 15px;
+    font-size: 3.5rem;
+    font-weight: 700;
+    color: #000;
+    margin: 0;
+    text-transform: uppercase;
+    letter-spacing: -1px;
+    line-height: 1.1;
+  }
+  
+  .title-line {
+    width: 100px;
+    height: 4px;
+    background: #3b82f6;
+    margin: 20px auto;
+  }
+  
+  .typography-description {
+    max-width: 700px;
+    margin: 30px auto;
+    font-size: 1.1rem;
+    line-height: 1.6;
+    color: #64748b;
+    font-style: italic;
   }
   
   .update-info {
-    color: #64748b;
-    font-style: italic;
-    font-size: 1rem;
+    color: #94a3b8;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
   }
   
   /* Container gambar */
   .image-container {
     display: flex;
     justify-content: center;
-    margin-bottom: 40px;
+    margin-bottom: 60px;
   }
   
   .faq-image {
     max-width: 100%;
     height: auto;
-    border-radius: 12px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    border-radius: 4px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
     border: 1px solid #e2e8f0;
   }
   
@@ -187,8 +239,8 @@ const faqData = [
   .faq-items {
     display: flex;
     flex-direction: column;
-    gap: 20px;
-    margin-bottom: 60px;
+    gap: 25px;
+    margin-bottom: 80px;
   }
   
   /* Animasi Framer Motion */
@@ -203,11 +255,11 @@ const faqData = [
     transform: translateY(0);
   }
   
-  /* Blok warna besar di bagian bawah - EKSTRA BESAR */
+  /* Blok warna besar di bagian bawah */
   .color-block-extra-large {
-    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+    background: #000; /* Latar belakang hitam */
     color: white;
-    padding: 150px 20px; /* Diperbesar secara vertikal */
+    padding: 120px 20px;
     text-align: center;
     width: 100vw;
     margin-left: calc(-50vw + 50%);
@@ -215,43 +267,45 @@ const faqData = [
   }
   
   .color-block-content {
-    max-width: 800px;
+    max-width: 700px;
     margin: 0 auto;
   }
   
   .color-block-extra-large h2 {
-    font-size: 3.5rem;
-    margin-bottom: 30px;
-    font-weight: 800;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+    font-size: 2.5rem;
+    margin-bottom: 25px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
   }
   
   .color-block-extra-large p {
-    font-size: 1.5rem;
-    margin-bottom: 50px;
+    font-size: 1.2rem;
+    margin-bottom: 40px;
     line-height: 1.6;
-    opacity: 0.9;
-    max-width: 700px;
-    margin-left: auto;
-    margin-right: auto;
+    color: #cbd5e1;
   }
   
   .cta-button-large {
     display: inline-block;
-    background: white;
-    color: #3b82f6;
-    padding: 20px 50px;
-    border-radius: 10px;
+    background: #3b82f6;
+    color: white;
+    padding: 16px 40px;
+    border-radius: 2px;
     text-decoration: none;
     font-weight: 700;
-    font-size: 1.4rem;
+    font-size: 1.1rem;
     transition: all 0.3s ease;
-    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border: none;
+    cursor: pointer;
   }
   
   .cta-button-large:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+    background: #2563eb;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(37, 99, 235, 0.3);
   }
   
   /* Responsive design */
@@ -265,39 +319,25 @@ const faqData = [
     }
     
     .marquee-content-large {
-      font-size: 2rem;
+      font-size: 1.5rem;
       animation-duration: 15s;
     }
     
     .page-title {
-      font-size: 2.2rem;
-    }
-    
-    .color-block-extra-large {
-      padding: 100px 20px;
-    }
-    
-    .color-block-extra-large h2 {
       font-size: 2.5rem;
     }
     
-    .color-block-extra-large p {
-      font-size: 1.2rem;
+    .title-accent {
+      font-size: 1rem;
     }
     
-    .cta-button-large {
-      padding: 16px 35px;
-      font-size: 1.2rem;
-    }
-  }
-
-  @media (max-width: 480px) {
-    .marquee-content-large {
-      font-size: 1.6rem;
+    .typography-description {
+      font-size: 1rem;
+      padding: 0 15px;
     }
     
-    .page-title {
-      font-size: 1.8rem;
+    .color-block-extra-large {
+      padding: 80px 20px;
     }
     
     .color-block-extra-large h2 {
@@ -310,7 +350,30 @@ const faqData = [
     
     .cta-button-large {
       padding: 14px 30px;
-      font-size: 1.1rem;
+      font-size: 1rem;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .marquee-content-large {
+      font-size: 1.2rem;
+    }
+    
+    .page-title {
+      font-size: 2rem;
+    }
+    
+    .title-accent {
+      font-size: 0.9rem;
+    }
+    
+    .color-block-extra-large h2 {
+      font-size: 1.7rem;
+    }
+    
+    .cta-button-large {
+      padding: 12px 25px;
+      font-size: 0.9rem;
     }
   }
 </style>
@@ -328,7 +391,7 @@ const faqData = [
       minute: '2-digit'
     };
     const dateTimeStr = now.toLocaleDateString('id-ID', options);
-    document.getElementById('currentDate').textContent = dateTimeStr;
+    document.getElementById('currentDate').textContent = dateTimeStr.toUpperCase();
 
     // Animasi scroll dengan Intersection Observer
     const observerOptions = {
