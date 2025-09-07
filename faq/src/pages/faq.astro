@@ -55,8 +55,8 @@ const faqData = [
 <Layout title="FAQ | Astro Example" description="Halaman FAQ dengan animasi, gambar, dan icon." currentPage="faq">
   <div class="container">
     <main class="main-content">
-      <!-- Teks Berjalan (Marquee) -->
-      <div class="marquee-container">
+      <!-- Teks Berjalan (Marquee) - TANPA BLOK WARNA -->
+      <div class="marquee-wrapper">
         <div class="marquee-content">
           ❓ Tanya Jawab Seputar Astro & Development Web • 🚀 Tips & Trik Terbaru • 📚 Sumber Belajar Terpercaya •
         </div>
@@ -91,12 +91,12 @@ const faqData = [
     </main>
   </div>
 
-  <!-- Blok Warna Besar di Bagian Bawah -->
-  <div class="color-block">
+  <!-- Blok Warna Besar di Bagian Bawah - DIPERBESAR -->
+  <div class="color-block-large">
     <div class="color-block-content">
       <h2>Masih Punya Pertanyaan?</h2>
-      <p>Jangan ragu untuk menghubungi kami melalui email atau media sosial</p>
-      <a href="/contact" class="cta-button">Hubungi Kami</a>
+      <p>Jangan ragu untuk menghubungi kami melalui email atau media sosial. Tim support kami siap membantu Anda dengan segala pertanyaan terkait Astro dan pengembangan web.</p>
+      <a href="/contact" class="cta-button">Hubungi Kami Sekarang</a>
     </div>
   </div>
 </Layout>
@@ -124,25 +124,23 @@ const faqData = [
     padding: 40px 0;
   }
 
-  /* Styling untuk teks berjalan - SIMPLE & CLEAN */
-  .marquee-container {
+  /* Styling untuk teks berjalan - TANPA BLOK WARNA, FONT BESAR HITAM */
+  .marquee-wrapper {
     overflow: hidden;
     position: relative;
     width: 100%;
-    padding: 15px 0;
-    margin-bottom: 40px;
-    background: #f1f5f9;
-    border-top: 1px solid #e2e8f0;
-    border-bottom: 1px solid #e2e8f0;
+    padding: 25px 0;
+    margin-bottom: 50px;
   }
   
   .marquee-content {
     white-space: nowrap;
     display: inline-block;
     padding-left: 100%;
-    animation: marquee 25s linear infinite;
-    font-size: 1.1rem;
-    color: #475569;
+    animation: marquee 20s linear infinite;
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: #000; /* Warna hitam */
   }
   
   @keyframes marquee {
@@ -157,7 +155,7 @@ const faqData = [
   }
   
   .page-title {
-    font-size: 2.2rem;
+    font-size: 2.5rem;
     font-weight: 700;
     color: #1e293b;
     margin-bottom: 15px;
@@ -204,50 +202,52 @@ const faqData = [
     transform: translateY(0);
   }
   
-  /* Blok warna besar di bagian bawah */
-  .color-block {
-    background: #f1f5f9;
-    color: #334155;
-    padding: 80px 20px;
+  /* Blok warna besar di bagian bawah - DIPERBESAR */
+  .color-block-large {
+    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+    color: white;
+    padding: 120px 20px; /* Diperbesar secara vertikal */
     text-align: center;
     width: 100%;
-    border-top: 1px solid #e2e8f0;
   }
   
   .color-block-content {
-    max-width: 600px;
+    max-width: 700px;
     margin: 0 auto;
   }
   
-  .color-block h2 {
-    font-size: 2rem;
-    margin-bottom: 20px;
-    font-weight: 600;
-    color: #1e293b;
+  .color-block-large h2 {
+    font-size: 2.8rem;
+    margin-bottom: 25px;
+    font-weight: 700;
   }
   
-  .color-block p {
-    font-size: 1.1rem;
-    margin-bottom: 30px;
-    color: #475569;
+  .color-block-large p {
+    font-size: 1.3rem;
+    margin-bottom: 40px;
     line-height: 1.6;
+    opacity: 0.9;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
   }
   
   .cta-button {
     display: inline-block;
-    background: #3b82f6;
-    color: white;
-    padding: 12px 30px;
-    border-radius: 6px;
+    background: white;
+    color: #3b82f6;
+    padding: 16px 40px;
+    border-radius: 8px;
     text-decoration: none;
-    font-weight: 500;
-    font-size: 1rem;
-    transition: all 0.2s ease;
+    font-weight: 600;
+    font-size: 1.2rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   }
   
   .cta-button:hover {
-    background: #2563eb;
-    transform: translateY(-2px);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
   }
   
   /* Responsive design */
@@ -261,24 +261,29 @@ const faqData = [
     }
     
     .marquee-content {
-      font-size: 1rem;
-      animation-duration: 20s;
+      font-size: 1.6rem;
+      animation-duration: 18s;
     }
     
     .page-title {
-      font-size: 1.8rem;
+      font-size: 2rem;
     }
     
-    .color-block {
-      padding: 60px 20px;
+    .color-block-large {
+      padding: 80px 20px;
     }
     
-    .color-block h2 {
-      font-size: 1.7rem;
+    .color-block-large h2 {
+      font-size: 2.2rem;
     }
     
-    .color-block p {
-      font-size: 1rem;
+    .color-block-large p {
+      font-size: 1.1rem;
+    }
+    
+    .cta-button {
+      padding: 14px 30px;
+      font-size: 1.1rem;
     }
   }
 </style>
