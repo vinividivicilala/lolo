@@ -13,7 +13,8 @@ const faqData = [
     answer: "Astro adalah framework modern untuk membangun website statis dan hybrid yang super cepat. Astro memungkinkan developer menggunakan berbagai framework UI (seperti React, Vue, Svelte) dalam satu proyek.",
     fullDescription: "Astro adalah framework web all-in-one yang dirancang untuk membuat website yang cepat dan efisien. Dibangun dengan konsep 'island architecture', Astro memungkinkan Anda menggunakan komponen dari berbagai framework UI (React, Vue, Svelte, dll) dalam satu proyek, sambil tetap menghasilkan HTML statis yang optimal. Astro juga mendukung server-side rendering (SSR) melalui adapter, memberikan fleksibilitas dalam deployment.",
     category: "Pengenalan",
-    lastUpdated: "15 November 2023, 14:30 WIB"
+    lastUpdated: "15 November 2023, 14:30 WIB",
+    isNew: true
   },
   {
     id: 2,
@@ -23,53 +24,48 @@ const faqData = [
     answer: "Gambar disimpan di folder /public/images. Contohnya di sini: /images/5.jpg. Pastikan untuk mengoptimalkan gambar sebelum menggunakannya di website untuk performa yang lebih baik.",
     fullDescription: "Dalam proyek Astro, semua aset statis seperti gambar, font, dan file lainnya disimpan dalam folder /public. Folder ini secara langsung dipetakan ke root website Anda. Untuk gambar, disarankan menyimpannya di /public/images. Sebelum menggunakan gambar, pastikan untuk mengoptimalkannya dengan kompresi dan format yang tepat (WebP untuk browser modern, JPEG/PNG untuk kompatibilitas) untuk meningkatkan performa loading website.",
     category: "Struktur Proyek",
-    lastUpdated: "12 November 2023, 09:15 WIB"
+    lastUpdated: "12 November 2023, 09:15 WIB",
+    isNew: false
   },
   {
     id: 3,
     index: "3",
     icon: "🔗",
     question: "Apakah ada tautan ke luar?",
-    answer: `Ya, berikut adalah beberapa tautan penting:
-      <br><br>
-      <a href="https://astro.build" target="_blank">📄 Dokumentasi Astro</a><br>
-      <a href="https://github.com/withastro/astro" target="_blank">💻 GitHub Repository</a><br>
-      <a href="https://astro.build/integrations/" target="_blank">🔌 Integrasi Astro</a>`,
+    answer: `Ya, berikut adalah beberapa tautan penting:`,
     fullDescription: `Website ini menyediakan berbagai tautan eksternal yang berguna untuk pengembangan dengan Astro. Tautan-tautan tersebut termasuk:
-    
-    • Dokumentasi resmi Astro - sumber informasi terlengkap tentang semua fitur Astro
-    • Repository GitHub - tempat Anda dapat berkontribusi atau melaporkan issues
-    • Halaman integrasi - menampilkan semua plugin dan adapter yang tersedia
-    • Komunitas Discord - tempat berinteraksi dengan developer Astro lainnya
-    • Blog Astro - tutorial dan pengumuman terbaru`,
+      
+      • Dokumentasi resmi Astro - sumber informasi terlengkap tentang semua fitur Astro
+      • Repository GitHub - tempat Anda dapat berkontribusi atau melaporkan issues
+      • Halaman integrasi - menampilkan semua plugin dan adapter yang tersedia
+      • Komunitas Discord - tempat berinteraksi dengan developer Astro lainnya
+      • Blog Astro - tutorial dan pengumuman terbaru`,
     category: "Sumber Daya",
-    lastUpdated: "10 November 2023, 16:45 WIB"
+    lastUpdated: "10 November 2023, 16:45 WIB",
+    isNew: true
   },
   {
     id: 4,
     index: "4",
     icon: "⚙️",
     question: "Bagaimana cara instalasi Astro?",
-    answer: `Untuk menginstall Astro, Anda dapat menggunakan perintah berikut:
-      <br><br>
-      <code>npm create astro@latest</code>
-      <br><br>
-      Ikuti petunjuk di command line untuk menyelesaikan proses instalasi.`,
+    answer: `Untuk menginstall Astro, Anda dapat menggunakan perintah berikut:`,
     fullDescription: `Instalasi Astro sangat mudah dan dapat dilakukan dalam beberapa langkah:
 
-    1. Pastikan Anda telah menginstall Node.js versi 16 atau lebih tinggi
-    2. Jalankan perintah: npm create astro@latest
-    3. Ikuti prompt yang muncul untuk mengkonfigurasi proyek
-    4. Masuk ke direktori proyek: cd nama-proyek-anda
-    5. Install dependencies: npm install
-    6. Jalankan server development: npm run dev
+      1. Pastikan Anda telah menginstall Node.js versi 16 atau lebih tinggi
+      2. Jalankan perintah: npm create astro@latest
+      3. Ikuti prompt yang muncul untuk mengkonfigurasi proyek
+      4. Masuk ke direktori proyek: cd nama-proyek-anda
+      5. Install dependencies: npm install
+      6. Jalankan server development: npm run dev
 
-    Anda juga dapat membuat proyek Astro dengan template tertentu menggunakan perintah:
-    npm create astro@latest -- --template nama-template
+      Anda juga dapat membuat proyek Astro dengan template tertentu menggunakan perintah:
+      npm create astro@latest -- --template nama-template
 
-    Beberapa template populer termasuk blog, dokumentasi, dan portfolio.`,
+      Beberapa template populer termasuk blog, dokumentasi, dan portfolio.`,
     category: "Instalasi",
-    lastUpdated: "8 November 2023, 11:20 WIB"
+    lastUpdated: "8 November 2023, 11:20 WIB",
+    isNew: false
   },
   {
     id: 5,
@@ -79,21 +75,22 @@ const faqData = [
     answer: "Ya, Astro mendukung Server-Side Rendering (SSR) melalui adapter. Anda dapat menambahkan SSR ke proyek Astro dengan menginstall adapter untuk deployment target Anda (seperti Netlify, Vercel, atau Node.js).",
     fullDescription: `Astro memang mendukung Server-Side Rendering (SSR) melalui sistem adapter. Fitur ini memungkinkan Anda untuk:
 
-    • Menghalaman konten dinamis pada server
-    • Mengimplementasikan API routes
-    • Menangani autentikasi pengguna
-    • Mengelola data real-time
+      • Menghalaman konten dinamis pada server
+      • Mengimplementasikan API routes
+      • Menangani autentikasi pengguna
+      • Mengelola data real-time
 
-    Untuk mengaktifkan SSR, Anda perlu menginstall adapter yang sesuai dengan platform deployment Anda. Beberapa adapter yang tersedia:
+      Untuk mengaktifkan SSR, Anda perlu menginstall adapter yang sesuai dengan platform deployment Anda. Beberapa adapter yang tersedia:
 
-    • @astrojs/netlify - untuk deploy ke Netlify
-    • @astrojs/vercel - untuk deploy ke Vercel
-    • @astrojs/node - untuk deploy ke lingkungan Node.js
-    • @astrojs/cloudflare - untuk deploy ke Cloudflare Pages
+      • @astrojs/netlify - untuk deploy ke Netlify
+      • @astrojs/vercel - untuk deploy ke Vercel
+      • @astrojs/node - untuk deploy ke lingkungan Node.js
+      • @astrojs/cloudflare - untuk deploy ke Cloudflare Pages
 
-    Setelah menginstall adapter, Anda perlu mengkonfigurasinya dalam file astro.config.mjs.`,
+      Setelah menginstall adapter, Anda perlu mengkonfigurasinya dalam file astro.config.mjs.`,
     category: "Fitur",
-    lastUpdated: "5 November 2023, 13:10 WIB"
+    lastUpdated: "5 November 2023, 13:10 WIB",
+    isNew: true
   },
   {
     id: 6,
@@ -103,21 +100,22 @@ const faqData = [
     answer: "Ya, Astro menghasilkan website yang fully responsive. Developer dapat dengan mudah membuat layout yang responsive dengan menggunakan CSS biasa atau framework CSS seperti Tailwind.",
     fullDescription: `Astro sendiri tidak menentukan bagaimana Anda membuat website responsive - itu sepenuhnya tergantung pada implementasi CSS Anda. Namun, Astro memberikan kebebasan penuh untuk menggunakan:
 
-    • CSS vanilla dengan media queries
-    • Framework CSS seperti Tailwind, Bootstrap, atau Bulma
-    • CSS-in-JS libraries seperti styled-components
-    • CSS modules untuk scoped styling
+      • CSS vanilla dengan media queries
+      • Framework CSS seperti Tailwind, Bootstrap, atau Bulma
+      • CSS-in-JS libraries seperti styled-components
+      • CSS modules untuk scoped styling
 
-    Karena Astro menghasilkan HTML statis, performa website biasanya sangat baik untuk perangkat mobile. Anda dapat dengan mudah mengimplementasikan responsive design patterns seperti:
+      Karena Astro menghasilkan HTML statis, performa website biasanya sangat baik untuk perangkat mobile. Anda dapat dengan mudah mengimplementasikan responsive design patterns seperti:
 
-    • Mobile-first design
-    • Flexible grid layouts
-    • Responsive images dengan elemen picture atau srcset
-    • Conditional loading komponen berdasarkan breakpoint
+      • Mobile-first design
+      • Flexible grid layouts
+      • Responsive images dengan elemen picture atau srcset
+      • Conditional loading komponen berdasarkan breakpoint
 
-    Astro juga mendukung pengelolaan asset yang cerdas, termasuk generating responsive images pada build time.`,
+      Astro juga mendukung pengelolaan asset yang cerdas, termasuk generating responsive images pada build time.`,
     category: "Responsivitas",
-    lastUpdated: "3 November 2023, 17:30 WIB"
+    lastUpdated: "3 November 2023, 17:30 WIB",
+    isNew: false
   }
 ];
 ---
@@ -160,7 +158,7 @@ const faqData = [
 
       <div class="faq-items">
         {faqData.map((faq, index) => (
-          <div data-framer data-index={index} class="faq-item-wrapper" onclick={`openFAQModal(${faq.id})`}>
+          <div data-framer data-index={index} class="faq-item-wrapper" data-faq-id={faq.id}>
             <FAQItem 
               index={faq.index} 
               icon={faq.icon} 
@@ -872,9 +870,17 @@ const faqData = [
       }, 100);
     }
 
-    // Modal functionality
+    // Modal functionality - FIXED
     const modal = document.getElementById("faqModal");
     const closeBtn = document.getElementsByClassName("close")[0];
+
+    // Tambahkan event listener ke setiap FAQ item
+    document.querySelectorAll('.faq-item-wrapper').forEach(wrapper => {
+      wrapper.addEventListener('click', function() {
+        const faqId = parseInt(this.getAttribute('data-faq-id'));
+        openFAQModal(faqId);
+      });
+    });
 
     closeBtn.onclick = function() {
       modal.style.display = "none";
