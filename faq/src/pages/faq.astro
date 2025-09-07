@@ -55,9 +55,9 @@ const faqData = [
 <Layout title="FAQ | Astro Example" description="Halaman FAQ dengan animasi, gambar, dan icon." currentPage="faq">
   <div class="container">
     <main class="main-content">
-      <!-- Teks Berjalan (Marquee) - TANPA BLOK WARNA -->
-      <div class="marquee-wrapper">
-        <div class="marquee-content">
+      <!-- Teks Berjalan (Marquee) - MEMENUHI LAYAR -->
+      <div class="marquee-fullwidth">
+        <div class="marquee-content-large">
           ❓ Tanya Jawab Seputar Astro & Development Web • 🚀 Tips & Trik Terbaru • 📚 Sumber Belajar Terpercaya •
         </div>
       </div>
@@ -91,19 +91,19 @@ const faqData = [
     </main>
   </div>
 
-  <!-- Blok Warna Besar di Bagian Bawah - DIPERBESAR -->
-  <div class="color-block-large">
+  <!-- Blok Warna Besar di Bagian Bawah - DIPERBESAR LAGI -->
+  <div class="color-block-extra-large">
     <div class="color-block-content">
       <h2>Masih Punya Pertanyaan?</h2>
-      <p>Jangan ragu untuk menghubungi kami melalui email atau media sosial. Tim support kami siap membantu Anda dengan segala pertanyaan terkait Astro dan pengembangan web.</p>
-      <a href="/contact" class="cta-button">Hubungi Kami Sekarang</a>
+      <p>Jangan ragu untuk menghubungi kami melalui email atau media sosial. Tim support kami siap membantu Anda dengan segala pertanyaan terkait Astro dan pengembangan web. Kami berkomitmen untuk memberikan respon terbaik dalam waktu 24 jam.</p>
+      <a href="/contact" class="cta-button-large">Hubungi Kami Sekarang</a>
     </div>
   </div>
 </Layout>
 
 <style>
   /* Import Google Fonts untuk typography yang lebih modern */
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
   
   body {
     background: #f8fafc;
@@ -124,22 +124,23 @@ const faqData = [
     padding: 40px 0;
   }
 
-  /* Styling untuk teks berjalan - TANPA BLOK WARNA, FONT BESAR HITAM */
-  .marquee-wrapper {
+  /* Styling untuk teks berjalan - MEMENUHI LAYAR PENUH */
+  .marquee-fullwidth {
     overflow: hidden;
     position: relative;
-    width: 100%;
-    padding: 25px 0;
-    margin-bottom: 50px;
+    width: 100vw;
+    margin-left: calc(-50vw + 50%);
+    padding: 30px 0;
+    margin-bottom: 60px;
   }
   
-  .marquee-content {
+  .marquee-content-large {
     white-space: nowrap;
     display: inline-block;
     padding-left: 100%;
-    animation: marquee 20s linear infinite;
-    font-size: 2.2rem;
-    font-weight: 700;
+    animation: marquee 18s linear infinite;
+    font-size: 3rem; /* Font lebih besar */
+    font-weight: 800;
     color: #000; /* Warna hitam */
   }
   
@@ -155,8 +156,8 @@ const faqData = [
   }
   
   .page-title {
-    font-size: 2.5rem;
-    font-weight: 700;
+    font-size: 2.8rem;
+    font-weight: 800;
     color: #1e293b;
     margin-bottom: 15px;
   }
@@ -164,7 +165,7 @@ const faqData = [
   .update-info {
     color: #64748b;
     font-style: italic;
-    font-size: 0.95rem;
+    font-size: 1rem;
   }
   
   /* Container gambar */
@@ -202,52 +203,55 @@ const faqData = [
     transform: translateY(0);
   }
   
-  /* Blok warna besar di bagian bawah - DIPERBESAR */
-  .color-block-large {
+  /* Blok warna besar di bagian bawah - EKSTRA BESAR */
+  .color-block-extra-large {
     background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
     color: white;
-    padding: 120px 20px; /* Diperbesar secara vertikal */
+    padding: 150px 20px; /* Diperbesar secara vertikal */
     text-align: center;
-    width: 100%;
+    width: 100vw;
+    margin-left: calc(-50vw + 50%);
+    box-sizing: border-box;
   }
   
   .color-block-content {
-    max-width: 700px;
+    max-width: 800px;
     margin: 0 auto;
   }
   
-  .color-block-large h2 {
-    font-size: 2.8rem;
-    margin-bottom: 25px;
-    font-weight: 700;
+  .color-block-extra-large h2 {
+    font-size: 3.5rem;
+    margin-bottom: 30px;
+    font-weight: 800;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
   }
   
-  .color-block-large p {
-    font-size: 1.3rem;
-    margin-bottom: 40px;
+  .color-block-extra-large p {
+    font-size: 1.5rem;
+    margin-bottom: 50px;
     line-height: 1.6;
     opacity: 0.9;
-    max-width: 600px;
+    max-width: 700px;
     margin-left: auto;
     margin-right: auto;
   }
   
-  .cta-button {
+  .cta-button-large {
     display: inline-block;
     background: white;
     color: #3b82f6;
-    padding: 16px 40px;
-    border-radius: 8px;
+    padding: 20px 50px;
+    border-radius: 10px;
     text-decoration: none;
-    font-weight: 600;
-    font-size: 1.2rem;
+    font-weight: 700;
+    font-size: 1.4rem;
     transition: all 0.3s ease;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
   }
   
-  .cta-button:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+  .cta-button-large:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
   }
   
   /* Responsive design */
@@ -260,28 +264,51 @@ const faqData = [
       padding: 30px 0;
     }
     
-    .marquee-content {
-      font-size: 1.6rem;
-      animation-duration: 18s;
+    .marquee-content-large {
+      font-size: 2rem;
+      animation-duration: 15s;
     }
     
     .page-title {
-      font-size: 2rem;
-    }
-    
-    .color-block-large {
-      padding: 80px 20px;
-    }
-    
-    .color-block-large h2 {
       font-size: 2.2rem;
     }
     
-    .color-block-large p {
-      font-size: 1.1rem;
+    .color-block-extra-large {
+      padding: 100px 20px;
     }
     
-    .cta-button {
+    .color-block-extra-large h2 {
+      font-size: 2.5rem;
+    }
+    
+    .color-block-extra-large p {
+      font-size: 1.2rem;
+    }
+    
+    .cta-button-large {
+      padding: 16px 35px;
+      font-size: 1.2rem;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .marquee-content-large {
+      font-size: 1.6rem;
+    }
+    
+    .page-title {
+      font-size: 1.8rem;
+    }
+    
+    .color-block-extra-large h2 {
+      font-size: 2rem;
+    }
+    
+    .color-block-extra-large p {
+      font-size: 1rem;
+    }
+    
+    .cta-button-large {
       padding: 14px 30px;
       font-size: 1.1rem;
     }
