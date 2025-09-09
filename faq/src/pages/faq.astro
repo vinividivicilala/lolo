@@ -301,14 +301,22 @@ const faqData = [
     </div>
   </div>
 
-  <!-- Modal untuk Detail FAQ - Diperbesar dengan Garis Sekeliling -->
+
+ <!-- Modal untuk Detail FAQ - Diperbarui dengan Daisy UI -->
   <div id="faqModal" class="modal">
-    <div class="modal-content large-modal">
-      <span class="close">&times;</span>
-      <div id="modalContent"></div>
+    <div class="modal-box max-w-4xl p-0 overflow-hidden">
+      <div class="modal-action m-4 absolute top-0 right-0 z-10">
+        <button class="btn btn-circle btn-sm btn-ghost">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+      <div id="modalContent" class="p-8"></div>
     </div>
   </div>
 </Layout>
+
 
 <style>
   /* Import Google Fonts - Space Mono */
@@ -621,185 +629,239 @@ const faqData = [
   
 
 
-/* ===== Modal Styling Baru ===== */
-.modal-content {
-  background: #fff;
-  margin: 3% auto;
-  border-radius: 16px;
-  max-width: 950px;
-  width: 92%;
-  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.35);
-  overflow: hidden;
-  transform: translateY(-20px);
-  animation: slideUp 0.35s ease forwards;
-  border: none; /* hapus border flat */
-}
-
-/* Header */
-.modal-header {
-  padding: 30px 40px;
-  border-bottom: none;
-  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
-  color: white;
-  box-shadow: inset 0 -3px 6px rgba(0, 0, 0, 0.25);
-}
-
-.modal-title {
-  font-size: 2rem;
-  font-weight: 800;
-  margin: 10px 0;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
-}
-
-.modal-category {
-  background: rgba(255, 255, 255, 0.2);
-  padding: 6px 14px;
-  border-radius: 20px;
-  font-size: 0.85rem;
-  font-weight: 600;
-  display: inline-block;
-}
-
-/* Meta info */
-.modal-meta {
-  display: flex;
-  gap: 20px;
-  font-size: 0.95rem;
-  color: #f1f5f9;
-  margin-top: 10px;
-}
-
-.modal-status {
-  background: #10b981;
-  color: #fff;
-  padding: 6px 14px;
-  border-radius: 20px;
-  font-weight: 700;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-}
-
-/* Body */
-.modal-body {
-  padding: 40px;
-  background: #f8fafc;
-}
-
-/* Deskripsi */
-.modal-description {
-  background: white;
-  border-radius: 12px;
-  padding: 25px 30px;
-  font-size: 1.15rem;
-  line-height: 1.8;
-  color: #334155;
-  margin-bottom: 35px;
-  box-shadow: 0 6px 16px rgba(0,0,0,0.08);
-  border-left: 5px solid #3b82f6;
-}
-
-/* List bullet rapi */
-.modal-description ul {
-  margin: 15px 0;
-  padding-left: 20px;
-}
-
-.modal-description li {
-  margin-bottom: 8px;
-  position: relative;
-  list-style: none;
-}
-
-.modal-description li::before {
-  content: "◆";
-  color: #3b82f6;
-  font-size: 0.8rem;
-  margin-right: 8px;
-}
-
-/* Timeline */
-.modal-timeline {
-  margin-top: 30px;
-  padding-left: 30px;
-  border-left: 3px solid #3b82f6;
-  background: white;
-  border-radius: 12px;
-  padding: 30px;
-  box-shadow: 0 6px 18px rgba(0,0,0,0.08);
-}
-
-.timeline-item {
-  margin-bottom: 25px;
-  position: relative;
-}
-
-.timeline-item::before {
-  content: "";
-  position: absolute;
-  left: -42px;
-  top: 8px;
-  width: 18px;
-  height: 18px;
-  background: #3b82f6;
-  border: 3px solid #fff;
-  border-radius: 50%;
-  box-shadow: 0 0 0 3px #93c5fd;
-}
-
-.timeline-title {
-  font-size: 1.2rem;
-  font-weight: 700;
-  margin-bottom: 8px;
-  color: #111827;
-}
-
-.timeline-content {
-  color: #475569;
-  font-size: 1rem;
-  line-height: 1.6;
-}
-
-/* Close button */
-.close {
-  position: absolute;
-  top: 18px;
-  right: 22px;
-  font-size: 24px;
-  background: white;
-  border-radius: 50%;
-  width: 38px;
-  height: 38px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-  transition: 0.2s;
-}
-
-.close:hover {
-  background: #f1f5f9;
-  transform: rotate(90deg);
-}
-
-/* Animasi */
-@keyframes slideUp {
-  from { transform: translateY(40px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
-}
-
-
-
-
-
-
-
-
+  /* Modal Styles - Diperbarui dengan Daisy UI */
+  .modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.6);
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .modal-box {
+    background-color: #fff;
+    border-radius: 12px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+    max-height: 90vh;
+    overflow-y: auto;
+    position: relative;
+  }
+  
+  /* Styling untuk konten modal - Diperbarui */
+  .modal-faq-content {
+    padding: 0;
+  }
+  
+  .modal-header {
+    border-bottom: 2px solid #e5e7eb;
+    padding-bottom: 1.5rem;
+    margin-bottom: 2rem;
+    position: relative;
+  }
+  
+  .modal-category {
+    display: inline-block;
+    background: #3b82f6;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 1.5rem;
+    border: 1px solid #2563eb;
+  }
+  
+  .modal-title-container {
+    position: relative;
+    padding: 1.5rem;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    background: #f9fafb;
+    margin-bottom: 1.5rem;
+  }
+  
+  .modal-title {
+    font-size: 1.875rem;
+    font-weight: 700;
+    color: #111827;
+    margin: 0;
+    line-height: 1.3;
+  }
+  
+  .modal-meta {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    color: #6b7280;
+    font-size: 0.875rem;
+    padding: 0.75rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    background: #f9fafb;
+    flex-wrap: wrap;
+  }
+  
+  .modal-update {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .modal-status {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: #10b981;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    font-weight: 700;
+    border: 1px solid #0da271;
+  }
+  
+  .modal-body {
+    padding: 1.5rem 0;
+  }
+  
+  .modal-description-container {
+    position: relative;
+    padding: 1.5rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    background: #f9fafb;
+    margin-bottom: 2rem;
+  }
+  
+  .modal-description {
+    font-size: 1.125rem;
+    line-height: 1.7;
+    color: #374151;
+    margin: 0;
+  }
+  
+  .modal-timeline-container {
+    position: relative;
+    padding: 1.5rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    background: #f9fafb;
+  }
+  
+  .modal-timeline {
+    position: relative;
+    padding-left: 2rem;
+    margin: 1.5rem 0;
+  }
+  
+  .modal-timeline::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: repeating-linear-gradient(
+      to bottom,
+      transparent,
+      transparent 6px,
+      #d1d5db 6px,
+      #d1d5db 12px
+    );
+  }
+  
+  .timeline-item {
+    margin-bottom: 1.5rem;
+    position: relative;
+    padding: 1rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    background: white;
+  }
+  
+  .timeline-item::before {
+    content: "";
+    position: absolute;
+    left: -1.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 1rem;
+    height: 1rem;
+    border-radius: 50%;
+    background: #3b82f6;
+    border: 3px solid white;
+    box-shadow: 0 0 0 2px #3b82f6;
+    z-index: 2;
+  }
+  
+  .timeline-title {
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+    color: #111827;
+    font-size: 1.125rem;
+    border-bottom: 1px solid #e5e7eb;
+    padding-bottom: 0.5rem;
+  }
   
   .timeline-content {
-    color: #64748b;
+    color: #6b7280;
     line-height: 1.6;
-    font-size: 1.2rem; /* Diperbesar */
+    font-size: 1rem;
   }
+  
+  /* Animasi untuk modal */
+  @keyframes modalFadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(-20px) scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+  
+  .modal-box {
+    animation: modalFadeIn 0.3s ease-out;
+  }
+  
+  /* Responsive design untuk modal */
+  @media (max-width: 768px) {
+    .modal-box {
+      margin: 1rem;
+      width: calc(100% - 2rem);
+    }
+    
+    .modal-title {
+      font-size: 1.5rem;
+    }
+    
+    .modal-description {
+      font-size: 1rem;
+    }
+    
+    .modal-meta {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.5rem;
+    }
+  }
+
+
+
+
+
+
+
+
   
   /* Responsive design */
   @media (max-width: 968px) {
@@ -1228,6 +1290,7 @@ const faqData = [
     modal.style.display = "block";
   }
 </script>
+
 
 
 
