@@ -301,22 +301,20 @@ const faqData = [
     </div>
   </div>
 
-
- <!-- Modal untuk Detail FAQ - Diperbarui dengan Daisy UI -->
+  <!-- Modal untuk Detail FAQ - Diperbarui dengan garis pembatas -->
   <div id="faqModal" class="modal">
-    <div class="modal-box max-w-4xl p-0 overflow-hidden">
+    <div class="modal-box max-w-4xl p-0 overflow-hidden border-2 border-gray-200 rounded-xl">
       <div class="modal-action m-4 absolute top-0 right-0 z-10">
-        <button class="btn btn-circle btn-sm btn-ghost">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <button class="btn btn-circle btn-sm btn-ghost border border-gray-300">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
           </svg>
         </button>
       </div>
-      <div id="modalContent" class="p-8"></div>
+      <div id="modalContent" class="p-1"></div>
     </div>
   </div>
 </Layout>
-
 
 <style>
   /* Import Google Fonts - Space Mono */
@@ -627,9 +625,7 @@ const faqData = [
     box-shadow: 0 5px 15px rgba(37, 99, 235, 0.3);
   }
   
-
-
-  /* Modal Styles - Diperbarui dengan Daisy UI */
+  /* Modal Styles - Diperbarui dengan garis pembatas */
   .modal {
     display: none;
     position: fixed;
@@ -653,16 +649,21 @@ const faqData = [
     position: relative;
   }
   
-  /* Styling untuk konten modal - Diperbarui */
+  /* Styling untuk konten modal - Diperbarui dengan garis pembatas */
   .modal-faq-content {
     padding: 0;
   }
   
+  .modal-section {
+    padding: 1.5rem;
+    margin: 1rem;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    background: #f9fafb;
+  }
+  
   .modal-header {
-    border-bottom: 2px solid #e5e7eb;
-    padding-bottom: 1.5rem;
-    margin-bottom: 2rem;
-    position: relative;
+    margin-bottom: 1.5rem;
   }
   
   .modal-category {
@@ -675,12 +676,11 @@ const faqData = [
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    margin-bottom: 1.5rem;
-    border: 1px solid #2563eb;
+    margin-bottom: 1rem;
+    border: 2px solid #2563eb;
   }
   
-  .modal-title-container {
-    position: relative;
+  .modal-title-section {
     padding: 1.5rem;
     border: 2px solid #e5e7eb;
     border-radius: 8px;
@@ -689,23 +689,23 @@ const faqData = [
   }
   
   .modal-title {
-    font-size: 1.875rem;
-    font-weight: 700;
-    color: #111827;
+    font-size: 2rem;
+    font-weight: 800;
+    color: #000;
     margin: 0;
     line-height: 1.3;
+    letter-spacing: -0.5px;
   }
   
-  .modal-meta {
+  .modal-meta-section {
     display: flex;
     align-items: center;
     gap: 1rem;
-    color: #6b7280;
-    font-size: 0.875rem;
-    padding: 0.75rem;
-    border: 1px solid #e5e7eb;
-    border-radius: 6px;
+    padding: 1rem;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
     background: #f9fafb;
+    margin-bottom: 1.5rem;
     flex-wrap: wrap;
   }
   
@@ -713,10 +713,21 @@ const faqData = [
     display: flex;
     align-items: center;
     gap: 0.5rem;
+    color: #6b7280;
+    font-size: 0.875rem;
+    font-weight: 600;
+  }
+  
+  .modal-status-section {
+    padding: 0.75rem;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    background: #f9fafb;
+    margin-bottom: 1.5rem;
   }
   
   .modal-status {
-    display: flex;
+    display: inline-flex;
     align-items: center;
     gap: 0.5rem;
     background: #10b981;
@@ -725,33 +736,32 @@ const faqData = [
     border-radius: 6px;
     font-size: 0.875rem;
     font-weight: 700;
-    border: 1px solid #0da271;
+    border: 2px solid #0da271;
   }
   
   .modal-body {
-    padding: 1.5rem 0;
+    padding: 0;
   }
   
-  .modal-description-container {
-    position: relative;
+  .modal-description-section {
     padding: 1.5rem;
-    border: 1px solid #e5e7eb;
+    border: 2px solid #e5e7eb;
     border-radius: 8px;
     background: #f9fafb;
-    margin-bottom: 2rem;
+    margin-bottom: 1.5rem;
   }
   
   .modal-description {
-    font-size: 1.125rem;
+    font-size: 1.25rem;
     line-height: 1.7;
     color: #374151;
     margin: 0;
+    font-weight: 500;
   }
   
-  .modal-timeline-container {
-    position: relative;
+  .modal-timeline-section {
     padding: 1.5rem;
-    border: 1px solid #e5e7eb;
+    border: 2px solid #e5e7eb;
     border-radius: 8px;
     background: #f9fafb;
   }
@@ -805,8 +815,8 @@ const faqData = [
   .timeline-title {
     font-weight: 700;
     margin-bottom: 0.75rem;
-    color: #111827;
-    font-size: 1.125rem;
+    color: #000;
+    font-size: 1.25rem;
     border-bottom: 1px solid #e5e7eb;
     padding-bottom: 0.5rem;
   }
@@ -814,7 +824,7 @@ const faqData = [
   .timeline-content {
     color: #6b7280;
     line-height: 1.6;
-    font-size: 1rem;
+    font-size: 1.1rem;
   }
   
   /* Animasi untuk modal */
@@ -833,36 +843,6 @@ const faqData = [
     animation: modalFadeIn 0.3s ease-out;
   }
   
-  /* Responsive design untuk modal */
-  @media (max-width: 768px) {
-    .modal-box {
-      margin: 1rem;
-      width: calc(100% - 2rem);
-    }
-    
-    .modal-title {
-      font-size: 1.5rem;
-    }
-    
-    .modal-description {
-      font-size: 1rem;
-    }
-    
-    .modal-meta {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 0.5rem;
-    }
-  }
-
-
-
-
-
-
-
-
-  
   /* Responsive design */
   @media (max-width: 968px) {
     .typography-left-layout {
@@ -879,7 +859,7 @@ const faqData = [
     }
 
     .modal-title {
-      font-size: 2.2rem;
+      font-size: 1.8rem;
     }
   }
   
@@ -935,32 +915,28 @@ const faqData = [
       font-size: 1rem;
     }
     
-    .modal-content {
-      width: 95%;
-      margin: 5% auto;
-    }
-    
-    .modal-faq-content {
-      padding: 40px;
+    .modal-box {
+      margin: 1rem;
+      width: calc(100% - 2rem);
     }
     
     .modal-title {
-      font-size: 1.9rem;
-      padding: 15px;
+      font-size: 1.6rem;
     }
-
+    
     .modal-description {
       font-size: 1.1rem;
-      padding: 20px;
     }
-
-    .modal-timeline {
-      padding-left: 40px;
-      padding: 20px;
+    
+    .modal-meta-section {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.5rem;
     }
-
-    .timeline-item::before {
-      left: -35px;
+    
+    .modal-section {
+      padding: 1rem;
+      margin: 0.5rem;
     }
   }
 
@@ -1004,29 +980,28 @@ const faqData = [
       font-size: 0.9rem;
     }
     
-    .modal-meta {
+    .modal-meta-section {
       flex-direction: column;
       align-items: flex-start;
-      gap: 10px;
+      gap: 0.5rem;
     }
 
     .modal-faq-content {
-      padding: 25px;
+      padding: 0.5rem;
     }
 
     .modal-title {
-      font-size: 1.6rem;
+      font-size: 1.4rem;
     }
 
     .modal-timeline {
-      padding-left: 30px;
-      padding: 15px;
+      padding-left: 1.5rem;
     }
 
     .timeline-item::before {
-      left: -30px;
-      width: 16px;
-      height: 16px;
+      left: -1.25rem;
+      width: 0.875rem;
+      height: 0.875rem;
     }
   }
 </style>
@@ -1218,9 +1193,9 @@ const faqData = [
       }, 100);
     }
 
-    // Modal functionality - FIXED
+    // Modal functionality - Diperbarui
     const modal = document.getElementById("faqModal");
-    const closeBtn = document.getElementsByClassName("close")[0];
+    const closeBtn = modal.querySelector(".modal-action button");
 
     // Tambahkan event listener ke setiap FAQ item
     document.querySelectorAll('.faq-item-wrapper').forEach(wrapper => {
@@ -1241,7 +1216,7 @@ const faqData = [
     }
   });
 
-  // Fungsi untuk membuka modal FAQ
+  // Fungsi untuk membuka modal FAQ - Diperbarui dengan garis pembatas
   function openFAQModal(id) {
     const faq = faqData.find(item => item.id === id);
     if (!faq) return;
@@ -1250,47 +1225,83 @@ const faqData = [
     const modalContent = document.getElementById("modalContent");
     
     modalContent.innerHTML = `
-      <div class="modal-faq-content">
+      <div class="modal-faq-content p-6">
         <div class="modal-header">
           <span class="modal-category">${faq.category}</span>
-          <h2 class="modal-title">${faq.question}</h2>
-          <div class="modal-meta">
-            <div class="modal-update">
-              <span>🕒 ${faq.lastUpdated}</span>
-            </div>
-            ${faq.isNew ? '<div class="modal-status">🆕 BARU</div>' : ''}
+        </div>
+        
+        <div class="modal-title-section">
+          <h2 class="modal-title">${faq.icon} ${faq.question}</h2>
+        </div>
+        
+        <div class="modal-meta-section">
+          <div class="modal-update">
+            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <span>${faq.lastUpdated}</span>
           </div>
         </div>
         
+        ${faq.isNew ? `
+        <div class="modal-status-section">
+          <div class="modal-status ${faq.labelColor}">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+            </svg>
+            BARU
+          </div>
+        </div>
+        ` : ''}
+        
         <div class="modal-body">
-          <div class="modal-description">
-            ${faq.fullDescription.replace(/\n/g, '<br>')}
+          <div class="modal-description-section">
+            <p class="modal-description">${faq.fullDescription.replace(/\n/g, '<br>')}</p>
           </div>
           
-          <div class="modal-timeline">
-            <div class="timeline-item">
-              <div class="timeline-title">Keuntungan Menggunakan Astro</div>
-              <div class="timeline-content">Astro menawarkan performa luar biasa dengan mengirimkan HTML statis yang minimal ke client.</div>
-            </div>
-            
-            <div class="timeline-item">
-              <div class="timeline-title">Kompatibilitas Framework</div>
-              <div class="timeline-content">Dukung multiple framework UI dalam satu proyek tanpa konflik.</div>
-            </div>
-            
-            <div class="timeline-item">
-              <div class="timeline-title">Optimasi Built-in</div>
-              <div class="timeline-content">Astro secara otomatis mengoptimalkan gambar, CSS, dan JavaScript untuk performa terbaik.</div>
+          <div class="modal-timeline-section">
+            <div class="modal-timeline">
+              <div class="timeline-item">
+                <div class="timeline-title">Keuntungan Menggunakan Astro</div>
+                <div class="timeline-content">Astro menawarkan performa luar biasa dengan mengirimkan HTML statis yang minimal ke client.</div>
+              </div>
+              
+              <div class="timeline-item">
+                <div class="timeline-title">Kompatibilitas Framework</div>
+                <div class="timeline-content">Dukung multiple framework UI dalam satu proyek tanpa konflik.</div>
+              </div>
+              
+              <div class="timeline-item">
+                <div class="timeline-title">Optimasi Built-in</div>
+                <div class="timeline-content">Astro secara otomatis mengoptimalkan gambar, CSS, dan JavaScript untuk performa terbaik.</div>
+              </div>
             </div>
           </div>
         </div>
       </div>
     `;
     
-    modal.style.display = "block";
+    // Terapkan warna label sesuai data
+    if (faq.isNew) {
+      const statusElement = modalContent.querySelector('.modal-status');
+      if (faq.labelColor === 'blue') {
+        statusElement.style.backgroundColor = '#3b82f6';
+        statusElement.style.borderColor = '#2563eb';
+      } else if (faq.labelColor === 'green') {
+        statusElement.style.backgroundColor = '#10b981';
+        statusElement.style.borderColor = '#0da271';
+      } else if (faq.labelColor === 'purple') {
+        statusElement.style.backgroundColor = '#8b5cf6';
+        statusElement.style.borderColor = '#7c3aed';
+      } else if (faq.labelColor === 'orange') {
+        statusElement.style.backgroundColor = '#f97316';
+        statusElement.style.borderColor = '#ea580c';
+      } else if (faq.labelColor === 'red') {
+        statusElement.style.backgroundColor = '#ef4444';
+        statusElement.style.borderColor = '#dc2626';
+      }
+    }
+    
+    modal.style.display = "flex";
   }
 </script>
-
-
-
-
