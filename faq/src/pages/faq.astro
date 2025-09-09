@@ -301,17 +301,11 @@ const faqData = [
     </div>
   </div>
 
-  <!-- Modal untuk Detail FAQ - Diperbarui dengan garis pembatas -->
+  <!-- Modal untuk Detail FAQ - Diperbesar dengan Garis Sekeliling -->
   <div id="faqModal" class="modal">
-    <div class="modal-box max-w-4xl p-0 overflow-hidden border-2 border-gray-200 rounded-xl">
-      <div class="modal-action m-4 absolute top-0 right-0 z-10">
-        <button class="btn btn-circle btn-sm btn-ghost border border-gray-300">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
-      </div>
-      <div id="modalContent" class="p-1"></div>
+    <div class="modal-content large-modal">
+      <span class="close">&times;</span>
+      <div id="modalContent"></div>
     </div>
   </div>
 </Layout>
@@ -625,7 +619,7 @@ const faqData = [
     box-shadow: 0 5px 15px rgba(37, 99, 235, 0.3);
   }
   
-  /* Modal Styles - Diperbarui dengan garis pembatas */
+  /* Modal Styles - DIPERBESAR dengan Garis Sekeliling */
   .modal {
     display: none;
     position: fixed;
@@ -636,163 +630,168 @@ const faqData = [
     height: 100%;
     overflow: auto;
     background-color: rgba(0, 0, 0, 0.6);
-    align-items: center;
-    justify-content: center;
   }
   
-  .modal-box {
+  .modal-content {
     background-color: #fff;
+    margin: 2% auto;
+    padding: 0;
+    border: 2px solid rgba(0, 0, 0, 0.2); /* Garis sekeliling modal */
+    width: 92%;
+    max-width: 1000px; /* Diperbesar */
     border-radius: 12px;
     box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+    position: relative;
     max-height: 90vh;
     overflow-y: auto;
-    position: relative;
+  }
+
+  .large-modal {
+    max-width: 1100px; /* Lebih besar lagi */
   }
   
-  /* Styling untuk konten modal - Diperbarui dengan garis pembatas */
+  .close {
+    color: #aaa;
+    position: absolute;
+    top: 25px;
+    right: 30px;
+    font-size: 36px;
+    font-weight: bold;
+    z-index: 10;
+    cursor: pointer;
+    background: #f1f5f9;
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #e2e8f0;
+  }
+  
+  .close:hover,
+  .close:focus {
+    color: #000;
+    background: #e2e8f0;
+  }
+  
+  /* Styling untuk konten modal - DIPERBESAR */
   .modal-faq-content {
-    padding: 0;
-  }
-  
-  .modal-section {
-    padding: 1.5rem;
-    margin: 1rem;
-    border: 2px solid #e5e7eb;
-    border-radius: 8px;
-    background: #f9fafb;
+    padding: 60px;
   }
   
   .modal-header {
-    margin-bottom: 1.5rem;
+    border-bottom: 2px dashed #e2e8f0;
+    padding-bottom: 30px;
+    margin-bottom: 35px;
+    position: relative;
   }
   
   .modal-category {
     display: inline-block;
     background: #3b82f6;
     color: white;
-    padding: 0.5rem 1rem;
+    padding: 10px 20px;
     border-radius: 6px;
-    font-size: 0.875rem;
+    font-size: 1rem;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    margin-bottom: 1rem;
-    border: 2px solid #2563eb;
-  }
-  
-  .modal-title-section {
-    padding: 1.5rem;
-    border: 2px solid #e5e7eb;
-    border-radius: 8px;
-    background: #f9fafb;
-    margin-bottom: 1.5rem;
+    margin-bottom: 25px;
+    border: 1px solid #2563eb; /* Garis sekeliling kategori */
   }
   
   .modal-title {
-    font-size: 2rem;
-    font-weight: 800;
+    font-size: 2.8rem; /* Diperbesar */
+    font-weight: 700;
     color: #000;
-    margin: 0;
+    margin: 0 0 25px 0;
     line-height: 1.3;
-    letter-spacing: -0.5px;
+    position: relative;
+    padding: 20px;
+    border: 2px solid rgba(0, 0, 0, 0.1); /* Garis sekeliling judul */
+    border-radius: 8px;
+    background: #f8fafc;
   }
   
-  .modal-meta-section {
+  .modal-meta {
     display: flex;
     align-items: center;
-    gap: 1rem;
-    padding: 1rem;
-    border: 2px solid #e5e7eb;
-    border-radius: 8px;
-    background: #f9fafb;
-    margin-bottom: 1.5rem;
-    flex-wrap: wrap;
+    gap: 25px;
+    color: #64748b;
+    font-size: 1.1rem;
+    padding: 15px;
+    border: 1px solid rgba(0, 0, 0, 0.1); /* Garis sekeliling meta */
+    border-radius: 6px;
+    background: #f8fafc;
   }
   
   .modal-update {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    color: #6b7280;
-    font-size: 0.875rem;
-    font-weight: 600;
-  }
-  
-  .modal-status-section {
-    padding: 0.75rem;
-    border: 2px solid #e5e7eb;
-    border-radius: 8px;
-    background: #f9fafb;
-    margin-bottom: 1.5rem;
+    gap: 10px;
   }
   
   .modal-status {
-    display: inline-flex;
+    display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 8px;
     background: #10b981;
     color: white;
-    padding: 0.5rem 1rem;
+    padding: 8px 16px;
     border-radius: 6px;
-    font-size: 0.875rem;
+    font-size: 1rem;
     font-weight: 700;
-    border: 2px solid #0da271;
+    border: 1px solid #0da271; /* Garis sekeliling status */
   }
   
   .modal-body {
-    padding: 0;
-  }
-  
-  .modal-description-section {
-    padding: 1.5rem;
-    border: 2px solid #e5e7eb;
-    border-radius: 8px;
-    background: #f9fafb;
-    margin-bottom: 1.5rem;
+    padding: 30px 0;
   }
   
   .modal-description {
-    font-size: 1.25rem;
-    line-height: 1.7;
-    color: #374151;
-    margin: 0;
-    font-weight: 500;
-  }
-  
-  .modal-timeline-section {
-    padding: 1.5rem;
-    border: 2px solid #e5e7eb;
+    font-size: 1.3rem; /* Diperbesar */
+    line-height: 1.8;
+    color: #334155;
+    margin-bottom: 40px;
+    position: relative;
+    padding: 25px;
+    border: 1px solid rgba(0, 0, 0, 0.1); /* Garis sekeliling deskripsi */
     border-radius: 8px;
-    background: #f9fafb;
+    background: #f8fafc;
   }
   
   .modal-timeline {
     position: relative;
-    padding-left: 2rem;
-    margin: 1.5rem 0;
+    padding-left: 50px;
+    margin: 35px 0;
+    border: 1px solid rgba(0, 0, 0, 0.1); /* Garis sekeliling timeline */
+    border-radius: 8px;
+    padding: 30px;
+    background: #f8fafc;
   }
   
   .modal-timeline::before {
     content: "";
     position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
+    left: 40px;
+    top: 30px;
+    bottom: 30px;
     width: 3px;
     background: repeating-linear-gradient(
       to bottom,
       transparent,
       transparent 6px,
-      #d1d5db 6px,
-      #d1d5db 12px
+      #cbd5e1 6px,
+      #cbd5e1 12px
     );
   }
   
   .timeline-item {
-    margin-bottom: 1.5rem;
+    margin-bottom: 30px;
     position: relative;
-    padding: 1rem;
-    border: 1px solid #e5e7eb;
+    padding: 15px;
+    border: 1px solid rgba(0, 0, 0, 0.05); /* Garis sekeliling item timeline */
     border-radius: 6px;
     background: white;
   }
@@ -800,47 +799,30 @@ const faqData = [
   .timeline-item::before {
     content: "";
     position: absolute;
-    left: -1.75rem;
+    left: -45px;
     top: 50%;
     transform: translateY(-50%);
-    width: 1rem;
-    height: 1rem;
+    width: 18px;
+    height: 18px;
     border-radius: 50%;
     background: #3b82f6;
     border: 3px solid white;
-    box-shadow: 0 0 0 2px #3b82f6;
-    z-index: 2;
+    box-shadow: 0 0 0 3px #3b82f6;
   }
   
   .timeline-title {
     font-weight: 700;
-    margin-bottom: 0.75rem;
+    margin-bottom: 12px;
     color: #000;
-    font-size: 1.25rem;
-    border-bottom: 1px solid #e5e7eb;
-    padding-bottom: 0.5rem;
+    font-size: 1.4rem; /* Diperbesar */
+    border-bottom: 1px solid #e2e8f0;
+    padding-bottom: 8px;
   }
   
   .timeline-content {
-    color: #6b7280;
+    color: #64748b;
     line-height: 1.6;
-    font-size: 1.1rem;
-  }
-  
-  /* Animasi untuk modal */
-  @keyframes modalFadeIn {
-    from {
-      opacity: 0;
-      transform: translateY(-20px) scale(0.95);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0) scale(1);
-    }
-  }
-  
-  .modal-box {
-    animation: modalFadeIn 0.3s ease-out;
+    font-size: 1.2rem; /* Diperbesar */
   }
   
   /* Responsive design */
@@ -859,7 +841,7 @@ const faqData = [
     }
 
     .modal-title {
-      font-size: 1.8rem;
+      font-size: 2.2rem;
     }
   }
   
@@ -915,28 +897,32 @@ const faqData = [
       font-size: 1rem;
     }
     
-    .modal-box {
-      margin: 1rem;
-      width: calc(100% - 2rem);
+    .modal-content {
+      width: 95%;
+      margin: 5% auto;
+    }
+    
+    .modal-faq-content {
+      padding: 40px;
     }
     
     .modal-title {
-      font-size: 1.6rem;
+      font-size: 1.9rem;
+      padding: 15px;
     }
-    
+
     .modal-description {
       font-size: 1.1rem;
+      padding: 20px;
     }
-    
-    .modal-meta-section {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 0.5rem;
+
+    .modal-timeline {
+      padding-left: 40px;
+      padding: 20px;
     }
-    
-    .modal-section {
-      padding: 1rem;
-      margin: 0.5rem;
+
+    .timeline-item::before {
+      left: -35px;
     }
   }
 
@@ -980,28 +966,29 @@ const faqData = [
       font-size: 0.9rem;
     }
     
-    .modal-meta-section {
+    .modal-meta {
       flex-direction: column;
       align-items: flex-start;
-      gap: 0.5rem;
+      gap: 10px;
     }
 
     .modal-faq-content {
-      padding: 0.5rem;
+      padding: 25px;
     }
 
     .modal-title {
-      font-size: 1.4rem;
+      font-size: 1.6rem;
     }
 
     .modal-timeline {
-      padding-left: 1.5rem;
+      padding-left: 30px;
+      padding: 15px;
     }
 
     .timeline-item::before {
-      left: -1.25rem;
-      width: 0.875rem;
-      height: 0.875rem;
+      left: -30px;
+      width: 16px;
+      height: 16px;
     }
   }
 </style>
@@ -1193,9 +1180,9 @@ const faqData = [
       }, 100);
     }
 
-    // Modal functionality - Diperbarui
+    // Modal functionality - FIXED
     const modal = document.getElementById("faqModal");
-    const closeBtn = modal.querySelector(".modal-action button");
+    const closeBtn = document.getElementsByClassName("close")[0];
 
     // Tambahkan event listener ke setiap FAQ item
     document.querySelectorAll('.faq-item-wrapper').forEach(wrapper => {
@@ -1216,7 +1203,7 @@ const faqData = [
     }
   });
 
-  // Fungsi untuk membuka modal FAQ - Diperbarui dengan garis pembatas
+  // Fungsi untuk membuka modal FAQ
   function openFAQModal(id) {
     const faq = faqData.find(item => item.id === id);
     if (!faq) return;
@@ -1225,83 +1212,43 @@ const faqData = [
     const modalContent = document.getElementById("modalContent");
     
     modalContent.innerHTML = `
-      <div class="modal-faq-content p-6">
+      <div class="modal-faq-content">
         <div class="modal-header">
           <span class="modal-category">${faq.category}</span>
-        </div>
-        
-        <div class="modal-title-section">
-          <h2 class="modal-title">${faq.icon} ${faq.question}</h2>
-        </div>
-        
-        <div class="modal-meta-section">
-          <div class="modal-update">
-            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-            </svg>
-            <span>${faq.lastUpdated}</span>
+          <h2 class="modal-title">${faq.question}</h2>
+          <div class="modal-meta">
+            <div class="modal-update">
+              <span>🕒 ${faq.lastUpdated}</span>
+            </div>
+            ${faq.isNew ? '<div class="modal-status">🆕 BARU</div>' : ''}
           </div>
         </div>
-        
-        ${faq.isNew ? `
-        <div class="modal-status-section">
-          <div class="modal-status ${faq.labelColor}">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-            </svg>
-            BARU
-          </div>
-        </div>
-        ` : ''}
         
         <div class="modal-body">
-          <div class="modal-description-section">
-            <p class="modal-description">${faq.fullDescription.replace(/\n/g, '<br>')}</p>
+          <div class="modal-description">
+            ${faq.fullDescription.replace(/\n/g, '<br>')}
           </div>
           
-          <div class="modal-timeline-section">
-            <div class="modal-timeline">
-              <div class="timeline-item">
-                <div class="timeline-title">Keuntungan Menggunakan Astro</div>
-                <div class="timeline-content">Astro menawarkan performa luar biasa dengan mengirimkan HTML statis yang minimal ke client.</div>
-              </div>
-              
-              <div class="timeline-item">
-                <div class="timeline-title">Kompatibilitas Framework</div>
-                <div class="timeline-content">Dukung multiple framework UI dalam satu proyek tanpa konflik.</div>
-              </div>
-              
-              <div class="timeline-item">
-                <div class="timeline-title">Optimasi Built-in</div>
-                <div class="timeline-content">Astro secara otomatis mengoptimalkan gambar, CSS, dan JavaScript untuk performa terbaik.</div>
-              </div>
+          <div class="modal-timeline">
+            <div class="timeline-item">
+              <div class="timeline-title">Keuntungan Menggunakan Astro</div>
+              <div class="timeline-content">Astro menawarkan performa luar biasa dengan mengirimkan HTML statis yang minimal ke client.</div>
+            </div>
+            
+            <div class="timeline-item">
+              <div class="timeline-title">Kompatibilitas Framework</div>
+              <div class="timeline-content">Dukung multiple framework UI dalam satu proyek tanpa konflik.</div>
+            </div>
+            
+            <div class="timeline-item">
+              <div class="timeline-title">Optimasi Built-in</div>
+              <div class="timeline-content">Astro secara otomatis mengoptimalkan gambar, CSS, dan JavaScript untuk performa terbaik.</div>
             </div>
           </div>
         </div>
       </div>
     `;
     
-    // Terapkan warna label sesuai data
-    if (faq.isNew) {
-      const statusElement = modalContent.querySelector('.modal-status');
-      if (faq.labelColor === 'blue') {
-        statusElement.style.backgroundColor = '#3b82f6';
-        statusElement.style.borderColor = '#2563eb';
-      } else if (faq.labelColor === 'green') {
-        statusElement.style.backgroundColor = '#10b981';
-        statusElement.style.borderColor = '#0da271';
-      } else if (faq.labelColor === 'purple') {
-        statusElement.style.backgroundColor = '#8b5cf6';
-        statusElement.style.borderColor = '#7c3aed';
-      } else if (faq.labelColor === 'orange') {
-        statusElement.style.backgroundColor = '#f97316';
-        statusElement.style.borderColor = '#ea580c';
-      } else if (faq.labelColor === 'red') {
-        statusElement.style.backgroundColor = '#ef4444';
-        statusElement.style.borderColor = '#dc2626';
-      }
-    }
-    
-    modal.style.display = "flex";
+    modal.style.display = "block";
   }
 </script>
