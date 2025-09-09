@@ -619,53 +619,54 @@ const faqData = [
     box-shadow: 0 5px 15px rgba(37, 99, 235, 0.3);
   }
   
-/* Modal overlay */
-.modal {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.65);
-  z-index: 1000;
-  animation: fadeIn 0.3s ease;
-}
 
-/* Konten modal */
+
+/* ===== Modal Styling Baru ===== */
 .modal-content {
   background: #fff;
   margin: 3% auto;
-  padding: 0;
-  border-radius: 14px;
-  max-width: 900px;
+  border-radius: 16px;
+  max-width: 950px;
   width: 92%;
-  box-shadow: 0 25px 60px rgba(0,0,0,0.25);
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.35);
   overflow: hidden;
   transform: translateY(-20px);
-  animation: slideUp 0.4s ease forwards;
+  animation: slideUp 0.35s ease forwards;
+  border: none; /* hapus border flat */
 }
 
-/* Header modal */
+/* Header */
 .modal-header {
-  padding: 25px 35px;
-  border-bottom: 2px solid #f1f5f9;
-  background: #f8fafc;
+  padding: 30px 40px;
+  border-bottom: none;
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  color: white;
+  box-shadow: inset 0 -3px 6px rgba(0, 0, 0, 0.25);
 }
 
 .modal-title {
   font-size: 2rem;
   font-weight: 800;
-  color: #111827;
-  margin: 15px 0;
-  border-left: 5px solid #3b82f6;
-  padding-left: 15px;
+  margin: 10px 0;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
+}
+
+.modal-category {
+  background: rgba(255, 255, 255, 0.2);
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  display: inline-block;
 }
 
 /* Meta info */
 .modal-meta {
   display: flex;
-  flex-wrap: wrap;
-  gap: 15px;
+  gap: 20px;
   font-size: 0.95rem;
-  color: #64748b;
+  color: #f1f5f9;
+  margin-top: 10px;
 }
 
 .modal-status {
@@ -674,25 +675,56 @@ const faqData = [
   padding: 6px 14px;
   border-radius: 20px;
   font-weight: 700;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
 }
 
-/* Body modal */
+/* Body */
 .modal-body {
-  padding: 35px;
+  padding: 40px;
+  background: #f8fafc;
 }
 
+/* Deskripsi */
 .modal-description {
+  background: white;
+  border-radius: 12px;
+  padding: 25px 30px;
   font-size: 1.15rem;
   line-height: 1.8;
-  margin-bottom: 30px;
   color: #334155;
+  margin-bottom: 35px;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+  border-left: 5px solid #3b82f6;
+}
+
+/* List bullet rapi */
+.modal-description ul {
+  margin: 15px 0;
+  padding-left: 20px;
+}
+
+.modal-description li {
+  margin-bottom: 8px;
+  position: relative;
+  list-style: none;
+}
+
+.modal-description li::before {
+  content: "◆";
+  color: #3b82f6;
+  font-size: 0.8rem;
+  margin-right: 8px;
 }
 
 /* Timeline */
 .modal-timeline {
+  margin-top: 30px;
+  padding-left: 30px;
   border-left: 3px solid #3b82f6;
-  margin-top: 20px;
-  padding-left: 25px;
+  background: white;
+  border-radius: 12px;
+  padding: 30px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.08);
 }
 
 .timeline-item {
@@ -703,29 +735,36 @@ const faqData = [
 .timeline-item::before {
   content: "";
   position: absolute;
-  left: -33px;
-  top: 10px;
-  width: 14px;
-  height: 14px;
+  left: -42px;
+  top: 8px;
+  width: 18px;
+  height: 18px;
   background: #3b82f6;
   border: 3px solid #fff;
   border-radius: 50%;
-  box-shadow: 0 0 0 3px #3b82f6;
+  box-shadow: 0 0 0 3px #93c5fd;
 }
 
 .timeline-title {
+  font-size: 1.2rem;
   font-weight: 700;
   margin-bottom: 8px;
-  font-size: 1.1rem;
+  color: #111827;
 }
 
-/* Tombol close */
+.timeline-content {
+  color: #475569;
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+/* Close button */
 .close {
   position: absolute;
   top: 18px;
-  right: 20px;
-  font-size: 28px;
-  background: #f1f5f9;
+  right: 22px;
+  font-size: 24px;
+  background: white;
   border-radius: 50%;
   width: 38px;
   height: 38px;
@@ -733,23 +772,27 @@ const faqData = [
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: background 0.2s;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+  transition: 0.2s;
 }
 
 .close:hover {
-  background: #e2e8f0;
+  background: #f1f5f9;
+  transform: rotate(90deg);
 }
 
 /* Animasi */
-@keyframes fadeIn {
-  from { opacity: 0 }
-  to { opacity: 1 }
+@keyframes slideUp {
+  from { transform: translateY(40px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
 }
 
-@keyframes slideUp {
-  from { transform: translateY(30px); opacity: 0 }
-  to { transform: translateY(0); opacity: 1 }
-}
+
+
+
+
+
+
 
   
   .timeline-content {
@@ -1185,5 +1228,6 @@ const faqData = [
     modal.style.display = "block";
   }
 </script>
+
 
 
