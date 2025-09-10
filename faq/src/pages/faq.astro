@@ -130,6 +130,15 @@ const faqData = [
     topic: "Fitur Lanjutan"
   }
 ];
+
+// ✅ Kelompokkan FAQ berdasarkan topic (tanpa TypeScript)
+const groupedFAQs = faqData.reduce((acc, faq) => {
+  if (!acc[faq.topic]) {
+    acc[faq.topic] = [];
+  }
+  acc[faq.topic].push(faq);
+  return acc;
+}, {});
 ---
 
 <Layout title="FAQ | Astro Example" description="Halaman FAQ dengan animasi, gambar, dan icon." currentPage="faq">
@@ -167,12 +176,7 @@ const faqData = [
 
       <!-- Grup FAQ berdasarkan Topik -->
       <div class="faq-topics">
-        {faqData.reduce((groups, faq) => {
-          const topic = faq.topic;
-          if (!groups[topic]) groups[topic] = [];
-          groups[topic].push(faq);
-          return groups;
-        }, {} as Record<string, typeof faqData>).map(([topic, items]) => (
+        {Object.entries(groupedFAQs).map(([topic, items]) => (
           <div class="faq-topic-group" key={topic}>
             <div class="topic-header">
               <h2 class="topic-title">{topic}</h2>
@@ -185,12 +189,11 @@ const faqData = [
                   data-index={index} 
                   class="faq-item-wrapper" 
                   data-faq-id={faq.id}
-                  client:load
                 >
                   {faq.isNew && (
                     <div 
                       class="new-label" 
-                      style={`background: var(--color-${faq.labelColor});`}
+                      style={`background: ${faq.labelColor ? `var(--color-${faq.labelColor})` : '#64748b'};`}
                     >
                       <span class="new-label-text">BARU</span>
                     </div>
@@ -233,19 +236,19 @@ const faqData = [
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap');
 
-  body, .marquee-content-large, .page-title, .update-info, 
-  .typography-description, .color-block-extra-large h2, 
-  .color-block-extra-large p, .cta-button-large, .title-accent,
-  .modal-title, .modal-category, .modal-meta, .modal-description, .timeline-title {
-    font-family: 'Space Mono', monospace !important;
-  }
-
   :root {
     --color-blue: #3b82f6;
     --color-green: #10b981;
     --color-purple: #8b5cf6;
     --color-orange: #f97316;
     --color-red: #ef4444;
+  }
+
+  body, .marquee-content-large, .page-title, .update-info, 
+  .typography-description, .color-block-extra-large h2, 
+  .color-block-extra-large p, .cta-button-large, .title-accent,
+  .modal-title, .modal-category, .modal-meta, .modal-description, .timeline-title {
+    font-family: 'Space Mono', monospace !important;
   }
 
   body {
@@ -348,6 +351,12 @@ const faqData = [
     letter-spacing: 1px;
   }
 
+  .image-container {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 60px;
+  }
+
   .faq-image {
     max-width: 100%;
     height: auto;
@@ -438,7 +447,7 @@ const faqData = [
     transform: translateY(0);
   }
 
-  /* MODAL STYLE (DIPERBESAR & DIPERBAIKI) */
+  /* MODAL STYLE */
   .modal {
     display: none;
     position: fixed;
@@ -637,9 +646,13 @@ const faqData = [
 
 <script>
   document.addEventListener('DOMContentLoaded', function () {
-    // Tampilkan tanggal
-    document.getElementById('currentData').textContent = new Date().toLocaleDateString('id-ID', {
-      day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit'
+    // Tampilkan tanggal update
+    document.getElementById('currentDate').textContent = new Date().toLocaleDateString('id-ID', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
     });
 
     // Modal logic
@@ -703,16 +716,18 @@ const faqData = [
       }
     });
 
-    // Animasi scroll
+    // Animasi saat scroll
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
-        if (entry.isIntersecting) entry.target.classList.add('animated');
+        if (entry.isIntersecting) {
+          entry.target.classList.add('animated');
+        }
       });
     }, { threshold: 0.1 });
 
     document.querySelectorAll('[data-framer]').forEach(el => observer.observe(el));
   });
 
-  // Expose faqData ke JavaScript
+  // Ekspor data ke JavaScript
   window.faqData = JSON.parse('{@JSON(faqData)}');
 </script>
