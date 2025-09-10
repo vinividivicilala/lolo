@@ -859,6 +859,8 @@ const faqData = [
   margin-bottom: 25px;
   background: #fff;
   box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  display: block;
+
 }
 
 
@@ -1488,17 +1490,16 @@ const faqData = [
     }
   });
 
- // Fungsi untuk membuka modal FAQ
 function openFAQModal(id) {
   const faq = faqData.find(item => item.id === id);
   if (!faq) return;
-  
+
   const modal = document.getElementById("faqModal");
   const modalContent = document.getElementById("modalContent");
-  
+
   modalContent.innerHTML = `
     <div class="modal-faq-content">
-      
+
       <!-- Kategori -->
       <div class="modal-box">
         <span class="modal-category">${faq.category}</span>
@@ -1511,11 +1512,7 @@ function openFAQModal(id) {
 
       <!-- Meta (Tanggal & Status Baru) -->
       <div class="modal-box">
-        <div class="modal-meta">
-          <div class="modal-update">
-            <span>🕒 ${faq.lastUpdated}</span>
-          </div>
-        </div>
+        <div class="modal-meta">🕒 ${faq.lastUpdated}</div>
         ${faq.isNew ? '<div class="modal-status">🆕 BARU</div>' : ''}
       </div>
 
@@ -1535,14 +1532,12 @@ function openFAQModal(id) {
               Astro menawarkan performa luar biasa dengan mengirimkan HTML statis yang minimal ke client.
             </div>
           </div>
-
           <div class="timeline-item">
             <div class="timeline-title">Kompatibilitas Framework</div>
             <div class="timeline-content">
               Dukung multiple framework UI dalam satu proyek tanpa konflik.
             </div>
           </div>
-
           <div class="timeline-item">
             <div class="timeline-title">Optimasi Built-in</div>
             <div class="timeline-content">
@@ -1554,10 +1549,12 @@ function openFAQModal(id) {
 
     </div>
   `;
-  
+
   modal.style.display = "block";
 }
 
+
 </script>
+
 
 
