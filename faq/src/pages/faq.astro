@@ -864,7 +864,7 @@ const faqData = [
     background-color: rgba(0, 0, 0, 0.6);
   }
   
-  /* Modal Content */
+ /* Modal Content */
 .modal-content {
   background-color: #fff;
   margin: 2% auto;
@@ -878,6 +878,8 @@ const faqData = [
   max-height: 90vh;
   overflow-y: auto;
 }
+
+
 
   .large-modal {
     max-width: 1100px; /* Lebih besar lagi */
@@ -933,12 +935,13 @@ const faqData = [
     margin-bottom: 25px;
     border: 1px solid #2563eb; /* Garis sekeliling kategori */
   }
-  
-  /* Judul FAQ */
+
+
+/* Judul FAQ */
 .modal-title {
   font-size: 2.5rem;
   font-weight: 700;
-  border: 2px solid #000;   /* garis sekeliling judul */
+  border: 3px solid #000;   /* garis sekeliling judul */
   padding: 20px;
   border-radius: 8px;
   margin-bottom: 25px;
@@ -949,12 +952,15 @@ const faqData = [
 .modal-meta {
   font-size: 1.2rem;
   font-weight: 700;
-  border: 2px solid #000;   /* garis sekeliling tanggal */
+  border: 3px solid #000;   /* garis sekeliling tanggal */
   padding: 15px;
   border-radius: 8px;
   margin-bottom: 25px;
   background: #f1f5f9;
 }
+
+
+
 
 
 
@@ -964,33 +970,36 @@ const faqData = [
     gap: 10px;
   }
   
-  /* Label Baru */
+  
+  .modal-body {
+    padding: 30px 0;
+  }
+
+/* Label Baru */
 .modal-status {
   display: inline-block;
   font-size: 1.2rem;
   font-weight: 700;
-  border: 2px solid #000;   /* garis sekeliling label baru */
+  border: 3px solid #000;   /* garis sekeliling label baru */
   padding: 10px 16px;
   border-radius: 8px;
   margin-bottom: 25px;
   background: #ef4444; /* blok warna merah */
   color: #fff;
 }
-  .modal-body {
-    padding: 30px 0;
-  }
-
 
 /* Deskripsi */
 .modal-description {
   font-size: 1.3rem;
-  font-weight: 400;         /* besar tapi tidak bold */
+  font-weight: 400;
   line-height: 1.8;
-  border: 2px solid #000;   /* garis sekeliling deskripsi */
+  border: 3px solid #000;   /* garis sekeliling deskripsi */
   padding: 25px;
   border-radius: 8px;
   background: #f8fafc;
+  margin-bottom: 25px;
 }
+
   
   .modal-timeline {
     position: relative;
@@ -1526,5 +1535,6 @@ function openFAQModal(id) {
 }
 
 </script>
+
 
 
