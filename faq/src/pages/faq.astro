@@ -913,8 +913,6 @@ const faqData = [
   }
   
   .modal-header {
-    border-bottom: 2px dashed #e2e8f0;
-    padding-bottom: 30px;
     margin-bottom: 35px;
     position: relative;
   }
@@ -923,14 +921,14 @@ const faqData = [
     display: inline-block;
     background: #3b82f6;
     color: white;
-    padding: 10px 20px;
+    padding: 12px 24px;
     border-radius: 6px;
-    font-size: 1rem;
+    font-size: 1.1rem;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.5px;
     margin-bottom: 25px;
-    border: 1px solid #2563eb; /* Garis sekeliling kategori */
+    border: 2px solid #2563eb; /* Garis sekeliling kategori */
   }
   
   .modal-title {
@@ -940,7 +938,7 @@ const faqData = [
     margin: 0 0 25px 0;
     line-height: 1.3;
     position: relative;
-    padding: 20px;
+    padding: 25px;
     border: 2px solid rgba(0, 0, 0, 0.1); /* Garis sekeliling judul */
     border-radius: 8px;
     background: #f8fafc;
@@ -952,16 +950,18 @@ const faqData = [
     gap: 25px;
     color: #64748b;
     font-size: 1.1rem;
-    padding: 15px;
-    border: 1px solid rgba(0, 0, 0, 0.1); /* Garis sekeliling meta */
-    border-radius: 6px;
+    padding: 18px;
+    border: 2px solid rgba(0, 0, 0, 0.1); /* Garis sekeliling meta */
+    border-radius: 8px;
     background: #f8fafc;
+    margin-bottom: 30px;
   }
   
   .modal-update {
     display: flex;
     align-items: center;
     gap: 10px;
+    font-weight: 700;
   }
   
   .modal-status {
@@ -970,11 +970,11 @@ const faqData = [
     gap: 8px;
     background: #10b981;
     color: white;
-    padding: 8px 16px;
+    padding: 10px 18px;
     border-radius: 6px;
-    font-size: 1rem;
+    font-size: 1.1rem;
     font-weight: 700;
-    border: 1px solid #0da271; /* Garis sekeliling status */
+    border: 2px solid #0da271; /* Garis sekeliling status */
   }
   
   .modal-body {
@@ -987,93 +987,101 @@ const faqData = [
     color: #334155;
     margin-bottom: 40px;
     position: relative;
-    padding: 25px;
-    border: 1px solid rgba(0, 0, 0, 0.1); /* Garis sekeliling deskripsi */
+    padding: 30px;
+    border: 2px solid rgba(0, 0, 0, 0.1); /* Garis sekeliling deskripsi */
     border-radius: 8px;
     background: #f8fafc;
+    font-weight: 500;
   }
   
   .modal-timeline {
     position: relative;
     padding-left: 50px;
     margin: 35px 0;
-    border: 1px solid rgba(0, 0, 0, 0.1); /* Garis sekeliling timeline */
+    border: 2px solid rgba(0, 0, 0, 0.1); /* Garis sekeliling timeline */
     border-radius: 8px;
     padding: 30px;
     background: #f8fafc;
   }
   
   .modal-timeline::before {
-    content: "";
+    content: '';
     position: absolute;
-    left: 40px;
-    top: 30px;
-    bottom: 30px;
+    left: 25px;
+    top: 40px;
+    bottom: 40px;
     width: 3px;
-    background: repeating-linear-gradient(
-      to bottom,
-      transparent,
-      transparent 6px,
-      #cbd5e1 6px,
-      #cbd5e1 12px
-    );
+    background: #3b82f6;
+    border-radius: 3px;
   }
   
   .timeline-item {
-    margin-bottom: 30px;
     position: relative;
-    padding: 15px;
-    border: 1px solid rgba(0, 0, 0, 0.05); /* Garis sekeliling item timeline */
-    border-radius: 6px;
-    background: white;
+    margin-bottom: 25px;
+    padding-left: 30px;
+  }
+  
+  .timeline-item:last-child {
+    margin-bottom: 0;
   }
   
   .timeline-item::before {
-    content: "";
+    content: '';
     position: absolute;
-    left: -45px;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 18px;
-    height: 18px;
+    left: -25px;
+    top: 8px;
+    width: 15px;
+    height: 15px;
     border-radius: 50%;
     background: #3b82f6;
     border: 3px solid white;
-    box-shadow: 0 0 0 3px #3b82f6;
-  }
-  
-  .timeline-title {
-    font-weight: 700;
-    margin-bottom: 12px;
-    color: #000;
-    font-size: 1.4rem; /* Diperbesar */
-    border-bottom: 1px solid #e2e8f0;
-    padding-bottom: 8px;
+    box-shadow: 0 0 0 2px #3b82f6;
   }
   
   .timeline-content {
-    color: #64748b;
+    font-size: 1.2rem;
     line-height: 1.6;
-    font-size: 1.2rem; /* Diperbesar */
+    color: #334155;
   }
   
-  /* Responsive design */
-  @media (max-width: 968px) {
+  .modal-footer {
+    margin-top: 40px;
+    padding-top: 30px;
+    border-top: 1px solid #e2e8f0;
+    text-align: center;
+  }
+  
+  .modal-close-btn {
+    display: inline-block;
+    background: #3b82f6;
+    color: white;
+    padding: 16px 40px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 1.1rem;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border: 2px solid #2563eb; /* Garis sekeliling tombol */
+    cursor: pointer;
+  }
+  
+  .modal-close-btn:hover {
+    background: #2563eb;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(37, 99, 235, 0.3);
+  }
+  
+  /* Responsivitas */
+  @media (max-width: 768px) {
     .typography-left-layout {
       grid-template-columns: 1fr;
       gap: 40px;
     }
     
     .page-title {
-      font-size: 3.5rem;
-    }
-    
-    .description-section {
-      padding-top: 0;
-    }
-
-    .modal-title {
-      font-size: 2.2rem;
+      font-size: 3rem;
     }
     
     .social-icons {
@@ -1090,61 +1098,8 @@ const faqData = [
     }
     
     .footer-links {
-      flex-wrap: wrap;
-      justify-content: center;
-    }
-  }
-  
-  @media (max-width: 768px) {
-    .container {
-      padding: 0 15px;
-    }
-    
-    .main-content {
-      padding: 30px 0;
-    }
-    
-    .marquee-content-large {
-      font-size: 1.5rem;
-      animation-duration: 15s;
-    }
-    
-    .page-title {
-      font-size: 2.8rem;
-    }
-    
-    .title-accent {
-      font-size: 1rem;
-    }
-    
-    .typography-description {
-      font-size: 1.1rem;
-    }
-
-    .topic-title {
-      font-size: 1.5rem;
-      padding: 12px 20px;
-    }
-
-    .faq-items {
-      padding: 20px;
-    }
-    
-    .color-block-extra-large {
-      padding: 80px 20px;
-    }
-    
-    .color-block-extra-large h2 {
-      font-size: 2rem;
-    }
-    
-    .color-block-extra-large p {
-      font-size: 1rem;
-    }
-    
-    .cta-button-large {
-      padding: 14px 30px;
-      font-size: 1rem;
+      flex-direction: column;
+      gap: 15px;
     }
     
     .modal-content {
@@ -1153,250 +1108,24 @@ const faqData = [
     }
     
     .modal-faq-content {
-      padding: 40px;
+      padding: 30px;
     }
     
     .modal-title {
-      font-size: 1.9rem;
-      padding: 15px;
-    }
-
-    .modal-description {
-      font-size: 1.1rem;
-      padding: 20px;
-    }
-
-    .modal-timeline {
-      padding-left: 40px;
-      padding: 20px;
-    }
-
-    .timeline-item::before {
-      left: -35px;
-    }
-    
-    .social-contact-title {
       font-size: 2rem;
-    }
-    
-    .social-icons {
-      grid-template-columns: repeat(2, 1fr);
-    }
-  }
-
-  @media (max-width: 480px) {
-    .marquee-content-large {
-      font-size: 1.2rem;
-    }
-    
-    .page-title {
-      font-size: 2.2rem;
-      letter-spacing: -1px;
-    }
-    
-    .title-accent {
-      font-size: 0.9rem;
-    }
-    
-    .typography-description {
-      font-size: 1rem;
-    }
-
-    .topic-title {
-      font-size: 1.3rem;
-      padding: 10px 15px;
-    }
-
-    .faq-items {
-      padding: 15px;
-    }
-
-    .faq-item-wrapper {
-      padding: 12px;
-    }
-    
-    .color-block-extra-large h2 {
-      font-size: 1.7rem;
-    }
-    
-    .cta-button-large {
-      padding: 12px 25px;
-      font-size: 0.9rem;
     }
     
     .modal-meta {
       flex-direction: column;
       align-items: flex-start;
-      gap: 10px;
-    }
-
-    .modal-faq-content {
-      padding: 25px;
-    }
-
-    .modal-title {
-      font-size: 1.6rem;
-    }
-
-    .modal-timeline {
-      padding-left: 30px;
-      padding: 15px;
-    }
-
-    .timeline-item::before {
-      left: -30px;
-      width: 16px;
-      height: 16px;
-    }
-    
-    .social-contact-title {
-      font-size: 1.7rem;
-      flex-direction: column;
-      gap: 10px;
-    }
-    
-    .social-icons {
-      grid-template-columns: 1fr;
-    }
-    
-    .footer-links {
-      flex-direction: column;
       gap: 15px;
     }
   }
 </style>
 
 <script>
-  // Data FAQ untuk modal
-  const faqData = [
-    {
-      id: 1,
-      index: "1",
-      icon: "🚀",
-      question: "Apa itu Astro?",
-      answer: "Astro adalah framework modern untuk membangun website statis dan hybrid yang super cepat. Astro memungkinkan developer menggunakan berbagai framework UI (seperti React, Vue, Svelte) dalam satu proyek.",
-      fullDescription: "Astro adalah framework web all-in-one yang dirancang untuk membuat website yang cepat dan efisien. Dibangun dengan konsep 'island architecture', Astro memungkinkan Anda menggunakan komponen dari berbagai framework UI (React, Vue, Svelte, dll) dalam satu proyek, sambil tetap menghasilkan HTML statis yang optimal. Astro juga mendukung server-side rendering (SSR) melalui adapter, memberikan fleksibilitas dalam deployment.",
-      category: "Pengenalan",
-      lastUpdated: "15 November 2023, 14:30 WIB",
-      isNew: true,
-      labelColor: "blue",
-      topic: "Dasar-Dasar Astro"
-    },
-    {
-      id: 2,
-      index: "2",
-      icon: "📂",
-      question: "Di mana letak gambar?",
-      answer: "Gambar disimpan di folder /public/images. Contohnya di sini: /images/5.jpg. Pastikan untuk mengoptimalkan gambar sebelum menggunakannya di website untuk performa yang lebih baik.",
-      fullDescription: "Dalam proyek Astro, semua aset statis seperti gambar, font, dan file lainnya disimpan dalam folder /public. Folder ini secara langsung dipetakan ke root website Anda. Untuk gambar, disarankan menyimpannya di /public/images. Sebelum menggunakan gambar, pastikan untuk mengoptimalkannya dengan kompresi dan format yang tepat (WebP untuk browser modern, JPEG/PNG untuk kompatibilitas) untuk meningkatkan performa loading website.",
-      category: "Struktur Proyek",
-      lastUpdated: "12 November 2023, 09:15 WIB",
-      isNew: true,
-      labelColor: "green",
-      topic: "Dasar-Dasar Astro"
-    },
-    {
-      id: 3,
-      index: "3",
-      icon: "🔗",
-      question: "Apakah ada tautan ke luar?",
-      answer: `Ya, berikut adalah beberapa tautan penting:`,
-      fullDescription: `Website ini menyediakan berbagai tautan eksternal yang berguna untuk pengembangan dengan Astro. Tautan-tautan tersebut termasuk:
-        
-        • Dokumentasi resmi Astro - sumber informasi terlengkap tentang semua fitur Astro
-        • Repository GitHub - tempat Anda dapat berkontribusi atau melaporkan issues
-        • Halaman integrasi - menampilkan semua plugin dan adapter yang tersedia
-        • Komunitas Discord - tempat berinteraksi dengan developer Astro lainnya
-        • Blog Astro - tutorial dan pengumuman terbaru`,
-      category: "Sumber Daya",
-      lastUpdated: "10 November 2023, 16:45 WIB",
-      isNew: true,
-      labelColor: "purple",
-      topic: "Sumber Daya"
-    },
-    {
-      id: 4,
-      index: "4",
-      icon: "⚙️",
-      question: "Bagaimana cara instalasi Astro?",
-      answer: `Untuk menginstall Astro, Anda dapat menggunakan perintah berikut:`,
-      fullDescription: `Instalasi Astro sangat mudah dan dapat dilakukan dalam beberapa langkah:
-
-        1. Pastikan Anda telah menginstall Node.js versi 16 atau lebih tinggi
-        2. Jalankan perintah: npm create astro@latest
-        3. Ikuti prompt yang muncul untuk mengkonfigurasi proyek
-        4. Masuk ke direktori proyek: cd nama-proyek-anda
-        5. Install dependencies: npm install
-        6. Jalankan server development: npm run dev
-
-        Anda juga dapat membuat proyek Astro dengan template tertentu menggunakan perintah:
-        npm create astro@latest -- --template nama-template
-
-        Beberapa template populer termasuk blog, dokumentasi, dan portfolio.`,
-      category: "Instalasi",
-      lastUpdated: "8 November 2023, 11:20 WIB",
-      isNew: true,
-      labelColor: "orange",
-      topic: "Instalasi & Setup"
-    },
-    {
-      id: 5,
-      index: "5",
-      icon: "🌐",
-      question: "Apakah Astro mendukung SSR?",
-      answer: "Ya, Astro mendukung Server-Side Rendering (SSR) melalui adapter. Anda dapat menambahkan SSR ke proyek Astro dengan menginstall adapter untuk deployment target Anda (seperti Netlify, Vercel, atau Node.js).",
-      fullDescription: `Astro memang mendukung Server-Side Rendering (SSR) melalui sistem adapter. Fitur ini memungkinkan Anda untuk:
-
-        • Menghalaman konten dinamis pada server
-        • Mengimplementasikan API routes
-        • Menangani autentikasi pengguna
-        • Mengelola data real-time
-
-        Untuk mengaktifkan SSR, Anda perlu menginstall adapter yang sesuai dengan platform deployment Anda. Beberapa adapter yang tersedia:
-
-        • @astrojs/netlify - untuk deploy ke Netlify
-        • @astrojs/vercel - untuk deploy ke Vercel
-        • @astrojs/node - untuk deploy ke lingkungan Node.js
-        • @astrojs/cloudflare - untuk deploy ke Cloudflare Pages
-
-        Setelah menginstall adapter, Anda perlu mengkonfigurasinya dalam file astro.config.mjs.`,
-      category: "Fitur",
-      lastUpdated: "5 November 2023, 13:10 WIB",
-      isNew: true,
-      labelColor: "red",
-      topic: "Fitur Lanjutan"
-    },
-    {
-      id: 6,
-      index: "6",
-      icon: "📱",
-      question: "Apakah Astro responsive?",
-      answer: "Ya, Astro menghasilkan website yang fully responsive. Developer dapat dengan mudah membuat layout yang responsive dengan menggunakan CSS biasa atau framework CSS seperti Tailwind.",
-      fullDescription: `Astro sendiri tidak menentukan bagaimana Anda membuat website responsive - itu sepenuhnya tergantung pada implementasi CSS Anda. Namun, Astro memberikan kebebasan penuh untuk menggunakan:
-
-        • CSS vanilla dengan media queries
-        • Framework CSS seperti Tailwind, Bootstrap, atau Bulma
-        • CSS-in-JS libraries seperti styled-components
-        • CSS modules untuk scoped styling
-
-        Karena Astro menghasilkan HTML statis, performa website biasanya sangat baik untuk perangkat mobile. You dapat dengan mudah mengimplementasikan responsive design patterns seperti:
-
-        • Mobile-first design
-        • Flexible grid layouts
-        • Responsive images dengan elemen picture atau srcset
-        • Conditional loading komponen berdasarkan breakpoint
-
-        Astro juga mendukung pengelolaan asset yang cerdas, termasuk generating responsive images pada build time.`,
-      category: "Responsivitas",
-      lastUpdated: "3 November 2023, 17:30 WIB",
-      isNew: false,
-      labelColor: "",
-      topic: "Fitur Lanjutan"
-    }
-  ];
-
-  document.addEventListener('DOMContentLoaded', function() {
-    // Tanggal pembaruan
+  // Fungsi untuk menampilkan tanggal dan jam saat ini
+  function updateCurrentDateTime() {
     const now = new Date();
     const options = { 
       weekday: 'long', 
@@ -1406,122 +1135,138 @@ const faqData = [
       hour: '2-digit',
       minute: '2-digit'
     };
-    const dateTimeStr = now.toLocaleDateString('id-ID', options);
-    document.getElementById('currentDate').textContent = dateTimeStr.toUpperCase();
-
-    // Animasi scroll dengan Intersection Observer
-    const observerOptions = {
-      threshold: 0.1,
-      rootMargin: '0px 0px -50px 0px'
-    };
-
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('animated');
+    const formattedDate = now.toLocaleDateString('id-ID', options);
+    document.getElementById('currentDate').textContent = formattedDate;
+  }
+  
+  // Panggil fungsi saat halaman dimuat
+  document.addEventListener('DOMContentLoaded', function() {
+    updateCurrentDateTime();
+    
+    // Animasi untuk elemen dengan atribut data-framer
+    const framerElements = document.querySelectorAll('[data-framer]');
+    framerElements.forEach((el, index) => {
+      setTimeout(() => {
+        el.classList.add('animated');
+      }, 150 * index);
+    });
+    
+    // Event listener untuk membuka modal FAQ
+    const faqItems = document.querySelectorAll('.faq-item-wrapper');
+    const modal = document.getElementById('faqModal');
+    const modalContent = document.getElementById('modalContent');
+    const closeBtn = document.querySelector('.close');
+    
+    faqItems.forEach(item => {
+      item.addEventListener('click', function() {
+        const faqId = this.getAttribute('data-faq-id');
+        const faq = faqData.find(item => item.id == faqId);
+        
+        if (faq) {
+          modalContent.innerHTML = `
+            <div class="modal-faq-content">
+              <div class="modal-header">
+                <div class="modal-category">${faq.category}</div>
+                <h2 class="modal-title">${faq.question}</h2>
+                <div class="modal-meta">
+                  <div class="modal-update">
+                    <span>📅</span>
+                    <span>${faq.lastUpdated}</span>
+                  </div>
+                  ${faq.isNew ? `
+                    <div class="modal-status">
+                      <span>🆕</span>
+                      <span>BARU</span>
+                    </div>
+                  ` : ''}
+                </div>
+              </div>
+              <div class="modal-body">
+                <div class="modal-description">
+                  ${faq.fullDescription}
+                </div>
+                ${faq.id === 3 ? `
+                  <div class="modal-timeline">
+                    <div class="timeline-item">
+                      <div class="timeline-content">
+                        <strong>Dokumentasi Resmi:</strong> <a href="https://docs.astro.build" target="_blank">https://docs.astro.build</a>
+                      </div>
+                    </div>
+                    <div class="timeline-item">
+                      <div class="timeline-content">
+                        <strong>GitHub Repository:</strong> <a href="https://github.com/withastro/astro" target="_blank">https://github.com/withastro/astro</a>
+                      </div>
+                    </div>
+                    <div class="timeline-item">
+                      <div class="timeline-content">
+                        <strong>Integrasi:</strong> <a href="https://astro.build/integrations" target="_blank">https://astro.build/integrations</a>
+                      </div>
+                    </div>
+                    <div class="timeline-item">
+                      <div class="timeline-content">
+                        <strong>Komunitas Discord:</strong> <a href="https://astro.build/chat" target="_blank">https://astro.build/chat</a>
+                      </div>
+                    </div>
+                  </div>
+                ` : ''}
+                ${faq.id === 4 ? `
+                  <div class="modal-timeline">
+                    <div class="timeline-item">
+                      <div class="timeline-content">
+                        <strong>1. Persiapan:</strong> Pastikan Node.js versi 16 atau lebih tinggi sudah terinstall di sistem Anda.
+                      </div>
+                    </div>
+                    <div class="timeline-item">
+                      <div class="timeline-content">
+                        <strong>2. Membuat Proyek Baru:</strong> Jalankan perintah <code>npm create astro@latest</code> di terminal.
+                      </div>
+                    </div>
+                    <div class="timeline-item">
+                      <div class="timeline-content">
+                        <strong>3. Konfigurasi:</strong> Ikuti prompt yang muncul untuk mengkonfigurasi proyek sesuai kebutuhan.
+                      </div>
+                    </div>
+                    <div class="timeline-item">
+                      <div class="timeline-content">
+                        <strong>4. Install Dependencies:</strong> Masuk ke direktori proyek dan jalankan <code>npm install</code>.
+                      </div>
+                    </div>
+                    <div class="timeline-item">
+                      <div class="timeline-content">
+                        <strong>5. Development Server:</strong> Jalankan <code>npm run dev</code> untuk memulai server development.
+                      </div>
+                    </div>
+                  </div>
+                ` : ''}
+              </div>
+              <div class="modal-footer">
+                <button class="modal-close-btn">Tutup</button>
+              </div>
+            </div>
+          `;
+          
+          modal.style.display = 'block';
+          
+          // Event listener untuk tombol tutup di dalam modal
+          const modalCloseBtn = document.querySelector('.modal-close-btn');
+          if (modalCloseBtn) {
+            modalCloseBtn.addEventListener('click', function() {
+              modal.style.display = 'none';
+            });
+          }
         }
       });
-    }, observerOptions);
-
-    document.querySelectorAll('[data-framer]').forEach(el => {
-      observer.observe(el);
     });
-
-    // Animasi gambar
-    const image = document.querySelector('.faq-image');
-    if (image) {
-      image.style.opacity = '0';
-      image.style.transform = 'scale(0.95)';
-      image.style.transition = 'opacity 0.8s ease, transform 0.8s ease';
-      
-      setTimeout(() => {
-        image.style.opacity = '1';
-        image.style.transform = 'scale(1)';
-      }, 300);
-    }
-
-    // Animasi judul
-    const title = document.querySelector('.page-title');
-    if (title) {
-      title.style.opacity = '0';
-      title.style.transform = 'translateY(-15px)';
-      title.style.transition = 'opacity 0.8s ease, transform 0.8s ease';
-      
-      setTimeout(() => {
-        title.style.opacity = '1';
-        title.style.transform = 'translateY(0)';
-      }, 100);
-    }
-
-    // Modal functionality - FIXED
-    const modal = document.getElementById("faqModal");
-    const closeBtn = document.getElementsByClassName("close")[0];
-
-    // Tambahkan event listener ke setiap FAQ item
-    document.querySelectorAll('.faq-item-wrapper').forEach(wrapper => {
-      wrapper.addEventListener('click', function() {
-        const faqId = parseInt(this.getAttribute('data-faq-id'));
-        openFAQModal(faqId);
-      });
+    
+    // Event listener untuk menutup modal
+    closeBtn.addEventListener('click', function() {
+      modal.style.display = 'none';
     });
-
-    closeBtn.onclick = function() {
-      modal.style.display = "none";
-    }
-
-    window.onclick = function(event) {
+    
+    window.addEventListener('click', function(event) {
       if (event.target == modal) {
-        modal.style.display = "none";
+        modal.style.display = 'none';
       }
-    }
+    });
   });
-
-  // Fungsi untuk membuka modal FAQ
-  function openFAQModal(id) {
-    const faq = faqData.find(item => item.id === id);
-    if (!faq) return;
-    
-    const modal = document.getElementById("faqModal");
-    const modalContent = document.getElementById("modalContent");
-    
-    modalContent.innerHTML = `
-      <div class="modal-faq-content">
-        <div class="modal-header">
-          <span class="modal-category">${faq.category}</span>
-          <h2 class="modal-title">${faq.question}</h2>
-          <div class="modal-meta">
-            <div class="modal-update">
-              <span>🕒 ${faq.lastUpdated}</span>
-            </div>
-            ${faq.isNew ? '<div class="modal-status">🆕 BARU</div>' : ''}
-          </div>
-        </div>
-        
-        <div class="modal-body">
-          <div class="modal-description">
-            ${faq.fullDescription.replace(/\n/g, '<br>')}
-          </div>
-          
-          <div class="modal-timeline">
-            <div class="timeline-item">
-              <div class="timeline-title">Keuntungan Menggunakan Astro</div>
-              <div class="timeline-content">Astro menawarkan performa luar biasa dengan mengirimkan HTML statis yang minimal ke client.</div>
-            </div>
-            
-            <div class="timeline-item">
-              <div class="timeline-title">Kompatibilitas Framework</div>
-              <div class="timeline-content">Dukung multiple framework UI dalam satu proyek tanpa konflik.</div>
-            </div>
-            
-            <div class="timeline-item">
-              <div class="timeline-title">Optimasi Built-in</div>
-              <div class="timeline-content">Astro secara otomatis mengoptimalkan gambar, CSS, dan JavaScript untuk performa terbaik.</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    `;
-    
-    modal.style.display = "block";
-  }
 </script>
