@@ -1029,12 +1029,12 @@ const faqData = [
       question: "Apakah ada tautan ke luar?",
       answer: `Ya, berikut adalah beberapa tautan penting:`,
       fullDescription: `Website ini menyediakan berbagai tautan eksternal yang berguna untuk pengembangan dengan Astro. Tautan-tautan tersebut termasuk:
-      
-      • Dokumentasi resmi Astro - sumber informasi terlengkap tentang semua fitur Astro
-      • Repository GitHub - tempat Anda dapat berkontribusi atau melaporkan issues
-      • Halaman integrasi - menampilkan semua plugin dan adapter yang tersedia
-      • Komunitas Discord - tempat berinteraksi dengan developer Astro lainnya
-      • Blog Astro - tutorial dan pengumuman terbaru`,
+        
+        • Dokumentasi resmi Astro - sumber informasi terlengkap tentang semua fitur Astro
+        • Repository GitHub - tempat Anda dapat berkontribusi atau melaporkan issues
+        • Halaman integrasi - menampilkan semua plugin dan adapter yang tersedia
+        • Komunitas Discord - tempat berinteraksi dengan developer Astro lainnya
+        • Blog Astro - tutorial dan pengumuman terbaru`,
       category: "Sumber Daya",
       lastUpdated: "10 November 2023, 16:45 WIB",
       isNew: true,
@@ -1049,17 +1049,17 @@ const faqData = [
       answer: `Untuk menginstall Astro, Anda dapat menggunakan perintah berikut:`,
       fullDescription: `Instalasi Astro sangat mudah dan dapat dilakukan dalam beberapa langkah:
 
-      1. Pastikan Anda telah menginstall Node.js versi 16 atau lebih tinggi
-      2. Jalankan perintah: npm create astro@latest
-      3. Ikuti prompt yang muncul untuk mengkonfigurasi proyek
-      4. Masuk ke direktori proyek: cd nama-proyek-anda
-      5. Install dependencies: npm install
-      6. Jalankan server development: npm run dev
+        1. Pastikan Anda telah menginstall Node.js versi 16 atau lebih tinggi
+        2. Jalankan perintah: npm create astro@latest
+        3. Ikuti prompt yang muncul untuk mengkonfigurasi proyek
+        4. Masuk ke direktori proyek: cd nama-proyek-anda
+        5. Install dependencies: npm install
+        6. Jalankan server development: npm run dev
 
-      Anda juga dapat membuat proyek Astro dengan template tertentu menggunakan perintah:
-      npm create astro@latest -- --template nama-template
+        Anda juga dapat membuat proyek Astro dengan template tertentu menggunakan perintah:
+        npm create astro@latest -- --template nama-template
 
-      Beberapa template populer termasuk blog, dokumentasi, dan portfolio.`,
+        Beberapa template populer termasuk blog, dokumentasi, dan portfolio.`,
       category: "Instalasi",
       lastUpdated: "8 November 2023, 11:20 WIB",
       isNew: true,
@@ -1074,19 +1074,19 @@ const faqData = [
       answer: "Ya, Astro mendukung Server-Side Rendering (SSR) melalui adapter. Anda dapat menambahkan SSR ke proyek Astro dengan menginstall adapter untuk deployment target Anda (seperti Netlify, Vercel, atau Node.js).",
       fullDescription: `Astro memang mendukung Server-Side Rendering (SSR) melalui sistem adapter. Fitur ini memungkinkan Anda untuk:
 
-      • Menghalaman konten dinamis pada server
-      • Mengimplementasikan API routes
-      • Menangani autentikasi pengguna
-      • Mengelola data real-time
+        • Menghalaman konten dinamis pada server
+        • Mengimplementasikan API routes
+        • Menangani autentikasi pengguna
+        • Mengelola data real-time
 
-      Untuk mengaktifkan SSR, Anda perlu menginstall adapter yang sesuai dengan platform deployment Anda. Beberapa adapter yang tersedia:
+        Untuk mengaktifkan SSR, Anda perlu menginstall adapter yang sesuai dengan platform deployment Anda. Beberapa adapter yang tersedia:
 
-      • @astrojs/netlify - untuk deploy ke Netlify
-      • @astrojs/vercel - untuk deploy ke Vercel
-      • @astrojs/node - untuk deploy ke lingkungan Node.js
-      • @astrojs/cloudflare - untuk deploy ke Cloudflare Pages
+        • @astrojs/netlify - untuk deploy ke Netlify
+        • @astrojs/vercel - untuk deploy ke Vercel
+        • @astrojs/node - untuk deploy ke lingkungan Node.js
+        • @astrojs/cloudflare - untuk deploy ke Cloudflare Pages
 
-      Setelah menginstall adapter, Anda perlu mengkonfigurasinya dalam file astro.config.mjs.`,
+        Setelah menginstall adapter, Anda perlu mengkonfigurasinya dalam file astro.config.mjs.`,
       category: "Fitur",
       lastUpdated: "5 November 2023, 13:10 WIB",
       isNew: true,
@@ -1101,19 +1101,19 @@ const faqData = [
       answer: "Ya, Astro menghasilkan website yang fully responsive. Developer dapat dengan mudah membuat layout yang responsive dengan menggunakan CSS biasa atau framework CSS seperti Tailwind.",
       fullDescription: `Astro sendiri tidak menentukan bagaimana Anda membuat website responsive - itu sepenuhnya tergantung pada implementasi CSS Anda. Namun, Astro memberikan kebebasan penuh untuk menggunakan:
 
-      • CSS vanilla dengan media queries
-      • Framework CSS seperti Tailwind, Bootstrap, atau Bulma
-      • CSS-in-JS libraries seperti styled-components
-      • CSS modules untuk scoped styling
+        • CSS vanilla dengan media queries
+        • Framework CSS seperti Tailwind, Bootstrap, atau Bulma
+        • CSS-in-JS libraries seperti styled-components
+        • CSS modules untuk scoped styling
 
-      Karena Astro menghasilkan HTML statis, performa website biasanya sangat baik untuk perangkat mobile. You dapat dengan mudah mengimplementasikan responsive design patterns seperti:
+        Karena Astro menghasilkan HTML statis, performa website biasanya sangat baik untuk perangkat mobile. You dapat dengan mudah mengimplementasikan responsive design patterns seperti:
 
-      • Mobile-first design
-      • Flexible grid layouts
-      • Responsive images dengan elemen picture atau srcset
-      • Conditional loading komponen berdasarkan breakpoint
+        • Mobile-first design
+        • Flexible grid layouts
+        • Responsive images dengan elemen picture atau srcset
+        • Conditional loading komponen berdasarkan breakpoint
 
-      Astro juga mendukung pengelolaan asset yang cerdas, termasuk generating responsive images pada build time.`,
+        Astro juga mendukung pengelolaan asset yang cerdas, termasuk generating responsive images pada build time.`,
       category: "Responsivitas",
       lastUpdated: "3 November 2023, 17:30 WIB",
       isNew: false,
@@ -1122,26 +1122,27 @@ const faqData = [
     }
   ];
 
+  // Set tanggal update terbaru
   document.addEventListener('DOMContentLoaded', function() {
-    // Tanggal pembaruan
-    const now = new Date();
-    const options = { 
-      weekday: 'long', 
-      year: 'numeric', 
-      month: 'long', 
+    const currentDate = new Date();
+    const formattedDate = currentDate.toLocaleDateString('id-ID', {
       day: 'numeric',
+      month: 'long',
+      year: 'numeric',
       hour: '2-digit',
-      minute: '2-digit'
-    };
-    const dateTimeStr = now.toLocaleDateString('id-ID', options);
-    document.getElementById('currentDate').textContent = dateTimeStr.toUpperCase();
-
-    // Animasi scroll dengan Intersection Observer
+      minute: '2-digit',
+      timeZoneName: 'short'
+    });
+    
+    document.getElementById('currentDate').textContent = formattedDate;
+    
+    // Animasi scroll untuk elemen dengan data-framer
     const observerOptions = {
-      threshold: 0.1,
-      rootMargin: '0px 0px -50px 0px'
+      root: null,
+      rootMargin: '0px',
+      threshold: 0.1
     };
-
+    
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
@@ -1149,106 +1150,65 @@ const faqData = [
         }
       });
     }, observerOptions);
-
-    document.querySelectorAll('[data-framer]').forEach(el => {
-      observer.observe(el);
+    
+    document.querySelectorAll('[data-framer]').forEach(item => {
+      observer.observe(item);
     });
-
-    // Animasi gambar
-    const image = document.querySelector('.faq-image');
-    if (image) {
-      image.style.opacity = '0';
-      image.style.transform = 'scale(0.95)';
-      image.style.transition = 'opacity 0.8s ease, transform 0.8s ease';
-      
-      setTimeout(() => {
-        image.style.opacity = '1';
-        image.style.transform = 'scale(1)';
-      }, 300);
-    }
-
-    // Animasi judul
-    const title = document.querySelector('.page-title');
-    if (title) {
-      title.style.opacity = '0';
-      title.style.transform = 'translateY(-15px)';
-      title.style.transition = 'opacity 0.8s ease, transform 0.8s ease';
-      
-      setTimeout(() => {
-        title.style.opacity = '1';
-        title.style.transform = 'translateY(0)';
-      }, 100);
-    }
-
-    // Modal functionality - FIXED
-    const modal = document.getElementById("faqModal");
-    const closeBtn = document.getElementsByClassName("close")[0];
-
-    // Tambahkan event listener ke setiap FAQ item
-    document.querySelectorAll('.faq-item-wrapper').forEach(wrapper => {
-      wrapper.addEventListener('click', function() {
-        const faqId = parseInt(this.getAttribute('data-faq-id'));
-        openFAQModal(faqId);
-      });
-    });
-
-    closeBtn.onclick = function() {
-      modal.style.display = "none";
-    }
-
-    window.onclick = function(event) {
-      if (event.target == modal) {
-        modal.style.display = "none";
+    
+    // Modal functionality
+    const modal = document.getElementById('faqModal');
+    const closeBtn = document.querySelector('.close');
+    const modalContent = document.getElementById('modalContent');
+    
+    // Fungsi untuk membuka modal
+    function openModal(faqId) {
+      const faq = faqData.find(item => item.id === faqId);
+      if (faq) {
+        modalContent.innerHTML = `
+          <div class="modal-faq-content">
+            <div class="modal-header">
+              <span class="modal-category">${faq.category}</span>
+              <h2 class="modal-title">${faq.question}</h2>
+              <div class="modal-meta">
+                <div class="modal-update">
+                  <span>🕒</span>
+                  <span>Update: ${faq.lastUpdated}</span>
+                </div>
+                ${faq.isNew ? '<div class="modal-status"><span>🔔</span> <span>BARU</span></div>' : ''}
+              </div>
+            </div>
+            <div class="modal-body">
+              <div class="modal-description">
+                ${faq.fullDescription}
+              </div>
+            </div>
+          </div>
+        `;
+        modal.style.display = 'block';
+        document.body.style.overflow = 'hidden';
       }
     }
+    
+    // Event listener untuk item FAQ
+    document.querySelectorAll('.faq-item-wrapper').forEach(item => {
+      item.addEventListener('click', function() {
+        const faqId = parseInt(this.getAttribute('data-faq-id'));
+        openModal(faqId);
+      });
+    });
+    
+    // Event listener untuk tombol close
+    closeBtn.addEventListener('click', function() {
+      modal.style.display = 'none';
+      document.body.style.overflow = 'auto';
+    });
+    
+    // Tutup modal jika klik di luar konten
+    window.addEventListener('click', function(event) {
+      if (event.target === modal) {
+        modal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+      }
+    });
   });
-
-  // Fungsi untuk membuka modal FAQ
-  function openFAQModal(id) {
-    const faq = faqData.find(item => item.id === id);
-    if (!faq) return;
-    
-    const modal = document.getElementById("faqModal");
-    const modalContent = document.getElementById("modalContent");
-    
-    modalContent.innerHTML = `
-      <div class="modal-faq-content">
-        <div class="modal-header">
-          <span class="modal-category">${faq.category}</span>
-          <h2 class="modal-title">${faq.question}</h2>
-          <div class="modal-meta">
-            <div class="modal-update">
-              <span>🕒 ${faq.lastUpdated}</span>
-            </div>
-            ${faq.isNew ? '<div class="modal-status">🆕 BARU</div>' : ''}
-          </div>
-        </div>
-        
-        <div class="modal-body">
-          <div class="modal-description">
-            ${faq.fullDescription.replace(/\n/g, '<br>')}
-          </div>
-          
-          <div class="modal-timeline">
-            <div class="timeline-item">
-              <div class="timeline-title">Keuntungan Menggunakan Astro</div>
-              <div class="timeline-content">Astro menawarkan performa luar biasa dengan mengirimkan HTML statis yang minimal ke client.</div>
-            </div>
-            
-            <div class="timeline-item">
-              <div class="timeline-title">Kompatibilitas Framework</div>
-              <div class="timeline-content">Dukung multiple framework UI dalam satu proyek tanpa konflik.</div>
-            </div>
-            
-            <div class="timeline-item">
-              <div class="timeline-title">Optimasi Built-in</div>
-              <div class="timeline-content">Astro secara otomatis mengoptimalkan gambar, CSS, dan JavaScript untuk performa terbaik.</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    `;
-    
-    modal.style.display = "block";
-  }
 </script>
