@@ -301,6 +301,80 @@ const faqData = [
     </div>
   </div>
 
+  <!-- Garis Pembatas -->
+  <div class="divider-line"></div>
+
+  <!-- Bagian Kontak Media Sosial -->
+  <div class="social-contact-section">
+    <div class="social-contact-container">
+      <div class="social-contact-header">
+        <h2 class="social-contact-title">
+          <span class="title-text">KONTAK MEDIA</span>
+          <span class="title-icon">📱</span>
+        </h2>
+        <div class="title-line"></div>
+      </div>
+      
+      <div class="social-contact-content">
+        <div class="social-icons">
+          <a href="#" class="social-icon">
+            <span class="icon">📘</span>
+            <span class="social-name">Facebook</span>
+          </a>
+          <a href="#" class="social-icon">
+            <span class="icon">📸</span>
+            <span class="social-name">Instagram</span>
+          </a>
+          <a href="#" class="social-icon">
+            <span class="icon">🐦</span>
+            <span class="social-name">Twitter</span>
+          </a>
+          <a href="#" class="social-icon">
+            <span class="icon">💼</span>
+            <span class="social-name">LinkedIn</span>
+          </a>
+          <a href="#" class="social-icon">
+            <span class="icon">📺</span>
+            <span class="social-name">YouTube</span>
+          </a>
+          <a href="#" class="social-icon">
+            <span class="icon">🐙</span>
+            <span class="social-name">GitHub</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Garis Pembatas -->
+  <div class="divider-line"></div>
+
+  <!-- Footer dengan informasi tambahan -->
+  <footer class="footer-section">
+    <div class="footer-container">
+      <div class="footer-content">
+        <div class="footer-left">
+          <div class="development-notice">
+            <span class="notice-icon">🚧</span>
+            <span class="notice-text">Website ini masih dikembangkan</span>
+          </div>
+        </div>
+        
+        <div class="footer-right">
+          <div class="footer-links">
+            <a href="/privacy-policy" class="footer-link">Kebijakan Privasi</a>
+            <a href="/terms" class="footer-link">Syarat & Ketentuan</a>
+            <a href="/feedback" class="footer-link">Berikan Masukan</a>
+          </div>
+          
+          <div class="copyright">
+            &copy; 2023 Astro Example. All rights reserved.
+          </div>
+        </div>
+      </div>
+    </div>
+  </footer>
+
   <!-- Modal untuk Detail FAQ - Diperbesar dengan Garis Sekeliling -->
   <div id="faqModal" class="modal">
     <div class="modal-content large-modal">
@@ -619,6 +693,164 @@ const faqData = [
     box-shadow: 0 5px 15px rgba(37, 99, 235, 0.3);
   }
   
+  /* Bagian Kontak Media Sosial */
+  .social-contact-section {
+    padding: 60px 20px;
+    background: #f8fafc;
+  }
+  
+  .social-contact-container {
+    max-width: 1000px;
+    margin: 0 auto;
+  }
+  
+  .social-contact-header {
+    text-align: center;
+    margin-bottom: 50px;
+  }
+  
+  .social-contact-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #000;
+    display: inline-flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 20px;
+    padding: 15px 30px;
+    border: 2px solid rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    background: #fff;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    animation: pulse 2s infinite;
+  }
+  
+  @keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+  }
+  
+  .title-icon {
+    font-size: 2rem;
+  }
+  
+  .social-contact-content {
+    display: flex;
+    justify-content: center;
+  }
+  
+  .social-icons {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 25px;
+  }
+  
+  .social-icon {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 25px;
+    background: #fff;
+    border-radius: 12px;
+    text-decoration: none;
+    color: #334155;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+  }
+  
+  .social-icon:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    border-color: #3b82f6;
+  }
+  
+  .icon {
+    font-size: 2.5rem;
+    margin-bottom: 15px;
+  }
+  
+  .social-name {
+    font-size: 1.1rem;
+    font-weight: 700;
+  }
+  
+  /* Footer Section */
+  .footer-section {
+    background: #000;
+    color: white;
+    padding: 40px 20px;
+  }
+  
+  .footer-container {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  
+  .footer-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 30px;
+  }
+  
+  .footer-left {
+    flex: 1;
+  }
+  
+  .development-notice {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 15px 20px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+  
+  .notice-icon {
+    font-size: 1.5rem;
+  }
+  
+  .notice-text {
+    font-size: 1.1rem;
+    font-weight: 700;
+  }
+  
+  .footer-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 15px;
+  }
+  
+  .footer-links {
+    display: flex;
+    gap: 25px;
+  }
+  
+  .footer-link {
+    color: #cbd5e1;
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: color 0.3s ease;
+    padding: 8px 15px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+  }
+  
+  .footer-link:hover {
+    color: white;
+    background: rgba(255, 255, 255, 0.1);
+  }
+  
+  .copyright {
+    color: #64748b;
+    font-size: 0.9rem;
+  }
+  
   /* Modal Styles - DIPERBESAR dengan Garis Sekeliling */
   .modal {
     display: none;
@@ -843,6 +1075,24 @@ const faqData = [
     .modal-title {
       font-size: 2.2rem;
     }
+    
+    .social-icons {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .footer-content {
+      flex-direction: column;
+      text-align: center;
+    }
+    
+    .footer-right {
+      align-items: center;
+    }
+    
+    .footer-links {
+      flex-wrap: wrap;
+      justify-content: center;
+    }
   }
   
   @media (max-width: 768px) {
@@ -924,6 +1174,14 @@ const faqData = [
     .timeline-item::before {
       left: -35px;
     }
+    
+    .social-contact-title {
+      font-size: 2rem;
+    }
+    
+    .social-icons {
+      grid-template-columns: repeat(2, 1fr);
+    }
   }
 
   @media (max-width: 480px) {
@@ -989,6 +1247,21 @@ const faqData = [
       left: -30px;
       width: 16px;
       height: 16px;
+    }
+    
+    .social-contact-title {
+      font-size: 1.7rem;
+      flex-direction: column;
+      gap: 10px;
+    }
+    
+    .social-icons {
+      grid-template-columns: 1fr;
+    }
+    
+    .footer-links {
+      flex-direction: column;
+      gap: 15px;
     }
   }
 </style>
@@ -1122,27 +1395,26 @@ const faqData = [
     }
   ];
 
-  // Set tanggal update terbaru
   document.addEventListener('DOMContentLoaded', function() {
-    const currentDate = new Date();
-    const formattedDate = currentDate.toLocaleDateString('id-ID', {
+    // Tanggal pembaruan
+    const now = new Date();
+    const options = { 
+      weekday: 'long', 
+      year: 'numeric', 
+      month: 'long', 
       day: 'numeric',
-      month: 'long',
-      year: 'numeric',
       hour: '2-digit',
-      minute: '2-digit',
-      timeZoneName: 'short'
-    });
-    
-    document.getElementById('currentDate').textContent = formattedDate;
-    
-    // Animasi scroll untuk elemen dengan data-framer
-    const observerOptions = {
-      root: null,
-      rootMargin: '0px',
-      threshold: 0.1
+      minute: '2-digit'
     };
-    
+    const dateTimeStr = now.toLocaleDateString('id-ID', options);
+    document.getElementById('currentDate').textContent = dateTimeStr.toUpperCase();
+
+    // Animasi scroll dengan Intersection Observer
+    const observerOptions = {
+      threshold: 0.1,
+      rootMargin: '0px 0px -50px 0px'
+    };
+
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
@@ -1150,65 +1422,106 @@ const faqData = [
         }
       });
     }, observerOptions);
-    
-    document.querySelectorAll('[data-framer]').forEach(item => {
-      observer.observe(item);
+
+    document.querySelectorAll('[data-framer]').forEach(el => {
+      observer.observe(el);
     });
-    
-    // Modal functionality
-    const modal = document.getElementById('faqModal');
-    const closeBtn = document.querySelector('.close');
-    const modalContent = document.getElementById('modalContent');
-    
-    // Fungsi untuk membuka modal
-    function openModal(faqId) {
-      const faq = faqData.find(item => item.id === faqId);
-      if (faq) {
-        modalContent.innerHTML = `
-          <div class="modal-faq-content">
-            <div class="modal-header">
-              <span class="modal-category">${faq.category}</span>
-              <h2 class="modal-title">${faq.question}</h2>
-              <div class="modal-meta">
-                <div class="modal-update">
-                  <span>🕒</span>
-                  <span>Update: ${faq.lastUpdated}</span>
-                </div>
-                ${faq.isNew ? '<div class="modal-status"><span>🔔</span> <span>BARU</span></div>' : ''}
-              </div>
-            </div>
-            <div class="modal-body">
-              <div class="modal-description">
-                ${faq.fullDescription}
-              </div>
-            </div>
-          </div>
-        `;
-        modal.style.display = 'block';
-        document.body.style.overflow = 'hidden';
-      }
+
+    // Animasi gambar
+    const image = document.querySelector('.faq-image');
+    if (image) {
+      image.style.opacity = '0';
+      image.style.transform = 'scale(0.95)';
+      image.style.transition = 'opacity 0.8s ease, transform 0.8s ease';
+      
+      setTimeout(() => {
+        image.style.opacity = '1';
+        image.style.transform = 'scale(1)';
+      }, 300);
     }
-    
-    // Event listener untuk item FAQ
-    document.querySelectorAll('.faq-item-wrapper').forEach(item => {
-      item.addEventListener('click', function() {
+
+    // Animasi judul
+    const title = document.querySelector('.page-title');
+    if (title) {
+      title.style.opacity = '0';
+      title.style.transform = 'translateY(-15px)';
+      title.style.transition = 'opacity 0.8s ease, transform 0.8s ease';
+      
+      setTimeout(() => {
+        title.style.opacity = '1';
+        title.style.transform = 'translateY(0)';
+      }, 100);
+    }
+
+    // Modal functionality - FIXED
+    const modal = document.getElementById("faqModal");
+    const closeBtn = document.getElementsByClassName("close")[0];
+
+    // Tambahkan event listener ke setiap FAQ item
+    document.querySelectorAll('.faq-item-wrapper').forEach(wrapper => {
+      wrapper.addEventListener('click', function() {
         const faqId = parseInt(this.getAttribute('data-faq-id'));
-        openModal(faqId);
+        openFAQModal(faqId);
       });
     });
-    
-    // Event listener untuk tombol close
-    closeBtn.addEventListener('click', function() {
-      modal.style.display = 'none';
-      document.body.style.overflow = 'auto';
-    });
-    
-    // Tutup modal jika klik di luar konten
-    window.addEventListener('click', function(event) {
-      if (event.target === modal) {
-        modal.style.display = 'none';
-        document.body.style.overflow = 'auto';
+
+    closeBtn.onclick = function() {
+      modal.style.display = "none";
+    }
+
+    window.onclick = function(event) {
+      if (event.target == modal) {
+        modal.style.display = "none";
       }
-    });
+    }
   });
+
+  // Fungsi untuk membuka modal FAQ
+  function openFAQModal(id) {
+    const faq = faqData.find(item => item.id === id);
+    if (!faq) return;
+    
+    const modal = document.getElementById("faqModal");
+    const modalContent = document.getElementById("modalContent");
+    
+    modalContent.innerHTML = `
+      <div class="modal-faq-content">
+        <div class="modal-header">
+          <span class="modal-category">${faq.category}</span>
+          <h2 class="modal-title">${faq.question}</h2>
+          <div class="modal-meta">
+            <div class="modal-update">
+              <span>🕒 ${faq.lastUpdated}</span>
+            </div>
+            ${faq.isNew ? '<div class="modal-status">🆕 BARU</div>' : ''}
+          </div>
+        </div>
+        
+        <div class="modal-body">
+          <div class="modal-description">
+            ${faq.fullDescription.replace(/\n/g, '<br>')}
+          </div>
+          
+          <div class="modal-timeline">
+            <div class="timeline-item">
+              <div class="timeline-title">Keuntungan Menggunakan Astro</div>
+              <div class="timeline-content">Astro menawarkan performa luar biasa dengan mengirimkan HTML statis yang minimal ke client.</div>
+            </div>
+            
+            <div class="timeline-item">
+              <div class="timeline-title">Kompatibilitas Framework</div>
+              <div class="timeline-content">Dukung multiple framework UI dalam satu proyek tanpa konflik.</div>
+            </div>
+            
+            <div class="timeline-item">
+              <div class="timeline-title">Optimasi Built-in</div>
+              <div class="timeline-content">Astro secara otomatis mengoptimalkan gambar, CSS, dan JavaScript untuk performa terbaik.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+    
+    modal.style.display = "block";
+  }
 </script>
