@@ -110,9 +110,7 @@ const faqData = [
 .close:hover { color: #000; }
 
 /* Section wrapper untuk tiap blok */
-.modal-section {
-  margin-bottom: 25px;
-}
+.modal-section { margin-bottom: 25px; }
 
 /* Judul FAQ */
 .modal-title {
@@ -181,74 +179,74 @@ const faqData = [
   padding-bottom: 5px;
 }
 
-.timeline-content {
-  font-size: 1.2rem;
-}
+.timeline-content { font-size: 1.2rem; }
 </style>
 
 <script>
-function openFAQModal(id) {
-  const faq = ${JSON.stringify(faqData)};
-  const item = faq.find(f => f.id === id);
-  if (!item) return;
+  // Ambil data dari server (Astro frontmatter) → serialize ke JS
+  const faq = Astro.serialize(faqData);
 
-  const modal = document.getElementById("faqModal");
-  const modalContent = document.getElementById("modalContent");
+  function openFAQModal(id) {
+    const item = faq.find(f => f.id === id);
+    if (!item) return;
 
-  modalContent.innerHTML = `
-    <div class="modal-faq-content">
-      <div class="modal-section">
-        <h2 class="modal-title">${item.question}</h2>
-      </div>
+    const modal = document.getElementById("faqModal");
+    const modalContent = document.getElementById("modalContent");
 
-      <div class="modal-section">
-        <div class="modal-meta">🕒 ${item.lastUpdated}</div>
-      </div>
-
-      ${item.isNew ? `
-      <div class="modal-section">
-        <div class="modal-status">🆕 BARU</div>
-      </div>` : ""}
-
-      <div class="modal-section">
-        <div class="modal-description">
-          ${item.fullDescription.replace(/\n/g, "<br>")}
+    modalContent.innerHTML = `
+      <div class="modal-faq-content">
+        <div class="modal-section">
+          <h2 class="modal-title">${item.question}</h2>
         </div>
-      </div>
 
-      <div class="modal-section">
-        <div class="modal-timeline">
-          <div class="timeline-item">
-            <div class="timeline-title">Keuntungan Menggunakan Astro</div>
-            <div class="timeline-content">Astro menawarkan performa luar biasa dengan mengirimkan HTML statis.</div>
-          </div>
-          <div class="timeline-item">
-            <div class="timeline-title">Kompatibilitas Framework</div>
-            <div class="timeline-content">Dukung multiple framework UI dalam satu proyek tanpa konflik.</div>
-          </div>
-          <div class="timeline-item">
-            <div class="timeline-title">Optimasi Built-in</div>
-            <div class="timeline-content">Astro secara otomatis mengoptimalkan gambar, CSS, dan JavaScript.</div>
+        <div class="modal-section">
+          <div class="modal-meta">🕒 ${item.lastUpdated}</div>
+        </div>
+
+        ${item.isNew ? `
+        <div class="modal-section">
+          <div class="modal-status">🆕 BARU</div>
+        </div>` : ""}
+
+        <div class="modal-section">
+          <div class="modal-description">
+            ${item.fullDescription.replace(/\\n/g, "<br>")}
           </div>
         </div>
+
+        <div class="modal-section">
+          <div class="modal-timeline">
+            <div class="timeline-item">
+              <div class="timeline-title">Keuntungan Menggunakan Astro</div>
+              <div class="timeline-content">Astro menawarkan performa luar biasa dengan mengirimkan HTML statis.</div>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-title">Kompatibilitas Framework</div>
+              <div class="timeline-content">Dukung multiple framework UI dalam satu proyek tanpa konflik.</div>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-title">Optimasi Built-in</div>
+              <div class="timeline-content">Astro secara otomatis mengoptimalkan gambar, CSS, dan JavaScript.</div>
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
-  `;
+    `;
 
-  modal.style.display = "block";
-}
+    modal.style.display = "block";
+  }
 
-document.addEventListener("DOMContentLoaded", () => {
-  const modal = document.getElementById("faqModal");
-  const closeBtn = document.querySelector(".close");
+  document.addEventListener("DOMContentLoaded", () => {
+    const modal = document.getElementById("faqModal");
+    const closeBtn = document.querySelector(".close");
 
-  document.querySelectorAll(".faq-item-wrapper").forEach(el => {
-    el.addEventListener("click", () => {
-      openFAQModal(parseInt(el.dataset.faqId));
+    document.querySelectorAll(".faq-item-wrapper").forEach(el => {
+      el.addEventListener("click", () => {
+        openFAQModal(parseInt(el.dataset.faqId));
+      });
     });
-  });
 
-  closeBtn.onclick = () => (modal.style.display = "none");
-  window.onclick = e => { if (e.target === modal) modal.style.display = "none"; };
-});
+    closeBtn.onclick = () => (modal.style.display = "none");
+    window.onclick = e => { if (e.target === modal) modal.style.display = "none"; };
+  });
 </script>
