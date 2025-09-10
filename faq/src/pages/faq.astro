@@ -915,33 +915,14 @@ const faqData = [
     padding: 60px;
   }
   
-  .modal-header {
-    border-bottom: 2px dashed #e2e8f0;
-    padding-bottom: 30px;
-    margin-bottom: 35px;
-    position: relative;
-  }
-  
-  .modal-category {
-    display: inline-block;
-    background: #3b82f6;
-    color: white;
-    padding: 10px 20px;
-    border-radius: 6px;
-    font-size: 1rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    margin-bottom: 25px;
-    border: 1px solid #2563eb; /* Garis sekeliling kategori */
-  }
+
 
 
 /* Judul FAQ */
 .modal-title {
   font-size: 2.5rem;
   font-weight: 700;
-  border: 3px solid #000;   /* garis sekeliling judul */
+  border: 3px solid #000;  !important;  /* garis sekeliling judul */
   padding: 20px;
   border-radius: 8px;
   margin-bottom: 25px;
@@ -952,7 +933,7 @@ const faqData = [
 .modal-meta {
   font-size: 1.2rem;
   font-weight: 700;
-  border: 3px solid #000;   /* garis sekeliling tanggal */
+  border: 3px solid #000;   !important; /* garis sekeliling tanggal */
   padding: 15px;
   border-radius: 8px;
   margin-bottom: 25px;
@@ -980,7 +961,7 @@ const faqData = [
   display: inline-block;
   font-size: 1.2rem;
   font-weight: 700;
-  border: 3px solid #000;   /* garis sekeliling label baru */
+  border: 3px solid #000;  !important;  /* garis sekeliling label baru */
   padding: 10px 16px;
   border-radius: 8px;
   margin-bottom: 25px;
@@ -993,7 +974,7 @@ const faqData = [
   font-size: 1.3rem;
   font-weight: 400;
   line-height: 1.8;
-  border: 3px solid #000;   /* garis sekeliling deskripsi */
+  border: 3px solid #000;  !important;   /* garis sekeliling deskripsi */
   padding: 25px;
   border-radius: 8px;
   background: #f8fafc;
@@ -1005,7 +986,7 @@ const faqData = [
     position: relative;
     padding-left: 50px;
     margin: 35px 0;
-    border: 1px solid rgba(0, 0, 0, 0.1); /* Garis sekeliling timeline */
+    border: 1px solid rgba(0, 0, 0, 0.1);  !important; /* Garis sekeliling timeline */
     border-radius: 8px;
     padding: 30px;
     background: #f8fafc;
@@ -1535,6 +1516,7 @@ function openFAQModal(id) {
 }
 
 </script>
+
 
 
 
