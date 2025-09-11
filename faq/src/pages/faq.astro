@@ -376,12 +376,13 @@ const faqData = [
   </footer>
 
   <!-- Modal untuk Detail FAQ - Diperbesar dengan Garis Sekeliling -->
-  <div id="faqModal" class="modal">
-    <div class="modal-content large-modal">
-      <span class="close">&times;</span>
-      <div id="modalContent"></div>
-    </div>
+<div id="faqModal" class="modal">
+  <div class="modal-content large-modal">
+    <span class="close">&times;</span>
+    <div id="modalContent"></div>
   </div>
+</div>
+
 </Layout>
 
 <style>
@@ -863,7 +864,7 @@ const faqData = [
     overflow: auto;
     background-color: rgba(0, 0, 0, 0.6);
   }
-  
+
   .modal-content {
     background-color: #fff;
     margin: 2% auto;
@@ -881,7 +882,7 @@ const faqData = [
   .large-modal {
     max-width: 1100px; /* Lebih besar lagi */
   }
-  
+
   .close {
     color: #aaa;
     position: absolute;
@@ -900,25 +901,30 @@ const faqData = [
     justify-content: center;
     border: 1px solid #e2e8f0;
   }
-  
+
   .close:hover,
   .close:focus {
     color: #000;
     background: #e2e8f0;
   }
-  
+
   /* Styling untuk konten modal - DIPERBESAR */
   .modal-faq-content {
     padding: 60px;
   }
   
-  .modal-header {
+
+ .modal-header {
     border-bottom: 2px dashed #e2e8f0;
     padding-bottom: 30px;
     margin-bottom: 35px;
     position: relative;
+    border: 2px solid rgba(0, 0, 0, 0.1); /* Garis sekeliling header */
+    border-radius: 12px;
+    padding: 25px;
+    background: #f8fafc;
   }
-  
+
   .modal-category {
     display: inline-block;
     background: #3b82f6;
@@ -932,7 +938,7 @@ const faqData = [
     margin-bottom: 25px;
     border: 1px solid #2563eb; /* Garis sekeliling kategori */
   }
-  
+
   .modal-title {
     font-size: 2.8rem; /* Diperbesar */
     font-weight: 700;
@@ -943,9 +949,9 @@ const faqData = [
     padding: 20px;
     border: 2px solid rgba(0, 0, 0, 0.1); /* Garis sekeliling judul */
     border-radius: 8px;
-    background: #f8fafc;
+    background: #fff;
   }
-  
+
   .modal-meta {
     display: flex;
     align-items: center;
@@ -957,13 +963,13 @@ const faqData = [
     border-radius: 6px;
     background: #f8fafc;
   }
-  
+
   .modal-update {
     display: flex;
     align-items: center;
     gap: 10px;
   }
-  
+
   .modal-status {
     display: flex;
     align-items: center;
@@ -976,11 +982,11 @@ const faqData = [
     font-weight: 700;
     border: 1px solid #0da271; /* Garis sekeliling status */
   }
-  
+
   .modal-body {
     padding: 30px 0;
   }
-  
+
   .modal-description {
     font-size: 1.3rem; /* Diperbesar */
     line-height: 1.8;
@@ -988,21 +994,21 @@ const faqData = [
     margin-bottom: 40px;
     position: relative;
     padding: 25px;
-    border: 1px solid rgba(0, 0, 0, 0.1); /* Garis sekeliling deskripsi */
+    border: 2px solid rgba(0, 0, 0, 0.1); /* Garis sekeliling deskripsi */
     border-radius: 8px;
     background: #f8fafc;
   }
-  
+
   .modal-timeline {
     position: relative;
     padding-left: 50px;
     margin: 35px 0;
-    border: 1px solid rgba(0, 0, 0, 0.1); /* Garis sekeliling timeline */
+    border: 2px solid rgba(0, 0, 0, 0.1); /* Garis sekeliling timeline */
     border-radius: 8px;
     padding: 30px;
     background: #f8fafc;
   }
-  
+
   .modal-timeline::before {
     content: "";
     position: absolute;
@@ -1018,16 +1024,16 @@ const faqData = [
       #cbd5e1 12px
     );
   }
-  
+
   .timeline-item {
     margin-bottom: 30px;
     position: relative;
     padding: 15px;
-    border: 1px solid rgba(0, 0, 0, 0.05); /* Garis sekeliling item timeline */
+    border: 1px solid rgba(0, 0, 0, 0.1); /* Garis sekeliling item timeline */
     border-radius: 6px;
     background: white;
   }
-  
+
   .timeline-item::before {
     content: "";
     position: absolute;
@@ -1041,7 +1047,7 @@ const faqData = [
     border: 3px solid white;
     box-shadow: 0 0 0 3px #3b82f6;
   }
-  
+
   .timeline-title {
     font-weight: 700;
     margin-bottom: 12px;
@@ -1050,13 +1056,21 @@ const faqData = [
     border-bottom: 1px solid #e2e8f0;
     padding-bottom: 8px;
   }
-  
+
   .timeline-content {
     color: #64748b;
     line-height: 1.6;
     font-size: 1.2rem; /* Diperbesar */
   }
-  
+
+
+
+
+
+
+
+
+
   /* Responsive design */
   @media (max-width: 968px) {
     .typography-left-layout {
@@ -1157,7 +1171,7 @@ const faqData = [
     }
     
     .modal-title {
-      font-size: 1.9rem;
+      font-size: 2.2rem;
       padding: 15px;
     }
 
@@ -1525,4 +1539,5 @@ const faqData = [
     modal.style.display = "block";
   }
 </script>
+
 
