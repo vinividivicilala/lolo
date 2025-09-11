@@ -863,116 +863,6 @@ const faqData = [
 }
 
 
-
-
----
-import Layout from '../layouts/Layout.astro';
-import FAQItem from '../components/FAQItem.astro';
-
-const faqData = [
-  {
-    id: 1,
-    index: "1",
-    icon: "🚀",
-    category: "Framework",
-    question: "Apa itu Astro?",
-    answer: "Astro adalah framework modern untuk membangun website statis dan hybrid.",
-    fullDescription: "Astro memungkinkan developer menggunakan berbagai framework frontend sekaligus. Dengan pendekatan Island Architecture, performa website menjadi lebih cepat.",
-    topic: "Astro",
-    lastUpdated: "11 Sep 2025",
-    isNew: true
-  },
-  {
-    id: 2,
-    index: "2",
-    icon: "⚡",
-    category: "Performa",
-    question: "Kenapa Astro cepat?",
-    answer: "Karena Astro hanya mengirimkan HTML murni ke browser.",
-    fullDescription: "Astro menghilangkan JavaScript yang tidak perlu dengan pendekatan partial hydration. Hanya komponen interaktif yang dikirim dengan JS, sisanya berupa HTML murni.",
-    topic: "Performa",
-    lastUpdated: "10 Sep 2025",
-    isNew: false
-  },
-  // Tambahkan FAQ lain sesuai kebutuhan...
-];
----
-
-<Layout title="FAQ">
-  <section class="faq-section">
-    <h1 class="page-title">Frequently Asked Questions</h1>
-    <div class="faq-items">
-      {faqData.map(faq => (
-        <FAQItem {...faq} onClick={() => openFAQModal(faq.id)} />
-      ))}
-    </div>
-  </section>
-
-  <!-- Modal FAQ -->
-  <div id="faqModal" class="modal">
-    <div class="modal-content large-modal">
-      <span class="close" onclick="closeFAQModal()">&times;</span>
-      <div id="modalContent"></div>
-    </div>
-  </div>
-</Layout>
-
-<script>
-  function openFAQModal(id) {
-    const faq = ${JSON.stringify(faqData)};
-    const item = faq.find(f => f.id === id);
-    if (!item) return;
-
-    const modal = document.getElementById("faqModal");
-    const modalContent = document.getElementById("modalContent");
-
-    modalContent.innerHTML = `
-      <div class="modal-faq-content">
-        <div class="line-box modal-category">${item.category}</div>
-        <h2 class="line-box modal-title">${item.question}</h2>
-        <div class="line-box modal-meta">
-          <div class="modal-update">🕒 ${item.lastUpdated}</div>
-          ${item.isNew ? '<div class="modal-status">🆕 BARU</div>' : ''}
-        </div>
-        <div class="line-box modal-description">
-          ${item.fullDescription.replace(/\n/g, '<br>')}
-        </div>
-        <div class="line-box modal-timeline">
-          <div class="timeline-item">
-            <div class="timeline-title">Informasi Penting</div>
-            <div class="timeline-content">Informasi detail tentang ${item.topic} yang perlu diperhatikan.</div>
-          </div>
-          <div class="timeline-item">
-            <div class="timeline-title">Tips Penggunaan</div>
-            <div class="timeline-content">Beberapa tips untuk memaksimalkan penggunaan fitur ini.</div>
-          </div>
-          <div class="timeline-item">
-            <div class="timeline-title">Best Practices</div>
-            <div class="timeline-content">Rekomendasi praktik terbaik untuk implementasi yang optimal.</div>
-          </div>
-        </div>
-      </div>
-    `;
-
-    modal.style.display = "block";
-  }
-
-  function closeFAQModal() {
-    document.getElementById("faqModal").style.display = "none";
-  }
-</script>
-
-<style>
-/* ===== Line Box Global ===== */
-.line-box {
-  border: 2px solid rgba(0,0,0,0.5);
-  border-radius: 12px;
-  padding: 20px 25px;
-  margin-bottom: 30px;
-  background: #fff;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-}
-
 /* ===== Modal ===== */
 .modal {
   display: none;
@@ -1028,8 +918,6 @@ const faqData = [
 .timeline-item { margin-bottom: 25px; }
 .timeline-title { font-size: 1.4rem; font-weight: 700; margin-bottom: 10px; }
 .timeline-content { font-size: 1.1rem; line-height: 1.6; color: #374151; }
-</style>
-
 
 
   /* Responsive design */
@@ -1493,6 +1381,7 @@ const faqData = [
     document.getElementById("faqModal").style.display = "none";
   }
 </script>
+
 
 
 
