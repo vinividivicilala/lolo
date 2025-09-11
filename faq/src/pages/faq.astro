@@ -764,7 +764,7 @@ const faqData = [
     background-color: #fff;
     margin: 2% auto;
     padding: 0;
-    border: 3px solid #3b82f6; /* Garis sekeliling modal - DIPERBESAR dan DIPERTEBAL */
+    border: 3px solid #000; /* Garis sekeliling modal - DIPERBESAR dan DIPERTEBAL */
     width: 92%;
     max-width: 1000px; /* Diperbesar */
     border-radius: 12px;
@@ -792,7 +792,7 @@ const faqData = [
     display: flex;
     align-items: center;
     justify-content: center;
-    border: 2px solid #3b82f6; /* Garis sekeliling tombol close */
+    border: 2px solid #000; /* Garis sekeliling tombol close */
   }
   .close:hover,
   .close:focus {
@@ -803,6 +803,7 @@ const faqData = [
   /* Styling untuk konten modal - DIPERBESAR */
   .modal-faq-content {
     padding: 60px;
+border: 2px solid #000;  /* garis hitam jelas */
   }
   .modal-header {
     padding-bottom: 30px;
@@ -820,7 +821,7 @@ const faqData = [
     text-transform: uppercase;
     letter-spacing: 0.5px;
     margin-bottom: 25px;
-    border: 3px solid #3b82f6; /* Garis sekeliling kategori - DIPERTEBAL */
+    border: 3px solid #000; /* Garis sekeliling kategori - DIPERTEBAL */
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   }
   .modal-title {
@@ -831,7 +832,7 @@ const faqData = [
     line-height: 1.3;
     position: relative;
     padding: 20px;
-    border: 3px solid #3b82f6; /* Garis sekeliling judul - DIPERTEBAL */
+    border: 3px solid #000; /* Garis sekeliling judul - DIPERTEBAL */
     border-radius: 8px;
     background: #fff;
     box-shadow: 0 5px 15px rgba(59, 130, 246, 0.1);
@@ -843,7 +844,7 @@ const faqData = [
     color: #64748b;
     font-size: 1.1rem;
     padding: 15px;
-    border: 3px solid #3b82f6; /* Garis sekeliling meta - DIPERTEBAL */
+    border: 3px solid #000; /* Garis sekeliling meta - DIPERTEBAL */
     border-radius: 6px;
     background: #f8fafc;
     box-shadow: 0 4px 8px rgba(59, 130, 246, 0.1);
@@ -863,7 +864,7 @@ const faqData = [
     border-radius: 6px;
     font-size: 1rem;
     font-weight: 700;
-    border: 3px solid #0da271; /* Garis sekeliling status - DIPERTEBAL */
+    border: 3px solid #000; /* Garis sekeliling status - DIPERTEBAL */
     box-shadow: 0 4px 8px rgba(16, 185, 129, 0.2);
   }
   .modal-body {
@@ -876,7 +877,7 @@ const faqData = [
     margin-bottom: 40px;
     position: relative;
     padding: 25px;
-    border: 3px solid #3b82f6; /* Garis sekeliling deskripsi - DIPERTEBAL */
+    border: 3px solid #000; /* Garis sekeliling deskripsi - DIPERTEBAL */
     border-radius: 8px;
     background: #f8fafc;
     box-shadow: 0 5px 15px rgba(59, 130, 246, 0.1);
@@ -885,7 +886,7 @@ const faqData = [
     position: relative;
     padding-left: 50px;
     margin: 35px 0;
-    border: 3px solid #3b82f6; /* Garis sekeliling timeline - DIPERTEBAL */
+    border: 3px solid #000; /* Garis sekeliling timeline - DIPERTEBAL */
     border-radius: 8px;
     padding: 30px;
     background: #f8fafc;
@@ -910,7 +911,7 @@ const faqData = [
     margin-bottom: 30px;
     position: relative;
     padding: 15px;
-    border: 3px solid #3b82f6; /* Garis sekeliling item timeline - DIPERTEBAL */
+    border: 3px solid #000; /* Garis sekeliling item timeline - DIPERTEBAL */
     border-radius: 6px;
     background: white;
     box-shadow: 0 4px 8px rgba(59, 130, 246, 0.1);
@@ -933,7 +934,7 @@ const faqData = [
     margin-bottom: 12px;
     color: #000;
     font-size: 1.4rem; /* Diperbesar */
-    border-bottom: 3px solid #3b82f6; /* Garis bawah judul timeline - DIPERTEBAL */
+    border-bottom: 3px solid #000; /* Garis bawah judul timeline - DIPERTEBAL */
     padding-bottom: 8px;
   }
   .timeline-content {
@@ -1017,6 +1018,7 @@ const faqData = [
     }
     .modal-faq-content {
       padding: 40px;
+border: 2px solid #000;  /* garis hitam jelas */
     }
     .modal-title {
       font-size: 2.2rem;
@@ -1078,6 +1080,7 @@ const faqData = [
     }
     .modal-faq-content {
       padding: 25px;
+border: 2px solid #000;  /* garis hitam jelas */
     }
     .modal-title {
       font-size: 1.6rem;
@@ -1333,5 +1336,6 @@ function openFAQModal(id) {
   modal.style.display = "block";
 }
 </script>
+
 
 
