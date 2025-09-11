@@ -1490,7 +1490,7 @@ const faqData = [
     }
   });
 
-  // Fungsi untuk membuka modal FAQ
+  // Fungsi untuk membuka modal FAQ dengan garis pembatas
   function openFAQModal(id) {
     const faq = faqData.find(item => item.id === id);
     if (!faq) return;
@@ -1518,18 +1518,18 @@ const faqData = [
           
           <div class="modal-timeline">
             <div class="timeline-item">
-              <div class="timeline-title">Keuntungan Menggunakan Astro</div>
-              <div class="timeline-content">Astro menawarkan performa luar biasa dengan mengirimkan HTML statis yang minimal ke client.</div>
+              <div class="timeline-title">Informasi Penting</div>
+              <div class="timeline-content">Informasi detail tentang ${faq.topic} yang perlu diperhatikan.</div>
             </div>
             
             <div class="timeline-item">
-              <div class="timeline-title">Kompatibilitas Framework</div>
-              <div class="timeline-content">Dukung multiple framework UI dalam satu proyek tanpa konflik.</div>
+              <div class="timeline-title">Tips Penggunaan</div>
+              <div class="timeline-content">Beberapa tips untuk memaksimalkan penggunaan fitur ini.</div>
             </div>
             
             <div class="timeline-item">
-              <div class="timeline-title">Optimasi Built-in</div>
-              <div class="timeline-content">Astro secara otomatis mengoptimalkan gambar, CSS, dan JavaScript untuk performa terbaik.</div>
+              <div class="timeline-title">Best Practices</div>
+              <div class="timeline-content">Rekomendasi praktik terbaik untuk implementasi yang optimal.</div>
             </div>
           </div>
         </div>
@@ -1539,5 +1539,6 @@ const faqData = [
     modal.style.display = "block";
   }
 </script>
+
 
 
