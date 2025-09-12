@@ -646,27 +646,31 @@ const faqData = [
     color: #cbd5e1;
   }
 
-  .cta-button-large {
-    display: inline-block;
-    background: #3b82f6;
-    color: white;
-    padding: 16px 40px;
-    border-radius: 2px;
-    text-decoration: none;
-    font-weight: 700;
-    font-size: 1.1rem;
-    transition: all 0.3s ease;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    border: none;
-    cursor: pointer;
-  }
+ /* Tombol CONTACT US NOW - Linebox Hitam Pudar */
+.cta-button-large {
+  display: inline-block;
+  background: #3b82f6;
+  color: white;
+  padding: 16px 40px;
+  border-radius: 2px;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 1.1rem;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  border: none;
+  cursor: pointer;
+  /* Linebox hitam pudar */
+  border: 1px solid rgba(0, 0, 0, 0.3);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
 
-  .cta-button-large:hover {
-    background: #2563eb;
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(37, 99, 235, 0.3);
-  }
+.cta-button-large:hover {
+  background: #2563eb;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(37, 99, 235, 0.3);
+}
 
  
 
@@ -1595,6 +1599,7 @@ function openFAQModal(id) {
   modal.style.display = "block";
 }
 </script>
+
 
 
 
