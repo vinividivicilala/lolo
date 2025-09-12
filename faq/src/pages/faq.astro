@@ -1502,62 +1502,65 @@ const faqData = [
       }
     }
   });
-  function openFAQModal(id) {
+function openFAQModal(id) {
   const faq = faqData.find(item => item.id === id);
   if (!faq) return;
-  
+
   const modal = document.getElementById("faqModal");
   const modalContent = document.getElementById("modalContent");
-  
+
   modalContent.innerHTML = `
     <div class="modal-faq-content">
 
-      <!-- Line box untuk kategori + judul -->
       <div class="line-box">
         <span class="modal-category">${faq.category}</span>
         <h2 class="modal-title">${faq.question}</h2>
       </div>
 
-      <!-- Line box untuk meta info -->
       <div class="line-box">
         <div class="modal-meta">
-          <div class="modal-update">🕒 ${faq.lastUpdated}</div>
+          <span class="modal-update">🕒 ${faq.lastUpdated}</span>
           ${faq.isNew ? '<div class="modal-status">🆕 BARU</div>' : ''}
         </div>
       </div>
 
-      <!-- Line box untuk deskripsi -->
       <div class="line-box">
         <div class="modal-description">
           ${faq.fullDescription.replace(/\n/g, '<br>')}
         </div>
       </div>
 
-      <!-- Line box untuk timeline -->
       <div class="line-box">
         <div class="modal-timeline">
           <div class="timeline-item">
             <div class="timeline-title">Informasi Penting</div>
-            <div class="timeline-content">Informasi detail tentang ${faq.topic} yang perlu diperhatikan.</div>
+            <div class="timeline-content">
+              Informasi detail tentang ${faq.topic} yang perlu diperhatikan.
+            </div>
           </div>
           <div class="timeline-item">
             <div class="timeline-title">Tips Penggunaan</div>
-            <div class="timeline-content">Beberapa tips untuk memaksimalkan penggunaan fitur ini.</div>
+            <div class="timeline-content">
+              Beberapa tips untuk memaksimalkan penggunaan fitur ini.
+            </div>
           </div>
           <div class="timeline-item">
             <div class="timeline-title">Best Practices</div>
-            <div class="timeline-content">Rekomendasi praktik terbaik untuk implementasi yang optimal.</div>
+            <div class="timeline-content">
+              Rekomendasi praktik terbaik untuk implementasi yang optimal.
+            </div>
           </div>
         </div>
       </div>
 
     </div>
   `;
-  
+
   modal.style.display = "block";
 }
 
 </script>
+
 
 
 
