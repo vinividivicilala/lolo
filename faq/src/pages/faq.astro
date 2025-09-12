@@ -867,11 +867,11 @@ const faqData = [
   background-color: rgba(0, 0, 0, 0.6);
 }
 
+/* ================= MODAL ================== */
 .modal-content {
   background-color: #fff;
   margin: 2% auto;
   padding: 0;
-  border: 3px solid rgba(0,0,0,0.3); /* Garis hitam pudar sekeliling modal */
   width: 92%;
   max-width: 1000px;
   border-radius: 12px;
@@ -880,6 +880,15 @@ const faqData = [
   max-height: 90vh;
   overflow-y: auto;
 }
+
+/* Konten modal lebih rapi */
+.modal-faq-content {
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+}
+
 
 .large-modal {
   max-width: 1100px;
@@ -928,56 +937,70 @@ const faqData = [
     box-shadow: 0 5px 15px rgba(59, 130, 246, 0.1); /* Shadow untuk efek kedalaman */
   }
 
- /* Highlight kategori */
+/* Kategori (highlight) */
 .modal-category {
-  display: inline-block;
-  background: #000;
-  color: #fff;
-  padding: 12px 22px;
-  border-radius: 6px;
-  font-size: 1.2rem;
+  font-size: 1.4rem;
   font-weight: 700;
   text-transform: uppercase;
-  margin-bottom: 25px;
-  border: 2px solid rgba(0,0,0,0.3);
+  padding: 15px 20px;
+  border: 2px solid rgba(0,0,0,0.3);   /* line box */
+  border-radius: 8px;
+  background: #000;
+  color: #fff;
 }
- 
+
 /* Judul */
 .modal-title {
-  font-size: 2.5rem;
+  font-size: 2.3rem;
   font-weight: 700;
-  color: #000;
-  margin: 0 0 25px 0;
-  line-height: 1.3;
+  line-height: 1.4;
   padding: 20px;
-  border: 3px solid rgba(0,0,0,0.3);
+  border: 2px solid rgba(0,0,0,0.3);   /* line box */
+  border-radius: 8px;
+  background: #f9fafb;
+  color: #000;
+}
+
+
+/* Tanggal + label baru */
+.modal-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  align-items: center;
+  font-size: 1.1rem;
+  font-weight: 700;
+  padding: 15px;
+  border: 2px solid rgba(0,0,0,0.3);   /* line box */
   border-radius: 8px;
   background: #fff;
 }
 
-/* Label Baru & Meta Info */
-.modal-meta {
-  display: flex;
-  align-items: center;
-  gap: 20px;
+.modal-status {
+  padding: 8px 18px;
+  border-radius: 6px;
+  font-weight: 700;
+  font-size: 1rem;
+  border: 2px solid rgba(0,0,0,0.3);
+  color: #fff;
+}
+.modal-status.blue { background: #3b82f6; }
+.modal-status.green { background: #10b981; }
+.modal-status.purple { background: #8b5cf6; }
+.modal-status.orange { background: #f97316; }
+.modal-status.red { background: #ef4444; }
+
+/* Deskripsi */
+.modal-description {
   font-size: 1.2rem;
   font-weight: 700;
-  padding: 15px;
-  border: 2px solid rgba(0,0,0,0.3);
-  border-radius: 6px;
-  background: #f8fafc;
-  margin-bottom: 30px;
+  line-height: 1.7;
+  padding: 25px;
+  border: 2px solid rgba(0,0,0,0.3);   /* line box */
+  border-radius: 8px;
+  background: #fff;
+  color: #111;
 }
-
-.modal-status {
-  background: #ef4444;
-  color: white;
-  padding: 8px 16px;
-  border-radius: 6px;
-  font-weight: 700;
-  border: 2px solid rgba(0,0,0,0.3);
-}
-
 
 
 
@@ -992,18 +1015,6 @@ const faqData = [
     padding: 30px 0;
   }
 
-/* Deskripsi */
-.modal-description {
-  font-size: 1.3rem;
-  line-height: 1.8;
-  font-weight: 700;
-  color: #111;
-  margin-bottom: 40px;
-  padding: 25px;
-  border: 3px solid rgba(0,0,0,0.3);
-  border-radius: 8px;
-  background: #fff;
-}
 
   .modal-timeline {
     position: relative;
@@ -1500,22 +1511,24 @@ function openFAQModal(id) {
   const modal = document.getElementById("faqModal");
   const modalContent = document.getElementById("modalContent");
 
-  modalContent.innerHTML = `
-    <div class="modal-faq-content">
-      <span class="modal-category">${faq.category}</span>
-      <h2 class="modal-title">${faq.question}</h2>
-      <div class="modal-meta">
-        <div>🕒 ${faq.lastUpdated}</div>
-        ${faq.isNew ? '<div class="modal-status">🆕 BARU</div>' : ''}
-      </div>
-      <div class="modal-description">
-        ${faq.fullDescription.replace(/\n/g, '<br>')}
-      </div>
+modalContent.innerHTML = `
+  <div class="modal-faq-content">
+    <div class="modal-category">${faq.category}</div>
+    <div class="modal-title">${faq.question}</div>
+    <div class="modal-meta">
+      <div>🕒 ${faq.lastUpdated}</div>
+      ${faq.isNew ? `<div class="modal-status ${faq.labelColor}">🆕 BARU</div>` : ''}
     </div>
-  `;
+    <div class="modal-description">
+      ${faq.fullDescription.replace(/\n/g, '<br>')}
+    </div>
+  </div>
+`;
+
   modal.style.display = "block";
 }
 </script>
+
 
 
 
