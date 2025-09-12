@@ -764,7 +764,7 @@ const faqData = [
     background-color: #fff;
     margin: 2% auto;
     padding: 0;
-    border: 3px solid rgba(0, 0, 0, 0.1); /* Garis sekeliling modal - DIPERBESAR dan DIPERTEBAL, warna hitam pudar */
+    border: 3px solid rgba(0, 0, 0, 0.1); /* Garis sekeliling modal utama - warna hitam pudar */
     width: 92%;
     max-width: 1000px; /* Diperbesar */
     border-radius: 12px;
@@ -803,13 +803,16 @@ const faqData = [
   /* Styling untuk konten modal - DIPERBESAR */
   .modal-faq-content {
     padding: 60px;
+    /* LINE BOX UTAMA: Garis besar yang menutupi seluruh area isi modal FAQ */
+    border: 4px solid rgba(0, 0, 0, 0.1); /* Garis tebal warna hitam pudar yang membungkus SEMUA konten */
+    border-radius: 16px;
+    background: #fff;
   }
   .modal-header {
-    border: 3px solid rgba(0, 0, 0, 0.1); /* Garis sekeliling header - HITAM PUDAR */
+    /* HAPUS border individu, biarkan hanya border dari .modal-faq-content yang bekerja */
     padding: 35px;
     margin-bottom: 40px;
     position: relative;
-    border-radius: 12px;
     background: #f8fafc;
     box-shadow: 0 5px 15px rgba(59, 130, 246, 0.1); /* Shadow untuk efek kedalaman */
   }
@@ -824,7 +827,7 @@ const faqData = [
     text-transform: uppercase;
     letter-spacing: 0.5px;
     margin-bottom: 30px;
-    border: 2px solid rgba(0, 0, 0, 0.1); /* Garis sekeliling kategori - HITAM PUDAR */
+    /* HAPUS border individu */
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   }
   .modal-title {
@@ -835,8 +838,7 @@ const faqData = [
     line-height: 1.3;
     position: relative;
     padding: 30px;
-    border: 3px solid rgba(0, 0, 0, 0.1); /* Garis sekeliling judul - HITAM PUDAR */
-    border-radius: 10px;
+    /* HAPUS border individu */
     background: #fff;
     box-shadow: 0 5px 15px rgba(59, 130, 246, 0.1);
   }
@@ -847,8 +849,7 @@ const faqData = [
     color: #64748b;
     font-size: 1.3rem;
     padding: 20px;
-    border: 3px solid rgba(0, 0, 0, 0.1); /* Garis sekeliling meta - HITAM PUDAR */
-    border-radius: 8px;
+    /* HAPUS border individu */
     background: #f8fafc;
     box-shadow: 0 4px 8px rgba(59, 130, 246, 0.1);
   }
@@ -867,7 +868,7 @@ const faqData = [
     border-radius: 8px;
     font-size: 1.2rem;
     font-weight: 700;
-    border: 2px solid rgba(0, 0, 0, 0.1); /* Garis sekeliling status - HITAM PUDAR */
+    /* HAPUS border individu */
     box-shadow: 0 4px 8px rgba(16, 185, 129, 0.2);
   }
   .modal-body {
@@ -880,8 +881,7 @@ const faqData = [
     margin-bottom: 50px;
     position: relative;
     padding: 35px;
-    border: 3px solid rgba(0, 0, 0, 0.1); /* Garis sekeliling deskripsi - HITAM PUDAR */
-    border-radius: 10px;
+    /* HAPUS border individu */
     background: #f8fafc;
     box-shadow: 0 5px 15px rgba(59, 130, 246, 0.1);
   }
@@ -889,8 +889,7 @@ const faqData = [
     position: relative;
     padding-left: 60px;
     margin: 45px 0;
-    border: 3px solid rgba(0, 0, 0, 0.1); /* Garis sekeliling timeline - HITAM PUDAR */
-    border-radius: 10px;
+    /* HAPUS border individu */
     padding: 40px;
     background: #f8fafc;
     box-shadow: 0 5px 15px rgba(59, 130, 246, 0.1);
@@ -914,8 +913,7 @@ const faqData = [
     margin-bottom: 40px;
     position: relative;
     padding: 20px;
-    border: 2px solid rgba(0, 0, 0, 0.1); /* Garis sekeliling item timeline - HITAM PUDAR */
-    border-radius: 8px;
+    /* HAPUS border individu */
     background: white;
     box-shadow: 0 4px 8px rgba(59, 130, 246, 0.1);
   }
@@ -937,7 +935,7 @@ const faqData = [
     margin-bottom: 15px;
     color: #000;
     font-size: 1.6rem; /* Diperbesar */
-    border-bottom: 3px solid rgba(0, 0, 0, 0.1); /* Garis bawah judul timeline - HITAM PUDAR */
+    /* HAPUS border-bottom individu */
     padding-bottom: 12px;
   }
   .timeline-content {
@@ -1294,7 +1292,7 @@ const faqData = [
       }
     }
   });
- // Fungsi untuk membuka modal FAQ dengan garis pembatas yang lebih tebal
+  // Fungsi untuk membuka modal FAQ dengan garis pembatas yang lebih tebal
   function openFAQModal(id) {
     const faq = faqData.find(item => item.id === id);
     if (!faq) return;
@@ -1337,4 +1335,3 @@ const faqData = [
     modal.style.display = "block";
   }
 </script>
-
