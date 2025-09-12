@@ -797,15 +797,28 @@ const faqData = [
     font-size: 0.9rem;
   }
 
-  /* --- FIXED LINEBOX --- */
-  .modal-box {
-    border: 2px solid #000 !important; /* paksa muncul */
-    border-radius: 8px;
-    padding: 16px 20px;
-    margin-bottom: 18px;
-    background: #fff;
-    box-shadow: 2px 2px 0 #000;
-  }
+/* --- FIXED LINEBOX --- */
+.modal-box {
+  position: relative;
+  padding: 16px 20px;
+  margin-bottom: 18px;
+  background: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+}
+
+.modal-box::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border: 1px solid rgba(0, 0, 0, 0.3);
+  border-radius: 8px;
+  pointer-events: none;
+  z-index: -1;
+}
 
   /* Modal Styles - Line Box Hitam Pudar */
   .modal {
@@ -1429,4 +1442,5 @@ const faqData = [
   modal.style.display = "block";
 }
 </script>
+
 
