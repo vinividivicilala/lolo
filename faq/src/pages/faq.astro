@@ -1294,12 +1294,13 @@ const faqData = [
       }
     }
   });
-  // Fungsi untuk membuka modal FAQ dengan garis pembatas yang lebih tebal
+ // Fungsi untuk membuka modal FAQ dengan garis pembatas yang lebih tebal
   function openFAQModal(id) {
     const faq = faqData.find(item => item.id === id);
     if (!faq) return;
     const modal = document.getElementById("faqModal");
     const modalContent = document.getElementById("modalContent");
+    // PERBAIKAN: Mengganti regex yang salah `/ /g` menjadi `/\n/g`
     modalContent.innerHTML = `
       <div class="modal-faq-content">
         <div class="modal-header">
@@ -1314,8 +1315,7 @@ const faqData = [
         </div>
         <div class="modal-body">
           <div class="modal-description">
-            ${faq.fullDescription.replace(/
-/g, '<br>')}
+            ${faq.fullDescription.replace(/\n/g, '<br>')}
           </div>
           <div class="modal-timeline">
             <div class="timeline-item">
@@ -1337,3 +1337,4 @@ const faqData = [
     modal.style.display = "block";
   }
 </script>
+
