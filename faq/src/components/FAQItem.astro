@@ -1,79 +1,40 @@
 ---
-const { question, answer, label, date } = Astro.props;
+const { icon, question, index, answer } = Astro.props;
 ---
 
-<div class="faq-item-modal">
-  <!-- Judul -->
-  <div class="faq-box faq-title-box">
-    <h2>{question}</h2>
+<div class="faq-item" data-framer>
+  <!-- Highlight / nomor + icon -->
+  <div class="faq-highlight">
+    <div class="faq-number">{index}</div>
+    <div class="faq-icon">{icon || "❓"}</div>
   </div>
 
-  <!-- Tanggal -->
-  {date && (
-    <div class="faq-box faq-date-box">
-      <span class="faq-date">🕒 {date}</span>
-    </div>
-  )}
+  <!-- Judul -->
+  <div class="faq-title-box">
+    <h2>
+      <button class="faq-toggle" aria-expanded="false">
+        <svg class="arrow-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+      {question}
+    </h2>
+  </div>
 
-  <!-- Label -->
-  {label && (
-    <div class="faq-box faq-label-box">
-      <span class="faq-label">{label}</span>
-    </div>
-  )}
+  <!-- Blok warna baru (contoh label "BARU") -->
+  <div class="faq-label-box">
+    <span class="faq-label">BARU</span>
+  </div>
 
-  <!-- Deskripsi -->
-  <div class="faq-box faq-description-box">
-    <p>{answer}</p>
+  <!-- Tanggal dan jam -->
+  <div class="faq-date-box">
+    <span class="faq-date">📅 3 November 2023, 17:30 WIB</span>
+  </div>
+
+  <!-- Deskripsi / Jawaban -->
+  <div class="faq-answer-box">
+    <div class="faq-answer">
+      {answer && <Fragment set:html={answer} />}
+    </div>
   </div>
 </div>
-
-<style>
-.faq-item-modal {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  padding: 20px;
-  font-family: "Space Mono", monospace;
-}
-
-.faq-box {
-  border: 2px solid #000;   /* ✅ kotak garis hitam */
-  border-radius: 6px;
-  padding: 14px 16px;
-  background: #fff;
-  box-shadow: 2px 2px 0 #000; /* efek 3D retro */
-}
-
-/* Judul */
-.faq-title-box h2 {
-  margin: 0;
-  font-size: 20px;
-  font-weight: 700;
-  text-transform: uppercase;
-}
-
-/* Tanggal */
-.faq-date {
-  font-size: 14px;
-  color: #333;
-}
-
-/* Label */
-.faq-label {
-  font-size: 14px;
-  font-weight: bold;
-  color: #fff;
-  background: #d32f2f;
-  padding: 4px 8px;
-  border-radius: 4px;
-}
-
-/* Deskripsi */
-.faq-description-box p {
-  margin: 0;
-  font-size: 15px;
-  line-height: 1.6;
-  color: #222;
-}
-</style>
