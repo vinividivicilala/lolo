@@ -291,51 +291,50 @@ const faqData = [
   </div>
 </div>
 
+
+
+
 <!-- Kontak Media Sosial -->
 <div class="social-contact-section">
   <div class="social-contact-container">
     <div class="social-contact-header">
-      <h2 class="social-contact-title">
-        <span class="title-text">KONTAK MEDIA</span>
-        <svg xmlns="http://www.w3.org/2000/svg" class="title-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M5 12h14M12 5l7 7-7 7"/>
-        </svg>
-      </h2>
-      <div class="title-line"></div>
-    </div>
-    <div class="social-contact-content">
-      <div class="social-icons">
-        <a href="#" class="social-icon">
+      <!-- Judul Contact kiri -->
+      <h2 class="social-contact-title">CONTACT</h2>
+
+      <!-- Ikon + Nama medsos kanan -->
+      <div class="social-icons-row">
+        <a href="#" class="social-icon-row">
           <img src="https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/facebook.svg" alt="Facebook" class="icon-img"/>
           <span class="social-name">Facebook</span>
+          <svg xmlns="http://www.w3.org/2000/svg" class="arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M5 12h14M12 5l7 7-7 7"/>
+          </svg>
         </a>
-        <a href="#" class="social-icon">
+        <a href="#" class="social-icon-row">
           <img src="https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/instagram.svg" alt="Instagram" class="icon-img"/>
           <span class="social-name">Instagram</span>
+          <svg xmlns="http://www.w3.org/2000/svg" class="arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M5 12h14M12 5l7 7-7 7"/>
+          </svg>
         </a>
-        <a href="#" class="social-icon">
+        <a href="#" class="social-icon-row">
           <img src="https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/x.svg" alt="Twitter" class="icon-img"/>
           <span class="social-name">Twitter</span>
+          <svg xmlns="http://www.w3.org/2000/svg" class="arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M5 12h14M12 5l7 7-7 7"/>
+          </svg>
         </a>
-        <a href="#" class="social-icon">
+        <a href="#" class="social-icon-row">
           <img src="https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/linkedin.svg" alt="LinkedIn" class="icon-img"/>
           <span class="social-name">LinkedIn</span>
-        </a>
-        <a href="#" class="social-icon">
-          <img src="https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/youtube.svg" alt="YouTube" class="icon-img"/>
-          <span class="social-name">YouTube</span>
-        </a>
-        <a href="#" class="social-icon">
-          <img src="https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/github.svg" alt="GitHub" class="icon-img"/>
-          <span class="social-name">GitHub</span>
+          <svg xmlns="http://www.w3.org/2000/svg" class="arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M5 12h14M12 5l7 7-7 7"/>
+          </svg>
         </a>
       </div>
     </div>
   </div>
 </div>
-
-
-
 
 
 
@@ -661,88 +660,7 @@ const faqData = [
     box-shadow: 0 5px 15px rgba(37, 99, 235, 0.3);
   }
 
-  /* Social Contact */
-  .social-contact-section {
-    padding: 60px 20px;
-    background: #f8fafc;
-  }
-
-  .social-contact-container {
-    max-width: 1000px;
-    margin: 0 auto;
-  }
-
-  .social-contact-header {
-    text-align: center;
-    margin-bottom: 50px;
-  }
-
-  .social-contact-title {
-    font-size: 2.5rem;
-    font-weight: 700;
-    color: #000;
-    display: inline-flex;
-    align-items: center;
-    gap: 15px;
-    margin-bottom: 20px;
-    padding: 15px 30px;
-    border: 2px solid rgba(0, 0, 0, 0.1);
-    border-radius: 8px;
-    background: #fff;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-    animation: pulse 2s infinite;
-  }
-
-  @keyframes pulse {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.05); }
-    100% { transform: scale(1); }
-  }
-
-  .title-icon {
-    font-size: 2rem;
-  }
-
-  .social-contact-content {
-    display: flex;
-    justify-content: center;
-  }
-
-  .social-icons {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 25px;
-  }
-
-  .social-icon {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 25px;
-    background: #fff;
-    border-radius: 12px;
-    text-decoration: none;
-    color: #334155;
-    transition: all 0.3s ease;
-    border: 1px solid rgba(0, 0, 0, 0.1);
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-  }
-
-  .social-icon:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-    border-color: #3b82f6;
-  }
-
-  .icon {
-    font-size: 2.5rem;
-    margin-bottom: 15px;
-  }
-
-  .social-name {
-    font-size: 1.1rem;
-    font-weight: 700;
-  }
+ 
 
   /* Footer */
   .footer-section {
@@ -820,33 +738,71 @@ const faqData = [
   }
 
 
-.social-contact-title {
-  display: inline-flex;
+.social-contact-section {
+  padding: 40px 20px;
+  background: #f8fafc;
+}
+
+.social-contact-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.social-contact-header {
+  display: flex;
+  justify-content: space-between;
   align-items: center;
-  gap: 12px;
-  padding: 15px 25px;
-  border: 2px solid #000; /* line box */
-  border-radius: 8px;
+}
+
+.social-contact-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #000;
+  padding: 12px 20px;
+  border: 1px solid rgba(0,0,0,0.3); /* line box hitam pudar */
+  border-radius: 6px;
   background: #fff;
 }
 
-.title-icon {
-  width: 28px;
-  height: 28px;
+.social-icons-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.social-icon-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: #000;
+  font-weight: 600;
+  padding: 8px 12px;
+  border: 1px solid rgba(0,0,0,0.15);
+  border-radius: 6px;
+  background: #fff;
+  transition: all 0.3s ease;
+}
+
+.social-icon-row:hover {
+  border-color: #3b82f6;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
 }
 
 .icon-img {
-  width: 40px;
-  height: 40px;
-  margin-bottom: 12px;
-  transition: transform 0.3s ease;
+  width: 22px;
+  height: 22px;
 }
 
-.icon-img:hover {
-  transform: scale(1.2);
+.social-name {
+  font-size: 1rem;
 }
 
-
+.arrow-icon {
+  width: 18px;
+  height: 18px;
+  stroke: #000;
+}
 
 
 
@@ -1564,6 +1520,7 @@ function openFAQModal(id) {
   modal.style.display = "block";
 }
 </script>
+
 
 
 
