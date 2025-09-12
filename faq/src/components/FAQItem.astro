@@ -1,176 +1,55 @@
 ---
-const { icon, question, index, answer, label, date } = Astro.props;
+const { question, answer, label, date } = Astro.props;
 ---
 
-<div class="faq-item" data-framer>
-  <div class="faq-content-wrapper">
-    <div class="faq-number">{index}</div>
-    <div class="faq-icon">{icon || "❓"}</div>
-    <div class="faq-content">
-      <!-- Judul -->
-      <div class="faq-box faq-title-box">
-        <h2>
-          <button class="faq-toggle" aria-expanded="false">
-            <svg class="arrow-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"
-              xmlns="http://www.w3.org/2000/svg">
-              <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" stroke-width="2"
-                stroke-linecap="round" stroke-linejoin="round" />
-            </svg>
-          </button>
-          {question}
-        </h2>
-      </div>
+<div class="faq-item-modal">
+  <!-- Judul -->
+  <div class="faq-box faq-title-box">
+    <h2>{question}</h2>
+  </div>
 
-      <!-- Tanggal -->
-      {date && (
-        <div class="faq-box faq-date-box">
-          <span class="faq-date">🕒 {date}</span>
-        </div>
-      )}
-
-      <!-- Label -->
-      {label && (
-        <div class="faq-box faq-label-box">
-          <span class="faq-label">{label}</span>
-        </div>
-      )}
-
-      <!-- Deskripsi -->
-      <div class="faq-box faq-description-box faq-answer">
-        {answer && <Fragment set:html={answer} />}
-      </div>
+  <!-- Tanggal -->
+  {date && (
+    <div class="faq-box faq-date-box">
+      <span class="faq-date">🕒 {date}</span>
     </div>
+  )}
+
+  <!-- Label -->
+  {label && (
+    <div class="faq-box faq-label-box">
+      <span class="faq-label">{label}</span>
+    </div>
+  )}
+
+  <!-- Deskripsi -->
+  <div class="faq-box faq-description-box">
+    <p>{answer}</p>
   </div>
 </div>
 
 <style>
-/* --- STYLE ASLI FAQ --- */
-.faq-item {
+.faq-item-modal {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  margin: 20px 0;
-  position: relative;
-}
-
-.faq-content-wrapper {
-  display: flex;
-  align-items: flex-start;
-  gap: 15px;
+  gap: 18px; /* jarak antar box */
   padding: 20px;
-  border-radius: 10px;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-  background: #000000;
-  position: relative;
-  overflow: hidden;
-  border: 1px solid #333;
-  width: 100%;
+  font-family: "Space Mono", monospace;
 }
 
-.faq-content-wrapper:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 6px 12px rgba(255, 255, 255, 0.1);
-}
-
-.faq-number {
-  background: rgba(255, 255, 255, 0.1);
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: bold;
-  flex-shrink: 0;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: white;
-}
-
-.faq-icon {
-  font-size: 1.8rem;
-  flex-shrink: 0;
-}
-
-.faq-content {
-  flex-grow: 1;
-}
-
-.faq-content h2 {
-  margin: 0 0 10px 0;
-  font-size: 1.3rem;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-family: 'Montserrat', sans-serif;
-  cursor: pointer;
-  color: white;
-}
-
-.faq-toggle {
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: transform 0.3s ease;
-}
-
-.faq-toggle[aria-expanded="true"] {
-  transform: rotate(90deg);
-}
-
-.arrow-icon {
-  width: 20px;
-  height: 20px;
-  flex-shrink: 0;
-  transition: transform 0.3s ease;
-  color: white;
-}
-
-.faq-answer {
-  margin-top: 10px;
-  line-height: 1.6;
-  max-height: 0;
-  overflow: hidden;
-  transition: max-height 0.5s ease, opacity 0.3s ease;
-  opacity: 0;
-}
-
-.faq-item.active .faq-answer {
-  max-height: 500px;
-  opacity: 1;
-}
-
-@media (max-width: 768px) {
-  .faq-content-wrapper {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
-  }
-
-  .faq-content h2 {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 5px;
-  }
-}
-
-/* --- STYLE LINE BOX --- */
+/* Semua box pakai line border */
 .faq-box {
-  border: 2px solid #000;
-  border-radius: 6px;
-  padding: 14px 16px;
+  border: 2px solid #000;       /* garis hitam */
+  border-radius: 8px;           /* sudut agak membulat */
+  padding: 16px 18px;
   background: #fff;
-  box-shadow: 2px 2px 0 #000;
-  margin-bottom: 10px;
+  box-shadow: 3px 3px 0 #000;   /* efek 3D retro */
 }
 
 /* Judul */
 .faq-title-box h2 {
   margin: 0;
-  font-size: 20px;
+  font-size: 22px;
   font-weight: 700;
   text-transform: uppercase;
   color: #111;
@@ -178,7 +57,8 @@ const { icon, question, index, answer, label, date } = Astro.props;
 
 /* Tanggal */
 .faq-date {
-  font-size: 14px;
+  font-size: 15px;
+  font-weight: 500;
   color: #333;
 }
 
@@ -188,43 +68,15 @@ const { icon, question, index, answer, label, date } = Astro.props;
   font-weight: bold;
   color: #fff;
   background: #d32f2f;
-  padding: 4px 8px;
+  padding: 4px 10px;
   border-radius: 4px;
 }
 
 /* Deskripsi */
-.faq-description-box {
-  font-size: 15px;
-  line-height: 1.6;
+.faq-description-box p {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.7;
   color: #222;
 }
 </style>
-
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-  const faqItems = document.querySelectorAll('.faq-item');
-
-  faqItems.forEach(item => {
-    const toggle = item.querySelector('.faq-toggle');
-    const answer = item.querySelector('.faq-answer');
-
-    if (toggle && answer) {
-      toggle.addEventListener('click', function () {
-        const isExpanded = toggle.getAttribute('aria-expanded') === 'true';
-        toggle.setAttribute('aria-expanded', !isExpanded);
-        item.classList.toggle('active');
-      });
-    }
-
-    const heading = item.querySelector('h2');
-    if (heading) {
-      heading.addEventListener('click', function () {
-        const toggle = item.querySelector('.faq-toggle');
-        if (toggle) {
-          toggle.click();
-        }
-      });
-    }
-  });
-});
-</script>
