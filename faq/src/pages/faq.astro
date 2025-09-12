@@ -1343,40 +1343,56 @@ function openFAQModal(id) {
 
   modalContent.innerHTML = `
     <div class="modal-faq-content">
-      <div class="modal-header">
+      <!-- Label kategori -->
+      <div class="modal-box">
         <span class="modal-category">${faq.category}</span>
-        <h2 class="modal-title">${faq.question}</h2>
-        <div class="modal-meta">
-          <div class="modal-update">
-            <span>🕒 ${faq.lastUpdated}</span>
-          </div>
-          ${faq.isNew ? '<div class="modal-status">🆕 BARU</div>' : ''}
-        </div>
       </div>
-      <div class="modal-body">
-        <div class="modal-description">
-          ${faq.fullDescription.replace(/\n/g, '<br>')}
+
+      <!-- Judul -->
+      <div class="modal-box">
+        <h2 class="modal-title">${faq.question}</h2>
+      </div>
+
+      <!-- Meta: tanggal & status -->
+      <div class="modal-box modal-meta">
+        <div class="modal-update">
+          <span>🕒 ${faq.lastUpdated}</span>
         </div>
-        <div class="modal-timeline">
-          <div class="timeline-item">
-            <div class="timeline-title">Informasi Penting</div>
-            <div class="timeline-content">Informasi detail tentang ${faq.topic} yang perlu diperhatikan.</div>
-          </div>
-          <div class="timeline-item">
-            <div class="timeline-title">Tips Penggunaan</div>
-            <div class="timeline-content">Beberapa tips untuk memaksimalkan penggunaan fitur ini.</div>
-          </div>
-          <div class="timeline-item">
-            <div class="timeline-title">Best Practices</div>
-            <div class="timeline-content">Rekomendasi praktik terbaik untuk implementasi yang optimal.</div>
-          </div>
+        ${faq.isNew ? '<div class="modal-status">🆕 BARU</div>' : ''}
+      </div>
+
+      <!-- Highlight / jawaban singkat -->
+      <div class="modal-box modal-highlight">
+        ${faq.answer}
+      </div>
+
+      <!-- Deskripsi -->
+      <div class="modal-box modal-description">
+        ${faq.fullDescription.replace(/\n/g, '<br>')}
+      </div>
+
+      <!-- Timeline -->
+      <div class="modal-box modal-timeline">
+        <div class="timeline-item">
+          <div class="timeline-title">Informasi Penting</div>
+          <div class="timeline-content">Informasi detail tentang ${faq.topic} yang perlu diperhatikan.</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-title">Tips Penggunaan</div>
+          <div class="timeline-content">Beberapa tips untuk memaksimalkan penggunaan fitur ini.</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-title">Best Practices</div>
+          <div class="timeline-content">Rekomendasi praktik terbaik untuk implementasi yang optimal.</div>
         </div>
       </div>
     </div>
   `;
   modal.style.display = "block";
 }
+
 </script>
+
 
 
 
