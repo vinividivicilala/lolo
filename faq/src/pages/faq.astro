@@ -287,7 +287,15 @@ const faqData = [
   </div>
   <!-- Tombol di Tengah -->
   <div class="cta-center">
-    <a href="/contact" class="cta-button-large">CONTACT US NOW</a>
+    <a href="#" class="cta-button-large" id="contactBtn">CONTACT US NOW</a>
+  </div>
+</div>
+
+<!-- Modal Timeline Website -->
+<div id="timelineModal" class="modal">
+  <div class="modal-content large-modal">
+    <span class="close">&times;</span>
+    <div id="timelineContent"></div>
   </div>
 </div>
 
@@ -1374,6 +1382,70 @@ const faqData = [
     }
   ];
 
+// Data timeline website
+const websites = [
+  { name: "Astro Official", url: "https://astro.build", date: "Jan 2023" },
+  { name: "Vercel", url: "https://vercel.com", date: "Feb 2023" },
+  { name: "Netlify", url: "https://netlify.com", date: "Mar 2023" },
+  { name: "Cloudflare Pages", url: "https://pages.cloudflare.com", date: "Apr 2023" },
+  { name: "GitHub", url: "https://github.com", date: "May 2023" }
+];
+
+// Fungsi buka modal timeline
+function openTimelineModal() {
+  const modal = document.getElementById("timelineModal");
+  const content = document.getElementById("timelineContent");
+
+  let html = `
+    <div class="modal-faq-content">
+      <div class="modal-header">
+        <h2 style="font-size: 2.4rem; font-weight: 700; color: #000; margin: 0;">Timeline Website</h2>
+      </div>
+      <div class="modal-timeline">
+  `;
+
+  websites.forEach((site, index) => {
+    html += `
+      <div class="timeline-item">
+        <div class="timeline-title">${site.name}</div>
+        <div class="timeline-content">
+          <a href="${site.url}" target="_blank" style="color: #3b82f6; text-decoration: underline;">${site.url}</a> • ${site.date}
+        </div>
+      </div>
+    `;
+  });
+
+  html += `</div></div>`;
+  content.innerHTML = html;
+  modal.style.display = "block";
+}
+
+// Event listener untuk tombol contact
+document.addEventListener('DOMContentLoaded', function () {
+  const contactBtn = document.getElementById('contactBtn');
+  if (contactBtn) {
+    contactBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      openTimelineModal();
+    });
+  }
+
+  // Tutup modal jika klik X atau luar
+  const closeBtn = document.querySelector('.close');
+  if (closeBtn) {
+    closeBtn.onclick = function() {
+      document.getElementById('timelineModal').style.display = 'none';
+    };
+  }
+
+  window.onclick = function(event) {
+    const modal = document.getElementById('timelineModal');
+    if (event.target === modal) {
+      modal.style.display = 'none';
+    }
+  };
+});
+
   document.addEventListener('DOMContentLoaded', function() {
     const now = new Date();
     const options = { 
@@ -1446,6 +1518,9 @@ const faqData = [
       }
     };
   });
+
+
+
 
 function openFAQModal(id) {
   const faq = faqData.find(item => item.id === id);
@@ -1520,6 +1595,7 @@ function openFAQModal(id) {
   modal.style.display = "block";
 }
 </script>
+
 
 
 
