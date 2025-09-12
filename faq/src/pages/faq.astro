@@ -755,7 +755,14 @@ const faqData = [
 
 
 
-
+.modal-box {
+  border: 2px solid #000;   /* ✅ Line box hitam */
+  border-radius: 6px;
+  padding: 15px 20px;
+  margin-bottom: 18px;
+  background: #fff;
+  box-shadow: 2px 2px 0 #000; /* efek retro */
+}
  /* Modal Styles - Line Box Hitam Pudar */
 .modal {
   display: none;
@@ -1136,6 +1143,8 @@ const faqData = [
 </style>
 
 <script>
+
+
 // Data FAQ untuk modal
   const faqData = [
     {
@@ -1337,55 +1346,64 @@ const faqData = [
     };
   });
 
-  // Fungsi untuk membuka modal FAQ dengan garis pembatas yang lebih tebal
-  function openFAQModal(id) {
-    const faq = faqData.find(item => item.id === id);
-    if (!faq) return;
-    
-    const modal = document.getElementById("faqModal");
-    const modalContent = document.getElementById("modalContent");
-    
-    modalContent.innerHTML = `
-      <div class="modal-faq-content">
-        <div class="modal-header">
-          <span class="modal-category">${faq.category}</span>
-          <h2 class="modal-title">${faq.question}</h2>
-          <div class="modal-meta">
-            <div class="modal-update">
-              <span>🕒 ${faq.lastUpdated}</span>
-            </div>
-            ${faq.isNew ? '<div class="modal-status">🆕 BARU</div>' : ''}
-          </div>
+function openFAQModal(id) {
+  const faq = faqData.find(item => item.id === id);
+  if (!faq) return;
+  
+  const modal = document.getElementById("faqModal");
+  const modalContent = document.getElementById("modalContent");
+  
+  modalContent.innerHTML = `
+    <div class="modal-faq-content">
+      <!-- Kategori -->
+      <div class="modal-box modal-category-box">
+        <span class="modal-category">${faq.category}</span>
+      </div>
+
+      <!-- Judul -->
+      <div class="modal-box modal-title-box">
+        <h2 class="modal-title">${faq.icon} ${faq.question}</h2>
+      </div>
+
+      <!-- Meta: tanggal + status -->
+      <div class="modal-box modal-meta-box">
+        <span>🕒 ${faq.lastUpdated}</span>
+        ${faq.isNew ? '<span class="modal-status">🆕 BARU</span>' : ''}
+      </div>
+
+      <!-- Highlight / jawaban singkat -->
+      <div class="modal-box modal-highlight">
+        ${faq.answer}
+      </div>
+
+      <!-- Deskripsi -->
+      <div class="modal-box modal-description">
+        ${faq.fullDescription.replace(/\n/g, '<br>')}
+      </div>
+
+      <!-- Timeline -->
+      <div class="modal-box modal-timeline">
+        <div class="timeline-item">
+          <div class="timeline-title">Informasi Penting</div>
+          <div class="timeline-content">Informasi detail tentang ${faq.topic} yang perlu diperhatikan.</div>
         </div>
-        
-        <div class="modal-body">
-          <div class="modal-description">
-            ${faq.fullDescription.replace(/\n/g, '<br>')}
-          </div>
-          
-          <div class="modal-timeline">
-            <div class="timeline-item">
-              <div class="timeline-title">Informasi Penting</div>
-              <div class="timeline-content">Informasi detail tentang ${faq.topic} yang perlu diperhatikan.</div>
-            </div>
-            
-            <div class="timeline-item">
-              <div class="timeline-title">Tips Penggunaan</div>
-              <div class="timeline-content">Beberapa tips untuk memaksimalkan penggunaan fitur ini.</div>
-            </div>
-            
-            <div class="timeline-item">
-              <div class="timeline-title">Best Practices</div>
-              <div class="timeline-content">Rekomendasi praktik terbaik untuk implementasi yang optimal.</div>
-            </div>
-          </div>
+        <div class="timeline-item">
+          <div class="timeline-title">Tips Penggunaan</div>
+          <div class="timeline-content">Beberapa tips untuk memaksimalkan penggunaan fitur ini.</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-title">Best Practices</div>
+          <div class="timeline-content">Rekomendasi praktik terbaik untuk implementasi yang optimal.</div>
         </div>
       </div>
-    `;
-    
-    modal.style.display = "block";
-  }
+    </div>
+  `;
+  
+  modal.style.display = "block";
+}
+
 </script>
+
 
 
 
