@@ -1368,43 +1368,47 @@ const faqData = [
   });
 
   function openFAQModal(id) {
-    const faq = faqData.find(item => item.id === id);
-    if (!faq) return;
+  const faq = faqData.find(item => item.id === id);
+  if (!faq) return;
 
-    const modal = document.getElementById("faqModal");
-    const modalContent = document.getElementById("modalContent");
+  const modal = document.getElementById("faqModal");
+  const modalContent = document.getElementById("modalContent");
 
-    modalContent.innerHTML = `
-      <div class="modal-faq-content">
-        <!-- Kategori -->
-        <div class="modal-box modal-category-box">
-          <span class="modal-category">${faq.category}</span>
-        </div>
-        
-        <!-- Judul -->
-        <div class="modal-box modal-title-box">
-          <h2 class="modal-title">${faq.icon} ${faq.question}</h2>
-        </div>
-        
-        <!-- Meta: tanggal + status -->
-        <div class="modal-box modal-meta-box">
+  modalContent.innerHTML = `
+    <div class="modal-faq-content">
+      <!-- Kategori -->
+      <div class="modal-box">
+        <span class="modal-category">${faq.category}</span>
+      </div>
+      
+      <!-- Judul -->
+      <div class="modal-box">
+        <h2 class="modal-title">${faq.icon} ${faq.question}</h2>
+      </div>
+      
+      <!-- Meta: tanggal + status -->
+      <div class="modal-box">
+        <div class="modal-meta">
           <span class="modal-update">🕒 ${faq.lastUpdated}</span>
           ${faq.isNew ? '<span class="modal-status">🆕 BARU</span>' : ''}
         </div>
-        
-        <!-- Highlight / jawaban singkat -->
-        <div class="modal-box modal-highlight">
-          <p class="modal-answer">${faq.answer}</p>
+      </div>
+      
+      <!-- Highlight / jawaban singkat -->
+      <div class="modal-box">
+        <p class="modal-highlight" style="font-size: 1.2rem; font-weight: 700; margin: 0; padding: 10px 0;">${faq.answer}</p>
+      </div>
+      
+      <!-- Deskripsi -->
+      <div class="modal-box">
+        <div class="modal-description">
+          ${faq.fullDescription.replace(/\n/g, '<br>')}
         </div>
-        
-        <!-- Deskripsi -->
-        <div class="modal-box modal-description">
-          ${faq.fullDescription.replace(/
-/g, '<br>')}
-        </div>
-        
-        <!-- Timeline -->
-        <div class="modal-box modal-timeline">
+      </div>
+      
+      <!-- Timeline -->
+      <div class="modal-box">
+        <div class="modal-timeline">
           <div class="timeline-item">
             <div class="timeline-title">Informasi Penting</div>
             <div class="timeline-content">Informasi detail tentang ${faq.topic} yang perlu diperhatikan.</div>
@@ -1419,8 +1423,10 @@ const faqData = [
           </div>
         </div>
       </div>
-    `;
+    </div>
+  `;
 
-    modal.style.display = "block";
-  }
+  modal.style.display = "block";
+}
 </script>
+
