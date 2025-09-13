@@ -286,15 +286,11 @@ const faqData = [
       </p>
     </div>
   </div>
-
-
-<div class="cta-center">
-  <div class="cta-wrapper">
+  <!-- Tombol di Tengah -->
+  <div class="cta-center">
     <a href="#" class="cta-button-large" id="contactBtn">CONTACT US NOW</a>
   </div>
 </div>
-
-
 
 <!-- Modal Timeline Website -->
 <div id="timelineModal" class="modal">
@@ -650,8 +646,32 @@ const faqData = [
     line-height: 1.6;
     color: #cbd5e1;
   }
+.cta-button-large {
+  display: inline-block;
+  background: #3b82f6;
+  color: white;
+  padding: 16px 40px;
+  border-radius: 2px;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 1.1rem;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  cursor: pointer;
+  /* LINEBOX HITAM PUDAR */
+  border: 1px solid rgba(0, 0, 0, 0.3);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
 
+.cta-button-large:hover {
+  background: #2563eb;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(37, 99, 235, 0.3);
+  border-color: rgba(0, 0, 0, 0.5); /* Lebih gelap saat hover */
+}
 
+ 
 
   /* Footer */
   .footer-section {
@@ -855,41 +875,6 @@ const faqData = [
   text-align: center;
   width: 100%;
 }
-
-.cta-wrapper {
-  display: inline-block;
-  padding: 8px;
-  border: 2px solid rgba(0,0,0,0.4);
-  border-radius: 10px;
-  box-shadow: inset 0 0 0 1px rgba(0,0,0,0.3);
-}
-
-
-#contactBtn.cta-button-large {
-  display: inline-block;
-  background: #3b82f6 !important; /* biru */
-  color: #fff !important;
-  padding: 16px 40px !important;
-  border-radius: 6px !important;
-  text-decoration: none !important;
-  font-weight: 700 !important;
-  font-size: 1.1rem !important;
-  text-transform: uppercase !important;
-  letter-spacing: 1px !important;
-
-  /* 🔹 Linebox Hitam Pudar */
-  border: 2px solid rgba(0,0,0,0.4) !important;
-  box-shadow: inset 0 0 0 1px rgba(0,0,0,0.3) !important;
-}
-
-#contactBtn.cta-button-large:hover {
-  background: #2563eb !important;
-  transform: translateY(-2px) !important;
-  box-shadow:
-    inset 0 0 0 1px rgba(0,0,0,0.3) !important,
-    0 5px 15px rgba(37, 99, 235, 0.3) !important;
-}
-
 
 
 
@@ -1613,10 +1598,6 @@ function openFAQModal(id) {
   modal.style.display = "block";
 }
 </script>
-
-
-
-
 
 
 
