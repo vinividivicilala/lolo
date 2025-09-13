@@ -646,30 +646,6 @@ const faqData = [
     line-height: 1.6;
     color: #cbd5e1;
   }
-.cta-button-large {
-  display: inline-block;
-  background: #3b82f6;
-  color: white;
-  padding: 16px 40px;
-  border-radius: 2px;
-  text-decoration: none;
-  font-weight: 700;
-  font-size: 1.1rem;
-  transition: all 0.3s ease;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  cursor: pointer;
-  /* LINEBOX HITAM PUDAR */
-  border: 1px solid rgba(0, 0, 0, 0.3);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.cta-button-large:hover {
-  background: #2563eb;
-  transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(37, 99, 235, 0.3);
-  border-color: rgba(0, 0, 0, 0.5); /* Lebih gelap saat hover */
-}
 
  
 
@@ -874,6 +850,37 @@ const faqData = [
 .cta-center {
   text-align: center;
   width: 100%;
+}
+
+
+/* Tombol Contact dengan Linebox Hitam - FORCE OVERRIDE */
+.cta-button-large {
+  display: inline-block !important;
+  font-family: 'Space Mono', monospace !important;
+  background: #3b82f6 !important;
+  color: white !important;
+  padding: 16px 40px !important;
+  border-radius: 6px !important;
+  text-decoration: none !important;
+  font-weight: 700 !important;
+  font-size: 1.1rem !important;
+  transition: all 0.3s ease !important;
+  text-transform: uppercase !important;
+  letter-spacing: 1px !important;
+  cursor: pointer !important;
+
+  /* LINEBOX HITAM PUDAR - DIPAKSA */
+  border: 2px solid rgba(0, 0, 0, 0.4) !important;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.3) !important;
+}
+
+.cta-button-large:hover {
+  background: #2563eb !important;
+  transform: translateY(-2px) !important;
+  box-shadow:
+    inset 0 0 0 1px rgba(0, 0, 0, 0.3) !important,
+    0 5px 15px rgba(37, 99, 235, 0.3) !important;
+  border-color: rgba(0, 0, 0, 0.6) !important;
 }
 
 
@@ -1598,6 +1605,7 @@ function openFAQModal(id) {
   modal.style.display = "block";
 }
 </script>
+
 
 
 
