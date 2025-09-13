@@ -1,3 +1,4 @@
+
 ---
 // faq.astro
 import Layout from '../layouts/Layout.astro';
@@ -387,7 +388,7 @@ const faqData = [
   @import url('https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap');
   body, .marquee-content-large, .page-title, .update-info, 
   .typography-description, .color-block-extra-large h2, 
-  .color-block-extra-large p, .title-accent {
+  .color-block-extra-large p, .cta-button-large, .title-accent {
     font-family: 'Space Mono', monospace !important;
   }
 
@@ -648,6 +649,34 @@ const faqData = [
 
 
 
+/* Tombol Contact dengan Linebox Hitam */
+.cta-button-large {
+  display: inline-block;
+  font-family: 'Space Mono', monospace !important; /* tetap pakai font */
+  background: #3b82f6; /* biru */
+  color: white;
+  padding: 16px 40px;
+  border-radius: 6px;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 1.1rem;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+
+  border: 2px solid rgba(0, 0, 0, 0.4);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.3);
+}
+
+.cta-button-large:hover {
+  background: #2563eb;
+  transform: translateY(-2px);
+  box-shadow:
+    inset 0 0 0 1px rgba(0, 0, 0, 0.3),
+    0 5px 15px rgba(37, 99, 235, 0.3);
+}
+
+
  
 
   /* Footer */
@@ -848,37 +877,10 @@ const faqData = [
   text-align: left;
 }
 
-
-/* Tombol Contact dengan Linebox Hitam */
-.cta-button-large {
-  display: inline-block;
-  font-family: 'Space Mono', monospace !important; /* tetap pakai font */
-  background: #3b82f6; /* biru */
-  color: white;
-  padding: 16px 40px;
-  border-radius: 6px;
-  text-decoration: none;
-  font-weight: 700;
-  font-size: 1.1rem;
-  transition: all 0.3s ease;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-
-  border: 2px solid rgba(0, 0, 0, 0.4);
-  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.3);
+.cta-center {
+  text-align: center;
+  width: 100%;
 }
-
-.cta-button-large:hover {
-  background: #2563eb;
-  transform: translateY(-2px);
-  box-shadow:
-    inset 0 0 0 1px rgba(0, 0, 0, 0.3),
-    0 5px 15px rgba(37, 99, 235, 0.3);
-}
-
-
-
-
 
 
 
@@ -1602,10 +1604,6 @@ function openFAQModal(id) {
   modal.style.display = "block";
 }
 </script>
-
-
-
-
 
 
 
