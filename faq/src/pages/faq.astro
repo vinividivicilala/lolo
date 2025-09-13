@@ -387,7 +387,7 @@ const faqData = [
   @import url('https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap');
   body, .marquee-content-large, .page-title, .update-info, 
   .typography-description, .color-block-extra-large h2, 
-  .color-block-extra-large p, .cta-button-large, .title-accent {
+  .color-block-extra-large p, .title-accent {
     font-family: 'Space Mono', monospace !important;
   }
 
@@ -848,37 +848,38 @@ const faqData = [
   text-align: left;
 }
 
-.cta-center {
-  text-align: center;
-  width: 100%;
-}
 
-/* Tombol Contact dengan Linebox Hitam */
-.cta-button-large {
+
+.color-block-full .cta-center .cta-button-large {
   display: inline-block;
-  background: #3b82f6; /* biru */
-  color: white;
-  padding: 16px 40px;
-  border-radius: 6px;
-  text-decoration: none;
-  font-weight: 700;
-  font-size: 1.1rem;
-  transition: all 0.3s ease;
-  text-transform: uppercase;
-  letter-spacing: 1px;
+  background: #3b82f6 !important; /* biru */
+  color: white !important;
+  padding: 16px 40px !important;
+  border-radius: 6px !important;
+  text-decoration: none !important;
+  font-weight: 700 !important;
+  font-size: 1.1rem !important;
+  transition: all 0.3s ease !important;
+  text-transform: uppercase !important;
+  letter-spacing: 1px !important;
 
+  /* 🔹 Linebox Hitam Pudar */
   border: 2px solid rgba(0, 0, 0, 0.4) !important;
-box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.3) !important;
-
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.3) !important;
 }
 
-.cta-button-large:hover {
-  background: #2563eb; /* biru lebih gelap */
-  transform: translateY(-2px);
+.color-block-full .cta-center .cta-button-large:hover {
+  background: #2563eb !important;
+  transform: translateY(-2px) !important;
   box-shadow: 
-    inset 0 0 0 1px rgba(0, 0, 0, 0.3),
-    0 5px 15px rgba(37, 99, 235, 0.3);
+    inset 0 0 0 1px rgba(0, 0, 0, 0.3) !important,
+    0 5px 15px rgba(37, 99, 235, 0.3) !important;
 }
+
+
+
+
+
 
 
 
@@ -1602,6 +1603,7 @@ function openFAQModal(id) {
   modal.style.display = "block";
 }
 </script>
+
 
 
 
