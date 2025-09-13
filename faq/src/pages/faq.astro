@@ -823,12 +823,10 @@ const faqData = [
   width: 100%;
 }
 
-
-
 .cta-button-large {
   display: inline-block;
-  background: transparent;
-  color: #fff;
+  background: transparent;                  
+  color: #fff;                              /* teks putih */
   padding: 14px 36px;
   border-radius: 6px;
   text-decoration: none;
@@ -839,19 +837,17 @@ const faqData = [
   letter-spacing: 2px;
   cursor: pointer;
 
-  /* Linebox elegan */
-  border: 2px solid #fff;                  /* border putih tegas */
-  outline: 2px solid rgba(255,255,255,0.3);/* outline pudar */
+  /* LINEBOX PUTIH PUDAR */
+  border: 2px solid rgba(255,255,255,0.6);   /* putih agak pudar */
+  outline: 2px solid rgba(255,255,255,0.2);  /* lapisan luar lebih samar */
   outline-offset: 4px;
 }
 
 .cta-button-large:hover {
-  background: rgba(255,255,255,0.08);      /* abu transparan saat hover */
-  color: #fff;
-  border-color: #fff;
-  outline-color: rgba(255,255,255,0.5);
+  border-color: rgba(255,255,255,0.9);       /* lebih terang saat hover */
+  outline-color: rgba(255,255,255,0.4);
+  background: rgba(255,255,255,0.05);        /* abu tipis transparan */
 }
-
 
 
 
@@ -1587,6 +1583,7 @@ function openFAQModal(id) {
   modal.style.display = "block";
 }
 </script>
+
 
 
 
