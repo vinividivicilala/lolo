@@ -1430,8 +1430,8 @@ function openTimelineModal() {
   modal.style.display = "block";
 }
 
-// Event listener untuk tombol contact
 document.addEventListener('DOMContentLoaded', function () {
+  // ==== CONTACT BUTTON & TIMELINE MODAL ====
   const contactBtn = document.getElementById('contactBtn');
   if (contactBtn) {
     contactBtn.addEventListener('click', function(e) {
@@ -1440,94 +1440,99 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
-  // Tutup modal jika klik X atau luar
-  const closeBtn = document.querySelector('.close');
-  if (closeBtn) {
-    closeBtn.onclick = function() {
-      document.getElementById('timelineModal').style.display = 'none';
+  const timelineModal = document.getElementById('timelineModal');
+  const timelineCloseBtn = document.querySelector('#timelineModal .close');
+  if (timelineCloseBtn) {
+    timelineCloseBtn.onclick = function() {
+      timelineModal.style.display = 'none';
     };
   }
 
+  // ==== TANGGAL & JAM ====
+  const now = new Date();
+  const options = { 
+    weekday: 'long', 
+    year: 'numeric', 
+    month: 'long', 
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  };
+  const dateTimeStr = now.toLocaleDateString('id-ID', options);
+  const currentDateEl = document.getElementById('currentDate');
+  if (currentDateEl) {
+    currentDateEl.textContent = dateTimeStr.toUpperCase();
+  }
+
+  // ==== ANIMASI SCROLL DENGAN INTERSECTION OBSERVER ====
+  const observerOptions = {
+    threshold: 0.1,
+    rootMargin: '0px 0px -50px 0px'
+  };
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('animated');
+      }
+    });
+  }, observerOptions);
+
+  document.querySelectorAll('[data-framer]').forEach(el => {
+    observer.observe(el);
+  });
+
+  // ==== ANIMASI FAQ IMAGE ====
+  const image = document.querySelector('.faq-image');
+  if (image) {
+    image.style.opacity = '0';
+    image.style.transform = 'scale(0.95)';
+    image.style.transition = 'opacity 0.8s ease, transform 0.8s ease';
+    setTimeout(() => {
+      image.style.opacity = '1';
+      image.style.transform = 'scale(1)';
+    }, 300);
+  }
+
+  // ==== ANIMASI TITLE ====
+  const title = document.querySelector('.page-title');
+  if (title) {
+    title.style.opacity = '0';
+    title.style.transform = 'translateY(-15px)';
+    title.style.transition = 'opacity 0.8s ease, transform 0.8s ease';
+    setTimeout(() => {
+      title.style.opacity = '1';
+      title.style.transform = 'translateY(0)';
+    }, 100);
+  }
+
+  // ==== FAQ MODAL ====
+  const faqModal = document.getElementById("faqModal");
+  const faqCloseBtn = faqModal ? faqModal.getElementsByClassName("close")[0] : null;
+
+  document.querySelectorAll('.faq-item-wrapper').forEach(wrapper => {
+    wrapper.addEventListener('click', function() {
+      const faqId = parseInt(this.getAttribute('data-faq-id'));
+      openFAQModal(faqId);
+    });
+  });
+
+  if (faqCloseBtn) {
+    faqCloseBtn.onclick = function() {
+      faqModal.style.display = "none";
+    };
+  }
+
+  // ==== GLOBAL CLOSE MODAL (klik luar) ====
   window.onclick = function(event) {
-    const modal = document.getElementById('timelineModal');
-    if (event.target === modal) {
-      modal.style.display = 'none';
+    if (event.target === timelineModal) {
+      timelineModal.style.display = 'none';
+    }
+    if (event.target === faqModal) {
+      faqModal.style.display = 'none';
     }
   };
 });
-
-  document.addEventListener('DOMContentLoaded', function() {
-    const now = new Date();
-    const options = { 
-      weekday: 'long', 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    };
-    const dateTimeStr = now.toLocaleDateString('id-ID', options);
-    document.getElementById('currentDate').textContent = dateTimeStr.toUpperCase();
-
-    const observerOptions = {
-      threshold: 0.1,
-      rootMargin: '0px 0px -50px 0px'
-    };
-
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('animated');
-        }
-      });
-    }, observerOptions);
-
-    document.querySelectorAll('[data-framer]').forEach(el => {
-      observer.observe(el);
-    });
-
-    const image = document.querySelector('.faq-image');
-    if (image) {
-      image.style.opacity = '0';
-      image.style.transform = 'scale(0.95)';
-      image.style.transition = 'opacity 0.8s ease, transform 0.8s ease';
-      setTimeout(() => {
-        image.style.opacity = '1';
-        image.style.transform = 'scale(1)';
-      }, 300);
-    }
-
-    const title = document.querySelector('.page-title');
-    if (title) {
-      title.style.opacity = '0';
-      title.style.transform = 'translateY(-15px)';
-      title.style.transition = 'opacity 0.8s ease, transform 0.8s ease';
-      setTimeout(() => {
-        title.style.opacity = '1';
-        title.style.transform = 'translateY(0)';
-      }, 100);
-    }
-
-    const modal = document.getElementById("faqModal");
-    const closeBtn = document.getElementsByClassName("close")[0];
-
-    document.querySelectorAll('.faq-item-wrapper').forEach(wrapper => {
-      wrapper.addEventListener('click', function() {
-        const faqId = parseInt(this.getAttribute('data-faq-id'));
-        openFAQModal(faqId);
-      });
-    });
-
-    closeBtn.onclick = function() {
-      modal.style.display = "none";
-    };
-
-    window.onclick = function(event) {
-      if (event.target == modal) {
-        modal.style.display = "none";
-      }
-    };
-  });
 
 
 
@@ -1605,6 +1610,7 @@ function openFAQModal(id) {
   modal.style.display = "block";
 }
 </script>
+
 
 
 
