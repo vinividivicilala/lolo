@@ -645,30 +645,8 @@ const faqData = [
     line-height: 1.6;
     color: #cbd5e1;
   }
-.cta-button-large {
-  display: inline-block;
-  background: #3b82f6;
-  color: white;
-  padding: 16px 40px;
-  border-radius: 2px;
-  text-decoration: none;
-  font-weight: 700;
-  font-size: 1.1rem;
-  transition: all 0.3s ease;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  cursor: pointer;
-  /* LINEBOX HITAM PUDAR */
-  border: 1px solid rgba(0, 0, 0, 0.3);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
 
-.cta-button-large:hover {
-  background: #2563eb;
-  transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(37, 99, 235, 0.3);
-  border-color: rgba(0, 0, 0, 0.5); /* Lebih gelap saat hover */
-}
+
 
  
 
@@ -873,6 +851,29 @@ const faqData = [
 .cta-center {
   text-align: center;
   width: 100%;
+}
+
+/* Tombol Contact dengan linebox */
+.cta-button-large {
+  display: inline-block;
+  background: #3b82f6;
+  color: white;
+  padding: 16px 40px;
+  border-radius: 6px;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 1.1rem;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  border: 2px solid rgba(0,0,0,0.4); /* linebox hitam pudar */
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,0.3);
+}
+
+.cta-button-large:hover {
+  background: #2563eb;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(37, 99, 235, 0.3);
 }
 
 
@@ -1597,6 +1598,7 @@ function openFAQModal(id) {
   modal.style.display = "block";
 }
 </script>
+
 
 
 
