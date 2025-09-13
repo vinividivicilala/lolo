@@ -1391,7 +1391,7 @@ function openTimelineModal() {
       <div class="modal-timeline">
   `;
   websites.forEach((site, index) => {
-    // Setiap item timeline akan memiliki line box hitam pudar
+    // Setiap item timeline akan memiliki line box hitam pudar dan gaya dot-to-dot
     html += `
       <div class="timeline-item" style="
         margin-bottom: 25px;
@@ -1400,23 +1400,43 @@ function openTimelineModal() {
         border: 1px solid rgba(0,0,0,0.3); /* Garis kotak hitam pudar */
         border-radius: 6px;
         background: white;
+        display: flex;
+        align-items: center;
+        gap: 15px;
       ">
-        <div class="timeline-title" style="
-          font-weight: 700;
-          margin-bottom: 10px;
-          color: #000;
-          font-size: 1.3rem;
-          border-bottom: 1px solid rgba(0,0,0,0.3); /* Garis bawah hitam pudar */
-          padding-bottom: 5px;
-        ">
-          ${site.name}
-        </div>
-        <div class="timeline-content" style="
-          color: #64748b;
-          line-height: 1.6;
-          font-size: 1.1rem;
-        ">
-          <a href="${site.url}" target="_blank" style="color: #3b82f6; text-decoration: underline;">${site.url}</a> • ${site.date}
+        <!-- Titik Bulat Aktif -->
+        <div class="timeline-dot" style="
+          width: 12px;
+          height: 12px;
+          background: #3b82f6;
+          border-radius: 50%;
+          border: 2px solid white;
+          box-shadow: 0 0 0 1px rgba(0,0,0,0.2);
+          z-index: 1;
+          transition: transform 0.3s ease;
+        "></div>
+        
+        <!-- Konten Item -->
+        <div class="timeline-content-wrapper">
+          <!-- Judul Nama Website: Besar, Tebal, Hitam -->
+          <div class="timeline-title" style="
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: #000;
+            font-size: 1.3rem;
+            border-bottom: 1px solid rgba(0,0,0,0.3); /* Garis bawah hitam pudar */
+            padding-bottom: 5px;
+          ">
+            ${site.name}
+          </div>
+          <!-- Link Website -->
+          <div class="timeline-link" style="
+            color: #3b82f6;
+            text-decoration: underline;
+            font-size: 1.1rem;
+          ">
+            <a href="${site.url}" target="_blank">${site.url}</a> • ${site.date}
+          </div>
         </div>
       </div>
     `;
@@ -1425,7 +1445,6 @@ function openTimelineModal() {
   content.innerHTML = html;
   modal.style.display = "block";
 }
-
 
 
 
@@ -1612,6 +1631,7 @@ function openFAQModal(id) {
   modal.style.display = "block";
 }
 </script>
+
 
 
 
