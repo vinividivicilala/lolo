@@ -346,6 +346,26 @@ const faqData = [
 </div>
 
 
+<!-- Toggle Pesan -->
+<div class="message-toggle">
+  <!-- Tombol Icon Pesan -->
+  <button id="msgToggleBtn" class="msg-btn">💬</button>
+
+  <!-- Box Form Pesan -->
+  <div id="msgBox" class="msg-box hidden">
+    <form id="msgForm">
+      <div class="linebox">
+        <label>Nama</label>
+        <input type="text" id="msgName" required />
+      </div>
+      <div class="linebox">
+        <label>Deskripsi</label>
+        <textarea id="msgDesc" required></textarea>
+      </div>
+      <button type="submit" class="send-btn">Kirim</button>
+    </form>
+  </div>
+</div>
 
 
 
@@ -617,6 +637,67 @@ const faqData = [
   }
 
 
+.message-toggle {
+  position: fixed;
+  bottom: 25px;
+  right: 25px;
+  z-index: 2000;
+}
+
+.msg-btn {
+  font-size: 2rem;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  transition: background 0.3s;
+}
+.msg-btn:hover { background: #2563eb; }
+
+.msg-box {
+  margin-top: 10px;
+  width: 300px;
+  background: #fff;
+  border: 1px solid rgba(0,0,0,0.3);
+  border-radius: 10px;
+  padding: 15px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+}
+.hidden { display: none; }
+
+.linebox {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 12px;
+}
+.linebox label {
+  font-weight: 600;
+  margin-bottom: 5px;
+}
+.linebox input, 
+.linebox textarea {
+  border: 1px solid rgba(0,0,0,0.3);
+  border-radius: 6px;
+  padding: 8px;
+  font-size: 1rem;
+  resize: none;
+}
+
+.send-btn {
+  background: #10b981;
+  color: white;
+  border: none;
+  padding: 10px;
+  width: 100%;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+}
+.send-btn:hover { background: #059669; }
 
  
 
@@ -1454,6 +1535,53 @@ function openTimelineModal() {
 }
 
 
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
+import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-firestore.js";
+
+   const firebaseConfig = {
+        apiKey: "AIzaSyCYbxo8n1zn-Y3heCIn_PmrsK44_OrdEw4",
+        authDomain:"noted-a3498.firebaseapp.com",
+        projectId: "noted-a3498",
+        storageBucket: "noted-a3498.appspot.com",
+        messagingSenderId: "1077214793842",
+        appId: "1:1077214793842:web:a70cc3643eceb53e3932eb",
+        measurementId: "G-SENDQS5Y7K"
+    };
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+document.addEventListener("DOMContentLoaded", () => {
+  const toggleBtn = document.getElementById("msgToggleBtn");
+  const msgBox = document.getElementById("msgBox");
+  const form = document.getElementById("msgForm");
+
+  // Toggle show/hide
+  toggleBtn.addEventListener("click", () => {
+    msgBox.classList.toggle("hidden");
+  });
+
+  // Submit ke Firestore
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const name = document.getElementById("msgName").value;
+    const desc = document.getElementById("msgDesc").value;
+
+    try {
+      await addDoc(collection(db, "messages"), {
+        name,
+        desc,
+        createdAt: serverTimestamp()
+      });
+      alert("Pesan berhasil dikirim ✅");
+      form.reset();
+      msgBox.classList.add("hidden");
+    } catch (err) {
+      console.error("Error tambah pesan:", err);
+      alert("Gagal kirim pesan ❌");
+    }
+  });
+});
 
 
 
@@ -1638,6 +1766,7 @@ function openFAQModal(id) {
   modal.style.display = "block";
 }
 </script>
+
 
 
 
