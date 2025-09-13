@@ -647,11 +647,9 @@ const faqData = [
     color: #cbd5e1;
   }
 
-
-
-/* Tombol Contact dengan Linebox Hitam - Revisi Final */
+/* Tombol Contact dengan Linebox Hitam - FORCE OVERRIDE */
 .cta-button-large {
-  display: inline-block;
+  display: inline-block !important;
   font-family: 'Space Mono', monospace !important;
   background: #3b82f6 !important;
   color: white !important;
@@ -665,7 +663,7 @@ const faqData = [
   letter-spacing: 1px !important;
   cursor: pointer !important;
 
-  /* LINEBOX HITAM PUDAR - PAKSA OVERRIDE */
+  /* LINEBOX HITAM PUDAR — DIPAKSA */
   border: 2px solid rgba(0, 0, 0, 0.4) !important;
   box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.3) !important;
 }
@@ -676,9 +674,8 @@ const faqData = [
   box-shadow:
     inset 0 0 0 1px rgba(0, 0, 0, 0.3) !important,
     0 5px 15px rgba(37, 99, 235, 0.3) !important;
-  border-color: rgba(0, 0, 0, 0.6) !important;
+  border-color: rgba(0, 0, 0, 0.6) !important; /* Lebih gelap saat hover */
 }
-
  
 
   /* Footer */
@@ -1606,6 +1603,7 @@ function openFAQModal(id) {
   modal.style.display = "block";
 }
 </script>
+
 
 
 
