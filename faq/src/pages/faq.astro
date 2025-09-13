@@ -1364,34 +1364,73 @@ const websites = [
   { name: "GitHub", url: "https://github.com", date: "May 2023" }
 ];
 
+
+
 // Fungsi buka modal timeline
 function openTimelineModal() {
   const modal = document.getElementById("timelineModal");
   const content = document.getElementById("timelineContent");
-
   let html = `
     <div class="modal-faq-content">
       <div class="modal-header">
-        <h2 style="font-size: 2.4rem; font-weight: 700; color: #000; margin: 0;">Timeline Website</h2>
+        <!-- Judul Timeline dengan Line Box Hitam Pudar -->
+        <h2 style="
+          font-size: 2.4rem; 
+          font-weight: 700; 
+          color: #000; 
+          margin: 0;
+          border: 1px solid rgba(0,0,0,0.3); /* Garis kotak hitam pudar */
+          padding: 15px 20px;
+          border-radius: 8px;
+          background: white;
+          box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        ">
+          Timeline Website
+        </h2>
       </div>
       <div class="modal-timeline">
   `;
-
   websites.forEach((site, index) => {
+    // Setiap item timeline akan memiliki line box hitam pudar
     html += `
-      <div class="timeline-item">
-        <div class="timeline-title">${site.name}</div>
-        <div class="timeline-content">
+      <div class="timeline-item" style="
+        margin-bottom: 25px;
+        position: relative;
+        padding: 15px;
+        border: 1px solid rgba(0,0,0,0.3); /* Garis kotak hitam pudar */
+        border-radius: 6px;
+        background: white;
+      ">
+        <div class="timeline-title" style="
+          font-weight: 700;
+          margin-bottom: 10px;
+          color: #000;
+          font-size: 1.3rem;
+          border-bottom: 1px solid rgba(0,0,0,0.3); /* Garis bawah hitam pudar */
+          padding-bottom: 5px;
+        ">
+          ${site.name}
+        </div>
+        <div class="timeline-content" style="
+          color: #64748b;
+          line-height: 1.6;
+          font-size: 1.1rem;
+        ">
           <a href="${site.url}" target="_blank" style="color: #3b82f6; text-decoration: underline;">${site.url}</a> • ${site.date}
         </div>
       </div>
     `;
   });
-
   html += `</div></div>`;
   content.innerHTML = html;
   modal.style.display = "block";
 }
+
+
+
+
+
+
 
 document.addEventListener('DOMContentLoaded', function () {
   // ==== CONTACT BUTTON & TIMELINE MODAL ====
@@ -1573,6 +1612,7 @@ function openFAQModal(id) {
   modal.style.display = "block";
 }
 </script>
+
 
 
 
