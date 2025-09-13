@@ -1370,80 +1370,88 @@ function openTimelineModal() {
   const content = document.getElementById("timelineContent");
   let html = `
     <div class="modal-faq-content">
-      <div class="modal-header">
-        <!-- Judul Timeline dengan Line Box Hitam Pudar -->
+      <div class="modal-header" style="
+        border: 1px solid rgba(0,0,0,0.3);
+        padding: 15px 20px;
+        border-radius: 8px;
+        background: white;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        margin-bottom: 25px;
+      ">
         <h2 style="
           font-size: 2.4rem; 
           font-weight: 700; 
           color: #000; 
           margin: 0;
-          border: 1px solid rgba(0,0,0,0.3); /* Garis kotak hitam pudar */
-          padding: 15px 20px;
-          border-radius: 8px;
-          background: white;
-          box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         ">
           Timeline Website
         </h2>
       </div>
-      <div class="modal-timeline">
+      <div class="modal-timeline" style="position: relative; padding-left: 30px;">
   `;
+
   websites.forEach((site, index) => {
-    // Setiap item timeline akan memiliki line box hitam pudar dan gaya dot-to-dot
+    const isLast = index === websites.length - 1;
+
     html += `
       <div class="timeline-item" style="
-        margin-bottom: 25px;
         position: relative;
-        padding: 15px;
-        border: 1px solid rgba(0,0,0,0.3); /* Garis kotak hitam pudar */
+        margin-bottom: 25px;
+        border: 1px solid rgba(0,0,0,0.3);
         border-radius: 6px;
         background: white;
-        display: flex;
-        align-items: center;
-        gap: 15px;
+        padding: 15px 20px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
       ">
-        <!-- Titik Bulat Aktif -->
+        <!-- Titik Bulat -->
         <div class="timeline-dot" style="
-          width: 12px;
-          height: 12px;
+          position: absolute;
+          left: -24px;
+          top: 20px;
+          width: 14px;
+          height: 14px;
           background: #3b82f6;
           border-radius: 50%;
           border: 2px solid white;
           box-shadow: 0 0 0 1px rgba(0,0,0,0.2);
-          z-index: 1;
-          transition: transform 0.3s ease;
+          z-index: 2;
         "></div>
-        
-        <!-- Konten Item -->
-        <div class="timeline-content-wrapper">
-          <!-- Judul Nama Website: Besar, Tebal, Hitam -->
-          <div class="timeline-title" style="
-            font-weight: 700;
-            margin-bottom: 10px;
-            color: #000;
-            font-size: 1.3rem;
-            border-bottom: 1px solid rgba(0,0,0,0.3); /* Garis bawah hitam pudar */
-            padding-bottom: 5px;
-          ">
-            ${site.name}
-          </div>
-          <!-- Link Website -->
-          <div class="timeline-link" style="
-            color: #3b82f6;
-            text-decoration: underline;
-            font-size: 1.1rem;
-          ">
-            <a href="${site.url}" target="_blank">${site.url}</a> • ${site.date}
-          </div>
+
+        <!-- Garis Patah-Patah -->
+        ${!isLast ? `
+        <div class="timeline-line" style="
+          position: absolute;
+          left: -18px;
+          top: 40px;
+          width: 2px;
+          height: calc(100% + 20px);
+          border-left: 2px dashed rgba(0,0,0,0.3);
+          z-index: 1;
+        "></div>` : ""}
+
+        <!-- Konten -->
+        <div class="timeline-title" style="
+          font-weight: 700;
+          margin-bottom: 8px;
+          color: #000;
+          font-size: 1.3rem;
+        ">
+          ${site.name}
+        </div>
+        <div class="timeline-link" style="
+          color: #3b82f6;
+          font-size: 1.05rem;
+        ">
+          <a href="${site.url}" target="_blank">${site.url}</a> • ${site.date}
         </div>
       </div>
     `;
   });
+
   html += `</div></div>`;
   content.innerHTML = html;
   modal.style.display = "block";
 }
-
 
 
 
@@ -1630,6 +1638,7 @@ function openFAQModal(id) {
   modal.style.display = "block";
 }
 </script>
+
 
 
 
