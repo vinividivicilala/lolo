@@ -852,34 +852,27 @@ const faqData = [
   width: 100%;
 }
 
-
-/* Tombol Contact dengan Linebox Hitam - FIXED */
 .cta-button-large {
-  display: inline-block !important;
-  font-family: 'Space Mono', monospace !important;
-  background: #3b82f6 !important;
-  color: white !important;
-  padding: 16px 40px !important;
-  border-radius: 6px !important;
-  text-decoration: none !important;
-  font-weight: 700 !important;
-  font-size: 1.1rem !important;
-  transition: all 0.3s ease !important;
-  text-transform: uppercase !important;
-  letter-spacing: 1px !important;
-  cursor: pointer !important;
+  display: inline-block;
+  background: #3b82f6;
+  color: white;
+  padding: 16px 40px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 1.1rem;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  cursor: pointer;
 
-  /* LINEBOX HITAM PUDAR - HANYA BORDER */
-  border: 2px solid rgba(0, 0, 0, 0.4) !important;
-  /* HAPUS box-shadow: inset — ini penyebab border tidak terlihat */
+  /* LINE BOX HITAM PUDAR */
+  border: 2px solid rgba(0,0,0,0.4);
+  outline: 3px solid rgba(0,0,0,0.15);
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,0.2),
+              0 4px 8px rgba(0,0,0,0.1);
 }
 
-.cta-button-large:hover {
-  background: #2563eb !important;
-  transform: translateY(-2px) !important;
-  box-shadow: 0 5px 15px rgba(37, 99, 235, 0.3) !important;
-  border-color: rgba(0, 0, 0, 0.6) !important;
-}
 
 
 
@@ -1608,6 +1601,7 @@ function openFAQModal(id) {
   modal.style.display = "block";
 }
 </script>
+
 
 
 
