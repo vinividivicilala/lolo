@@ -346,20 +346,28 @@ const faqData = [
 </div>
 
 
-<!-- Toggle Pesan -->
-<div class="message-toggle">
-  <!-- Tombol Icon Pesan -->
-  <button id="msgToggleBtn" class="msg-btn">💬</button>
+
+<!-- Virtual Asisten -->
+<div class="assistant-toggle">
+  <!-- Tombol Icon Pesan + Counter -->
+  <div class="toggle-wrapper">
+    <button id="msgToggleBtn" class="msg-btn">💬</button>
+    <span id="msgCount" class="msg-count">0</span>
+  </div>
+
+  <!-- Preview pesan terakhir -->
+  <div id="lastMsgPreview" class="last-msg hidden"></div>
 
   <!-- Box Chat -->
   <div id="msgBox" class="msg-box hidden">
-    <!-- Header Asisten -->
+    <!-- Header -->
     <div class="linebox header-box">
       <img src="/images/asisten.png" alt="Asisten" class="asst-fp"/>
       <div>
         <div class="asst-name">Asisten Virtual</div>
-        <div class="asst-desc">Selalu siap bantu kamu ✨</div>
+        <div class="asst-desc">Siap membantu ✨</div>
       </div>
+      <button id="closeBtn" class="close-btn">❌</button>
     </div>
 
     <!-- Area Riwayat Pesan -->
@@ -378,6 +386,12 @@ const faqData = [
     </form>
   </div>
 </div>
+
+
+
+
+
+
 
 
 
@@ -649,11 +663,18 @@ const faqData = [
   }
 
 
-.message-toggle {
+.assistant-toggle {
   position: fixed;
   bottom: 25px;
   right: 25px;
   z-index: 2000;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.toggle-wrapper {
+  position: relative;
 }
 
 .msg-btn {
@@ -670,6 +691,30 @@ const faqData = [
 }
 .msg-btn:hover { background: #2563eb; }
 
+.msg-count {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: #ef4444;
+  color: white;
+  font-size: 0.85rem;
+  font-weight: bold;
+  border-radius: 50%;
+  padding: 3px 7px;
+}
+
+.last-msg {
+  margin-top: 6px;
+  background: #f8fafc;
+  border: 1px solid rgba(0,0,0,0.3);
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 0.85rem;
+  max-width: 260px;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+}
+.hidden { display: none; }
+
 .msg-box {
   width: 360px;
   height: 480px;
@@ -680,6 +725,7 @@ const faqData = [
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  margin-top: 10px;
 }
 
 .linebox {
@@ -692,6 +738,7 @@ const faqData = [
 .header-box {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 12px;
 }
 
@@ -704,7 +751,13 @@ const faqData = [
 .asst-name { font-weight: 700; }
 .asst-desc { font-size: 0.85rem; color: #64748b; }
 
-/* Chat Area */
+.close-btn {
+  background: transparent;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+
 .chat-area {
   flex: 1;
   overflow-y: auto;
@@ -712,38 +765,27 @@ const faqData = [
   display: flex;
   flex-direction: column;
   gap: 8px;
-  background: #fff;
 }
 
-/* Pesan */
 .chat-msg {
   max-width: 80%;
   padding: 8px 12px;
   border-radius: 8px;
-  font-size: 0.95rem;
-  line-height: 1.4;
+  font-size: 0.9rem;
   border: 1px solid rgba(0,0,0,0.3);
   background: #f8fafc;
-  animation: fadeInMsg 0.4s ease forwards;
 }
 .chat-msg.user {
   align-self: flex-end;
   background: #3b82f6;
   color: white;
-  border-color: #2563eb;
 }
 .chat-msg.asst {
   align-self: flex-start;
   background: #e2e8f0;
-  border-color: #cbd5e1;
+  color: #111827;
 }
 
-@keyframes fadeInMsg {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-/* Input */
 .msg-input {
   display: flex;
   gap: 8px;
@@ -767,16 +809,9 @@ const faqData = [
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: background 0.3s;
 }
 .send-btn:hover { background: #059669; }
-.send-icon {
-  width: 22px;
-  height: 22px;
-}
-
-
-
+.send-icon { width: 20px; height: 20px; }
 
 
 
@@ -1619,6 +1654,8 @@ function openTimelineModal() {
   content.innerHTML = html;
   modal.style.display = "block";
 }
+
+
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
 import { 
   getFirestore, 
@@ -1645,22 +1682,28 @@ const db = getFirestore(app);
 
 document.addEventListener("DOMContentLoaded", () => {
   const toggleBtn = document.getElementById("msgToggleBtn");
+  const closeBtn = document.getElementById("closeBtn");
   const msgBox = document.getElementById("msgBox");
   const chatArea = document.getElementById("chatArea");
   const form = document.getElementById("msgForm");
+  const msgCount = document.getElementById("msgCount");
+  const lastMsgPreview = document.getElementById("lastMsgPreview");
 
-  // Toggle buka chat
+  // Toggle buka/tutup chat
   toggleBtn.addEventListener("click", () => {
     msgBox.classList.toggle("hidden");
+    lastMsgPreview.classList.add("hidden");
 
-    // Tambahkan pesan otomatis sekali
     if (!chatArea.querySelector(".auto-greet")) {
       const greet = document.createElement("div");
       greet.className = "chat-msg asst auto-greet";
       greet.textContent = "Halo 👋, saya Asisten Virtual. Ada yang bisa saya bantu?";
       chatArea.appendChild(greet);
-      chatArea.scrollTop = chatArea.scrollHeight;
     }
+  });
+
+  closeBtn.addEventListener("click", () => {
+    msgBox.classList.add("hidden");
   });
 
   // Kirim pesan ke Firestore
@@ -1668,45 +1711,52 @@ document.addEventListener("DOMContentLoaded", () => {
     e.preventDefault();
     const name = document.getElementById("msgName").value.trim();
     const desc = document.getElementById("msgDesc").value.trim();
-
     if (!name || !desc) return;
 
-    try {
-      await addDoc(collection(db, "messages"), {
-        name,
-        desc,
-        createdAt: serverTimestamp()
-      });
-      form.reset();
-    } catch (err) {
-      console.error("Error:", err);
-    }
+    await addDoc(collection(db, "messages"), {
+      name,
+      desc,
+      createdAt: serverTimestamp()
+    });
+    form.reset();
   });
 
-  // Ambil pesan dari Firestore realtime
+  // Realtime pesan
   const q = query(collection(db, "messages"), orderBy("createdAt", "asc"));
   onSnapshot(q, (snapshot) => {
     chatArea.innerHTML = "";
+    let lastMsg = "";
+    let count = 0;
 
-    // Pesan otomatis asisten
+    // Pesan asisten default
     const greet = document.createElement("div");
     greet.className = "chat-msg asst auto-greet";
     greet.textContent = "Halo 👋, saya Asisten Virtual. Ada yang bisa saya bantu?";
     chatArea.appendChild(greet);
 
-    // Tampilkan semua pesan dari Firebase
+    // Tampilkan semua pesan user
     snapshot.forEach((doc) => {
       const data = doc.data();
       const msg = document.createElement("div");
       msg.className = "chat-msg user";
       msg.innerHTML = `<b>${data.name || "Anonim"}:</b> ${data.desc}`;
       chatArea.appendChild(msg);
+      lastMsg = data.desc;
+      count++;
     });
+
+    // Update count di tombol
+    msgCount.textContent = count;
+
+    // Preview pesan terakhir
+    if (lastMsg) {
+      lastMsgPreview.textContent = lastMsg;
+      lastMsgPreview.classList.remove("hidden");
+    }
 
     chatArea.scrollTop = chatArea.scrollHeight;
   });
 });
-
 
 
 
@@ -1894,6 +1944,7 @@ function openFAQModal(id) {
   modal.style.display = "block";
 }
 </script>
+
 
 
 
