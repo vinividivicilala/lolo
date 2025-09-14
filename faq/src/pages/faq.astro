@@ -351,37 +351,31 @@ const faqData = [
   <!-- Tombol Icon Pesan -->
   <button id="msgToggleBtn" class="msg-btn">💬</button>
 
-  <!-- Box Form Pesan -->
+  <!-- Box Chat -->
   <div id="msgBox" class="msg-box hidden">
-    <!-- Header dengan foto profil + nama asisten -->
+    <!-- Header Asisten -->
     <div class="linebox header-box">
       <img src="/images/asisten.png" alt="Asisten" class="asst-fp"/>
       <div>
         <div class="asst-name">Asisten Virtual</div>
-        <div class="asst-desc">Siap membantu menjawab pertanyaanmu ✨</div>
+        <div class="asst-desc">Selalu siap bantu kamu ✨</div>
       </div>
     </div>
 
-    <!-- Kalimat otomatis -->
-    <div class="linebox auto-msg">
-      Halo 👋, silakan tulis pesan Anda di bawah ini.
-    </div>
+    <!-- Area Riwayat Pesan -->
+    <div id="chatArea" class="chat-area"></div>
 
-    <!-- Form pesan -->
-    <form id="msgForm">
-      <div class="linebox">
-        <label>Nama</label>
-        <input type="text" id="msgName" required />
-      </div>
-      <div class="linebox">
-        <label>Deskripsi</label>
-        <textarea id="msgDesc" required></textarea>
-      </div>
-      <button type="submit" class="send-btn">📩 Kirim</button>
+    <!-- Form Input -->
+    <form id="msgForm" class="msg-input">
+      <input type="text" id="msgName" placeholder="Nama kamu..." required />
+      <input type="text" id="msgDesc" placeholder="Tulis pesan..." required />
+      <button type="submit" class="send-btn">
+        <svg xmlns="http://www.w3.org/2000/svg" class="send-icon" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+          <path d="M22 2L11 13"/>
+          <path d="M22 2L15 22L11 13L2 9L22 2Z"/>
+        </svg>
+      </button>
     </form>
-
-    <!-- List pesan dari Firebase -->
-    <div id="msgList" class="msg-list"></div>
   </div>
 </div>
 
@@ -655,8 +649,6 @@ const faqData = [
   }
 
 
-
-
 .message-toggle {
   position: fixed;
   bottom: 25px;
@@ -679,20 +671,16 @@ const faqData = [
 .msg-btn:hover { background: #2563eb; }
 
 .msg-box {
-  margin-top: 10px;
-  width: 380px;
-  max-height: 500px;
-  overflow-y: auto;
+  width: 360px;
+  height: 480px;
   background: #fff;
   border: 1px solid rgba(0,0,0,0.3);
   border-radius: 12px;
-  padding: 15px;
   box-shadow: 0 6px 20px rgba(0,0,0,0.2);
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  overflow: hidden;
 }
-.hidden { display: none; }
 
 .linebox {
   border: 1px solid rgba(0,0,0,0.3);
@@ -708,71 +696,84 @@ const faqData = [
 }
 
 .asst-fp {
-  width: 45px;
-  height: 45px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   border: 1px solid rgba(0,0,0,0.3);
 }
+.asst-name { font-weight: 700; }
+.asst-desc { font-size: 0.85rem; color: #64748b; }
 
-.asst-name {
-  font-weight: 700;
-  font-size: 1.1rem;
+/* Chat Area */
+.chat-area {
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: #fff;
 }
 
-.asst-desc {
-  font-size: 0.9rem;
-  color: #64748b;
-}
-
-.auto-msg {
+/* Pesan */
+.chat-msg {
+  max-width: 80%;
+  padding: 8px 12px;
+  border-radius: 8px;
   font-size: 0.95rem;
-  font-weight: 600;
-  color: #334155;
+  line-height: 1.4;
+  border: 1px solid rgba(0,0,0,0.3);
+  background: #f8fafc;
+  animation: fadeInMsg 0.4s ease forwards;
+}
+.chat-msg.user {
+  align-self: flex-end;
+  background: #3b82f6;
+  color: white;
+  border-color: #2563eb;
+}
+.chat-msg.asst {
+  align-self: flex-start;
+  background: #e2e8f0;
+  border-color: #cbd5e1;
 }
 
-.linebox input, 
-.linebox textarea {
+@keyframes fadeInMsg {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Input */
+.msg-input {
+  display: flex;
+  gap: 8px;
+  padding: 10px;
+  border-top: 1px solid rgba(0,0,0,0.2);
+  background: #f8fafc;
+}
+.msg-input input {
+  flex: 1;
   border: 1px solid rgba(0,0,0,0.3);
   border-radius: 6px;
   padding: 8px;
-  font-size: 1rem;
-  resize: none;
-  width: 100%;
 }
-
 .send-btn {
   background: #10b981;
-  color: white;
   border: none;
-  padding: 10px;
-  width: 100%;
-  border-radius: 6px;
-  font-weight: bold;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
-  font-size: 1.1rem;
+  transition: background 0.3s;
 }
 .send-btn:hover { background: #059669; }
-
-.msg-list {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+.send-icon {
+  width: 22px;
+  height: 22px;
 }
-.msg-item {
-  border: 1px solid rgba(0,0,0,0.3);
-  border-radius: 6px;
-  padding: 8px 10px;
-  background: #fff;
-}
-.msg-item .msg-name {
-  font-weight: 700;
-  margin-bottom: 5px;
-}
-.msg-item .msg-desc {
-  font-size: 0.95rem;
-  color: #334155;
-}
-
 
 
 
@@ -1640,15 +1641,24 @@ const db = getFirestore(app);
 document.addEventListener("DOMContentLoaded", () => {
   const toggleBtn = document.getElementById("msgToggleBtn");
   const msgBox = document.getElementById("msgBox");
+  const chatArea = document.getElementById("chatArea");
   const form = document.getElementById("msgForm");
-  const msgList = document.getElementById("msgList");
 
-  // Toggle show/hide
+  // Toggle buka chat
   toggleBtn.addEventListener("click", () => {
     msgBox.classList.toggle("hidden");
+
+    // Tambahkan pesan otomatis dari asisten kalau belum ada
+    if (!chatArea.querySelector(".auto-greet")) {
+      const greet = document.createElement("div");
+      greet.className = "chat-msg asst auto-greet";
+      greet.textContent = "Halo 👋, saya Asisten Virtual. Ada yang bisa saya bantu?";
+      chatArea.appendChild(greet);
+      chatArea.scrollTop = chatArea.scrollHeight;
+    }
   });
 
-  // Submit ke Firestore
+  // Kirim pesan ke Firebase
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
     const name = document.getElementById("msgName").value;
@@ -1662,28 +1672,32 @@ document.addEventListener("DOMContentLoaded", () => {
       });
       form.reset();
     } catch (err) {
-      console.error("Error tambah pesan:", err);
-      alert("Gagal kirim pesan ❌");
+      console.error("Error:", err);
     }
   });
 
-  // Realtime listener untuk pesan
-  const q = query(collection(db, "messages"), orderBy("createdAt", "desc"));
+  // Load pesan dari Firebase
+  const q = query(collection(db, "messages"), orderBy("createdAt", "asc"));
   onSnapshot(q, (snapshot) => {
-    msgList.innerHTML = "";
+    chatArea.innerHTML = "";
+
+    // tambahkan pesan otomatis di atas
+    const greet = document.createElement("div");
+    greet.className = "chat-msg asst auto-greet";
+    greet.textContent = "Halo 👋, saya Asisten Virtual. Ada yang bisa saya bantu?";
+    chatArea.appendChild(greet);
+
     snapshot.forEach((doc) => {
       const data = doc.data();
-      const item = document.createElement("div");
-      item.className = "msg-item linebox";
-      item.innerHTML = `
-        <div class="msg-name">${data.name || "Anonim"}</div>
-        <div class="msg-desc">${data.desc}</div>
-      `;
-      msgList.appendChild(item);
+      const msg = document.createElement("div");
+      msg.className = "chat-msg user";
+      msg.innerHTML = `<b>${data.name || "Anonim"}:</b> ${data.desc}`;
+      chatArea.appendChild(msg);
     });
+
+    chatArea.scrollTop = chatArea.scrollHeight;
   });
 });
-
 
 
 
@@ -1871,6 +1885,7 @@ function openFAQModal(id) {
   modal.style.display = "block";
 }
 </script>
+
 
 
 
