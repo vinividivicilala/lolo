@@ -1619,24 +1619,29 @@ function openTimelineModal() {
   content.innerHTML = html;
   modal.style.display = "block";
 }
-
-
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
-import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-firestore.js";
+import { 
+  getFirestore, 
+  collection, 
+  addDoc, 
+  serverTimestamp,
+  onSnapshot, 
+  query, 
+  orderBy 
+} from "https://www.gstatic.com/firebasejs/11.3.1/firebase-firestore.js";
 
-   const firebaseConfig = {
-        apiKey: "AIzaSyCYbxo8n1zn-Y3heCIn_PmrsK44_OrdEw4",
-        authDomain:"noted-a3498.firebaseapp.com",
-        projectId: "noted-a3498",
-        storageBucket: "noted-a3498.appspot.com",
-        messagingSenderId: "1077214793842",
-        appId: "1:1077214793842:web:a70cc3643eceb53e3932eb",
-        measurementId: "G-SENDQS5Y7K"
-    };
+const firebaseConfig = {
+  apiKey: "AIzaSyCYbxo8n1zn-Y3heCIn_PmrsK44_OrdEw4",
+  authDomain:"noted-a3498.firebaseapp.com",
+  projectId: "noted-a3498",
+  storageBucket: "noted-a3498.appspot.com",
+  messagingSenderId: "1077214793842",
+  appId: "1:1077214793842:web:a70cc3643eceb53e3932eb",
+  measurementId: "G-SENDQS5Y7K"
+};
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
-
 
 document.addEventListener("DOMContentLoaded", () => {
   const toggleBtn = document.getElementById("msgToggleBtn");
@@ -1648,7 +1653,7 @@ document.addEventListener("DOMContentLoaded", () => {
   toggleBtn.addEventListener("click", () => {
     msgBox.classList.toggle("hidden");
 
-    // Tambahkan pesan otomatis dari asisten kalau belum ada
+    // Tambahkan pesan otomatis sekali
     if (!chatArea.querySelector(".auto-greet")) {
       const greet = document.createElement("div");
       greet.className = "chat-msg asst auto-greet";
@@ -1658,11 +1663,13 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // Kirim pesan ke Firebase
+  // Kirim pesan ke Firestore
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
-    const name = document.getElementById("msgName").value;
-    const desc = document.getElementById("msgDesc").value;
+    const name = document.getElementById("msgName").value.trim();
+    const desc = document.getElementById("msgDesc").value.trim();
+
+    if (!name || !desc) return;
 
     try {
       await addDoc(collection(db, "messages"), {
@@ -1676,17 +1683,18 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // Load pesan dari Firebase
+  // Ambil pesan dari Firestore realtime
   const q = query(collection(db, "messages"), orderBy("createdAt", "asc"));
   onSnapshot(q, (snapshot) => {
     chatArea.innerHTML = "";
 
-    // tambahkan pesan otomatis di atas
+    // Pesan otomatis asisten
     const greet = document.createElement("div");
     greet.className = "chat-msg asst auto-greet";
     greet.textContent = "Halo 👋, saya Asisten Virtual. Ada yang bisa saya bantu?";
     chatArea.appendChild(greet);
 
+    // Tampilkan semua pesan dari Firebase
     snapshot.forEach((doc) => {
       const data = doc.data();
       const msg = document.createElement("div");
@@ -1698,6 +1706,7 @@ document.addEventListener("DOMContentLoaded", () => {
     chatArea.scrollTop = chatArea.scrollHeight;
   });
 });
+
 
 
 
@@ -1885,6 +1894,7 @@ function openFAQModal(id) {
   modal.style.display = "block";
 }
 </script>
+
 
 
 
