@@ -353,6 +353,21 @@ const faqData = [
 
   <!-- Box Form Pesan -->
   <div id="msgBox" class="msg-box hidden">
+    <!-- Header dengan foto profil + nama asisten -->
+    <div class="linebox header-box">
+      <img src="/images/asisten.png" alt="Asisten" class="asst-fp"/>
+      <div>
+        <div class="asst-name">Asisten Virtual</div>
+        <div class="asst-desc">Siap membantu menjawab pertanyaanmu ✨</div>
+      </div>
+    </div>
+
+    <!-- Kalimat otomatis -->
+    <div class="linebox auto-msg">
+      Halo 👋, silakan tulis pesan Anda di bawah ini.
+    </div>
+
+    <!-- Form pesan -->
     <form id="msgForm">
       <div class="linebox">
         <label>Nama</label>
@@ -362,8 +377,11 @@ const faqData = [
         <label>Deskripsi</label>
         <textarea id="msgDesc" required></textarea>
       </div>
-      <button type="submit" class="send-btn">Kirim</button>
+      <button type="submit" class="send-btn">📩 Kirim</button>
     </form>
+
+    <!-- List pesan dari Firebase -->
+    <div id="msgList" class="msg-list"></div>
   </div>
 </div>
 
@@ -637,6 +655,8 @@ const faqData = [
   }
 
 
+
+
 .message-toggle {
   position: fixed;
   bottom: 25px;
@@ -660,24 +680,56 @@ const faqData = [
 
 .msg-box {
   margin-top: 10px;
-  width: 300px;
+  width: 380px;
+  max-height: 500px;
+  overflow-y: auto;
   background: #fff;
   border: 1px solid rgba(0,0,0,0.3);
-  border-radius: 10px;
+  border-radius: 12px;
   padding: 15px;
   box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
 }
 .hidden { display: none; }
 
 .linebox {
+  border: 1px solid rgba(0,0,0,0.3);
+  border-radius: 6px;
+  padding: 10px;
+  background: #f8fafc;
+}
+
+.header-box {
   display: flex;
-  flex-direction: column;
-  margin-bottom: 12px;
+  align-items: center;
+  gap: 12px;
 }
-.linebox label {
+
+.asst-fp {
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  border: 1px solid rgba(0,0,0,0.3);
+}
+
+.asst-name {
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+.asst-desc {
+  font-size: 0.9rem;
+  color: #64748b;
+}
+
+.auto-msg {
+  font-size: 0.95rem;
   font-weight: 600;
-  margin-bottom: 5px;
+  color: #334155;
 }
+
 .linebox input, 
 .linebox textarea {
   border: 1px solid rgba(0,0,0,0.3);
@@ -685,6 +737,7 @@ const faqData = [
   padding: 8px;
   font-size: 1rem;
   resize: none;
+  width: 100%;
 }
 
 .send-btn {
@@ -696,8 +749,40 @@ const faqData = [
   border-radius: 6px;
   font-weight: bold;
   cursor: pointer;
+  font-size: 1.1rem;
 }
 .send-btn:hover { background: #059669; }
+
+.msg-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.msg-item {
+  border: 1px solid rgba(0,0,0,0.3);
+  border-radius: 6px;
+  padding: 8px 10px;
+  background: #fff;
+}
+.msg-item .msg-name {
+  font-weight: 700;
+  margin-bottom: 5px;
+}
+.msg-item .msg-desc {
+  font-size: 0.95rem;
+  color: #334155;
+}
+
+
+
+
+
+
+
+
+
+
+
 
  
 
@@ -1551,10 +1636,12 @@ import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.g
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
+
 document.addEventListener("DOMContentLoaded", () => {
   const toggleBtn = document.getElementById("msgToggleBtn");
   const msgBox = document.getElementById("msgBox");
   const form = document.getElementById("msgForm");
+  const msgList = document.getElementById("msgList");
 
   // Toggle show/hide
   toggleBtn.addEventListener("click", () => {
@@ -1573,15 +1660,33 @@ document.addEventListener("DOMContentLoaded", () => {
         desc,
         createdAt: serverTimestamp()
       });
-      alert("Pesan berhasil dikirim ✅");
       form.reset();
-      msgBox.classList.add("hidden");
     } catch (err) {
       console.error("Error tambah pesan:", err);
       alert("Gagal kirim pesan ❌");
     }
   });
+
+  // Realtime listener untuk pesan
+  const q = query(collection(db, "messages"), orderBy("createdAt", "desc"));
+  onSnapshot(q, (snapshot) => {
+    msgList.innerHTML = "";
+    snapshot.forEach((doc) => {
+      const data = doc.data();
+      const item = document.createElement("div");
+      item.className = "msg-item linebox";
+      item.innerHTML = `
+        <div class="msg-name">${data.name || "Anonim"}</div>
+        <div class="msg-desc">${data.desc}</div>
+      `;
+      msgList.appendChild(item);
+    });
+  });
 });
+
+
+
+
 
 
 
@@ -1766,6 +1871,7 @@ function openFAQModal(id) {
   modal.style.display = "block";
 }
 </script>
+
 
 
 
