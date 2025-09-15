@@ -122,6 +122,17 @@ const faqData = [
 
 <Layout title="FAQ | Astro Example" description="Halaman FAQ dengan animasi, gambar, dan icon." currentPage="faq">
   <div class="container">
+
+
+    <!-- Breadcrumb -->
+    <nav class="breadcrumb">
+      <a href="/">Home</a> › 
+      <a href="/faq">FAQ</a> › 
+      <span>Blog</span>
+    </nav>
+
+
+
     <main class="main-content">
       <!-- Teks Berjalan -->
       <div class="marquee-fullwidth">
@@ -894,32 +905,6 @@ body.night {
   --font-main: 'Poppins', sans-serif;
 }
 
-body {
-  background: var(--bg-color);
-  color: var(--text-color);
-  font-family: var(--font-main);
-  transition: background 0.4s, color 0.4s;
-}
-
-.msg-box {
-  background: var(--box-bg);
-  box-shadow: 0 10px 25px var(--shadow);
-}
-
-.chat-msg.user {
-  background: var(--user-bg);
-}
-.chat-msg.asst {
-  background: var(--asst-bg);
-}
-
-.send-btn {
-  background: var(--btn-bg);
-}
-.send-btn:hover {
-  background: var(--btn-hover);
-}
-
 .theme-btn {
   background: transparent;
   border: none;
@@ -930,7 +915,22 @@ body {
 
 
 
-
+.breadcrumb {
+  font-size: 0.9rem;
+  margin: 20px 0;
+  color: #64748b;
+}
+.breadcrumb a {
+  color: #3b82f6;
+  text-decoration: none;
+}
+.breadcrumb a:hover {
+  text-decoration: underline;
+}
+.breadcrumb span {
+  color: #334155;
+  font-weight: 600;
+}
 
 
 
@@ -2116,6 +2116,7 @@ function openFAQModal(id) {
   modal.style.display = "block";
 }
 </script>
+
 
 
 
