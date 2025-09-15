@@ -346,10 +346,8 @@ const faqData = [
 </div>
 
 
-
 <!-- Virtual Asisten -->
 <div class="assistant-toggle">
-  <!-- Tombol Icon Pesan + Counter -->
   <div class="toggle-wrapper">
     <button id="msgToggleBtn" class="msg-btn">💬</button>
     <span id="msgCount" class="msg-count">0</span>
@@ -386,9 +384,6 @@ const faqData = [
     </form>
   </div>
 </div>
-
-
-
 
 
 
@@ -815,6 +810,59 @@ const faqData = [
 
 
 
+.msg-box {
+  width: 380px;
+  height: 500px;
+  background: #fff;
+  border: 1px solid rgba(0,0,0,0.25);
+  border-radius: 16px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  margin-top: 10px;
+  transform: translateY(30px) scale(0.95);
+  opacity: 0;
+  transition: all 0.4s ease;
+}
+.msg-box.show {
+  transform: translateY(0) scale(1);
+  opacity: 1;
+}
+
+.chat-msg {
+  max-width: 80%;
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  border: 1px solid rgba(0,0,0,0.3);
+  background: #f8fafc;
+  animation: fadeInMsg 0.4s ease forwards;
+  box-shadow: 2px 4px 8px rgba(0,0,0,0.15);
+}
+.chat-msg.user {
+  align-self: flex-end;
+  background: linear-gradient(135deg,#3b82f6,#2563eb);
+  color: white;
+}
+.chat-msg.asst {
+  align-self: flex-start;
+  background: linear-gradient(135deg,#e2e8f0,#cbd5e1);
+  color: #111827;
+}
+@keyframes fadeInMsg {
+  from { opacity: 0; transform: translateY(15px) scale(0.95); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Timestamp */
+.msg-time {
+  font-size: 0.75rem;
+  color: #6b7280;
+  margin-top: 4px;
+  display: block;
+  text-align: right;
+}
 
 
 
@@ -1680,6 +1728,21 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
+
+
+
+// Fungsi format waktu relatif
+function timeAgo(date) {
+  const now = new Date();
+  const diff = Math.floor((now - date) / 1000); // detik
+  if (diff < 60) return "baru saja";
+  if (diff < 3600) return `${Math.floor(diff/60)} menit yang lalu`;
+  if (diff < 86400) return `${Math.floor(diff/3600)} jam yang lalu`;
+  return date.toLocaleString("id-ID", {
+    weekday: "long", day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit"
+  });
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   const toggleBtn = document.getElementById("msgToggleBtn");
   const closeBtn = document.getElementById("closeBtn");
@@ -1689,24 +1752,27 @@ document.addEventListener("DOMContentLoaded", () => {
   const msgCount = document.getElementById("msgCount");
   const lastMsgPreview = document.getElementById("lastMsgPreview");
 
-  // Toggle buka/tutup chat
+  // Toggle buka
   toggleBtn.addEventListener("click", () => {
+    msgBox.classList.toggle("show");
     msgBox.classList.toggle("hidden");
     lastMsgPreview.classList.add("hidden");
 
     if (!chatArea.querySelector(".auto-greet")) {
       const greet = document.createElement("div");
       greet.className = "chat-msg asst auto-greet";
-      greet.textContent = "Halo 👋, saya Asisten Virtual. Ada yang bisa saya bantu?";
+      greet.innerHTML = `Halo 👋, saya Asisten Virtual. Ada yang bisa saya bantu?
+        <span class="msg-time">${timeAgo(new Date())}</span>`;
       chatArea.appendChild(greet);
     }
   });
 
   closeBtn.addEventListener("click", () => {
+    msgBox.classList.remove("show");
     msgBox.classList.add("hidden");
   });
 
-  // Kirim pesan ke Firestore
+  // Kirim pesan
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
     const name = document.getElementById("msgName").value.trim();
@@ -1721,34 +1787,33 @@ document.addEventListener("DOMContentLoaded", () => {
     form.reset();
   });
 
-  // Realtime pesan
+  // Ambil pesan realtime
   const q = query(collection(db, "messages"), orderBy("createdAt", "asc"));
   onSnapshot(q, (snapshot) => {
     chatArea.innerHTML = "";
     let lastMsg = "";
     let count = 0;
 
-    // Pesan asisten default
+    // greet tetap ada
     const greet = document.createElement("div");
     greet.className = "chat-msg asst auto-greet";
-    greet.textContent = "Halo 👋, saya Asisten Virtual. Ada yang bisa saya bantu?";
+    greet.innerHTML = `Halo 👋, saya Asisten Virtual. Ada yang bisa saya bantu?
+      <span class="msg-time">${timeAgo(new Date())}</span>`;
     chatArea.appendChild(greet);
 
-    // Tampilkan semua pesan user
     snapshot.forEach((doc) => {
       const data = doc.data();
+      const created = data.createdAt?.toDate?.() || new Date();
       const msg = document.createElement("div");
       msg.className = "chat-msg user";
-      msg.innerHTML = `<b>${data.name || "Anonim"}:</b> ${data.desc}`;
+      msg.innerHTML = `<b>${data.name || "Anonim"}:</b> ${data.desc}
+        <span class="msg-time">${timeAgo(created)}</span>`;
       chatArea.appendChild(msg);
       lastMsg = data.desc;
       count++;
     });
 
-    // Update count di tombol
     msgCount.textContent = count;
-
-    // Preview pesan terakhir
     if (lastMsg) {
       lastMsgPreview.textContent = lastMsg;
       lastMsgPreview.classList.remove("hidden");
@@ -1757,7 +1822,6 @@ document.addEventListener("DOMContentLoaded", () => {
     chatArea.scrollTop = chatArea.scrollHeight;
   });
 });
-
 
 
 
@@ -1944,6 +2008,7 @@ function openFAQModal(id) {
   modal.style.display = "block";
 }
 </script>
+
 
 
 
