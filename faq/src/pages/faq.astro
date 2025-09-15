@@ -1,4 +1,3 @@
-
 ---
 // faq.astro
 import Layout from '../layouts/Layout.astro';
@@ -365,8 +364,11 @@ const faqData = [
         <div class="asst-name">Asisten Virtual</div>
         <div class="asst-desc">Siap membantu ✨</div>
       </div>
-      <button id="closeBtn" class="close-btn">❌</button>
-    </div>
+  <div class="header-actions">
+    <button id="themeToggle" class="theme-btn">🌙</button>
+    <button id="closeBtn" class="close-btn">❌</button>
+  </div>
+</div>
 
     <!-- Area Riwayat Pesan -->
     <div id="chatArea" class="chat-area"></div>
@@ -863,6 +865,76 @@ const faqData = [
   display: block;
   text-align: right;
 }
+
+
+
+:root {
+  --bg-color: #f8fafc;
+  --text-color: #334155;
+  --box-bg: #fff;
+  --accent: #3b82f6;
+  --user-bg: linear-gradient(135deg,#3b82f6,#2563eb);
+  --asst-bg: linear-gradient(135deg,#e2e8f0,#cbd5e1);
+  --btn-bg: #10b981;
+  --btn-hover: #059669;
+  --shadow: rgba(0,0,0,0.2);
+  --font-main: 'Space Mono', monospace;
+}
+
+body.night {
+  --bg-color: #0f172a;
+  --text-color: #f1f5f9;
+  --box-bg: #1e293b;
+  --accent: #f59e0b;
+  --user-bg: linear-gradient(135deg,#2563eb,#1e40af);
+  --asst-bg: linear-gradient(135deg,#334155,#1e293b);
+  --btn-bg: #f59e0b;
+  --btn-hover: #d97706;
+  --shadow: rgba(255,255,255,0.15);
+  --font-main: 'Poppins', sans-serif;
+}
+
+body {
+  background: var(--bg-color);
+  color: var(--text-color);
+  font-family: var(--font-main);
+  transition: background 0.4s, color 0.4s;
+}
+
+.msg-box {
+  background: var(--box-bg);
+  box-shadow: 0 10px 25px var(--shadow);
+}
+
+.chat-msg.user {
+  background: var(--user-bg);
+}
+.chat-msg.asst {
+  background: var(--asst-bg);
+}
+
+.send-btn {
+  background: var(--btn-bg);
+}
+.send-btn:hover {
+  background: var(--btn-hover);
+}
+
+.theme-btn {
+  background: transparent;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  color: var(--text-color);
+}
+
+
+
+
+
+
+
+
 
 
 
@@ -1823,6 +1895,42 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 
+document.addEventListener("DOMContentLoaded", () => {
+  const themeToggle = document.getElementById("themeToggle");
+
+  function setTheme(mode) {
+    if (mode === "night") {
+      document.body.classList.add("night");
+      themeToggle.textContent = "☀️";
+      localStorage.setItem("theme", "night");
+    } else {
+      document.body.classList.remove("night");
+      themeToggle.textContent = "🌙";
+      localStorage.setItem("theme", "day");
+    }
+  }
+
+  // Deteksi otomatis sesuai jam
+  const hour = new Date().getHours();
+  if (hour >= 18 || hour < 6) {
+    setTheme("night");
+  } else {
+    setTheme("day");
+  }
+
+  // Cek preferensi sebelumnya
+  const savedTheme = localStorage.getItem("theme");
+  if (savedTheme) setTheme(savedTheme);
+
+  // Toggle manual
+  themeToggle.addEventListener("click", () => {
+    if (document.body.classList.contains("night")) {
+      setTheme("day");
+    } else {
+      setTheme("night");
+    }
+  });
+});
 
 
 
@@ -2008,6 +2116,7 @@ function openFAQModal(id) {
   modal.style.display = "block";
 }
 </script>
+
 
 
 
