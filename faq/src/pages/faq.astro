@@ -3,6 +3,14 @@
 import Layout from '../layouts/Layout.astro';
 import FAQItem from '../components/FAQItem.astro';
 
+// Ambil path URL sekarang
+const path = Astro.url.pathname;                 // misal: "/faq/blog"
+const segments = path.split("/").filter(Boolean); // ["faq","blog"]
+
+function formatSegment(seg) {
+  return seg.charAt(0).toUpperCase() + seg.slice(1);
+}
+
 // Data FAQ
 const faqData = [
   {
@@ -124,14 +132,19 @@ const faqData = [
   <div class="container">
 
 
-    <!-- Breadcrumb -->
+     <!-- Breadcrumb Dinamis -->
     <nav class="breadcrumb">
-      <a href="/">Home</a> › 
-      <a href="/faq">FAQ</a> › 
-      <span>Blog</span>
+      <a href="/">Home</a>
+      {segments.map((seg, i) => {
+        const link = "/" + segments.slice(0, i + 1).join("/");
+        const isLast = i === segments.length - 1;
+        return isLast ? (
+          <span class="active">{formatSegment(seg)}</span>
+        ) : (
+          <a href={link}>{formatSegment(seg)}</a>
+        );
+      })}
     </nav>
-
-
 
     <main class="main-content">
       <!-- Teks Berjalan -->
@@ -914,25 +927,45 @@ body.night {
 }
 
 
-
 .breadcrumb {
-  font-size: 0.9rem;
+  font-size: 1.2rem;
+  font-weight: 600;
   margin: 20px 0;
   color: #64748b;
+  display: flex;
+  gap: 8px;
+  opacity: 0;
+  transform: translateY(-8px);
+  animation: fadeSlide 0.6s ease forwards;
 }
+
 .breadcrumb a {
   color: #3b82f6;
   text-decoration: none;
+  position: relative;
 }
+
 .breadcrumb a:hover {
   text-decoration: underline;
 }
-.breadcrumb span {
-  color: #334155;
-  font-weight: 600;
+
+/* Tambahkan panah otomatis antar link */
+.breadcrumb a::after {
+  content: "›";
+  margin-left: 8px;
+  color: #999;
 }
 
+.breadcrumb span.active {
+  color: #111;
+  font-weight: 700;
+}
 
+/* Animasi fade + slide */
+@keyframes fadeSlide {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
 
 
 
@@ -2116,6 +2149,7 @@ function openFAQModal(id) {
   modal.style.display = "block";
 }
 </script>
+
 
 
 
