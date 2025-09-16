@@ -510,103 +510,6 @@ const faqData = [
 
 
 
- /* Timeline Scroll Bar Styles */
-  .timeline-scrollbar {
-    position: fixed;
-    right: 30px;
-    top: 50%;
-    transform: translateY(-50%);
-    z-index: 1000;
-    display: flex;
-    align-items: center;
-    height: 70vh;
-  }
-  
-  .timeline-track {
-    width: 4px;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.1);
-    border-radius: 2px;
-    position: relative;
-    margin-right: 15px;
-  }
-  
-  .timeline-progress {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 0%;
-    background: #000;
-    border-radius: 2px;
-    transition: height 0.3s ease;
-  }
-  
-  .timeline-markers {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    height: 100%;
-  }
-  
-  .timeline-marker {
-    position: relative;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    margin: 5px 0;
-  }
-  
-  .timeline-marker::before {
-    content: '';
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    background: #fff;
-    border: 2px solid rgba(0, 0, 0, 0.3);
-    margin-right: 10px;
-    transition: all 0.3s ease;
-  }
-  
-  .timeline-marker.active::before {
-    background: #000;
-    border-color: #000;
-    transform: scale(1.2);
-  }
-  
-  .marker-label {
-    opacity: 0;
-    transform: translateX(-10px);
-    transition: all 0.3s ease;
-    font-size: 0.8rem;
-    font-weight: 600;
-    color: #000;
-    white-space: nowrap;
-  }
-  
-  .timeline-marker:hover .marker-label,
-  .timeline-marker.active .marker-label {
-    opacity: 1;
-    transform: translateX(0);
-  }
-  
-  /* Responsive */
-  @media (max-width: 968px) {
-    .timeline-scrollbar {
-      right: 15px;
-    }
-    
-    .marker-label {
-      font-size: 0.7rem;
-    }
-  }
-  
-  @media (max-width: 768px) {
-    .timeline-scrollbar {
-      display: none;
-    }
-  }
-
 
 
 
@@ -2520,6 +2423,7 @@ function openFAQModal(id) {
   modal.style.display = "block";
 }
 </script>
+
 
 
 
