@@ -477,45 +477,65 @@ const faqData = [
 #scrollTimeline {
   position: fixed;
   top: 100px;
-  left: 30px;
-  width: 120px;
+  left: 30px; /* Bisa dipindah ke kanan dengan right:30px; */
+  width: 200px;
   z-index: 999;
 }
+
 .timeline-line {
   position: absolute;
   top: 0;
-  left: 50%;
-  transform: translateX(-50%);
+  left: 30px;
   width: 4px;
   height: 100%;
-  background: rgba(0,0,0,0.2);
+  background: #444; /* abu-abu gelap */
+  border-radius: 2px;
 }
+
 #timelineProgress {
   position: absolute;
   top: 0;
-  left: 50%;
-  transform: translateX(-50%);
+  left: 30px;
   width: 4px;
   height: 0;
-  background: #000; /* line hitam */
+  background: #000; /* garis aktif hitam */
+  border-radius: 2px;
 }
+
 .timeline-labels {
   display: flex;
   flex-direction: column;
   gap: 30px;
   position: relative;
-  margin-left: 20px;
+  margin-left: 60px; /* kasih jarak dari garis */
 }
+
 .timeline-labels div {
-  font-size: 0.85rem;
-  color: #000;
+  font-size: 0.9rem;
+  color: #fff;
+  background: #000;       /* linebox hitam */
+  padding: 8px 12px;
+  border-radius: 6px;
   cursor: pointer;
-  position: relative;
+  transition: all 0.3s ease;
+  display: inline-block;
+  white-space: nowrap;
 }
+
 .timeline-labels div.active {
+  background: #111; /* lebih pekat */
   font-weight: bold;
-  color: #000;
 }
+
+
+
+
+
+
+
+
+
+
 
 
   body {
@@ -2265,6 +2285,7 @@ function openFAQModal(id) {
   modal.style.display = "block";
 }
 </script>
+
 
 
 
