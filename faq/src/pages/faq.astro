@@ -159,17 +159,6 @@ const faqData = [
       </div>
 
 
-<!-- Container timeline -->
-<div class="scroll-timeline"></div>
-
-<!-- Section konten -->
-<section id="dasar-astro" style="height:100vh; background:#f1f5f9;">Dasar Astro</section>
-<section id="sumber-daya" style="height:100vh; background:#e0f2fe;">Sumber Daya</section>
-<section id="instalasi-setup" style="height:100vh; background:#fef3c7;">Instalasi & Setup</section>
-<section id="fitur-lanjutan" style="height:100vh; background:#fecaca;">Fitur Lanjutan</section>
-<section id="kontak" style="height:100vh; background:#0f172a; color:white;">Still Have Questions?</section>
-<section id="sosial" style="height:100vh; background:#f8fafc;">Contact</section>
-
 
 
       <!-- Layout Typografi Kiri -->
@@ -1139,154 +1128,6 @@ body.night {
 
 
 
-<style>
-.scroll-timeline {
-  position: fixed;
-  top: 100px;
-  left: 40px;
-  width: 220px;
-  z-index: 999;
-}
-.timeline-line {
-  position: absolute;
-  left: 10px;
-  top: 0;
-  width: 4px;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.1);
-  border-radius: 2px;
-}
-.timeline-progress {
-  position: absolute;
-  left: 10px;
-  top: 0;
-  width: 4px;
-  height: 0;
-  background: #3b82f6;
-  border-radius: 2px;
-  transition: height 0.3s ease;
-}
-.timeline-list { position: relative; padding-left: 30px; }
-.timeline-item { margin-bottom: 20px; cursor:pointer; }
-.timeline-dot {
-  position: absolute; left: -20px; top: 50%;
-  transform: translateY(-50%); width: 12px; height: 12px;
-  border-radius: 50%; background: #3b82f6; border: 2px solid white;
-}
-.timeline-title-box {
-  padding: 8px 12px; border: 1px solid rgba(0,0,0,0.3);
-  border-radius: 6px; background: white; font-weight: 600;
-}
-.timeline-item.active .timeline-title-box {
-  background: #3b82f6; color:white; border-color:#3b82f6;
-}
-
-
-
-/* Styling untuk timeline */
-.scroll-timeline {
-  position: fixed;
-  top: 100px;
-  left: 40px;
-  width: 220px;
-  z-index: 999;
-}
-
-.timeline-line {
-  position: absolute;
-  left: 10px;
-  top: 0;
-  width: 4px;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.1);
-  border-radius: 2px;
-}
-
-.timeline-progress {
-  position: absolute;
-  left: 10px;
-  top: 0;
-  width: 4px;
-  height: 0;
-  background: #3b82f6;
-  border-radius: 2px;
-  transition: height 0.3s ease;
-}
-
-.timeline-list {
-  position: relative;
-  padding-left: 30px;
-}
-
-.timeline-item {
-  position: relative;
-  margin-bottom: 20px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.timeline-dot {
-  position: absolute;
-  left: -20px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background: #3b82f6;
-  border: 2px solid white;
-  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.2);
-  transition: all 0.3s ease;
-}
-
-.timeline-title-box {
-  padding: 10px 15px;
-  border: 1px solid rgba(0, 0, 0, 0.3);
-  border-radius: 6px;
-  background: white;
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: #334155;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-  transition: all 0.3s ease;
-}
-
-.timeline-item.active .timeline-dot {
-  transform: translateY(-50%) scale(1.2);
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
-}
-
-.timeline-item.active .timeline-title-box {
-  background: #3b82f6;
-  color: white;
-  border-color: #3b82f6;
-}
-
-.timeline-item:hover .timeline-title-box {
-  border-color: #3b82f6;
-}
-
-/* Responsif */
-@media (max-width: 1200px) {
-  .scroll-timeline {
-    left: 20px;
-    width: 180px;
-  }
-  
-  .timeline-title-box {
-    font-size: 0.8rem;
-    padding: 8px 12px;
-  }
-}
-
-@media (max-width: 968px) {
-  .scroll-timeline {
-    display: none;
-  }
-}
-
-
-
 
 
 
@@ -2143,78 +1984,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 
-// Data section timeline
-const timelineSections = [
-  { id: "dasar-astro", title: "DASAR-DASAR ASTRO", color: "#3b82f6" },
-  { id: "sumber-daya", title: "SUMBER DAYA", color: "#8b5cf6" },
-  { id: "instalasi-setup", title: "INSTALASI & SETUP", color: "#f97316" },
-  { id: "fitur-lanjutan", title: "FITUR LANJUTAN", color: "#ef4444" },
-  { id: "kontak", title: "STILL HAVE QUESTIONS?", color: "#000000" },
-  { id: "sosial", title: "CONTACT", color: "#64748b" }
-];
-
-function createTimeline() {
-  const container = document.querySelector('.scroll-timeline');
-  container.innerHTML = '';
-  const line = document.createElement('div');
-  line.className = 'timeline-line';
-  const progress = document.createElement('div');
-  progress.className = 'timeline-progress';
-  const list = document.createElement('div');
-  list.className = 'timeline-list';
-  timelineSections.forEach(section => {
-    const item = document.createElement('div');
-    item.className = 'timeline-item';
-    item.setAttribute('data-section', section.id);
-    const dot = document.createElement('div');
-    dot.className = 'timeline-dot';
-    dot.style.backgroundColor = section.color;
-    const title = document.createElement('div');
-    title.className = 'timeline-title-box';
-    title.textContent = section.title;
-    item.appendChild(dot);
-    item.appendChild(title);
-    item.addEventListener('click', () => {
-      document.getElementById(section.id).scrollIntoView({ behavior: 'smooth' });
-    });
-    list.appendChild(item);
-  });
-  container.appendChild(line);
-  container.appendChild(progress);
-  container.appendChild(list);
-}
-
-function updateTimelineOnScroll() {
-  const items = document.querySelectorAll('.timeline-item');
-  const progress = document.querySelector('.timeline-progress');
-  const sectionPositions = timelineSections.map(sec => {
-    const el = document.getElementById(sec.id);
-    return { id: sec.id, top: el.offsetTop };
-  });
-  window.addEventListener('scroll', () => {
-    const scrollPos = window.scrollY + window.innerHeight/2;
-    let activeIndex = 0;
-    for (let i=0;i<sectionPositions.length;i++) {
-      if (scrollPos >= sectionPositions[i].top) activeIndex = i;
-    }
-    const total = sectionPositions.length-1;
-    progress.style.height = `${(activeIndex/total)*100}%`;
-    items.forEach(i => i.classList.remove('active'));
-    if (items[activeIndex]) items[activeIndex].classList.add('active');
-  });
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-  createTimeline();
-  updateTimelineOnScroll();
-});
-
-
-
-
-
-
-
 
 
 
@@ -2402,6 +2171,7 @@ function openFAQModal(id) {
   modal.style.display = "block";
 }
 </script>
+
 
 
 
