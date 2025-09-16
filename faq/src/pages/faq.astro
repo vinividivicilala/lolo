@@ -328,10 +328,11 @@ const faqData = [
   </div>
 </div>
 
-<!-- Vertical Timeline Line -->
+<!-- Scroll Timeline Sidebar -->
 <div class="scroll-timeline">
   <div class="timeline-line"></div>
   <div class="timeline-progress"></div>
+  <div class="timeline-nav"></div>
 </div>
 
 
@@ -2010,31 +2011,60 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 
+
 document.addEventListener("DOMContentLoaded", () => {
-  const faqBlocks = document.querySelectorAll(".faq-item-wrapper");
+  const topics = document.querySelectorAll(".topic-title");
+  const nav = document.querySelector(".timeline-nav");
   const progressLine = document.querySelector(".timeline-progress");
 
-  function updateTimeline() {
-    if (!faqBlocks.length || !progressLine) return;
+  // Buat daftar link otomatis
+  topics.forEach((topic, idx) => {
+    const link = document.createElement("a");
+    link.className = "timeline-link";
+    link.textContent = topic.textContent.trim();
+    link.dataset.index = idx;
+    nav.appendChild(link);
+  });
 
+  const links = document.querySelectorAll(".timeline-link");
+
+  function updateTimeline() {
     const scrollPos = window.scrollY + window.innerHeight / 2;
     let activeIndex = 0;
 
-    faqBlocks.forEach((block, idx) => {
-      const rect = block.getBoundingClientRect();
+    topics.forEach((topic, idx) => {
+      const rect = topic.getBoundingClientRect();
       const top = rect.top + window.scrollY;
-      if (scrollPos >= top) {
-        activeIndex = idx;
-      }
+      if (scrollPos >= top) activeIndex = idx;
     });
 
-    const total = faqBlocks.length - 1;
+    const total = topics.length - 1;
     const percentage = total > 0 ? activeIndex / total : 0;
     progressLine.style.height = `${percentage * 100}%`;
+
+    // highlight link aktif
+    links.forEach((link, i) => {
+      link.classList.toggle("active", i === activeIndex);
+    });
   }
 
   window.addEventListener("scroll", updateTimeline);
   updateTimeline();
+
+  // Smooth scroll ke judul saat link diklik
+  links.forEach(link => {
+    link.addEventListener("click", e => {
+      e.preventDefault();
+      const index = parseInt(link.dataset.index, 10);
+      const target = topics[index];
+      if (target) {
+        window.scrollTo({
+          top: target.offsetTop - 100,
+          behavior: "smooth"
+        });
+      }
+    });
+  });
 });
 
 
@@ -2225,6 +2255,7 @@ function openFAQModal(id) {
   modal.style.display = "block";
 }
 </script>
+
 
 
 
