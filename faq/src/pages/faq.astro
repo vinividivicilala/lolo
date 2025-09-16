@@ -11,6 +11,14 @@ function formatSegment(seg) {
   return seg.charAt(0).toUpperCase() + seg.slice(1);
 }
 
+
+<!-- Vertical Timeline Line -->
+<div class="scroll-timeline">
+  <div class="timeline-line"></div>
+  <div class="timeline-progress"></div>
+</div>
+
+
 // Data FAQ
 const faqData = [
   {
@@ -153,13 +161,6 @@ const faqData = [
           ❓ TANYA JAWAB SEPUTAR ASTRO & DEVELOPMENT WEB • 🚀 TIPS & TRIK TERBARU • 📚 SUMBER BELAJAR TERPERCAYA •
         </div>
       </div>
-
-
-<!-- Sidebar Timeline -->
-<aside id="faqTimeline" class="faq-timeline">
-  <h3 class="timeline-title-side">Timeline FAQ</h3>
-  <ul id="faqTimelineList"></ul>
-</aside>
 
 
       <!-- Layout Typografi Kiri -->
@@ -467,50 +468,36 @@ const faqData = [
     font-family: 'Space Mono', monospace !important;
   }
 
-.faq-timeline {
+.scroll-timeline {
   position: fixed;
   top: 100px;
-  right: 20px;
-  width: 240px;
-  max-height: 70vh;
-  overflow-y: auto;
-  background: #fff;
-  border: 1px solid rgba(0,0,0,0.15);
-  border-radius: 8px;
-  padding: 15px;
-  box-shadow: 0 6px 18px rgba(0,0,0,0.15);
-  font-size: 0.95rem;
+  left: 40px;
+  width: 4px;
+  height: 70vh;
+  background: rgba(0,0,0,0.1);
+  border-radius: 2px;
+  z-index: 999;
 }
 
-.timeline-title-side {
-  font-weight: 700;
-  margin-bottom: 10px;
-  font-size: 1.1rem;
-  color: #111;
+.timeline-line {
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.1);
+  border-radius: 2px;
+  position: absolute;
+  top: 0;
+  left: 0;
 }
 
-.faq-timeline ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.faq-timeline li {
-  margin: 8px 0;
-  padding: 6px 10px;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: background 0.3s;
-}
-
-.faq-timeline li:hover {
-  background: #f1f5f9;
-}
-
-.faq-timeline li.active {
+.timeline-progress {
+  width: 100%;
+  height: 0;
   background: #3b82f6;
-  color: #fff;
-  font-weight: bold;
+  border-radius: 2px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  transition: height 0.3s ease;
 }
 
 
@@ -1987,46 +1974,6 @@ document.addEventListener("DOMContentLoaded", () => {
 document.addEventListener("DOMContentLoaded", () => {
   const themeToggle = document.getElementById("themeToggle");
 
-// ==== TIMELINE SIDEBAR ==== 
-const faqItems = document.querySelectorAll(".faq-item-wrapper");
-const faqTimelineList = document.getElementById("faqTimelineList");
-
-// Buat list otomatis dari FAQ
-faqItems.forEach(item => {
-  const id = item.getAttribute("data-faq-id");
-  const text = item.querySelector(".faq-item-question")?.innerText || "FAQ";
-  const li = document.createElement("li");
-  li.textContent = text;
-  li.dataset.id = id;
-
-  // klik pada timeline → scroll ke FAQ
-  li.addEventListener("click", () => {
-    document.querySelector(`[data-faq-id="${id}"]`)
-      ?.scrollIntoView({ behavior: "smooth", block: "center" });
-  });
-
-  faqTimelineList.appendChild(li);
-});
-
-// Observer untuk highlight aktif saat scroll
-const sideObserver = new IntersectionObserver((entries) => {
-  entries.forEach(entry => {
-    if (entry.isIntersecting) {
-      const id = entry.target.getAttribute("data-faq-id");
-      document.querySelectorAll("#faqTimeline li")
-        .forEach(li => li.classList.remove("active"));
-      const activeLi = document.querySelector(`#faqTimeline li[data-id="${id}"]`);
-      if (activeLi) activeLi.classList.add("active");
-
-      // scroll otomatis di timeline agar item aktif selalu terlihat
-      activeLi?.scrollIntoView({ block: "nearest", behavior: "smooth" });
-    }
-  });
-}, { threshold: 0.6 });
-
-faqItems.forEach(item => sideObserver.observe(item));
-
-
   function setTheme(mode) {
     if (mode === "night") {
       document.body.classList.add("night");
@@ -2059,6 +2006,35 @@ faqItems.forEach(item => sideObserver.observe(item));
       setTheme("night");
     }
   });
+});
+
+
+
+document.addEventListener("DOMContentLoaded", () => {
+  const faqBlocks = document.querySelectorAll(".faq-item-wrapper");
+  const progressLine = document.querySelector(".timeline-progress");
+
+  function updateTimeline() {
+    if (!faqBlocks.length || !progressLine) return;
+
+    const scrollPos = window.scrollY + window.innerHeight / 2;
+    let activeIndex = 0;
+
+    faqBlocks.forEach((block, idx) => {
+      const rect = block.getBoundingClientRect();
+      const top = rect.top + window.scrollY;
+      if (scrollPos >= top) {
+        activeIndex = idx;
+      }
+    });
+
+    const total = faqBlocks.length - 1;
+    const percentage = total > 0 ? activeIndex / total : 0;
+    progressLine.style.height = `${percentage * 100}%`;
+  }
+
+  window.addEventListener("scroll", updateTimeline);
+  updateTimeline();
 });
 
 
@@ -2249,6 +2225,7 @@ function openFAQModal(id) {
   modal.style.display = "block";
 }
 </script>
+
 
 
 
