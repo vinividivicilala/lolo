@@ -1682,48 +1682,6 @@ body.night {
 
 <script>
 
-
-document.addEventListener("DOMContentLoaded", () => {
-  const sections = document.querySelectorAll(".topic-title");
-  const labelsContainer = document.querySelector("#scrollTimeline .timeline-labels");
-  const progressLine = document.getElementById("timelineProgress");
-
-  const labels = [];
-  sections.forEach((sec, i) => {
-    const label = document.createElement("div");
-    label.textContent = sec.textContent.trim();
-    label.addEventListener("click", () => {
-      sec.scrollIntoView({ behavior: "smooth", block: "start" });
-    });
-    labelsContainer.appendChild(label);
-    labels.push(label);
-  });
-
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if(entry.isIntersecting){
-        const idx = Array.from(sections).indexOf(entry.target);
-        labels.forEach(l => l.classList.remove("active"));
-        if (labels[idx]) labels[idx].classList.add("active");
-
-        // Update panjang garis hitam sesuai section yang aktif
-        const activeLabel = labels[idx];
-        const rect = activeLabel.getBoundingClientRect();
-        const containerTop = labelsContainer.getBoundingClientRect().top;
-        progressLine.style.height = (rect.top - containerTop + rect.height/2) + "px";
-      }
-    });
-  }, { threshold: 0.5 });
-
-  sections.forEach(sec => observer.observe(sec));
-});
-
-
-
-
-
-
-
   // Data FAQ untuk modal
   const faqData = [
     {
@@ -2097,6 +2055,46 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 
+document.addEventListener("DOMContentLoaded", () => {
+  const sections = document.querySelectorAll(".topic-title");
+  const labelsContainer = document.querySelector("#scrollTimeline .timeline-labels");
+  const progressLine = document.getElementById("timelineProgress");
+
+  const labels = [];
+  sections.forEach((sec, i) => {
+    const label = document.createElement("div");
+    label.textContent = sec.textContent.trim();
+    label.addEventListener("click", () => {
+      sec.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+    labelsContainer.appendChild(label);
+    labels.push(label);
+  });
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if(entry.isIntersecting){
+        const idx = Array.from(sections).indexOf(entry.target);
+        labels.forEach(l => l.classList.remove("active"));
+        if (labels[idx]) labels[idx].classList.add("active");
+
+        // Update tinggi progress line
+        const activeLabel = labels[idx];
+        const rect = activeLabel.getBoundingClientRect();
+        const containerTop = labelsContainer.getBoundingClientRect().top;
+        progressLine.style.height = (rect.top - containerTop + rect.height/2) + "px";
+      }
+    });
+  }, { threshold: 0.5 });
+
+  sections.forEach(sec => observer.observe(sec));
+});
+
+
+
+
+
+
 
 
 
@@ -2285,6 +2283,7 @@ function openFAQModal(id) {
   modal.style.display = "block";
 }
 </script>
+
 
 
 
