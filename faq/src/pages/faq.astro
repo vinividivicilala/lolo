@@ -135,13 +135,6 @@ const faqData = [
 <Layout title="FAQ | Astro Example" description="Halaman FAQ dengan animasi, gambar, dan icon." currentPage="faq">
   <div class="container">
 
-<!-- Scroll Timeline -->
-<div id="scrollTimeline">
-  <div class="timeline-line"></div>
-  <div id="timelineProgress"></div>
-  <div class="timeline-labels"></div>
-</div>
-
 
      <!-- Breadcrumb Dinamis -->
     <nav class="breadcrumb">
@@ -427,7 +420,38 @@ const faqData = [
 
 
 
-
+<!-- Timeline Scroll Bar -->
+<div class="timeline-scrollbar">
+  <div class="timeline-track">
+    <div class="timeline-progress"></div>
+  </div>
+  <div class="timeline-markers">
+    <div class="timeline-marker" data-target="breadcrumb">
+      <span class="marker-label">Home</span>
+    </div>
+    <div class="timeline-marker" data-target="main-title">
+      <span class="marker-label">FAQ</span>
+    </div>
+    <div class="timeline-marker" data-target="dasar-dasar">
+      <span class="marker-label">Dasar-Dasar</span>
+    </div>
+    <div class="timeline-marker" data-target="sumber-daya">
+      <span class="marker-label">Sumber Daya</span>
+    </div>
+    <div class="timeline-marker" data-target="instalasi-setup">
+      <span class="marker-label">Instalasi</span>
+    </div>
+    <div class="timeline-marker" data-target="fitur-lanjutan">
+      <span class="marker-label">Fitur Lanjutan</span>
+    </div>
+    <div class="timeline-marker" data-target="contact-block">
+      <span class="marker-label">Contact</span>
+    </div>
+    <div class="timeline-marker" data-target="footer">
+      <span class="marker-label">Footer</span>
+    </div>
+  </div>
+</div>
 
 
 
@@ -474,61 +498,103 @@ const faqData = [
   }
 
 
-#scrollTimeline {
-  position: fixed;
-  top: 100px;
-  left: 30px; /* Bisa dipindah ke kanan dengan right:30px; */
-  width: 200px;
-  z-index: 999;
-}
 
-.timeline-line {
-  position: absolute;
-  top: 0;
-  left: 30px;
-  width: 4px;
-  height: 100%;
-  background: #444; /* abu-abu gelap */
-  border-radius: 2px;
-}
-
-#timelineProgress {
-  position: absolute;
-  top: 0;
-  left: 30px;
-  width: 4px;
-  height: 0;
-  background: #000; /* garis aktif hitam */
-  border-radius: 2px;
-}
-
-.timeline-labels {
-  display: flex;
-  flex-direction: column;
-  gap: 30px;
-  position: relative;
-  margin-left: 60px; /* kasih jarak dari garis */
-}
-
-.timeline-labels div {
-  font-size: 0.9rem;
-  color: #fff;
-  background: #000;       /* linebox hitam */
-  padding: 8px 12px;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  display: inline-block;
-  white-space: nowrap;
-}
-
-.timeline-labels div.active {
-  background: #111; /* lebih pekat */
-  font-weight: bold;
-}
-
-
-
+ /* Timeline Scroll Bar Styles */
+  .timeline-scrollbar {
+    position: fixed;
+    right: 30px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    height: 70vh;
+  }
+  
+  .timeline-track {
+    width: 4px;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 2px;
+    position: relative;
+    margin-right: 15px;
+  }
+  
+  .timeline-progress {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 0%;
+    background: #000;
+    border-radius: 2px;
+    transition: height 0.3s ease;
+  }
+  
+  .timeline-markers {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
+  }
+  
+  .timeline-marker {
+    position: relative;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    margin: 5px 0;
+  }
+  
+  .timeline-marker::before {
+    content: '';
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #fff;
+    border: 2px solid rgba(0, 0, 0, 0.3);
+    margin-right: 10px;
+    transition: all 0.3s ease;
+  }
+  
+  .timeline-marker.active::before {
+    background: #000;
+    border-color: #000;
+    transform: scale(1.2);
+  }
+  
+  .marker-label {
+    opacity: 0;
+    transform: translateX(-10px);
+    transition: all 0.3s ease;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #000;
+    white-space: nowrap;
+  }
+  
+  .timeline-marker:hover .marker-label,
+  .timeline-marker.active .marker-label {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  
+  /* Responsive */
+  @media (max-width: 968px) {
+    .timeline-scrollbar {
+      right: 15px;
+    }
+    
+    .marker-label {
+      font-size: 0.7rem;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .timeline-scrollbar {
+      display: none;
+    }
+  }
 
 
 
@@ -2055,45 +2121,83 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 
-document.addEventListener("DOMContentLoaded", () => {
-  const sections = document.querySelectorAll(".topic-title");
-  const labelsContainer = document.querySelector("#scrollTimeline .timeline-labels");
-  const progressLine = document.getElementById("timelineProgress");
 
-  const labels = [];
-  sections.forEach((sec, i) => {
-    const label = document.createElement("div");
-    label.textContent = sec.textContent.trim();
-    label.addEventListener("click", () => {
-      sec.scrollIntoView({ behavior: "smooth", block: "start" });
-    });
-    labelsContainer.appendChild(label);
-    labels.push(label);
+document.addEventListener('DOMContentLoaded', function() {
+  // Tambahkan ID ke setiap bagian yang akan dilacak
+  const sections = [
+    { id: 'breadcrumb', element: document.querySelector('.breadcrumb') },
+    { id: 'main-title', element: document.querySelector('.title-section') },
+    { id: 'dasar-dasar', element: document.querySelector('[data-target="dasar-dasar"]') },
+    { id: 'sumber-daya', element: document.querySelector('[data-target="sumber-daya"]') },
+    { id: 'instalasi-setup', element: document.querySelector('[data-target="instalasi-setup"]') },
+    { id: 'fitur-lanjutan', element: document.querySelector('[data-target="fitur-lanjutan"]') },
+    { id: 'contact-block', element: document.querySelector('.color-block-full') },
+    { id: 'footer', element: document.querySelector('.footer-section') }
+  ];
+  
+  // Tambahkan ID ke elemen jika belum ada
+  sections.forEach(section => {
+    if (section.element && !section.element.id) {
+      section.element.id = section.id;
+    }
   });
-
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if(entry.isIntersecting){
-        const idx = Array.from(sections).indexOf(entry.target);
-        labels.forEach(l => l.classList.remove("active"));
-        if (labels[idx]) labels[idx].classList.add("active");
-
-        // Update tinggi progress line
-        const activeLabel = labels[idx];
-        const rect = activeLabel.getBoundingClientRect();
-        const containerTop = labelsContainer.getBoundingClientRect().top;
-        progressLine.style.height = (rect.top - containerTop + rect.height/2) + "px";
+  
+  // Buat marker untuk setiap section
+  const markers = document.querySelectorAll('.timeline-marker');
+  const progressBar = document.querySelector('.timeline-progress');
+  
+  // Fungsi untuk update timeline
+  function updateTimeline() {
+    const scrollPosition = window.scrollY;
+    const documentHeight = document.documentElement.scrollHeight - window.innerHeight;
+    const scrollPercentage = (scrollPosition / documentHeight) * 100;
+    
+    // Update progress bar
+    progressBar.style.height = scrollPercentage + '%';
+    
+    // Cari section yang sedang aktif
+    let currentSection = null;
+    
+    sections.forEach(section => {
+      if (section.element) {
+        const rect = section.element.getBoundingClientRect();
+        if (rect.top <= window.innerHeight / 2 && rect.bottom >= window.innerHeight / 2) {
+          currentSection = section.id;
+        }
       }
     });
-  }, { threshold: 0.5 });
-
-  sections.forEach(sec => observer.observe(sec));
+    
+    // Update marker aktif
+    markers.forEach(marker => {
+      if (marker.getAttribute('data-target') === currentSection) {
+        marker.classList.add('active');
+      } else {
+        marker.classList.remove('active');
+      }
+    });
+  }
+  
+  // Event listener untuk scroll
+  window.addEventListener('scroll', updateTimeline);
+  
+  // Event listener untuk klik marker
+  markers.forEach(marker => {
+    marker.addEventListener('click', function() {
+      const targetId = this.getAttribute('data-target');
+      const targetElement = document.getElementById(targetId);
+      
+      if (targetElement) {
+        window.scrollTo({
+          top: targetElement.offsetTop - 20,
+          behavior: 'smooth'
+        });
+      }
+    });
+  });
+  
+  // Inisialisasi timeline
+  updateTimeline();
 });
-
-
-
-
-
 
 
 
@@ -2283,6 +2387,7 @@ function openFAQModal(id) {
   modal.style.display = "block";
 }
 </script>
+
 
 
 
