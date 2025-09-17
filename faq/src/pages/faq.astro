@@ -533,6 +533,29 @@ const faqData = [
     <div class="modal-content large-modal">
       <span class="close">&times;</span>
       <div id="modalContent"></div>
+<!-- Modal Feedback: Apakah kamu menyukai FAQ ini? -->
+<div class="modal-feedback" role="region" aria-label="Feedback FAQ">
+  <h3 class="feedback-title">Apakah kamu menyukai FAQ ini?</h3>
+
+  <div class="feedback-buttons" role="toolbar" aria-label="Feedback buttons">
+    <!-- Like -->
+    <button id="faqLikeBtn" class="feedback-btn" aria-pressed="false" aria-label="Suka">
+      <svg viewBox="0 0 24 24" class="icon icon-like" width="36" height="36" aria-hidden="true">
+        <path class="icon-stroke" d="M14 9V5a3 3 0 0 0-3-3 1 1 0 0 0-.95.68L8 7H5a1 1 0 0 0-1 1v7a2 2 0 0 0 2 2h8a3 3 0 0 0 3-3v-4a2 2 0 0 0-3-2z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+        <path class="icon-fill" d="M14 9V5a3 3 0 0 0-3-3 1 1 0 0 0-.95.68L8 7H5a1 1 0 0 0-1 1v7a2 2 0 0 0 2 2h8a3 3 0 0 0 3-3v-4a2 2 0 0 0-3-2z" fill="currentColor" fill-opacity="0"/>
+      </svg>
+    </button>
+
+    <!-- Dislike -->
+    <button id="faqDislikeBtn" class="feedback-btn" aria-pressed="false" aria-label="Tidak suka">
+      <svg viewBox="0 0 24 24" class="icon icon-dislike" width="36" height="36" aria-hidden="true">
+        <path class="icon-stroke" d="M10 15v4a3 3 0 0 0 3 3 1 1 0 0 0 .95-.68L16 17h3a1 1 0 0 0 1-1v-7a2 2 0 0 0-2-2H10a3 3 0 0 0-3 3v4a2 2 0 0 0 3 2z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+        <path class="icon-fill" d="M10 15v4a3 3 0 0 0 3 3 1 1 0 0 0 .95-.68L16 17h3a1 1 0 0 0 1-1v-7a2 2 0 0 0-2-2H10a3 3 0 0 0-3 3v4a2 2 0 0 0 3 2z" fill="currentColor" fill-opacity="0"/>
+      </svg>
+    </button>
+  </div>
+</div>
+
     </div>
   </div>
 </Layout>
@@ -713,6 +736,91 @@ const faqData = [
 
 
 
+/* Modal feedback */
+.modal-feedback {
+  margin-top: 18px;
+  padding: 18px 22px;
+  border-top: 1px solid rgba(0,0,0,0.08);
+  text-align: center;
+  background: transparent;
+}
+
+.feedback-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin-bottom: 12px;
+  color: #000;
+}
+
+/* tombol */
+.feedback-buttons {
+  display: inline-flex;
+  gap: 18px;
+  align-items: center;
+  justify-content: center;
+}
+
+.feedback-btn {
+  background: transparent;
+  border: 2px solid rgba(0,0,0,0.12);
+  padding: 8px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 52px;
+}
+
+.feedback-btn:focus {
+  outline: none;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+  transform: translateY(-3px);
+  border-color: rgba(0,0,0,0.24);
+}
+
+/* SVG base */
+.icon {
+  display: block;
+}
+
+/* stroke (outline) */
+.icon-stroke {
+  stroke: #111827;
+  transition: stroke 200ms ease;
+}
+
+/* fill path initially transparent */
+.icon-fill {
+  transition: fill-opacity 300ms ease, transform 280ms cubic-bezier(.2,.9,.3,1);
+  transform-origin: center;
+  transform-box: fill-box;
+  /* initial: invisible */
+  fill-opacity: 0;
+  fill: currentColor;
+}
+
+/* When selected, add filled color + pop animation */
+.feedback-btn.selected .icon-fill {
+  fill-opacity: 1;
+  transform: scale(1.02);
+}
+
+/* Different colors for like/dislike */
+#faqLikeBtn.selected { color: #10b981; border-color: rgba(16,185,129,0.2); box-shadow: 0 8px 24px rgba(16,185,129,0.06); }
+#faqDislikeBtn.selected { color: #ef4444; border-color: rgba(239,68,68,0.16); box-shadow: 0 8px 24px rgba(239,68,68,0.06); }
+
+/* Subtle pop keyframe (used by JS when toggling for one-shot) */
+@keyframes popFill {
+  0%   { transform: scale(0.92); }
+  60%  { transform: scale(1.08); }
+  100% { transform: scale(1.02); }
+}
+
+/* small hover effect for non-selected */
+.feedback-btn:not(.selected):hover .icon-stroke { stroke: #000; transform: translateY(-2px); }
 
 
 
@@ -2240,6 +2348,68 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 
+document.addEventListener("DOMContentLoaded", () => {
+  const likeBtn = document.getElementById("faqLikeBtn");
+  const dislikeBtn = document.getElementById("faqDislikeBtn");
+
+  if (!likeBtn || !dislikeBtn) return; // safety
+
+  // helper: toggle selected, ensure only one active at time
+  function setSelected(btnToSelect) {
+    [likeBtn, dislikeBtn].forEach(btn => {
+      if (btn === btnToSelect) {
+        const already = btn.classList.contains("selected");
+        if (already) {
+          // unselect
+          btn.classList.remove("selected");
+          btn.setAttribute("aria-pressed", "false");
+        } else {
+          // select this, unselect other
+          btn.classList.add("selected");
+          btn.setAttribute("aria-pressed", "true");
+          // one-shot pop animation on fill path
+          const svgFill = btn.querySelector(".icon-fill");
+          if (svgFill) {
+            svgFill.style.animation = "popFill 320ms ease";
+            // remove animation after done to allow replay next time
+            setTimeout(() => { svgFill.style.animation = ""; }, 360);
+          }
+          // unset other
+          const other = btn === likeBtn ? dislikeBtn : likeBtn;
+          other.classList.remove("selected");
+          other.setAttribute("aria-pressed", "false");
+        }
+      }
+    });
+  }
+
+  likeBtn.addEventListener("click", (e) => {
+    e.preventDefault();
+    setSelected(likeBtn);
+
+    // Optional: lakukan sesuatu, mis. kirim ke server / firestore
+    // sendFeedback(currentFaqId, like=true)
+  });
+
+  dislikeBtn.addEventListener("click", (e) => {
+    e.preventDefault();
+    setSelected(dislikeBtn);
+
+    // Optional: lakukan sesuatu, mis. kirim ke server / firestore
+    // sendFeedback(currentFaqId, like=false)
+  });
+});
+
+
+
+
+
+
+
+
+
+
+
 
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -2515,6 +2685,7 @@ function openFAQModal(id) {
   modal.style.display = "block";
 }
 </script>
+
 
 
 
