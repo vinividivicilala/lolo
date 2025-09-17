@@ -2569,7 +2569,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
 
-function openFAQModal(id) {
+async function openFAQModal(id) {
   const faq = faqData.find(item => item.id === id);
   if (!faq) return;
 
@@ -2685,6 +2685,7 @@ function openFAQModal(id) {
 }
 }
 </script>
+
 
 
 
