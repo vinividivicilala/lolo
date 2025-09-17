@@ -2365,24 +2365,12 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 
-
-
-let currentFaqIndex = 0;
-let userVotedFaqs = {}; // simpan status lokal agar 1x per FAQ
-
-// Buat ID unik anonim untuk setiap browser (sekali seumur hidup)
-let anonId = localStorage.getItem("anonId");
-if (!anonId) {
-  anonId = crypto.randomUUID();
-  localStorage.setItem("anonId", anonId);
-}
-
 async function openFaqModal(index) {
   currentFaqIndex = index;
   const faq = faqData[index];
   if (!faq) return;
 
-  // Isi konten modal
+  // Isi modal
   document.getElementById("modalTitle").textContent = faq.question;
   document.getElementById("modalContent").innerHTML = `
     <div class="modal-faq-content">
@@ -2397,7 +2385,7 @@ async function openFaqModal(index) {
   const modal = document.getElementById("faqModal");
   modal.style.display = "block";
 
-  // Referensi koleksi votes untuk FAQ ini
+  // Refs Firestore
   const votesCol = collection(db, "faqFeedback", `faq-${faq.id}`, "votes");
   const voteRef = doc(votesCol, anonId);
 
@@ -2410,7 +2398,7 @@ async function openFaqModal(index) {
   likeBtn.classList.remove("voted");
   dislikeBtn.classList.remove("voted");
 
-  // Cek apakah user sudah vote
+  // Cek apakah user sudah vote sebelumnya
   const userSnap = await getDoc(voteRef);
   if (userSnap.exists()) {
     const vote = userSnap.data().type;
@@ -2418,45 +2406,39 @@ async function openFaqModal(index) {
     if (vote === "dislike") dislikeBtn.classList.add("voted");
   }
 
-  // Realtime hitung likes & dislikes
+  // Realtime update jumlah like/dislike
   onSnapshot(votesCol, (snapshot) => {
     let likeCount = 0;
     let dislikeCount = 0;
-    snapshot.forEach((doc) => {
-      const data = doc.data();
-      if (data.type === "like") likeCount++;
-      if (data.type === "dislike") dislikeCount++;
+    snapshot.forEach((d) => {
+      const v = d.data();
+      if (v.type === "like") likeCount++;
+      if (v.type === "dislike") dislikeCount++;
     });
     likeCountEl.textContent = likeCount;
     dislikeCountEl.textContent = dislikeCount;
   });
 
-  // Klik Like
-  likeBtn.onclick = async () => {
+  // Pastikan tombol bisa di-klik
+  likeBtn.addEventListener("click", async () => {
     const snap = await getDoc(voteRef);
     if (!snap.exists()) {
-      await setDoc(voteRef, {
-        type: "like",
-        createdAt: serverTimestamp()
-      });
+      await setDoc(voteRef, { type: "like", createdAt: serverTimestamp() });
       likeBtn.classList.add("voted");
       dislikeBtn.classList.remove("voted");
     }
-  };
+  });
 
-  // Klik Dislike
-  dislikeBtn.onclick = async () => {
+  dislikeBtn.addEventListener("click", async () => {
     const snap = await getDoc(voteRef);
     if (!snap.exists()) {
-      await setDoc(voteRef, {
-        type: "dislike",
-        createdAt: serverTimestamp()
-      });
+      await setDoc(voteRef, { type: "dislike", createdAt: serverTimestamp() });
       dislikeBtn.classList.add("voted");
       likeBtn.classList.remove("voted");
     }
-  };
+  });
 }
+
 
 
 
@@ -2737,5 +2719,6 @@ function openFAQModal(id) {
   modal.style.display = "block";
 }
 </script>
+
 
 
