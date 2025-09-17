@@ -2732,9 +2732,23 @@ function openFAQModal(id) {
   `;
 
   modal.style.display = "block";
-// Cek vote device const voteRef = doc(db, "faqVotes", ${faq.id}_${deviceId}); const voteSnap = await getDoc(voteRef); if (voteSnap.exists()) { const vote = voteSnap.data().vote; if (vote === "like") { document.getElementById("faqLikeBtn").classList.add("selected"); document.getElementById("faqLikeBtn").setAttribute("aria-pressed", "true"); } else if (vote === "dislike") { document.getElementById("faqDislikeBtn").classList.add("selected"); document.getElementById("faqDislikeBtn").setAttribute("aria-pressed", "true"); } }
+  // 🔥 Cek vote device di Firestore
+  const voteRef = doc(db, "faqVotes", `${faq.id}_${deviceId}`);
+  const voteSnap = await getDoc(voteRef);
+  if (voteSnap.exists()) {
+    const vote = voteSnap.data().vote;
+    if (vote === "like") {
+      document.getElementById("faqLikeBtn").classList.add("selected");
+      document.getElementById("faqLikeBtn").setAttribute("aria-pressed", "true");
+    } else if (vote === "dislike") {
+      document.getElementById("faqDislikeBtn").classList.add("selected");
+      document.getElementById("faqDislikeBtn").setAttribute("aria-pressed", "true");
+    }
+  }
+}
 }
 </script>
+
 
 
 
