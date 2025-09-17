@@ -2362,6 +2362,84 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 
+let currentFaqIndex = 0;
+let userVotedFaqs = {}; // simpan status lokal agar 1x per FAQ
+
+async function openFaqModal(index) {
+  currentFaqIndex = index;
+  const faq = faqData[index];
+  if (!faq) return;
+
+  document.getElementById("modalTitle").textContent = faq.question;
+  document.getElementById("modalContent").innerHTML = `
+    <div class="modal-faq-content">
+      <p>${faq.fullDescription}</p>
+      <div class="modal-meta">
+        <span>Kategori: ${faq.category}</span>
+        <span>Update: ${faq.lastUpdated}</span>
+      </div>
+    </div>
+  `;
+
+  const modal = document.getElementById("faqModal");
+  modal.style.display = "block";
+
+
+  // ambil data dari firestore
+  const ref = doc(db, "faqFeedback", `faq-${faq.id}`);
+  const snap = await getDoc(ref);
+  if (!snap.exists()) {
+    await setDoc(ref, { likes: 0, dislikes: 0 });
+  }
+  // listen realtime update
+  onSnapshot(ref, (docSnap) => {
+    if (docSnap.exists()) {
+      document.getElementById("likeCount").textContent = docSnap.data().likes || 0;
+      document.getElementById("dislikeCount").textContent = docSnap.data().dislikes || 0;
+    }
+  });
+
+
+
+
+
+
+
+  // reset tombol UI
+  document.getElementById("faqLikeBtn").classList.remove("selected");
+  document.getElementById("faqDislikeBtn").classList.remove("selected");
+  document.getElementById("faqLikeBtn").setAttribute("aria-pressed", "false");
+  document.getElementById("faqDislikeBtn").setAttribute("aria-pressed", "false");
+}
+
+// klik Like
+document.getElementById("faqLikeBtn").addEventListener("click", async () => {
+  const faq = faqData[currentFaqIndex];
+  if (!faq || userVotedFaqs[faq.id]) return; // sudah vote
+
+  const ref = doc(db, "faqFeedback", `faq-${faq.id}`);
+  await updateDoc(ref, { likes: increment(1) });
+
+  userVotedFaqs[faq.id] = true;
+  document.getElementById("faqLikeBtn").classList.add("selected");
+  document.getElementById("faqLikeBtn").setAttribute("aria-pressed", "true");
+});
+
+// klik Dislike
+document.getElementById("faqDislikeBtn").addEventListener("click", async () => {
+  const faq = faqData[currentFaqIndex];
+  if (!faq || userVotedFaqs[faq.id]) return; // sudah vote
+
+  const ref = doc(db, "faqFeedback", `faq-${faq.id}`);
+  await updateDoc(ref, { dislikes: increment(1) });
+
+  userVotedFaqs[faq.id] = true;
+  document.getElementById("faqDislikeBtn").classList.add("selected");
+  document.getElementById("faqDislikeBtn").setAttribute("aria-pressed", "true");
+});
+
+
+
 
 
 
@@ -2569,7 +2647,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
 
-async function openFAQModal(id) {
+function openFAQModal(id) {
   const faq = faqData.find(item => item.id === id);
   if (!faq) return;
 
@@ -2614,13 +2692,6 @@ async function openFAQModal(id) {
           <!-- Garis vertikal timeline -->
           <div style="position: absolute; left: 30px; top: 0; bottom: 0; width: 2px; background: repeating-linear-gradient(to bottom, transparent, transparent 6px, rgba(0,0,0,0.2) 6px, rgba(0,0,0,0.2) 12px);"></div>
 
-  <!-- Voting -->
-      <div style="margin: 20px 0; display:flex; align-items:center; gap:20px;">
-        <button id="faqLikeBtn" style="padding:10px 16px; border:1px solid #ccc; border-radius:6px; background:#f0f9ff; cursor:pointer;">👍 <span id="likeCount">0</span></button>
-        <button id="faqDislikeBtn" style="padding:10px 16px; border:1px solid #ccc; border-radius:6px; background:#fff1f2; cursor:pointer;">👎 <span id="dislikeCount">0</span></button>
-      </div>
-    </div>
-
           <!-- Item 1 -->
           <div style="margin-bottom: 25px; position: relative; padding: 15px; border: 1px solid rgba(0,0,0,0.2); border-radius: 6px; background: white;">
             <div style="position: absolute; left: -35px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; border-radius: 50%; background: rgba(0,0,0,0.2); border: 1px solid white;"></div>
@@ -2647,45 +2718,6 @@ async function openFAQModal(id) {
   `;
 
   modal.style.display = "block";
-
-// Firestore refs
-  const faqRef = doc(db, "faqFeedback", `faq-${faq.id}`);
-  const voteRef = doc(db, "faqVotes", `${faq.id}_${deviceId}`);
-
-  // Realtime update angka
-  onSnapshot(faqRef, (snap) => {
-    if (snap.exists()) {
-      document.getElementById("likeCount").textContent = snap.data().likes || 0;
-      document.getElementById("dislikeCount").textContent = snap.data().dislikes || 0;
-    }
-  });
-
-  // Cek status vote device
-  const votedSnap = await getDoc(voteRef);
-  if (votedSnap.exists()) {
-    const vote = votedSnap.data().vote;
-    if (vote === "like") document.getElementById("faqLikeBtn").classList.add("selected");
-    if (vote === "dislike") document.getElementById("faqDislikeBtn").classList.add("selected");
-  }
-
-  // Event tombol
-  document.getElementById("faqLikeBtn").onclick = async () => {
-    const votedSnap = await getDoc(voteRef);
-    if (votedSnap.exists()) return;
-    await updateDoc(faqRef, { likes: increment(1) });
-    await setDoc(voteRef, { vote: "like" });
-  };
-
-  document.getElementById("faqDislikeBtn").onclick = async () => {
-    const votedSnap = await getDoc(voteRef);
-    if (votedSnap.exists()) return;
-    await updateDoc(faqRef, { dislikes: increment(1) });
-    await setDoc(voteRef, { vote: "dislike" });
-  };
 }
 </script>
-
-
-
-
 
