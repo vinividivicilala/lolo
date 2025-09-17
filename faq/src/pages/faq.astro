@@ -2372,31 +2372,25 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 
-
-
-
-
-
 async function openFaqModal(index) {
   currentFaqIndex = index;
   const faq = faqData[index];
   if (!faq) return;
 
+  // Judul + konten modal
   document.getElementById("modalTitle").textContent = faq.question;
   document.getElementById("modalContent").innerHTML = `
-    <div class="modal-faq-content">
-      <p>${faq.fullDescription}</p>
-      <div class="modal-meta">
-        <span>Kategori: ${faq.category}</span>
-        <span>Update: ${faq.lastUpdated}</span>
-      </div>
+    <p>${faq.fullDescription}</p>
+    <div class="modal-meta">
+      <span>Kategori: ${faq.category}</span>
+      <span>Update: ${faq.lastUpdated}</span>
     </div>
   `;
 
   const modal = document.getElementById("faqModal");
   modal.style.display = "block";
 
-  // Firestore references
+  // Firestore refs
   const votesCol = collection(db, "faqFeedback", `faq-${faq.id}`, "votes");
   const voteRef = doc(votesCol, anonId);
 
@@ -2405,11 +2399,11 @@ async function openFaqModal(index) {
   const likeCountEl = document.getElementById("likeCount");
   const dislikeCountEl = document.getElementById("dislikeCount");
 
-  // Reset tombol
+  // Reset
   likeBtn.classList.remove("voted");
   dislikeBtn.classList.remove("voted");
 
-  // Cek status vote user
+  // Cek status user
   const userSnap = await getDoc(voteRef);
   if (userSnap.exists()) {
     const vote = userSnap.data().type;
@@ -2419,37 +2413,39 @@ async function openFaqModal(index) {
 
   // Realtime update count
   onSnapshot(votesCol, (snapshot) => {
-    let likeCount = 0;
-    let dislikeCount = 0;
+    let likes = 0, dislikes = 0;
     snapshot.forEach((d) => {
       const v = d.data();
-      if (v.type === "like") likeCount++;
-      if (v.type === "dislike") dislikeCount++;
+      if (v.type === "like") likes++;
+      if (v.type === "dislike") dislikes++;
     });
-    likeCountEl.textContent = likeCount;
-    dislikeCountEl.textContent = dislikeCount;
+    likeCountEl.textContent = likes;
+    dislikeCountEl.textContent = dislikes;
   });
 
-  // Event Like
-  likeBtn.addEventListener("click", async () => {
+  // Klik Like
+  likeBtn.onclick = async () => {
     const snap = await getDoc(voteRef);
     if (!snap.exists()) {
       await setDoc(voteRef, { type: "like", createdAt: serverTimestamp() });
       likeBtn.classList.add("voted");
       dislikeBtn.classList.remove("voted");
     }
-  });
+  };
 
-  // Event Dislike
-  dislikeBtn.addEventListener("click", async () => {
+  // Klik Dislike
+  dislikeBtn.onclick = async () => {
     const snap = await getDoc(voteRef);
     if (!snap.exists()) {
       await setDoc(voteRef, { type: "dislike", createdAt: serverTimestamp() });
       dislikeBtn.classList.add("voted");
       likeBtn.classList.remove("voted");
     }
-  });
+  };
 }
+
+
+
 
 
 
@@ -2729,6 +2725,7 @@ function openFAQModal(id) {
   modal.style.display = "block";
 }
 </script>
+
 
 
 
