@@ -2280,7 +2280,7 @@ document.getElementById("faqLikeBtn").addEventListener("click", async () => {
   if (!faq || userVotedFaqs[faq.id]) return; // sudah vote
 
   const ref = doc(db, "faqFeedback", `faq-${faq.id}`);
-  await updateDoc(ref, { likes: increment(1) });
+  await setDoc(ref, { likes: increment(1) }, { merge: true });
 
   userVotedFaqs[faq.id] = true;
   document.getElementById("faqLikeBtn").classList.add("selected");
@@ -2293,13 +2293,12 @@ document.getElementById("faqDislikeBtn").addEventListener("click", async () => {
   if (!faq || userVotedFaqs[faq.id]) return; // sudah vote
 
   const ref = doc(db, "faqFeedback", `faq-${faq.id}`);
-  await updateDoc(ref, { dislikes: increment(1) });
+  await setDoc(ref, { dislikes: increment(1) }, { merge: true });
 
   userVotedFaqs[faq.id] = true;
   document.getElementById("faqDislikeBtn").classList.add("selected");
   document.getElementById("faqDislikeBtn").setAttribute("aria-pressed", "true");
 });
-
 
 
 
@@ -2717,6 +2716,7 @@ function openFAQModal(id) {
   modal.style.display = "block";
 }
 </script>
+
 
 
 
