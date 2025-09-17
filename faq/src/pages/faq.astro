@@ -2230,6 +2230,79 @@ const db = getFirestore(app);
 
 
 
+let currentFaqIndex = 0;
+let userVotedFaqs = {}; // simpan status lokal agar 1x per FAQ
+
+async function openFaqModal(index) {
+  currentFaqIndex = index;
+  const faq = faqData[index];
+  if (!faq) return;
+
+  document.getElementById("modalTitle").textContent = faq.question;
+  document.getElementById("modalContent").innerHTML = `
+    <div class="modal-faq-content">
+      <p>${faq.fullDescription}</p>
+      <div class="modal-meta">
+        <span>Kategori: ${faq.category}</span>
+        <span>Update: ${faq.lastUpdated}</span>
+      </div>
+    </div>
+  `;
+
+  const modal = document.getElementById("faqModal");
+  modal.style.display = "block";
+
+  // ambil data dari firestore
+  const ref = doc(db, "faqFeedback", `faq-${faq.id}`);
+  const snap = await getDoc(ref);
+  if (!snap.exists()) {
+    await setDoc(ref, { likes: 0, dislikes: 0 });
+  }
+
+  // listen realtime update
+  onSnapshot(ref, (docSnap) => {
+    if (docSnap.exists()) {
+      document.getElementById("likeCount").textContent = docSnap.data().likes || 0;
+      document.getElementById("dislikeCount").textContent = docSnap.data().dislikes || 0;
+    }
+  });
+
+  // reset tombol UI
+  document.getElementById("faqLikeBtn").classList.remove("selected");
+  document.getElementById("faqDislikeBtn").classList.remove("selected");
+  document.getElementById("faqLikeBtn").setAttribute("aria-pressed", "false");
+  document.getElementById("faqDislikeBtn").setAttribute("aria-pressed", "false");
+}
+
+// klik Like
+document.getElementById("faqLikeBtn").addEventListener("click", async () => {
+  const faq = faqData[currentFaqIndex];
+  if (!faq || userVotedFaqs[faq.id]) return; // sudah vote
+
+  const ref = doc(db, "faqFeedback", `faq-${faq.id}`);
+  await updateDoc(ref, { likes: increment(1) });
+
+  userVotedFaqs[faq.id] = true;
+  document.getElementById("faqLikeBtn").classList.add("selected");
+  document.getElementById("faqLikeBtn").setAttribute("aria-pressed", "true");
+});
+
+// klik Dislike
+document.getElementById("faqDislikeBtn").addEventListener("click", async () => {
+  const faq = faqData[currentFaqIndex];
+  if (!faq || userVotedFaqs[faq.id]) return; // sudah vote
+
+  const ref = doc(db, "faqFeedback", `faq-${faq.id}`);
+  await updateDoc(ref, { dislikes: increment(1) });
+
+  userVotedFaqs[faq.id] = true;
+  document.getElementById("faqDislikeBtn").classList.add("selected");
+  document.getElementById("faqDislikeBtn").setAttribute("aria-pressed", "true");
+});
+
+
+
+
 
 // Fungsi format waktu relatif
 function timeAgo(date) {
@@ -2361,76 +2434,6 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 
-
-let currentFaqIndex = 0;
-let userVotedFaqs = {}; // simpan status lokal agar 1x per FAQ
-
-async function openFaqModal(index) {
-  currentFaqIndex = index;
-  const faq = faqData[index];
-  if (!faq) return;
-
-  document.getElementById("modalTitle").textContent = faq.question;
-  document.getElementById("modalContent").innerHTML = `
-    <div class="modal-faq-content">
-      <p>${faq.fullDescription}</p>
-      <div class="modal-meta">
-        <span>Kategori: ${faq.category}</span>
-        <span>Update: ${faq.lastUpdated}</span>
-      </div>
-    </div>
-  `;
-
-  const modal = document.getElementById("faqModal");
-  modal.style.display = "block";
-
-  // ambil data dari firestore
-  const ref = doc(db, "faqFeedback", `faq-${faq.id}`);
-  const snap = await getDoc(ref);
-  if (!snap.exists()) {
-    await setDoc(ref, { likes: 0, dislikes: 0 });
-  }
-
-  // listen realtime update
-  onSnapshot(ref, (docSnap) => {
-    if (docSnap.exists()) {
-      document.getElementById("likeCount").textContent = docSnap.data().likes || 0;
-      document.getElementById("dislikeCount").textContent = docSnap.data().dislikes || 0;
-    }
-  });
-
-  // reset tombol UI
-  document.getElementById("faqLikeBtn").classList.remove("selected");
-  document.getElementById("faqDislikeBtn").classList.remove("selected");
-  document.getElementById("faqLikeBtn").setAttribute("aria-pressed", "false");
-  document.getElementById("faqDislikeBtn").setAttribute("aria-pressed", "false");
-}
-
-// klik Like
-document.getElementById("faqLikeBtn").addEventListener("click", async () => {
-  const faq = faqData[currentFaqIndex];
-  if (!faq || userVotedFaqs[faq.id]) return; // sudah vote
-
-  const ref = doc(db, "faqFeedback", `faq-${faq.id}`);
-  await updateDoc(ref, { likes: increment(1) });
-
-  userVotedFaqs[faq.id] = true;
-  document.getElementById("faqLikeBtn").classList.add("selected");
-  document.getElementById("faqLikeBtn").setAttribute("aria-pressed", "true");
-});
-
-// klik Dislike
-document.getElementById("faqDislikeBtn").addEventListener("click", async () => {
-  const faq = faqData[currentFaqIndex];
-  if (!faq || userVotedFaqs[faq.id]) return; // sudah vote
-
-  const ref = doc(db, "faqFeedback", `faq-${faq.id}`);
-  await updateDoc(ref, { dislikes: increment(1) });
-
-  userVotedFaqs[faq.id] = true;
-  document.getElementById("faqDislikeBtn").classList.add("selected");
-  document.getElementById("faqDislikeBtn").setAttribute("aria-pressed", "true");
-});
 
 
 
@@ -2714,6 +2717,7 @@ function openFAQModal(id) {
   modal.style.display = "block";
 }
 </script>
+
 
 
 
