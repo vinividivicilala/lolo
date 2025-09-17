@@ -544,6 +544,7 @@ const faqData = [
         <path class="icon-stroke" d="M14 9V5a3 3 0 0 0-3-3 1 1 0 0 0-.95.68L8 7H5a1 1 0 0 0-1 1v7a2 2 0 0 0 2 2h8a3 3 0 0 0 3-3v-4a2 2 0 0 0-3-2z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
         <path class="icon-fill" d="M14 9V5a3 3 0 0 0-3-3 1 1 0 0 0-.95.68L8 7H5a1 1 0 0 0-1 1v7a2 2 0 0 0 2 2h8a3 3 0 0 0 3-3v-4a2 2 0 0 0-3-2z" fill="currentColor" fill-opacity="0"/>
       </svg>
+      <span id="likeCount" class="count-label">0</span>
     </button>
 
     <!-- Dislike -->
@@ -552,6 +553,7 @@ const faqData = [
         <path class="icon-stroke" d="M10 15v4a3 3 0 0 0 3 3 1 1 0 0 0 .95-.68L16 17h3a1 1 0 0 0 1-1v-7a2 2 0 0 0-2-2H10a3 3 0 0 0-3 3v4a2 2 0 0 0 3 2z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
         <path class="icon-fill" d="M10 15v4a3 3 0 0 0 3 3 1 1 0 0 0 .95-.68L16 17h3a1 1 0 0 0 1-1v-7a2 2 0 0 0-2-2H10a3 3 0 0 0-3 3v4a2 2 0 0 0 3 2z" fill="currentColor" fill-opacity="0"/>
       </svg>
+      <span id="likeCount" class="count-label">0</span>
     </button>
   </div>
 </div>
@@ -821,6 +823,13 @@ const faqData = [
 
 /* small hover effect for non-selected */
 .feedback-btn:not(.selected):hover .icon-stroke { stroke: #000; transform: translateY(-2px); }
+
+.count-label {
+  font-size: 0.9rem;
+  font-weight: 700;
+  margin-left: 6px;
+  color: #333;
+}
 
 
 
@@ -2198,7 +2207,12 @@ import {
   serverTimestamp,
   onSnapshot, 
   query, 
-  orderBy 
+  orderBy,
+increment,
+ doc, 
+  setDoc, 
+  getDoc, 
+  updateDoc
 } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -2348,60 +2362,75 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 
-document.addEventListener("DOMContentLoaded", () => {
-  const likeBtn = document.getElementById("faqLikeBtn");
-  const dislikeBtn = document.getElementById("faqDislikeBtn");
+let currentFaqIndex = 0;
+let userVotedFaqs = {}; // simpan status lokal agar 1x per FAQ
 
-  if (!likeBtn || !dislikeBtn) return; // safety
+async function openFaqModal(index) {
+  currentFaqIndex = index;
+  const faq = faqData[index];
+  if (!faq) return;
 
-  // helper: toggle selected, ensure only one active at time
-  function setSelected(btnToSelect) {
-    [likeBtn, dislikeBtn].forEach(btn => {
-      if (btn === btnToSelect) {
-        const already = btn.classList.contains("selected");
-        if (already) {
-          // unselect
-          btn.classList.remove("selected");
-          btn.setAttribute("aria-pressed", "false");
-        } else {
-          // select this, unselect other
-          btn.classList.add("selected");
-          btn.setAttribute("aria-pressed", "true");
-          // one-shot pop animation on fill path
-          const svgFill = btn.querySelector(".icon-fill");
-          if (svgFill) {
-            svgFill.style.animation = "popFill 320ms ease";
-            // remove animation after done to allow replay next time
-            setTimeout(() => { svgFill.style.animation = ""; }, 360);
-          }
-          // unset other
-          const other = btn === likeBtn ? dislikeBtn : likeBtn;
-          other.classList.remove("selected");
-          other.setAttribute("aria-pressed", "false");
-        }
-      }
-    });
+  document.getElementById("modalTitle").textContent = faq.question;
+  document.getElementById("modalContent").innerHTML = `
+    <div class="modal-faq-content">
+      <p>${faq.fullDescription}</p>
+      <div class="modal-meta">
+        <span>Kategori: ${faq.category}</span>
+        <span>Update: ${faq.lastUpdated}</span>
+      </div>
+    </div>
+  `;
+
+  const modal = document.getElementById("faqModal");
+  modal.style.display = "block";
+
+  // ambil data dari firestore
+  const ref = doc(db, "faqFeedback", `faq-${faq.id}`);
+  const snap = await getDoc(ref);
+  if (!snap.exists()) {
+    await setDoc(ref, { likes: 0, dislikes: 0 });
   }
 
-  likeBtn.addEventListener("click", (e) => {
-    e.preventDefault();
-    setSelected(likeBtn);
-
-    // Optional: lakukan sesuatu, mis. kirim ke server / firestore
-    // sendFeedback(currentFaqId, like=true)
+  // listen realtime update
+  onSnapshot(ref, (docSnap) => {
+    if (docSnap.exists()) {
+      document.getElementById("likeCount").textContent = docSnap.data().likes || 0;
+      document.getElementById("dislikeCount").textContent = docSnap.data().dislikes || 0;
+    }
   });
 
-  dislikeBtn.addEventListener("click", (e) => {
-    e.preventDefault();
-    setSelected(dislikeBtn);
+  // reset tombol UI
+  document.getElementById("faqLikeBtn").classList.remove("selected");
+  document.getElementById("faqDislikeBtn").classList.remove("selected");
+  document.getElementById("faqLikeBtn").setAttribute("aria-pressed", "false");
+  document.getElementById("faqDislikeBtn").setAttribute("aria-pressed", "false");
+}
 
-    // Optional: lakukan sesuatu, mis. kirim ke server / firestore
-    // sendFeedback(currentFaqId, like=false)
-  });
+// klik Like
+document.getElementById("faqLikeBtn").addEventListener("click", async () => {
+  const faq = faqData[currentFaqIndex];
+  if (!faq || userVotedFaqs[faq.id]) return; // sudah vote
+
+  const ref = doc(db, "faqFeedback", `faq-${faq.id}`);
+  await updateDoc(ref, { likes: increment(1) });
+
+  userVotedFaqs[faq.id] = true;
+  document.getElementById("faqLikeBtn").classList.add("selected");
+  document.getElementById("faqLikeBtn").setAttribute("aria-pressed", "true");
 });
 
+// klik Dislike
+document.getElementById("faqDislikeBtn").addEventListener("click", async () => {
+  const faq = faqData[currentFaqIndex];
+  if (!faq || userVotedFaqs[faq.id]) return; // sudah vote
 
+  const ref = doc(db, "faqFeedback", `faq-${faq.id}`);
+  await updateDoc(ref, { dislikes: increment(1) });
 
+  userVotedFaqs[faq.id] = true;
+  document.getElementById("faqDislikeBtn").classList.add("selected");
+  document.getElementById("faqDislikeBtn").setAttribute("aria-pressed", "true");
+});
 
 
 
@@ -2685,6 +2714,7 @@ function openFAQModal(id) {
   modal.style.display = "block";
 }
 </script>
+
 
 
 
