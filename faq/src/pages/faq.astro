@@ -528,38 +528,44 @@ const faqData = [
     </div>
   </footer>
 
-  <!-- Modal untuk Detail FAQ -->
-  <div id="faqModal" class="modal">
-    <div class="modal-content large-modal">
-      <span class="close">&times;</span>
-      <div id="modalContent"></div>
-<!-- Modal Feedback: Apakah kamu menyukai FAQ ini? -->
-<div class="modal-feedback" role="region" aria-label="Feedback FAQ">
-  <h3 class="feedback-title">Apakah kamu menyukai FAQ ini?</h3>
+<!-- Modal untuk Detail FAQ -->
+<div id="faqModal" class="modal">
+  <div class="modal-content large-modal">
+    <span class="close">&times;</span>
 
-  <div class="feedback-buttons" role="toolbar" aria-label="Feedback buttons">
-    <!-- Like -->
-    <button id="faqLikeBtn" class="feedback-btn" aria-pressed="false" aria-label="Suka">
-      <svg viewBox="0 0 24 24" class="icon icon-like" width="36" height="36" aria-hidden="true">
-        <path class="icon-stroke" d="M14 9V5a3 3 0 0 0-3-3 1 1 0 0 0-.95.68L8 7H5a1 1 0 0 0-1 1v7a2 2 0 0 0 2 2h8a3 3 0 0 0 3-3v-4a2 2 0 0 0-3-2z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
-        <path class="icon-fill" d="M14 9V5a3 3 0 0 0-3-3 1 1 0 0 0-.95.68L8 7H5a1 1 0 0 0-1 1v7a2 2 0 0 0 2 2h8a3 3 0 0 0 3-3v-4a2 2 0 0 0-3-2z" fill="currentColor" fill-opacity="0"/>
-      </svg>
-      <span id="likeCount" class="count-label">0</span>
-    </button>
+    <!-- Judul FAQ -->
+    <h2 id="modalTitle" class="modal-title"></h2>
 
-    <!-- Dislike -->
-    <button id="faqDislikeBtn" class="feedback-btn" aria-pressed="false" aria-label="Tidak suka">
-      <svg viewBox="0 0 24 24" class="icon icon-dislike" width="36" height="36" aria-hidden="true">
-        <path class="icon-stroke" d="M10 15v4a3 3 0 0 0 3 3 1 1 0 0 0 .95-.68L16 17h3a1 1 0 0 0 1-1v-7a2 2 0 0 0-2-2H10a3 3 0 0 0-3 3v4a2 2 0 0 0 3 2z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
-        <path class="icon-fill" d="M10 15v4a3 3 0 0 0 3 3 1 1 0 0 0 .95-.68L16 17h3a1 1 0 0 0 1-1v-7a2 2 0 0 0-2-2H10a3 3 0 0 0-3 3v4a2 2 0 0 0 3 2z" fill="currentColor" fill-opacity="0"/>
-      </svg>
-    <span id="dislikeCount" class="count-label">0</span>
-    </button>
+    <!-- Isi FAQ -->
+    <div id="modalContent"></div>
+
+    <!-- Modal Feedback: Apakah kamu menyukai FAQ ini? -->
+    <div class="modal-feedback" role="region" aria-label="Feedback FAQ">
+      <h3 class="feedback-title">Apakah kamu menyukai FAQ ini?</h3>
+      <div class="feedback-buttons" role="toolbar" aria-label="Feedback buttons">
+
+        <!-- Like -->
+        <button id="faqLikeBtn" class="feedback-btn" aria-pressed="false" aria-label="Suka">
+          <svg viewBox="0 0 24 24" class="icon icon-like" width="36" height="36" aria-hidden="true">
+            <path class="icon-stroke" d="M14 9V5a3 3 0 0 0-3-3 1 1 0 0 0-.95.68L8 7H5a1 1 0 0 0-1 1v7a2 2 0 0 0 2 2h8a3 3 0 0 0 3-3v-4a2 2 0 0 0-3-2z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+            <path class="icon-fill" d="M14 9V5a3 3 0 0 0-3-3 1 1 0 0 0-.95.68L8 7H5a1 1 0 0 0-1 1v7a2 2 0 0 0 2 2h8a3 3 0 0 0 3-3v-4a2 2 0 0 0-3-2z" fill="currentColor" fill-opacity="0"/>
+          </svg>
+          <span id="likeCount" class="count-label">0</span>
+        </button>
+
+        <!-- Dislike -->
+        <button id="faqDislikeBtn" class="feedback-btn" aria-pressed="false" aria-label="Tidak suka">
+          <svg viewBox="0 0 24 24" class="icon icon-dislike" width="36" height="36" aria-hidden="true">
+            <path class="icon-stroke" d="M10 15v4a3 3 0 0 0 3 3 1 1 0 0 0 .95-.68L16 17h3a1 1 0 0 0 1-1v-7a2 2 0 0 0-2-2H10a3 3 0 0 0-3 3v4a2 2 0 0 0 3 2z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+            <path class="icon-fill" d="M10 15v4a3 3 0 0 0 3 3 1 1 0 0 0 .95-.68L16 17h3a1 1 0 0 0 1-1v-7a2 2 0 0 0-2-2H10a3 3 0 0 0-3 3v4a2 2 0 0 0 3 2z" fill="currentColor" fill-opacity="0"/>
+          </svg>
+          <span id="dislikeCount" class="count-label">0</span>
+        </button>
+      </div>
+    </div>
   </div>
 </div>
 
-    </div>
-  </div>
 </Layout>
 
 <style>
@@ -2723,6 +2729,7 @@ function openFAQModal(id) {
   modal.style.display = "block";
 }
 </script>
+
 
 
 
