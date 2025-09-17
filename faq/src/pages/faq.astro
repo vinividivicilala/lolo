@@ -2365,12 +2365,17 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 
+
+
+
+
+
+
 async function openFaqModal(index) {
   currentFaqIndex = index;
   const faq = faqData[index];
   if (!faq) return;
 
-  // Isi modal
   document.getElementById("modalTitle").textContent = faq.question;
   document.getElementById("modalContent").innerHTML = `
     <div class="modal-faq-content">
@@ -2385,7 +2390,7 @@ async function openFaqModal(index) {
   const modal = document.getElementById("faqModal");
   modal.style.display = "block";
 
-  // Refs Firestore
+  // Firestore references
   const votesCol = collection(db, "faqFeedback", `faq-${faq.id}`, "votes");
   const voteRef = doc(votesCol, anonId);
 
@@ -2394,11 +2399,11 @@ async function openFaqModal(index) {
   const likeCountEl = document.getElementById("likeCount");
   const dislikeCountEl = document.getElementById("dislikeCount");
 
-  // Reset state tombol
+  // Reset tombol
   likeBtn.classList.remove("voted");
   dislikeBtn.classList.remove("voted");
 
-  // Cek apakah user sudah vote sebelumnya
+  // Cek status vote user
   const userSnap = await getDoc(voteRef);
   if (userSnap.exists()) {
     const vote = userSnap.data().type;
@@ -2406,7 +2411,7 @@ async function openFaqModal(index) {
     if (vote === "dislike") dislikeBtn.classList.add("voted");
   }
 
-  // Realtime update jumlah like/dislike
+  // Realtime update count
   onSnapshot(votesCol, (snapshot) => {
     let likeCount = 0;
     let dislikeCount = 0;
@@ -2419,7 +2424,7 @@ async function openFaqModal(index) {
     dislikeCountEl.textContent = dislikeCount;
   });
 
-  // Pastikan tombol bisa di-klik
+  // Event Like
   likeBtn.addEventListener("click", async () => {
     const snap = await getDoc(voteRef);
     if (!snap.exists()) {
@@ -2429,6 +2434,7 @@ async function openFaqModal(index) {
     }
   });
 
+  // Event Dislike
   dislikeBtn.addEventListener("click", async () => {
     const snap = await getDoc(voteRef);
     if (!snap.exists()) {
@@ -2438,8 +2444,6 @@ async function openFaqModal(index) {
     }
   });
 }
-
-
 
 
 
@@ -2719,6 +2723,7 @@ function openFAQModal(id) {
   modal.style.display = "block";
 }
 </script>
+
 
 
 
