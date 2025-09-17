@@ -1984,6 +1984,15 @@ body.night {
 
 <script>
 
+
+// Bikin ID unik untuk device, simpan di localStorage
+let deviceId = localStorage.getItem("deviceId");
+if (!deviceId) {
+  deviceId = "dev-" + Math.random().toString(36).substring(2, 12);
+  localStorage.setItem("deviceId", deviceId);
+}
+
+
   // Data FAQ untuk modal
   const faqData = [
     {
@@ -2274,32 +2283,41 @@ async function openFaqModal(index) {
   document.getElementById("faqDislikeBtn").setAttribute("aria-pressed", "false");
 }
 
-// klik Like
+// Klik Like
 document.getElementById("faqLikeBtn").addEventListener("click", async () => {
   const faq = faqData[currentFaqIndex];
-  if (!faq || userVotedFaqs[faq.id]) return; // sudah vote
+  if (!faq) return;
+
+  const voteRef = doc(db, "faqVotes", `${faq.id}_${deviceId}`);
+  const voteSnap = await getDoc(voteRef);
+  if (voteSnap.exists()) return; // sudah vote
 
   const ref = doc(db, "faqFeedback", `faq-${faq.id}`);
   await setDoc(ref, { likes: increment(1) }, { merge: true });
 
-  userVotedFaqs[faq.id] = true;
+  await setDoc(voteRef, { faqId: faq.id, deviceId, vote: "like" });
+
   document.getElementById("faqLikeBtn").classList.add("selected");
   document.getElementById("faqLikeBtn").setAttribute("aria-pressed", "true");
 });
 
-// klik Dislike
+// Klik Dislike
 document.getElementById("faqDislikeBtn").addEventListener("click", async () => {
   const faq = faqData[currentFaqIndex];
-  if (!faq || userVotedFaqs[faq.id]) return; // sudah vote
+  if (!faq) return;
+
+  const voteRef = doc(db, "faqVotes", `${faq.id}_${deviceId}`);
+  const voteSnap = await getDoc(voteRef);
+  if (voteSnap.exists()) return; // sudah vote
 
   const ref = doc(db, "faqFeedback", `faq-${faq.id}`);
   await setDoc(ref, { dislikes: increment(1) }, { merge: true });
 
-  userVotedFaqs[faq.id] = true;
+  await setDoc(voteRef, { faqId: faq.id, deviceId, vote: "dislike" });
+
   document.getElementById("faqDislikeBtn").classList.add("selected");
   document.getElementById("faqDislikeBtn").setAttribute("aria-pressed", "true");
 });
-
 
 
 
@@ -2714,8 +2732,10 @@ function openFAQModal(id) {
   `;
 
   modal.style.display = "block";
+// Cek vote device const voteRef = doc(db, "faqVotes", ${faq.id}_${deviceId}); const voteSnap = await getDoc(voteRef); if (voteSnap.exists()) { const vote = voteSnap.data().vote; if (vote === "like") { document.getElementById("faqLikeBtn").classList.add("selected"); document.getElementById("faqLikeBtn").setAttribute("aria-pressed", "true"); } else if (vote === "dislike") { document.getElementById("faqDislikeBtn").classList.add("selected"); document.getElementById("faqDislikeBtn").setAttribute("aria-pressed", "true"); } }
 }
 </script>
+
 
 
 
