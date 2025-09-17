@@ -185,6 +185,44 @@ const faqData = [
         <img src="/images/5.jpg" alt="Ilustrasi FAQ" class="faq-image" />
       </div>
 
+
+ <!-- Related FAQ otomatis -->
+  <div class="related-faq-header">
+    <h2 class="related-faq-title">RELATED FAQ</h2>
+    <div class="related-faq-line"></div>
+  </div>
+
+  <!-- Loop otomatis semua topic -->
+  <div class="faq-topics">
+    {
+      [...new Set(faqData.map(faq => faq.topic))].map((topicName) => (
+        <div class="faq-topic-group" id={topicName.replace(/\s+/g, '-').toLowerCase()}>
+          <div class="topic-header">
+            <h2 class="topic-title">{topicName}</h2>
+            <div class="topic-line"></div>
+          </div>
+          <div class="faq-items">
+            {faqData.filter(f => f.topic === topicName).map((faq, index) => (
+              <div class="faq-item-wrapper linebox" data-faq-id={faq.id}>
+                <div class="faq-title-box">
+                  <span class="faq-index">{faq.index}.</span>
+                  <span class="faq-question">{faq.question}</span>
+                </div>
+                <FAQItem 
+                  index={faq.index}
+                  icon={faq.icon}
+                  question={faq.question}
+                  answer={faq.answer}
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+      ))
+    }
+  </div>
+
+
       <div class="divider-line"></div>
 
       <!-- Grup FAQ -->
@@ -627,6 +665,60 @@ const faqData = [
       display: none;
     }
   }
+
+
+.related-faq-header {
+  text-align: center;
+  margin: 50px 0 30px;
+}
+
+.related-faq-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #000;
+  text-transform: uppercase;
+  padding: 12px 24px;
+  border: 2px solid #000; /* linebox hitam */
+  display: inline-block;
+  border-radius: 6px;
+  background: #fff;
+}
+
+.related-faq-line {
+  height: 3px;
+  width: 80px;
+  background: #000;
+  margin: 15px auto 0;
+}
+
+.faq-item-wrapper.linebox {
+  border: 2px solid #000;  /* linebox hitam */
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 25px;
+  background: #fff;
+}
+
+.faq-title-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.faq-question {
+  font-size: 1.1rem;
+}
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2423,6 +2515,7 @@ function openFAQModal(id) {
   modal.style.display = "block";
 }
 </script>
+
 
 
 
