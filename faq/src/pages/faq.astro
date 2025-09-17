@@ -2362,27 +2362,31 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 
-  // 🔹 Bikin anonymousId (1x per device)
+
+
+
+
+  // 🔹 Anonymous ID unik per device
   let anonymousId = localStorage.getItem("faqAnonId");
   if (!anonymousId) {
     anonymousId = "anon-" + Math.random().toString(36).substring(2, 15);
     localStorage.setItem("faqAnonId", anonymousId);
   }
 
-
   let currentFaqIndex = 0;
 
+  // 🔹 Load feedback (angka & status user)
   async function loadFeedback(faq) {
     const feedbackRef = doc(db, "faqFeedback", `faq-${faq.id}`);
     const voteRef = doc(db, "faqVotes", `${faq.id}_${anonymousId}`);
 
-    // buat dokumen feedback kalau belum ada
+    // kalau dokumen feedback belum ada → bikin
     const snap = await getDoc(feedbackRef);
     if (!snap.exists()) {
       await setDoc(feedbackRef, { likes: 0, dislikes: 0 });
     }
 
-    // realtime listener update angka
+    // realtime update angka like & dislike
     onSnapshot(feedbackRef, (docSnap) => {
       if (docSnap.exists()) {
         document.getElementById("likeCount").textContent = docSnap.data().likes || 0;
@@ -2391,56 +2395,66 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     // reset UI tombol
-    document.getElementById("faqLikeBtn").classList.remove("selected");
-    document.getElementById("faqDislikeBtn").classList.remove("selected");
+    document.getElementById("faqLikeBtn")?.classList.remove("selected");
+    document.getElementById("faqDislikeBtn")?.classList.remove("selected");
 
-    // cek apakah user sudah pernah vote
+    // cek apakah user sudah vote
     const voteSnap = await getDoc(voteRef);
     if (voteSnap.exists()) {
       const data = voteSnap.data();
       if (data.vote === "like") {
-        document.getElementById("faqLikeBtn").classList.add("selected");
+        document.getElementById("faqLikeBtn")?.classList.add("selected");
       } else if (data.vote === "dislike") {
-        document.getElementById("faqDislikeBtn").classList.add("selected");
+        document.getElementById("faqDislikeBtn")?.classList.add("selected");
       }
     }
   }
 
-  document.addEventListener("DOMContentLoaded", () => {
-    const faq = faqData[currentFaqIndex];
-    loadFeedback(faq); // load angka awal
-
-    const likeBtn = document.getElementById("faqLikeBtn");
-    const dislikeBtn = document.getElementById("faqDislikeBtn");
-
-    // klik like
-    likeBtn.addEventListener("click", async () => {
-      const faq = faqData[currentFaqIndex];
+  // 🔹 Delegasi event untuk tombol like/dislike
+  document.addEventListener("click", async (e) => {
+    // tombol LIKE ditekan
+    if (e.target.closest("#faqLikeBtn")) {
+      const faq = faqData[currentFaqIndex]; // faqData sudah ada di file kamu
       const voteRef = doc(db, "faqVotes", `${faq.id}_${anonymousId}`);
       const existingVote = await getDoc(voteRef);
-      if (existingVote.exists()) return; // sudah vote
+      if (existingVote.exists()) return; // sudah pernah vote
 
       const feedbackRef = doc(db, "faqFeedback", `faq-${faq.id}`);
       await updateDoc(feedbackRef, { likes: increment(1) });
       await setDoc(voteRef, { vote: "like", user: anonymousId, createdAt: new Date() });
 
-      likeBtn.classList.add("selected");
-    });
+      e.target.closest("#faqLikeBtn").classList.add("selected");
+    }
 
-    // klik dislike
-    dislikeBtn.addEventListener("click", async () => {
+    // tombol DISLIKE ditekan
+    if (e.target.closest("#faqDislikeBtn")) {
       const faq = faqData[currentFaqIndex];
       const voteRef = doc(db, "faqVotes", `${faq.id}_${anonymousId}`);
       const existingVote = await getDoc(voteRef);
-      if (existingVote.exists()) return; // sudah vote
+      if (existingVote.exists()) return;
 
       const feedbackRef = doc(db, "faqFeedback", `faq-${faq.id}`);
       await updateDoc(feedbackRef, { dislikes: increment(1) });
       await setDoc(voteRef, { vote: "dislike", user: anonymousId, createdAt: new Date() });
 
-      dislikeBtn.classList.add("selected");
-    });
+      e.target.closest("#faqDislikeBtn").classList.add("selected");
+    }
   });
+
+  // 🔹 Panggil loadFeedback saat modal dibuka
+  document.addEventListener("DOMContentLoaded", () => {
+    const faq = faqData[currentFaqIndex];
+    loadFeedback(faq);
+  });
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2724,6 +2738,7 @@ function openFAQModal(id) {
   modal.style.display = "block";
 }
 </script>
+
 
 
 
