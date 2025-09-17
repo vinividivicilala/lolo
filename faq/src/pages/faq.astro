@@ -2359,7 +2359,11 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 });
-// Buat anonymousId untuk identitas device/user tanpa login
+
+
+
+
+// Buat anonymousId (sekali per device)
 let anonymousId = localStorage.getItem("faqAnonId");
 if (!anonymousId) {
   anonymousId = "anon-" + Math.random().toString(36).substring(2, 15);
@@ -2368,14 +2372,15 @@ if (!anonymousId) {
 
 let currentFaqIndex = 0;
 
+// Buka modal FAQ
 async function openFaqModal(index) {
   currentFaqIndex = index;
-  const faq = faqData[index];
+  const faq = faqData[index]; // pastikan faqData sudah ada
   if (!faq) return;
 
-  document.getElementById("modalTitle").textContent = faq.question;
   document.getElementById("modalContent").innerHTML = `
     <div class="modal-faq-content">
+      <h2>${faq.question}</h2>
       <p>${faq.fullDescription}</p>
       <div class="modal-meta">
         <span>Kategori: ${faq.category}</span>
@@ -2396,7 +2401,7 @@ async function openFaqModal(index) {
     await setDoc(feedbackRef, { likes: 0, dislikes: 0 });
   }
 
-  // Realtime update jumlah likes & dislikes
+  // Realtime update jumlah like/dislike
   onSnapshot(feedbackRef, (docSnap) => {
     if (docSnap.exists()) {
       document.getElementById("likeCount").textContent = docSnap.data().likes || 0;
@@ -2404,64 +2409,59 @@ async function openFaqModal(index) {
     }
   });
 
-  // Reset tombol dulu
+  // Reset tombol
   document.getElementById("faqLikeBtn").classList.remove("selected");
   document.getElementById("faqDislikeBtn").classList.remove("selected");
-  document.getElementById("faqLikeBtn").setAttribute("aria-pressed", "false");
-  document.getElementById("faqDislikeBtn").setAttribute("aria-pressed", "false");
 
-  // Cek apakah user sudah vote (permanen dari Firestore)
+  // Cek apakah user sudah vote
   const voteSnap = await getDoc(voteRef);
   if (voteSnap.exists()) {
     const data = voteSnap.data();
     if (data.vote === "like") {
       document.getElementById("faqLikeBtn").classList.add("selected");
-      document.getElementById("faqLikeBtn").setAttribute("aria-pressed", "true");
     } else if (data.vote === "dislike") {
       document.getElementById("faqDislikeBtn").classList.add("selected");
-      document.getElementById("faqDislikeBtn").setAttribute("aria-pressed", "true");
     }
   }
 }
 
-// Klik Like
-document.getElementById("faqLikeBtn").addEventListener("click", async () => {
-  const faq = faqData[currentFaqIndex];
-  if (!faq) return;
+// ✅ Event listener setelah DOM siap
+document.addEventListener("DOMContentLoaded", () => {
+  const likeBtn = document.getElementById("faqLikeBtn");
+  const dislikeBtn = document.getElementById("faqDislikeBtn");
 
-  const voteRef = doc(db, "faqVotes", `${faq.id}_${anonymousId}`);
-  const existingVote = await getDoc(voteRef);
+  // Klik Like
+  likeBtn.addEventListener("click", async () => {
+    const faq = faqData[currentFaqIndex];
+    if (!faq) return;
 
-  if (existingVote.exists()) return; // sudah vote
+    const voteRef = doc(db, "faqVotes", `${faq.id}_${anonymousId}`);
+    const existingVote = await getDoc(voteRef);
+    if (existingVote.exists()) return; // sudah vote
 
-  const feedbackRef = doc(db, "faqFeedback", `faq-${faq.id}`);
-  await updateDoc(feedbackRef, { likes: increment(1) });
+    const feedbackRef = doc(db, "faqFeedback", `faq-${faq.id}`);
+    await updateDoc(feedbackRef, { likes: increment(1) });
+    await setDoc(voteRef, { vote: "like", user: anonymousId, createdAt: new Date() });
 
-  await setDoc(voteRef, { vote: "like", user: anonymousId, createdAt: new Date() });
+    likeBtn.classList.add("selected");
+  });
 
-  document.getElementById("faqLikeBtn").classList.add("selected");
-  document.getElementById("faqLikeBtn").setAttribute("aria-pressed", "true");
+  // Klik Dislike
+  dislikeBtn.addEventListener("click", async () => {
+    const faq = faqData[currentFaqIndex];
+    if (!faq) return;
+
+    const voteRef = doc(db, "faqVotes", `${faq.id}_${anonymousId}`);
+    const existingVote = await getDoc(voteRef);
+    if (existingVote.exists()) return; // sudah vote
+
+    const feedbackRef = doc(db, "faqFeedback", `faq-${faq.id}`);
+    await updateDoc(feedbackRef, { dislikes: increment(1) });
+    await setDoc(voteRef, { vote: "dislike", user: anonymousId, createdAt: new Date() });
+
+    dislikeBtn.classList.add("selected");
+  });
 });
-
-// Klik Dislike
-document.getElementById("faqDislikeBtn").addEventListener("click", async () => {
-  const faq = faqData[currentFaqIndex];
-  if (!faq) return;
-
-  const voteRef = doc(db, "faqVotes", `${faq.id}_${anonymousId}`);
-  const existingVote = await getDoc(voteRef);
-
-  if (existingVote.exists()) return; // sudah vote
-
-  const feedbackRef = doc(db, "faqFeedback", `faq-${faq.id}`);
-  await updateDoc(feedbackRef, { dislikes: increment(1) });
-
-  await setDoc(voteRef, { vote: "dislike", user: anonymousId, createdAt: new Date() });
-
-  document.getElementById("faqDislikeBtn").classList.add("selected");
-  document.getElementById("faqDislikeBtn").setAttribute("aria-pressed", "true");
-});
-
 
 
 
@@ -2744,5 +2744,6 @@ function openFAQModal(id) {
   modal.style.display = "block";
 }
 </script>
+
 
 
