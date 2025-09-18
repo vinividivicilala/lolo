@@ -14,6 +14,7 @@ export default function AvailablePage() {
           padding: 0;
           height: 100%;
           background-color: #000;
+          font-family: 'Geist', sans-serif;
         }
       `}</style>
 
@@ -22,18 +23,18 @@ export default function AvailablePage() {
           minHeight: "100vh",
           display: "flex",
           flexDirection: "column",
-          alignItems: "center",
           justifyContent: "center",
-          backgroundColor: "#000", // hitam full
+          alignItems: "flex-start", // teks di sisi kiri
+          backgroundColor: "#000",
           color: "#f1f5f9",
-          fontFamily: "'Geist', sans-serif",
-          textAlign: "center",
-          padding: "40px",
+          padding: "60px",
+          textAlign: "right", // rata kanan
         }}
       >
+        {/* Judul */}
         <h1
           style={{
-            fontSize: "3.5rem",
+            fontSize: "4rem",
             fontWeight: "700",
             marginBottom: "1.5rem",
             letterSpacing: "-1px",
@@ -42,11 +43,12 @@ export default function AvailablePage() {
           AVAILABLE FOR WORK
         </h1>
 
+        {/* Deskripsi */}
         <p
           style={{
-            fontSize: "1.3rem",
-            maxWidth: "700px",
+            fontSize: "1.4rem",
             lineHeight: "1.8",
+            maxWidth: "700px",
           }}
         >
           Saya terbuka untuk{" "}
@@ -89,17 +91,19 @@ export default function AvailablePage() {
           yang menantang.
         </p>
 
+        {/* Tombol */}
         <a
           href="/"
           style={{
-            marginTop: "2rem",
-            padding: "12px 20px",
+            marginTop: "2.5rem",
+            padding: "12px 24px",
             border: "2px solid #3b82f6",
             borderRadius: "6px",
             color: "#3b82f6",
             textDecoration: "none",
             fontWeight: "bold",
             transition: "all 0.3s ease",
+            alignSelf: "flex-end", // tombol ikut rata kanan
           }}
         >
           ⬅ Back to Home
