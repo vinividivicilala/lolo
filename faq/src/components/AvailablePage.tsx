@@ -9,21 +9,74 @@ export default function AvailablePage() {
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
-        backgroundColor: "#0f172a",
+        backgroundColor: "#000", // full hitam
         color: "#f1f5f9",
-        fontFamily: "sans-serif",
+        fontFamily: "'Geist', sans-serif",
         textAlign: "center",
         padding: "40px",
       }}
     >
-      <h1 style={{ fontSize: "3rem", marginBottom: "1rem" }}>
+      {/* Judul besar + bold */}
+      <h1
+        style={{
+          fontSize: "3.5rem",
+          fontWeight: "700",
+          marginBottom: "1.5rem",
+          letterSpacing: "-1px",
+        }}
+      >
         AVAILABLE FOR WORK
       </h1>
-      <p style={{ fontSize: "1.2rem", maxWidth: "600px", lineHeight: "1.6" }}>
-        Saya terbuka untuk peluang kerja baru 🚀 <br />
-        Jika tertarik untuk berkolaborasi, silakan hubungi saya melalui kontak
-        yang tersedia.
+
+      {/* Deskripsi + blok warna */}
+      <p
+        style={{
+          fontSize: "1.3rem",
+          maxWidth: "700px",
+          lineHeight: "1.8",
+        }}
+      >
+        Saya terbuka untuk{" "}
+        <span
+          style={{
+            backgroundColor: "#3b82f6", // biru
+            padding: "2px 6px",
+            borderRadius: "4px",
+            fontWeight: "600",
+            color: "#fff",
+          }}
+        >
+          peluang kerja
+        </span>{" "}
+        baru 🚀 <br />
+        Jika tertarik untuk berkolaborasi, silakan hubungi saya melalui{" "}
+        <span
+          style={{
+            backgroundColor: "#ef4444", // merah
+            padding: "2px 6px",
+            borderRadius: "4px",
+            fontWeight: "600",
+            color: "#fff",
+          }}
+        >
+          kontak
+        </span>{" "}
+        yang tersedia. Saya juga menyukai{" "}
+        <span
+          style={{
+            backgroundColor: "#22c55e", // hijau
+            padding: "2px 6px",
+            borderRadius: "4px",
+            fontWeight: "600",
+            color: "#fff",
+          }}
+        >
+          project kreatif
+        </span>{" "}
+        yang menantang.
       </p>
+
+      {/* Tombol Back */}
       <a
         href="/"
         style={{
@@ -39,6 +92,12 @@ export default function AvailablePage() {
       >
         ⬅ Back to Home
       </a>
+
+      {/* Import font Geist */}
+      <link
+        href="https://fonts.googleapis.com/css2?family=Geist:wght@400;600;700&display=swap"
+        rel="stylesheet"
+      />
     </div>
   );
 }
