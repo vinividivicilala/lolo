@@ -23,12 +23,11 @@ export default function AvailablePage() {
           minHeight: "100vh",
           display: "flex",
           flexDirection: "column",
-          justifyContent: "center",
-          alignItems: "flex-start", // teks di sisi kiri
+          justifyContent: "flex-start", // konten naik ke atas
+          alignItems: "flex-start", // blok teks di sisi kiri
           backgroundColor: "#000",
           color: "#f1f5f9",
           padding: "60px",
-          textAlign: "right", // rata kanan
         }}
       >
         {/* Judul */}
@@ -103,7 +102,6 @@ export default function AvailablePage() {
             textDecoration: "none",
             fontWeight: "bold",
             transition: "all 0.3s ease",
-            alignSelf: "flex-end", // tombol ikut rata kanan
           }}
         >
           ⬅ Back to Home
