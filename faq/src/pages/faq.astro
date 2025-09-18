@@ -520,6 +520,11 @@ const faqData = [
             <a href="/terms" class="footer-link">Syarat & Ketentuan</a>
             <a href="/feedback" class="footer-link">Berikan Masukan</a>
           </div>
+<!-- Status Available -->
+<div class="available-box">
+  <span class="status-dot"></span>
+  <span class="status-text">AVAILABLE FOR WORK</span>
+</div>
           <div class="copyright">
             &copy; 2023 Astro Example. All rights reserved.
           </div>
@@ -572,6 +577,49 @@ const faqData = [
   }
 
 
+/* Box putih di dalam bg hitam */
+.available-box {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  border: 2px solid rgba(255, 255, 255, 0.8);
+  padding: 12px 24px;
+  border-radius: 8px;
+  background: transparent;
+  margin-top: 30px;
+  animation: pulseBox 3s infinite;
+}
+
+/* Teks */
+.available-box .status-text {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 1px;
+}
+
+/* Dot biru kedap-kedip */
+.status-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #3b82f6;
+  box-shadow: 0 0 0 0 rgba(59,130,246, 0.8);
+  animation: pulseDot 1.5s infinite;
+}
+
+/* Animasi dot */
+@keyframes pulseDot {
+  0% { transform: scale(0.9); box-shadow: 0 0 0 0 rgba(59,130,246, 0.7); }
+  70% { transform: scale(1.2); box-shadow: 0 0 0 12px rgba(59,130,246, 0); }
+  100% { transform: scale(0.9); box-shadow: 0 0 0 0 rgba(59,130,246, 0); }
+}
+
+/* Animasi box */
+@keyframes pulseBox {
+  0%, 100% { border-color: rgba(255,255,255,0.8); }
+  50% { border-color: rgba(59,130,246,0.9); }
+}
 
 
 
@@ -2703,6 +2751,7 @@ function openFAQModal(id) {
   modal.style.display = "block";
 }
 </script>
+
 
 
 
