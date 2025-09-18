@@ -23,11 +23,12 @@ export default function AvailablePage() {
           minHeight: "100vh",
           display: "flex",
           flexDirection: "column",
-          justifyContent: "flex-start", // posisikan ke atas
-          alignItems: "stretch", // biar deskripsi full lebar
+          justifyContent: "center",
+          alignItems: "flex-start", // teks di sisi kiri
           backgroundColor: "#000",
           color: "#f1f5f9",
           padding: "60px",
+          textAlign: "right", // rata kanan
         }}
       >
         {/* Judul */}
@@ -37,7 +38,6 @@ export default function AvailablePage() {
             fontWeight: "700",
             marginBottom: "1.5rem",
             letterSpacing: "-1px",
-            textAlign: "right", // judul rata kanan
           }}
         >
           AVAILABLE FOR WORK
@@ -48,9 +48,7 @@ export default function AvailablePage() {
           style={{
             fontSize: "1.4rem",
             lineHeight: "1.8",
-            maxWidth: "100%", // ambil penuh
-            textAlign: "right", // teks rata kanan
-            marginBottom: "2rem",
+            maxWidth: "700px",
           }}
         >
           Saya terbuka untuk{" "}
@@ -94,22 +92,22 @@ export default function AvailablePage() {
         </p>
 
         {/* Tombol */}
-        <div style={{ display: "flex", justifyContent: "flex-end" }}>
-          <a
-            href="/"
-            style={{
-              padding: "12px 24px",
-              border: "2px solid #3b82f6",
-              borderRadius: "6px",
-              color: "#3b82f6",
-              textDecoration: "none",
-              fontWeight: "bold",
-              transition: "all 0.3s ease",
-            }}
-          >
-            ⬅ Back to Home
-          </a>
-        </div>
+        <a
+          href="/"
+          style={{
+            marginTop: "2.5rem",
+            padding: "12px 24px",
+            border: "2px solid #3b82f6",
+            borderRadius: "6px",
+            color: "#3b82f6",
+            textDecoration: "none",
+            fontWeight: "bold",
+            transition: "all 0.3s ease",
+            alignSelf: "flex-end", // tombol ikut rata kanan
+          }}
+        >
+          ⬅ Back to Home
+        </a>
       </div>
     </>
   );
