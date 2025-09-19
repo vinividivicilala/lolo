@@ -194,13 +194,7 @@ export default function AvailablePage() {
           justifyContent: "space-between",
           backgroundColor: "#000",
           color: "#f1f5f9",
-          {/* Banner Uji Coba */}
-<div className="banner-ujicoba">
-  <span>🚧 Website ini lagi ujicoba 🚧 </span>
-  <a href="https://contoh-tautan.com" target="_blank" rel="noopener noreferrer">
-    Baca Selengkapnya
-  </a>
-</div>  
+        
         }}
       >
         {/* Konten Utama */}
@@ -215,6 +209,14 @@ export default function AvailablePage() {
           >
             AVAILABLE FOR WORK
           </h1>
+
+            {/* Banner Uji Coba */}
+<div className="banner-ujicoba">
+  <span>🚧 Website ini lagi ujicoba 🚧 </span>
+  <a href="https://contoh-tautan.com" target="_blank" rel="noopener noreferrer">
+    Baca Selengkapnya
+  </a>
+</div>  
 
           <p
             style={{
@@ -367,6 +369,7 @@ export default function AvailablePage() {
     </>
   );
 }
+
 
 
 
