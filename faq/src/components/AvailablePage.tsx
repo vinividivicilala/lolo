@@ -20,16 +20,14 @@ export default function AvailablePage() {
           position: relative;
           display: inline-block;
           border: 1px solid rgba(255,255,255,0.2);
-          border-radius: 12px;
+          border-radius: 6px; /* tidak terlalu melengkung */
           overflow: hidden;
-          transition: border 0.3s ease;
         }
-        .linebox::before {
-          content: "";
-          position: absolute;
-          inset: 0;
-          background: rgba(255,255,255,0.05);
-          pointer-events: none;
+        .linebox span {
+          color: transparent;                 /* teks transparan */
+          -webkit-text-stroke: 1px #fff;      /* outline putih */
+          font-family: 'Montserrat', sans-serif;
+          font-weight: 600;
         }
         .hero-btn {
           background: transparent;
@@ -46,22 +44,13 @@ export default function AvailablePage() {
           position: relative;
           z-index: 1;
         }
-        .hero-btn:hover {
-          color: #60a5fa;
-        }
         .hero-btn svg {
           width: 26px;
           height: 26px;
           stroke: currentColor;
-          transition: transform 0.3s ease;
         }
-        .hero-btn:hover svg {
-          transform: translateX(4px);
-        }
-
-        /* Footer */
         .footer-container {
-          background-color: #000;   /* diganti hitam */
+          background-color: #000;
           padding: 60px;
           color: white;
         }
@@ -74,15 +63,13 @@ export default function AvailablePage() {
         .footer-left .linebox,
         .footer-right .linebox {
           border: 1px solid rgba(255,255,255,0.2);
-          background: rgba(255,255,255,0.1);
-          border-radius: 12px;
+          background: rgba(255,255,255,0.05);
+          border-radius: 6px;
           padding: 10px 16px;
-          font-size: 1rem;   /* font lebih kecil */
-          font-weight: 600;
+          font-size: 1rem;
           display: flex;
           align-items: center;
           gap: 8px;
-          font-family: 'Montserrat', 'Poppins', sans-serif;
         }
         .footer-right {
           display: flex;
@@ -172,11 +159,7 @@ export default function AvailablePage() {
                 strokeWidth="2"
                 stroke="currentColor"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M7 17L17 7M7 7h10v10"
-                />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M7 17L17 7M7 7h10v10" />
               </svg>
             </a>
           </div>
@@ -188,7 +171,6 @@ export default function AvailablePage() {
             {/* Kiri */}
             <div className="footer-left">
               <div className="linebox">
-                {/* Icon info svg */}
                 <svg xmlns="http://www.w3.org/2000/svg"
                      fill="none"
                      viewBox="0 0 24 24"
