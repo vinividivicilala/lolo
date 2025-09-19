@@ -3,9 +3,9 @@ import React from "react";
 export default function AvailablePage() {
   return (
     <>
-      {/* Import font modern */}
+      {/* Import font Inter */}
       <link
-        href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap"
         rel="stylesheet"
       />
       <style>{`
@@ -14,7 +14,7 @@ export default function AvailablePage() {
           padding: 0;
           height: 100%;
           background-color: #000;
-          font-family: 'Poppins', sans-serif;
+          font-family: 'Inter', sans-serif;
         }
       `}</style>
 
@@ -24,7 +24,7 @@ export default function AvailablePage() {
           display: "flex",
           flexDirection: "column",
           justifyContent: "flex-start",
-          alignItems: "flex-end", // rata kanan
+          alignItems: "flex-start", // konten tetap di kiri
           backgroundColor: "#000",
           color: "#f1f5f9",
           padding: "60px",
@@ -37,7 +37,6 @@ export default function AvailablePage() {
             fontWeight: "700",
             marginBottom: "1.5rem",
             letterSpacing: "-1px",
-            textAlign: "right",
           }}
         >
           AVAILABLE FOR WORK
@@ -49,7 +48,7 @@ export default function AvailablePage() {
             fontSize: "1.4rem",
             lineHeight: "1.8",
             maxWidth: "700px",
-            textAlign: "right",
+            textAlign: "right", // deskripsi panjang ke kanan
             fontWeight: "300",
           }}
         >
