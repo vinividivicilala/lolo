@@ -141,6 +141,49 @@ export default function AvailablePage() {
           gap: 12px;
           flex-wrap: wrap;
         }
+
+
+        .banner-ujicoba {
+  position: fixed;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%) rotateX(5deg);
+  background: linear-gradient(135deg, #3b82f6, #06b6d4);
+  color: #fff;
+  padding: 12px 24px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+  z-index: 9999;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  animation: floatBanner 3s ease-in-out infinite;
+}
+
+.banner-ujicoba a {
+  color: #fff;
+  font-weight: 700;
+  text-decoration: underline;
+  transition: color 0.3s;
+}
+
+.banner-ujicoba a:hover {
+  color: #ffdd57;
+}
+
+@keyframes floatBanner {
+  0%, 100% {
+    transform: translateX(-50%) translateY(0) rotateX(5deg);
+  }
+  50% {
+    transform: translateX(-50%) translateY(-6px) rotateX(5deg);
+  }
+}
+
+
+        
       `}</style>
 
       <div
@@ -151,6 +194,13 @@ export default function AvailablePage() {
           justifyContent: "space-between",
           backgroundColor: "#000",
           color: "#f1f5f9",
+          {/* Banner Uji Coba */}
+<div className="banner-ujicoba">
+  <span>🚧 Website ini lagi ujicoba 🚧 </span>
+  <a href="https://contoh-tautan.com" target="_blank" rel="noopener noreferrer">
+    Baca Selengkapnya
+  </a>
+</div>  
         }}
       >
         {/* Konten Utama */}
@@ -317,6 +367,7 @@ export default function AvailablePage() {
     </>
   );
 }
+
 
 
 
