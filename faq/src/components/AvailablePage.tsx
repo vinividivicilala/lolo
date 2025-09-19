@@ -233,14 +233,14 @@ export default function AvailablePage() {
 
         {/* Nama Panjang */}
 <div className="linebox" style={{ marginTop: "1.5rem" }}>
-  <span style={{ fontSize: "1.3rem", fontWeight: "700" }}>
+  <span style={{ fontSize: "1.3rem", fontWeight: "700", padding-left: 30px; }}>
     Farid Ardiansyah
   </span>
 </div>
 
 {/* Deskripsi */}
 <div className="linebox" style={{ marginTop: "1rem" }}>
-  <p style={{ margin: 0, fontSize: "1rem", fontWeight: "400", color: "#e5e5e5" }}>
+  <p style={{ margin: 0, fontSize: "1rem", fontWeight: "400", color: "#e5e5e5", padding-left: 30px; }}>
     Seorang web developer yang berfokus pada desain minimalis, tipografi,
     serta membangun aplikasi modern berbasis Firebase dan React.
   </p>
@@ -317,5 +317,6 @@ export default function AvailablePage() {
     </>
   );
 }
+
 
 
