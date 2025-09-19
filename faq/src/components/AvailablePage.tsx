@@ -3,9 +3,13 @@ import React from "react";
 export default function AvailablePage() {
   return (
     <>
-      {/* Font: Prioritaskan Geist, fallback ke Inter */}
+      {/* Font Inter dan Geist */}
       <link
-        href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Inter:wght@400;600;700&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap"
+        rel="stylesheet"
+      />
+      <link
+        href="https://fonts.googleapis.com/css2?family=Geist:wght@400;600;700&display=swap"
         rel="stylesheet"
       />
       <style>{`
@@ -14,7 +18,7 @@ export default function AvailablePage() {
           padding: 0;
           height: 100%;
           background-color: #000;
-          font-family: 'Geist', 'Inter', sans-serif; /* Gunakan Geist dulu */
+          font-family: 'Inter', sans-serif;
         }
         .linebox {
           position: relative;
@@ -70,6 +74,57 @@ export default function AvailablePage() {
         .footer-link:hover {
           color: #d1d5db;
         }
+        /* Styles khusus untuk footer */
+        .footer-container {
+          background-color: #dc2626;
+          padding: 60px 60px 40px;
+          color: white;
+          display: flex;
+          flex-direction: column;
+          gap: 30px;
+        }
+        .footer-top {
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-start;
+          flex-wrap: wrap;
+          gap: 20px;
+        }
+        .footer-links {
+          display: flex;
+          gap: 20px;
+          flex-wrap: wrap;
+        }
+        .footer-links .linebox {
+          border: 2px solid rgba(0, 0, 0, 0.3);
+          border-radius: 16px;
+          padding: 4px;
+        }
+        .footer-links .footer-link {
+          font-size: 1.2rem;
+          font-weight: 600;
+          padding: 12px 24px;
+        }
+        .footer-dev-notice {
+          font-family: 'Geist', sans-serif;
+          font-size: 1.2rem;
+          font-weight: 600;
+        }
+        .footer-dev-notice .linebox {
+          border: 2px solid rgba(0, 0, 0, 0.3);
+          border-radius: 16px;
+          padding: 12px 24px;
+          background: rgba(0, 0, 0, 0.2);
+          display: flex;
+          align-items: center;
+          gap: 10px;
+        }
+        .footer-bottom {
+          display: flex;
+          justify-content: flex-end;
+          font-size: 0.9rem;
+          margin-top: 20px;
+        }
       `}</style>
 
       <div
@@ -98,6 +153,7 @@ export default function AvailablePage() {
           >
             AVAILABLE FOR WORK
           </h1>
+
           {/* Deskripsi */}
           <p
             style={{
@@ -146,10 +202,12 @@ export default function AvailablePage() {
             </span>{" "}
             yang tersedia. Mari kita bikin sesuatu yang luar biasa bareng-bareng 🔥
           </p>
+
           {/* Tombol Hero UI dengan linebox */}
           <div className="linebox" style={{ marginTop: "2.5rem" }}>
             <a href="/" className="hero-btn">
               Back to Home
+              {/* Panah serong kanan SVG */}
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
@@ -167,126 +225,46 @@ export default function AvailablePage() {
           </div>
         </div>
 
-        {/* Footer Merah (tinggi lebih kecil) */}
-        <div style={{
-          backgroundColor: "#dc2626",
-          padding: "30px 60px",
-          color: "white",
-          fontFamily: "'Geist', sans-serif",
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "center",
-          alignItems: "flex-start",
-          gap: "20px",
-        }}>
-          {/* Baris Atas: Tautan */}
-          <div style={{
-            display: "flex",
-            gap: "15px",
-            flexWrap: "wrap",
-            alignSelf: "flex-start",
-          }}>
-            {["Kebijakan Privasi", "Syarat & Ketentuan", "Berikan Masukan"].map((text) => (
-              <div
-                key={text}
-                className="linebox"
-                style={{
-                  border: "1px solid rgba(255,255,255,0.3)",
-                  borderRadius: "8px",
-                }}
-              >
-                <a
-                  href="#"
-                  className="footer-link"
-                  style={{
-                    fontSize: "0.95rem",
-                    fontWeight: "500",
-                    padding: "8px 16px",
-                    color: "white",
-                  }}
-                >
-                  {text}
+        {/* Footer dengan background merah tinggi */}
+        <div className="footer-container">
+          <div className="footer-top">
+            {/* Tautan dengan linebox di sisi kanan */}
+            <div className="footer-links" style={{ marginLeft: 'auto' }}>
+              <div className="linebox">
+                <a href="#" className="footer-link">
+                  Kebijakan Privasi
                 </a>
               </div>
-            ))}
-          </div>
-
-          {/* Baris Tengah: Info Pengembangan (tengah bawah) */}
-          <div
-            className="linebox"
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              padding: "10px 20px",
-              backgroundColor: "rgba(0, 0, 0, 0.2)",
-              border: "1px solid rgba(255,255,255,0.2)",
-              borderRadius: "12px",
-              fontSize: "1rem",
-              fontWeight: "500",
-              width: "fit-content",
-              marginLeft: "auto",
-              marginRight: "auto",
-            }}
-          >
-            <span style={{ marginRight: "8px", fontSize: "1.2rem" }}>⚠️</span>
-            Website ini masih dikembangkan
-          </div>
-
-          {/* Baris Bawah: Tombol + Hak Cipta */}
-          <div style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            width: "100%",
-            marginTop: "10px",
-          }}>
-            {/* Kiri: Kosong */}
-            <div></div>
-
-            {/* Kanan: Tombol & Copyright */}
-            <div style={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "flex-end",
-              gap: "6px",
-            }}>
-              {/* Tombol Available for Work */}
-              <button
-                style={{
-                  backgroundColor: "transparent",
-                  border: "2px solid #3b82f6",
-                  borderRadius: "30px",
-                  padding: "10px 24px",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "10px",
-                  fontSize: "1.1rem",
-                  fontWeight: "700",
-                  textTransform: "uppercase",
-                  color: "#3b82f6",
-                  cursor: "pointer",
-                  transition: "all 0.3s ease",
-                }}
-              >
-                <span
-                  style={{
-                    width: "10px",
-                    height: "10px",
-                    backgroundColor: "#3b82f6",
-                    borderRadius: "50%",
-                  }}
-                ></span>
-                available for work
-              </button>
-              {/* Hak Cipta */}
-              <div style={{
-                fontSize: "0.85rem",
-                color: "rgba(255,255,255,0.7)",
-                textAlign: "right",
-              }}>
-                ® 2023 Astro Example. All rights reserved.
+              <div className="linebox">
+                <a href="#" className="footer-link">
+                  Syarat & Ketentuan
+                </a>
               </div>
+              <div className="linebox">
+                <a href="#" className="footer-link">
+                  Berikan Masukan
+                </a>
+              </div>
+            </div>
+            
+            {/* Teks dengan linebox dan icon di sisi kiri */}
+            <div className="footer-dev-notice">
+              <div className="linebox">
+                <span>和</span>
+                <span>Website ini masih dikembangkan</span>
+              </div>
+            </div>
+          </div>
+          
+          {/* Hak cipta */}
+          <div className="footer-bottom">
+            <div style={{ 
+              display: "flex", 
+              flexDirection: "column", 
+              alignItems: "flex-end",
+            }}>
+              <div>@ AVAILABLE FOR WORK</div>
+              <div>® 2023 Astro Example. All rights reserved.</div>
             </div>
           </div>
         </div>
