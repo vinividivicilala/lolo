@@ -3,9 +3,9 @@ import React from "react";
 export default function AvailablePage() {
   return (
     <>
-      {/* Import font Geist */}
+      {/* Import font modern */}
       <link
-        href="https://fonts.googleapis.com/css2?family=Geist:wght@400;600;700&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap"
         rel="stylesheet"
       />
       <style>{`
@@ -14,7 +14,7 @@ export default function AvailablePage() {
           padding: 0;
           height: 100%;
           background-color: #000;
-          font-family: 'Geist', sans-serif;
+          font-family: 'Poppins', sans-serif;
         }
       `}</style>
 
@@ -23,8 +23,8 @@ export default function AvailablePage() {
           minHeight: "100vh",
           display: "flex",
           flexDirection: "column",
-          justifyContent: "flex-start", // konten naik ke atas
-          alignItems: "flex-start", // blok teks di sisi kiri
+          justifyContent: "flex-start",
+          alignItems: "flex-end", // rata kanan
           backgroundColor: "#000",
           color: "#f1f5f9",
           padding: "60px",
@@ -37,6 +37,7 @@ export default function AvailablePage() {
             fontWeight: "700",
             marginBottom: "1.5rem",
             letterSpacing: "-1px",
+            textAlign: "right",
           }}
         >
           AVAILABLE FOR WORK
@@ -48,46 +49,51 @@ export default function AvailablePage() {
             fontSize: "1.4rem",
             lineHeight: "1.8",
             maxWidth: "700px",
+            textAlign: "right",
+            fontWeight: "300",
           }}
         >
-          Saya terbuka untuk{" "}
+          Halo! 👋 Saya adalah individu yang penuh semangat, kreatif, dan selalu
+          haus akan pengalaman baru ✨. Saya terbuka untuk
           <span
             style={{
               backgroundColor: "#3b82f6",
               padding: "2px 6px",
-              borderRadius: "4px",
+              borderRadius: "6px",
               fontWeight: "600",
               color: "#fff",
+              margin: "0 6px",
             }}
           >
             peluang kerja
-          </span>{" "}
-          baru 🚀 <br />
-          Jika tertarik untuk berkolaborasi, silakan hubungi saya melalui{" "}
-          <span
-            style={{
-              backgroundColor: "#ef4444",
-              padding: "2px 6px",
-              borderRadius: "4px",
-              fontWeight: "600",
-              color: "#fff",
-            }}
-          >
-            kontak
-          </span>{" "}
-          yang tersedia. Saya juga menyukai{" "}
+          </span>
+          maupun
           <span
             style={{
               backgroundColor: "#22c55e",
               padding: "2px 6px",
-              borderRadius: "4px",
+              borderRadius: "6px",
               fontWeight: "600",
               color: "#fff",
+              margin: "0 6px",
             }}
           >
             project kreatif
-          </span>{" "}
-          yang menantang.
+          </span>
+          yang menantang 🚀. Jika tertarik berkolaborasi, hubungi saya lewat
+          <span
+            style={{
+              backgroundColor: "#ef4444",
+              padding: "2px 6px",
+              borderRadius: "6px",
+              fontWeight: "600",
+              color: "#fff",
+              marginLeft: "6px",
+            }}
+          >
+            kontak
+          </span>
+          yang tersedia. Mari kita bikin sesuatu yang luar biasa bareng-bareng 🔥
         </p>
 
         {/* Tombol */}
