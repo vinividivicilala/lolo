@@ -24,7 +24,7 @@ export default function AvailablePage() {
           display: "flex",
           flexDirection: "column",
           justifyContent: "flex-start",
-          alignItems: "flex-start", // konten tetap di kiri
+          alignItems: "flex-start", // tetap normal di kiri
           backgroundColor: "#000",
           color: "#f1f5f9",
           padding: "60px",
@@ -47,13 +47,12 @@ export default function AvailablePage() {
           style={{
             fontSize: "1.4rem",
             lineHeight: "1.8",
-            maxWidth: "700px",
-            textAlign: "right", // deskripsi panjang ke kanan
+            width: "100%", // biar memanjang penuh ke kanan
             fontWeight: "300",
           }}
         >
           Halo! 👋 Saya adalah individu yang penuh semangat, kreatif, dan selalu
-          haus akan pengalaman baru ✨. Saya terbuka untuk
+          haus akan pengalaman baru ✨. Saya terbuka untuk{" "}
           <span
             style={{
               backgroundColor: "#3b82f6",
@@ -61,12 +60,11 @@ export default function AvailablePage() {
               borderRadius: "6px",
               fontWeight: "600",
               color: "#fff",
-              margin: "0 6px",
             }}
           >
             peluang kerja
-          </span>
-          maupun
+          </span>{" "}
+          maupun{" "}
           <span
             style={{
               backgroundColor: "#22c55e",
@@ -74,12 +72,11 @@ export default function AvailablePage() {
               borderRadius: "6px",
               fontWeight: "600",
               color: "#fff",
-              margin: "0 6px",
             }}
           >
             project kreatif
-          </span>
-          yang menantang 🚀. Jika tertarik berkolaborasi, hubungi saya lewat
+          </span>{" "}
+          yang menantang 🚀. Jika tertarik berkolaborasi, hubungi saya lewat{" "}
           <span
             style={{
               backgroundColor: "#ef4444",
@@ -87,11 +84,10 @@ export default function AvailablePage() {
               borderRadius: "6px",
               fontWeight: "600",
               color: "#fff",
-              marginLeft: "6px",
             }}
           >
             kontak
-          </span>
+          </span>{" "}
           yang tersedia. Mari kita bikin sesuatu yang luar biasa bareng-bareng 🔥
         </p>
 
