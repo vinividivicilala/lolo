@@ -16,18 +16,38 @@ export default function AvailablePage() {
           background-color: #000;
           font-family: 'Inter', sans-serif;
         }
+        .linebox {
+          position: relative;
+          display: inline-block;
+          border: 1px solid rgba(255,255,255,0.2); /* putih pudar */
+          border-radius: 12px;
+          overflow: hidden;
+          transition: border 0.3s ease;
+        }
+        .linebox::before {
+          content: "";
+          position: absolute;
+          inset: 0;
+          background: rgba(255,255,255,0.05); /* lapisan putih transparan */
+          pointer-events: none;
+        }
+        .linebox:hover {
+          border-color: rgba(59,130,246,0.6); /* biru saat hover */
+        }
         .hero-btn {
           background: transparent;
           color: #3b82f6;
           font-weight: 700;
-          font-size: 1.6rem;
+          font-size: 1.6rem; /* teks lebih besar */
           padding: 14px 28px;
           display: flex;
           align-items: center;
           gap: 10px;
           cursor: pointer;
-          text-decoration: none; /* hilangkan garis bawah */
+          text-decoration: none; /* hilangin underline */
           transition: color 0.3s ease;
+          position: relative;
+          z-index: 1;
         }
         .hero-btn:hover {
           color: #60a5fa;
@@ -39,7 +59,7 @@ export default function AvailablePage() {
           transition: transform 0.3s ease;
         }
         .hero-btn:hover svg {
-          transform: translateX(4px);
+          transform: translateX(4px); /* panah geser saat hover */
         }
       `}</style>
 
@@ -116,23 +136,26 @@ export default function AvailablePage() {
           yang tersedia. Mari kita bikin sesuatu yang luar biasa bareng-bareng 🔥
         </p>
 
-        {/* Tombol tanpa underline + panah kanan saja */}
-        <a href="/" className="hero-btn" style={{ marginTop: "2.5rem" }}>
-          Back to Home
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth="2"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M7 17L17 7M7 7h10v10"
-            />
-          </svg>
-        </a>
+        {/* Tombol Hero UI dengan linebox */}
+        <div className="linebox" style={{ marginTop: "2.5rem" }}>
+          <a href="/" className="hero-btn">
+            Back to Home
+            {/* Panah serong kanan SVG */}
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth="2"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M7 17L17 7M7 7h10v10"
+              />
+            </svg>
+          </a>
+        </div>
       </div>
     </>
   );
