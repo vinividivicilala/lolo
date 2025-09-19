@@ -1,11 +1,12 @@
+
 import React from "react";
 
 export default function AvailablePage() {
   return (
     <>
-      {/* Font Geist */}
+      {/* Font Inter */}
       <link
-        href="https://fonts.googleapis.com/css2?family=Geist:wght@400;600;700&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap"
         rel="stylesheet"
       />
       <style>{`
@@ -14,31 +15,61 @@ export default function AvailablePage() {
           padding: 0;
           height: 100%;
           background-color: #000;
-          font-family: 'Geist', sans-serif;
+          font-family: 'Inter', sans-serif;
         }
         .linebox {
           position: relative;
           display: inline-block;
-          border: 2px solid rgba(0,0,0,0.4);
+          border: 1px solid rgba(255,255,255,0.2);
           border-radius: 12px;
           overflow: hidden;
-          padding: 14px 24px;
-          background: rgba(0,0,0,0.25);
+          transition: border 0.3s ease;
         }
-        /* hilangin hover effect */
         .linebox::before {
-          content: none;
+          content: "";
+          position: absolute;
+          inset: 0;
+          background: rgba(255,255,255,0.05);
+          pointer-events: none;
+        }
+        .linebox:hover {
+          border-color: rgba(59,130,246,0.6);
+        }
+        .hero-btn {
+          background: transparent;
+          color: #3b82f6;
+          font-weight: 700;
+          font-size: 1.6rem;
+          padding: 14px 28px;
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          cursor: pointer;
+          text-decoration: none;
+          transition: color 0.3s ease;
+          position: relative;
+          z-index: 1;
+        }
+        .hero-btn:hover {
+          color: #60a5fa;
+        }
+        .hero-btn svg {
+          width: 26px;
+          height: 26px;
+          stroke: currentColor;
+          transition: transform 0.3s ease;
+        }
+        .hero-btn:hover svg {
+          transform: translateX(4px);
         }
         .footer-link {
           color: white;
           text-decoration: none;
-          font-size: 1.2rem;
-          font-weight: 600;
+          padding: 8px 16px;
+          font-size: 0.9rem;
         }
-        .footer-text {
-          color: white;
-          font-size: 1.4rem;
-          font-weight: 600;
+        .footer-link:hover {
+          color: #d1d5db;
         }
       `}</style>
 
@@ -52,8 +83,12 @@ export default function AvailablePage() {
           color: "#f1f5f9",
         }}
       >
-        {/* Konten Utama (punya kamu tetap ada) */}
-        <div style={{ padding: "60px", flex: "1" }}>
+        {/* Konten Utama */}
+        <div style={{
+          padding: "60px",
+          flex: "1",
+        }}>
+          {/* Judul */}
           <h1
             style={{
               fontSize: "4rem",
@@ -65,6 +100,7 @@ export default function AvailablePage() {
             AVAILABLE FOR WORK
           </h1>
 
+          {/* Deskripsi */}
           <p
             style={{
               fontSize: "1.4rem",
@@ -113,10 +149,11 @@ export default function AvailablePage() {
             yang tersedia. Mari kita bikin sesuatu yang luar biasa bareng-bareng 🔥
           </p>
 
-          {/* Tombol Hero tetap ada */}
+          {/* Tombol Hero UI dengan linebox */}
           <div className="linebox" style={{ marginTop: "2.5rem" }}>
             <a href="/" className="hero-btn">
               Back to Home
+              {/* Panah serong kanan SVG */}
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
@@ -135,25 +172,18 @@ export default function AvailablePage() {
         </div>
 
         {/* Footer dengan background merah tinggi */}
-        <div
-          style={{
-            backgroundColor: "#dc2626",
-            padding: "80px 60px", // lebih tinggi
-            color: "white",
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            flexWrap: "wrap",
-            gap: "30px",
-          }}
-        >
-          {/* Kiri: teks Website ini masih dikembangkan */}
-          <div className="linebox">
-            <span className="footer-text">Website ini masih dikembangkan</span>
-          </div>
-
-          {/* Kanan: link */}
-          <div style={{ display: "flex", gap: "20px", flexWrap: "wrap" }}>
+        <div style={{
+          backgroundColor: "#dc2626",
+          padding: "40px 60px",
+          color: "white",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          flexWrap: "wrap",
+          gap: "20px",
+        }}>
+          {/* Tautan dengan linebox */}
+          <div style={{ display: "flex", gap: "15px", flexWrap: "wrap" }}>
             <div className="linebox">
               <a href="#" className="footer-link">
                 Kebijakan Privasi
@@ -169,6 +199,28 @@ export default function AvailablePage() {
                 Berikan Masukan
               </a>
             </div>
+          </div>
+          
+          {/* Teks dengan linebox dan icon */}
+          <div className="linebox" style={{ 
+            display: "flex", 
+            alignItems: "center", 
+            padding: "8px 16px",
+            backgroundColor: "rgba(0, 0, 0, 0.2)",
+          }}>
+            <span style={{ marginRight: "8px" }}>和</span>
+            <span>Website ini masih dikembangkan</span>
+          </div>
+          
+          {/* Hak cipta */}
+          <div style={{ 
+            display: "flex", 
+            flexDirection: "column", 
+            alignItems: "flex-end",
+            fontSize: "0.9rem"
+          }}>
+            <div>@ AVAILABLE FOR WORK</div>
+            <div>® 2023 Astro Example. All rights reserved.</div>
           </div>
         </div>
       </div>
