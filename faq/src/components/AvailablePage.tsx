@@ -61,6 +61,15 @@ export default function AvailablePage() {
         .hero-btn:hover svg {
           transform: translateX(4px); /* panah geser saat hover */
         }
+        .footer-link {
+          color: white;
+          text-decoration: none;
+          padding: 8px 16px;
+          font-size: 0.9rem;
+        }
+        .footer-link:hover {
+          color: #d1d5db;
+        }
       `}</style>
 
       <div
@@ -74,6 +83,7 @@ export default function AvailablePage() {
           color: "#f1f5f9",
           padding: "60px",
           position: "relative",
+          paddingBottom: "120px", // Memberikan ruang untuk footer
         }}
       >
         {/* Judul */}
@@ -160,7 +170,7 @@ export default function AvailablePage() {
 
         {/* Footer dengan background merah */}
         <div style={{
-          position: "absolute",
+          position: "fixed",
           bottom: "0",
           left: "0",
           width: "100%",
@@ -171,24 +181,49 @@ export default function AvailablePage() {
           alignItems: "center",
           flexWrap: "wrap",
           color: "white",
-          fontSize: "0.9rem"
+          fontSize: "0.9rem",
+          gap: "15px"
         }}>
-          <div style={{ display: "flex", gap: "20px" }}>
-            <a href="#" style={{ color: "white", textDecoration: "none" }}>
-              Kebijakan Privasi
-            </a>
-            <a href="#" style={{ color: "white", textDecoration: "none" }}>
-              Syarat & Ketentuan
-            </a>
-            <a href="#" style={{ color: "white", textDecoration: "none" }}>
-              Berikan Masukan
-            </a>
+          {/* Tautan dengan linebox */}
+          <div style={{ display: "flex", gap: "15px", flexWrap: "wrap" }}>
+            <div className="linebox">
+              <a href="#" className="footer-link">
+                Kebijakan Privasi
+              </a>
+            </div>
+            <div className="linebox">
+              <a href="#" className="footer-link">
+                Syarat & Ketentuan
+              </a>
+            </div>
+            <div className="linebox">
+              <a href="#" className="footer-link">
+                Berikan Masukan
+              </a>
+            </div>
           </div>
           
-          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-            <span>和 Website ini masih dikembangkan</span>
+          {/* Teks dengan linebox dan icon */}
+          <div className="linebox" style={{ display: "flex", alignItems: "center", padding: "8px 16px" }}>
+            <svg 
+              xmlns="http://www.w3.org/2000/svg" 
+              width="16" 
+              height="16" 
+              viewBox="0 0 24 24" 
+              fill="none" 
+              stroke="currentColor" 
+              strokeWidth="2" 
+              strokeLinecap="round" 
+              strokeLinejoin="round"
+              style={{ marginRight: "8px" }}
+            >
+              <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+              <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+            </svg>
+            <span>Website ini masih dikembangkan</span>
           </div>
           
+          {/* Hak cipta */}
           <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end" }}>
             <div>@ AVAILABLE FOR WORK</div>
             <div>® 2023 Astro Example. All rights reserved.</div>
