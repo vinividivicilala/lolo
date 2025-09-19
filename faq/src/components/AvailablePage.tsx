@@ -5,7 +5,7 @@ export default function AvailablePage() {
     <>
       {/* Font Inter */}
       <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap"
         rel="stylesheet"
       />
       <style>{`
@@ -16,42 +16,30 @@ export default function AvailablePage() {
           background-color: #000;
           font-family: 'Inter', sans-serif;
         }
-        .linebox {
-          position: relative;
-          display: inline-block;
-          border: 1px solid rgba(255,255,255,0.2); /* putih pudar */
-          border-radius: 12px;
-          overflow: hidden;
-          transition: border 0.3s ease;
-        }
-        .linebox::before {
-          content: "";
-          position: absolute;
-          inset: 0;
-          background: rgba(255,255,255,0.05); /* lapisan putih transparan */
-          pointer-events: none;
-        }
-        .linebox:hover {
-          border-color: rgba(59,130,246,0.6); /* biru saat hover */
-        }
         .hero-btn {
           background: transparent;
           color: #3b82f6;
-          font-weight: 600;
-          font-size: 1rem;
-          padding: 12px 24px;
-          border: none;
+          font-weight: 700;
+          font-size: 1.6rem;
+          padding: 14px 28px;
           display: flex;
           align-items: center;
-          gap: 8px;
+          gap: 10px;
           cursor: pointer;
-          z-index: 1;
-          position: relative;
+          text-decoration: none; /* hilangkan garis bawah */
+          transition: color 0.3s ease;
+        }
+        .hero-btn:hover {
+          color: #60a5fa;
         }
         .hero-btn svg {
-          width: 20px;
-          height: 20px;
+          width: 26px;
+          height: 26px;
           stroke: currentColor;
+          transition: transform 0.3s ease;
+        }
+        .hero-btn:hover svg {
+          transform: translateX(4px);
         }
       `}</style>
 
@@ -128,22 +116,23 @@ export default function AvailablePage() {
           yang tersedia. Mari kita bikin sesuatu yang luar biasa bareng-bareng 🔥
         </p>
 
-        {/* Tombol Hero UI + linebox + panah SVG */}
-        <div className="linebox" style={{ marginTop: "2.5rem" }}>
-          <a href="/" className="hero-btn">
-            ⬅ Back to Home
-            {/* Panah serong kanan SVG */}
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth="2"
-              stroke="currentColor"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" d="M7 17L17 7M7 7h10v10" />
-            </svg>
-          </a>
-        </div>
+        {/* Tombol tanpa underline + panah kanan saja */}
+        <a href="/" className="hero-btn" style={{ marginTop: "2.5rem" }}>
+          Back to Home
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth="2"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M7 17L17 7M7 7h10v10"
+            />
+          </svg>
+        </a>
       </div>
     </>
   );
