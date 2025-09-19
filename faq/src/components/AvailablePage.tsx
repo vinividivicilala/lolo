@@ -3,9 +3,9 @@ import React from "react";
 export default function AvailablePage() {
   return (
     <>
-      {/* Font Montserrat dan Poppins */}
+      {/* Font Space Mono */}
       <link
-        href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Poppins:wght@400;600;700&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap"
         rel="stylesheet"
       />
       <style>{`
@@ -14,20 +14,21 @@ export default function AvailablePage() {
           padding: 0;
           height: 100%;
           background-color: #000;
-          font-family: 'Poppins', 'Montserrat', sans-serif;
+          font-family: 'Space Mono', monospace;
         }
         .linebox {
           position: relative;
           display: inline-block;
           border: 1px solid rgba(255,255,255,0.2);
-          border-radius: 6px; /* tidak terlalu melengkung */
-          overflow: hidden;
-        }
-        .linebox span {
-          color: transparent;                 /* teks transparan */
-          -webkit-text-stroke: 1px #fff;      /* outline putih */
-          font-family: 'Montserrat', sans-serif;
+          border-radius: 6px; /* agak kotak */
+          background: rgba(255,255,255,0.05);
+          padding: 10px 16px;
+          font-size: 1rem;
           font-weight: 600;
+          color: #fff; /* jelas normal */
+          display: flex;
+          align-items: center;
+          gap: 8px;
         }
         .hero-btn {
           background: transparent;
@@ -59,17 +60,6 @@ export default function AvailablePage() {
           justify-content: space-between;
           align-items: center;
           flex-wrap: wrap;
-        }
-        .footer-left .linebox,
-        .footer-right .linebox {
-          border: 1px solid rgba(255,255,255,0.2);
-          background: rgba(255,255,255,0.05);
-          border-radius: 6px;
-          padding: 10px 16px;
-          font-size: 1rem;
-          display: flex;
-          align-items: center;
-          gap: 8px;
         }
         .footer-right {
           display: flex;
