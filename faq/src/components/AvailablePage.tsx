@@ -3,13 +3,9 @@ import React from "react";
 export default function AvailablePage() {
   return (
     <>
-      {/* Font Inter dan Geist */}
+      {/* Font Montserrat dan Poppins */}
       <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap"
-        rel="stylesheet"
-      />
-      <link
-        href="https://fonts.googleapis.com/css2?family=Geist:wght@400;600;700&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Poppins:wght@400;600;700&display=swap"
         rel="stylesheet"
       />
       <style>{`
@@ -18,7 +14,7 @@ export default function AvailablePage() {
           padding: 0;
           height: 100%;
           background-color: #000;
-          font-family: 'Inter', sans-serif;
+          font-family: 'Poppins', 'Montserrat', sans-serif;
         }
         .linebox {
           position: relative;
@@ -34,9 +30,6 @@ export default function AvailablePage() {
           inset: 0;
           background: rgba(255,255,255,0.05);
           pointer-events: none;
-        }
-        .linebox:hover {
-          border-color: rgba(59,130,246,0.6);
         }
         .hero-btn {
           background: transparent;
@@ -65,9 +58,11 @@ export default function AvailablePage() {
         .hero-btn:hover svg {
           transform: translateX(4px);
         }
+
+        /* Footer */
         .footer-container {
-          background-color: #dc2626;
-          padding: 80px 60px;   /* tinggi lebih besar */
+          background-color: #000;   /* diganti hitam */
+          padding: 60px;
           color: white;
         }
         .footer-content {
@@ -78,19 +73,20 @@ export default function AvailablePage() {
         }
         .footer-left .linebox,
         .footer-right .linebox {
-          border: 2px solid rgba(255,255,255,0.2);
+          border: 1px solid rgba(255,255,255,0.2);
           background: rgba(255,255,255,0.1);
-          border-radius: 16px;
-          padding: 16px 24px;
-          font-size: 1.5rem;     /* font besar */
-          font-weight: 700;
+          border-radius: 12px;
+          padding: 10px 16px;
+          font-size: 1rem;   /* font lebih kecil */
+          font-weight: 600;
           display: flex;
           align-items: center;
-          gap: 10px;
+          gap: 8px;
+          font-family: 'Montserrat', 'Poppins', sans-serif;
         }
         .footer-right {
           display: flex;
-          gap: 20px;
+          gap: 12px;
           flex-wrap: wrap;
         }
       `}</style>
@@ -107,7 +103,6 @@ export default function AvailablePage() {
       >
         {/* Konten Utama */}
         <div style={{ padding: "60px", flex: "1" }}>
-          {/* Judul */}
           <h1
             style={{
               fontSize: "4rem",
@@ -119,7 +114,6 @@ export default function AvailablePage() {
             AVAILABLE FOR WORK
           </h1>
 
-          {/* Deskripsi */}
           <p
             style={{
               fontSize: "1.4rem",
@@ -168,11 +162,9 @@ export default function AvailablePage() {
             yang tersedia. Mari kita bikin sesuatu yang luar biasa bareng-bareng 🔥
           </p>
 
-          {/* Tombol Hero UI dengan linebox */}
           <div className="linebox" style={{ marginTop: "2.5rem" }}>
             <a href="/" className="hero-btn">
               Back to Home
-              {/* Panah serong kanan SVG */}
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
@@ -190,31 +182,21 @@ export default function AvailablePage() {
           </div>
         </div>
 
-        {/* Footer dengan background merah tinggi */}
+        {/* Footer */}
         <div className="footer-container">
           <div className="footer-content">
             {/* Kiri */}
             <div className="footer-left">
               <div className="linebox">
-                {/* Icon svg contoh */}
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth="2"
-                  stroke="currentColor"
-                  style={{ width: "28px", height: "28px" }}
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M12 6v6h4"
-                  />
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M12 18h.01"
-                  />
+                {/* Icon info svg */}
+                <svg xmlns="http://www.w3.org/2000/svg"
+                     fill="none"
+                     viewBox="0 0 24 24"
+                     strokeWidth="2"
+                     stroke="currentColor"
+                     style={{ width: "20px", height: "20px" }}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4" />
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 18h.01" />
                 </svg>
                 <span>Website ini masih dikembangkan</span>
               </div>
@@ -228,7 +210,7 @@ export default function AvailablePage() {
             </div>
           </div>
         </div>
-      </div> {/* Tutup wrapper utama */}
+      </div>
     </>
   );
 }
