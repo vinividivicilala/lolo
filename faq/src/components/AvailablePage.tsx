@@ -18,41 +18,38 @@ export default function AvailablePage() {
         }
         .linebox {
           position: relative;
-          display: inline-block;
+          display: inline-flex;
+          align-items: center;
           border: 1px solid rgba(255,255,255,0.2);
           border-radius: 6px; /* agak kotak */
           background: rgba(255,255,255,0.05);
-          padding: 10px 16px;
+          padding: 8px 14px;
           font-size: 1rem;
           font-weight: 600;
-          color: #fff; /* jelas normal */
-          display: flex;
-          align-items: center;
+          color: #fff;
           gap: 8px;
+          width: fit-content; /* ngepas konten */
         }
         .hero-btn {
           background: transparent;
           color: #3b82f6;
           font-weight: 700;
-          font-size: 1.6rem;
-          padding: 14px 28px;
+          font-size: 1.2rem;
+          padding: 8px 14px;  /* lebih kecil, biar nggak panjang */
           display: flex;
           align-items: center;
-          gap: 10px;
+          gap: 8px;
           cursor: pointer;
           text-decoration: none;
-          transition: color 0.3s ease;
-          position: relative;
-          z-index: 1;
         }
         .hero-btn svg {
-          width: 26px;
-          height: 26px;
+          width: 22px;
+          height: 22px;
           stroke: currentColor;
         }
         .footer-container {
           background-color: #000;
-          padding: 60px;
+          padding: 50px 60px;
           color: white;
         }
         .footer-content {
@@ -139,6 +136,7 @@ export default function AvailablePage() {
             yang tersedia. Mari kita bikin sesuatu yang luar biasa bareng-bareng 🔥
           </p>
 
+          {/* Tombol Back to Home dengan linebox pendek */}
           <div className="linebox" style={{ marginTop: "2.5rem" }}>
             <a href="/" className="hero-btn">
               Back to Home
@@ -161,14 +159,14 @@ export default function AvailablePage() {
             {/* Kiri */}
             <div className="footer-left">
               <div className="linebox">
+                {/* Icon alert-triangle */}
                 <svg xmlns="http://www.w3.org/2000/svg"
                      fill="none"
                      viewBox="0 0 24 24"
                      strokeWidth="2"
                      stroke="currentColor"
                      style={{ width: "20px", height: "20px" }}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4" />
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 18h.01" />
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M10.29 3.86l-7.3 12.61A1 1 0 004 19h16a1 1 0 00.87-1.5l-7.3-12.61a1 1 0 00-1.74 0z" />
                 </svg>
                 <span>Website ini masih dikembangkan</span>
               </div>
