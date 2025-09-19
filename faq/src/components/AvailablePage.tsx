@@ -1,12 +1,11 @@
-
 import React from "react";
 
 export default function AvailablePage() {
   return (
     <>
-      {/* Font Inter */}
+      {/* Font Geist dari Vercel */}
       <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&display=swap"
         rel="stylesheet"
       />
       <style>{`
@@ -15,7 +14,7 @@ export default function AvailablePage() {
           padding: 0;
           height: 100%;
           background-color: #000;
-          font-family: 'Inter', sans-serif;
+          font-family: 'Geist', sans-serif; /* Diubah dari Inter ke Geist */
         }
         .linebox {
           position: relative;
@@ -32,8 +31,9 @@ export default function AvailablePage() {
           background: rgba(255,255,255,0.05);
           pointer-events: none;
         }
-        .linebox:hover {
-          border-color: rgba(59,130,246,0.6);
+        /* Nonaktifkan hover biru untuk footer, tetap pakai abu-abu pudar */
+        .footer-linebox:hover {
+          border-color: rgba(0, 0, 0, 0.3) !important;
         }
         .hero-btn {
           background: transparent;
@@ -66,7 +66,7 @@ export default function AvailablePage() {
           color: white;
           text-decoration: none;
           padding: 8px 16px;
-          font-size: 0.9rem;
+          font-size: 1.1rem;
         }
         .footer-link:hover {
           color: #d1d5db;
@@ -99,7 +99,6 @@ export default function AvailablePage() {
           >
             AVAILABLE FOR WORK
           </h1>
-
           {/* Deskripsi */}
           <p
             style={{
@@ -148,12 +147,10 @@ export default function AvailablePage() {
             </span>{" "}
             yang tersedia. Mari kita bikin sesuatu yang luar biasa bareng-bareng 🔥
           </p>
-
           {/* Tombol Hero UI dengan linebox */}
           <div className="linebox" style={{ marginTop: "2.5rem" }}>
             <a href="/" className="hero-btn">
               Back to Home
-              {/* Panah serong kanan SVG */}
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
@@ -171,53 +168,80 @@ export default function AvailablePage() {
           </div>
         </div>
 
-        {/* Footer dengan background merah tinggi */}
+        {/* Footer - Background Merah Tinggi */}
         <div style={{
           backgroundColor: "#dc2626",
-          padding: "40px 60px",
+          padding: "60px",
           color: "white",
+          minHeight: "200px",
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
           flexWrap: "wrap",
-          gap: "20px",
+          gap: "30px",
+          fontFamily: "'Geist', sans-serif",
         }}>
-          {/* Tautan dengan linebox */}
-          <div style={{ display: "flex", gap: "15px", flexWrap: "wrap" }}>
-            <div className="linebox">
-              <a href="#" className="footer-link">
-                Kebijakan Privasi
-              </a>
-            </div>
-            <div className="linebox">
-              <a href="#" className="footer-link">
-                Syarat & Ketentuan
-              </a>
-            </div>
-            <div className="linebox">
-              <a href="#" className="footer-link">
-                Berikan Masukan
-              </a>
-            </div>
-          </div>
-          
-          {/* Teks dengan linebox dan icon */}
-          <div className="linebox" style={{ 
-            display: "flex", 
-            alignItems: "center", 
-            padding: "8px 16px",
-            backgroundColor: "rgba(0, 0, 0, 0.2)",
-          }}>
-            <span style={{ marginRight: "8px" }}>和</span>
+          {/* KIRI: Info Pengembangan */}
+          <div
+            className="linebox"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              padding: "16px 24px",
+              backgroundColor: "rgba(0, 0, 0, 0.2)",
+              border: "2px solid rgba(0, 0, 0, 0.3)",
+              borderRadius: "16px",
+              fontSize: "1.4rem",
+              fontWeight: "500",
+              minWidth: "300px",
+            }}
+          >
+            <span style={{ marginRight: "12px", fontSize: "1.6rem" }}>和</span>
             <span>Website ini masih dikembangkan</span>
           </div>
-          
-          {/* Hak cipta */}
-          <div style={{ 
-            display: "flex", 
-            flexDirection: "column", 
+
+          {/* KANAN: Tautan */}
+          <div style={{
+            display: "flex",
+            gap: "20px",
+            flexWrap: "wrap",
+            marginLeft: "auto",
+          }}>
+            {["Kebijakan Privasi", "Syarat & Ketentuan", "Berikan Masukan"].map((text) => (
+              <div
+                key={text}
+                className="linebox footer-linebox"
+                style={{
+                  border: "2px solid rgba(0, 0, 0, 0.3)",
+                  borderRadius: "16px",
+                }}
+              >
+                <a
+                  href="#"
+                  className="footer-link"
+                  style={{
+                    fontSize: "1.4rem",
+                    fontWeight: "600",
+                    padding: "14px 24px",
+                    color: "white",
+                    textDecoration: "none",
+                    display: "block",
+                  }}
+                >
+                  {text}
+                </a>
+              </div>
+            ))}
+          </div>
+
+          {/* Hak Cipta */}
+          <div style={{
+            display: "flex",
+            flexDirection: "column",
             alignItems: "flex-end",
-            fontSize: "0.9rem"
+            fontSize: "0.9rem",
+            width: "100%",
+            marginTop: "20px",
           }}>
             <div>@ AVAILABLE FOR WORK</div>
             <div>® 2023 Astro Example. All rights reserved.</div>
