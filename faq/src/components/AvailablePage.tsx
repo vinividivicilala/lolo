@@ -73,6 +73,7 @@ export default function AvailablePage() {
           backgroundColor: "#000",
           color: "#f1f5f9",
           padding: "60px",
+          position: "relative",
         }}
       >
         {/* Judul */}
@@ -155,6 +156,43 @@ export default function AvailablePage() {
               />
             </svg>
           </a>
+        </div>
+
+        {/* Footer dengan background merah */}
+        <div style={{
+          position: "absolute",
+          bottom: "0",
+          left: "0",
+          width: "100%",
+          backgroundColor: "#dc2626", // Warna merah
+          padding: "20px 60px",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          flexWrap: "wrap",
+          color: "white",
+          fontSize: "0.9rem"
+        }}>
+          <div style={{ display: "flex", gap: "20px" }}>
+            <a href="#" style={{ color: "white", textDecoration: "none" }}>
+              Kebijakan Privasi
+            </a>
+            <a href="#" style={{ color: "white", textDecoration: "none" }}>
+              Syarat & Ketentuan
+            </a>
+            <a href="#" style={{ color: "white", textDecoration: "none" }}>
+              Berikan Masukan
+            </a>
+          </div>
+          
+          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+            <span>和 Website ini masih dikembangkan</span>
+          </div>
+          
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end" }}>
+            <div>@ AVAILABLE FOR WORK</div>
+            <div>® 2023 Astro Example. All rights reserved.</div>
+          </div>
         </div>
       </div>
     </>
