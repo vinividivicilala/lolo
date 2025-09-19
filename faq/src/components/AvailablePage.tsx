@@ -65,43 +65,34 @@ export default function AvailablePage() {
         .hero-btn:hover svg {
           transform: translateX(4px);
         }
-
         .footer-container {
-  background-color: #dc2626;
-  padding: 80px 60px;   /* tinggi lebih besar */
-  color: white;
-}
-
-.footer-content {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-}
-
-.footer-left .linebox,
-.footer-right .linebox {
-  border: 2px solid rgba(255,255,255,0.2);
-  background: rgba(255,255,255,0.1);
-  border-radius: 16px;
-  padding: 16px 24px;
-  font-size: 1.5rem;     /* font besar */
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.footer-right {
-  display: flex;
-  gap: 20px;
-  flex-wrap: wrap;
-}
-
-
-
-        
-      
+          background-color: #dc2626;
+          padding: 80px 60px;   /* tinggi lebih besar */
+          color: white;
+        }
+        .footer-content {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          flex-wrap: wrap;
+        }
+        .footer-left .linebox,
+        .footer-right .linebox {
+          border: 2px solid rgba(255,255,255,0.2);
+          background: rgba(255,255,255,0.1);
+          border-radius: 16px;
+          padding: 16px 24px;
+          font-size: 1.5rem;     /* font besar */
+          font-weight: 700;
+          display: flex;
+          align-items: center;
+          gap: 10px;
+        }
+        .footer-right {
+          display: flex;
+          gap: 20px;
+          flex-wrap: wrap;
+        }
       `}</style>
 
       <div
@@ -115,10 +106,7 @@ export default function AvailablePage() {
         }}
       >
         {/* Konten Utama */}
-        <div style={{
-          padding: "60px",
-          flex: "1",
-        }}>
+        <div style={{ padding: "60px", flex: "1" }}>
           {/* Judul */}
           <h1
             style={{
@@ -202,34 +190,45 @@ export default function AvailablePage() {
           </div>
         </div>
 
-    {/* Footer dengan background merah tinggi */}
-<div className="footer-container">
-  <div className="footer-content">
-    {/* Kiri */}
-    <div className="footer-left">
-      <div className="linebox">
-        {/* Icon svg contoh */}
-        <svg xmlns="http://www.w3.org/2000/svg" 
-             fill="none" viewBox="0 0 24 24" 
-             strokeWidth="2" stroke="currentColor" 
-             style={{ width: "28px", height: "28px" }}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4" />
-          <path strokeLinecap="round" strokeLinejoin="round" d="M12 18h.01" />
-        </svg>
-        <span>Website ini masih dikembangkan</span>
-      </div>
-    </div>
+        {/* Footer dengan background merah tinggi */}
+        <div className="footer-container">
+          <div className="footer-content">
+            {/* Kiri */}
+            <div className="footer-left">
+              <div className="linebox">
+                {/* Icon svg contoh */}
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth="2"
+                  stroke="currentColor"
+                  style={{ width: "28px", height: "28px" }}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M12 6v6h4"
+                  />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M12 18h.01"
+                  />
+                </svg>
+                <span>Website ini masih dikembangkan</span>
+              </div>
+            </div>
 
-    {/* Kanan */}
-    <div className="footer-right">
-      <div className="linebox"><span>Kebijakan Privasi</span></div>
-      <div className="linebox"><span>Syarat & Ketentuan</span></div>
-      <div className="linebox"><span>Berikan Masukan</span></div>
-    </div>
-  </div>
-</div>
-
+            {/* Kanan */}
+            <div className="footer-right">
+              <div className="linebox"><span>Kebijakan Privasi</span></div>
+              <div className="linebox"><span>Syarat & Ketentuan</span></div>
+              <div className="linebox"><span>Berikan Masukan</span></div>
+            </div>
+          </div>
+        </div>
+      </div> {/* Tutup wrapper utama */}
     </>
   );
 }
-
