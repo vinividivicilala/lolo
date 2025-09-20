@@ -18,73 +18,89 @@ export default function AvailablePage() {
         }
 
 
-        .timeline {
-  position: relative;
-  margin-left: 20px;
-  padding-left: 30px;
-  border-left: 2px dashed rgba(255,255,255,0.3);
-}
+  /* Timeline Line dengan animasi dash */
+  .timeline {
+    position: relative;
+    margin-left: 20px;
+    padding-left: 30px;
+    border-left: 3px dashed rgba(255,255,255,0.4);
+    animation: dashmove 3s linear infinite;
+    background-image: repeating-linear-gradient(
+      to bottom,
+      transparent 0,
+      transparent 6px,
+      rgba(255,255,255,0.15) 6px,
+      rgba(255,255,255,0.15) 12px
+    );
+  }
 
-.timeline-item {
-  display: flex;
-  align-items: flex-start;
-  margin-bottom: 2rem;
-  position: relative;
-}
+  @keyframes dashmove {
+    from { background-position: 0 0; }
+    to { background-position: 0 12px; }
+  }
 
-.timeline-left {
-  flex: 0 0 180px; /* sisi kiri lebih rapi */
-  text-align: left;
-  color: #fff;
-  padding-right: 20px;
-}
+  .timeline-item {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 2rem;
+    position: relative;
+  }
 
-.timeline-date {
-  display: block;
-  font-size: 0.9rem;
-  color: #94a3b8;
-}
+  /* Titik default */
+  .timeline-item::before {
+    content: "";
+    position: absolute;
+    left: -42px;
+    top: 8px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.2);
+    border: 2px solid rgba(255,255,255,0.7);
+  }
 
-.timeline-title {
-  font-size: 1.1rem;
-  font-weight: 600;
-  margin-top: 0.3rem;
-}
+  /* Titik aktif dengan pemancar */
+  .timeline-item.active::before {
+    background: #3b82f6;
+    box-shadow: 0 0 10px #3b82f6, 0 0 20px #3b82f6, 0 0 40px rgba(59,130,246,0.6);
+    animation: pulse 1.5s infinite, beacon 2s infinite;
+  }
 
-.timeline-right {
-  flex: 1;
-  color: #e5e5e5;
-  font-size: 1rem;
-  line-height: 1.6;
-}
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.4); opacity: 0.7; }
+  }
 
-/* Titik animasi */
-.timeline-item::before {
-  content: "";
-  position: absolute;
-  left: -42px;
-  top: 8px;
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  background: rgba(255,255,255,0.4);
-  border: 2px solid rgba(255,255,255,0.8);
-}
+  @keyframes beacon {
+    0% { box-shadow: 0 0 0 0 rgba(59,130,246,0.6); }
+    70% { box-shadow: 0 0 0 15px rgba(59,130,246,0); }
+    100% { box-shadow: 0 0 0 0 rgba(59,130,246,0); }
+  }
 
-/* Titik aktif - berkedip */
-.timeline-item.active::before {
-  background: #3b82f6;
-  box-shadow: 0 0 10px #3b82f6;
-  animation: pulse 1.5s infinite;
-}
+  /* Linebox untuk date, title, desc */
+  .timeline-left .linebox, 
+  .timeline-right .linebox {
+    display: inline-block;
+    margin-bottom: 8px;
+  }
 
-@keyframes pulse {
-  0%, 100% { transform: scale(1); opacity: 1; }
-  50% { transform: scale(1.3); opacity: 0.6; }
-}
+  .timeline-date {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #fff;
+  }
 
+  .timeline-title {
+    font-size: 1.6rem;
+    font-weight: 800;
+    margin-top: 0.4rem;
+    color: #3b82f6;
+  }
 
-
+  .timeline-right p {
+    font-size: 1.2rem;
+    font-weight: 600;
+  }
 
 
 
@@ -299,39 +315,40 @@ export default function AvailablePage() {
 </div>
 
 
-        {/* Timeline Box */}
+
+{/* Timeline Box */}
 <div style={{ marginTop: "3rem", paddingLeft: "60px" }}>
   <div className="timeline">
     {/* Kegiatan 1 - Aktif */}
     <div className="timeline-item active">
       <div className="timeline-left">
-        <span className="timeline-date">2025-09-19</span>
-        <span className="timeline-title">Rilis Website</span>
+        <div className="linebox"><span className="timeline-date">2025-09-19</span></div>
+        <div className="linebox"><span className="timeline-title">Rilis Website</span></div>
       </div>
       <div className="timeline-right">
-        <p>Peluncuran versi pertama website portfolio dengan desain minimalis dan interaktif.</p>
+        <div className="linebox"><p>Peluncuran versi pertama website portfolio dengan desain minimalis dan interaktif.</p></div>
       </div>
     </div>
 
-    {/* Kegiatan 2 - Nonaktif */}
+    {/* Kegiatan 2 */}
     <div className="timeline-item">
       <div className="timeline-left">
-        <span className="timeline-date">2025-08-10</span>
-        <span className="timeline-title">Uji Coba Firebase</span>
+        <div className="linebox"><span className="timeline-date">2025-08-10</span></div>
+        <div className="linebox"><span className="timeline-title">Uji Coba Firebase</span></div>
       </div>
       <div className="timeline-right">
-        <p>Menerapkan autentikasi dan penyimpanan data real-time menggunakan Firebase.</p>
+        <div className="linebox"><p>Menerapkan autentikasi dan penyimpanan data real-time menggunakan Firebase.</p></div>
       </div>
     </div>
 
-    {/* Kegiatan 3 - Nonaktif */}
+    {/* Kegiatan 3 */}
     <div className="timeline-item">
       <div className="timeline-left">
-        <span className="timeline-date">2025-07-05</span>
-        <span className="timeline-title">Desain UI</span>
+        <div className="linebox"><span className="timeline-date">2025-07-05</span></div>
+        <div className="linebox"><span className="timeline-title">Desain UI</span></div>
       </div>
       <div className="timeline-right">
-        <p>Membuat desain UI tipografi-based dan minimalist UI untuk tampilan website.</p>
+        <div className="linebox"><p>Membuat desain UI tipografi-based dan minimalist UI untuk tampilan website.</p></div>
       </div>
     </div>
   </div>
@@ -369,6 +386,7 @@ export default function AvailablePage() {
     </>
   );
 }
+
 
 
 
