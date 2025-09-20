@@ -30,16 +30,23 @@ export default function AvailablePage() {
           left: 0;
           top: 0;
           height: 100%;
-          border-left: 2px dashed rgba(255, 255, 255, 0.3);
-          animation: dash-move 15s linear infinite;
+          border-left: 2px dashed rgba(59, 130, 246, 0.6);
+          background-image: linear-gradient(to bottom, 
+            transparent 0%, 
+            transparent 50%, 
+            rgba(59, 130, 246, 0.8) 50%, 
+            rgba(59, 130, 246, 0.8) 100%);
+          background-size: 100% 20px;
+          animation: dash-scroll 3s linear infinite;
+          z-index: 1;
         }
 
-        @keyframes dash-move {
+        @keyframes dash-scroll {
           0% {
             background-position: 0 0;
           }
           100% {
-            background-position: 0 40px;
+            background-position: 0 20px;
           }
         }
 
@@ -87,6 +94,22 @@ export default function AvailablePage() {
           padding: 20px;
           margin-top: 10px;
           box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+          position: relative;
+        }
+
+        /* Icon di dalam kotak konten */
+        .timeline-icon {
+          position: absolute;
+          top: -12px;
+          right: 15px;
+          background: #3b82f6;
+          border-radius: 50%;
+          width: 28px;
+          height: 28px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          box-shadow: 0 0 10px rgba(59, 130, 246, 0.7);
         }
 
         /* Titik animasi */
@@ -211,6 +234,51 @@ export default function AvailablePage() {
             transform: translateX(-50%) translateY(-6px) rotateX(5deg);
           }
         }
+
+        /* Icon styles */
+        .icon-wrapper {
+          display: flex;
+          gap: 15px;
+          margin-top: 20px;
+          margin-left: 60px;
+        }
+
+        .icon-item {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          color: #e5e5e5;
+          transition: transform 0.3s, color 0.3s;
+        }
+
+        .icon-item:hover {
+          transform: translateY(-5px);
+          color: #3b82f6;
+        }
+
+        .icon-circle {
+          width: 60px;
+          height: 60px;
+          border-radius: 50%;
+          background: rgba(59, 130, 246, 0.1);
+          border: 2px solid rgba(59, 130, 246, 0.3);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin-bottom: 8px;
+          transition: all 0.3s;
+        }
+
+        .icon-item:hover .icon-circle {
+          background: rgba(59, 130, 246, 0.2);
+          border-color: #3b82f6;
+          box-shadow: 0 0 15px rgba(59, 130, 246, 0.5);
+        }
+
+        .icon-label {
+          font-size: 0.9rem;
+          font-weight: 600;
+        }
       `}</style>
 
       <div
@@ -325,6 +393,40 @@ export default function AvailablePage() {
           </p>
         </div>
 
+        {/* Icon Notifikasi, Pesan, dan Komunitas */}
+        <div className="icon-wrapper">
+          <div className="icon-item">
+            <div className="icon-circle">
+              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+              </svg>
+            </div>
+            <span className="icon-label">Notifikasi</span>
+          </div>
+          
+          <div className="icon-item">
+            <div className="icon-circle">
+              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+              </svg>
+            </div>
+            <span className="icon-label">Pesan</span>
+          </div>
+          
+          <div className="icon-item">
+            <div className="icon-circle">
+              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                <circle cx="9" cy="7" r="4"></circle>
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+              </svg>
+            </div>
+            <span className="icon-label">Komunitas</span>
+          </div>
+        </div>
+
         {/* Timeline Box - Layout Sejajar ke Samping */}
         <div style={{ marginTop: "3rem", paddingLeft: "60px", marginBottom: "3rem" }}>
           <div className="timeline">
@@ -336,6 +438,13 @@ export default function AvailablePage() {
               </div>
               <div className="timeline-right">
                 <div className="timeline-content-box">
+                  <div className="timeline-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <circle cx="12" cy="12" r="10"></circle>
+                      <line x1="12" y1="8" x2="12" y2="12"></line>
+                      <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                    </svg>
+                  </div>
                   <p>Peluncuran versi pertama website portfolio dengan desain minimalis dan interaktif.</p>
                 </div>
               </div>
@@ -349,6 +458,11 @@ export default function AvailablePage() {
               </div>
               <div className="timeline-right">
                 <div className="timeline-content-box">
+                  <div className="timeline-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                    </svg>
+                  </div>
                   <p>Menerapkan autentikasi dan penyimpanan data real-time menggunakan Firebase.</p>
                 </div>
               </div>
@@ -362,6 +476,14 @@ export default function AvailablePage() {
               </div>
               <div className="timeline-right">
                 <div className="timeline-content-box">
+                  <div className="timeline-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                      <circle cx="9" cy="7" r="4"></circle>
+                      <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                      <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                    </svg>
+                  </div>
                   <p>Membuat desain UI tipografi-based dan minimalist UI untuk tampilan website.</p>
                 </div>
               </div>
