@@ -70,6 +70,7 @@ export default function AvailablePage() {
           font-weight: 700;
           margin-top: 0.3rem;
           margin-bottom: 10px;
+          color: #fff;
         }
 
         /* Blok warna di bawah title */
@@ -80,6 +81,9 @@ export default function AvailablePage() {
           font-size: 0.9rem;
           font-weight: 700;
           margin-top: 5px;
+          background: rgba(255, 255, 255, 0.1);
+          color: #fff;
+          border: 1px solid rgba(255, 255, 255, 0.3);
         }
 
         .timeline-right {
@@ -114,7 +118,7 @@ export default function AvailablePage() {
         /* Garis putus-putus dengan animasi untuk item aktif */
         .timeline-item.active .timeline-connector {
           background: transparent;
-          border-top: 2px dashed #3b82f6;
+          border-top: 2px dashed #fff;
           animation: dash-move 1s linear infinite;
         }
 
@@ -143,23 +147,23 @@ export default function AvailablePage() {
 
         /* Titik aktif - berkedip */
         .timeline-item.active::before {
-          background: #3b82f6;
-          box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.4);
+          background: #fff;
+          box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.4);
           animation: pulse 1.5s infinite;
         }
 
         @keyframes pulse {
           0% {
             transform: scale(0.95);
-            box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7);
+            box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7);
           }
           70% {
             transform: scale(1.1);
-            box-shadow: 0 0 0 12px rgba(59, 130, 246, 0);
+            box-shadow: 0 0 0 12px rgba(255, 255, 255, 0);
           }
           100% {
             transform: scale(0.95);
-            box-shadow: 0 0 0 0 rgba(59, 130, 246, 0);
+            box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
           }
         }
 
@@ -179,7 +183,7 @@ export default function AvailablePage() {
         }
         .hero-btn {
           background: transparent;
-          color: #3b82f6;
+          color: #fff;
           font-weight: 700;
           font-size: 1.2rem;
           padding: 8px 14px;
@@ -188,6 +192,11 @@ export default function AvailablePage() {
           gap: 8px;
           cursor: pointer;
           text-decoration: none;
+          border: 1px solid rgba(255,255,255,0.2);
+          border-radius: 6px;
+        }
+        .hero-btn:hover {
+          background: rgba(255,255,255,0.1);
         }
         .hero-btn svg {
           width: 22px;
@@ -216,7 +225,8 @@ export default function AvailablePage() {
           top: 0;
           left: 50%;
           transform: translateX(-50%) rotateX(5deg);
-          background: linear-gradient(135deg, #3b82f6, #06b6d4);
+          background: rgba(255, 255, 255, 0.1);
+          backdrop-filter: blur(10px);
           color: #fff;
           padding: 12px 24px;
           font-size: 1.1rem;
@@ -228,6 +238,7 @@ export default function AvailablePage() {
           gap: 12px;
           align-items: center;
           animation: floatBanner 3s ease-in-out infinite;
+          border: 1px solid rgba(255,255,255,0.2);
         }
 
         .banner-ujicoba a {
@@ -239,7 +250,7 @@ export default function AvailablePage() {
         }
 
         .banner-ujicoba a:hover {
-          color: #ffdd57;
+          color: #e5e5e5;
         }
 
         @keyframes floatBanner {
@@ -268,7 +279,7 @@ export default function AvailablePage() {
 
         .modal-content {
           background: #111;
-          border: 2px solid rgba(59, 130, 246, 0.3);
+          border: 2px solid rgba(255, 255, 255, 0.2);
           border-radius: 12px;
           max-width: 800px;
           width: 100%;
@@ -309,20 +320,21 @@ export default function AvailablePage() {
         .modal-title {
           font-size: 2.2rem;
           font-weight: 700;
-          color: #3b82f6;
+          color: #fff;
           margin-bottom: 15px;
         }
 
         .modal-image {
           width: 100%;
           height: 200px;
-          background: linear-gradient(135deg, #1e40af, #3b82f6);
+          background: rgba(255, 255, 255, 0.05);
           border-radius: 8px;
           display: flex;
           align-items: center;
           justify-content: center;
           margin-bottom: 25px;
           overflow: hidden;
+          border: 1px solid rgba(255,255,255,0.1);
         }
 
         .modal-image-content {
@@ -365,10 +377,10 @@ export default function AvailablePage() {
         .modal-link {
           display: block;
           padding: 15px;
-          background: rgba(59, 130, 246, 0.1);
-          border: 1px solid rgba(59, 130, 246, 0.3);
+          background: rgba(255, 255, 255, 0.05);
+          border: 1px solid rgba(255, 255, 255, 0.2);
           border-radius: 8px;
-          color: #3b82f6;
+          color: #fff;
           text-decoration: none;
           font-weight: 600;
           transition: all 0.3s;
@@ -376,8 +388,8 @@ export default function AvailablePage() {
         }
 
         .modal-link:hover {
-          background: rgba(59, 130, 246, 0.2);
-          border-color: #3b82f6;
+          background: rgba(255, 255, 255, 0.1);
+          border-color: #fff;
           transform: translateY(-2px);
         }
 
@@ -407,15 +419,15 @@ export default function AvailablePage() {
 
         .icon-item:hover {
           transform: translateY(-5px);
-          color: #3b82f6;
+          color: #fff;
         }
 
         .icon-circle {
           width: 70px;
           height: 70px;
           border-radius: 50%;
-          background: rgba(59, 130, 246, 0.1);
-          border: 2px solid rgba(59, 130, 246, 0.3);
+          background: rgba(255, 255, 255, 0.05);
+          border: 2px solid rgba(255, 255, 255, 0.2);
           display: flex;
           align-items: center;
           justify-content: center;
@@ -424,15 +436,16 @@ export default function AvailablePage() {
         }
 
         .icon-item:hover .icon-circle {
-          background: rgba(59, 130, 246, 0.2);
-          border-color: #3b82f6;
-          box-shadow: 0 0 20px rgba(59, 130, 246, 0.7);
+          background: rgba(255, 255, 255, 0.1);
+          border-color: #fff;
+          box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
         }
 
         .icon-label {
           font-size: 1rem;
           font-weight: 700;
           text-align: center;
+          color: #fff;
         }
 
         /* Gelar sarjana */
@@ -447,7 +460,7 @@ export default function AvailablePage() {
         .degree-icon {
           width: 24px;
           height: 24px;
-          color: #3b82f6;
+          color: #fff;
         }
 
         .degree-text {
@@ -457,8 +470,17 @@ export default function AvailablePage() {
         }
 
         .degree-highlight {
-          color: #3b82f6;
+          color: #fff;
           font-weight: 700;
+        }
+
+        /* Highlight text dalam paragraf */
+        .highlight {
+          background: rgba(255, 255, 255, 0.1);
+          padding: 2px 6px;
+          border-radius: 6px;
+          font-weight: 600;
+          color: #fff;
         }
       `}</style>
 
@@ -481,6 +503,7 @@ export default function AvailablePage() {
               fontWeight: "700",
               marginBottom: "1.5rem",
               letterSpacing: "-1px",
+              color: "#fff",
             }}
           >
             AVAILABLE FOR WORK
@@ -500,43 +523,20 @@ export default function AvailablePage() {
               lineHeight: "1.8",
               width: "100%",
               fontWeight: "300",
+              color: "#e5e5e5",
             }}
           >
             Halo! 👋 Saya adalah individu yang penuh semangat, kreatif, dan selalu
             haus akan pengalaman baru ✨. Saya terbuka untuk{" "}
-            <span
-              style={{
-                backgroundColor: "#3b82f6",
-                padding: "2px 6px",
-                borderRadius: "6px",
-                fontWeight: "600",
-                color: "#fff",
-              }}
-            >
+            <span className="highlight">
               peluang kerja
             </span>{" "}
             maupun{" "}
-            <span
-              style={{
-                backgroundColor: "#22c55e",
-                padding: "2px 6px",
-                borderRadius: "6px",
-                fontWeight: "600",
-                color: "#fff",
-              }}
-            >
+            <span className="highlight">
               project kreatif
             </span>{" "}
             yang menantang 🚀. Jika tertarik berkolaborasi, hubungi saya lewat{" "}
-            <span
-              style={{
-                backgroundColor: "#ef4444",
-                padding: "2px 6px",
-                borderRadius: "6px",
-                fontWeight: "600",
-                color: "#fff",
-              }}
-            >
+            <span className="highlight">
               kontak
             </span>{" "}
             yang tersedia. Mari kita bikin sesuatu yang luar biasa bareng-bareng 🔥
@@ -561,7 +561,7 @@ export default function AvailablePage() {
 
         {/* Nama Panjang */}
         <div className="linebox" style={{ marginTop: "1.5rem", marginLeft: "60px" }}>
-          <span style={{ fontSize: "1.3rem", fontWeight: "700" }}>
+          <span style={{ fontSize: "1.3rem", fontWeight: "700", color: "#fff" }}>
             Farid Ardiansyah
           </span>
         </div>
@@ -676,7 +676,7 @@ export default function AvailablePage() {
               <div className="timeline-left">
                 <span className="timeline-date">2025-09-19</span>
                 <span className="timeline-title">Rilis Website</span>
-                <div className="timeline-tag" style={{ backgroundColor: "rgba(59, 130, 246, 0.2)", color: "#3b82f6", border: "1px solid rgba(59, 130, 246, 0.5)" }}>
+                <div className="timeline-tag">
                   VERSI PRODUKSI
                 </div>
               </div>
@@ -693,7 +693,7 @@ export default function AvailablePage() {
               <div className="timeline-left">
                 <span className="timeline-date">2025-08-10</span>
                 <span className="timeline-title">Uji Coba Firebase</span>
-                <div className="timeline-tag" style={{ backgroundColor: "rgba(16, 185, 129, 0.2)", color: "#10b981", border: "1px solid rgba(16, 185, 129, 0.5)" }}>
+                <div className="timeline-tag">
                   BACKEND
                 </div>
               </div>
@@ -710,7 +710,7 @@ export default function AvailablePage() {
               <div className="timeline-left">
                 <span className="timeline-date">2025-07-05</span>
                 <span className="timeline-title">Desain UI</span>
-                <div className="timeline-tag" style={{ backgroundColor: "rgba(245, 158, 11, 0.2)", color: "#f59e0b", border: "1px solid rgba(245, 158, 11, 0.5)" }}>
+                <div className="timeline-tag">
                   FRONTEND
                 </div>
               </div>
