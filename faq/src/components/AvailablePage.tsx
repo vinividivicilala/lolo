@@ -393,6 +393,7 @@ export default function AvailablePage() {
           display: flex;
           gap: 25px;
           margin: 30px 0 40px 60px;
+          flex-wrap: wrap;
         }
 
         .icon-item {
@@ -401,6 +402,7 @@ export default function AvailablePage() {
           align-items: center;
           color: #e5e5e5;
           transition: transform 0.3s, color 0.3s;
+          min-width: 80px;
         }
 
         .icon-item:hover {
@@ -429,6 +431,33 @@ export default function AvailablePage() {
 
         .icon-label {
           font-size: 1rem;
+          font-weight: 700;
+          text-align: center;
+        }
+
+        /* Gelar sarjana */
+        .degree-container {
+          display: flex;
+          align-items: center;
+          margin-top: 15px;
+          margin-left: 60px;
+          gap: 10px;
+        }
+
+        .degree-icon {
+          width: 24px;
+          height: 24px;
+          color: #3b82f6;
+        }
+
+        .degree-text {
+          font-size: 1rem;
+          color: #94a3b8;
+          font-weight: 600;
+        }
+
+        .degree-highlight {
+          color: #3b82f6;
           font-weight: 700;
         }
       `}</style>
@@ -545,7 +574,20 @@ export default function AvailablePage() {
           </p>
         </div>
 
-        {/* Icon Notifikasi, Pesan, dan Komunitas - DI ATAS TIMELINE */}
+        {/* Gelar Sarjana */}
+        <div className="degree-container">
+          <svg className="degree-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M12 14l9-5-9-5-9 5 9 5z"></path>
+            <path d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"></path>
+            <path d="M12 14v6"></path>
+            <path d="M12 8.5V14"></path>
+          </svg>
+          <span className="degree-text">
+            Bergelar <span className="degree-highlight">Sarjana Komputer</span> dari Universitas Teknologi Digital
+          </span>
+        </div>
+
+        {/* Icon Notifikasi, Pesan, Komunitas, Meeting, Project, Postingan, Tentang */}
         <div className="icon-wrapper">
           <div className="icon-item">
             <div className="icon-circle">
@@ -576,6 +618,52 @@ export default function AvailablePage() {
               </svg>
             </div>
             <span className="icon-label">Komunitas</span>
+          </div>
+
+          <div className="icon-item">
+            <div className="icon-circle">
+              <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="4" width="18" height="16" rx="2" ry="2"></rect>
+                <line x1="8" y1="10" x2="16" y2="10"></line>
+                <line x1="8" y1="14" x2="14" y2="14"></line>
+                <line x1="8" y1="18" x2="12" y2="18"></line>
+                <line x1="3" y1="8" x2="21" y2="8"></line>
+              </svg>
+            </div>
+            <span className="icon-label">Postingan</span>
+          </div>
+
+          <div className="icon-item">
+            <div className="icon-circle">
+              <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"></path>
+                <circle cx="9" cy="7" r="4"></circle>
+                <path d="M23 21v-2a4 4 0 00-3-3.87"></path>
+                <path d="M16 3.13a4 4 0 010 7.75"></path>
+              </svg>
+            </div>
+            <span className="icon-label">Tentang Saya</span>
+          </div>
+
+          <div className="icon-item">
+            <div className="icon-circle">
+              <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                <line x1="8" y1="21" x2="16" y2="21"></line>
+                <line x1="12" y1="17" x2="12" y2="21"></line>
+              </svg>
+            </div>
+            <span className="icon-label">Meeting</span>
+          </div>
+
+          <div className="icon-item">
+            <div className="icon-circle">
+              <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="16 18 22 12 16 6"></polyline>
+                <polyline points="8 6 2 12 8 18"></polyline>
+              </svg>
+            </div>
+            <span className="icon-label">Daftar Project</span>
           </div>
         </div>
 
