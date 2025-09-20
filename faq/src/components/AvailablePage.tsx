@@ -325,7 +325,7 @@ export default function AvailablePage() {
           </p>
         </div>
 
-        {/* Timeline Box */}
+        {/* Timeline Box - Layout Sejajar ke Samping */}
         <div style={{ marginTop: "3rem", paddingLeft: "60px", marginBottom: "3rem" }}>
           <div className="timeline">
             {/* Kegiatan 1 - Aktif */}
@@ -333,10 +333,10 @@ export default function AvailablePage() {
               <div className="timeline-left">
                 <span className="timeline-date">2025-09-19</span>
                 <span className="timeline-title">Rilis Website</span>
+              </div>
+              <div className="timeline-right">
                 <div className="timeline-content-box">
-                  <div className="timeline-right">
-                    <p>Peluncuran versi pertama website portfolio dengan desain minimalis dan interaktif.</p>
-                  </div>
+                  <p>Peluncuran versi pertama website portfolio dengan desain minimalis dan interaktif.</p>
                 </div>
               </div>
             </div>
@@ -346,10 +346,10 @@ export default function AvailablePage() {
               <div className="timeline-left">
                 <span className="timeline-date">2025-08-10</span>
                 <span className="timeline-title">Uji Coba Firebase</span>
+              </div>
+              <div className="timeline-right">
                 <div className="timeline-content-box">
-                  <div className="timeline-right">
-                    <p>Menerapkan autentikasi dan penyimpanan data real-time menggunakan Firebase.</p>
-                  </div>
+                  <p>Menerapkan autentikasi dan penyimpanan data real-time menggunakan Firebase.</p>
                 </div>
               </div>
             </div>
@@ -359,10 +359,10 @@ export default function AvailablePage() {
               <div className="timeline-left">
                 <span className="timeline-date">2025-07-05</span>
                 <span className="timeline-title">Desain UI</span>
+              </div>
+              <div className="timeline-right">
                 <div className="timeline-content-box">
-                  <div className="timeline-right">
-                    <p>Membuat desain UI tipografi-based dan minimalist UI untuk tampilan website.</p>
-                  </div>
+                  <p>Membuat desain UI tipografi-based dan minimalist UI untuk tampilan website.</p>
                 </div>
               </div>
             </div>
