@@ -1,7 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 
 export default function AvailablePage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isAboutOpen, setIsAboutOpen] = useState(false);
+  const aboutRef = useRef(null);
 
   const openModal = () => {
     setIsModalOpen(true);
@@ -10,6 +12,16 @@ export default function AvailablePage() {
   const closeModal = () => {
     setIsModalOpen(false);
   };
+
+  const toggleAbout = () => {
+    setIsAboutOpen(!isAboutOpen);
+  };
+
+  useEffect(() => {
+    if (isAboutOpen && aboutRef.current) {
+      aboutRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [isAboutOpen]);
 
   return (
     <>
@@ -180,7 +192,40 @@ export default function AvailablePage() {
           color: #fff;
           gap: 8px;
           width: fit-content;
+          transition: all 0.3s ease;
         }
+        
+        /* Warna cerah untuk linebox */
+        .linebox.primary {
+          border: 1px solid rgba(74, 144, 226, 0.5);
+          background: rgba(74, 144, 226, 0.15);
+          box-shadow: 0 0 15px rgba(74, 144, 226, 0.3);
+        }
+        
+        .linebox.secondary {
+          border: 1px solid rgba(159, 122, 234, 0.5);
+          background: rgba(159, 122, 234, 0.15);
+          box-shadow: 0 0 15px rgba(159, 122, 234, 0.3);
+        }
+        
+        .linebox.accent {
+          border: 1px solid rgba(236, 72, 153, 0.5);
+          background: rgba(236, 72, 153, 0.15);
+          box-shadow: 0 0 15px rgba(236, 72, 153, 0.3);
+        }
+        
+        .linebox.success {
+          border: 1px solid rgba(16, 185, 129, 0.5);
+          background: rgba(16, 185, 129, 0.15);
+          box-shadow: 0 0 15px rgba(16, 185, 129, 0.3);
+        }
+        
+        .linebox.warning {
+          border: 1px solid rgba(245, 158, 11, 0.5);
+          background: rgba(245, 158, 11, 0.15);
+          box-shadow: 0 0 15px rgba(245, 158, 11, 0.3);
+        }
+
         .hero-btn {
           background: transparent;
           color: #fff;
@@ -194,26 +239,43 @@ export default function AvailablePage() {
           text-decoration: none;
           border: 1px solid rgba(255,255,255,0.2);
           border-radius: 6px;
+          transition: all 0.3s ease;
         }
+        
+        .hero-btn.primary {
+          border: 1px solid rgba(74, 144, 226, 0.5);
+          background: rgba(74, 144, 226, 0.15);
+        }
+        
         .hero-btn:hover {
           background: rgba(255,255,255,0.1);
+          transform: translateY(-2px);
         }
+        
+        .hero-btn.primary:hover {
+          background: rgba(74, 144, 226, 0.25);
+          box-shadow: 0 0 15px rgba(74, 144, 226, 0.4);
+        }
+        
         .hero-btn svg {
           width: 22px;
           height: 22px;
           stroke: currentColor;
         }
+        
         .footer-container {
           background-color: #000;
           padding: 50px 60px;
           color: white;
         }
+        
         .footer-content {
           display: flex;
           justify-content: space-between;
           align-items: center;
           flex-wrap: wrap;
         }
+        
         .footer-right {
           display: flex;
           gap: 12px;
@@ -415,6 +477,7 @@ export default function AvailablePage() {
           color: #e5e5e5;
           transition: transform 0.3s, color 0.3s;
           min-width: 80px;
+          cursor: pointer;
         }
 
         .icon-item:hover {
@@ -482,6 +545,107 @@ export default function AvailablePage() {
           font-weight: 600;
           color: #fff;
         }
+        
+        /* About Section Styles */
+        .about-section {
+          margin: 60px;
+          padding: 40px;
+          border-radius: 12px;
+          background: rgba(255, 255, 255, 0.05);
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          transition: all 0.5s ease;
+          opacity: ${isAboutOpen ? 1 : 0};
+          transform: ${isAboutOpen ? 'translateY(0)' : 'translateY(20px)'};
+          display: ${isAboutOpen ? 'block' : 'none'};
+          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        .about-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 30px;
+        }
+        
+        .about-title {
+          font-size: 2.5rem;
+          font-weight: 700;
+          color: #fff;
+          margin: 0;
+        }
+        
+        .about-close {
+          background: transparent;
+          border: none;
+          color: #fff;
+          font-size: 1.5rem;
+          cursor: pointer;
+          width: 40px;
+          height: 40px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 50%;
+          transition: background 0.3s;
+        }
+        
+        .about-close:hover {
+          background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .about-content {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 40px;
+        }
+        
+        .about-left {
+          display: flex;
+          flex-direction: column;
+          gap: 20px;
+        }
+        
+        .about-right {
+          display: flex;
+          flex-direction: column;
+          gap: 20px;
+        }
+        
+        .about-box {
+          padding: 20px;
+          border-radius: 8px;
+          background: rgba(255, 255, 255, 0.03);
+          border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .about-box-title {
+          font-size: 1.2rem;
+          font-weight: 700;
+          color: #fff;
+          margin-bottom: 15px;
+        }
+        
+        .about-box-content {
+          color: #e5e5e5;
+          line-height: 1.6;
+        }
+        
+        .skill-list {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 10px;
+          margin-top: 10px;
+        }
+        
+        .skill-item {
+          padding: 6px 12px;
+          border-radius: 20px;
+          background: rgba(74, 144, 226, 0.2);
+          border: 1px solid rgba(74, 144, 226, 0.5);
+          color: #fff;
+          font-size: 0.9rem;
+          font-weight: 600;
+        }
       `}</style>
 
       <div
@@ -543,8 +707,8 @@ export default function AvailablePage() {
           </p>
 
           {/* Tombol Back to Home dengan linebox pendek */}
-          <div className="linebox" style={{ marginTop: "2.5rem" }}>
-            <a href="/" className="hero-btn">
+          <div className="linebox primary" style={{ marginTop: "2.5rem" }}>
+            <a href="/" className="hero-btn primary">
               Back to Home
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -560,14 +724,14 @@ export default function AvailablePage() {
         </div>
 
         {/* Nama Panjang */}
-        <div className="linebox" style={{ marginTop: "1.5rem", marginLeft: "60px" }}>
+        <div className="linebox secondary" style={{ marginTop: "1.5rem", marginLeft: "60px" }}>
           <span style={{ fontSize: "1.3rem", fontWeight: "700", color: "#fff" }}>
             Farid Ardiansyah
           </span>
         </div>
 
         {/* Deskripsi */}
-        <div className="linebox" style={{ marginTop: "1rem", marginLeft: "60px", maxWidth: "700px" }}>
+        <div className="linebox accent" style={{ marginTop: "1rem", marginLeft: "60px", maxWidth: "700px" }}>
           <p style={{ margin: 0, fontSize: "1rem", fontWeight: "400", color: "#e5e5e5" }}>
             Seorang web developer yang berfokus pada desain minimalis, tipografi,
             serta membangun aplikasi modern berbasis Firebase dan React.
@@ -633,7 +797,7 @@ export default function AvailablePage() {
             <span className="icon-label">Postingan</span>
           </div>
 
-          <div className="icon-item">
+          <div className="icon-item" onClick={toggleAbout}>
             <div className="icon-circle">
               <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"></path>
@@ -664,6 +828,58 @@ export default function AvailablePage() {
               </svg>
             </div>
             <span className="icon-label">Daftar Project</span>
+          </div>
+        </div>
+
+        {/* About Section */}
+        <div ref={aboutRef} className="about-section">
+          <div className="about-header">
+            <h2 className="about-title">Tentang Saya</h2>
+            <button className="about-close" onClick={toggleAbout}>×</button>
+          </div>
+          
+          <div className="about-content">
+            <div className="about-left">
+              <div className="about-box">
+                <h3 className="about-box-title">Profil</h3>
+                <p className="about-box-content">
+                  Saya adalah seorang Web Developer dengan passion dalam menciptakan pengalaman digital yang menarik dan fungsional. 
+                  Dengan latar belakang pendidikan di bidang Ilmu Komputer, saya memiliki fondasi yang kuat dalam pengembangan perangkat lunak.
+                </p>
+              </div>
+              
+              <div className="about-box">
+                <h3 className="about-box-title">Pendidikan</h3>
+                <p className="about-box-content">
+                  <strong>Sarjana Komputer</strong><br/>
+                  Universitas Teknologi Digital<br/>
+                  Lulus dengan predikat Cum Laude
+                </p>
+              </div>
+            </div>
+            
+            <div className="about-right">
+              <div className="about-box">
+                <h3 className="about-box-title">Keahlian</h3>
+                <div className="skill-list">
+                  <span className="skill-item">React</span>
+                  <span className="skill-item">JavaScript</span>
+                  <span className="skill-item">Firebase</span>
+                  <span className="skill-item">HTML/CSS</span>
+                  <span className="skill-item">UI/UX Design</span>
+                  <span className="skill-item">Responsive Design</span>
+                </div>
+              </div>
+              
+              <div className="about-box">
+                <h3 className="about-box-title">Pengalaman</h3>
+                <p className="about-box-content">
+                  <strong>Frontend Developer</strong> - Perusahaan Teknologi XYZ (2022-Sekarang)<br/>
+                  <strong>Web Developer Intern</strong> - Startup ABC (2021-2022)<br/>
+                  <strong>Freelance Web Designer</strong> (2020-2021)
+                </p>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -728,83 +944,121 @@ export default function AvailablePage() {
           <div className="footer-content">
             {/* Kiri */}
             <div className="footer-left">
-              <div className="linebox">
+              <div className="linebox warning">
                 {/* Icon alert-triangle */}
                 <svg xmlns="http://www.w3.org/2000/svg"
                      fill="none"
                      viewBox="0 0 24 24"
                      strokeWidth="2"
                      stroke="currentColor"
-                     style={{ width: "20px", height: "20px" }}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M10.29 3.86l-7.3 12.61A1 1 0 004 19h16a1 1 0 00.87-1.5l-7.3-12.61a1 1 0 00-1.74 0z" />
+                     width="20"
+                     height="20">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                 </svg>
-                <span>Website ini masih dikembangkan</span>
+                <span style={{ fontSize: "1rem", fontWeight: "600", color: "#fff" }}>
+                  Status: Available for Work
+                </span>
               </div>
             </div>
 
             {/* Kanan */}
             <div className="footer-right">
-              <div className="linebox"><span>Kebijakan Privasi</span></div>
-              <div className="linebox"><span>Syarat & Ketentuan</span></div>
-              <div className="linebox"><span>Berikan Masukan</span></div>
+              <div className="linebox success">
+                <svg xmlns="http://www.w3.org/2000/svg"
+                     fill="none"
+                     viewBox="0 0 24 24"
+                     strokeWidth="2"
+                     stroke="currentColor"
+                     width="20"
+                     height="20">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+                <span style={{ fontSize: "1rem", fontWeight: "600", color: "#fff" }}>
+                  Email
+                </span>
+              </div>
+
+              <div className="linebox accent">
+                <svg xmlns="http://www.w3.org/2000/svg"
+                     fill="none"
+                     viewBox="0 0 24 24"
+                     strokeWidth="2"
+                     stroke="currentColor"
+                     width="20"
+                     height="20">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+                <span style={{ fontSize: "1rem", fontWeight: "600", color: "#fff" }}>
+                  Komunitas
+                </span>
+              </div>
+
+              <div className="linebox primary">
+                <svg xmlns="http://www.w3.org/2000/svg"
+                     fill="none"
+                     viewBox="0 0 24 24"
+                     strokeWidth="2"
+                     stroke="currentColor"
+                     width="20"
+                     height="20">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                </svg>
+                <span style={{ fontSize: "1rem", fontWeight: "600", color: "#fff" }}>
+                  Linktree
+                </span>
+              </div>
             </div>
           </div>
         </div>
+      </div>
 
-        {/* Modal Uji Coba */}
-        {isModalOpen && (
-          <div className="modal-overlay" onClick={closeModal}>
-            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-              <button className="modal-close" onClick={closeModal}>×</button>
-              
-              <div className="modal-header">
-                <h2 className="modal-title">🚧 Website Dalam Masa Uji Coba 🚧</h2>
-                <div className="linebox">
-                  <span>Status: Development</span>
-                </div>
+      {/* Modal */}
+      {isModalOpen && (
+        <div className="modal-overlay" onClick={closeModal}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <button className="modal-close" onClick={closeModal}>×</button>
+            
+            <div className="modal-header">
+              <h2 className="modal-title">Website dalam Uji Coba</h2>
+            </div>
+            
+            <div className="modal-image">
+              <div className="modal-image-content">🚧</div>
+            </div>
+            
+            <div className="modal-info">
+              <div className="modal-date">
+                <span className="modal-date-label">Dimulai</span>
+                <span className="modal-date-value">19 September 2025</span>
               </div>
               
-              <div className="modal-image">
-                <div className="modal-image-content">🛠️</div>
-              </div>
-              
-              <div className="modal-info">
-                <div className="modal-date">
-                  <span className="modal-date-label">Tanggal Mulai</span>
-                  <span className="modal-date-value">15 September 2025</span>
-                </div>
-                <div className="modal-date">
-                  <span className="modal-date-label">Update Terakhir</span>
-                  <span className="modal-date-value">19 September 2025</span>
-                </div>
-                <div className="modal-date">
-                  <span className="modal-date-label">Versi</span>
-                  <span className="modal-date-value">v1.0.0-beta</span>
-                </div>
-              </div>
-              
-              <div className="modal-description">
-                <p>Website ini sedang dalam tahap pengembangan dan uji coba. Beberapa fitur mungkin belum berfungsi dengan sempurna atau masih dalam proses penyempurnaan. Terima kasih atas pengertiannya.</p>
-              </div>
-              
-              <div className="modal-links">
-                <a href="https://github.com/example" className="modal-link" target="_blank" rel="noopener noreferrer">
-                  Repository GitHub
-                </a>
-                <a href="https://documentation.example.com" className="modal-link" target="_blank" rel="noopener noreferrer">
-                  Dokumentasi
-                </a>
-                <a href="https://feedback.example.com" className="modal-link" target="_blank" rel="noopener noreferrer">
-                  Berikan Masukan
-                </a>
-                <a href="https://status.example.com" className="modal-link" target="_blank" rel="noopener noreferrer">
-                  Status Website
-                </a>
+              <div className="modal-date">
+                <span className="modal-date-label">Estimasi Selesai</span>
+                <span className="modal-date-value">30 September 2025</span>
               </div>
             </div>
+            
+            <div className="modal-links">
+              <a href="#" className="modal-link">Lihat Progress Development</a>
+              <a href="#" className="modal-link">Berikan Feedback</a>
+              <a href="#" className="modal-link">Lihat Portfolio Lainnya</a>
+              <a href="#" className="modal-link">Hubungi Saya</a>
+            </div>
+            
+            <div className="modal-description">
+              <p>
+                Website ini sedang dalam tahap pengembangan dan uji coba. Beberapa fitur mungkin belum berfungsi dengan sempurna.
+                Saya terus melakukan perbaikan dan penambahan fitur untuk memberikan pengalaman terbaik.
+              </p>
+              
+              <p>
+                Jika Anda menemukan bug atau memiliki saran, jangan ragu untuk menghubungi saya melalui kontak yang tersedia.
+                Terima kasih atas pengertian dan dukungannya!
+              </p>
+            </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </>
   );
 }
