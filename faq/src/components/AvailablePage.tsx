@@ -1,6 +1,16 @@
-import React from "react";
+import React, { useState } from "react";
 
 export default function AvailablePage() {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const openModal = () => {
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+  };
+
   return (
     <>
       {/* Font Space Mono */}
@@ -225,6 +235,7 @@ export default function AvailablePage() {
           font-weight: 700;
           text-decoration: underline;
           transition: color 0.3s;
+          cursor: pointer;
         }
 
         .banner-ujicoba a:hover {
@@ -238,6 +249,143 @@ export default function AvailablePage() {
           50% {
             transform: translateX(-50%) translateY(-6px) rotateX(5deg);
           }
+        }
+
+        /* Modal styles */
+        .modal-overlay {
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background-color: rgba(0, 0, 0, 0.9);
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          z-index: 10000;
+          padding: 20px;
+        }
+
+        .modal-content {
+          background: #111;
+          border: 2px solid rgba(59, 130, 246, 0.3);
+          border-radius: 12px;
+          max-width: 800px;
+          width: 100%;
+          max-height: 90vh;
+          overflow-y: auto;
+          padding: 30px;
+          position: relative;
+          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-close {
+          position: absolute;
+          top: 15px;
+          right: 15px;
+          background: transparent;
+          border: none;
+          color: #fff;
+          font-size: 1.5rem;
+          cursor: pointer;
+          width: 40px;
+          height: 40px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 50%;
+          transition: background 0.3s;
+        }
+
+        .modal-close:hover {
+          background: rgba(255, 255, 255, 0.1);
+        }
+
+        .modal-header {
+          text-align: center;
+          margin-bottom: 25px;
+        }
+
+        .modal-title {
+          font-size: 2.2rem;
+          font-weight: 700;
+          color: #3b82f6;
+          margin-bottom: 15px;
+        }
+
+        .modal-image {
+          width: 100%;
+          height: 200px;
+          background: linear-gradient(135deg, #1e40af, #3b82f6);
+          border-radius: 8px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin-bottom: 25px;
+          overflow: hidden;
+        }
+
+        .modal-image-content {
+          font-size: 4rem;
+          color: white;
+        }
+
+        .modal-info {
+          display: flex;
+          justify-content: space-between;
+          margin-bottom: 25px;
+          flex-wrap: wrap;
+          gap: 15px;
+        }
+
+        .modal-date {
+          display: flex;
+          flex-direction: column;
+        }
+
+        .modal-date-label {
+          font-size: 0.9rem;
+          color: #94a3b8;
+          margin-bottom: 5px;
+        }
+
+        .modal-date-value {
+          font-size: 1.1rem;
+          font-weight: 700;
+          color: #fff;
+        }
+
+        .modal-links {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+          gap: 15px;
+          margin-bottom: 25px;
+        }
+
+        .modal-link {
+          display: block;
+          padding: 15px;
+          background: rgba(59, 130, 246, 0.1);
+          border: 1px solid rgba(59, 130, 246, 0.3);
+          border-radius: 8px;
+          color: #3b82f6;
+          text-decoration: none;
+          font-weight: 600;
+          transition: all 0.3s;
+          text-align: center;
+        }
+
+        .modal-link:hover {
+          background: rgba(59, 130, 246, 0.2);
+          border-color: #3b82f6;
+          transform: translateY(-2px);
+        }
+
+        .modal-description {
+          color: #e5e5e5;
+          line-height: 1.6;
+          margin-bottom: 25px;
+          font-size: 1.1rem;
         }
 
         /* Icon styles */
@@ -312,7 +460,7 @@ export default function AvailablePage() {
           {/* Banner Uji Coba */}
           <div className="banner-ujicoba">
             <span>🚧 Website ini lagi ujicoba 🚧 </span>
-            <a href="https://contoh-tautan.com" target="_blank" rel="noopener noreferrer">
+            <a onClick={openModal} style={{ cursor: 'pointer' }}>
               Baca Selengkapnya
             </a>
           </div>  
@@ -514,6 +662,60 @@ export default function AvailablePage() {
             </div>
           </div>
         </div>
+
+        {/* Modal Uji Coba */}
+        {isModalOpen && (
+          <div className="modal-overlay" onClick={closeModal}>
+            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+              <button className="modal-close" onClick={closeModal}>×</button>
+              
+              <div className="modal-header">
+                <h2 className="modal-title">🚧 Website Dalam Masa Uji Coba 🚧</h2>
+                <div className="linebox">
+                  <span>Status: Development</span>
+                </div>
+              </div>
+              
+              <div className="modal-image">
+                <div className="modal-image-content">🛠️</div>
+              </div>
+              
+              <div className="modal-info">
+                <div className="modal-date">
+                  <span className="modal-date-label">Tanggal Mulai</span>
+                  <span className="modal-date-value">15 September 2025</span>
+                </div>
+                <div className="modal-date">
+                  <span className="modal-date-label">Update Terakhir</span>
+                  <span className="modal-date-value">19 September 2025</span>
+                </div>
+                <div className="modal-date">
+                  <span className="modal-date-label">Versi</span>
+                  <span className="modal-date-value">v1.0.0-beta</span>
+                </div>
+              </div>
+              
+              <div className="modal-description">
+                <p>Website ini sedang dalam tahap pengembangan dan uji coba. Beberapa fitur mungkin belum berfungsi dengan sempurna atau masih dalam proses penyempurnaan. Terima kasih atas pengertiannya.</p>
+              </div>
+              
+              <div className="modal-links">
+                <a href="https://github.com/example" className="modal-link" target="_blank" rel="noopener noreferrer">
+                  Repository GitHub
+                </a>
+                <a href="https://documentation.example.com" className="modal-link" target="_blank" rel="noopener noreferrer">
+                  Dokumentasi
+                </a>
+                <a href="https://feedback.example.com" className="modal-link" target="_blank" rel="noopener noreferrer">
+                  Berikan Masukan
+                </a>
+                <a href="https://status.example.com" className="modal-link" target="_blank" rel="noopener noreferrer">
+                  Status Website
+                </a>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </>
   );
