@@ -18,25 +18,25 @@ export default function AvailablePage() {
         }
 
 
-  /* Timeline Line dengan animasi dash */
+        /* Timeline dengan animasi garis putus-putus */
   .timeline {
     position: relative;
     margin-left: 20px;
     padding-left: 30px;
     border-left: 3px dashed rgba(255,255,255,0.4);
-    animation: dashmove 3s linear infinite;
     background-image: repeating-linear-gradient(
       to bottom,
       transparent 0,
-      transparent 6px,
-      rgba(255,255,255,0.15) 6px,
-      rgba(255,255,255,0.15) 12px
+      transparent 8px,
+      rgba(255,255,255,0.2) 8px,
+      rgba(255,255,255,0.2) 16px
     );
+    animation: dashmove 2s linear infinite;
   }
 
   @keyframes dashmove {
     from { background-position: 0 0; }
-    to { background-position: 0 12px; }
+    to { background-position: 0 16px; }
   }
 
   .timeline-item {
@@ -59,55 +59,46 @@ export default function AvailablePage() {
     border: 2px solid rgba(255,255,255,0.7);
   }
 
-  /* Titik aktif dengan pemancar */
+  /* Titik aktif dengan beacon */
   .timeline-item.active::before {
     background: #3b82f6;
-    box-shadow: 0 0 10px #3b82f6, 0 0 20px #3b82f6, 0 0 40px rgba(59,130,246,0.6);
     animation: pulse 1.5s infinite, beacon 2s infinite;
   }
 
   @keyframes pulse {
     0%, 100% { transform: scale(1); opacity: 1; }
-    50% { transform: scale(1.4); opacity: 0.7; }
+    50% { transform: scale(1.3); opacity: 0.7; }
   }
 
   @keyframes beacon {
-    0% { box-shadow: 0 0 0 0 rgba(59,130,246,0.6); }
-    70% { box-shadow: 0 0 0 15px rgba(59,130,246,0); }
+    0% { box-shadow: 0 0 0 0 rgba(59,130,246,0.7); }
+    70% { box-shadow: 0 0 0 20px rgba(59,130,246,0); }
     100% { box-shadow: 0 0 0 0 rgba(59,130,246,0); }
   }
 
-  /* Linebox untuk date, title, desc */
-  .timeline-left .linebox, 
+  /* Linebox styling */
+  .timeline-left .linebox,
   .timeline-right .linebox {
-    display: inline-block;
-    margin-bottom: 8px;
+    margin-bottom: 10px;
   }
 
   .timeline-date {
-    font-size: 1.4rem;
-    font-weight: 700;
+    font-size: 1.5rem;
+    font-weight: 800;
     color: #fff;
   }
 
   .timeline-title {
-    font-size: 1.6rem;
-    font-weight: 800;
-    margin-top: 0.4rem;
+    font-size: 1.8rem;
+    font-weight: 900;
     color: #3b82f6;
   }
 
   .timeline-right p {
     font-size: 1.2rem;
-    font-weight: 600;
+    font-weight: 700;
+    color: #e5e5e5;
   }
-
-
-
-
-
-
-
 
         
         .linebox {
@@ -355,6 +346,17 @@ export default function AvailablePage() {
 </div>
 
 
+
+
+
+
+
+
+
+
+        
+
+
         {/* Footer */}
         <div className="footer-container">
           <div className="footer-content">
@@ -386,6 +388,7 @@ export default function AvailablePage() {
     </>
   );
 }
+
 
 
 
