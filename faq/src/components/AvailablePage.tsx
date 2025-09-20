@@ -23,7 +23,7 @@ export default function AvailablePage() {
           padding-left: 30px;
         }
 
-        /* Garis putus-putus statis untuk item non-aktif */
+        /* Garis putus-putus statis untuk timeline */
         .timeline::before {
           content: "";
           position: absolute;
@@ -31,32 +31,6 @@ export default function AvailablePage() {
           top: 0;
           height: 100%;
           border-left: 2px dashed rgba(255, 255, 255, 0.3);
-        }
-
-        /* Garis penghubung dari titik ke kotak */
-        .timeline-connector {
-          position: absolute;
-          left: -30px;
-          top: 23px;
-          width: 30px;
-          height: 2px;
-          background: rgba(255, 255, 255, 0.3);
-        }
-
-        /* Garis putus-putus dengan animasi untuk item aktif */
-        .timeline-item.active .timeline-connector {
-          background: transparent;
-          border-top: 2px dashed #3b82f6;
-          animation: dash-move 1s linear infinite;
-        }
-
-        @keyframes dash-move {
-          0% {
-            background-position: 0 0;
-          }
-          100% {
-            background-position: 10px 0;
-          }
         }
 
         .timeline-item {
@@ -103,6 +77,33 @@ export default function AvailablePage() {
           padding: 20px;
           margin-top: 10px;
           box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+          position: relative;
+        }
+
+        /* Garis horizontal yang nyambung dari titik ke kotak */
+        .timeline-connector {
+          position: absolute;
+          left: -30px;
+          top: 23px;
+          width: 28px;
+          height: 2px;
+          background: rgba(255, 255, 255, 0.3);
+        }
+
+        /* Garis putus-putus dengan animasi untuk item aktif */
+        .timeline-item.active .timeline-connector {
+          background: transparent;
+          border-top: 2px dashed #3b82f6;
+          animation: dash-move 1s linear infinite;
+        }
+
+        @keyframes dash-move {
+          0% {
+            background-position: 0 0;
+          }
+          100% {
+            background-position: 10px 0;
+          }
         }
 
         /* Titik animasi */
