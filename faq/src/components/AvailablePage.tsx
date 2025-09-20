@@ -59,6 +59,17 @@ export default function AvailablePage() {
           font-size: 1.5rem;
           font-weight: 700;
           margin-top: 0.3rem;
+          margin-bottom: 10px;
+        }
+
+        /* Blok warna di bawah title */
+        .timeline-tag {
+          display: inline-block;
+          padding: 6px 12px;
+          border-radius: 6px;
+          font-size: 0.9rem;
+          font-weight: 700;
+          margin-top: 5px;
         }
 
         .timeline-right {
@@ -429,6 +440,9 @@ export default function AvailablePage() {
               <div className="timeline-left">
                 <span className="timeline-date">2025-09-19</span>
                 <span className="timeline-title">Rilis Website</span>
+                <div className="timeline-tag" style={{ backgroundColor: "rgba(59, 130, 246, 0.2)", color: "#3b82f6", border: "1px solid rgba(59, 130, 246, 0.5)" }}>
+                  VERSI PRODUKSI
+                </div>
               </div>
               <div className="timeline-right">
                 <div className="timeline-content-box">
@@ -443,6 +457,9 @@ export default function AvailablePage() {
               <div className="timeline-left">
                 <span className="timeline-date">2025-08-10</span>
                 <span className="timeline-title">Uji Coba Firebase</span>
+                <div className="timeline-tag" style={{ backgroundColor: "rgba(16, 185, 129, 0.2)", color: "#10b981", border: "1px solid rgba(16, 185, 129, 0.5)" }}>
+                  BACKEND
+                </div>
               </div>
               <div className="timeline-right">
                 <div className="timeline-content-box">
@@ -457,6 +474,9 @@ export default function AvailablePage() {
               <div className="timeline-left">
                 <span className="timeline-date">2025-07-05</span>
                 <span className="timeline-title">Desain UI</span>
+                <div className="timeline-tag" style={{ backgroundColor: "rgba(245, 158, 11, 0.2)", color: "#f59e0b", border: "1px solid rgba(245, 158, 11, 0.5)" }}>
+                  FRONTEND
+                </div>
               </div>
               <div className="timeline-right">
                 <div className="timeline-content-box">
