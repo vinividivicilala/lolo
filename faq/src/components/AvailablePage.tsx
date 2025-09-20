@@ -2,6 +2,12 @@ import React, { useState } from "react";
 
 export default function AvailablePage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  // Tambah state baru
+const [isAboutOpen, setIsAboutOpen] = useState(false);
+
+const openAbout = () => setIsAboutOpen(true);
+const closeAbout = () => setIsAboutOpen(false);
+
 
   const openModal = () => {
     setIsModalOpen(true);
@@ -482,6 +488,58 @@ export default function AvailablePage() {
           font-weight: 600;
           color: #fff;
         }
+
+/* Halaman Tentang Saya (overlay penuh) */
+.about-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 60px 30px;
+  z-index: 9999;
+  overflow-y: auto;
+}
+
+.about-header {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 1.5rem;
+}
+
+.about-linebox {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  padding: 15px 20px;
+  margin-bottom: 20px;
+  color: #e5e5e5;
+  max-width: 700px;
+  text-align: center;
+}
+
+.about-close {
+  position: absolute;
+  top: 20px;
+  right: 25px;
+  font-size: 2rem;
+  background: transparent;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+}
+
+
+
+
+
+        
       `}</style>
 
       <div
@@ -633,17 +691,24 @@ export default function AvailablePage() {
             <span className="icon-label">Postingan</span>
           </div>
 
-          <div className="icon-item">
-            <div className="icon-circle">
-              <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"></path>
-                <circle cx="9" cy="7" r="4"></circle>
-                <path d="M23 21v-2a4 4 0 00-3-3.87"></path>
-                <path d="M16 3.13a4 4 0 010 7.75"></path>
-              </svg>
-            </div>
-            <span className="icon-label">Tentang Saya</span>
-          </div>
+
+          <div className="icon-item" onClick={openAbout} style={{ cursor: "pointer" }}>
+  <div className="icon-circle">
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32"
+      viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"></path>
+      <circle cx="9" cy="7" r="4"></circle>
+      <path d="M23 21v-2a4 4 0 00-3-3.87"></path>
+      <path d="M16 3.13a4 4 0 010 7.75"></path>
+    </svg>
+  </div>
+  <span className="icon-label">Tentang Saya</span>
+</div>
+
+
+
+          
 
           <div className="icon-item">
             <div className="icon-circle">
@@ -742,6 +807,40 @@ export default function AvailablePage() {
               </div>
             </div>
 
+
+            {isAboutOpen && (
+  <div className="about-overlay">
+    <button className="about-close" onClick={closeAbout}>×</button>
+    
+    <h2 className="about-header">Tentang Saya</h2>
+
+    <div className="about-linebox">
+      <strong>Farid Ardiansyah</strong>
+    </div>
+
+    <div className="about-linebox">
+      <p>
+        Seorang web developer yang berfokus pada desain minimalis, tipografi,
+        serta membangun aplikasi modern berbasis Firebase dan React.
+      </p>
+    </div>
+
+    <div className="about-linebox">
+      🎓 Bergelar <b>Sarjana Komputer</b> dari Universitas Teknologi Digital
+    </div>
+
+    <div className="about-linebox">
+      🔗 Ikuti perjalanan saya dalam dunia teknologi!
+    </div>
+  </div>
+)}
+
+
+
+
+
+            
+
             {/* Kanan */}
             <div className="footer-right">
               <div className="linebox"><span>Kebijakan Privasi</span></div>
@@ -808,3 +907,4 @@ export default function AvailablePage() {
     </>
   );
 }
+
