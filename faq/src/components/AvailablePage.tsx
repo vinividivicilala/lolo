@@ -33,24 +33,29 @@ export default function AvailablePage() {
           border-left: 2px dashed rgba(255, 255, 255, 0.3);
         }
 
-        /* Garis putus-putus dengan animasi HANYA untuk item aktif */
-        .timeline-active-line {
-          content: "";
+        /* Garis penghubung dari titik ke kotak */
+        .timeline-connector {
           position: absolute;
-          left: 0;
-          top: 0;
-          height: 40px;
-          border-left: 2px dashed #3b82f6;
-          animation: dash-scroll 1.5s linear infinite;
-          z-index: 1;
+          left: -30px;
+          top: 23px;
+          width: 30px;
+          height: 2px;
+          background: rgba(255, 255, 255, 0.3);
         }
 
-        @keyframes dash-scroll {
+        /* Garis putus-putus dengan animasi untuk item aktif */
+        .timeline-item.active .timeline-connector {
+          background: transparent;
+          border-top: 2px dashed #3b82f6;
+          animation: dash-move 1s linear infinite;
+        }
+
+        @keyframes dash-move {
           0% {
             background-position: 0 0;
           }
           100% {
-            background-position: 0 20px;
+            background-position: 10px 0;
           }
         }
 
@@ -415,13 +420,11 @@ export default function AvailablePage() {
         </div>
 
         {/* Timeline Box - Layout Sejajar ke Samping */}
-        <div style={{ marginTop: "2rem", paddingLeft: "60px", marginBottom: "3rem", position: "relative" }}>
-          {/* Garis animasi khusus untuk item aktif */}
-          <div className="timeline-active-line" style={{ top: "15px", height: "40px" }}></div>
-          
+        <div style={{ marginTop: "2rem", paddingLeft: "60px", marginBottom: "3rem" }}>
           <div className="timeline">
             {/* Kegiatan 1 - Aktif */}
             <div className="timeline-item active">
+              <div className="timeline-connector"></div>
               <div className="timeline-left">
                 <span className="timeline-date">2025-09-19</span>
                 <span className="timeline-title">Rilis Website</span>
@@ -435,6 +438,7 @@ export default function AvailablePage() {
 
             {/* Kegiatan 2 - Nonaktif */}
             <div className="timeline-item">
+              <div className="timeline-connector"></div>
               <div className="timeline-left">
                 <span className="timeline-date">2025-08-10</span>
                 <span className="timeline-title">Uji Coba Firebase</span>
@@ -448,6 +452,7 @@ export default function AvailablePage() {
 
             {/* Kegiatan 3 - Nonaktif */}
             <div className="timeline-item">
+              <div className="timeline-connector"></div>
               <div className="timeline-left">
                 <span className="timeline-date">2025-07-05</span>
                 <span className="timeline-title">Desain UI</span>
