@@ -11,6 +11,14 @@ export default function AvailablePage() {
     setIsModalOpen(false);
   };
 
+  // Fungsi untuk scroll ke bagian tentang saya
+  const scrollToAbout = () => {
+    const aboutSection = document.getElementById('about-section');
+    if (aboutSection) {
+      aboutSection.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   return (
     <>
       {/* Font Space Mono */}
@@ -173,14 +181,42 @@ export default function AvailablePage() {
           align-items: center;
           border: 1px solid rgba(255,255,255,0.2);
           border-radius: 6px;
-          background: rgba(255,255,255,0.05);
+          background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.15) 100%);
           padding: 8px 14px;
           font-size: 1rem;
           font-weight: 600;
           color: #fff;
           gap: 8px;
           width: fit-content;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.2);
         }
+        
+        /* Warna cerah untuk linebox tertentu */
+        .linebox.blue {
+          background: linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(59, 130, 246, 0.3) 100%);
+          border: 1px solid rgba(59, 130, 246, 0.4);
+        }
+        
+        .linebox.green {
+          background: linear-gradient(135deg, rgba(34, 197, 94, 0.2) 0%, rgba(34, 197, 94, 0.3) 100%);
+          border: 1px solid rgba(34, 197, 94, 0.4);
+        }
+        
+        .linebox.purple {
+          background: linear-gradient(135deg, rgba(168, 85, 247, 0.2) 0%, rgba(168, 85, 247, 0.3) 100%);
+          border: 1px solid rgba(168, 85, 247, 0.4);
+        }
+        
+        .linebox.orange {
+          background: linear-gradient(135deg, rgba(249, 115, 22, 0.2) 0%, rgba(249, 115, 22, 0.3) 100%);
+          border: 1px solid rgba(249, 115, 22, 0.4);
+        }
+        
+        .linebox.pink {
+          background: linear-gradient(135deg, rgba(236, 72, 153, 0.2) 0%, rgba(236, 72, 153, 0.3) 100%);
+          border: 1px solid rgba(236, 72, 153, 0.4);
+        }
+
         .hero-btn {
           background: transparent;
           color: #fff;
@@ -415,6 +451,7 @@ export default function AvailablePage() {
           color: #e5e5e5;
           transition: transform 0.3s, color 0.3s;
           min-width: 80px;
+          cursor: pointer;
         }
 
         .icon-item:hover {
@@ -482,6 +519,36 @@ export default function AvailablePage() {
           font-weight: 600;
           color: #fff;
         }
+        
+        /* About section styling */
+        .about-section {
+          padding: 40px 60px;
+          background: rgba(255, 255, 255, 0.03);
+          border-top: 1px solid rgba(255, 255, 255, 0.1);
+          border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+          margin: 40px 0;
+        }
+        
+        .about-title {
+          font-size: 2.5rem;
+          font-weight: 700;
+          color: #fff;
+          margin-bottom: 20px;
+        }
+        
+        .about-content {
+          display: flex;
+          flex-direction: column;
+          gap: 20px;
+        }
+        
+        .about-linebox {
+          border: 2px solid rgba(59, 130, 246, 0.4);
+          background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(59, 130, 246, 0.25) 100%);
+          padding: 15px 20px;
+          border-radius: 8px;
+          max-width: 800px;
+        }
       `}</style>
 
       <div
@@ -543,7 +610,7 @@ export default function AvailablePage() {
           </p>
 
           {/* Tombol Back to Home dengan linebox pendek */}
-          <div className="linebox" style={{ marginTop: "2.5rem" }}>
+          <div className="linebox blue" style={{ marginTop: "2.5rem" }}>
             <a href="/" className="hero-btn">
               Back to Home
               <svg
@@ -560,14 +627,14 @@ export default function AvailablePage() {
         </div>
 
         {/* Nama Panjang */}
-        <div className="linebox" style={{ marginTop: "1.5rem", marginLeft: "60px" }}>
+        <div className="linebox green" style={{ marginTop: "1.5rem", marginLeft: "60px" }}>
           <span style={{ fontSize: "1.3rem", fontWeight: "700", color: "#fff" }}>
             Farid Ardiansyah
           </span>
         </div>
 
         {/* Deskripsi */}
-        <div className="linebox" style={{ marginTop: "1rem", marginLeft: "60px", maxWidth: "700px" }}>
+        <div className="linebox purple" style={{ marginTop: "1rem", marginLeft: "60px", maxWidth: "700px" }}>
           <p style={{ margin: 0, fontSize: "1rem", fontWeight: "400", color: "#e5e5e5" }}>
             Seorang web developer yang berfokus pada desain minimalis, tipografi,
             serta membangun aplikasi modern berbasis Firebase dan React.
@@ -633,13 +700,11 @@ export default function AvailablePage() {
             <span className="icon-label">Postingan</span>
           </div>
 
-          <div className="icon-item">
+          <div className="icon-item" onClick={scrollToAbout}>
             <div className="icon-circle">
               <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"></path>
-                <circle cx="9" cy="7" r="4"></circle>
-                <path d="M23 21v-2a4 4 0 00-3-3.87"></path>
-                <path d="M16 3.13a4 4 0 010 7.75"></path>
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
               </svg>
             </div>
             <span className="icon-label">Tentang Saya</span>
@@ -723,12 +788,43 @@ export default function AvailablePage() {
           </div>
         </div>
 
+        {/* About Section */}
+        <div id="about-section" className="about-section">
+          <h2 className="about-title">Tentang Saya</h2>
+          <div className="about-content">
+            <div className="about-linebox">
+              <span style={{ fontSize: "1.3rem", fontWeight: "700", color: "#fff" }}>
+                Farid Ardiansyah
+              </span>
+            </div>
+            
+            <div className="about-linebox">
+              <p style={{ margin: 0, fontSize: "1rem", fontWeight: "400", color: "#e5e5e5" }}>
+                Seorang web developer yang berfokus pada desain minimalis, tipografi,
+                serta membangun aplikasi modern berbasis Firebase dan React.
+              </p>
+            </div>
+            
+            <div className="degree-container">
+              <svg className="degree-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 14l9-5-9-5-9 5 9 5z"></path>
+                <path d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"></path>
+                <path d="M12 14v6"></path>
+                <path d="M12 8.5V14"></path>
+              </svg>
+              <span className="degree-text">
+                Bergelar <span className="degree-highlight">Sarjana Komputer</span> dari Universitas Teknologi Digital
+              </span>
+            </div>
+          </div>
+        </div>
+
         {/* Footer */}
         <div className="footer-container">
           <div className="footer-content">
             {/* Kiri */}
             <div className="footer-left">
-              <div className="linebox">
+              <div className="linebox orange">
                 {/* Icon alert-triangle */}
                 <svg xmlns="http://www.w3.org/2000/svg"
                      fill="none"
@@ -744,9 +840,9 @@ export default function AvailablePage() {
 
             {/* Kanan */}
             <div className="footer-right">
-              <div className="linebox"><span>Kebijakan Privasi</span></div>
-              <div className="linebox"><span>Syarat & Ketentuan</span></div>
-              <div className="linebox"><span>Berikan Masukan</span></div>
+              <div className="linebox pink"><span>Kebijakan Privasi</span></div>
+              <div className="linebox blue"><span>Syarat & Ketentuan</span></div>
+              <div className="linebox green"><span>Berikan Masukan</span></div>
             </div>
           </div>
         </div>
@@ -788,18 +884,10 @@ export default function AvailablePage() {
               </div>
               
               <div className="modal-links">
-                <a href="https://github.com/example" className="modal-link" target="_blank" rel="noopener noreferrer">
-                  Repository GitHub
-                </a>
-                <a href="https://documentation.example.com" className="modal-link" target="_blank" rel="noopener noreferrer">
-                  Dokumentasi
-                </a>
-                <a href="https://feedback.example.com" className="modal-link" target="_blank" rel="noopener noreferrer">
-                  Berikan Masukan
-                </a>
-                <a href="https://status.example.com" className="modal-link" target="_blank" rel="noopener noreferrer">
-                  Status Website
-                </a>
+                <a href="https://github.com" className="modal-link">Lihat Kode Sumber</a>
+                <a href="https://github.com/issues" className="modal-link">Laporkan Masalah</a>
+                <a href="https://github.com/discussions" className="modal-link">Berikan Saran</a>
+                <a href="mailto:contact@example.com" className="modal-link">Hubungi Developer</a>
               </div>
             </div>
           </div>
