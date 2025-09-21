@@ -1269,83 +1269,89 @@ export default function AvailablePage() {
           </div>
         </div>
 
-        {/* Form untuk menambah ulasan baru */}
-        <div style={{ 
-          background: "rgba(255, 255, 255, 0.05)",
-          border: "1px solid rgba(255, 255, 255, 0.15)",
-          borderRadius: "8px",
-          padding: "25px",
-          marginTop: "40px"
-        }}>
-          <h4 style={{
-            fontSize: "1.4rem",
-            fontWeight: "700",
-            color: "#fff",
-            marginBottom: "20px"
-          }}>Tambah Ulasan Baru</h4>
-          
-          <div style={{ display: "grid", gap: "15px" }}>
-            <input 
-              type="text" 
-              placeholder="Nama"
-              style={{
-                padding: "12px 15px",
-                borderRadius: "6px",
-                border: "1px solid rgba(255, 255, 255, 0.2)",
-                background: "rgba(255, 255, 255, 0.05)",
-                color: "#fff",
-                fontSize: "1rem"
-              }}
-            />
-            
-            <input 
-              type="text" 
-              placeholder="Jabatan/Perusahaan"
-              style={{
-                padding: "12px 15px",
-                borderRadius: "6px",
-                border: "1px solid rgba(255, 255, 255, 0.2)",
-                background: "rgba(255, 255, 255, 0.05)",
-                color: "#fff",
-                fontSize: "1rem"
-              }}
-            />
-            
-            <textarea 
-              placeholder="Ulasan Anda"
-              rows="4"
-              style={{
-                padding: "12px 15px",
-                borderRadius: "6px",
-                border: "1px solid rgba(255, 255, 255, 0.2)",
-                background: "rgba(255, 255, 255, 0.05)",
-                color: "#fff",
-                fontSize: "1rem",
-                resize: "vertical"
-              }}
-            ></textarea>
-            
-            <button 
-              style={{
-                padding: "12px 20px",
-                borderRadius: "6px",
-                border: "none",
-                background: "rgba(255, 255, 255, 0.1)",
-                color: "#fff",
-                fontSize: "1rem",
-                fontWeight: "600",
-                cursor: "pointer",
-                transition: "background 0.3s"
-              }}
-              onMouseOver={(e) => e.target.style.background = "rgba(255, 255, 255, 0.2)"}
-              onMouseOut={(e) => e.target.style.background = "rgba(255, 255, 255, 0.1)"}
-            >
-              Kirim Ulasan
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
+    {/* Form untuk menambah ulasan baru */}
+<div style={{ 
+  background: "rgba(255, 255, 255, 0.05)",
+  border: "1px solid rgba(255, 255, 255, 0.15)",
+  borderRadius: "8px",
+  padding: "25px",
+  marginTop: "40px"
+}}>
+  <h4 style={{
+    fontSize: "1.4rem",
+    fontWeight: "700",
+    color: "#fff",
+    marginBottom: "20px"
+  }}>Tambah Ulasan Baru</h4>
+  
+  <div style={{ display: "grid", gap: "15px" }}>
+    <input 
+      type="text" 
+      placeholder="Nama"
+      value={newReview.name}
+      onChange={(e) => setNewReview({ ...newReview, name: e.target.value })}
+      style={{
+        padding: "12px 15px",
+        borderRadius: "6px",
+        border: "1px solid rgba(255, 255, 255, 0.2)",
+        background: "rgba(255, 255, 255, 0.05)",
+        color: "#fff",
+        fontSize: "1rem"
+      }}
+    />
+    
+    <input 
+      type="text" 
+      placeholder="Jabatan/Perusahaan"
+      value={newReview.position}
+      onChange={(e) => setNewReview({ ...newReview, position: e.target.value })}
+      style={{
+        padding: "12px 15px",
+        borderRadius: "6px",
+        border: "1px solid rgba(255, 255, 255, 0.2)",
+        background: "rgba(255, 255, 255, 0.05)",
+        color: "#fff",
+        fontSize: "1rem"
+      }}
+    />
+    
+    <textarea 
+      placeholder="Ulasan Anda"
+      rows="4"
+      value={newReview.comment}
+      onChange={(e) => setNewReview({ ...newReview, comment: e.target.value })}
+      style={{
+        padding: "12px 15px",
+        borderRadius: "6px",
+        border: "1px solid rgba(255, 255, 255, 0.2)",
+        background: "rgba(255, 255, 255, 0.05)",
+        color: "#fff",
+        fontSize: "1rem",
+        resize: "vertical"
+      }}
+    ></textarea>
+    
+    <button 
+      onClick={addReview}
+      style={{
+        padding: "12px 20px",
+        borderRadius: "6px",
+        border: "none",
+        background: "rgba(255, 255, 255, 0.1)",
+        color: "#fff",
+        fontSize: "1rem",
+        fontWeight: "600",
+        cursor: "pointer",
+        transition: "background 0.3s"
+      }}
+      onMouseOver={(e) => e.target.style.background = "rgba(255, 255, 255, 0.2)"}
+      onMouseOut={(e) => e.target.style.background = "rgba(255, 255, 255, 0.1)"}
+    >
+      Kirim Ulasan
+    </button>
+  </div>
+</div>
+
 
     {/* Tambahkan style untuk animasi pulse */}
     <style>{`
@@ -1438,6 +1444,7 @@ export default function AvailablePage() {
     </>
   );
 }
+
 
 
 
