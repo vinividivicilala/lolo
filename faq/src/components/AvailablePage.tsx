@@ -1115,7 +1115,9 @@ export default function AvailablePage() {
         </div>
       </div>
     </div>
-{/* Bagian Ulasan */}
+
+
+    {/* Bagian Ulasan */}
 <div style={{ 
   marginLeft: "60px", 
   marginBottom: "40px",
@@ -1134,6 +1136,23 @@ export default function AvailablePage() {
       @keyframes dashmove {
         to {
           background-position: -20px 0;
+        }
+      }
+      
+      /* 🔹 Animasi pemancar (radar) */
+      @keyframes radar {
+        0% {
+          transform: scale(0.8);
+          opacity: 0.8;
+          box-shadow: 0 0 0 0 rgba(34, 211, 238, 0.7);
+        }
+        70% {
+          box-shadow: 0 0 0 15px rgba(34, 211, 238, 0);
+        }
+        100% {
+          transform: scale(1.2);
+          opacity: 0;
+          box-shadow: 0 0 0 0 rgba(34, 211, 238, 0);
         }
       }
 
@@ -1174,6 +1193,46 @@ export default function AvailablePage() {
         );
         animation: dashmove 1s linear infinite;
       }
+      
+      /* 🔹 Pemancar (radar) */
+      .radar-pulse {
+        position: absolute;
+        left: -45px;
+        top: 10px;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: rgba(34, 211, 238, 0.3);
+        animation: radar 2s infinite;
+      }
+      
+      /* 🔹 Garis putus-putus horizontal khusus */
+      .dashed-line-horizontal {
+        height: 2px;
+        margin: 20px 0;
+        background: repeating-linear-gradient(
+          to right,
+          rgba(255, 255, 255, 0.3) 0,
+          rgba(255, 255, 255, 0.3) 8px,
+          transparent 8px,
+          transparent 16px
+        );
+        animation: dashmove 1.5s linear infinite;
+      }
+      
+      /* 🔹 Garis putus-putus vertikal khusus */
+      .dashed-line-vertical {
+        width: 2px;
+        margin: 0 20px;
+        background: repeating-linear-gradient(
+          to bottom,
+          rgba(255, 255, 255, 0.3) 0,
+          rgba(255, 255, 255, 0.3) 8px,
+          transparent 8px,
+          transparent 16px
+        );
+        animation: dashmove 1.5s linear infinite;
+      }
     `}
   </style>
 
@@ -1182,19 +1241,37 @@ export default function AvailablePage() {
     fontWeight: "700",
     color: "#fff",
     marginBottom: "30px",
-    position: "relative"
+    position: "relative",
+    display: "flex",
+    alignItems: "center"
   }}>
+    {/* Tambahkan pemancar di sebelah judul */}
+    <div style={{ position: "relative", marginRight: "15px" }}>
+      <div className="radar-pulse"></div>
+      <div style={{
+        width: "16px",
+        height: "16px",
+        borderRadius: "50%",
+        background: "rgba(34, 211, 238, 0.8)",
+        position: "relative",
+        zIndex: "2"
+      }}></div>
+    </div>
+    
     Ulasan
     <div style={{
       position: "absolute",
       bottom: "-10px",
-      left: "0",
+      left: "40px",
       width: "100px",
       height: "3px",
       background: "rgba(255, 255, 255, 0.3)",
       borderRadius: "2px"
     }}></div>
   </h3>
+
+  {/* Garis putus-putus horizontal pemisah */}
+  <div className="dashed-line-horizontal"></div>
 
   {/* 🔹 Garis vertikal utama */}
   <div className="timeline-vertical"></div>
@@ -1208,17 +1285,22 @@ export default function AvailablePage() {
         marginBottom: "30px",
         position: "relative"
       }}>
-        {/* Titik kiri */}
-        <div className="timeline-dot" style={{
-          position: "absolute",
-          left: "-41px",
-          top: "15px",
-          width: "16px",
-          height: "16px",
-          borderRadius: "50%",
-          background: "rgba(255, 255, 255, 0.4)",
-          border: "2px solid rgba(255, 255, 255, 0.8)"
-        }}></div>
+        {/* Titik kiri dengan efek pemancar */}
+        <div style={{ position: "relative" }}>
+          <div className="radar-pulse" style={{ left: "-8px", top: "-2px" }}></div>
+          <div className="timeline-dot" style={{
+            position: "absolute",
+            left: "-41px",
+            top: "15px",
+            width: "16px",
+            height: "16px",
+            borderRadius: "50%",
+            background: "rgba(255, 255, 255, 0.4)",
+            border: "2px solid rgba(255, 255, 255, 0.8)",
+            zIndex: "2"
+          }}></div>
+        </div>
+        
         {/* Garis penghubung */}
         <div className="timeline-line"></div>
 
@@ -1261,8 +1343,17 @@ export default function AvailablePage() {
             padding: "20px",
             color: "#e5e5e5",
             fontSize: "1.1rem",
-            lineHeight: "1.6"
+            lineHeight: "1.6",
+            position: "relative"
           }}>
+            {/* Garis vertikal di sisi kiri konten ulasan */}
+            <div className="dashed-line-vertical" style={{
+              position: "absolute",
+              left: "-15px",
+              top: "0",
+              height: "100%"
+            }}></div>
+            
             "{rev.comment}"
           </div>
         </div>
@@ -1276,16 +1367,20 @@ export default function AvailablePage() {
       marginBottom: "30px",
       position: "relative"
     }}>
-      <div className="timeline-dot" style={{
-        position: "absolute",
-        left: "-41px",
-        top: "15px",
-        width: "16px",
-        height: "16px",
-        borderRadius: "50%",
-        background: "rgba(255, 255, 255, 0.4)",
-        border: "2px solid rgba(255, 255, 255, 0.8)"
-      }}></div>
+      <div style={{ position: "relative" }}>
+        <div className="radar-pulse" style={{ left: "-8px", top: "-2px" }}></div>
+        <div className="timeline-dot" style={{
+          position: "absolute",
+          left: "-41px",
+          top: "15px",
+          width: "16px",
+          height: "16px",
+          borderRadius: "50%",
+          background: "rgba(255, 255, 255, 0.4)",
+          border: "2px solid rgba(255, 255, 255, 0.8)",
+          zIndex: "2"
+        }}></div>
+      </div>
       <div className="timeline-line"></div>
 
       <div style={{ flex: "1" }}>
@@ -1322,8 +1417,17 @@ export default function AvailablePage() {
           padding: "20px",
           color: "#e5e5e5",
           fontSize: "1.1rem",
-          lineHeight: "1.6"
+          lineHeight: "1.6",
+          position: "relative"
         }}>
+          {/* Garis vertikal di sisi kiri konten ulasan */}
+          <div className="dashed-line-vertical" style={{
+            position: "absolute",
+            left: "-15px",
+            top: "0",
+            height: "100%"
+          }}></div>
+          
           "Farid adalah developer yang sangat berbakat. Desain website yang dibuatnya sangat modern dan fungsional."
         </div>
       </div>
@@ -1336,16 +1440,20 @@ export default function AvailablePage() {
       marginBottom: "30px",
       position: "relative"
     }}>
-      <div className="timeline-dot" style={{
-        position: "absolute",
-        left: "-41px",
-        top: "15px",
-        width: "16px",
-        height: "16px",
-        borderRadius: "50%",
-        background: "rgba(255, 255, 255, 0.4)",
-        border: "2px solid rgba(255, 255, 255, 0.8)"
-      }}></div>
+      <div style={{ position: "relative" }}>
+        <div className="radar-pulse" style={{ left: "-8px", top: "-2px" }}></div>
+        <div className="timeline-dot" style={{
+          position: "absolute",
+          left: "-41px",
+          top: "15px",
+          width: "16px",
+          height: "16px",
+          borderRadius: "50%",
+          background: "rgba(255, 255, 255, 0.4)",
+          border: "2px solid rgba(255, 255, 255, 0.8)",
+          zIndex: "2"
+        }}></div>
+      </div>
       <div className="timeline-line"></div>
 
       <div style={{ flex: "1" }}>
@@ -1382,125 +1490,143 @@ export default function AvailablePage() {
           padding: "20px",
           color: "#e5e5e5",
           fontSize: "1.1rem",
-          lineHeight: "1.6"
+          lineHeight: "1.6",
+          position: "relative"
         }}>
+          {/* Garis vertikal di sisi kiri konten ulasan */}
+          <div className="dashed-line-vertical" style={{
+            position: "absolute",
+            left: "-15px",
+            top: "0",
+            height: "100%"
+          }}></div>
+          
           "Kolaborasi dengan Farid sangat menyenangkan. Ia cepat memahami kebutuhan desain dan menerapkannya dengan tepat. Hasilnya memuaskan!"
         </div>
       </div>
     </div>
   </div>
-</div>
 
-
-
-
-
-    
-    {/* Form untuk menambah ulasan baru */}
-<div style={{ 
-  background: "rgba(255, 255, 255, 0.05)",
-  border: "1px solid rgba(255, 255, 255, 0.15)",
-  borderRadius: "8px",
-  padding: "25px",
-  marginTop: "40px"
-}}>
-  <h4 style={{
-    fontSize: "1.4rem",
-    fontWeight: "700",
-    color: "#fff",
-    marginBottom: "20px"
-  }}>Tambah Ulasan Baru</h4>
+  {/* Garis putus-putus horizontal pemisah sebelum form */}
+  <div className="dashed-line-horizontal" style={{margin: "40px 0 30px"}}></div>
   
-  <div style={{ display: "grid", gap: "15px" }}>
-    <input 
-      type="text" 
-      placeholder="Nama"
-      value={newReview.name}
-      onChange={(e) => setNewReview({ ...newReview, name: e.target.value })}
-      style={{
-        padding: "12px 15px",
-        borderRadius: "6px",
-        border: "1px solid rgba(255, 255, 255, 0.2)",
-        background: "rgba(255, 255, 255, 0.05)",
-        color: "#fff",
-        fontSize: "1rem"
-      }}
-    />
+  {/* Form untuk menambah ulasan baru */}
+  <div style={{ 
+    background: "rgba(255, 255, 255, 0.05)",
+    border: "1px solid rgba(255, 255, 255, 0.15)",
+    borderRadius: "8px",
+    padding: "25px",
+    marginTop: "40px",
+    position: "relative"
+  }}>
+    {/* Pemancar di pojok form */}
+    <div className="radar-pulse" style={{ left: "15px", top: "15px", width: "20px", height: "20px" }}></div>
+    <div style={{
+      position: "absolute",
+      left: "20px",
+      top: "20px",
+      width: "10px",
+      height: "10px",
+      borderRadius: "50%",
+      background: "rgba(34, 211, 238, 0.8)",
+      zIndex: "2"
+    }}></div>
     
-    <input 
-      type="text" 
-      placeholder="Jabatan/Perusahaan"
-      value={newReview.position}
-      onChange={(e) => setNewReview({ ...newReview, position: e.target.value })}
-      style={{
-        padding: "12px 15px",
-        borderRadius: "6px",
-        border: "1px solid rgba(255, 255, 255, 0.2)",
-        background: "rgba(255, 255, 255, 0.05)",
-        color: "#fff",
-        fontSize: "1rem"
-      }}
-    />
+    <h4 style={{
+      fontSize: "1.4rem",
+      fontWeight: "700",
+      color: "#fff",
+      marginBottom: "20px",
+      marginLeft: "30px"
+    }}>Tambah Ulasan Baru</h4>
     
-    <textarea 
-      placeholder="Ulasan Anda"
-      rows="4"
-      value={newReview.comment}
-      onChange={(e) => setNewReview({ ...newReview, comment: e.target.value })}
-      style={{
-        padding: "12px 15px",
-        borderRadius: "6px",
-        border: "1px solid rgba(255, 255, 255, 0.2)",
-        background: "rgba(255, 255, 255, 0.05)",
-        color: "#fff",
-        fontSize: "1rem",
-        resize: "vertical"
-      }}
-    ></textarea>
-    
-    <button 
-      onClick={addReview}
-      style={{
-        padding: "12px 20px",
-        borderRadius: "6px",
-        border: "none",
-        background: "rgba(255, 255, 255, 0.1)",
-        color: "#fff",
-        fontSize: "1rem",
-        fontWeight: "600",
-        cursor: "pointer",
-        transition: "background 0.3s"
-      }}
-      onMouseOver={(e) => e.target.style.background = "rgba(255, 255, 255, 0.2)"}
-      onMouseOut={(e) => e.target.style.background = "rgba(255, 255, 255, 0.1)"}
-    >
-      Kirim Ulasan
-    </button>
+    <div style={{ display: "grid", gap: "15px" }}>
+      <input 
+        type="text" 
+        placeholder="Nama"
+        value={newReview.name}
+        onChange={(e) => setNewReview({ ...newReview, name: e.target.value })}
+        style={{
+          padding: "12px 15px",
+          borderRadius: "6px",
+          border: "1px solid rgba(255, 255, 255, 0.2)",
+          background: "rgba(255, 255, 255, 0.05)",
+          color: "#fff",
+          fontSize: "1rem"
+        }}
+      />
+      
+      <input 
+        type="text" 
+        placeholder="Jabatan/Perusahaan"
+        value={newReview.position}
+        onChange={(e) => setNewReview({ ...newReview, position: e.target.value })}
+        style={{
+          padding: "12px 15px",
+          borderRadius: "6px",
+          border: "1px solid rgba(255, 255, 255, 0.2)",
+          background: "rgba(255, 255, 255, 0.05)",
+          color: "#fff",
+          fontSize: "1rem"
+        }}
+      />
+      
+      <textarea 
+        placeholder="Ulasan Anda"
+        rows="4"
+        value={newReview.comment}
+        onChange={(e) => setNewReview({ ...newReview, comment: e.target.value })}
+        style={{
+          padding: "12px 15px",
+          borderRadius: "6px",
+          border: "1px solid rgba(255, 255, 255, 0.2)",
+          background: "rgba(255, 255, 255, 0.05)",
+          color: "#fff",
+          fontSize: "1rem",
+          resize: "vertical"
+        }}
+      ></textarea>
+      
+      <button 
+        onClick={addReview}
+        style={{
+          padding: "12px 20px",
+          borderRadius: "6px",
+          border: "none",
+          background: "rgba(255, 255, 255, 0.1)",
+          color: "#fff",
+          fontSize: "1rem",
+          fontWeight: "600",
+          cursor: "pointer",
+          transition: "background 0.3s",
+          position: "relative",
+          overflow: "hidden"
+        }}
+        onMouseOver={(e) => {
+          e.target.style.background = "rgba(255, 255, 255, 0.2)";
+          e.target.style.boxShadow = "0 0 15px rgba(34, 211, 238, 0.5)";
+        }}
+        onMouseOut={(e) => {
+          e.target.style.background = "rgba(255, 255, 255, 0.1)";
+          e.target.style.boxShadow = "none";
+        }}
+      >
+        Kirim Ulasan
+        {/* Efek kedip pada tombol */}
+        <div style={{
+          position: "absolute",
+          top: "0",
+          left: "0",
+          right: "0",
+          bottom: "0",
+          background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent)",
+          transform: "translateX(-100%)",
+          animation: "dashmove 2s infinite"
+        }}></div>
+      </button>
+    </div>
   </div>
 </div>
- </div>
-    {/* End Bagian Ulasan */}
-
-    {/* Tambahkan style untuk animasi pulse */}
-    <style>{`
-      @keyframes pulse {
-        0% {
-          transform: scale(0.95);
-          box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7);
-        }
-        70% {
-          transform: scale(1.1);
-          box-shadow: 0 0 0 12px rgba(255, 255, 255, 0);
-        }
-        100% {
-          transform: scale(0.95);
-          box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
-        }
-      }
-    `}</style>
-  </div>
-)}
-
             
 
             
@@ -1572,6 +1698,7 @@ export default function AvailablePage() {
     </>
   );
 }
+
 
 
 
