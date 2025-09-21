@@ -1117,6 +1117,7 @@ export default function AvailablePage() {
     </div>
 
 
+
 {/* Bagian Ulasan */}
 <div style={{ 
   marginLeft: "60px", 
@@ -1142,6 +1143,18 @@ export default function AvailablePage() {
       borderRadius: "2px"
     }}></div>
   </h3>
+
+  {/* 🔹 Garis putus-putus vertikal */}
+  <div className="review-timeline-line" 
+    style={{
+      position: "absolute",
+      top: "60px",
+      left: "-33px",
+      width: "2px",
+      height: "100%",
+      borderLeft: "2px dashed rgba(255,255,255,0.3)"
+    }}
+  ></div>
 
   {/* 🔹 Daftar ulasan realtime dari Firestore */}
   <div style={{ marginLeft: "30px" }}>
@@ -1354,11 +1367,12 @@ export default function AvailablePage() {
       </div>
     </div>
   </div>
-
- 
-
+</div>
 
 
+
+
+    
 
 
     
@@ -1539,6 +1553,7 @@ export default function AvailablePage() {
     </>
   );
 }
+
 
 
 
