@@ -1117,333 +1117,158 @@ export default function AvailablePage() {
     </div>
 
     {/* Bagian Ulasan */}
-<div style={{ 
-  marginLeft: "60px", 
-  marginBottom: "40px",
-  position: "relative",
-  paddingLeft: "30px"
-}}>
-  <h3 style={{
-    fontSize: "2rem",
-    fontWeight: "700",
-    color: "#fff",
-    marginBottom: "30px",
-    position: "relative"
-  }}>
-    Ulasan
-    <div style={{
-      position: "absolute",
-      bottom: "-10px",
-      left: "0",
-      width: "100px",
-      height: "3px",
-      background: "rgba(255, 255, 255, 0.3)",
-      borderRadius: "2px"
-    }}></div>
-  </h3>
-
-  {/* Garis vertikal putus-putus dengan animasi */}
-  <div style={{
-    position: "absolute",
-    left: "0",
-    top: "0",
-    height: "100%",
-    width: "2px",
-    overflow: "hidden"
-  }}>
-    <div style={{
-      height: "200%",
-      width: "100%",
-      background: "repeating-linear-gradient(to bottom, transparent, transparent 5px, rgba(34, 211, 238, 0.5) 5px, rgba(34, 211, 238, 0.5) 10px)",
-      animation: "moveLine 3s linear infinite"
-    }}></div>
-  </div>
-
-  {/* Pemancar kedap-kedip */}
-  <div style={{
-    position: "absolute",
-    left: "-9px",
-    top: "15px",
-    width: "18px",
-    height: "18px",
-    borderRadius: "50%",
-    background: "rgba(34, 211, 238, 0.3)",
-    boxShadow: "0 0 0 0 rgba(34, 211, 238, 0.7)",
-    animation: "pulse 2s infinite",
-    zIndex: "10"
-  }}></div>
-
-  {/* 🔹 Daftar ulasan realtime dari Firestore */}
-  <div style={{ marginLeft: "30px", position: "relative", zIndex: "5" }}>
-    {reviews.map((rev) => (
-      <div key={rev.id} style={{ 
-        display: "flex", 
-        alignItems: "flex-start",
+    <div style={{ 
+      marginLeft: "60px", 
+      marginBottom: "40px",
+      position: "relative",
+      paddingLeft: "30px"
+    }}>
+      <h3 style={{
+        fontSize: "2rem",
+        fontWeight: "700",
+        color: "#fff",
         marginBottom: "30px",
         position: "relative"
       }}>
-        {/* Titik kiri dengan efek kedap-kedip */}
+        Ulasan
+        {/* Garis horizontal di bawah judul Ulasan */}
         <div style={{
           position: "absolute",
-          left: "-41px",
-          top: "15px",
-          width: "16px",
-          height: "16px",
-          borderRadius: "50%",
-          background: "rgba(255, 255, 255, 0.4)",
-          border: "2px solid rgba(255, 255, 255, 0.8)",
-          animation: "glow 2s infinite alternate"
-        }}></div>
-        {/* Garis penghubung dengan animasi */}
-        <div style={{
-          position: "absolute",
-          left: "-30px",
-          top: "23px",
-          width: "28px",
-          height: "2px",
+          bottom: "-10px",
+          left: "0",
+          width: "100px",
+          height: "3px",
           background: "rgba(255, 255, 255, 0.3)",
-          animation: "dash 1.5s linear infinite"
+          borderRadius: "2px"
         }}></div>
+      </h3>
 
-        {/* Konten Ulasan */}
-        <div style={{ flex: "1" }}>
+      {/* Container untuk daftar ulasan */}
+      <div style={{ marginLeft: "30px" }}>
+        {/* Ulasan 1 */}
+        <div style={{ 
+          display: "flex", 
+          alignItems: "flex-start",
+          marginBottom: "30px",
+          position: "relative"
+        }}>
+          {/* Titik kiri */}
           <div style={{
-            display: "inline-block",
-            padding: "8px 14px",
-            borderRadius: "6px",
-            background: "rgba(255, 255, 255, 0.05)",
-            border: "1px solid rgba(255, 255, 255, 0.2)",
-            marginBottom: "15px",
-            color: "#fff",
-            fontSize: "1.1rem",
-            fontWeight: "600"
-          }}>
-            <div style={{ fontWeight: "700", marginBottom: "5px" }}>
-              {rev.name}
-            </div>
-            <div style={{ fontSize: "0.9rem", color: "#94a3b8" }}>
-              {rev.position || "Tanpa jabatan"}
-            </div>
-            <span style={{
+            position: "absolute",
+            left: "-41px",
+            top: "15px",
+            width: "16px",
+            height: "16px",
+            borderRadius: "50%",
+            background: "rgba(255, 255, 255, 0.4)",
+            border: "2px solid rgba(255, 255, 255, 0.8)",
+            zIndex: "2"
+          }}></div>
+          
+          {/* Garis penghubung horizontal */}
+          <div style={{
+            position: "absolute",
+            left: "-30px",
+            top: "23px",
+            width: "28px",
+            height: "2px",
+            background: "rgba(255, 255, 255, 0.3)",
+            zIndex: "1"
+          }}></div>
+
+          {/* Konten Ulasan */}
+          <div style={{ flex: "1" }}>
+            <div style={{
               display: "inline-block",
-              marginTop: "6px",
-              fontSize: "0.75rem",
-              color: "#22d3ee",
-              background: "rgba(34,211,238,0.1)",
-              padding: "2px 8px",
-              borderRadius: "4px"
+              padding: "8px 14px",
+              borderRadius: "6px",
+              background: "rgba(255, 255, 255, 0.05)",
+              border: "1px solid rgba(255, 255, 255, 0.2)",
+              marginBottom: "15px",
+              color: "#fff",
+              fontSize: "1.1rem",
+              fontWeight: "600"
             }}>
-              Realtime Review
-            </span>
+              <div style={{ fontWeight: "700", marginBottom: "5px" }}>Budi Santoso</div>
+              <div style={{ fontSize: "0.9rem", color: "#94a3b8" }}>Project Manager di TechCorp</div>
+            </div>
+            
+            <div style={{
+              background: "rgba(255, 255, 255, 0.05)",
+              border: "1px solid rgba(255, 255, 255, 0.15)",
+              borderRadius: "8px",
+              padding: "20px",
+              color: "#e5e5e5",
+              fontSize: "1.1rem",
+              lineHeight: "1.6"
+            }}>
+              "Farid adalah developer yang sangat berbakat. Desain website yang dibuatnya sangat modern dan fungsional. Sangat recomended untuk project web development!"
+            </div>
           </div>
+        </div>
 
+        {/* Ulasan 2 */}
+        <div style={{ 
+          display: "flex", 
+          alignItems: "flex-start",
+          marginBottom: "30px",
+          position: "relative"
+        }}>
+          {/* Titik kiri */}
           <div style={{
-            background: "rgba(255, 255, 255, 0.05)",
-            border: "1px solid rgba(255, 255, 255, 0.15)",
-            borderRadius: "8px",
-            padding: "20px",
-            color: "#e5e5e5",
-            fontSize: "1.1rem",
-            lineHeight: "1.6"
-          }}>
-            "{rev.comment}"
+            position: "absolute",
+            left: "-41px",
+            top: "15px",
+            width: "16px",
+            height: "16px",
+            borderRadius: "50%",
+            background: "rgba(255, 255, 255, 0.4)",
+            border: "2px solid rgba(255, 255, 255, 0.8)",
+            zIndex: "2"
+          }}></div>
+          
+          {/* Garis penghubung horizontal */}
+          <div style={{
+            position: "absolute",
+            left: "-30px",
+            top: "23px",
+            width: "28px",
+            height: "2px",
+            background: "rgba(255, 255, 255, 0.3)",
+            zIndex: "1"
+          }}></div>
+
+          {/* Konten Ulasan */}
+          <div style={{ flex: "1" }}>
+            <div style={{
+              display: "inline-block",
+              padding: "8px 14px",
+              borderRadius: "6px",
+              background: "rgba(255, 255, 255, 0.05)",
+              border: "1px solid rgba(255, 255, 255, 0.2)",
+              marginBottom: "15px",
+              color: "#fff",
+              fontSize: "1.1rem",
+              fontWeight: "600"
+            }}>
+              <div style={{ fontWeight: "700", marginBottom: "5px" }}>Siti Rahayu</div>
+              <div style={{ fontSize: "0.9rem", color: "#94a3b8" }}>UI/UX Designer di CreativeStudio</div>
+            </div>
+            
+            <div style={{
+              background: "rgba(255, 255, 255, 0.05)",
+              border: "1px solid rgba(255, 255, 255, 0.15)",
+              borderRadius: "8px",
+              padding: "20px",
+              color: "#e5e5e5",
+              fontSize: "1.1rem",
+              lineHeight: "1.6"
+            }}>
+              "Kolaborasi dengan Farid sangat menyenangkan. Ia cepat memahami kebutuhan desain dan menerapkannya dengan tepat dalam kode. Hasilnya selalu memuaskan!"
+            </div>
           </div>
         </div>
-      </div>
-    ))}
-
-    {/* 🔹 Contoh Review 1 */}
-    <div style={{ 
-      display: "flex", 
-      alignItems: "flex-start",
-      marginBottom: "30px",
-      position: "relative"
-    }}>
-      <div style={{
-        position: "absolute",
-        left: "-41px",
-        top: "15px",
-        width: "16px",
-        height: "16px",
-        borderRadius: "50%",
-        background: "rgba(255, 255, 255, 0.4)",
-        border: "2px solid rgba(255, 255, 255, 0.8)",
-        animation: "glow 2s infinite alternate"
-      }}></div>
-      <div style={{
-        position: "absolute",
-        left: "-30px",
-        top: "23px",
-        width: "28px",
-        height: "2px",
-        background: "rgba(255, 255, 255, 0.3)",
-        animation: "dash 1.5s linear infinite"
-      }}></div>
-
-      <div style={{ flex: "1" }}>
-        <div style={{
-          display: "inline-block",
-          padding: "8px 14px",
-          borderRadius: "6px",
-          background: "rgba(255, 255, 255, 0.05)",
-          border: "1px solid rgba(255, 255, 255, 0.2)",
-          marginBottom: "15px",
-          color: "#fff",
-          fontSize: "1.1rem",
-          fontWeight: "600"
-        }}>
-          <div style={{ fontWeight: "700", marginBottom: "5px" }}>Budi Santoso</div>
-          <div style={{ fontSize: "0.9rem", color: "#94a3b8" }}>Project Manager di TechCorp</div>
-          <span style={{
-            display: "inline-block",
-            marginTop: "6px",
-            fontSize: "0.75rem",
-            color: "#facc15",
-            background: "rgba(250,204,21,0.1)",
-            padding: "2px 8px",
-            borderRadius: "4px"
-          }}>
-            Contoh Review
-          </span>
-        </div>
-
-        <div style={{
-          background: "rgba(255, 255, 255, 0.05)",
-          border: "1px solid rgba(255, 255, 255, 0.15)",
-          borderRadius: "8px",
-          padding: "20px",
-          color: "#e5e5e5",
-          fontSize: "1.1rem",
-          lineHeight: "1.6"
-        }}>
-          "Farid adalah developer yang sangat berbakat. Desain website yang dibuatnya sangat modern dan fungsional."
-        </div>
-      </div>
-    </div>
-
-    {/* 🔹 Contoh Review 2 */}
-    <div style={{ 
-      display: "flex", 
-      alignItems: "flex-start",
-      marginBottom: "30px",
-      position: "relative"
-    }}>
-      <div style={{
-        position: "absolute",
-        left: "-41px",
-        top: "15px",
-        width: "16px",
-        height: "16px",
-        borderRadius: "50%",
-        background: "rgba(255, 255, 255, 0.4)",
-        border: "2px solid rgba(255, 255, 255, 0.8)",
-        animation: "glow 2s infinite alternate"
-      }}></div>
-      <div style={{
-        position: "absolute",
-        left: "-30px",
-        top: "23px",
-        width: "28px",
-        height: "2px",
-        background: "rgba(255, 255, 255, 0.3)",
-        animation: "dash 1.5s linear infinite"
-      }}></div>
-
-      <div style={{ flex: "1" }}>
-        <div style={{
-          display: "inline-block",
-          padding: "8px 14px",
-          borderRadius: "6px",
-          background: "rgba(255, 255, 255, 0.05)",
-          border: "1px solid rgba(255, 255, 255, 0.2)",
-          marginBottom: "15px",
-          color: "#fff",
-          fontSize: "1.1rem",
-          fontWeight: "600"
-        }}>
-          <div style={{ fontWeight: "700", marginBottom: "5px" }}>Siti Rahayu</div>
-          <div style={{ fontSize: "0.9rem", color: "#94a3b8" }}>UI/UX Designer di CreativeStudio</div>
-          <span style={{
-            display: "inline-block",
-            marginTop: "6px",
-            fontSize: "0.75rem",
-            color: "#facc15",
-            background: "rgba(250,204,21,0.1)",
-            padding: "2px 8px",
-            borderRadius: "4px"
-          }}>
-            Contoh Review
-          </span>
-        </div>
-
-        <div style={{
-          background: "rgba(255, 255, 255, 0.05)",
-          border: "1px solid rgba(255, 255, 255, 0.15)",
-          borderRadius: "8px",
-          padding: "20px",
-          color: "#e5e5e5",
-          fontSize: "1.1rem",
-          lineHeight: "1.6"
-        }}>
-          "Kolaborasi dengan Farid sangat menyenangkan. Ia cepat memahami kebutuhan desain dan menerapkannya dengan tepat. Hasilnya memuaskan!"
-        </div>
-      </div>
-    </div>
-  </div>
-
-  {/* CSS untuk animasi */}
-  <style>
-    {`
-    @keyframes moveLine {
-      0% {
-        transform: translateY(-50%);
-      }
-      100% {
-        transform: translateY(0%);
-      }
-    }
-    
-    @keyframes dash {
-      0% {
-        background-position: 0 0;
-        opacity: 0.6;
-      }
-      100% {
-        background-position: 10px 0;
-        opacity: 1;
-      }
-    }
-    
-    @keyframes pulse {
-      0% {
-        box-shadow: 0 0 0 0 rgba(34, 211, 238, 0.7);
-      }
-      70% {
-        box-shadow: 0 0 0 10px rgba(34, 211, 238, 0);
-      }
-      100% {
-        box-shadow: 0 0 0 0 rgba(34, 211, 238, 0);
-      }
-    }
-    
-    @keyframes glow {
-      from {
-        box-shadow: 0 0 2px rgba(255, 255, 255, 0.4);
-      }
-      to {
-        box-shadow: 0 0 8px rgba(255, 255, 255, 0.8), 0 0 12px rgba(34, 211, 238, 0.5);
-      }
-    }
-    `}
-  </style>
-</div>
-
-
-
-    
-
-
-    
+          </div> 
 
     {/* Form untuk menambah ulasan baru */}
 <div style={{ 
@@ -1621,9 +1446,6 @@ export default function AvailablePage() {
     </>
   );
 }
-
-
-
 
 
 
