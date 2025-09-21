@@ -1,27 +1,28 @@
-import React, { useState, useEffect  } from "react";
+import React, { useState, useEffect } from "react";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
+import { 
+  getFirestore, collection, addDoc, onSnapshot, serverTimestamp, query, orderBy,
+  deleteDoc, getDoc, writeBatch, setDoc, doc, updateDoc, where, getDocs, documentId,
+  limit, increment, getCountFromServer, arrayUnion, arrayRemove, deleteField, runTransaction
+} from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
+import { 
+  getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, 
+  signInWithPopup, signOut, onAuthStateChanged, GoogleAuthProvider, 
+  setPersistence, browserLocalPersistence
+} from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
 
 export default function AvailablePage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  // Tambah state baru
-const [isAboutOpen, setIsAboutOpen] = useState(false);
+  const [isAboutOpen, setIsAboutOpen] = useState(false);
 
-const openAbout = () => setIsAboutOpen(true);
-const closeAbout = () => setIsAboutOpen(false);
+  const openAbout = () => setIsAboutOpen(true);
+  const closeAbout = () => setIsAboutOpen(false);
 
+  const openModal = () => setIsModalOpen(true);
+  const closeModal = () => setIsModalOpen(false);
 
-  const openModal = () => {
-    setIsModalOpen(true);
-  };
-
-  const closeModal = () => {
-    setIsModalOpen(false);
-  };
-
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp, query, orderBy, deleteDoc, getDoc, writeBatch, setDoc, doc, updateDoc, where, getDocs, documentId, limit, increment, getCountFromServer,  arrayUnion, 
-    arrayRemove, deleteField, runTransaction  } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword , signInWithPopup, signOut, onAuthStateChanged, GoogleAuthProvider,  setPersistence,
-  browserLocalPersistence  } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js"; // Pastikan semua fungsi auth yang Anda butuhkan diimpor
+  ...
+}
 
 
 // Tambahkan state untuk ulasan
@@ -1708,6 +1709,7 @@ const addReview = async () => {
     </>
   );
 }
+
 
 
 
