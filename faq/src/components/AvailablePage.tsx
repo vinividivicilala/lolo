@@ -1141,16 +1141,15 @@ export default function AvailablePage() {
     }}></div>
   </h3>
 
-  {/* Container untuk daftar ulasan */}
+  {/* Daftar Ulasan dari Firestore */}
   <div style={{ marginLeft: "30px" }}>
-    {reviews.map((review) => (
-      <div key={review.id} style={{ 
+    {reviews.map((rev) => (
+      <div key={rev.id} style={{ 
         display: "flex", 
         alignItems: "flex-start",
         marginBottom: "30px",
         position: "relative"
       }}>
-        {/* Titik kiri */}
         <div style={{
           position: "absolute",
           left: "-41px",
@@ -1159,22 +1158,17 @@ export default function AvailablePage() {
           height: "16px",
           borderRadius: "50%",
           background: "rgba(255, 255, 255, 0.4)",
-          border: "2px solid rgba(255, 255, 255, 0.8)",
-          zIndex: "2"
+          border: "2px solid rgba(255, 255, 255, 0.8)"
         }}></div>
-        
-        {/* Garis penghubung horizontal */}
         <div style={{
           position: "absolute",
           left: "-30px",
           top: "23px",
           width: "28px",
           height: "2px",
-          background: "rgba(255, 255, 255, 0.3)",
-          zIndex: "1"
+          background: "rgba(255, 255, 255, 0.3)"
         }}></div>
 
-        {/* Konten Ulasan */}
         <div style={{ flex: "1" }}>
           <div style={{
             display: "inline-block",
@@ -1187,12 +1181,25 @@ export default function AvailablePage() {
             fontSize: "1.1rem",
             fontWeight: "600"
           }}>
-            <div style={{ fontWeight: "700", marginBottom: "5px" }}>{review.name}</div>
-            {review.position && (
-              <div style={{ fontSize: "0.9rem", color: "#94a3b8" }}>{review.position}</div>
-            )}
+            <div style={{ fontWeight: "700", marginBottom: "5px" }}>
+              {rev.name}
+            </div>
+            <div style={{ fontSize: "0.9rem", color: "#94a3b8" }}>
+              {rev.position || "Tanpa jabatan"}
+            </div>
+            <span style={{
+              display: "inline-block",
+              marginTop: "6px",
+              fontSize: "0.75rem",
+              color: "#22d3ee",
+              background: "rgba(34,211,238,0.1)",
+              padding: "2px 8px",
+              borderRadius: "4px"
+            }}>
+              Realtime Review
+            </span>
           </div>
-          
+
           <div style={{
             background: "rgba(255, 255, 255, 0.05)",
             border: "1px solid rgba(255, 255, 255, 0.15)",
@@ -1202,94 +1209,183 @@ export default function AvailablePage() {
             fontSize: "1.1rem",
             lineHeight: "1.6"
           }}>
-            "{review.comment}"
+            "{rev.comment}"
           </div>
         </div>
       </div>
     ))}
-  </div>
 
-  {/* Form untuk tambah ulasan baru */}
-  <div style={{ 
-    background: "rgba(255, 255, 255, 0.05)",
-    border: "1px solid rgba(255, 255, 255, 0.15)",
-    borderRadius: "8px",
-    padding: "25px",
-    marginTop: "40px"
-  }}>
-    <h4 style={{
-      fontSize: "1.4rem",
-      fontWeight: "700",
-      color: "#fff",
-      marginBottom: "20px"
-    }}>Tambah Ulasan Baru</h4>
-    
-    <div style={{ display: "grid", gap: "15px" }}>
-      <input 
-        type="text" 
-        placeholder="Nama"
-        value={newReview.name}
-        onChange={(e) => setNewReview({ ...newReview, name: e.target.value })}
-        style={{
-          padding: "12px 15px",
+    {/* Contoh Review (tetap ada, diberi label) */}
+    <div style={{ 
+      display: "flex", 
+      alignItems: "flex-start",
+      marginBottom: "30px",
+      position: "relative"
+    }}>
+      <div style={{
+        position: "absolute",
+        left: "-41px",
+        top: "15px",
+        width: "16px",
+        height: "16px",
+        borderRadius: "50%",
+        background: "rgba(255, 255, 255, 0.4)",
+        border: "2px solid rgba(255, 255, 255, 0.8)"
+      }}></div>
+      <div style={{
+        position: "absolute",
+        left: "-30px",
+        top: "23px",
+        width: "28px",
+        height: "2px",
+        background: "rgba(255, 255, 255, 0.3)"
+      }}></div>
+      <div style={{ flex: "1" }}>
+        <div style={{
+          display: "inline-block",
+          padding: "8px 14px",
           borderRadius: "6px",
-          border: "1px solid rgba(255, 255, 255, 0.2)",
           background: "rgba(255, 255, 255, 0.05)",
-          color: "#fff",
-          fontSize: "1rem"
-        }}
-      />
-      
-      <input 
-        type="text" 
-        placeholder="Jabatan/Perusahaan"
-        value={newReview.position}
-        onChange={(e) => setNewReview({ ...newReview, position: e.target.value })}
-        style={{
-          padding: "12px 15px",
-          borderRadius: "6px",
           border: "1px solid rgba(255, 255, 255, 0.2)",
+          marginBottom: "15px",
+          color: "#fff",
+          fontSize: "1.1rem",
+          fontWeight: "600"
+        }}>
+          <div style={{ fontWeight: "700", marginBottom: "5px" }}>Budi Santoso</div>
+          <div style={{ fontSize: "0.9rem", color: "#94a3b8" }}>Project Manager di TechCorp</div>
+          <span style={{
+            display: "inline-block",
+            marginTop: "6px",
+            fontSize: "0.75rem",
+            color: "#facc15",
+            background: "rgba(250,204,21,0.1)",
+            padding: "2px 8px",
+            borderRadius: "4px"
+          }}>
+            Contoh Review
+          </span>
+        </div>
+        <div style={{
           background: "rgba(255, 255, 255, 0.05)",
-          color: "#fff",
-          fontSize: "1rem"
-        }}
-      />
-      
-      <textarea 
-        placeholder="Ulasan Anda"
-        rows="4"
-        value={newReview.comment}
-        onChange={(e) => setNewReview({ ...newReview, comment: e.target.value })}
-        style={{
-          padding: "12px 15px",
-          borderRadius: "6px",
-          border: "1px solid rgba(255, 255, 255, 0.2)",
-          background: "rgba(255, 255, 255, 0.05)",
-          color: "#fff",
-          fontSize: "1rem",
-          resize: "vertical"
-        }}
-      ></textarea>
-      
-      <button 
-        onClick={addReview}
-        style={{
-          padding: "12px 20px",
-          borderRadius: "6px",
-          border: "none",
-          background: "rgba(255, 255, 255, 0.1)",
-          color: "#fff",
-          fontSize: "1rem",
-          fontWeight: "600",
-          cursor: "pointer",
-          transition: "background 0.3s"
-        }}
-      >
-        Kirim Ulasan
-      </button>
+          border: "1px solid rgba(255, 255, 255, 0.15)",
+          borderRadius: "8px",
+          padding: "20px",
+          color: "#e5e5e5",
+          fontSize: "1.1rem",
+          lineHeight: "1.6"
+        }}>
+          "Farid adalah developer yang sangat berbakat..."
+        </div>
+      </div>
     </div>
   </div>
+
+
+    {/* Form untuk menambah ulasan baru */}
+<div style={{ 
+  background: "rgba(255, 255, 255, 0.05)",
+  border: "1px solid rgba(255, 255, 255, 0.15)",
+  borderRadius: "8px",
+  padding: "25px",
+  marginTop: "40px"
+}}>
+  <h4 style={{
+    fontSize: "1.4rem",
+    fontWeight: "700",
+    color: "#fff",
+    marginBottom: "20px"
+  }}>Tambah Ulasan Baru</h4>
+  
+  <div style={{ display: "grid", gap: "15px" }}>
+    <input 
+      type="text" 
+      placeholder="Nama"
+      value={newReview.name}
+      onChange={(e) => setNewReview({ ...newReview, name: e.target.value })}
+      style={{
+        padding: "12px 15px",
+        borderRadius: "6px",
+        border: "1px solid rgba(255, 255, 255, 0.2)",
+        background: "rgba(255, 255, 255, 0.05)",
+        color: "#fff",
+        fontSize: "1rem"
+      }}
+    />
+    
+    <input 
+      type="text" 
+      placeholder="Jabatan/Perusahaan"
+      value={newReview.position}
+      onChange={(e) => setNewReview({ ...newReview, position: e.target.value })}
+      style={{
+        padding: "12px 15px",
+        borderRadius: "6px",
+        border: "1px solid rgba(255, 255, 255, 0.2)",
+        background: "rgba(255, 255, 255, 0.05)",
+        color: "#fff",
+        fontSize: "1rem"
+      }}
+    />
+    
+    <textarea 
+      placeholder="Ulasan Anda"
+      rows="4"
+      value={newReview.comment}
+      onChange={(e) => setNewReview({ ...newReview, comment: e.target.value })}
+      style={{
+        padding: "12px 15px",
+        borderRadius: "6px",
+        border: "1px solid rgba(255, 255, 255, 0.2)",
+        background: "rgba(255, 255, 255, 0.05)",
+        color: "#fff",
+        fontSize: "1rem",
+        resize: "vertical"
+      }}
+    ></textarea>
+    
+    <button 
+      onClick={addReview}
+      style={{
+        padding: "12px 20px",
+        borderRadius: "6px",
+        border: "none",
+        background: "rgba(255, 255, 255, 0.1)",
+        color: "#fff",
+        fontSize: "1rem",
+        fontWeight: "600",
+        cursor: "pointer",
+        transition: "background 0.3s"
+      }}
+      onMouseOver={(e) => e.target.style.background = "rgba(255, 255, 255, 0.2)"}
+      onMouseOut={(e) => e.target.style.background = "rgba(255, 255, 255, 0.1)"}
+    >
+      Kirim Ulasan
+    </button>
+  </div>
 </div>
+ </div>
+    {/* End Bagian Ulasan */}
+
+    {/* Tambahkan style untuk animasi pulse */}
+    <style>{`
+      @keyframes pulse {
+        0% {
+          transform: scale(0.95);
+          box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7);
+        }
+        70% {
+          transform: scale(1.1);
+          box-shadow: 0 0 0 12px rgba(255, 255, 255, 0);
+        }
+        100% {
+          transform: scale(0.95);
+          box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
+        }
+      }
+    `}</style>
+  </div>
+)}
 
             
 
