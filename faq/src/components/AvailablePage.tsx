@@ -1116,8 +1116,7 @@ export default function AvailablePage() {
       </div>
     </div>
 
-
-
+    
 {/* Bagian Ulasan */}
 <div style={{ 
   marginLeft: "60px", 
@@ -1144,17 +1143,33 @@ export default function AvailablePage() {
     }}></div>
   </h3>
 
-  {/* 🔹 Garis putus-putus vertikal */}
-  <div className="review-timeline-line" 
-    style={{
-      position: "absolute",
-      top: "60px",
-      left: "-33px",
-      width: "2px",
-      height: "100%",
-      borderLeft: "2px dashed rgba(255,255,255,0.3)"
-    }}
-  ></div>
+  {/* 🔹 Tambahan animasi blink & garis */}
+  <style>
+    {`
+      .blink-dot {
+        animation: blink 1.5s infinite;
+      }
+      @keyframes blink {
+        0%, 100% { background: rgba(34,211,238,0.9); box-shadow: 0 0 8px rgba(34,211,238,0.9); }
+        50% { background: rgba(34,211,238,0.3); box-shadow: 0 0 2px rgba(34,211,238,0.3); }
+      }
+
+      .dash-line {
+        background: repeating-linear-gradient(
+          to right,
+          rgba(255, 255, 255, 0.6) 0px,
+          rgba(255, 255, 255, 0.6) 10px,
+          transparent 10px,
+          transparent 20px
+        );
+        animation: moveDash 1.5s linear infinite;
+      }
+      @keyframes moveDash {
+        from { background-position: 0 0; }
+        to { background-position: 20px 0; }
+      }
+    `}
+  </style>
 
   {/* 🔹 Daftar ulasan realtime dari Firestore */}
   <div style={{ marginLeft: "30px" }}>
@@ -1165,25 +1180,24 @@ export default function AvailablePage() {
         marginBottom: "30px",
         position: "relative"
       }}>
-        {/* Titik kiri */}
-        <div style={{
+        {/* Titik kiri kedap kedip */}
+        <div className="blink-dot" style={{
           position: "absolute",
           left: "-41px",
           top: "15px",
           width: "16px",
           height: "16px",
           borderRadius: "50%",
-          background: "rgba(255, 255, 255, 0.4)",
           border: "2px solid rgba(255, 255, 255, 0.8)"
         }}></div>
-        {/* Garis penghubung */}
-        <div style={{
+
+        {/* Garis penghubung putus-putus bergerak */}
+        <div className="dash-line" style={{
           position: "absolute",
           left: "-30px",
           top: "23px",
           width: "28px",
-          height: "2px",
-          background: "rgba(255, 255, 255, 0.3)"
+          height: "2px"
         }}></div>
 
         {/* Konten Ulasan */}
@@ -1240,23 +1254,21 @@ export default function AvailablePage() {
       marginBottom: "30px",
       position: "relative"
     }}>
-      <div style={{
+      <div className="blink-dot" style={{
         position: "absolute",
         left: "-41px",
         top: "15px",
         width: "16px",
         height: "16px",
         borderRadius: "50%",
-        background: "rgba(255, 255, 255, 0.4)",
         border: "2px solid rgba(255, 255, 255, 0.8)"
       }}></div>
-      <div style={{
+      <div className="dash-line" style={{
         position: "absolute",
         left: "-30px",
         top: "23px",
         width: "28px",
-        height: "2px",
-        background: "rgba(255, 255, 255, 0.3)"
+        height: "2px"
       }}></div>
 
       <div style={{ flex: "1" }}>
@@ -1307,23 +1319,21 @@ export default function AvailablePage() {
       marginBottom: "30px",
       position: "relative"
     }}>
-      <div style={{
+      <div className="blink-dot" style={{
         position: "absolute",
         left: "-41px",
         top: "15px",
         width: "16px",
         height: "16px",
         borderRadius: "50%",
-        background: "rgba(255, 255, 255, 0.4)",
         border: "2px solid rgba(255, 255, 255, 0.8)"
       }}></div>
-      <div style={{
+      <div className="dash-line" style={{
         position: "absolute",
         left: "-30px",
         top: "23px",
         width: "28px",
-        height: "2px",
-        background: "rgba(255, 255, 255, 0.3)"
+        height: "2px"
       }}></div>
 
       <div style={{ flex: "1" }}>
@@ -1368,6 +1378,8 @@ export default function AvailablePage() {
     </div>
   </div>
 </div>
+
+
 
 
 
@@ -1553,6 +1565,7 @@ export default function AvailablePage() {
     </>
   );
 }
+
 
 
 
