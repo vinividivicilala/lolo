@@ -808,9 +808,7 @@ const closeAbout = () => setIsAboutOpen(false);
             </div>
 
 
-
-
-            {isAboutOpen && (
+{isAboutOpen && (
   <div className="about-overlay">
     <button className="about-close" onClick={closeAbout}>×</button>
     
@@ -831,7 +829,8 @@ const closeAbout = () => setIsAboutOpen(false);
     <div style={{ 
       marginLeft: "60px", 
       marginBottom: "40px", 
-      position: "relative"
+      position: "relative",
+      paddingLeft: "30px"
     }}>
       {/* Garis putus-putus vertikal utama */}
       <div style={{
@@ -842,39 +841,46 @@ const closeAbout = () => setIsAboutOpen(false);
         borderLeft: "2px dashed rgba(255, 255, 255, 0.3)"
       }}></div>
       
-      {/* Item Timeline 1 */}
+      {/* Item Timeline 1 - dengan animasi kedap-kedip */}
       <div style={{ 
         display: "flex", 
         alignItems: "flex-start",
         marginBottom: "50px",
         position: "relative"
       }}>
-        {/* Titik kiri dengan garis penghubung */}
+        {/* Titik kiri dengan animasi kedap-kedip */}
         <div style={{
           position: "absolute",
-          left: "-20px",
-          top: "25px",
+          left: "-41px",
+          top: "15px",
           width: "16px",
           height: "16px",
           borderRadius: "50%",
           background: "#fff",
           boxShadow: "0 0 0 4px rgba(255, 255, 255, 0.4)",
+          animation: "pulse 1.5s infinite",
           zIndex: "2"
         }}></div>
         
         {/* Garis penghubung horizontal */}
-        <div style={{
+        <div className="timeline-connector" style={{
           position: "absolute",
-          left: "-20px",
-          top: "32px",
-          width: "20px",
+          left: "-30px",
+          top: "23px",
+          width: "28px",
           height: "2px",
-          background: "rgba(255, 255, 255, 0.3)",
-          zIndex: "1"
+          background: "rgba(255, 255, 255, 0.3)"
         }}></div>
 
         {/* Konten Timeline */}
-        <div style={{ marginLeft: "30px", flex: "1" }}>
+        <div style={{ flex: "1" }}>
+          <div style={{
+            fontSize: "1.1rem",
+            color: "#94a3b8",
+            fontWeight: "700",
+            marginBottom: "5px"
+          }}>2025-09-19</div>
+          
           <div style={{
             fontSize: "1.8rem",
             fontWeight: "700",
@@ -909,39 +915,46 @@ const closeAbout = () => setIsAboutOpen(false);
         </div>
       </div>
       
-      {/* Item Timeline 2 */}
+      {/* Item Timeline 2 - dengan animasi kedap-kedip */}
       <div style={{ 
         display: "flex", 
         alignItems: "flex-start",
         marginBottom: "50px",
         position: "relative"
       }}>
-        {/* Titik kiri dengan garis penghubung */}
+        {/* Titik kiri dengan animasi kedap-kedip */}
         <div style={{
           position: "absolute",
-          left: "-20px",
-          top: "25px",
+          left: "-41px",
+          top: "15px",
           width: "16px",
           height: "16px",
           borderRadius: "50%",
           background: "#fff",
           boxShadow: "0 0 0 4px rgba(255, 255, 255, 0.4)",
+          animation: "pulse 1.5s infinite",
           zIndex: "2"
         }}></div>
         
         {/* Garis penghubung horizontal */}
-        <div style={{
+        <div className="timeline-connector" style={{
           position: "absolute",
-          left: "-20px",
-          top: "32px",
-          width: "20px",
+          left: "-30px",
+          top: "23px",
+          width: "28px",
           height: "2px",
-          background: "rgba(255, 255, 255, 0.3)",
-          zIndex: "1"
+          background: "rgba(255, 255, 255, 0.3)"
         }}></div>
 
         {/* Konten Timeline */}
-        <div style={{ marginLeft: "30px", flex: "1" }}>
+        <div style={{ flex: "1" }}>
+          <div style={{
+            fontSize: "1.1rem",
+            color: "#94a3b8",
+            fontWeight: "700",
+            marginBottom: "5px"
+          }}>2025-08-10</div>
+          
           <div style={{
             fontSize: "1.8rem",
             fontWeight: "700",
@@ -976,39 +989,46 @@ const closeAbout = () => setIsAboutOpen(false);
         </div>
       </div>
       
-      {/* Item Timeline 3 */}
+      {/* Item Timeline 3 - dengan animasi kedap-kedip */}
       <div style={{ 
         display: "flex", 
         alignItems: "flex-start",
         marginBottom: "20px",
         position: "relative"
       }}>
-        {/* Titik kiri dengan garis penghubung */}
+        {/* Titik kiri dengan animasi kedap-kedip */}
         <div style={{
           position: "absolute",
-          left: "-20px",
-          top: "25px",
+          left: "-41px",
+          top: "15px",
           width: "16px",
           height: "16px",
           borderRadius: "50%",
           background: "#fff",
           boxShadow: "0 0 0 4px rgba(255, 255, 255, 0.4)",
+          animation: "pulse 1.5s infinite",
           zIndex: "2"
         }}></div>
         
         {/* Garis penghubung horizontal */}
-        <div style={{
+        <div className="timeline-connector" style={{
           position: "absolute",
-          left: "-20px",
-          top: "32px",
-          width: "20px",
+          left: "-30px",
+          top: "23px",
+          width: "28px",
           height: "2px",
-          background: "rgba(255, 255, 255, 0.3)",
-          zIndex: "1"
+          background: "rgba(255, 255, 255, 0.3)"
         }}></div>
 
         {/* Konten Timeline */}
-        <div style={{ marginLeft: "30px", flex: "1" }}>
+        <div style={{ flex: "1" }}>
+          <div style={{
+            fontSize: "1.1rem",
+            color: "#94a3b8",
+            fontWeight: "700",
+            marginBottom: "5px"
+          }}>2025-07-05</div>
+          
           <div style={{
             fontSize: "1.8rem",
             fontWeight: "700",
@@ -1043,9 +1063,28 @@ const closeAbout = () => setIsAboutOpen(false);
         </div>
       </div>
     </div>
+
+    {/* Tambahkan style untuk animasi pulse */}
+    <style>{`
+      @keyframes pulse {
+        0% {
+          transform: scale(0.95);
+          box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7);
+        }
+        70% {
+          transform: scale(1.1);
+          box-shadow: 0 0 0 12px rgba(255, 255, 255, 0);
+        }
+        100% {
+          transform: scale(0.95);
+          box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
+        }
+      }
+    `}</style>
   </div>
 )}
 
+            
             
 
             {/* Kanan */}
@@ -1114,6 +1153,7 @@ const closeAbout = () => setIsAboutOpen(false);
     </>
   );
 }
+
 
 
 
