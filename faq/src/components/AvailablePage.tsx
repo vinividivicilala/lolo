@@ -1268,6 +1268,7 @@ export default function AvailablePage() {
             </div>
           </div>
         </div>
+          </div> 
 
     {/* Form untuk menambah ulasan baru */}
 <div style={{ 
@@ -1351,7 +1352,8 @@ export default function AvailablePage() {
     </button>
   </div>
 </div>
-
+ </div>
+    {/* End Bagian Ulasan */}
 
     {/* Tambahkan style untuk animasi pulse */}
     <style>{`
@@ -1444,6 +1446,7 @@ export default function AvailablePage() {
     </>
   );
 }
+
 
 
 
