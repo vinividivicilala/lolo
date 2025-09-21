@@ -1115,9 +1115,6 @@ export default function AvailablePage() {
         </div>
       </div>
     </div>
-
-
-
 {/* Bagian Ulasan */}
 <div style={{ 
   marginLeft: "60px", 
@@ -1125,6 +1122,61 @@ export default function AvailablePage() {
   position: "relative",
   paddingLeft: "30px"
 }}>
+  <style>
+    {`
+      /* 🔹 Animasi kedap-kedip titik */
+      @keyframes blink {
+        0%, 100% { opacity: 0.4; box-shadow: 0 0 0px rgba(255,255,255,0.6); }
+        50% { opacity: 1; box-shadow: 0 0 12px rgba(255,255,255,0.9); }
+      }
+
+      /* 🔹 Animasi garis putus2 bergerak */
+      @keyframes dashmove {
+        to {
+          background-position: -20px 0;
+        }
+      }
+
+      .timeline-dot {
+        animation: blink 1.5s infinite;
+      }
+
+      .timeline-line {
+        position: absolute;
+        left: -30px;
+        top: 23px;
+        width: 28px;
+        height: 2px;
+        background: repeating-linear-gradient(
+          to right,
+          rgba(255, 255, 255, 0.6) 0,
+          rgba(255, 255, 255, 0.6) 8px,
+          transparent 8px,
+          transparent 14px
+        );
+        background-size: 20px 2px;
+        animation: dashmove 1s linear infinite;
+      }
+
+      /* 🔹 Garis vertikal utama (timeline) */
+      .timeline-vertical {
+        position: absolute;
+        top: 0;
+        left: -33px;
+        width: 2px;
+        height: 100%;
+        background: repeating-linear-gradient(
+          to bottom,
+          rgba(255, 255, 255, 0.3) 0,
+          rgba(255, 255, 255, 0.3) 10px,
+          transparent 10px,
+          transparent 18px
+        );
+        animation: dashmove 1s linear infinite;
+      }
+    `}
+  </style>
+
   <h3 style={{
     fontSize: "2rem",
     fontWeight: "700",
@@ -1144,6 +1196,9 @@ export default function AvailablePage() {
     }}></div>
   </h3>
 
+  {/* 🔹 Garis vertikal utama */}
+  <div className="timeline-vertical"></div>
+
   {/* 🔹 Daftar ulasan realtime dari Firestore */}
   <div style={{ marginLeft: "30px" }}>
     {reviews.map((rev) => (
@@ -1154,7 +1209,7 @@ export default function AvailablePage() {
         position: "relative"
       }}>
         {/* Titik kiri */}
-        <div style={{
+        <div className="timeline-dot" style={{
           position: "absolute",
           left: "-41px",
           top: "15px",
@@ -1165,14 +1220,7 @@ export default function AvailablePage() {
           border: "2px solid rgba(255, 255, 255, 0.8)"
         }}></div>
         {/* Garis penghubung */}
-        <div style={{
-          position: "absolute",
-          left: "-30px",
-          top: "23px",
-          width: "28px",
-          height: "2px",
-          background: "rgba(255, 255, 255, 0.3)"
-        }}></div>
+        <div className="timeline-line"></div>
 
         {/* Konten Ulasan */}
         <div style={{ flex: "1" }}>
@@ -1228,7 +1276,7 @@ export default function AvailablePage() {
       marginBottom: "30px",
       position: "relative"
     }}>
-      <div style={{
+      <div className="timeline-dot" style={{
         position: "absolute",
         left: "-41px",
         top: "15px",
@@ -1238,14 +1286,7 @@ export default function AvailablePage() {
         background: "rgba(255, 255, 255, 0.4)",
         border: "2px solid rgba(255, 255, 255, 0.8)"
       }}></div>
-      <div style={{
-        position: "absolute",
-        left: "-30px",
-        top: "23px",
-        width: "28px",
-        height: "2px",
-        background: "rgba(255, 255, 255, 0.3)"
-      }}></div>
+      <div className="timeline-line"></div>
 
       <div style={{ flex: "1" }}>
         <div style={{
@@ -1295,7 +1336,7 @@ export default function AvailablePage() {
       marginBottom: "30px",
       position: "relative"
     }}>
-      <div style={{
+      <div className="timeline-dot" style={{
         position: "absolute",
         left: "-41px",
         top: "15px",
@@ -1305,14 +1346,7 @@ export default function AvailablePage() {
         background: "rgba(255, 255, 255, 0.4)",
         border: "2px solid rgba(255, 255, 255, 0.8)"
       }}></div>
-      <div style={{
-        position: "absolute",
-        left: "-30px",
-        top: "23px",
-        width: "28px",
-        height: "2px",
-        background: "rgba(255, 255, 255, 0.3)"
-      }}></div>
+      <div className="timeline-line"></div>
 
       <div style={{ flex: "1" }}>
         <div style={{
@@ -1355,6 +1389,7 @@ export default function AvailablePage() {
       </div>
     </div>
   </div>
+</div>
 
 
 
@@ -1537,6 +1572,7 @@ export default function AvailablePage() {
     </>
   );
 }
+
 
 
 
