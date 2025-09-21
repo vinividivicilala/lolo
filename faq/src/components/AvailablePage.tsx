@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect  } from "react";
 
 export default function AvailablePage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -16,6 +16,52 @@ const closeAbout = () => setIsAboutOpen(false);
   const closeModal = () => {
     setIsModalOpen(false);
   };
+
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
+    import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp, query, orderBy, deleteDoc, getDoc, writeBatch, setDoc, doc, updateDoc, where, getDocs, documentId, limit, increment, getCountFromServer,  arrayUnion, 
+    arrayRemove, deleteField, runTransaction  } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword , signInWithPopup, signOut, onAuthStateChanged, GoogleAuthProvider,  setPersistence,
+  browserLocalPersistence  } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js"; // Pastikan semua fungsi auth yang Anda butuhkan diimpor
+
+
+// Tambahkan state untuk ulasan
+const [reviews, setReviews] = useState([]);
+const [newReview, setNewReview] = useState({
+  name: "",
+  position: "",
+  comment: ""
+});
+
+// Fungsi untuk mengambil data ulasan dari Firebase
+useEffect(() => {
+  const q = query(collection(db, "reviews"), orderBy("createdAt", "desc"));
+  const unsubscribe = onSnapshot(q, (querySnapshot) => {
+    const reviewsData = [];
+    querySnapshot.forEach((doc) => {
+      reviewsData.push({ id: doc.id, ...doc.data() });
+    });
+    setReviews(reviewsData);
+  });
+  
+  return () => unsubscribe();
+}, []);
+
+// Fungsi untuk menambah ulasan baru
+const addReview = async () => {
+  if (newReview.name && newReview.comment) {
+    try {
+      await addDoc(collection(db, "reviews"), {
+        name: newReview.name,
+        position: newReview.position,
+        comment: newReview.comment,
+        createdAt: serverTimestamp()
+      });
+      setNewReview({ name: "", position: "", comment: "" });
+    } catch (error) {
+      console.error("Error adding review: ", error);
+    }
+  }
+};
 
   return (
     <>
@@ -1084,6 +1130,515 @@ const closeAbout = () => setIsAboutOpen(false);
   </div>
 )}
 
+{isAboutOpen && (
+  <div className="about-overlay">
+    <button className="about-close" onClick={closeAbout}>×</button>
+    
+    <h2 className="about-header">Tentang Saya</h2>
+
+    {/* Nama Panjang di atas Timeline Box */}
+    <div style={{
+      marginLeft: "60px",
+      marginBottom: "40px",
+      fontSize: "1.8rem",
+      fontWeight: "700",
+      color: "#fff"
+    }}>
+      Farid Ardiansyah
+    </div>
+
+    {/* Timeline Container */}
+    <div style={{ 
+      marginLeft: "60px", 
+      marginBottom: "40px", 
+      position: "relative",
+      paddingLeft: "30px"
+    }}>
+      {/* Garis putus-putus vertikal utama */}
+      <div style={{
+        position: "absolute",
+        left: "0",
+        top: "0",
+        height: "100%",
+        borderLeft: "2px dashed rgba(255, 255, 255, 0.3)"
+      }}></div>
+      
+      {/* Item Timeline 1 - dengan animasi kedap-kedip */}
+      <div style={{ 
+        display: "flex", 
+        alignItems: "flex-start",
+        marginBottom: "50px",
+        position: "relative"
+      }}>
+        {/* Titik kiri dengan animasi kedap-kedip */}
+        <div style={{
+          position: "absolute",
+          left: "-41px",
+          top: "15px",
+          width: "16px",
+          height: "16px",
+          borderRadius: "50%",
+          background: "#fff",
+          boxShadow: "0 0 0 4px rgba(255, 255, 255, 0.4)",
+          animation: "pulse 1.5s infinite",
+          zIndex: "2"
+        }}></div>
+        
+        {/* Garis penghubung horizontal */}
+        <div className="timeline-connector" style={{
+          position: "absolute",
+          left: "-30px",
+          top: "23px",
+          width: "28px",
+          height: "2px",
+          background: "rgba(255, 255, 255, 0.3)"
+        }}></div>
+
+        {/* Konten Timeline */}
+        <div style={{ flex: "1" }}>
+          <div style={{
+            fontSize: "1.1rem",
+            color: "#94a3b8",
+            fontWeight: "700",
+            marginBottom: "5px"
+          }}>2025-09-19</div>
+          
+          <div style={{
+            fontSize: "1.8rem",
+            fontWeight: "700",
+            color: "#fff",
+            marginBottom: "10px"
+          }}>Rilis Website</div>
+          
+          <div style={{
+            display: "inline-block",
+            padding: "6px 12px",
+            borderRadius: "6px",
+            fontSize: "1rem",
+            fontWeight: "700",
+            background: "rgba(255, 255, 255, 0.1)",
+            color: "#fff",
+            border: "1px solid rgba(255, 255, 255, 0.3)",
+            marginBottom: "20px"
+          }}>VERSI PRODUKSI</div>
+          
+          <div style={{
+            background: "rgba(255, 255, 255, 0.05)",
+            border: "1px solid rgba(255, 255, 255, 0.15)",
+            borderRadius: "8px",
+            padding: "25px",
+            color: "#e5e5e5",
+            fontSize: "1.2rem",
+            lineHeight: "1.6",
+            fontWeight: "600"
+          }}>
+            Peluncuran versi pertama website portfolio dengan desain minimalis dan interaktif.
+          </div>
+        </div>
+      </div>
+      
+      {/* Item Timeline 2 - dengan animasi kedap-kedip */}
+      <div style={{ 
+        display: "flex", 
+        alignItems: "flex-start",
+        marginBottom: "50px",
+        position: "relative"
+      }}>
+        {/* Titik kiri dengan animasi kedap-kedip */}
+        <div style={{
+          position: "absolute",
+          left: "-41px",
+          top: "15px",
+          width: "16px",
+          height: "16px",
+          borderRadius: "50%",
+          background: "#fff",
+          boxShadow: "0 0 0 4px rgba(255, 255, 255, 0.4)",
+          animation: "pulse 1.5s infinite",
+          zIndex: "2"
+        }}></div>
+        
+        {/* Garis penghubung horizontal */}
+        <div className="timeline-connector" style={{
+          position: "absolute",
+          left: "-30px",
+          top: "23px",
+          width: "28px",
+          height: "2px",
+          background: "rgba(255, 255, 255, 0.3)"
+        }}></div>
+
+        {/* Konten Timeline */}
+        <div style={{ flex: "1" }}>
+          <div style={{
+            fontSize: "1.1rem",
+            color: "#94a3b8",
+            fontWeight: "700",
+            marginBottom: "5px"
+          }}>2025-08-10</div>
+          
+          <div style={{
+            fontSize: "1.8rem",
+            fontWeight: "700",
+            color: "#fff",
+            marginBottom: "10px"
+          }}>Uji Coba Firebase</div>
+          
+          <div style={{
+            display: "inline-block",
+            padding: "6px 12px",
+            borderRadius: "6px",
+            fontSize: "1rem",
+            fontWeight: "700",
+            background: "rgba(255, 255, 255, 0.1)",
+            color: "#fff",
+            border: "1px solid rgba(255, 255, 255, 0.3)",
+            marginBottom: "20px"
+          }}>BACKEND</div>
+          
+          <div style={{
+            background: "rgba(255, 255, 255, 0.05)",
+            border: "1px solid rgba(255, 255, 255, 0.15)",
+            borderRadius: "8px",
+            padding: "25px",
+            color: "#e5e5e5",
+            fontSize: "1.2rem",
+            lineHeight: "1.6",
+            fontWeight: "600"
+          }}>
+            Menerapkan autentikasi dan penyimpanan data real-time menggunakan Firebase.
+          </div>
+        </div>
+      </div>
+      
+      {/* Item Timeline 3 - dengan animasi kedap-kedip */}
+      <div style={{ 
+        display: "flex", 
+        alignItems: "flex-start",
+        marginBottom: "50px",
+        position: "relative"
+      }}>
+        {/* Titik kiri dengan animasi kedap-kedip */}
+        <div style={{
+          position: "absolute",
+          left: "-41px",
+          top: "15px",
+          width: "16px",
+          height: "16px",
+          borderRadius: "50%",
+          background: "#fff",
+          boxShadow: "0 0 0 4px rgba(255, 255, 255, 0.4)",
+          animation: "pulse 1.5s infinite",
+          zIndex: "2"
+        }}></div>
+        
+        {/* Garis penghubung horizontal */}
+        <div className="timeline-connector" style={{
+          position: "absolute",
+          left: "-30px",
+          top: "23px",
+          width: "28px",
+          height: "2px",
+          background: "rgba(255, 255, 255, 0.3)"
+        }}></div>
+
+        {/* Konten Timeline */}
+        <div style={{ flex: "1" }}>
+          <div style={{
+            fontSize: "1.1rem",
+            color: "#94a3b8",
+            fontWeight: "700",
+            marginBottom: "5px"
+          }}>2025-07-05</div>
+          
+          <div style={{
+            fontSize: "1.8rem",
+            fontWeight: "700",
+            color: "#fff",
+            marginBottom: "10px"
+          }}>Desain UI</div>
+          
+          <div style={{
+            display: "inline-block",
+            padding: "6px 12px",
+            borderRadius: "6px",
+            fontSize: "1rem",
+            fontWeight: "700",
+            background: "rgba(255, 255, 255, 0.1)",
+            color: "#fff",
+            border: "1px solid rgba(255, 255, 255, 0.3)",
+            marginBottom: "20px"
+          }}>FRONTEND</div>
+          
+          <div style={{
+            background: "rgba(255, 255, 255, 0.05)",
+            border: "1px solid rgba(255, 255, 255, 0.15)",
+            borderRadius: "8px",
+            padding: "25px",
+            color: "#e5e5e5",
+            fontSize: "1.2rem",
+            lineHeight: "1.6",
+            fontWeight: "600"
+          }}>
+            Membuat desain UI tipografi-based dan minimalist UI untuk tampilan website.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {/* Bagian Ulasan */}
+    <div style={{ 
+      marginLeft: "60px", 
+      marginBottom: "40px",
+      position: "relative",
+      paddingLeft: "30px"
+    }}>
+      <h3 style={{
+        fontSize: "2rem",
+        fontWeight: "700",
+        color: "#fff",
+        marginBottom: "30px",
+        position: "relative"
+      }}>
+        Ulasan
+        {/* Garis horizontal di bawah judul Ulasan */}
+        <div style={{
+          position: "absolute",
+          bottom: "-10px",
+          left: "0",
+          width: "100px",
+          height: "3px",
+          background: "rgba(255, 255, 255, 0.3)",
+          borderRadius: "2px"
+        }}></div>
+      </h3>
+
+      {/* Container untuk daftar ulasan */}
+      <div style={{ marginLeft: "30px" }}>
+        {/* Ulasan 1 */}
+        <div style={{ 
+          display: "flex", 
+          alignItems: "flex-start",
+          marginBottom: "30px",
+          position: "relative"
+        }}>
+          {/* Titik kiri */}
+          <div style={{
+            position: "absolute",
+            left: "-41px",
+            top: "15px",
+            width: "16px",
+            height: "16px",
+            borderRadius: "50%",
+            background: "rgba(255, 255, 255, 0.4)",
+            border: "2px solid rgba(255, 255, 255, 0.8)",
+            zIndex: "2"
+          }}></div>
+          
+          {/* Garis penghubung horizontal */}
+          <div style={{
+            position: "absolute",
+            left: "-30px",
+            top: "23px",
+            width: "28px",
+            height: "2px",
+            background: "rgba(255, 255, 255, 0.3)",
+            zIndex: "1"
+          }}></div>
+
+          {/* Konten Ulasan */}
+          <div style={{ flex: "1" }}>
+            <div style={{
+              display: "inline-block",
+              padding: "8px 14px",
+              borderRadius: "6px",
+              background: "rgba(255, 255, 255, 0.05)",
+              border: "1px solid rgba(255, 255, 255, 0.2)",
+              marginBottom: "15px",
+              color: "#fff",
+              fontSize: "1.1rem",
+              fontWeight: "600"
+            }}>
+              <div style={{ fontWeight: "700", marginBottom: "5px" }}>Budi Santoso</div>
+              <div style={{ fontSize: "0.9rem", color: "#94a3b8" }}>Project Manager di TechCorp</div>
+            </div>
+            
+            <div style={{
+              background: "rgba(255, 255, 255, 0.05)",
+              border: "1px solid rgba(255, 255, 255, 0.15)",
+              borderRadius: "8px",
+              padding: "20px",
+              color: "#e5e5e5",
+              fontSize: "1.1rem",
+              lineHeight: "1.6"
+            }}>
+              "Farid adalah developer yang sangat berbakat. Desain website yang dibuatnya sangat modern dan fungsional. Sangat recomended untuk project web development!"
+            </div>
+          </div>
+        </div>
+
+        {/* Ulasan 2 */}
+        <div style={{ 
+          display: "flex", 
+          alignItems: "flex-start",
+          marginBottom: "30px",
+          position: "relative"
+        }}>
+          {/* Titik kiri */}
+          <div style={{
+            position: "absolute",
+            left: "-41px",
+            top: "15px",
+            width: "16px",
+            height: "16px",
+            borderRadius: "50%",
+            background: "rgba(255, 255, 255, 0.4)",
+            border: "2px solid rgba(255, 255, 255, 0.8)",
+            zIndex: "2"
+          }}></div>
+          
+          {/* Garis penghubung horizontal */}
+          <div style={{
+            position: "absolute",
+            left: "-30px",
+            top: "23px",
+            width: "28px",
+            height: "2px",
+            background: "rgba(255, 255, 255, 0.3)",
+            zIndex: "1"
+          }}></div>
+
+          {/* Konten Ulasan */}
+          <div style={{ flex: "1" }}>
+            <div style={{
+              display: "inline-block",
+              padding: "8px 14px",
+              borderRadius: "6px",
+              background: "rgba(255, 255, 255, 0.05)",
+              border: "1px solid rgba(255, 255, 255, 0.2)",
+              marginBottom: "15px",
+              color: "#fff",
+              fontSize: "1.1rem",
+              fontWeight: "600"
+            }}>
+              <div style={{ fontWeight: "700", marginBottom: "5px" }}>Siti Rahayu</div>
+              <div style={{ fontSize: "0.9rem", color: "#94a3b8" }}>UI/UX Designer di CreativeStudio</div>
+            </div>
+            
+            <div style={{
+              background: "rgba(255, 255, 255, 0.05)",
+              border: "1px solid rgba(255, 255, 255, 0.15)",
+              borderRadius: "8px",
+              padding: "20px",
+              color: "#e5e5e5",
+              fontSize: "1.1rem",
+              lineHeight: "1.6"
+            }}>
+              "Kolaborasi dengan Farid sangat menyenangkan. Ia cepat memahami kebutuhan desain dan menerapkannya dengan tepat dalam kode. Hasilnya selalu memuaskan!"
+            </div>
+          </div>
+        </div>
+
+        {/* Form untuk menambah ulasan baru */}
+        <div style={{ 
+          background: "rgba(255, 255, 255, 0.05)",
+          border: "1px solid rgba(255, 255, 255, 0.15)",
+          borderRadius: "8px",
+          padding: "25px",
+          marginTop: "40px"
+        }}>
+          <h4 style={{
+            fontSize: "1.4rem",
+            fontWeight: "700",
+            color: "#fff",
+            marginBottom: "20px"
+          }}>Tambah Ulasan Baru</h4>
+          
+          <div style={{ display: "grid", gap: "15px" }}>
+            <input 
+              type="text" 
+              placeholder="Nama"
+              style={{
+                padding: "12px 15px",
+                borderRadius: "6px",
+                border: "1px solid rgba(255, 255, 255, 0.2)",
+                background: "rgba(255, 255, 255, 0.05)",
+                color: "#fff",
+                fontSize: "1rem"
+              }}
+            />
+            
+            <input 
+              type="text" 
+              placeholder="Jabatan/Perusahaan"
+              style={{
+                padding: "12px 15px",
+                borderRadius: "6px",
+                border: "1px solid rgba(255, 255, 255, 0.2)",
+                background: "rgba(255, 255, 255, 0.05)",
+                color: "#fff",
+                fontSize: "1rem"
+              }}
+            />
+            
+            <textarea 
+              placeholder="Ulasan Anda"
+              rows="4"
+              style={{
+                padding: "12px 15px",
+                borderRadius: "6px",
+                border: "1px solid rgba(255, 255, 255, 0.2)",
+                background: "rgba(255, 255, 255, 0.05)",
+                color: "#fff",
+                fontSize: "1rem",
+                resize: "vertical"
+              }}
+            ></textarea>
+            
+            <button 
+              style={{
+                padding: "12px 20px",
+                borderRadius: "6px",
+                border: "none",
+                background: "rgba(255, 255, 255, 0.1)",
+                color: "#fff",
+                fontSize: "1rem",
+                fontWeight: "600",
+                cursor: "pointer",
+                transition: "background 0.3s"
+              }}
+              onMouseOver={(e) => e.target.style.background = "rgba(255, 255, 255, 0.2)"}
+              onMouseOut={(e) => e.target.style.background = "rgba(255, 255, 255, 0.1)"}
+            >
+              Kirim Ulasan
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {/* Tambahkan style untuk animasi pulse */}
+    <style>{`
+      @keyframes pulse {
+        0% {
+          transform: scale(0.95);
+          box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7);
+        }
+        70% {
+          transform: scale(1.1);
+          box-shadow: 0 0 0 12px rgba(255, 255, 255, 0);
+        }
+        100% {
+          transform: scale(0.95);
+          box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
+        }
+      }
+    `}</style>
+  </div>
+)}
+
+            
+
             
             
 
@@ -1153,6 +1708,7 @@ const closeAbout = () => setIsAboutOpen(false);
     </>
   );
 }
+
 
 
 
