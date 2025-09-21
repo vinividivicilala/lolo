@@ -1116,8 +1116,7 @@ export default function AvailablePage() {
       </div>
     </div>
 
-    
-{/* Bagian Ulasan */}
+    {/* Bagian Ulasan */}
 <div style={{ 
   marginLeft: "60px", 
   marginBottom: "40px",
@@ -1143,36 +1142,39 @@ export default function AvailablePage() {
     }}></div>
   </h3>
 
-  {/* 🔹 Tambahan animasi blink & garis */}
-  <style>
-    {`
-      .blink-dot {
-        animation: blink 1.5s infinite;
-      }
-      @keyframes blink {
-        0%, 100% { background: rgba(34,211,238,0.9); box-shadow: 0 0 8px rgba(34,211,238,0.9); }
-        50% { background: rgba(34,211,238,0.3); box-shadow: 0 0 2px rgba(34,211,238,0.3); }
-      }
+  {/* Garis vertikal putus-putus dengan animasi */}
+  <div style={{
+    position: "absolute",
+    left: "0",
+    top: "0",
+    height: "100%",
+    width: "2px",
+    overflow: "hidden"
+  }}>
+    <div style={{
+      height: "200%",
+      width: "100%",
+      background: "repeating-linear-gradient(to bottom, transparent, transparent 5px, rgba(34, 211, 238, 0.5) 5px, rgba(34, 211, 238, 0.5) 10px)",
+      animation: "moveLine 3s linear infinite"
+    }}></div>
+  </div>
 
-      .dash-line {
-        background: repeating-linear-gradient(
-          to right,
-          rgba(255, 255, 255, 0.6) 0px,
-          rgba(255, 255, 255, 0.6) 10px,
-          transparent 10px,
-          transparent 20px
-        );
-        animation: moveDash 1.5s linear infinite;
-      }
-      @keyframes moveDash {
-        from { background-position: 0 0; }
-        to { background-position: 20px 0; }
-      }
-    `}
-  </style>
+  {/* Pemancar kedap-kedip */}
+  <div style={{
+    position: "absolute",
+    left: "-9px",
+    top: "15px",
+    width: "18px",
+    height: "18px",
+    borderRadius: "50%",
+    background: "rgba(34, 211, 238, 0.3)",
+    boxShadow: "0 0 0 0 rgba(34, 211, 238, 0.7)",
+    animation: "pulse 2s infinite",
+    zIndex: "10"
+  }}></div>
 
   {/* 🔹 Daftar ulasan realtime dari Firestore */}
-  <div style={{ marginLeft: "30px" }}>
+  <div style={{ marginLeft: "30px", position: "relative", zIndex: "5" }}>
     {reviews.map((rev) => (
       <div key={rev.id} style={{ 
         display: "flex", 
@@ -1180,24 +1182,27 @@ export default function AvailablePage() {
         marginBottom: "30px",
         position: "relative"
       }}>
-        {/* Titik kiri kedap kedip */}
-        <div className="blink-dot" style={{
+        {/* Titik kiri dengan efek kedap-kedip */}
+        <div style={{
           position: "absolute",
           left: "-41px",
           top: "15px",
           width: "16px",
           height: "16px",
           borderRadius: "50%",
-          border: "2px solid rgba(255, 255, 255, 0.8)"
+          background: "rgba(255, 255, 255, 0.4)",
+          border: "2px solid rgba(255, 255, 255, 0.8)",
+          animation: "glow 2s infinite alternate"
         }}></div>
-
-        {/* Garis penghubung putus-putus bergerak */}
-        <div className="dash-line" style={{
+        {/* Garis penghubung dengan animasi */}
+        <div style={{
           position: "absolute",
           left: "-30px",
           top: "23px",
           width: "28px",
-          height: "2px"
+          height: "2px",
+          background: "rgba(255, 255, 255, 0.3)",
+          animation: "dash 1.5s linear infinite"
         }}></div>
 
         {/* Konten Ulasan */}
@@ -1254,21 +1259,25 @@ export default function AvailablePage() {
       marginBottom: "30px",
       position: "relative"
     }}>
-      <div className="blink-dot" style={{
+      <div style={{
         position: "absolute",
         left: "-41px",
         top: "15px",
         width: "16px",
         height: "16px",
         borderRadius: "50%",
-        border: "2px solid rgba(255, 255, 255, 0.8)"
+        background: "rgba(255, 255, 255, 0.4)",
+        border: "2px solid rgba(255, 255, 255, 0.8)",
+        animation: "glow 2s infinite alternate"
       }}></div>
-      <div className="dash-line" style={{
+      <div style={{
         position: "absolute",
         left: "-30px",
         top: "23px",
         width: "28px",
-        height: "2px"
+        height: "2px",
+        background: "rgba(255, 255, 255, 0.3)",
+        animation: "dash 1.5s linear infinite"
       }}></div>
 
       <div style={{ flex: "1" }}>
@@ -1319,21 +1328,25 @@ export default function AvailablePage() {
       marginBottom: "30px",
       position: "relative"
     }}>
-      <div className="blink-dot" style={{
+      <div style={{
         position: "absolute",
         left: "-41px",
         top: "15px",
         width: "16px",
         height: "16px",
         borderRadius: "50%",
-        border: "2px solid rgba(255, 255, 255, 0.8)"
+        background: "rgba(255, 255, 255, 0.4)",
+        border: "2px solid rgba(255, 255, 255, 0.8)",
+        animation: "glow 2s infinite alternate"
       }}></div>
-      <div className="dash-line" style={{
+      <div style={{
         position: "absolute",
         left: "-30px",
         top: "23px",
         width: "28px",
-        height: "2px"
+        height: "2px",
+        background: "rgba(255, 255, 255, 0.3)",
+        animation: "dash 1.5s linear infinite"
       }}></div>
 
       <div style={{ flex: "1" }}>
@@ -1377,10 +1390,53 @@ export default function AvailablePage() {
       </div>
     </div>
   </div>
+
+  {/* CSS untuk animasi */}
+  <style>
+    {`
+    @keyframes moveLine {
+      0% {
+        transform: translateY(-50%);
+      }
+      100% {
+        transform: translateY(0%);
+      }
+    }
+    
+    @keyframes dash {
+      0% {
+        background-position: 0 0;
+        opacity: 0.6;
+      }
+      100% {
+        background-position: 10px 0;
+        opacity: 1;
+      }
+    }
+    
+    @keyframes pulse {
+      0% {
+        box-shadow: 0 0 0 0 rgba(34, 211, 238, 0.7);
+      }
+      70% {
+        box-shadow: 0 0 0 10px rgba(34, 211, 238, 0);
+      }
+      100% {
+        box-shadow: 0 0 0 0 rgba(34, 211, 238, 0);
+      }
+    }
+    
+    @keyframes glow {
+      from {
+        box-shadow: 0 0 2px rgba(255, 255, 255, 0.4);
+      }
+      to {
+        box-shadow: 0 0 8px rgba(255, 255, 255, 0.8), 0 0 12px rgba(34, 211, 238, 0.5);
+      }
+    }
+    `}
+  </style>
 </div>
-
-
-
 
 
 
