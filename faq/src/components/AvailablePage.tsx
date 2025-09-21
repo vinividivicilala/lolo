@@ -1115,6 +1115,8 @@ export default function AvailablePage() {
         </div>
       </div>
     </div>
+
+
 {/* Bagian Ulasan */}
 <div style={{ 
   marginLeft: "60px", 
@@ -1141,7 +1143,7 @@ export default function AvailablePage() {
     }}></div>
   </h3>
 
-  {/* Daftar Ulasan dari Firestore */}
+  {/* 🔹 Daftar ulasan realtime dari Firestore */}
   <div style={{ marginLeft: "30px" }}>
     {reviews.map((rev) => (
       <div key={rev.id} style={{ 
@@ -1150,6 +1152,7 @@ export default function AvailablePage() {
         marginBottom: "30px",
         position: "relative"
       }}>
+        {/* Titik kiri */}
         <div style={{
           position: "absolute",
           left: "-41px",
@@ -1160,6 +1163,7 @@ export default function AvailablePage() {
           background: "rgba(255, 255, 255, 0.4)",
           border: "2px solid rgba(255, 255, 255, 0.8)"
         }}></div>
+        {/* Garis penghubung */}
         <div style={{
           position: "absolute",
           left: "-30px",
@@ -1169,6 +1173,7 @@ export default function AvailablePage() {
           background: "rgba(255, 255, 255, 0.3)"
         }}></div>
 
+        {/* Konten Ulasan */}
         <div style={{ flex: "1" }}>
           <div style={{
             display: "inline-block",
@@ -1215,7 +1220,7 @@ export default function AvailablePage() {
       </div>
     ))}
 
-    {/* Contoh Review (tetap ada, diberi label) */}
+    {/* 🔹 Contoh Review 1 */}
     <div style={{ 
       display: "flex", 
       alignItems: "flex-start",
@@ -1240,6 +1245,7 @@ export default function AvailablePage() {
         height: "2px",
         background: "rgba(255, 255, 255, 0.3)"
       }}></div>
+
       <div style={{ flex: "1" }}>
         <div style={{
           display: "inline-block",
@@ -1266,6 +1272,7 @@ export default function AvailablePage() {
             Contoh Review
           </span>
         </div>
+
         <div style={{
           background: "rgba(255, 255, 255, 0.05)",
           border: "1px solid rgba(255, 255, 255, 0.15)",
@@ -1275,12 +1282,86 @@ export default function AvailablePage() {
           fontSize: "1.1rem",
           lineHeight: "1.6"
         }}>
-          "Farid adalah developer yang sangat berbakat..."
+          "Farid adalah developer yang sangat berbakat. Desain website yang dibuatnya sangat modern dan fungsional."
+        </div>
+      </div>
+    </div>
+
+    {/* 🔹 Contoh Review 2 */}
+    <div style={{ 
+      display: "flex", 
+      alignItems: "flex-start",
+      marginBottom: "30px",
+      position: "relative"
+    }}>
+      <div style={{
+        position: "absolute",
+        left: "-41px",
+        top: "15px",
+        width: "16px",
+        height: "16px",
+        borderRadius: "50%",
+        background: "rgba(255, 255, 255, 0.4)",
+        border: "2px solid rgba(255, 255, 255, 0.8)"
+      }}></div>
+      <div style={{
+        position: "absolute",
+        left: "-30px",
+        top: "23px",
+        width: "28px",
+        height: "2px",
+        background: "rgba(255, 255, 255, 0.3)"
+      }}></div>
+
+      <div style={{ flex: "1" }}>
+        <div style={{
+          display: "inline-block",
+          padding: "8px 14px",
+          borderRadius: "6px",
+          background: "rgba(255, 255, 255, 0.05)",
+          border: "1px solid rgba(255, 255, 255, 0.2)",
+          marginBottom: "15px",
+          color: "#fff",
+          fontSize: "1.1rem",
+          fontWeight: "600"
+        }}>
+          <div style={{ fontWeight: "700", marginBottom: "5px" }}>Siti Rahayu</div>
+          <div style={{ fontSize: "0.9rem", color: "#94a3b8" }}>UI/UX Designer di CreativeStudio</div>
+          <span style={{
+            display: "inline-block",
+            marginTop: "6px",
+            fontSize: "0.75rem",
+            color: "#facc15",
+            background: "rgba(250,204,21,0.1)",
+            padding: "2px 8px",
+            borderRadius: "4px"
+          }}>
+            Contoh Review
+          </span>
+        </div>
+
+        <div style={{
+          background: "rgba(255, 255, 255, 0.05)",
+          border: "1px solid rgba(255, 255, 255, 0.15)",
+          borderRadius: "8px",
+          padding: "20px",
+          color: "#e5e5e5",
+          fontSize: "1.1rem",
+          lineHeight: "1.6"
+        }}>
+          "Kolaborasi dengan Farid sangat menyenangkan. Ia cepat memahami kebutuhan desain dan menerapkannya dengan tepat. Hasilnya memuaskan!"
         </div>
       </div>
     </div>
   </div>
 
+ 
+
+
+
+
+
+    
 
     {/* Form untuk menambah ulasan baru */}
 <div style={{ 
@@ -1458,6 +1539,7 @@ export default function AvailablePage() {
     </>
   );
 }
+
 
 
 
