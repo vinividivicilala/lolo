@@ -807,19 +807,34 @@ const closeAbout = () => setIsAboutOpen(false);
               </div>
             </div>
 
-
-    {isAboutOpen && (
+{isAboutOpen && (
   <div className="about-overlay">
     <button className="about-close" onClick={closeAbout}>×</button>
     
     <h2 className="about-header">Tentang Saya</h2>
 
-    {/* Timeline dengan garis putus-putus dan titik berkedip */}
-    <div style={{ marginLeft: "60px", marginBottom: "40px", position: "relative" }}>
+    {/* Nama Panjang di atas Timeline Box */}
+    <div style={{
+      marginLeft: "60px",
+      marginBottom: "30px",
+      fontSize: "1.8rem",
+      fontWeight: "700",
+      color: "#fff"
+    }}>
+      Farid Ardiansyah
+    </div>
+
+    {/* Timeline Box */}
+    <div style={{ 
+      marginLeft: "60px", 
+      marginBottom: "40px", 
+      position: "relative",
+      paddingLeft: "30px"
+    }}>
       {/* Garis putus-putus vertikal */}
       <div style={{
         position: "absolute",
-        left: "-20px",
+        left: "0",
         top: "0",
         height: "100%",
         borderLeft: "2px dashed rgba(255, 255, 255, 0.3)"
@@ -828,77 +843,121 @@ const closeAbout = () => setIsAboutOpen(false);
       {/* Titik animasi berkedip */}
       <div style={{
         position: "absolute",
-        left: "-28px",
+        left: "-8px",
         top: "15px",
         width: "16px",
         height: "16px",
         borderRadius: "50%",
         background: "#fff",
         boxShadow: "0 0 0 4px rgba(255, 255, 255, 0.4)",
-        animation: "pulse 1.5s infinite"
+        animation: "pulse 1.5s infinite",
+        zIndex: "2"
       }}></div>
       
-      {/* Konten about */}
-      <div style={{ marginLeft: "30px" }}>
-        <div style={{ marginBottom: "30px" }}>
-          <div style={{
-            fontSize: "1.8rem",
-            fontWeight: "700",
-            color: "#fff",
-            marginBottom: "10px"
-          }}>Farid Ardiansyah</div>
-          
-          <div style={{
-            color: "#e5e5e5",
-            fontSize: "1.1rem",
-            lineHeight: "1.6",
-            maxWidth: "700px"
-          }}>
-            Seorang web developer yang berfokus pada desain minimalis, tipografi,
-            serta membangun aplikasi modern berbasis Firebase dan React.
-          </div>
-        </div>
+      {/* Item Timeline 1 */}
+      <div style={{ marginBottom: "40px", position: "relative" }}>
+        <div style={{
+          fontSize: "1.5rem",
+          fontWeight: "700",
+          color: "#fff",
+          marginBottom: "5px"
+        }}>Rilis Website</div>
         
-        <div style={{ marginBottom: "30px" }}>
-          <div style={{
-            fontSize: "1.4rem",
-            fontWeight: "700",
-            color: "#fff",
-            marginBottom: "10px"
-          }}>Pendidikan</div>
-          
-          <div style={{
-            color: "#e5e5e5",
-            fontSize: "1.1rem",
-            lineHeight: "1.6"
-          }}>
-            🎓 Bergelar <b>Sarjana Komputer</b> dari Universitas Teknologi Digital
-          </div>
-        </div>
+        <div style={{
+          display: "inline-block",
+          padding: "4px 10px",
+          borderRadius: "4px",
+          fontSize: "0.9rem",
+          fontWeight: "700",
+          background: "rgba(255, 255, 255, 0.1)",
+          color: "#fff",
+          border: "1px solid rgba(255, 255, 255, 0.3)",
+          marginBottom: "15px"
+        }}>VERSI PRODUKSI</div>
         
-        <div>
-          <div style={{
-            fontSize: "1.4rem",
-            fontWeight: "700",
-            color: "#fff",
-            marginBottom: "10px"
-          }}>Keterangan</div>
-          
-          <div style={{
-            color: "#e5e5e5",
-            fontSize: "1.1rem",
-            lineHeight: "1.6",
-            maxWidth: "700px"
-          }}>
-            🔗 Ikuti perjalanan saya dalam dunia teknologi! Saya terbuka untuk kolaborasi
-            dan proyek-proyek kreatif yang menantang.
-          </div>
+        <div style={{
+          background: "rgba(255, 255, 255, 0.05)",
+          border: "1px solid rgba(255, 255, 255, 0.15)",
+          borderRadius: "8px",
+          padding: "15px",
+          color: "#e5e5e5",
+          fontSize: "1rem",
+          lineHeight: "1.5"
+        }}>
+          Peluncuran versi pertama website portfolio dengan desain minimalis dan interaktif.
+        </div>
+      </div>
+      
+      {/* Item Timeline 2 */}
+      <div style={{ marginBottom: "40px", position: "relative" }}>
+        <div style={{
+          fontSize: "1.5rem",
+          fontWeight: "700",
+          color: "#fff",
+          marginBottom: "5px"
+        }}>Uji Coba Firebase</div>
+        
+        <div style={{
+          display: "inline-block",
+          padding: "4px 10px",
+          borderRadius: "4px",
+          fontSize: "0.9rem",
+          fontWeight: "700",
+          background: "rgba(255, 255, 255, 0.1)",
+          color: "#fff",
+          border: "1px solid rgba(255, 255, 255, 0.3)",
+          marginBottom: "15px"
+        }}>BACKEND</div>
+        
+        <div style={{
+          background: "rgba(255, 255, 255, 0.05)",
+          border: "1px solid rgba(255, 255, 255, 0.15)",
+          borderRadius: "8px",
+          padding: "15px",
+          color: "#e5e5e5",
+          fontSize: "1rem",
+          lineHeight: "1.5"
+        }}>
+          Menerapkan autentikasi dan penyimpanan data real-time menggunakan Firebase.
+        </div>
+      </div>
+      
+      {/* Item Timeline 3 */}
+      <div style={{ marginBottom: "40px", position: "relative" }}>
+        <div style={{
+          fontSize: "1.5rem",
+          fontWeight: "700",
+          color: "#fff",
+          marginBottom: "5px"
+        }}>Desain UI</div>
+        
+        <div style={{
+          display: "inline-block",
+          padding: "4px 10px",
+          borderRadius: "4px",
+          fontSize: "0.9rem",
+          fontWeight: "700",
+          background: "rgba(255, 255, 255, 0.1)",
+          color: "#fff",
+          border: "1px solid rgba(255, 255, 255, 0.3)",
+          marginBottom: "15px"
+        }}>FRONTEND</div>
+        
+        <div style={{
+          background: "rgba(255, 255, 255, 0.05)",
+          border: "1px solid rgba(255, 255, 255, 0.15)",
+          borderRadius: "8px",
+          padding: "15px",
+          color: "#e5e5e5",
+          fontSize: "1rem",
+          lineHeight: "1.5"
+        }}>
+          Membuat desain UI tipografi-based dan minimalist UI untuk tampilan website.
         </div>
       </div>
     </div>
   </div>
 )}
-
 
 
             
@@ -969,5 +1028,6 @@ const closeAbout = () => setIsAboutOpen(false);
     </>
   );
 }
+
 
 
