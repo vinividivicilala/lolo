@@ -808,34 +808,96 @@ const closeAbout = () => setIsAboutOpen(false);
             </div>
 
 
-            {isAboutOpen && (
+    {isAboutOpen && (
   <div className="about-overlay">
     <button className="about-close" onClick={closeAbout}>×</button>
     
     <h2 className="about-header">Tentang Saya</h2>
 
-    <div className="about-linebox">
-      <strong>Farid Ardiansyah</strong>
-    </div>
-
-    <div className="about-linebox">
-      <p>
-        Seorang web developer yang berfokus pada desain minimalis, tipografi,
-        serta membangun aplikasi modern berbasis Firebase dan React.
-      </p>
-    </div>
-
-    <div className="about-linebox">
-      🎓 Bergelar <b>Sarjana Komputer</b> dari Universitas Teknologi Digital
-    </div>
-
-    <div className="about-linebox">
-      🔗 Ikuti perjalanan saya dalam dunia teknologi!
+    {/* Timeline dengan garis putus-putus dan titik berkedip */}
+    <div style={{ marginLeft: "60px", marginBottom: "40px", position: "relative" }}>
+      {/* Garis putus-putus vertikal */}
+      <div style={{
+        position: "absolute",
+        left: "-20px",
+        top: "0",
+        height: "100%",
+        borderLeft: "2px dashed rgba(255, 255, 255, 0.3)"
+      }}></div>
+      
+      {/* Titik animasi berkedip */}
+      <div style={{
+        position: "absolute",
+        left: "-28px",
+        top: "15px",
+        width: "16px",
+        height: "16px",
+        borderRadius: "50%",
+        background: "#fff",
+        boxShadow: "0 0 0 4px rgba(255, 255, 255, 0.4)",
+        animation: "pulse 1.5s infinite"
+      }}></div>
+      
+      {/* Konten about */}
+      <div style={{ marginLeft: "30px" }}>
+        <div style={{ marginBottom: "30px" }}>
+          <div style={{
+            fontSize: "1.8rem",
+            fontWeight: "700",
+            color: "#fff",
+            marginBottom: "10px"
+          }}>Farid Ardiansyah</div>
+          
+          <div style={{
+            color: "#e5e5e5",
+            fontSize: "1.1rem",
+            lineHeight: "1.6",
+            maxWidth: "700px"
+          }}>
+            Seorang web developer yang berfokus pada desain minimalis, tipografi,
+            serta membangun aplikasi modern berbasis Firebase dan React.
+          </div>
+        </div>
+        
+        <div style={{ marginBottom: "30px" }}>
+          <div style={{
+            fontSize: "1.4rem",
+            fontWeight: "700",
+            color: "#fff",
+            marginBottom: "10px"
+          }}>Pendidikan</div>
+          
+          <div style={{
+            color: "#e5e5e5",
+            fontSize: "1.1rem",
+            lineHeight: "1.6"
+          }}>
+            🎓 Bergelar <b>Sarjana Komputer</b> dari Universitas Teknologi Digital
+          </div>
+        </div>
+        
+        <div>
+          <div style={{
+            fontSize: "1.4rem",
+            fontWeight: "700",
+            color: "#fff",
+            marginBottom: "10px"
+          }}>Keterangan</div>
+          
+          <div style={{
+            color: "#e5e5e5",
+            fontSize: "1.1rem",
+            lineHeight: "1.6",
+            maxWidth: "700px"
+          }}>
+            🔗 Ikuti perjalanan saya dalam dunia teknologi! Saya terbuka untuk kolaborasi
+            dan proyek-proyek kreatif yang menantang.
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 )}
-
-
 
 
 
@@ -907,4 +969,5 @@ const closeAbout = () => setIsAboutOpen(false);
     </>
   );
 }
+
 
