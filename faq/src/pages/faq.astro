@@ -151,39 +151,36 @@ const faqData = [
     </nav>
 
     <main class="main-content">
-      <!-- Teks Berjalan -->
-      <div class="marquee-fullwidth">
-        <div class="marquee-content-large">
-          Website ini masih dikembangkan
-        </div>
-      </div>
+      <!-- Ganti marquee dengan banner animasi baru -->
+<div class="development-banner" id="devBanner">
+  <div class="banner-content">
+    <span class="banner-icon">🚧</span>
+    <span class="banner-text">WEBSITE MASIH DIKEMBANGKAN</span>
+    <button class="banner-info-btn" onclick="openDevModal()">ℹ️</button>
+  </div>
+</div>
 
 
 
-
-      <!-- Layout Typografi Kiri -->
-      <div class="typography-left-layout">
-        <div class="title-section">
-          <div class="title-accent">QUESTIONS</div>
-          <h1 class="page-title">
-            FREQUENTLY<br>ASKED
-          </h1>
-          <div class="title-line"></div>
-        </div>
-        <div class="description-section">
-          <p class="typography-description">
-            Eksplorasi lengkap seputar Astro dan pengembangan web modern. 
-            Temukan jawaban atas pertanyaan paling umum yang diajukan oleh developer.
-          </p>
-          <div class="update-info">
-            LAST UPDATE: <span id="currentDate"></span>
-          </div>
-        </div>
-      </div>
-
-      <div class="image-container">
-        <img src="/images/5.jpg" alt="Ilustrasi FAQ" class="faq-image" />
-      </div>
+    <!-- Layout Typografi Kiri - Diperbarui -->
+<div class="typography-left-layout">
+  <div class="title-section">
+    <div class="title-accent">QUESTIONS</div>
+    <h1 class="page-title animate-typing">
+      FREQUENTLY<br>ASKED
+    </h1>
+    <div class="title-line"></div>
+  </div>
+  <div class="description-section">
+    <p class="typography-description animate-fade-in">
+      Eksplorasi lengkap seputar Astro dan pengembangan web modern. 
+      Temukan jawaban atas pertanyaan paling umum yang diajukan oleh developer.
+    </p>
+    <div class="update-info">
+      LAST UPDATE: <span id="currentDate"></span>
+    </div>
+  </div>
+</div>
 
 
  <!-- Related FAQ otomatis -->
@@ -578,7 +575,7 @@ const faqData = [
 <style>
   /* Import Google Fonts */
   @import url('https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap');
-  body, .marquee-content-large, .page-title, .update-info, 
+  body, .page-title, .update-info, 
   .typography-description, .color-block-extra-large h2, 
   .color-block-extra-large p, .cta-button-large, .title-accent {
     font-family: 'Space Mono', monospace !important;
@@ -888,7 +885,129 @@ const faqData = [
 }
 
 
+/* Banner Development */
+.development-banner {
+  background: linear-gradient(90deg, #3b82f6, #2563eb, #1d4ed8);
+  color: white;
+  padding: 16px 0;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 40px;
+  animation: pulseBanner 3s infinite;
+}
 
+.banner-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.banner-icon {
+  font-size: 1.5rem;
+  animation: bounce 2s infinite;
+}
+
+.banner-text {
+  font-weight: 700;
+  font-size: 1.2rem;
+  letter-spacing: 1px;
+}
+
+.banner-info-btn {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  cursor: pointer;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.3s;
+}
+
+.banner-info-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* Animasi Typography */
+.animate-typing {
+  overflow: hidden;
+  border-right: 3px solid #3b82f6;
+  white-space: nowrap;
+  animation: typing 3.5s steps(40, end), blink-caret 0.75s step-end infinite;
+}
+
+.animate-fade-in {
+  opacity: 0;
+  animation: fadeIn 2s forwards;
+  animation-delay: 1s;
+}
+
+/* Info Grid dalam Modal */
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+
+.info-item {
+  display: flex;
+  flex-direction: column;
+  padding: 15px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  background: #f8fafc;
+}
+
+.info-label {
+  font-size: 0.9rem;
+  color: #64748b;
+  margin-bottom: 5px;
+}
+
+.info-value {
+  font-weight: 700;
+  color: #000;
+}
+
+.status-active {
+  color: #10b981 !important;
+}
+
+/* Animations */
+@keyframes pulseBanner {
+  0% { opacity: 0.9; }
+  50% { opacity: 1; }
+  100% { opacity: 0.9; }
+}
+
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
+  40% {transform: translateY(-10px);}
+  60% {transform: translateY(-5px);}
+}
+
+@keyframes typing {
+  from { width: 0 }
+  to { width: 100% }
+}
+
+@keyframes blink-caret {
+  from, to { border-color: transparent }
+  50% { border-color: #3b82f6 }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
 
 
 
@@ -915,33 +1034,7 @@ const faqData = [
     padding: 40px 0;
   }
 
-  /* Marquee */
- .marquee-fullwidth {
-    overflow: hidden;
-    position: relative;
-    width: 100vw;
-    margin-left: calc(-50vw + 50%);
-    padding: 30px 0;
-    margin-bottom: 60px;
-    background: transparent; /* Diubah dari #000 menjadi transparent */
-  }
-
-   .marquee-content-large {
-    white-space: nowrap;
-    display: inline-block;
-    padding-left: 100%;
-    animation: marquee 40s linear infinite;
-    font-size: 35px;
-    font-weight: 1500;
-    color: #000; /* Diubah dari #fff menjadi #000 */
-    text-transform: uppercase;
-    letter-spacing: 1px;
-  }
-
-  @keyframes marquee {
-    0% { transform: translateX(0); }
-    100% { transform: translateX(-100%); }
-  }
+ 
 
   /* Typography Left Layout */
   .typography-left-layout {
@@ -1909,10 +2002,7 @@ body.night {
     .main-content {
       padding: 30px 0;
     }
-    .marquee-content-large {
-      font-size: 1.5rem;
-      animation-duration: 15s;
-    }
+    
     .page-title {
       font-size: 2.8rem;
     }
@@ -1973,9 +2063,7 @@ body.night {
   }
 
   @media (max-width: 480px) {
-    .marquee-content-large {
-      font-size: 1.2rem;
-    }
+   
     .page-title {
       font-size: 2.2rem;
       letter-spacing: -1px;
@@ -2418,6 +2506,54 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 
+<!-- Modal untuk informasi pengembangan website -->
+<div id="devModal" class="modal">
+  <div class="modal-content">
+    <span class="close" onclick="closeDevModal()">&times;</span>
+    <div class="modal-box">
+      <h2>Status Pengembangan Website</h2>
+    </div>
+    
+    <div class="modal-box">
+      <div class="info-grid">
+        <div class="info-item">
+          <span class="info-label">Tanggal Mulai</span>
+          <span class="info-value">15 November 2023</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Update Terakhir</span>
+          <span class="info-value" id="lastUpdateValue">20 November 2023</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Versi</span>
+          <span class="info-value">1.2.0-beta</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Status</span>
+          <span class="info-value status-active">Dalam Pengembangan</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="modal-box">
+      <h3>Deskripsi</h3>
+      <p>Website ini sedang dalam tahap pengembangan aktif. Beberapa fitur mungkin belum berfungsi dengan sempurna atau masih dalam tahap penyempurnaan. Terima kasih atas pengertiannya.</p>
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 // 🔹 Bikin anonymousId (opsional, kalau masih mau dipakai)
@@ -2759,6 +2895,7 @@ function openFAQModal(id) {
   modal.style.display = "block";
 }
 </script>
+
 
 
 
