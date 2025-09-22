@@ -1,5 +1,5 @@
 ---
-// index.astro
+// src/pages/index.astro
 import Layout from '../layouts/Layout.astro';
 ---
 
@@ -7,36 +7,69 @@ import Layout from '../layouts/Layout.astro';
   <div class="container">
     <main class="home-container">
       <section class="hero-section">
-        <h1 class="hero-title">Selamat Datang di Note Farid</h1>
+        <h1 class="hero-title">Note Farid</h1>
         <p class="hero-subtitle">Tempat berbagi pengetahuan tentang development web, Astro, dan teknologi terkini.</p>
-        <div class="hero-actions">
-          <a href="/faq" class="btn btn-primary">Lihat FAQ</a>
-          <a href="/blog" class="btn btn-secondary">Baca Blog</a>
-        </div>
-      </section>
-
-      <section class="features-section">
-        <h2 class="section-title">Apa yang Anda Temukan di Sini?</h2>
-        <div class="features-grid">
-          <div class="feature-card" data-framer>
-            <div class="feature-icon">❓</div>
-            <h3>FAQ</h3>
-            <p>Jawaban untuk pertanyaan-pertanyaan umum seputar Astro dan development web.</p>
-            <a href="/faq" class="feature-link">Jelajahi FAQ →</a>
+        
+        <div class="linebox">
+          <div class="linebox-item">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+              <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+            </svg>
+            <span>Notifikasi</span>
           </div>
           
-          <div class="feature-card" data-framer>
-            <div class="feature-icon">📝</div>
-            <h3>Blog</h3>
-            <p>Artikel dan tutorial tentang development web, tips, dan best practices.</p>
-            <a href="/blog" class="feature-link">Baca Blog →</a>
+          <div class="linebox-item">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+            </svg>
+            <span>Pesan</span>
           </div>
           
-          <div class="feature-card" data-framer>
-            <div class="feature-icon">🚀</div>
-            <h3>Astro</h3>
-            <p>Informasi terkini tentang Astro, framework modern untuk website yang cepat.</p>
-            <a href="/faq" class="feature-link">Pelajari Astro →</a>
+          <div class="linebox-item">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+              <circle cx="9" cy="7" r="4"></circle>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+            </svg>
+            <span>Komunitas</span>
+          </div>
+          
+          <div class="linebox-item">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+              <polyline points="10 9 9 9 8 9"></polyline>
+            </svg>
+            <span>Postingan</span>
+          </div>
+          
+          <div class="linebox-item">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+              <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+            <span>Tentang Saya</span>
+          </div>
+          
+          <div class="linebox-item">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="16" y1="2" x2="16" y2="6"></line>
+              <line x1="8" y1="2" x2="8" y2="6"></line>
+              <line x1="3" y1="10" x2="21" y2="10"></line>
+            </svg>
+            <span>Meeting</span>
+          </div>
+          
+          <div class="linebox-item">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+            </svg>
+            <span>Daftar Project</span>
           </div>
         </div>
       </section>
@@ -46,8 +79,8 @@ import Layout from '../layouts/Layout.astro';
 
 <style>
   body {
-    background: #f8f9fa;
-    color: #333;
+    background: #000;
+    color: #fff;
     min-height: 100vh;
     padding: 0;
     margin: 0;
@@ -67,10 +100,6 @@ import Layout from '../layouts/Layout.astro';
   .hero-section {
     text-align: center;
     padding: 80px 0;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    border-radius: 15px;
-    margin-bottom: 60px;
   }
   
   .hero-title {
@@ -78,122 +107,52 @@ import Layout from '../layouts/Layout.astro';
     font-weight: 700;
     margin-bottom: 20px;
     font-family: 'Montserrat', sans-serif;
+    color: #fff;
   }
   
   .hero-subtitle {
     font-size: 1.3rem;
     max-width: 600px;
-    margin: 0 auto 40px;
-    opacity: 0.9;
+    margin: 0 auto 60px;
+    opacity: 0.8;
+    color: #ccc;
   }
   
-  .hero-actions {
-    display: flex;
-    gap: 20px;
-    justify-content: center;
-    flex-wrap: wrap;
-  }
-  
-  .btn {
-    padding: 15px 30px;
-    border-radius: 50px;
-    text-decoration: none;
-    font-weight: 600;
-    transition: all 0.3s ease;
-  }
-  
-  .btn-primary {
-    background: white;
-    color: #667eea;
-  }
-  
-  .btn-primary:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
-  }
-  
-  .btn-secondary {
-    background: transparent;
-    color: white;
-    border: 2px solid white;
-  }
-  
-  .btn-secondary:hover {
-    background: white;
-    color: #667eea;
-    transform: translateY(-3px);
-  }
-  
-  .features-section {
-    margin-bottom: 60px;
-  }
-  
-  .section-title {
-    text-align: center;
-    font-size: 2.2rem;
-    margin-bottom: 50px;
-    color: #333;
-    font-family: 'Montserrat', sans-serif;
-  }
-  
-  .features-grid {
+  .linebox {
+    background: #111;
+    border-radius: 12px;
+    padding: 30px;
+    max-width: 800px;
+    margin: 0 auto;
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 30px;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
   }
   
-  .feature-card {
-    background: white;
-    padding: 40px 30px;
-    border-radius: 15px;
-    text-align: center;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  .linebox-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px 15px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    cursor: pointer;
   }
   
-  .feature-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+  .linebox-item:hover {
+    background: #222;
+    transform: translateY(-3px);
   }
   
-  .feature-icon {
-    font-size: 3rem;
-    margin-bottom: 20px;
-  }
-  
-  .feature-card h3 {
-    font-size: 1.5rem;
-    margin: 0 0 15px 0;
-    color: #333;
-  }
-  
-  .feature-card p {
-    color: #666;
-    line-height: 1.6;
-    margin: 0 0 20px 0;
-  }
-  
-  .feature-link {
+  .linebox-item svg {
     color: #667eea;
-    text-decoration: none;
+    margin-bottom: 15px;
+  }
+  
+  .linebox-item span {
     font-weight: 600;
-    transition: color 0.3s ease;
-  }
-  
-  .feature-link:hover {
-    color: #5a67d8;
-  }
-  
-  /* Animasi Framer Motion */
-  [data-framer] {
-    opacity: 0;
-    transform: translateY(20px);
-    transition: opacity 0.6s ease, transform 0.6s ease;
-  }
-  
-  [data-framer].animated {
-    opacity: 1;
-    transform: translateY(0);
+    color: #fff;
   }
   
   /* Responsive design */
@@ -206,46 +165,16 @@ import Layout from '../layouts/Layout.astro';
       font-size: 1.1rem;
     }
     
-    .hero-actions {
-      flex-direction: column;
-      align-items: center;
+    .linebox {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 15px;
+      padding: 20px;
     }
-    
-    .btn {
-      width: 200px;
-      text-align: center;
-    }
-    
-    .features-grid {
+  }
+  
+  @media (max-width: 480px) {
+    .linebox {
       grid-template-columns: 1fr;
     }
   }
 </style>
-
-<script>
-  document.addEventListener('DOMContentLoaded', function() {
-    // Inisialisasi Lucide icons
-    if (typeof lucide !== 'undefined') {
-      lucide.createIcons();
-    }
-
-    // Animasi dengan Intersection Observer
-    const observerOptions = {
-      threshold: 0.1,
-      rootMargin: '0px 0px -50px 0px'
-    };
-
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('animated');
-        }
-      });
-    }, observerOptions);
-
-    // Amati semua elemen dengan data-framer
-    document.querySelectorAll('[data-framer]').forEach(el => {
-      observer.observe(el);
-    });
-  });
-</script>
