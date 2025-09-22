@@ -178,12 +178,14 @@ import Layout from '../layouts/Layout.astro';
   margin: 0;
   font-family: 'Space Mono', monospace;
   text-align: left; /* semua rata kiri */
+padding-left: 50px; /* lebih besar, biar teks ga mentok kiri */
 }
 
   .container {
     max-width: 1200px;
     margin: 0;
     padding: 20px;
+
   }
   
   .home-container {
@@ -194,6 +196,7 @@ import Layout from '../layouts/Layout.astro';
 .hero-section {
   text-align: left;   /* hilangkan center */
   padding: 60px 0;
+padding-left: 50px;
 }
   
 
@@ -226,6 +229,7 @@ import Layout from '../layouts/Layout.astro';
   border: 1px solid rgba(255, 255, 255, 0.3);
   justify-content: start; /* biar item rata kiri */
   margin-bottom: 60px; 
+padding-left: 50px;
 }
 
 .linebox-item {
@@ -239,6 +243,7 @@ import Layout from '../layouts/Layout.astro';
   cursor: pointer;
   border: 1px solid rgba(255, 255, 255, 0.3);
   background: none;
+padding-left: 50px;
 }
 
   
@@ -290,26 +295,24 @@ import Layout from '../layouts/Layout.astro';
   position: relative;
   max-width: 1100px;
   margin: 0 auto;
-  padding-left: 60px; /* jarak garis ke konten kiri */
+  padding-left: 100px; /* lebih besar, biar teks ga mentok kiri */
 }
 
-/* garis vertikal putus-putus */
+/* garis vertikal putus-putus (global, nyambung semua item) */
 .timeline-container::before {
   content: "";
   position: absolute;
-  left: 28px;
+  left: 50px; /* geser dikit supaya dot pas di garis */
   top: 0;
   bottom: 0;
   border-left: 2px dashed rgba(255, 255, 255, 0.25);
   z-index: 1;
 }
 
-
-
 .timeline-item {
   position: relative;
   margin-bottom: 80px;
-  padding-left: 60px; /* geser isi biar dekat garis */
+  padding-left: 80px; /* konten agak menjauh dari garis */
   margin-top: 40px;
 }
 
@@ -317,13 +320,13 @@ import Layout from '../layouts/Layout.astro';
   display: flex;
   flex-direction: row;
   gap: 30px;
-  align-items: flex-start; /* sejajar dari atas */
+  align-items: flex-start;
 }
 
 /* dot */
 .timeline-dot {
   position: absolute;
-  left: 20px;
+  left: 42px; /* sejajar garis global */
   top: 20px;
   width: 18px;
   height: 18px;
@@ -339,14 +342,9 @@ import Layout from '../layouts/Layout.astro';
   animation: blink 1.6s infinite;
 }
 
-/* garis putus-putus */
+/* matikan garis per-item */
 .timeline-line {
-  position: absolute;
-  left: 28px;
-  top: 0;
-  bottom: 0;
-  border-left: 2px dashed rgba(255,255,255,0.25);
-  z-index: 1;
+  display: none;
 }
 
 /* kiri */
@@ -404,6 +402,7 @@ import Layout from '../layouts/Layout.astro';
 
 
 </style>
+
 
 
 
