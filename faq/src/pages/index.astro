@@ -73,72 +73,25 @@ import Layout from '../layouts/Layout.astro';
           </div>
         </div>
 
+<div class="timeline-item">
+  <div class="timeline-dot active"></div>
+  <div class="timeline-line"></div>
 
-<section class="timeline-section">
-  <div class="timeline-container">
-
-    <!-- ITEM 1 -->
-    <div class="timeline-item">
-      <div class="timeline-dot active"></div>
-      <div class="timeline-line"></div>
-
-      <!-- Kiri polos -->
-      <div class="timeline-left">
-        <span class="date">2025-09-19</span>
-        <h3 class="title">Rilis Website</h3>
-        <span class="label">VERSI PRODUKSI</span>
-      </div>
-
-      <!-- Kanan pakai linebox -->
-      <div class="timeline-right linebox">
-        <p class="text">
-          Peluncuran versi pertama website portfolio dengan desain minimalis dan interaktif.
-        </p>
-      </div>
+  <!-- konten dibungkus flex -->
+  <div class="timeline-content">
+    <div class="timeline-left">
+      <span class="date">2025-09-19</span>
+      <h3 class="title">Rilis Website</h3>
+      <span class="label linebox">VERSI PRODUKSI</span>
     </div>
 
-    <!-- ITEM 2 -->
-    <div class="timeline-item">
-      <div class="timeline-dot"></div>
-      <div class="timeline-line"></div>
-
-      <div class="timeline-left">
-        <span class="date">2025-08-10</span>
-        <h3 class="title">Uji Coba Firebase</h3>
-        <span class="label">BACKEND</span>
-      </div>
-
-      <div class="timeline-right linebox">
-        <p class="text">
-          Menerapkan autentikasi dan penyimpanan data real-time menggunakan Firebase.
-        </p>
-      </div>
+    <div class="timeline-right linebox">
+      <p class="text">
+        Peluncuran versi pertama website portfolio dengan desain minimalis dan interaktif.
+      </p>
     </div>
-
-    <!-- ITEM 3 -->
-    <div class="timeline-item">
-      <div class="timeline-dot"></div>
-      <div class="timeline-line"></div>
-
-      <div class="timeline-left">
-        <span class="date">2025-07-05</span>
-        <h3 class="title">Desain UI</h3>
-        <span class="label">FRONTEND</span>
-      </div>
-
-      <div class="timeline-right linebox">
-        <p class="text">
-          Membuat desain UI tipografi-based dan minimalist UI untuk tampilan website.
-        </p>
-      </div>
-    </div>
-
   </div>
-</section>
-
-
-  </div>
-</section>
+</div>
 
 
 
@@ -279,14 +232,19 @@ import Layout from '../layouts/Layout.astro';
   z-index: 1;
 }
 
-/* item */
+
+
 .timeline-item {
-  display: grid;
-  grid-template-columns: 250px 1fr; /* kiri info, kanan keterangan */
-  gap: 30px;
-  margin-bottom: 80px;
   position: relative;
-  align-items: flex-start;
+  margin-bottom: 80px;
+  padding-left: 60px; /* geser isi biar dekat garis */
+}
+
+.timeline-content {
+  display: flex;
+  flex-direction: row;
+  gap: 30px;
+  align-items: flex-start; /* sejajar dari atas */
 }
 
 /* dot */
@@ -307,18 +265,21 @@ import Layout from '../layouts/Layout.astro';
   box-shadow: 0 0 12px #6ea6ff, 0 0 24px #6ea6ff;
   animation: blink 1.6s infinite;
 }
-@keyframes blink {
-  0% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.5; transform: scale(1.1); }
-  100% { opacity: 1; transform: scale(1); }
+
+/* garis putus-putus */
+.timeline-line {
+  position: absolute;
+  left: 28px;
+  top: 0;
+  bottom: 0;
+  border-left: 2px dashed rgba(255,255,255,0.25);
+  z-index: 1;
 }
 
-/* kolom kiri */
+/* kiri */
 .timeline-left {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  text-align: left;  /* ratain kiri */
+  min-width: 220px;
+  text-align: left;
 }
 .date {
   font-size: 20px;
@@ -328,10 +289,11 @@ import Layout from '../layouts/Layout.astro';
 .title {
   font-size: 32px;
   font-weight: 700;
+  margin: 6px 0;
   color: #fff;
-  margin: 0;
 }
 .label.linebox {
+  display: inline-block;
   background: rgba(0,0,0,0.6);
   border: 1px solid rgba(255,255,255,0.3);
   padding: 10px 16px;
@@ -339,17 +301,16 @@ import Layout from '../layouts/Layout.astro';
   font-size: 16px;
   color: #fff;
   text-transform: uppercase;
-  text-align: left;  /* ratain kiri */
-  display: inline-block;
 }
 
-/* kolom kanan */
+/* kanan */
 .timeline-right.linebox {
+  flex: 1;
   background: rgba(0,0,0,0.6);
   border: 1px solid rgba(255,255,255,0.3);
   padding: 28px 32px;
   border-radius: 8px;
-  text-align: left; /* ratain kiri */
+  text-align: left;
 }
 .timeline-right .text {
   font-size: 20px;
@@ -359,18 +320,18 @@ import Layout from '../layouts/Layout.astro';
 
 /* responsive */
 @media (max-width: 768px) {
-  .timeline-item {
-    grid-template-columns: 1fr;
+  .timeline-content {
+    flex-direction: column;
   }
-  .timeline-right {
-    grid-column: 1 / 2;
+  .timeline-left {
+    min-width: unset;
   }
 }
 
 
 
-
 </style>
+
 
 
 
