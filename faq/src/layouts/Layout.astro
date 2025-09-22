@@ -226,43 +226,7 @@ import Navbar from '../components/Navbar.astro';
         min-height: 100vh;
       }
 
-      /* Banner yang diperbarui */
-      .custom-banner {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 15px;
-        padding: 12px 20px;
-        margin: 0 auto 20px;
-        border-radius: 8px;
-        max-width: 700px;
-        font-weight: 500;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-      }
-      
-      .custom-banner .left {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        font-size: 1rem;
-        font-weight: 600;
-      }
-      
-      .custom-banner button {
-        background: none;
-        border: none;
-        font-size: 1.2rem;
-        cursor: pointer;
-        color: white;
-        opacity: 0.8;
-        transition: opacity 0.2s;
-      }
-      
-      .custom-banner button:hover {
-        opacity: 1;
-      }
+    
       
       .min-h-screen {
         min-height: 100vh;
@@ -272,12 +236,7 @@ import Navbar from '../components/Navbar.astro';
   <body>
     <Navbar currentPage={currentPage} />
     
-    <!-- Banner -->
-    <div class="custom-banner" id="customBanner">
-      <div class="left">👀 Note Farid - Tempat Belajar Development Web</div>
-      <button onclick="document.getElementById('customBanner').style.display='none'">✖</button>
-    </div>
-
+  
     <main class="min-h-screen">
       <slot />
     </main>
@@ -328,23 +287,10 @@ import Navbar from '../components/Navbar.astro';
         }
       };
 
-      // Inisialisasi Framer Motion
-      document.addEventListener('DOMContentLoaded', function() {
-        // Animasi untuk banner
-        const banner = document.getElementById('customBanner');
-        if (banner) {
-          banner.style.opacity = '0';
-          banner.style.transform = 'translateY(-10px)';
-          
-          setTimeout(() => {
-            banner.style.opacity = '1';
-            banner.style.transform = 'translateY(0)';
-            banner.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
-          }, 100);
-        }
-      });
+      
     </script>
   </body>
 </html>
+
 
 
