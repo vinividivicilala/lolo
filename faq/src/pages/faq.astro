@@ -559,6 +559,49 @@ const developmentInfo = {
 
 
 
+<!-- Tambahkan di bagian konten utama, setelah elemen .minimalist-header -->
+<div class="release-timeline-section">
+  <div class="timeline-header">
+    <h2 class="timeline-title">RELEASE TIMELINE</h2>
+    <div class="timeline-title-line"></div>
+  </div>
+
+  <div class="timeline-container">
+    <!-- Item 1 -->
+    <div class="timeline-item">
+      <div class="timeline-dot"></div>
+      <div class="timeline-content linebox">
+        <h3 class="timeline-version">VERSIE PARDINALE</h3>
+        <p class="timeline-description">Rilis website portfolio dengan desain minimalis dan interaktif.</p>
+        <span class="timeline-date">November 2023</span>
+      </div>
+    </div>
+
+    <!-- Item 2 -->
+    <div class="timeline-item">
+      <div class="timeline-dot"></div>
+      <div class="timeline-content linebox">
+        <h3 class="timeline-version">MACKERD</h3>
+        <p class="timeline-description">Uji coba integrasi Firebase untuk autentikasi dan penyimpanan data real-time.</p>
+        <span class="timeline-date">Desember 2023</span>
+      </div>
+    </div>
+
+    <!-- Item 3 -->
+    <div class="timeline-item">
+      <div class="timeline-dot"></div>
+      <div class="timeline-content linebox">
+        <h3 class="timeline-version">PROSTEED</h3>
+        <p class="timeline-description">Penyempurnaan desain UI dengan pendekatan tipografi-based dan minimalis.</p>
+        <span class="timeline-date">Januari 2024</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
   <!-- Footer -->
   <footer class="footer-section">
     <div class="footer-container">
@@ -1302,6 +1345,139 @@ const developmentInfo = {
         font-size: 1rem;
       }
     }
+
+
+
+
+/* Timeline Styles */
+.release-timeline-section {
+  margin: 60px 0;
+  padding: 40px 0;
+}
+
+.timeline-header {
+  text-align: center;
+  margin-bottom: 50px;
+}
+
+.timeline-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #000;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-bottom: 15px;
+}
+
+.timeline-title-line {
+  height: 3px;
+  width: 80px;
+  background: #3b82f6;
+  margin: 0 auto;
+}
+
+.timeline-container {
+  position: relative;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px 0;
+}
+
+.timeline-container::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: #3b82f6;
+  transform: translateX(-50%);
+}
+
+.timeline-item {
+  position: relative;
+  margin-bottom: 40px;
+  width: 50%;
+  padding: 0 40px;
+  box-sizing: border-box;
+}
+
+.timeline-item:nth-child(odd) {
+  left: 0;
+}
+
+.timeline-item:nth-child(even) {
+  left: 50%;
+}
+
+.timeline-dot {
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  background: #3b82f6;
+  border-radius: 50%;
+  top: 20px;
+  right: -8px;
+  z-index: 2;
+}
+
+.timeline-item:nth-child(even) .timeline-dot {
+  left: -8px;
+  right: auto;
+}
+
+.timeline-content {
+  padding: 20px;
+  background: #fff;
+  border-radius: 8px;
+}
+
+.timeline-version {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #000;
+  margin: 0 0 10px 0;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.timeline-description {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: #334155;
+  margin: 0 0 10px 0;
+}
+
+.timeline-date {
+  font-size: 0.9rem;
+  color: #64748b;
+  font-weight: 600;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .timeline-container::before {
+    left: 30px;
+  }
+  
+  .timeline-item {
+    width: 100%;
+    padding-left: 70px;
+    padding-right: 20px;
+    left: 0 !important;
+  }
+  
+  .timeline-dot {
+    left: 22px !important;
+    right: auto !important;
+  }
+}
+
+
+
+
+
+
 
 
 
@@ -3195,6 +3371,7 @@ function openFAQModal(id) {
   modal.style.display = "block";
 }
 </script>
+
 
 
 
