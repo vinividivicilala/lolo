@@ -72,55 +72,63 @@ import Layout from '../layouts/Layout.astro';
             <span>Daftar Project</span>
           </div>
         </div>
-      </section>
 
-      {/* Bagian Ulasan dengan Animasi */}
-      <section class="reviews-section">
-        <h3 class="reviews-title">
-          Ulasan
-          <div class="title-underline"></div>
-        </h3>
 
-        {/* Garis vertikal putus-putus dengan animasi */}
-        <div class="animated-line"></div>
+<section class="timeline-section">
+  <div class="timeline-container">
 
-        {/* Pemancar kedap-kedip */}
-        <div class="pulse-transmitter"></div>
+    <!-- ITEM 1 (active dot, dengan linebox) -->
+    <div class="timeline-item">
+      <div class="timeline-dot active"></div>
+      <div class="timeline-line"></div>
+      <div class="timeline-content linebox">
+        <span class="date">2025-09-19</span>
+        <h3 class="title">Rilis Website</h3>
+        <span class="label">VERSI PRODUKSI</span>
+        <p class="text">
+          Peluncuran versi pertama website portfolio dengan desain minimalis dan interaktif.
+        </p>
+      </div>
+    </div>
 
-        {/* Konten Ulasan */}
-        <div class="reviews-content">
-          {/* Ulasan 1 */}
-          <div class="review-item">
-            <div class="review-dot"></div>
-            <div class="review-connector"></div>
-            <div class="review-content">
-              <div class="reviewer-info">
-                <div class="reviewer-name">Budi Santoso</div>
-                <div class="reviewer-position">Project Manager di TechCorp</div>
-                <span class="review-badge">Contoh Review</span>
-              </div>
-              <div class="review-comment">
-                "Farid adalah developer yang sangat berbakat. Desain website yang dibuatnya sangat modern dan fungsional."
-              </div>
-            </div>
-          </div>
+    <!-- ITEM 2 -->
+    <div class="timeline-item">
+      <div class="timeline-dot"></div>
+      <div class="timeline-line"></div>
+      <div class="timeline-content linebox">
+        <span class="date">2025-08-10</span>
+        <h3 class="title">Uji Coba Firebase</h3>
+        <span class="label">BACKEND</span>
+        <p class="text">
+          Menerapkan autentikasi dan penyimpanan data real-time menggunakan Firebase.
+        </p>
+      </div>
+    </div>
 
-          {/* Ulasan 2 */}
-          <div class="review-item">
-            <div class="review-dot"></div>
-            <div class="review-connector"></div>
-            <div class="review-content">
-              <div class="reviewer-info">
-                <div class="reviewer-name">Siti Rahayu</div>
-                <div class="reviewer-position">UI/UX Designer di CreativeStudio</div>
-                <span class="review-badge">Contoh Review</span>
-              </div>
-              <div class="review-comment">
-                "Kolaborasi dengan Farid sangat menyenangkan. Ia cepat memahami kebutuhan desain dan menerapkannya dengan tepat. Hasilnya memuaskan!"
-              </div>
-            </div>
-          </div>
-        </div>
+    <!-- ITEM 3 -->
+    <div class="timeline-item">
+      <div class="timeline-dot"></div>
+      <div class="timeline-line"></div>
+      <div class="timeline-content linebox">
+        <span class="date">2025-07-05</span>
+        <h3 class="title">Desain UI</h3>
+        <span class="label">FRONTEND</span>
+        <p class="text">
+          Membuat desain UI tipografi-based dan minimalist UI untuk tampilan website.
+        </p>
+      </div>
+    </div>
+  </div>
+
+
+
+
+
+
+
+
+
+
       </section>
     </main>
   </div>
@@ -175,20 +183,22 @@ import Layout from '../layouts/Layout.astro';
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 20px;
-    border: 1px solid rgba(255, 255, 255, 0.3);
+ border: 1px solid rgba(255, 255, 255, 0.3); /* garis putih pudar */
   }
   
-  .linebox-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 20px 15px;
-    border-radius: 8px;
-    transition: all 0.3s ease;
-    cursor: pointer;
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    background: none;
-  }
+.linebox-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px 15px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  border: 1px solid rgba(255, 255, 255, 0.3); /* garis putih pudar */
+  background: none; /* hilangkan fill background */
+}
+
+
   
   .linebox-item svg {
     color: #667eea;
@@ -199,195 +209,7 @@ import Layout from '../layouts/Layout.astro';
     font-weight: 600;
     color: #fff;
   }
-
-  /* Styles untuk bagian Ulasan */
-  .reviews-section {
-    margin-left: 60px;
-    margin-bottom: 40px;
-    position: relative;
-    padding-left: 30px;
-  }
-
-  .reviews-title {
-    font-size: 2rem;
-    font-weight: 700;
-    color: #fff;
-    margin-bottom: 30px;
-    position: relative;
-  }
-
-  .title-underline {
-    position: absolute;
-    bottom: -10px;
-    left: 0;
-    width: 100px;
-    height: 3px;
-    background: rgba(255, 255, 255, 0.3);
-    border-radius: 2px;
-  }
-
-  /* Garis vertikal putus-putus dengan animasi */
-  .animated-line {
-    position: absolute;
-    left: 0;
-    top: 0;
-    height: 100%;
-    width: 2px;
-    overflow: hidden;
-  }
-
-  .animated-line::before {
-    content: '';
-    position: absolute;
-    height: 200%;
-    width: 100%;
-    background: repeating-linear-gradient(
-      to bottom, 
-      transparent, 
-      transparent 5px, 
-      rgba(34, 211, 238, 0.5) 5px, 
-      rgba(34, 211, 238, 0.5) 10px
-    );
-    animation: moveLine 3s linear infinite;
-  }
-
-  /* Pemancar kedap-kedip */
-  .pulse-transmitter {
-    position: absolute;
-    left: -9px;
-    top: 15px;
-    width: 18px;
-    height: 18px;
-    border-radius: 50%;
-    background: rgba(34, 211, 238, 0.3);
-    box-shadow: 0 0 0 0 rgba(34, 211, 238, 0.7);
-    animation: pulse 2s infinite;
-    z-index: 10;
-  }
-
-  .reviews-content {
-    margin-left: 30px;
-    position: relative;
-    z-index: 5;
-  }
-
-  .review-item {
-    display: flex;
-    align-items: flex-start;
-    margin-bottom: 30px;
-    position: relative;
-  }
-
-  .review-dot {
-    position: absolute;
-    left: -41px;
-    top: 15px;
-    width: 16px;
-    height: 16px;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.4);
-    border: 2px solid rgba(255, 255, 255, 0.8);
-    animation: glow 2s infinite alternate;
-  }
-
-  .review-connector {
-    position: absolute;
-    left: -30px;
-    top: 23px;
-    width: 28px;
-    height: 2px;
-    background: rgba(255, 255, 255, 0.3);
-    animation: dash 1.5s linear infinite;
-  }
-
-  .review-content {
-    flex: 1;
-  }
-
-  .reviewer-info {
-    display: inline-block;
-    padding: 8px 14px;
-    border-radius: 6px;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    margin-bottom: 15px;
-    color: #fff;
-    font-size: 1.1rem;
-    font-weight: 600;
-  }
-
-  .reviewer-name {
-    font-weight: 700;
-    margin-bottom: 5px;
-  }
-
-  .reviewer-position {
-    font-size: 0.9rem;
-    color: #94a3b8;
-  }
-
-  .review-badge {
-    display: inline-block;
-    margin-top: 6px;
-    font-size: 0.75rem;
-    color: #facc15;
-    background: rgba(250, 204, 21, 0.1);
-    padding: 2px 8px;
-    border-radius: 4px;
-  }
-
-  .review-comment {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    border-radius: 8px;
-    padding: 20px;
-    color: #e5e5e5;
-    font-size: 1.1rem;
-    line-height: 1.6;
-  }
-
-  /* Animasi Keyframes */
-  @keyframes moveLine {
-    0% {
-      transform: translateY(-50%);
-    }
-    100% {
-      transform: translateY(0%);
-    }
-  }
   
-  @keyframes dash {
-    0% {
-      background-position: 0 0;
-      opacity: 0.6;
-    }
-    100% {
-      background-position: 10px 0;
-      opacity: 1;
-    }
-  }
-  
-  @keyframes pulse {
-    0% {
-      box-shadow: 0 0 0 0 rgba(34, 211, 238, 0.7);
-    }
-    70% {
-      box-shadow: 0 0 0 10px rgba(34, 211, 238, 0);
-    }
-    100% {
-      box-shadow: 0 0 0 0 rgba(34, 211, 238, 0);
-    }
-  }
-  
-  @keyframes glow {
-    from {
-      box-shadow: 0 0 2px rgba(255, 255, 255, 0.4);
-    }
-    to {
-      box-shadow: 0 0 8px rgba(255, 255, 255, 0.8), 0 0 12px rgba(34, 211, 238, 0.5);
-    }
-  }
-
   /* Responsive design */
   @media (max-width: 768px) {
     .hero-title {
@@ -403,41 +225,120 @@ import Layout from '../layouts/Layout.astro';
       gap: 15px;
       padding: 20px;
     }
-
-    .reviews-section {
-      margin-left: 30px;
-      padding-left: 15px;
-    }
-
-    .review-dot {
-      left: -31px;
-    }
-
-    .review-connector {
-      left: -20px;
-      width: 18px;
-    }
   }
   
   @media (max-width: 480px) {
     .linebox {
       grid-template-columns: 1fr;
     }
-
-    .reviews-section {
-      margin-left: 15px;
-      padding-left: 10px;
-    }
-
-    .review-dot {
-      left: -21px;
-      width: 12px;
-      height: 12px;
-    }
-
-    .review-connector {
-      left: -15px;
-      width: 12px;
-    }
   }
+
+
+/* Timeline base */
+.timeline-section {
+  padding: 40px 20px;
+  font-family: 'Space Mono', monospace;
+}
+
+.timeline-container {
+  position: relative;
+  margin: 0 auto;
+  max-width: 900px;
+}
+
+/* Item */
+.timeline-item {
+  display: flex;
+  align-items: flex-start;
+  position: relative;
+  margin-bottom: 40px;
+}
+
+/* Dot (pemancar) */
+.timeline-dot {
+  position: relative;
+  z-index: 2;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #222;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  flex-shrink: 0;
+  margin-right: 20px;
+}
+
+/* Kedap-kedip untuk active */
+.timeline-dot.active {
+  background: #fff;
+  border-color: #6ea6ff;
+  box-shadow: 0 0 12px #6ea6ff, 0 0 24px #6ea6ff;
+  animation: blink 1.6s infinite;
+}
+
+@keyframes blink {
+  0% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(1.1); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+/* Garis putus-putus */
+.timeline-line {
+  position: absolute;
+  left: 8px; /* sejajar dengan tengah dot */
+  top: 20px;
+  bottom: -40px;
+  width: 2px;
+  border-left: 2px dashed rgba(255, 255, 255, 0.2);
+  z-index: 1;
+}
+
+/* Content box (linebox) */
+.timeline-content.linebox {
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 18px 22px;
+  border-radius: 8px;
+  flex: 1;
+}
+
+.date {
+  font-size: 13px;
+  color: #9dbbff;
+  margin-bottom: 6px;
+  display: block;
+}
+
+.title {
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0 0 8px 0;
+  color: #fff;
+}
+
+.label {
+  display: inline-block;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  padding: 4px 10px;
+  font-size: 11px;
+  border-radius: 6px;
+  margin-bottom: 12px;
+  color: #fff;
+}
+
+.text {
+  font-size: 15px;
+  line-height: 1.5;
+  color: #ddd;
+}
+
+
+
+
+
+
+
+
+
 </style>
+
