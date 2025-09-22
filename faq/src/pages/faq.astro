@@ -558,47 +558,38 @@ const developmentInfo = {
 
 
 
-
-<!-- Tambahkan di bagian konten utama, setelah elemen .minimalist-header -->
-<div class="release-timeline-section">
-  <div class="timeline-header">
-    <h2 class="timeline-title">RELEASE TIMELINE</h2>
-    <div class="timeline-title-line"></div>
+<!-- Timeline Isi -->
+<div class="timeline">
+  <div class="timeline-item">
+    <div class="timeline-date">2025-09-19</div>
+    <div class="timeline-dot"></div>
+    <div class="timeline-content linebox">
+      <h3>Rilis Website</h3>
+      <span class="timeline-badge">VERSI PRODUKSI</span>
+      <p>Peluncuran versi pertama website portfolio dengan desain minimalis dan interaktif.</p>
+    </div>
   </div>
 
-  <div class="timeline-container">
-    <!-- Item 1 -->
-    <div class="timeline-item">
-      <div class="timeline-dot"></div>
-      <div class="timeline-content linebox">
-        <h3 class="timeline-version">VERSIE PARDINALE</h3>
-        <p class="timeline-description">Rilis website portfolio dengan desain minimalis dan interaktif.</p>
-        <span class="timeline-date">November 2023</span>
-      </div>
+  <div class="timeline-item">
+    <div class="timeline-date">2025-08-10</div>
+    <div class="timeline-dot"></div>
+    <div class="timeline-content linebox">
+      <h3>Uji Coba Firebase</h3>
+      <span class="timeline-badge">BACKEND</span>
+      <p>Menerapkan autentikasi dan penyimpanan data real-time menggunakan Firebase.</p>
     </div>
+  </div>
 
-    <!-- Item 2 -->
-    <div class="timeline-item">
-      <div class="timeline-dot"></div>
-      <div class="timeline-content linebox">
-        <h3 class="timeline-version">MACKERD</h3>
-        <p class="timeline-description">Uji coba integrasi Firebase untuk autentikasi dan penyimpanan data real-time.</p>
-        <span class="timeline-date">Desember 2023</span>
-      </div>
-    </div>
-
-    <!-- Item 3 -->
-    <div class="timeline-item">
-      <div class="timeline-dot"></div>
-      <div class="timeline-content linebox">
-        <h3 class="timeline-version">PROSTEED</h3>
-        <p class="timeline-description">Penyempurnaan desain UI dengan pendekatan tipografi-based dan minimalis.</p>
-        <span class="timeline-date">Januari 2024</span>
-      </div>
+  <div class="timeline-item">
+    <div class="timeline-date">2025-07-05</div>
+    <div class="timeline-dot"></div>
+    <div class="timeline-content linebox">
+      <h3>Desain UI</h3>
+      <span class="timeline-badge">FRONTEND</span>
+      <p>Membuat desain UI tipografi-based dan minimalist UI untuk tampilan website.</p>
     </div>
   </div>
 </div>
-
 
 
 
@@ -1349,129 +1340,54 @@ const developmentInfo = {
 
 
 
-/* Timeline Styles */
-.release-timeline-section {
-  margin: 60px 0;
-  padding: 40px 0;
-}
 
-.timeline-header {
-  text-align: center;
-  margin-bottom: 50px;
-}
 
-.timeline-title {
-  font-size: 2rem;
-  font-weight: 700;
-  color: #000;
-  text-transform: uppercase;
-  letter-spacing: 2px;
-  margin-bottom: 15px;
-}
-
-.timeline-title-line {
-  height: 3px;
-  width: 80px;
-  background: #3b82f6;
-  margin: 0 auto;
-}
-
-.timeline-container {
+.timeline {
   position: relative;
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 20px 0;
+  border-left: 2px dashed #444;
+  margin: 20px 0;
+  padding-left: 40px;
 }
-
-.timeline-container::before {
-  content: '';
-  position: absolute;
-  left: 50%;
-  top: 0;
-  bottom: 0;
-  width: 2px;
-  background: #3b82f6;
-  transform: translateX(-50%);
-}
-
 .timeline-item {
-  position: relative;
   margin-bottom: 40px;
-  width: 50%;
-  padding: 0 40px;
-  box-sizing: border-box;
+  position: relative;
 }
-
-.timeline-item:nth-child(odd) {
-  left: 0;
+.timeline-date {
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: #999;
 }
-
-.timeline-item:nth-child(even) {
-  left: 50%;
-}
-
 .timeline-dot {
   position: absolute;
+  left: -9px;
+  top: 5px;
   width: 16px;
   height: 16px;
-  background: #3b82f6;
-  border-radius: 50%;
-  top: 20px;
-  right: -8px;
-  z-index: 2;
-}
-
-.timeline-item:nth-child(even) .timeline-dot {
-  left: -8px;
-  right: auto;
-}
-
-.timeline-content {
-  padding: 20px;
   background: #fff;
-  border-radius: 8px;
+  border: 2px solid #000;
+  border-radius: 50%;
 }
-
-.timeline-version {
-  font-size: 1.4rem;
+.timeline-content h3 {
   font-weight: 700;
-  color: #000;
-  margin: 0 0 10px 0;
-  text-transform: uppercase;
-  letter-spacing: 1px;
+  margin: 0 0 10px;
+}
+.timeline-badge {
+  display: inline-block;
+  background: #000;
+  color: #fff;
+  padding: 4px 10px;
+  font-size: 0.8rem;
+  border-radius: 6px;
+  margin-bottom: 10px;
 }
 
-.timeline-description {
-  font-size: 1rem;
-  line-height: 1.6;
-  color: #334155;
-  margin: 0 0 10px 0;
-}
 
-.timeline-date {
-  font-size: 0.9rem;
-  color: #64748b;
-  font-weight: 600;
-}
 
-/* Responsive */
-@media (max-width: 768px) {
-  .timeline-container::before {
-    left: 30px;
-  }
-  
-  .timeline-item {
-    width: 100%;
-    padding-left: 70px;
-    padding-right: 20px;
-    left: 0 !important;
-  }
-  
-  .timeline-dot {
-    left: 22px !important;
-    right: auto !important;
-  }
-}
+
+
+
+
+
 
 
 
@@ -3371,6 +3287,7 @@ function openFAQModal(id) {
   modal.style.display = "block";
 }
 </script>
+
 
 
 
