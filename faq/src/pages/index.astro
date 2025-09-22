@@ -278,139 +278,139 @@ padding-left: 100px;
     }
   }
 
-
 /* TIMELINE STYLES */
-  .timeline-container {
-    position: relative;
-    max-width: 1100px;
-    margin: 0 auto;
-    padding-left: 60px;
-    font-family: 'Space Mono', monospace;
-  }
+.timeline-container {
+  position: relative;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding-left: 60px;
+  font-family: 'Space Mono', monospace;
+}
 
-  /* Garis vertikal utama */
-  .timeline-container::before {
-    content: "";
-    position: absolute;
-    left: 28px;
-    top: 0;
-    bottom: 0;
-    border-left: 2px dashed rgba(255, 255, 255, 0.25);
-    z-index: 1;
-  }
+/* Garis vertikal utama */
+.timeline-container::before {
+  content: "";
+  position: absolute;
+  left: 29px; /* Diadjust agar tepat di tengah dot */
+  top: 0;
+  bottom: 0;
+  border-left: 2px dashed rgba(255, 255, 255, 0.25);
+  z-index: 1;
+}
 
-  .timeline-item {
-    position: relative;
-    margin-bottom: 80px;
-    padding-left: 60px;
-    margin-top: 40px;
-    font-family: 'Space Mono', monospace;
-  }
+.timeline-item {
+  position: relative;
+  margin-bottom: 80px;
+  padding-left: 60px;
+  margin-top: 40px;
+  font-family: 'Space Mono', monospace;
+}
 
-  /* Dot timeline */
-  .timeline-dot {
-    position: absolute;
-    left: 20px;
-    top: 20px;
-    width: 18px;
-    height: 18px;
-    border-radius: 50%;
-    background: #222;
-    border: 2px solid rgba(255,255,255,0.4);
-    z-index: 2;
-  }
+/* Dot timeline - POSISI FIXED */
+.timeline-dot {
+  position: absolute;
+  left: 21px; /* Diadjust agar sejajar dengan garis */
+  top: 25px; /* Jarak dari atas konten */
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #222;
+  border: 2px solid rgba(255,255,255,0.4);
+  z-index: 2;
+}
 
-  .timeline-dot.active {
-    background: #fff;
-    border-color: #6ea6ff;
-    box-shadow: 0 0 12px #6ea6ff, 0 0 24px #6ea6ff;
-    animation: blink 1.6s infinite;
-  }
+.timeline-dot.active {
+  background: #fff;
+  border-color: #6ea6ff;
+  box-shadow: 0 0 12px #6ea6ff, 0 0 24px #6ea6ff;
+  animation: blink 1.6s infinite;
+}
 
-  @keyframes blink {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.6; }
-  }
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
 
+.timeline-content {
+  display: flex;
+  flex-direction: row;
+  gap: 30px;
+  align-items: flex-start;
+  font-family: 'Space Mono', monospace;
+  padding-top: 10px; /* Beri ruang untuk dot */
+}
+
+/* Kiri - tanggal dan judul */
+.timeline-left {
+  min-width: 220px;
+  text-align: left;
+}
+
+.date {
+  font-size: 20px;
+  font-weight: 600;
+  color: #9dbbff;
+}
+
+.title {
+  font-size: 32px;
+  font-weight: 700;
+  margin: 6px 0;
+  color: #fff;
+}
+
+.label.linebox {
+  display: inline-block;
+  background: rgba(0,0,0,0.6);
+  border: 1px solid rgba(255,255,255,0.3);
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-size: 16px;
+  color: #fff;
+  text-transform: uppercase;
+}
+
+/* Kanan - deskripsi */
+.timeline-right.linebox {
+  flex: 1;
+  background: rgba(0,0,0,0.6);
+  border: 1px solid rgba(255,255,255,0.3);
+  padding: 28px 32px;
+  border-radius: 8px;
+  text-align: left;
+}
+
+.timeline-right .text {
+  font-size: 20px;
+  line-height: 1.7;
+  color: #ddd;
+}
+
+/* Responsive timeline */
+@media (max-width: 768px) {
   .timeline-content {
-    display: flex;
-    flex-direction: row;
-    gap: 30px;
-    align-items: flex-start;
-    font-family: 'Space Mono', monospace;
+    flex-direction: column;
   }
-
-  /* Kiri - tanggal dan judul */
+  
   .timeline-left {
-    min-width: 220px;
-    text-align: left;
+    min-width: unset;
   }
-
-  .date {
-    font-size: 20px;
-    font-weight: 600;
-    color: #9dbbff;
+  
+  .timeline-container::before {
+    left: 19px;
   }
-
-  .title {
-    font-size: 32px;
-    font-weight: 700;
-    margin: 6px 0;
-    color: #fff;
+  
+  .timeline-dot {
+    left: 11px;
+    top: 20px;
   }
-
-  .label.linebox {
-    display: inline-block;
-    background: rgba(0,0,0,0.6);
-    border: 1px solid rgba(255,255,255,0.3);
-    padding: 10px 16px;
-    border-radius: 8px;
-    font-size: 16px;
-    color: #fff;
-    text-transform: uppercase;
+  
+  .timeline-item {
+    padding-left: 40px;
   }
-
-  /* Kanan - deskripsi */
-  .timeline-right.linebox {
-    flex: 1;
-    background: rgba(0,0,0,0.6);
-    border: 1px solid rgba(255,255,255,0.3);
-    padding: 28px 32px;
-    border-radius: 8px;
-    text-align: left;
-  }
-
-  .timeline-right .text {
-    font-size: 20px;
-    line-height: 1.7;
-    color: #ddd;
-  }
-
-  /* Responsive timeline */
-  @media (max-width: 768px) {
-    .timeline-content {
-      flex-direction: column;
-    }
-    
-    .timeline-left {
-      min-width: unset;
-    }
-    
-    .timeline-container::before {
-      left: 18px;
-    }
-    
-    .timeline-dot {
-      left: 10px;
-    }
-    
-    .timeline-item {
-      padding-left: 40px;
-    }
-  }
-
-
+}
 </style>
+
 
 
 
