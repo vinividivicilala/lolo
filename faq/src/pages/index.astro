@@ -73,11 +73,14 @@ import Layout from '../layouts/Layout.astro';
           </div>
         </div>
 
+
+
+
+<!-- ITEM 1 -->
 <div class="timeline-item">
   <div class="timeline-dot active"></div>
   <div class="timeline-line"></div>
 
-  <!-- konten dibungkus flex -->
   <div class="timeline-content">
     <div class="timeline-left">
       <span class="date">2025-09-19</span>
@@ -93,8 +96,65 @@ import Layout from '../layouts/Layout.astro';
   </div>
 </div>
 
+<!-- ITEM 2 -->
+<div class="timeline-item">
+  <div class="timeline-dot"></div>
+  <div class="timeline-line"></div>
 
+  <div class="timeline-content">
+    <div class="timeline-left">
+      <span class="date">2025-10-05</span>
+      <h3 class="title">Update Fitur</h3>
+      <span class="label linebox">VERSI 1.1</span>
+    </div>
 
+    <div class="timeline-right linebox">
+      <p class="text">
+        Penambahan sistem komentar, perbaikan bug, dan optimasi tampilan untuk perangkat mobile.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- ITEM 3 -->
+<div class="timeline-item">
+  <div class="timeline-dot"></div>
+  <div class="timeline-line"></div>
+
+  <div class="timeline-content">
+    <div class="timeline-left">
+      <span class="date">2025-11-01</span>
+      <h3 class="title">Integrasi Firebase</h3>
+      <span class="label linebox">BACKEND</span>
+    </div>
+
+    <div class="timeline-right linebox">
+      <p class="text">
+        Implementasi sistem login Google, penyimpanan komentar, dan rating bintang dengan Firestore.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- ITEM 4 -->
+<div class="timeline-item">
+  <div class="timeline-dot"></div>
+  <div class="timeline-line"></div>
+
+  <div class="timeline-content">
+    <div class="timeline-left">
+      <span class="date">2025-12-10</span>
+      <h3 class="title">Dark Mode</h3>
+      <span class="label linebox">UI/UX</span>
+    </div>
+
+    <div class="timeline-right linebox">
+      <p class="text">
+        Penambahan dark mode, peningkatan animasi timeline, dan desain baru untuk halaman pengumuman penting.
+      </p>
+    </div>
+  </div>
+</div>
 
 
 
@@ -107,6 +167,8 @@ import Layout from '../layouts/Layout.astro';
 </Layout>
 
 <style>
+
+@import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap');
 
   body {
     background: #000;
@@ -159,6 +221,10 @@ import Layout from '../layouts/Layout.astro';
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 20px;
  border: 1px solid rgba(255, 255, 255, 0.3); /* garis putih pudar */
+  justify-content: start; /* biar item rata kiri */
+font-family: 'Space Mono', monospace;
+ margin-bottom: 60px;
+
   }
   
 .linebox-item {
@@ -171,6 +237,7 @@ import Layout from '../layouts/Layout.astro';
   cursor: pointer;
   border: 1px solid rgba(255, 255, 255, 0.3); /* garis putih pudar */
   background: none; /* hilangkan fill background */
+font-family: 'Space Mono', monospace;
 }
 
 
@@ -210,8 +277,6 @@ import Layout from '../layouts/Layout.astro';
   }
 
 
-/* Import Space Mono */
-@import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap');
 
 .timeline-section {
   font-family: 'Space Mono', monospace;
@@ -241,6 +306,7 @@ import Layout from '../layouts/Layout.astro';
   position: relative;
   margin-bottom: 80px;
   padding-left: 60px; /* geser isi biar dekat garis */
+ margin-top: 40px;
 }
 
 .timeline-content {
@@ -334,6 +400,7 @@ import Layout from '../layouts/Layout.astro';
 
 
 </style>
+
 
 
 
