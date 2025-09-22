@@ -73,35 +73,64 @@ import Layout from '../layouts/Layout.astro';
           </div>
         </div>
 
-<section class="timeline">
-  <div class="timeline-item">
-    <div class="timeline-dot"></div>
-    <div class="timeline-content linebox">
-      <span class="timeline-date">22 Sept 2025</span>
-      <h3 class="timeline-title">Rilis Versi Baru</h3>
-      <span class="timeline-label">Update</span>
-      <p class="timeline-text">Website mendapatkan desain baru dengan fitur timeline interaktif.</p>
-    </div>
-  </div>
+<!-- PASTE THIS where you want the timeline (e.g. after hero-section) -->
+<section class="timeline-section" aria-label="Timeline">
+  <div class="timeline-container">
+    <!-- ITEM 1 (active / pemancar berkedip) -->
+    <article class="timeline-item">
+      <div class="left">
+        <time class="date">2025-09-19</time>
+        <h3 class="title">Rilis Website</h3>
+        <span class="badge">VERSI PRODUKSI</span>
+      </div>
 
-  <div class="timeline-item">
-    <div class="timeline-dot"></div>
-    <div class="timeline-content linebox">
-      <span class="timeline-date">10 Okt 2025</span>
-      <h3 class="timeline-title">Tambah Fitur</h3>
-      <span class="timeline-label">Fitur</span>
-      <p class="timeline-text">Penambahan sistem komentar, balasan, dan notifikasi real-time.</p>
-    </div>
-  </div>
-</section>
+      <div class="center">
+        <span class="dot active" aria-hidden="true"></span>
+      </div>
 
+      <div class="right">
+        <div class="desc">
+          Peluncuran versi pertama website portfolio dengan desain minimalis dan interaktif.
+        </div>
+      </div>
+    </article>
 
+    <!-- ITEM 2 -->
+    <article class="timeline-item">
+      <div class="left">
+        <time class="date">2025-08-10</time>
+        <h3 class="title">Uji Coba Firebase</h3>
+        <span class="badge">BACKEND</span>
+      </div>
 
+      <div class="center">
+        <span class="dot"></span>
+      </div>
 
+      <div class="right">
+        <div class="desc">
+          Menerapkan autentikasi dan penyimpanan data real-time menggunakan Firebase.
+        </div>
+      </div>
+    </article>
 
+    <!-- ITEM 3 -->
+    <article class="timeline-item">
+      <div class="left">
+        <time class="date">2025-07-05</time>
+        <h3 class="title">Desain UI</h3>
+        <span class="badge">FRONTEND</span>
+      </div>
 
+      <div class="center">
+        <span class="dot"></span>
+      </div>
 
-
+      <div class="right">
+        <div class="desc">
+          Membuat desain UI tipografi-based dan minimalist UI untuk tampilan website.
+        </div>
+      </div>
 
       </section>
     </main>
@@ -115,8 +144,171 @@ import Layout from '../layouts/Layout.astro';
     min-height: 100vh;
     padding: 0;
     margin: 0;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: Space Mono;
   }
+
+
+/* --- Timeline styles (paste into your <style> area) --- */
+@import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap');
+
+
+/* container */
+.timeline-section{
+  padding: 40px 20px;
+  background: transparent;
+  color: var(--white);
+  font-family: 'Space Mono', monospace;
+}
+
+/* grid container — overall width control */
+.timeline-container{
+  max-width: 1160px;
+  margin: 0 auto;
+  position: relative;
+  /* the vertical dashed line position = left column width (320px) + center half (20px) */
+}
+ 
+/* continuous dashed line through items */
+.timeline-container::before{
+  content:"";
+  position:absolute;
+  left: 340px; /* adjust if you change left column width or center width */
+  top: 12px;
+  bottom: 12px;
+  width: 2px;
+  border-left: 2px dashed var(--muted);
+  z-index: 1;
+}
+
+/* each item: three columns (left info / center dot / right desc) */
+.timeline-item{
+  display: grid;
+  grid-template-columns: 320px 40px 1fr;
+  gap: 18px;
+  align-items: start;
+  margin-bottom: 36px;
+  position: relative;
+  z-index: 2; /* above the dashed line */
+}
+
+/* left column (date / title / badge) */
+.timeline-item .left{
+  padding-right: 6px;
+  text-align: left;
+}
+
+.date{
+  display:block;
+  color: #9dbbff;
+  font-size: 12px;
+  letter-spacing: 2px;
+  margin-bottom: 8px;
+}
+
+.title{
+  margin: 0 0 10px 0;
+  font-size: 30px;
+  line-height: 1.05;
+  color: var(--white);
+  font-weight: 700;
+  word-wrap: break-word;
+}
+
+/* badge style */
+.badge{
+  display:inline-block;
+  background: transparent;
+  border: 1px solid var(--panel-border);
+  color: var(--white);
+  font-size: 11px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  box-shadow: none;
+}
+
+/* center column (dot) */
+.center{
+  display:flex;
+  align-items:flex-start;
+  justify-content:center;
+  position:relative;
+  padding-top: 6px;
+}
+
+/* pemancar dot */
+.dot{
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display:inline-block;
+  box-sizing: border-box;
+  border: 2px solid var(--muted);
+  background: rgba(255,255,255,0.02);
+  position: relative;
+  transition: transform .25s ease, box-shadow .25s ease, background .25s ease;
+  margin-top: 6px;
+}
+
+/* active (kedap-kedip) */
+.dot.active{
+  background: var(--white);
+  border-color: rgba(255,255,255,0.9);
+  box-shadow: 0 0 18px rgba(110,166,255,0.18), 0 0 36px rgba(110,166,255,0.08);
+  animation: blinkDot 1.4s infinite;
+}
+
+/* subtle passive look */
+.dot:not(.active){
+  background: rgba(255,255,255,0.02);
+  border-color: rgba(255,255,255,0.16);
+  box-shadow: none;
+  opacity: 0.8;
+}
+
+@keyframes blinkDot {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.05); opacity: 0.45; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* right column (description box) */
+.right .desc{
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  padding: 22px 24px;
+  border-radius: 8px;
+  color: #d6d6d6;
+  font-size: 16px;
+  line-height: 1.7;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.01);
+  min-height: 72px;
+}
+
+/* small responsive tweaks */
+@media (max-width: 980px){
+  .timeline-item{ grid-template-columns: 280px 36px 1fr; }
+  .timeline-container::before{ left: 298px; }
+  .title{ font-size: 26px; }
+}
+
+@media (max-width: 720px){
+  /* stacked on small screens */
+  .timeline-item{ grid-template-columns: 1fr; }
+  .center{ order: 2; margin: 6px 0 0 0; justify-content:flex-start; }
+  .right{ order: 3; margin-top: 10px; }
+  .left{ order: 1; margin-bottom: 6px; }
+  .timeline-container::before{ display:none; } /* hide vertical line on very small */
+}
+
+
+
+
+
+
+
+
 
   .container {
     max-width: 1200px;
@@ -207,88 +399,8 @@ import Layout from '../layouts/Layout.astro';
     }
   }
 
-/* Timeline container */
-.timeline {
-  position: relative;
-  margin: 50px auto;
-  padding-left: 40px;
-  border-left: 2px dashed rgba(255, 255, 255, 0.5); /* garis putus-putus */
-}
-
-/* Timeline item */
-.timeline-item {
-  position: relative;
-  margin-bottom: 40px;
-}
-
-/* Titik pemancar (kedap-kedip) */
-.timeline-dot {
-  position: absolute;
-  left: -11px;
-  top: 10px;
-  width: 20px;
-  height: 20px;
-  background: #667eea;
-  border-radius: 50%;
-  box-shadow: 0 0 10px #667eea, 0 0 20px #667eea;
-  animation: blink 1.5s infinite alternate;
-}
-
-@keyframes blink {
-  from { opacity: 1; }
-  to { opacity: 0.3; }
-}
-
-/* Timeline content box */
-.timeline-content {
-  background: rgba(0, 0, 0, 0.6); /* linebox hitam pudar */
-  padding: 20px;
-  border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  margin-left: 20px;
-}
-
-.timeline-date {
-  font-size: 0.9rem;
-  color: #ccc;
-}
-
-.timeline-title {
-  font-size: 1.2rem;
-  font-weight: bold;
-  margin: 5px 0;
-  color: #fff;
-}
-
-.timeline-label {
-  display: inline-block;
-  background: #667eea;
-  color: #fff;
-  font-size: 0.8rem;
-  padding: 3px 8px;
-  border-radius: 4px;
-  margin-bottom: 10px;
-}
-
-.timeline-text {
-  font-size: 1rem;
-  color: #ddd;
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 </style>
+
 
 
 
