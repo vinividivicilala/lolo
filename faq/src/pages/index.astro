@@ -72,6 +72,37 @@ import Layout from '../layouts/Layout.astro';
             <span>Daftar Project</span>
           </div>
         </div>
+
+<section class="timeline">
+  <div class="timeline-item">
+    <div class="timeline-dot"></div>
+    <div class="timeline-content linebox">
+      <span class="timeline-date">22 Sept 2025</span>
+      <h3 class="timeline-title">Rilis Versi Baru</h3>
+      <span class="timeline-label">Update</span>
+      <p class="timeline-text">Website mendapatkan desain baru dengan fitur timeline interaktif.</p>
+    </div>
+  </div>
+
+  <div class="timeline-item">
+    <div class="timeline-dot"></div>
+    <div class="timeline-content linebox">
+      <span class="timeline-date">10 Okt 2025</span>
+      <h3 class="timeline-title">Tambah Fitur</h3>
+      <span class="timeline-label">Fitur</span>
+      <p class="timeline-text">Penambahan sistem komentar, balasan, dan notifikasi real-time.</p>
+    </div>
+  </div>
+</section>
+
+
+
+
+
+
+
+
+
       </section>
     </main>
   </div>
@@ -175,6 +206,89 @@ import Layout from '../layouts/Layout.astro';
       grid-template-columns: 1fr;
     }
   }
+
+/* Timeline container */
+.timeline {
+  position: relative;
+  margin: 50px auto;
+  padding-left: 40px;
+  border-left: 2px dashed rgba(255, 255, 255, 0.5); /* garis putus-putus */
+}
+
+/* Timeline item */
+.timeline-item {
+  position: relative;
+  margin-bottom: 40px;
+}
+
+/* Titik pemancar (kedap-kedip) */
+.timeline-dot {
+  position: absolute;
+  left: -11px;
+  top: 10px;
+  width: 20px;
+  height: 20px;
+  background: #667eea;
+  border-radius: 50%;
+  box-shadow: 0 0 10px #667eea, 0 0 20px #667eea;
+  animation: blink 1.5s infinite alternate;
+}
+
+@keyframes blink {
+  from { opacity: 1; }
+  to { opacity: 0.3; }
+}
+
+/* Timeline content box */
+.timeline-content {
+  background: rgba(0, 0, 0, 0.6); /* linebox hitam pudar */
+  padding: 20px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  margin-left: 20px;
+}
+
+.timeline-date {
+  font-size: 0.9rem;
+  color: #ccc;
+}
+
+.timeline-title {
+  font-size: 1.2rem;
+  font-weight: bold;
+  margin: 5px 0;
+  color: #fff;
+}
+
+.timeline-label {
+  display: inline-block;
+  background: #667eea;
+  color: #fff;
+  font-size: 0.8rem;
+  padding: 3px 8px;
+  border-radius: 4px;
+  margin-bottom: 10px;
+}
+
+.timeline-text {
+  font-size: 1rem;
+  color: #ddd;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 </style>
+
 
 
