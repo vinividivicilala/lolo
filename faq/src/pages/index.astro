@@ -73,25 +73,115 @@ import Layout from '../layouts/Layout.astro';
           </div>
         </div>
 
+<div class="timeline-item">
+  <div class="timeline-dot active"></div>
+  <div class="timeline-line"></div>
 
-  55, 255, 0.3);
-  background: none;
-padding-left: 50px;
+  <!-- konten dibungkus flex -->
+  <div class="timeline-content">
+    <div class="timeline-left">
+      <span class="date">2025-09-19</span>
+      <h3 class="title">Rilis Website</h3>
+      <span class="label linebox">VERSI PRODUKSI</span>
+    </div>
+
+    <div class="timeline-right linebox">
+      <p class="text">
+        Peluncuran versi pertama website portfolio dengan desain minimalis dan interaktif.
+      </p>
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+
+
+      </section>
+    </main>
+  </div>
+</Layout>
+
+<style>
+
+  body {
+    background: #000;
+    color: #fff;
+    min-height: 100vh;
+    padding: 0;
+    margin: 0;
+     font-family: 'Space Mono', monospace;
+  }
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+  
+  .home-container {
+    padding: 40px 0;
+  }
+  
+  .hero-section {
+    text-align: center;
+    padding: 80px 0;
+  }
+  
+  .hero-title {
+    font-size: 3rem;
+    font-weight: 700;
+    margin-bottom: 20px;
+    font-family: 'Montserrat', sans-serif;
+    color: #fff;
+  }
+  
+  .hero-subtitle {
+    font-size: 1.3rem;
+    max-width: 600px;
+    margin: 0 auto 60px;
+    opacity: 0.8;
+    color: #ccc;
+  }
+  
+  .linebox {
+    border-radius: 12px;
+    padding: 30px;
+    max-width: 800px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+ border: 1px solid rgba(255, 255, 255, 0.3); /* garis putih pudar */
+  }
+  
+.linebox-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px 15px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  border: 1px solid rgba(255, 255, 255, 0.3); /* garis putih pudar */
+  background: none; /* hilangkan fill background */
 }
+
 
   
-
-.linebox-item svg {
-  color: #6ea6ff;
-  flex-shrink: 0;
-}
-
-.linebox-item span {
-  font-weight: 600;
-  color: #fff;
-  font-family: 'Space Mono', monospace;
-}
-
+  .linebox-item svg {
+    color: #667eea;
+    margin-bottom: 15px;
+  }
+  
+  .linebox-item span {
+    font-weight: 600;
+    color: #fff;
+  }
   
   /* Responsive design */
   @media (max-width: 768px) {
@@ -128,42 +218,39 @@ padding-left: 50px;
   position: relative;
   max-width: 1100px;
   margin: 0 auto;
-  padding-left: 50px; /* lebih besar, biar teks ga mentok kiri */
+  padding-left: 60px; /* jarak garis ke konten kiri */
 }
 
+/* garis vertikal putus-putus */
 .timeline-container::before {
   content: "";
   position: absolute;
-  left: 50px; /* sejajarkan dengan dot */
+  left: 28px;
   top: 0;
   bottom: 0;
-  border-left: 2px dashed rgba(255, 255, 255, 0.4);
-  z-index: 0; /* di belakang dot */
+  border-left: 2px dashed rgba(255, 255, 255, 0.25);
+  z-index: 1;
 }
 
-.timeline-line {
-  display: none; /* matikan garis per item */
-}
 
 
 .timeline-item {
   position: relative;
   margin-bottom: 80px;
-  padding-left: 80px; /* konten agak menjauh dari garis */
-  margin-top: 40px;
+  padding-left: 60px; /* geser isi biar dekat garis */
 }
 
 .timeline-content {
   display: flex;
   flex-direction: row;
   gap: 30px;
-  align-items: flex-start;
+  align-items: flex-start; /* sejajar dari atas */
 }
 
 /* dot */
 .timeline-dot {
   position: absolute;
-  left: 42px; /* sejajar garis global */
+  left: 20px;
   top: 20px;
   width: 18px;
   height: 18px;
@@ -179,17 +266,14 @@ padding-left: 50px;
   animation: blink 1.6s infinite;
 }
 
-@keyframes blink {
-  0%   { box-shadow: 0 0 6px #6ea6ff, 0 0 12px #6ea6ff; }
-  50%  { box-shadow: 0 0 16px #6ea6ff, 0 0 32px #6ea6ff; }
-  100% { box-shadow: 0 0 6px #6ea6ff, 0 0 12px #6ea6ff; }
-}
-
-
-
-/* matikan garis per-item */
+/* garis putus-putus */
 .timeline-line {
-  display: none;
+  position: absolute;
+  left: 28px;
+  top: 0;
+  bottom: 0;
+  border-left: 2px dashed rgba(255,255,255,0.25);
+  z-index: 1;
 }
 
 /* kiri */
@@ -242,19 +326,11 @@ padding-left: 50px;
   .timeline-left {
     min-width: unset;
   }
-} 
+}
 
 
 
 </style>
-
-
-
-
-
-
-
-
 
 
 
