@@ -277,6 +277,9 @@ padding-left: 100px;
       grid-template-columns: 1fr;
     }
   }
+
+
+
   /* TIMELINE STYLES */
   .timeline-container {
     position: relative;
@@ -305,19 +308,20 @@ padding-left: 100px;
     font-family: 'Space Mono', monospace;
   }
 
-  /* Dot timeline */
-  .timeline-dot {
-    position: absolute;
-    left: 28px;
-    top: 20px;
-    width: 18px;
-    height: 18px;
-    border-radius: 50%;
-    background: #222;
-    border: 2px solid rgba(255,255,255,0.4);
-    z-index: 2;
-transform: translateX(-50%);
-  }
+ .timeline-dot {
+  position: absolute;
+  left: 28px;               /* sama dengan garis */
+  top: 20px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #222;
+  border: 2px solid rgba(255,255,255,0.4);
+  z-index: 2;
+
+  /* trik biar bulatan center tepat di garis */
+  transform: translateX(-50%);
+}
 
   .timeline-dot.active {
     background: #fff;
@@ -408,6 +412,7 @@ transform: translateX(-50%);
     }
   }
 </style>
+
 
 
 
