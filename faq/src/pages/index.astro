@@ -75,88 +75,78 @@ import Layout from '../layouts/Layout.astro';
 
 
 
+  <!-- TIMELINE CONTAINER -->
+        <div class="timeline-container">
+          
+          <!-- ITEM 1 -->
+          <div class="timeline-item">
+            <div class="timeline-dot active"></div>
+            <div class="timeline-content">
+              <div class="timeline-left">
+                <span class="date">2025-09-19</span>
+                <h3 class="title">Rilis Website</h3>
+                <span class="label linebox">VERSI PRODUKSI</span>
+              </div>
+              <div class="timeline-right linebox">
+                <p class="text">
+                  Peluncuran versi pertama website portfolio dengan desain minimalis dan interaktif.
+                </p>
+              </div>
+            </div>
+          </div>
 
-<!-- ITEM 1 -->
-<div class="timeline-item">
-  <div class="timeline-dot active"></div>
-  <div class="timeline-line"></div>
+          <!-- ITEM 2 -->
+          <div class="timeline-item">
+            <div class="timeline-dot"></div>
+            <div class="timeline-content">
+              <div class="timeline-left">
+                <span class="date">2025-10-05</span>
+                <h3 class="title">Update Fitur</h3>
+                <span class="label linebox">VERSI 1.1</span>
+              </div>
+              <div class="timeline-right linebox">
+                <p class="text">
+                  Penambahan sistem komentar, perbaikan bug, dan optimasi tampilan untuk perangkat mobile.
+                </p>
+              </div>
+            </div>
+          </div>
 
-  <div class="timeline-content">
-    <div class="timeline-left">
-      <span class="date">2025-09-19</span>
-      <h3 class="title">Rilis Website</h3>
-      <span class="label linebox">VERSI PRODUKSI</span>
-    </div>
+          <!-- ITEM 3 -->
+          <div class="timeline-item">
+            <div class="timeline-dot"></div>
+            <div class="timeline-content">
+              <div class="timeline-left">
+                <span class="date">2025-11-01</span>
+                <h3 class="title">Integrasi Firebase</h3>
+                <span class="label linebox">BACKEND</span>
+              </div>
+              <div class="timeline-right linebox">
+                <p class="text">
+                  Implementasi sistem login Google, penyimpanan komentar, dan rating bintang dengan Firestore.
+                </p>
+              </div>
+            </div>
+          </div>
 
-    <div class="timeline-right linebox">
-      <p class="text">
-        Peluncuran versi pertama website portfolio dengan desain minimalis dan interaktif.
-      </p>
-    </div>
-  </div>
-</div>
+          <!-- ITEM 4 -->
+          <div class="timeline-item">
+            <div class="timeline-dot"></div>
+            <div class="timeline-content">
+              <div class="timeline-left">
+                <span class="date">2025-12-10</span>
+                <h3 class="title">Dark Mode</h3>
+                <span class="label linebox">UI/UX</span>
+              </div>
+              <div class="timeline-right linebox">
+                <p class="text">
+                  Penambahan dark mode, peningkatan animasi timeline, dan desain baru untuk halaman pengumuman penting.
+                </p>
+              </div>
+            </div>
+          </div>
 
-<!-- ITEM 2 -->
-<div class="timeline-item">
-  <div class="timeline-dot"></div>
-  <div class="timeline-line"></div>
-
-  <div class="timeline-content">
-    <div class="timeline-left">
-      <span class="date">2025-10-05</span>
-      <h3 class="title">Update Fitur</h3>
-      <span class="label linebox">VERSI 1.1</span>
-    </div>
-
-    <div class="timeline-right linebox">
-      <p class="text">
-        Penambahan sistem komentar, perbaikan bug, dan optimasi tampilan untuk perangkat mobile.
-      </p>
-    </div>
-  </div>
-</div>
-
-<!-- ITEM 3 -->
-<div class="timeline-item">
-  <div class="timeline-dot"></div>
-  <div class="timeline-line"></div>
-
-  <div class="timeline-content">
-    <div class="timeline-left">
-      <span class="date">2025-11-01</span>
-      <h3 class="title">Integrasi Firebase</h3>
-      <span class="label linebox">BACKEND</span>
-    </div>
-
-    <div class="timeline-right linebox">
-      <p class="text">
-        Implementasi sistem login Google, penyimpanan komentar, dan rating bintang dengan Firestore.
-      </p>
-    </div>
-  </div>
-</div>
-
-<!-- ITEM 4 -->
-<div class="timeline-item">
-  <div class="timeline-dot"></div>
-  <div class="timeline-line"></div>
-
-  <div class="timeline-content">
-    <div class="timeline-left">
-      <span class="date">2025-12-10</span>
-      <h3 class="title">Dark Mode</h3>
-      <span class="label linebox">UI/UX</span>
-    </div>
-
-    <div class="timeline-right linebox">
-      <p class="text">
-        Penambahan dark mode, peningkatan animasi timeline, dan desain baru untuk halaman pengumuman penting.
-      </p>
-    </div>
-  </div>
-</div>
-
-
+        
 
 
 
@@ -234,7 +224,7 @@ padding-left: 60px;
   justify-content: start; /* biar item rata kiri */
 font-family: 'Space Mono', monospace;
  margin-bottom: 60px;
-padding-left: 60px; 
+padding-left: 100px; 
 
   }
   
@@ -249,7 +239,7 @@ padding-left: 60px;
   border: 1px solid rgba(255, 255, 255, 0.3); /* garis putih pudar */
   background: none; /* hilangkan fill background */
 font-family: 'Space Mono', monospace;
-padding-left: 60px; 
+padding-left: 100px; 
 }
 
 
@@ -289,133 +279,139 @@ padding-left: 60px;
   }
 
 
+/* TIMELINE STYLES */
+  .timeline-container {
+    position: relative;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding-left: 60px;
+    font-family: 'Space Mono', monospace;
+  }
 
-.timeline-section {
-  font-family: 'Space Mono', monospace;
+  /* Garis vertikal utama */
+  .timeline-container::before {
+    content: "";
+    position: absolute;
+    left: 28px;
+    top: 0;
+    bottom: 0;
+    border-left: 2px dashed rgba(255, 255, 255, 0.25);
+    z-index: 1;
+  }
 
-}
+  .timeline-item {
+    position: relative;
+    margin-bottom: 80px;
+    padding-left: 60px;
+    margin-top: 40px;
+    font-family: 'Space Mono', monospace;
+  }
 
-.timeline-container {
-  position: relative;
-  max-width: 1100px;
-  margin: 0 auto;
-  padding-left: 60px; /* jarak garis ke konten kiri */
-   font-family: 'Space Mono', monospace;
-}
+  /* Dot timeline */
+  .timeline-dot {
+    position: absolute;
+    left: 20px;
+    top: 20px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #222;
+    border: 2px solid rgba(255,255,255,0.4);
+    z-index: 2;
+  }
 
-/* garis vertikal putus-putus */
-.timeline-container::before {
-  content: "";
-  position: absolute;
-  left: 28px;
-  top: 0;
-  bottom: 0;
-  border-left: 2px dashed rgba(255, 255, 255, 0.25);
-  z-index: 1;
-}
+  .timeline-dot.active {
+    background: #fff;
+    border-color: #6ea6ff;
+    box-shadow: 0 0 12px #6ea6ff, 0 0 24px #6ea6ff;
+    animation: blink 1.6s infinite;
+  }
 
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+  }
 
-
-.timeline-item {
-  position: relative;
-  margin-bottom: 80px;
-  padding-left: 60px; /* geser isi biar dekat garis */
- margin-top: 40px;
-   font-family: 'Space Mono', monospace;
-}
-
-.timeline-content {
-  display: flex;
-  flex-direction: row;
-  gap: 30px;
-  align-items: flex-start; /* sejajar dari atas */
-   font-family: 'Space Mono', monospace;
-}
-
-/* dot */
-.timeline-dot {
-  position: absolute;
-  left: 20px;
-  top: 20px;
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  background: #222;
-  border: 2px solid rgba(255,255,255,0.4);
-  z-index: 2;
-}
-.timeline-dot.active {
-  background: #fff;
-  border-color: #6ea6ff;
-  box-shadow: 0 0 12px #6ea6ff, 0 0 24px #6ea6ff;
-  animation: blink 1.6s infinite;
-}
-
-/* garis putus-putus */
-.timeline-line {
-  position: absolute;
-  left: 28px;
-  top: 0;
-  bottom: 0;
-  border-left: 2px dashed rgba(255,255,255,0.25);
-  z-index: 1;
-}
-
-/* kiri */
-.timeline-left {
-  min-width: 220px;
-  text-align: left;
-}
-.date {
-  font-size: 20px;
-  font-weight: 600;
-  color: #9dbbff;
-}
-.title {
-  font-size: 32px;
-  font-weight: 700;
-  margin: 6px 0;
-  color: #fff;
-}
-.label.linebox {
-  display: inline-block;
-  background: rgba(0,0,0,0.6);
-  border: 1px solid rgba(255,255,255,0.3);
-  padding: 10px 16px;
-  border-radius: 8px;
-  font-size: 16px;
-  color: #fff;
-  text-transform: uppercase;
-}
-
-/* kanan */
-.timeline-right.linebox {
-  flex: 1;
-  background: rgba(0,0,0,0.6);
-  border: 1px solid rgba(255,255,255,0.3);
-  padding: 28px 32px;
-  border-radius: 8px;
-  text-align: left;
-}
-.timeline-right .text {
-  font-size: 20px;
-  line-height: 1.7;
-  color: #ddd;
-}
-
-/* responsive */
-@media (max-width: 768px) {
   .timeline-content {
-    flex-direction: column;
+    display: flex;
+    flex-direction: row;
+    gap: 30px;
+    align-items: flex-start;
+    font-family: 'Space Mono', monospace;
   }
-  .timeline-left {
-    min-width: unset;
-  }
-}
 
+  /* Kiri - tanggal dan judul */
+  .timeline-left {
+    min-width: 220px;
+    text-align: left;
+  }
+
+  .date {
+    font-size: 20px;
+    font-weight: 600;
+    color: #9dbbff;
+  }
+
+  .title {
+    font-size: 32px;
+    font-weight: 700;
+    margin: 6px 0;
+    color: #fff;
+  }
+
+  .label.linebox {
+    display: inline-block;
+    background: rgba(0,0,0,0.6);
+    border: 1px solid rgba(255,255,255,0.3);
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-size: 16px;
+    color: #fff;
+    text-transform: uppercase;
+  }
+
+  /* Kanan - deskripsi */
+  .timeline-right.linebox {
+    flex: 1;
+    background: rgba(0,0,0,0.6);
+    border: 1px solid rgba(255,255,255,0.3);
+    padding: 28px 32px;
+    border-radius: 8px;
+    text-align: left;
+  }
+
+  .timeline-right .text {
+    font-size: 20px;
+    line-height: 1.7;
+    color: #ddd;
+  }
+
+  /* Responsive timeline */
+  @media (max-width: 768px) {
+    .timeline-content {
+      flex-direction: column;
+    }
+    
+    .timeline-left {
+      min-width: unset;
+    }
+    
+    .timeline-container::before {
+      left: 18px;
+    }
+    
+    .timeline-dot {
+      left: 10px;
+    }
+    
+    .timeline-item {
+      padding-left: 40px;
+    }
+  }
 
 
 </style>
+
 
 
 
