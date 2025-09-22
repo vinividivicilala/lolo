@@ -373,44 +373,255 @@ const developmentInfo = {
 </div>
 
 
-
-
-
-<div class="timeline">
-  <div class="timeline-item">
-    <div class="timeline-dot pulse"></div>
-    <div class="timeline-date">2025-09-19</div>
-    <div class="timeline-content linebox">
-      <h3>Rilis Website</h3>
-      <span class="label linebox">VERSI PRODUKSI</span>
-      <p>Peluncuran versi pertama website portfolio dengan desain minimalis dan interaktif.</p>
+  {/* Nama Panjang di atas Timeline Box */}
+    <div style={{
+      marginLeft: "60px",
+      marginBottom: "40px",
+      fontSize: "1.8rem",
+      fontWeight: "700",
+      color: "#fff"
+    }}>
+      Farid Ardiansyah
     </div>
-  </div>
 
-  <div class="timeline-item">
-    <div class="timeline-dot"></div>
-    <div class="timeline-date">2025-08-10</div>
-    <div class="timeline-content linebox">
-      <h3>Uji Coba Firebase</h3>
-      <span class="label linebox">BACKEND</span>
-      <p>Menerapkan autentikasi dan penyimpanan data real-time menggunakan Firebase.</p>
+    {/* Timeline Container */}
+    <div style={{ 
+      marginLeft: "60px", 
+      marginBottom: "40px", 
+      position: "relative",
+      paddingLeft: "30px"
+    }}>
+      {/* Garis putus-putus vertikal utama */}
+      <div style={{
+        position: "absolute",
+        left: "0",
+        top: "0",
+        height: "100%",
+        borderLeft: "2px dashed rgba(255, 255, 255, 0.3)"
+      }}></div>
+      
+      {/* Item Timeline 1 - dengan animasi kedap-kedip */}
+      <div style={{ 
+        display: "flex", 
+        alignItems: "flex-start",
+        marginBottom: "50px",
+        position: "relative"
+      }}>
+        {/* Titik kiri dengan animasi kedap-kedip */}
+        <div style={{
+          position: "absolute",
+          left: "-41px",
+          top: "15px",
+          width: "16px",
+          height: "16px",
+          borderRadius: "50%",
+          background: "#fff",
+          boxShadow: "0 0 0 4px rgba(255, 255, 255, 0.4)",
+          animation: "pulse 1.5s infinite",
+          zIndex: "2"
+        }}></div>
+        
+        {/* Garis penghubung horizontal */}
+        <div className="timeline-connector" style={{
+          position: "absolute",
+          left: "-30px",
+          top: "23px",
+          width: "28px",
+          height: "2px",
+          background: "rgba(255, 255, 255, 0.3)"
+        }}></div>
+
+        {/* Konten Timeline */}
+        <div style={{ flex: "1" }}>
+          <div style={{
+            fontSize: "1.1rem",
+            color: "#94a3b8",
+            fontWeight: "700",
+            marginBottom: "5px"
+          }}>2025-09-19</div>
+          
+          <div style={{
+            fontSize: "1.8rem",
+            fontWeight: "700",
+            color: "#fff",
+            marginBottom: "10px"
+          }}>Rilis Website</div>
+          
+          <div style={{
+            display: "inline-block",
+            padding: "6px 12px",
+            borderRadius: "6px",
+            fontSize: "1rem",
+            fontWeight: "700",
+            background: "rgba(255, 255, 255, 0.1)",
+            color: "#fff",
+            border: "1px solid rgba(255, 255, 255, 0.3)",
+            marginBottom: "20px"
+          }}>VERSI PRODUKSI</div>
+          
+          <div style={{
+            background: "rgba(255, 255, 255, 0.05)",
+            border: "1px solid rgba(255, 255, 255, 0.15)",
+            borderRadius: "8px",
+            padding: "25px",
+            color: "#e5e5e5",
+            fontSize: "1.2rem",
+            lineHeight: "1.6",
+            fontWeight: "600"
+          }}>
+            Peluncuran versi pertama website portfolio dengan desain minimalis dan interaktif.
+          </div>
+        </div>
+      </div>
+      
+      {/* Item Timeline 2 - dengan animasi kedap-kedip */}
+      <div style={{ 
+        display: "flex", 
+        alignItems: "flex-start",
+        marginBottom: "50px",
+        position: "relative"
+      }}>
+        {/* Titik kiri dengan animasi kedap-kedip */}
+        <div style={{
+          position: "absolute",
+          left: "-41px",
+          top: "15px",
+          width: "16px",
+          height: "16px",
+          borderRadius: "50%",
+          background: "#fff",
+          boxShadow: "0 0 0 4px rgba(255, 255, 255, 0.4)",
+          animation: "pulse 1.5s infinite",
+          zIndex: "2"
+        }}></div>
+        
+        {/* Garis penghubung horizontal */}
+        <div className="timeline-connector" style={{
+          position: "absolute",
+          left: "-30px",
+          top: "23px",
+          width: "28px",
+          height: "2px",
+          background: "rgba(255, 255, 255, 0.3)"
+        }}></div>
+
+        {/* Konten Timeline */}
+        <div style={{ flex: "1" }}>
+          <div style={{
+            fontSize: "1.1rem",
+            color: "#94a3b8",
+            fontWeight: "700",
+            marginBottom: "5px"
+          }}>2025-08-10</div>
+          
+          <div style={{
+            fontSize: "1.8rem",
+            fontWeight: "700",
+            color: "#fff",
+            marginBottom: "10px"
+          }}>Uji Coba Firebase</div>
+          
+          <div style={{
+            display: "inline-block",
+            padding: "6px 12px",
+            borderRadius: "6px",
+            fontSize: "1rem",
+            fontWeight: "700",
+            background: "rgba(255, 255, 255, 0.1)",
+            color: "#fff",
+            border: "1px solid rgba(255, 255, 255, 0.3)",
+            marginBottom: "20px"
+          }}>BACKEND</div>
+          
+          <div style={{
+            background: "rgba(255, 255, 255, 0.05)",
+            border: "1px solid rgba(255, 255, 255, 0.15)",
+            borderRadius: "8px",
+            padding: "25px",
+            color: "#e5e5e5",
+            fontSize: "1.2rem",
+            lineHeight: "1.6",
+            fontWeight: "600"
+          }}>
+            Menerapkan autentikasi dan penyimpanan data real-time menggunakan Firebase.
+          </div>
+        </div>
+      </div>
+      
+      {/* Item Timeline 3 - dengan animasi kedap-kedip */}
+      <div style={{ 
+        display: "flex", 
+        alignItems: "flex-start",
+        marginBottom: "50px",
+        position: "relative"
+      }}>
+        {/* Titik kiri dengan animasi kedap-kedip */}
+        <div style={{
+          position: "absolute",
+          left: "-41px",
+          top: "15px",
+          width: "16px",
+          height: "16px",
+          borderRadius: "50%",
+          background: "#fff",
+          boxShadow: "0 0 0 4px rgba(255, 255, 255, 0.4)",
+          animation: "pulse 1.5s infinite",
+          zIndex: "2"
+        }}></div>
+        
+        {/* Garis penghubung horizontal */}
+        <div className="timeline-connector" style={{
+          position: "absolute",
+          left: "-30px",
+          top: "23px",
+          width: "28px",
+          height: "2px",
+          background: "rgba(255, 255, 255, 0.3)"
+        }}></div>
+
+        {/* Konten Timeline */}
+        <div style={{ flex: "1" }}>
+          <div style={{
+            fontSize: "1.1rem",
+            color: "#94a3b8",
+            fontWeight: "700",
+            marginBottom: "5px"
+          }}>2025-07-05</div>
+          
+          <div style={{
+            fontSize: "1.8rem",
+            fontWeight: "700",
+            color: "#fff",
+            marginBottom: "10px"
+          }}>Desain UI</div>
+          
+          <div style={{
+            display: "inline-block",
+            padding: "6px 12px",
+            borderRadius: "6px",
+            fontSize: "1rem",
+            fontWeight: "700",
+            background: "rgba(255, 255, 255, 0.1)",
+            color: "#fff",
+            border: "1px solid rgba(255, 255, 255, 0.3)",
+            marginBottom: "20px"
+          }}>FRONTEND</div>
+          
+          <div style={{
+            background: "rgba(255, 255, 255, 0.05)",
+            border: "1px solid rgba(255, 255, 255, 0.15)",
+            borderRadius: "8px",
+            padding: "25px",
+            color: "#e5e5e5",
+            fontSize: "1.2rem",
+            lineHeight: "1.6",
+            fontWeight: "600"
+          }}>
+            Membuat desain UI tipografi-based dan minimalist UI untuk tampilan website.
+          </div>
+        </div>
+      </div>
     </div>
-  </div>
-
-  <div class="timeline-item">
-    <div class="timeline-dot"></div>
-    <div class="timeline-date">2025-07-05</div>
-    <div class="timeline-content linebox">
-      <h3>Desain UI</h3>
-      <span class="label linebox">FRONTEND</span>
-      <p>Membuat desain UI tipografi-based dan minimalist UI untuk tampilan website.</p>
-    </div>
-  </div>
-</div>
-
-
-
-
 
 
 
@@ -723,78 +934,160 @@ const developmentInfo = {
   }
 
 
+    .timeline {
+          position: relative;
+          margin-left: 20px;
+          padding-left: 30px;
+        }
 
-.timeline {
-  position: relative;
-  margin: 40px 0;
-  padding-left: 40px;
-  border-left: 2px dashed rgba(255,255,255,0.4); /* line putus-putus */
-}
+        /* Garis putus-putus statis untuk timeline */
+        .timeline::before {
+          content: "";
+          position: absolute;
+          left: 0;
+          top: 0;
+          height: 100%;
+          border-left: 2px dashed rgba(255, 255, 255, 0.3);
+        }
 
-.timeline-item {
-  position: relative;
-  margin-bottom: 50px;
-}
+        .timeline-item {
+          display: flex;
+          align-items: flex-start;
+          margin-bottom: 2.5rem;
+          position: relative;
+        }
 
-.timeline-dot {
-  position: absolute;
-  left: -10px;
-  top: 0;
-  width: 18px;
-  height: 18px;
-  background: #000;
-  border-radius: 50%;
-  border: 3px solid #fff;
-}
+        .timeline-left {
+          flex: 0 0 220px;
+          text-align: left;
+          color: #fff;
+          padding-right: 20px;
+        }
 
-.timeline-dot.pulse {
-  background: #3b82f6;
-  animation: pulseBlink 1.5s infinite;
-}
+        .timeline-date {
+          display: block;
+          font-size: 1.1rem;
+          color: #94a3b8;
+          font-weight: 700;
+          margin-bottom: 5px;
+        }
 
-@keyframes pulseBlink {
-  0% { box-shadow: 0 0 0 0 rgba(59,130,246,0.7); }
-  70% { box-shadow: 0 0 0 12px rgba(59,130,246,0); }
-  100% { box-shadow: 0 0 0 0 rgba(59,130,246,0); }
-}
+        .timeline-title {
+          font-size: 1.5rem;
+          font-weight: 700;
+          margin-top: 0.3rem;
+          margin-bottom: 10px;
+          color: #fff;
+        }
 
-.timeline-date {
-  font-weight: 700;
-  font-size: 0.9rem;
-  margin-bottom: 6px;
-  color: #fff;
-}
+        /* Blok warna di bawah title */
+        .timeline-tag {
+          display: inline-block;
+          padding: 6px 12px;
+          border-radius: 6px;
+          font-size: 0.9rem;
+          font-weight: 700;
+          margin-top: 5px;
+          background: rgba(255, 255, 255, 0.1);
+          color: #fff;
+          border: 1px solid rgba(255, 255, 255, 0.3);
+        }
 
-.timeline-content {
-  background: rgba(0,0,0,0.6);
-  padding: 15px 20px;
-  border-radius: 8px;
-  border: 1px solid rgba(255,255,255,0.2);
-  color: #fff;
-}
+        .timeline-right {
+          flex: 1;
+          color: #e5e5e5;
+          font-size: 1.1rem;
+          line-height: 1.6;
+          font-weight: 600;
+        }
 
-.timeline-content h3 {
-  margin: 0 0 6px;
-  font-size: 1.2rem;
-}
+        /* Container untuk timeline content */
+        .timeline-content-box {
+          background: rgba(255, 255, 255, 0.05);
+          border: 1px solid rgba(255, 255, 255, 0.15);
+          border-radius: 8px;
+          padding: 20px;
+          margin-top: 10px;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+          position: relative;
+        }
 
-.timeline-content p {
-  margin: 8px 0 0;
-  font-size: 0.95rem;
-  line-height: 1.4;
-}
+        /* Garis horizontal yang nyambung dari titik ke kotak */
+        .timeline-connector {
+          position: absolute;
+          left: -30px;
+          top: 23px;
+          width: 28px;
+          height: 2px;
+          background: rgba(255, 255, 255, 0.3);
+        }
 
-.label {
-  display: inline-block;
-  padding: 4px 10px;
-  font-size: 0.8rem;
-  font-weight: 700;
-  margin-bottom: 6px;
-  background: rgba(255,255,255,0.1);
-  border: 1px solid rgba(255,255,255,0.3);
-  border-radius: 4px;
-}
+        /* Garis putus-putus dengan animasi untuk item aktif */
+        .timeline-item.active .timeline-connector {
+          background: transparent;
+          border-top: 2px dashed #fff;
+          animation: dash-move 1s linear infinite;
+        }
 
+        @keyframes dash-move {
+          0% {
+            background-position: 0 0;
+          }
+          100% {
+            background-position: 10px 0;
+          }
+        }
+
+        /* Titik animasi */
+        .timeline-item::before {
+          content: "";
+          position: absolute;
+          left: -41px;
+          top: 15px;
+          width: 16px;
+          height: 16px;
+          border-radius: 50%;
+          background: rgba(255, 255, 255, 0.4);
+          border: 2px solid rgba(255, 255, 255, 0.8);
+          z-index: 2;
+        }
+
+        /* Titik aktif - berkedip */
+        .timeline-item.active::before {
+          background: #fff;
+          box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.4);
+          animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+          0% {
+            transform: scale(0.95);
+            box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7);
+          }
+          70% {
+            transform: scale(1.1);
+            box-shadow: 0 0 0 12px rgba(255, 255, 255, 0);
+          }
+          100% {
+            transform: scale(0.95);
+            box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
+          }
+        }
+
+ .linebox {
+          position: relative;
+          display: inline-flex;
+          align-items: center;
+          border: 1px solid rgba(255,255,255,0.2);
+          border-radius: 6px;
+          background: rgba(255,255,255,0.05);
+          padding: 8px 14px;
+          font-size: 1rem;
+          font-weight: 600;
+          color: #fff;
+          gap: 8px;
+          width: fit-content;
+        }
 
 
 
@@ -3355,6 +3648,7 @@ function openFAQModal(id) {
   modal.style.display = "block";
 }
 </script>
+
 
 
 
