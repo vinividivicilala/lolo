@@ -119,7 +119,6 @@ import Layout from '../layouts/Layout.astro';
   }
   
   .linebox {
-    background: #111;
     border-radius: 12px;
     padding: 30px;
     max-width: 800px;
@@ -127,7 +126,7 @@ import Layout from '../layouts/Layout.astro';
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 20px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+ border: 1px solid rgba(255, 255, 255, 0.3); /* garis putih pudar */
   }
   
 .linebox-item {
@@ -138,7 +137,8 @@ import Layout from '../layouts/Layout.astro';
   border-radius: 8px;
   transition: all 0.3s ease;
   cursor: pointer;
-  background: rgba(255, 255, 255, 0.05); /* putih pudar transparan */
+  border: 1px solid rgba(255, 255, 255, 0.3); /* garis putih pudar */
+  background: none; /* hilangkan fill background */
 }
 
 
@@ -176,4 +176,5 @@ import Layout from '../layouts/Layout.astro';
     }
   }
 </style>
+
 
