@@ -373,6 +373,78 @@ const developmentInfo = {
 </div>
 
 
+<div class="timeline-container">
+  <div class="timeline-box">
+    <!-- Item 1 -->
+    <div class="timeline-item">
+      <div class="timeline-marker">
+        <div class="timeline-dot"></div>
+        <div class="timeline-line"></div>
+      </div>
+      <div class="timeline-content linebox">
+        <div class="timeline-header">
+          <h2 class="timeline-title">Rilis Website</h2>
+          <span class="timeline-label">VERSI PARDINALE</span>
+        </div>
+        <div class="timeline-desc">
+          <p>Peluncuran versi pertama website portfolio dengan desain minimalis dan interaktif.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Item 2 -->
+    <div class="timeline-item">
+      <div class="timeline-marker">
+        <div class="timeline-dot"></div>
+        <div class="timeline-line"></div>
+      </div>
+      <div class="timeline-content linebox">
+        <div class="timeline-header">
+          <h2 class="timeline-title">Uji Coba Firebase</h2>
+          <span class="timeline-label">MACKERD</span>
+        </div>
+        <div class="timeline-desc">
+          <p>Bereksperimen dengan autentikasi dan pengimpanan data real-time menggunakan Firebase.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Item 3 -->
+    <div class="timeline-item">
+      <div class="timeline-marker">
+        <div class="timeline-dot"></div>
+        <div class="timeline-line"></div>
+      </div>
+      <div class="timeline-content linebox">
+        <div class="timeline-header">
+          <h2 class="timeline-title">Desain UI</h2>
+          <span class="timeline-label">PROSTEED</span>
+        </div>
+        <div class="timeline-desc">
+          <p>Membuat desain UI tipografi-based dan minimalis UI untuk tampilan website.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 <!-- Kontak Media Sosial -->
@@ -557,244 +629,6 @@ const developmentInfo = {
 </div>
 
 
-<!-- Tambahkan kode ini di bagian yang sesuai dari file Anda -->
-<div class="timeline-container">
-  <div class="timeline-box">
-    <div class="timeline-header linebox">
-      <div class="timeline-date">15 November 2023</div>
-      <div class="timeline-title">Pembaruan Website</div>
-      <div class="timeline-label">VERSI 1.2.0</div>
-    </div>
-    
-    <div class="timeline-content linebox">
-      <div class="timeline-text">
-        <h3>Fitur Baru Ditambahkan</h3>
-        <p>Tim kami telah menambahkan beberapa fitur baru untuk meningkatkan pengalaman pengguna, termasuk sistem feedback dan virtual assistant.</p>
-      </div>
-      
-      <div class="timeline-line-container">
-        <div class="timeline-line-dashed"></div>
-        <div class="timeline-transmitter">
-          <div class="transmitter-pulse"></div>
-          <div class="transmitter-core"></div>
-        </div>
-      </div>
-      
-      <div class="timeline-meta linebox">
-        <div class="meta-item">
-          <span class="meta-label">Status:</span>
-          <span class="meta-value active">Aktif</span>
-        </div>
-        <div class="meta-item">
-          <span class="meta-label">Kategori:</span>
-          <span class="meta-value">Pembaruan Fitur</span>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<style>
-  /* Timeline Container */
-  .timeline-container {
-    margin: 40px 0;
-    padding: 0 20px;
-  }
-  
-  /* Timeline Box */
-  .timeline-box {
-    position: relative;
-    max-width: 800px;
-    margin: 0 auto;
-  }
-  
-  /* Linebox Style (sesuai dengan style yang sudah ada) */
-  .linebox {
-    border: 1px solid rgba(0, 0, 0, 0.15);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-    border-radius: 8px;
-    padding: 20px;
-    background: #fff;
-  }
-  
-  /* Timeline Header */
-  .timeline-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-    padding: 15px 20px;
-  }
-  
-  .timeline-date {
-    font-weight: 700;
-    color: #3b82f6;
-    font-size: 1.1rem;
-  }
-  
-  .timeline-title {
-    font-weight: 700;
-    font-size: 1.4rem;
-    text-align: center;
-    flex-grow: 1;
-  }
-  
-  .timeline-label {
-    background: #3b82f6;
-    color: white;
-    padding: 6px 12px;
-    border-radius: 20px;
-    font-size: 0.8rem;
-    font-weight: 700;
-  }
-  
-  /* Timeline Content */
-  .timeline-content {
-    position: relative;
-    padding: 25px;
-  }
-  
-  .timeline-text h3 {
-    margin-top: 0;
-    color: #000;
-    font-size: 1.3rem;
-    margin-bottom: 15px;
-  }
-  
-  .timeline-text p {
-    line-height: 1.6;
-    color: #334155;
-    margin-bottom: 20px;
-  }
-  
-  /* Timeline Line Container */
-  .timeline-line-container {
-    position: relative;
-    height: 40px;
-    margin: 20px 0;
-    display: flex;
-    align-items: center;
-  }
-  
-  /* Garis putus-putus */
-  .timeline-line-dashed {
-    position: absolute;
-    left: 0;
-    right: 0;
-    height: 2px;
-    background: repeating-linear-gradient(
-      to right,
-      #3b82f6,
-      #3b82f6 8px,
-      transparent 8px,
-      transparent 16px
-    );
-  }
-  
-  /* Pemancar kedap-kedip */
-  .timeline-transmitter {
-    position: absolute;
-    right: 0;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 40px;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  
-  .transmitter-core {
-    width: 16px;
-    height: 16px;
-    background: #3b82f6;
-    border-radius: 50%;
-    z-index: 2;
-    position: relative;
-  }
-  
-  .transmitter-pulse {
-    position: absolute;
-    width: 40px;
-    height: 40px;
-    background: rgba(59, 130, 246, 0.3);
-    border-radius: 50%;
-    animation: pulse 2s infinite;
-    z-index: 1;
-  }
-  
-  @keyframes pulse {
-    0% {
-      transform: scale(0.8);
-      opacity: 0.8;
-    }
-    70% {
-      transform: scale(1.5);
-      opacity: 0;
-    }
-    100% {
-      transform: scale(0.8);
-      opacity: 0;
-    }
-  }
-  
-  /* Timeline Meta */
-  .timeline-meta {
-    display: flex;
-    gap: 20px;
-    padding: 15px;
-    margin-top: 20px;
-  }
-  
-  .meta-item {
-    display: flex;
-    gap: 8px;
-    align-items: center;
-  }
-  
-  .meta-label {
-    font-weight: 600;
-    color: #64748b;
-  }
-  
-  .meta-value {
-    font-weight: 700;
-    color: #000;
-  }
-  
-  .meta-value.active {
-    color: #10b981;
-  }
-  
-  /* Responsive */
-  @media (max-width: 768px) {
-    .timeline-header {
-      flex-direction: column;
-      gap: 15px;
-      text-align: center;
-    }
-    
-    .timeline-meta {
-      flex-direction: column;
-      gap: 12px;
-    }
-  }
-</style>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
   <!-- Footer -->
@@ -879,10 +713,11 @@ const developmentInfo = {
   }
 
 
- /* Timeline Container */
+  /* Timeline Container */
   .timeline-container {
     margin: 40px 0;
     padding: 0 20px;
+    font-family: 'Space Mono', monospace;
   }
   
   /* Timeline Box */
@@ -892,12 +727,63 @@ const developmentInfo = {
     margin: 0 auto;
   }
   
-  /* Linebox Style (sesuai dengan style yang sudah ada) */
-  .linebox {
-    border: 1px solid rgba(0, 0, 0, 0.15);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-    border-radius: 8px;
+  /* Timeline Item */
+  .timeline-item {
+    display: flex;
+    margin-bottom: 30px;
+    position: relative;
+  }
+  
+  /* Timeline Marker (dot + line) */
+  .timeline-marker {
+    position: relative;
+    width: 40px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .timeline-dot {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #3b82f6;
+    border: 3px solid white;
+    box-shadow: 0 0 0 2px #3b82f6;
+    z-index: 2;
+  }
+  
+  .timeline-line {
+    width: 2px;
+    height: 100%;
+    background: repeating-linear-gradient(
+      to bottom,
+      transparent,
+      transparent 6px,
+      #3b82f6 6px,
+      #3b82f6 8px
+    );
+    margin-top: 5px;
+    flex-grow: 1;
+  }
+  
+  .timeline-item:last-child .timeline-line {
+    display: none;
+  }
+  
+  /* Timeline Content */
+  .timeline-content {
+    flex-grow: 1;
+    margin-left: 20px;
     padding: 20px;
+    margin-bottom: 10px;
+  }
+  
+  /* Linebox Style */
+  .linebox {
+    border: 2px solid rgba(0, 0, 0, 0.8);
+    border-radius: 8px;
     background: #fff;
   }
   
@@ -906,161 +792,87 @@ const developmentInfo = {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
-    padding: 15px 20px;
-  }
-  
-  .timeline-date {
-    font-weight: 700;
-    color: #3b82f6;
-    font-size: 1.1rem;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
   }
   
   .timeline-title {
-    font-weight: 700;
     font-size: 1.4rem;
-    text-align: center;
-    flex-grow: 1;
+    font-weight: 700;
+    margin: 0;
+    color: #000;
+    text-transform: uppercase;
+    letter-spacing: -0.5px;
   }
   
   .timeline-label {
-    background: #3b82f6;
+    background: #000;
     color: white;
     padding: 6px 12px;
-    border-radius: 20px;
-    font-size: 0.8rem;
+    border-radius: 4px;
+    font-size: 0.9rem;
     font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
   }
   
-  /* Timeline Content */
-  .timeline-content {
-    position: relative;
-    padding: 25px;
-  }
-  
-  .timeline-text h3 {
-    margin-top: 0;
-    color: #000;
-    font-size: 1.3rem;
-    margin-bottom: 15px;
-  }
-  
-  .timeline-text p {
+  /* Timeline Description */
+  .timeline-desc p {
     line-height: 1.6;
     color: #334155;
-    margin-bottom: 20px;
-  }
-  
-  /* Timeline Line Container */
-  .timeline-line-container {
-    position: relative;
-    height: 40px;
-    margin: 20px 0;
-    display: flex;
-    align-items: center;
-  }
-  
-  /* Garis putus-putus */
-  .timeline-line-dashed {
-    position: absolute;
-    left: 0;
-    right: 0;
-    height: 2px;
-    background: repeating-linear-gradient(
-      to right,
-      #3b82f6,
-      #3b82f6 8px,
-      transparent 8px,
-      transparent 16px
-    );
-  }
-  
-  /* Pemancar kedap-kedip */
-  .timeline-transmitter {
-    position: absolute;
-    right: 0;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 40px;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  
-  .transmitter-core {
-    width: 16px;
-    height: 16px;
-    background: #3b82f6;
-    border-radius: 50%;
-    z-index: 2;
-    position: relative;
-  }
-  
-  .transmitter-pulse {
-    position: absolute;
-    width: 40px;
-    height: 40px;
-    background: rgba(59, 130, 246, 0.3);
-    border-radius: 50%;
-    animation: pulse 2s infinite;
-    z-index: 1;
-  }
-  
-  @keyframes pulse {
-    0% {
-      transform: scale(0.8);
-      opacity: 0.8;
-    }
-    70% {
-      transform: scale(1.5);
-      opacity: 0;
-    }
-    100% {
-      transform: scale(0.8);
-      opacity: 0;
-    }
-  }
-  
-  /* Timeline Meta */
-  .timeline-meta {
-    display: flex;
-    gap: 20px;
-    padding: 15px;
-    margin-top: 20px;
-  }
-  
-  .meta-item {
-    display: flex;
-    gap: 8px;
-    align-items: center;
-  }
-  
-  .meta-label {
-    font-weight: 600;
-    color: #64748b;
-  }
-  
-  .meta-value {
-    font-weight: 700;
-    color: #000;
-  }
-  
-  .meta-value.active {
-    color: #10b981;
+    margin: 0;
+    font-size: 1.1rem;
   }
   
   /* Responsive */
   @media (max-width: 768px) {
     .timeline-header {
       flex-direction: column;
-      gap: 15px;
-      text-align: center;
+      align-items: flex-start;
+      gap: 10px;
     }
     
-    .timeline-meta {
+    .timeline-label {
+      align-self: flex-start;
+    }
+    
+    .timeline-content {
+      margin-left: 15px;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .timeline-item {
       flex-direction: column;
-      gap: 12px;
+    }
+    
+    .timeline-marker {
+      width: 100%;
+      flex-direction: row;
+      height: 40px;
+      margin-bottom: 10px;
+    }
+    
+    .timeline-dot {
+      margin-right: 15px;
+    }
+    
+    .timeline-line {
+      width: 100%;
+      height: 2px;
+      margin-top: 0;
+      margin-left: 10px;
+      background: repeating-linear-gradient(
+        to right,
+        transparent,
+        transparent 6px,
+        #3b82f6 6px,
+        #3b82f6 8px
+      );
+    }
+    
+    .timeline-content {
+      margin-left: 0;
     }
   }
 
@@ -1735,20 +1547,6 @@ const developmentInfo = {
         font-size: 1rem;
       }
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -3642,14 +3440,6 @@ function openFAQModal(id) {
   modal.style.display = "block";
 }
 </script>
-
-
-
-
-
-
-
-
 
 
 
