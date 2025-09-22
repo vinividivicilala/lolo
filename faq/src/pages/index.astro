@@ -130,20 +130,18 @@ import Layout from '../layouts/Layout.astro';
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
   }
   
-  .linebox-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 20px 15px;
-    border-radius: 8px;
-    transition: all 0.3s ease;
-    cursor: pointer;
-  }
-  
-  .linebox-item:hover {
-    background: #222;
-    transform: translateY(-3px);
-  }
+.linebox-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px 15px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.05); /* putih pudar transparan */
+}
+
+
   
   .linebox-item svg {
     color: #667eea;
@@ -178,3 +176,4 @@ import Layout from '../layouts/Layout.astro';
     }
   }
 </style>
+
