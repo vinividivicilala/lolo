@@ -556,7 +556,6 @@ const developmentInfo = {
   </div>
 </div>
 
-
 <div class="timeline">
   <div class="timeline-item">
     <div class="timeline-dot"></div>
@@ -566,6 +565,18 @@ const developmentInfo = {
       <div class="timeline-date">2025-09-19</div>
       <div class="timeline-desc linebox">
         Peluncuran versi pertama website portfolio dengan desain minimalis dan interaktif.
+      </div>
+    </div>
+  </div>
+
+  <div class="timeline-item">
+    <div class="timeline-dot"></div>
+    <div class="timeline-content">
+      <span class="timeline-badge">BACKEND</span>
+      <h4 class="timeline-title">Uji Coba Firebase</h4>
+      <div class="timeline-date">2025-08-10</div>
+      <div class="timeline-desc linebox">
+        Menerapkan autentikasi dan penyimpanan data real-time menggunakan Firebase.
       </div>
     </div>
   </div>
@@ -661,22 +672,31 @@ const developmentInfo = {
   }
 
 
+
+
 .timeline {
   position: relative;
   margin: 20px 0;
   padding-left: 40px;
-  border-left: 2px dashed #111; /* garis patah2 nyambung */
 }
 
-.timeline-item {
-  position: relative;
-  margin-bottom: 40px;
+/* garis patah2 dengan animasi kedap-kedip */
+.timeline::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 7px;
+  width: 2px;
+  height: 100%;
+  border-left: 2px dashed #111;
+  animation: pulseLine 2s linear infinite;
 }
 
+/* dot kedap-kedip */
 .timeline-dot {
   position: absolute;
-  left: -10px;
-  top: 5px;
+  left: 0;
+  top: 6px;
   width: 14px;
   height: 14px;
   background: #111;
@@ -684,15 +704,9 @@ const developmentInfo = {
   animation: pulseDot 1.8s infinite;
 }
 
-/* Efek kedap-kedip pemancar */
-@keyframes pulseDot {
-  0%   { box-shadow: 0 0 0 0 rgba(17,17,17,0.4); }
-  70%  { box-shadow: 0 0 0 12px rgba(17,17,17,0); }
-  100% { box-shadow: 0 0 0 0 rgba(17,17,17,0); }
-}
-
+/* isi */
 .timeline-content {
-  margin-left: 20px;
+  margin-left: 30px;
 }
 
 .timeline-badge {
@@ -728,6 +742,27 @@ const developmentInfo = {
   font-size: 0.9rem;
   line-height: 1.4;
 }
+
+/* Animasi */
+@keyframes pulseDot {
+  0%   { box-shadow: 0 0 0 0 rgba(17,17,17,0.4); }
+  70%  { box-shadow: 0 0 0 12px rgba(17,17,17,0); }
+  100% { box-shadow: 0 0 0 0 rgba(17,17,17,0); }
+}
+
+@keyframes pulseLine {
+  0%   { border-color: rgba(17,17,17,0.2); }
+  50%  { border-color: rgba(17,17,17,1); }
+  100% { border-color: rgba(17,17,17,0.2); }
+}
+
+
+
+
+
+
+
+
 
 
 
@@ -3301,6 +3336,7 @@ function openFAQModal(id) {
   modal.style.display = "block";
 }
 </script>
+
 
 
 
