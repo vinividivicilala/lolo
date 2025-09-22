@@ -497,6 +497,45 @@ const faqData = [
 </div>
 
 
+<!-- Modal untuk informasi pengembangan website -->
+<div id="devModal" class="modal">
+  <div class="modal-content">
+    <span class="close" onclick="closeDevModal()">&times;</span>
+    <div class="modal-box">
+      <h2>Status Pengembangan Website</h2>
+    </div>
+    
+    <div class="modal-box">
+      <div class="info-grid">
+        <div class="info-item">
+          <span class="info-label">Tanggal Mulai</span>
+          <span class="info-value">15 November 2023</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Update Terakhir</span>
+          <span class="info-value" id="lastUpdateValue">20 November 2023</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Versi</span>
+          <span class="info-value">1.2.0-beta</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Status</span>
+          <span class="info-value status-active">Dalam Pengembangan</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="modal-box">
+      <h3>Deskripsi</h3>
+      <p>Website ini sedang dalam tahap pengembangan aktif. Beberapa fitur mungkin belum berfungsi dengan sempurna atau masih dalam tahap penyempurnaan. Terima kasih atas pengertiannya.</p>
+    </div>
+  </div>
+</div>
+
+
+
+
 
 
 
@@ -2506,46 +2545,49 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 
-<!-- Modal untuk informasi pengembangan website -->
-<div id="devModal" class="modal">
-  <div class="modal-content">
-    <span class="close" onclick="closeDevModal()">&times;</span>
-    <div class="modal-box">
-      <h2>Status Pengembangan Website</h2>
-    </div>
-    
-    <div class="modal-box">
-      <div class="info-grid">
-        <div class="info-item">
-          <span class="info-label">Tanggal Mulai</span>
-          <span class="info-value">15 November 2023</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">Update Terakhir</span>
-          <span class="info-value" id="lastUpdateValue">20 November 2023</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">Versi</span>
-          <span class="info-value">1.2.0-beta</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">Status</span>
-          <span class="info-value status-active">Dalam Pengembangan</span>
-        </div>
-      </div>
-    </div>
-    
-    <div class="modal-box">
-      <h3>Deskripsi</h3>
-      <p>Website ini sedang dalam tahap pengembangan aktif. Beberapa fitur mungkin belum berfungsi dengan sempurna atau masih dalam tahap penyempurnaan. Terima kasih atas pengertiannya.</p>
-    </div>
-  </div>
-</div>
 
 
 
+// Fungsi untuk modal development
+function openDevModal() {
+  document.getElementById('devModal').style.display = 'block';
+}
 
+function closeDevModal() {
+  document.getElementById('devModal').style.display = 'none';
+}
 
+// Update tanggal terakhir
+document.addEventListener('DOMContentLoaded', function() {
+  const now = new Date();
+  const options = { 
+    weekday: 'long', 
+    year: 'numeric', 
+    month: 'long', 
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  };
+  const dateTimeStr = now.toLocaleDateString('id-ID', options);
+  
+  // Set tanggal di banner
+  if (document.getElementById('currentDate')) {
+    document.getElementById('currentDate').textContent = dateTimeStr.toUpperCase();
+  }
+  
+  // Set tanggal update terakhir di modal
+  if (document.getElementById('lastUpdateValue')) {
+    document.getElementById('lastUpdateValue').textContent = dateTimeStr;
+  }
+  
+  // Tutup modal ketika klik di luar
+  window.onclick = function(event) {
+    const modal = document.getElementById('devModal');
+    if (event.target == modal) {
+      closeDevModal();
+    }
+  };
+});
 
 
 
@@ -2895,6 +2937,7 @@ function openFAQModal(id) {
   modal.style.display = "block";
 }
 </script>
+
 
 
 
