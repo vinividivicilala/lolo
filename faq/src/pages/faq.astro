@@ -130,10 +130,27 @@ const faqData = [
     topic: "Fitur Lanjutan"
   }
 ];
+
+// Data untuk modal development
+const developmentInfo = {
+  startDate: "1 November 2023",
+  lastUpdate: "15 November 2023, 14:30 WIB",
+  version: "1.0.0-beta",
+  status: "Dalam Pengembangan",
+  description: "Website ini sedang dalam tahap pengembangan aktif. Beberapa fitur mungkin belum sepenuhnya berfungsi atau masih dalam proses penyempurnaan."
+};
 ---
 
 <Layout title="FAQ | Astro Example" description="Halaman FAQ dengan animasi, gambar, dan icon." currentPage="faq">
   <div class="container">
+   <!-- Banner Development dengan Animasi -->
+    <div class="development-banner" id="devBanner">
+      <div class="banner-content">
+        <span class="banner-icon">🚧</span>
+        <span class="banner-text">WEBSITE MASIH DIKEMBANGKAN</span>
+        <button class="banner-info-btn" onclick="openDevModal()">ℹ️</button>
+      </div>
+    </div>
 
 
      <!-- Breadcrumb Dinamis -->
@@ -150,37 +167,26 @@ const faqData = [
       })}
     </nav>
 
-    <main class="main-content">
-      <!-- Ganti marquee dengan banner animasi baru -->
-<div class="development-banner" id="devBanner">
-  <div class="banner-content">
-    <span class="banner-icon">🚧</span>
-    <span class="banner-text">WEBSITE MASIH DIKEMBANGKAN</span>
-    <button class="banner-info-btn" onclick="openDevModal()">ℹ️</button>
-  </div>
-</div>
-
-
-
-    <!-- Layout Typografi Kiri - Diperbarui -->
-<div class="typography-left-layout">
-  <div class="title-section">
-    <div class="title-accent">QUESTIONS</div>
-    <h1 class="page-title animate-typing">
-      FREQUENTLY<br>ASKED
-    </h1>
-    <div class="title-line"></div>
-  </div>
-  <div class="description-section">
-    <p class="typography-description animate-fade-in">
-      Eksplorasi lengkap seputar Astro dan pengembangan web modern. 
-      Temukan jawaban atas pertanyaan paling umum yang diajukan oleh developer.
-    </p>
-    <div class="update-info">
-      LAST UPDATE: <span id="currentDate"></span>
-    </div>
-  </div>
-</div>
+ <main class="main-content">
+      <!-- Layout Typografi Minimalis Modern -->
+      <div class="minimalist-header">
+        <div class="title-wrapper">
+          <div class="title-accent">QUESTIONS</div>
+          <h1 class="page-title animate-typing">
+            FREQUENTLY<br>ASKED
+          </h1>
+          <div class="title-line"></div>
+        </div>
+        <div class="description-wrapper">
+          <p class="minimalist-description animate-fade-in">
+            Eksplorasi lengkap seputar Astro dan pengembangan web modern. 
+            Temukan jawaban atas pertanyaan paling umum yang diajukan oleh developer.
+          </p>
+          <div class="update-info">
+            LAST UPDATE: <span id="currentDate"></span>
+          </div>
+        </div>
+      </div>
 
 
  <!-- Related FAQ otomatis -->
@@ -497,43 +503,38 @@ const faqData = [
 </div>
 
 
-<!-- Modal untuk informasi pengembangan website -->
-<div id="devModal" class="modal">
-  <div class="modal-content">
-    <span class="close" onclick="closeDevModal()">&times;</span>
-    <div class="modal-box">
-      <h2>Status Pengembangan Website</h2>
-    </div>
-    
-    <div class="modal-box">
-      <div class="info-grid">
-        <div class="info-item">
-          <span class="info-label">Tanggal Mulai</span>
-          <span class="info-value">15 November 2023</span>
+  <!-- Modal Development Info -->
+  <div id="devModal" class="modal">
+    <div class="modal-content dev-modal">
+      <span class="close" onclick="closeDevModal()">&times;</span>
+      <div class="modal-header">
+        <h2>Informasi Pengembangan</h2>
+      </div>
+      <div class="modal-body">
+        <div class="info-grid">
+          <div class="info-item linebox">
+            <span class="info-label">Tanggal Mulai</span>
+            <span class="info-value">{developmentInfo.startDate}</span>
+          </div>
+          <div class="info-item linebox">
+            <span class="info-label">Update Terakhir</span>
+            <span class="info-value">{developmentInfo.lastUpdate}</span>
+          </div>
+          <div class="info-item linebox">
+            <span class="info-label">Versi</span>
+            <span class="info-value">{developmentInfo.version}</span>
+          </div>
+          <div class="info-item linebox">
+            <span class="info-label">Status</span>
+            <span class="info-value status-badge">{developmentInfo.status}</span>
+          </div>
         </div>
-        <div class="info-item">
-          <span class="info-label">Update Terakhir</span>
-          <span class="info-value" id="lastUpdateValue">20 November 2023</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">Versi</span>
-          <span class="info-value">1.2.0-beta</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">Status</span>
-          <span class="info-value status-active">Dalam Pengembangan</span>
+        <div class="description-box linebox">
+          <p>{developmentInfo.description}</p>
         </div>
       </div>
     </div>
-    
-    <div class="modal-box">
-      <h3>Deskripsi</h3>
-      <p>Website ini sedang dalam tahap pengembangan aktif. Beberapa fitur mungkin belum berfungsi dengan sempurna atau masih dalam tahap penyempurnaan. Terima kasih atas pengertiannya.</p>
-    </div>
   </div>
-</div>
-
-
 
 
 
@@ -924,129 +925,242 @@ const faqData = [
 }
 
 
-/* Banner Development */
-.development-banner {
-  background: linear-gradient(90deg, #3b82f6, #2563eb, #1d4ed8);
-  color: white;
-  padding: 16px 0;
-  text-align: center;
-  position: relative;
-  overflow: hidden;
-  margin-bottom: 40px;
-  animation: pulseBanner 3s infinite;
-}
 
-.banner-content {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 20px;
-}
+  /* Banner Development */
+    .development-banner {
+      background: linear-gradient(135deg, #3b82f6, #2563eb);
+      color: white;
+      padding: 12px 20px;
+      margin-bottom: 30px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+      animation: pulseBanner 2s infinite;
+      cursor: pointer;
+    }
 
-.banner-icon {
-  font-size: 1.5rem;
-  animation: bounce 2s infinite;
-}
+    .banner-content {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+    }
 
-.banner-text {
-  font-weight: 700;
-  font-size: 1.2rem;
-  letter-spacing: 1px;
-}
+    .banner-icon {
+      font-size: 1.2rem;
+    }
 
-.banner-info-btn {
-  background: rgba(255, 255, 255, 0.2);
-  border: none;
-  border-radius: 50%;
-  width: 30px;
-  height: 30px;
-  cursor: pointer;
-  font-size: 1rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background 0.3s;
-}
+    .banner-text {
+      font-weight: 700;
+      font-size: 1rem;
+      letter-spacing: 0.5px;
+    }
 
-.banner-info-btn:hover {
-  background: rgba(255, 255, 255, 0.3);
-}
+    .banner-info-btn {
+      background: rgba(255, 255, 255, 0.2);
+      border: none;
+      border-radius: 50%;
+      width: 28px;
+      height: 28px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
 
-/* Animasi Typography */
-.animate-typing {
-  overflow: hidden;
-  border-right: 3px solid #3b82f6;
-  white-space: nowrap;
-  animation: typing 3.5s steps(40, end), blink-caret 0.75s step-end infinite;
-}
+    @keyframes pulseBanner {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.02); }
+      100% { transform: scale(1); }
+    }
 
-.animate-fade-in {
-  opacity: 0;
-  animation: fadeIn 2s forwards;
-  animation-delay: 1s;
-}
+    /* Header Minimalis Modern */
+    .minimalist-header {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 60px;
+      margin-bottom: 60px;
+      padding: 30px 0;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    }
 
-/* Info Grid dalam Modal */
-.info-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 20px;
-}
+    .title-wrapper {
+      text-align: left;
+    }
 
-.info-item {
-  display: flex;
-  flex-direction: column;
-  padding: 15px;
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  border-radius: 8px;
-  background: #f8fafc;
-}
+    .title-accent {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #3b82f6;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      margin-bottom: 15px;
+      opacity: 0;
+      animation: fadeInUp 0.6s ease forwards;
+      animation-delay: 0.2s;
+    }
 
-.info-label {
-  font-size: 0.9rem;
-  color: #64748b;
-  margin-bottom: 5px;
-}
+    .page-title {
+      font-size: 3.5rem;
+      font-weight: 700;
+      color: #000;
+      margin: 0 0 20px 0;
+      text-transform: uppercase;
+      letter-spacing: -2px;
+      line-height: 1.1;
+      opacity: 0;
+      transform: translateY(20px);
+      animation: fadeInUp 0.8s ease forwards;
+      animation-delay: 0.4s;
+    }
 
-.info-value {
-  font-weight: 700;
-  color: #000;
-}
+    .title-line {
+      width: 80px;
+      height: 3px;
+      background: #3b82f6;
+      margin: 20px 0;
+      opacity: 0;
+      animation: fadeIn 0.8s ease forwards;
+      animation-delay: 0.6s;
+    }
 
-.status-active {
-  color: #10b981 !important;
-}
+    .description-wrapper {
+      text-align: left;
+      padding-top: 20px;
+    }
 
-/* Animations */
-@keyframes pulseBanner {
-  0% { opacity: 0.9; }
-  50% { opacity: 1; }
-  100% { opacity: 0.9; }
-}
+    .minimalist-description {
+      font-size: 1.2rem;
+      line-height: 1.6;
+      color: #334155;
+      margin-bottom: 30px;
+      opacity: 0;
+      transform: translateY(20px);
+      animation: fadeInUp 0.8s ease forwards;
+      animation-delay: 0.8s;
+    }
 
-@keyframes bounce {
-  0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
-  40% {transform: translateY(-10px);}
-  60% {transform: translateY(-5px);}
-}
+    .update-info {
+      color: #64748b;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      opacity: 0;
+      animation: fadeIn 0.8s ease forwards;
+      animation-delay: 1s;
+    }
 
-@keyframes typing {
-  from { width: 0 }
-  to { width: 100% }
-}
+    /* Modal Development */
+    .dev-modal {
+      max-width: 600px;
+    }
 
-@keyframes blink-caret {
-  from, to { border-color: transparent }
-  50% { border-color: #3b82f6 }
-}
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 15px;
+      margin-bottom: 25px;
+    }
 
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
-}
+    .info-item {
+      padding: 15px;
+      border-radius: 8px;
+      background: #f8fafc;
+    }
+
+    .info-label {
+      display: block;
+      font-size: 0.9rem;
+      color: #64748b;
+      margin-bottom: 5px;
+    }
+
+    .info-value {
+      display: block;
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #000;
+    }
+
+    .status-badge {
+      background: #10b981;
+      color: white;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 0.8rem !important;
+    }
+
+    .description-box {
+      padding: 20px;
+      border-radius: 8px;
+      background: #f8fafc;
+    }
+
+    .description-box p {
+      margin: 0;
+      line-height: 1.6;
+      color: #334155;
+    }
+
+    /* Linebox hitam pudar */
+    .linebox {
+      border: 1px solid rgba(0, 0, 0, 0.2);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    /* Animations */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
+    }
+
+    /* Responsive */
+    @media (max-width: 968px) {
+      .minimalist-header {
+        grid-template-columns: 1fr;
+        gap: 40px;
+      }
+      
+      .page-title {
+        font-size: 2.8rem;
+      }
+      
+      .info-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .page-title {
+        font-size: 2.4rem;
+      }
+      
+      .minimalist-description {
+        font-size: 1.1rem;
+      }
+    }
+
+
+
+
+
+
+
 
 
 
@@ -2545,49 +2659,40 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 
+  // Set tanggal saat ini
+    document.addEventListener('DOMContentLoaded', function() {
+      const now = new Date();
+      const options = { 
+        weekday: 'long', 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      };
+      const dateTimeStr = now.toLocaleDateString('id-ID', options);
+      const currentDateEl = document.getElementById('currentDate');
+      if (currentDateEl) {
+        currentDateEl.textContent = dateTimeStr.toUpperCase();
+      }
+    });
 
-
-
-// Fungsi untuk modal development
-function openDevModal() {
-  document.getElementById('devModal').style.display = 'block';
-}
-
-function closeDevModal() {
-  document.getElementById('devModal').style.display = 'none';
-}
-
-// Update tanggal terakhir
-document.addEventListener('DOMContentLoaded', function() {
-  const now = new Date();
-  const options = { 
-    weekday: 'long', 
-    year: 'numeric', 
-    month: 'long', 
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  };
-  const dateTimeStr = now.toLocaleDateString('id-ID', options);
-  
-  // Set tanggal di banner
-  if (document.getElementById('currentDate')) {
-    document.getElementById('currentDate').textContent = dateTimeStr.toUpperCase();
-  }
-  
-  // Set tanggal update terakhir di modal
-  if (document.getElementById('lastUpdateValue')) {
-    document.getElementById('lastUpdateValue').textContent = dateTimeStr;
-  }
-  
-  // Tutup modal ketika klik di luar
-  window.onclick = function(event) {
-    const modal = document.getElementById('devModal');
-    if (event.target == modal) {
-      closeDevModal();
+    // Fungsi untuk modal development
+    function openDevModal() {
+      document.getElementById('devModal').style.display = 'block';
     }
-  };
-});
+
+    function closeDevModal() {
+      document.getElementById('devModal').style.display = 'none';
+    }
+
+    // Tutup modal ketika klik di luar konten modal
+    window.onclick = function(event) {
+      const modal = document.getElementById('devModal');
+      if (event.target === modal) {
+        closeDevModal();
+      }
+    };
 
 
 
@@ -2937,6 +3042,7 @@ function openFAQModal(id) {
   modal.style.display = "block";
 }
 </script>
+
 
 
 
