@@ -154,13 +154,16 @@ import Layout from '../layouts/Layout.astro';
 </Layout>
 
 <style>
+/* Import font Space Mono */
+@import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap');
+
   body {
     background: #000;
     color: #fff;
     min-height: 100vh;
     padding: 0;
     margin: 0;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+     font-family: 'Space Mono', monospace;
   }
 
   .container {
@@ -253,17 +256,24 @@ import Layout from '../layouts/Layout.astro';
   }
 
 
+
+
+.timeline-section {
+  font-family: 'Space Mono', monospace;
+}
+
 .timeline-container {
   position: relative;
   max-width: 1100px;
   margin: 0 auto;
+  padding-left: 60px; /* supaya kiri dekat garis */
 }
 
 /* garis vertikal putus-putus */
 .timeline-container::before {
   content: "";
   position: absolute;
-  left: 28px;
+  left: 28px; /* sejajar dot */
   top: 0;
   bottom: 0;
   border-left: 2px dashed rgba(255, 255, 255, 0.25);
@@ -273,9 +283,9 @@ import Layout from '../layouts/Layout.astro';
 /* item */
 .timeline-item {
   display: grid;
-  grid-template-columns: 60px 1fr 1fr;
+  grid-template-columns: 220px 1fr; /* kiri lebih kecil, kanan lebih lebar */
   gap: 24px;
-  margin-bottom: 70px; /* jarak antar item lebih lega */
+  margin-bottom: 80px; /* jarak antar item lebih jauh */
   position: relative;
 }
 
@@ -283,7 +293,7 @@ import Layout from '../layouts/Layout.astro';
 .timeline-dot {
   position: absolute;
   left: 20px;
-  top: 20px;
+  top: 16px;
   width: 18px;
   height: 18px;
   border-radius: 50%;
@@ -303,27 +313,27 @@ import Layout from '../layouts/Layout.astro';
   100% { opacity: 1; transform: scale(1); }
 }
 
-/* kiri (tanpa linebox) */
+/* kiri */
 .timeline-left {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
 }
 .date {
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 600;
   color: #9dbbff;
 }
 .title {
-  font-size: 28px;
+  font-size: 32px;
   font-weight: 700;
   color: #fff;
   margin: 0;
 }
 .label {
   display: inline-block;
-  padding: 6px 12px;
-  font-size: 14px;
+  padding: 6px 14px;
+  font-size: 15px;
   background: rgba(255,255,255,0.08);
   border: 1px solid rgba(255,255,255,0.25);
   border-radius: 6px;
@@ -331,28 +341,19 @@ import Layout from '../layouts/Layout.astro';
   text-transform: uppercase;
 }
 
-/* kanan (linebox dipertahankan) */
-.linebox {
+/* kanan (keterangan dalam linebox besar) */
+.timeline-right.linebox {
   background: rgba(0,0,0,0.6);
   border: 1px solid rgba(255,255,255,0.2);
-  padding: 22px 24px;
+  padding: 28px 32px;
   border-radius: 8px;
 }
 .timeline-right .text {
   font-size: 18px;
-  line-height: 1.6;
+  line-height: 1.7;
   color: #ddd;
 }
 
-/* responsive */
-@media (max-width: 768px) {
-  .timeline-item {
-    grid-template-columns: 60px 1fr;
-  }
-  .timeline-right {
-    grid-column: 2 / 3;
-  }
-}
 
 
 
@@ -361,6 +362,7 @@ import Layout from '../layouts/Layout.astro';
 
 
 </style>
+
 
 
 
