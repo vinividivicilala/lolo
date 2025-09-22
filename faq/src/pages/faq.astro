@@ -557,45 +557,236 @@ const developmentInfo = {
 </div>
 
 
-
-
-
-
-
-
-
-
-
-<div class="timeline">
-  <!-- Garis + titik jadi satu jalur -->
-  <svg class="timeline-line" width="4" height="100%">
-    <line x1="2" y1="0" x2="2" y2="100%" />
-  </svg>
-
-  <div class="timeline-item" style="top:40px;">
-    <div class="timeline-dot"></div>
-    <div class="timeline-content">
-      <span class="timeline-badge">VERSI PRODUKSI</span>
-      <h4 class="timeline-title">Rilis Website</h4>
-      <div class="timeline-date">2025-09-19</div>
-      <div class="timeline-desc linebox">
-        Peluncuran versi pertama website portfolio dengan desain minimalis dan interaktif.
-      </div>
+<!-- Tambahkan kode ini di bagian yang sesuai dari file Anda -->
+<div class="timeline-container">
+  <div class="timeline-box">
+    <div class="timeline-header linebox">
+      <div class="timeline-date">15 November 2023</div>
+      <div class="timeline-title">Pembaruan Website</div>
+      <div class="timeline-label">VERSI 1.2.0</div>
     </div>
-  </div>
-
-  <div class="timeline-item" style="top:140px;">
-    <div class="timeline-dot"></div>
-    <div class="timeline-content">
-      <span class="timeline-badge">BACKEND</span>
-      <h4 class="timeline-title">Uji Coba Firebase</h4>
-      <div class="timeline-date">2025-08-10</div>
-      <div class="timeline-desc linebox">
-        Menerapkan autentikasi dan penyimpanan data real-time menggunakan Firebase.
+    
+    <div class="timeline-content linebox">
+      <div class="timeline-text">
+        <h3>Fitur Baru Ditambahkan</h3>
+        <p>Tim kami telah menambahkan beberapa fitur baru untuk meningkatkan pengalaman pengguna, termasuk sistem feedback dan virtual assistant.</p>
+      </div>
+      
+      <div class="timeline-line-container">
+        <div class="timeline-line-dashed"></div>
+        <div class="timeline-transmitter">
+          <div class="transmitter-pulse"></div>
+          <div class="transmitter-core"></div>
+        </div>
+      </div>
+      
+      <div class="timeline-meta linebox">
+        <div class="meta-item">
+          <span class="meta-label">Status:</span>
+          <span class="meta-value active">Aktif</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Kategori:</span>
+          <span class="meta-value">Pembaruan Fitur</span>
+        </div>
       </div>
     </div>
   </div>
 </div>
+
+<style>
+  /* Timeline Container */
+  .timeline-container {
+    margin: 40px 0;
+    padding: 0 20px;
+  }
+  
+  /* Timeline Box */
+  .timeline-box {
+    position: relative;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+  
+  /* Linebox Style (sesuai dengan style yang sudah ada) */
+  .linebox {
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    border-radius: 8px;
+    padding: 20px;
+    background: #fff;
+  }
+  
+  /* Timeline Header */
+  .timeline-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding: 15px 20px;
+  }
+  
+  .timeline-date {
+    font-weight: 700;
+    color: #3b82f6;
+    font-size: 1.1rem;
+  }
+  
+  .timeline-title {
+    font-weight: 700;
+    font-size: 1.4rem;
+    text-align: center;
+    flex-grow: 1;
+  }
+  
+  .timeline-label {
+    background: #3b82f6;
+    color: white;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 700;
+  }
+  
+  /* Timeline Content */
+  .timeline-content {
+    position: relative;
+    padding: 25px;
+  }
+  
+  .timeline-text h3 {
+    margin-top: 0;
+    color: #000;
+    font-size: 1.3rem;
+    margin-bottom: 15px;
+  }
+  
+  .timeline-text p {
+    line-height: 1.6;
+    color: #334155;
+    margin-bottom: 20px;
+  }
+  
+  /* Timeline Line Container */
+  .timeline-line-container {
+    position: relative;
+    height: 40px;
+    margin: 20px 0;
+    display: flex;
+    align-items: center;
+  }
+  
+  /* Garis putus-putus */
+  .timeline-line-dashed {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: repeating-linear-gradient(
+      to right,
+      #3b82f6,
+      #3b82f6 8px,
+      transparent 8px,
+      transparent 16px
+    );
+  }
+  
+  /* Pemancar kedap-kedip */
+  .timeline-transmitter {
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .transmitter-core {
+    width: 16px;
+    height: 16px;
+    background: #3b82f6;
+    border-radius: 50%;
+    z-index: 2;
+    position: relative;
+  }
+  
+  .transmitter-pulse {
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    background: rgba(59, 130, 246, 0.3);
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+    z-index: 1;
+  }
+  
+  @keyframes pulse {
+    0% {
+      transform: scale(0.8);
+      opacity: 0.8;
+    }
+    70% {
+      transform: scale(1.5);
+      opacity: 0;
+    }
+    100% {
+      transform: scale(0.8);
+      opacity: 0;
+    }
+  }
+  
+  /* Timeline Meta */
+  .timeline-meta {
+    display: flex;
+    gap: 20px;
+    padding: 15px;
+    margin-top: 20px;
+  }
+  
+  .meta-item {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  
+  .meta-label {
+    font-weight: 600;
+    color: #64748b;
+  }
+  
+  .meta-value {
+    font-weight: 700;
+    color: #000;
+  }
+  
+  .meta-value.active {
+    color: #10b981;
+  }
+  
+  /* Responsive */
+  @media (max-width: 768px) {
+    .timeline-header {
+      flex-direction: column;
+      gap: 15px;
+      text-align: center;
+    }
+    
+    .timeline-meta {
+      flex-direction: column;
+      gap: 12px;
+    }
+  }
+</style>
+
+
+
+
+
+
+
 
 
 
@@ -688,90 +879,190 @@ const developmentInfo = {
   }
 
 
-
-.timeline {
-  position: relative;
-  margin: 20px 0;
-  padding-left: 60px;
-}
-
-/* garis patah2 hidup */
-.timeline-line {
-  position: absolute;
-  top: 0;
-  left: 20px;
-  height: 100%;
-}
-.timeline-line line {
-  stroke: #111;
-  stroke-width: 2;
-  stroke-dasharray: 6 6;      /* pola garis patah2 */
-  stroke-dashoffset: 0;
-  animation: dashFlow 1.2s linear infinite;
-}
-
-/* animasi garis berjalan */
-@keyframes dashFlow {
-  to { stroke-dashoffset: -12; }
-}
-
-/* dot ditempel di jalur */
-.timeline-dot {
-  position: absolute;
-  left: 14px;   /* sejajar dengan garis */
-  width: 14px;
-  height: 14px;
-  background: #111;
-  border-radius: 50%;
-  animation: pulseDot 1.8s infinite;
-}
-
-/* animasi dot */
-@keyframes pulseDot {
-  0%   { box-shadow: 0 0 0 0 rgba(17,17,17,0.5); }
-  70%  { box-shadow: 0 0 0 12px rgba(17,17,17,0); }
-  100% { box-shadow: 0 0 0 0 rgba(17,17,17,0); }
-}
-
-/* isi konten */
-.timeline-item {
-  position: relative;
-  margin-bottom: 100px;
-}
-.timeline-content {
-  margin-left: 30px;
-}
-.timeline-badge {
-  display: inline-block;
-  background: #000;
-  color: #fff;
-  font-size: 0.75rem;
-  font-weight: 700;
-  padding: 3px 10px;
-  border-radius: 4px;
-  margin-bottom: 6px;
-}
-.timeline-title {
-  font-size: 1rem;
-  font-weight: 700;
-  margin: 0 0 4px;
-}
-.timeline-date {
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: #555;
-  margin-bottom: 8px;
-}
-.timeline-desc.linebox {
-  border: 1px solid #ccc;
-  padding: 10px 14px;
-  border-radius: 6px;
-  background: #fff;
-  font-size: 0.9rem;
-  line-height: 1.4;
-}
-
-
+ /* Timeline Container */
+  .timeline-container {
+    margin: 40px 0;
+    padding: 0 20px;
+  }
+  
+  /* Timeline Box */
+  .timeline-box {
+    position: relative;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+  
+  /* Linebox Style (sesuai dengan style yang sudah ada) */
+  .linebox {
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    border-radius: 8px;
+    padding: 20px;
+    background: #fff;
+  }
+  
+  /* Timeline Header */
+  .timeline-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding: 15px 20px;
+  }
+  
+  .timeline-date {
+    font-weight: 700;
+    color: #3b82f6;
+    font-size: 1.1rem;
+  }
+  
+  .timeline-title {
+    font-weight: 700;
+    font-size: 1.4rem;
+    text-align: center;
+    flex-grow: 1;
+  }
+  
+  .timeline-label {
+    background: #3b82f6;
+    color: white;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 700;
+  }
+  
+  /* Timeline Content */
+  .timeline-content {
+    position: relative;
+    padding: 25px;
+  }
+  
+  .timeline-text h3 {
+    margin-top: 0;
+    color: #000;
+    font-size: 1.3rem;
+    margin-bottom: 15px;
+  }
+  
+  .timeline-text p {
+    line-height: 1.6;
+    color: #334155;
+    margin-bottom: 20px;
+  }
+  
+  /* Timeline Line Container */
+  .timeline-line-container {
+    position: relative;
+    height: 40px;
+    margin: 20px 0;
+    display: flex;
+    align-items: center;
+  }
+  
+  /* Garis putus-putus */
+  .timeline-line-dashed {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: repeating-linear-gradient(
+      to right,
+      #3b82f6,
+      #3b82f6 8px,
+      transparent 8px,
+      transparent 16px
+    );
+  }
+  
+  /* Pemancar kedap-kedip */
+  .timeline-transmitter {
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .transmitter-core {
+    width: 16px;
+    height: 16px;
+    background: #3b82f6;
+    border-radius: 50%;
+    z-index: 2;
+    position: relative;
+  }
+  
+  .transmitter-pulse {
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    background: rgba(59, 130, 246, 0.3);
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+    z-index: 1;
+  }
+  
+  @keyframes pulse {
+    0% {
+      transform: scale(0.8);
+      opacity: 0.8;
+    }
+    70% {
+      transform: scale(1.5);
+      opacity: 0;
+    }
+    100% {
+      transform: scale(0.8);
+      opacity: 0;
+    }
+  }
+  
+  /* Timeline Meta */
+  .timeline-meta {
+    display: flex;
+    gap: 20px;
+    padding: 15px;
+    margin-top: 20px;
+  }
+  
+  .meta-item {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  
+  .meta-label {
+    font-weight: 600;
+    color: #64748b;
+  }
+  
+  .meta-value {
+    font-weight: 700;
+    color: #000;
+  }
+  
+  .meta-value.active {
+    color: #10b981;
+  }
+  
+  /* Responsive */
+  @media (max-width: 768px) {
+    .timeline-header {
+      flex-direction: column;
+      gap: 15px;
+      text-align: center;
+    }
+    
+    .timeline-meta {
+      flex-direction: column;
+      gap: 12px;
+    }
+  }
 
 
 
@@ -3351,6 +3642,7 @@ function openFAQModal(id) {
   modal.style.display = "block";
 }
 </script>
+
 
 
 
