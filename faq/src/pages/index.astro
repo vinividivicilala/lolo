@@ -254,6 +254,8 @@ import Layout from '../layouts/Layout.astro';
   }
 
 
+/* Import Space Mono */
+@import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap');
 
 .timeline-section {
   font-family: 'Space Mono', monospace;
@@ -263,6 +265,7 @@ import Layout from '../layouts/Layout.astro';
   position: relative;
   max-width: 1100px;
   margin: 0 auto;
+  padding-left: 60px; /* jarak garis ke konten kiri */
 }
 
 /* garis vertikal putus-putus */
@@ -279,17 +282,18 @@ import Layout from '../layouts/Layout.astro';
 /* item */
 .timeline-item {
   display: grid;
-  grid-template-columns: 240px 1fr; /* kiri kecil, kanan besar */
+  grid-template-columns: 250px 1fr; /* kiri info, kanan keterangan */
   gap: 30px;
-  margin-bottom: 80px; /* jarak antar item lega */
+  margin-bottom: 80px;
   position: relative;
+  align-items: flex-start;
 }
 
 /* dot */
 .timeline-dot {
   position: absolute;
   left: 20px;
-  top: 18px;
+  top: 20px;
   width: 18px;
   height: 18px;
   border-radius: 50%;
@@ -309,12 +313,12 @@ import Layout from '../layouts/Layout.astro';
   100% { opacity: 1; transform: scale(1); }
 }
 
-/* kiri */
+/* kolom kiri */
 .timeline-left {
   display: flex;
   flex-direction: column;
   gap: 14px;
-  text-align: left;
+  text-align: left;  /* ratain kiri */
 }
 .date {
   font-size: 20px;
@@ -327,27 +331,25 @@ import Layout from '../layouts/Layout.astro';
   color: #fff;
   margin: 0;
 }
-
-/* label dalam linebox */
 .label.linebox {
-  display: inline-block;
   background: rgba(0,0,0,0.6);
   border: 1px solid rgba(255,255,255,0.3);
   padding: 10px 16px;
   border-radius: 8px;
+  font-size: 16px;
   color: #fff;
   text-transform: uppercase;
-  font-size: 16px;
-  text-align: left;
+  text-align: left;  /* ratain kiri */
+  display: inline-block;
 }
 
-/* kanan (keterangan linebox besar) */
+/* kolom kanan */
 .timeline-right.linebox {
   background: rgba(0,0,0,0.6);
   border: 1px solid rgba(255,255,255,0.3);
   padding: 28px 32px;
   border-radius: 8px;
-  text-align: left;
+  text-align: left; /* ratain kiri */
 }
 .timeline-right .text {
   font-size: 20px;
@@ -368,9 +370,8 @@ import Layout from '../layouts/Layout.astro';
 
 
 
-
-
 </style>
+
 
 
 
