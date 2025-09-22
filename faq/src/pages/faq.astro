@@ -558,38 +558,23 @@ const developmentInfo = {
 
 
 
-<!-- Timeline Isi -->
 <div class="timeline">
   <div class="timeline-item">
     <div class="timeline-date">2025-09-19</div>
     <div class="timeline-dot"></div>
-    <div class="timeline-content linebox">
-      <h3>Rilis Website</h3>
+    <div class="timeline-content linebox small">
+      <h4>Rilis Website</h4>
       <span class="timeline-badge">VERSI PRODUKSI</span>
       <p>Peluncuran versi pertama website portfolio dengan desain minimalis dan interaktif.</p>
     </div>
   </div>
-
-  <div class="timeline-item">
-    <div class="timeline-date">2025-08-10</div>
-    <div class="timeline-dot"></div>
-    <div class="timeline-content linebox">
-      <h3>Uji Coba Firebase</h3>
-      <span class="timeline-badge">BACKEND</span>
-      <p>Menerapkan autentikasi dan penyimpanan data real-time menggunakan Firebase.</p>
-    </div>
-  </div>
-
-  <div class="timeline-item">
-    <div class="timeline-date">2025-07-05</div>
-    <div class="timeline-dot"></div>
-    <div class="timeline-content linebox">
-      <h3>Desain UI</h3>
-      <span class="timeline-badge">FRONTEND</span>
-      <p>Membuat desain UI tipografi-based dan minimalist UI untuk tampilan website.</p>
-    </div>
-  </div>
 </div>
+
+
+
+
+
+
 
 
 
@@ -673,6 +658,68 @@ const developmentInfo = {
   .color-block-extra-large p, .cta-button-large, .title-accent {
     font-family: 'Space Mono', monospace !important;
   }
+
+
+
+.timeline {
+  position: relative;
+  border-left: 2px dashed #111;   /* garis patah-patah */
+  margin: 20px 0;
+  padding-left: 30px;
+}
+.timeline-item {
+  margin-bottom: 24px;
+  position: relative;
+}
+.timeline-date {
+  font-size: 0.8rem;
+  font-weight: 600;
+  margin-bottom: 5px;
+  color: #444;
+}
+.timeline-dot {
+  position: absolute;
+  left: -11px;
+  top: 4px;
+  width: 12px;
+  height: 12px;
+  background: #111;
+  border-radius: 50%;
+  animation: pulseDot 1.8s infinite; /* efek kedap-kedip */
+}
+
+/* animasi pemancar */
+@keyframes pulseDot {
+  0%   { box-shadow: 0 0 0 0 rgba(17,17,17,0.5); }
+  70%  { box-shadow: 0 0 0 10px rgba(17,17,17,0); }
+  100% { box-shadow: 0 0 0 0 rgba(17,17,17,0); }
+}
+
+.timeline-content.linebox.small {
+  border: 1px solid #ccc;   /* linebox tipis */
+  padding: 10px 14px;
+  border-radius: 6px;
+  background: #fff;
+  font-size: 0.9rem;        /* font lebih kecil */
+}
+.timeline-content h4 {
+  margin: 0 0 6px;
+  font-size: 1rem;
+  font-weight: 700;
+}
+.timeline-badge {
+  display: inline-block;
+  background: #000;
+  color: #fff;
+  padding: 2px 8px;
+  font-size: 0.7rem;
+  border-radius: 4px;
+  margin-bottom: 8px;
+}
+
+
+
+
 
 
 /* Box putih di dalam bg hitam */
@@ -1336,50 +1383,6 @@ const developmentInfo = {
         font-size: 1rem;
       }
     }
-
-
-
-
-
-
-.timeline {
-  position: relative;
-  border-left: 2px dashed #444;
-  margin: 20px 0;
-  padding-left: 40px;
-}
-.timeline-item {
-  margin-bottom: 40px;
-  position: relative;
-}
-.timeline-date {
-  font-weight: 700;
-  margin-bottom: 8px;
-  color: #999;
-}
-.timeline-dot {
-  position: absolute;
-  left: -9px;
-  top: 5px;
-  width: 16px;
-  height: 16px;
-  background: #fff;
-  border: 2px solid #000;
-  border-radius: 50%;
-}
-.timeline-content h3 {
-  font-weight: 700;
-  margin: 0 0 10px;
-}
-.timeline-badge {
-  display: inline-block;
-  background: #000;
-  color: #fff;
-  padding: 4px 10px;
-  font-size: 0.8rem;
-  border-radius: 6px;
-  margin-bottom: 10px;
-}
 
 
 
@@ -3287,6 +3290,7 @@ function openFAQModal(id) {
   modal.style.display = "block";
 }
 </script>
+
 
 
 
