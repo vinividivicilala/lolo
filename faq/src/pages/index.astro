@@ -64,6 +64,26 @@ import Layout from '../layouts/Layout.astro';
             </svg>
             <span>Meeting</span>
           </div>
+
+  <!-- Tambahan item baru -->
+          <div class="linebox-item">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+              <polyline points="22,6 12,13 2,6"></polyline>
+            </svg>
+            <span>Gmail</span>
+          </div>
+          
+          <div class="linebox-item">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+              <circle cx="8.5" cy="8.5" r="1.5"></circle>
+              <polyline points="21,15 16,10 5,21"></polyline>
+            </svg>
+            <span>Galeri</span>
+          </div>
+     
+
           
           <div class="linebox-item">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -74,13 +94,13 @@ import Layout from '../layouts/Layout.astro';
         </div>
 
 
-
   <!-- TIMELINE CONTAINER -->
         <div class="timeline-container">
           
           <!-- ITEM 1 -->
           <div class="timeline-item">
             <div class="timeline-dot active"></div>
+            <div class="timeline-connector"></div>
             <div class="timeline-content">
               <div class="timeline-left">
                 <span class="date">2025-09-19</span>
@@ -98,6 +118,7 @@ import Layout from '../layouts/Layout.astro';
           <!-- ITEM 2 -->
           <div class="timeline-item">
             <div class="timeline-dot"></div>
+            <div class="timeline-connector"></div>
             <div class="timeline-content">
               <div class="timeline-left">
                 <span class="date">2025-10-05</span>
@@ -115,6 +136,7 @@ import Layout from '../layouts/Layout.astro';
           <!-- ITEM 3 -->
           <div class="timeline-item">
             <div class="timeline-dot"></div>
+            <div class="timeline-connector"></div>
             <div class="timeline-content">
               <div class="timeline-left">
                 <span class="date">2025-11-01</span>
@@ -132,6 +154,7 @@ import Layout from '../layouts/Layout.astro';
           <!-- ITEM 4 -->
           <div class="timeline-item">
             <div class="timeline-dot"></div>
+            <div class="timeline-connector"></div>
             <div class="timeline-content">
               <div class="timeline-left">
                 <span class="date">2025-12-10</span>
@@ -147,8 +170,6 @@ import Layout from '../layouts/Layout.astro';
           </div>
 
         
-
-
 
 
       </section>
@@ -280,6 +301,7 @@ padding-left: 100px;
 
 
 
+
   /* TIMELINE STYLES */
   .timeline-container {
     position: relative;
@@ -367,13 +389,24 @@ padding-left: 100px;
   }
 }
 
-  .timeline-content {
-    display: flex;
-    flex-direction: row;
-    gap: 30px;
-    align-items: flex-start;
-    font-family: 'Space Mono', monospace;
-  }
+/* Garis penghubung dari dot ke konten */
+.timeline-connector {
+  position: absolute;
+  left: -40px;
+  top: 39px; /* Mulai dari bawah dot */
+  width: 60px; /* Panjang garis horizontal */
+  height: 2px;
+  background: rgba(255, 255, 255, 0.3);
+  z-index: 1;
+}
+
+.timeline-content {
+  display: flex;
+  flex-direction: row;
+  gap: 30px;
+  align-items: flex-start;
+  font-family: 'Space Mono', monospace;
+}
 
   /* Kiri - tanggal dan judul */
   .timeline-left {
@@ -413,6 +446,7 @@ padding-left: 100px;
     padding: 28px 32px;
     border-radius: 8px;
     text-align: left;
+    position: relative;
   }
 
   .timeline-right .text {
@@ -438,12 +472,18 @@ padding-left: 100px;
     .timeline-dot {
       left: 10px;
     }
+
+    .timeline-connector {
+      left: 10px;
+      width: 30px;
+    }
     
     .timeline-item {
       padding-left: 40px;
     }
   }
 </style>
+
 
 
 
