@@ -298,6 +298,7 @@ padding-left: 100px;
     bottom: 0;
     border-left: 2px dashed rgba(255, 255, 255, 0.25);
     z-index: 1;
+ transform: translateX(-50%);
   }
 
   .timeline-item {
@@ -323,17 +324,48 @@ padding-left: 100px;
   transform: translateX(-50%);
 }
 
-  .timeline-dot.active {
-    background: #fff;
-    border-color: #6ea6ff;
-    box-shadow: 0 0 12px #6ea6ff, 0 0 24px #6ea6ff;
-    animation: blink 1.6s infinite;
-  }
+/* Titik aktif dengan pemancar */
+.timeline-dot.active {
+  background: #fff;
+  border-color: #6ea6ff;
+  box-shadow: 0 0 12px #6ea6ff, 0 0 24px #6ea6ff;
+  animation: blink 1.6s infinite;
+}
 
-  @keyframes blink {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.6; }
+/* Animasi kedap-kedip */
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+/* Efek ripple/pemancar keluar */
+.timeline-dot.active::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 2px solid #6ea6ff;
+  transform: translate(-50%, -50%) scale(0.5);
+  opacity: 0;
+  animation: ripple 2s infinite;
+}
+
+@keyframes ripple {
+  0% {
+    transform: translate(-50%, -50%) scale(0.5);
+    opacity: 0.8;
   }
+  70% {
+    transform: translate(-50%, -50%) scale(1.8);
+    opacity: 0;
+  }
+  100% {
+    opacity: 0;
+  }
+}
 
   .timeline-content {
     display: flex;
@@ -412,6 +444,7 @@ padding-left: 100px;
     }
   }
 </style>
+
 
 
 
