@@ -74,140 +74,7 @@ import Layout from '../layouts/Layout.astro';
         </div>
 
 
-<div class="timeline-container">
-
-  <!-- ITEM 1 -->
-  <div class="timeline-item">
-    <div class="timeline-dot active"></div>
-    <div class="timeline-content">
-      <div class="timeline-left">
-        <span class="date">2025-09-19</span>
-        <h3 class="title">Rilis Website</h3>
-        <span class="label linebox">VERSI PRODUKSI</span>
-      </div>
-      <div class="timeline-right linebox">
-        <p class="text">Peluncuran versi pertama website portfolio dengan desain minimalis dan interaktif.</p>
-      </div>
-    </div>
-  </div>
-
-  <!-- ITEM 2 -->
-  <div class="timeline-item">
-    <div class="timeline-dot"></div>
-    <div class="timeline-content">
-      <div class="timeline-left">
-        <span class="date">2025-10-05</span>
-        <h3 class="title">Update Fitur</h3>
-        <span class="label linebox">VERSI 1.1</span>
-      </div>
-      <div class="timeline-right linebox">
-        <p class="text">Penambahan sistem komentar, perbaikan bug, dan optimasi tampilan untuk perangkat mobile.</p>
-      </div>
-    </div>
-  </div>
-
-  <!-- ITEM 3 -->
-  <div class="timeline-item">
-    <div class="timeline-dot"></div>
-    <div class="timeline-content">
-      <div class="timeline-left">
-        <span class="date">2025-11-01</span>
-        <h3 class="title">Integrasi Firebase</h3>
-        <span class="label linebox">BACKEND</span>
-      </div>
-      <div class="timeline-right linebox">
-        <p class="text">Implementasi login Google, komentar, dan rating bintang tersimpan di Firestore.</p>
-      </div>
-    </div>
-  </div>
-
-</div>
-
-
-
-
-
-
-
-      </section>
-    </main>
-  </div>
-</Layout>
-
-<style>
-
- body {
-  background: #000;
-  color: #fff;
-  min-height: 100vh;
-  padding: 0;
-  margin: 0;
-  font-family: 'Space Mono', monospace;
-  text-align: left; /* semua rata kiri */
-padding-left: 50px; /* lebih besar, biar teks ga mentok kiri */
-}
-
-  .container {
-    max-width: 1200px;
-    margin: 0;
-    padding: 20px;
-
-  }
-  
-  .home-container {
-    padding: 40px 0;
-  }
-  
-
-.hero-section {
-  text-align: left;   /* hilangkan center */
-  padding: 60px 0;
-padding-left: 50px;
-}
-  
-
-.hero-title {
-  font-size: 3rem;
-  font-weight: 700;
-  margin-bottom: 20px;
-  font-family: 'Space Mono', monospace; /* ganti Montserrat ke Space Mono */
-  color: #fff;
-}
-
-.hero-subtitle {
-  font-size: 1.3rem;
-  max-width: 600px;
-  margin: 0 0 40px 0; /* rata kiri */
-  opacity: 0.8;
-  color: #ccc;
-}
-
-
-/* linebox biar rata kiri, nggak auto center */
-.linebox {
-  border-radius: 12px;
-  padding: 20px;
-  max-width: 100%;
-  margin: 20px 0; /* kasih jarak sama timeline */
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  justify-content: start; /* biar item rata kiri */
-  margin-bottom: 60px; 
-padding-left: 50px;
-}
-
-.linebox-item {
-  display: flex;
-  flex-direction: row; /* icon sama teks sejajar */
-  align-items: center;
-  gap: 10px;
-  padding: 12px 15px;
-  border-radius: 8px;
-  transition: all 0.3s ease;
-  cursor: pointer;
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  55, 255, 0.3);
   background: none;
 padding-left: 50px;
 }
@@ -261,31 +128,42 @@ padding-left: 50px;
   position: relative;
   max-width: 1100px;
   margin: 0 auto;
-  padding-left: 50px; /* teks tidak mentok kiri */
+  padding-left: 50px; /* lebih besar, biar teks ga mentok kiri */
 }
 
-/* garis utama, selalu nyambung */
 .timeline-container::before {
   content: "";
   position: absolute;
-  left: 50px; /* posisi garis sejajar dot */
+  left: 50px; /* sejajarkan dengan dot */
   top: 0;
   bottom: 0;
   border-left: 2px dashed rgba(255, 255, 255, 0.4);
-  z-index: 0;
+  z-index: 0; /* di belakang dot */
 }
 
-/* setiap item */
+.timeline-line {
+  display: none; /* matikan garis per item */
+}
+
+
 .timeline-item {
   position: relative;
-  margin-bottom: 80px;  /* jarak antar item */
-  padding-left: 80px;   /* jarak konten dari garis */
+  margin-bottom: 80px;
+  padding-left: 80px; /* konten agak menjauh dari garis */
+  margin-top: 40px;
+}
+
+.timeline-content {
+  display: flex;
+  flex-direction: row;
+  gap: 30px;
+  align-items: flex-start;
 }
 
 /* dot */
 .timeline-dot {
   position: absolute;
-  left: 42px; /* sejajar garis */
+  left: 42px; /* sejajar garis global */
   top: 20px;
   width: 18px;
   height: 18px;
@@ -294,18 +172,24 @@ padding-left: 50px;
   border: 2px solid rgba(255,255,255,0.4);
   z-index: 2;
 }
-
-/* dot aktif dengan animasi kedap-kedip */
 .timeline-dot.active {
   background: #fff;
   border-color: #6ea6ff;
-  animation: blink 1.5s infinite ease-in-out;
+  box-shadow: 0 0 12px #6ea6ff, 0 0 24px #6ea6ff;
+  animation: blink 1.6s infinite;
 }
 
 @keyframes blink {
   0%   { box-shadow: 0 0 6px #6ea6ff, 0 0 12px #6ea6ff; }
   50%  { box-shadow: 0 0 16px #6ea6ff, 0 0 32px #6ea6ff; }
   100% { box-shadow: 0 0 6px #6ea6ff, 0 0 12px #6ea6ff; }
+}
+
+
+
+/* matikan garis per-item */
+.timeline-line {
+  display: none;
 }
 
 /* kiri */
@@ -358,11 +242,12 @@ padding-left: 50px;
   .timeline-left {
     min-width: unset;
   }
-}
+} 
 
 
 
 </style>
+
 
 
 
