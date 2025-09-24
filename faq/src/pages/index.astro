@@ -325,6 +325,42 @@ padding-left: 60px;
 
   }
 
+/* Animasi masuk & keluar ala Framer Motion */
+@keyframes slideFadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideFadeOut {
+  from { opacity: 1; transform: translateY(0); }
+  to { opacity: 0; transform: translateY(-20px); }
+}
+
+.feedback-item {
+  margin: 15px 0;
+  padding: 15px 20px;
+  border: 1px solid rgba(255,255,255,0.3);
+  border-radius: 12px;
+  background: rgba(255,255,255,0.08); /* putih pudar */
+  backdrop-filter: blur(6px);
+  animation: slideFadeIn 0.6s ease forwards;
+}
+
+.feedback-item.exit {
+  animation: slideFadeOut 0.6s ease forwards;
+}
+
+/* Status submit animasi */
+.feedback-status {
+  opacity: 0;
+  transform: translateY(10px);
+  transition: all 0.4s ease;
+}
+.feedback-status.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
 
 /* Feedback list item */
 .feedback-item {
@@ -1076,98 +1112,109 @@ import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword , s
     const auth = getAuth(app);
 
   document.addEventListener("DOMContentLoaded", () => {
-    const feedbackForm = document.getElementById("feedbackForm");
-    const statusDiv = document.getElementById("feedbackStatus");
-    const latestContainer = document.getElementById("latestFeedback");
+  const feedbackForm = document.getElementById("feedbackForm");
+  const statusDiv = document.getElementById("feedbackStatus");
+  const latestContainer = document.getElementById("latestFeedback");
 
-    // Helper: waktu relatif
-    function timeAgo(date) {
-      const now = new Date();
-      const diffMs = now - date;
-      const diffMin = Math.floor(diffMs / 60000);
-      const diffHr = Math.floor(diffMin / 60);
-      const diffDay = Math.floor(diffHr / 24);
+  // Helper: waktu relatif
+  function timeAgo(date) {
+    const now = new Date();
+    const diffMs = now - date;
+    const diffMin = Math.floor(diffMs / 60000);
+    const diffHr = Math.floor(diffMin / 60);
+    const diffDay = Math.floor(diffHr / 24);
 
-      if (diffMin < 1) return "baru saja";
-      if (diffMin < 60) return `${diffMin} menit yang lalu`;
-      if (diffHr < 24) return `${diffHr} jam yang lalu`;
-      return `${diffDay} hari yang lalu`;
-    }
+    if (diffMin < 1) return "baru saja";
+    if (diffMin < 60) return `${diffMin} menit yang lalu`;
+    if (diffHr < 24) return `${diffHr} jam yang lalu`;
+    return `${diffDay} hari yang lalu`;
+  }
 
-    // Render item feedback
-    function renderFeedbackItem(data) {
-      const date = data.timestamp?.toDate ? data.timestamp.toDate() : new Date();
-      return `
-        <div class="feedback-item">
-          <div class="feedback-header">${data.name || "Anonim"}</div>
-          <div class="feedback-message">${data.message}</div>
-          <div class="feedback-meta">${timeAgo(date)}</div>
-        </div>
-      `;
-    }
+  // Render feedback dengan animasi
+  function renderFeedbackItem(data) {
+    const date = data.timestamp?.toDate ? data.timestamp.toDate() : new Date();
+    const div = document.createElement("div");
+    div.className = "feedback-item";
+    div.innerHTML = `
+      <div class="feedback-header">${data.name || "Anonim"}</div>
+      <div class="feedback-message">${data.message}</div>
+      <div class="feedback-meta">${timeAgo(date)}</div>
+    `;
 
-    // Submit form
-    if (feedbackForm) {
-      feedbackForm.addEventListener("submit", async (e) => {
-        e.preventDefault();
+    // Auto hilang setelah 10 detik
+    setTimeout(() => {
+      div.classList.add("exit");
+      setTimeout(() => div.remove(), 600); // tunggu animasi selesai
+    }, 10000);
 
-        const name = document.getElementById("feedbackName").value.trim();
-        const title = document.getElementById("feedbackTitle").value.trim();
-        const message = document.getElementById("feedbackMessage").value.trim();
+    return div;
+  }
 
-        if (!title || !message) {
-          showStatus("Harap isi judul dan keterangan!", "error");
-          return;
-        }
+  // Submit form
+  if (feedbackForm) {
+    feedbackForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
 
-        const submitBtn = feedbackForm.querySelector("button");
-        const originalText = submitBtn.innerHTML;
-        submitBtn.disabled = true;
-        submitBtn.innerHTML = "<span>Mengirim...</span>";
+      const name = document.getElementById("feedbackName").value.trim();
+      const title = document.getElementById("feedbackTitle").value.trim();
+      const message = document.getElementById("feedbackMessage").value.trim();
 
-        try {
-          await addDoc(collection(db, "feedbacks"), {
-            name: name || "Anonim",
-            title,
-            message,
-            timestamp: serverTimestamp(),
-            page: window.location.href
-          });
+      if (!title || !message) {
+        showStatus("Harap isi judul dan keterangan!", "error");
+        return;
+      }
 
-          showStatus("✅ Terima kasih! Saran Anda telah dikirim.", "success");
-          feedbackForm.reset();
-          setTimeout(hideStatus, 5000);
-        } catch (error) {
-          console.error("Error saving feedback:", error);
-          showStatus("❌ Maaf, terjadi error. Silakan coba lagi.", "error");
-        } finally {
-          submitBtn.disabled = false;
-          submitBtn.innerHTML = originalText;
-        }
-      });
-    }
+      const submitBtn = feedbackForm.querySelector("button");
+      const originalText = submitBtn.innerHTML;
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = "<span>Mengirim...</span>";
 
-    // Status pesan
-    function showStatus(message, type) {
-      statusDiv.textContent = message;
-      statusDiv.className = `feedback-status ${type}`;
-    }
-    function hideStatus() {
-      statusDiv.className = "feedback-status";
-      statusDiv.textContent = "";
-    }
+      try {
+        await addDoc(collection(db, "feedbacks"), {
+          name: name || "Anonim",
+          title,
+          message,
+          timestamp: serverTimestamp(),
+          page: window.location.href
+        });
 
-    // Listener realtime: ambil feedback terbaru
-    const q = query(collection(db, "feedbacks"), orderBy("timestamp", "desc"));
-    onSnapshot(q, (snapshot) => {
-      latestContainer.innerHTML = "";
-      snapshot.forEach((doc) => {
-        const data = doc.data();
-        latestContainer.innerHTML += renderFeedbackItem(data);
-      });
+        showStatus("✅ Terima kasih! Saran Anda telah dikirim.", "success");
+        feedbackForm.reset();
+      } catch (error) {
+        console.error("Error saving feedback:", error);
+        showStatus("❌ Maaf, terjadi error. Silakan coba lagi.", "error");
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalText;
+      }
+    });
+  }
+
+  // Status pesan dengan animasi
+  function showStatus(message, type) {
+    statusDiv.textContent = message;
+    statusDiv.className = `feedback-status ${type} show`;
+    setTimeout(hideStatus, 4000); // auto sembunyi
+  }
+  function hideStatus() {
+    statusDiv.className = "feedback-status";
+    statusDiv.textContent = "";
+  }
+
+  // Listener realtime
+  const q = query(collection(db, "feedbacks"), orderBy("timestamp", "desc"));
+  onSnapshot(q, (snapshot) => {
+    latestContainer.innerHTML = "";
+    snapshot.forEach((doc) => {
+      const data = doc.data();
+      const item = renderFeedbackItem(data);
+      latestContainer.appendChild(item);
     });
   });
+});
+
 </script>
+
 
 
 
