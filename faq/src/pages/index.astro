@@ -332,6 +332,228 @@ padding-left: 60px;
 #latestFeedback {
   margin: 30px 0;
   max-width: 800px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+/* Item feedback dengan desain yang bagus */
+.feedback-item {
+  padding: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  animation: fadeInUp 0.5s ease-out;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+  font-family: 'Space Mono', monospace;
+}
+
+.feedback-item:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+/* Header feedback */
+.feedback-item-header {
+  font-weight: bold;
+  color: #9dbbff;
+  margin-bottom: 8px;
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.feedback-item-header::before {
+  content: "👤";
+  font-size: 1rem;
+}
+
+/* Judul feedback */
+.feedback-item-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 8px 0;
+  padding-left: 26px;
+}
+
+.feedback-item-title::before {
+  content: "💬";
+  margin-right: 8px;
+}
+
+/* Pesan feedback */
+.feedback-item-message {
+  color: #ddd;
+  margin: 10px 0;
+  line-height: 1.5;
+  padding: 10px 15px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+  border-left: 3px solid #9dbbff;
+}
+
+/* Metadata feedback */
+.feedback-item-meta {
+  font-size: 0.85rem;
+  color: #aaa;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Indikator waktu baru saja */
+.new-indicator {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  background-color: #4caf50;
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.7);
+  }
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 10px rgba(76, 175, 80, 0);
+  }
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(76, 175, 80, 0);
+  }
+}
+
+/* Animasi untuk feedback baru */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Status feedback */
+.feedback-status {
+  margin-top: 20px;
+  padding: 15px;
+  border-radius: 8px;
+  text-align: center;
+  font-weight: 600;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: all 0.3s ease;
+}
+
+.feedback-status.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.feedback-status.success {
+  background: rgba(76, 175, 80, 0.2);
+  border: 1px solid rgba(76, 175, 80, 0.5);
+  color: #4caf50;
+}
+
+.feedback-status.error {
+  background: rgba(244, 67, 54, 0.2);
+  border: 1px solid rgba(244, 67, 54, 0.5);
+  color: #f44336;
+}
+
+/* Form styling */
+.feedback-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-input, .form-textarea {
+  padding: 12px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
+  font-family: 'Space Mono', monospace;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.form-input:focus, .form-textarea:focus {
+  outline: none;
+  border-color: #9dbbff;
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 0 0 2px rgba(157, 187, 255, 0.2);
+}
+
+.form-input::placeholder, .form-textarea::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.submit-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 12px 24px;
+  background: linear-gradient(45deg, #667eea, #764ba2);
+  border: none;
+  border-radius: 8px;
+  color: #fff;
+  font-family: 'Space Mono', monospace;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 10px;
+}
+
+.submit-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+}
+
+.submit-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .feedback-item {
+    padding: 15px;
+  }
+  
+  .feedback-item-message {
+    padding: 8px 12px;
+  }
+}
+
+
+/* Container feedback terbaru */
+#latestFeedback {
+  margin: 30px 0;
+  max-width: 800px;
 }
 
 /* Item feedback dengan desain yang bagus */
@@ -1491,11 +1713,18 @@ import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword , s
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     const auth = getAuth(app);
+
+
+
+
+
 document.addEventListener("DOMContentLoaded", () => {
   const feedbackForm = document.getElementById("feedbackForm");
   const statusDiv = document.getElementById("feedbackStatus");
   const latestContainer = document.getElementById("latestFeedback");
   const lastUpdateTime = document.getElementById("lastUpdateTime");
+
+  console.log("Script loaded"); // Debug
 
   // Update waktu terakhir
   function updateLastUpdateTime() {
@@ -1529,18 +1758,21 @@ document.addEventListener("DOMContentLoaded", () => {
     
     return `
       <div class="feedback-item">
-        <div class="feedback-header">${data.name || "Anonim"}</div>
-        <div class="feedback-title">${data.title || "Tanpa Judul"}</div>
-        <div class="feedback-message">${data.message}</div>
-        <div class="feedback-meta">${timeAgo(date)}</div>
+        <div class="feedback-item-header">${data.name || "Anonim"}</div>
+        <div class="feedback-item-title">${data.title || "Tanpa Judul"}</div>
+        <div class="feedback-item-message">${data.message}</div>
+        <div class="feedback-item-meta">${timeAgo(date)}</div>
       </div>
     `;
   }
 
   // Submit form
   if (feedbackForm) {
+    console.log("Form found"); // Debug
+    
     feedbackForm.addEventListener("submit", async (e) => {
       e.preventDefault();
+      console.log("Form submitted"); // Debug
 
       const name = document.getElementById("feedbackName").value.trim();
       const title = document.getElementById("feedbackTitle").value.trim();
@@ -1586,6 +1818,8 @@ document.addEventListener("DOMContentLoaded", () => {
         submitBtn.innerHTML = originalText;
       }
     });
+  } else {
+    console.log("Form not found"); // Debug
   }
 
   // Status pesan
@@ -1600,26 +1834,40 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // Listener realtime: ambil feedback terbaru
-  const q = query(collection(db, "feedbacks"), orderBy("timestamp", "desc"));
-  onSnapshot(q, (snapshot) => {
-    latestContainer.innerHTML = "";
-    
-    if (snapshot.empty) {
-      latestContainer.innerHTML = `
-        <div class="feedback-item">
-          <div class="feedback-message" style="text-align: center; color: #888;">
-            Belum ada feedback. Jadilah yang pertama memberikan saran!
+  try {
+    const q = query(collection(db, "feedbacks"), orderBy("timestamp", "desc"));
+    onSnapshot(q, (snapshot) => {
+      console.log("Snapshot received:", snapshot.size, "items"); // Debug
+      
+      latestContainer.innerHTML = "";
+      
+      if (snapshot.empty) {
+        latestContainer.innerHTML = `
+          <div class="feedback-item">
+            <div class="feedback-item-message" style="text-align: center; color: #888;">
+              Belum ada feedback. Jadilah yang pertama memberikan saran!
+            </div>
           </div>
-        </div>
-      `;
-      return;
-    }
-    
-    snapshot.forEach((doc) => {
-      const data = doc.data();
-      latestContainer.innerHTML += renderFeedbackItem(data);
+        `;
+        return;
+      }
+      
+      snapshot.forEach((doc) => {
+        const data = doc.data();
+        console.log("Feedback data:", data); // Debug
+        latestContainer.innerHTML += renderFeedbackItem(data);
+      });
     });
-  });
+  } catch (error) {
+    console.error("Error setting up snapshot listener:", error);
+    latestContainer.innerHTML = `
+      <div class="feedback-item">
+        <div class="feedback-item-message" style="text-align: center; color: #f44336;">
+          Error loading feedback. Please refresh the page.
+        </div>
+      </div>
+    `;
+  }
 
   // Inisialisasi waktu terakhir
   updateLastUpdateTime();
@@ -1627,7 +1875,15 @@ document.addEventListener("DOMContentLoaded", () => {
   // Update waktu setiap menit
   setInterval(updateLastUpdateTime, 60000);
 });
+
+
+
+
+
+
+
 </script>
+
 
 
 
