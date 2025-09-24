@@ -10,8 +10,6 @@ import Layout from '../layouts/Layout.astro';
         <h1 class="hero-title">Note Farid</h1>
         <p class="hero-subtitle">Tempat berbagi pengetahuan tentang development web, Astro, dan teknologi terkini.</p>
 
-<!-- Container feedback terbaru -->
-<div id="latestFeedback" class="feedback-list"></div>
 
 
 <!-- Section Website Masih Dikembangkan -->
@@ -295,6 +293,10 @@ import Layout from '../layouts/Layout.astro';
           </div>
         </div>
 
+<!-- Container feedback terbaru -->
+<div id="latestFeedback" class="feedback-list"></div>
+
+
 
       </section>
     </main>
@@ -324,6 +326,65 @@ padding-left: 60px;
    font-family: 'Space Mono', monospace;
 
   }
+
+
+/* Container feedback list */
+.feedback-list {
+  margin-top: 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 800px;
+}
+
+/* Item feedback */
+.feedback-item {
+  padding: 18px 20px;
+  border: 1px solid rgba(255,255,255,0.3);
+  border-radius: 12px;
+  background: rgba(255,255,255,0.06); /* putih pudar */
+  backdrop-filter: blur(6px);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  animation: slideFadeIn 0.5s ease;
+}
+
+.feedback-item:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 14px rgba(0,0,0,0.4);
+}
+
+/* Header (nama + judul) */
+.feedback-header {
+  font-weight: 600;
+  color: #9dbbff;
+  margin-bottom: 6px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.feedback-title {
+  font-size: 1rem;
+  color: #fff;
+  font-weight: 700;
+  margin-left: 8px;
+}
+
+/* Isi pesan */
+.feedback-message {
+  color: #ddd;
+  margin: 8px 0 12px 0;
+  line-height: 1.6;
+}
+
+/* Footer (waktu) */
+.feedback-meta {
+  font-size: 0.85rem;
+  color: #aaa;
+  text-align: right;
+  font-style: italic;
+}
+
 
 /* Animasi masuk & keluar ala Framer Motion */
 @keyframes slideFadeIn {
@@ -1214,6 +1275,7 @@ import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword , s
 });
 
 </script>
+
 
 
 
