@@ -327,6 +327,177 @@ padding-left: 60px;
 
   }
 
+/* Animasi untuk feedback item */
+@keyframes slideInOut {
+  0% {
+    opacity: 0;
+    transform: translateX(-100%);
+  }
+  10% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  90% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+}
+
+/* Container feedback terbaru dengan animasi */
+#latestFeedback {
+  position: relative;
+  margin: 30px 0;
+  max-width: 800px;
+  overflow: hidden;
+}
+
+.feedback-item {
+  margin: 15px 0;
+  padding: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  position: relative;
+  animation: slideInOut 8s forwards;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+}
+
+/* Efek hover untuk feedback item */
+.feedback-item:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+  animation-play-state: paused;
+}
+
+/* Linebox dengan warna putih pudar */
+.feedback-linebox {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 16px;
+  padding: 30px;
+  backdrop-filter: blur(10px);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Efek shimmer pada linebox */
+.feedback-linebox::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  animation: shimmer 3s infinite;
+}
+
+@keyframes shimmer {
+  0% { left: -100%; }
+  100% { left: 100%; }
+}
+
+/* Styling untuk header feedback */
+.feedback-header {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 10px;
+  font-weight: bold;
+  color: #9dbbff;
+}
+
+/* Styling untuk pesan feedback */
+.feedback-message {
+  color: #ddd;
+  margin: 10px 0;
+  line-height: 1.5;
+}
+
+/* Styling untuk metadata feedback */
+.feedback-meta {
+  font-size: 0.85rem;
+  color: #aaa;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* Indikator waktu baru saja */
+.feedback-meta .new-indicator {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  background-color: #4caf50;
+  border-radius: 50%;
+  margin-right: 5px;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.7);
+  }
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 10px rgba(76, 175, 80, 0);
+  }
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(76, 175, 80, 0);
+  }
+}
+
+/* Status feedback */
+.feedback-status {
+  margin-top: 20px;
+  padding: 15px;
+  border-radius: 8px;
+  text-align: center;
+  font-weight: 600;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: all 0.3s ease;
+  animation: statusSlideIn 0.5s forwards;
+}
+
+@keyframes statusSlideIn {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.feedback-status.success {
+  background: rgba(76, 175, 80, 0.2);
+  border: 1px solid rgba(76, 175, 80, 0.5);
+  color: #4caf50;
+}
+
+.feedback-status.error {
+  background: rgba(244, 67, 54, 0.2);
+  border: 1px solid rgba(244, 67, 54, 0.5);
+  color: #f44336;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .feedback-item {
+    padding: 15px;
+    margin: 10px 0;
+  }
+  
+  .feedback-linebox {
+    padding: 20px;
+  }
+}
+
 /* Container daftar feedback */
 .feedback-list {
   margin: 40px auto 0;
@@ -1096,12 +1267,25 @@ import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword , s
     const db = getFirestore(app);
     const auth = getAuth(app);
 
-  document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", () => {
   const feedbackForm = document.getElementById("feedbackForm");
   const statusDiv = document.getElementById("feedbackStatus");
   const latestContainer = document.getElementById("latestFeedback");
+  const lastUpdateTime = document.getElementById("lastUpdateTime");
 
-  // Helper: waktu relatif
+  // Update waktu terakhir
+  function updateLastUpdateTime() {
+    const now = new Date();
+    lastUpdateTime.textContent = now.toLocaleString('id-ID', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  }
+
+  // Helper: waktu relatif dengan indikator "baru saja"
   function timeAgo(date) {
     const now = new Date();
     const diffMs = now - date;
@@ -1109,34 +1293,25 @@ import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword , s
     const diffHr = Math.floor(diffMin / 60);
     const diffDay = Math.floor(diffHr / 24);
 
-    if (diffMin < 1) return "baru saja";
+    if (diffMin < 1) return '<span class="new-indicator"></span>baru saja';
     if (diffMin < 60) return `${diffMin} menit yang lalu`;
     if (diffHr < 24) return `${diffHr} jam yang lalu`;
     return `${diffDay} hari yang lalu`;
   }
 
-function renderFeedbackItem(data) {
-  const date = data.timestamp?.toDate ? data.timestamp.toDate() : new Date();
-  const div = document.createElement("div");
-  div.className = "feedback-item";
-  div.innerHTML = `
-    <div class="feedback-item-header">
-      <span class="feedback-name">${data.name || "Anonim"}</span>
-      <span class="feedback-title">${data.title || "(Tanpa Judul)"}</span>
-    </div>
-    <div class="feedback-message">${data.message}</div>
-    <div class="feedback-meta">${timeAgo(date)}</div>
-  `;
-
-  // Kalau mau auto-hilang
-  setTimeout(() => {
-    div.classList.add("exit");
-    setTimeout(() => div.remove(), 600);
-  }, 10000);
-
-  return div;
-}
-
+  // Render item feedback dengan animasi
+  function renderFeedbackItem(data, index) {
+    const date = data.timestamp?.toDate ? data.timestamp.toDate() : new Date();
+    const delay = index * 0.5; // Delay untuk animasi berurutan
+    
+    return `
+      <div class="feedback-item" style="animation-delay: ${delay}s">
+        <div class="feedback-header">${data.name || "Anonim"}</div>
+        <div class="feedback-message">${data.message}</div>
+        <div class="feedback-meta">${timeAgo(date)}</div>
+      </div>
+    `;
+  }
 
   // Submit form
   if (feedbackForm) {
@@ -1168,6 +1343,10 @@ function renderFeedbackItem(data) {
 
         showStatus("✅ Terima kasih! Saran Anda telah dikirim.", "success");
         feedbackForm.reset();
+        updateLastUpdateTime();
+        
+        // Auto-hide status setelah 5 detik
+        setTimeout(hideStatus, 5000);
       } catch (error) {
         console.error("Error saving feedback:", error);
         showStatus("❌ Maaf, terjadi error. Silakan coba lagi.", "error");
@@ -1178,64 +1357,33 @@ function renderFeedbackItem(data) {
     });
   }
 
-  // Status pesan dengan animasi
+  // Status pesan
   function showStatus(message, type) {
     statusDiv.textContent = message;
-    statusDiv.className = `feedback-status ${type} show`;
-    setTimeout(hideStatus, 4000); // auto sembunyi
+    statusDiv.className = `feedback-status ${type}`;
   }
+  
   function hideStatus() {
     statusDiv.className = "feedback-status";
     statusDiv.textContent = "";
   }
 
-  // Listener realtime
-  const q = query(collection(db, "feedbacks"), orderBy("timestamp", "desc"));
+  // Listener realtime: ambil feedback terbaru
+  const q = query(collection(db, "feedbacks"), orderBy("timestamp", "desc"), limit(5));
   onSnapshot(q, (snapshot) => {
     latestContainer.innerHTML = "";
+    let index = 0;
+    
     snapshot.forEach((doc) => {
       const data = doc.data();
-      const item = renderFeedbackItem(data);
-      latestContainer.appendChild(item);
+      latestContainer.innerHTML += renderFeedbackItem(data, index);
+      index++;
     });
   });
+
+  // Inisialisasi waktu terakhir
+  updateLastUpdateTime();
 });
-
 </script>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
