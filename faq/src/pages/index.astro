@@ -326,6 +326,30 @@ padding-left: 60px;
 
   }
 
+
+
+.feedback-item {
+  margin: 12px 0;
+  padding: 16px;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.25);
+  color: #fff;
+  animation: slideIn 0.5s ease-out;
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(20px);}
+  to   { opacity: 1; transform: translateY(0);}
+}
+
+.fade-out {
+  animation: fadeOut 0.6s ease forwards;
+}
+@keyframes fadeOut {
+  to { opacity: 0; transform: translateY(-20px);}
+}
+
 .feedback-item {
   margin: 15px 0;
   padding: 15px 20px;
@@ -1154,7 +1178,7 @@ import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword , s
     }
 
 
-// Render + animasi
+// Render item feedback dengan animasi
 function renderFeedbackItem(data) {
   const date = data.timestamp?.toDate ? data.timestamp.toDate() : new Date();
   const wrapper = document.createElement("div");
@@ -1165,16 +1189,14 @@ function renderFeedbackItem(data) {
     <div class="feedback-meta">${timeAgo(date)}</div>
   `;
 
-  // otomatis hilang setelah 10 detik
+  // efek hilang otomatis (optional)
   setTimeout(() => {
     wrapper.classList.add("fade-out");
-    setTimeout(() => wrapper.remove(), 600); // hapus dari DOM setelah animasi
-  }, 10000);
+    setTimeout(() => wrapper.remove(), 600);
+  }, 15000);
 
   return wrapper;
 }
-
-
     // Submit form
     if (feedbackForm) {
       feedbackForm.addEventListener("submit", async (e) => {
@@ -1226,13 +1248,14 @@ function renderFeedbackItem(data) {
       statusDiv.textContent = "";
     }
 
-    // Listener realtime: ambil feedback terbaru
-    const q = query(collection(db, "feedbacks"), orderBy("timestamp", "desc"));
-    onSnapshot(q, (snapshot) => {
+   // Listener realtime
+const q = query(collection(db, "feedbacks"), orderBy("timestamp", "desc"));
+onSnapshot(q, (snapshot) => {
   latestContainer.innerHTML = "";
   snapshot.forEach((doc) => {
     const data = doc.data();
-    latestContainer.appendChild(renderFeedbackItem(data));
+    const item = renderFeedbackItem(data);
+    latestContainer.appendChild(item); // pakai appendChild, bukan innerHTML
   });
 });
   });
