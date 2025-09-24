@@ -327,6 +327,67 @@ padding-left: 60px;
 
   }
 
+/* Container daftar feedback */
+.feedback-list {
+  margin-top: 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 800px;
+}
+
+/* Kartu feedback */
+.feedback-item {
+  padding: 18px 22px;
+  border: 1px solid rgba(255,255,255,0.25);
+  border-radius: 12px;
+  background: rgba(255,255,255,0.06); /* putih pudar transparan */
+  backdrop-filter: blur(8px);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  animation: slideFadeIn 0.5s ease;
+}
+
+/* Hover interaktif */
+.feedback-item:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+}
+
+/* Header: nama + judul */
+.feedback-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.feedback-name {
+  font-weight: 600;
+  color: #9dbbff;
+}
+
+.feedback-title {
+  font-weight: 700;
+  color: #fff;
+  font-size: 1rem;
+}
+
+/* Isi pesan */
+.feedback-message {
+  color: #ddd;
+  margin: 10px 0;
+  line-height: 1.6;
+}
+
+/* Footer: waktu */
+.feedback-meta {
+  font-size: 0.85rem;
+  color: #aaa;
+  text-align: right;
+  font-style: italic;
+}
+
+
 
 /* Container feedback list */
 .feedback-list {
@@ -1191,25 +1252,28 @@ import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword , s
     return `${diffDay} hari yang lalu`;
   }
 
-  // Render feedback dengan animasi
-  function renderFeedbackItem(data) {
-    const date = data.timestamp?.toDate ? data.timestamp.toDate() : new Date();
-    const div = document.createElement("div");
-    div.className = "feedback-item";
-    div.innerHTML = `
-      <div class="feedback-header">${data.name || "Anonim"}</div>
-      <div class="feedback-message">${data.message}</div>
-      <div class="feedback-meta">${timeAgo(date)}</div>
-    `;
+ function renderFeedbackItem(data) {
+  const date = data.timestamp?.toDate ? data.timestamp.toDate() : new Date();
+  const div = document.createElement("div");
+  div.className = "feedback-item";
+  div.innerHTML = `
+    <div class="feedback-top">
+      <span class="feedback-name">${data.name || "Anonim"}</span>
+      <span class="feedback-title">${data.title || "(Tanpa Judul)"}</span>
+    </div>
+    <div class="feedback-message">${data.message}</div>
+    <div class="feedback-meta">${timeAgo(date)}</div>
+  `;
 
-    // Auto hilang setelah 10 detik
-    setTimeout(() => {
-      div.classList.add("exit");
-      setTimeout(() => div.remove(), 600); // tunggu animasi selesai
-    }, 10000);
+  // Kalau mau auto-hilang
+  setTimeout(() => {
+    div.classList.add("exit");
+    setTimeout(() => div.remove(), 600);
+  }, 10000);
 
-    return div;
-  }
+  return div;
+}
+
 
   // Submit form
   if (feedbackForm) {
@@ -1275,6 +1339,7 @@ import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword , s
 });
 
 </script>
+
 
 
 
