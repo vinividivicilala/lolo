@@ -246,8 +246,6 @@ import Layout from '../layouts/Layout.astro';
       </a>
     </div>
   </div>
-
-
   <!-- Feedback Section -->
         <div class="feedback-section">
           <div class="feedback-linebox">
@@ -290,11 +288,27 @@ import Layout from '../layouts/Layout.astro';
             </form>
 
             <div id="feedbackStatus" class="feedback-status"></div>
+          </div>
+        </div>
+
+        <!-- Container untuk menampilkan feedback terbaru -->
+        <div class="feedback-display-section">
+          <div class="feedback-display-linebox">
+            <div class="feedback-display-header">
+              <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+              </svg>
+              <h3>Saran & Kritik Terbaru</h3>
+              <span class="feedback-count">(<span id="feedbackCount">0</span> saran)</span>
+            </div>
+            <div id="latestFeedback" class="feedback-list"></div>
+          </div>
+        </div>
+
 
           </div>
         </div>
-<!-- Container list terbaru -->
-<div id="latestFeedback" class="feedback-list"></div>
+
 
 
       </section>
@@ -328,137 +342,251 @@ padding-left: 60px;
 
 
 
-.feedback-item {
-  margin: 12px 0;
-  padding: 16px;
-  border-radius: 12px;
-  background: rgba(255,255,255,0.08);
-  border: 1px solid rgba(255,255,255,0.25);
-  color: #fff;
-  animation: slideIn 0.5s ease-out;
-}
 
-@keyframes slideIn {
-  from { opacity: 0; transform: translateY(20px);}
-  to   { opacity: 1; transform: translateY(0);}
-}
+  /* Feedback Display Section Styles */
+  .feedback-display-section {
+    margin: 60px 0;
+    max-width: 800px;
+  }
 
-.fade-out {
-  animation: fadeOut 0.6s ease forwards;
-}
-@keyframes fadeOut {
-  to { opacity: 0; transform: translateY(-20px);}
-}
+  .feedback-display-linebox {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 16px;
+    padding: 30px;
+    backdrop-filter: blur(10px);
+  }
 
-.feedback-item {
-  margin: 15px 0;
-  padding: 15px 20px;
-  border: 1px solid rgba(255,255,255,0.3); /* putih pudar */
-  border-radius: 12px;
-  background: rgba(255,255,255,0.08);
-  position: relative;
-  overflow: hidden;
-  animation: slideIn 0.6s ease-out forwards;
-}
+  .feedback-display-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  }
 
-.feedback-item::before {
-  content: "";
-  position: absolute;
-  top: 0; left: -100%;
-  width: 100%; height: 100%;
-  background: rgba(255,255,255,0.15);
-  animation: lineSweep 1.2s ease-out forwards;
-}
+  .feedback-display-header svg {
+    color: #9dbbff;
+  }
 
-.feedback-header {
-  font-weight: bold;
-  color: #9dbbff;
-  margin-bottom: 6px;
-}
+  .feedback-display-header h3 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0;
+    color: #fff;
+  }
 
-.feedback-message {
-  color: #eee;
-  margin: 6px 0;
-}
+  .feedback-count {
+    color: #9dbbff;
+    font-size: 0.9rem;
+    margin-left: auto;
+  }
 
-.feedback-meta {
-  font-size: 0.85rem;
-  color: #aaa;
-}
+  .feedback-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    max-height: 500px;
+    overflow-y: auto;
+    padding-right: 10px;
+  }
 
-/* Animasi masuk */
-@keyframes slideIn {
-  from {opacity: 0; transform: translateY(20px);}
-  to   {opacity: 1; transform: translateY(0);}
-}
+  /* Scrollbar styling */
+  .feedback-list::-webkit-scrollbar {
+    width: 6px;
+  }
 
-/* Sweep line putih */
-@keyframes lineSweep {
-  from {left: -100%;}
-  to   {left: 100%;}
-}
+  .feedback-list::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+  }
 
-/* Animasi keluar otomatis */
-.fade-out {
-  animation: fadeOut 0.6s ease forwards;
-}
+  .feedback-list::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 3px;
+  }
 
-@keyframes fadeOut {
-  to {opacity: 0; transform: translateY(-20px);}
-}
+  .feedback-list::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.5);
+  }
 
+  /* Feedback Item Styles dengan animasi Framer Motion-like */
+  .feedback-item {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 12px;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+    animation: slideInUp 0.6s ease-out forwards;
+    transform-origin: top center;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
 
+  /* Animasi masuk seperti Framer Motion */
+  @keyframes slideInUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px) scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
 
-/* Feedback list item */
-.feedback-item {
-  margin: 15px 0;
-  padding: 15px 20px;
-  border: 1px solid rgba(255,255,255,0.3); /* garis putih pudar */
-  border-radius: 12px;
-  background: rgba(255,255,255,0.05);
-}
+  /* Animasi keluar dengan efek bergerak */
+  .feedback-item.fade-out {
+    animation: slideOutUp 0.6s ease-in forwards;
+  }
 
-.feedback-header {
-  font-weight: bold;
-  color: #9dbbff;
-  margin-bottom: 6px;
-}
+  @keyframes slideOutUp {
+    from {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+    to {
+      opacity: 0;
+      transform: translateY(-30px) scale(0.95);
+    }
+  }
 
-.feedback-message {
-  color: #ddd;
-  margin: 6px 0;
-}
+  /* Efek hover yang halus */
+  .feedback-item:hover {
+    transform: translateY(-2px);
+    border-color: rgba(255, 255, 255, 0.4);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+  }
 
-.feedback-meta {
-  font-size: 0.85rem;
-  color: #aaa;
-}
+  /* Garis putih pudar yang bergerak */
+  .feedback-item::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.1),
+      transparent
+    );
+    animation: shimmer 2s infinite;
+    z-index: 1;
+  }
 
+  @keyframes shimmer {
+    0% {
+      left: -100%;
+    }
+    100% {
+      left: 100%;
+    }
+  }
 
-.feedback-display {
-  margin: 20px auto;
-  max-width: 800px;
-  padding: 20px;
-  border: 1px solid rgba(255,255,255,0.3);
-  border-radius: 12px;
-  background: rgba(255,255,255,0.05);
-  color: #fff;
-}
-.feedback-display h3 {
-  margin: 0 0 10px;
-  font-size: 1.2rem;
-  color: #9dbbff;
-}
-.feedback-display p {
-  margin: 0 0 10px;
-  color: #ddd;
-}
-.feedback-meta {
-  font-size: 0.9rem;
-  color: #aaa;
-}
+  /* Konten feedback */
+  .feedback-content {
+    position: relative;
+    z-index: 2;
+  }
 
+  .feedback-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 10px;
+  }
 
+  .feedback-user {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .user-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: linear-gradient(45deg, #667eea, #764ba2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    color: white;
+    font-size: 14px;
+  }
+
+  .user-info h4 {
+    margin: 0;
+    font-size: 1rem;
+    color: #9dbbff;
+    font-weight: 600;
+  }
+
+  .feedback-time {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.6);
+    white-space: nowrap;
+    margin-left: 15px;
+  }
+
+  .feedback-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #fff;
+    margin: 5px 0 10px 0;
+    line-height: 1.4;
+  }
+
+  .feedback-message {
+    color: rgba(255, 255, 255, 0.9);
+    line-height: 1.5;
+    margin: 0;
+    font-size: 0.95rem;
+  }
+
+  /* Indikator status baru */
+  .new-indicator {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #ff6b6b;
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+    50% {
+      transform: scale(1.2);
+      opacity: 0.7;
+    }
+  }
+
+  /* Responsive design */
+  @media (max-width: 768px) {
+    .feedback-header {
+      flex-direction: column;
+      gap: 5px;
+    }
+    
+    .feedback-time {
+      margin-left: 42px; /* Sesuai dengan avatar + gap */
+    }
+    
+    .feedback-item {
+      padding: 15px;
+    }
+  }
+
+  /* Feedback Section Styles (existing) */
   .feedback-section {
     margin: 40px 0;
     max-width: 800px;
@@ -619,8 +747,6 @@ padding-left: 60px;
       display: none;
     }
   }
-
-
 
 
 
@@ -1260,4 +1386,5 @@ onSnapshot(q, (snapshot) => {
 });
   });
 </script>
+
 
