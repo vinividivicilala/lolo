@@ -1284,10 +1284,27 @@ import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword , s
     const db = getFirestore(app);
     const auth = getAuth(app);
 
-  document.addEventListener("DOMContentLoaded", () => {
+
+ document.addEventListener("DOMContentLoaded", () => {
     const feedbackForm = document.getElementById("feedbackForm");
     const statusDiv = document.getElementById("feedbackStatus");
     const latestContainer = document.getElementById("latestFeedback");
+    const feedbackCountEl = document.getElementById("feedbackCount");
+    const lastUpdateTimeEl = document.getElementById("lastUpdateTime");
+
+    // Update waktu terakhir
+    function updateLastUpdateTime() {
+      const now = new Date();
+      const options = { 
+        weekday: 'long', 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      };
+      lastUpdateTimeEl.textContent = now.toLocaleDateString('id-ID', options);
+    }
 
     // Helper: waktu relatif
     function timeAgo(date) {
@@ -1303,26 +1320,76 @@ import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword , s
       return `${diffDay} hari yang lalu`;
     }
 
+    // Hitung total feedback
+    async function updateFeedbackCount() {
+      try {
+        const coll = collection(db, "feedbacks");
+        const snapshot = await getCountFromServer(coll);
+        const count = snapshot.data().count;
+        feedbackCountEl.textContent = count;
+      } catch (error) {
+        console.error("Error counting feedbacks:", error);
+      }
+    }
 
-// Render item feedback dengan animasi
-function renderFeedbackItem(data) {
-  const date = data.timestamp?.toDate ? data.timestamp.toDate() : new Date();
-  const wrapper = document.createElement("div");
-  wrapper.className = "feedback-item";
-  wrapper.innerHTML = `
-    <div class="feedback-header">${data.name || "Anonim"}</div>
-    <div class="feedback-message">${data.message}</div>
-    <div class="feedback-meta">${timeAgo(date)}</div>
-  `;
+    // Render item feedback dengan design linebox yang bagus
+    function renderFeedbackItem(data, id) {
+      const date = data.timestamp?.toDate ? data.timestamp.toDate() : new Date();
+      const timeAgoText = timeAgo(date);
+      const isNew = (new Date() - date) < (5 * 60 * 1000); // Baru jika < 5 menit
+      
+      const wrapper = document.createElement("div");
+      wrapper.className = `feedback-item ${isNew ? 'new-feedback' : ''}`;
+      wrapper.setAttribute('data-id', id);
+      
+      wrapper.innerHTML = `
+        <div class="feedback-linebox-content">
+          <div class="feedback-item-header">
+            <div class="feedback-user-info">
+              <div class="user-avatar">${(data.name || "A").charAt(0).toUpperCase()}</div>
+              <div class="user-details">
+                <span class="feedback-user-name">${data.name || "Anonim"}</span>
+                <span class="feedback-time">${timeAgoText}</span>
+              </div>
+            </div>
+            ${isNew ? '<span class="new-badge">BARU</span>' : ''}
+          </div>
+          
+          <div class="feedback-item-body">
+            <h4 class="feedback-title">${data.title || "Tanpa Judul"}</h4>
+            <p class="feedback-message">${data.message}</p>
+          </div>
+          
+          <div class="feedback-item-footer">
+            <div class="feedback-meta">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <polyline points="12 6 12 12 16 14"></polyline>
+              </svg>
+              <span>${date.toLocaleDateString('id-ID')}</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="feedback-shimmer"></div>
+      `;
 
-  // efek hilang otomatis (optional)
-  setTimeout(() => {
-    wrapper.classList.add("fade-out");
-    setTimeout(() => wrapper.remove(), 600);
-  }, 15000);
+      // Auto remove setelah 30 detik untuk feedback baru
+      if (isNew) {
+        setTimeout(() => {
+          wrapper.classList.add('fade-out');
+          setTimeout(() => {
+            if (wrapper.parentNode) {
+              wrapper.parentNode.removeChild(wrapper);
+              updateFeedbackCount(); // Update count setelah remove
+            }
+          }, 600);
+        }, 30000);
+      }
 
-  return wrapper;
-}
+      return wrapper;
+    }
+
     // Submit form
     if (feedbackForm) {
       feedbackForm.addEventListener("submit", async (e) => {
@@ -1340,7 +1407,13 @@ function renderFeedbackItem(data) {
         const submitBtn = feedbackForm.querySelector("button");
         const originalText = submitBtn.innerHTML;
         submitBtn.disabled = true;
-        submitBtn.innerHTML = "<span>Mengirim...</span>";
+        submitBtn.innerHTML = `
+          <span>Mengirim...</span>
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2z"></path>
+            <path d="M12 6v6l4 2"></path>
+          </svg>
+        `;
 
         try {
           await addDoc(collection(db, "feedbacks"), {
@@ -1348,12 +1421,17 @@ function renderFeedbackItem(data) {
             title,
             message,
             timestamp: serverTimestamp(),
-            page: window.location.href
+            page: window.location.href,
+            status: 'active'
           });
 
           showStatus("✅ Terima kasih! Saran Anda telah dikirim.", "success");
           feedbackForm.reset();
-          setTimeout(hideStatus, 5000);
+          updateLastUpdateTime();
+          
+          setTimeout(() => {
+            hideStatus();
+          }, 5000);
         } catch (error) {
           console.error("Error saving feedback:", error);
           showStatus("❌ Maaf, terjadi error. Silakan coba lagi.", "error");
@@ -1368,23 +1446,74 @@ function renderFeedbackItem(data) {
     function showStatus(message, type) {
       statusDiv.textContent = message;
       statusDiv.className = `feedback-status ${type}`;
+      
+      // Tambahkan icon berdasarkan type
+      if (type === 'success') {
+        statusDiv.innerHTML = `
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+          </svg>
+          ${message}
+        `;
+      } else if (type === 'error') {
+        statusDiv.innerHTML = `
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="15" y1="9" x2="9" y2="15"></line>
+            <line x1="9" y1="9" x2="15" y2="15"></line>
+          </svg>
+          ${message}
+        `;
+      }
     }
+
     function hideStatus() {
       statusDiv.className = "feedback-status";
       statusDiv.textContent = "";
     }
 
-   // Listener realtime
-const q = query(collection(db, "feedbacks"), orderBy("timestamp", "desc"));
-onSnapshot(q, (snapshot) => {
-  latestContainer.innerHTML = "";
-  snapshot.forEach((doc) => {
-    const data = doc.data();
-    const item = renderFeedbackItem(data);
-    latestContainer.appendChild(item); // pakai appendChild, bukan innerHTML
-  });
-});
+    // Listener realtime dengan optimasi
+    const q = query(collection(db, "feedbacks"), orderBy("timestamp", "desc"));
+    
+    onSnapshot(q, (snapshot) => {
+      latestContainer.innerHTML = '';
+      let hasNewFeedback = false;
+      
+      snapshot.forEach((doc) => {
+        const data = doc.data();
+        const item = renderFeedbackItem(data, doc.id);
+        latestContainer.appendChild(item);
+        
+        // Check jika ada feedback baru
+        if (data.timestamp?.toDate) {
+          const feedbackTime = data.timestamp.toDate();
+          if ((new Date() - feedbackTime) < (5 * 60 * 1000)) {
+            hasNewFeedback = true;
+          }
+        }
+      });
+
+      // Update counter
+      updateFeedbackCount();
+      
+      // Animasi untuk feedback baru
+      if (hasNewFeedback) {
+        latestContainer.classList.add('has-new-feedback');
+        setTimeout(() => {
+          latestContainer.classList.remove('has-new-feedback');
+        }, 2000);
+      }
+    });
+
+    // Inisialisasi
+    updateLastUpdateTime();
+    updateFeedbackCount();
+    
+    // Update waktu setiap menit
+    setInterval(updateLastUpdateTime, 60000);
   });
 </script>
+
 
 
