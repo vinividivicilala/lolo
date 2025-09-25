@@ -342,6 +342,323 @@ padding-left: 60px;
 
 
 
+  /* Feedback Display Section */
+  .feedback-display-section {
+    margin: 40px 0;
+    max-width: 800px;
+  }
+
+  .feedback-display-linebox {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 16px;
+    padding: 30px;
+    backdrop-filter: blur(10px);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .feedback-display-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 25px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  .feedback-display-header svg {
+    color: #9dbbff;
+  }
+
+  .feedback-display-header h3 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0;
+    color: #fff;
+  }
+
+  .feedback-count {
+    color: #9dbbff;
+    font-size: 1rem;
+    font-weight: 600;
+    margin-left: auto;
+    background: rgba(157, 187, 255, 0.1);
+    padding: 5px 12px;
+    border-radius: 20px;
+    border: 1px solid rgba(157, 187, 255, 0.3);
+  }
+
+  .feedback-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    max-height: 600px;
+    overflow-y: auto;
+    padding-right: 10px;
+  }
+
+  .feedback-list.has-new-feedback {
+    animation: pulse-glow 2s ease-in-out;
+  }
+
+  @keyframes pulse-glow {
+    0%, 100% { background: transparent; }
+    50% { background: rgba(157, 187, 255, 0.05); }
+  }
+
+  /* Feedback Item Styles */
+  .feedback-item {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 12px;
+    padding: 0;
+    position: relative;
+    overflow: hidden;
+    animation: slideInUp 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+    transform-origin: top center;
+  }
+
+  .feedback-item.new-feedback {
+    border-color: rgba(157, 187, 255, 0.5);
+    box-shadow: 0 0 20px rgba(157, 187, 255, 0.2);
+  }
+
+  .feedback-linebox-content {
+    padding: 20px;
+    position: relative;
+    z-index: 2;
+  }
+
+  .feedback-item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 15px;
+  }
+
+  .feedback-user-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .user-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    color: white;
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+
+  .user-details {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .feedback-user-name {
+    font-weight: 600;
+    color: #9dbbff;
+    font-size: 1rem;
+  }
+
+  .feedback-time {
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.7);
+    margin-top: 2px;
+  }
+
+  .new-badge {
+    background: linear-gradient(135deg, #ff6b6b, #ffa726);
+    color: white;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    animation: pulse 2s infinite;
+  }
+
+  .feedback-item-body {
+    margin-bottom: 15px;
+  }
+
+  .feedback-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #fff;
+    margin: 0 0 8px 0;
+    line-height: 1.4;
+  }
+
+  .feedback-message {
+    color: rgba(255, 255, 255, 0.9);
+    line-height: 1.5;
+    margin: 0;
+    font-size: 0.95rem;
+  }
+
+  .feedback-item-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 15px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .feedback-meta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.6);
+  }
+
+  .feedback-meta svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  /* Animations */
+  @keyframes slideInUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px) scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.8; transform: scale(1.05); }
+  }
+
+  .feedback-item.fade-out {
+    animation: slideOutUp 0.6s cubic-bezier(0.55, 0.085, 0.68, 0.53) forwards;
+  }
+
+  @keyframes slideOutUp {
+    from {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+    to {
+      opacity: 0;
+      transform: translateY(-30px) scale(0.95);
+    }
+  }
+
+  .feedback-shimmer {
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.1),
+      transparent
+    );
+    animation: shimmer 3s infinite;
+    z-index: 1;
+  }
+
+  @keyframes shimmer {
+    0% { left: -100%; }
+    100% { left: 100%; }
+  }
+
+  /* Scrollbar Styling */
+  .feedback-list::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .feedback-list::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+  }
+
+  .feedback-list::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 3px;
+  }
+
+  .feedback-list::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.5);
+  }
+
+  /* Status Messages */
+  .feedback-status {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 20px;
+    padding: 15px;
+    border-radius: 8px;
+    text-align: left;
+    font-weight: 600;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.3s ease;
+  }
+
+  .feedback-status.success {
+    background: rgba(76, 175, 80, 0.15);
+    border: 1px solid rgba(76, 175, 80, 0.3);
+    color: #4caf50;
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .feedback-status.error {
+    background: rgba(244, 67, 54, 0.15);
+    border: 1px solid rgba(244, 67, 54, 0.3);
+    color: #f44336;
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    .feedback-display-linebox {
+      padding: 20px;
+    }
+    
+    .feedback-item-header {
+      flex-direction: column;
+      gap: 10px;
+      align-items: flex-start;
+    }
+    
+    .feedback-user-info {
+      width: 100%;
+    }
+    
+    .new-badge {
+      align-self: flex-start;
+    }
+    
+    .feedback-linebox-content {
+      padding: 15px;
+    }
+  }
+
+
+
+
+
+
+
+
 
   /* Feedback Display Section Styles */
   .feedback-display-section {
@@ -1514,6 +1831,7 @@ import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword , s
     setInterval(updateLastUpdateTime, 60000);
   });
 </script>
+
 
 
 
