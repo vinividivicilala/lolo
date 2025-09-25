@@ -1,215 +1,117 @@
 ---
 // src/pages/blog.astro
 import Layout from '../layouts/Layout.astro';
-
-const blogPosts = [
-  {
-    id: 1,
-    title: "Memulai dengan Astro",
-    date: "15 Maret 2023",
-    excerpt: "Pelajari cara memulai pembuatan website dengan Astro, framework modern yang cepat dan efisien.",
-    image: "/images/blog1.jpg",
-    category: "Tutorial"
-  },
-  // ... data blog posts lainnya sama seperti di atas
-];
 ---
 
 <Layout title="Blog | Note Farid" description="Artikel dan tutorial tentang development web dan Astro." currentPage="blog">
-  <div class="container">
+  <div class="lego-container">
     <main>
-      <div class="header-section">
-        <h1 class="main-title">BLOG<br/>NOTE FARID</h1>
-        <div class="description-box">
-          <p class="right-align">Selamat datang di blog saya! Di sini saya berbagi tutorial, tips, dan pemikiran tentang development web, Astro, dan teknologi terkini. Setiap artikel ditulis dengan dedikasi untuk membantu Anda mengembangkan skill dan pengetahuan dalam dunia web development.</p>
+      <h1 class="lego-title">BLOG</h1>
+      
+      <div class="linebox-container">
+        <div class="linebox">
+          <div class="content-wrapper">
+            <h2 class="main-heading">CATATAN DIGITAL</h2>
+            <p class="right-aligned">
+              Ruang dimana ide dan kode bertemu. Setiap baris adalah cerita, 
+              setiap project adalah petualangan baru dalam dunia development.
+            </p>
+          </div>
         </div>
-      </div>
-
-      <div class="blog-grid">
-        {blogPosts.map(post => (
-          <article class="linebox-card">
-            <div class="card-border">
-              <div class="blog-image">
-                <img src={post.image} alt={post.title} />
-                <span class="blog-category">{post.category}</span>
-              </div>
-              <div class="blog-content">
-                <h2 class="blog-title">{post.title}</h2>
-                <p class="blog-date">{post.date}</p>
-                <p class="blog-excerpt">{post.excerpt}</p>
-                <a href={`/blog/${post.id}`} class="blog-read-more">→ Baca selengkapnya</a>
-              </div>
-            </div>
-          </article>
-        ))}
       </div>
     </main>
   </div>
 </Layout>
 
 <style>
+  @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@800;900&display=swap');
+
   body {
-    background: #fefefe;
-    color: #333;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     min-height: 100vh;
     margin: 0;
-    font-family: 'Arial', sans-serif;
+    padding: 0;
+    font-family: 'Montserrat', sans-serif;
   }
 
-  .container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 40px 20px;
+  .lego-container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
   }
 
-  .header-section {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 60px;
-    align-items: start;
-    margin-bottom: 60px;
-    border-bottom: 3px solid #333;
-    padding-bottom: 40px;
-  }
-
-  .main-title {
-    font-size: 4.5rem;
+  .lego-title {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 4rem;
     font-weight: 900;
-    line-height: 1.1;
-    margin: 0;
-    color: #222;
-    text-transform: uppercase;
-    letter-spacing: -1px;
-  }
-
-  .description-box {
-    border: 2px solid #333;
-    padding: 30px;
-    background: #fff;
-    position: relative;
-  }
-
-  .right-align {
-    text-align: right;
-    font-size: 1.1rem;
-    line-height: 1.7;
-    color: #555;
-    margin: 0;
-  }
-
-  .blog-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
-    gap: 40px;
-  }
-
-  .linebox-card {
-    position: relative;
-  }
-
-  .card-border {
-    border: 2px solid #333;
-    background: #fff;
-    transition: all 0.3s ease;
-    position: relative;
-  }
-
-  .linebox-card:hover .card-border {
-    transform: translate(-8px, -8px);
-    box-shadow: 8px 8px 0 #333;
-  }
-
-  .blog-image {
-    position: relative;
-    height: 220px;
-    overflow: hidden;
-    border-bottom: 2px solid #333;
-  }
-
-  .blog-image img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: transform 0.5s ease;
-  }
-
-  .linebox-card:hover .blog-image img {
-    transform: scale(1.05);
-  }
-
-  .blog-category {
-    position: absolute;
-    top: 15px;
-    right: 15px;
-    background: #333;
+    text-align: center;
     color: white;
-    padding: 8px 15px;
-    font-weight: bold;
-    font-size: 0.8rem;
-    letter-spacing: 1px;
+    text-shadow: 
+      5px 5px 0 #000,
+      8px 8px 0 rgba(0,0,0,0.2);
+    margin-bottom: 3rem;
+    letter-spacing: 3px;
+    text-transform: uppercase;
   }
 
-  .blog-content {
-    padding: 25px;
+  .linebox-container {
+    width: 100%;
+    max-width: 800px;
   }
 
-  .blog-title {
-    font-size: 1.5rem;
+  .linebox {
+    background: rgba(255, 255, 255, 0.15);
+    border: 3px solid white;
+    border-radius: 25px;
+    padding: 3rem;
+    backdrop-filter: blur(10px);
+    box-shadow: 
+      0 20px 40px rgba(0,0,0,0.1),
+      inset 0 1px 0 rgba(255,255,255,0.3);
+  }
+
+  .content-wrapper {
+    text-align: center;
+  }
+
+  .main-heading {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 3rem;
     font-weight: 800;
-    margin: 0 0 10px 0;
-    color: #222;
-    line-height: 1.3;
+    color: white;
+    margin-bottom: 2rem;
+    text-shadow: 3px 3px 0 rgba(0,0,0,0.2);
+    letter-spacing: 2px;
   }
 
-  .blog-date {
-    color: #666;
-    font-size: 0.9rem;
-    margin: 0 0 15px 0;
+  .right-aligned {
+    text-align: right;
+    color: white;
+    font-size: 1.3rem;
+    line-height: 1.6;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+    margin: 0;
     font-weight: 500;
   }
 
-  .blog-excerpt {
-    color: #555;
-    line-height: 1.6;
-    margin: 0 0 20px 0;
-  }
-
-  .blog-read-more {
-    color: #333;
-    text-decoration: none;
-    font-weight: 700;
-    font-size: 0.9rem;
-    letter-spacing: 0.5px;
-    transition: color 0.3s ease;
-  }
-
-  .blog-read-more:hover {
-    color: #666;
-  }
-
-  @media (max-width: 968px) {
-    .header-section {
-      grid-template-columns: 1fr;
-      gap: 30px;
-    }
-
-    .main-title {
-      font-size: 3rem;
-      text-align: center;
-    }
-
-    .right-align {
-      text-align: center;
-    }
-  }
-
   @media (max-width: 768px) {
-    .blog-grid {
-      grid-template-columns: 1fr;
-    }
-
-    .main-title {
+    .lego-title {
       font-size: 2.5rem;
+    }
+    
+    .main-heading {
+      font-size: 2rem;
+    }
+    
+    .right-aligned {
+      font-size: 1.1rem;
+      text-align: center;
+    }
+    
+    .linebox {
+      padding: 2rem;
     }
   }
 </style>
