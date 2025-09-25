@@ -1,117 +1,71 @@
 ---
-// src/pages/blog.astro
+// blog.astro
 import Layout from '../layouts/Layout.astro';
 ---
 
-<Layout title="Blog | Note Farid" description="Artikel dan tutorial tentang development web dan Astro." currentPage="blog">
-  <div class="lego-container">
+<Layout title="Blog | Note Farid" description="Halaman blog kosong dengan desain baru." currentPage="blog">
+  <div class="container">
     <main>
-      <h1 class="lego-title">BLOG</h1>
-      
-      <div class="linebox-container">
-        <div class="linebox">
-          <div class="content-wrapper">
-            <h2 class="main-heading">CATATAN DIGITAL</h2>
-            <p class="right-aligned">
-              Ruang dimana ide dan kode bertemu. Setiap baris adalah cerita, 
-              setiap project adalah petualangan baru dalam dunia development.
-            </p>
-          </div>
-        </div>
-      </div>
+      <section class="linebox">
+        <h1 class="big-title">Halaman Blog</h1>
+        <p class="desc">
+          Konten blog akan segera hadir. Semua artikel akan tampil di sini
+          dengan desain bersih dan modern.
+        </p>
+      </section>
     </main>
   </div>
 </Layout>
 
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@800;900&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
 
   body {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    min-height: 100vh;
     margin: 0;
     padding: 0;
-    font-family: 'Montserrat', sans-serif;
+    font-family: 'Inter', sans-serif;
+    background: #f2f3f5;
+    color: #222;
   }
 
-  .lego-container {
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-  }
-
-  .lego-title {
-    font-family: 'Montserrat', sans-serif;
-    font-size: 4rem;
-    font-weight: 900;
-    text-align: center;
-    color: white;
-    text-shadow: 
-      5px 5px 0 #000,
-      8px 8px 0 rgba(0,0,0,0.2);
-    margin-bottom: 3rem;
-    letter-spacing: 3px;
-    text-transform: uppercase;
-  }
-
-  .linebox-container {
-    width: 100%;
-    max-width: 800px;
+  .container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 40px 20px;
   }
 
   .linebox {
-    background: rgba(255, 255, 255, 0.15);
-    border: 3px solid white;
-    border-radius: 25px;
-    padding: 3rem;
+    background: rgba(255, 255, 255, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    border-radius: 16px;
+    padding: 50px;
     backdrop-filter: blur(10px);
-    box-shadow: 
-      0 20px 40px rgba(0,0,0,0.1),
-      inset 0 1px 0 rgba(255,255,255,0.3);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.1);
   }
 
-  .content-wrapper {
-    text-align: center;
-  }
-
-  .main-heading {
-    font-family: 'Montserrat', sans-serif;
+  .big-title {
     font-size: 3rem;
     font-weight: 800;
-    color: white;
-    margin-bottom: 2rem;
-    text-shadow: 3px 3px 0 rgba(0,0,0,0.2);
-    letter-spacing: 2px;
+    margin-bottom: 20px;
+    text-align: left;
+    color: #111;
   }
 
-  .right-aligned {
+  .desc {
+    font-size: 1.2rem;
+    font-weight: 400;
+    line-height: 1.8;
     text-align: right;
-    color: white;
-    font-size: 1.3rem;
-    line-height: 1.6;
-    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
-    margin: 0;
-    font-weight: 500;
+    color: #333;
   }
 
   @media (max-width: 768px) {
-    .lego-title {
-      font-size: 2.5rem;
-    }
-    
-    .main-heading {
+    .big-title {
       font-size: 2rem;
     }
-    
-    .right-aligned {
-      font-size: 1.1rem;
+    .desc {
+      font-size: 1rem;
       text-align: center;
-    }
-    
-    .linebox {
-      padding: 2rem;
     }
   }
 </style>
