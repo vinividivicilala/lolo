@@ -341,6 +341,398 @@ padding-left: 60px;
   }
 
 
+  /* Feedback Display Section */
+  .feedback-display-section {
+    margin: 40px 0;
+    max-width: 800px;
+  }
+
+  .feedback-display-linebox {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 16px;
+    padding: 30px;
+    backdrop-filter: blur(10px);
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  }
+
+  .feedback-display-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 25px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .feedback-display-header svg {
+    color: #9dbbff;
+    width: 32px;
+    height: 32px;
+  }
+
+  .feedback-display-header h3 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0;
+    color: #ffffff;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  }
+
+  .feedback-count {
+    color: #9dbbff;
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-left: auto;
+    background: rgba(157, 187, 255, 0.15);
+    padding: 8px 16px;
+    border-radius: 20px;
+    border: 2px solid rgba(157, 187, 255, 0.3);
+    box-shadow: 0 4px 12px rgba(157, 187, 255, 0.2);
+  }
+
+  .feedback-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    max-height: 600px;
+    overflow-y: auto;
+    padding-right: 10px;
+  }
+
+  /* Empty State */
+  .empty-feedback {
+    text-align: center;
+    padding: 40px 20px;
+    color: rgba(255, 255, 255, 0.7);
+  }
+
+  .empty-feedback svg {
+    color: rgba(255, 255, 255, 0.5);
+    margin-bottom: 15px;
+  }
+
+  .empty-feedback h4 {
+    color: rgba(255, 255, 255, 0.9);
+    margin: 0 0 10px 0;
+    font-size: 1.2rem;
+  }
+
+  .empty-feedback p {
+    margin: 0;
+    font-size: 0.95rem;
+  }
+
+  /* Feedback Item Styles - FIXED TEXT DISPLAY */
+  .feedback-item {
+    background: rgba(255, 255, 255, 0.08);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    padding: 0;
+    position: relative;
+    overflow: hidden;
+    animation: slideInUp 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+    transform-origin: top center;
+    transition: all 0.3s ease;
+  }
+
+  .feedback-item:hover {
+    border-color: rgba(255, 255, 255, 0.3);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+  }
+
+  .feedback-item.new-feedback {
+    border-color: rgba(157, 187, 255, 0.6);
+    box-shadow: 0 0 30px rgba(157, 187, 255, 0.3);
+  }
+
+  .feedback-linebox-content {
+    padding: 25px;
+    position: relative;
+    z-index: 2;
+  }
+
+  /* Header Styles - FIXED */
+  .feedback-item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .feedback-user-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+  }
+
+  .user-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    color: white;
+    font-size: 20px;
+    flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  }
+
+  .user-details {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .feedback-user-name {
+    font-weight: 700;
+    color: #9dbbff;
+    font-size: 1.1rem;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  }
+
+  .feedback-time-ago {
+    font-size: 0.9rem;
+    color: #ffa726;
+    font-weight: 600;
+  }
+
+  .new-badge {
+    background: linear-gradient(135deg, #ff6b6b, #ffa726);
+    color: white;
+    padding: 6px 12px;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    animation: pulse 2s infinite;
+    box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+  }
+
+  /* Body Styles - FIXED TEXT CLARITY */
+  .feedback-item-body {
+    margin-bottom: 20px;
+  }
+
+  .feedback-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin: 0 0 12px 0;
+    line-height: 1.4;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    border-left: 4px solid #9dbbff;
+    padding-left: 12px;
+  }
+
+  .feedback-message {
+    color: #e0e0e0;
+    line-height: 1.6;
+    margin: 0;
+    font-size: 1rem;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 15px;
+    border-radius: 8px;
+    border-left: 3px solid rgba(255, 255, 255, 0.2);
+    font-family: 'Space Mono', monospace;
+  }
+
+  /* Footer Styles - FIXED */
+  .feedback-item-footer {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    padding-top: 15px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .feedback-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9rem;
+    color: #b0b0b0;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .feedback-meta svg {
+    width: 16px;
+    height: 16px;
+    color: #9dbbff;
+  }
+
+  .full-date {
+    color: #cccccc;
+    font-weight: 500;
+  }
+
+  /* Animations */
+  @keyframes slideInUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px) scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  @keyframes pulse {
+    0%, 100% { 
+      opacity: 1; 
+      transform: scale(1); 
+    }
+    50% { 
+      opacity: 0.8; 
+      transform: scale(1.05); 
+    }
+  }
+
+  .feedback-item.fade-out {
+    animation: slideOutUp 0.6s cubic-bezier(0.55, 0.085, 0.68, 0.53) forwards;
+  }
+
+  @keyframes slideOutUp {
+    from {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+    to {
+      opacity: 0;
+      transform: translateY(-30px) scale(0.95);
+    }
+  }
+
+  .feedback-shimmer {
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.1),
+      transparent
+    );
+    animation: shimmer 3s infinite;
+    z-index: 1;
+  }
+
+  @keyframes shimmer {
+    0% { left: -100%; }
+    100% { left: 100%; }
+  }
+
+  /* Scrollbar Styling */
+  .feedback-list::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  .feedback-list::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+  }
+
+  .feedback-list::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 4px;
+  }
+
+  .feedback-list::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.5);
+  }
+
+  /* Status Messages */
+  .feedback-status {
+    margin-top: 20px;
+    padding: 15px;
+    border-radius: 8px;
+    text-align: left;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.3s ease;
+  }
+
+  .status-content {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 600;
+  }
+
+  .status-icon {
+    font-size: 1.2rem;
+  }
+
+  .feedback-status.success {
+    background: rgba(76, 175, 80, 0.15);
+    border: 2px solid rgba(76, 175, 80, 0.4);
+    color: #4caf50;
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .feedback-status.error {
+    background: rgba(244, 67, 54, 0.15);
+    border: 2px solid rgba(244, 67, 54, 0.4);
+    color: #f44336;
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    .feedback-display-linebox {
+      padding: 20px;
+    }
+    
+    .feedback-linebox-content {
+      padding: 20px;
+    }
+    
+    .feedback-item-header {
+      flex-direction: column;
+      gap: 10px;
+      align-items: flex-start;
+    }
+    
+    .feedback-user-info {
+      width: 100%;
+    }
+    
+    .new-badge {
+      align-self: flex-start;
+    }
+    
+    .feedback-title {
+      font-size: 1.1rem;
+    }
+    
+    .feedback-message {
+      font-size: 0.95rem;
+      padding: 12px;
+    }
+    
+    .user-avatar {
+      width: 40px;
+      height: 40px;
+      font-size: 16px;
+    }
+  }
+
+
 
   /* Feedback Display Section */
   .feedback-display-section {
@@ -1602,7 +1994,7 @@ import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword , s
     const auth = getAuth(app);
 
 
- document.addEventListener("DOMContentLoaded", () => {
+  document.addEventListener("DOMContentLoaded", () => {
     const feedbackForm = document.getElementById("feedbackForm");
     const statusDiv = document.getElementById("feedbackStatus");
     const latestContainer = document.getElementById("latestFeedback");
@@ -1634,7 +2026,21 @@ import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword , s
       if (diffMin < 1) return "baru saja";
       if (diffMin < 60) return `${diffMin} menit yang lalu`;
       if (diffHr < 24) return `${diffHr} jam yang lalu`;
-      return `${diffDay} hari yang lalu`;
+      if (diffDay === 1) return "kemarin";
+      if (diffDay < 7) return `${diffDay} hari yang lalu`;
+      return date.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
+    }
+
+    // Format tanggal lengkap
+    function formatFullDate(date) {
+      return date.toLocaleDateString('id-ID', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
     }
 
     // Hitung total feedback
@@ -1649,11 +2055,12 @@ import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword , s
       }
     }
 
-    // Render item feedback dengan design linebox yang bagus
+    // Render item feedback dengan design linebox yang jelas
     function renderFeedbackItem(data, id) {
       const date = data.timestamp?.toDate ? data.timestamp.toDate() : new Date();
       const timeAgoText = timeAgo(date);
-      const isNew = (new Date() - date) < (5 * 60 * 1000); // Baru jika < 5 menit
+      const fullDate = formatFullDate(date);
+      const isNew = (new Date() - date) < (10 * 60 * 1000); // Baru jika < 10 menit
       
       const wrapper = document.createElement("div");
       wrapper.className = `feedback-item ${isNew ? 'new-feedback' : ''}`;
@@ -1661,29 +2068,34 @@ import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword , s
       
       wrapper.innerHTML = `
         <div class="feedback-linebox-content">
+          <!-- Header dengan avatar dan info user -->
           <div class="feedback-item-header">
             <div class="feedback-user-info">
               <div class="user-avatar">${(data.name || "A").charAt(0).toUpperCase()}</div>
               <div class="user-details">
                 <span class="feedback-user-name">${data.name || "Anonim"}</span>
-                <span class="feedback-time">${timeAgoText}</span>
+                <span class="feedback-time-ago">${timeAgoText}</span>
               </div>
             </div>
             ${isNew ? '<span class="new-badge">BARU</span>' : ''}
           </div>
           
+          <!-- Body dengan judul dan pesan -->
           <div class="feedback-item-body">
             <h4 class="feedback-title">${data.title || "Tanpa Judul"}</h4>
-            <p class="feedback-message">${data.message}</p>
+            <p class="feedback-message">${data.message || "Tidak ada pesan"}</p>
           </div>
           
+          <!-- Footer dengan tanggal lengkap -->
           <div class="feedback-item-footer">
             <div class="feedback-meta">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="12" cy="12" r="10"></circle>
-                <polyline points="12 6 12 12 16 14"></polyline>
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                <line x1="16" y1="2" x2="16" y2="6"></line>
+                <line x1="8" y1="2" x2="8" y2="6"></line>
+                <line x1="3" y1="10" x2="21" y2="10"></line>
               </svg>
-              <span>${date.toLocaleDateString('id-ID')}</span>
+              <span class="full-date">${fullDate}</span>
             </div>
           </div>
         </div>
@@ -1691,17 +2103,17 @@ import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword , s
         <div class="feedback-shimmer"></div>
       `;
 
-      // Auto remove setelah 30 detik untuk feedback baru
+      // Auto remove setelah 1 menit untuk feedback baru
       if (isNew) {
         setTimeout(() => {
           wrapper.classList.add('fade-out');
           setTimeout(() => {
             if (wrapper.parentNode) {
               wrapper.parentNode.removeChild(wrapper);
-              updateFeedbackCount(); // Update count setelah remove
+              updateFeedbackCount();
             }
           }, 600);
-        }, 30000);
+        }, 60000); // 1 menit
       }
 
       return wrapper;
@@ -1735,8 +2147,8 @@ import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword , s
         try {
           await addDoc(collection(db, "feedbacks"), {
             name: name || "Anonim",
-            title,
-            message,
+            title: title || "Tanpa Judul",
+            message: message || "Tidak ada pesan",
             timestamp: serverTimestamp(),
             page: window.location.href,
             status: 'active'
@@ -1761,28 +2173,13 @@ import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword , s
 
     // Status pesan
     function showStatus(message, type) {
-      statusDiv.textContent = message;
+      statusDiv.innerHTML = `
+        <div class="status-content">
+          <span class="status-icon">${type === 'success' ? '✅' : '❌'}</span>
+          <span class="status-text">${message}</span>
+        </div>
+      `;
       statusDiv.className = `feedback-status ${type}`;
-      
-      // Tambahkan icon berdasarkan type
-      if (type === 'success') {
-        statusDiv.innerHTML = `
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-            <polyline points="22 4 12 14.01 9 11.01"></polyline>
-          </svg>
-          ${message}
-        `;
-      } else if (type === 'error') {
-        statusDiv.innerHTML = `
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="10"></circle>
-            <line x1="15" y1="9" x2="9" y2="15"></line>
-            <line x1="9" y1="9" x2="15" y2="15"></line>
-          </svg>
-          ${message}
-        `;
-      }
     }
 
     function hideStatus() {
@@ -1790,47 +2187,41 @@ import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword , s
       statusDiv.textContent = "";
     }
 
-    // Listener realtime dengan optimasi
+    // Listener realtime
     const q = query(collection(db, "feedbacks"), orderBy("timestamp", "desc"));
     
     onSnapshot(q, (snapshot) => {
       latestContainer.innerHTML = '';
-      let hasNewFeedback = false;
+      
+      if (snapshot.empty) {
+        latestContainer.innerHTML = `
+          <div class="empty-feedback">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+            </svg>
+            <h4>Belum ada saran dan kritik</h4>
+            <p>Jadilah yang pertama memberikan masukan!</p>
+          </div>
+        `;
+        return;
+      }
       
       snapshot.forEach((doc) => {
         const data = doc.data();
         const item = renderFeedbackItem(data, doc.id);
         latestContainer.appendChild(item);
-        
-        // Check jika ada feedback baru
-        if (data.timestamp?.toDate) {
-          const feedbackTime = data.timestamp.toDate();
-          if ((new Date() - feedbackTime) < (5 * 60 * 1000)) {
-            hasNewFeedback = true;
-          }
-        }
       });
 
-      // Update counter
       updateFeedbackCount();
-      
-      // Animasi untuk feedback baru
-      if (hasNewFeedback) {
-        latestContainer.classList.add('has-new-feedback');
-        setTimeout(() => {
-          latestContainer.classList.remove('has-new-feedback');
-        }, 2000);
-      }
     });
 
     // Inisialisasi
     updateLastUpdateTime();
     updateFeedbackCount();
-    
-    // Update waktu setiap menit
     setInterval(updateLastUpdateTime, 60000);
   });
 </script>
+
 
 
 
