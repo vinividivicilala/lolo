@@ -10,38 +10,45 @@ import Layout from '../layouts/Layout.astro';
       <section class="header-section">
         <div class="header-content">
           <h1 class="big-title">Blog</h1>
-          <a href="/blog/all" class="all-blog-link">All Blog →</a>
+          <a href="/blog/all" class="all-blog-link">
+            <span>All Blog</span>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M7 17L17 7M17 7H7M17 7V17"/>
+            </svg>
+          </a>
         </div>
       </section>
 
       <!-- Blog Content Section -->
-      <section class="linebox">
-        <div class="blog-meta">
-          <div class="meta-item">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-            </svg>
-            <span>15 Mar 2024</span>
+      <section class="content-section">
+        <div class="linebox">
+          <div class="blog-meta">
+            <div class="meta-item">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+              </svg>
+              <span>15 Mar 2024</span>
+            </div>
+            <div class="meta-item">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+              <span>5 min read</span>
+            </div>
           </div>
-          <div class="meta-item">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-              <circle cx="12" cy="12" r="3"/>
-            </svg>
-            <span>5 min read</span>
+
+          <h2 class="blog-title">Konten Blog Akan Segera Hadir</h2>
+          <p class="desc">
+            Semua artikel akan tampil di sini dengan desain bersih dan modern. 
+            Stay tuned untuk update terbaru!
+          </p>
+
+          <div class="tag-list">
+            <span class="tag">Astro</span>
+            <span class="tag">Blog</span>
+            <span class="tag">Coming Soon</span>
           </div>
-        </div>
-
-        <h2 class="blog-title">Konten Blog Akan Segera Hadir</h2>
-        <p class="desc">
-          Semua artikel akan tampil di sini dengan desain bersih dan modern. 
-          Stay tuned untuk update terbaru!
-        </p>
-
-        <div class="tag-list">
-          <span class="tag">Astro</span>
-          <span class="tag">Blog</span>
-          <span class="tag">Coming Soon</span>
         </div>
       </section>
     </main>
@@ -68,7 +75,7 @@ import Layout from '../layouts/Layout.astro';
 
   /* Header Section */
   .header-section {
-    margin-bottom: 30px;
+    margin-bottom: 40px;
   }
 
   .header-content {
@@ -80,47 +87,85 @@ import Layout from '../layouts/Layout.astro';
   }
 
   .big-title {
-    font-size: 39px;
+    font-size: 48px;
     font-weight: 800;
     margin: 0;
-    color: white;
-    
+    color: #ffffff;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
   }
 
   .all-blog-link {
-    font-size: 1.1rem;
-    font-weight: 600;
-    color: #2563eb;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #ffffff;
     text-decoration: none;
-    padding: 10px 20px;
-    border: 2px solid #2563eb;
-    border-radius: 8px;
+    padding: 12px 24px;
+    background: rgba(255, 255, 255, 0.2);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 10px;
+    backdrop-filter: blur(10px);
     transition: all 0.3s ease;
   }
 
   .all-blog-link:hover {
-    background: #2563eb;
-    color: white;
+    background: rgba(255, 255, 255, 0.3);
+    border-color: rgba(255, 255, 255, 0.5);
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+    box-shadow: 0 6px 20px rgba(255, 255, 255, 0.2);
   }
 
-  /* Linebox Section */
+  .all-blog-link svg {
+    transition: transform 0.3s ease;
+  }
+
+  .all-blog-link:hover svg {
+    transform: translateX(3px) translateY(-3px);
+  }
+
+  /* Content Section */
+  .content-section {
+    position: relative;
+  }
+
   .linebox {
-    background: rgba(255, 255, 255, 0.85);
-    border: 1px solid rgba(255, 255, 255, 0.6);
-    border-radius: 20px;
-    padding: 40px;
-    backdrop-filter: blur(15px);
-    box-shadow: 0 12px 40px rgba(0,0,0,0.15);
-    animation: fadeInUp 0.8s ease-out;
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 0;
+    padding: 50px;
+    backdrop-filter: blur(20px);
+    color: #ffffff;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .linebox::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.8), transparent);
+  }
+
+  .linebox::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.8), transparent);
   }
 
   /* Blog Meta */
   .blog-meta {
     display: flex;
-    gap: 20px;
-    margin-bottom: 20px;
+    gap: 25px;
+    margin-bottom: 25px;
     flex-wrap: wrap;
   }
 
@@ -128,47 +173,49 @@ import Layout from '../layouts/Layout.astro';
     display: flex;
     align-items: center;
     gap: 8px;
-    font-size: 0.9rem;
-    color: #666;
+    font-size: 0.95rem;
+    color: rgba(255, 255, 255, 0.9);
   }
 
   .meta-item svg {
-    color: #2563eb;
+    color: rgba(255, 255, 255, 0.9);
   }
 
   /* Blog Title */
   .blog-title {
-    font-size: 2.2rem;
+    font-size: 2.5rem;
     font-weight: 700;
-    margin-bottom: 20px;
-    color: #111;
+    margin-bottom: 25px;
+    color: #ffffff;
     line-height: 1.3;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
   }
 
   /* Description */
   .desc {
-    font-size: 1.2rem;
+    font-size: 1.3rem;
     font-weight: 400;
     line-height: 1.8;
-    color: #333;
-    margin-bottom: 25px;
+    color: rgba(255, 255, 255, 0.95);
+    margin-bottom: 30px;
   }
 
   /* Tags */
   .tag-list {
     display: flex;
-    gap: 10px;
+    gap: 12px;
     flex-wrap: wrap;
   }
 
   .tag {
-    background: rgba(37, 99, 235, 0.1);
-    color: #2563eb;
-    padding: 6px 12px;
+    background: rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+    padding: 8px 16px;
     border-radius: 20px;
-    font-size: 0.85rem;
+    font-size: 0.9rem;
     font-weight: 600;
-    border: 1px solid rgba(37, 99, 235, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    backdrop-filter: blur(10px);
   }
 
   /* Animations */
@@ -183,6 +230,10 @@ import Layout from '../layouts/Layout.astro';
     }
   }
 
+  .linebox {
+    animation: fadeInUp 0.8s ease-out;
+  }
+
   /* Responsive */
   @media (max-width: 768px) {
     .header-content {
@@ -191,11 +242,16 @@ import Layout from '../layouts/Layout.astro';
     }
 
     .big-title {
-      font-size: 3rem;
+      font-size: 36px;
+    }
+
+    .all-blog-link {
+      font-size: 1.1rem;
+      padding: 10px 20px;
     }
 
     .blog-title {
-      font-size: 1.8rem;
+      font-size: 2rem;
     }
 
     .desc {
@@ -207,27 +263,27 @@ import Layout from '../layouts/Layout.astro';
       padding: 30px 20px;
     }
 
-    .all-blog-link {
-      width: 100%;
-      text-align: center;
+    .blog-meta {
+      gap: 15px;
     }
   }
 
   @media (max-width: 480px) {
     .big-title {
-      font-size: 2.5rem;
+      font-size: 28px;
     }
     
     .blog-title {
-      font-size: 1.5rem;
+      font-size: 1.6rem;
     }
     
     .desc {
       font-size: 1rem;
     }
+
+    .all-blog-link {
+      width: 100%;
+      justify-content: center;
+    }
   }
 </style>
-
-
-
-
