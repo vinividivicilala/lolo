@@ -3,37 +3,30 @@
 import Layout from '../layouts/Layout.astro';
 ---
 
-<Layout title="Blog | Note Farid" description="Halaman blog kosong dengan desain baru." currentPage="blog">
+<Layout title="Blog | Note Farid" description="Halaman blog dengan desain baru." currentPage="blog">
   <div class="container">
     <main>
-      <!-- Header Section -->
-      <section class="header-section">
-        <div class="header-content">
-          <h1 class="big-title">Blog</h1>
-          <a href="/blog/all" class="all-blog-link">All Blog →</a>
-        </div>
-      </section>
+      <!-- Header blog -->
+      <div class="blog-header">
+        <h1 class="blog-title">Blog</h1>
+        <a href="/all-blog" class="all-blog-link">All Blog →</a>
+      </div>
 
-      <!-- Content Section -->
+      <!-- Linebox layout -->
       <section class="linebox">
-        <h2 class="blog-subtitle">Halaman Blog</h2>
-        <p class="desc">
-          Konten blog akan segera hadir. Semua artikel akan tampil di sini
-          dengan desain bersih dan modern.
-        </p>
-        
-        <!-- Blog Meta Info -->
-        <div class="blog-meta">
-          <span class="meta-item">
-            <span class="icon">📅</span>
-            <span class="text">January 15, 2024</span>
-          </span>
-          <span class="meta-item">
-            <span class="icon">⏱️</span>
-            <span class="text">5 min read</span>
-          </span>
-          <span class="label-tag">Design</span>
+        <div class="linebox-content">
+          <div class="meta">
+            <span class="meta-item">📅 26 Sep 2025</span>
+            <span class="meta-item">⏱ 5 min read</span>
+            <span class="label">Tips</span>
+          </div>
+          <h2 class="post-title">Contoh Artikel Pertama</h2>
+          <p class="post-excerpt">
+            Ini adalah contoh ringkasan artikel blog dengan desain baru.
+            Bagian ini bisa diisi dengan deskripsi singkat artikel.
+          </p>
         </div>
+        <div class="linebox-bg"></div>
       </section>
     </main>
   </div>
@@ -56,144 +49,93 @@ import Layout from '../layouts/Layout.astro';
     padding: 40px 20px;
   }
 
-  /* Header Section */
-  .header-section {
-    margin-bottom: 30px;
-  }
-
-  .header-content {
+  /* Blog header */
+  .blog-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    flex-wrap: wrap;
-    gap: 20px;
+    margin-bottom: 30px;
   }
-
-  .big-title {
-    font-size: 3.5rem;
+  .blog-title {
+    font-size: 2.5rem;
     font-weight: 800;
-    margin: 0;
     color: #111;
   }
-
   .all-blog-link {
-    font-size: 1.1rem;
+    font-size: 1rem;
     font-weight: 600;
-    color: #3b82f6;
+    color: #0077ff;
     text-decoration: none;
-    padding: 10px 20px;
-    border: 2px solid #3b82f6;
-    border-radius: 8px;
-    transition: all 0.3s ease;
   }
-
   .all-blog-link:hover {
-    background: #3b82f6;
-    color: white;
+    text-decoration: underline;
   }
 
-  /* Linebox Section - tetap sama seperti original */
+  /* Linebox */
   .linebox {
+    position: relative;
     background: rgba(255, 255, 255, 0.7);
     border: 1px solid rgba(255, 255, 255, 0.4);
     border-radius: 16px;
-    padding: 50px;
+    padding: 40px;
     backdrop-filter: blur(10px);
     box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+    overflow: hidden;
+  }
+
+  .linebox-bg {
+    background: url('/images/sample-bg.jpg') center/cover no-repeat;
+    position: absolute;
+    inset: 0;
+    opacity: 0.25;
+    z-index: 0;
+  }
+
+  .linebox-content {
     position: relative;
+    z-index: 1;
   }
 
-  .blog-subtitle {
-    font-size: 2.5rem;
-    font-weight: 800;
-    margin-bottom: 20px;
-    color: #111;
-  }
-
-  .desc {
-    font-size: 1.2rem;
-    font-weight: 400;
-    line-height: 1.8;
-    color: #333;
-    margin-bottom: 30px;
-  }
-
-  /* Blog Meta Styles */
-  .blog-meta {
+  .meta {
     display: flex;
+    gap: 15px;
     align-items: center;
-    gap: 20px;
-    flex-wrap: wrap;
-    padding-top: 20px;
-    border-top: 1px solid rgba(0,0,0,0.1);
+    margin-bottom: 15px;
+    font-size: 0.95rem;
+    color: #444;
   }
-
   .meta-item {
     display: flex;
     align-items: center;
-    gap: 8px;
-    font-size: 0.9rem;
-    color: #666;
+    gap: 4px;
   }
-
-  .icon {
-    font-size: 1rem;
-  }
-
-  .label-tag {
-    background: #3b82f6;
-    color: white;
-    padding: 4px 12px;
-    border-radius: 12px;
+  .label {
+    background: #0077ff;
+    color: #fff;
     font-size: 0.8rem;
     font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 8px;
+  }
+
+  .post-title {
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+  }
+
+  .post-excerpt {
+    font-size: 1.1rem;
+    color: #333;
+    line-height: 1.6;
   }
 
   @media (max-width: 768px) {
-    .header-content {
-      flex-direction: column;
-      align-items: flex-start;
-    }
-
-    .big-title {
-      font-size: 2.5rem;
-    }
-
-    .blog-subtitle {
+    .blog-title {
       font-size: 2rem;
     }
-
-    .desc {
-      font-size: 1rem;
-      text-align: left;
-    }
-
-    .linebox {
-      padding: 30px;
-    }
-
-    .blog-meta {
-      gap: 15px;
-    }
-  }
-
-  @media (max-width: 480px) {
-    .big-title {
-      font-size: 2rem;
-    }
-    
-    .blog-subtitle {
-      font-size: 1.5rem;
-    }
-    
-    .linebox {
-      padding: 20px;
-    }
-    
-    .blog-meta {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 10px;
+    .post-title {
+      font-size: 1.4rem;
     }
   }
 </style>
