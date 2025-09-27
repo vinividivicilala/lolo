@@ -10,9 +10,9 @@ import Layout from '../layouts/Layout.astro';
       <section class="header-section">
         <div class="header-content">
           <h1 class="big-title">
-            <span class="typing-container">
-              <span class="typing-text" data-texts='["Blog", "Articles", "Thoughts", "Stories"]'></span>
-              <span class="typing-cursor">|</span>
+            <span class="animated-title">
+              <span class="title-text" id="mainTitle">Blog</span>
+              <span class="title-cursor">|</span>
             </span>
           </h1>
           <a href="/blog/all" class="all-blog-link">
@@ -44,7 +44,7 @@ import Layout from '../layouts/Layout.astro';
             </div>
           </div>
 
-          <h2 class="blog-title typing-subtitle" data-texts='["Konten Blog Akan Segera Hadir", "Coming Soon", "Stay Tuned", "Blog Under Construction"]'></h2>
+          <h2 class="blog-title">Konten Blog Akan Segera Hadir</h2>
           <p class="desc">
             Semua artikel akan tampil di sini dengan desain bersih dan modern. 
             Stay tuned untuk update terbaru!
@@ -75,7 +75,7 @@ import Layout from '../layouts/Layout.astro';
             </div>
           </div>
 
-          <h2 class="blog-title typing-fade" data-texts='["Tips Pengembangan Web Modern", "Modern Web Dev Tips", "Web Development Guide", "Latest Web Techniques"]'></h2>
+          <h2 class="blog-title">Tips Pengembangan Web Modern</h2>
           <p class="desc">
             Pelajari teknik-teknik terbaru dalam pengembangan web modern 
             untuk meningkatkan performa dan user experience.
@@ -106,7 +106,7 @@ import Layout from '../layouts/Layout.astro';
             </div>
           </div>
 
-          <h2 class="blog-title typing-slide" data-texts='["Optimisasi SEO untuk Developer", "SEO Technical Guide", "Developer SEO Optimization", "Search Engine Optimization"]'></h2>
+          <h2 class="blog-title">Optimisasi SEO untuk Developer</h2>
           <p class="desc">
             Panduan lengkap optimisasi SEO teknikal untuk developer 
             yang ingin meningkatkan ranking website di mesin pencari.
@@ -137,7 +137,7 @@ import Layout from '../layouts/Layout.astro';
             </div>
           </div>
 
-          <h2 class="blog-title typing-scale" data-texts='["Framework JavaScript Terpopuler 2024", "Top JS Frameworks 2024", "JavaScript Framework Review", "2024 Framework Comparison"]'></h2>
+          <h2 class="blog-title">Framework JavaScript Terpopuler 2024</h2>
           <p class="desc">
             Review mendalam tentang framework JavaScript terpopuler 
             tahun 2024 dan perbandingan fitur-fiturnya.
@@ -167,49 +167,6 @@ import Layout from '../layouts/Layout.astro';
     margin: 0 auto;
     padding: 40px 20px;
   }
-.big-title {
-  font-size: 48px;
-  font-weight: 800;
-  margin: 0;
-  color: #fff;
-  display: inline-block;
-  animation: animateText 6s infinite;
-}
-
-/* Animasi gonta-ganti efek */
-@keyframes animateText {
-  0% {
-    transform: scale(1);
-    opacity: 1;
-    letter-spacing: 0px;
-    color: #fff;
-  }
-  25% {
-    transform: scale(1.2);
-    opacity: 0.7;
-    letter-spacing: 3px;
-    color: #ff4d4d;
-  }
-  50% {
-    transform: rotate(-5deg) scale(1.1);
-    opacity: 1;
-    letter-spacing: 1px;
-    color: #4dff91;
-  }
-  75% {
-    transform: rotate(5deg) scale(0.9);
-    opacity: 0.8;
-    letter-spacing: 4px;
-    color: #4da6ff;
-  }
-  100% {
-    transform: scale(1);
-    opacity: 1;
-    letter-spacing: 0px;
-    color: #fff;
-  }
-}
-
 
   /* Header */
   .header-section {
@@ -231,17 +188,18 @@ import Layout from '../layouts/Layout.astro';
     color: #fff;
   }
 
-  /* Typing Effect Styles */
-  .typing-container {
+  /* Animated Title Styles */
+  .animated-title {
     display: inline-block;
     position: relative;
   }
 
-  .typing-text {
+  .title-text {
     display: inline-block;
+    position: relative;
   }
 
-  .typing-cursor {
+  .title-cursor {
     display: inline-block;
     margin-left: 2px;
     animation: blink 1s infinite;
@@ -254,26 +212,91 @@ import Layout from '../layouts/Layout.astro';
     51%, 100% { opacity: 0; }
   }
 
-  /* Different typing animations */
-  .typing-subtitle {
-    position: relative;
-    min-height: 1.3em;
+  /* Animation Effects */
+  .typing-effect {
+    animation: typing 0.5s ease-in-out;
   }
 
-  .typing-fade {
-    position: relative;
-    min-height: 1.3em;
+  .fade-effect {
+    animation: fadeInOut 2s ease-in-out;
   }
 
-  .typing-slide {
-    position: relative;
-    min-height: 1.3em;
-    overflow: hidden;
+  .slide-effect {
+    animation: slideIn 1s ease-out;
   }
 
-  .typing-scale {
-    position: relative;
-    min-height: 1.3em;
+  .bounce-effect {
+    animation: bounce 1s ease;
+  }
+
+  .glitch-effect {
+    animation: glitch 0.5s ease-in-out;
+  }
+
+  .rotate-effect {
+    animation: rotate 1s ease-in-out;
+  }
+
+  .scale-effect {
+    animation: scale 0.8s ease-in-out;
+  }
+
+  .gradient-effect {
+    background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #feca57);
+    background-size: 300% 300%;
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: gradientShift 3s ease-in-out infinite;
+  }
+
+  /* Keyframes for animations */
+  @keyframes typing {
+    from { width: 0; opacity: 0; }
+    to { width: auto; opacity: 1; }
+  }
+
+  @keyframes fadeInOut {
+    0% { opacity: 0; transform: translateY(-20px); }
+    50% { opacity: 1; transform: translateY(0); }
+    100% { opacity: 0; transform: translateY(20px); }
+  }
+
+  @keyframes slideIn {
+    0% { transform: translateX(-100%); opacity: 0; }
+    100% { transform: translateX(0); opacity: 1; }
+  }
+
+  @keyframes bounce {
+    0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+    40% { transform: translateY(-30px); }
+    60% { transform: translateY(-15px); }
+  }
+
+  @keyframes glitch {
+    0% { transform: translate(0); }
+    20% { transform: translate(-5px, 5px); }
+    40% { transform: translate(-5px, -5px); }
+    60% { transform: translate(5px, 5px); }
+    80% { transform: translate(5px, -5px); }
+    100% { transform: translate(0); }
+  }
+
+  @keyframes rotate {
+    0% { transform: rotate(0deg) scale(0.5); opacity: 0; }
+    100% { transform: rotate(360deg) scale(1); opacity: 1; }
+  }
+
+  @keyframes scale {
+    0% { transform: scale(0); opacity: 0; }
+    70% { transform: scale(1.2); opacity: 1; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  @keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
   }
 
   .all-blog-link {
@@ -446,141 +469,77 @@ import Layout from '../layouts/Layout.astro';
 </style>
 
 <script>
-  // Typing Effect dengan animasi berbeda-beda
   document.addEventListener('DOMContentLoaded', function() {
-    // Animasi untuk judul utama (typing effect klasik)
-    const mainTypingElement = document.querySelector('.typing-text');
-    if (mainTypingElement) {
-      const texts = JSON.parse(mainTypingElement.getAttribute('data-texts'));
-      let textIndex = 0;
-      let charIndex = 0;
-      let isDeleting = false;
-      let typingSpeed = 100;
-      let deletingSpeed = 50;
-      let pauseTime = 2000;
+    const titleElement = document.getElementById('mainTitle');
+    const cursorElement = document.querySelector('.title-cursor');
+    
+    const titleVariations = [
+      "Blog",
+      "Articles",
+      "Stories",
+      "Thoughts",
+      "Journal",
+      "Notes",
+      "Ideas",
+      "Updates"
+    ];
 
-      function typeMain() {
-        const currentText = texts[textIndex];
-        
-        if (isDeleting) {
-          mainTypingElement.textContent = currentText.substring(0, charIndex - 1);
-          charIndex--;
-          typingSpeed = deletingSpeed;
-        } else {
-          mainTypingElement.textContent = currentText.substring(0, charIndex + 1);
-          charIndex++;
-          typingSpeed = 100;
-        }
+    const animationEffects = [
+      'typing-effect',
+      'fade-effect',
+      'slide-effect',
+      'bounce-effect',
+      'glitch-effect',
+      'rotate-effect',
+      'scale-effect',
+      'gradient-effect'
+    ];
 
-        if (!isDeleting && charIndex === currentText.length) {
-          isDeleting = true;
-          typingSpeed = pauseTime;
-        } else if (isDeleting && charIndex === 0) {
-          isDeleting = false;
-          textIndex = (textIndex + 1) % texts.length;
-          typingSpeed = 500;
-        }
+    let currentIndex = 0;
+    let animationIndex = 0;
 
-        setTimeout(typeMain, typingSpeed);
-      }
-
-      setTimeout(typeMain, 1000);
+    function changeTitleWithAnimation() {
+      // Remove previous animation classes
+      titleElement.className = 'title-text';
+      
+      // Add current animation effect
+      titleElement.classList.add(animationEffects[animationIndex]);
+      
+      // Change text
+      titleElement.textContent = titleVariations[currentIndex];
+      
+      // Update cursor color based on animation
+      updateCursorColor(animationIndex);
+      
+      // Increment indexes
+      currentIndex = (currentIndex + 1) % titleVariations.length;
+      animationIndex = (animationIndex + 1) % animationEffects.length;
+      
+      // Schedule next change
+      setTimeout(changeTitleWithAnimation, 2000);
     }
 
-    // Animasi untuk subtitle (fade effect)
-    const subtitleElements = document.querySelectorAll('.typing-subtitle');
-    subtitleElements.forEach((element, index) => {
-      const texts = JSON.parse(element.getAttribute('data-texts'));
-      let currentIndex = 0;
+    function updateCursorColor(animIndex) {
+      const colors = [
+        '#ff6b6b', // Red for typing
+        '#4ecdc4', // Teal for fade
+        '#45b7d1', // Blue for slide
+        '#feca57', // Yellow for bounce
+        '#ff9ff3', // Pink for glitch
+        '#54a0ff', // Light blue for rotate
+        '#5f27cd', // Purple for scale
+        '#00d2d3'  // Cyan for gradient
+      ];
       
-      function changeText() {
-        element.style.opacity = '0';
-        element.style.transition = 'opacity 0.5s ease';
-        
-        setTimeout(() => {
-          element.textContent = texts[currentIndex];
-          element.style.opacity = '1';
-          currentIndex = (currentIndex + 1) % texts.length;
-        }, 500);
-        
-        setTimeout(changeText, 3000);
-      }
-      
-      // Start dengan delay berbeda untuk setiap element
-      setTimeout(changeText, 1500 + (index * 1000));
-    });
+      cursorElement.style.color = colors[animIndex];
+    }
 
-    // Animasi untuk fade effect
-    const fadeElements = document.querySelectorAll('.typing-fade');
-    fadeElements.forEach((element, index) => {
-      const texts = JSON.parse(element.getAttribute('data-texts'));
-      let currentIndex = 0;
-      
-      function changeTextFade() {
-        element.style.transition = 'all 0.8s ease';
-        element.style.transform = 'translateY(20px)';
-        element.style.opacity = '0';
-        
-        setTimeout(() => {
-          element.textContent = texts[currentIndex];
-          element.style.transform = 'translateY(0)';
-          element.style.opacity = '1';
-          currentIndex = (currentIndex + 1) % texts.length;
-        }, 800);
-        
-        setTimeout(changeTextFade, 3500);
-      }
-      
-      setTimeout(changeTextFade, 2000 + (index * 800));
-    });
+    // Start the animation sequence
+    setTimeout(changeTitleWithAnimation, 1000);
 
-    // Animasi untuk slide effect
-    const slideElements = document.querySelectorAll('.typing-slide');
-    slideElements.forEach((element, index) => {
-      const texts = JSON.parse(element.getAttribute('data-texts'));
-      let currentIndex = 0;
-      
-      function changeTextSlide() {
-        element.style.transition = 'all 0.6s ease';
-        element.style.transform = 'translateX(-100%)';
-        element.style.opacity = '0';
-        
-        setTimeout(() => {
-          element.textContent = texts[currentIndex];
-          element.style.transform = 'translateX(0)';
-          element.style.opacity = '1';
-          currentIndex = (currentIndex + 1) % texts.length;
-        }, 600);
-        
-        setTimeout(changeTextSlide, 4000);
-      }
-      
-      setTimeout(changeTextSlide, 2500 + (index * 600));
-    });
-
-    // Animasi untuk scale effect
-    const scaleElements = document.querySelectorAll('.typing-scale');
-    scaleElements.forEach((element, index) => {
-      const texts = JSON.parse(element.getAttribute('data-texts'));
-      let currentIndex = 0;
-      
-      function changeTextScale() {
-        element.style.transition = 'all 0.7s ease';
-        element.style.transform = 'scale(0.8)';
-        element.style.opacity = '0';
-        
-        setTimeout(() => {
-          element.textContent = texts[currentIndex];
-          element.style.transform = 'scale(1)';
-          element.style.opacity = '1';
-          currentIndex = (currentIndex + 1) % texts.length;
-        }, 700);
-        
-        setTimeout(changeTextScale, 3800);
-      }
-      
-      setTimeout(changeTextScale, 3000 + (index * 700));
-    });
+    // Additional effect: Random cursor movement
+    setInterval(() => {
+      cursorElement.style.transform = `translateY(${Math.random() * 5 - 2.5}px)`;
+    }, 300);
   });
 </script>
-
