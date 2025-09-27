@@ -167,6 +167,49 @@ import Layout from '../layouts/Layout.astro';
     margin: 0 auto;
     padding: 40px 20px;
   }
+.big-title {
+  font-size: 48px;
+  font-weight: 800;
+  margin: 0;
+  color: #fff;
+  display: inline-block;
+  animation: animateText 6s infinite;
+}
+
+/* Animasi gonta-ganti efek */
+@keyframes animateText {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+    letter-spacing: 0px;
+    color: #fff;
+  }
+  25% {
+    transform: scale(1.2);
+    opacity: 0.7;
+    letter-spacing: 3px;
+    color: #ff4d4d;
+  }
+  50% {
+    transform: rotate(-5deg) scale(1.1);
+    opacity: 1;
+    letter-spacing: 1px;
+    color: #4dff91;
+  }
+  75% {
+    transform: rotate(5deg) scale(0.9);
+    opacity: 0.8;
+    letter-spacing: 4px;
+    color: #4da6ff;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+    letter-spacing: 0px;
+    color: #fff;
+  }
+}
+
 
   /* Header */
   .header-section {
@@ -540,3 +583,4 @@ import Layout from '../layouts/Layout.astro';
     });
   });
 </script>
+
