@@ -2,23 +2,6 @@
 // src/pages/blog.astro
 import Layout from '../layouts/Layout.astro';
 
-// FUNGSI OTOMATIS
-const getLatestFeaturedPost = () => {
-  const featuredPosts = blogData.filter(post => post.isFeatured);
-  return featuredPosts.sort((a, b) => new Date(b.date) - new Date(a.date))[0];
-};
-
-const formatDate = (dateString) => {
-  const date = new Date(dateString);
-  return date.toLocaleDateString('id-ID', { 
-    day: 'numeric', 
-    month: 'short', 
-    year: 'numeric' 
-  });
-};
-
-// VARIABEL OTOMATIS
-const latestPost = getLatestFeaturedPost();
 ---
 
 <Layout title="Blog | Note Farid" description="Halaman blog kosong dengan desain baru." currentPage="blog">
@@ -51,48 +34,6 @@ const latestPost = getLatestFeaturedPost();
           </a>
         </div>
       </section>
-
-      <!-- FEATURED UPDATE SECTION -->
-      {latestPost && (
-        <section class="auto-featured-section">
-          <div class="section-header">
-            <h2 class="section-title">
-              <span class="highlight-badge">Update Terbaru</span>
-              Trending Now
-            </h2>
-          </div>
-          
-          <div class="auto-featured-card">
-            <div class="featured-image-auto">
-              <img src="/images/5.jpg" alt={latestPost.title} class="featured-img" />
-              <div class="featured-badge-auto">Featured</div>
-            </div>
-            <div class="featured-content-auto">
-              <div class="post-meta-auto">
-                <span class="date-auto">{formatDate(latestPost.date)}</span>
-                <span class="read-time-auto">{latestPost.readTime} min read</span>
-                <span class="new-badge-auto">NEW</span>
-              </div>
-              <h3 class="post-title-auto">{latestPost.title}</h3>
-              <p class="post-desc-auto">{latestPost.description}</p>
-              <div class="tags-auto">
-                {latestPost.tags.map(tag => (
-                  <span class="tag-auto">{tag}</span>
-                ))}
-              </div>
-              <a href={`/blog/${latestPost.id}`} class="read-more-auto">
-                Baca Selengkapnya
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M5 12h14M12 5l7 7-7 7"/>
-                </svg>
-              </a>
-            </div>
-          </div>
-        </section>
-      )}
-
-      <!-- BLOG CONTENT SECTION DIHAPUS -->
-      <!-- Grid blog articles dihapus sesuai permintaan -->
 
     </main>
   </div>
@@ -480,4 +421,5 @@ const latestPost = getLatestFeaturedPost();
     setTimeout(changeTitle, 1000);
   });
 </script>
+
 
