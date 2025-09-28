@@ -1,7 +1,7 @@
 ---
 // src/pages/blog.astro
 import Layout from '../layouts/Layout.astro';
-import "../scripts/animations.js";
+
 
 
 // DATA BLOG OTOMATIS (TAMBAHAN BARU)
@@ -1145,7 +1145,7 @@ h1, h2, h3, h4, h5, h6 {
 </style>
 
 
-<script>
+<script type="module" src="/src/scripts/animations.js"></script>
 
   // Script yang sudah ada tetap sama
   document.addEventListener('DOMContentLoaded', function() {
@@ -1310,6 +1310,7 @@ h1, h2, h3, h4, h5, h6 {
     window.selectSearchResult = selectSearchResult;
   });
 </script>
+
 
 
 
