@@ -3,18 +3,21 @@
 import Layout from '../layouts/Layout.astro';
 ---
 
-<Layout title="Blog | Note Farid" description="Halaman blog kosong dengan desain baru." currentPage="blog">
+<Layout title="Blog | Note Farid" description="Halaman blog dengan desain modern dan animasi menarik." currentPage="blog">
   <div class="container">
     <main>
       <!-- Header Section -->
       <section class="header-section">
         <div class="header-content">
-          <h1 class="big-title">
-            <span class="animated-title">
-              <span class="title-text" id="mainTitle">Blog</span>
-              <span class="title-cursor">|</span>
-            </span>
-          </h1>
+          <div class="title-container">
+            <h1 class="big-title">
+              <span class="animated-title">
+                <span class="title-text" id="mainTitle">Blog</span>
+                <span class="title-cursor">|</span>
+              </span>
+            </h1>
+            <p class="subtitle">Latest</p>
+          </div>
           <a href="/blog/all" class="all-blog-link">
             All Blog 
             <svg xmlns="http://www.w3.org/2000/svg" class="arrow-icon" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -27,128 +30,177 @@ import Layout from '../layouts/Layout.astro';
       <!-- Blog Content Grid -->
       <div class="blog-grid">
         <!-- Blog Content Section 1 -->
-        <section class="linebox">
-          <div class="blog-meta">
-            <div class="meta-item">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+        <article class="blog-card">
+          <div class="blog-image">
+            <div class="image-placeholder">
+              <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                <polyline points="21,15 16,10 5,21"></polyline>
               </svg>
-              <span>15 Mar 2024</span>
-            </div>
-            <div class="meta-item">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                <circle cx="12" cy="12" r="3"/>
-              </svg>
-              <span>5 min read</span>
             </div>
           </div>
+          <div class="blog-content">
+            <div class="blog-meta">
+              <div class="meta-item">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                </svg>
+                <span>15 Mar 2024</span>
+              </div>
+              <div class="meta-item">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                  <circle cx="12" cy="12" r="3"/>
+                </svg>
+                <span>5 min read</span>
+              </div>
+            </div>
 
-          <h2 class="blog-title">Konten Blog Akan Segera Hadir</h2>
-          <p class="desc">
-            Semua artikel akan tampil di sini dengan desain bersih dan modern. 
-            Stay tuned untuk update terbaru!
-          </p>
+            <h2 class="blog-title">Konten Blog Akan Segera Hadir</h2>
+            <p class="desc">
+              Semua artikel akan tampil di sini dengan desain bersih dan modern. 
+              Stay tuned untuk update terbaru!
+            </p>
 
-          <div class="tag-list">
-            <span class="tag">Astro</span>
-            <span class="tag">Blog</span>
-            <span class="tag">Coming Soon</span>
+            <div class="tag-list">
+              <span class="tag">Astro</span>
+              <span class="tag">Blog</span>
+              <span class="tag">Coming Soon</span>
+            </div>
           </div>
-        </section>
+        </article>
 
         <!-- Blog Content Section 2 -->
-        <section class="linebox">
-          <div class="blog-meta">
-            <div class="meta-item">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+        <article class="blog-card">
+          <div class="blog-image">
+            <div class="image-placeholder">
+              <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14,2 14,8 20,8"></polyline>
+                <line x1="16" y1="13" x2="8" y2="13"></line>
+                <line x1="16" y1="17" x2="8" y2="17"></line>
+                <polyline points="10,9 9,9 8,9"></polyline>
               </svg>
-              <span>20 Mar 2024</span>
-            </div>
-            <div class="meta-item">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                <circle cx="12" cy="12" r="3"/>
-              </svg>
-              <span>7 min read</span>
             </div>
           </div>
+          <div class="blog-content">
+            <div class="blog-meta">
+              <div class="meta-item">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                </svg>
+                <span>20 Mar 2024</span>
+              </div>
+              <div class="meta-item">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                  <circle cx="12" cy="12" r="3"/>
+                </svg>
+                <span>7 min read</span>
+              </div>
+            </div>
 
-          <h2 class="blog-title">Tips Pengembangan Web Modern</h2>
-          <p class="desc">
-            Pelajari teknik-teknik terbaru dalam pengembangan web modern 
-            untuk meningkatkan performa dan user experience.
-          </p>
+            <h2 class="blog-title">Tips Pengembangan Web Modern</h2>
+            <p class="desc">
+              Pelajari teknik-teknik terbaru dalam pengembangan web modern 
+              untuk meningkatkan performa dan user experience.
+            </p>
 
-          <div class="tag-list">
-            <span class="tag">Web Dev</span>
-            <span class="tag">Tips</span>
-            <span class="tag">Modern</span>
+            <div class="tag-list">
+              <span class="tag">Web Dev</span>
+              <span class="tag">Tips</span>
+              <span class="tag">Modern</span>
+            </div>
           </div>
-        </section>
+        </article>
 
         <!-- Blog Content Section 3 -->
-        <section class="linebox">
-          <div class="blog-meta">
-            <div class="meta-item">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+        <article class="blog-card">
+          <div class="blog-image">
+            <div class="image-placeholder">
+              <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                <circle cx="12" cy="12" r="3"></circle>
+                <path d="M21 17v2a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-2"></path>
+                <polyline points="7,10 12,15 17,10"></polyline>
               </svg>
-              <span>25 Mar 2024</span>
-            </div>
-            <div class="meta-item">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                <circle cx="12" cy="12" r="3"/>
-              </svg>
-              <span>10 min read</span>
             </div>
           </div>
+          <div class="blog-content">
+            <div class="blog-meta">
+              <div class="meta-item">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                </svg>
+                <span>25 Mar 2024</span>
+              </div>
+              <div class="meta-item">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                  <circle cx="12" cy="12" r="3"/>
+                </svg>
+                <span>10 min read</span>
+              </div>
+            </div>
 
-          <h2 class="blog-title">Optimisasi SEO untuk Developer</h2>
-          <p class="desc">
-            Panduan lengkap optimisasi SEO teknikal untuk developer 
-            yang ingin meningkatkan ranking website di mesin pencari.
-          </p>
+            <h2 class="blog-title">Optimisasi SEO untuk Developer</h2>
+            <p class="desc">
+              Panduan lengkap optimisasi SEO teknikal untuk developer 
+              yang ingin meningkatkan ranking website di mesin pencari.
+            </p>
 
-          <div class="tag-list">
-            <span class="tag">SEO</span>
-            <span class="tag">Optimization</span>
-            <span class="tag">Technical</span>
+            <div class="tag-list">
+              <span class="tag">SEO</span>
+              <span class="tag">Optimization</span>
+              <span class="tag">Technical</span>
+            </div>
           </div>
-        </section>
+        </article>
 
         <!-- Blog Content Section 4 -->
-        <section class="linebox">
-          <div class="blog-meta">
-            <div class="meta-item">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+        <article class="blog-card">
+          <div class="blog-image">
+            <div class="image-placeholder">
+              <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <polygon points="12,2 22,8.5 22,15.5 12,22 2,15.5 2,8.5 12,2"></polygon>
+                <line x1="12" y1="22" x2="12" y2="15.5"></line>
+                <polyline points="22,8.5 12,15.5 2,8.5"></polyline>
+                <polyline points="2,15.5 12,8.5 22,15.5"></polyline>
+                <line x1="12" y1="15.5" x2="12" y2="8.5"></line>
               </svg>
-              <span>30 Mar 2024</span>
-            </div>
-            <div class="meta-item">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                <circle cx="12" cy="12" r="3"/>
-              </svg>
-              <span>8 min read</span>
             </div>
           </div>
+          <div class="blog-content">
+            <div class="blog-meta">
+              <div class="meta-item">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                </svg>
+                <span>30 Mar 2024</span>
+              </div>
+              <div class="meta-item">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                  <circle cx="12" cy="12" r="3"/>
+                </svg>
+                <span>8 min read</span>
+              </div>
+            </div>
 
-          <h2 class="blog-title">Framework JavaScript Terpopuler 2024</h2>
-          <p class="desc">
-            Review mendalam tentang framework JavaScript terpopuler 
-            tahun 2024 dan perbandingan fitur-fiturnya.
-          </p>
+            <h2 class="blog-title">Framework JavaScript Terpopuler 2024</h2>
+            <p class="desc">
+              Review mendalam tentang framework JavaScript terpopuler 
+              tahun 2024 dan perbandingan fitur-fiturnya.
+            </p>
 
-          <div class="tag-list">
-            <span class="tag">JavaScript</span>
-            <span class="tag">Framework</span>
-            <span class="tag">2024</span>
+            <div class="tag-list">
+              <span class="tag">JavaScript</span>
+              <span class="tag">Framework</span>
+              <span class="tag">2024</span>
+            </div>
           </div>
-        </section>
+        </article>
       </div>
     </main>
   </div>
@@ -170,22 +222,38 @@ import Layout from '../layouts/Layout.astro';
 
   /* Header */
   .header-section {
-    margin-bottom: 40px;
+    margin-bottom: 60px;
   }
 
   .header-content {
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: flex-end;
     flex-wrap: wrap;
     gap: 20px;
   }
 
+  .title-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
   .big-title {
-    font-size: 48px;
+    font-size: 64px;
     font-weight: 800;
     margin: 0;
     color: #fff;
+    line-height: 1;
+  }
+
+  .subtitle {
+    font-size: 24px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.7);
+    margin: 0;
+    letter-spacing: 2px;
+    text-transform: uppercase;
   }
 
   /* Animated Title Styles */
@@ -197,12 +265,18 @@ import Layout from '../layouts/Layout.astro';
   .title-text {
     display: inline-block;
     position: relative;
+    background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #feca57);
+    background-size: 300% 300%;
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: gradientShift 3s ease-in-out infinite;
   }
 
   .title-cursor {
     display: inline-block;
     margin-left: 2px;
-    animation: blink 1s infinite;
+    animation: blink 1s infinite, pulse 2s infinite;
     color: #4f46e5;
     font-weight: 300;
   }
@@ -210,6 +284,12 @@ import Layout from '../layouts/Layout.astro';
   @keyframes blink {
     0%, 50% { opacity: 1; }
     51%, 100% { opacity: 0; }
+  }
+
+  @keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
   }
 
   /* Animation Effects */
@@ -317,6 +397,8 @@ import Layout from '../layouts/Layout.astro';
   .all-blog-link:hover {
     background: rgba(255,255,255,0.2);
     color: #fff;
+    transform: translateY(-3px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.2);
   }
 
   .arrow-icon {
@@ -327,23 +409,48 @@ import Layout from '../layouts/Layout.astro';
   .blog-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 30px;
+    gap: 40px;
     margin-top: 20px;
   }
 
-  /* Linebox */
-  .linebox {
-    border: 2px solid rgba(255,255,255,0.4);
+  /* Blog Card */
+  .blog-card {
+    border-radius: 24px;
     background: rgba(255,255,255,0.08);
-    border-radius: 16px;
-    padding: 35px;
-    color: #fff;
-    transition: transform 0.3s ease, border-color 0.3s ease;
+    border: 1px solid rgba(255,255,255,0.15);
+    overflow: hidden;
+    transition: transform 0.4s ease, box-shadow 0.4s ease;
+    display: flex;
+    flex-direction: column;
   }
 
-  .linebox:hover {
-    transform: translateY(-5px);
-    border-color: rgba(255,255,255,0.6);
+  .blog-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+    border-color: rgba(255,255,255,0.3);
+  }
+
+  .blog-image {
+    height: 200px;
+    background: rgba(255,255,255,0.05);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+  }
+
+  .image-placeholder {
+    color: rgba(255,255,255,0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .blog-content {
+    padding: 30px;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
   }
 
   /* Blog Meta */
@@ -369,6 +476,11 @@ import Layout from '../layouts/Layout.astro';
     margin: 20px 0;
     color: #fff;
     line-height: 1.3;
+    transition: color 0.3s ease;
+  }
+
+  .blog-card:hover .blog-title {
+    color: #4ecdc4;
   }
 
   .desc {
@@ -376,6 +488,7 @@ import Layout from '../layouts/Layout.astro';
     line-height: 1.7;
     margin-bottom: 25px;
     font-size: 1.1rem;
+    flex-grow: 1;
   }
 
   /* Tags */
@@ -393,13 +506,19 @@ import Layout from '../layouts/Layout.astro';
     border-radius: 20px;
     font-size: 0.9rem;
     font-weight: 600;
+    transition: all 0.3s ease;
+  }
+
+  .tag:hover {
+    background: rgba(255,255,255,0.25);
+    transform: translateY(-2px);
   }
 
   /* Responsive */
   @media (max-width: 1024px) {
     .blog-grid {
       grid-template-columns: 1fr;
-      gap: 25px;
+      gap: 30px;
     }
   }
 
@@ -410,11 +529,11 @@ import Layout from '../layouts/Layout.astro';
 
     .header-content {
       flex-direction: column;
-      text-align: center;
+      align-items: flex-start;
     }
 
     .big-title {
-      font-size: 2.8rem;
+      font-size: 3.5rem;
     }
 
     .blog-title {
@@ -423,10 +542,9 @@ import Layout from '../layouts/Layout.astro';
 
     .desc {
       font-size: 1rem;
-      text-align: left;
     }
 
-    .linebox {
+    .blog-content {
       padding: 25px 20px;
     }
 
@@ -437,7 +555,7 @@ import Layout from '../layouts/Layout.astro';
     }
 
     .blog-grid {
-      gap: 20px;
+      gap: 25px;
     }
   }
 
@@ -447,14 +565,18 @@ import Layout from '../layouts/Layout.astro';
     }
 
     .big-title {
-      font-size: 2.2rem;
+      font-size: 2.5rem;
+    }
+
+    .subtitle {
+      font-size: 18px;
     }
 
     .blog-title {
       font-size: 1.5rem;
     }
 
-    .linebox {
+    .blog-content {
       padding: 20px 15px;
     }
 
@@ -541,5 +663,17 @@ import Layout from '../layouts/Layout.astro';
     setInterval(() => {
       cursorElement.style.transform = `translateY(${Math.random() * 5 - 2.5}px)`;
     }, 300);
+
+    // Add hover effects to blog cards
+    const blogCards = document.querySelectorAll('.blog-card');
+    blogCards.forEach(card => {
+      card.addEventListener('mouseenter', function() {
+        this.style.transform = 'translateY(-10px) scale(1.02)';
+      });
+      
+      card.addEventListener('mouseleave', function() {
+        this.style.transform = 'translateY(0) scale(1)';
+      });
+    });
   });
 </script>
