@@ -2,6 +2,10 @@
 // src/pages/blog.astro
 import Layout from '../layouts/Layout.astro';
 
+mport gsap from "gsap";
+import ScrollTrigger from "gsap/ScrollTrigger";
+import Flip from "gsap/Flip";
+import Lenis from "@studio-freight/lenis";
 
 
 
@@ -82,6 +86,11 @@ const newPostsCount = getNewPostCount();
 const totalBlogs = getTotalBlogCount();
 const featuredCount = getFeaturedCount();
 
+// Register GSAP plugins
+if (typeof window !== 'undefined') {
+  gsap.registerPlugin(ScrollTrigger, Flip);
+}
+
 ---
 
 <Layout title="Blog | Note Farid" description="Halaman blog kosong dengan desain baru." currentPage="blog">
@@ -89,6 +98,86 @@ const featuredCount = getFeaturedCount();
     <main>
     
 
+<!-- Tambahkan section horizontal scroll sebelum penutup main tag -->
+<section class="horizontal-scroll-section">
+  <div class="horizontal-container">
+    <div class="horizontal-header">
+      <h2 class="horizontal-title">Featured Series</h2>
+      <p class="horizontal-subtitle">Scroll horizontally to explore more content</p>
+    </div>
+    
+    <div class="horizontal-scroll-wrapper">
+      <div class="horizontal-scroll-content">
+        <!-- Card 1 -->
+        <div class="horizontal-card">
+          <div class="card-image gradient-1"></div>
+          <div class="card-content">
+            <h3>Web Development Mastery</h3>
+            <p>Complete guide to modern web development practices and techniques.</p>
+            <span class="card-badge">5 Parts</span>
+          </div>
+        </div>
+        
+        <!-- Card 2 -->
+        <div class="horizontal-card">
+          <div class="card-image gradient-2"></div>
+          <div class="card-content">
+            <h3>JavaScript Deep Dive</h3>
+            <p>Advanced JavaScript concepts and modern ES6+ features explained.</p>
+            <span class="card-badge">8 Parts</span>
+          </div>
+        </div>
+        
+        <!-- Card 3 -->
+        <div class="horizontal-card">
+          <div class="card-image gradient-3"></div>
+          <div class="card-content">
+            <h3>CSS Animation Magic</h3>
+            <p>Create stunning animations and transitions with pure CSS.</p>
+            <span class="card-badge">6 Parts</span>
+          </div>
+        </div>
+        
+        <!-- Card 4 -->
+        <div class="horizontal-card">
+          <div class="card-image gradient-4"></div>
+          <div class="card-content">
+            <h3>Performance Optimization</h3>
+            <p>Techniques to make your websites faster and more efficient.</p>
+            <span class="card-badge">4 Parts</span>
+          </div>
+        </div>
+        
+        <!-- Card 5 -->
+        <div class="horizontal-card">
+          <div class="card-image gradient-1"></div>
+          <div class="card-content">
+            <h3>SEO Best Practices</h3>
+            <p>Improve your website's visibility and search engine ranking.</p>
+            <span class="card-badge">7 Parts</span>
+          </div>
+        </div>
+        
+        <!-- Card 6 -->
+        <div class="horizontal-card">
+          <div class="card-image gradient-2"></div>
+          <div class="card-content">
+            <h3>Mobile First Design</h3>
+            <p>Design strategies for optimal mobile user experience.</p>
+            <span class="card-badge">5 Parts</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="scroll-indicator">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M7 16l-4-4m0 0l4-4m-4 4h18"/>
+      </svg>
+      <span>Drag to scroll</span>
+    </div>
+  </div>
+</section>
 
 
       <!-- HEADER SECTION (TIDAK DIUBAH) -->
@@ -340,7 +429,121 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 
+/* Horizontal Scroll Section */
+.horizontal-scroll-section {
+  margin: 80px 0;
+  padding: 40px 0;
+}
 
+.horizontal-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.horizontal-header {
+  text-align: center;
+  margin-bottom: 50px;
+}
+
+.horizontal-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 15px;
+  background: linear-gradient(135deg, #4f46e5, #06b6d4);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.horizontal-subtitle {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 1.1rem;
+}
+
+.horizontal-scroll-wrapper {
+  overflow: hidden;
+  position: relative;
+  padding: 20px 0;
+}
+
+.horizontal-scroll-content {
+  display: flex;
+  gap: 30px;
+  width: max-content;
+  will-change: transform;
+}
+
+.horizontal-card {
+  flex: 0 0 350px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.horizontal-card:hover {
+  transform: translateY(-10px);
+  border-color: rgba(255, 255, 255, 0.3);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+
+.card-image {
+  height: 180px;
+  width: 100%;
+  background-size: 200% 200%;
+  animation: gradientShift 3s ease infinite;
+}
+
+.card-content {
+  padding: 25px;
+}
+
+.card-content h3 {
+  font-size: 1.4rem;
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: #fff;
+}
+
+.card-content p {
+  color: rgba(255, 255, 255, 0.8);
+  line-height: 1.5;
+  margin-bottom: 15px;
+  font-size: 0.95rem;
+}
+
+.card-badge {
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+  padding: 6px 12px;
+  border-radius: 15px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.scroll-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 30px;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.9rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .horizontal-card {
+    flex: 0 0 300px;
+  }
+  
+  .horizontal-title {
+    font-size: 2rem;
+  }
+}
 
 
   .container {
@@ -1139,6 +1342,121 @@ h1, h2, h3, h4, h5, h6 {
 
 <script is:inline>
 
+// GSAP Horizontal Scroll dengan Lenis Smooth Scroll
+document.addEventListener('DOMContentLoaded', function() {
+  // Initialize Lenis for smooth scrolling
+  const lenis = new Lenis({
+    duration: 1.2,
+    easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+    orientation: 'horizontal',
+    gestureOrientation: 'horizontal',
+    smoothWheel: true,
+  });
+
+  function raf(time) {
+    lenis.raf(time);
+    requestAnimationFrame(raf);
+  }
+  requestAnimationFrame(raf);
+
+  // GSAP Horizontal Scroll Animation
+  const horizontalSection = document.querySelector('.horizontal-scroll-section');
+  const scrollContent = document.querySelector('.horizontal-scroll-content');
+  const cards = document.querySelectorAll('.horizontal-card');
+
+  if (horizontalSection && scrollContent) {
+    // Calculate total scroll width
+    const scrollWidth = scrollContent.scrollWidth - window.innerWidth;
+
+    // GSAP Timeline for horizontal scroll
+    const tl = gsap.timeline({
+      scrollTrigger: {
+        trigger: horizontalSection,
+        start: 'top top',
+        end: () => `+=${scrollWidth}`,
+        pin: true,
+        scrub: 1,
+        anticipatePin: 1,
+      }
+    });
+
+    tl.to(scrollContent, {
+      x: () => -scrollWidth,
+      ease: 'none',
+      duration: 1
+    });
+
+    // Card animation on scroll
+    cards.forEach((card, index) => {
+      gsap.fromTo(card, 
+        {
+          opacity: 0,
+          y: 50,
+          rotationY: -15
+        },
+        {
+          opacity: 1,
+          y: 0,
+          rotationY: 0,
+          duration: 0.8,
+          scrollTrigger: {
+            trigger: card,
+            start: 'top 80%',
+            end: 'top 30%',
+            scrub: true,
+            toggleActions: 'play none none reverse'
+          }
+        }
+      );
+    });
+
+    // FLIP animation for card hover
+    cards.forEach(card => {
+      card.addEventListener('mouseenter', () => {
+        const state = Flip.getState(card);
+        card.style.zIndex = 10;
+        
+        Flip.from(state, {
+          duration: 0.3,
+          ease: 'power1.out',
+          scale: true,
+          absolute: true
+        });
+      });
+
+      card.addEventListener('mouseleave', () => {
+        const state = Flip.getState(card);
+        card.style.zIndex = '';
+        
+        Flip.from(state, {
+          duration: 0.3,
+          ease: 'power1.out'
+        });
+      });
+    });
+
+    // Mouse wheel horizontal scroll
+    horizontalSection.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      lenis.scrollBy(e.deltaY * 0.5, { lock: true });
+    });
+
+    // Touch support for mobile
+    let startX = 0;
+    horizontalSection.addEventListener('touchstart', (e) => {
+      startX = e.touches[0].clientX;
+    });
+
+    horizontalSection.addEventListener('touchmove', (e) => {
+      e.preventDefault();
+      const x = e.touches[0].clientX;
+      const diff = startX - x;
+      lenis.scrollBy(diff * 2, { lock: true });
+      startX = x;
+    });
+  }
+});
+
   
 
   // Script yang sudah ada tetap sama
@@ -1304,6 +1622,7 @@ h1, h2, h3, h4, h5, h6 {
     window.selectSearchResult = selectSearchResult;
   });
 </script>
+
 
 
 
