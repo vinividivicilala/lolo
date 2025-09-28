@@ -80,11 +80,6 @@ const newPostsCount = getNewPostCount();
 const totalBlogs = getTotalBlogCount();
 const featuredCount = getFeaturedCount();
 
-// Register GSAP plugins
-if (typeof window !== 'undefined') {
-  gsap.registerPlugin(ScrollTrigger, Flip);
-}
-
 ---
 
 <Layout title="Blog | Note Farid" description="Halaman blog kosong dengan desain baru." currentPage="blog">
@@ -1361,6 +1356,7 @@ h1, h2, h3, h4, h5, h6 {
     window.selectSearchResult = selectSearchResult;
   });
 </script>
+
 
 
 
