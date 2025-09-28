@@ -83,35 +83,9 @@ const featuredCount = getFeaturedCount();
 <Layout title="Blog | Note Farid" description="Halaman blog kosong dengan desain baru." currentPage="blog">
   <div class="container">
     <main>
-      <!-- KEDAP-KEDIP PEMANCAR (TAMBAHAN BARU) -->
-      <div class="transmitter-container">
-        <div class="transmitter">
-          <div class="transmitter-tower">
-            <div class="tower-base"></div>
-            <div class="tower-pole"></div>
-            <div class="tower-top"></div>
-          </div>
-          <div class="signal-dots">
-            <div class="dot dot-1"></div>
-            <div class="dot dot-2"></div>
-            <div class="dot dot-3"></div>
-            <div class="dot dot-4"></div>
-          </div>
-          <div class="transmitter-glow"></div>
-        </div>
-        <div class="transmitter-text">Live Updates Active</div>
-      </div>
+    
 
-  <!-- Tambahan Deskripsi Animasi -->
-  <section class="desc-section">
-    <h2 class="desc-title">Tentang Animasi</h2>
-    <p class="desc-text">
-      Halaman ini menggunakan <strong>GSAP</strong> sebagai mesin animasi utama, 
-      dengan dukungan <strong>ScrollTrigger</strong> untuk efek saat halaman discroll, 
-      <strong>Flip</strong> untuk transisi layout yang mulus, dan 
-      <strong>Lenis</strong> untuk pengalaman scroll yang lebih halus dan modern.
-    </p>
-  </section>
+
 
       <!-- HEADER SECTION (TIDAK DIUBAH) -->
       <section class="header-section">
@@ -359,27 +333,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 
-.desc-section {
-  margin: 40px 0;
-  padding: 25px 30px;
-  border-radius: 16px;
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.15);
-  backdrop-filter: blur(10px);
-}
 
-.desc-title {
-  font-size: 1.8rem;
-  font-weight: 700;
-  margin-bottom: 15px;
-  color: #4ecdc4;
-}
-
-.desc-text {
-  font-size: 1.1rem;
-  line-height: 1.7;
-  color: rgba(255,255,255,0.85);
-}
 
 
   .container {
@@ -1178,62 +1132,6 @@ h1, h2, h3, h4, h5, h6 {
 
 <script is:inline>
 
-  import gsap from "gsap";
-  import ScrollTrigger from "gsap/ScrollTrigger";
-  import Flip from "gsap/Flip";
-  import Lenis from "@studio-freight/lenis";
-
-  document.addEventListener("DOMContentLoaded", () => {
-    // Registrasi plugin GSAP
-    gsap.registerPlugin(ScrollTrigger, Flip);
-
-    // Smooth Scroll dengan Lenis
-    const lenis = new Lenis({
-      duration: 1.2,
-      smooth: true,
-    });
-
-    function raf(time) {
-      lenis.raf(time);
-      requestAnimationFrame(raf);
-    }
-    requestAnimationFrame(raf);
-
-    // Animasi Deskripsi Section (body)
-    gsap.from(".desc-section", {
-      opacity: 0,
-      y: 50,
-      duration: 1.2,
-      ease: "power3.out",
-      scrollTrigger: {
-        trigger: ".desc-section",
-        start: "top 85%",
-      }
-    });
-
-    // Animasi Blog Cards
-    gsap.from(".linebox", {
-      opacity: 0,
-      y: 80,
-      duration: 1,
-      stagger: 0.2,
-      ease: "power3.out",
-      scrollTrigger: {
-        trigger: ".blog-grid",
-        start: "top 85%",
-      }
-    });
-
-    // Efek Flip di Title
-    const header = document.querySelector(".big-title");
-    if (header) {
-      header.addEventListener("click", () => {
-        const state = Flip.getState(header);
-        header.classList.toggle("gradient-effect");
-        Flip.from(state, { duration: 1, ease: "power2.inOut" });
-      });
-    }
-  });
 
 
 
@@ -1400,5 +1298,6 @@ h1, h2, h3, h4, h5, h6 {
     window.selectSearchResult = selectSearchResult;
   });
 </script>
+
 
 
