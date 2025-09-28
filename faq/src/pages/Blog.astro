@@ -10,13 +10,16 @@ import Layout from '../layouts/Layout.astro';
       <section class="header-section">
         <div class="header-content">
           <div class="title-container">
+            <!-- Sub judul "Latest" di atas judul utama -->
+            <div class="latest-subtitle">
+              <span>Latest</span>
+            </div>
             <h1 class="big-title">
               <span class="animated-title">
                 <span class="title-text" id="mainTitle">Blog</span>
-                <span class="title-cursor">|</span>
+                <!-- Hapus cursor/garis "|" -->
               </span>
             </h1>
-            <p class="subtitle">Latest</p>
           </div>
           <a href="/blog/all" class="all-blog-link">
             All Blog 
@@ -236,7 +239,30 @@ import Layout from '../layouts/Layout.astro';
   .title-container {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 5px;
+  }
+
+  /* Sub judul "Latest" */
+  .latest-subtitle {
+    font-size: 18px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.7);
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    margin-bottom: 10px;
+    position: relative;
+    display: inline-block;
+  }
+
+  .latest-subtitle::after {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    left: 0;
+    width: 40px;
+    height: 2px;
+    background: linear-gradient(90deg, #4ecdc4, #45b7d1);
+    border-radius: 2px;
   }
 
   .big-title {
@@ -247,16 +273,7 @@ import Layout from '../layouts/Layout.astro';
     line-height: 1;
   }
 
-  .subtitle {
-    font-size: 24px;
-    font-weight: 600;
-    color: rgba(255, 255, 255, 0.7);
-    margin: 0;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-  }
-
-  /* Animated Title Styles */
+  /* Animated Title Styles - tanpa cursor */
   .animated-title {
     display: inline-block;
     position: relative;
@@ -271,25 +288,6 @@ import Layout from '../layouts/Layout.astro';
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     animation: gradientShift 3s ease-in-out infinite;
-  }
-
-  .title-cursor {
-    display: inline-block;
-    margin-left: 2px;
-    animation: blink 1s infinite, pulse 2s infinite;
-    color: #4f46e5;
-    font-weight: 300;
-  }
-
-  @keyframes blink {
-    0%, 50% { opacity: 1; }
-    51%, 100% { opacity: 0; }
-  }
-
-  @keyframes pulse {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.2); }
-    100% { transform: scale(1); }
   }
 
   /* Animation Effects */
@@ -536,6 +534,10 @@ import Layout from '../layouts/Layout.astro';
       font-size: 3.5rem;
     }
 
+    .latest-subtitle {
+      font-size: 16px;
+    }
+
     .blog-title {
       font-size: 1.8rem;
     }
@@ -552,6 +554,7 @@ import Layout from '../layouts/Layout.astro';
       width: 100%;
       justify-content: center;
       font-size: 1.2rem;
+      margin-top: 20px;
     }
 
     .blog-grid {
@@ -568,8 +571,9 @@ import Layout from '../layouts/Layout.astro';
       font-size: 2.5rem;
     }
 
-    .subtitle {
-      font-size: 18px;
+    .latest-subtitle {
+      font-size: 14px;
+      letter-spacing: 2px;
     }
 
     .blog-title {
@@ -593,7 +597,6 @@ import Layout from '../layouts/Layout.astro';
 <script>
   document.addEventListener('DOMContentLoaded', function() {
     const titleElement = document.getElementById('mainTitle');
-    const cursorElement = document.querySelector('.title-cursor');
     
     const titleVariations = [
       "Blog",
@@ -630,9 +633,6 @@ import Layout from '../layouts/Layout.astro';
       // Change text
       titleElement.textContent = titleVariations[currentIndex];
       
-      // Update cursor color based on animation
-      updateCursorColor(animationIndex);
-      
       // Increment indexes
       currentIndex = (currentIndex + 1) % titleVariations.length;
       animationIndex = (animationIndex + 1) % animationEffects.length;
@@ -641,28 +641,8 @@ import Layout from '../layouts/Layout.astro';
       setTimeout(changeTitleWithAnimation, 2000);
     }
 
-    function updateCursorColor(animIndex) {
-      const colors = [
-        '#ff6b6b', // Red for typing
-        '#4ecdc4', // Teal for fade
-        '#45b7d1', // Blue for slide
-        '#feca57', // Yellow for bounce
-        '#ff9ff3', // Pink for glitch
-        '#54a0ff', // Light blue for rotate
-        '#5f27cd', // Purple for scale
-        '#00d2d3'  // Cyan for gradient
-      ];
-      
-      cursorElement.style.color = colors[animIndex];
-    }
-
     // Start the animation sequence
     setTimeout(changeTitleWithAnimation, 1000);
-
-    // Additional effect: Random cursor movement
-    setInterval(() => {
-      cursorElement.style.transform = `translateY(${Math.random() * 5 - 2.5}px)`;
-    }, 300);
 
     // Add hover effects to blog cards
     const blogCards = document.querySelectorAll('.blog-card');
