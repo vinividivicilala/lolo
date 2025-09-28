@@ -2,9 +2,7 @@
 // src/pages/blog.astro
 import Layout from '../layouts/Layout.astro';
 
-
-
-// DATA BLOG OTOMATIS (TAMBAHAN BARU)
+// DATA BLOG OTOMATIS
 const blogData = [
   {
     id: 1,
@@ -15,7 +13,7 @@ const blogData = [
     tags: ["Astro", "Blog", "Coming Soon"],
     isFeatured: true,
     isNew: true,
-    bgColor: "gradient-1" // WARNA DESIGNER BARU
+    bgColor: "gradient-1"
   },
   {
     id: 2,
@@ -26,7 +24,7 @@ const blogData = [
     tags: ["Web Dev", "Tips", "Modern"],
     isFeatured: false,
     isNew: true,
-    bgColor: "gradient-2" // WARNA DESIGNER BARU
+    bgColor: "gradient-2"
   },
   {
     id: 3,
@@ -37,7 +35,7 @@ const blogData = [
     tags: ["SEO", "Optimization", "Technical"],
     isFeatured: true,
     isNew: false,
-    bgColor: "gradient-3" // WARNA DESIGNER BARU
+    bgColor: "gradient-3"
   },
   {
     id: 4,
@@ -48,23 +46,15 @@ const blogData = [
     tags: ["JavaScript", "Framework", "2024"],
     isFeatured: false,
     isNew: true,
-    bgColor: "gradient-4" // WARNA DESIGNER BARU
+    bgColor: "gradient-4"
   }
 ];
 
-// FUNGSI OTOMATIS (TAMBAHAN BARU)
+// FUNGSI OTOMATIS
 const getLatestFeaturedPost = () => {
   const featuredPosts = blogData.filter(post => post.isFeatured);
   return featuredPosts.sort((a, b) => new Date(b.date) - new Date(a.date))[0];
 };
-
-const getNewPosts = () => {
-  return blogData.filter(post => post.isNew);
-};
-
-const getTotalBlogCount = () => blogData.length;
-const getNewPostCount = () => blogData.filter(post => post.isNew).length;
-const getFeaturedCount = () => blogData.filter(post => post.isFeatured).length;
 
 const formatDate = (dateString) => {
   const date = new Date(dateString);
@@ -77,27 +67,30 @@ const formatDate = (dateString) => {
 
 // VARIABEL OTOMATIS
 const latestPost = getLatestFeaturedPost();
-const newPostsCount = getNewPostCount();
-const totalBlogs = getTotalBlogCount();
-const featuredCount = getFeaturedCount();
-
 ---
 
 <Layout title="Blog | Note Farid" description="Halaman blog kosong dengan desain baru." currentPage="blog">
   <div class="container">
     <main>
 
-
-
-      <!-- HEADER SECTION (TIDAK DIUBAH) -->
+      <!-- HEADER SECTION -->
       <section class="header-section">
         <div class="header-content">
-          <h1 class="big-title">
-            <span class="animated-title">
-              <span class="title-text" id="mainTitle">Blog</span>
-              <span class="title-cursor">|</span>
-            </span>
-          </h1>
+          <div class="title-container">
+            <h1 class="big-title">
+              <span class="animated-title">
+                <span class="title-text" id="mainTitle">Blog</span>
+              </span>
+            </h1>
+            <div class="subtitle-animation">
+              <span class="subtitle-text">Tempat Berbagi Ilmu & Inspirasi</span>
+              <div class="floating-dots">
+                <span class="dot"></span>
+                <span class="dot"></span>
+                <span class="dot"></span>
+              </div>
+            </div>
+          </div>
           <a href="/blog/all" class="all-blog-link">
             All Blog 
             <svg xmlns="http://www.w3.org/2000/svg" class="arrow-icon" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -107,45 +100,7 @@ const featuredCount = getFeaturedCount();
         </div>
       </section>
 
-      <!-- SEARCH BAR (TAMBAHAN BARU) -->
-      <section class="search-section">
-        <div class="search-container">
-          <div class="search-icon">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="11" cy="11" r="8"/>
-              <path d="m21 21-4.35-4.35"/>
-            </svg>
-          </div>
-          <input 
-            type="text" 
-            id="blogSearch" 
-            class="search-input" 
-            placeholder="Cari judul blog..." 
-            autocomplete="off"
-          />
-          <div class="search-results" id="searchResults"></div>
-        </div>
-      </section>
-
-      <!-- COUNTER STATS (TAMBAHAN BARU) -->
-      <section class="stats-section">
-        <div class="stats-grid">
-          <div class="stat-card">
-            <div class="stat-number" id="totalBlogsCounter">{totalBlogs}</div>
-            <div class="stat-label">Total Blog</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-number" id="newPostsCounter">{newPostsCount}</div>
-            <div class="stat-label">Update Terbaru</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-number" id="featuredCounter">{featuredCount}</div>
-            <div class="stat-label">Featured</div>
-          </div>
-        </div>
-      </section>
-
-      <!-- FEATURED UPDATE SECTION OTOMATIS (TAMBAHAN BARU) -->
+      <!-- FEATURED UPDATE SECTION -->
       {latestPost && (
         <section class="auto-featured-section">
           <div class="section-header">
@@ -153,15 +108,11 @@ const featuredCount = getFeaturedCount();
               <span class="highlight-badge">Update Terbaru</span>
               Trending Now
             </h2>
-            <div class="update-indicator">
-              <span class="pulse-dot"></span>
-              Baru saja diperbarui
-            </div>
           </div>
           
           <div class="auto-featured-card">
             <div class="featured-image-auto">
-              <div class="image-bg-auto {latestPost.bgColor}"></div>
+              <img src="/images/5.jpg" alt={latestPost.title} class="featured-img" />
               <div class="featured-badge-auto">Featured</div>
             </div>
             <div class="featured-content-auto">
@@ -188,162 +139,54 @@ const featuredCount = getFeaturedCount();
         </section>
       )}
 
-      <!-- BLOG CONTENT GRID (TIDAK DIUBAH) -->
+      <!-- BLOG CONTENT GRID -->
       <div class="blog-grid">
-        <!-- Blog Content Section 1 dengan BG Color -->
-        <section class="linebox gradient-bg-1">
-          <div class="blog-meta">
-            <div class="meta-item">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-              </svg>
-              <span>15 Mar 2024</span>
+        {blogData.map(post => (
+          <section class={`linebox ${post.bgColor}`}>
+            <div class="blog-meta">
+              <div class="meta-item">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                </svg>
+                <span>{formatDate(post.date)}</span>
+              </div>
+              <div class="meta-item">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                  <circle cx="12" cy="12" r="3"/>
+                </svg>
+                <span>{post.readTime} min read</span>
+              </div>
             </div>
-            <div class="meta-item">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                <circle cx="12" cy="12" r="3"/>
-              </svg>
-              <span>5 min read</span>
+
+            <h2 class="blog-title">{post.title}</h2>
+            <p class="desc">{post.description}</p>
+
+            <div class="tag-list">
+              {post.tags.map(tag => (
+                <span class="tag">{tag}</span>
+              ))}
             </div>
-          </div>
-
-          <h2 class="blog-title">Konten Blog Akan Segera Hadir</h2>
-          <p class="desc">
-            Semua artikel akan tampil di sini dengan desain bersih dan modern. 
-            Stay tuned untuk update terbaru!
-          </p>
-
-          <div class="tag-list">
-            <span class="tag">Astro</span>
-            <span class="tag">Blog</span>
-            <span class="tag">Coming Soon</span>
-          </div>
-        </section>
-
-        <!-- Blog Content Section 2 dengan BG Color -->
-        <section class="linebox gradient-bg-2">
-          <div class="blog-meta">
-            <div class="meta-item">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-              </svg>
-              <span>20 Mar 2024</span>
-            </div>
-            <div class="meta-item">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                <circle cx="12" cy="12" r="3"/>
-              </svg>
-              <span>7 min read</span>
-            </div>
-          </div>
-
-          <h2 class="blog-title">Tips Pengembangan Web Modern</h2>
-          <p class="desc">
-            Pelajari teknik-teknik terbaru dalam pengembangan web modern 
-            untuk meningkatkan performa dan user experience.
-          </p>
-
-          <div class="tag-list">
-            <span class="tag">Web Dev</span>
-            <span class="tag">Tips</span>
-            <span class="tag">Modern</span>
-          </div>
-        </section>
-
-        <!-- Blog Content Section 3 dengan BG Color -->
-        <section class="linebox gradient-bg-3">
-          <div class="blog-meta">
-            <div class="meta-item">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-              </svg>
-              <span>25 Mar 2024</span>
-            </div>
-            <div class="meta-item">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                <circle cx="12" cy="12" r="3"/>
-              </svg>
-              <span>10 min read</span>
-            </div>
-          </div>
-
-          <h2 class="blog-title">Optimisasi SEO untuk Developer</h2>
-          <p class="desc">
-            Panduan lengkap optimisasi SEO teknikal untuk developer 
-            yang ingin meningkatkan ranking website di mesin pencari.
-          </p>
-
-          <div class="tag-list">
-            <span class="tag">SEO</span>
-            <span class="tag">Optimization</span>
-            <span class="tag">Technical</span>
-          </div>
-        </section>
-
-        <!-- Blog Content Section 4 dengan BG Color -->
-        <section class="linebox gradient-bg-4">
-          <div class="blog-meta">
-            <div class="meta-item">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-              </svg>
-              <span>30 Mar 2024</span>
-            </div>
-            <div class="meta-item">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                <circle cx="12" cy="12" r="3"/>
-              </svg>
-              <span>8 min read</span>
-            </div>
-          </div>
-
-          <h2 class="blog-title">Framework JavaScript Terpopuler 2024</h2>
-          <p class="desc">
-            Review mendalam tentang framework JavaScript terpopuler 
-            tahun 2024 dan perbandingan fitur-fiturnya.
-          </p>
-
-          <div class="tag-list">
-            <span class="tag">JavaScript</span>
-            <span class="tag">Framework</span>
-            <span class="tag">2024</span>
-          </div>
-        </section>
-
-
-
+          </section>
+        ))}
       </div>
     </main>
   </div>
 </Layout>
 
 <style>
+  @import url('https://fonts.googleapis.com/css2?family=Arame&display=swap');
 
-@import url('https://fonts.googleapis.com/css2?family=Arame&display=swap');
-
-  /* CSS YANG SUDAH ADA TETAP SAMA */
   body {
     background: #111;
     color: #fff;
-   font-family: 'Arame';
+    font-family: 'Arame';
     font-size: 18px;
   }
 
-h1, h2, h3, h4, h5, h6 {
-  font-family: 'Arame';
-}
-
-
-
-
-
-
-
-
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Arame';
+  }
 
   .container {
     max-width: 1200px;
@@ -359,121 +202,70 @@ h1, h2, h3, h4, h5, h6 {
   .header-content {
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: flex-start;
     flex-wrap: wrap;
     gap: 20px;
+  }
+
+  .title-container {
+    flex: 1;
   }
 
   .big-title {
     font-size: 48px;
     font-weight: 800;
-    margin: 0;
+    margin: 0 0 10px 0;
     color: #fff;
   }
 
-  /* Animated Title Styles */
-  .animated-title {
-    display: inline-block;
+  /* Subtitle Animation */
+  .subtitle-animation {
     position: relative;
-  }
-
-  .title-text {
     display: inline-block;
-    position: relative;
   }
 
-  .title-cursor {
-    display: inline-block;
-    margin-left: 2px;
-    animation: blink 1s infinite;
-    color: #4f46e5;
-    font-weight: 300;
-  }
-
-  @keyframes blink {
-    0%, 50% { opacity: 1; }
-    51%, 100% { opacity: 0; }
-  }
-
-  /* Animation Effects */
-  .typing-effect {
-    animation: typing 0.5s ease-in-out;
-  }
-
-  .fade-effect {
-    animation: fadeInOut 2s ease-in-out;
-  }
-
-  .slide-effect {
-    animation: slideIn 1s ease-out;
-  }
-
-  .bounce-effect {
-    animation: bounce 1s ease;
-  }
-
-  .glitch-effect {
-    animation: glitch 0.5s ease-in-out;
-  }
-
-  .rotate-effect {
-    animation: rotate 1s ease-in-out;
-  }
-
-  .scale-effect {
-    animation: scale 0.8s ease-in-out;
-  }
-
-  .gradient-effect {
-    background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #feca57);
+  .subtitle-text {
+    font-size: 1.2rem;
+    color: rgba(255, 255, 255, 0.8);
+    background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4);
     background-size: 300% 300%;
     background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     animation: gradientShift 3s ease-in-out infinite;
+    font-weight: 600;
   }
 
-  /* Keyframes for animations */
-  @keyframes typing {
-    from { width: 0; opacity: 0; }
-    to { width: auto; opacity: 1; }
+  .floating-dots {
+    position: absolute;
+    right: -40px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    gap: 4px;
   }
 
-  @keyframes fadeInOut {
-    0% { opacity: 0; transform: translateY(-20px); }
-    50% { opacity: 1; transform: translateY(0); }
-    100% { opacity: 0; transform: translateY(20px); }
+  .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #4ecdc4;
+    animation: floatDots 2s ease-in-out infinite;
   }
 
-  @keyframes slideIn {
-    0% { transform: translateX(-100%); opacity: 0; }
-    100% { transform: translateX(0); opacity: 1; }
+  .dot:nth-child(2) {
+    background: #ff6b6b;
+    animation-delay: 0.2s;
   }
 
-  @keyframes bounce {
-    0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
-    40% { transform: translateY(-30px); }
-    60% { transform: translateY(-15px); }
+  .dot:nth-child(3) {
+    background: #feca57;
+    animation-delay: 0.4s;
   }
 
-  @keyframes glitch {
-    0% { transform: translate(0); }
-    20% { transform: translate(-5px, 5px); }
-    40% { transform: translate(-5px, -5px); }
-    60% { transform: translate(5px, 5px); }
-    80% { transform: translate(5px, -5px); }
-    100% { transform: translate(0); }
-  }
-
-  @keyframes rotate {
-    0% { transform: rotate(0deg) scale(0.5); opacity: 0; }
-    100% { transform: rotate(360deg) scale(1); opacity: 1; }
-  }
-
-  @keyframes scale {
-    0% { transform: scale(0); opacity: 0; }
-    70% { transform: scale(1.2); opacity: 1; }
-    100% { transform: scale(1); opacity: 1; }
+  @keyframes floatDots {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
   }
 
   @keyframes gradientShift {
@@ -502,10 +294,6 @@ h1, h2, h3, h4, h5, h6 {
     color: #fff;
   }
 
-  .arrow-icon {
-    stroke: currentColor;
-  }
-
   /* Blog Grid */
   .blog-grid {
     display: grid;
@@ -514,32 +302,17 @@ h1, h2, h3, h4, h5, h6 {
     margin-top: 20px;
   }
 
-  /* Linebox */
+  /* Linebox dengan Background Full */
   .linebox {
     border: 2px solid rgba(255,255,255,0.4);
-    background: rgba(255,255,255,0.08);
     border-radius: 16px;
     padding: 35px;
     color: #fff;
     transition: transform 0.3s ease, border-color 0.3s ease;
     position: relative;
     overflow: hidden;
-  }
-
-  .linebox::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
-    background: linear-gradient(90deg, var(--gradient-color-1), var(--gradient-color-2));
-    transform: scaleX(0);
-    transition: transform 0.3s ease;
-  }
-
-  .linebox:hover::before {
-    transform: scaleX(1);
+    background-size: 200% 200%;
+    animation: gradientShift 3s ease infinite;
   }
 
   .linebox:hover {
@@ -559,8 +332,12 @@ h1, h2, h3, h4, h5, h6 {
     display: flex;
     align-items: center;
     gap: 8px;
-    color: rgba(255,255,255,0.8);
+    color: rgba(255,255,255,0.9);
     font-size: 1rem;
+    background: rgba(255,255,255,0.2);
+    padding: 6px 12px;
+    border-radius: 20px;
+    backdrop-filter: blur(10px);
   }
 
   /* Blog Title */
@@ -570,13 +347,15 @@ h1, h2, h3, h4, h5, h6 {
     margin: 20px 0;
     color: #fff;
     line-height: 1.3;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
   }
 
   .desc {
-    color: rgba(255,255,255,0.85);
+    color: rgba(255,255,255,0.95);
     line-height: 1.7;
     margin-bottom: 25px;
     font-size: 1.1rem;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.3);
   }
 
   /* Tags */
@@ -587,297 +366,28 @@ h1, h2, h3, h4, h5, h6 {
   }
 
   .tag {
-    background: rgba(255,255,255,0.15);
-    border: 1px solid rgba(255,255,255,0.3);
+    background: rgba(255,255,255,0.25);
+    border: 1px solid rgba(255,255,255,0.4);
     color: #fff;
     padding: 8px 16px;
     border-radius: 20px;
     font-size: 0.9rem;
     font-weight: 600;
-  }
-
-  /* CSS BARU UNTUK FITUR TAMBAHAN */
-
-  /* Kedap-kedip Pemancar */
-  .transmitter-container {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    z-index: 1000;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 10px;
-  }
-
-  .transmitter {
-    position: relative;
-    width: 60px;
-    height: 60px;
-  }
-
-  .transmitter-tower {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-  }
-
-  .tower-base {
-    width: 20px;
-    height: 5px;
-    background: #4ecdc4;
-    border-radius: 2px;
-    margin: 0 auto;
-  }
-
-  .tower-pole {
-    width: 3px;
-    height: 25px;
-    background: #4ecdc4;
-    margin: 0 auto;
-  }
-
-  .tower-top {
-    width: 15px;
-    height: 8px;
-    background: #ff6b6b;
-    border-radius: 3px;
-    margin: 0 auto;
-    position: relative;
-  }
-
-  .tower-top::after {
-    content: '';
-    position: absolute;
-    top: -2px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 3px;
-    height: 3px;
-    background: #ffa726;
-    border-radius: 50%;
-    animation: transmitterBlink 1.5s infinite;
-  }
-
-  .signal-dots {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-  }
-
-  .dot {
-    position: absolute;
-    width: 8px;
-    height: 8px;
-    background: #4ecdc4;
-    border-radius: 50%;
-    animation: signalPulse 2s infinite;
-  }
-
-  .dot-1 { top: -30px; left: -4px; animation-delay: 0s; }
-  .dot-2 { top: -20px; left: 20px; animation-delay: 0.5s; }
-  .dot-3 { top: 10px; left: 25px; animation-delay: 1s; }
-  .dot-4 { top: 20px; left: -10px; animation-delay: 1.5s; }
-
-  .transmitter-glow {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 40px;
-    height: 40px;
-    background: radial-gradient(circle, rgba(78, 205, 196, 0.3) 0%, transparent 70%);
-    border-radius: 50%;
-    animation: glowPulse 2s infinite;
-  }
-
-  .transmitter-text {
-    font-size: 0.7rem;
-    color: #4ecdc4;
-    font-weight: 600;
-    background: rgba(78, 205, 196, 0.1);
-    padding: 4px 8px;
-    border-radius: 10px;
-    animation: textFade 3s infinite;
-  }
-
-  @keyframes transmitterBlink {
-    0%, 50% { opacity: 1; }
-    51%, 100% { opacity: 0; }
-  }
-
-  @keyframes signalPulse {
-    0% { transform: scale(0); opacity: 1; }
-    100% { transform: scale(2); opacity: 0; }
-  }
-
-  @keyframes glowPulse {
-    0%, 100% { opacity: 0.5; transform: translate(-50%, -50%) scale(1); }
-    50% { opacity: 0.8; transform: translate(-50%, -50%) scale(1.2); }
-  }
-
-  @keyframes textFade {
-    0%, 100% { opacity: 0.7; }
-    50% { opacity: 1; }
-  }
-
-  /* Search Bar */
-  .search-section {
-    margin: 30px 0;
-  }
-
-  .search-container {
-    position: relative;
-    max-width: 500px;
-    margin: 0 auto;
-  }
-
-  .search-icon {
-    position: absolute;
-    left: 15px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: rgba(255, 255, 255, 0.6);
-    z-index: 2;
-  }
-
-  .search-input {
-    width: 100%;
-    padding: 15px 15px 15px 45px;
-    background: rgba(255, 255, 255, 0.1);
-    border: 2px solid rgba(255, 255, 255, 0.2);
-    border-radius: 12px;
-    color: white;
-    font-size: 1rem;
-    transition: all 0.3s ease;
-  }
-
-  .search-input:focus {
-    outline: none;
-    border-color: #4f46e5;
-    background: rgba(255, 255, 255, 0.15);
-    box-shadow: 0 0 20px rgba(79, 70, 229, 0.3);
-  }
-
-  .search-input::placeholder {
-    color: rgba(255, 255, 255, 0.5);
-  }
-
-  .search-results {
-    position: absolute;
-    top: 100%;
-    left: 0;
-    right: 0;
-    background: rgba(30, 30, 30, 0.95);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 12px;
-    margin-top: 5px;
-    max-height: 200px;
-    overflow-y: auto;
-    display: none;
-    z-index: 1000;
     backdrop-filter: blur(10px);
   }
 
-  .search-result-item {
-    padding: 12px 15px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    cursor: pointer;
-    transition: background 0.3s ease;
-  }
-
-  .search-result-item:hover {
-    background: rgba(255, 255, 255, 0.1);
-  }
-
-  .search-result-item:last-child {
-    border-bottom: none;
-  }
-
-  /* Background Colors Designer untuk Blog */
-  .gradient-bg-1 {
-    --gradient-color-1: #ff6b6b;
-    --gradient-color-2: #4ecdc4;
-  }
-
-  .gradient-bg-2 {
-    --gradient-color-1: #45b7d1;
-    --gradient-color-2: #96ceb4;
-  }
-
-  .gradient-bg-3 {
-    --gradient-color-1: #feca57;
-    --gradient-color-2: #ff9ff3;
-  }
-
-  .gradient-bg-4 {
-    --gradient-color-1: #54a0ff;
-    --gradient-color-2: #5f27cd;
-  }
-
-  .gradient-bg-1 .tag {
+  /* WARNA DESIGNER */
+  .gradient-1 { 
     background: linear-gradient(135deg, #ff6b6b, #4ecdc4);
   }
-
-  .gradient-bg-2 .tag {
+  .gradient-2 { 
     background: linear-gradient(135deg, #45b7d1, #96ceb4);
   }
-
-  .gradient-bg-3 .tag {
+  .gradient-3 { 
     background: linear-gradient(135deg, #feca57, #ff9ff3);
   }
-
-  .gradient-bg-4 .tag {
+  .gradient-4 { 
     background: linear-gradient(135deg, #54a0ff, #5f27cd);
-  }
-
-  /* WARNA DESIGNER UNTUK FEATURED SECTION */
-  .gradient-1 { background: linear-gradient(135deg, #ff6b6b, #4ecdc4); }
-  .gradient-2 { background: linear-gradient(135deg, #45b7d1, #96ceb4); }
-  .gradient-3 { background: linear-gradient(135deg, #feca57, #ff9ff3); }
-  .gradient-4 { background: linear-gradient(135deg, #54a0ff, #5f27cd); }
-
-  /* CSS Stats dan Featured yang sudah ada sebelumnya tetap sama */
-  .stats-section {
-    margin: 40px 0;
-  }
-
-  .stats-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 20px;
-  }
-
-  .stat-card {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 12px;
-    padding: 25px;
-    text-align: center;
-    transition: all 0.3s ease;
-  }
-
-  .stat-card:hover {
-    transform: translateY(-5px);
-    border-color: rgba(255, 255, 255, 0.3);
-  }
-
-  .stat-number {
-    font-size: 2.5rem;
-    font-weight: 800;
-    background: linear-gradient(135deg, #4f46e5, #06b6d4);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    margin-bottom: 8px;
-  }
-
-  .stat-label {
-    font-size: 0.9rem;
-    color: rgba(255, 255, 255, 0.7);
-    font-weight: 600;
   }
 
   /* Auto Featured Section */
@@ -910,23 +420,6 @@ h1, h2, h3, h4, h5, h6 {
     font-weight: 600;
   }
 
-  .update-indicator {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    color: #4ecdc4;
-    font-size: 0.9rem;
-    font-weight: 600;
-  }
-
-  .pulse-dot {
-    width: 8px;
-    height: 8px;
-    background: #4ecdc4;
-    border-radius: 50%;
-    animation: pulse 2s infinite;
-  }
-
   .auto-featured-card {
     display: grid;
     grid-template-columns: 300px 1fr;
@@ -945,14 +438,15 @@ h1, h2, h3, h4, h5, h6 {
 
   .featured-image-auto {
     position: relative;
+    border-radius: 15px;
+    overflow: hidden;
   }
 
-  .image-bg-auto {
+  .featured-img {
     width: 100%;
     height: 200px;
+    object-fit: cover;
     border-radius: 15px;
-    animation: gradientShift 3s ease infinite;
-    background-size: 200% 200%;
   }
 
   .featured-badge-auto {
@@ -981,8 +475,11 @@ h1, h2, h3, h4, h5, h6 {
   }
 
   .date-auto, .read-time-auto {
-    color: rgba(255, 255, 255, 0.7);
+    color: rgba(255, 255, 255, 0.8);
     font-size: 0.9rem;
+    background: rgba(255,255,255,0.1);
+    padding: 4px 8px;
+    border-radius: 6px;
   }
 
   .new-badge-auto {
@@ -1017,7 +514,7 @@ h1, h2, h3, h4, h5, h6 {
   }
 
   .tag-auto {
-    background: rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.2);
     border: 1px solid rgba(255, 255, 255, 0.3);
     color: #fff;
     padding: 6px 12px;
@@ -1046,27 +543,6 @@ h1, h2, h3, h4, h5, h6 {
   }
 
   /* Responsive */
-  @media (max-width: 768px) {
-    .transmitter-container {
-      top: 10px;
-      right: 10px;
-      transform: scale(0.8);
-    }
-    
-    .search-container {
-      max-width: 100%;
-    }
-    
-    .stats-grid {
-      grid-template-columns: 1fr;
-    }
-    
-    .auto-featured-card {
-      grid-template-columns: 1fr;
-    }
-  }
-
-  /* Responsive yang sudah ada */
   @media (max-width: 1024px) {
     .blog-grid {
       grid-template-columns: 1fr;
@@ -1110,6 +586,17 @@ h1, h2, h3, h4, h5, h6 {
     .blog-grid {
       gap: 20px;
     }
+
+    .auto-featured-card {
+      grid-template-columns: 1fr;
+    }
+
+    .floating-dots {
+      position: static;
+      transform: none;
+      justify-content: center;
+      margin-top: 10px;
+    }
   }
 
   @media (max-width: 480px) {
@@ -1139,17 +626,13 @@ h1, h2, h3, h4, h5, h6 {
   }
 </style>
 
-
 <script>
-
-  // Script yang sudah ada tetap sama
   document.addEventListener('DOMContentLoaded', function() {
     const titleElement = document.getElementById('mainTitle');
-    const cursorElement = document.querySelector('.title-cursor');
     
     const titleVariations = [
       "Blog",
-      "Articles",
+      "Articles", 
       "Stories",
       "Thoughts",
       "Journal",
@@ -1158,172 +641,22 @@ h1, h2, h3, h4, h5, h6 {
       "Updates"
     ];
 
-    const animationEffects = [
-      'typing-effect',
-      'fade-effect',
-      'slide-effect',
-      'bounce-effect',
-      'glitch-effect',
-      'rotate-effect',
-      'scale-effect',
-      'gradient-effect'
-    ];
-
     let currentIndex = 0;
-    let animationIndex = 0;
 
-    function changeTitleWithAnimation() {
-      titleElement.className = 'title-text';
-      titleElement.classList.add(animationEffects[animationIndex]);
-      titleElement.textContent = titleVariations[currentIndex];
-      updateCursorColor(animationIndex);
+    function changeTitle() {
+      titleElement.style.opacity = '0';
       
-      currentIndex = (currentIndex + 1) % titleVariations.length;
-      animationIndex = (animationIndex + 1) % animationEffects.length;
-      
-      setTimeout(changeTitleWithAnimation, 2000);
-    }
-
-    function updateCursorColor(animIndex) {
-      const colors = [
-        '#ff6b6b', '#4ecdc4', '#45b7d1', '#feca57', 
-        '#ff9ff3', '#54a0ff', '#5f27cd', '#00d2d3'
-      ];
-      cursorElement.style.color = colors[animIndex];
-    }
-
-    // Script baru untuk Search Functionality
-    const searchInput = document.getElementById('blogSearch');
-    const searchResults = document.getElementById('searchResults');
-
-    if (searchInput) {
-      searchInput.addEventListener('input', function(e) {
-        const searchTerm = e.target.value.toLowerCase().trim();
-        
-        if (searchTerm.length === 0) {
-          searchResults.style.display = 'none';
-          return;
-        }
-
-        // Simulasi data blog untuk search
-        const blogPosts = [
-          "Konten Blog Akan Segera Hadir",
-          "Tips Pengembangan Web Modern",
-          "Optimisasi SEO untuk Developer",
-          "Framework JavaScript Terpopuler 2024",
-          "Mastering CSS Grid dan Flexbox",
-          "React vs Vue: Perbandingan Mendalam",
-          "Tips Optimisasi Performance Website",
-          "Panduan Lengkap TypeScript untuk Pemula"
-        ];
-
-        const filteredPosts = blogPosts.filter(post => 
-          post.toLowerCase().includes(searchTerm)
-        );
-
-        displaySearchResults(filteredPosts, searchTerm);
-      });
-
-      searchInput.addEventListener('focus', function() {
-        if (this.value.trim().length > 0) {
-          searchResults.style.display = 'block';
-        }
-      });
-
-      document.addEventListener('click', function(e) {
-        if (!searchContainer.contains(e.target)) {
-          searchResults.style.display = 'none';
-        }
-      });
-    }
-
-    function displaySearchResults(results, searchTerm) {
-      if (results.length === 0) {
-        searchResults.innerHTML = '<div class="search-result-item">Tidak ada hasil ditemukan</div>';
-      } else {
-        searchResults.innerHTML = results.map(post => `
-          <div class="search-result-item" onclick="selectSearchResult('${post}')">
-            ${highlightSearchTerm(post, searchTerm)}
-          </div>
-        `).join('');
-      }
-      searchResults.style.display = 'block';
-    }
-
-    function highlightSearchTerm(text, term) {
-      const regex = new RegExp(`(${term})`, 'gi');
-      return text.replace(regex, '<mark>$1</mark>');
-    }
-
-    function selectSearchResult(selectedText) {
-      searchInput.value = selectedText;
-      searchResults.style.display = 'none';
-      // Redirect atau filter blog berdasarkan pilihan
-      console.log('Selected:', selectedText);
-    }
-
-    // Script untuk animasi counter
-    function animateCounters() {
-      const counters = document.querySelectorAll('.stat-number');
-      
-      counters.forEach(counter => {
-        const target = parseInt(counter.textContent);
-        let current = 0;
-        const increment = target / 50;
-        const timer = setInterval(() => {
-          current += increment;
-          if (current >= target) {
-            counter.textContent = target;
-            clearInterval(timer);
-          } else {
-            counter.textContent = Math.floor(current);
-          }
-        }, 30);
-      });
-    }
-
-    // Auto-update simulation
-    function simulateUpdate() {
       setTimeout(() => {
-        const newPosts = document.getElementById('newPostsCounter');
-        const current = parseInt(newPosts.textContent);
-        newPosts.textContent = current + 1;
-        animateCounters();
-      }, 5000);
+        titleElement.textContent = titleVariations[currentIndex];
+        titleElement.style.opacity = '1';
+        
+        currentIndex = (currentIndex + 1) % titleVariations.length;
+        
+        setTimeout(changeTitle, 2000);
+      }, 500);
     }
 
-    // Start animations
-    setTimeout(changeTitleWithAnimation, 1000);
-    setTimeout(animateCounters, 500);
-    simulateUpdate();
-
-    setInterval(() => {
-      cursorElement.style.transform = `translateY(${Math.random() * 5 - 2.5}px)`;
-    }, 300);
-
-    // Expose function to global scope for onclick
-    window.selectSearchResult = selectSearchResult;
+    // Start animation
+    setTimeout(changeTitle, 1000);
   });
 </script>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
