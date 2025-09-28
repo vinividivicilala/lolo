@@ -45,15 +45,7 @@ export default function AvailablePage() {
   const closeModal = () => setIsModalOpen(false);
 
 
-  // Setup GSAP dan ScrollTrigger untuk animasi
-  useEffect(() => {
-    if (titleRef.current) {
-      gsap.fromTo(
-        titleRef.current,
-        { opacity: 0, y: 50 },
-        { opacity: 1, y: 0, duration: 1.5, ease: "power3.out" }
-      );
-    }
+  
 
   // Ambil ulasan dari Firestore
   useEffect(() => {
@@ -1567,3 +1559,4 @@ export default function AvailablePage() {
     </>
   );
 }
+
