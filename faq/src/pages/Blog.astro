@@ -3,19 +3,20 @@
 import Layout from '../layouts/Layout.astro';
 ---
 
-<Layout title="Blog | Note Farid" description="Halaman blog dengan desain modern dan section Latest." currentPage="blog">
+<Layout title="Blog | Note Farid" description="Halaman blog kosong dengan desain baru." currentPage="blog">
   <div class="container">
     <main>
       <!-- Header Section -->
       <section class="header-section">
         <div class="header-content">
-          <div class="title-block">
-            <h1 class="big-title">Blog</h1>
-            <div class="title-sub">Latest</div>
-          </div>
-
+          <h1 class="big-title">
+            <span class="animated-title">
+              <span class="title-text" id="mainTitle">Blog</span>
+              <span class="title-cursor">|</span>
+            </span>
+          </h1>
           <a href="/blog/all" class="all-blog-link">
-            All Blog
+            All Blog 
             <svg xmlns="http://www.w3.org/2000/svg" class="arrow-icon" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
               <path d="M5 12h14M12 5l7 7-7 7"/>
             </svg>
@@ -23,182 +24,659 @@ import Layout from '../layouts/Layout.astro';
         </div>
       </section>
 
-      <!-- Blog Content Grid -->
-      <div class="blog-grid">
-        <!-- Post Card 1 -->
-        <article class="post-card">
-          <figure class="post-image" role="img" aria-label="Gambar: Tips Pengembangan Web" style="background-image: url('/images/blog1.jpg')"></figure>
-
-          <div class="post-body">
-            <h2 class="post-title">Konten Blog Akan Segera Hadir</h2>
-
-            <div class="post-meta">
+      <!-- Featured Update Section -->
+      <section class="featured-update">
+        <h2 class="update-title">Update Terbaru</h2>
+        <div class="featured-content">
+          <div class="featured-image">
+            <div class="image-placeholder"></div>
+          </div>
+          <div class="featured-details">
+            <div class="featured-meta">
               <div class="meta-item">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                 </svg>
                 <span>15 Mar 2024</span>
               </div>
-
               <div class="meta-item">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
                   <circle cx="12" cy="12" r="3"/>
                 </svg>
                 <span>5 min read</span>
               </div>
             </div>
+            
+            <h3 class="featured-blog-title">Konten Blog Akan Segera Hadir</h3>
+            <p class="featured-desc">
+              Semua artikel akan tampil di sini dengan desain bersih dan modern. 
+              Stay tuned untuk update terbaru!
+            </p>
 
-            <p class="desc">Semua artikel akan tampil di sini dengan desain bersih dan modern. Stay tuned untuk update terbaru!</p>
-          </div>
-        </article>
-
-        <!-- Post Card 2 -->
-        <article class="post-card">
-          <figure class="post-image" role="img" aria-label="Gambar: Tips Pengembangan Web" style="background-image: url('/images/blog2.jpg')"></figure>
-
-          <div class="post-body">
-            <h2 class="post-title">Tips Pengembangan Web Modern</h2>
-
-            <div class="post-meta">
-              <div class="meta-item">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden>
-                  <path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                </svg>
-                <span>20 Mar 2024</span>
-              </div>
-
-              <div class="meta-item">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden>
-                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                  <circle cx="12" cy="12" r="3"/>
-                </svg>
-                <span>7 min read</span>
-              </div>
+            <div class="tag-list">
+              <span class="tag">Astro</span>
+              <span class="tag">Blog</span>
+              <span class="tag">Coming Soon</span>
             </div>
-
-            <p class="desc">Pelajari teknik-teknik terbaru dalam pengembangan web modern untuk meningkatkan performa dan user experience.</p>
           </div>
-        </article>
+        </div>
+      </section>
 
-        <!-- Post Card 3 -->
-        <article class="post-card">
-          <figure class="post-image" role="img" aria-label="Gambar: SEO" style="background-image: url('/images/blog3.jpg')"></figure>
-
-          <div class="post-body">
-            <h2 class="post-title">Optimisasi SEO untuk Developer</h2>
-
-            <div class="post-meta">
-              <div class="meta-item">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden>
-                  <path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                </svg>
-                <span>25 Mar 2024</span>
-              </div>
-
-              <div class="meta-item">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden>
-                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                  <circle cx="12" cy="12" r="3"/>
-                </svg>
-                <span>10 min read</span>
-              </div>
+      <!-- Blog Content Grid -->
+      <div class="blog-grid">
+        <!-- Blog Content Section 2 -->
+        <section class="linebox">
+          <div class="blog-meta">
+            <div class="meta-item">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+              </svg>
+              <span>20 Mar 2024</span>
             </div>
-
-            <p class="desc">Panduan lengkap optimisasi SEO teknikal untuk developer yang ingin meningkatkan ranking website di mesin pencari.</p>
-          </div>
-        </article>
-
-        <!-- Post Card 4 -->
-        <article class="post-card">
-          <figure class="post-image" role="img" aria-label="Gambar: Framework" style="background-image: url('/images/blog4.jpg')"></figure>
-
-          <div class="post-body">
-            <h2 class="post-title">Framework JavaScript Terpopuler 2024</h2>
-
-            <div class="post-meta">
-              <div class="meta-item">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden>
-                  <path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                </svg>
-                <span>30 Mar 2024</span>
-              </div>
-
-              <div class="meta-item">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden>
-                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                  <circle cx="12" cy="12" r="3"/>
-                </svg>
-                <span>8 min read</span>
-              </div>
+            <div class="meta-item">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+              <span>7 min read</span>
             </div>
-
-            <p class="desc">Review mendalam tentang framework JavaScript terpopuler tahun 2024 dan perbandingan fitur-fiturnya.</p>
           </div>
-        </article>
+
+          <h2 class="blog-title">Tips Pengembangan Web Modern</h2>
+          <p class="desc">
+            Pelajari teknik-teknik terbaru dalam pengembangan web modern 
+            untuk meningkatkan performa dan user experience.
+          </p>
+
+          <div class="tag-list">
+            <span class="tag">Web Dev</span>
+            <span class="tag">Tips</span>
+            <span class="tag">Modern</span>
+          </div>
+        </section>
+
+        <!-- Blog Content Section 3 -->
+        <section class="linebox">
+          <div class="blog-meta">
+            <div class="meta-item">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+              </svg>
+              <span>25 Mar 2024</span>
+            </div>
+            <div class="meta-item">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+              <span>10 min read</span>
+            </div>
+          </div>
+
+          <h2 class="blog-title">Optimisasi SEO untuk Developer</h2>
+          <p class="desc">
+            Panduan lengkap optimisasi SEO teknikal untuk developer 
+            yang ingin meningkatkan ranking website di mesin pencari.
+          </p>
+
+          <div class="tag-list">
+            <span class="tag">SEO</span>
+            <span class="tag">Optimization</span>
+            <span class="tag">Technical</span>
+          </div>
+        </section>
+
+        <!-- Blog Content Section 4 -->
+        <section class="linebox">
+          <div class="blog-meta">
+            <div class="meta-item">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+              </svg>
+              <span>30 Mar 2024</span>
+            </div>
+            <div class="meta-item">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+              <span>8 min read</span>
+            </div>
+          </div>
+
+          <h2 class="blog-title">Framework JavaScript Terpopuler 2024</h2>
+          <p class="desc">
+            Review mendalam tentang framework JavaScript terpopuler 
+            tahun 2024 dan perbandingan fitur-fiturnya.
+          </p>
+
+          <div class="tag-list">
+            <span class="tag">JavaScript</span>
+            <span class="tag">Framework</span>
+            <span class="tag">2024</span>
+          </div>
+        </section>
       </div>
     </main>
   </div>
 </Layout>
 
-<style>
-  :root{
-    --bg: #0b1020;
-    --card: rgba(255,255,255,0.04);
-    --muted: rgba(255,255,255,0.75);
-    --accent: #7c3aed;
+<style is:global>
+  body {
+    background: #111;
+    color: #fff;
+    font-family: 'Inter', sans-serif;
+    font-size: 18px;
+    margin: 0;
+    padding: 0;
   }
 
-  body{ background: var(--bg); color: #fff; font-family: 'Inter', system-ui, sans-serif; }
-
-  .container{ max-width:1200px; margin:0 auto; padding:40px 20px; }
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 20px;
+  }
 
   /* Header */
-  .header-section{ margin-bottom:32px; }
-  .header-content{ display:flex; justify-content:space-between; align-items:center; gap:20px; flex-wrap:wrap; }
+  .header-section {
+    margin-bottom: 60px;
+  }
 
-  .title-block{ display:flex; flex-direction:column; gap:10px; }
-  .big-title{ font-size:44px; font-weight:800; margin:0; color:#fff; letter-spacing:-0.02em; }
+  .header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 20px;
+  }
 
-  /* subtitle / badge */
-  .title-sub{ display:inline-block; align-self:flex-start; padding:8px 14px; border-radius:12px; background: linear-gradient(135deg, rgba(124,58,237,0.12), rgba(99,102,241,0.08)); color:var(--muted); border:1px solid rgba(124,58,237,0.18); font-weight:700; font-size:0.95rem; }
+  .big-title {
+    font-size: 48px;
+    font-weight: 800;
+    margin: 0;
+    color: #fff;
+  }
 
-  .all-blog-link{ font-size:1rem; font-weight:700; display:flex; align-items:center; gap:8px; color:var(--muted); padding:10px 16px; border-radius:12px; background: rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.04); text-decoration:none; transition:transform .18s ease, box-shadow .18s ease; }
-  .all-blog-link:hover{ transform:translateY(-4px); box-shadow:0 6px 24px rgba(0,0,0,0.6); }
+  /* Animated Title Styles */
+  .animated-title {
+    display: inline-block;
+    position: relative;
+  }
 
-  /* Grid */
-  .blog-grid{ display:grid; grid-template-columns: repeat(2,1fr); gap:28px; margin-top:16px; }
+  .title-text {
+    display: inline-block;
+    position: relative;
+  }
 
-  /* Post Card */
-  .post-card{ background:var(--card); border-radius:18px; overflow:hidden; display:flex; flex-direction:column; box-shadow: 0 6px 24px rgba(2,6,23,0.6); transition:transform .25s cubic-bezier(.2,.9,.1,1), box-shadow .25s ease; border:1px solid rgba(255,255,255,0.04); }
-  .post-card:hover{ transform:translateY(-8px) scale(1.01); box-shadow: 0 14px 48px rgba(2,6,23,0.75); }
+  .title-cursor {
+    display: inline-block;
+    margin-left: 2px;
+    animation: blink 1s infinite;
+    color: #4f46e5;
+    font-weight: 300;
+  }
 
-  .post-image{ width:100%; padding-top:54%; background-size:cover; background-position:center; display:block; }
+  @keyframes blink {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0; }
+  }
 
-  .post-body{ padding:22px; }
-  .post-title{ font-size:1.5rem; margin:6px 0 12px 0; color:#fff; line-height:1.2; display:flex; gap:12px; align-items:center; }
+  /* Featured Update Section */
+  .featured-update {
+    margin-bottom: 60px;
+  }
 
-  /* Meta */
-  .post-meta{ display:flex; gap:16px; align-items:center; color:rgba(255,255,255,0.8); font-size:0.95rem; margin-bottom:12px; }
-  .meta-item{ display:flex; gap:8px; align-items:center; }
-  .meta-item svg{ opacity:0.85; }
+  .update-title {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 30px;
+    color: #fff;
+    position: relative;
+    display: inline-block;
+  }
 
-  .desc{ color:rgba(255,255,255,0.8); line-height:1.6; margin:0; font-size:0.98rem; }
+  .update-title::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: linear-gradient(90deg, #4f46e5, #06b6d4);
+    border-radius: 2px;
+  }
+
+  .featured-content {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 40px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    padding: 30px;
+    transition: all 0.3s ease;
+  }
+
+  .featured-content:hover {
+    border-color: rgba(255, 255, 255, 0.3);
+    transform: translateY(-5px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  }
+
+  .featured-image {
+    position: relative;
+  }
+
+  .image-placeholder {
+    width: 100%;
+    height: 200px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 600;
+    font-size: 1.2rem;
+    animation: gradientShift 3s ease infinite;
+    background-size: 200% 200%;
+  }
+
+  .featured-details {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .featured-meta {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+  }
+
+  .featured-blog-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin: 15px 0;
+    color: #fff;
+    line-height: 1.2;
+    background: linear-gradient(135deg, #fff, #a5b4fc);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .featured-desc {
+    color: rgba(255, 255, 255, 0.9);
+    line-height: 1.6;
+    margin-bottom: 20px;
+    font-size: 1.1rem;
+  }
+
+  /* Animation Effects */
+  .typing-effect {
+    animation: typing 0.8s ease-in-out;
+  }
+
+  .fade-effect {
+    animation: fadeInOut 2s ease-in-out;
+  }
+
+  .slide-effect {
+    animation: slideIn 1s ease-out;
+  }
+
+  .bounce-effect {
+    animation: bounce 1s ease;
+  }
+
+  .glitch-effect {
+    animation: glitch 0.5s ease-in-out;
+  }
+
+  .rotate-effect {
+    animation: rotate 1s ease-in-out;
+  }
+
+  .scale-effect {
+    animation: scale 0.8s ease-in-out;
+  }
+
+  .gradient-effect {
+    background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #feca57);
+    background-size: 300% 300%;
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: gradientShift 3s ease-in-out infinite;
+  }
+
+  /* Keyframes for animations */
+  @keyframes typing {
+    from { width: 0; opacity: 0; }
+    to { width: auto; opacity: 1; }
+  }
+
+  @keyframes fadeInOut {
+    0% { opacity: 0; transform: translateY(-20px); }
+    50% { opacity: 1; transform: translateY(0); }
+    100% { opacity: 0; transform: translateY(20px); }
+  }
+
+  @keyframes slideIn {
+    0% { transform: translateX(-100%); opacity: 0; }
+    100% { transform: translateX(0); opacity: 1; }
+  }
+
+  @keyframes bounce {
+    0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+    40% { transform: translateY(-30px); }
+    60% { transform: translateY(-15px); }
+  }
+
+  @keyframes glitch {
+    0% { transform: translate(0); }
+    20% { transform: translate(-5px, 5px); }
+    40% { transform: translate(-5px, -5px); }
+    60% { transform: translate(5px, 5px); }
+    80% { transform: translate(5px, -5px); }
+    100% { transform: translate(0); }
+  }
+
+  @keyframes rotate {
+    0% { transform: rotate(0deg) scale(0.5); opacity: 0; }
+    100% { transform: rotate(360deg) scale(1); opacity: 1; }
+  }
+
+  @keyframes scale {
+    0% { transform: scale(0); opacity: 0; }
+    70% { transform: scale(1.2); opacity: 1; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  @keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  .all-blog-link {
+    font-size: 1.4rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: rgba(255,255,255,0.85);
+    padding: 12px 20px;
+    border: 2px solid rgba(255,255,255,0.4);
+    border-radius: 10px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    background: rgba(255,255,255,0.1);
+  }
+
+  .all-blog-link:hover {
+    background: rgba(255,255,255,0.2);
+    color: #fff;
+    transform: translateY(-2px);
+  }
+
+  .arrow-icon {
+    stroke: currentColor;
+  }
+
+  /* Blog Grid */
+  .blog-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 30px;
+    margin-top: 20px;
+  }
+
+  /* Linebox */
+  .linebox {
+    border: 2px solid rgba(255,255,255,0.4);
+    background: rgba(255,255,255,0.08);
+    border-radius: 16px;
+    padding: 35px;
+    color: #fff;
+    transition: transform 0.3s ease, border-color 0.3s ease;
+  }
+
+  .linebox:hover {
+    transform: translateY(-5px);
+    border-color: rgba(255,255,255,0.6);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  }
+
+  /* Blog Meta */
+  .blog-meta {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+
+  .meta-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: rgba(255,255,255,0.8);
+    font-size: 1rem;
+  }
+
+  /* Blog Title */
+  .blog-title {
+    font-size: 2.2rem;
+    font-weight: 700;
+    margin: 20px 0;
+    color: #fff;
+    line-height: 1.3;
+  }
+
+  .desc {
+    color: rgba(255,255,255,0.85);
+    line-height: 1.7;
+    margin-bottom: 25px;
+    font-size: 1.1rem;
+  }
+
+  /* Tags */
+  .tag-list {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .tag {
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.3);
+    color: #fff;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+  }
+
+  .tag:hover {
+    background: rgba(255,255,255,0.25);
+    transform: scale(1.05);
+  }
 
   /* Responsive */
-  @media (max-width: 1024px){ .blog-grid{ grid-template-columns:1fr; } .big-title{ font-size:36px; } }
-  @media (max-width: 480px){ .container{ padding:20px 14px;} .big-title{ font-size:28px;} .post-title{ font-size:1.15rem;} }
+  @media (max-width: 1024px) {
+    .blog-grid {
+      grid-template-columns: 1fr;
+      gap: 25px;
+    }
+    
+    .featured-content {
+      grid-template-columns: 250px 1fr;
+      gap: 30px;
+    }
+  }
 
-  /* subtle animated underline on title */
-  .big-title{ position:relative; }
-  .big-title::after{ content:''; position:absolute; left:0; bottom:-8px; height:4px; width:60px; border-radius:8px; background: linear-gradient(90deg, rgba(124,58,237,0.9), rgba(34,197,94,0.9)); transform-origin:left center; transform:scaleX(0); transition:transform .6s cubic-bezier(.2,.9,.1,1); }
-  .post-card:hover ~ .big-title::after { transform:scaleX(1); }
+  @media (max-width: 768px) {
+    body {
+      font-size: 16px;
+    }
 
-  /* small readable helpers */
-  .post-title a{ color:inherit; text-decoration:none; }
+    .header-content {
+      flex-direction: column;
+      text-align: center;
+    }
+
+    .big-title {
+      font-size: 2.8rem;
+    }
+
+    .featured-content {
+      grid-template-columns: 1fr;
+      text-align: center;
+    }
+
+    .image-placeholder {
+      height: 150px;
+    }
+
+    .featured-blog-title {
+      font-size: 2rem;
+    }
+
+    .blog-title {
+      font-size: 1.8rem;
+    }
+
+    .desc {
+      font-size: 1rem;
+      text-align: left;
+    }
+
+    .linebox {
+      padding: 25px 20px;
+    }
+
+    .all-blog-link {
+      width: 100%;
+      justify-content: center;
+      font-size: 1.2rem;
+    }
+
+    .blog-grid {
+      gap: 20px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .container {
+      padding: 20px 15px;
+    }
+
+    .big-title {
+      font-size: 2.2rem;
+    }
+
+    .featured-blog-title {
+      font-size: 1.6rem;
+    }
+
+    .blog-title {
+      font-size: 1.5rem;
+    }
+
+    .linebox {
+      padding: 20px 15px;
+    }
+
+    .blog-meta {
+      gap: 15px;
+    }
+
+    .meta-item {
+      font-size: 0.9rem;
+    }
+
+    .featured-content {
+      padding: 20px;
+    }
+  }
 </style>
 
-<script>
-  // removed blinking cursor JS per request.
-  // kept page lightweight — animations are CSS only for modern feel.
+<script is:inline>
+  document.addEventListener('DOMContentLoaded', function() {
+    const titleElement = document.getElementById('mainTitle');
+    const cursorElement = document.querySelector('.title-cursor');
+    
+    const titleVariations = [
+      "Blog",
+      "Articles",
+      "Stories",
+      "Thoughts",
+      "Journal",
+      "Notes",
+      "Ideas",
+      "Updates"
+    ];
+
+    const animationEffects = [
+      'typing-effect',
+      'fade-effect',
+      'slide-effect',
+      'bounce-effect',
+      'glitch-effect',
+      'rotate-effect',
+      'scale-effect',
+      'gradient-effect'
+    ];
+
+    let currentIndex = 0;
+    let animationIndex = 0;
+
+    function changeTitleWithAnimation() {
+      // Remove previous animation classes
+      titleElement.className = 'title-text';
+      
+      // Add current animation effect
+      titleElement.classList.add(animationEffects[animationIndex]);
+      
+      // Change text
+      titleElement.textContent = titleVariations[currentIndex];
+      
+      // Update cursor color based on animation
+      updateCursorColor(animationIndex);
+      
+      // Increment indexes
+      currentIndex = (currentIndex + 1) % titleVariations.length;
+      animationIndex = (animationIndex + 1) % animationEffects.length;
+      
+      // Schedule next change
+      setTimeout(changeTitleWithAnimation, 2000);
+    }
+
+    function updateCursorColor(animIndex) {
+      const colors = [
+        '#ff6b6b', // Red for typing
+        '#4ecdc4', // Teal for fade
+        '#45b7d1', // Blue for slide
+        '#feca57', // Yellow for bounce
+        '#ff9ff3', // Pink for glitch
+        '#54a0ff', // Light blue for rotate
+        '#5f27cd', // Purple for scale
+        '#00d2d3'  // Cyan for gradient
+      ];
+      
+      cursorElement.style.color = colors[animIndex];
+    }
+
+    // Start the animation sequence
+    setTimeout(changeTitleWithAnimation, 1000);
+
+    // Additional effect: Random cursor movement
+    setInterval(() => {
+      cursorElement.style.transform = `translateY(${Math.random() * 5 - 2.5}px)`;
+    }, 300);
+  });
 </script>
