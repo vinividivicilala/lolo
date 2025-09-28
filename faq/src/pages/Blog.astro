@@ -139,53 +139,30 @@ const latestPost = getLatestFeaturedPost();
         </section>
       )}
 
-      <!-- BLOG CONTENT GRID -->
-      <div class="blog-grid">
-        {blogData.map(post => (
-          <section class={`linebox ${post.bgColor}`}>
-            <div class="blog-meta">
-              <div class="meta-item">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                </svg>
-                <span>{formatDate(post.date)}</span>
-              </div>
-              <div class="meta-item">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                  <circle cx="12" cy="12" r="3"/>
-                </svg>
-                <span>{post.readTime} min read</span>
-              </div>
-            </div>
+      <!-- BLOG CONTENT SECTION DIHAPUS -->
+      <!-- Grid blog articles dihapus sesuai permintaan -->
 
-            <h2 class="blog-title">{post.title}</h2>
-            <p class="desc">{post.description}</p>
-
-            <div class="tag-list">
-              {post.tags.map(tag => (
-                <span class="tag">{tag}</span>
-              ))}
-            </div>
-          </section>
-        ))}
-      </div>
     </main>
   </div>
 </Layout>
 
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Arame&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+
+  /* SPACE MONO MURNI - SEMUA TEKS */
+  * {
+    font-family: 'Space Mono', monospace !important;
+  }
 
   body {
     background: #111;
     color: #fff;
-    font-family: 'Arame';
+    font-family: 'Space Mono', monospace;
     font-size: 18px;
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Arame';
+    font-family: 'Space Mono', monospace;
   }
 
   .container {
@@ -213,9 +190,10 @@ const latestPost = getLatestFeaturedPost();
 
   .big-title {
     font-size: 48px;
-    font-weight: 800;
+    font-weight: 700;
     margin: 0 0 10px 0;
     color: #fff;
+    font-family: 'Space Mono', monospace;
   }
 
   /* Subtitle Animation */
@@ -234,6 +212,7 @@ const latestPost = getLatestFeaturedPost();
     -webkit-text-fill-color: transparent;
     animation: gradientShift 3s ease-in-out infinite;
     font-weight: 600;
+    font-family: 'Space Mono', monospace;
   }
 
   .floating-dots {
@@ -287,107 +266,12 @@ const latestPost = getLatestFeaturedPost();
     text-decoration: none;
     transition: all 0.3s ease;
     background: rgba(255,255,255,0.1);
+    font-family: 'Space Mono', monospace;
   }
 
   .all-blog-link:hover {
     background: rgba(255,255,255,0.2);
     color: #fff;
-  }
-
-  /* Blog Grid */
-  .blog-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 30px;
-    margin-top: 20px;
-  }
-
-  /* Linebox dengan Background Full */
-  .linebox {
-    border: 2px solid rgba(255,255,255,0.4);
-    border-radius: 16px;
-    padding: 35px;
-    color: #fff;
-    transition: transform 0.3s ease, border-color 0.3s ease;
-    position: relative;
-    overflow: hidden;
-    background-size: 200% 200%;
-    animation: gradientShift 3s ease infinite;
-  }
-
-  .linebox:hover {
-    transform: translateY(-5px);
-    border-color: rgba(255,255,255,0.6);
-  }
-
-  /* Blog Meta */
-  .blog-meta {
-    display: flex;
-    gap: 20px;
-    margin-bottom: 20px;
-    flex-wrap: wrap;
-  }
-
-  .meta-item {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    color: rgba(255,255,255,0.9);
-    font-size: 1rem;
-    background: rgba(255,255,255,0.2);
-    padding: 6px 12px;
-    border-radius: 20px;
-    backdrop-filter: blur(10px);
-  }
-
-  /* Blog Title */
-  .blog-title {
-    font-size: 2.2rem;
-    font-weight: 700;
-    margin: 20px 0;
-    color: #fff;
-    line-height: 1.3;
-    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
-  }
-
-  .desc {
-    color: rgba(255,255,255,0.95);
-    line-height: 1.7;
-    margin-bottom: 25px;
-    font-size: 1.1rem;
-    text-shadow: 0 1px 2px rgba(0,0,0,0.3);
-  }
-
-  /* Tags */
-  .tag-list {
-    display: flex;
-    gap: 12px;
-    flex-wrap: wrap;
-  }
-
-  .tag {
-    background: rgba(255,255,255,0.25);
-    border: 1px solid rgba(255,255,255,0.4);
-    color: #fff;
-    padding: 8px 16px;
-    border-radius: 20px;
-    font-size: 0.9rem;
-    font-weight: 600;
-    backdrop-filter: blur(10px);
-  }
-
-  /* WARNA DESIGNER */
-  .gradient-1 { 
-    background: linear-gradient(135deg, #ff6b6b, #4ecdc4);
-  }
-  .gradient-2 { 
-    background: linear-gradient(135deg, #45b7d1, #96ceb4);
-  }
-  .gradient-3 { 
-    background: linear-gradient(135deg, #feca57, #ff9ff3);
-  }
-  .gradient-4 { 
-    background: linear-gradient(135deg, #54a0ff, #5f27cd);
   }
 
   /* Auto Featured Section */
@@ -409,6 +293,7 @@ const latestPost = getLatestFeaturedPost();
     display: flex;
     align-items: center;
     gap: 15px;
+    font-family: 'Space Mono', monospace;
   }
 
   .highlight-badge {
@@ -418,6 +303,7 @@ const latestPost = getLatestFeaturedPost();
     border-radius: 8px;
     font-size: 0.8rem;
     font-weight: 600;
+    font-family: 'Space Mono', monospace;
   }
 
   .auto-featured-card {
@@ -459,6 +345,7 @@ const latestPost = getLatestFeaturedPost();
     border-radius: 20px;
     font-size: 0.8rem;
     font-weight: 600;
+    font-family: 'Space Mono', monospace;
   }
 
   .featured-content-auto {
@@ -480,6 +367,7 @@ const latestPost = getLatestFeaturedPost();
     background: rgba(255,255,255,0.1);
     padding: 4px 8px;
     border-radius: 6px;
+    font-family: 'Space Mono', monospace;
   }
 
   .new-badge-auto {
@@ -489,6 +377,7 @@ const latestPost = getLatestFeaturedPost();
     border-radius: 6px;
     font-size: 0.8rem;
     font-weight: 600;
+    font-family: 'Space Mono', monospace;
   }
 
   .post-title-auto {
@@ -497,6 +386,7 @@ const latestPost = getLatestFeaturedPost();
     margin: 10px 0;
     color: #fff;
     line-height: 1.3;
+    font-family: 'Space Mono', monospace;
   }
 
   .post-desc-auto {
@@ -504,6 +394,7 @@ const latestPost = getLatestFeaturedPost();
     line-height: 1.6;
     margin-bottom: 20px;
     font-size: 1.1rem;
+    font-family: 'Space Mono', monospace;
   }
 
   .tags-auto {
@@ -521,6 +412,7 @@ const latestPost = getLatestFeaturedPost();
     border-radius: 15px;
     font-size: 0.8rem;
     font-weight: 600;
+    font-family: 'Space Mono', monospace;
   }
 
   .read-more-auto {
@@ -535,6 +427,7 @@ const latestPost = getLatestFeaturedPost();
     font-weight: 600;
     transition: all 0.3s ease;
     width: fit-content;
+    font-family: 'Space Mono', monospace;
   }
 
   .read-more-auto:hover {
@@ -564,15 +457,6 @@ const latestPost = getLatestFeaturedPost();
       font-size: 2.8rem;
     }
 
-    .blog-title {
-      font-size: 1.8rem;
-    }
-
-    .desc {
-      font-size: 1rem;
-      text-align: left;
-    }
-
     .linebox {
       padding: 25px 20px;
     }
@@ -581,10 +465,6 @@ const latestPost = getLatestFeaturedPost();
       width: 100%;
       justify-content: center;
       font-size: 1.2rem;
-    }
-
-    .blog-grid {
-      gap: 20px;
     }
 
     .auto-featured-card {
@@ -608,20 +488,8 @@ const latestPost = getLatestFeaturedPost();
       font-size: 2.2rem;
     }
 
-    .blog-title {
-      font-size: 1.5rem;
-    }
-
     .linebox {
       padding: 20px 15px;
-    }
-
-    .blog-meta {
-      gap: 15px;
-    }
-
-    .meta-item {
-      font-size: 0.9rem;
     }
   }
 </style>
