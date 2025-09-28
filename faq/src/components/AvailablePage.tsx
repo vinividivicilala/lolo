@@ -1,7 +1,5 @@
 
-import React, { useState, useEffect, useRef } from "react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
+import React, { useState, useEffect, } from "react";
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
 import { 
   getFirestore, collection, addDoc, onSnapshot, serverTimestamp, query, orderBy
@@ -23,8 +21,7 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 
-// GSAP Plugin ScrollTrigger
-gsap.registerPlugin(ScrollTrigger);
+
 
 export default function AvailablePage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -90,19 +87,7 @@ export default function AvailablePage() {
   };
 
 
-     // Inisialisasi ScrollTrigger untuk scroll horizontal yang lebih kasar
-    gsap.to(scrollRef.current, {
-      x: "-100%", // Scroll ke kiri saat halaman digulir
-      ease: "none", // Tidak ada efek easing, agar terlihat kasar
-      scrollTrigger: {
-        trigger: scrollRef.current,
-        pin: true,
-        scrub: 1, // Animasi mengikuti scroll secara langsung
-        start: "top top",
-        end: "bottom bottom",
-      },
-    });
-  }, []);
+    
 
   return (
     <>
@@ -1583,6 +1568,7 @@ export default function AvailablePage() {
     </>
   );
 }
+
 
 
 
