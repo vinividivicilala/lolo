@@ -1,7 +1,10 @@
 [build]
-  base = "faq"          # Netlify masuk ke folder astro
+  base = "faq"          # folder project astro kamu
   command = "npm run build"
-  publish = "dist"      # Deploy hasil build astro
+  publish = "dist"      # hasil build astro ada di dist
+
+[build.environment]
+  NODE_VERSION = "20"   # 🔑 paksa Netlify pakai Node 20.x
 
 [[redirects]]
   from = "/*"
