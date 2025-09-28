@@ -2,54 +2,6 @@
 // src/pages/blog.astro
 import Layout from '../layouts/Layout.astro';
 
-// DATA BLOG OTOMATIS
-const blogData = [
-  {
-    id: 1,
-    title: "Konten Blog Akan Segera Hadir",
-    date: "2024-03-15",
-    readTime: 5,
-    description: "Semua artikel akan tampil di sini dengan desain bersih dan modern. Stay tuned untuk update terbaru!",
-    tags: ["Astro", "Blog", "Coming Soon"],
-    isFeatured: true,
-    isNew: true,
-    bgColor: "gradient-1"
-  },
-  {
-    id: 2,
-    title: "Tips Pengembangan Web Modern", 
-    date: "2024-03-20",
-    readTime: 7,
-    description: "Pelajari teknik-teknik terbaru dalam pengembangan web modern untuk meningkatkan performa dan user experience.",
-    tags: ["Web Dev", "Tips", "Modern"],
-    isFeatured: false,
-    isNew: true,
-    bgColor: "gradient-2"
-  },
-  {
-    id: 3,
-    title: "Optimisasi SEO untuk Developer",
-    date: "2024-03-25", 
-    readTime: 10,
-    description: "Panduan lengkap optimisasi SEO teknikal untuk developer yang ingin meningkatkan ranking website di mesin pencari.",
-    tags: ["SEO", "Optimization", "Technical"],
-    isFeatured: true,
-    isNew: false,
-    bgColor: "gradient-3"
-  },
-  {
-    id: 4,
-    title: "Framework JavaScript Terpopuler 2024",
-    date: "2024-03-30",
-    readTime: 8,
-    description: "Review mendalam tentang framework JavaScript terpopuler tahun 2024 dan perbandingan fitur-fiturnya.",
-    tags: ["JavaScript", "Framework", "2024"],
-    isFeatured: false,
-    isNew: true,
-    bgColor: "gradient-4"
-  }
-];
-
 // FUNGSI OTOMATIS
 const getLatestFeaturedPost = () => {
   const featuredPosts = blogData.filter(post => post.isFeatured);
@@ -528,3 +480,4 @@ const latestPost = getLatestFeaturedPost();
     setTimeout(changeTitle, 1000);
   });
 </script>
+
