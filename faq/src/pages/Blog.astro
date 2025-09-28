@@ -96,6 +96,15 @@ if (typeof window !== 'undefined') {
 <Layout title="Blog | Note Farid" description="Halaman blog kosong dengan desain baru." currentPage="blog">
   <div class="container">
     <main>
+
+
+  <!-- Section dengan card -->
+    <section class="blog-grid">
+      <div class="linebox">Konten 1</div>
+      <div class="linebox">Konten 2</div>
+      <div class="linebox">Konten 3</div>
+      <div class="linebox">Konten 4</div>
+    </section>
     
 
 
@@ -1152,7 +1161,42 @@ h1, h2, h3, h4, h5, h6 {
 <script is:inline>
 
 
+  import gsap from "gsap";
+  import ScrollTrigger from "gsap/ScrollTrigger";
+  import Lenis from "@studio-freight/lenis";
 
+  gsap.registerPlugin(ScrollTrigger);
+
+  // 🔹 Lenis Smooth Scroll
+  const lenis = new Lenis();
+  function raf(time) {
+    lenis.raf(time);
+    requestAnimationFrame(raf);
+  }
+  requestAnimationFrame(raf);
+
+  // 🔹 Animasi header masuk
+  gsap.from(".big-title", {
+    y: -50,
+    opacity: 0,
+    duration: 1.2,
+    ease: "power3.out",
+  });
+
+  // 🔹 Animasi tiap card pas discroll
+  gsap.utils.toArray(".linebox").forEach((card) => {
+    gsap.from(card, {
+      scrollTrigger: {
+        trigger: card,
+        start: "top 80%",
+        toggleActions: "play none none reverse",
+      },
+      y: 50,
+      opacity: 0,
+      duration: 0.8,
+      ease: "power2.out",
+    });
+  });
 
 
 
@@ -1323,6 +1367,7 @@ h1, h2, h3, h4, h5, h6 {
     window.selectSearchResult = selectSearchResult;
   });
 </script>
+
 
 
 
