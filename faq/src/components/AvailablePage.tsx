@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from "react";
 import gsap from "gsap";
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
@@ -8,14 +9,14 @@ import {
   getAuth, signInWithPopup, GoogleAuthProvider
 } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyCYbxo8n1zn-Y3heCIn_PmrsK44_OrdEw4",
-  authDomain:"noted-a3498.firebaseapp.com",
-  projectId: "noted-a3498",
-  storageBucket: "noted-a3498.appspot.com",
-  messagingSenderId: "1077214793842",
-  appId: "1:1077214793842:web:a70cc3643eceb53e3932eb",
-  measurementId: "G-SENDQS5Y7K"
+  const firebaseConfig = {
+        apiKey: "AIzaSyCYbxo8n1zn-Y3heCIn_PmrsK44_OrdEw4",
+        authDomain:"noted-a3498.firebaseapp.com",
+        projectId: "noted-a3498",
+        storageBucket: "noted-a3498.appspot.com",
+        messagingSenderId: "1077214793842",
+        appId: "1:1077214793842:web:a70cc3643eceb53e3932eb",
+        measurementId: "G-SENDQS5Y7K"
 };
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
@@ -24,10 +25,9 @@ const auth = getAuth(app);
 export default function AvailablePage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isAboutOpen, setIsAboutOpen] = useState(false);
-  const [isTechOpen, setIsTechOpen] = useState(false);
 
   const titleRef = useRef(null);
-  const horizontalScrollRef = useRef(null);
+
 
   // State untuk ulasan
   const [reviews, setReviews] = useState([]);
@@ -39,14 +39,12 @@ export default function AvailablePage() {
 
   const openAbout = () => setIsAboutOpen(true);
   const closeAbout = () => setIsAboutOpen(false);
-  
-  const openTech = () => setIsTechOpen(true);
-  const closeTech = () => setIsTechOpen(false);
 
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
 
-  // 🔹 Animasi GSAP untuk judul
+
+    // 🔹 Animasi GSAP untuk judul
   useEffect(() => {
     if (titleRef.current) {
       gsap.fromTo(
@@ -54,25 +52,6 @@ export default function AvailablePage() {
         { opacity: 0, y: 50 },
         { opacity: 1, y: 0, duration: 1.5, ease: "power3.out" }
       );
-    }
-  }, []);
-
-  // 🔹 Animasi Horizontal Scroll untuk Studio Lenis
-  useEffect(() => {
-    if (horizontalScrollRef.current) {
-      const scrollSection = horizontalScrollRef.current;
-      gsap.to(scrollSection, {
-        x: () => -(scrollSection.scrollWidth - window.innerWidth),
-        ease: "none",
-        scrollTrigger: {
-          trigger: ".horizontal-scroll-container",
-          start: "top top",
-          end: () => `+=${scrollSection.scrollWidth - window.innerWidth}`,
-          scrub: 1,
-          pin: true,
-          anticipatePin: 1
-        }
-      });
     }
   }, []);
 
@@ -120,7 +99,6 @@ export default function AvailablePage() {
           height: 100%;
           background-color: #000;
           font-family: 'Space Mono', monospace;
-          overflow-x: hidden;
         }
 
         .timeline {
@@ -511,7 +489,6 @@ export default function AvailablePage() {
           color: #e5e5e5;
           transition: transform 0.3s, color 0.3s;
           min-width: 80px;
-          cursor: pointer;
         }
 
         .icon-item:hover {
@@ -580,150 +557,57 @@ export default function AvailablePage() {
           color: #fff;
         }
 
-        /* Halaman Tentang Saya (overlay penuh) */
-        .about-overlay {
-          position: fixed;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          background-color: #000;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: flex-start;
-          padding: 60px 30px;
-          z-index: 9999;
-          overflow-y: auto;
-        }
+/* Halaman Tentang Saya (overlay penuh) */
+.about-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 60px 30px;
+  z-index: 9999;
+  overflow-y: auto;
+}
 
-        .about-header {
-          font-size: 2.5rem;
-          font-weight: 700;
-          color: #fff;
-          margin-bottom: 1.5rem;
-        }
+.about-header {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 1.5rem;
+}
 
-        .about-linebox {
-          background: rgba(255, 255, 255, 0.05);
-          border: 1px solid rgba(255, 255, 255, 0.2);
-          border-radius: 8px;
-          padding: 15px 20px;
-          margin-bottom: 20px;
-          color: #e5e5e5;
-          max-width: 700px;
-          text-align: center;
-        }
+.about-linebox {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  padding: 15px 20px;
+  margin-bottom: 20px;
+  color: #e5e5e5;
+  max-width: 700px;
+  text-align: center;
+}
 
-        .about-close {
-          position: absolute;
-          top: 20px;
-          right: 25px;
-          font-size: 2rem;
-          background: transparent;
-          border: none;
-          color: #fff;
-          cursor: pointer;
-        }
+.about-close {
+  position: absolute;
+  top: 20px;
+  right: 25px;
+  font-size: 2rem;
+  background: transparent;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+}
 
-        /* Horizontal Scroll Container */
-        .horizontal-scroll-container {
-          position: relative;
-          width: 100%;
-          height: 100vh;
-          overflow: hidden;
-          margin: 100px 0;
-        }
 
-        .horizontal-scroll-content {
-          display: flex;
-          width: fit-content;
-          height: 100%;
-          will-change: transform;
-        }
 
-        .horizontal-panel {
-          width: 100vw;
-          height: 100vh;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          flex-shrink: 0;
-          padding: 0 60px;
-        }
 
-        .panel-content {
-          max-width: 1200px;
-          width: 100%;
-        }
 
-        .tech-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-          gap: 30px;
-          margin-top: 40px;
-        }
-
-        .tech-card {
-          background: rgba(255, 255, 255, 0.05);
-          border: 1px solid rgba(255, 255, 255, 0.1);
-          border-radius: 12px;
-          padding: 30px;
-          transition: all 0.3s ease;
-        }
-
-        .tech-card:hover {
-          background: rgba(255, 255, 255, 0.08);
-          border-color: rgba(255, 255, 255, 0.3);
-          transform: translateY(-5px);
-        }
-
-        .tech-icon {
-          font-size: 3rem;
-          margin-bottom: 20px;
-          text-align: center;
-        }
-
-        .tech-title {
-          font-size: 1.5rem;
-          font-weight: 700;
-          color: #fff;
-          margin-bottom: 15px;
-        }
-
-        .tech-description {
-          color: #e5e5e5;
-          line-height: 1.6;
-          font-size: 1rem;
-        }
-
-        .scroll-indicator {
-          position: absolute;
-          bottom: 30px;
-          left: 50%;
-          transform: translateX(-50%);
-          color: rgba(255, 255, 255, 0.6);
-          font-size: 0.9rem;
-          display: flex;
-          align-items: center;
-          gap: 10px;
-        }
-
-        .scroll-arrow {
-          animation: bounce 2s infinite;
-        }
-
-        @keyframes bounce {
-          0%, 20%, 50%, 80%, 100% {
-            transform: translateX(0);
-          }
-          40% {
-            transform: translateX(-10px);
-          }
-          60% {
-            transform: translateX(-5px);
-          }
-        }
+        
       `}</style>
 
       <div
@@ -734,13 +618,14 @@ export default function AvailablePage() {
           justifyContent: "space-between",
           backgroundColor: "#000",
           color: "#f1f5f9",
+        
         }}
       >
        
        {/* Konten Utama */}
       <div style={{ padding: "60px", flex: "1" }}>
         <h1
-          ref={titleRef}
+          ref={titleRef} // 👉 hubungkan ref ke elemen h1
           style={{
             fontSize: "4rem",
             fontWeight: "700",
@@ -876,21 +761,26 @@ export default function AvailablePage() {
             <span className="icon-label">Postingan</span>
           </div>
 
-          <div className="icon-item" onClick={openAbout} style={{ cursor: "pointer" }}>
-            <div className="icon-circle">
-              <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32"
-                viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"></path>
-                <circle cx="9" cy="7" r="4"></circle>
-                <path d="M23 21v-2a4 4 0 00-3-3.87"></path>
-                <path d="M16 3.13a4 4 0 010 7.75"></path>
-              </svg>
-            </div>
-            <span className="icon-label">Tentang Saya</span>
-          </div>
 
-          <div className="icon-item" onClick={openTech}>
+          <div className="icon-item" onClick={openAbout} style={{ cursor: "pointer" }}>
+  <div className="icon-circle">
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32"
+      viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"></path>
+      <circle cx="9" cy="7" r="4"></circle>
+      <path d="M23 21v-2a4 4 0 00-3-3.87"></path>
+      <path d="M16 3.13a4 4 0 010 7.75"></path>
+    </svg>
+  </div>
+  <span className="icon-label">Tentang Saya</span>
+</div>
+
+
+
+          
+
+          <div className="icon-item">
             <div className="icon-circle">
               <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
@@ -898,7 +788,7 @@ export default function AvailablePage() {
                 <line x1="12" y1="17" x2="12" y2="21"></line>
               </svg>
             </div>
-            <span className="icon-label">Teknologi</span>
+            <span className="icon-label">Meeting</span>
           </div>
 
           <div className="icon-item">
@@ -968,235 +858,713 @@ export default function AvailablePage() {
           </div>
         </div>
 
-        {/* Horizontal Scroll Section - Studio Lenis */}
-        <div className="horizontal-scroll-container">
-          <div className="horizontal-scroll-content" ref={horizontalScrollRef}>
-            {/* Panel 1 - Introduction */}
-            <div className="horizontal-panel">
-              <div className="panel-content">
-                <h2 style={{ fontSize: "3rem", fontWeight: "700", color: "#fff", marginBottom: "20px" }}>
-                  Studio Lenis
-                </h2>
-                <p style={{ fontSize: "1.4rem", color: "#e5e5e5", lineHeight: "1.6", marginBottom: "30px" }}>
-                  Pengalaman scroll horizontal yang mulus dengan GSAP ScrollTrigger dan Lenis Smooth Scroll
-                </p>
-                <div className="scroll-indicator">
-                  <span>Scroll ke kanan untuk melanjutkan</span>
-                  <div className="scroll-arrow">→</div>
-                </div>
-              </div>
-            </div>
-
-            {/* Panel 2 - GSAP */}
-            <div className="horizontal-panel">
-              <div className="panel-content">
-                <div className="tech-grid">
-                  <div className="tech-card">
-                    <div className="tech-icon">🎯</div>
-                    <h3 className="tech-title">GSAP</h3>
-                    <p className="tech-description">
-                      GreenSock Animation Platform - library animasi JavaScript yang powerful untuk 
-                      membuat animasi yang smooth dan performant. Digunakan untuk animasi timeline, 
-                      scroll-triggered animations, dan interaksi kompleks.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Panel 3 - Lenis */}
-            <div className="horizontal-panel">
-              <div className="panel-content">
-                <div className="tech-grid">
-                  <div className="tech-card">
-                    <div className="tech-icon">✨</div>
-                    <h3 className="tech-title">Lenis</h3>
-                    <p className="tech-description">
-                      Smooth scroll library yang elegan - memberikan pengalaman scrolling 
-                      yang lebih halus dan natural. Terintegrasi sempurna dengan GSAP 
-                      untuk animasi scroll-based yang advanced.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Panel 4 - ScrollTrigger */}
-            <div className="horizontal-panel">
-              <div className="panel-content">
-                <div className="tech-grid">
-                  <div className="tech-card">
-                    <div className="tech-icon">🚀</div>
-                    <h3 className="tech-title">ScrollTrigger</h3>
-                    <p className="tech-description">
-                      Plugin GSAP untuk trigger animasi berdasarkan scroll position. 
-                      Memungkinkan pembuatan efek parallax, reveal animations, 
-                      dan scroll-linked animations dengan presisi tinggi.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Panel 5 - Flip */}
-            <div className="horizontal-panel">
-              <div className="panel-content">
-                <div className="tech-grid">
-                  <div className="tech-card">
-                    <div className="tech-icon">🔄</div>
-                    <h3 className="tech-title">Flip</h3>
-                    <p className="tech-description">
-                      GSAP Flip plugin - memudahkan animasi layout changes dengan 
-                      teknik FLIP (First, Last, Invert, Play). Perfect untuk 
-                      transitions antara layout yang berbeda dengan performa optimal.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
         {/* Footer */}
         <div className="footer-container">
           <div className="footer-content">
+            {/* Kiri */}
             <div className="footer-left">
-              <span style={{ fontSize: "1rem", fontWeight: "600", color: "#94a3b8" }}>
-                © 2025 Farid Ardiansyah. All rights reserved.
-              </span>
+              <div className="linebox">
+                {/* Icon alert-triangle */}
+                <svg xmlns="http://www.w3.org/2000/svg"
+                     fill="none"
+                     viewBox="0 0 24 24"
+                     strokeWidth="2"
+                     stroke="currentColor"
+                     style={{ width: "20px", height: "20px" }}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M10.29 3.86l-7.3 12.61A1 1 0 004 19h16a1 1 0 00.87-1.5l-7.3-12.61a1 1 0 00-1.74 0z" />
+                </svg>
+                <span>Website ini masih dikembangkan</span>
+              </div>
             </div>
-            <div className="footer-right">
-              <a href="/" className="hero-btn">
-                Home
-              </a>
-              <a href="/about" className="hero-btn">
-                About
-              </a>
-              <a href="/contact" className="hero-btn">
-                Contact
-              </a>
-              <a href="/projects" className="hero-btn">
-                Projects
-              </a>
-            </div>
+
+
+
+{isAboutOpen && (
+  <div className="about-overlay">
+    <button className="about-close" onClick={closeAbout}>×</button>
+    
+    <h2 className="about-header">Tentang Saya</h2>
+
+    {/* Nama Panjang di atas Timeline Box */}
+    <div style={{
+      marginLeft: "60px",
+      marginBottom: "40px",
+      fontSize: "1.8rem",
+      fontWeight: "700",
+      color: "#fff"
+    }}>
+      Farid Ardiansyah
+    </div>
+
+    {/* Timeline Container */}
+    <div style={{ 
+      marginLeft: "60px", 
+      marginBottom: "40px", 
+      position: "relative",
+      paddingLeft: "30px"
+    }}>
+      {/* Garis putus-putus vertikal utama */}
+      <div style={{
+        position: "absolute",
+        left: "0",
+        top: "0",
+        height: "100%",
+        borderLeft: "2px dashed rgba(255, 255, 255, 0.3)"
+      }}></div>
+      
+      {/* Item Timeline 1 - dengan animasi kedap-kedip */}
+      <div style={{ 
+        display: "flex", 
+        alignItems: "flex-start",
+        marginBottom: "50px",
+        position: "relative"
+      }}>
+        {/* Titik kiri dengan animasi kedap-kedip */}
+        <div style={{
+          position: "absolute",
+          left: "-41px",
+          top: "15px",
+          width: "16px",
+          height: "16px",
+          borderRadius: "50%",
+          background: "#fff",
+          boxShadow: "0 0 0 4px rgba(255, 255, 255, 0.4)",
+          animation: "pulse 1.5s infinite",
+          zIndex: "2"
+        }}></div>
+        
+        {/* Garis penghubung horizontal */}
+        <div className="timeline-connector" style={{
+          position: "absolute",
+          left: "-30px",
+          top: "23px",
+          width: "28px",
+          height: "2px",
+          background: "rgba(255, 255, 255, 0.3)"
+        }}></div>
+
+        {/* Konten Timeline */}
+        <div style={{ flex: "1" }}>
+          <div style={{
+            fontSize: "1.1rem",
+            color: "#94a3b8",
+            fontWeight: "700",
+            marginBottom: "5px"
+          }}>2025-09-19</div>
+          
+          <div style={{
+            fontSize: "1.8rem",
+            fontWeight: "700",
+            color: "#fff",
+            marginBottom: "10px"
+          }}>Rilis Website</div>
+          
+          <div style={{
+            display: "inline-block",
+            padding: "6px 12px",
+            borderRadius: "6px",
+            fontSize: "1rem",
+            fontWeight: "700",
+            background: "rgba(255, 255, 255, 0.1)",
+            color: "#fff",
+            border: "1px solid rgba(255, 255, 255, 0.3)",
+            marginBottom: "20px"
+          }}>VERSI PRODUKSI</div>
+          
+          <div style={{
+            background: "rgba(255, 255, 255, 0.05)",
+            border: "1px solid rgba(255, 255, 255, 0.15)",
+            borderRadius: "8px",
+            padding: "25px",
+            color: "#e5e5e5",
+            fontSize: "1.2rem",
+            lineHeight: "1.6",
+            fontWeight: "600"
+          }}>
+            Peluncuran versi pertama website portfolio dengan desain minimalis dan interaktif.
           </div>
         </div>
       </div>
+      
+      {/* Item Timeline 2 - dengan animasi kedap-kedip */}
+      <div style={{ 
+        display: "flex", 
+        alignItems: "flex-start",
+        marginBottom: "50px",
+        position: "relative"
+      }}>
+        {/* Titik kiri dengan animasi kedap-kedip */}
+        <div style={{
+          position: "absolute",
+          left: "-41px",
+          top: "15px",
+          width: "16px",
+          height: "16px",
+          borderRadius: "50%",
+          background: "#fff",
+          boxShadow: "0 0 0 4px rgba(255, 255, 255, 0.4)",
+          animation: "pulse 1.5s infinite",
+          zIndex: "2"
+        }}></div>
+        
+        {/* Garis penghubung horizontal */}
+        <div className="timeline-connector" style={{
+          position: "absolute",
+          left: "-30px",
+          top: "23px",
+          width: "28px",
+          height: "2px",
+          background: "rgba(255, 255, 255, 0.3)"
+        }}></div>
 
-      {/* Modal Uji Coba */}
-      {isModalOpen && (
-        <div className="modal-overlay">
-          <div className="modal-content">
-            <button className="modal-close" onClick={closeModal}>×</button>
-            <div className="modal-header">
-              <h2 className="modal-title">🚧 Website dalam Tahap Uji Coba</h2>
+        {/* Konten Timeline */}
+        <div style={{ flex: "1" }}>
+          <div style={{
+            fontSize: "1.1rem",
+            color: "#94a3b8",
+            fontWeight: "700",
+            marginBottom: "5px"
+          }}>2025-08-10</div>
+          
+          <div style={{
+            fontSize: "1.8rem",
+            fontWeight: "700",
+            color: "#fff",
+            marginBottom: "10px"
+          }}>Uji Coba Firebase</div>
+          
+          <div style={{
+            display: "inline-block",
+            padding: "6px 12px",
+            borderRadius: "6px",
+            fontSize: "1rem",
+            fontWeight: "700",
+            background: "rgba(255, 255, 255, 0.1)",
+            color: "#fff",
+            border: "1px solid rgba(255, 255, 255, 0.3)",
+            marginBottom: "20px"
+          }}>BACKEND</div>
+          
+          <div style={{
+            background: "rgba(255, 255, 255, 0.05)",
+            border: "1px solid rgba(255, 255, 255, 0.15)",
+            borderRadius: "8px",
+            padding: "25px",
+            color: "#e5e5e5",
+            fontSize: "1.2rem",
+            lineHeight: "1.6",
+            fontWeight: "600"
+          }}>
+            Menerapkan autentikasi dan penyimpanan data real-time menggunakan Firebase.
+          </div>
+        </div>
+      </div>
+      
+      {/* Item Timeline 3 - dengan animasi kedap-kedip */}
+      <div style={{ 
+        display: "flex", 
+        alignItems: "flex-start",
+        marginBottom: "50px",
+        position: "relative"
+      }}>
+        {/* Titik kiri dengan animasi kedap-kedip */}
+        <div style={{
+          position: "absolute",
+          left: "-41px",
+          top: "15px",
+          width: "16px",
+          height: "16px",
+          borderRadius: "50%",
+          background: "#fff",
+          boxShadow: "0 0 0 4px rgba(255, 255, 255, 0.4)",
+          animation: "pulse 1.5s infinite",
+          zIndex: "2"
+        }}></div>
+        
+        {/* Garis penghubung horizontal */}
+        <div className="timeline-connector" style={{
+          position: "absolute",
+          left: "-30px",
+          top: "23px",
+          width: "28px",
+          height: "2px",
+          background: "rgba(255, 255, 255, 0.3)"
+        }}></div>
+
+        {/* Konten Timeline */}
+        <div style={{ flex: "1" }}>
+          <div style={{
+            fontSize: "1.1rem",
+            color: "#94a3b8",
+            fontWeight: "700",
+            marginBottom: "5px"
+          }}>2025-07-05</div>
+          
+          <div style={{
+            fontSize: "1.8rem",
+            fontWeight: "700",
+            color: "#fff",
+            marginBottom: "10px"
+          }}>Desain UI</div>
+          
+          <div style={{
+            display: "inline-block",
+            padding: "6px 12px",
+            borderRadius: "6px",
+            fontSize: "1rem",
+            fontWeight: "700",
+            background: "rgba(255, 255, 255, 0.1)",
+            color: "#fff",
+            border: "1px solid rgba(255, 255, 255, 0.3)",
+            marginBottom: "20px"
+          }}>FRONTEND</div>
+          
+          <div style={{
+            background: "rgba(255, 255, 255, 0.05)",
+            border: "1px solid rgba(255, 255, 255, 0.15)",
+            borderRadius: "8px",
+            padding: "25px",
+            color: "#e5e5e5",
+            fontSize: "1.2rem",
+            lineHeight: "1.6",
+            fontWeight: "600"
+          }}>
+            Membuat desain UI tipografi-based dan minimalist UI untuk tampilan website.
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+
+{/* Bagian Ulasan */}
+<div style={{ 
+  marginLeft: "60px", 
+  marginBottom: "40px",
+  position: "relative",
+  paddingLeft: "30px"
+}}>
+  <h3 style={{
+    fontSize: "2rem",
+    fontWeight: "700",
+    color: "#fff",
+    marginBottom: "30px",
+    position: "relative"
+  }}>
+    Ulasan
+    <div style={{
+      position: "absolute",
+      bottom: "-10px",
+      left: "0",
+      width: "100px",
+      height: "3px",
+      background: "rgba(255, 255, 255, 0.3)",
+      borderRadius: "2px"
+    }}></div>
+  </h3>
+
+  {/* 🔹 Daftar ulasan realtime dari Firestore */}
+  <div style={{ marginLeft: "30px" }}>
+    {reviews.map((rev) => (
+      <div key={rev.id} style={{ 
+        display: "flex", 
+        alignItems: "flex-start",
+        marginBottom: "30px",
+        position: "relative"
+      }}>
+        {/* Titik kiri */}
+        <div style={{
+          position: "absolute",
+          left: "-41px",
+          top: "15px",
+          width: "16px",
+          height: "16px",
+          borderRadius: "50%",
+          background: "rgba(255, 255, 255, 0.4)",
+          border: "2px solid rgba(255, 255, 255, 0.8)"
+        }}></div>
+        {/* Garis penghubung */}
+        <div style={{
+          position: "absolute",
+          left: "-30px",
+          top: "23px",
+          width: "28px",
+          height: "2px",
+          background: "rgba(255, 255, 255, 0.3)"
+        }}></div>
+
+        {/* Konten Ulasan */}
+        <div style={{ flex: "1" }}>
+          <div style={{
+            display: "inline-block",
+            padding: "8px 14px",
+            borderRadius: "6px",
+            background: "rgba(255, 255, 255, 0.05)",
+            border: "1px solid rgba(255, 255, 255, 0.2)",
+            marginBottom: "15px",
+            color: "#fff",
+            fontSize: "1.1rem",
+            fontWeight: "600"
+          }}>
+            <div style={{ fontWeight: "700", marginBottom: "5px" }}>
+              {rev.name}
             </div>
-            <div className="modal-image">
-              <div className="modal-image-content">🚀</div>
+            <div style={{ fontSize: "0.9rem", color: "#94a3b8" }}>
+              {rev.position || "Tanpa jabatan"}
             </div>
-            <div className="modal-info">
-              <div className="modal-date">
-                <span className="modal-date-label">Tanggal Rilis</span>
-                <span className="modal-date-value">19 September 2025</span>
-              </div>
-              <div className="modal-date">
-                <span className="modal-date-label">Status</span>
-                <span className="modal-date-value">Beta Testing</span>
-              </div>
-              <div className="modal-date">
-                <span className="modal-date-label">Versi</span>
-                <span className="modal-date-value">1.0.0</span>
-              </div>
-            </div>
-            <div className="modal-links">
-              <a href="#" className="modal-link">📋 Lihat Changelog</a>
-              <a href="#" className="modal-link">🐛 Laporkan Bug</a>
-              <a href="#" className="modal-link">💡 Beri Saran</a>
-              <a href="#" className="modal-link">📊 Status System</a>
-            </div>
-            <div className="modal-description">
-              <p>
-                Website ini sedang dalam tahap pengembangan dan uji coba. Beberapa fitur mungkin belum sepenuhnya stabil 
-                atau masih dalam proses penyempurnaan. Kami sangat menghargai feedback dan laporan bug dari pengguna 
-                untuk membantu kami meningkatkan kualitas website.
-              </p>
-              <p style={{ marginTop: "15px" }}>
-                Terima kasih atas pengertian dan partisipasinya dalam program uji coba ini! 🙏
-              </p>
+            <span style={{
+              display: "inline-block",
+              marginTop: "6px",
+              fontSize: "0.75rem",
+              color: "#22d3ee",
+              background: "rgba(34,211,238,0.1)",
+              padding: "2px 8px",
+              borderRadius: "4px"
+            }}>
+              Realtime Review
+            </span>
+          </div>
+
+          <div style={{
+            background: "rgba(255, 255, 255, 0.05)",
+            border: "1px solid rgba(255, 255, 255, 0.15)",
+            borderRadius: "8px",
+            padding: "20px",
+            color: "#e5e5e5",
+            fontSize: "1.1rem",
+            lineHeight: "1.6"
+          }}>
+            "{rev.comment}"
+          </div>
+        </div>
+      </div>
+    ))}
+
+    {/* 🔹 Contoh Review 1 */}
+    <div style={{ 
+      display: "flex", 
+      alignItems: "flex-start",
+      marginBottom: "30px",
+      position: "relative"
+    }}>
+      <div style={{
+        position: "absolute",
+        left: "-41px",
+        top: "15px",
+        width: "16px",
+        height: "16px",
+        borderRadius: "50%",
+        background: "rgba(255, 255, 255, 0.4)",
+        border: "2px solid rgba(255, 255, 255, 0.8)"
+      }}></div>
+      <div style={{
+        position: "absolute",
+        left: "-30px",
+        top: "23px",
+        width: "28px",
+        height: "2px",
+        background: "rgba(255, 255, 255, 0.3)"
+      }}></div>
+
+      <div style={{ flex: "1" }}>
+        <div style={{
+          display: "inline-block",
+          padding: "8px 14px",
+          borderRadius: "6px",
+          background: "rgba(255, 255, 255, 0.05)",
+          border: "1px solid rgba(255, 255, 255, 0.2)",
+          marginBottom: "15px",
+          color: "#fff",
+          fontSize: "1.1rem",
+          fontWeight: "600"
+        }}>
+          <div style={{ fontWeight: "700", marginBottom: "5px" }}>Budi Santoso</div>
+          <div style={{ fontSize: "0.9rem", color: "#94a3b8" }}>Project Manager di TechCorp</div>
+          <span style={{
+            display: "inline-block",
+            marginTop: "6px",
+            fontSize: "0.75rem",
+            color: "#facc15",
+            background: "rgba(250,204,21,0.1)",
+            padding: "2px 8px",
+            borderRadius: "4px"
+          }}>
+            Contoh Review
+          </span>
+        </div>
+
+        <div style={{
+          background: "rgba(255, 255, 255, 0.05)",
+          border: "1px solid rgba(255, 255, 255, 0.15)",
+          borderRadius: "8px",
+          padding: "20px",
+          color: "#e5e5e5",
+          fontSize: "1.1rem",
+          lineHeight: "1.6"
+        }}>
+          "Farid adalah developer yang sangat berbakat. Desain website yang dibuatnya sangat modern dan fungsional."
+        </div>
+      </div>
+    </div>
+
+    {/* 🔹 Contoh Review 2 */}
+    <div style={{ 
+      display: "flex", 
+      alignItems: "flex-start",
+      marginBottom: "30px",
+      position: "relative"
+    }}>
+      <div style={{
+        position: "absolute",
+        left: "-41px",
+        top: "15px",
+        width: "16px",
+        height: "16px",
+        borderRadius: "50%",
+        background: "rgba(255, 255, 255, 0.4)",
+        border: "2px solid rgba(255, 255, 255, 0.8)"
+      }}></div>
+      <div style={{
+        position: "absolute",
+        left: "-30px",
+        top: "23px",
+        width: "28px",
+        height: "2px",
+        background: "rgba(255, 255, 255, 0.3)"
+      }}></div>
+
+      <div style={{ flex: "1" }}>
+        <div style={{
+          display: "inline-block",
+          padding: "8px 14px",
+          borderRadius: "6px",
+          background: "rgba(255, 255, 255, 0.05)",
+          border: "1px solid rgba(255, 255, 255, 0.2)",
+          marginBottom: "15px",
+          color: "#fff",
+          fontSize: "1.1rem",
+          fontWeight: "600"
+        }}>
+          <div style={{ fontWeight: "700", marginBottom: "5px" }}>Siti Rahayu</div>
+          <div style={{ fontSize: "0.9rem", color: "#94a3b8" }}>UI/UX Designer di CreativeStudio</div>
+          <span style={{
+            display: "inline-block",
+            marginTop: "6px",
+            fontSize: "0.75rem",
+            color: "#facc15",
+            background: "rgba(250,204,21,0.1)",
+            padding: "2px 8px",
+            borderRadius: "4px"
+          }}>
+            Contoh Review
+          </span>
+        </div>
+
+        <div style={{
+          background: "rgba(255, 255, 255, 0.05)",
+          border: "1px solid rgba(255, 255, 255, 0.15)",
+          borderRadius: "8px",
+          padding: "20px",
+          color: "#e5e5e5",
+          fontSize: "1.1rem",
+          lineHeight: "1.6"
+        }}>
+          "Kolaborasi dengan Farid sangat menyenangkan. Ia cepat memahami kebutuhan desain dan menerapkannya dengan tepat. Hasilnya memuaskan!"
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+
+
+
+    
+    {/* Form untuk menambah ulasan baru */}
+<div style={{ 
+  background: "rgba(255, 255, 255, 0.05)",
+  border: "1px solid rgba(255, 255, 255, 0.15)",
+  borderRadius: "8px",
+  padding: "25px",
+  marginTop: "40px"
+}}>
+  <h4 style={{
+    fontSize: "1.4rem",
+    fontWeight: "700",
+    color: "#fff",
+    marginBottom: "20px"
+  }}>Tambah Ulasan Baru</h4>
+  
+  <div style={{ display: "grid", gap: "15px" }}>
+    <input 
+      type="text" 
+      placeholder="Nama"
+      value={newReview.name}
+      onChange={(e) => setNewReview({ ...newReview, name: e.target.value })}
+      style={{
+        padding: "12px 15px",
+        borderRadius: "6px",
+        border: "1px solid rgba(255, 255, 255, 0.2)",
+        background: "rgba(255, 255, 255, 0.05)",
+        color: "#fff",
+        fontSize: "1rem"
+      }}
+    />
+    
+    <input 
+      type="text" 
+      placeholder="Jabatan/Perusahaan"
+      value={newReview.position}
+      onChange={(e) => setNewReview({ ...newReview, position: e.target.value })}
+      style={{
+        padding: "12px 15px",
+        borderRadius: "6px",
+        border: "1px solid rgba(255, 255, 255, 0.2)",
+        background: "rgba(255, 255, 255, 0.05)",
+        color: "#fff",
+        fontSize: "1rem"
+      }}
+    />
+    
+    <textarea 
+      placeholder="Ulasan Anda"
+      rows="4"
+      value={newReview.comment}
+      onChange={(e) => setNewReview({ ...newReview, comment: e.target.value })}
+      style={{
+        padding: "12px 15px",
+        borderRadius: "6px",
+        border: "1px solid rgba(255, 255, 255, 0.2)",
+        background: "rgba(255, 255, 255, 0.05)",
+        color: "#fff",
+        fontSize: "1rem",
+        resize: "vertical"
+      }}
+    ></textarea>
+    
+    <button 
+      onClick={addReview}
+      style={{
+        padding: "12px 20px",
+        borderRadius: "6px",
+        border: "none",
+        background: "rgba(255, 255, 255, 0.1)",
+        color: "#fff",
+        fontSize: "1rem",
+        fontWeight: "600",
+        cursor: "pointer",
+        transition: "background 0.3s"
+      }}
+      onMouseOver={(e) => e.target.style.background = "rgba(255, 255, 255, 0.2)"}
+      onMouseOut={(e) => e.target.style.background = "rgba(255, 255, 255, 0.1)"}
+    >
+      Kirim Ulasan
+    </button>
+  </div>
+</div>
+ </div>
+    {/* End Bagian Ulasan */}
+
+    {/* Tambahkan style untuk animasi pulse */}
+    <style>{`
+      @keyframes pulse {
+        0% {
+          transform: scale(0.95);
+          box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7);
+        }
+        70% {
+          transform: scale(1.1);
+          box-shadow: 0 0 0 12px rgba(255, 255, 255, 0);
+        }
+        100% {
+          transform: scale(0.95);
+          box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
+        }
+      }
+    `}</style>
+  </div>
+)}
+
+            
+
+            
+            
+
+            {/* Kanan */}
+            <div className="footer-right">
+              <div className="linebox"><span>Kebijakan Privasi</span></div>
+              <div className="linebox"><span>Syarat & Ketentuan</span></div>
+              <div className="linebox"><span>Berikan Masukan</span></div>
             </div>
           </div>
         </div>
-      )}
 
-      {/* Halaman Tentang Saya */}
-      {isAboutOpen && (
-        <div className="about-overlay">
-          <button className="about-close" onClick={closeAbout}>×</button>
-          <h1 className="about-header">Tentang Saya</h1>
-          <div className="about-linebox">
-            <p style={{ margin: 0, fontSize: "1.1rem", lineHeight: "1.6" }}>
-              Saya adalah seorang web developer dengan passion dalam menciptakan 
-              pengalaman digital yang bermakna dan berfokus pada user experience.
-            </p>
-          </div>
-          <div className="about-linebox">
-            <p style={{ margin: 0, fontSize: "1.1rem", lineHeight: "1.6" }}>
-              Dengan latar belakang pendidikan di bidang komputer, saya terus 
-              belajar dan mengembangkan skill dalam teknologi web modern.
-            </p>
-          </div>
-          <div className="about-linebox">
-            <p style={{ margin: 0, fontSize: "1.1rem", lineHeight: "1.6" }}>
-              Saya percaya bahwa desain yang baik tidak hanya tentang estetika, 
-              tetapi juga tentang fungsionalitas dan aksesibilitas.
-            </p>
-          </div>
-        </div>
-      )}
-
-      {/* Modal Teknologi */}
-      {isTechOpen && (
-        <div className="modal-overlay">
-          <div className="modal-content">
-            <button className="modal-close" onClick={closeTech}>×</button>
-            <div className="modal-header">
-              <h2 className="modal-title">🛠️ Teknologi yang Digunakan</h2>
-            </div>
-            <div className="modal-description">
-              <p>
-                Website ini dibangun menggunakan teknologi modern untuk memberikan 
-                pengalaman yang optimal dan performa yang tinggi.
-              </p>
-            </div>
-            <div className="tech-grid">
-              <div className="tech-card">
-                <div className="tech-icon">⚛️</div>
-                <h3 className="tech-title">React</h3>
-                <p className="tech-description">
-                  Library JavaScript untuk membangun user interface yang interaktif 
-                  dan reusable components.
-                </p>
+        {/* Modal Uji Coba */}
+        {isModalOpen && (
+          <div className="modal-overlay" onClick={closeModal}>
+            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+              <button className="modal-close" onClick={closeModal}>×</button>
+              
+              <div className="modal-header">
+                <h2 className="modal-title">🚧 Website Dalam Masa Uji Coba 🚧</h2>
+                <div className="linebox">
+                  <span>Status: Development</span>
+                </div>
               </div>
-              <div className="tech-card">
-                <div className="tech-icon">🔥</div>
-                <h3 className="tech-title">Firebase</h3>
-                <p className="tech-description">
-                  Platform backend-as-a-service untuk autentikasi, database real-time, 
-                  dan hosting.
-                </p>
+              
+              <div className="modal-image">
+                <div className="modal-image-content">🛠️</div>
               </div>
-              <div className="tech-card">
-                <div className="tech-icon">🎨</div>
-                <h3 className="tech-title">GSAP</h3>
-                <p className="tech-description">
-                  GreenSock Animation Platform untuk animasi yang smooth dan 
-                  performant.
-                </p>
+              
+              <div className="modal-info">
+                <div className="modal-date">
+                  <span className="modal-date-label">Tanggal Mulai</span>
+                  <span className="modal-date-value">15 September 2025</span>
+                </div>
+                <div className="modal-date">
+                  <span className="modal-date-label">Update Terakhir</span>
+                  <span className="modal-date-value">19 September 2025</span>
+                </div>
+                <div className="modal-date">
+                  <span className="modal-date-label">Versi</span>
+                  <span className="modal-date-value">v1.0.0-beta</span>
+                </div>
+              </div>
+              
+              <div className="modal-description">
+                <p>Website ini sedang dalam tahap pengembangan dan uji coba. Beberapa fitur mungkin belum berfungsi dengan sempurna atau masih dalam proses penyempurnaan. Terima kasih atas pengertiannya.</p>
+              </div>
+              
+              <div className="modal-links">
+                <a href="https://github.com/example" className="modal-link" target="_blank" rel="noopener noreferrer">
+                  Repository GitHub
+                </a>
+                <a href="https://documentation.example.com" className="modal-link" target="_blank" rel="noopener noreferrer">
+                  Dokumentasi
+                </a>
+                <a href="https://feedback.example.com" className="modal-link" target="_blank" rel="noopener noreferrer">
+                  Berikan Masukan
+                </a>
+                <a href="https://status.example.com" className="modal-link" target="_blank" rel="noopener noreferrer">
+                  Status Website
+                </a>
               </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </>
   );
 }
+
+
+
+
+
+
+
+
+
+
+
+
