@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
 import { 
   getFirestore, collection, addDoc, onSnapshot, serverTimestamp, query, orderBy
@@ -22,11 +23,15 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 
+// GSAP Plugin ScrollTrigger
+gsap.registerPlugin(ScrollTrigger);
+
 export default function AvailablePage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isAboutOpen, setIsAboutOpen] = useState(false);
 
   const titleRef = useRef(null);
+   const scrollRef = useRef(null); // Referensi untuk bagian scroll horizontal
 
 
   // State untuk ulasan
@@ -44,7 +49,7 @@ export default function AvailablePage() {
   const closeModal = () => setIsModalOpen(false);
 
 
-    // 🔹 Animasi GSAP untuk judul
+  // Setup GSAP dan ScrollTrigger untuk animasi
   useEffect(() => {
     if (titleRef.current) {
       gsap.fromTo(
@@ -53,7 +58,6 @@ export default function AvailablePage() {
         { opacity: 1, y: 0, duration: 1.5, ease: "power3.out" }
       );
     }
-  }, []);
 
   // Ambil ulasan dari Firestore
   useEffect(() => {
@@ -84,6 +88,21 @@ export default function AvailablePage() {
       }
     }
   };
+
+
+     // Inisialisasi ScrollTrigger untuk scroll horizontal yang lebih kasar
+    gsap.to(scrollRef.current, {
+      x: "-100%", // Scroll ke kiri saat halaman digulir
+      ease: "none", // Tidak ada efek easing, agar terlihat kasar
+      scrollTrigger: {
+        trigger: scrollRef.current,
+        pin: true,
+        scrub: 1, // Animasi mengikuti scroll secara langsung
+        start: "top top",
+        end: "bottom bottom",
+      },
+    });
+  }, []);
 
   return (
     <>
@@ -636,6 +655,9 @@ export default function AvailablePage() {
         >
           AVAILABLE FOR WORK
         </h1>
+
+
+        
 
           {/* Banner Uji Coba */}
           <div className="banner-ujicoba">
@@ -1499,6 +1521,62 @@ export default function AvailablePage() {
           </div>
         </div>
 
+
+  {/* Deskripsi tentang GSAP, Lenis, dan ScrollTrigger */}
+          <div className="intro">
+            <h2>Enhanced with GSAP, Lenis, and ScrollTrigger</h2>
+            <p>
+              This website uses <strong>GSAP</strong> for animations,{" "}
+              <strong>Lenis</strong> for silky-smooth scrolling, and{" "}
+              <strong>ScrollTrigger</strong> for scroll-based animations.
+            </p>
+          </div>
+
+          {/* Horizontal Scroll Section */}
+          <div
+            ref={scrollRef}
+            style={{
+              display: "flex",
+              overflowX: "hidden",
+              whiteSpace: "nowrap",
+              marginTop: "3rem",
+            }}
+          >
+            <div
+              style={{
+                minWidth: "100vw",
+                background: "#333",
+                color: "#fff",
+                padding: "3rem",
+                marginRight: "2rem",
+                flexShrink: 0,
+              }}
+            >
+              <h3>Section 1</h3>
+              <p>This is a horizontally scrollable section with animations!</p>
+            </div>
+
+            <div
+              style={{
+                minWidth: "100vw",
+                background: "#555",
+                color: "#fff",
+                padding: "3rem",
+                marginRight: "2rem",
+                flexShrink: 0,
+              }}
+            >
+              <h3>Section 2</h3>
+              <p>Another horizontally scrollable section with GSAP animation.</p>
+            </div>
+          </div>
+        </div>
+
+
+
+
+        
+
         {/* Modal Uji Coba */}
         {isModalOpen && (
           <div className="modal-overlay" onClick={closeModal}>
@@ -1556,6 +1634,7 @@ export default function AvailablePage() {
     </>
   );
 }
+
 
 
 
