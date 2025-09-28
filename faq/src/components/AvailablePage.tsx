@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, } from "react";
+import React, { useState, useEffect } from "react";
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
 import { 
   getFirestore, collection, addDoc, onSnapshot, serverTimestamp, query, orderBy
@@ -21,14 +21,9 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 
-
-
 export default function AvailablePage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isAboutOpen, setIsAboutOpen] = useState(false);
-
-  const titleRef = useRef(null);
-
 
   // State untuk ulasan
   const [reviews, setReviews] = useState([]);
@@ -43,9 +38,6 @@ export default function AvailablePage() {
 
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
-
-
-  
 
   // Ambil ulasan dari Firestore
   useEffect(() => {
@@ -76,9 +68,6 @@ export default function AvailablePage() {
       }
     }
   };
-
-
-    
 
   return (
     <>
@@ -616,24 +605,19 @@ export default function AvailablePage() {
         
         }}
       >
-       
-       {/* Konten Utama */}
-      <div style={{ padding: "60px", flex: "1" }}>
-        <h1
-          ref={titleRef} // 👉 hubungkan ref ke elemen h1
-          style={{
-            fontSize: "4rem",
-            fontWeight: "700",
-            marginBottom: "1.5rem",
-            letterSpacing: "-1px",
-            color: "#fff",
-          }}
-        >
-          AVAILABLE FOR WORK
-        </h1>
-
-
-        
+        {/* Konten Utama */}
+        <div style={{ padding: "60px", flex: "1" }}>
+          <h1
+            style={{
+              fontSize: "4rem",
+              fontWeight: "700",
+              marginBottom: "1.5rem",
+              letterSpacing: "-1px",
+              color: "#fff",
+            }}
+          >
+            AVAILABLE FOR WORK
+          </h1>
 
           {/* Banner Uji Coba */}
           <div className="banner-ujicoba">
@@ -1485,7 +1469,7 @@ export default function AvailablePage() {
 
             
 
-    
+            
             
 
             {/* Kanan */}
@@ -1496,11 +1480,6 @@ export default function AvailablePage() {
             </div>
           </div>
         </div>
-
-
-
-
-
 
         {/* Modal Uji Coba */}
         {isModalOpen && (
@@ -1559,5 +1538,13 @@ export default function AvailablePage() {
     </>
   );
 }
+
+
+
+
+
+
+
+
 
 
