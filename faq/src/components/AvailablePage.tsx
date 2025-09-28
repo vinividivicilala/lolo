@@ -28,7 +28,6 @@ export default function AvailablePage() {
   const [isAboutOpen, setIsAboutOpen] = useState(false);
 
   const titleRef = useRef(null);
-   const scrollRef = useRef(null); // Referensi untuk bagian scroll horizontal
 
 
   // State untuk ulasan
@@ -1568,6 +1567,7 @@ export default function AvailablePage() {
     </>
   );
 }
+
 
 
 
