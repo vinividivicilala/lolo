@@ -1493,7 +1493,7 @@ export default function AvailablePage() {
 
             
 
-            
+    
             
 
             {/* Kanan */}
@@ -1508,7 +1508,7 @@ export default function AvailablePage() {
 
 
 
-        
+
 
         {/* Modal Uji Coba */}
         {isModalOpen && (
@@ -1567,19 +1567,6 @@ export default function AvailablePage() {
     </>
   );
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
