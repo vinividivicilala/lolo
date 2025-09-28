@@ -1567,6 +1567,3 @@ export default function AvailablePage() {
     </>
   );
 }
-
-
-
