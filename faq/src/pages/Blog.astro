@@ -332,13 +332,20 @@ const featuredCount = getFeaturedCount();
 </Layout>
 
 <style is:global>
+
+@import url('https://fonts.googleapis.com/css2?family=Arame&display=swap');
+
   /* CSS YANG SUDAH ADA TETAP SAMA */
   body {
     background: #111;
     color: #fff;
-    font-family: 'Inter', sans-serif;
+   font-family: 'Arame';
     font-size: 18px;
   }
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Arame';
+}
 
   .container {
     max-width: 1200px;
@@ -1298,3 +1305,4 @@ const featuredCount = getFeaturedCount();
     window.selectSearchResult = selectSearchResult;
   });
 </script>
+
