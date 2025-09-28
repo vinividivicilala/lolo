@@ -1,6 +1,13 @@
 ---
 // src/pages/blog.astro
 import Layout from '../layouts/Layout.astro';
+// Import GSAP dan plugins (tambahkan di bagian atas file)
+import gsap from 'gsap';
+import ScrollTrigger from 'gsap/ScrollTrigger';
+import Flip from 'gsap/Flip';
+import Lenis from 'lenis';
+
+
 
 // DATA BLOG OTOMATIS (TAMBAHAN BARU)
 const blogData = [
@@ -78,6 +85,11 @@ const latestPost = getLatestFeaturedPost();
 const newPostsCount = getNewPostCount();
 const totalBlogs = getTotalBlogCount();
 const featuredCount = getFeaturedCount();
+
+// Inisialisasi GSAP plugins
+if (typeof window !== 'undefined') {
+  gsap.registerPlugin(ScrollTrigger, Flip);
+}
 ---
 
 <Layout title="Blog | Note Farid" description="Halaman blog kosong dengan desain baru." currentPage="blog">
@@ -311,6 +323,124 @@ const featuredCount = getFeaturedCount();
             <span class="tag">2024</span>
           </div>
         </section>
+
+
+   <!-- HORIZONTAL SCROLL SECTION (TAMBAHAN BARU) -->
+      <section class="horizontal-scroll-section">
+        <div class="section-header">
+          <h2 class="section-title">
+            <span class="highlight-badge">Featured Series</span>
+            Trending Topics
+          </h2>
+          <div class="scroll-hint">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M7 17l5-5-5-5M12 17l5-5-5-5"/>
+            </svg>
+            Scroll horizontal
+          </div>
+        </div>
+
+        <div class="horizontal-scroll-container">
+          <div class="horizontal-scroll-content">
+            <!-- Card 1 -->
+            <div class="horizontal-card">
+              <div class="card-image gradient-h-1">
+                <div class="card-badge">Web Dev</div>
+              </div>
+              <div class="card-content">
+                <h3 class="card-title">Modern JavaScript Frameworks</h3>
+                <p class="card-desc">Explore the latest trends in JavaScript ecosystem and framework comparisons.</p>
+                <div class="card-stats">
+                  <span class="stat">15 Articles</span>
+                  <span class="stat">Updated Weekly</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Card 2 -->
+            <div class="horizontal-card">
+              <div class="card-image gradient-h-2">
+                <div class="card-badge">Design</div>
+              </div>
+              <div class="card-content">
+                <h3 class="card-title">UI/UX Best Practices</h3>
+                <p class="card-desc">Learn modern design principles and user experience optimization techniques.</p>
+                <div class="card-stats">
+                  <span class="stat">12 Articles</span>
+                  <span class="stat">Beginner Friendly</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Card 3 -->
+            <div class="horizontal-card">
+              <div class="card-image gradient-h-3">
+                <div class="card-badge">SEO</div>
+              </div>
+              <div class="card-content">
+                <h3 class="card-title">Technical SEO Mastery</h3>
+                <p class="card-desc">Deep dive into technical SEO optimization for developers and marketers.</p>
+                <div class="card-stats">
+                  <span class="stat">8 Articles</span>
+                  <span class="stat">Advanced Level</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Card 4 -->
+            <div class="horizontal-card">
+              <div class="card-image gradient-h-4">
+                <div class="card-badge">Performance</div>
+              </div>
+              <div class="card-content">
+                <h3 class="card-title">Web Performance Optimization</h3>
+                <p class="card-desc">Optimize your website speed and performance with proven techniques.</p>
+                <div class="card-stats">
+                  <span class="stat">10 Articles</span>
+                  <span class="stat">Practical Guides</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Card 5 -->
+            <div class="horizontal-card">
+              <div class="card-image gradient-h-5">
+                <div class="card-badge">Tools</div>
+              </div>
+              <div class="card-content">
+                <h3 class="card-title">Developer Toolbox</h3>
+                <p class="card-desc">Essential tools and extensions that every developer should know about.</p>
+                <div class="card-stats">
+                  <span class="stat">6 Articles</span>
+                  <span class="stat">Productivity</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Card 6 -->
+            <div class="horizontal-card">
+              <div class="card-image gradient-h-6">
+                <div class="card-badge">Career</div>
+              </div>
+              <div class="card-content">
+                <h3 class="card-title">Developer Career Growth</h3>
+                <p class="card-desc">Strategies for career advancement and professional development.</p>
+                <div class="card-stats">
+                  <span class="stat">7 Articles</span>
+                  <span class="stat">Career Tips</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="scroll-progress">
+          <div class="progress-bar"></div>
+        </div>
+      </section>
+
+
+
       </div>
     </main>
   </div>
@@ -333,7 +463,175 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 
+  /* HORIZONTAL SCROLL STYLES */
+  .horizontal-scroll-section {
+    margin: 80px 0;
+    position: relative;
+  }
 
+  .scroll-hint {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #4ecdc4;
+    font-size: 0.9rem;
+    font-weight: 600;
+    opacity: 0.8;
+  }
+
+  .horizontal-scroll-container {
+    position: relative;
+    overflow: hidden;
+    margin: 40px 0;
+    padding: 20px 0;
+  }
+
+  .horizontal-scroll-content {
+    display: flex;
+    gap: 30px;
+    width: max-content;
+    will-change: transform;
+  }
+
+  .horizontal-card {
+    flex: 0 0 400px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    position: relative;
+  }
+
+  .horizontal-card:hover {
+    border-color: rgba(255, 255, 255, 0.3);
+    transform: translateY(-5px);
+  }
+
+  .card-image {
+    height: 200px;
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-end;
+    padding: 20px;
+  }
+
+  .card-badge {
+    background: rgba(255, 255, 255, 0.9);
+    color: #111;
+    padding: 6px 12px;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    font-weight: 600;
+  }
+
+  .card-content {
+    padding: 25px;
+  }
+
+  .card-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+    color: #fff;
+    line-height: 1.3;
+  }
+
+  .card-desc {
+    color: rgba(255, 255, 255, 0.8);
+    line-height: 1.5;
+    margin-bottom: 20px;
+    font-size: 0.95rem;
+  }
+
+  .card-stats {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+  }
+
+  .stat {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.9);
+  }
+
+  /* Gradient backgrounds for horizontal cards */
+  .gradient-h-1 {
+    background: linear-gradient(135deg, #ff6b6b, #4ecdc4);
+  }
+
+  .gradient-h-2 {
+    background: linear-gradient(135deg, #45b7d1, #96ceb4);
+  }
+
+  .gradient-h-3 {
+    background: linear-gradient(135deg, #feca57, #ff9ff3);
+  }
+
+  .gradient-h-4 {
+    background: linear-gradient(135deg, #54a0ff, #5f27cd);
+  }
+
+  .gradient-h-5 {
+    background: linear-gradient(135deg, #00d2d3, #ff9ff3);
+  }
+
+  .gradient-h-6 {
+    background: linear-gradient(135deg, #ff9ff3, #feca57);
+  }
+
+  .scroll-progress {
+    position: absolute;
+    bottom: -20px;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #4f46e5, #06b6d4);
+    width: 0%;
+    border-radius: 2px;
+    transition: width 0.1s ease;
+  }
+
+  /* Responsive horizontal scroll */
+  @media (max-width: 768px) {
+    .horizontal-card {
+      flex: 0 0 300px;
+    }
+    
+    .card-image {
+      height: 150px;
+    }
+    
+    .card-content {
+      padding: 20px;
+    }
+    
+    .card-title {
+      font-size: 1.3rem;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .horizontal-card {
+      flex: 0 0 280px;
+    }
+    
+    .horizontal-scroll-content {
+      gap: 20px;
+    }
+  }
 
 
   .container {
@@ -1132,7 +1430,125 @@ h1, h2, h3, h4, h5, h6 {
 
 <script is:inline>
 
+// Initialize Lenis for smooth scrolling
+    const lenis = new Lenis({
+      duration: 1.2,
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      orientation: 'vertical',
+      gestureOrientation: 'vertical',
+      smoothWheel: true,
+      wheelMultiplier: 1,
+      touchMultiplier: 2,
+      infinite: false,
+    });
 
+    function raf(time) {
+      lenis.raf(time);
+      requestAnimationFrame(raf);
+    }
+    requestAnimationFrame(raf);
+
+    // Horizontal Scroll Animation with GSAP
+    function initHorizontalScroll() {
+      const horizontalSection = document.querySelector('.horizontal-scroll-section');
+      const horizontalContent = document.querySelector('.horizontal-scroll-content');
+      const progressBar = document.querySelector('.progress-bar');
+      
+      if (!horizontalSection || !horizontalContent) return;
+
+      const cards = gsap.utils.toArray('.horizontal-card');
+      
+      // Calculate total scroll width
+      const totalWidth = horizontalContent.scrollWidth - horizontalSection.offsetWidth;
+      
+      // GSAP horizontal scroll animation
+      gsap.to(horizontalContent, {
+        x: () => -totalWidth,
+        ease: "none",
+        scrollTrigger: {
+          trigger: horizontalSection,
+          start: "top top",
+          end: () => `+=${totalWidth}`,
+          pin: true,
+          scrub: 1,
+          anticipatePin: 1,
+          onUpdate: (self) => {
+            // Update progress bar
+            if (progressBar) {
+              progressBar.style.width = `${self.progress * 100}%`;
+            }
+            
+            // Parallax effect for cards
+            cards.forEach((card, index) => {
+              const speed = 0.5 + (index * 0.1);
+              const x = self.progress * 100 * speed;
+              gsap.to(card, {
+                x: -x,
+                rotationY: x * 0.1,
+                duration: 0.1
+              });
+            });
+          }
+        }
+      });
+
+      // Flip animation for card hover
+      cards.forEach((card, index) => {
+        card.addEventListener('mouseenter', () => {
+          const state = Flip.getState(cards);
+          card.style.zIndex = 10;
+          gsap.to(card, {
+            scale: 1.05,
+            duration: 0.3,
+            ease: "power2.out"
+          });
+          
+          cards.forEach((otherCard, otherIndex) => {
+            if (otherIndex !== index) {
+              gsap.to(otherCard, {
+                scale: 0.95,
+                duration: 0.3,
+                ease: "power2.out"
+              });
+            }
+          });
+        });
+
+        card.addEventListener('mouseleave', () => {
+          gsap.to(cards, {
+            scale: 1,
+            duration: 0.3,
+            ease: "power2.out"
+          });
+          card.style.zIndex = '';
+        });
+      });
+
+      // ScrollTrigger refresh handler
+      ScrollTrigger.addEventListener('refresh', () => {
+        if (progressBar) {
+          const progress = ScrollTrigger.getById('horizontal-scroll')?.progress || 0;
+          progressBar.style.width = `${progress * 100}%`;
+        }
+      });
+
+      ScrollTrigger.refresh();
+    }
+
+    // Initialize horizontal scroll after page load
+    setTimeout(initHorizontalScroll, 100);
+
+    // Handle resize events
+    let resizeTimeout;
+    window.addEventListener('resize', () => {
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(() => {
+        ScrollTrigger.refresh();
+        initHorizontalScroll();
+      }, 250);
+    });
+
+   
 
 
   // Script yang sudah ada tetap sama
@@ -1298,6 +1714,7 @@ h1, h2, h3, h4, h5, h6 {
     window.selectSearchResult = selectSearchResult;
   });
 </script>
+
 
 
 
