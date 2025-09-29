@@ -46,27 +46,6 @@ export default function AvailablePage() {
     const textRef = useRef(null);
   const timelineRef = useRef(null);
 
-  useEffect(() => {
-    // Animasi untuk teks utama
-    if (textRef.current) {
-      gsap.fromTo(textRef.current, 
-        { 
-          opacity: 0, 
-          y: 50 
-        },
-        { 
-          opacity: 1, 
-          y: 0, 
-          duration: 1,
-          scrollTrigger: {
-            trigger: textRef.current,
-            start: "top 80%",
-            end: "bottom 20%",
-            toggleActions: "play none none reverse"
-          }
-        }
-      );
-    }
 
     // Animasi untuk timeline items
     if (timelineRef.current) {
@@ -118,18 +97,16 @@ export default function AvailablePage() {
     });
 
 
-  // Ambil ulasan dari Firestore
   useEffect(() => {
-    const q = query(collection(db, "reviews"), orderBy("createdAt", "desc"));
-    const unsubscribe = onSnapshot(q, (querySnapshot) => {
-      const reviewsData = [];
-      querySnapshot.forEach((doc) => {
-        reviewsData.push({ id: doc.id, ...doc.data() });
-      });
-      setReviews(reviewsData);
-    });
-    return () => unsubscribe();
-  }, []);
+    // Animasi untuk teks utama
+    if (textRef.current) {
+      gsap.fromTo(textRef.current, 
+        { opacity: 0, y: 50 },
+        { opacity: 1, y: 0, duration: 1, 
+          scrollTrigger: { trigger: textRef.current, start: "top 80%", end: "bottom 20%", toggleActions: "play none none reverse" }
+        }
+      );
+    }
 
   // Tambahkan ulasan baru
   const addReview = async () => {
@@ -1621,6 +1598,7 @@ export default function AvailablePage() {
     </>
   );
 }
+
 
 
 
