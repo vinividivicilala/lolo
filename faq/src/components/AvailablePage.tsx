@@ -1620,10 +1620,10 @@ export default function AvailablePage() {
             </div>
           </div>
         )}
-      </div>
     </>
   );
 }
+
 
 
 
