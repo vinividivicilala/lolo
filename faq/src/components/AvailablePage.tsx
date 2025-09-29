@@ -1,6 +1,9 @@
 
 
 import React, { useState, useEffect } from "react";
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
 import { 
   getFirestore, collection, addDoc, onSnapshot, serverTimestamp, query, orderBy
@@ -22,6 +25,8 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 
+gsap.registerPlugin(ScrollTrigger);
+
 export default function AvailablePage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isAboutOpen, setIsAboutOpen] = useState(false);
@@ -39,6 +44,81 @@ export default function AvailablePage() {
 
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
+
+    const textRef = useRef(null);
+  const timelineRef = useRef(null);
+
+  useEffect(() => {
+    // Animasi untuk teks utama
+    if (textRef.current) {
+      gsap.fromTo(textRef.current, 
+        { 
+          opacity: 0, 
+          y: 50 
+        },
+        { 
+          opacity: 1, 
+          y: 0, 
+          duration: 1,
+          scrollTrigger: {
+            trigger: textRef.current,
+            start: "top 80%",
+            end: "bottom 20%",
+            toggleActions: "play none none reverse"
+          }
+        }
+      );
+    }
+
+    // Animasi untuk timeline items
+    if (timelineRef.current) {
+      const timelineItems = timelineRef.current.querySelectorAll('.timeline-item');
+      
+      timelineItems.forEach((item, index) => {
+        gsap.fromTo(item,
+          {
+            opacity: 0,
+            x: -50
+          },
+          {
+            opacity: 1,
+            x: 0,
+            duration: 0.8,
+            delay: index * 0.2,
+            scrollTrigger: {
+              trigger: item,
+              start: "top 85%",
+              end: "bottom 15%",
+              toggleActions: "play none none reverse"
+            }
+          }
+        );
+      });
+    }
+
+    // Animasi untuk icon items
+    const iconItems = document.querySelectorAll('.icon-item');
+    iconItems.forEach((icon, index) => {
+      gsap.fromTo(icon,
+        {
+          opacity: 0,
+          scale: 0.8
+        },
+        {
+          opacity: 1,
+          scale: 1,
+          duration: 0.6,
+          delay: index * 0.1,
+          scrollTrigger: {
+            trigger: icon,
+            start: "top 90%",
+            end: "bottom 10%",
+            toggleActions: "play none none reverse"
+          }
+        }
+      );
+    });
+
 
   // Ambil ulasan dari Firestore
   useEffect(() => {
@@ -69,6 +149,15 @@ export default function AvailablePage() {
       }
     }
   };
+
+
+// Cleanup function
+    return () => {
+      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
+    };
+  }, []);
+
+    
 
   return (
     <>
@@ -606,19 +695,15 @@ export default function AvailablePage() {
         
         }}
       >
-        {/* Konten Utama */}
-        <div style={{ padding: "60px", flex: "1" }}>
-          <h1
-            style={{
-              fontSize: "4rem",
-              fontWeight: "700",
-              marginBottom: "1.5rem",
-              letterSpacing: "-1px",
-              color: "#fff",
-            }}
-          >
-            AVAILABLE FOR WORK
-          </h1>
+        {/* Teks utama dengan animasi */}
+      <div ref={textRef}>
+        <h1 style={{ fontSize: "4rem", fontWeight: "700", marginBottom: "1.5rem" }}>
+          AVAILABLE FOR WORK
+        </h1>
+        <p style={{ fontSize: "1.4rem", lineHeight: "1.8" }}>
+          Halo! 👋 Saya adalah individu yang penuh semangat...
+        </p>
+      </div>
 
           {/* Banner Uji Coba */}
           <div className="banner-ujicoba">
@@ -1539,6 +1624,7 @@ export default function AvailablePage() {
     </>
   );
 }
+
 
 
 
