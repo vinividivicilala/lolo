@@ -1,5 +1,8 @@
 
 import React, { useState, useEffect } from "react";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
 import { 
   getFirestore, collection, addDoc, onSnapshot, serverTimestamp, query, orderBy
@@ -20,6 +23,10 @@ import {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
+
+
+// Mendaftarkan plugin ScrollTrigger ke GSAP
+gsap.registerPlugin(ScrollTrigger);
 
 export default function AvailablePage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -68,6 +75,26 @@ export default function AvailablePage() {
       }
     }
   };
+
+  useEffect(() => {
+    // Animasi teks saat elemen muncul di viewport
+    gsap.fromTo(
+      ".scroll-animate", 
+      { opacity: 0, y: 50 }, 
+      { 
+        opacity: 1, 
+        y: 0, 
+        duration: 1, 
+        scrollTrigger: {
+          trigger: ".scroll-animate", // Menentukan elemen yang memicu animasi
+          start: "top 80%", // Animasi dimulai saat elemen mencapai 80% layar
+          end: "top 20%", // Animasi berhenti saat elemen mencapai 20% layar
+          scrub: true, // Membuat efek scroll smooth
+          markers: true // Digunakan untuk debugging, bisa dihapus saat produksi
+        }
+      }
+    );
+  }, []);
 
   return (
     <>
@@ -605,19 +632,18 @@ export default function AvailablePage() {
         
         }}
       >
-        {/* Konten Utama */}
-        <div style={{ padding: "60px", flex: "1" }}>
-          <h1
-            style={{
-              fontSize: "4rem",
-              fontWeight: "700",
-              marginBottom: "1.5rem",
-              letterSpacing: "-1px",
-              color: "#fff",
-            }}
-          >
-            AVAILABLE FOR WORK
-          </h1>
+
+        <div style={{ padding: "60px", backgroundColor: "#000", color: "#fff" }}>
+      <h1 className="scroll-animate" style={{ fontSize: "4rem", fontWeight: "700" }}>
+        Available for Work
+      </h1>
+      <p className="scroll-animate" style={{ fontSize: "1.4rem", lineHeight: "1.8", color: "#e5e5e5" }}>
+        Saya adalah individu yang penuh semangat, kreatif, dan selalu haus akan pengalaman baru. Saya terbuka untuk peluang kerja maupun project kreatif yang menantang.
+      </p>
+      {/* Konten lainnya bisa ditambahkan di sini */}
+    </div>
+  );
+}
 
           {/* Banner Uji Coba */}
           <div className="banner-ujicoba">
@@ -1538,6 +1564,7 @@ export default function AvailablePage() {
     </>
   );
 }
+
 
 
 
