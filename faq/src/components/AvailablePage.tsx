@@ -640,7 +640,6 @@ export default function AvailablePage() {
       <p className="scroll-animate" style={{ fontSize: "1.4rem", lineHeight: "1.8", color: "#e5e5e5" }}>
         Saya adalah individu yang penuh semangat, kreatif, dan selalu haus akan pengalaman baru. Saya terbuka untuk peluang kerja maupun project kreatif yang menantang.
       </p>
-      {/* Konten lainnya bisa ditambahkan di sini */}
     </div>
   );
 }
@@ -1564,6 +1563,7 @@ export default function AvailablePage() {
     </>
   );
 }
+
 
 
 
