@@ -620,26 +620,45 @@ export default function AvailablePage() {
 
         
       `}</style>
-
-      <div
-  style={{
-    minHeight: "100vh",
-    display: "flex",
-    flexDirection: "column",
-    justifyContent: "space-between",
-    backgroundColor: "#000",
-    color: "#f1f5f9"
-  }}
->
-  <div style={{ padding: "60px", backgroundColor: "#000", color: "#fff" }}>
-    <h1 className="scroll-animate" style={{ fontSize: "4rem", fontWeight: "700" }}>
-      Available for Work
-    </h1>
-    <p className="scroll-animate" style={{ fontSize: "1.4rem", lineHeight: "1.8", color: "#e5e5e5" }}>
-      Saya adalah individu yang penuh semangat, kreatif, dan selalu haus akan pengalaman baru. Saya terbuka untuk peluang kerja maupun project kreatif yang menantang.
-    </p>
-  </div>
-</div>
+ <div
+      style={{
+        minHeight: "100vh",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "space-between",
+        backgroundColor: "#000",
+        color: "#f1f5f9",
+      }}
+    >
+      {/* Konten Utama */}
+      <div style={{ padding: "60px", flex: "1" }}>
+        <h1
+          className="scroll-animate"
+          style={{
+            fontSize: "4rem",
+            fontWeight: "700",
+            marginBottom: "1.5rem",
+            letterSpacing: "-1px",
+            color: "#fff",
+          }}
+        >
+          AVAILABLE FOR WORK
+        </h1>
+        <p
+          className="scroll-animate"
+          style={{
+            fontSize: "1.4rem",
+            lineHeight: "1.8",
+            color: "#e5e5e5",
+          }}
+        >
+          Saya adalah individu yang penuh semangat, kreatif, dan selalu haus akan pengalaman baru. Saya terbuka untuk peluang kerja maupun project kreatif yang menantang.
+        </p>
+        {/* Konten lainnya bisa ditambahkan di sini */}
+      </div>
+    </div>
+  );
+}
 
 
           {/* Banner Uji Coba */}
@@ -1561,6 +1580,7 @@ export default function AvailablePage() {
     </>
   );
 }
+
 
 
 
