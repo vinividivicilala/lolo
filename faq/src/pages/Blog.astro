@@ -1,6 +1,68 @@
 ---
 // src/pages/blog.astro
 import Layout from '../layouts/Layout.astro';
+
+// Data blog (bisa dipindah ke file terpisah nanti)
+const blogPosts = {
+  tentangDiri: [
+    {
+      title: "Perjalanan Menjadi Developer",
+      date: "25 Des 2023",
+      readTime: "5 min read",
+      image: "/images/5.jpg",
+      desc: "Bagaimana saya memulai perjalanan sebagai developer dan tantangan yang dihadapi selama proses pembelajaran.",
+      tags: ["Programming", "Journey"],
+      badge: "New"
+    },
+    {
+      title: "Passion dalam Teknologi", 
+      date: "20 Des 2023",
+      readTime: "7 min read",
+      image: "/images/5.jpg",
+      desc: "Menjelajahi minat dan passion saya di dunia teknologi serta bagaimana hal itu membentuk karir saya.",
+      tags: ["Technology", "Passion"],
+      badge: null
+    },
+    {
+      title: "Belajar dari Kegagalan",
+      date: "15 Des 2023", 
+      readTime: "4 min read",
+      image: "/images/5.jpg",
+      desc: "Refleksi tentang kegagalan yang pernah dialami dan pelajaran berharga yang didapat darinya.",
+      tags: ["Reflection", "Growth"],
+      badge: null
+    }
+  ],
+  random: [
+    {
+      title: "Tips Produktivitas Harian",
+      date: "10 Des 2023",
+      readTime: "6 min read", 
+      image: "/images/5.jpg",
+      desc: "Metode dan teknik yang saya gunakan untuk tetap produktif dalam pekerjaan sehari-hari.",
+      tags: ["Productivity", "Tips"],
+      badge: "New"
+    },
+    {
+      title: "Eksplorasi Desain Web Modern",
+      date: "5 Des 2023",
+      readTime: "8 min read",
+      image: "/images/5.jpg",
+      desc: "Mengenal tren desain web terkini dan bagaimana menerapkannya dalam proyek nyata.",
+      tags: ["Design", "Web"],
+      badge: null
+    },
+    {
+      title: "Membaca untuk Pengembangan Diri",
+      date: "1 Des 2023",
+      readTime: "5 min read",
+      image: "/images/5.jpg",
+      desc: "Rekomendasi buku yang telah mempengaruhi pemikiran dan membantu pengembangan diri.", 
+      tags: ["Reading", "Books"],
+      badge: null
+    }
+  ]
+};
 ---
 
 <Layout title="Blog | Note Farid" description="Halaman blog kosong dengan desain baru." currentPage="blog">
@@ -38,85 +100,50 @@ import Layout from '../layouts/Layout.astro';
         <div class="section-header">
           <h2 class="section-title">
             Tentang Diri
-            <span class="highlight-badge" id="tentangDiriCount">3 Artikel</span>
+            <span class="highlight-badge">{blogPosts.tentangDiri.length} Artikel</span>
           </h2>
         </div>
 
         <div class="blog-grid">
-          <!-- Blog 1 -->
-          <div class="blog-card">
-            <div class="blog-images">
-              <img src="/images/5.jpg" alt="Tentang Diri" class="blog-image" />
-            </div>
-            <div class="blog-content">
-              <div class="blog-meta">
-                <span class="blog-date">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
-                    <path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM2 2a1 1 0 0 0-1 1v11a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V3a1 1 0 0 0-1-1H2z"/>
-                    <path d="M2.5 4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5H3a.5.5 0 0 1-.5-.5V4z"/>
-                  </svg>
-                  25 Des 2023
-                </span>
-                <span class="blog-read-time">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
-                    <path d="M8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71V3.5z"/>
-                    <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm7-8A7 7 0 1 1 1 8a7 7 0 0 1 14 0z"/>
-                  </svg>
-                  5 min read
-                </span>
-                <span class="blog-badge">New</span>
+          {blogPosts.tentangDiri.map((post, index) => (
+            <div class="blog-card">
+              <div class="blog-images">
+                <img src={post.image} alt={post.title} class="blog-image" />
               </div>
-              <h3 class="blog-title">Perjalanan Menjadi Developer</h3>
-              <p class="blog-desc">Bagaimana saya memulai perjalanan sebagai developer dan tantangan yang dihadapi selama proses pembelajaran.</p>
-              <div class="blog-tags">
-                <span class="blog-tag">Programming</span>
-                <span class="blog-tag">Journey</span>
-              </div>
-              <a href="#" class="blog-read-more">
-                Baca Selengkapnya
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                  <path fill-rule="evenodd" d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"/>
-                </svg>
-              </a>
-            </div>
-          </div>
-
-          <!-- Blog 2 -->
-          <div class="blog-card">
-            <div class="blog-images">
-              <img src="/images/5.jpg" alt="Tentang Diri" class="blog-image" />
-            </div>
-            <div class="blog-content">
-              <div class="blog-meta">
-                <span class="blog-date">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
-                    <path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM2 2a1 1 0 0 0-1 1v11a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V3a1 1 0 0 0-1-1H2z"/>
-                    <path d="M2.5 4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5H3a.5.5 0 0 1-.5-.5V4z"/>
+              <div class="blog-content">
+                <div class="blog-meta">
+                  <span class="blog-date">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
+                      <path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM2 2a1 1 0 0 0-1 1v11a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V3a1 1 0 0 0-1-1H2z"/>
+                      <path d="M2.5 4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5H3a.5.5 0 0 1-.5-.5V4z"/>
+                    </svg>
+                    {post.date}
+                  </span>
+                  <span class="blog-read-time">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
+                      <path d="M8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71V3.5z"/>
+                      <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm7-8A7 7 0 1 1 1 8a7 7 0 0 1 14 0z"/>
+                    </svg>
+                    {post.readTime}
+                  </span>
+                  {post.badge && <span class="blog-badge">{post.badge}</span>}
+                </div>
+                <h3 class="blog-title">{post.title}</h3>
+                <p class="blog-desc">{post.desc}</p>
+                <div class="blog-tags">
+                  {post.tags.map(tag => (
+                    <span class="blog-tag">{tag}</span>
+                  ))}
+                </div>
+                <a href="#" class="blog-read-more">
+                  Baca Selengkapnya
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd" d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"/>
                   </svg>
-                  20 Des 2023
-                </span>
-                <span class="blog-read-time">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
-                    <path d="M8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71V3.5z"/>
-                    <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm7-8A7 7 0 1 1 1 8a7 7 0 0 1 14 0z"/>
-                  </svg>
-                  7 min read
-                </span>
+                </a>
               </div>
-              <h3 class="blog-title">Passion dalam Teknologi</h3>
-              <p class="blog-desc">Menjelajahi minat dan passion saya di dunia teknologi serta bagaimana hal itu membentuk karir saya.</p>
-              <div class="blog-tags">
-                <span class="blog-tag">Technology</span>
-                <span class="blog-tag">Passion</span>
-              </div>
-              <a href="#" class="blog-read-more">
-                Baca Selengkapnya
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                  <path fill-rule="evenodd" d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"/>
-                </svg>
-              </a>
             </div>
-          </div>
+          ))}
         </div>
       </section>
 
@@ -125,48 +152,50 @@ import Layout from '../layouts/Layout.astro';
         <div class="section-header">
           <h2 class="section-title">
             Random
-            <span class="highlight-badge" id="randomCount">2 Artikel</span>
+            <span class="highlight-badge">{blogPosts.random.length} Artikel</span>
           </h2>
         </div>
 
         <div class="blog-grid">
-          <!-- Blog 4 -->
-          <div class="blog-card">
-            <div class="blog-images">
-              <img src="/images/5.jpg" alt="Random" class="blog-image" />
-            </div>
-            <div class="blog-content">
-              <div class="blog-meta">
-                <span class="blog-date">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
-                    <path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM2 2a1 1 0 0 0-1 1v11a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V3a1 1 0 0 0-1-1H2z"/>
-                    <path d="M2.5 4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5H3a.5.5 0 0 1-.5-.5V4z"/>
-                  </svg>
-                  10 Des 2023
-                </span>
-                <span class="blog-read-time">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
-                    <path d="M8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71V3.5z"/>
-                    <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm7-8A7 7 0 1 1 1 8a7 7 0 0 1 14 0z"/>
-                  </svg>
-                  6 min read
-                </span>
-                <span class="blog-badge">New</span>
+          {blogPosts.random.map((post, index) => (
+            <div class="blog-card">
+              <div class="blog-images">
+                <img src={post.image} alt={post.title} class="blog-image" />
               </div>
-              <h3 class="blog-title">Tips Produktivitas Harian</h3>
-              <p class="blog-desc">Metode dan teknik yang saya gunakan untuk tetap produktif dalam pekerjaan sehari-hari.</p>
-              <div class="blog-tags">
-                <span class="blog-tag">Productivity</span>
-                <span class="blog-tag">Tips</span>
+              <div class="blog-content">
+                <div class="blog-meta">
+                  <span class="blog-date">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
+                      <path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM2 2a1 1 0 0 0-1 1v11a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V3a1 1 0 0 0-1-1H2z"/>
+                      <path d="M2.5 4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5H3a.5.5 0 0 1-.5-.5V4z"/>
+                    </svg>
+                    {post.date}
+                  </span>
+                  <span class="blog-read-time">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
+                      <path d="M8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71V3.5z"/>
+                      <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm7-8A7 7 0 1 1 1 8a7 7 0 0 1 14 0z"/>
+                    </svg>
+                    {post.readTime}
+                  </span>
+                  {post.badge && <span class="blog-badge">{post.badge}</span>}
+                </div>
+                <h3 class="blog-title">{post.title}</h3>
+                <p class="blog-desc">{post.desc}</p>
+                <div class="blog-tags">
+                  {post.tags.map(tag => (
+                    <span class="blog-tag">{tag}</span>
+                  ))}
+                </div>
+                <a href="#" class="blog-read-more">
+                  Baca Selengkapnya
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd" d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"/>
+                  </svg>
+                </a>
               </div>
-              <a href="#" class="blog-read-more">
-                Baca Selengkapnya
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                  <path fill-rule="evenodd" d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"/>
-                </svg>
-              </a>
             </div>
-          </div>
+          ))}
         </div>
       </section>
     </main>
@@ -347,16 +376,14 @@ import Layout from '../layouts/Layout.astro';
     transform: translateY(-5px);
   }
 
-  /* Blog Images */
+  /* Blog Images - UKURAN NORMAL */
   .blog-images {
     display: flex;
-    flex-direction: column;
-    gap: 15px;
   }
 
   .blog-image {
     width: 100%;
-    height: 120px;
+    height: 200px;
     object-fit: cover;
     border-radius: 15px;
   }
@@ -428,23 +455,36 @@ import Layout from '../layouts/Layout.astro';
     font-weight: 600;
   }
 
+  /* Baca Selengkapnya - TANPA GARIS, PANAH BESAR */
   .blog-read-more {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
     color: rgba(255, 255, 255, 0.9);
-    padding: 8px 0;
+    padding: 12px 20px;
     text-decoration: none;
     font-weight: 600;
     transition: all 0.3s ease;
     width: fit-content;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.05);
   }
 
   .blog-read-more:hover {
     color: #fff;
-    border-bottom-color: #fff;
-    gap: 12px;
+    border-color: rgba(255, 255, 255, 0.6);
+    background: rgba(255, 255, 255, 0.1);
+    gap: 15px;
+    transform: translateX(5px);
+  }
+
+  .blog-read-more svg {
+    transition: transform 0.3s ease;
+  }
+
+  .blog-read-more:hover svg {
+    transform: translateX(3px);
   }
 
   /* Responsive */
@@ -472,14 +512,8 @@ import Layout from '../layouts/Layout.astro';
       grid-template-columns: 1fr;
     }
 
-    .blog-images {
-      flex-direction: row;
-      justify-content: space-between;
-    }
-
     .blog-image {
-      width: 32%;
-      height: 100px;
+      height: 180px;
     }
 
     .floating-dots {
@@ -499,21 +533,16 @@ import Layout from '../layouts/Layout.astro';
       font-size: 2.2rem;
     }
 
-    .blog-images {
-      flex-direction: column;
-    }
-
     .blog-image {
-      width: 100%;
-      height: 120px;
+      height: 150px;
     }
   }
 </style>
 
 <script>
   document.addEventListener('DOMContentLoaded', function() {
-    // Title animation
     const titleElement = document.getElementById('mainTitle');
+    
     const titleVariations = [
       "Blog",
       "Articles", 
@@ -540,28 +569,7 @@ import Layout from '../layouts/Layout.astro';
       }, 500);
     }
 
-    // Auto count blog posts
-    function updateBlogCount() {
-      const tentangDiriSection = document.querySelector('.blog-section:nth-of-type(1)');
-      const randomSection = document.querySelector('.blog-section:nth-of-type(2)');
-      
-      const tentangDiriCount = tentangDiriSection ? tentangDiriSection.querySelectorAll('.blog-card').length : 0;
-      const randomCount = randomSection ? randomSection.querySelectorAll('.blog-card').length : 0;
-      
-      const tentangDiriBadge = document.getElementById('tentangDiriCount');
-      const randomBadge = document.getElementById('randomCount');
-      
-      if (tentangDiriBadge) {
-        tentangDiriBadge.textContent = `${tentangDiriCount} Artikel${tentangDiriCount !== 1 ? '' : ''}`;
-      }
-      
-      if (randomBadge) {
-        randomBadge.textContent = `${randomCount} Artikel${randomCount !== 1 ? '' : ''}`;
-      }
-    }
-
-    // Start animations
+    // Start animation
     setTimeout(changeTitle, 1000);
-    updateBlogCount();
   });
 </script>
