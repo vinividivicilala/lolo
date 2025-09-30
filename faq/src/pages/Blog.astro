@@ -35,6 +35,9 @@ import Layout from '../layouts/Layout.astro';
         </div>
       </section>
 
+
+
+
 <!-- HEADER SECTION -->
 <section class="header-section">
   <div class="header-content">
@@ -67,7 +70,6 @@ import Layout from '../layouts/Layout.astro';
   <!-- Subjudul: Tentang Diri -->
   <div class="subtitle-section">
     <h2 class="section-subtitle">Tentang Diri</h2>
-    <div class="subtitle-line"></div>
   </div>
 
   <div class="blog-grid">
@@ -129,7 +131,6 @@ import Layout from '../layouts/Layout.astro';
   <!-- Subjudul: Random -->
   <div class="subtitle-section">
     <h2 class="section-subtitle">Random</h2>
-    <div class="subtitle-line"></div>
   </div>
 
   <div class="blog-grid">
@@ -191,6 +192,13 @@ import Layout from '../layouts/Layout.astro';
 
 
 
+
+
+
+
+
+
+
     </main>
   </div>
 </Layout>
@@ -212,67 +220,63 @@ import Layout from '../layouts/Layout.astro';
 
 .subtitle-section {
   margin-bottom: 30px;
-  display: flex;
-  align-items: center;
-  gap: 20px;
 }
 
 .section-subtitle {
   font-size: 2rem;
   font-weight: 700;
   color: #fff;
-  margin: 0;
+  margin: 0 0 10px 0;
   font-family: 'Space Mono', monospace;
-  white-space: nowrap;
-}
-
-.subtitle-line {
-  flex: 1;
-  height: 2px;
-  background: linear-gradient(90deg, #ff6b6b, #4ecdc4);
-  border-radius: 2px;
+  background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: inline-block;
 }
 
 .blog-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 30px;
+  gap: 25px;
   margin-bottom: 60px;
 }
 
 .blog-card {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 15px;
-  padding: 20px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 0;
   transition: all 0.3s ease;
+  overflow: hidden;
 }
 
 .blog-card:hover {
-  border-color: rgba(255, 255, 255, 0.3);
-  transform: translateY(-5px);
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-3px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
 }
 
 .image-container {
-  margin-bottom: 15px;
+  margin-bottom: 0;
 }
 
 .blog-image {
   width: 100%;
-  height: 200px;
+  height: 180px;
   object-fit: cover;
-  border-radius: 10px;
+  border-radius: 0;
 }
 
 .blog-content {
-  padding: 0 10px;
+  padding: 20px;
 }
 
 .blog-title {
-  font-size: 1.4rem;
+  font-size: 1.3rem;
   font-weight: 700;
   color: #fff;
-  margin: 0 0 15px 0;
+  margin: 0 0 12px 0;
   line-height: 1.4;
   font-family: 'Space Mono', monospace;
 }
@@ -285,20 +289,20 @@ import Layout from '../layouts/Layout.astro';
 }
 
 .meta-icon {
-  color: rgba(255, 255, 255, 0.8);
+  color: rgba(255, 255, 255, 0.7);
 }
 
 .meta-date {
-  color: rgba(255, 255, 255, 0.8);
-  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.85rem;
   font-family: 'Space Mono', monospace;
 }
 
 .blog-excerpt {
-  color: rgba(255, 255, 255, 0.9);
-  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.8);
+  line-height: 1.5;
   margin: 0;
-  font-size: 1rem;
+  font-size: 0.95rem;
   font-family: 'Space Mono', monospace;
 }
 
@@ -306,7 +310,7 @@ import Layout from '../layouts/Layout.astro';
 @media (max-width: 1024px) {
   .blog-grid {
     grid-template-columns: repeat(2, 1fr);
-    gap: 25px;
+    gap: 20px;
   }
 }
 
@@ -316,28 +320,18 @@ import Layout from '../layouts/Layout.astro';
     gap: 20px;
   }
   
-  .subtitle-section {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
-  }
-  
-  .subtitle-line {
-    width: 100%;
-  }
-  
   .section-subtitle {
     font-size: 1.6rem;
+  }
+  
+  .blog-content {
+    padding: 15px;
   }
 }
 
 @media (max-width: 480px) {
   .blog-grid {
     gap: 15px;
-  }
-  
-  .blog-card {
-    padding: 15px;
   }
   
   .blog-title {
@@ -347,8 +341,11 @@ import Layout from '../layouts/Layout.astro';
   .section-subtitle {
     font-size: 1.4rem;
   }
+  
+  .blog-image {
+    height: 160px;
+  }
 }
-
 
 
 
@@ -728,6 +725,7 @@ import Layout from '../layouts/Layout.astro';
     setTimeout(changeTitle, 1000);
   });
 </script>
+
 
 
 
