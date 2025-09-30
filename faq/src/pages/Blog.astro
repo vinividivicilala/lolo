@@ -76,9 +76,12 @@ import Layout from '../layouts/Layout.astro';
 
 .about-me-image {
   width: 100%;
+  height: auto;
+  max-width: 500px;  /* Menentukan lebar maksimal gambar */
   border-radius: 15px;
   object-fit: cover;
 }
+
 
 /* About Me Section */
 .about-me-section {
@@ -506,6 +509,7 @@ import Layout from '../layouts/Layout.astro';
     setTimeout(changeTitle, 1000);
   });
 </script>
+
 
 
 
