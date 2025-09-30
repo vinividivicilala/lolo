@@ -35,24 +35,159 @@ import Layout from '../layouts/Layout.astro';
         </div>
       </section>
 
-<!-- Gambar dengan border radius -->
-<div class="image-container">
-  <img src="/images/5.jpg" alt="Tentang Diri" class="about-me-image" />
-</div>
-
-<!-- Subjudul Tentang Diri -->
-<div class="about-me-section">
-  <div class="about-me-header">
-    <h3 class="about-me-title">Tentang Diri</h3>
-    <div class="meta-icons">
-      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" class="meta-icon">
-        <path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM2 2a1 1 0 0 0-1 1v11a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V3a1 1 0 0 0-1-1H2z"/>
-        <path d="M2.5 4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5H3a.5.5 0 0 1-.5-.5V4z"/>
+<!-- HEADER SECTION -->
+<section class="header-section">
+  <div class="header-content">
+    <div class="title-container">
+      <h1 class="big-title">
+        <span class="animated-title">
+          <span class="title-text" id="mainTitle">Blog</span>
+        </span>
+      </h1>
+      <div class="subtitle-animation">
+        <span class="subtitle-text">Tempat Berbagi Ilmu & Inspirasi</span>
+        <div class="floating-dots">
+          <span class="dot"></span>
+          <span class="dot"></span>
+          <span class="dot"></span>
+        </div>
+      </div>
+    </div>
+    <a href="/blog/all" class="all-blog-link">
+      All Blog 
+      <svg xmlns="http://www.w3.org/2000/svg" class="arrow-icon" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path d="M5 12h14M12 5l7 7-7 7"/>
       </svg>
-      <span class="meta-date">25 Des 2023</span>
+    </a>
+  </div>
+</section>
+
+<!-- BLOG GRID SECTION -->
+<section class="blog-grid-section">
+  <!-- Subjudul: Tentang Diri -->
+  <div class="subtitle-section">
+    <h2 class="section-subtitle">Tentang Diri</h2>
+    <div class="subtitle-line"></div>
+  </div>
+
+  <div class="blog-grid">
+    <!-- Blog 1 -->
+    <div class="blog-card">
+      <div class="image-container">
+        <img src="/images/5.jpg" alt="Blog 1" class="blog-image" />
+      </div>
+      <div class="blog-content">
+        <h3 class="blog-title">Perjalanan Menjadi Developer</h3>
+        <div class="meta-icons">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" class="meta-icon">
+            <path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM2 2a1 1 0 0 0-1 1v11a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V3a1 1 0 0 0-1-1H2z"/>
+            <path d="M2.5 4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5H3a.5.5 0 0 1-.5-.5V4z"/>
+          </svg>
+          <span class="meta-date">25 Des 2023</span>
+        </div>
+        <p class="blog-excerpt">Belajar programming dari nol hingga menjadi full-stack developer dengan berbagai tantangan dan pencapaian.</p>
+      </div>
+    </div>
+
+    <!-- Blog 2 -->
+    <div class="blog-card">
+      <div class="image-container">
+        <img src="/images/6.jpg" alt="Blog 2" class="blog-image" />
+      </div>
+      <div class="blog-content">
+        <h3 class="blog-title">Hobi dan Passion</h3>
+        <div class="meta-icons">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" class="meta-icon">
+            <path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM2 2a1 1 0 0 0-1 1v11a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V3a1 1 0 0 0-1-1H2z"/>
+            <path d="M2.5 4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5H3a.5.5 0 0 1-.5-.5V4z"/>
+          </svg>
+          <span class="meta-date">20 Des 2023</span>
+        </div>
+        <p class="blog-excerpt">Menjelajahi berbagai hobi dari fotografi hingga musik, dan bagaimana mereka membentuk kehidupan sehari-hari.</p>
+      </div>
+    </div>
+
+    <!-- Blog 3 -->
+    <div class="blog-card">
+      <div class="image-container">
+        <img src="/images/7.jpg" alt="Blog 3" class="blog-image" />
+      </div>
+      <div class="blog-content">
+        <h3 class="blog-title">Visi dan Masa Depan</h3>
+        <div class="meta-icons">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" class="meta-icon">
+            <path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM2 2a1 1 0 0 0-1 1v11a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V3a1 1 0 0 0-1-1H2z"/>
+            <path d="M2.5 4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5H3a.5.5 0 0 1-.5-.5V4z"/>
+          </svg>
+          <span class="meta-date">15 Des 2023</span>
+        </div>
+        <p class="blog-excerpt">Rencana dan impian untuk masa depan, baik dalam karir maupun kehidupan personal.</p>
+      </div>
     </div>
   </div>
-</div>
+
+  <!-- Subjudul: Random -->
+  <div class="subtitle-section">
+    <h2 class="section-subtitle">Random</h2>
+    <div class="subtitle-line"></div>
+  </div>
+
+  <div class="blog-grid">
+    <!-- Blog 4 -->
+    <div class="blog-card">
+      <div class="image-container">
+        <img src="/images/8.jpg" alt="Blog 4" class="blog-image" />
+      </div>
+      <div class="blog-content">
+        <h3 class="blog-title">Tips Produktivitas</h3>
+        <div class="meta-icons">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" class="meta-icon">
+            <path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM2 2a1 1 0 0 0-1 1v11a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V3a1 1 0 0 0-1-1H2z"/>
+            <path d="M2.5 4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5H3a.5.5 0 0 1-.5-.5V4z"/>
+          </svg>
+          <span class="meta-date">10 Des 2023</span>
+        </div>
+        <p class="blog-excerpt">Metode dan tools yang membantu meningkatkan produktivitas dalam bekerja dan belajar.</p>
+      </div>
+    </div>
+
+    <!-- Blog 5 -->
+    <div class="blog-card">
+      <div class="image-container">
+        <img src="/images/9.jpg" alt="Blog 5" class="blog-image" />
+      </div>
+      <div class="blog-content">
+        <h3 class="blog-title">Review Buku Favorit</h3>
+        <div class="meta-icons">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" class="meta-icon">
+            <path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM2 2a1 1 0 0 0-1 1v11a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V3a1 1 0 0 0-1-1H2z"/>
+            <path d="M2.5 4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5H3a.5.5 0 0 1-.5-.5V4z"/>
+          </svg>
+          <span class="meta-date">5 Des 2023</span>
+        </div>
+        <p class="blog-excerpt">Kumpulan buku-buku inspiratif yang memberikan dampak positif dalam kehidupan.</p>
+      </div>
+    </div>
+
+    <!-- Blog 6 -->
+    <div class="blog-card">
+      <div class="image-container">
+        <img src="/images/10.jpg" alt="Blog 6" class="blog-image" />
+      </div>
+      <div class="blog-content">
+        <h3 class="blog-title">Teknologi Terkini</h3>
+        <div class="meta-icons">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" class="meta-icon">
+            <path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM2 2a1 1 0 0 0-1 1v11a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V3a1 1 0 0 0-1-1H2z"/>
+            <path d="M2.5 4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5H3a.5.5 0 0 1-.5-.5V4z"/>
+          </svg>
+          <span class="meta-date">1 Des 2023</span>
+        </div>
+        <p class="blog-excerpt">Update terbaru seputar perkembangan teknologi dan bagaimana memanfaatkannya.</p>
+      </div>
+    </div>
+  </div>
+</section>
 
 
 
@@ -70,45 +205,75 @@ import Layout from '../layouts/Layout.astro';
 
 
 
+/* Blog Grid Section */
+.blog-grid-section {
+  margin-top: 60px;
+}
 
-
-/* Image Container */
-.image-container {
-  margin-bottom: 20px;
+.subtitle-section {
+  margin-bottom: 30px;
   display: flex;
-  justify-content: center;  /* Center the image */
-}
-
-.about-me-image {
-  width: 100%;
-  max-width: 500px;  /* Atur lebar maksimal gambar */
-  height: auto;
-  border-radius: 15px;  /* Border radius untuk gambar */
-  object-fit: cover;  /* Agar gambar tidak terdistorsi */
-}
-
-/* About Me Section */
-.about-me-section {
-  padding: 20px;
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 15px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  max-width: 600px;
-  margin: 0 auto;  /* Untuk meletakkan section di tengah */
-}
-
-.about-me-header {
-  display: flex;
-  justify-content: space-between;
   align-items: center;
-  margin-bottom: 10px;
+  gap: 20px;
 }
 
-.about-me-title {
-  font-size: 1.6rem;
+.section-subtitle {
+  font-size: 2rem;
   font-weight: 700;
   color: #fff;
   margin: 0;
+  font-family: 'Space Mono', monospace;
+  white-space: nowrap;
+}
+
+.subtitle-line {
+  flex: 1;
+  height: 2px;
+  background: linear-gradient(90deg, #ff6b6b, #4ecdc4);
+  border-radius: 2px;
+}
+
+.blog-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 30px;
+  margin-bottom: 60px;
+}
+
+.blog-card {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 15px;
+  padding: 20px;
+  transition: all 0.3s ease;
+}
+
+.blog-card:hover {
+  border-color: rgba(255, 255, 255, 0.3);
+  transform: translateY(-5px);
+}
+
+.image-container {
+  margin-bottom: 15px;
+}
+
+.blog-image {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 10px;
+}
+
+.blog-content {
+  padding: 0 10px;
+}
+
+.blog-title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 0 0 15px 0;
+  line-height: 1.4;
   font-family: 'Space Mono', monospace;
 }
 
@@ -116,6 +281,7 @@ import Layout from '../layouts/Layout.astro';
   display: flex;
   align-items: center;
   gap: 8px;
+  margin-bottom: 15px;
 }
 
 .meta-icon {
@@ -128,20 +294,60 @@ import Layout from '../layouts/Layout.astro';
   font-family: 'Space Mono', monospace;
 }
 
+.blog-excerpt {
+  color: rgba(255, 255, 255, 0.9);
+  line-height: 1.6;
+  margin: 0;
+  font-size: 1rem;
+  font-family: 'Space Mono', monospace;
+}
+
 /* Responsive */
+@media (max-width: 1024px) {
+  .blog-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 25px;
+  }
+}
+
 @media (max-width: 768px) {
-  .about-me-header {
+  .blog-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  
+  .subtitle-section {
     flex-direction: column;
     align-items: flex-start;
     gap: 10px;
   }
-
-  .about-me-title {
-    font-size: 1.2rem;
+  
+  .subtitle-line {
+    width: 100%;
+  }
+  
+  .section-subtitle {
+    font-size: 1.6rem;
   }
 }
 
-
+@media (max-width: 480px) {
+  .blog-grid {
+    gap: 15px;
+  }
+  
+  .blog-card {
+    padding: 15px;
+  }
+  
+  .blog-title {
+    font-size: 1.2rem;
+  }
+  
+  .section-subtitle {
+    font-size: 1.4rem;
+  }
+}
 
 
 
@@ -522,6 +728,7 @@ import Layout from '../layouts/Layout.astro';
     setTimeout(changeTitle, 1000);
   });
 </script>
+
 
 
 
