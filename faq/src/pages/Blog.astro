@@ -35,6 +35,31 @@ import Layout from '../layouts/Layout.astro';
         </div>
       </section>
 
+<!-- Di bagian featured-image-auto, tambahkan subjudul di bawah gambar -->
+<div class="featured-image-auto">
+  <img src="/images/5.jpg" alt="Tentang Diri" class="featured-img" />
+  <div class="featured-badge-auto">Featured</div>
+</div>
+
+<!-- Tambahkan subjudul "Tentang Diri" di bawah gambar -->
+<div class="about-me-section">
+  <div class="about-me-header">
+    <h3 class="about-me-title">Tentang Diri</h3>
+    <div class="meta-icons">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" class="meta-icon">
+        <path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM2 2a1 1 0 0 0-1 1v11a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V3a1 1 0 0 0-1-1H2z"/>
+        <path d="M2.5 4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5H3a.5.5 0 0 1-.5-.5V4z"/>
+      </svg>
+      <span class="meta-date">25 Des 2023</span>
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
     </main>
   </div>
 </Layout>
@@ -46,6 +71,47 @@ import Layout from '../layouts/Layout.astro';
   * {
     font-family: 'Space Mono', monospace !important;
   }
+
+
+/* About Me Section */
+.about-me-section {
+  margin-top: 15px;
+  padding: 15px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.about-me-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.about-me-title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 0;
+  font-family: 'Space Mono', monospace;
+}
+
+.meta-icons {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.meta-icon {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.meta-date {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.9rem;
+  font-family: 'Space Mono', monospace;
+}
 
   body {
     background: #111;
@@ -421,5 +487,6 @@ import Layout from '../layouts/Layout.astro';
     setTimeout(changeTitle, 1000);
   });
 </script>
+
 
 
