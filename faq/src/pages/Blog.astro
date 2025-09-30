@@ -35,81 +35,24 @@ import Layout from '../layouts/Layout.astro';
         </div>
       </section>
 
+<!-- Gambar dengan border radius -->
+<div class="image-container">
+  <img src="/images/5.jpg" alt="Tentang Diri" class="about-me-image" />
+</div>
 
-
-
-   <!-- HEADER SECTION -->
-      <section class="header-section">
-        <div class="header-content">
-          <div class="title-container">
-            <h1 class="big-title">
-              <span class="animated-title">
-                <span class="title-text" id="mainTitle">Blog</span>
-              </span>
-            </h1>
-            <div class="subtitle-animation">
-              <span class="subtitle-text">Tempat Berbagi Ilmu & Inspirasi</span>
-              <div class="floating-dots">
-                <span class="dot"></span>
-                <span class="dot"></span>
-                <span class="dot"></span>
-              </div>
-            </div>
-          </div>
-          <a href="/blog/all" class="all-blog-link">
-            All Blog 
-            <svg xmlns="http://www.w3.org/2000/svg" class="arrow-icon" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <path d="M5 12h14M12 5l7 7-7 7"/>
-            </svg>
-          </a>
-        </div>
-      </section>
-
-      <!-- Gambar dengan border radius -->
-      <div class="image-container">
-        <img src="/images/5.jpg" alt="Tentang Diri" class="about-me-image" />
-        <img src="/images/6.jpg" alt="Random 1" class="about-me-image" />
-        <img src="/images/7.jpg" alt="Random 2" class="about-me-image" />
-      </div>
-
-      <!-- Subjudul Tentang Diri -->
-      <div class="about-me-section">
-        <div class="about-me-header">
-          <h3 class="about-me-title">Tentang Diri</h3>
-          <div class="meta-icons">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" class="meta-icon">
-              <path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM2 2a1 1 0 0 0-1 1v11a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V3a1 1 0 0 0-1-1H2z"/>
-              <path d="M2.5 4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5H3a.5.5 0 0 1-.5-.5V4z"/>
-            </svg>
-            <span class="meta-date">25 Des 2023</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Subjudul Random -->
-      <div class="about-me-section">
-        <div class="about-me-header">
-          <h3 class="about-me-title">Random</h3>
-          <div class="meta-icons">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" class="meta-icon">
-              <path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM2 2a1 1 0 0 0-1 1v11a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V3a1 1 0 0 0-1-1H2z"/>
-              <path d="M2.5 4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5H3a.5.5 0 0 1-.5-.5V4z"/>
-            </svg>
-            <span class="meta-date">26 Des 2023</span>
-          </div>
-        </div>
-      </div>
-
-    </main>
+<!-- Subjudul Tentang Diri -->
+<div class="about-me-section">
+  <div class="about-me-header">
+    <h3 class="about-me-title">Tentang Diri</h3>
+    <div class="meta-icons">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" class="meta-icon">
+        <path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM2 2a1 1 0 0 0-1 1v11a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V3a1 1 0 0 0-1-1H2z"/>
+        <path d="M2.5 4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5H3a.5.5 0 0 1-.5-.5V4z"/>
+      </svg>
+      <span class="meta-date">25 Des 2023</span>
+    </div>
   </div>
-
-
-
-
-
-
-
-
+</div>
 
 
 
@@ -127,33 +70,79 @@ import Layout from '../layouts/Layout.astro';
 
 
 
-  .image-container {
-    margin-bottom: 20px;
-    display: flex;
-    justify-content: space-between;
-  }
 
-  .about-me-image {
-    width: 32%;
-    height: auto;
-    border-radius: 15px;
-    object-fit: cover;
-  }
 
+/* Image Container */
+.image-container {
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: center;  /* Center the image */
+}
+
+.about-me-image {
+  width: 100%;
+  max-width: 500px;  /* Atur lebar maksimal gambar */
+  height: auto;
+  border-radius: 15px;  /* Border radius untuk gambar */
+  object-fit: cover;  /* Agar gambar tidak terdistorsi */
+}
+
+/* About Me Section */
+.about-me-section {
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 15px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  max-width: 600px;
+  margin: 0 auto;  /* Untuk meletakkan section di tengah */
+}
+
+.about-me-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.about-me-title {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 0;
+  font-family: 'Space Mono', monospace;
+}
+
+.meta-icons {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.meta-icon {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.meta-date {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.9rem;
+  font-family: 'Space Mono', monospace;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
   .about-me-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 10px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
   }
 
   .about-me-title {
-    font-size: 1.6rem;
-    font-weight: 700;
-    color: #fff;
-    margin: 0;
-    font-family: 'Space Mono', monospace;
+    font-size: 1.2rem;
   }
+}
+
+
+
 
 
 
