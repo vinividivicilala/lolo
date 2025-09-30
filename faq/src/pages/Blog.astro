@@ -69,26 +69,32 @@ import Layout from '../layouts/Layout.astro';
   }
 
 
+
+
+
 /* Image Container */
 .image-container {
   margin-bottom: 20px;
+  display: flex;
+  justify-content: center;  /* Center the image */
 }
 
 .about-me-image {
   width: 100%;
+  max-width: 500px;  /* Atur lebar maksimal gambar */
   height: auto;
-  max-width: 500px;  /* Menentukan lebar maksimal gambar */
-  border-radius: 15px;
-  object-fit: cover;
+  border-radius: 15px;  /* Border radius untuk gambar */
+  object-fit: cover;  /* Agar gambar tidak terdistorsi */
 }
-
 
 /* About Me Section */
 .about-me-section {
-  padding: 15px;
+  padding: 20px;
   background: rgba(255, 255, 255, 0.05);
-  border-radius: 12px;
+  border-radius: 15px;
   border: 1px solid rgba(255, 255, 255, 0.1);
+  max-width: 600px;
+  margin: 0 auto;  /* Untuk meletakkan section di tengah */
 }
 
 .about-me-header {
@@ -99,7 +105,7 @@ import Layout from '../layouts/Layout.astro';
 }
 
 .about-me-title {
-  font-size: 1.4rem;
+  font-size: 1.6rem;
   font-weight: 700;
   color: #fff;
   margin: 0;
@@ -129,11 +135,18 @@ import Layout from '../layouts/Layout.astro';
     align-items: flex-start;
     gap: 10px;
   }
-  
+
   .about-me-title {
     font-size: 1.2rem;
   }
 }
+
+
+
+
+
+
+
 
   body {
     background: #111;
@@ -509,6 +522,7 @@ import Layout from '../layouts/Layout.astro';
     setTimeout(changeTitle, 1000);
   });
 </script>
+
 
 
 
