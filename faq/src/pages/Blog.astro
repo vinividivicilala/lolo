@@ -198,10 +198,77 @@ const blogPosts = {
     </main>
   </div>
 
- <script type="module">
-  import { initBlogAnimations } from '../scripts/blog-animation.js';
-  document.addEventListener('DOMContentLoaded', () => {
-    initBlogAnimations();
+
+
+
+<script>
+  // Tunggu DOM siap
+  document.addEventListener('DOMContentLoaded', async () => {
+    // Dynamic import GSAP & Lenis (Vite akan bundle ini dengan benar)
+    const { gsap } = await import('gsap');
+    const { ScrollTrigger } = await import('gsap/ScrollTrigger');
+    const Lenis = (await import('lenis')).default;
+
+    gsap.registerPlugin(ScrollTrigger);
+
+    // Inisialisasi Lenis
+    const lenis = new Lenis({
+      duration: 1.2,
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      direction: 'vertical',
+      smooth: true,
+      smoothWheel: true,
+      smoothTouch: false
+    });
+
+    function raf(time) {
+      lenis.raf(time);
+      requestAnimationFrame(raf);
+    }
+    requestAnimationFrame(raf);
+
+    // Sinkronisasi dengan ScrollTrigger
+    lenis.on('scroll', ScrollTrigger.update);
+
+    ScrollTrigger.scrollerProxy(document.body, {
+      scrollTop(value) {
+        return arguments.length ? lenis.scrollTo(value, { immediate: true }) : lenis.scrollTop;
+      },
+      getBoundingClientRect() {
+        return { top: 0, left: 0, width: window.innerWidth, height: window.innerHeight };
+      }
+    });
+
+    ScrollTrigger.defaults({ scroller: document.body });
+
+    // Animasi saat scroll
+    gsap.utils.toArray('.section-title').forEach(el => {
+      gsap.from(el, {
+        opacity: 0,
+        y: 40,
+        duration: 0.8,
+        ease: 'power3.out',
+        scrollTrigger: {
+          trigger: el,
+          start: 'top 85%',
+          toggleActions: 'play none none none'
+        }
+      });
+    });
+
+    gsap.utils.toArray('.blog-card').forEach(el => {
+      gsap.from(el, {
+        opacity: 0,
+        y: 50,
+        duration: 0.9,
+        ease: 'power3.out',
+        scrollTrigger: {
+          trigger: el,
+          start: 'top 90%',
+          toggleActions: 'play none none none'
+        }
+      });
+    });
   });
 </script>
 
@@ -497,4 +564,5 @@ const blogPosts = {
     }
   </style>
 </Layout>
+
 
