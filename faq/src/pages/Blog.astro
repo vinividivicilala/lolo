@@ -198,75 +198,16 @@ const blogPosts = {
     </main>
   </div>
 
-  <script type="module">
-    // Import GSAP, ScrollTrigger, dan Lenis
-    import { gsap } from 'gsap';
-    import { ScrollTrigger } from 'gsap/ScrollTrigger';
-    import Lenis from 'lenis';
+ <script type="module">
+  import { initBlogAnimations } from '../scripts/blog-animation.js';
+  document.addEventListener('DOMContentLoaded', () => {
+    initBlogAnimations();
+  });
+</script>
 
-    // Daftarkan plugin GSAP
-    gsap.registerPlugin(ScrollTrigger);
 
-    // Inisialisasi Lenis
-    const lenis = new Lenis({
-      duration: 1.2,
-      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-      direction: 'vertical',
-      smooth: true,
-      smoothWheel: true,
-      smoothTouch: false,
-    });
 
-    // RAF untuk Lenis
-    function raf(time) {
-      lenis.raf(time);
-      requestAnimationFrame(raf);
-    }
-    requestAnimationFrame(raf);
 
-    // Sinkronisasi dengan ScrollTrigger
-    lenis.on('scroll', ScrollTrigger.update);
-
-    ScrollTrigger.scrollerProxy(document.body, {
-      scrollTop(value) {
-        return arguments.length ? lenis.scrollTo(value, { immediate: true }) : lenis.scrollTop;
-      },
-      getBoundingClientRect() {
-        return { top: 0, left: 0, width: window.innerWidth, height: window.innerHeight };
-      }
-    });
-
-    ScrollTrigger.defaults({ scroller: document.body });
-
-    // Animasi saat scroll
-    gsap.utils.toArray('.reveal-title').forEach(el => {
-      gsap.from(el, {
-        opacity: 0,
-        y: 40,
-        duration: 0.8,
-        ease: 'power3.out',
-        scrollTrigger: {
-          trigger: el,
-          start: 'top 85%',
-          toggleActions: 'play none none none'
-        }
-      });
-    });
-
-    gsap.utils.toArray('.reveal-card').forEach(el => {
-      gsap.from(el, {
-        opacity: 0,
-        y: 50,
-        duration: 0.9,
-        ease: 'power3.out',
-        scrollTrigger: {
-          trigger: el,
-          start: 'top 90%',
-          toggleActions: 'play none none none'
-        }
-      });
-    });
-  </script>
 
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap');
@@ -556,3 +497,4 @@ const blogPosts = {
     }
   </style>
 </Layout>
+
