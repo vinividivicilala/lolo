@@ -202,19 +202,18 @@ const blogPosts = {
 
 
 
+
 <script>
-  // Pastikan hanya jalan di browser
   if (typeof window !== 'undefined') {
     document.addEventListener('DOMContentLoaded', async () => {
       try {
-        // Import GSAP & Lenis
         const { gsap } = await import('gsap');
         const { ScrollTrigger } = await import('gsap/ScrollTrigger');
         const Lenis = (await import('@studio-freight/lenis')).default;
 
         gsap.registerPlugin(ScrollTrigger);
 
-        // Inisialisasi Lenis
+        // 1. Inisialisasi Lenis
         const lenis = new Lenis({
           duration: 1.2,
           easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
@@ -224,16 +223,14 @@ const blogPosts = {
           smoothTouch: false
         });
 
-        // RAF loop untuk Lenis
+        // 2. RAF loop
         function raf(time) {
           lenis.raf(time);
           requestAnimationFrame(raf);
         }
         requestAnimationFrame(raf);
 
-        // Sinkronisasi dengan ScrollTrigger
-        lenis.on('scroll', ScrollTrigger.update);
-
+        // 3. 🔥 SINKRONISASI WAJIB: lakukan SEBELUM animasi apa pun
         ScrollTrigger.scrollerProxy(document.body, {
           scrollTop(value) {
             return arguments.length ? lenis.scrollTo(value, { immediate: true }) : lenis.scrollTop;
@@ -243,26 +240,25 @@ const blogPosts = {
           }
         });
 
+        // 4. 🔥 Beri tahu ScrollTrigger bahwa scroller-nya adalah body
         ScrollTrigger.defaults({ scroller: document.body });
 
-        // === ANIMASI SAAT SCROLL ===
-
-        // 1. Animasi judul section (Tentang Diri, Random)
+        // 5. Sekarang baru buat animasi
         gsap.utils.toArray('.section-title').forEach(el => {
           gsap.from(el, {
             opacity: 0,
-            y: 30,
-            duration: 0.7,
+            y: 40,
+            duration: 0.8,
             ease: 'power3.out',
             scrollTrigger: {
               trigger: el,
-              start: 'top 90%',
+              start: 'top 85%',
               toggleActions: 'play none none none'
             }
           });
         });
 
-        // 2. Animasi kartu blog per section (dengan stagger)
+        // Animasi per section agar stagger lebih natural
         document.querySelectorAll('.blog-section').forEach(section => {
           const cards = section.querySelectorAll('.blog-card');
           if (cards.length > 0) {
@@ -281,7 +277,7 @@ const blogPosts = {
           }
         });
 
-        // 3. Opsional: animasi judul utama "Blog"
+        // Opsional: animasi judul utama
         gsap.from('.big-title', {
           opacity: 0,
           y: 40,
@@ -293,12 +289,20 @@ const blogPosts = {
           }
         });
 
+        // 6. Update ScrollTrigger saat Lenis scroll
+        lenis.on('scroll', ScrollTrigger.update);
+
       } catch (error) {
-        console.warn('Failed to load GSAP or Lenis:', error);
+        console.warn('GSAP or Lenis failed to load:', error);
       }
     });
   }
 </script>
+
+
+
+
+
 
 
 
@@ -591,6 +595,7 @@ const blogPosts = {
     }
   </style>
 </Layout>
+
 
 
 
