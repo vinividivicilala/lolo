@@ -203,100 +203,143 @@ const blogPosts = {
 
 
 <script>
-  if (typeof window !== 'undefined') {
-    document.addEventListener('DOMContentLoaded', async () => {
-      try {
-        // 1. Import GSAP & Lenis
-        const { gsap } = await import('gsap');
-        const { ScrollTrigger } = await import('gsap/ScrollTrigger');
-        const Lenis = (await import('@studio-freight/lenis')).default;
+document.addEventListener('DOMContentLoaded', async () => {
+  try {
+    // 1. Import GSAP & Lenis
+    const { gsap } = await import('gsap');
+    const { ScrollTrigger } = await import('gsap/ScrollTrigger');
+    const Lenis = (await import('@studio-freight/lenis')).default;
 
-        gsap.registerPlugin(ScrollTrigger);
+    gsap.registerPlugin(ScrollTrigger);
 
-        // 2. Inisialisasi Lenis
-        const lenis = new Lenis({
-          duration: 1.2,
-          easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-          direction: 'vertical',
-          smooth: true,
-          smoothWheel: true,
-          smoothTouch: false
-        });
+    // 2. Inisialisasi Lenis untuk smooth scroll
+    const lenis = new Lenis({
+      duration: 1.2,
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      direction: 'vertical',
+      smooth: true,
+      smoothWheel: true,
+      smoothTouch: false
+    });
 
-        // 3. RAF loop
-        function raf(time) {
-          lenis.raf(time);
-          requestAnimationFrame(raf);
-        }
-        requestAnimationFrame(raf);
+    // 3. RAF loop
+    function raf(time) {
+      lenis.raf(time);
+      requestAnimationFrame(raf);
+    }
+    requestAnimationFrame(raf);
 
-        // 4. 🔥 SINKRONISASI WAJIB: lakukan SEBELUM animasi apa pun
-        ScrollTrigger.scrollerProxy(document.body, {
-          scrollTop(value) {
-            return arguments.length ? lenis.scrollTo(value, { immediate: true }) : lenis.scrollTop;
-          },
-          getBoundingClientRect() {
-            return { top: 0, left: 0, width: window.innerWidth, height: window.innerHeight };
-          }
-        });
-
-        // 5. 🔥 Beri tahu ScrollTrigger bahwa scroller-nya adalah body
-        ScrollTrigger.defaults({ scroller: document.body });
-
-        // 6. Update ScrollTrigger saat Lenis scroll
-        lenis.on('scroll', ScrollTrigger.update);
-
-        // 7. ✅ Animasi: Judul Section
-        gsap.utils.toArray('.section-title').forEach(el => {
-          gsap.from(el, {
-            opacity: 0,
-            y: 30,
-            duration: 0.7,
-            ease: 'power3.out',
-            scrollTrigger: {
-              trigger: el,
-              start: 'top 90%',
-              toggleActions: 'play none none none'
-            }
-          });
-        });
-
-        // 8. ✅ Animasi: Kartu Blog per Section (dengan stagger)
-        document.querySelectorAll('.blog-section').forEach(section => {
-          const cards = section.querySelectorAll('.blog-card');
-          if (cards.length > 0) {
-            gsap.from(cards, {
-              opacity: 0,
-              y: 50,
-              duration: 0.8,
-              ease: 'power3.out',
-              stagger: 0.12, // muncul berurutan
-              scrollTrigger: {
-                trigger: section,
-                start: 'top 85%',
-                toggleActions: 'play none none none'
-              }
-            });
-          }
-        });
-
-        // 9. ✅ Opsional: Animasi judul utama "Blog"
-        gsap.from('.big-title', {
-          opacity: 0,
-          y: 40,
-          duration: 1,
-          ease: 'power2.out',
-          scrollTrigger: {
-            trigger: '.big-title',
-            start: 'top 90%'
-          }
-        });
-
-      } catch (error) {
-        console.warn('GSAP or Lenis failed to load:', error);
+    // 4. Sinkronisasi dengan ScrollTrigger
+    ScrollTrigger.scrollerProxy(document.body, {
+      scrollTop(value) {
+        return arguments.length ? lenis.scrollTo(value, { immediate: true }) : lenis.scrollTop;
+      },
+      getBoundingClientRect() {
+        return { top: 0, left: 0, width: window.innerWidth, height: window.innerHeight };
       }
     });
+
+    // 5. Beri tahu ScrollTrigger tentang scroller
+    ScrollTrigger.defaults({ scroller: document.body });
+
+    // 6. Update ScrollTrigger saat Lenis scroll
+    lenis.on('scroll', ScrollTrigger.update);
+
+    // **7. Animasi untuk Judul Utama "Blog"**
+    gsap.from('.big-title', {
+      opacity: 0,
+      y: 40,
+      duration: 1.2,
+      ease: 'power2.out',
+      scrollTrigger: {
+        trigger: '.big-title',
+        start: 'top 90%',
+        toggleActions: 'play none none none'
+      }
+    });
+
+    // **8. Animasi untuk Subtitle**
+    gsap.from('.subtitle-text', {
+      opacity: 0,
+      y: 30,
+      duration: 1,
+      ease: 'power2.out',
+      scrollTrigger: {
+        trigger: '.subtitle-text',
+        start: 'top 85%',
+        toggleActions: 'play none none none'
+      }
+    });
+
+    // **9. Animasi untuk Section Titles**
+    gsap.utils.toArray('.section-title').forEach((el) => {
+      gsap.from(el, {
+        opacity: 0,
+        x: -50,
+        duration: 0.8,
+        ease: 'power3.out',
+        scrollTrigger: {
+          trigger: el,
+          start: 'top 90%',
+          toggleActions: 'play none none none'
+        }
+      });
+    });
+
+    // **10. Animasi untuk Blog Cards - Slide Up dengan Stagger**
+    document.querySelectorAll('.blog-section').forEach((section) => {
+      const cards = section.querySelectorAll('.blog-card');
+      if (cards.length > 0) {
+        gsap.from(cards, {
+          opacity: 0,
+          y: 50,
+          duration: 0.8,
+          ease: 'power3.out',
+          stagger: 0.12, // cards muncul satu per satu
+          scrollTrigger: {
+            trigger: section,
+            start: 'top 85%',
+            toggleActions: 'play none none none'
+          }
+        });
+      }
+    });
+
+    // **11. Animasi untuk Gambar Blog (Zoom In)**
+    document.querySelectorAll('.blog-image').forEach((el) => {
+      gsap.from(el, {
+        scale: 0.8,
+        opacity: 0,
+        duration: 0.8,
+        ease: 'power2.out',
+        scrollTrigger: {
+          trigger: el,
+          start: 'top 85%',
+          toggleActions: 'play none none none'
+        }
+      });
+    });
+
+    // **12. Animasi untuk Tags (Bounce Effect)**
+    document.querySelectorAll('.blog-tag').forEach((el) => {
+      gsap.from(el, {
+        y: -10,
+        opacity: 0,
+        duration: 0.5,
+        ease: 'bounce.out',
+        scrollTrigger: {
+          trigger: el,
+          start: 'top 90%',
+          toggleActions: 'play none none none'
+        }
+      });
+    });
+
+  } catch (error) {
+    console.warn('GSAP or Lenis failed to load:', error);
   }
+});
+
 </script>
 
 
@@ -638,6 +681,7 @@ const blogPosts = {
     }
   </style>
 </Layout>
+
 
 
 
