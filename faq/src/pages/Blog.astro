@@ -2,6 +2,7 @@
 // src/pages/blog.astro
 import Layout from '../layouts/Layout.astro';
 
+// Data blog (bisa dipindah ke file terpisah nanti)
 const blogPosts = {
   tentangDiri: [
     {
@@ -97,14 +98,15 @@ const blogPosts = {
       <!-- BLOG SECTION - TENTANG DIRI -->
       <section class="blog-section">
         <div class="section-header">
-          <h2 class="section-title reveal-title">
+          <h2 class="section-title">
             Tentang Diri
             <span class="highlight-badge">{blogPosts.tentangDiri.length} Artikel</span>
           </h2>
         </div>
+
         <div class="blog-grid">
           {blogPosts.tentangDiri.map((post, index) => (
-            <div class="blog-card reveal-card">
+            <div class="blog-card">
               <div class="blog-images">
                 <img src={post.image} alt={post.title} class="blog-image" />
               </div>
@@ -148,14 +150,15 @@ const blogPosts = {
       <!-- BLOG SECTION - RANDOM -->
       <section class="blog-section">
         <div class="section-header">
-          <h2 class="section-title reveal-title">
+          <h2 class="section-title">
             Random
             <span class="highlight-badge">{blogPosts.random.length} Artikel</span>
           </h2>
         </div>
+
         <div class="blog-grid">
           {blogPosts.random.map((post, index) => (
-            <div class="blog-card reveal-card">
+            <div class="blog-card">
               <div class="blog-images">
                 <img src={post.image} alt={post.title} class="blog-image" />
               </div>
@@ -197,497 +200,376 @@ const blogPosts = {
       </section>
     </main>
   </div>
-
-
-
-
-
-<script>
-document.addEventListener('DOMContentLoaded', async () => {
-  try {
-    // 1. Import GSAP & Lenis
-    const { gsap } = await import('gsap');
-    const { ScrollTrigger } = await import('gsap/ScrollTrigger');
-    const Lenis = (await import('@studio-freight/lenis')).default;
-
-    gsap.registerPlugin(ScrollTrigger);
-
-    // 2. Inisialisasi Lenis untuk smooth scroll
-    const lenis = new Lenis({
-      duration: 1.2,
-      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-      direction: 'vertical',
-      smooth: true,
-      smoothWheel: true,
-      smoothTouch: false
-    });
-
-    // 3. RAF loop
-    function raf(time) {
-      lenis.raf(time);
-      requestAnimationFrame(raf);
-    }
-    requestAnimationFrame(raf);
-
-    // 4. Sinkronisasi dengan ScrollTrigger
-    ScrollTrigger.scrollerProxy(document.body, {
-      scrollTop(value) {
-        return arguments.length ? lenis.scrollTo(value, { immediate: true }) : lenis.scrollTop;
-      },
-      getBoundingClientRect() {
-        return { top: 0, left: 0, width: window.innerWidth, height: window.innerHeight };
-      }
-    });
-
-    // 5. Beri tahu ScrollTrigger tentang scroller
-    ScrollTrigger.defaults({ scroller: document.body });
-
-    // 6. Update ScrollTrigger saat Lenis scroll
-    lenis.on('scroll', ScrollTrigger.update);
-
-    // **7. Animasi untuk Judul Utama "Blog"**
-    gsap.from('.big-title', {
-      opacity: 0,
-      y: 40,
-      duration: 1.2,
-      ease: 'power2.out',
-      scrollTrigger: {
-        trigger: '.big-title',
-        start: 'top 90%',
-        toggleActions: 'play none none none'
-      }
-    });
-
-    // **8. Animasi untuk Subtitle**
-    gsap.from('.subtitle-text', {
-      opacity: 0,
-      y: 30,
-      duration: 1,
-      ease: 'power2.out',
-      scrollTrigger: {
-        trigger: '.subtitle-text',
-        start: 'top 85%',
-        toggleActions: 'play none none none'
-      }
-    });
-
-    // **9. Animasi untuk Section Titles**
-    gsap.utils.toArray('.section-title').forEach((el) => {
-      gsap.from(el, {
-        opacity: 0,
-        x: -50,
-        duration: 0.8,
-        ease: 'power3.out',
-        scrollTrigger: {
-          trigger: el,
-          start: 'top 90%',
-          toggleActions: 'play none none none'
-        }
-      });
-    });
-
-    // **10. Animasi untuk Blog Cards - Slide Up dengan Stagger**
-    document.querySelectorAll('.blog-section').forEach((section) => {
-      const cards = section.querySelectorAll('.blog-card');
-      if (cards.length > 0) {
-        gsap.from(cards, {
-          opacity: 0,
-          y: 50,
-          duration: 0.8,
-          ease: 'power3.out',
-          stagger: 0.12, // cards muncul satu per satu
-          scrollTrigger: {
-            trigger: section,
-            start: 'top 85%',
-            toggleActions: 'play none none none'
-          }
-        });
-      }
-    });
-
-    // **11. Animasi untuk Gambar Blog (Zoom In)**
-    document.querySelectorAll('.blog-image').forEach((el) => {
-      gsap.from(el, {
-        scale: 0.8,
-        opacity: 0,
-        duration: 0.8,
-        ease: 'power2.out',
-        scrollTrigger: {
-          trigger: el,
-          start: 'top 85%',
-          toggleActions: 'play none none none'
-        }
-      });
-    });
-
-    // **12. Animasi untuk Tags (Bounce Effect)**
-    document.querySelectorAll('.blog-tag').forEach((el) => {
-      gsap.from(el, {
-        y: -10,
-        opacity: 0,
-        duration: 0.5,
-        ease: 'bounce.out',
-        scrollTrigger: {
-          trigger: el,
-          start: 'top 90%',
-          toggleActions: 'play none none none'
-        }
-      });
-    });
-
-  } catch (error) {
-    console.warn('GSAP or Lenis failed to load:', error);
-  }
-});
-
-</script>
-
-
-
-
-
-
-
-
-
-
-
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap');
-    * {
-      font-family: 'Space Mono', monospace !important;
-    }
-
-
-/* Blog Section Animations */
-.blog-card {
-  display: grid;
-  grid-template-columns: 300px 1fr;
-  gap: 30px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 2px solid rgba(255, 255, 255, 0.1);
-  border-radius: 20px;
-  padding: 30px;
-  transition: all 0.3s ease;
-
-  transform: translateY(50px); /* Start below the screen */
-}
-
-.blog-card:hover {
-  border-color: rgba(255, 255, 255, 0.3);
-  transform: translateY(-5px);
-  opacity: 1; /* On hover, make it visible */
-}
-
-.section-title {
-
-  transform: translateY(30px); /* Start from below */
-}
-
-/* Ensure that all elements are visible only after the animation */
-.blog-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 30px;
-}
-
-
-
-
-
-
-
-
-    body {
-      background: #111;
-      color: #fff;
-      font-family: 'Space Mono', monospace;
-      font-size: 18px;
-    }
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 40px 20px;
-    }
-    /* Header */
-    .header-section {
-      margin-bottom: 40px;
-    }
-    .header-content {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      flex-wrap: wrap;
-      gap: 20px;
-    }
-    .title-container {
-      flex: 1;
-    }
-    .big-title {
-      font-size: 48px;
-      font-weight: 700;
-      margin: 0 0 10px 0;
-      color: #fff;
-    }
-    /* Subtitle Animation */
-    .subtitle-animation {
-      position: relative;
-      display: inline-block;
-    }
-    .subtitle-text {
-      font-size: 1.2rem;
-      color: rgba(255, 255, 255, 0.8);
-      background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4);
-      background-size: 300% 300%;
-      background-clip: text;
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      animation: gradientShift 3s ease-in-out infinite;
-      font-weight: 600;
-    }
-    .floating-dots {
-      position: absolute;
-      right: -40px;
-      top: 50%;
-      transform: translateY(-50%);
-      display: flex;
-      gap: 4px;
-    }
-    .dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: #4ecdc4;
-      animation: floatDots 2s ease-in-out infinite;
-    }
-    .dot:nth-child(2) {
-      background: #ff6b6b;
-      animation-delay: 0.2s;
-    }
-    .dot:nth-child(3) {
-      background: #feca57;
-      animation-delay: 0.4s;
-    }
-    @keyframes floatDots {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-8px); }
-    }
-    @keyframes gradientShift {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
-    }
-    .all-blog-link {
-      font-size: 1.4rem;
-      font-weight: 700;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      color: rgba(255,255,255,0.85);
-      padding: 12px 20px;
-      border: 2px solid rgba(255,255,255,0.4);
-      border-radius: 10px;
-      text-decoration: none;
-      transition: all 0.3s ease;
-      background: rgba(255,255,255,0.1);
-    }
-    .all-blog-link:hover {
-      background: rgba(255,255,255,0.2);
-      color: #fff;
-    }
-    /* Blog Section */
-    .blog-section {
-      margin: 60px 0;
-    }
-    .section-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 30px;
-    }
-    .section-title {
-      font-size: 2rem;
-      font-weight: 700;
-      color: #fff;
-      display: flex;
-      align-items: center;
-      gap: 15px;
-    }
-    .highlight-badge {
-      background: linear-gradient(135deg, #ff6b6b, #ffa726);
-      color: white;
-      padding: 6px 12px;
-      border-radius: 8px;
-      font-size: 0.8rem;
-      font-weight: 600;
-    }
-    /* Blog Grid */
-    .blog-grid {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 30px;
-    }
-    /* Blog Card */
-    .blog-card {
-      display: grid;
-      grid-template-columns: 300px 1fr;
-      gap: 30px;
-      background: rgba(255, 255, 255, 0.05);
-      border: 2px solid rgba(255, 255, 255, 0.1);
-      border-radius: 20px;
-      padding: 30px;
-      transition: all 0.3s ease;
-    }
-    .blog-card:hover {
-      border-color: rgba(255, 255, 255, 0.3);
-      transform: translateY(-5px);
-    }
-    /* Blog Images */
-    .blog-images {
-      display: flex;
-    }
-    .blog-image {
-      width: 100%;
-      height: 200px;
-      object-fit: cover;
-      border-radius: 15px;
-    }
-    /* Blog Content */
-    .blog-content {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-    }
-    .blog-meta {
-      display: flex;
-      gap: 15px;
-      margin-bottom: 15px;
-      flex-wrap: wrap;
-      align-items: center;
-    }
-    .blog-date, .blog-read-time {
-      color: rgba(255, 255, 255, 0.8);
-      font-size: 0.9rem;
-      background: rgba(255,255,255,0.1);
-      padding: 8px 12px;
-      border-radius: 6px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .blog-badge {
-      background: #4ecdc4;
-      color: white;
-      padding: 4px 8px;
-      border-radius: 6px;
-      font-size: 0.8rem;
-      font-weight: 600;
-    }
-    .blog-title {
-      font-size: 1.8rem;
-      font-weight: 700;
-      margin: 10px 0;
-      color: #fff;
-      line-height: 1.3;
-    }
-    .blog-desc {
-      color: rgba(255, 255, 255, 0.9);
-      line-height: 1.6;
-      margin-bottom: 20px;
-      font-size: 1rem;
-    }
-    .blog-tags {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin-bottom: 20px;
-    }
-    .blog-tag {
-      background: rgba(255, 255, 255, 0.2);
-      border: 1px solid rgba(255, 255, 255, 0.3);
-      color: #fff;
-      padding: 6px 12px;
-      border-radius: 15px;
-      font-size: 0.8rem;
-      font-weight: 600;
-    }
-    .blog-read-more {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      color: rgba(255, 255, 255, 0.9);
-      padding: 12px 20px;
-      text-decoration: none;
-      font-weight: 600;
-      transition: all 0.3s ease;
-      width: fit-content;
-      border: 2px solid rgba(255, 255, 255, 0.3);
-      border-radius: 8px;
-      background: rgba(255, 255, 255, 0.05);
-    }
-    .blog-read-more:hover {
-      color: #fff;
-      border-color: rgba(255, 255, 255, 0.6);
-      background: rgba(255, 255, 255, 0.1);
-      gap: 15px;
-      transform: translateX(5px);
-    }
-    .blog-read-more svg {
-      transition: transform 0.3s ease;
-    }
-    .blog-read-more:hover svg {
-      transform: translateX(3px);
-    }
-    /* Responsive */
-    @media (max-width: 768px) {
-      body {
-        font-size: 16px;
-      }
-      .header-content {
-        flex-direction: column;
-        text-align: center;
-      }
-      .big-title {
-        font-size: 2.8rem;
-      }
-      .all-blog-link {
-        width: 100%;
-        justify-content: center;
-        font-size: 1.2rem;
-      }
-      .blog-card {
-        grid-template-columns: 1fr;
-      }
-      .blog-image {
-        height: 180px;
-      }
-      .floating-dots {
-        position: static;
-        transform: none;
-        justify-content: center;
-        margin-top: 10px;
-      }
-    }
-    @media (max-width: 480px) {
-      .container {
-        padding: 20px 15px;
-      }
-      .big-title {
-        font-size: 2.2rem;
-      }
-      .blog-image {
-        height: 150px;
-      }
-    }
-  </style>
 </Layout>
 
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap');
 
+  * {
+    font-family: 'Space Mono', monospace !important;
+  }
 
+  body {
+    background: #111;
+    color: #fff;
+    font-family: 'Space Mono', monospace;
+    font-size: 18px;
+  }
 
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 20px;
+  }
 
+  /* Header */
+  .header-section {
+    margin-bottom: 40px;
+  }
 
+  .header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 20px;
+  }
 
+  .title-container {
+    flex: 1;
+  }
 
+  .big-title {
+    font-size: 48px;
+    font-weight: 700;
+    margin: 0 0 10px 0;
+    color: #fff;
+  }
 
+  /* Subtitle Animation */
+  .subtitle-animation {
+    position: relative;
+    display: inline-block;
+  }
 
+  .subtitle-text {
+    font-size: 1.2rem;
+    color: rgba(255, 255, 255, 0.8);
+    background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4);
+    background-size: 300% 300%;
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: gradientShift 3s ease-in-out infinite;
+    font-weight: 600;
+  }
+
+  .floating-dots {
+    position: absolute;
+    right: -40px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    gap: 4px;
+  }
+
+  .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #4ecdc4;
+    animation: floatDots 2s ease-in-out infinite;
+  }
+
+  .dot:nth-child(2) {
+    background: #ff6b6b;
+    animation-delay: 0.2s;
+  }
+
+  .dot:nth-child(3) {
+    background: #feca57;
+    animation-delay: 0.4s;
+  }
+
+  @keyframes floatDots {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+  }
+
+  @keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  .all-blog-link {
+    font-size: 1.4rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: rgba(255,255,255,0.85);
+    padding: 12px 20px;
+    border: 2px solid rgba(255,255,255,0.4);
+    border-radius: 10px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    background: rgba(255,255,255,0.1);
+  }
+
+  .all-blog-link:hover {
+    background: rgba(255,255,255,0.2);
+    color: #fff;
+  }
+
+  /* Blog Section */
+  .blog-section {
+    margin: 60px 0;
+  }
+
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+  }
+
+  .section-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+  }
+
+  .highlight-badge {
+    background: linear-gradient(135deg, #ff6b6b, #ffa726);
+    color: white;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 600;
+  }
+
+  /* Blog Grid */
+  .blog-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 30px;
+  }
+
+  /* Blog Card */
+  .blog-card {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 30px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    padding: 30px;
+    transition: all 0.3s ease;
+  }
+
+  .blog-card:hover {
+    border-color: rgba(255, 255, 255, 0.3);
+    transform: translateY(-5px);
+  }
+
+  /* Blog Images - UKURAN NORMAL */
+  .blog-images {
+    display: flex;
+  }
+
+  .blog-image {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 15px;
+  }
+
+  /* Blog Content */
+  .blog-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .blog-meta {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .blog-date, .blog-read-time {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.9rem;
+    background: rgba(255,255,255,0.1);
+    padding: 8px 12px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .blog-badge {
+    background: #4ecdc4;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 600;
+  }
+
+  .blog-title {
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin: 10px 0;
+    color: #fff;
+    line-height: 1.3;
+  }
+
+  .blog-desc {
+    color: rgba(255, 255, 255, 0.9);
+    line-height: 1.6;
+    margin-bottom: 20px;
+    font-size: 1rem;
+  }
+
+  .blog-tags {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+  }
+
+  .blog-tag {
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: #fff;
+    padding: 6px 12px;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    font-weight: 600;
+  }
+
+  /* Baca Selengkapnya - TANPA GARIS, PANAH BESAR */
+  .blog-read-more {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    color: rgba(255, 255, 255, 0.9);
+    padding: 12px 20px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    width: fit-content;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.05);
+  }
+
+  .blog-read-more:hover {
+    color: #fff;
+    border-color: rgba(255, 255, 255, 0.6);
+    background: rgba(255, 255, 255, 0.1);
+    gap: 15px;
+    transform: translateX(5px);
+  }
+
+  .blog-read-more svg {
+    transition: transform 0.3s ease;
+  }
+
+  .blog-read-more:hover svg {
+    transform: translateX(3px);
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    body {
+      font-size: 16px;
+    }
+
+    .header-content {
+      flex-direction: column;
+      text-align: center;
+    }
+
+    .big-title {
+      font-size: 2.8rem;
+    }
+
+    .all-blog-link {
+      width: 100%;
+      justify-content: center;
+      font-size: 1.2rem;
+    }
+
+    .blog-card {
+      grid-template-columns: 1fr;
+    }
+
+    .blog-image {
+      height: 180px;
+    }
+
+    .floating-dots {
+      position: static;
+      transform: none;
+      justify-content: center;
+      margin-top: 10px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .container {
+      padding: 20px 15px;
+    }
+
+    .big-title {
+      font-size: 2.2rem;
+    }
+
+    .blog-image {
+      height: 150px;
+    }
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const titleElement = document.getElementById('mainTitle');
+    
+    const titleVariations = [
+      "Blog",
+      "Articles", 
+      "Stories",
+      "Thoughts",
+      "Journal",
+      "Notes",
+      "Ideas",
+      "Updates"
+    ];
+
+    let currentIndex = 0;
+
+    function changeTitle() {
+      titleElement.style.opacity = '0';
+      
+      setTimeout(() => {
+        titleElement.textContent = titleVariations[currentIndex];
+        titleElement.style.opacity = '1';
+        
+        currentIndex = (currentIndex + 1) % titleVariations.length;
+        
+        setTimeout(changeTitle, 2000);
+      }, 500);
+    }
+
+    // Start animation
+    setTimeout(changeTitle, 1000);
+  });
+</script>
