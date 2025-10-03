@@ -95,9 +95,8 @@ const blogPosts = {
         </div>
       </section>
 
-      <!-- HORIZONTAL SCROLL WRAPPER -->
+      <!-- HORIZONTAL SCROLL SECTIONS -->
       <div class="horizontal-scroll-wrapper">
-        <!-- HORIZONTAL SECTIONS CONTAINER -->
         <div class="horizontal-sections-container">
           <!-- BLOG SECTION - TENTANG DIRI -->
           <section class="blog-section horizontal-section" id="tentang-diri">
@@ -107,9 +106,6 @@ const blogPosts = {
                   Tentang Diri
                   <span class="highlight-badge">{blogPosts.tentangDiri.length} Artikel</span>
                 </h2>
-                <div class="section-description">
-                  <p>Kumpulan cerita dan refleksi personal tentang perjalanan hidup, pembelajaran, dan pertumbuhan diri sebagai developer dan individu.</p>
-                </div>
               </div>
 
               <div class="blog-grid-horizontal">
@@ -164,9 +160,6 @@ const blogPosts = {
                   Random
                   <span class="highlight-badge">{blogPosts.random.length} Artikel</span>
                 </h2>
-                <div class="section-description">
-                  <p>Berbagai tulisan random tentang teknologi, produktivitas, desain, dan hal-hal menarik lainnya yang saya pelajari sepanjang perjalanan.</p>
-                </div>
               </div>
 
               <div class="blog-grid-horizontal">
@@ -214,6 +207,44 @@ const blogPosts = {
           </section>
         </div>
       </div>
+
+      <!-- DESCRIPTION SECTION (Setelah Horizontal Scroll) -->
+      <section class="description-section">
+        <div class="description-content">
+          <h2 class="description-title">Tentang Blog Ini</h2>
+          <div class="description-text">
+            <p>
+              Blog ini adalah ruang personal tempat saya berbagi cerita, pengalaman, dan pengetahuan 
+              yang saya dapatkan selama perjalanan sebagai developer. Setiap tulisan di sini merupakan 
+              refleksi dari proses belajar dan tumbuh yang terus berlangsung.
+            </p>
+            <p>
+              Dari perjalanan karir di dunia teknologi hingga refleksi kehidupan sehari-hari, 
+              saya berharap konten di blog ini dapat memberikan nilai dan inspirasi bagi pembaca. 
+              Tidak hanya tentang coding, tapi juga tentang bagaimana kita belajar, berkembang, 
+              dan menemukan passion dalam setiap hal yang kita lakukan.
+            </p>
+            <p>
+              Terima kasih telah mampir dan meluangkan waktu untuk membaca. Semoga menemukan 
+              sesuatu yang bermanfaat di antara baris-baris tulisan ini.
+            </p>
+          </div>
+          <div class="description-stats">
+            <div class="stat-item">
+              <span class="stat-number">{blogPosts.tentangDiri.length + blogPosts.random.length}</span>
+              <span class="stat-label">Total Artikel</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-number">2</span>
+              <span class="stat-label">Kategori</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-number">2023</span>
+              <span class="stat-label">Tahun Aktif</span>
+            </div>
+          </div>
+        </div>
+      </section>
     </main>
   </div>
 </Layout>
@@ -249,8 +280,8 @@ const blogPosts = {
 
   /* Header */
   .header-section {
-    margin-bottom: 40px;
-    padding: 40px 20px;
+    margin-bottom: 0;
+    padding: 60px 20px;
     background: #111;
     position: relative;
     z-index: 10;
@@ -406,17 +437,6 @@ const blogPosts = {
     margin-bottom: 20px;
   }
 
-  .section-description {
-    max-width: 600px;
-    margin: 0 auto;
-  }
-
-  .section-description p {
-    font-size: 1.1rem;
-    color: rgba(255, 255, 255, 0.7);
-    line-height: 1.6;
-  }
-
   .highlight-badge {
     background: linear-gradient(135deg, #ff6b6b, #ffa726);
     color: white;
@@ -564,6 +584,68 @@ const blogPosts = {
     transform: translateX(3px);
   }
 
+  /* Description Section */
+  .description-section {
+    padding: 100px 20px;
+    background: #111;
+    position: relative;
+    z-index: 10;
+  }
+
+  .description-content {
+    max-width: 800px;
+    margin: 0 auto;
+    text-align: center;
+  }
+
+  .description-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 40px;
+    color: #fff;
+    background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .description-text {
+    margin-bottom: 50px;
+  }
+
+  .description-text p {
+    font-size: 1.1rem;
+    line-height: 1.8;
+    color: rgba(255, 255, 255, 0.8);
+    margin-bottom: 20px;
+  }
+
+  .description-stats {
+    display: flex;
+    justify-content: center;
+    gap: 60px;
+    flex-wrap: wrap;
+  }
+
+  .stat-item {
+    text-align: center;
+  }
+
+  .stat-number {
+    display: block;
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #4ecdc4;
+    margin-bottom: 8px;
+  }
+
+  .stat-label {
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.6);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
   /* Scroll Progress Indicator */
   .scroll-progress {
     position: fixed;
@@ -629,39 +711,6 @@ const blogPosts = {
     opacity: 1;
   }
 
-  /* Navigation Arrows */
-  .scroll-arrows {
-    position: fixed;
-    left: 30px;
-    top: 50%;
-    transform: translateY(-50%);
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-    z-index: 1000;
-  }
-
-  .scroll-arrow {
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.1);
-    border: 2px solid rgba(255, 255, 255, 0.3);
-    color: white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    font-size: 1.2rem;
-  }
-
-  .scroll-arrow:hover {
-    background: rgba(255, 255, 255, 0.2);
-    border-color: rgba(255, 255, 255, 0.6);
-    transform: scale(1.1);
-  }
-
   /* Responsive */
   @media (max-width: 768px) {
     body {
@@ -713,24 +762,30 @@ const blogPosts = {
       gap: 20px;
     }
 
+    .description-section {
+      padding: 60px 20px;
+    }
+
+    .description-title {
+      font-size: 2rem;
+    }
+
+    .description-stats {
+      gap: 40px;
+    }
+
+    .stat-number {
+      font-size: 2rem;
+    }
+
     .section-indicator {
       right: 15px;
-    }
-
-    .scroll-arrows {
-      left: 15px;
-    }
-
-    .scroll-arrow {
-      width: 40px;
-      height: 40px;
-      font-size: 1rem;
     }
   }
 
   @media (max-width: 480px) {
     .header-section {
-      padding: 20px 15px;
+      padding: 40px 15px;
     }
 
     .big-title {
@@ -753,6 +808,22 @@ const blogPosts = {
     .section-title {
       font-size: 1.8rem;
     }
+
+    .description-section {
+      padding: 40px 15px;
+    }
+
+    .description-title {
+      font-size: 1.8rem;
+    }
+
+    .description-stats {
+      gap: 30px;
+    }
+
+    .stat-number {
+      font-size: 1.8rem;
+    }
   }
 </style>
 
@@ -760,12 +831,10 @@ const blogPosts = {
   // Import GSAP plugins
   import { gsap } from 'gsap';
   import { ScrollTrigger } from 'gsap/ScrollTrigger';
-  import { Flip } from 'gsap/Flip';
-  import Lenis from '@studio-freight/lenis';
 
   // Register GSAP plugins
   if (typeof window !== 'undefined') {
-    gsap.registerPlugin(ScrollTrigger, Flip);
+    gsap.registerPlugin(ScrollTrigger);
   }
 
   document.addEventListener('DOMContentLoaded', function() {
@@ -800,33 +869,7 @@ const blogPosts = {
     // Start animation
     setTimeout(changeTitle, 1000);
 
-    // Initialize Lenis for smooth horizontal scrolling
-    let lenis;
-    if (typeof window !== 'undefined') {
-      lenis = new Lenis({
-        duration: 1.5,
-        easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-        direction: 'horizontal', // Horizontal scrolling
-        gestureDirection: 'horizontal',
-        smooth: true,
-        smoothTouch: false,
-        touchMultiplier: 2,
-      });
-
-      // Update Lenis scroll to work with horizontal layout
-      lenis.on('scroll', (e) => {
-        // Custom horizontal scroll behavior will be handled by GSAP
-      });
-
-      function raf(time) {
-        lenis.raf(time);
-        requestAnimationFrame(raf);
-      }
-
-      requestAnimationFrame(raf);
-    }
-
-    // GSAP Horizontal Scroll with ScrollTrigger
+    // GSAP Horizontal Scroll with Normal Speed
     if (typeof window !== 'undefined' && gsap) {
       // Create scroll progress indicator
       const scrollProgress = document.createElement('div');
@@ -844,32 +887,22 @@ const blogPosts = {
       `;
       document.body.appendChild(sectionIndicator);
 
-      // Create navigation arrows
-      const scrollArrows = document.createElement('div');
-      scrollArrows.className = 'scroll-arrows';
-      scrollArrows.innerHTML = `
-        <div class="scroll-arrow prev-arrow">←</div>
-        <div class="scroll-arrow next-arrow">→</div>
-      `;
-      document.body.appendChild(scrollArrows);
-
       const horizontalContainer = document.querySelector('.horizontal-sections-container');
       const horizontalSections = gsap.utils.toArray('.horizontal-section');
-      const totalSections = horizontalSections.length;
       
       // Calculate total width for horizontal scroll
-      const totalWidth = totalSections * 100; // 100vw per section
+      const totalWidth = horizontalSections.length * 100; // 100vw per section
 
       // Set initial container width
       horizontalContainer.style.width = `${totalWidth}vw`;
 
-      // Create the main horizontal scroll timeline
+      // Create the main horizontal scroll timeline with NORMAL SPEED
       const horizontalTl = gsap.timeline({
         scrollTrigger: {
           trigger: '.horizontal-scroll-wrapper',
           start: 'top top',
-          end: () => `+=${totalWidth * window.innerWidth}`,
-          scrub: 1,
+          end: () => `+=${(totalWidth - 100) * window.innerWidth}`, // Normal speed calculation
+          scrub: 0.5, // Less scrub for faster response
           pin: true,
           anticipatePin: 1,
           invalidateOnRefresh: true,
@@ -882,7 +915,7 @@ const blogPosts = {
             }
             
             // Update section indicator
-            const currentSection = Math.floor(progress * totalSections);
+            const currentSection = Math.floor(progress * (horizontalSections.length - 1));
             document.querySelectorAll('.section-dot').forEach((dot, index) => {
               dot.classList.toggle('active', index === currentSection);
             });
@@ -890,10 +923,10 @@ const blogPosts = {
         }
       });
 
-      // Animate horizontal scroll
+      // Animate horizontal scroll with NORMAL SPEED (no ease for direct response)
       horizontalTl.to(horizontalContainer, {
-        x: () => -((totalSections - 1) * window.innerWidth),
-        ease: 'none'
+        x: () => -((horizontalSections.length - 1) * window.innerWidth),
+        ease: 'none' // No easing for immediate response
       });
 
       // Add animations for each section
@@ -910,7 +943,7 @@ const blogPosts = {
           {
             opacity: 1,
             y: 0,
-            duration: 1,
+            duration: 0.8,
             scrollTrigger: {
               trigger: section,
               containerAnimation: horizontalTl,
@@ -932,8 +965,8 @@ const blogPosts = {
             opacity: 1,
             x: 0,
             scale: 1,
-            duration: 0.8,
-            stagger: 0.2,
+            duration: 0.6,
+            stagger: 0.1, // Faster stagger
             scrollTrigger: {
               trigger: section,
               containerAnimation: horizontalTl,
@@ -977,50 +1010,38 @@ const blogPosts = {
         });
       });
 
-      // Navigation arrows functionality
-      document.querySelector('.next-arrow').addEventListener('click', () => {
-        const currentProgress = horizontalTl.scrollTrigger.progress;
-        const nextProgress = Math.min(currentProgress + (1 / (totalSections - 1)), 1);
-        
-        gsap.to(horizontalTl, {
-          progress: nextProgress,
-          duration: 1.5,
-          ease: 'power2.inOut'
-        });
-      });
-
-      document.querySelector('.prev-arrow').addEventListener('click', () => {
-        const currentProgress = horizontalTl.scrollTrigger.progress;
-        const prevProgress = Math.max(currentProgress - (1 / (totalSections - 1)), 0);
-        
-        gsap.to(horizontalTl, {
-          progress: prevProgress,
-          duration: 1.5,
-          ease: 'power2.inOut'
-        });
-      });
-
       // Section indicator click handler
       document.querySelectorAll('.section-dot').forEach((dot, index) => {
         dot.addEventListener('click', () => {
-          const targetProgress = index / (totalSections - 1);
+          const targetProgress = index / (horizontalSections.length - 1);
           
           gsap.to(horizontalTl, {
             progress: targetProgress,
-            duration: 1.5,
+            duration: 1, // Faster transition
             ease: 'power2.inOut'
           });
         });
       });
 
-      // Keyboard navigation
-      document.addEventListener('keydown', (e) => {
-        if (e.key === 'ArrowRight') {
-          document.querySelector('.next-arrow').click();
-        } else if (e.key === 'ArrowLeft') {
-          document.querySelector('.prev-arrow').click();
+      // Add animation for description section
+      const descriptionSection = document.querySelector('.description-section');
+      gsap.fromTo(descriptionSection,
+        {
+          opacity: 0,
+          y: 100
+        },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 1,
+          scrollTrigger: {
+            trigger: descriptionSection,
+            start: 'top 80%',
+            end: 'top 50%',
+            toggleActions: 'play none none reverse'
+          }
         }
-      });
+      );
 
       // Refresh ScrollTrigger on resize
       window.addEventListener('resize', () => {
