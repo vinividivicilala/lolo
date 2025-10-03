@@ -210,37 +210,39 @@ const blogPosts = {
 
       <!-- DESCRIPTION SECTION (Setelah Horizontal Scroll) -->
       <section class="description-section">
-        <div class="description-content">
-          <h2 class="description-title">Tentang Blog Ini</h2>
-          <div class="description-text">
-            <p>
-              Blog ini adalah ruang personal tempat saya berbagi cerita, pengalaman, dan pengetahuan 
-              yang saya dapatkan selama perjalanan sebagai developer. Setiap tulisan di sini merupakan 
-              refleksi dari proses belajar dan tumbuh yang terus berlangsung.
-            </p>
-            <p>
-              Dari perjalanan karir di dunia teknologi hingga refleksi kehidupan sehari-hari, 
-              saya berharap konten di blog ini dapat memberikan nilai dan inspirasi bagi pembaca. 
-              Tidak hanya tentang coding, tapi juga tentang bagaimana kita belajar, berkembang, 
-              dan menemukan passion dalam setiap hal yang kita lakukan.
-            </p>
-            <p>
-              Terima kasih telah mampir dan meluangkan waktu untuk membaca. Semoga menemukan 
-              sesuatu yang bermanfaat di antara baris-baris tulisan ini.
-            </p>
-          </div>
-          <div class="description-stats">
-            <div class="stat-item">
-              <span class="stat-number">{blogPosts.tentangDiri.length + blogPosts.random.length}</span>
-              <span class="stat-label">Total Artikel</span>
+        <div class="description-scroll-wrapper">
+          <div class="description-content">
+            <h2 class="description-title">Tentang Blog Ini</h2>
+            <div class="description-text">
+              <p class="large-text">
+                Blog ini adalah ruang personal tempat saya berbagi cerita, pengalaman, dan pengetahuan 
+                yang saya dapatkan selama perjalanan sebagai developer. Setiap tulisan di sini merupakan 
+                refleksi dari proses belajar dan tumbuh yang terus berlangsung.
+              </p>
+              <p class="large-text">
+                Dari perjalanan karir di dunia teknologi hingga refleksi kehidupan sehari-hari, 
+                saya berharap konten di blog ini dapat memberikan nilai dan inspirasi bagi pembaca. 
+                Tidak hanya tentang coding, tapi juga tentang bagaimana kita belajar, berkembang, 
+                dan menemukan passion dalam setiap hal yang kita lakukan.
+              </p>
+              <p class="large-text">
+                Terima kasih telah mampir dan meluangkan waktu untuk membaca. Semoga menemukan 
+                sesuatu yang bermanfaat di antara baris-baris tulisan ini.
+              </p>
             </div>
-            <div class="stat-item">
-              <span class="stat-number">2</span>
-              <span class="stat-label">Kategori</span>
-            </div>
-            <div class="stat-item">
-              <span class="stat-number">2023</span>
-              <span class="stat-label">Tahun Aktif</span>
+            <div class="description-stats">
+              <div class="stat-item">
+                <span class="stat-number">{blogPosts.tentangDiri.length + blogPosts.random.length}</span>
+                <span class="stat-label">Total Artikel</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-number">2</span>
+                <span class="stat-label">Kategori</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-number">2023</span>
+                <span class="stat-label">Tahun Aktif</span>
+              </div>
             </div>
           </div>
         </div>
@@ -586,64 +588,82 @@ const blogPosts = {
 
   /* Description Section */
   .description-section {
-    padding: 100px 20px;
+    padding: 100px 0;
     background: #111;
     position: relative;
     z-index: 10;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+  }
+
+  .description-scroll-wrapper {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
   }
 
   .description-content {
-    max-width: 800px;
-    margin: 0 auto;
-    text-align: center;
+    max-width: none;
+    margin: 0;
+    padding: 0 40px;
+    text-align: left;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
   }
 
   .description-title {
-    font-size: 2.5rem;
+    font-size: 4rem;
     font-weight: 700;
-    margin-bottom: 40px;
+    margin-bottom: 60px;
     color: #fff;
     background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
     background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
+    line-height: 1.1;
   }
 
   .description-text {
-    margin-bottom: 50px;
+    margin-bottom: 80px;
+    max-width: 800px;
   }
 
-  .description-text p {
-    font-size: 1.1rem;
-    line-height: 1.8;
-    color: rgba(255, 255, 255, 0.8);
-    margin-bottom: 20px;
+  .large-text {
+    font-size: 1.8rem;
+    line-height: 1.6;
+    color: rgba(255, 255, 255, 0.9);
+    margin-bottom: 40px;
+    font-weight: 400;
   }
 
   .description-stats {
     display: flex;
-    justify-content: center;
-    gap: 60px;
+    gap: 80px;
     flex-wrap: wrap;
   }
 
   .stat-item {
-    text-align: center;
+    text-align: left;
   }
 
   .stat-number {
     display: block;
-    font-size: 2.5rem;
+    font-size: 3.5rem;
     font-weight: 700;
     color: #4ecdc4;
-    margin-bottom: 8px;
+    margin-bottom: 15px;
+    line-height: 1;
   }
 
   .stat-label {
-    font-size: 0.9rem;
-    color: rgba(255, 255, 255, 0.6);
+    font-size: 1.1rem;
+    color: rgba(255, 255, 255, 0.7);
     text-transform: uppercase;
-    letter-spacing: 1px;
+    letter-spacing: 2px;
+    font-weight: 600;
   }
 
   /* Scroll Progress Indicator */
@@ -763,11 +783,23 @@ const blogPosts = {
     }
 
     .description-section {
-      padding: 60px 20px;
+      padding: 60px 0;
+      height: auto;
+      min-height: 100vh;
+    }
+
+    .description-content {
+      padding: 0 20px;
     }
 
     .description-title {
-      font-size: 2rem;
+      font-size: 2.5rem;
+      margin-bottom: 40px;
+    }
+
+    .large-text {
+      font-size: 1.3rem;
+      margin-bottom: 30px;
     }
 
     .description-stats {
@@ -775,7 +807,11 @@ const blogPosts = {
     }
 
     .stat-number {
-      font-size: 2rem;
+      font-size: 2.5rem;
+    }
+
+    .stat-label {
+      font-size: 1rem;
     }
 
     .section-indicator {
@@ -810,11 +846,17 @@ const blogPosts = {
     }
 
     .description-section {
-      padding: 40px 15px;
+      padding: 40px 0;
     }
 
     .description-title {
-      font-size: 1.8rem;
+      font-size: 2rem;
+      margin-bottom: 30px;
+    }
+
+    .large-text {
+      font-size: 1.1rem;
+      margin-bottom: 25px;
     }
 
     .description-stats {
@@ -822,7 +864,11 @@ const blogPosts = {
     }
 
     .stat-number {
-      font-size: 1.8rem;
+      font-size: 2rem;
+    }
+
+    .stat-label {
+      font-size: 0.9rem;
     }
   }
 </style>
@@ -869,7 +915,7 @@ const blogPosts = {
     // Start animation
     setTimeout(changeTitle, 1000);
 
-    // GSAP Horizontal Scroll with Normal Speed
+    // GSAP Horizontal Scroll with FAST Speed
     if (typeof window !== 'undefined' && gsap) {
       // Create scroll progress indicator
       const scrollProgress = document.createElement('div');
@@ -884,11 +930,13 @@ const blogPosts = {
       sectionIndicator.innerHTML = `
         <div class="section-dot active" data-title="Tentang Diri" data-section="0"></div>
         <div class="section-dot" data-title="Random" data-section="1"></div>
+        <div class="section-dot" data-title="Tentang Blog" data-section="2"></div>
       `;
       document.body.appendChild(sectionIndicator);
 
       const horizontalContainer = document.querySelector('.horizontal-sections-container');
       const horizontalSections = gsap.utils.toArray('.horizontal-section');
+      const descriptionSection = document.querySelector('.description-section');
       
       // Calculate total width for horizontal scroll
       const totalWidth = horizontalSections.length * 100; // 100vw per section
@@ -896,13 +944,13 @@ const blogPosts = {
       // Set initial container width
       horizontalContainer.style.width = `${totalWidth}vw`;
 
-      // Create the main horizontal scroll timeline with NORMAL SPEED
+      // Create the main horizontal scroll timeline with FAST SPEED
       const horizontalTl = gsap.timeline({
         scrollTrigger: {
           trigger: '.horizontal-scroll-wrapper',
           start: 'top top',
-          end: () => `+=${(totalWidth - 100) * window.innerWidth}`, // Normal speed calculation
-          scrub: 0.5, // Less scrub for faster response
+          end: () => `+=${(totalWidth - 100) * window.innerWidth * 0.8}`, // Shorter distance for faster scroll
+          scrub: 0.1, // Very little scrub for immediate response
           pin: true,
           anticipatePin: 1,
           invalidateOnRefresh: true,
@@ -915,7 +963,7 @@ const blogPosts = {
             }
             
             // Update section indicator
-            const currentSection = Math.floor(progress * (horizontalSections.length - 1));
+            const currentSection = Math.floor(progress * (horizontalSections.length));
             document.querySelectorAll('.section-dot').forEach((dot, index) => {
               dot.classList.toggle('active', index === currentSection);
             });
@@ -923,7 +971,7 @@ const blogPosts = {
         }
       });
 
-      // Animate horizontal scroll with NORMAL SPEED (no ease for direct response)
+      // Animate horizontal scroll with FAST SPEED
       horizontalTl.to(horizontalContainer, {
         x: () => -((horizontalSections.length - 1) * window.innerWidth),
         ease: 'none' // No easing for immediate response
@@ -943,7 +991,7 @@ const blogPosts = {
           {
             opacity: 1,
             y: 0,
-            duration: 0.8,
+            duration: 0.6, // Faster duration
             scrollTrigger: {
               trigger: section,
               containerAnimation: horizontalTl,
@@ -954,7 +1002,7 @@ const blogPosts = {
           }
         );
 
-        // Blog cards animation with stagger
+        // Blog cards animation with faster stagger
         gsap.fromTo(blogCards, 
           {
             opacity: 0,
@@ -965,8 +1013,8 @@ const blogPosts = {
             opacity: 1,
             x: 0,
             scale: 1,
-            duration: 0.6,
-            stagger: 0.1, // Faster stagger
+            duration: 0.4, // Much faster
+            stagger: 0.05, // Very fast stagger
             scrollTrigger: {
               trigger: section,
               containerAnimation: horizontalTl,
@@ -991,7 +1039,7 @@ const blogPosts = {
             const angleY = (centerX - x) / 25;
             
             gsap.to(card, {
-              duration: 0.3,
+              duration: 0.2, // Faster magnetic effect
               rotateX: angleX,
               rotateY: angleY,
               transformPerspective: 1000,
@@ -1001,7 +1049,7 @@ const blogPosts = {
           
           card.addEventListener('mouseleave', () => {
             gsap.to(card, {
-              duration: 0.5,
+              duration: 0.3, // Faster return
               rotateX: 0,
               rotateY: 0,
               ease: 'power2.out'
@@ -1010,21 +1058,7 @@ const blogPosts = {
         });
       });
 
-      // Section indicator click handler
-      document.querySelectorAll('.section-dot').forEach((dot, index) => {
-        dot.addEventListener('click', () => {
-          const targetProgress = index / (horizontalSections.length - 1);
-          
-          gsap.to(horizontalTl, {
-            progress: targetProgress,
-            duration: 1, // Faster transition
-            ease: 'power2.inOut'
-          });
-        });
-      });
-
       // Add animation for description section
-      const descriptionSection = document.querySelector('.description-section');
       gsap.fromTo(descriptionSection,
         {
           opacity: 0,
@@ -1033,7 +1067,7 @@ const blogPosts = {
         {
           opacity: 1,
           y: 0,
-          duration: 1,
+          duration: 0.8,
           scrollTrigger: {
             trigger: descriptionSection,
             start: 'top 80%',
@@ -1042,6 +1076,28 @@ const blogPosts = {
           }
         }
       );
+
+      // Section indicator click handler
+      document.querySelectorAll('.section-dot').forEach((dot, index) => {
+        dot.addEventListener('click', () => {
+          if (index < horizontalSections.length) {
+            const targetProgress = index / (horizontalSections.length - 1);
+            
+            gsap.to(horizontalTl, {
+              progress: targetProgress,
+              duration: 0.8, // Faster transition
+              ease: 'power2.inOut'
+            });
+          } else {
+            // Scroll to description section
+            gsap.to(window, {
+              duration: 1,
+              scrollTo: descriptionSection,
+              ease: 'power2.inOut'
+            });
+          }
+        });
+      });
 
       // Refresh ScrollTrigger on resize
       window.addEventListener('resize', () => {
