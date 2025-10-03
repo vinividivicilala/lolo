@@ -207,7 +207,7 @@ const blogPosts = {
     // Dynamic import GSAP & Lenis (Vite akan bundle ini dengan benar)
     const { gsap } = await import('gsap');
     const { ScrollTrigger } = await import('gsap/ScrollTrigger');
-    const Lenis = (await import('lenis')).default;
+    const Lenis = (await import('@studio-freight/lenis')).default;
 
     gsap.registerPlugin(ScrollTrigger);
 
@@ -564,5 +564,6 @@ const blogPosts = {
     }
   </style>
 </Layout>
+
 
 
