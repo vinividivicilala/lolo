@@ -4,7 +4,7 @@ import Layout from '../layouts/Layout.astro';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Flip } from 'gsap/Flip';
-import Lenis from 'lenis';
+import Lenis from '@studio-freight/lenis';
 
 // Data blog (bisa dipindah ke file terpisah nanti)
 const blogPosts = {
@@ -599,7 +599,7 @@ const blogPosts = {
   import { gsap } from 'gsap';
   import { ScrollTrigger } from 'gsap/ScrollTrigger';
   import { Flip } from 'gsap/Flip';
-  import Lenis from 'lenis';
+  import Lenis from '@studio-freight/lenis';
 
   // Register GSAP plugins
   if (typeof window !== 'undefined') {
@@ -808,3 +808,4 @@ const blogPosts = {
     }
   });
 </script>
+
