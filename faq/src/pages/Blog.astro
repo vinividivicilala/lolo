@@ -1,6 +1,10 @@
 ---
 // src/pages/blog.astro
 import Layout from '../layouts/Layout.astro';
+import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { Flip } from 'gsap/Flip';
+import Lenis from 'lenis';
 
 // Data blog (bisa dipindah ke file terpisah nanti)
 const blogPosts = {
@@ -95,109 +99,112 @@ const blogPosts = {
         </div>
       </section>
 
-      <!-- BLOG SECTION - TENTANG DIRI -->
-      <section class="blog-section">
-        <div class="section-header">
-          <h2 class="section-title">
-            Tentang Diri
-            <span class="highlight-badge">{blogPosts.tentangDiri.length} Artikel</span>
-          </h2>
-        </div>
+      <!-- HORIZONTAL SCROLL CONTAINER -->
+      <div class="horizontal-scroll-container">
+        <!-- BLOG SECTION - TENTANG DIRI -->
+        <section class="blog-section horizontal-section">
+          <div class="section-header">
+            <h2 class="section-title">
+              Tentang Diri
+              <span class="highlight-badge">{blogPosts.tentangDiri.length} Artikel</span>
+            </h2>
+          </div>
 
-        <div class="blog-grid">
-          {blogPosts.tentangDiri.map((post, index) => (
-            <div class="blog-card">
-              <div class="blog-images">
-                <img src={post.image} alt={post.title} class="blog-image" />
-              </div>
-              <div class="blog-content">
-                <div class="blog-meta">
-                  <span class="blog-date">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
-                      <path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM2 2a1 1 0 0 0-1 1v11a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V3a1 1 0 0 0-1-1H2z"/>
-                      <path d="M2.5 4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5H3a.5.5 0 0 1-.5-.5V4z"/>
-                    </svg>
-                    {post.date}
-                  </span>
-                  <span class="blog-read-time">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
-                      <path d="M8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71V3.5z"/>
-                      <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm7-8A7 7 0 1 1 1 8a7 7 0 0 1 14 0z"/>
-                    </svg>
-                    {post.readTime}
-                  </span>
-                  {post.badge && <span class="blog-badge">{post.badge}</span>}
+          <div class="blog-grid-horizontal">
+            {blogPosts.tentangDiri.map((post, index) => (
+              <div class="blog-card-horizontal" data-index={index}>
+                <div class="blog-images">
+                  <img src={post.image} alt={post.title} class="blog-image" />
                 </div>
-                <h3 class="blog-title">{post.title}</h3>
-                <p class="blog-desc">{post.desc}</p>
-                <div class="blog-tags">
-                  {post.tags.map(tag => (
-                    <span class="blog-tag">{tag}</span>
-                  ))}
+                <div class="blog-content">
+                  <div class="blog-meta">
+                    <span class="blog-date">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM2 2a1 1 0 0 0-1 1v11a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V3a1 1 0 0 0-1-1H2z"/>
+                        <path d="M2.5 4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5H3a.5.5 0 0 1-.5-.5V4z"/>
+                      </svg>
+                      {post.date}
+                    </span>
+                    <span class="blog-read-time">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71V3.5z"/>
+                        <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm7-8A7 7 0 1 1 1 8a7 7 0 0 1 14 0z"/>
+                      </svg>
+                      {post.readTime}
+                    </span>
+                    {post.badge && <span class="blog-badge">{post.badge}</span>}
+                  </div>
+                  <h3 class="blog-title">{post.title}</h3>
+                  <p class="blog-desc">{post.desc}</p>
+                  <div class="blog-tags">
+                    {post.tags.map(tag => (
+                      <span class="blog-tag">{tag}</span>
+                    ))}
+                  </div>
+                  <a href="#" class="blog-read-more">
+                    Baca Selengkapnya
+                    <svg xmlns="http://www.w3.org/2000/svg" width="39" height="39" fill="currentColor" viewBox="0 0 16 16">
+                      <path fill-rule="evenodd" d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"/>
+                    </svg>
+                  </a>
                 </div>
-                <a href="#" class="blog-read-more">
-                  Baca Selengkapnya
-                  <svg xmlns="http://www.w3.org/2000/svg" width="39" height="39" fill="currentColor" viewBox="0 0 16 16">
-                    <path fill-rule="evenodd" d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"/>
-                  </svg>
-                </a>
               </div>
-            </div>
-          ))}
-        </div>
-      </section>
+            ))}
+          </div>
+        </section>
 
-      <!-- BLOG SECTION - RANDOM -->
-      <section class="blog-section">
-        <div class="section-header">
-          <h2 class="section-title">
-            Random
-            <span class="highlight-badge">{blogPosts.random.length} Artikel</span>
-          </h2>
-        </div>
+        <!-- BLOG SECTION - RANDOM -->
+        <section class="blog-section horizontal-section">
+          <div class="section-header">
+            <h2 class="section-title">
+              Random
+              <span class="highlight-badge">{blogPosts.random.length} Artikel</span>
+            </h2>
+          </div>
 
-        <div class="blog-grid">
-          {blogPosts.random.map((post, index) => (
-            <div class="blog-card">
-              <div class="blog-images">
-                <img src={post.image} alt={post.title} class="blog-image" />
-              </div>
-              <div class="blog-content">
-                <div class="blog-meta">
-                  <span class="blog-date">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
-                      <path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM2 2a1 1 0 0 0-1 1v11a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V3a1 1 0 0 0-1-1H2z"/>
-                      <path d="M2.5 4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5H3a.5.5 0 0 1-.5-.5V4z"/>
-                    </svg>
-                    {post.date}
-                  </span>
-                  <span class="blog-read-time">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
-                      <path d="M8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71V3.5z"/>
-                      <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm7-8A7 7 0 1 1 1 8a7 7 0 0 1 14 0z"/>
-                    </svg>
-                    {post.readTime}
-                  </span>
-                  {post.badge && <span class="blog-badge">{post.badge}</span>}
+          <div class="blog-grid-horizontal">
+            {blogPosts.random.map((post, index) => (
+              <div class="blog-card-horizontal" data-index={index}>
+                <div class="blog-images">
+                  <img src={post.image} alt={post.title} class="blog-image" />
                 </div>
-                <h3 class="blog-title">{post.title}</h3>
-                <p class="blog-desc">{post.desc}</p>
-                <div class="blog-tags">
-                  {post.tags.map(tag => (
-                    <span class="blog-tag">{tag}</span>
-                  ))}
+                <div class="blog-content">
+                  <div class="blog-meta">
+                    <span class="blog-date">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM2 2a1 1 0 0 0-1 1v11a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V3a1 1 0 0 0-1-1H2z"/>
+                        <path d="M2.5 4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5H3a.5.5 0 0 1-.5-.5V4z"/>
+                      </svg>
+                      {post.date}
+                    </span>
+                    <span class="blog-read-time">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71V3.5z"/>
+                        <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm7-8A7 7 0 1 1 1 8a7 7 0 0 1 14 0z"/>
+                      </svg>
+                      {post.readTime}
+                    </span>
+                    {post.badge && <span class="blog-badge">{post.badge}</span>}
+                  </div>
+                  <h3 class="blog-title">{post.title}</h3>
+                  <p class="blog-desc">{post.desc}</p>
+                  <div class="blog-tags">
+                    {post.tags.map(tag => (
+                      <span class="blog-tag">{tag}</span>
+                    ))}
+                  </div>
+                  <a href="#" class="blog-read-more">
+                    Baca Selengkapnya
+                    <svg xmlns="http://www.w3.org/2000/svg" width="39" height="39" fill="currentColor" viewBox="0 0 16 16">
+                      <path fill-rule="evenodd" d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"/>
+                    </svg>
+                  </a>
                 </div>
-                <a href="#" class="blog-read-more">
-                  Baca Selengkapnya
-                  <svg xmlns="http://www.w3.org/2000/svg" width="39" height="39" fill="currentColor" viewBox="0 0 16 16">
-                    <path fill-rule="evenodd" d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"/>
-                  </svg>
-                </a>
               </div>
-            </div>
-          ))}
-        </div>
-      </section>
+            ))}
+          </div>
+        </section>
+      </div>
     </main>
   </div>
 </Layout>
@@ -214,6 +221,7 @@ const blogPosts = {
     color: #fff;
     font-family: 'Space Mono', monospace;
     font-size: 18px;
+    overflow-x: hidden;
   }
 
   .container {
@@ -322,6 +330,19 @@ const blogPosts = {
     color: #fff;
   }
 
+  /* Horizontal Scroll Container */
+  .horizontal-scroll-container {
+    width: 100%;
+    position: relative;
+  }
+
+  .horizontal-section {
+    width: 100vw;
+    margin-left: calc(-50vw + 50%);
+    padding: 0 20px;
+    margin-bottom: 80px;
+  }
+
   /* Blog Section */
   .blog-section {
     margin: 60px 0;
@@ -332,6 +353,7 @@ const blogPosts = {
     justify-content: space-between;
     align-items: center;
     margin-bottom: 30px;
+    padding: 0 20px;
   }
 
   .section-title {
@@ -352,33 +374,35 @@ const blogPosts = {
     font-weight: 600;
   }
 
-  /* Blog Grid */
-  .blog-grid {
-    display: grid;
-    grid-template-columns: 1fr;
+  /* Horizontal Blog Grid */
+  .blog-grid-horizontal {
+    display: flex;
     gap: 30px;
+    padding: 0 20px;
+    overflow-x: visible;
+    width: max-content;
   }
 
-  /* Blog Card */
-  .blog-card {
-    display: grid;
-    grid-template-columns: 300px 1fr;
-    gap: 30px;
+  /* Horizontal Blog Card */
+  .blog-card-horizontal {
+    min-width: 500px;
     background: rgba(255, 255, 255, 0.05);
     border: 2px solid rgba(255, 255, 255, 0.1);
     border-radius: 20px;
     padding: 30px;
     transition: all 0.3s ease;
+    position: relative;
+    transform-style: preserve-3d;
   }
 
-  .blog-card:hover {
+  .blog-card-horizontal:hover {
     border-color: rgba(255, 255, 255, 0.3);
-    transform: translateY(-5px);
   }
 
-  /* Blog Images - UKURAN NORMAL */
+  /* Blog Images */
   .blog-images {
     display: flex;
+    margin-bottom: 20px;
   }
 
   .blog-image {
@@ -455,7 +479,7 @@ const blogPosts = {
     font-weight: 600;
   }
 
-  /* Baca Selengkapnya - TANPA GARIS, PANAH BESAR */
+  /* Baca Selengkapnya */
   .blog-read-more {
     display: inline-flex;
     align-items: center;
@@ -476,7 +500,6 @@ const blogPosts = {
     border-color: rgba(255, 255, 255, 0.6);
     background: rgba(255, 255, 255, 0.1);
     gap: 15px;
-    transform: translateX(5px);
   }
 
   .blog-read-more svg {
@@ -485,6 +508,24 @@ const blogPosts = {
 
   .blog-read-more:hover svg {
     transform: translateX(3px);
+  }
+
+  /* Scroll Progress Indicator */
+  .scroll-progress {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: rgba(255, 255, 255, 0.1);
+    z-index: 1000;
+  }
+
+  .scroll-progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #ff6b6b, #4ecdc4);
+    width: 0%;
+    transition: width 0.1s ease;
   }
 
   /* Responsive */
@@ -508,7 +549,8 @@ const blogPosts = {
       font-size: 1.2rem;
     }
 
-    .blog-card {
+    .blog-card-horizontal {
+      min-width: 300px;
       grid-template-columns: 1fr;
     }
 
@@ -521,6 +563,14 @@ const blogPosts = {
       transform: none;
       justify-content: center;
       margin-top: 10px;
+    }
+
+    .horizontal-section {
+      padding: 0 15px;
+    }
+
+    .blog-grid-horizontal {
+      padding: 0 15px;
     }
   }
 
@@ -536,13 +586,29 @@ const blogPosts = {
     .blog-image {
       height: 150px;
     }
+
+    .blog-card-horizontal {
+      min-width: 280px;
+      padding: 20px;
+    }
   }
 </style>
 
 <script>
+  // Import GSAP plugins
+  import { gsap } from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+  import { Flip } from 'gsap/Flip';
+  import Lenis from 'lenis';
+
+  // Register GSAP plugins
+  if (typeof window !== 'undefined') {
+    gsap.registerPlugin(ScrollTrigger, Flip);
+  }
+
   document.addEventListener('DOMContentLoaded', function() {
+    // Title animation
     const titleElement = document.getElementById('mainTitle');
-    
     const titleVariations = [
       "Blog",
       "Articles", 
@@ -571,5 +637,174 @@ const blogPosts = {
 
     // Start animation
     setTimeout(changeTitle, 1000);
+
+    // Initialize Lenis for smooth scrolling
+    let lenis;
+    if (typeof window !== 'undefined') {
+      lenis = new Lenis({
+        duration: 1.2,
+        easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+        direction: 'vertical',
+        gestureDirection: 'vertical',
+        smooth: true,
+        smoothTouch: false,
+        touchMultiplier: 2,
+      });
+
+      function raf(time) {
+        lenis.raf(time);
+        requestAnimationFrame(raf);
+      }
+
+      requestAnimationFrame(raf);
+    }
+
+    // GSAP ScrollTrigger Horizontal Hijack
+    if (typeof window !== 'undefined' && gsap) {
+      // Create scroll progress indicator
+      const scrollProgress = document.createElement('div');
+      scrollProgress.className = 'scroll-progress';
+      scrollProgress.innerHTML = '<div class="scroll-progress-bar"></div>';
+      document.body.appendChild(scrollProgress);
+      const progressBar = scrollProgress.querySelector('.scroll-progress-bar');
+
+      // Horizontal scroll hijack for blog sections
+      const horizontalSections = gsap.utils.toArray('.horizontal-section');
+
+      horizontalSections.forEach((section, index) => {
+        const blogGrid = section.querySelector('.blog-grid-horizontal');
+        const blogCards = section.querySelectorAll('.blog-card-horizontal');
+        
+        if (!blogGrid || blogCards.length === 0) return;
+
+        // Calculate total width needed for horizontal scroll
+        const cardWidth = 500; // min-width dari card
+        const gap = 30; // gap antara cards
+        const totalWidth = (blogCards.length * cardWidth) + ((blogCards.length - 1) * gap);
+        blogGrid.style.width = `${totalWidth}px`;
+
+        // Create horizontal scroll animation
+        const tl = gsap.timeline({
+          scrollTrigger: {
+            trigger: section,
+            start: 'top top',
+            end: () => `+=${totalWidth - window.innerWidth}`,
+            scrub: 1,
+            pin: true,
+            anticipatePin: 1,
+            invalidateOnRefresh: true,
+            onUpdate: (self) => {
+              // Update progress bar
+              const progress = self.progress;
+              if (progressBar) {
+                progressBar.style.width = `${progress * 100}%`;
+              }
+            }
+          }
+        });
+
+        tl.to(blogGrid, {
+          x: () => -(totalWidth - window.innerWidth),
+          ease: 'none'
+        });
+
+        // Add parallax and scale effects to individual cards
+        blogCards.forEach((card, cardIndex) => {
+          gsap.fromTo(card, 
+            {
+              opacity: 0,
+              y: 50,
+              scale: 0.9
+            },
+            {
+              opacity: 1,
+              y: 0,
+              scale: 1,
+              duration: 0.6,
+              scrollTrigger: {
+                trigger: card,
+                start: 'left 80%',
+                end: 'left 20%',
+                scrub: 1,
+                toggleActions: 'play none none reverse'
+              }
+            }
+          );
+        });
+
+        // Add magnetic effect to cards
+        blogCards.forEach(card => {
+          card.addEventListener('mousemove', (e) => {
+            const rect = card.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            const centerX = rect.width / 2;
+            const centerY = rect.height / 2;
+            
+            const angleX = (y - centerY) / 20;
+            const angleY = (centerX - x) / 20;
+            
+            gsap.to(card, {
+              duration: 0.5,
+              rotateX: angleX,
+              rotateY: angleY,
+              ease: 'power2.out'
+            });
+          });
+          
+          card.addEventListener('mouseleave', () => {
+            gsap.to(card, {
+              duration: 0.5,
+              rotateX: 0,
+              rotateY: 0,
+              ease: 'power2.out'
+            });
+          });
+        });
+      });
+
+      // Add flip animation for card hover states
+      const allBlogCards = gsap.utils.toArray('.blog-card-horizontal');
+      
+      allBlogCards.forEach(card => {
+        card.addEventListener('mouseenter', () => {
+          const state = Flip.getState(card);
+          card.style.zIndex = 10;
+          card.classList.add('card-hover');
+          Flip.from(state, {
+            duration: 0.3,
+            scale: true,
+            ease: 'power1.inOut'
+          });
+        });
+        
+        card.addEventListener('mouseleave', () => {
+          const state = Flip.getState(card);
+          card.style.zIndex = '';
+          card.classList.remove('card-hover');
+          Flip.from(state, {
+            duration: 0.3,
+            scale: true,
+            ease: 'power1.inOut'
+          });
+        });
+      });
+
+      // Update progress bar on regular scroll
+      ScrollTrigger.addEventListener('scroll', () => {
+        if (progressBar) {
+          const progress = ScrollTrigger.maxScroll(window) ? 
+            (ScrollTrigger.scroll() - ScrollTrigger.maxScroll(window) * -1) / ScrollTrigger.maxScroll(window) : 
+            0;
+          progressBar.style.width = `${progress * 100}%`;
+        }
+      });
+
+      // Refresh ScrollTrigger on resize
+      window.addEventListener('resize', () => {
+        ScrollTrigger.refresh();
+      });
+    }
   });
 </script>
