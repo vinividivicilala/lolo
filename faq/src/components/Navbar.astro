@@ -14,30 +14,32 @@ const { currentPage = 'home' } = Astro.props;
         <span class="logo-name">Note Farid</span>
         <span class="logo-subtitle">Portfolio</span>
       </div>
-      <!-- SVG Arrow -->
-      <svg class="arrow-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M7 17L17 7M17 7H8M17 7V16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
     </div>
 
     <!-- Menu tengah -->
     <ul class="nav-menu">
       <li class="nav-item">
         <a href="/" class={`nav-link ${currentPage === 'home' ? 'active' : ''}`}>
-          <span class="link-number">01</span>
           Home
+          <svg class="menu-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M7 17L17 7M17 7H8M17 7V16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
         </a>
       </li>
       <li class="nav-item">
         <a href="/faq" class={`nav-link ${currentPage === 'faq' ? 'active' : ''}`}>
-          <span class="link-number">02</span>
           FAQ
+          <svg class="menu-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M7 17L17 7M17 7H8M17 7V16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
         </a>
       </li>
       <li class="nav-item">
         <a href="/blog" class={`nav-link ${currentPage === 'blog' ? 'active' : ''}`}>
-          <span class="link-number">03</span>
           Blog
+          <svg class="menu-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M7 17L17 7M17 7H8M17 7V16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
         </a>
       </li>
     </ul>
@@ -115,7 +117,6 @@ const { currentPage = 'home' } = Astro.props;
     align-items: center;
     gap: 0.75rem;
     transition: all 0.4s ease;
-    position: relative;
   }
   
   .logo-image {
@@ -177,19 +178,6 @@ const { currentPage = 'home' } = Astro.props;
     font-size: 1rem;
   }
   
-  /* Arrow Icon */
-  .arrow-icon {
-    color: #000;
-    transition: all 0.4s ease;
-    opacity: 0.8;
-    margin-left: 0.5rem;
-  }
-  
-  .navbar.scrolled .arrow-icon {
-    transform: scale(1.1);
-    opacity: 1;
-  }
-  
   /* Menu Styles */
   .nav-menu {
     display: flex;
@@ -226,25 +214,28 @@ const { currentPage = 'home' } = Astro.props;
     font-size: 1.2rem;
   }
   
-  .link-number {
-    font-size: 1rem;
+  /* Menu Arrow Icon */
+  .menu-arrow {
     color: #888;
-    font-weight: 500;
     transition: all 0.3s ease;
+    opacity: 0.8;
   }
   
-  .navbar.scrolled .link-number {
-    font-size: 0.9rem;
+  .navbar.scrolled .menu-arrow {
+    width: 14px;
+    height: 14px;
   }
   
-  /* Hover effects tanpa underline */
+  /* Hover effects */
   .nav-link:hover {
     color: #333;
     transform: translateY(-1px);
   }
   
-  .nav-link:hover .link-number {
+  .nav-link:hover .menu-arrow {
     color: #000;
+    opacity: 1;
+    transform: translate(2px, -2px);
   }
   
   .nav-link.active {
@@ -252,9 +243,9 @@ const { currentPage = 'home' } = Astro.props;
     font-weight: 700;
   }
   
-  .nav-link.active .link-number {
+  .nav-link.active .menu-arrow {
     color: #000;
-    font-weight: 600;
+    opacity: 1;
   }
   
   /* Button Styles */
@@ -391,19 +382,16 @@ const { currentPage = 'home' } = Astro.props;
     .nav-link {
       font-size: 1.3rem;
       padding: 0.75rem 0;
+      justify-content: space-between;
     }
     
-    .link-number {
-      font-size: 1rem;
+    .menu-arrow {
+      width: 18px;
+      height: 18px;
     }
 
     /* Hide logo text on mobile */
     .logo-text {
-      display: none;
-    }
-
-    /* Hide arrow icon on mobile */
-    .arrow-icon {
       display: none;
     }
   }
