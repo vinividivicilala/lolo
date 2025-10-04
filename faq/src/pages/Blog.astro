@@ -915,7 +915,7 @@ const blogPosts = {
     // Start animation
     setTimeout(changeTitle, 1000);
 
-    // GSAP Horizontal Scroll with FAST Speed
+    // GSAP Horizontal Scroll with ULTRA FAST Speed
     if (typeof window !== 'undefined' && gsap) {
       // Create scroll progress indicator
       const scrollProgress = document.createElement('div');
@@ -944,13 +944,13 @@ const blogPosts = {
       // Set initial container width
       horizontalContainer.style.width = `${totalWidth}vw`;
 
-      // Create the main horizontal scroll timeline with FAST SPEED
+      // Create the main horizontal scroll timeline with ULTRA FAST SPEED
       const horizontalTl = gsap.timeline({
         scrollTrigger: {
           trigger: '.horizontal-scroll-wrapper',
           start: 'top top',
-          end: () => `+=${(totalWidth - 100) * window.innerWidth * 0.8}`, // Shorter distance for faster scroll
-          scrub: 0.1, // Very little scrub for immediate response
+          end: () => `+=${(totalWidth - 100) * window.innerWidth * 0.5}`, // Very short distance for ultra fast scroll
+          scrub: 0.01, // Almost no scrub for immediate response
           pin: true,
           anticipatePin: 1,
           invalidateOnRefresh: true,
@@ -971,18 +971,18 @@ const blogPosts = {
         }
       });
 
-      // Animate horizontal scroll with FAST SPEED
+      // Animate horizontal scroll with ULTRA FAST SPEED
       horizontalTl.to(horizontalContainer, {
         x: () => -((horizontalSections.length - 1) * window.innerWidth),
         ease: 'none' // No easing for immediate response
       });
 
-      // Add animations for each section
+      // Add ULTRA FAST animations for each section
       horizontalSections.forEach((section, index) => {
         const blogCards = section.querySelectorAll('.blog-card-horizontal');
         const sectionHeader = section.querySelector('.section-header');
         
-        // Section header animation
+        // Section header animation - ULTRA FAST
         gsap.fromTo(sectionHeader, 
           {
             opacity: 0,
@@ -991,7 +991,7 @@ const blogPosts = {
           {
             opacity: 1,
             y: 0,
-            duration: 0.6, // Faster duration
+            duration: 0.3, // Ultra fast duration
             scrollTrigger: {
               trigger: section,
               containerAnimation: horizontalTl,
@@ -1002,7 +1002,7 @@ const blogPosts = {
           }
         );
 
-        // Blog cards animation with faster stagger
+        // Blog cards animation with ULTRA FAST stagger
         gsap.fromTo(blogCards, 
           {
             opacity: 0,
@@ -1013,8 +1013,8 @@ const blogPosts = {
             opacity: 1,
             x: 0,
             scale: 1,
-            duration: 0.4, // Much faster
-            stagger: 0.05, // Very fast stagger
+            duration: 0.2, // Ultra fast
+            stagger: 0.02, // Ultra fast stagger
             scrollTrigger: {
               trigger: section,
               containerAnimation: horizontalTl,
@@ -1025,7 +1025,7 @@ const blogPosts = {
           }
         );
 
-        // Add magnetic effect to cards
+        // Add ULTRA FAST magnetic effect to cards
         blogCards.forEach(card => {
           card.addEventListener('mousemove', (e) => {
             const rect = card.getBoundingClientRect();
@@ -1039,7 +1039,7 @@ const blogPosts = {
             const angleY = (centerX - x) / 25;
             
             gsap.to(card, {
-              duration: 0.2, // Faster magnetic effect
+              duration: 0.1, // Ultra fast magnetic effect
               rotateX: angleX,
               rotateY: angleY,
               transformPerspective: 1000,
@@ -1049,7 +1049,7 @@ const blogPosts = {
           
           card.addEventListener('mouseleave', () => {
             gsap.to(card, {
-              duration: 0.3, // Faster return
+              duration: 0.2, // Ultra fast return
               rotateX: 0,
               rotateY: 0,
               ease: 'power2.out'
@@ -1058,7 +1058,7 @@ const blogPosts = {
         });
       });
 
-      // Add animation for description section
+      // Add ULTRA FAST animation for description section
       gsap.fromTo(descriptionSection,
         {
           opacity: 0,
@@ -1067,7 +1067,7 @@ const blogPosts = {
         {
           opacity: 1,
           y: 0,
-          duration: 0.8,
+          duration: 0.4, // Ultra fast
           scrollTrigger: {
             trigger: descriptionSection,
             start: 'top 80%',
@@ -1077,7 +1077,30 @@ const blogPosts = {
         }
       );
 
-      // Section indicator click handler
+      // Add horizontal scroll effect to description text (each line)
+      const descriptionTexts = document.querySelectorAll('.large-text');
+      descriptionTexts.forEach((text, index) => {
+        gsap.fromTo(text,
+          {
+            opacity: 0,
+            x: 100
+          },
+          {
+            opacity: 1,
+            x: 0,
+            duration: 0.3,
+            delay: index * 0.1, // Fast stagger for each line
+            scrollTrigger: {
+              trigger: text,
+              start: 'top 80%',
+              end: 'top 50%',
+              toggleActions: 'play none none reverse'
+            }
+          }
+        );
+      });
+
+      // Section indicator click handler with FAST transition
       document.querySelectorAll('.section-dot').forEach((dot, index) => {
         dot.addEventListener('click', () => {
           if (index < horizontalSections.length) {
@@ -1085,19 +1108,50 @@ const blogPosts = {
             
             gsap.to(horizontalTl, {
               progress: targetProgress,
-              duration: 0.8, // Faster transition
+              duration: 0.5, // Ultra fast transition
               ease: 'power2.inOut'
             });
           } else {
             // Scroll to description section
             gsap.to(window, {
-              duration: 1,
+              duration: 0.6, // Fast scroll
               scrollTo: descriptionSection,
               ease: 'power2.inOut'
             });
           }
         });
       });
+
+      // Enable fast mouse wheel scrolling
+      let scrollTimeout;
+      const horizontalWrapper = document.querySelector('.horizontal-scroll-wrapper');
+      
+      if (horizontalWrapper) {
+        horizontalWrapper.addEventListener('wheel', (e) => {
+          e.preventDefault();
+          
+          // Clear any existing timeout
+          if (scrollTimeout) clearTimeout(scrollTimeout);
+          
+          // Fast scroll with wheel
+          const currentProgress = horizontalTl.scrollTrigger.progress;
+          const scrollDirection = e.deltaY > 0 ? 1 : -1;
+          const scrollAmount = 0.3; // Fast scroll amount
+          
+          const newProgress = Math.max(0, Math.min(1, currentProgress + (scrollDirection * scrollAmount)));
+          
+          gsap.to(horizontalTl, {
+            progress: newProgress,
+            duration: 0.3, // Very fast response
+            ease: 'power2.out'
+          });
+          
+          // Set timeout to prevent too many rapid updates
+          scrollTimeout = setTimeout(() => {
+            scrollTimeout = null;
+          }, 50);
+        }, { passive: false });
+      }
 
       // Refresh ScrollTrigger on resize
       window.addEventListener('resize', () => {
