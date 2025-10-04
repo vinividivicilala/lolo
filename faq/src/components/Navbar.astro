@@ -1,26 +1,40 @@
 ---
-const { currentPage = 'faq' } = Astro.props;
+const { currentPage = 'about' } = Astro.props;
 ---
 
 <nav class="navbar">
   <div class="nav-container">
     <div class="nav-logo">
-      <img src="/images/5.jpg" alt="Logo" class="logo-image" />
-      <a href="/">Note Farid</a>
+      <span class="logo-ampersand">&</span>
+      <div class="logo-text">
+        <span class="logo-name">Noah Pham</span>
+        <span class="logo-subtitle">Portfolio</span>
+      </div>
     </div>
     <ul class="nav-menu">
       <li class="nav-item">
-        <a href="/" class={`nav-link ${currentPage === 'home' ? 'active' : ''}`}>Home</a>
+        <a href="/about" class={`nav-link ${currentPage === 'about' ? 'active' : ''}`}>
+          <span class="link-number">01</span>
+          About
+        </a>
       </li>
       <li class="nav-item">
-        <a href="/faq" class={`nav-link ${currentPage === 'faq' ? 'active' : ''}`}>FAQ</a>
+        <a href="/projects" class={`nav-link ${currentPage === 'projects' ? 'active' : ''}`}>
+          <span class="link-number">02</span>
+          Projects
+        </a>
       </li>
       <li class="nav-item">
-        <a href="/blog" class={`nav-link ${currentPage === 'blog' ? 'active' : ''}`}>Blog</a>
+        <a href="/resume" class={`nav-link ${currentPage === 'resume' ? 'active' : ''}`}>
+          <span class="link-number">03</span>
+          Resume
+        </a>
       </li>
     </ul>
+    <div class="nav-actions">
+      <button class="contact-btn">Get in Touch</button>
+    </div>
     <div class="hamburger">
-      <span class="bar"></span>
       <span class="bar"></span>
       <span class="bar"></span>
     </div>
@@ -28,118 +42,140 @@ const { currentPage = 'faq' } = Astro.props;
 </nav>
 
 <style>
+  :global(html) {
+    scroll-behavior: smooth;
+  }
+
   .navbar {
-    background: rgba(34, 139, 34, 0.95);
+    background: rgba(255, 255, 255, 0.9);
     backdrop-filter: blur(0px);
     -webkit-backdrop-filter: blur(0px);
-    padding: 1.8rem 0;
+    padding: 2rem 0;
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
     z-index: 1000;
     border-radius: 0px;
-    transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
     transform-origin: top;
-    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 1px 0 rgba(0, 0, 0, 0.05);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
   }
   
   .navbar.scrolled {
-    background: rgba(34, 139, 34, 0.85);
-    backdrop-filter: blur(15px);
-    -webkit-backdrop-filter: blur(15px);
-    padding: 0.8rem 0;
-    border-radius: 20px;
-    margin: 15px 25px 0 25px;
-    width: calc(100% - 50px);
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    padding: 1rem 0;
+    border-radius: 16px;
+    margin: 1rem 2rem 0 2rem;
+    width: calc(100% - 4rem);
     box-shadow: 
-      0 10px 40px rgba(0, 0, 0, 0.25),
-      inset 0 1px 0 rgba(255, 255, 255, 0.15);
-    transform: translateY(0) scale(0.92);
-    border: 1px solid rgba(255, 255, 255, 0.15);
+      0 8px 32px rgba(0, 0, 0, 0.08),
+      0 2px 4px rgba(0, 0, 0, 0.02);
+    transform: translateY(0) scale(0.95);
+    border: 1px solid rgba(0, 0, 0, 0.08);
   }
   
   .navbar.scrolled.more {
-    padding: 0.6rem 0;
-    border-radius: 25px;
-    transform: translateY(0) scale(0.88);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    margin: 12px 20px 0 20px;
-    width: calc(100% - 40px);
+    padding: 0.8rem 0;
+    border-radius: 20px;
+    transform: translateY(0) scale(0.92);
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
+    margin: 0.8rem 1.5rem 0 1.5rem;
+    width: calc(100% - 3rem);
   }
   
   .nav-container {
-    max-width: 1200px;
+    max-width: 1400px;
     margin: 0 auto;
-    padding: 0 30px;
+    padding: 0 2rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    transition: all 0.5s ease;
+    transition: all 0.4s ease;
   }
   
   .navbar.scrolled .nav-container {
-    padding: 0 25px;
+    padding: 0 1.5rem;
   }
   
   .navbar.scrolled.more .nav-container {
-    padding: 0 20px;
+    padding: 0 1.25rem;
   }
   
   .nav-logo {
     display: flex;
     align-items: center;
-    gap: 15px;
-    transition: all 0.5s ease;
+    gap: 0.75rem;
+    transition: all 0.4s ease;
   }
   
-  .logo-image {
-    width: 60px;
-    height: 60px;
-    border-radius: 12px;
-    object-fit: cover;
-    transition: all 0.5s ease;
-    border: 2px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  .logo-ampersand {
+    font-size: 2rem;
+    font-weight: 400;
+    color: #000;
+    font-family: 'Georgia', serif;
+    transition: all 0.4s ease;
   }
   
-  .navbar.scrolled .logo-image {
-    width: 45px;
-    height: 45px;
-    border-radius: 10px;
+  .navbar.scrolled .logo-ampersand {
+    font-size: 1.75rem;
   }
   
-  .navbar.scrolled.more .logo-image {
-    width: 40px;
-    height: 40px;
-    border-radius: 8px;
+  .navbar.scrolled.more .logo-ampersand {
+    font-size: 1.5rem;
   }
   
-  .nav-logo a {
-    color: white;
-    font-size: 2.2rem;
-    font-weight: 700;
-    text-decoration: none;
-    font-family: 'Montserrat', sans-serif;
-    transition: all 0.5s ease;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  .logo-text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.1;
   }
   
-  .navbar.scrolled .nav-logo a {
-    font-size: 1.8rem;
+  .logo-name {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #000;
+    font-family: 'Inter', sans-serif;
+    letter-spacing: -0.01em;
+    transition: all 0.4s ease;
   }
   
-  .navbar.scrolled.more .nav-logo a {
-    font-size: 1.6rem;
+  .navbar.scrolled .logo-name {
+    font-size: 1.1rem;
+  }
+  
+  .navbar.scrolled.more .logo-name {
+    font-size: 1rem;
+  }
+  
+  .logo-subtitle {
+    font-size: 0.75rem;
+    font-weight: 400;
+    color: #666;
+    font-family: 'Inter', sans-serif;
+    letter-spacing: 0.02em;
+    transition: all 0.4s ease;
+  }
+  
+  .navbar.scrolled .logo-subtitle {
+    font-size: 0.7rem;
+  }
+  
+  .navbar.scrolled.more .logo-subtitle {
+    font-size: 0.65rem;
   }
   
   .nav-menu {
     display: flex;
     list-style: none;
     gap: 2.5rem;
-    transition: all 0.5s ease;
+    margin: 0;
+    padding: 0;
+    transition: all 0.4s ease;
   }
   
   .navbar.scrolled .nav-menu {
@@ -147,48 +183,41 @@ const { currentPage = 'faq' } = Astro.props;
   }
   
   .navbar.scrolled.more .nav-menu {
-    gap: 1.5rem;
+    gap: 1.75rem;
   }
   
   .nav-link {
-    color: white;
+    color: #000;
     text-decoration: none;
-    font-weight: 600;
-    padding: 0.7rem 1.2rem;
-    border-radius: 10px;
-    transition: all 0.4s ease;
+    font-weight: 450;
+    padding: 0.5rem 0;
+    transition: all 0.3s ease;
     position: relative;
-    overflow: hidden;
-    font-size: 1.1rem;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    font-family: 'Inter', sans-serif;
+    font-size: 0.95rem;
+    letter-spacing: -0.01em;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
   }
   
   .navbar.scrolled .nav-link {
-    padding: 0.6rem 1rem;
-    font-size: 1rem;
-    border-radius: 8px;
+    font-size: 0.9rem;
   }
   
   .navbar.scrolled.more .nav-link {
-    padding: 0.5rem 0.9rem;
-    font-size: 0.95rem;
-    border-radius: 7px;
+    font-size: 0.85rem;
   }
   
-  .nav-link::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-    transition: left 0.6s ease;
+  .link-number {
+    font-size: 0.75rem;
+    color: #888;
+    font-weight: 400;
+    transition: all 0.3s ease;
   }
   
-  .nav-link:hover::before {
-    left: 100%;
+  .navbar.scrolled .link-number {
+    font-size: 0.7rem;
   }
   
   .nav-link::after {
@@ -197,10 +226,9 @@ const { currentPage = 'faq' } = Astro.props;
     bottom: 0;
     left: 0;
     width: 0;
-    height: 3px;
-    background: linear-gradient(90deg, #fff, rgba(255,255,255,0.7));
-    transition: width 0.4s ease;
-    border-radius: 2px;
+    height: 1px;
+    background: #000;
+    transition: width 0.3s ease;
   }
   
   .nav-link:hover::after,
@@ -208,11 +236,45 @@ const { currentPage = 'faq' } = Astro.props;
     width: 100%;
   }
   
-  .nav-link:hover, .nav-link.active {
-    background: rgba(255, 255, 255, 0.15);
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-    border-color: rgba(255, 255, 255, 0.3);
+  .nav-link:hover .link-number,
+  .nav-link.active .link-number {
+    color: #000;
+  }
+  
+  .nav-actions {
+    display: flex;
+    align-items: center;
+    transition: all 0.4s ease;
+  }
+  
+  .contact-btn {
+    background: #000;
+    color: #fff;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 450;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    letter-spacing: -0.01em;
+  }
+  
+  .navbar.scrolled .contact-btn {
+    padding: 0.6rem 1.25rem;
+    font-size: 0.85rem;
+    border-radius: 6px;
+  }
+  
+  .navbar.scrolled.more .contact-btn {
+    padding: 0.5rem 1.1rem;
+    font-size: 0.8rem;
+  }
+  
+  .contact-btn:hover {
+    background: #333;
+    transform: translateY(-1px);
   }
   
   .hamburger {
@@ -220,30 +282,24 @@ const { currentPage = 'faq' } = Astro.props;
     flex-direction: column;
     cursor: pointer;
     transition: all 0.4s ease;
-    padding: 5px;
-    border-radius: 5px;
-    background: rgba(255, 255, 255, 0.1);
+    padding: 0.5rem;
+    gap: 3px;
   }
   
   .navbar.scrolled .hamburger {
     transform: scale(0.9);
   }
   
-  .navbar.scrolled.more .hamburger {
-    transform: scale(0.85);
-  }
-  
   .bar {
-    width: 28px;
-    height: 3px;
-    background: white;
-    margin: 3px 0;
-    transition: 0.4s;
-    border-radius: 3px;
+    width: 20px;
+    height: 1.5px;
+    background: #000;
+    transition: 0.3s;
+    border-radius: 1px;
   }
   
   .hamburger.active .bar:nth-child(1) {
-    transform: translateY(9px) rotate(45deg);
+    transform: rotate(45deg) translate(4px, 4px);
   }
   
   .hamburger.active .bar:nth-child(2) {
@@ -251,67 +307,44 @@ const { currentPage = 'faq' } = Astro.props;
   }
   
   .hamburger.active .bar:nth-child(3) {
-    transform: translateY(-9px) rotate(-45deg);
+    transform: rotate(-45deg) translate(4px, -4px);
+  }
+  
+  @media (max-width: 968px) {
+    .nav-menu {
+      gap: 2rem;
+    }
+    
+    .nav-actions {
+      display: none;
+    }
   }
   
   @media (max-width: 768px) {
     .navbar {
-      padding: 1.2rem 0;
-      margin: 0;
-      width: 100%;
+      padding: 1.5rem 0;
     }
     
     .navbar.scrolled {
-      margin: 10px 15px 0 15px;
-      width: calc(100% - 30px);
-      border-radius: 18px;
+      margin: 0.8rem 1rem 0 1rem;
+      width: calc(100% - 2rem);
+      border-radius: 12px;
       padding: 0.8rem 0;
     }
     
     .navbar.scrolled.more {
-      border-radius: 20px;
+      border-radius: 14px;
       padding: 0.6rem 0;
-      margin: 8px 12px 0 12px;
-      width: calc(100% - 24px);
+      margin: 0.6rem 0.8rem 0 0.8rem;
+      width: calc(100% - 1.6rem);
     }
     
     .nav-container {
-      padding: 0 20px;
+      padding: 0 1.5rem;
     }
     
     .navbar.scrolled .nav-container {
-      padding: 0 18px;
-    }
-    
-    .navbar.scrolled.more .nav-container {
-      padding: 0 15px;
-    }
-    
-    .logo-image {
-      width: 50px;
-      height: 50px;
-    }
-    
-    .navbar.scrolled .logo-image {
-      width: 40px;
-      height: 40px;
-    }
-    
-    .navbar.scrolled.more .logo-image {
-      width: 35px;
-      height: 35px;
-    }
-    
-    .nav-logo a {
-      font-size: 1.8rem;
-    }
-    
-    .navbar.scrolled .nav-logo a {
-      font-size: 1.5rem;
-    }
-    
-    .navbar.scrolled.more .nav-logo a {
-      font-size: 1.3rem;
+      padding: 0 1.25rem;
     }
     
     .hamburger {
@@ -323,15 +356,15 @@ const { currentPage = 'faq' } = Astro.props;
       left: -100%;
       top: 0;
       flex-direction: column;
-      background: rgba(34, 139, 34, 0.98);
-      backdrop-filter: blur(25px);
-      -webkit-backdrop-filter: blur(25px);
+      background: rgba(255, 255, 255, 0.98);
+      backdrop-filter: blur(30px);
+      -webkit-backdrop-filter: blur(30px);
       width: 100%;
       height: 100vh;
-      text-align: center;
-      transition: 0.5s;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-      padding: 5rem 0;
+      text-align: left;
+      transition: 0.4s;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      padding: 6rem 2rem 2rem;
       gap: 0;
       z-index: 999;
       border-radius: 0;
@@ -342,12 +375,16 @@ const { currentPage = 'faq' } = Astro.props;
     }
     
     .nav-item {
-      margin: 2rem 0;
+      margin: 1rem 0;
     }
     
     .nav-link {
-      font-size: 1.2rem;
-      padding: 1rem 2rem;
+      font-size: 1.1rem;
+      padding: 0.75rem 0;
+    }
+    
+    .link-number {
+      font-size: 0.8rem;
     }
   }
   
@@ -382,7 +419,7 @@ const { currentPage = 'faq' } = Astro.props;
       const currentScrollY = window.scrollY;
       
       // Calculate scroll progress (0 to 1)
-      const scrollProgress = Math.min(currentScrollY / 200, 1); // Max effect at 200px scroll
+      const scrollProgress = Math.min(currentScrollY / 150, 1); // Max effect at 150px scroll
       
       // Update navbar classes based on scroll progress
       if (scrollProgress > 0.1) {
@@ -391,7 +428,7 @@ const { currentPage = 'faq' } = Astro.props;
         navbar.classList.remove('scrolled');
       }
       
-      if (scrollProgress > 0.5) {
+      if (scrollProgress > 0.6) {
         navbar.classList.add('more');
       } else {
         navbar.classList.remove('more');
