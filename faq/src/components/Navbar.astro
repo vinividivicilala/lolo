@@ -1,8 +1,8 @@
 ---
-const { currentPage = 'home' } = Astro.props;
+const { currentPage = 'home', darkMode = false } = Astro.props;
 ---
 
-<nav class="navbar">
+<nav class={`navbar ${darkMode ? 'dark' : ''}`}>
   <div class="nav-container">
     <!-- Logo dengan foto dan nama -->
     <div class="nav-logo">
@@ -57,7 +57,7 @@ const { currentPage = 'home' } = Astro.props;
     scroll-behavior: smooth;
   }
 
-  /* Navbar Normal (tanpa scroll) */
+  /* ===== LIGHT MODE (Default) ===== */
   .navbar {
     background: transparent;
     padding: 2rem 0;
@@ -73,7 +73,7 @@ const { currentPage = 'home' } = Astro.props;
     border: none;
   }
   
-  /* Navbar Saat Scroll - DESIGN YANG SUDAH ANDA SUKA */
+  /* Navbar Saat Scroll - Light Mode */
   .navbar.scrolled {
     background: rgba(255, 255, 255, 0.7);
     backdrop-filter: blur(10px);
@@ -90,22 +90,8 @@ const { currentPage = 'home' } = Astro.props;
     left: 50%;
     transform: translateX(-50%);
   }
-  
-  .nav-container {
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 0 2rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    transition: all 0.4s ease;
-  }
-  
-  .navbar.scrolled .nav-container {
-    padding: 0 2rem;
-  }
-  
-  /* Logo Styles */
+
+  /* Logo Styles - Light Mode */
   .nav-logo {
     display: flex;
     align-items: center;
@@ -133,12 +119,6 @@ const { currentPage = 'home' } = Astro.props;
     object-fit: cover;
   }
   
-  .logo-text {
-    display: flex;
-    flex-direction: column;
-    line-height: 1.1;
-  }
-  
   .logo-name {
     font-size: 2rem;
     font-weight: 600;
@@ -146,10 +126,6 @@ const { currentPage = 'home' } = Astro.props;
     font-family: 'Inter', sans-serif;
     letter-spacing: -0.01em;
     transition: all 0.4s ease;
-  }
-  
-  .navbar.scrolled .logo-name {
-    font-size: 1.8rem;
   }
   
   .logo-subtitle {
@@ -160,28 +136,8 @@ const { currentPage = 'home' } = Astro.props;
     letter-spacing: 0.02em;
     transition: all 0.4s ease;
   }
-  
-  .navbar.scrolled .logo-subtitle {
-    font-size: 0.9rem;
-  }
-  
-  /* Menu Styles */
-  .nav-menu {
-    display: flex;
-    list-style: none;
-    gap: 2.5rem;
-    margin: 0;
-    padding: 0;
-    transition: all 0.4s ease;
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
-  }
-  
-  .navbar.scrolled .nav-menu {
-    gap: 2.5rem;
-  }
-  
+
+  /* Menu Styles - Light Mode */
   .nav-link {
     color: #000;
     text-decoration: none;
@@ -197,19 +153,11 @@ const { currentPage = 'home' } = Astro.props;
     gap: 0.5rem;
   }
   
-  .navbar.scrolled .nav-link {
-    font-size: 1rem;
-  }
-  
   .link-number {
     font-size: 0.9rem;
     color: #888;
     font-weight: 400;
     transition: all 0.3s ease;
-  }
-  
-  .navbar.scrolled .link-number {
-    font-size: 0.8rem;
   }
   
   .nav-link::after {
@@ -232,14 +180,8 @@ const { currentPage = 'home' } = Astro.props;
   .nav-link.active .link-number {
     color: #000;
   }
-  
-  /* Button Styles */
-  .nav-actions {
-    display: flex;
-    align-items: center;
-    transition: all 0.4s ease;
-  }
-  
+
+  /* Button Styles - Light Mode */
   .contact-btn {
     background: #000;
     color: #fff;
@@ -254,17 +196,140 @@ const { currentPage = 'home' } = Astro.props;
     letter-spacing: -0.01em;
   }
   
+  .contact-btn:hover {
+    background: #333;
+    transform: translateY(-1px);
+  }
+
+  /* Hamburger - Light Mode */
+  .bar {
+    width: 25px;
+    height: 2px;
+    background: #000;
+    transition: 0.3s;
+    border-radius: 1px;
+  }
+
+  /* ===== DARK MODE ===== */
+  .navbar.dark {
+    /* Navbar normal dark mode */
+  }
+  
+  /* Navbar Saat Scroll - Dark Mode */
+  .navbar.dark.scrolled {
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 
+      0 4px 20px rgba(0, 0, 0, 0.3),
+      0 0 0 1px rgba(255, 255, 255, 0.05);
+  }
+
+  /* Logo Styles - Dark Mode */
+  .navbar.dark .logo-image {
+    border: 2px solid #fff;
+  }
+  
+  .navbar.dark .logo-name {
+    color: #fff;
+  }
+  
+  .navbar.dark .logo-subtitle {
+    color: #ccc;
+  }
+
+  /* Menu Styles - Dark Mode */
+  .navbar.dark .nav-link {
+    color: #fff;
+  }
+  
+  .navbar.dark .link-number {
+    color: #aaa;
+  }
+  
+  .navbar.dark .nav-link::after {
+    background: #fff;
+  }
+  
+  .navbar.dark .nav-link:hover .link-number,
+  .navbar.dark .nav-link.active .link-number {
+    color: #fff;
+  }
+
+  /* Button Styles - Dark Mode */
+  .navbar.dark .contact-btn {
+    background: #fff;
+    color: #000;
+  }
+  
+  .navbar.dark .contact-btn:hover {
+    background: #e0e0e0;
+  }
+
+  /* Hamburger - Dark Mode */
+  .navbar.dark .bar {
+    background: #fff;
+  }
+
+  /* ===== COMMON STYLES ===== */
+  .nav-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.4s ease;
+  }
+  
+  .navbar.scrolled .nav-container {
+    padding: 0 2rem;
+  }
+  
+  .nav-menu {
+    display: flex;
+    list-style: none;
+    gap: 2.5rem;
+    margin: 0;
+    padding: 0;
+    transition: all 0.4s ease;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+  
+  .navbar.scrolled .nav-menu {
+    gap: 2.5rem;
+  }
+  
+  .navbar.scrolled .nav-link {
+    font-size: 1rem;
+  }
+  
+  .navbar.scrolled .link-number {
+    font-size: 0.8rem;
+  }
+  
+  .navbar.scrolled .logo-name {
+    font-size: 1.8rem;
+  }
+  
+  .navbar.scrolled .logo-subtitle {
+    font-size: 0.9rem;
+  }
+  
   .navbar.scrolled .contact-btn {
     padding: 0.7rem 1.4rem;
     font-size: 0.95rem;
   }
   
-  .contact-btn:hover {
-    background: #333;
-    transform: translateY(-1px);
+  .nav-actions {
+    display: flex;
+    align-items: center;
+    transition: all 0.4s ease;
   }
   
-  /* Hamburger Menu */
   .hamburger {
     display: none;
     flex-direction: column;
@@ -273,31 +338,7 @@ const { currentPage = 'home' } = Astro.props;
     padding: 0.5rem;
     gap: 4px;
   }
-  
-  .navbar.scrolled .hamburger {
-    transform: scale(1);
-  }
-  
-  .bar {
-    width: 25px;
-    height: 2px;
-    background: #000;
-    transition: 0.3s;
-    border-radius: 1px;
-  }
-  
-  .hamburger.active .bar:nth-child(1) {
-    transform: rotate(45deg) translate(5px, 5px);
-  }
-  
-  .hamburger.active .bar:nth-child(2) {
-    opacity: 0;
-  }
-  
-  .hamburger.active .bar:nth-child(3) {
-    transform: rotate(-45deg) translate(5px, -5px);
-  }
-  
+
   /* Responsive Design */
   @media (max-width: 968px) {
     .nav-menu {
@@ -321,15 +362,9 @@ const { currentPage = 'home' } = Astro.props;
       width: 95%;
       border-radius: 12px;
       padding: 1.2rem 0;
-      left: 50%;
-      transform: translateX(-50%);
     }
     
     .nav-container {
-      padding: 0 1.5rem;
-    }
-    
-    .navbar.scrolled .nav-container {
       padding: 0 1.5rem;
     }
     
@@ -353,7 +388,11 @@ const { currentPage = 'home' } = Astro.props;
       padding: 6rem 2rem 2rem;
       gap: 0;
       z-index: 999;
-      border-radius: 0;
+    }
+
+    /* Mobile Menu Dark Mode */
+    .navbar.dark .nav-menu {
+      background: rgba(0, 0, 0, 0.98);
     }
     
     .nav-menu.active {
@@ -369,11 +408,6 @@ const { currentPage = 'home' } = Astro.props;
       padding: 0.75rem 0;
     }
     
-    .link-number {
-      font-size: 0.9rem;
-    }
-
-    /* Hide logo text on mobile */
     .logo-text {
       display: none;
     }
@@ -387,17 +421,14 @@ const { currentPage = 'home' } = Astro.props;
     const navbar = document.querySelector('.navbar');
     const navLinks = document.querySelectorAll('.nav-link');
     
-    // Navbar scroll effects - SAMA PERSIS DENGAN YANG SEBELUMNYA
+    // Navbar scroll effects
     let lastScrollY = window.scrollY;
     let ticking = false;
     
     function updateNavbar() {
       const currentScrollY = window.scrollY;
+      const scrollProgress = Math.min(currentScrollY / 100, 1);
       
-      // Calculate scroll progress (0 to 1)
-      const scrollProgress = Math.min(currentScrollY / 100, 1); // Max effect at 100px scroll
-      
-      // Update navbar classes based on scroll progress
       if (scrollProgress > 0.1) {
         navbar.classList.add('scrolled');
       } else {
@@ -415,10 +446,7 @@ const { currentPage = 'home' } = Astro.props;
       }
     }
     
-    // Listen to scroll events
     window.addEventListener('scroll', onScroll, { passive: true });
-    
-    // Initial update
     updateNavbar();
     
     // Hamburger menu functionality
@@ -427,18 +455,13 @@ const { currentPage = 'home' } = Astro.props;
         hamburger.classList.toggle('active');
         navMenu.classList.toggle('active');
         
-        // Disable/enable scroll when menu is open (mobile)
         if (window.innerWidth <= 768) {
-          if (navMenu.classList.contains('active')) {
-            document.body.style.overflow = 'hidden';
-          } else {
-            document.body.style.overflow = '';
-          }
+          document.body.style.overflow = navMenu.classList.contains('active') ? 'hidden' : '';
         }
       });
     }
     
-    // Close menu when clicking on a link
+    // Close menu when clicking on links
     navLinks.forEach(link => {
       link.addEventListener('click', () => {
         hamburger.classList.remove('active');
@@ -447,7 +470,7 @@ const { currentPage = 'home' } = Astro.props;
       });
     });
     
-    // Close menu when clicking outside (mobile)
+    // Close menu when clicking outside
     document.addEventListener('click', (e) => {
       if (window.innerWidth <= 768 && 
           !navbar.contains(e.target) && 
@@ -458,7 +481,7 @@ const { currentPage = 'home' } = Astro.props;
       }
     });
     
-    // Handle resize events
+    // Handle resize
     window.addEventListener('resize', () => {
       if (window.innerWidth > 768) {
         hamburger.classList.remove('active');
