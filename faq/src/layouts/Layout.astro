@@ -216,21 +216,54 @@ const { title = "Note Farid", description = "", currentPage = 'home' } = Astro.p
     <style>
       * { margin: 0; padding: 0; box-sizing: border-box; }
       body {
-        background-color: #000;
+        background-color: #ffffff;
         color: #334155;
         font-family: 'Poppins', sans-serif;
         min-height: 100vh;
+        line-height: 1.6;
       }
 
       .min-h-screen {
         min-height: 100vh;
+      }
+
+      /* Content styles untuk demo efek blur */
+      .content-section {
+        padding: 100px 20px;
+        text-align: center;
+      }
+      
+      .content-section h1 {
+        font-size: 3rem;
+        margin-bottom: 2rem;
+        color: #1f2937;
+      }
+      
+      .content-section p {
+        font-size: 1.2rem;
+        color: #6b7280;
+        max-width: 600px;
+        margin: 0 auto;
+      }
+      
+      .demo-image {
+        width: 300px;
+        height: 200px;
+        background: linear-gradient(45deg, #667eea, #764ba2);
+        border-radius: 12px;
+        margin: 2rem auto;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 600;
       }
     </style>
 
     <!-- Navbar Styles -->
     <style>
       .navbar {
-        background: rgba(0, 0, 0, 0.9);
+        background: rgba(255, 255, 255, 0.95);
         backdrop-filter: blur(0px);
         -webkit-backdrop-filter: blur(0px);
         padding: 1.5rem 0;
@@ -240,10 +273,11 @@ const { title = "Note Farid", description = "", currentPage = 'home' } = Astro.p
         border-radius: 0px;
         transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
         transform-origin: top;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
       }
       
       .navbar.scrolled {
-        background: rgba(0, 0, 0, 0.85);
+        background: rgba(255, 255, 255, 0.85);
         backdrop-filter: blur(20px);
         -webkit-backdrop-filter: blur(20px);
         padding: 0.8rem 0;
@@ -251,10 +285,10 @@ const { title = "Note Farid", description = "", currentPage = 'home' } = Astro.p
         margin: 10px 20px 0 20px;
         width: calc(100% - 40px);
         box-shadow: 
-          0 8px 32px rgba(0, 0, 0, 0.3),
-          inset 0 1px 0 rgba(255, 255, 255, 0.1);
+          0 8px 32px rgba(0, 0, 0, 0.1),
+          inset 0 1px 0 rgba(255, 255, 255, 0.8);
         transform: scale(0.95);
-        border: 1px solid rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(0, 0, 0, 0.08);
       }
       
       .navbar.scrolled.more {
@@ -263,6 +297,7 @@ const { title = "Note Farid", description = "", currentPage = 'home' } = Astro.p
         transform: scale(0.92);
         backdrop-filter: blur(25px);
         -webkit-backdrop-filter: blur(25px);
+        background: rgba(255, 255, 255, 0.8);
       }
       
       .nav-container {
@@ -279,8 +314,36 @@ const { title = "Note Farid", description = "", currentPage = 'home' } = Astro.p
         padding: 0 25px;
       }
       
+      .nav-logo {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        transition: all 0.4s ease;
+      }
+      
+      .logo-image {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        object-fit: cover;
+        transition: all 0.4s ease;
+        border: 2px solid rgba(0, 0, 0, 0.1);
+      }
+      
+      .navbar.scrolled .logo-image {
+        width: 35px;
+        height: 35px;
+        border-radius: 8px;
+      }
+      
+      .navbar.scrolled.more .logo-image {
+        width: 30px;
+        height: 30px;
+        border-radius: 6px;
+      }
+      
       .nav-logo a {
-        color: white;
+        color: #1f2937;
         font-size: 1.8rem;
         font-weight: 700;
         text-decoration: none;
@@ -308,11 +371,11 @@ const { title = "Note Farid", description = "", currentPage = 'home' } = Astro.p
       }
       
       .nav-link {
-        color: white;
+        color: #4b5563;
         text-decoration: none;
         font-weight: 500;
         padding: 0.5rem 1rem;
-        border-radius: 8px;
+        border-radius: 10px;
         transition: all 0.3s ease;
         position: relative;
         overflow: hidden;
@@ -322,7 +385,7 @@ const { title = "Note Farid", description = "", currentPage = 'home' } = Astro.p
       .navbar.scrolled .nav-link {
         padding: 0.4rem 0.8rem;
         font-size: 0.9rem;
-        border-radius: 6px;
+        border-radius: 8px;
       }
       
       .nav-link::after {
@@ -332,7 +395,7 @@ const { title = "Note Farid", description = "", currentPage = 'home' } = Astro.p
         left: 0;
         width: 0;
         height: 2px;
-        background: linear-gradient(90deg, #fff, rgba(255,255,255,0.5));
+        background: linear-gradient(90deg, #3b82f6, #8b5cf6);
         transition: width 0.3s ease;
       }
       
@@ -342,7 +405,8 @@ const { title = "Note Farid", description = "", currentPage = 'home' } = Astro.p
       }
       
       .nav-link:hover, .nav-link.active {
-        background: rgba(255, 255, 255, 0.15);
+        background: rgba(59, 130, 246, 0.1);
+        color: #3b82f6;
         transform: translateY(-1px);
       }
       
@@ -351,6 +415,12 @@ const { title = "Note Farid", description = "", currentPage = 'home' } = Astro.p
         flex-direction: column;
         cursor: pointer;
         transition: all 0.4s ease;
+        padding: 0.5rem;
+        border-radius: 8px;
+      }
+      
+      .hamburger:hover {
+        background: rgba(0, 0, 0, 0.05);
       }
       
       .navbar.scrolled .hamburger {
@@ -360,7 +430,7 @@ const { title = "Note Farid", description = "", currentPage = 'home' } = Astro.p
       .bar {
         width: 25px;
         height: 3px;
-        background: white;
+        background: #4b5563;
         margin: 3px 0;
         transition: 0.3s;
         border-radius: 2px;
@@ -368,6 +438,7 @@ const { title = "Note Farid", description = "", currentPage = 'home' } = Astro.p
       
       .hamburger.active .bar:nth-child(1) {
         transform: translateY(8px) rotate(45deg);
+        background: #3b82f6;
       }
       
       .hamburger.active .bar:nth-child(2) {
@@ -376,6 +447,7 @@ const { title = "Note Farid", description = "", currentPage = 'home' } = Astro.p
       
       .hamburger.active .bar:nth-child(3) {
         transform: translateY(-8px) rotate(-45deg);
+        background: #3b82f6;
       }
       
       @media (max-width: 768px) {
@@ -406,14 +478,14 @@ const { title = "Note Farid", description = "", currentPage = 'home' } = Astro.p
           left: -100%;
           top: 0;
           flex-direction: column;
-          background: rgba(0, 0, 0, 0.95);
+          background: rgba(255, 255, 255, 0.95);
           backdrop-filter: blur(30px);
           -webkit-backdrop-filter: blur(30px);
           width: 100%;
           height: 100vh;
           text-align: center;
           transition: 0.4s;
-          box-shadow: 0 10px 27px rgba(0,0,0,0.05);
+          box-shadow: 0 10px 27px rgba(0,0,0,0.1);
           padding: 2rem 0;
           gap: 0;
           z-index: 999;
@@ -430,6 +502,10 @@ const { title = "Note Farid", description = "", currentPage = 'home' } = Astro.p
         
         .navbar.scrolled .nav-container {
           padding: 0 20px;
+        }
+        
+        .nav-logo a {
+          font-size: 1.5rem;
         }
       }
       
@@ -454,6 +530,7 @@ const { title = "Note Farid", description = "", currentPage = 'home' } = Astro.p
     <nav class="navbar">
       <div class="nav-container">
         <div class="nav-logo">
+          <img src="/images/5.jpg" alt="Note Farid Logo" class="logo-image" />
           <a href="/">Note Farid</a>
         </div>
         <ul class="nav-menu">
@@ -476,6 +553,26 @@ const { title = "Note Farid", description = "", currentPage = 'home' } = Astro.p
     </nav>
 
     <main class="min-h-screen">
+      <!-- Demo content untuk melihat efek blur -->
+      <section class="content-section">
+        <h1>Welcome to Note Farid</h1>
+        <p>Scroll ke bawah untuk melihat efek navbar yang mengecil dengan blur background</p>
+        <div class="demo-image">Demo Image</div>
+        <p>Efek blur akan terlihat jelas ketika navbar berada di atas konten yang berwarna</p>
+      </section>
+      
+      <section class="content-section" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+        <h1>Beautiful Gradient Section</h1>
+        <p>Navbar akan terlihat transparan dengan efek blur di atas background ini</p>
+        <div class="demo-image" style="background: rgba(255,255,255,0.2);">Content Image</div>
+      </section>
+      
+      <section class="content-section">
+        <h1>Another Content Section</h1>
+        <p>Terus scroll untuk melihat efek navbar yang berubah</p>
+        <div style="height: 1000px;"></div>
+      </section>
+
       <slot />
     </main>
     
@@ -487,15 +584,24 @@ const { title = "Note Farid", description = "", currentPage = 'home' } = Astro.p
         const navbar = document.querySelector('.navbar');
         const navLinks = document.querySelectorAll('.nav-link');
         
-        // Navbar scroll effects dengan progress-based animation
         let lastScrollY = window.scrollY;
         let scrollProgress = 0;
+        let isAtTop = true;
         
         function updateNavbar() {
           const currentScrollY = window.scrollY;
           
+          // Reset ke normal jika di paling atas
+          if (currentScrollY <= 5) {
+            navbar.classList.remove('scrolled', 'more');
+            isAtTop = true;
+            return;
+          }
+          
+          isAtTop = false;
+          
           // Calculate scroll progress (0 to 1)
-          scrollProgress = Math.min(currentScrollY / 300, 1); // Max effect at 300px scroll
+          scrollProgress = Math.min(currentScrollY / 200, 1); // Max effect at 200px scroll
           
           // Update navbar classes based on scroll progress
           if (scrollProgress > 0.1) {
@@ -577,7 +683,6 @@ const { title = "Note Farid", description = "", currentPage = 'home' } = Astro.p
 
     <!-- Framer Motion Local Script -->
     <script>
-      // Simplified Framer Motion implementation
       window.framerMotion = {
         animate: (element, options) => {
           if (options.opacity) {
