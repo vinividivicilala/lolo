@@ -29,124 +29,166 @@ const { currentPage = 'faq' } = Astro.props;
 
 <style>
   .navbar {
-    background: rgba(34, 139, 34, 0.9); /* Hijau forest dengan transparansi */
+    background: rgba(34, 139, 34, 0.95);
     backdrop-filter: blur(0px);
     -webkit-backdrop-filter: blur(0px);
-    padding: 1.5rem 0;
-    position: sticky;
+    padding: 1.8rem 0;
+    position: fixed;
     top: 0;
+    left: 0;
+    right: 0;
     z-index: 1000;
     border-radius: 0px;
-    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     transform-origin: top;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   }
   
   .navbar.scrolled {
-    background: rgba(34, 139, 34, 0.85); /* Hijau forest dengan sedikit transparansi */
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+    background: rgba(34, 139, 34, 0.85);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
     padding: 0.8rem 0;
     border-radius: 20px;
-    margin: 10px 20px 0 20px;
-    width: calc(100% - 40px);
+    margin: 15px 25px 0 25px;
+    width: calc(100% - 50px);
     box-shadow: 
-      0 8px 32px rgba(0, 0, 0, 0.3),
-      inset 0 1px 0 rgba(255, 255, 255, 0.1);
-    transform: scale(0.95);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+      0 10px 40px rgba(0, 0, 0, 0.25),
+      inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    transform: translateY(0) scale(0.92);
+    border: 1px solid rgba(255, 255, 255, 0.15);
   }
   
   .navbar.scrolled.more {
     padding: 0.6rem 0;
     border-radius: 25px;
-    transform: scale(0.92);
-    backdrop-filter: blur(25px);
-    -webkit-backdrop-filter: blur(25px);
+    transform: translateY(0) scale(0.88);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    margin: 12px 20px 0 20px;
+    width: calc(100% - 40px);
   }
   
   .nav-container {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 0 20px;
+    padding: 0 30px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    transition: all 0.4s ease;
+    transition: all 0.5s ease;
   }
   
   .navbar.scrolled .nav-container {
     padding: 0 25px;
   }
   
+  .navbar.scrolled.more .nav-container {
+    padding: 0 20px;
+  }
+  
   .nav-logo {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 15px;
+    transition: all 0.5s ease;
   }
   
   .logo-image {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
     object-fit: cover;
-    transition: all 0.4s ease;
+    transition: all 0.5s ease;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
   }
   
   .navbar.scrolled .logo-image {
-    width: 35px;
-    height: 35px;
+    width: 45px;
+    height: 45px;
+    border-radius: 10px;
   }
   
   .navbar.scrolled.more .logo-image {
-    width: 30px;
-    height: 30px;
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
   }
   
   .nav-logo a {
     color: white;
-    font-size: 1.8rem;
+    font-size: 2.2rem;
     font-weight: 700;
     text-decoration: none;
     font-family: 'Montserrat', sans-serif;
-    transition: all 0.4s ease;
+    transition: all 0.5s ease;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
   }
   
   .navbar.scrolled .nav-logo a {
-    font-size: 1.5rem;
+    font-size: 1.8rem;
   }
   
   .navbar.scrolled.more .nav-logo a {
-    font-size: 1.4rem;
+    font-size: 1.6rem;
   }
   
   .nav-menu {
     display: flex;
     list-style: none;
-    gap: 2rem;
-    transition: all 0.4s ease;
+    gap: 2.5rem;
+    transition: all 0.5s ease;
   }
   
   .navbar.scrolled .nav-menu {
+    gap: 2rem;
+  }
+  
+  .navbar.scrolled.more .nav-menu {
     gap: 1.5rem;
   }
   
   .nav-link {
     color: white;
     text-decoration: none;
-    font-weight: 500;
-    padding: 0.5rem 1rem;
-    border-radius: 8px;
-    transition: all 0.3s ease;
+    font-weight: 600;
+    padding: 0.7rem 1.2rem;
+    border-radius: 10px;
+    transition: all 0.4s ease;
     position: relative;
     overflow: hidden;
-    font-size: 1rem;
+    font-size: 1.1rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
   }
   
   .navbar.scrolled .nav-link {
-    padding: 0.4rem 0.8rem;
-    font-size: 0.9rem;
-    border-radius: 6px;
+    padding: 0.6rem 1rem;
+    font-size: 1rem;
+    border-radius: 8px;
+  }
+  
+  .navbar.scrolled.more .nav-link {
+    padding: 0.5rem 0.9rem;
+    font-size: 0.95rem;
+    border-radius: 7px;
+  }
+  
+  .nav-link::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.6s ease;
+  }
+  
+  .nav-link:hover::before {
+    left: 100%;
   }
   
   .nav-link::after {
@@ -155,9 +197,10 @@ const { currentPage = 'faq' } = Astro.props;
     bottom: 0;
     left: 0;
     width: 0;
-    height: 2px;
-    background: linear-gradient(90deg, #fff, rgba(255,255,255,0.5));
-    transition: width 0.3s ease;
+    height: 3px;
+    background: linear-gradient(90deg, #fff, rgba(255,255,255,0.7));
+    transition: width 0.4s ease;
+    border-radius: 2px;
   }
   
   .nav-link:hover::after,
@@ -167,7 +210,9 @@ const { currentPage = 'faq' } = Astro.props;
   
   .nav-link:hover, .nav-link.active {
     background: rgba(255, 255, 255, 0.15);
-    transform: translateY(-1px);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    border-color: rgba(255, 255, 255, 0.3);
   }
   
   .hamburger {
@@ -175,23 +220,30 @@ const { currentPage = 'faq' } = Astro.props;
     flex-direction: column;
     cursor: pointer;
     transition: all 0.4s ease;
+    padding: 5px;
+    border-radius: 5px;
+    background: rgba(255, 255, 255, 0.1);
   }
   
   .navbar.scrolled .hamburger {
     transform: scale(0.9);
   }
   
+  .navbar.scrolled.more .hamburger {
+    transform: scale(0.85);
+  }
+  
   .bar {
-    width: 25px;
+    width: 28px;
     height: 3px;
     background: white;
     margin: 3px 0;
-    transition: 0.3s;
-    border-radius: 2px;
+    transition: 0.4s;
+    border-radius: 3px;
   }
   
   .hamburger.active .bar:nth-child(1) {
-    transform: translateY(8px) rotate(45deg);
+    transform: translateY(9px) rotate(45deg);
   }
   
   .hamburger.active .bar:nth-child(2) {
@@ -199,26 +251,67 @@ const { currentPage = 'faq' } = Astro.props;
   }
   
   .hamburger.active .bar:nth-child(3) {
-    transform: translateY(-8px) rotate(-45deg);
+    transform: translateY(-9px) rotate(-45deg);
   }
   
   @media (max-width: 768px) {
     .navbar {
-      padding: 1rem 0;
+      padding: 1.2rem 0;
       margin: 0;
       width: 100%;
     }
     
     .navbar.scrolled {
-      margin: 8px 15px 0 15px;
+      margin: 10px 15px 0 15px;
       width: calc(100% - 30px);
-      border-radius: 15px;
-      padding: 0.7rem 0;
+      border-radius: 18px;
+      padding: 0.8rem 0;
     }
     
     .navbar.scrolled.more {
-      border-radius: 18px;
-      padding: 0.5rem 0;
+      border-radius: 20px;
+      padding: 0.6rem 0;
+      margin: 8px 12px 0 12px;
+      width: calc(100% - 24px);
+    }
+    
+    .nav-container {
+      padding: 0 20px;
+    }
+    
+    .navbar.scrolled .nav-container {
+      padding: 0 18px;
+    }
+    
+    .navbar.scrolled.more .nav-container {
+      padding: 0 15px;
+    }
+    
+    .logo-image {
+      width: 50px;
+      height: 50px;
+    }
+    
+    .navbar.scrolled .logo-image {
+      width: 40px;
+      height: 40px;
+    }
+    
+    .navbar.scrolled.more .logo-image {
+      width: 35px;
+      height: 35px;
+    }
+    
+    .nav-logo a {
+      font-size: 1.8rem;
+    }
+    
+    .navbar.scrolled .nav-logo a {
+      font-size: 1.5rem;
+    }
+    
+    .navbar.scrolled.more .nav-logo a {
+      font-size: 1.3rem;
     }
     
     .hamburger {
@@ -230,15 +323,15 @@ const { currentPage = 'faq' } = Astro.props;
       left: -100%;
       top: 0;
       flex-direction: column;
-      background: rgba(34, 139, 34, 0.95); /* Hijau forest dengan transparansi tinggi */
-      backdrop-filter: blur(30px);
-      -webkit-backdrop-filter: blur(30px);
+      background: rgba(34, 139, 34, 0.98);
+      backdrop-filter: blur(25px);
+      -webkit-backdrop-filter: blur(25px);
       width: 100%;
       height: 100vh;
       text-align: center;
-      transition: 0.4s;
-      box-shadow: 0 10px 27px rgba(0,0,0,0.05);
-      padding: 2rem 0;
+      transition: 0.5s;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      padding: 5rem 0;
       gap: 0;
       z-index: 999;
       border-radius: 0;
@@ -249,11 +342,12 @@ const { currentPage = 'faq' } = Astro.props;
     }
     
     .nav-item {
-      margin: 1.5rem 0;
+      margin: 2rem 0;
     }
     
-    .navbar.scrolled .nav-container {
-      padding: 0 20px;
+    .nav-link {
+      font-size: 1.2rem;
+      padding: 1rem 2rem;
     }
   }
   
@@ -274,40 +368,21 @@ const { currentPage = 'faq' } = Astro.props;
 </style>
 
 <script>
-  import Lenis from '@studio-freight/lenis';
-  
   document.addEventListener('DOMContentLoaded', function() {
     const hamburger = document.querySelector('.hamburger');
     const navMenu = document.querySelector('.nav-menu');
     const navbar = document.querySelector('.navbar');
     const navLinks = document.querySelectorAll('.nav-link');
     
-    // Initialize Lenis smooth scroll
-    const lenis = new Lenis({
-      duration: 1.2,
-      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-      orientation: 'vertical',
-      gestureOrientation: 'vertical',
-      smoothWheel: true,
-    });
-    
-    function raf(time) {
-      lenis.raf(time);
-      requestAnimationFrame(raf);
-    }
-    
-    requestAnimationFrame(raf);
-    
-    // Navbar scroll effects dengan progress-based animation
+    // Navbar scroll effects
     let lastScrollY = window.scrollY;
-    let scrollProgress = 0;
+    let ticking = false;
     
     function updateNavbar() {
       const currentScrollY = window.scrollY;
-      const scrollDelta = currentScrollY - lastScrollY;
       
       // Calculate scroll progress (0 to 1)
-      scrollProgress = Math.min(currentScrollY / 300, 1); // Max effect at 300px scroll
+      const scrollProgress = Math.min(currentScrollY / 200, 1); // Max effect at 200px scroll
       
       // Update navbar classes based on scroll progress
       if (scrollProgress > 0.1) {
@@ -316,29 +391,25 @@ const { currentPage = 'faq' } = Astro.props;
         navbar.classList.remove('scrolled');
       }
       
-      if (scrollProgress > 0.6) {
+      if (scrollProgress > 0.5) {
         navbar.classList.add('more');
       } else {
         navbar.classList.remove('more');
       }
       
-      // Apply dynamic scaling based on scroll progress
-      const scale = 1 - (scrollProgress * 0.08); // Scale down up to 8%
-      const borderRadius = scrollProgress * 25; // Up to 25px border radius
-      const padding = 1.5 - (scrollProgress * 0.9); // Reduce padding from 1.5rem to 0.6rem
-      
-      // Apply dynamic styles
-      navbar.style.setProperty('--scale', scale);
-      navbar.style.setProperty('--border-radius', `${borderRadius}px`);
-      navbar.style.setProperty('--padding', `${padding}rem`);
-      
       lastScrollY = currentScrollY;
+      ticking = false;
     }
     
-    // Listen to Lenis scroll events
-    lenis.on('scroll', (e) => {
-      updateNavbar();
-    });
+    function onScroll() {
+      if (!ticking) {
+        requestAnimationFrame(updateNavbar);
+        ticking = true;
+      }
+    }
+    
+    // Listen to scroll events
+    window.addEventListener('scroll', onScroll, { passive: true });
     
     // Initial update
     updateNavbar();
@@ -353,10 +424,8 @@ const { currentPage = 'faq' } = Astro.props;
         if (window.innerWidth <= 768) {
           if (navMenu.classList.contains('active')) {
             document.body.style.overflow = 'hidden';
-            lenis.stop();
           } else {
             document.body.style.overflow = '';
-            lenis.start();
           }
         }
       });
@@ -368,19 +437,6 @@ const { currentPage = 'faq' } = Astro.props;
         hamburger.classList.remove('active');
         navMenu.classList.remove('active');
         document.body.style.overflow = '';
-        lenis.start();
-        
-        // Smooth scroll untuk anchor links
-        const href = link.getAttribute('href');
-        if (href.startsWith('#')) {
-          const target = document.querySelector(href);
-          if (target) {
-            lenis.scrollTo(target, {
-              offset: -100,
-              duration: 1.5
-            });
-          }
-        }
       });
     });
     
@@ -392,7 +448,6 @@ const { currentPage = 'faq' } = Astro.props;
         hamburger.classList.remove('active');
         navMenu.classList.remove('active');
         document.body.style.overflow = '';
-        lenis.start();
       }
     });
     
@@ -402,7 +457,6 @@ const { currentPage = 'faq' } = Astro.props;
         hamburger.classList.remove('active');
         navMenu.classList.remove('active');
         document.body.style.overflow = '';
-        lenis.start();
       }
     });
   });
