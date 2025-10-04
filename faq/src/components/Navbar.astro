@@ -19,13 +19,13 @@ const { currentPage = 'about' } = Astro.props;
         </a>
       </li>
       <li class="nav-item">
-        <a href="/" class={`nav-link ${currentPage === 'faq' ? 'active' : ''}`}>
+        <a href="/faq" class={`nav-link ${currentPage === 'faq' ? 'active' : ''}`}>
           <span class="link-number"></span>
         faq
         </a>
       </li>
       <li class="nav-item">
-        <a href="/" class={`nav-link ${currentPage === 'blog' ? 'active' : ''}`}>
+        <a href="/blog" class={`nav-link ${currentPage === 'blog' ? 'active' : ''}`}>
           <span class="link-number"></span>
           blog
         </a>
@@ -439,5 +439,6 @@ const { currentPage = 'about' } = Astro.props;
     });
   });
 </script>
+
 
 
