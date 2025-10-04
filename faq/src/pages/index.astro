@@ -6,6 +6,8 @@ import Layout from '../layouts/Layout.astro';
 <Layout title="Home | Note Farid" description="Website pribadi Farid dengan blog dan FAQ tentang development web." currentPage="home">
   <div class="container">
     <main class="home-container">
+   <!-- Kursor Custom -->
+      <div class="custom-cursor" id="customCursor"></div>
       <section class="hero-section">
         <h1 class="hero-title">Note Farid</h1>
         <p class="hero-subtitle">Tempat berbagi pengetahuan tentang development web, Astro, dan teknologi terkini.</p>
@@ -342,64 +344,53 @@ padding-left: 60px;
 
 
 
-
-
-
-
-/* Kursor kustom */
+ /* Kursor Custom Styles */
   .custom-cursor {
     position: fixed;
     top: 0;
     left: 0;
     width: 20px;
     height: 20px;
-    background-color: rgba(0, 0, 0, 0.5);
+    background: rgba(157, 187, 255, 0.8);
     border-radius: 50%;
     pointer-events: none;
     z-index: 9999;
     mix-blend-mode: difference;
-    transition: transform 0.2s ease;
+    transition: transform 0.2s ease, width 0.3s ease, height 0.3s ease, background 0.3s ease;
+    transform: translate(-50%, -50%);
   }
-  
-  .cursor-dot {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 4px;
-    height: 4px;
-    background-color: #000;
-    border-radius: 50%;
-    pointer-events: none;
-    z-index: 9999;
-    transition: transform 0.1s ease;
+
+  .custom-cursor.hover-text {
+    width: 60px;
+    height: 60px;
+    background: rgba(102, 126, 234, 0.6);
+    transform: translate(-50%, -50%) scale(1.2);
   }
-  
-  /* Efek saat hover di atas elemen yang dapat diinteraksi */
-  .cursor-hover {
-    transform: scale(2);
-    background-color: rgba(0, 0, 0, 0.7);
+
+  .custom-cursor.hover-link {
+    width: 40px;
+    height: 40px;
+    background: rgba(255, 107, 107, 0.7);
+    transform: translate(-50%, -50%) scale(1.1);
   }
-  
-  /* Efek saat hover di atas teks */
-  .cursor-text {
-    transform: scale(3);
-    background-color: rgba(0, 0, 0, 0.8);
+
+  .custom-cursor.hover-button {
+    width: 50px;
+    height: 50px;
+    background: rgba(76, 175, 80, 0.7);
+    border-radius: 30%;
+    transform: translate(-50%, -50%) rotate(45deg);
   }
-  
-  /* Efek saat hover di atas tombol */
-  .cursor-button {
-    transform: scale(1.5);
-    background-color: rgba(0, 0, 0, 0.9);
-  }
-  
-  /* Sembunyikan kursor default */
+
+  /* Sembunyikan cursor default */
   body {
     cursor: none;
   }
-  
-  /* Pastikan kursor default tetap muncul di elemen input/textarea */
-  input, textarea, select, button {
-    cursor: auto;
+
+  /* Pastikan elemen interaktif tetap bisa dihover */
+  a, button, .linebox-item, .legal-link, .submit-btn, 
+  .feedback-item, input, textarea {
+    cursor: none !important;
   }
 
 
@@ -1668,109 +1659,6 @@ import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword , s
     const auth = getAuth(app);
 
 
-
-document.addEventListener('DOMContentLoaded', function() {
-    // Buat elemen kursor
-    const cursor = document.createElement('div');
-    cursor.classList.add('custom-cursor');
-    
-    const cursorDot = document.createElement('div');
-    cursorDot.classList.add('cursor-dot');
-    
-    document.body.appendChild(cursor);
-    document.body.appendChild(cursorDot);
-    
-    // Posisi kursor
-    let mouseX = 0;
-    let mouseY = 0;
-    let cursorX = 0;
-    let cursorY = 0;
-    let dotX = 0;
-    let dotY = 0;
-    
-    // Update posisi kursor
-    document.addEventListener('mousemove', function(e) {
-      mouseX = e.clientX;
-      mouseY = e.clientY;
-    });
-    
-    // Animasi kursor
-    function animateCursor() {
-      // Kursor utama dengan delay
-      cursorX += (mouseX - cursorX) * 0.1;
-      cursorY += (mouseY - cursorY) * 0.1;
-      
-      cursor.style.left = cursorX + 'px';
-      cursor.style.top = cursorY + 'px';
-      
-      // Dot kursor tanpa delay
-      dotX = mouseX;
-      dotY = mouseY;
-      
-      cursorDot.style.left = (dotX - 2) + 'px';
-      cursorDot.style.top = (dotY - 2) + 'px';
-      
-      requestAnimationFrame(animateCursor);
-    }
-    
-    animateCursor();
-    
-    // Efek hover untuk elemen interaktif
-    const hoverElements = document.querySelectorAll('a, button, .nav-link, .contact-btn');
-    const textElements = document.querySelectorAll('p, h1, h2, h3, h4, h5, h6, span, li');
-    
-    hoverElements.forEach(el => {
-      el.addEventListener('mouseenter', () => {
-        cursor.classList.add('cursor-hover');
-      });
-      
-      el.addEventListener('mouseleave', () => {
-        cursor.classList.remove('cursor-hover');
-      });
-    });
-    
-    textElements.forEach(el => {
-      el.addEventListener('mouseenter', () => {
-        cursor.classList.add('cursor-text');
-      });
-      
-      el.addEventListener('mouseleave', () => {
-        cursor.classList.remove('cursor-text');
-      });
-    });
-    
-    // Efek khusus untuk tombol
-    const buttons = document.querySelectorAll('button, .contact-btn');
-    
-    buttons.forEach(el => {
-      el.addEventListener('mouseenter', () => {
-        cursor.classList.add('cursor-button');
-      });
-      
-      el.addEventListener('mouseleave', () => {
-        cursor.classList.remove('cursor-button');
-      });
-    });
-    
-    // Sembunyikan kursor saat keluar dari window
-    document.addEventListener('mouseout', () => {
-      cursor.style.opacity = '0';
-      cursorDot.style.opacity = '0';
-    });
-    
-    document.addEventListener('mouseover', () => {
-      cursor.style.opacity = '1';
-      cursorDot.style.opacity = '1';
-    });
-  });
-
-
-
-
-
-
-
-
  document.addEventListener("DOMContentLoaded", () => {
     const feedbackForm = document.getElementById("feedbackForm");
     const statusDiv = document.getElementById("feedbackStatus");
@@ -2000,6 +1888,96 @@ document.addEventListener('DOMContentLoaded', function() {
     setInterval(updateLastUpdateTime, 60000);
   });
 </script>
+
+<script>
+  // Kursor Custom JavaScript
+  document.addEventListener('DOMContentLoaded', function() {
+    const cursor = document.getElementById('customCursor');
+    
+    if (!cursor) return;
+
+    // Update cursor position
+    document.addEventListener('mousemove', (e) => {
+      cursor.style.left = e.clientX + 'px';
+      cursor.style.top = e.clientY + 'px';
+    });
+
+    // Hover effects untuk teks
+    const textElements = document.querySelectorAll('h1, h2, h3, h4, h5, h6, p, span, li, .hero-title, .hero-subtitle, .development-text, .legal-text, .feedback-title, .timeline-content');
+    
+    textElements.forEach(el => {
+      el.addEventListener('mouseenter', () => {
+        cursor.classList.add('hover-text');
+      });
+      
+      el.addEventListener('mouseleave', () => {
+        cursor.classList.remove('hover-text');
+      });
+    });
+
+    // Hover effects untuk link
+    const linkElements = document.querySelectorAll('a, .legal-link, .linebox-item');
+    
+    linkElements.forEach(el => {
+      el.addEventListener('mouseenter', () => {
+        cursor.classList.add('hover-link');
+      });
+      
+      el.addEventListener('mouseleave', () => {
+        cursor.classList.remove('hover-link');
+      });
+    });
+
+    // Hover effects untuk button
+    const buttonElements = document.querySelectorAll('button, .submit-btn, input[type="submit"]');
+    
+    buttonElements.forEach(el => {
+      el.addEventListener('mouseenter', () => {
+        cursor.classList.add('hover-button');
+      });
+      
+      el.addEventListener('mouseleave', () => {
+        cursor.classList.remove('hover-button');
+      });
+    });
+
+    // Hover effects untuk form elements
+    const formElements = document.querySelectorAll('input, textarea');
+    
+    formElements.forEach(el => {
+      el.addEventListener('mouseenter', () => {
+        cursor.classList.add('hover-text');
+      });
+      
+      el.addEventListener('mouseleave', () => {
+        cursor.classList.remove('hover-text');
+      });
+    });
+
+    // Hide cursor ketika keluar dari window
+    document.addEventListener('mouseout', (e) => {
+      if (!e.relatedTarget && e.clientY <= 0) {
+        cursor.style.opacity = '0';
+      }
+    });
+
+    document.addEventListener('mouseover', () => {
+      cursor.style.opacity = '1';
+    });
+
+    // Click effect
+    document.addEventListener('mousedown', () => {
+      cursor.style.transform = 'translate(-50%, -50%) scale(0.8)';
+    });
+
+    document.addEventListener('mouseup', () => {
+      cursor.style.transform = 'translate(-50%, -50%) scale(1)';
+    });
+  });
+</script>
+
+
+
 
 
 
