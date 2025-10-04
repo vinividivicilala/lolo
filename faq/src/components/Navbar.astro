@@ -7,26 +7,26 @@ const { currentPage = 'about' } = Astro.props;
     <div class="nav-logo">
       <span class="logo-ampersand">&</span>
       <div class="logo-text">
-        <span class="logo-name">Noah Pham</span>
+        <span class="logo-name"></span>
         <span class="logo-subtitle">Portfolio</span>
       </div>
     </div>
     <ul class="nav-menu">
       <li class="nav-item">
-        <a href="/about" class={`nav-link ${currentPage === 'about' ? 'active' : ''}`}>
-          <span class="link-number">01</span>
+        <a href="/" class={`nav-link ${currentPage === 'home' ? 'active' : ''}`}>
+          <span class="link-number"></span>
           About
         </a>
       </li>
       <li class="nav-item">
-        <a href="/projects" class={`nav-link ${currentPage === 'projects' ? 'active' : ''}`}>
-          <span class="link-number">02</span>
+        <a href="/" class={`nav-link ${currentPage === 'faq' ? 'active' : ''}`}>
+          <span class="link-number"></span>
           Projects
         </a>
       </li>
       <li class="nav-item">
-        <a href="/resume" class={`nav-link ${currentPage === 'resume' ? 'active' : ''}`}>
-          <span class="link-number">03</span>
+        <a href="/" class={`nav-link ${currentPage === 'blog' ? 'active' : ''}`}>
+          <span class="link-number"></span>
           Resume
         </a>
       </li>
@@ -439,3 +439,4 @@ const { currentPage = 'about' } = Astro.props;
     });
   });
 </script>
+
