@@ -1,39 +1,48 @@
 ---
-const { currentPage = 'about' } = Astro.props;
+const { currentPage = 'home' } = Astro.props;
 ---
 
 <nav class="navbar">
   <div class="nav-container">
+    <!-- Logo dengan foto icon dan nama -->
     <div class="nav-logo">
-      <span class="logo-ampersand">&</span>
+      <div class="logo-icon">
+        <img src="/icon-profile.jpg" alt="Note Farid Icon" class="icon-img" />
+      </div>
       <div class="logo-text">
-        <span class="logo-name">Noah Pham</span>
+        <span class="logo-name">Note Farid</span>
         <span class="logo-subtitle">Portfolio</span>
       </div>
     </div>
+
+    <!-- Menu di tengah -->
     <ul class="nav-menu">
       <li class="nav-item">
-        <a href="/about" class={`nav-link ${currentPage === 'about' ? 'active' : ''}`}>
+        <a href="/home" class={`nav-link ${currentPage === 'home' ? 'active' : ''}`}>
           <span class="link-number">01</span>
-          About
+          Home
         </a>
       </li>
       <li class="nav-item">
-        <a href="/projects" class={`nav-link ${currentPage === 'projects' ? 'active' : ''}`}>
+        <a href="/blog" class={`nav-link ${currentPage === 'blog' ? 'active' : ''}`}>
           <span class="link-number">02</span>
-          Projects
+          Blog
         </a>
       </li>
       <li class="nav-item">
-        <a href="/resume" class={`nav-link ${currentPage === 'resume' ? 'active' : ''}`}>
+        <a href="/faq" class={`nav-link ${currentPage === 'faq' ? 'active' : ''}`}>
           <span class="link-number">03</span>
-          Resume
+          FAQ
         </a>
       </li>
     </ul>
+
+    <!-- Get in Touch button -->
     <div class="nav-actions">
       <button class="contact-btn">Get in Touch</button>
     </div>
+
+    <!-- Hamburger menu untuk mobile -->
     <div class="hamburger">
       <span class="bar"></span>
       <span class="bar"></span>
@@ -47,6 +56,7 @@ const { currentPage = 'about' } = Astro.props;
     scroll-behavior: smooth;
   }
 
+  /* Navbar default state - transparan */
   .navbar {
     background: transparent;
     padding: 2rem 0;
@@ -62,19 +72,20 @@ const { currentPage = 'about' } = Astro.props;
     border: none;
   }
   
+  /* Navbar saat scroll */
   .navbar.scrolled {
-    background: rgba(255, 255, 255, 0.7);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    padding: 1.5rem 0;
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    padding: 1rem 0;
     border-radius: 16px;
     margin: 1rem auto;
     width: 90%;
     max-width: 1200px;
     box-shadow: 
-      0 4px 20px rgba(0, 0, 0, 0.1),
-      0 0 0 1px rgba(0, 0, 0, 0.05);
-    border: 1px solid rgba(0, 0, 0, 0.08);
+      0 8px 32px rgba(0, 0, 0, 0.1),
+      0 0 0 1px rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(0, 0, 0, 0.1);
     left: 50%;
     transform: translateX(-50%);
   }
@@ -89,27 +100,32 @@ const { currentPage = 'about' } = Astro.props;
     transition: all 0.4s ease;
   }
   
-  .navbar.scrolled .nav-container {
-    padding: 0 2rem;
-  }
-  
+  /* Logo dengan foto icon */
   .nav-logo {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
+    gap: 1rem;
     transition: all 0.4s ease;
   }
   
-  .logo-ampersand {
-    font-size: 3rem; /* Ukuran lebih besar */
-    font-weight: 400;
-    color: #000;
-    font-family: 'Georgia', serif;
+  .logo-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 2px solid rgba(0, 0, 0, 0.1);
     transition: all 0.4s ease;
   }
   
-  .navbar.scrolled .logo-ampersand {
-    font-size: 3rem; /* Tetap sama saat scroll */
+  .navbar.scrolled .logo-icon {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .icon-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
   }
   
   .logo-text {
@@ -119,35 +135,36 @@ const { currentPage = 'about' } = Astro.props;
   }
   
   .logo-name {
-    font-size: 2rem; /* Ukuran lebih besar */
-    font-weight: 600;
+    font-size: 1.5rem;
+    font-weight: 700;
     color: #000;
     font-family: 'Inter', sans-serif;
-    letter-spacing: -0.01em;
+    letter-spacing: -0.02em;
     transition: all 0.4s ease;
   }
   
   .navbar.scrolled .logo-name {
-    font-size: 2rem; /* Tetap sama saat scroll */
+    font-size: 1.3rem;
   }
   
   .logo-subtitle {
-    font-size: 1rem; /* Ukuran lebih besar */
+    font-size: 0.8rem;
     font-weight: 400;
     color: #666;
     font-family: 'Inter', sans-serif;
-    letter-spacing: 0.02em;
+    letter-spacing: 0.03em;
     transition: all 0.4s ease;
   }
   
   .navbar.scrolled .logo-subtitle {
-    font-size: 1rem; /* Tetap sama saat scroll */
+    font-size: 0.75rem;
   }
   
+  /* Menu di tengah */
   .nav-menu {
     display: flex;
     list-style: none;
-    gap: 2.5rem;
+    gap: 3rem;
     margin: 0;
     padding: 0;
     transition: all 0.4s ease;
@@ -157,18 +174,18 @@ const { currentPage = 'about' } = Astro.props;
   }
   
   .navbar.scrolled .nav-menu {
-    gap: 2.5rem; /* Tetap sama saat scroll */
+    gap: 2.5rem;
   }
   
   .nav-link {
     color: #000;
     text-decoration: none;
-    font-weight: 450;
+    font-weight: 500;
     padding: 0.5rem 0;
     transition: all 0.3s ease;
     position: relative;
     font-family: 'Inter', sans-serif;
-    font-size: 1.1rem; /* Ukuran lebih besar */
+    font-size: 1rem;
     letter-spacing: -0.01em;
     display: flex;
     align-items: center;
@@ -176,18 +193,18 @@ const { currentPage = 'about' } = Astro.props;
   }
   
   .navbar.scrolled .nav-link {
-    font-size: 1.1rem; /* Tetap sama saat scroll */
+    font-size: 0.95rem;
   }
   
   .link-number {
-    font-size: 0.9rem; /* Ukuran lebih besar */
+    font-size: 0.8rem;
     color: #888;
     font-weight: 400;
     transition: all 0.3s ease;
   }
   
   .navbar.scrolled .link-number {
-    font-size: 0.9rem; /* Tetap sama saat scroll */
+    font-size: 0.75rem;
   }
   
   .nav-link::after {
@@ -196,7 +213,7 @@ const { currentPage = 'about' } = Astro.props;
     bottom: 0;
     left: 0;
     width: 0;
-    height: 1px;
+    height: 2px;
     background: #000;
     transition: width 0.3s ease;
   }
@@ -211,6 +228,7 @@ const { currentPage = 'about' } = Astro.props;
     color: #000;
   }
   
+  /* Get in Touch button */
   .nav-actions {
     display: flex;
     align-items: center;
@@ -224,24 +242,25 @@ const { currentPage = 'about' } = Astro.props;
     padding: 0.75rem 1.5rem;
     border-radius: 8px;
     font-family: 'Inter', sans-serif;
-    font-size: 1rem; /* Ukuran lebih besar */
-    font-weight: 450;
+    font-size: 0.9rem;
+    font-weight: 500;
     cursor: pointer;
     transition: all 0.3s ease;
     letter-spacing: -0.01em;
   }
   
   .navbar.scrolled .contact-btn {
-    padding: 0.75rem 1.5rem; /* Tetap sama saat scroll */
-    font-size: 1rem; /* Tetap sama saat scroll */
-    border-radius: 8px; /* Tetap sama saat scroll */
+    padding: 0.65rem 1.4rem;
+    font-size: 0.85rem;
   }
   
   .contact-btn:hover {
     background: #333;
     transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   }
   
+  /* Hamburger menu */
   .hamburger {
     display: none;
     flex-direction: column;
@@ -252,7 +271,7 @@ const { currentPage = 'about' } = Astro.props;
   }
   
   .navbar.scrolled .hamburger {
-    transform: scale(1); /* Tetap sama saat scroll */
+    transform: scale(0.9);
   }
   
   .bar {
@@ -264,7 +283,7 @@ const { currentPage = 'about' } = Astro.props;
   }
   
   .hamburger.active .bar:nth-child(1) {
-    transform: rotate(45deg) translate(5px, 5px);
+    transform: rotate(45deg) translate(6px, 6px);
   }
   
   .hamburger.active .bar:nth-child(2) {
@@ -272,14 +291,13 @@ const { currentPage = 'about' } = Astro.props;
   }
   
   .hamburger.active .bar:nth-child(3) {
-    transform: rotate(-45deg) translate(5px, -5px);
+    transform: rotate(-45deg) translate(6px, -6px);
   }
   
+  /* Responsive Design */
   @media (max-width: 968px) {
     .nav-menu {
       gap: 2rem;
-      position: static;
-      transform: none;
     }
     
     .nav-actions {
@@ -296,9 +314,7 @@ const { currentPage = 'about' } = Astro.props;
       margin: 0.8rem auto;
       width: 95%;
       border-radius: 12px;
-      padding: 1.2rem 0;
-      left: 50%;
-      transform: translateX(-50%);
+      padding: 0.8rem 0;
     }
     
     .nav-container {
@@ -306,7 +322,7 @@ const { currentPage = 'about' } = Astro.props;
     }
     
     .navbar.scrolled .nav-container {
-      padding: 0 1.5rem;
+      padding: 0 1.25rem;
     }
     
     .hamburger {
@@ -330,6 +346,9 @@ const { currentPage = 'about' } = Astro.props;
       gap: 0;
       z-index: 999;
       border-radius: 0;
+      position: absolute;
+      left: -100%;
+      transform: none;
     }
     
     .nav-menu.active {
@@ -346,7 +365,7 @@ const { currentPage = 'about' } = Astro.props;
     }
     
     .link-number {
-      font-size: 0.9rem;
+      font-size: 0.85rem;
     }
   }
 </style>
@@ -366,7 +385,7 @@ const { currentPage = 'about' } = Astro.props;
       const currentScrollY = window.scrollY;
       
       // Calculate scroll progress (0 to 1)
-      const scrollProgress = Math.min(currentScrollY / 100, 1); // Max effect at 100px scroll
+      const scrollProgress = Math.min(currentScrollY / 100, 1);
       
       // Update navbar classes based on scroll progress
       if (scrollProgress > 0.1) {
