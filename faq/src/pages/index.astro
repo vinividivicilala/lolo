@@ -342,6 +342,72 @@ padding-left: 60px;
 
 
 
+
+
+
+
+/* Kursor kustom */
+  .custom-cursor {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 20px;
+    height: 20px;
+    background-color: rgba(0, 0, 0, 0.5);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9999;
+    mix-blend-mode: difference;
+    transition: transform 0.2s ease;
+  }
+  
+  .cursor-dot {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 4px;
+    background-color: #000;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9999;
+    transition: transform 0.1s ease;
+  }
+  
+  /* Efek saat hover di atas elemen yang dapat diinteraksi */
+  .cursor-hover {
+    transform: scale(2);
+    background-color: rgba(0, 0, 0, 0.7);
+  }
+  
+  /* Efek saat hover di atas teks */
+  .cursor-text {
+    transform: scale(3);
+    background-color: rgba(0, 0, 0, 0.8);
+  }
+  
+  /* Efek saat hover di atas tombol */
+  .cursor-button {
+    transform: scale(1.5);
+    background-color: rgba(0, 0, 0, 0.9);
+  }
+  
+  /* Sembunyikan kursor default */
+  body {
+    cursor: none;
+  }
+  
+  /* Pastikan kursor default tetap muncul di elemen input/textarea */
+  input, textarea, select, button {
+    cursor: auto;
+  }
+
+
+
+
+
+
+
   /* Feedback Display Section */
   .feedback-display-section {
     margin: 40px 0;
@@ -1602,6 +1668,109 @@ import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword , s
     const auth = getAuth(app);
 
 
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Buat elemen kursor
+    const cursor = document.createElement('div');
+    cursor.classList.add('custom-cursor');
+    
+    const cursorDot = document.createElement('div');
+    cursorDot.classList.add('cursor-dot');
+    
+    document.body.appendChild(cursor);
+    document.body.appendChild(cursorDot);
+    
+    // Posisi kursor
+    let mouseX = 0;
+    let mouseY = 0;
+    let cursorX = 0;
+    let cursorY = 0;
+    let dotX = 0;
+    let dotY = 0;
+    
+    // Update posisi kursor
+    document.addEventListener('mousemove', function(e) {
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+    });
+    
+    // Animasi kursor
+    function animateCursor() {
+      // Kursor utama dengan delay
+      cursorX += (mouseX - cursorX) * 0.1;
+      cursorY += (mouseY - cursorY) * 0.1;
+      
+      cursor.style.left = cursorX + 'px';
+      cursor.style.top = cursorY + 'px';
+      
+      // Dot kursor tanpa delay
+      dotX = mouseX;
+      dotY = mouseY;
+      
+      cursorDot.style.left = (dotX - 2) + 'px';
+      cursorDot.style.top = (dotY - 2) + 'px';
+      
+      requestAnimationFrame(animateCursor);
+    }
+    
+    animateCursor();
+    
+    // Efek hover untuk elemen interaktif
+    const hoverElements = document.querySelectorAll('a, button, .nav-link, .contact-btn');
+    const textElements = document.querySelectorAll('p, h1, h2, h3, h4, h5, h6, span, li');
+    
+    hoverElements.forEach(el => {
+      el.addEventListener('mouseenter', () => {
+        cursor.classList.add('cursor-hover');
+      });
+      
+      el.addEventListener('mouseleave', () => {
+        cursor.classList.remove('cursor-hover');
+      });
+    });
+    
+    textElements.forEach(el => {
+      el.addEventListener('mouseenter', () => {
+        cursor.classList.add('cursor-text');
+      });
+      
+      el.addEventListener('mouseleave', () => {
+        cursor.classList.remove('cursor-text');
+      });
+    });
+    
+    // Efek khusus untuk tombol
+    const buttons = document.querySelectorAll('button, .contact-btn');
+    
+    buttons.forEach(el => {
+      el.addEventListener('mouseenter', () => {
+        cursor.classList.add('cursor-button');
+      });
+      
+      el.addEventListener('mouseleave', () => {
+        cursor.classList.remove('cursor-button');
+      });
+    });
+    
+    // Sembunyikan kursor saat keluar dari window
+    document.addEventListener('mouseout', () => {
+      cursor.style.opacity = '0';
+      cursorDot.style.opacity = '0';
+    });
+    
+    document.addEventListener('mouseover', () => {
+      cursor.style.opacity = '1';
+      cursorDot.style.opacity = '1';
+    });
+  });
+
+
+
+
+
+
+
+
  document.addEventListener("DOMContentLoaded", () => {
     const feedbackForm = document.getElementById("feedbackForm");
     const statusDiv = document.getElementById("feedbackStatus");
@@ -1831,6 +2000,7 @@ import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword , s
     setInterval(updateLastUpdateTime, 60000);
   });
 </script>
+
 
 
 
