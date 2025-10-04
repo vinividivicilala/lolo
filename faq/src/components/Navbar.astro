@@ -14,6 +14,10 @@ const { currentPage = 'home' } = Astro.props;
         <span class="logo-name">Note Farid</span>
         <span class="logo-subtitle">Portfolio</span>
       </div>
+      <!-- SVG Arrow -->
+      <svg class="arrow-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M7 17L17 7M17 7H8M17 7V16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
     </div>
 
     <!-- Menu tengah -->
@@ -111,26 +115,34 @@ const { currentPage = 'home' } = Astro.props;
     align-items: center;
     gap: 0.75rem;
     transition: all 0.4s ease;
+    position: relative;
   }
   
   .logo-image {
     width: 90px;
     height: 90px;
-    border-radius: 12px;
+    border-radius: 20px;
     overflow: hidden;
-    border: 2px solid #000;
+    border: 2px solid transparent;
     transition: all 0.4s ease;
+    background: transparent;
   }
   
   .navbar.scrolled .logo-image {
-    width: 45px;
-    height: 45px;
+    width: 60px;
+    height: 60px;
+    border-radius: 15px;
   }
   
   .logo-image img {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    border-radius: 18px;
+  }
+  
+  .navbar.scrolled .logo-image img {
+    border-radius: 13px;
   }
   
   .logo-text {
@@ -140,8 +152,8 @@ const { currentPage = 'home' } = Astro.props;
   }
   
   .logo-name {
-    font-size: 39px;
-    font-weight: 600;
+    font-size: 42px;
+    font-weight: 700;
     color: #000;
     font-family: 'Inter', sans-serif;
     letter-spacing: -0.01em;
@@ -149,12 +161,12 @@ const { currentPage = 'home' } = Astro.props;
   }
   
   .navbar.scrolled .logo-name {
-    font-size: 1.8rem;
+    font-size: 2.2rem;
   }
   
   .logo-subtitle {
-    font-size: 1rem;
-    font-weight: 400;
+    font-size: 1.1rem;
+    font-weight: 500;
     color: #666;
     font-family: 'Inter', sans-serif;
     letter-spacing: 0.02em;
@@ -162,7 +174,20 @@ const { currentPage = 'home' } = Astro.props;
   }
   
   .navbar.scrolled .logo-subtitle {
-    font-size: 0.9rem;
+    font-size: 1rem;
+  }
+  
+  /* Arrow Icon */
+  .arrow-icon {
+    color: #000;
+    transition: all 0.4s ease;
+    opacity: 0.8;
+    margin-left: 0.5rem;
+  }
+  
+  .navbar.scrolled .arrow-icon {
+    transform: scale(1.1);
+    opacity: 1;
   }
   
   /* Menu Styles */
@@ -185,12 +210,12 @@ const { currentPage = 'home' } = Astro.props;
   .nav-link {
     color: #000;
     text-decoration: none;
-    font-weight: 450;
+    font-weight: 600;
     padding: 0.5rem 0;
     transition: all 0.3s ease;
     position: relative;
     font-family: 'Inter', sans-serif;
-    font-size: 1.1rem;
+    font-size: 1.3rem;
     letter-spacing: -0.01em;
     display: flex;
     align-items: center;
@@ -198,39 +223,38 @@ const { currentPage = 'home' } = Astro.props;
   }
   
   .navbar.scrolled .nav-link {
-    font-size: 1rem;
+    font-size: 1.2rem;
   }
   
   .link-number {
-    font-size: 0.9rem;
+    font-size: 1rem;
     color: #888;
-    font-weight: 400;
+    font-weight: 500;
     transition: all 0.3s ease;
   }
   
   .navbar.scrolled .link-number {
-    font-size: 0.8rem;
+    font-size: 0.9rem;
   }
   
-  .nav-link::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 0;
-    height: 1px;
-    background: #000;
-    transition: width 0.3s ease;
+  /* Hover effects tanpa underline */
+  .nav-link:hover {
+    color: #333;
+    transform: translateY(-1px);
   }
   
-  .nav-link:hover::after,
-  .nav-link.active::after {
-    width: 100%;
+  .nav-link:hover .link-number {
+    color: #000;
   }
   
-  .nav-link:hover .link-number,
+  .nav-link.active {
+    color: #000;
+    font-weight: 700;
+  }
+  
   .nav-link.active .link-number {
     color: #000;
+    font-weight: 600;
   }
   
   /* Button Styles */
@@ -244,24 +268,24 @@ const { currentPage = 'home' } = Astro.props;
     background: #000;
     color: #fff;
     border: none;
-    padding: 0.75rem 1.5rem;
-    border-radius: 8px;
+    padding: 0.85rem 1.75rem;
+    border-radius: 10px;
     font-family: 'Inter', sans-serif;
-    font-size: 1rem;
-    font-weight: 450;
+    font-size: 1.1rem;
+    font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
     letter-spacing: -0.01em;
   }
   
   .navbar.scrolled .contact-btn {
-    padding: 0.7rem 1.4rem;
-    font-size: 0.95rem;
+    padding: 0.8rem 1.6rem;
+    font-size: 1.05rem;
   }
   
   .contact-btn:hover {
     background: #333;
-    transform: translateY(-1px);
+    transform: translateY(-2px);
   }
   
   /* Hamburger Menu */
@@ -365,16 +389,21 @@ const { currentPage = 'home' } = Astro.props;
     }
     
     .nav-link {
-      font-size: 1.1rem;
+      font-size: 1.3rem;
       padding: 0.75rem 0;
     }
     
     .link-number {
-      font-size: 0.9rem;
+      font-size: 1rem;
     }
 
     /* Hide logo text on mobile */
     .logo-text {
+      display: none;
+    }
+
+    /* Hide arrow icon on mobile */
+    .arrow-icon {
       display: none;
     }
   }
@@ -387,7 +416,7 @@ const { currentPage = 'home' } = Astro.props;
     const navbar = document.querySelector('.navbar');
     const navLinks = document.querySelectorAll('.nav-link');
     
-    // Navbar scroll effects - SAMA PERSIS DENGAN YANG SEBELUMNYA
+    // Navbar scroll effects
     let lastScrollY = window.scrollY;
     let ticking = false;
     
@@ -468,4 +497,3 @@ const { currentPage = 'home' } = Astro.props;
     });
   });
 </script>
-
