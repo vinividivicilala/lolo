@@ -21,7 +21,7 @@ const { currentPage = 'home' } = Astro.props;
       <li class="nav-item">
         <a href="/" class={`nav-link ${currentPage === 'home' ? 'active' : ''}`}>
           Home
-          <svg class="menu-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <svg class="menu-arrow" width=35" height="35" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M7 17L17 7M17 7H8M17 7V16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
         </a>
@@ -29,7 +29,7 @@ const { currentPage = 'home' } = Astro.props;
       <li class="nav-item">
         <a href="/faq" class={`nav-link ${currentPage === 'faq' ? 'active' : ''}`}>
           FAQ
-          <svg class="menu-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <svg class="menu-arrow" width="35" height="35" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M7 17L17 7M17 7H8M17 7V16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
         </a>
@@ -37,7 +37,7 @@ const { currentPage = 'home' } = Astro.props;
       <li class="nav-item">
         <a href="/blog" class={`nav-link ${currentPage === 'blog' ? 'active' : ''}`}>
           Blog
-          <svg class="menu-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <svg class="menu-arrow" width="35" height="35" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M7 17L17 7M17 7H8M17 7V16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
         </a>
@@ -485,3 +485,4 @@ const { currentPage = 'home' } = Astro.props;
     });
   });
 </script>
+
