@@ -3106,200 +3106,207 @@ import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword , s
 
 
 
-  document.addEventListener("DOMContentLoaded", function() {
-   // Modal elements
-    const paymentModal = document.getElementById('paymentModal');
-    const qrisModal = document.getElementById('qrisModal');
-    const donateBtn = document.getElementById('donateBtn');
-    const paymentClose = document.querySelector('.payment-close');
-    const qrisClose = document.querySelector('.qris-close');
-    const showQRBtn = document.getElementById('showQRBtn');
-    const paymentForm = document.getElementById('paymentForm');
-    const displayAmount = document.getElementById('displayAmount');
-    const totalDonationsEl = document.getElementById('totalDonations');
-    const donationsCountEl = document.getElementById('donationsCount');
-    const latestDonations = document.getElementById('latestDonations');
-    const cancelPaymentBtn = document.getElementById('cancelPayment');
-    const confirmPaymentBtn = document.getElementById('confirmPayment');
 
-    let currentPaymentId = null;
-    let currentPaymentData = null;
+document.addEventListener("DOMContentLoaded", function() {
+  // Modal elements
+  const paymentModal = document.getElementById('paymentModal');
+  const qrisModal = document.getElementById('qrisModal');
+  const donateBtn = document.getElementById('donateBtn');
+  const paymentClose = document.querySelector('.payment-close');
+  const qrisClose = document.querySelector('.qris-close');
+  const showQRBtn = document.getElementById('showQRBtn');
+  const paymentForm = document.getElementById('paymentForm');
+  const displayAmount = document.getElementById('displayAmount');
+  const totalDonationsEl = document.getElementById('totalDonations');
+  const donationsCountEl = document.getElementById('donationsCount');
+  const latestDonations = document.getElementById('latestDonations');
+  const cancelPaymentBtn = document.getElementById('cancelPayment');
+  const confirmPaymentBtn = document.getElementById('confirmPayment');
 
-    // Open payment modal
-    donateBtn.addEventListener('click', function() {
-      paymentModal.style.display = 'block';
-    });
+  let currentPaymentId = null;
+  let currentPaymentData = null;
 
-    // Close modals
-    paymentClose.addEventListener('click', function() {
+  // Open payment modal
+  donateBtn.addEventListener('click', function() {
+    paymentModal.style.display = 'block';
+  });
+
+  // Close modals
+  paymentClose.addEventListener('click', function() {
+    paymentModal.style.display = 'none';
+  });
+
+  qrisClose.addEventListener('click', function() {
+    qrisModal.style.display = 'none';
+    paymentModal.style.display = 'none';
+  });
+
+  // Close modal when clicking outside
+  window.addEventListener('click', function(event) {
+    if (event.target === paymentModal) {
       paymentModal.style.display = 'none';
-    });
-
-    qrisClose.addEventListener('click', function() {
+    }
+    if (event.target === qrisModal) {
       qrisModal.style.display = 'none';
       paymentModal.style.display = 'none';
-    });
+    }
+  });
 
-    // Close modal when clicking outside
-    window.addEventListener('click', function(event) {
-      if (event.target === paymentModal) {
-        paymentModal.style.display = 'none';
-      }
-      if (event.target === qrisModal) {
-        qrisModal.style.display = 'none';
-        paymentModal.style.display = 'none';
-      }
-    });
+  // Show QRIS modal
+  showQRBtn.addEventListener('click', async function() {
+    const name = document.getElementById('payerName').value.trim();
+    const amount = document.getElementById('paymentAmount').value;
+    const description = document.getElementById('paymentDescription').value.trim();
 
-    // Show QRIS modal
-    showQRBtn.addEventListener('click', async function() {
-      const name = document.getElementById('payerName').value.trim();
-      const amount = document.getElementById('paymentAmount').value;
-      const description = document.getElementById('paymentDescription').value.trim();
+    if (!amount || amount < 1000) {
+      alert('Masukkan nominal minimal Rp 1.000');
+      return;
+    }
 
-      if (!amount || amount < 1000) {
-        alert('Masukkan nominal minimal Rp 1.000');
-        return;
-      }
+    currentPaymentData = {
+      name: name || 'Anonim',
+      amount: parseInt(amount),
+      description: description,
+      status: 'pending', // pending, verified, failed
+      admin_verified: false,
+      timestamp: new Date()
+    };
 
-      currentPaymentData = {
-        name: name || 'Anonim',
-        amount: parseInt(amount),
-        description: description,
-        status: 'pending', // pending, verified, failed
-        admin_verified: false,
-        timestamp: new Date()
-      };
+    try {
+      // Save payment data to Firebase dengan status pending
+      const docRef = await addDoc(collection(db, "payments"), {
+        ...currentPaymentData,
+        timestamp: serverTimestamp()
+      });
 
-      try {
-        // Save payment data to Firebase dengan status pending
-        const docRef = await db.collection("payments").add({
-          ...currentPaymentData,
-          timestamp: serverTimestamp()
-        });
-        
-        currentPaymentId = docRef.id;
-        
-        // Update display amount
-        displayAmount.textContent = `Rp ${parseInt(amount).toLocaleString('id-ID')}`;
-        
-        // Reset status ke pending
-        document.getElementById('paymentStatus').textContent = 'Menunggu Pembayaran';
-        document.querySelector('.status-indicator').className = 'status-indicator pending';
-        
-        // Switch to QRIS modal
-        paymentModal.style.display = 'none';
-        qrisModal.style.display = 'block';
+      currentPaymentId = docRef.id;
 
-      } catch (error) {
-        console.error("Error saving payment:", error);
-        alert('Terjadi error saat menyimpan data pembayaran');
-      }
-    });
+      // Update display amount
+      displayAmount.textContent = `Rp ${parseInt(amount).toLocaleString('id-ID')}`;
 
-    // Cancel payment
-    cancelPaymentBtn.addEventListener('click', function() {
-      if (currentPaymentId) {
-        // Update status menjadi failed
-        db.collection("payments").doc(currentPaymentId).update({
-          status: 'failed',
-          admin_verified: false
-        });
-      }
-      qrisModal.style.display = 'none';
-      paymentForm.reset();
-    });
-
-    // Confirm payment (user mengklaim sudah bayar)
-    confirmPaymentBtn.addEventListener('click', function() {
-      document.getElementById('paymentStatus').textContent = 'Menunggu Verifikasi Admin';
+      // Reset status ke pending
+      document.getElementById('paymentStatus').textContent = 'Menunggu Pembayaran';
       document.querySelector('.status-indicator').className = 'status-indicator pending';
-      
-      alert('Terima kasih! Pembayaran Anda sedang diverifikasi oleh admin. Status akan diperbarui dalam 1x24 jam.');
-      
-      // Tutup modal setelah konfirmasi
-      setTimeout(() => {
-        qrisModal.style.display = 'none';
-        paymentForm.reset();
-        loadDonations(); // Reload data
-      }, 2000);
-    });
 
-    // Load donations from Firebase (hanya yang verified)
-    function loadDonations() {
-      const q = db.collection("payments")
-        .where("status", "==", "verified")
-        .orderBy("timestamp", "desc")
-        .limit(10);
+      // Switch to QRIS modal
+      paymentModal.style.display = 'none';
+      qrisModal.style.display = 'block';
 
-      q.onSnapshot((snapshot) => {
-        latestDonations.innerHTML = '';
-        let totalAmount = 0;
-        let donationCount = 0;
+    } catch (error) {
+      console.error("Error saving payment:", error);
+      alert('Terjadi error saat menyimpan data pembayaran');
+    }
+  });
 
-        snapshot.forEach((doc) => {
-          const data = doc.data();
-          if (data.status === 'verified') {
-            totalAmount += data.amount;
-            donationCount++;
-            
-            const donationItem = createDonationItem(data);
-            latestDonations.appendChild(donationItem);
-          }
-        });
-
-        // Update totals
-        totalDonationsEl.textContent = `Rp ${totalAmount.toLocaleString('id-ID')}`;
-        donationsCountEl.textContent = donationCount;
+  // Cancel payment
+  cancelPaymentBtn.addEventListener('click', function() {
+    if (currentPaymentId) {
+      // Update status menjadi failed
+      const paymentDocRef = doc(db, "payments", currentPaymentId);
+      updateDoc(paymentDocRef, {
+        status: 'failed',
+        admin_verified: false
       });
     }
+    qrisModal.style.display = 'none';
+    paymentForm.reset();
+  });
 
-    // Create donation item element
-    function createDonationItem(data) {
-      const date = data.timestamp?.toDate ? data.timestamp.toDate() : new Date();
-      const timeAgoText = timeAgo(date);
-      
-      const item = document.createElement('div');
-      item.className = 'donation-item';
-      
-      item.innerHTML = `
-        <div class="donation-header">
-          <div class="donation-user">
-            <div class="donation-avatar">${(data.name || "A").charAt(0).toUpperCase()}</div>
-            <div class="donation-user-info">
-              <h4>${data.name || "Anonim"}</h4>
-              <span class="donation-time">${timeAgoText}</span>
-            </div>
-          </div>
-          <div class="donation-amount">
-            Rp ${data.amount.toLocaleString('id-ID')}
-            <span class="donation-status status-verified">Terverifikasi</span>
+  // Confirm payment (user mengklaim sudah bayar)
+  confirmPaymentBtn.addEventListener('click', function() {
+    document.getElementById('paymentStatus').textContent = 'Menunggu Verifikasi Admin';
+    document.querySelector('.status-indicator').className = 'status-indicator pending';
+
+    alert('Terima kasih! Pembayaran Anda sedang diverifikasi oleh admin. Status akan diperbarui dalam 1x24 jam.');
+
+    // Tutup modal setelah konfirmasi
+    setTimeout(() => {
+      qrisModal.style.display = 'none';
+      paymentForm.reset();
+      loadDonations(); // Reload data
+    }, 2000);
+  });
+
+  // Load donations from Firebase (hanya yang verified)
+  function loadDonations() {
+    const q = query(
+      collection(db, "payments"),
+      where("status", "==", "verified"),
+      orderBy("timestamp", "desc"),
+      limit(10)
+    );
+
+    onSnapshot(q, (snapshot) => {
+      latestDonations.innerHTML = '';
+      let totalAmount = 0;
+      let donationCount = 0;
+
+      snapshot.forEach((doc) => {
+        const data = doc.data();
+        if (data.status === 'verified') {
+          totalAmount += data.amount;
+          donationCount++;
+
+          const donationItem = createDonationItem(data);
+          latestDonations.appendChild(donationItem);
+        }
+      });
+
+      // Update totals
+      totalDonationsEl.textContent = `Rp ${totalAmount.toLocaleString('id-ID')}`;
+      donationsCountEl.textContent = donationCount;
+    });
+  }
+
+  // Create donation item element
+  function createDonationItem(data) {
+    const date = data.timestamp?.toDate ? data.timestamp.toDate() : new Date();
+    const timeAgoText = timeAgo(date);
+
+    const item = document.createElement('div');
+    item.className = 'donation-item';
+
+    item.innerHTML = `
+      <div class="donation-header">
+        <div class="donation-user">
+          <div class="donation-avatar">${(data.name || "A").charAt(0).toUpperCase()}</div>
+          <div class="donation-user-info">
+            <h4>${data.name || "Anonim"}</h4>
+            <span class="donation-time">${timeAgoText}</span>
           </div>
         </div>
-        ${data.description ? `<p class="donation-message">${data.description}</p>` : ''}
-      `;
-      
-      return item;
-    }
+        <div class="donation-amount">
+          Rp ${data.amount.toLocaleString('id-ID')}
+          <span class="donation-status status-verified">Terverifikasi</span>
+        </div>
+      </div>
+      ${data.description ? `<p class="donation-message">${data.description}</p>` : ''}
+    `;
 
-    // Time ago helper function
-    function timeAgo(date) {
-      const now = new Date();
-      const diffMs = now - date;
-      const diffMin = Math.floor(diffMs / 60000);
-      const diffHr = Math.floor(diffMin / 60);
-      const diffDay = Math.floor(diffHr / 24);
+    return item;
+  }
 
-      if (diffMin < 1) return "baru saja";
-      if (diffMin < 60) return `${diffMin} menit lalu`;
-      if (diffHr < 24) return `${diffHr} jam lalu`;
-      if (diffDay === 1) return "1 hari lalu";
-      return `${diffDay} hari lalu`;
-    }
+  // Time ago helper function
+  function timeAgo(date) {
+    const now = new Date();
+    const diffMs = now - date;
+    const diffMin = Math.floor(diffMs / 60000);
+    const diffHr = Math.floor(diffMin / 60);
+    const diffDay = Math.floor(diffHr / 24);
 
-    // Initialize
-    loadDonations();
-  });
+    if (diffMin < 1) return "baru saja";
+    if (diffMin < 60) return `${diffMin} menit lalu`;
+    if (diffHr < 24) return `${diffHr} jam lalu`;
+    if (diffDay === 1) return "1 hari lalu";
+    return `${diffDay} hari lalu`;
+  }
+
+  // Initialize
+  loadDonations();
+});
+
+
+
 </script>
 
 
@@ -3396,6 +3403,7 @@ import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword , s
     });
   });
 </script>
+
 
 
 
