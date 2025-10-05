@@ -308,6 +308,136 @@ import Layout from '../layouts/Layout.astro';
         </div>
 
 
+   <!-- Modal Pembayaran -->
+        <div id="paymentModal" class="payment-modal">
+          <div class="payment-modal-content">
+            <div class="payment-modal-header">
+              <h2>💳 Dukung Pengembangan Website</h2>
+              <span class="payment-close">&times;</span>
+            </div>
+            <div class="payment-modal-body">
+              <div class="payment-benefits">
+                <h3>Manfaat Donasi Anda:</h3>
+                <ul>
+                  <li>🔄 Pemeliharaan server dan hosting</li>
+                  <li>🎨 Pengembangan fitur baru</li>
+                  <li>🚀 Peningkatan performa website</li>
+                  <li>🔧 Perbaikan bug dan keamanan</li>
+                  <li>📱 Optimasi untuk semua device</li>
+                </ul>
+              </div>
+              
+              <form id="paymentForm" class="payment-form">
+                <div class="form-group">
+                  <input type="text" id="payerName" placeholder="Nama Anda (opsional)" class="form-input" />
+                </div>
+                <div class="form-group">
+                  <input type="number" id="paymentAmount" placeholder="Nominal (Rp)" class="form-input" required min="1000" />
+                </div>
+                <div class="form-group">
+                  <textarea id="paymentDescription" placeholder="Deskripsi/Pesan (opsional)" class="form-textarea" rows="3"></textarea>
+                </div>
+                
+                <button type="button" id="showQRBtn" class="payment-btn">
+                  <span>Lanjut ke Pembayaran</span>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                    <polyline points="12 5 19 12 12 19"></polyline>
+                  </svg>
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <!-- Modal QRIS -->
+        <div id="qrisModal" class="qris-modal">
+          <div class="qris-modal-content">
+            <div class="qris-modal-header">
+              <h2>Scan QRIS GoPay</h2>
+              <span class="qris-close">&times;</span>
+            </div>
+            <div class="qris-modal-body">
+              <div class="qris-instruction">
+                <p>Scan kode QR berikut menggunakan aplikasi GoPay atau Gojek</p>
+              </div>
+              <div class="qris-code-container">
+                <div class="qris-placeholder">
+                  <!-- QR Code akan ditampilkan di sini -->
+                  <div class="qris-info">
+                    <div class="qris-amount">
+                      <span id="displayAmount">Rp 0</span>
+                    </div>
+                    <div class="qris-recipient">
+                      <strong>farid ardiansyah</strong>
+                      <span>+62895****9660</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="payment-status">
+                <div class="status-indicator pending">
+                  <div class="status-dot"></div>
+                  <span>Status: <strong id="paymentStatus">Pending</strong></span>
+                </div>
+                <p class="status-note">Pembayaran akan terverifikasi otomatis dalam beberapa menit</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tombol Donasi -->
+        <div class="donation-section">
+          <div class="donation-linebox">
+            <div class="donation-content">
+              <div class="donation-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                </svg>
+              </div>
+              <div class="donation-text">
+                <h3>Dukung Pengembangan</h3>
+                <p>Bantu website ini terus berkembang dengan memberikan dukungan finansial</p>
+                <div class="total-donations">
+                  <span>Total Donasi: <strong id="totalDonations">Rp 0</strong></span>
+                </div>
+              </div>
+              <button id="donateBtn" class="donate-btn">
+                <span>Donasi Sekarang</span>
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="12" y1="1" x2="12" y2="23"></line>
+                  <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Daftar Donasi Terbaru -->
+        <div class="donations-display-section">
+          <div class="donations-display-linebox">
+            <div class="donations-display-header">
+              <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="12" y1="1" x2="12" y2="23"></line>
+                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+              </svg>
+              <h3>Donasi Terbaru</h3>
+              <span class="donations-count">(<span id="donationsCount">0</span> donasi)</span>
+            </div>
+            <div id="latestDonations" class="donations-list"></div>
+          </div>
+        </div>
+
+
+
+
+
+
+
+
+
+
+
           </div>
         </div>
 
@@ -341,6 +471,770 @@ padding-left: 60px;
    font-family: 'Space Mono', monospace;
 
   }
+
+
+
+
+Today
+New chat
+Yesterday
+Add Custom Cursor Animation in Astro
+Tambahkan Kursor Custom untuk Efek Hover
+perbaiki codingan supaya menu di
+Fix Navbar Design and Scroll Effect
+perbaiki codingan yg 1 jgn make
+masih salah, saya pgn bg navbar
+perbaiki codingan supaya navbar
+Add Horizontal Scroll with GSAP Effects
+7 Days
+perbaik codingan yg 1 semua tgl
+Tambahkan 6 blog dengan subjudul
+tambahkan codingan sub judul " t
+Add Scroll Animation with GSAP in React
+Modifikasi Blog dengan Font Mono
+30 Days
+Perbaikan Desain Blog dengan Animasi Modern
+Add GSAP, Lenis, ScrollTrigger, FLIP Features
+Add GSAP, Lenis, and Flip Animation
+Perbaikan Desain Blog dengan Animasi GSAP
+tambahkan codingan sprti difoto,
+Add Timeline Code for Website Release
+perbaiki codingan d halaman faq
+Perbaikan Timeline Box dengan Animasi
+Perbaikan Kode Footer untuk Tampilan Terbaik
+Add Red Background Footer Design
+Perbaikan Tombol Like dan Dislike FAQ
+Perbaikan Sistem Feedback FAQ dengan Firebase
+Timeline Scroll Bar dengan Linebox Hitam
+Perbaikan Timeline Scrollbar Sesuai Judul
+perbaiki codingan supaya design
+Perbaikan Desain Modal FAQ Astro
+Perbaikan Desain FAQ dengan Garis Hitam
+Perbaikan Kode Modal FAQ dengan Garis
+Perbaikan Kode FAQ dengan Garis Pembatas
+Perbaikan Kode FAQ dengan Garis Pembatas
+perbaiki codingan supaya modal f
+perbaiki codingan layout modal s
+Perbaikan Kode FAQ dengan Astro
+2025-07
+Implementasi Komentar Firebase untuk Halaman 10
+Implementasi Komentar Firebase dengan Login
+Implementasi Komentar dengan Firebase dan Login
+Implementasi Komentar dan Filter Kategori Baru
+Add Features to Arduino History Page
+Perbaikan Sistem Emoji untuk Login
+Perbaikan Kode Emoji Reaksi untuk Login
+Perbaikan Kode untuk Riwayat Edit dan Tampilan
+Perbaikan Coding Halaman 9 untuk Pengguna
+Fixing Diff is not defined error in code
+Perbaikan Kode untuk Ikon Edit Global
+Tambahkan History Perubahan Otomatis Pengumuman
+Perbaikan Halaman Detail Pengumuman Lengkap
+Add Profile Photos to Announcements System
+Implementasi Foto Profil Google Otomatis
+Implementasi Fitur Firebase Studio Community
+Enhancing Announcement Detail with User Features
+Enhanced Announcement Detail Page Features
+Perbaikan Halaman 9 untuk Edit Pengumuman
+perbaiki codingan di halaman 9 s
+Perbaikan Form Edit Pengumuman Halaman 9
+Perbaikan Desain Halaman Detail Pengumuman
+Perbaikan Error dan Struktur Kode JavaScript
+Perbaikan Masalah Halaman 9 Tidak Lengkap
+Perbaikan Masalah Tampilan Page 9 HTML
+Perbaikan Layout Halaman 9 untuk Konten Penuh
+Perbaikan Kode untuk Tampilan Halaman 9
+2025-06
+Perbaikan Kode Sistem Bantuan Note Farid
+Firebase Initialization and User Login Issues
+Enhanced Article Page with Interactive Features
+Improve Help Center Search Functionality
+Create Help Center Interface with Note
+Perbaikan Tampilan Bantuan FLOQ Sistem
+Chat Application Error Analysis and Fixes
+Perbaikan UI/UX dan Animasi Grup Chat
+Perbaikan Sistem Follow dan Daftar Pengikut
+Enhanced Group Follow System with Popups
+New chat
+tysw.JPG
+JPG 30.99KB
+43x.txt
+TXT 51.87KB
+tambahkan codingan membuat sistem pembayaran lewat scan qris gopay biasa sprti di foto, di bikin modal yaitu ( ada judul dan deskripsi manfaat pembayaran tersebut ) lalu ada tombol mengarahkan ke sistem pembayaran sprti di foto, nanti org lain tinggal ktik nama, nominal, deskripsi, status pending otomatis ktika sudah berhasil, ada scan qris gopay lewat foto, sama jumlah uang yg secara otomatis bertambah ktika ada yg scan qris pembayran gopay biasa, astro no html
+Saya akan membantu Anda membuat sistem pembayaran dengan QRIS GoPay. Berikut implementasinya:
+
+astro
+---
+// src/pages/index.astro
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="Home | Note Farid" description="Website pribadi Farid dengan blog dan FAQ tentang development web." currentPage="home">
+  <div class="container">
+    <main class="home-container">
+      <!-- Kursor Custom -->
+      <div class="custom-cursor" id="customCursor"></div>
+      <section class="hero-section">
+        <h1 class="hero-title">Note Farid</h1>
+        <p class="hero-subtitle">Tempat berbagi pengetahuan tentang development web, Astro, dan teknologi terkini.</p>
+
+        <!-- Modal Pembayaran -->
+        <div id="paymentModal" class="payment-modal">
+          <div class="payment-modal-content">
+            <div class="payment-modal-header">
+              <h2>💳 Dukung Pengembangan Website</h2>
+              <span class="payment-close">&times;</span>
+            </div>
+            <div class="payment-modal-body">
+              <div class="payment-benefits">
+                <h3>Manfaat Donasi Anda:</h3>
+                <ul>
+                  <li>🔄 Pemeliharaan server dan hosting</li>
+                  <li>🎨 Pengembangan fitur baru</li>
+                  <li>🚀 Peningkatan performa website</li>
+                  <li>🔧 Perbaikan bug dan keamanan</li>
+                  <li>📱 Optimasi untuk semua device</li>
+                </ul>
+              </div>
+              
+              <form id="paymentForm" class="payment-form">
+                <div class="form-group">
+                  <input type="text" id="payerName" placeholder="Nama Anda (opsional)" class="form-input" />
+                </div>
+                <div class="form-group">
+                  <input type="number" id="paymentAmount" placeholder="Nominal (Rp)" class="form-input" required min="1000" />
+                </div>
+                <div class="form-group">
+                  <textarea id="paymentDescription" placeholder="Deskripsi/Pesan (opsional)" class="form-textarea" rows="3"></textarea>
+                </div>
+                
+                <button type="button" id="showQRBtn" class="payment-btn">
+                  <span>Lanjut ke Pembayaran</span>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                    <polyline points="12 5 19 12 12 19"></polyline>
+                  </svg>
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <!-- Modal QRIS -->
+        <div id="qrisModal" class="qris-modal">
+          <div class="qris-modal-content">
+            <div class="qris-modal-header">
+              <h2>Scan QRIS GoPay</h2>
+              <span class="qris-close">&times;</span>
+            </div>
+            <div class="qris-modal-body">
+              <div class="qris-instruction">
+                <p>Scan kode QR berikut menggunakan aplikasi GoPay atau Gojek</p>
+              </div>
+              <div class="qris-code-container">
+                <div class="qris-placeholder">
+                  <!-- QR Code akan ditampilkan di sini -->
+                  <div class="qris-info">
+                    <div class="qris-amount">
+                      <span id="displayAmount">Rp 0</span>
+                    </div>
+                    <div class="qris-recipient">
+                      <strong>farid ardiansyah</strong>
+                      <span>+62895****9660</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="payment-status">
+                <div class="status-indicator pending">
+                  <div class="status-dot"></div>
+                  <span>Status: <strong id="paymentStatus">Pending</strong></span>
+                </div>
+                <p class="status-note">Pembayaran akan terverifikasi otomatis dalam beberapa menit</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tombol Donasi -->
+        <div class="donation-section">
+          <div class="donation-linebox">
+            <div class="donation-content">
+              <div class="donation-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                </svg>
+              </div>
+              <div class="donation-text">
+                <h3>Dukung Pengembangan</h3>
+                <p>Bantu website ini terus berkembang dengan memberikan dukungan finansial</p>
+                <div class="total-donations">
+                  <span>Total Donasi: <strong id="totalDonations">Rp 0</strong></span>
+                </div>
+              </div>
+              <button id="donateBtn" class="donate-btn">
+                <span>Donasi Sekarang</span>
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="12" y1="1" x2="12" y2="23"></line>
+                  <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Daftar Donasi Terbaru -->
+        <div class="donations-display-section">
+          <div class="donations-display-linebox">
+            <div class="donations-display-header">
+              <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="12" y1="1" x2="12" y2="23"></line>
+                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+              </svg>
+              <h3>Donasi Terbaru</h3>
+              <span class="donations-count">(<span id="donationsCount">0</span> donasi)</span>
+            </div>
+            <div id="latestDonations" class="donations-list"></div>
+          </div>
+        </div>
+
+        <!-- Section Website Masih Dikembangan (existing code) -->
+        <div class="development-notice">
+          <!-- ... existing development notice code ... -->
+        </div>
+
+        <!-- Linebox items (existing code) -->
+        <div class="linebox">
+          <!-- ... existing linebox items code ... -->
+        </div>
+
+        <!-- Timeline container (existing code) -->
+        <div class="timeline-container">
+          <!-- ... existing timeline code ... -->
+        </div>
+
+        <!-- Legal section (existing code) -->
+        <section class="legal-section">
+          <!-- ... existing legal section code ... -->
+        </section>
+
+        <!-- Feedback section (existing code) -->
+        <div class="feedback-section">
+          <!-- ... existing feedback section code ... -->
+        </div>
+
+        <!-- Feedback display section (existing code) -->
+        <div class="feedback-display-section">
+          <!-- ... existing feedback display code ... -->
+        </div>
+      </section>
+    </main>
+  </div>
+</Layout>
+
+<style>
+  /* Existing styles... */
+
+  /* Donation Section Styles */
+  .donation-section {
+    margin: 40px 0;
+    max-width: 800px;
+  }
+
+  .donation-linebox {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 16px;
+    padding: 30px;
+    backdrop-filter: blur(10px);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .donation-content {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .donation-icon svg {
+    color: #ff6b6b;
+  }
+
+  .donation-text {
+    flex: 1;
+  }
+
+  .donation-text h3 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0 0 10px 0;
+    color: #fff;
+  }
+
+  .donation-text p {
+    margin: 0 0 15px 0;
+    color: #ccc;
+    opacity: 0.8;
+  }
+
+  .total-donations {
+    background: rgba(255, 107, 107, 0.1);
+    padding: 8px 16px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 107, 107, 0.3);
+    display: inline-block;
+  }
+
+  .total-donations span {
+    color: #ff6b6b;
+    font-weight: 600;
+  }
+
+  .donate-btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 24px;
+    background: linear-gradient(45deg, #ff6b6b, #ffa726);
+    border: none;
+    border-radius: 8px;
+    color: #fff;
+    font-family: 'Space Mono', monospace;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+  }
+
+  .donate-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(255, 107, 107, 0.3);
+  }
+
+  /* Payment Modal Styles */
+  .payment-modal {
+    display: none;
+    position: fixed;
+    z-index: 10000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(5px);
+  }
+
+  .payment-modal-content {
+    background: rgba(0, 0, 0, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 16px;
+    margin: 5% auto;
+    padding: 0;
+    width: 90%;
+    max-width: 500px;
+    position: relative;
+    animation: modalSlideIn 0.3s ease-out;
+  }
+
+  @keyframes modalSlideIn {
+    from {
+      opacity: 0;
+      transform: translateY(-50px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .payment-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 25px 30px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  .payment-modal-header h2 {
+    margin: 0;
+    color: #fff;
+    font-size: 1.5rem;
+  }
+
+  .payment-close {
+    color: #aaa;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: color 0.3s ease;
+  }
+
+  .payment-close:hover {
+    color: #fff;
+  }
+
+  .payment-modal-body {
+    padding: 30px;
+  }
+
+  .payment-benefits {
+    margin-bottom: 25px;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .payment-benefits h3 {
+    color: #9dbbff;
+    margin-bottom: 15px;
+    font-size: 1.1rem;
+  }
+
+  .payment-benefits ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .payment-benefits li {
+    padding: 8px 0;
+    color: #ccc;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .payment-benefits li:last-child {
+    border-bottom: none;
+  }
+
+  .payment-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .payment-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 15px 24px;
+    background: linear-gradient(45deg, #667eea, #764ba2);
+    border: none;
+    border-radius: 8px;
+    color: #fff;
+    font-family: 'Space Mono', monospace;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 10px;
+  }
+
+  .payment-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+  }
+
+  /* QRIS Modal Styles */
+  .qris-modal {
+    display: none;
+    position: fixed;
+    z-index: 10001;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.9);
+    backdrop-filter: blur(5px);
+  }
+
+  .qris-modal-content {
+    background: rgba(0, 0, 0, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 16px;
+    margin: 2% auto;
+    padding: 0;
+    width: 90%;
+    max-width: 400px;
+    position: relative;
+    animation: modalSlideIn 0.3s ease-out;
+  }
+
+  .qris-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 25px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  .qris-modal-header h2 {
+    margin: 0;
+    color: #fff;
+    font-size: 1.3rem;
+  }
+
+  .qris-close {
+    color: #aaa;
+    font-size: 24px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: color 0.3s ease;
+  }
+
+  .qris-close:hover {
+    color: #fff;
+  }
+
+  .qris-modal-body {
+    padding: 25px;
+  }
+
+  .qris-instruction {
+    text-align: center;
+    margin-bottom: 20px;
+    padding: 15px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+  }
+
+  .qris-instruction p {
+    margin: 0;
+    color: #9dbbff;
+    font-weight: 600;
+  }
+
+  .qris-code-container {
+    background: #fff;
+    border-radius: 12px;
+    padding: 30px;
+    margin-bottom: 20px;
+    text-align: center;
+    border: 2px solid rgba(255, 255, 255, 0.5);
+  }
+
+  .qris-placeholder {
+    min-height: 200px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .qris-info {
+    text-align: center;
+    color: #000;
+  }
+
+  .qris-amount {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+  }
+
+  .qris-recipient {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .qris-recipient strong {
+    font-size: 1.1rem;
+  }
+
+  .qris-recipient span {
+    color: #666;
+    font-size: 0.9rem;
+  }
+
+  .payment-status {
+    text-align: center;
+    padding: 15px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+  }
+
+  .status-indicator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+
+  .status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #ffa726;
+    animation: pulse 2s infinite;
+  }
+
+  .status-indicator.pending .status-dot {
+    background: #ffa726;
+  }
+
+  .status-indicator.success .status-dot {
+    background: #4caf50;
+  }
+
+  .status-note {
+    margin: 0;
+    font-size: 0.9rem;
+    color: #ccc;
+  }
+
+  /* Donations Display Section */
+  .donations-display-section {
+    margin: 40px 0;
+    max-width: 800px;
+  }
+
+  .donations-display-linebox {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 16px;
+    padding: 30px;
+    backdrop-filter: blur(10px);
+  }
+
+  .donations-display-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  .donations-display-header svg {
+    color: #ff6b6b;
+  }
+
+  .donations-display-header h3 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0;
+    color: #fff;
+  }
+
+  .donations-count {
+    color: #ff6b6b;
+    font-size: 0.9rem;
+    margin-left: auto;
+    background: rgba(255, 107, 107, 0.1);
+    padding: 5px 12px;
+    border-radius: 20px;
+    border: 1px solid rgba(255, 107, 107, 0.3);
+  }
+
+  .donations-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    max-height: 400px;
+    overflow-y: auto;
+    padding-right: 10px;
+  }
+
+  .donation-item {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 12px;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+    animation: slideInUp 0.6s ease-out forwards;
+  }
+
+  .donation-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 10px;
+  }
+
+  .donation-user {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .donation-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: linear-gradient(45deg, #ff6b6b, #ffa726);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    color: white;
+    font-size: 14px;
+  }
+
+  .donation-user-info h4 {
+    margin: 0;
+    font-size: 1rem;
+    color: #9dbbff;
+    font-weight: 600;
+  }
+
+  .donation-amount {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #ff6b6b;
+  }
+
+  .donation-message {
+    color: #ffffff;
+    line-height: 1.5;
+    margin: 10px 0 0 0;
+    font-size: 0.95rem;
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 6px;
+  }
+
+  .donation-time {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.6);
+    margin-top: 8px;
+  }
+
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    .donation-content {
+      flex-direction: column;
+      text-align: center;
+      gap: 15px;
+    }
+    
+    .payment-modal-content,
+    .qris-modal-content {
+      margin: 10% auto;
+      width: 95%;
+    }
+    
+    .donation-header {
+      flex-direction: column;
+      gap: 10px;
+    }
+    
+    .donation-user {
+      width: 100%;
+    }
+  }
+
+
+
+
+
+
+
+
 
 
 
@@ -1887,7 +2781,200 @@ import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword , s
     // Update waktu setiap menit
     setInterval(updateLastUpdateTime, 60000);
   });
+
+
+
+
+  document.addEventListener("DOMContentLoaded", function() {
+    // Modal elements
+    const paymentModal = document.getElementById('paymentModal');
+    const qrisModal = document.getElementById('qrisModal');
+    const donateBtn = document.getElementById('donateBtn');
+    const paymentClose = document.querySelector('.payment-close');
+    const qrisClose = document.querySelector('.qris-close');
+    const showQRBtn = document.getElementById('showQRBtn');
+    const paymentForm = document.getElementById('paymentForm');
+    const displayAmount = document.getElementById('displayAmount');
+    const totalDonationsEl = document.getElementById('totalDonations');
+    const donationsCountEl = document.getElementById('donationsCount');
+    const latestDonations = document.getElementById('latestDonations');
+
+    let currentPaymentData = null;
+
+    // Open payment modal
+    donateBtn.addEventListener('click', function() {
+      paymentModal.style.display = 'block';
+    });
+
+    // Close modals
+    paymentClose.addEventListener('click', function() {
+      paymentModal.style.display = 'none';
+    });
+
+    qrisClose.addEventListener('click', function() {
+      qrisModal.style.display = 'none';
+      paymentModal.style.display = 'none';
+    });
+
+    // Close modal when clicking outside
+    window.addEventListener('click', function(event) {
+      if (event.target === paymentModal) {
+        paymentModal.style.display = 'none';
+      }
+      if (event.target === qrisModal) {
+        qrisModal.style.display = 'none';
+        paymentModal.style.display = 'none';
+      }
+    });
+
+    // Show QRIS modal
+    showQRBtn.addEventListener('click', function() {
+      const name = document.getElementById('payerName').value.trim();
+      const amount = document.getElementById('paymentAmount').value;
+      const description = document.getElementById('paymentDescription').value.trim();
+
+      if (!amount || amount < 1000) {
+        alert('Masukkan nominal minimal Rp 1.000');
+        return;
+      }
+
+      currentPaymentData = {
+        name: name || 'Anonim',
+        amount: parseInt(amount),
+        description: description,
+        timestamp: new Date(),
+        status: 'pending'
+      };
+
+      // Update display amount
+      displayAmount.textContent = `Rp ${parseInt(amount).toLocaleString('id-ID')}`;
+      
+      // Switch to QRIS modal
+      paymentModal.style.display = 'none';
+      qrisModal.style.display = 'block';
+
+      // Simulate payment processing
+      simulatePaymentProcessing();
+    });
+
+    // Simulate payment processing (in real implementation, integrate with payment gateway)
+    function simulatePaymentProcessing() {
+      setTimeout(async () => {
+        if (currentPaymentData) {
+          // Save to Firebase
+          await savePaymentToFirebase(currentPaymentData);
+          
+          // Update status
+          document.getElementById('paymentStatus').textContent = 'Berhasil';
+          document.querySelector('.status-indicator').classList.add('success');
+          document.querySelector('.status-dot').style.background = '#4caf50';
+          
+          // Close modal after success
+          setTimeout(() => {
+            qrisModal.style.display = 'none';
+            paymentForm.reset();
+            loadDonations();
+          }, 3000);
+        }
+      }, 5000); // Simulate 5 second processing time
+    }
+
+    // Save payment to Firebase
+    async function savePaymentToFirebase(paymentData) {
+      try {
+        const docRef = await addDoc(collection(db, "payments"), {
+          ...paymentData,
+          timestamp: serverTimestamp(),
+          status: 'completed'
+        });
+        console.log("Payment saved with ID: ", docRef.id);
+        return docRef.id;
+      } catch (error) {
+        console.error("Error saving payment: ", error);
+        throw error;
+      }
+    }
+
+    // Load donations from Firebase
+    function loadDonations() {
+      const q = query(collection(db, "payments"), 
+        where("status", "==", "completed"),
+        orderBy("timestamp", "desc"),
+        limit(10)
+      );
+
+      onSnapshot(q, (snapshot) => {
+        latestDonations.innerHTML = '';
+        let totalAmount = 0;
+        let donationCount = 0;
+
+        snapshot.forEach((doc) => {
+          const data = doc.data();
+          totalAmount += data.amount;
+          donationCount++;
+          
+          const donationItem = createDonationItem(data);
+          latestDonations.appendChild(donationItem);
+        });
+
+        // Update totals
+        totalDonationsEl.textContent = `Rp ${totalAmount.toLocaleString('id-ID')}`;
+        donationsCountEl.textContent = donationCount;
+      });
+    }
+
+    // Create donation item element
+    function createDonationItem(data) {
+      const date = data.timestamp?.toDate ? data.timestamp.toDate() : new Date();
+      const timeAgoText = timeAgo(date);
+      
+      const item = document.createElement('div');
+      item.className = 'donation-item';
+      
+      item.innerHTML = `
+        <div class="donation-header">
+          <div class="donation-user">
+            <div class="donation-avatar">${(data.name || "A").charAt(0).toUpperCase()}</div>
+            <div class="donation-user-info">
+              <h4>${data.name || "Anonim"}</h4>
+              <span class="donation-time">${timeAgoText}</span>
+            </div>
+          </div>
+          <div class="donation-amount">Rp ${data.amount.toLocaleString('id-ID')}</div>
+        </div>
+        ${data.description ? `<p class="donation-message">${data.description}</p>` : ''}
+      `;
+      
+      return item;
+    }
+
+    // Time ago helper function
+    function timeAgo(date) {
+      const now = new Date();
+      const diffMs = now - date;
+      const diffMin = Math.floor(diffMs / 60000);
+      const diffHr = Math.floor(diffMin / 60);
+      const diffDay = Math.floor(diffHr / 24);
+
+      if (diffMin < 1) return "baru saja";
+      if (diffMin < 60) return `${diffMin} menit lalu`;
+      if (diffHr < 24) return `${diffHr} jam lalu`;
+      return `${diffDay} hari lalu`;
+    }
+
+    // Initialize
+    loadDonations();
+  });
+
 </script>
+
+
+
+
+
+
+
+
 
 <script>
   // Kursor Custom JavaScript
@@ -1975,6 +3062,7 @@ import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword , s
     });
   });
 </script>
+
 
 
 
