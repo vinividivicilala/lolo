@@ -66,6 +66,108 @@ import Layout from '../layouts/Layout.astro';
 
 
 
+<!-- Tambahkan di bagian setelah development-notice section -->
+<!-- Typing Animation Section -->
+<div class="typing-section">
+  <div class="typing-linebox">
+    <div class="typing-header">
+      <div class="typing-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 19l7-7 3 3-7 7-3-3z"></path>
+          <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"></path>
+          <path d="M2 2l7.586 7.586"></path>
+          <circle cx="11" cy="11" r="2"></circle>
+        </svg>
+      </div>
+      <div class="typing-title">
+        <h3>Pesan Animasi Interaktif</h3>
+        <p>Ketik pesan Anda dan lihat animasi mengetik yang menarik!</p>
+      </div>
+    </div>
+
+    <div class="typing-container">
+      <div class="typing-display">
+        <div class="typing-text" id="typingText">
+          <span class="typing-cursor">|</span>
+        </div>
+        <div class="typing-controls">
+          <button id="startTyping" class="typing-btn">
+            <span>Mulai Animasi</span>
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="5 3 19 12 5 21 5 3"></polygon>
+            </svg>
+          </button>
+          <button id="pauseTyping" class="typing-btn pause">
+            <span>Jeda</span>
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="6" y="4" width="4" height="16"></rect>
+              <rect x="14" y="4" width="4" height="16"></rect>
+            </svg>
+          </button>
+          <button id="resetTyping" class="typing-btn reset">
+            <span>Reset</span>
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+              <path d="M3 3v5h5"></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="typing-input-section">
+        <div class="form-group">
+          <label for="customMessage">Pesan Kustom Anda:</label>
+          <textarea 
+            id="customMessage" 
+            class="form-textarea" 
+            rows="3" 
+            placeholder="Ketik pesan Anda di sini... Contoh: Selamat datang di Note Farid! ✨"
+            maxlength="200"
+          ></textarea>
+          <div class="char-count">
+            <span id="charCount">0</span>/200 karakter
+          </div>
+        </div>
+        
+        <div class="preset-messages">
+          <h4>Pesan Cepat:</h4>
+          <div class="preset-buttons">
+            <button class="preset-btn" data-message="Halo! Selamat datang di website Note Farid 🚀">Sapaan</button>
+            <button class="preset-btn" data-message="Terima kasih sudah berkunjung! Semoga menemukan hal yang bermanfaat 😊">Terima Kasih</button>
+            <button class="preset-btn" data-message="Website ini masih dalam pengembangan aktif. Stay tuned untuk update terbaru! 🔧">Info Update</button>
+            <button class="preset-btn" data-message="Jangan ragu untuk memberikan feedback dan saran untuk pengembangan website ini! 💡">Feedback</button>
+          </div>
+        </div>
+
+        <button id="updateMessage" class="update-btn">
+          <span>Update Pesan</span>
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="typing-stats">
+      <div class="stat-item">
+        <span class="stat-label">Kecepatan:</span>
+        <div class="speed-control">
+          <button id="decreaseSpeed" class="speed-btn">-</button>
+          <span id="typingSpeed">50</span> ms/karakter
+          <button id="increaseSpeed" class="speed-btn">+</button>
+        </div>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">Status:</span>
+        <span id="typingStatus" class="status-idle">Menunggu</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
 <!-- Section Website Masih Dikembangkan -->
         <div class="development-notice">
           <div class="development-linebox">
@@ -526,6 +628,302 @@ padding-left: 60px;
    font-family: 'Space Mono', monospace;
 
   }
+
+
+
+
+
+
+/* Typing Animation Styles */
+.typing-section {
+  margin: 60px 0;
+  max-width: 800px;
+}
+
+.typing-linebox {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 16px;
+  padding: 30px;
+  backdrop-filter: blur(10px);
+  position: relative;
+  overflow: hidden;
+}
+
+.typing-header {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+.typing-icon svg {
+  color: #9dbbff;
+}
+
+.typing-title {
+  flex: 1;
+}
+
+.typing-title h3 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0 0 5px 0;
+  color: #fff;
+}
+
+.typing-title p {
+  margin: 0;
+  color: #ccc;
+  opacity: 0.8;
+}
+
+.typing-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 30px;
+  margin-bottom: 25px;
+}
+
+.typing-display {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  padding: 25px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.typing-text {
+  min-height: 120px;
+  font-size: 1.1rem;
+  line-height: 1.6;
+  color: #fff;
+  margin-bottom: 20px;
+  font-family: 'Space Mono', monospace;
+  border-left: 3px solid #9dbbff;
+  padding-left: 15px;
+  background: rgba(157, 187, 255, 0.05);
+  border-radius: 0 8px 8px 0;
+}
+
+.typing-cursor {
+  animation: blink 1s infinite;
+  color: #9dbbff;
+  font-weight: bold;
+}
+
+@keyframes blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+
+.typing-controls {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.typing-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: linear-gradient(45deg, #667eea, #764ba2);
+  border: none;
+  border-radius: 6px;
+  color: #fff;
+  font-family: 'Space Mono', monospace;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  flex: 1;
+  justify-content: center;
+}
+
+.typing-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+}
+
+.typing-btn.pause {
+  background: linear-gradient(45deg, #ffa726, #ff6b6b);
+}
+
+.typing-btn.reset {
+  background: linear-gradient(45deg, #868e96, #495057);
+}
+
+.typing-input-section {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.preset-messages h4 {
+  color: #fff;
+  margin-bottom: 10px;
+  font-size: 1rem;
+}
+
+.preset-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 15px;
+}
+
+.preset-btn {
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  color: #ccc;
+  font-family: 'Space Mono', monospace;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: center;
+}
+
+.preset-btn:hover {
+  background: rgba(157, 187, 255, 0.2);
+  border-color: rgba(157, 187, 255, 0.5);
+  color: #fff;
+}
+
+.update-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 20px;
+  background: linear-gradient(45deg, #4caf50, #45a049);
+  border: none;
+  border-radius: 8px;
+  color: #fff;
+  font-family: 'Space Mono', monospace;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.update-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(76, 175, 80, 0.3);
+}
+
+.char-count {
+  text-align: right;
+  font-size: 0.8rem;
+  color: #ccc;
+  margin-top: 5px;
+}
+
+.typing-stats {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.stat-label {
+  color: #ccc;
+  font-size: 0.9rem;
+}
+
+.speed-control {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 5px 10px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.speed-btn {
+  background: rgba(157, 187, 255, 0.3);
+  border: 1px solid rgba(157, 187, 255, 0.5);
+  color: #fff;
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  transition: all 0.3s ease;
+}
+
+.speed-btn:hover {
+  background: rgba(157, 187, 255, 0.5);
+}
+
+#typingSpeed {
+  color: #9dbbff;
+  font-weight: 600;
+  min-width: 30px;
+  text-align: center;
+}
+
+#typingStatus {
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.status-idle {
+  background: rgba(255, 167, 38, 0.2);
+  color: #ffa726;
+  border: 1px solid rgba(255, 167, 38, 0.3);
+}
+
+.status-typing {
+  background: rgba(76, 175, 80, 0.2);
+  color: #4caf50;
+  border: 1px solid rgba(76, 175, 80, 0.3);
+}
+
+.status-paused {
+  background: rgba(255, 107, 107, 0.2);
+  color: #ff6b6b;
+  border: 1px solid rgba(255, 107, 107, 0.3);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .typing-container {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  
+  .typing-stats {
+    flex-direction: column;
+    gap: 10px;
+    align-items: flex-start;
+  }
+  
+  .preset-buttons {
+    grid-template-columns: 1fr;
+  }
+  
+  .typing-controls {
+    flex-direction: column;
+  }
+}
 
 
 
@@ -3502,6 +3900,228 @@ document.addEventListener("DOMContentLoaded", function() {
 
 
 
+
+// Typing Animation JavaScript
+document.addEventListener('DOMContentLoaded', function() {
+  const typingText = document.getElementById('typingText');
+  const customMessage = document.getElementById('customMessage');
+  const charCount = document.getElementById('charCount');
+  const startBtn = document.getElementById('startTyping');
+  const pauseBtn = document.getElementById('pauseTyping');
+  const resetBtn = document.getElementById('resetTyping');
+  const updateBtn = document.getElementById('updateMessage');
+  const typingStatus = document.getElementById('typingStatus');
+  const typingSpeed = document.getElementById('typingSpeed');
+  const decreaseSpeed = document.getElementById('decreaseSpeed');
+  const increaseSpeed = document.getElementById('increaseSpeed');
+  const presetButtons = document.querySelectorAll('.preset-btn');
+
+  let currentMessage = "Selamat datang di Note Farid! ✨ Mari jelajahi dunia web development bersama-sama...";
+  let isTyping = false;
+  let isPaused = false;
+  let currentSpeed = 50;
+  let typingInterval;
+  let currentIndex = 0;
+
+  // Initialize
+  updateCharCount();
+  updateSpeedDisplay();
+
+  // Character counter
+  customMessage.addEventListener('input', updateCharCount);
+
+  function updateCharCount() {
+    const count = customMessage.value.length;
+    charCount.textContent = count;
+    charCount.style.color = count > 180 ? '#ff6b6b' : '#ccc';
+  }
+
+  // Speed control
+  decreaseSpeed.addEventListener('click', () => {
+    if (currentSpeed > 10) {
+      currentSpeed -= 10;
+      updateSpeedDisplay();
+    }
+  });
+
+  increaseSpeed.addEventListener('click', () => {
+    if (currentSpeed < 200) {
+      currentSpeed += 10;
+      updateSpeedDisplay();
+    }
+  });
+
+  function updateSpeedDisplay() {
+    typingSpeed.textContent = currentSpeed;
+  }
+
+  // Preset messages
+  presetButtons.forEach(button => {
+    button.addEventListener('click', function() {
+      customMessage.value = this.getAttribute('data-message');
+      updateCharCount();
+    });
+  });
+
+  // Update message
+  updateBtn.addEventListener('click', function() {
+    if (customMessage.value.trim()) {
+      currentMessage = customMessage.value.trim();
+      resetAnimation();
+      showNotification('Pesan berhasil diupdate!', 'success');
+    } else {
+      showNotification('Silakan ketik pesan terlebih dahulu!', 'error');
+    }
+  });
+
+  // Start typing animation
+  startBtn.addEventListener('click', function() {
+    if (isTyping) return;
+    
+    if (isPaused) {
+      // Resume from pause
+      isPaused = false;
+      typingStatus.textContent = 'Mengetik...';
+      typingStatus.className = 'status-typing';
+      startTyping();
+    } else {
+      // Start new
+      resetAnimation();
+      startTyping();
+    }
+  });
+
+  // Pause typing
+  pauseBtn.addEventListener('click', function() {
+    if (isTyping && !isPaused) {
+      clearInterval(typingInterval);
+      isPaused = true;
+      isTyping = false;
+      typingStatus.textContent = 'Dijeda';
+      typingStatus.className = 'status-paused';
+    }
+  });
+
+  // Reset typing
+  resetBtn.addEventListener('click', resetAnimation);
+
+  function startTyping() {
+    isTyping = true;
+    isPaused = false;
+    typingStatus.textContent = 'Mengetik...';
+    typingStatus.className = 'status-typing';
+    
+    const textElement = typingText.querySelector('span:not(.typing-cursor)') || document.createElement('span');
+    if (!textElement.parentNode) {
+      typingText.insertBefore(textElement, typingText.querySelector('.typing-cursor'));
+    }
+
+    typingInterval = setInterval(() => {
+      if (currentIndex < currentMessage.length) {
+        textElement.textContent += currentMessage[currentIndex];
+        currentIndex++;
+        
+        // Auto scroll to bottom
+        typingText.scrollTop = typingText.scrollHeight;
+      } else {
+        // Animation complete
+        clearInterval(typingInterval);
+        isTyping = false;
+        typingStatus.textContent = 'Selesai';
+        typingStatus.className = 'status-idle';
+        showNotification('Animasi selesai!', 'success');
+      }
+    }, currentSpeed);
+  }
+
+  function resetAnimation() {
+    clearInterval(typingInterval);
+    isTyping = false;
+    isPaused = false;
+    currentIndex = 0;
+    
+    const textElement = typingText.querySelector('span:not(.typing-cursor)');
+    if (textElement) {
+      textElement.textContent = '';
+    }
+    
+    typingStatus.textContent = 'Menunggu';
+    typingStatus.className = 'status-idle';
+  }
+
+  function showNotification(message, type) {
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.className = `typing-notification ${type}`;
+    notification.innerHTML = `
+      <span>${message}</span>
+      <button onclick="this.parentElement.remove()">&times;</button>
+    `;
+    
+    // Add styles for notification
+    if (!document.querySelector('.typing-notification')) {
+      const style = document.createElement('style');
+      style.textContent = `
+        .typing-notification {
+          position: fixed;
+          top: 20px;
+          right: 20px;
+          padding: 15px 20px;
+          border-radius: 8px;
+          color: white;
+          font-weight: 600;
+          z-index: 10000;
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          animation: slideInRight 0.3s ease-out;
+        }
+        .typing-notification.success {
+          background: linear-gradient(45deg, #4caf50, #45a049);
+          border: 1px solid rgba(76, 175, 80, 0.5);
+        }
+        .typing-notification.error {
+          background: linear-gradient(45deg, #f44336, #d32f2f);
+          border: 1px solid rgba(244, 67, 54, 0.5);
+        }
+        .typing-notification button {
+          background: none;
+          border: none;
+          color: white;
+          font-size: 18px;
+          cursor: pointer;
+          padding: 0;
+          width: 20px;
+          height: 20px;
+        }
+        @keyframes slideInRight {
+          from { transform: translateX(100%); opacity: 0; }
+          to { transform: translateX(0); opacity: 1; }
+        }
+      `;
+      document.head.appendChild(style);
+    }
+    
+    document.body.appendChild(notification);
+    
+    // Auto remove after 3 seconds
+    setTimeout(() => {
+      if (notification.parentNode) {
+        notification.remove();
+      }
+    }, 3000);
+  }
+
+  // Auto-start animation after 2 seconds
+  setTimeout(() => {
+    if (!isTyping && !isPaused) {
+      startTyping();
+    }
+  }, 2000);
+});
+
+
+
 </script>
 
 
@@ -3598,6 +4218,7 @@ document.addEventListener("DOMContentLoaded", function() {
     });
   });
 </script>
+
 
 
 
