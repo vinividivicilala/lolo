@@ -13,6 +13,58 @@ import Layout from '../layouts/Layout.astro';
         <p class="hero-subtitle">Tempat berbagi pengetahuan tentang development web, Astro, dan teknologi terkini.</p>
 
 
+<!-- Tambahkan setelah development-notice section -->
+
+<!-- Section Deskripsi Note -->
+<div class="note-description-section">
+  <div class="note-description-linebox">
+    <div class="note-description-content">
+      <div class="note-description-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+          <line x1="16" y1="13" x2="8" y2="13"></line>
+          <line x1="16" y1="17" x2="8" y2="17"></line>
+          <polyline points="10 9 9 9 8 9"></polyline>
+        </svg>
+      </div>
+      <div class="note-description-text">
+        <h3>Tentang <span class="red-bold">Note Farid</span></h3>
+        <p class="faded-text">
+          Website ini merupakan <span class="red-bold">kumpulan catatan pribadi</span> yang berisi pembelajaran, 
+          eksperimen, dan dokumentasi seputar <span class="red-bold">web development</span>. 
+          Di sini saya membagikan berbagai hal yang saya pelajari tentang 
+          <span class="red-bold">Astro, React, Firebase, dan teknologi web modern</span> lainnya.
+        </p>
+        <p class="faded-text">
+          Setiap konten dibuat dengan <span class="red-bold">penuh passion</span> dan keinginan untuk 
+          berbagi pengetahuan. Website ini terus berkembang seiring dengan 
+          <span class="red-bold">proses belajar</span> yang tidak pernah berhenti.
+        </p>
+        <div class="note-highlights">
+          <div class="highlight-item">
+            <span class="highlight-dot"></span>
+            <span><span class="red-bold">Catatan Pribadi:</span> Dokumentasi pembelajaran harian</span>
+          </div>
+          <div class="highlight-item">
+            <span class="highlight-dot"></span>
+            <span><span class="red-bold">Web Development:</span> Focus on modern web technologies</span>
+          </div>
+          <div class="highlight-item">
+            <span class="highlight-dot"></span>
+            <span><span class="red-bold">Open Source:</span> Code tersedia untuk dipelajari</span>
+          </div>
+          <div class="highlight-item">
+            <span class="highlight-dot"></span>
+            <span><span class="red-bold">Continuous Learning:</span> Selalu update dengan trend terbaru</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
 
 <!-- Section Website Masih Dikembangkan -->
         <div class="development-notice">
@@ -474,6 +526,137 @@ padding-left: 60px;
    font-family: 'Space Mono', monospace;
 
   }
+
+
+
+/* Note Description Section Styles */
+.note-description-section {
+  margin: 50px 0;
+  max-width: 800px;
+}
+
+.note-description-linebox {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 16px;
+  padding: 35px;
+  backdrop-filter: blur(10px);
+  position: relative;
+  overflow: hidden;
+}
+
+.note-description-content {
+  display: flex;
+  align-items: flex-start;
+  gap: 25px;
+}
+
+.note-description-icon svg {
+  color: #ff6b6b;
+  flex-shrink: 0;
+}
+
+.note-description-text {
+  flex: 1;
+}
+
+.note-description-text h3 {
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin: 0 0 20px 0;
+  color: #fff;
+  font-family: 'Space Mono', monospace;
+}
+
+/* Text Styles */
+.faded-text {
+  color: rgba(255, 255, 255, 0.7); /* Warna putih pudar yang tetap terlihat */
+  line-height: 1.7;
+  margin-bottom: 15px;
+  font-size: 1.05rem;
+  font-family: 'Space Mono', monospace;
+}
+
+.red-bold {
+  color: #ff6b6b; /* Warna merah */
+  font-weight: 700; /* Bold */
+  background: rgba(255, 107, 107, 0.1);
+  padding: 2px 6px;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 107, 107, 0.3);
+}
+
+/* Highlights Section */
+.note-highlights {
+  margin-top: 25px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.highlight-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 15px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+}
+
+.highlight-item:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: translateX(5px);
+}
+
+.highlight-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #ff6b6b;
+  flex-shrink: 0;
+  animation: pulse-dot 2s infinite;
+}
+
+@keyframes pulse-dot {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.3);
+    opacity: 0.7;
+  }
+}
+
+.highlight-item span:last-child {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.95rem;
+  font-family: 'Space Mono', monospace;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .note-description-content {
+    flex-direction: column;
+    text-align: center;
+    gap: 20px;
+  }
+  
+  .note-description-linebox {
+    padding: 25px;
+  }
+  
+  .note-description-text h3 {
+    font-size: 1.5rem;
+  }
+  
+  .highlight-item {
+    padding: 8px 12px;
+  }
+}
 
 
 
@@ -3415,6 +3598,7 @@ document.addEventListener("DOMContentLoaded", function() {
     });
   });
 </script>
+
 
 
 
