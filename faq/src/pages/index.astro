@@ -704,6 +704,8 @@ padding-left: 60px;
     max-width: 400px;
     position: relative;
     animation: modalSlideIn 0.3s ease-out;
+  max-height: 80vh;  /* Set max-height to avoid overflowing */
+    overflow-y: auto;  
   }
 
   .qris-modal-header {
@@ -734,6 +736,7 @@ padding-left: 60px;
 
   .qris-modal-body {
     padding: 25px;
+min-height: 300px;
   }
 
   .qris-instruction {
@@ -1046,6 +1049,8 @@ padding-left: 60px;
     .qris-modal-content {
       margin: 10% auto;
       width: 95%;
+  max-height: 80vh;  /* Set max-height to avoid overflowing */
+    overflow-y: auto;  
     }
     
     .donation-header {
@@ -1319,6 +1324,7 @@ padding-left: 60px;
 
   .qris-modal-body {
     padding: 25px;
+min-height: 300px;
   }
 
   .qris-instruction {
@@ -3409,6 +3415,7 @@ document.addEventListener("DOMContentLoaded", function() {
     });
   });
 </script>
+
 
 
 
