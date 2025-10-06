@@ -577,6 +577,8 @@ padding-left: 60px;
     max-width: 500px;
     position: relative;
     animation: modalSlideIn 0.3s ease-out;
+  max-height: 80vh; /* Ensure it takes up no more than 80% of the screen height */
+    overflow-y: auto; /* Allow scrolling if the content is too tall */
   }
 
   @keyframes modalSlideIn {
@@ -618,6 +620,7 @@ padding-left: 60px;
 
   .payment-modal-body {
     padding: 30px;
+ min-height: 300px; 
   }
 
   .payment-benefits {
@@ -1159,6 +1162,8 @@ padding-left: 60px;
     max-width: 500px;
     position: relative;
     animation: modalSlideIn 0.3s ease-out;
+  max-height: 80vh; /* Ensure it takes up no more than 80% of the screen height */
+    overflow-y: auto; /* Allow scrolling if the content is too tall */
   }
 
   @keyframes modalSlideIn {
@@ -1200,6 +1205,7 @@ padding-left: 60px;
 
   .payment-modal-body {
     padding: 30px;
+ min-height: 300px; 
   }
 
   .payment-benefits {
@@ -3403,6 +3409,7 @@ document.addEventListener("DOMContentLoaded", function() {
     });
   });
 </script>
+
 
 
 
