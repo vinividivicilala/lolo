@@ -1,6 +1,8 @@
 ---
 // src/pages/index.astro
 import Layout from '../layouts/Layout.astro';
+import { motion } from 'framer-motion';
+
 ---
 
 <Layout title="Home | Note Farid" description="Website pribadi Farid dengan blog dan FAQ tentang development web." currentPage="home">
@@ -9,8 +11,19 @@ import Layout from '../layouts/Layout.astro';
    <!-- Kursor Custom -->
       <div class="custom-cursor" id="customCursor"></div>
       <section class="hero-section">
+
+   <motion.section 
+      class="hero-section" 
+      initial={{ opacity: 0 }} 
+      animate={{ opacity: 1 }} 
+      transition={{ duration: 2 }}
+    >
         <h1 class="hero-title">Note Farid</h1>
         <p class="hero-subtitle">Tempat berbagi pengetahuan tentang development web, Astro, dan teknologi terkini.</p>
+ </motion.section>
+
+
+
 
 
 <!-- Tambahkan setelah development-notice section -->
@@ -4218,6 +4231,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
 </script>
+
 
 
 
