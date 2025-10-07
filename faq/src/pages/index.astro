@@ -8,19 +8,19 @@ import { motion } from 'framer-motion';
 <Layout title="Home | Note Farid" description="Website pribadi Farid dengan blog dan FAQ tentang development web." currentPage="home">
   <div class="container">
     <main class="home-container">
-   <!-- Kursor Custom -->
+      <!-- Kursor Custom -->
       <div class="custom-cursor" id="customCursor"></div>
-      <section class="hero-section">
 
-   <motion.section 
-      class="hero-section" 
-      initial={{ opacity: 0 }} 
-      animate={{ opacity: 1 }} 
-      transition={{ duration: 2 }}
-    >
+      <!-- Hero Section with Animation -->
+      <motion.section 
+        class="hero-section" 
+        initial={{ opacity: 0 }} 
+        animate={{ opacity: 1 }} 
+        transition={{ duration: 2 }}
+      >
         <h1 class="hero-title">Note Farid</h1>
         <p class="hero-subtitle">Tempat berbagi pengetahuan tentang development web, Astro, dan teknologi terkini.</p>
- </motion.section>
+      </motion.section>
 
 
 
@@ -3046,6 +3046,8 @@ min-height: 300px;
   text-align: left;   /* hilangkan center */
   padding: 60px 0;
    font-family: 'Space Mono', monospace;
+ opacity: 1 !important; /* Ensure visibility */
+  transition: opacity 2s ease; /* Optional: Smooth transition */
  
 }
 
@@ -4231,6 +4233,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
 </script>
+
 
 
 
