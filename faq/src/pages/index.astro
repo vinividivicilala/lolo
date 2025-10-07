@@ -656,6 +656,23 @@ padding-left: 60px;
   }
 
 
+.monogram-text {
+  font-size: 5rem; /* Large size for the monogram */
+  font-weight: 900; /* Bold weight */
+  color: #ff6b6b; /* Monogram color */
+  font-family: 'Space Mono', monospace;
+  text-transform: uppercase;
+  text-align: center;
+  letter-spacing: 5px;
+  display: inline-block;
+  opacity: 0; /* Initially hidden */
+  transform: scale(0); /* Start from small scale */
+  transition: all 0.3s ease-in-out;
+}
+
+.monogram-text h2 {
+  margin: 0;
+}
 
 
 
@@ -4246,6 +4263,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
 </script>
+
 
 
 
