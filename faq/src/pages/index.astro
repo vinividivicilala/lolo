@@ -4266,6 +4266,26 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 
+  <!-- Script JS untuk framer-motion -->
+  <script type="module">
+    import { motion } from "framer-motion";
+    document.addEventListener("DOMContentLoaded", () => {
+      const element = document.querySelector('.monogram-text');
+      if (element) {
+        motion(element, {
+          opacity: 1,
+          scale: 1,
+          duration: 2,
+          delay: 1,
+        });
+      }
+    });
+  </script>
+
+
+
+
+
 
 
 
