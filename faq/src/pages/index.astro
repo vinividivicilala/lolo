@@ -1,6 +1,8 @@
 ---
 // src/pages/index.astro
 import Layout from '../layouts/Layout.astro';
+import { motion } from 'framer-motion';
+
 
 
 ---
@@ -10,8 +12,28 @@ import Layout from '../layouts/Layout.astro';
     <main class="home-container">
       <!-- Kursor Custom -->
       <div class="custom-cursor" id="customCursor"></div>
+
+   <!-- Hero Section with Animation -->
+      <motion.section 
+        class="hero-section" 
+        initial={{ opacity: 0 }} 
+        animate={{ opacity: 1 }} 
+        transition={{ duration: 2 }}
+      >
         <h1 class="hero-title">Note Farid</h1>
         <p class="hero-subtitle">Tempat berbagi pengetahuan tentang development web, Astro, dan teknologi terkini.</p>
+
+ <!-- Monogram Animated Text -->
+        <motion.div 
+          class="monogram-text"
+          initial={{ opacity: 0, scale: 0 }} 
+          animate={{ opacity: 1, scale: 1 }} 
+          transition={{ duration: 2, delay: 1 }}
+        >
+          <h2>Tempat berbagi pengetahuan tentang development web, Astro, dan teknologi terkini</h2>
+        </motion.div>
+      </motion.section>
+
     
 
 
@@ -4224,6 +4246,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
 </script>
+
 
 
 
