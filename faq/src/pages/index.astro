@@ -13,26 +13,11 @@ import { motion } from 'framer-motion';
       <!-- Kursor Custom -->
       <div class="custom-cursor" id="customCursor"></div>
 
-   <!-- Hero Section with Animation -->
-      <motion.section 
-        class="hero-section" 
-        initial={{ opacity: 0 }} 
-        animate={{ opacity: 1 }} 
-        transition={{ duration: 2 }}
-      >
+  
         <h1 class="hero-title">Note Farid</h1>
         <p class="hero-subtitle">Tempat berbagi pengetahuan tentang development web, Astro, dan teknologi terkini.</p>
 
- <!-- Monogram Animated Text -->
-        <motion.div 
-          class="monogram-text"
-          initial={{ opacity: 0, scale: 0 }} 
-          animate={{ opacity: 1, scale: 1 }} 
-          transition={{ duration: 2, delay: 1 }}
-        >
-          <h2>Tempat berbagi pengetahuan tentang development web, Astro, dan teknologi terkini</h2>
-        </motion.div>
-      </motion.section>
+
 
     
 
@@ -4265,22 +4250,6 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 
 
-
-  <!-- Script JS untuk framer-motion -->
-  <script type="module">
-    import { motion } from "framer-motion";
-    document.addEventListener("DOMContentLoaded", () => {
-      const element = document.querySelector('.monogram-text');
-      if (element) {
-        motion(element, {
-          opacity: 1,
-          scale: 1,
-          duration: 2,
-          delay: 1,
-        });
-      }
-    });
-  </script>
 
 
 
