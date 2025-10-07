@@ -1,11 +1,15 @@
 ---
 // src/pages/index.astro
 import Layout from '../layouts/Layout.astro';
-import { motion } from 'framer-motion';
 
+import AnimatedSection from '../components/AnimatedSection.jsx';
 
 
 ---
+
+
+
+
 
 <Layout title="Home | Note Farid" description="Website pribadi Farid dengan blog dan FAQ tentang development web." currentPage="home">
   <div class="container">
@@ -363,6 +367,15 @@ import { motion } from 'framer-motion';
             </div>
           </div>
 
+
+<!-- Tambahkan Animated Section dengan Framer Motion -->
+        <AnimatedSection client:load />
+
+
+
+
+
+
 <!-- Tambahkan setelah timeline-container -->
 <section class="legal-section">
   <div class="legal-linebox">
@@ -641,23 +654,207 @@ padding-left: 60px;
   }
 
 
-.monogram-text {
-  font-size: 5rem; /* Large size for the monogram */
-  font-weight: 900; /* Bold weight */
-  color: #ff6b6b; /* Monogram color */
-  font-family: 'Space Mono', monospace;
-  text-transform: uppercase;
-  text-align: center;
-  letter-spacing: 5px;
-  display: inline-block;
-  opacity: 0; /* Initially hidden */
-  transform: scale(0); /* Start from small scale */
-  transition: all 0.3s ease-in-out;
-}
 
-.monogram-text h2 {
-  margin: 0;
-}
+
+  /* Tambahkan styles untuk Framer Motion Section */
+  .framer-motion-section {
+    margin: 80px 0;
+    max-width: 800px;
+  }
+
+  .framer-motion-linebox {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 16px;
+    padding: 40px;
+    backdrop-filter: blur(10px);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .monogram-container {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+    margin-bottom: 40px;
+  }
+
+  .monogram {
+    width: 80px;
+    height: 80px;
+    border-radius: 20px;
+    background: linear-gradient(135deg, #FF6B6B, #4ECDC4, #45B7D1, #96CEB4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    font-weight: 700;
+    color: white;
+    position: relative;
+    box-shadow: 0 10px 30px rgba(255, 107, 107, 0.3);
+  }
+
+  .monogram-text {
+    flex: 1;
+  }
+
+  .monogram-text h3 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin: 0 0 10px 0;
+    background: linear-gradient(135deg, #FF6B6B, #4ECDC4);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .monogram-text p {
+    margin: 0;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 1.1rem;
+    line-height: 1.6;
+  }
+
+  .motion-features {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 25px;
+    margin: 40px 0;
+  }
+
+  .motion-feature {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 16px;
+    padding: 30px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+  }
+
+  .motion-feature::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    transition: left 0.5s ease;
+  }
+
+  .feature-icon {
+    width: 60px;
+    height: 60px;
+    margin: 0 auto 20px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    color: white;
+  }
+
+  .feature-content h4 {
+    font-size: 1.3rem;
+    font-weight: 600;
+    margin: 0 0 15px 0;
+    color: #fff;
+  }
+
+  .feature-content p {
+    margin: 0;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 1rem;
+    line-height: 1.6;
+  }
+
+  .tech-stack {
+    margin-top: 40px;
+    text-align: center;
+  }
+
+  .tech-badges {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    flex-wrap: wrap;
+  }
+
+  .tech-badge {
+    padding: 10px 20px;
+    border-radius: 25px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    border: 1px solid;
+    cursor: pointer;
+  }
+
+  .tech-badge.astro {
+    background: rgba(255, 107, 107, 0.1);
+    border-color: rgba(255, 107, 107, 0.3);
+    color: #FF6B6B;
+  }
+
+  .tech-badge.motion {
+    background: rgba(78, 205, 196, 0.1);
+    border-color: rgba(78, 205, 196, 0.3);
+    color: #4ECDC4;
+  }
+
+  .tech-badge.firebase {
+    background: rgba(255, 167, 38, 0.1);
+    border-color: rgba(255, 167, 38, 0.3);
+    color: #FFA726;
+  }
+
+  .tech-badge.responsive {
+    background: rgba(102, 126, 234, 0.1);
+    border-color: rgba(102, 126, 234, 0.3);
+    color: #667eea;
+  }
+
+  .animated-text {
+    display: inline-block;
+    background: linear-gradient(135deg, #FF6B6B, #4ECDC4, #45B7D1);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .monogram-container {
+      flex-direction: column;
+      text-align: center;
+      gap: 20px;
+    }
+    
+    .motion-features {
+      grid-template-columns: 1fr;
+    }
+    
+    .framer-motion-linebox {
+      padding: 25px;
+    }
+    
+    .tech-badges {
+      gap: 10px;
+    }
+    
+    .tech-badge {
+      padding: 8px 16px;
+      font-size: 0.8rem;
+    }
+  }
+
+
+
+
+
+
 
 
 
@@ -3730,6 +3927,9 @@ import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword , s
 
 
 
+
+
+
 document.addEventListener("DOMContentLoaded", function() {
   // Modal elements
   const paymentModal = document.getElementById('paymentModal');
@@ -4248,6 +4448,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
 </script>
+
 
 
 
