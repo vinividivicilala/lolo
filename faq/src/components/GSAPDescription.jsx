@@ -10,97 +10,142 @@ if (typeof window !== 'undefined') {
 export default function GSAPDescription() {
   const sectionRef = useRef(null);
   const headingRef = useRef(null);
+  const subtitleRef = useRef(null);
   const paragraphsRef = useRef([]);
   const highlightsRef = useRef([]);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      // Heading animation - GSAP style
-      gsap.fromTo(headingRef.current, 
+      const masterTL = gsap.timeline({
+        scrollTrigger: {
+          trigger: sectionRef.current,
+          start: "top 80%",
+          end: "bottom 20%",
+          toggleActions: "play none none reverse",
+          markers: false,
+        }
+      });
+
+      // 1. HEADING ANIMATION - Smooth GSAP Style
+      masterTL.fromTo(headingRef.current, 
         {
           y: 100,
           opacity: 0,
-          scale: 0.8
+          scale: 0.6,
+          rotationX: 90
         },
         {
           y: 0,
           opacity: 1,
           scale: 1,
+          rotationX: 0,
           duration: 1.2,
-          ease: "elastic.out(1, 0.5)",
-          scrollTrigger: {
-            trigger: headingRef.current,
-            start: "top 80%",
-            end: "bottom 20%",
-            toggleActions: "play none none reverse"
-          }
+          ease: "power4.out",
+          transformOrigin: "center bottom"
         }
       );
 
-      // Paragraphs stagger animation - Classic GSAP
-      gsap.fromTo(paragraphsRef.current,
+      // 2. SUBTITLE ANIMATION - Typing-like Smooth Transition
+      masterTL.fromTo(subtitleRef.current,
         {
-          x: -100,
           opacity: 0,
-          rotationY: 90
+          x: -80
+        },
+        {
+          opacity: 1,
+          x: 0,
+          duration: 1,
+          ease: "power3.out"
+        },
+        "-=0.6"
+      );
+
+      // 3. PARAGRAPHS STAGGER - Smoother GSAP Stagger with Adjusted Delay
+      masterTL.fromTo(paragraphsRef.current,
+        {
+          x: -150,
+          opacity: 0,
+          scale: 0.7,
+          rotationY: 35
         },
         {
           x: 0,
           opacity: 1,
+          scale: 1,
           rotationY: 0,
-          duration: 1,
-          stagger: 0.3,
-          ease: "power3.out",
-          scrollTrigger: {
-            trigger: paragraphsRef.current[0],
-            start: "top 70%",
-            end: "bottom 20%",
-            toggleActions: "play none none reverse"
-          }
-        }
+          duration: 1.3,
+          stagger: {
+            each: 0.4,
+            from: "start",
+            ease: "power3.out"
+          },
+          ease: "back.out(2)"
+        },
+        "-=0.4"
       );
 
-      // Highlights grid animation
-      gsap.fromTo(highlightsRef.current,
+      // 4. HIGHLIGHTS GRID - Bounce In with Delayed Stagger
+      masterTL.fromTo(highlightsRef.current,
         {
-          y: 50,
+          y: 120,
           opacity: 0,
-          scale: 0
+          scale: 0.1
         },
         {
           y: 0,
           opacity: 1,
           scale: 1,
-          duration: 0.8,
-          stagger: 0.15,
-          ease: "back.out(1.7)",
-          scrollTrigger: {
-            trigger: highlightsRef.current[0],
-            start: "top 80%",
-            end: "bottom 20%",
-            toggleActions: "play none none reverse"
-          }
-        }
+          duration: 1.0,
+          stagger: {
+            each: 0.1,
+            grid: "auto",
+            from: "center"
+          },
+          ease: "bounce.out"
+        },
+        "-=0.7"
       );
 
-      // Hover effects dengan GSAP
+      // SCROLL TRIGGERS untuk setiap paragraph dengan lebih halus
       paragraphsRef.current.forEach((paragraph, index) => {
+        gsap.fromTo(paragraph,
+          {
+            opacity: 0.2,
+            scale: 0.95
+          },
+          {
+            opacity: 1,
+            scale: 1,
+            duration: 0.8,
+            scrollTrigger: {
+              trigger: paragraph,
+              start: "top 80%",
+              end: "bottom 20%",
+              toggleActions: "play none none reverse"
+            }
+          }
+        );
+      });
+
+      // Hover Effects with GSAP Physics - Added Z rotation for smoother hover
+      paragraphsRef.current.forEach((paragraph) => {
         paragraph.addEventListener('mouseenter', () => {
           gsap.to(paragraph, {
-            scale: 1.05,
-            y: -10,
-            duration: 0.3,
-            ease: "power2.out",
+            scale: 1.1,
+            y: -20,
+            rotationZ: 5,
+            duration: 0.5,
+            ease: "power3.out",
             overwrite: true
           });
 
-          // Highlight words animation
           const highlights = paragraph.querySelectorAll('.highlight-word');
           gsap.to(highlights, {
-            scale: 1.2,
-            duration: 0.2,
-            stagger: 0.05,
-            ease: "power2.out",
+            scale: 1.4,
+            y: -8,
+            duration: 0.3,
+            stagger: 0.06,
+            ease: "power2.inOut",
             yoyo: true,
             repeat: 1
           });
@@ -110,18 +155,29 @@ export default function GSAPDescription() {
           gsap.to(paragraph, {
             scale: 1,
             y: 0,
-            duration: 0.4,
-            ease: "elastic.out(1, 0.8)"
+            rotationZ: 0,
+            duration: 0.7,
+            ease: "elastic.out(1.2, 0.8)"
           });
         });
       });
 
-      // Continuous background animation
+      // Continuous Background Animation with smooth transition
       gsap.to(sectionRef.current, {
         backgroundPosition: "200% 200%",
-        duration: 20,
+        duration: 30,
         ease: "none",
-        repeat: -1
+        repeat: -1,
+        yoyo: true
+      });
+
+      // TEXT GRADIENT ANIMATION with smoother transition
+      gsap.to(".gradient-highlight", {
+        backgroundPosition: "200% 200%",
+        duration: 4,
+        ease: "none",
+        repeat: -1,
+        yoyo: true
       });
 
     }, sectionRef);
@@ -144,11 +200,11 @@ export default function GSAPDescription() {
   return (
     <section ref={sectionRef} className="gsap-description-section">
       <div className="gsap-description-linebox">
-        <div ref={headingRef} className="gsap-header">
-          <h2 className="gsap-main-title">
+        <div className="gsap-header">
+          <h2 ref={headingRef} className="gsap-main-title">
             🚀 <span className="gradient-highlight">Revolutionary</span> Web Experience
           </h2>
-          <p className="gsap-subtitle">
+          <p ref={subtitleRef} className="gsap-subtitle">
             Dibangun dengan teknologi terdepan untuk performa maksimal
           </p>
         </div>
@@ -237,4 +293,3 @@ const TechHighlight = React.forwardRef(({ icon, text, color }, ref) => {
     </div>
   );
 });
-
