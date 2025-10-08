@@ -1,132 +1,216 @@
-import { motion } from 'framer-motion';
-import { useInView } from 'framer-motion';
-import { useRef } from 'react';
+import { useRef, useEffect } from 'react';
+import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+// Register ScrollTrigger plugin
+if (typeof window !== 'undefined') {
+  gsap.registerPlugin(ScrollTrigger);
+}
 
 export default function GSAPDescription() {
-  const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: "-100px" });
+  const sectionRef = useRef(null);
+  const headingRef = useRef(null);
+  const paragraphsRef = useRef([]);
+  const highlightsRef = useRef([]);
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.2,
-        delayChildren: 0.3
-      }
+  useEffect(() => {
+    const ctx = gsap.context(() => {
+      // Heading animation - GSAP style
+      gsap.fromTo(headingRef.current, 
+        {
+          y: 100,
+          opacity: 0,
+          scale: 0.8
+        },
+        {
+          y: 0,
+          opacity: 1,
+          scale: 1,
+          duration: 1.2,
+          ease: "elastic.out(1, 0.5)",
+          scrollTrigger: {
+            trigger: headingRef.current,
+            start: "top 80%",
+            end: "bottom 20%",
+            toggleActions: "play none none reverse"
+          }
+        }
+      );
+
+      // Paragraphs stagger animation - Classic GSAP
+      gsap.fromTo(paragraphsRef.current,
+        {
+          x: -100,
+          opacity: 0,
+          rotationY: 90
+        },
+        {
+          x: 0,
+          opacity: 1,
+          rotationY: 0,
+          duration: 1,
+          stagger: 0.3,
+          ease: "power3.out",
+          scrollTrigger: {
+            trigger: paragraphsRef.current[0],
+            start: "top 70%",
+            end: "bottom 20%",
+            toggleActions: "play none none reverse"
+          }
+        }
+      );
+
+      // Highlights grid animation
+      gsap.fromTo(highlightsRef.current,
+        {
+          y: 50,
+          opacity: 0,
+          scale: 0
+        },
+        {
+          y: 0,
+          opacity: 1,
+          scale: 1,
+          duration: 0.8,
+          stagger: 0.15,
+          ease: "back.out(1.7)",
+          scrollTrigger: {
+            trigger: highlightsRef.current[0],
+            start: "top 80%",
+            end: "bottom 20%",
+            toggleActions: "play none none reverse"
+          }
+        }
+      );
+
+      // Hover effects dengan GSAP
+      paragraphsRef.current.forEach((paragraph, index) => {
+        paragraph.addEventListener('mouseenter', () => {
+          gsap.to(paragraph, {
+            scale: 1.05,
+            y: -10,
+            duration: 0.3,
+            ease: "power2.out",
+            overwrite: true
+          });
+
+          // Highlight words animation
+          const highlights = paragraph.querySelectorAll('.highlight-word');
+          gsap.to(highlights, {
+            scale: 1.2,
+            duration: 0.2,
+            stagger: 0.05,
+            ease: "power2.out",
+            yoyo: true,
+            repeat: 1
+          });
+        });
+
+        paragraph.addEventListener('mouseleave', () => {
+          gsap.to(paragraph, {
+            scale: 1,
+            y: 0,
+            duration: 0.4,
+            ease: "elastic.out(1, 0.8)"
+          });
+        });
+      });
+
+      // Continuous background animation
+      gsap.to(sectionRef.current, {
+        backgroundPosition: "200% 200%",
+        duration: 20,
+        ease: "none",
+        repeat: -1
+      });
+
+    }, sectionRef);
+
+    return () => ctx.revert();
+  }, []);
+
+  const addToParagraphsRef = (el) => {
+    if (el && !paragraphsRef.current.includes(el)) {
+      paragraphsRef.current.push(el);
     }
   };
 
-  const itemVariants = {
-    hidden: { 
-      opacity: 0, 
-      y: 50,
-      scale: 0.8
-    },
-    visible: {
-      opacity: 1,
-      y: 0,
-      scale: 1,
-      transition: {
-        type: "spring",
-        stiffness: 100,
-        damping: 15
-      }
+  const addToHighlightsRef = (el) => {
+    if (el && !highlightsRef.current.includes(el)) {
+      highlightsRef.current.push(el);
     }
   };
 
   return (
-    <motion.section 
-      ref={ref}
-      className="gsap-description-section"
-      initial="hidden"
-      animate={isInView ? "visible" : "hidden"}
-      variants={containerVariants}
-    >
+    <section ref={sectionRef} className="gsap-description-section">
       <div className="gsap-description-linebox">
-        <motion.div 
-          className="gsap-header"
-          variants={itemVariants}
-        >
+        <div ref={headingRef} className="gsap-header">
           <h2 className="gsap-main-title">
             🚀 <span className="gradient-highlight">Revolutionary</span> Web Experience
           </h2>
           <p className="gsap-subtitle">
             Dibangun dengan teknologi terdepan untuk performa maksimal
           </p>
-        </motion.div>
+        </div>
 
-        <motion.div 
-          className="description-content"
-          variants={containerVariants}
-        >
+        <div className="description-content">
           <DescriptionParagraph
+            ref={addToParagraphsRef}
             icon="⚡"
             text="Website ini menggunakan <highlight>Astro</highlight> yang menghilangkan JavaScript tidak perlu, menghasilkan <highlight>loading time tercepat</highlight> dan <highlight>Core Web Vitals score 100</highlight>"
           />
           
           <DescriptionParagraph
+            ref={addToParagraphsRef}
             icon="🎨"
             text="Dilengkapi dengan <highlight>Framer Motion</highlight> untuk animasi smooth, <highlight>scroll-triggered effects</highlight>, dan <highlight>micro-interactions</highlight> yang memukau"
           />
           
           <DescriptionParagraph
+            ref={addToParagraphsRef}
             icon="🔧"
             text="Backend powered oleh <highlight>Firebase</highlight> dengan realtime database, authentication, dan <highlight>cloud functions</highlight> yang scalable"
           />
           
           <DescriptionParagraph
+            ref={addToParagraphsRef}
             icon="📱"
             text="Desain <highlight>mobile-first responsive</highlight> dengan <highlight>progressive enhancement</highlight> untuk semua device dan jaringan"
           />
           
           <DescriptionParagraph
+            ref={addToParagraphsRef}
             icon="🚀"
             text="Optimized untuk <highlight>SEO</highlight>, <highlight>accessibility</highlight>, dan <highlight>user experience</highlight> terbaik dengan modern best practices"
           />
           
           <DescriptionParagraph
+            ref={addToParagraphsRef}
             icon="💫"
             text="Mengimplementasikan <highlight>modern CSS</highlight> dengan Grid, Flexbox, Custom Properties, dan <highlight>advanced animations</highlight>"
           />
-        </motion.div>
+        </div>
 
-        <motion.div 
-          className="tech-highlights"
-          variants={itemVariants}
-        >
+        <div className="tech-highlights">
           <div className="highlight-grid">
-            <TechHighlight icon="🔥" text="Zero JS by Default" color="orange" />
-            <TechHighlight icon="⚡" text="Instant Loading" color="yellow" />
-            <TechHighlight icon="🎯" text="Perfect Scores" color="green" />
-            <TechHighlight icon="🔒" text="Secure & Safe" color="blue" />
-            <TechHighlight icon="📈" text="SEO Optimized" color="purple" />
-            <TechHighlight icon="🌟" text="Modern Stack" color="pink" />
+            <TechHighlight ref={addToHighlightsRef} icon="🔥" text="Zero JS by Default" color="orange" />
+            <TechHighlight ref={addToHighlightsRef} icon="⚡" text="Instant Loading" color="yellow" />
+            <TechHighlight ref={addToHighlightsRef} icon="🎯" text="Perfect Scores" color="green" />
+            <TechHighlight ref={addToHighlightsRef} icon="🔒" text="Secure & Safe" color="blue" />
+            <TechHighlight ref={addToHighlightsRef} icon="📈" text="SEO Optimized" color="purple" />
+            <TechHighlight ref={addToHighlightsRef} icon="🌟" text="Modern Stack" color="pink" />
           </div>
-        </motion.div>
+        </div>
       </div>
-    </motion.section>
+    </section>
   );
 }
 
-function DescriptionParagraph({ icon, text }) {
+const DescriptionParagraph = React.forwardRef(({ icon, text }, ref) => {
   const parts = text.split(/(<highlight>.*?<\/highlight>)/g);
   
   return (
-    <motion.div 
-      className="description-paragraph"
-      initial={{ opacity: 0, x: -50 }}
-      whileInView={{ opacity: 1, x: 0 }}
-      transition={{ 
-        type: "spring",
-        stiffness: 80,
-        damping: 15
-      }}
-      whileHover={{ 
-        x: 10,
-        transition: { duration: 0.3 }
-      }}
-    >
+    <div ref={ref} className="description-paragraph">
       <span className="paragraph-icon">{icon}</span>
       <p className="paragraph-text">
         {parts.map((part, index) => {
@@ -141,29 +225,15 @@ function DescriptionParagraph({ icon, text }) {
           return part;
         })}
       </p>
-    </motion.div>
+    </div>
   );
-}
+});
 
-function TechHighlight({ icon, text, color }) {
+const TechHighlight = React.forwardRef(({ icon, text, color }, ref) => {
   return (
-    <motion.div 
-      className={`tech-highlight ${color}`}
-      initial={{ opacity: 0, scale: 0 }}
-      whileInView={{ opacity: 1, scale: 1 }}
-      transition={{ 
-        type: "spring",
-        stiffness: 200,
-        damping: 15
-      }}
-      whileHover={{ 
-        scale: 1.1,
-        rotate: [0, -5, 5, 0],
-        transition: { duration: 0.4 }
-      }}
-    >
+    <div ref={ref} className={`tech-highlight ${color}`}>
       <div className="highlight-icon">{icon}</div>
       <div className="highlight-text">{text}</div>
-    </motion.div>
+    </div>
   );
-}
+});
