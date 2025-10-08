@@ -119,16 +119,14 @@ padding-left: 60px;
 
 
 
-
-
-
 /* Legal Section Styles */
 .legal-section {
-  margin: 60px 0;
+  margin: 60px auto; /* Centers the section */
   max-width: 800px;
-margin-bottom: 29px
-margin-top: 30px
-
+  margin-bottom: 29px;
+  margin-top: 30px;
+  display: flex;
+  justify-content: center; /* Centers the content horizontally */
 }
 
 .legal-linebox {
@@ -137,7 +135,13 @@ margin-top: 30px
   border-radius: 16px;
   padding: 30px;
   backdrop-filter: blur(10px);
+  width: 100%; /* Makes sure it takes full width of its parent */
+  max-width: 800px; /* Restricts the width */
 }
+
+
+
+
 
 .legal-content {
   display: flex;
@@ -246,6 +250,7 @@ import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword , s
 
 
 </script>
+
 
 
 
