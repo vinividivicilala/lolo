@@ -1,8 +1,9 @@
 ---
 // src/pages/index.astro
 import Layout from '../layouts/Layout.astro';
-
 import ParallaxSection from '../components/ParallaxSection.jsx';
+import GSAPDescription from '../components/GSAPDescription.jsx';
+
 
 ---
 
@@ -369,6 +370,15 @@ import ParallaxSection from '../components/ParallaxSection.jsx';
 
 
 
+ <!-- Tambahkan GSAP Description Section -->
+        <GSAPDescription client:load />
+
+
+
+
+
+
+
 
 
 
@@ -620,6 +630,9 @@ import ParallaxSection from '../components/ParallaxSection.jsx';
 
 
 
+
+
+
           </div>
         </div>
 
@@ -653,6 +666,274 @@ padding-left: 60px;
    font-family: 'Space Mono', monospace;
 
   }
+
+
+
+
+
+  /* GSAP Style Description Section */
+  .gsap-description-section {
+    margin: 100px 0;
+    max-width: 1200px;
+  }
+
+  .gsap-description-linebox {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 24px;
+    padding: 60px 50px;
+    backdrop-filter: blur(20px);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .gsap-description-linebox::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+      radial-gradient(circle at 20% 80%, rgba(255, 107, 107, 0.1) 0%, transparent 50%),
+      radial-gradient(circle at 80% 20%, rgba(78, 205, 196, 0.1) 0%, transparent 50%),
+      radial-gradient(circle at 40% 40%, rgba(102, 126, 234, 0.1) 0%, transparent 50%);
+    animation: floatBackground 20s ease-in-out infinite;
+    z-index: -1;
+  }
+
+  @keyframes floatBackground {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    25% { transform: translate(-10px, -10px) scale(1.05); }
+    50% { transform: translate(10px, 10px) scale(1.1); }
+    75% { transform: translate(-10px, 10px) scale(1.05); }
+  }
+
+  .gsap-header {
+    text-align: center;
+    margin-bottom: 60px;
+  }
+
+  .gsap-main-title {
+    font-size: 4rem;
+    font-weight: 800;
+    margin: 0 0 20px 0;
+    color: #fff;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+  }
+
+  .gradient-highlight {
+    background: linear-gradient(135deg, #FF6B6B, #4ECDC4, #45B7D1, #FFE66D);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    background-size: 300% 300%;
+    animation: gradientFlow 6s ease infinite;
+  }
+
+  @keyframes gradientFlow {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+  }
+
+  .gsap-subtitle {
+    font-size: 1.4rem;
+    color: rgba(255, 255, 255, 0.8);
+    margin: 0;
+    font-weight: 400;
+  }
+
+  .description-content {
+    display: flex;
+    flex-direction: column;
+    gap: 35px;
+    margin-bottom: 60px;
+  }
+
+  .description-paragraph {
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+    padding: 25px 30px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+  }
+
+  .description-paragraph:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.2);
+    transform: translateX(10px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  }
+
+  .paragraph-icon {
+    font-size: 2rem;
+    flex-shrink: 0;
+    margin-top: 5px;
+  }
+
+  .paragraph-text {
+    font-size: 2.5rem; /* 40px equivalent */
+    font-weight: 500;
+    line-height: 1.4;
+    color: rgba(255, 255, 255, 0.9);
+    margin: 0;
+    flex: 1;
+  }
+
+  .highlight-word {
+    background: linear-gradient(135deg, #FF6B6B, #4ECDC4);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: 700;
+    padding: 2px 4px;
+    border-radius: 4px;
+    position: relative;
+    display: inline-block;
+  }
+
+  .highlight-word::after {
+    content: '';
+    position: absolute;
+    bottom: 2px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(135deg, #FF6B6B, #4ECDC4);
+    border-radius: 2px;
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+  }
+
+  .description-paragraph:hover .highlight-word::after {
+    transform: scaleX(1);
+  }
+
+  .tech-highlights {
+    margin-top: 40px;
+  }
+
+  .highlight-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+  }
+
+  .tech-highlight {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 16px;
+    padding: 25px 20px;
+    text-align: center;
+    transition: all 0.3s ease;
+    cursor: pointer;
+  }
+
+  .tech-highlight:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
+  }
+
+  .tech-highlight.orange { border-color: rgba(255, 167, 38, 0.4); }
+  .tech-highlight.yellow { border-color: rgba(255, 230, 109, 0.4); }
+  .tech-highlight.green { border-color: rgba(78, 205, 196, 0.4); }
+  .tech-highlight.blue { border-color: rgba(69, 183, 209, 0.4); }
+  .tech-highlight.purple { border-color: rgba(102, 126, 234, 0.4); }
+  .tech-highlight.pink { border-color: rgba(255, 107, 107, 0.4); }
+
+  .tech-highlight.orange:hover { background: rgba(255, 167, 38, 0.1); }
+  .tech-highlight.yellow:hover { background: rgba(255, 230, 109, 0.1); }
+  .tech-highlight.green:hover { background: rgba(78, 205, 196, 0.1); }
+  .tech-highlight.blue:hover { background: rgba(69, 183, 209, 0.1); }
+  .tech-highlight.purple:hover { background: rgba(102, 126, 234, 0.1); }
+  .tech-highlight.pink:hover { background: rgba(255, 107, 107, 0.1); }
+
+  .highlight-icon {
+    font-size: 2.5rem;
+    margin-bottom: 12px;
+  }
+
+  .highlight-text {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #fff;
+  }
+
+  /* GSAP-style Power-ups */
+  .gsap-description-section .description-paragraph:nth-child(odd) {
+    border-left: 4px solid #FF6B6B;
+  }
+
+  .gsap-description-section .description-paragraph:nth-child(even) {
+    border-left: 4px solid #4ECDC4;
+  }
+
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    .gsap-description-linebox {
+      padding: 40px 25px;
+    }
+
+    .gsap-main-title {
+      font-size: 2.8rem;
+    }
+
+    .gsap-subtitle {
+      font-size: 1.2rem;
+    }
+
+    .paragraph-text {
+      font-size: 1.8rem;
+    }
+
+    .description-paragraph {
+      flex-direction: column;
+      gap: 15px;
+      text-align: center;
+    }
+
+    .paragraph-icon {
+      margin-top: 0;
+    }
+
+    .highlight-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .tech-highlight {
+      padding: 20px 15px;
+    }
+
+    .highlight-icon {
+      font-size: 2rem;
+    }
+
+    .highlight-text {
+      font-size: 1rem;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .gsap-main-title {
+      font-size: 2.2rem;
+    }
+
+    .paragraph-text {
+      font-size: 1.5rem;
+    }
+
+    .highlight-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+
+
 
 
 
@@ -4488,6 +4769,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
 </script>
+
 
 
 
