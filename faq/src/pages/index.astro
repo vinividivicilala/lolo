@@ -117,6 +117,42 @@ padding-left: 60px;
 
 
 
+/* Custom Cursor */
+.custom-cursor {
+  position: fixed;
+  width: 20px;
+  height: 20px;
+  background-color: #fff;
+  border-radius: 50%;
+  pointer-events: none; /* Ensures the cursor doesn't interfere with clicks */
+  transition: transform 0.1s ease, opacity 0.1s ease;
+  z-index: 9999; /* Make sure it stays above other content */
+  opacity: 0.8; /* Slight opacity for better visibility */
+}
+
+/* When hovering over elements */
+.custom-cursor.hovered {
+  transform: scale(1.5); /* Scales up the cursor when hovering over interactive elements */
+}
+
+/* Navbar styles (if any) */
+nav {
+  position: relative;
+  z-index: 100; /* Ensure the navbar is on top of other elements */
+}
+
+/* Adjust navbar items or layout if necessary */
+.navbar-item {
+  position: relative;
+  z-index: 101; /* Ensure individual navbar items are on top of other elements */
+}
+
+
+
+
+
+
+
 
 
 /* Legal Section Styles */
@@ -249,7 +285,25 @@ import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword , s
     const auth = getAuth(app);
 
 
+document.addEventListener('mousemove', (e) => {
+  const cursor = document.getElementById('customCursor');
+  cursor.style.left = `${e.pageX - cursor.offsetWidth / 2}px`;
+  cursor.style.top = `${e.pageY - cursor.offsetHeight / 2}px`;
+});
+
+document.querySelectorAll('a, button').forEach((element) => {
+  element.addEventListener('mouseover', () => {
+    document.getElementById('customCursor').classList.add('hovered');
+  });
+  element.addEventListener('mouseout', () => {
+    document.getElementById('customCursor').classList.remove('hovered');
+  });
+});
+
+
+
 </script>
+
 
 
 
