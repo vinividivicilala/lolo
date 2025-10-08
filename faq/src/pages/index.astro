@@ -215,18 +215,13 @@ import GSAPDescription from '../components/GSAPDescription.jsx';
 <!-- Blog Features Section -->
 <section class="blog-features-section">
   <div class="blog-features-container">
-    <!-- Header dengan gambar -->
+    <!-- Header -->
     <div class="blog-header" data-aos="fade-up">
-      <div class="header-image-container">
-        <img src="/images/5.jpg" alt="Blog & Portfolio Farid" class="header-image" />
-        <div class="header-overlay">
-          <h1 class="blog-title">Blog & Portfolio Farid</h1>
-          <p class="blog-subtitle">
-            Tempat berbagi pengetahuan, pengalaman, dan project terbaru seputar web development, 
-            teknologi modern, dan kreativitas digital.
-          </p>
-        </div>
-      </div>
+      <h1 class="blog-title">Blog & Portfolio Farid</h1>
+      <p class="blog-subtitle">
+        Tempat berbagi pengetahuan, pengalaman, dan project terbaru seputar web development, 
+        teknologi modern, dan kreativitas digital.
+      </p>
     </div>
 
     <!-- Features Grid -->
@@ -241,7 +236,7 @@ import GSAPDescription from '../components/GSAPDescription.jsx';
             </svg>
           </div>
           <div class="card-image">
-            <img src="/images/notifications.jpg" alt="Notifikasi" onerror="this.style.display='none'" />
+            <img src="/images/5.jpg" alt="Notifikasi" class="feature-img" />
           </div>
         </div>
         <div class="card-content">
@@ -267,7 +262,7 @@ import GSAPDescription from '../components/GSAPDescription.jsx';
             </svg>
           </div>
           <div class="card-image">
-            <img src="/images/messages.jpg" alt="Pesan" onerror="this.style.display='none'" />
+            <img src="/images/5.jpg" alt="Pesan" class="feature-img" />
           </div>
         </div>
         <div class="card-content">
@@ -296,7 +291,7 @@ import GSAPDescription from '../components/GSAPDescription.jsx';
             </svg>
           </div>
           <div class="card-image">
-            <img src="/images/community.jpg" alt="Komunitas" onerror="this.style.display='none'" />
+            <img src="/images/5.jpg" alt="Komunitas" class="feature-img" />
           </div>
         </div>
         <div class="card-content">
@@ -326,7 +321,7 @@ import GSAPDescription from '../components/GSAPDescription.jsx';
             </svg>
           </div>
           <div class="card-image">
-            <img src="/images/posts.jpg" alt="Postingan" onerror="this.style.display='none'" />
+            <img src="/images/5.jpg" alt="Postingan" class="feature-img" />
           </div>
         </div>
         <div class="card-content">
@@ -353,7 +348,7 @@ import GSAPDescription from '../components/GSAPDescription.jsx';
             </svg>
           </div>
           <div class="card-image">
-            <img src="/images/about.jpg" alt="Tentang Saya" onerror="this.style.display='none'" />
+            <img src="/images/5.jpg" alt="Tentang Saya" class="feature-img" />
           </div>
         </div>
         <div class="card-content">
@@ -382,7 +377,7 @@ import GSAPDescription from '../components/GSAPDescription.jsx';
             </svg>
           </div>
           <div class="card-image">
-            <img src="/images/meeting.jpg" alt="Meeting" onerror="this.style.display='none'" />
+            <img src="/images/5.jpg" alt="Meeting" class="feature-img" />
           </div>
         </div>
         <div class="card-content">
@@ -409,7 +404,7 @@ import GSAPDescription from '../components/GSAPDescription.jsx';
             </svg>
           </div>
           <div class="card-image">
-            <img src="/images/gmail.jpg" alt="Gmail" onerror="this.style.display='none'" />
+            <img src="/images/5.jpg" alt="Gmail" class="feature-img" />
           </div>
         </div>
         <div class="card-content">
@@ -437,7 +432,7 @@ import GSAPDescription from '../components/GSAPDescription.jsx';
             </svg>
           </div>
           <div class="card-image">
-            <img src="/images/gallery.jpg" alt="Galeri" onerror="this.style.display='none'" />
+            <img src="/images/5.jpg" alt="Galeri" class="feature-img" />
           </div>
         </div>
         <div class="card-content">
@@ -463,7 +458,7 @@ import GSAPDescription from '../components/GSAPDescription.jsx';
             </svg>
           </div>
           <div class="card-image">
-            <img src="/images/projects.jpg" alt="Daftar Project" onerror="this.style.display='none'" />
+            <img src="/images/5.jpg" alt="Daftar Project" class="feature-img" />
           </div>
         </div>
         <div class="card-content">
@@ -482,8 +477,6 @@ import GSAPDescription from '../components/GSAPDescription.jsx';
     </div>
   </div>
 </section>
-
-
 
 
 
@@ -863,272 +856,6 @@ padding-left: 60px;
 
   }
 
-/* Header dengan Gambar */
-.header-image-container {
-  position: relative;
-  border-radius: 24px;
-  overflow: hidden;
-  margin-bottom: 40px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-}
-
-.header-image {
-  width: 100%;
-  height: 400px;
-  object-fit: cover;
-  border-radius: 24px;
-  transition: transform 0.6s ease;
-}
-
-.header-image-container:hover .header-image {
-  transform: scale(1.05);
-}
-
-.header-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(
-    135deg,
-    rgba(0, 0, 0, 0.7) 0%,
-    rgba(0, 0, 0, 0.4) 50%,
-    rgba(0, 0, 0, 0.7) 100%
-  );
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-  padding: 40px;
-  border-radius: 24px;
-}
-
-.header-overlay .blog-title {
-  font-size: 4rem;
-  font-weight: 800;
-  margin: 0 0 20px 0;
-  color: #fff;
-  text-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
-  background: none;
-  -webkit-text-fill-color: #fff;
-  background-clip: unset;
-}
-
-.header-overlay .blog-subtitle {
-  font-size: 1.4rem;
-  color: rgba(255, 255, 255, 0.9);
-  max-width: 700px;
-  margin: 0 auto;
-  line-height: 1.6;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
-}
-
-/* Responsive untuk Header Gambar */
-@media (max-width: 768px) {
-  .header-image {
-    height: 300px;
-  }
-  
-  .header-overlay {
-    padding: 30px 20px;
-  }
-  
-  .header-overlay .blog-title {
-    font-size: 2.5rem;
-  }
-  
-  .header-overlay .blog-subtitle {
-    font-size: 1.1rem;
-  }
-}
-
-@media (max-width: 480px) {
-  .header-image {
-    height: 250px;
-  }
-  
-  .header-overlay .blog-title {
-    font-size: 2rem;
-  }
-  
-  .header-overlay .blog-subtitle {
-    font-size: 1rem;
-  }
-}
-
-/* Blog Features Section Styles */
-.blog-features-section {
-  margin: 80px 0;
-  max-width: 1200px;
-}
-
-.blog-features-container {
-  padding: 0 20px;
-}
-
-.features-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-  gap: 30px;
-  margin-top: 50px;
-}
-
-.feature-card {
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 20px;
-  padding: 30px;
-  position: relative;
-  overflow: hidden;
-  cursor: pointer;
-  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  backdrop-filter: blur(10px);
-}
-
-.feature-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-  transition: left 0.6s ease;
-}
-
-.feature-card:hover::before {
-  left: 100%;
-}
-
-.feature-card:hover {
-  transform: translateY(-10px) scale(1.02);
-  border-color: rgba(102, 126, 234, 0.6);
-  box-shadow: 0 20px 40px rgba(102, 126, 234, 0.3);
-}
-
-.card-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 25px;
-}
-
-.card-icon {
-  width: 60px;
-  height: 60px;
-  border-radius: 16px;
-  background: linear-gradient(135deg, #667eea, #764ba2);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  flex-shrink: 0;
-}
-
-.card-icon svg {
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
-}
-
-.card-image {
-  width: 80px;
-  height: 60px;
-  border-radius: 12px;
-  overflow: hidden;
-  position: relative;
-}
-
-.card-image img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  border-radius: 12px;
-  transition: transform 0.3s ease;
-}
-
-.feature-card:hover .card-image img {
-  transform: scale(1.1);
-}
-
-.card-content {
-  margin-bottom: 20px;
-}
-
-.card-title {
-  font-size: 1.5rem;
-  font-weight: 700;
-  margin: 0 0 12px 0;
-  color: #fff;
-  line-height: 1.2;
-}
-
-.card-description {
-  color: rgba(255, 255, 255, 0.7);
-  line-height: 1.6;
-  margin: 0;
-  font-size: 0.95rem;
-}
-
-.card-arrow {
-  position: absolute;
-  bottom: 25px;
-  right: 25px;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.1);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.3s ease;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.feature-card:hover .card-arrow {
-  background: linear-gradient(135deg, #667eea, #764ba2);
-  transform: translate(5px, -5px);
-  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-}
-
-/* Responsive Design */
-@media (max-width: 768px) {
-  .features-grid {
-    grid-template-columns: 1fr;
-    gap: 20px;
-  }
-  
-  .feature-card {
-    padding: 25px;
-  }
-  
-  .card-header {
-    margin-bottom: 20px;
-  }
-  
-  .card-icon {
-    width: 50px;
-    height: 50px;
-  }
-  
-  .card-image {
-    width: 70px;
-    height: 50px;
-  }
-}
-
-@media (max-width: 480px) {
-  .feature-card {
-    padding: 20px;
-  }
-  
-  .card-title {
-    font-size: 1.3rem;
-  }
-}
-
-
-
 
 
 
@@ -1233,22 +960,27 @@ padding-left: 60px;
 }
 
 .card-image {
-  width: 80px;
-  height: 60px;
-  border-radius: 12px;
+  width: 100px;
+  height: 80px;
+  border-radius: 16px;
   overflow: hidden;
   position: relative;
+  flex-shrink: 0;
 }
 
-.card-image img {
+.feature-img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.3s ease;
+  border-radius: 16px;
+  transition: all 0.4s ease;
+  filter: brightness(0.9);
 }
 
-.feature-card:hover .card-image img {
+.feature-card:hover .feature-img {
   transform: scale(1.1);
+  filter: brightness(1.1);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
 }
 
 .card-content {
@@ -1320,8 +1052,8 @@ padding-left: 60px;
   }
   
   .card-image {
-    width: 70px;
-    height: 50px;
+    width: 80px;
+    height: 60px;
   }
 }
 
@@ -1341,9 +1073,12 @@ padding-left: 60px;
   .card-title {
     font-size: 1.3rem;
   }
+  
+  .card-image {
+    width: 70px;
+    height: 50px;
+  }
 }
-
-
 
 
 
@@ -5532,6 +5267,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
 </script>
+
 
 
 
