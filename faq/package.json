@@ -47,7 +47,6 @@
     "@radix-ui/react-tooltip": "^1.2.8",
     "@studio-freight/lenis": "^1.0.42",
     "animejs": "^4.1.4",
-    "astro": "^5.13.3",
     "daisyui": "^5.0.54",
     "firebase": "^12.1.0",
     "framer-motion": "^12.23.12",
