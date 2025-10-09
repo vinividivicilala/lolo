@@ -38,7 +38,7 @@ export default function Home() {
     );
 
     // Anime.js for floating elements
-    anime.default({
+    anime({
       targets: '.floating-element',
       translateY: [-15, 15],
       duration: 3000,
@@ -168,5 +168,6 @@ export default function Home() {
     </div>
   );
 }
+
 
 
