@@ -1,12 +1,13 @@
 [build]
   base = "faq"          # Jika proyek Next.js berada di dalam folder "faq"
   command = "npm run build"
-  publish = ".next"     # Atau "out" jika menggunakan Static Export
+  publish = ".next"     # Menggunakan folder .next sebagai publikasi
 
 [build.environment]
-  NODE_VERSION = "20"   # Pastikan menggunakan Node.js 20.x
+  NODE_VERSION = "22"   # Pastikan menggunakan Node.js 20.x
 
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
+# Hapus bagian redirects yang tidak perlu
+# [[redirects]]
+#   from = "/*"
+#   to = "/index.html"
+#   status = 200
