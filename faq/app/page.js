@@ -2,8 +2,9 @@
 
 import { useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
+
+// ✅ Import GSAP dengan cara yang benar
 import { gsap } from 'gsap';
-import anime from 'animejs';
 
 export default function Home() {
   const heroRef = useRef(null);
@@ -11,34 +12,62 @@ export default function Home() {
   const textRef = useRef(null);
 
   useEffect(() => {
-    console.log('🚀 Animations started');
+    console.log('🚀 GSAP Animations starting...');
 
-    // ✅ GSAP Animation saja
+    // ✅ GSAP Animation dengan error handling
     if (textRef.current && imageRef.current) {
-      const tl = gsap.timeline();
-      tl.fromTo(
-        textRef.current,
-        { opacity: 0, y: 50 },
-        { opacity: 1, y: 0, duration: 1.2, ease: 'power3.out' }
-      ).fromTo(
-        imageRef.current,
-        { scale: 1.2, opacity: 0 },
-        { scale: 1, opacity: 1, duration: 1.5, ease: 'power2.out' },
-        '-=0.5'
-      );
+      try {
+        const tl = gsap.timeline();
+        
+        tl.fromTo(
+          textRef.current,
+          { 
+            opacity: 0, 
+            y: 50,
+            duration: 0 // reset duration
+          },
+          { 
+            opacity: 1, 
+            y: 0, 
+            duration: 1.2, 
+            ease: 'power3.out' 
+          }
+        ).fromTo(
+          imageRef.current,
+          { 
+            scale: 1.2, 
+            opacity: 0,
+            duration: 0 // reset duration
+          },
+          { 
+            scale: 1, 
+            opacity: 1, 
+            duration: 1.5, 
+            ease: 'power2.out' 
+          },
+          '-=0.5'
+        );
+
+        console.log('✅ GSAP timeline created successfully');
+      } catch (error) {
+        console.error('❌ GSAP error:', error);
+      }
     }
 
-    // ✅ Anime.js floating effect
-    anime({
-      targets: '.floating-element',
-      translateY: [-15, 15],
-      duration: 3000,
-      direction: 'alternate',
-      loop: true,
-      easing: 'easeInOutSine',
-    });
+    // ✅ Simple floating animation dengan GSAP (ganti Anime.js)
+    const floatingElements = document.querySelectorAll('.floating-element');
+    if (floatingElements.length > 0) {
+      floatingElements.forEach(el => {
+        gsap.to(el, {
+          y: -15,
+          duration: 1.5,
+          yoyo: true,
+          repeat: -1,
+          ease: "sine.inOut"
+        });
+      });
+    }
 
-    // ✅ No cleanup needed for simple animations
   }, []);
 
   return (
@@ -57,6 +86,7 @@ export default function Home() {
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 1, delay: 0.2 }}
               className="text-center lg:text-left"
+              style={{ opacity: 0, transform: 'translateY(50px)' }} // Initial state untuk GSAP
             >
               <motion.h1
                 className="text-5xl sm:text-6xl lg:text-7xl font-bold mb-6"
@@ -103,6 +133,7 @@ export default function Home() {
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 1, delay: 0.5 }}
               className="relative"
+              style={{ opacity: 0, transform: 'scale(1.2)' }} // Initial state untuk GSAP
             >
               <div className="relative rounded-2xl overflow-hidden shadow-2xl floating-element">
                 <motion.img
