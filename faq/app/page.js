@@ -4,7 +4,6 @@ import { useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { gsap } from 'gsap';
 import anime from 'animejs';
-import { Lenis } from '@studio-freight/lenis'; // ✅ Named import
 
 export default function Home() {
   const heroRef = useRef(null);
@@ -12,36 +11,9 @@ export default function Home() {
   const textRef = useRef(null);
 
   useEffect(() => {
-    let lenis;
-    
-    // ✅ Inisialisasi Lenis dengan error handling
-    const initLenis = () => {
-      try {
-        lenis = new Lenis({
-          duration: 1.2,
-          easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-          smooth: true,
-          smoothTouch: false,
-          touchMultiplier: 2,
-        });
+    console.log('🚀 Animations started');
 
-        const raf = (time) => {
-          lenis.raf(time);
-          requestAnimationFrame(raf);
-        };
-        
-        requestAnimationFrame(raf);
-        
-        return lenis;
-      } catch (error) {
-        console.warn('Lenis initialization failed:', error);
-        return null;
-      }
-    };
-
-    lenis = initLenis();
-
-    // ✅ GSAP Animation
+    // ✅ GSAP Animation saja
     if (textRef.current && imageRef.current) {
       const tl = gsap.timeline();
       tl.fromTo(
@@ -56,7 +28,7 @@ export default function Home() {
       );
     }
 
-    // ✅ Anime.js Animation
+    // ✅ Anime.js floating effect
     anime({
       targets: '.floating-element',
       translateY: [-15, 15],
@@ -66,15 +38,9 @@ export default function Home() {
       easing: 'easeInOutSine',
     });
 
-    // ✅ Cleanup
-    return () => {
-      if (lenis && typeof lenis.destroy === 'function') {
-        lenis.destroy();
-      }
-    };
+    // ✅ No cleanup needed for simple animations
   }, []);
 
-  // JSX tetap sama...
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 overflow-hidden">
       {/* Hero Section */}
