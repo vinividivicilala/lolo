@@ -13,7 +13,8 @@
     "start:next": "next start",
     "lint": "next lint",
     "shadcn": "shadcn",
-    "dev": "npm-run-all --parallel watch:ts dev:css dev:next"
+    "dev": "npm-run-all --parallel watch:ts dev:css dev:next",
+    "start": "next start"
     
   },
   "dependencies": {
