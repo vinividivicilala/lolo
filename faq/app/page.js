@@ -4,8 +4,8 @@ import { useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import gsap from 'gsap';
 import * as anime from 'animejs';
-import LenisImport from '@studio-freight/lenis';
-const Lenis = LenisImport.default || LenisImport;
+import { Lenis } from '@studio-freight/lenis'; // ✅ named import yang benar
+
 
 
 export default function Home() {
@@ -170,6 +170,7 @@ export default function Home() {
     </div>
   );
 }
+
 
 
 
