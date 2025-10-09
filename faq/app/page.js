@@ -3,10 +3,10 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { gsap } from 'gsap';
-import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
-import { Badge } from '@/components/ui/badge';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Button } from '../components/ui/button';
+import { Progress } from '../components/ui/progress';
+import { Badge } from '../components/ui/badge';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../components/ui/tooltip';
 
 export default function MaintenancePage() {
   const containerRef = useRef(null);
@@ -309,3 +309,4 @@ export default function MaintenancePage() {
     </TooltipProvider>
   );
 }
+
