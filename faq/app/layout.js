@@ -22,7 +22,7 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" className={`${poppins.variable} ${clashDisplay.variable}`}>
+    <html lang="en" className={`${poppins.variable} ${inter.variable}`}>
       <body className="antialiased">
         {children}
       </body>
@@ -30,6 +30,7 @@ export default function RootLayout({ children }) {
   );
 
 }
+
 
 
 
