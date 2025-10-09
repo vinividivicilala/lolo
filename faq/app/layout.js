@@ -1,4 +1,4 @@
-import { Inter, Poppins, Clash_Display } from 'next/font/google';
+import { Inter, Poppins, ClashDisplay } from 'next/font/google';
 import './globals.css';
 
 const poppins = Poppins({
@@ -27,4 +27,5 @@ export default function RootLayout({ children }) {
       </body>
     </html>
   );
+
 }
