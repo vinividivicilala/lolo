@@ -4,7 +4,9 @@ import { useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import gsap from 'gsap';
 import * as anime from 'animejs';
-import Lenis from '@studio-freight/lenis';
+import LenisImport from '@studio-freight/lenis';
+const Lenis = LenisImport.default || LenisImport;
+
 
 export default function Home() {
   const heroRef = useRef(null);
@@ -168,6 +170,7 @@ export default function Home() {
     </div>
   );
 }
+
 
 
 
