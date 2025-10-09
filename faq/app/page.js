@@ -4,8 +4,7 @@ import { useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import gsap from 'gsap';
 import * as anime from 'animejs';
-// ⛑️ Pastikan kompatibilitas Lenis di semua mode
-import * as lenis from '@studio-freight/lenis';
+import Lenis from '@studio-freight/lenis';
 
 export default function Home() {
   const heroRef = useRef(null);
@@ -169,6 +168,7 @@ export default function Home() {
     </div>
   );
 }
+
 
 
 
