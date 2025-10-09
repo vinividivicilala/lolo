@@ -2,24 +2,27 @@
 const nextConfig = {
   reactStrictMode: true,
   output: 'standalone',
+
   experimental: {
     serverActions: {
       bodySizeLimit: '2mb',
-      allowedOrigins: ['*']
+      allowedOrigins: ['*'],
     },
-    // Pastikan transform tidak gagal di Netlify
-    forceSwcTransforms: true
+    // hapus "forceSwcTransforms" jika kamu tidak benar-benar butuh (kadang bikin konflik di Next 14/15)
   },
+
   images: {
-    unoptimized: true, // ⚠️ wajib diaktifkan agar build image tidak error
-    domains: ['localhost']
+    unoptimized: true,
+    domains: ['localhost'],
   },
+
   eslint: {
-    ignoreDuringBuilds: true // biar lint error tidak menggagalkan build
+    ignoreDuringBuilds: true,
   },
+
   typescript: {
-    ignoreBuildErrors: true // biar error TS tidak menggagalkan build
-  }
+    ignoreBuildErrors: true,
+  },
 };
 
 module.exports = nextConfig;
