@@ -1,16 +1,10 @@
-
-
 [build]
   base = "faq"
   command = "npm run build"
-  publish = ".next"
+  publish = "faq/.next"
+
+[build.environment]
+  NODE_VERSION = "22"
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
-
-# Root → index.html statis
-[[redirects]]
-  from = "/"
-  to = "/index.html"
-  status = 200
-  force = true
