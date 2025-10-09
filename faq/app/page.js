@@ -4,7 +4,7 @@ import { useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import gsap from 'gsap';
 import * as anime from 'animejs';
-import { Lenis } from '@studio-freight/lenis'; // ✅ named import yang benar
+import Lenis from '@studio-freight/lenis'; // ✅ FIX AKHIR
 
 
 
@@ -170,6 +170,7 @@ export default function Home() {
     </div>
   );
 }
+
 
 
 
