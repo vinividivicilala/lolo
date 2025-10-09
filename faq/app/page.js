@@ -3,7 +3,7 @@
 import { useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import gsap from 'gsap';
-import { anime } from 'animejs';
+import anime from 'animejs';
 import Lenis from '@studio-freight/lenis';
 
 export default function Home() {
@@ -168,4 +168,5 @@ export default function Home() {
     </div>
   );
 }
+
 
