@@ -1,16 +1,10 @@
 [build]
-  base = "faq"          # Jika proyek Next.js berada di dalam folder "faq"
+  base = "faq"
   command = "npm run build"
-  publish = ".next"     # Menggunakan folder .next sebagai publikasi
+  publish = ".next"
 
 [build.environment]
-  NODE_VERSION = "22"   # Pastikan menggunakan Node.js 20.x
+  NODE_VERSION = "22"
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
-
-# Redirect semua route ke handler Next.js
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
