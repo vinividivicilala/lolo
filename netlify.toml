@@ -1,13 +1,12 @@
 [build]
-  base = "faq"          # folder project astro kamu
+  base = "faq"          # Jika proyek Next.js berada di dalam folder "faq"
   command = "npm run build"
-  publish = "dist"      # hasil build astro ada di dist
+  publish = ".next"     # Atau "out" jika menggunakan Static Export
 
 [build.environment]
-  NODE_VERSION = "22"   # 🔑 paksa Netlify pakai Node 20.x
+  NODE_VERSION = "20"   # Pastikan menggunakan Node.js 20.x
 
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
-
