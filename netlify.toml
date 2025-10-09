@@ -1,7 +1,7 @@
 [build]
-base = "faq"
   command = "npm run build"
-  publish = "out"
+  publish = ".next"
+  functions = ".netlify/functions"
 
 [build.environment]
   NODE_VERSION = "22.18.0"
@@ -10,4 +10,3 @@ base = "faq"
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
-
