@@ -3,7 +3,7 @@
 import { useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import gsap from 'gsap';
-import anime from 'animejs';
+import * as anime from 'animejs';
 import Lenis from '@studio-freight/lenis';
 
 export default function Home() {
@@ -38,7 +38,7 @@ export default function Home() {
     );
 
     // Anime.js for floating elements
-    anime({
+    anime.default({
       targets: '.floating-element',
       translateY: [-15, 15],
       duration: 3000,
@@ -70,7 +70,7 @@ export default function Home() {
               className="text-center lg:text-left"
             >
               <motion.h1 
-                className="text-5xl sm:text-6xl lg:text-7xl font-bold mb-6 font-modern"
+                className="text-5xl sm:text-6xl lg:text-7xl font-bold mb-6"
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.5 }}
