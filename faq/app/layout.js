@@ -8,7 +8,7 @@ const poppins = Poppins({
   variable: '--font-poppins',
 });
 
-const clashDisplay = Clash_Display({
+const clashDisplay = ClashDisplay({
   subsets: ['latin'],
   display: 'swap',
   variable: '--font-clash',
@@ -29,3 +29,4 @@ export default function RootLayout({ children }) {
   );
 
 }
+
