@@ -2,10 +2,9 @@
 
 import { useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { gsap } from 'gsap'; // ✅ FIX PENTING — named import
+import { gsap } from 'gsap';
 import anime from 'animejs';
-// 🔹 Import Lenis — pastikan tidak double import default
-import Lenis from '@studio-freight/lenis';
+import { Lenis } from '@studio-freight/lenis'; // ✅ Named import
 
 export default function Home() {
   const heroRef = useRef(null);
@@ -13,25 +12,36 @@ export default function Home() {
   const textRef = useRef(null);
 
   useEffect(() => {
-    // ✅ Pastikan inisialisasi Lenis tidak duplikat
     let lenis;
-    try {
-      lenis = new Lenis({
-        duration: 1.2,
-        easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-        smooth: true,
-      });
+    
+    // ✅ Inisialisasi Lenis dengan error handling
+    const initLenis = () => {
+      try {
+        lenis = new Lenis({
+          duration: 1.2,
+          easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+          smooth: true,
+          smoothTouch: false,
+          touchMultiplier: 2,
+        });
 
-      function raf(time) {
-        lenis.raf(time);
+        const raf = (time) => {
+          lenis.raf(time);
+          requestAnimationFrame(raf);
+        };
+        
         requestAnimationFrame(raf);
+        
+        return lenis;
+      } catch (error) {
+        console.warn('Lenis initialization failed:', error);
+        return null;
       }
-      requestAnimationFrame(raf);
-    } catch (err) {
-      console.error('Lenis init failed:', err);
-    }
+    };
 
-    // ✅ GSAP animasi aman
+    lenis = initLenis();
+
+    // ✅ GSAP Animation
     if (textRef.current && imageRef.current) {
       const tl = gsap.timeline();
       tl.fromTo(
@@ -46,7 +56,7 @@ export default function Home() {
       );
     }
 
-    // ✅ Anime.js floating effect aman
+    // ✅ Anime.js Animation
     anime({
       targets: '.floating-element',
       translateY: [-15, 15],
@@ -56,12 +66,15 @@ export default function Home() {
       easing: 'easeInOutSine',
     });
 
-    // ✅ Cleanup untuk Lenis
+    // ✅ Cleanup
     return () => {
-      if (lenis && lenis.destroy) lenis.destroy();
+      if (lenis && typeof lenis.destroy === 'function') {
+        lenis.destroy();
+      }
     };
   }, []);
 
+  // JSX tetap sama...
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 overflow-hidden">
       {/* Hero Section */}
@@ -176,5 +189,3 @@ export default function Home() {
     </div>
   );
 }
-
-
