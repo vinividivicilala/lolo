@@ -4,9 +4,10 @@
   publish = "dist"      # hasil build astro ada di dist
 
 [build.environment]
-  NODE_VERSION = "20"   # 🔑 paksa Netlify pakai Node 20.x
+  NODE_VERSION = "22"   # 🔑 paksa Netlify pakai Node 20.x
 
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
+
