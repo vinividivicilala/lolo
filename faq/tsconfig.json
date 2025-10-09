@@ -25,10 +25,12 @@
 
     /* ===== Base URL ===== */
     "baseUrl": ".",
-    "paths": {
-      "@/*": ["src/*"]
-    }
+   "paths": {
+  "@/*": ["./*"]
+}
   },
+
+  
   "include": [
     "next-env.d.ts",
     "**/*.ts",
@@ -38,3 +40,4 @@
   ],
   "exclude": ["node_modules"]
 }
+
