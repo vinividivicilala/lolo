@@ -1,5 +1,6 @@
 'use client';
 
+import React from "react"; // ⬅️ WAJIB UNTUK forwardRef DAN JSX
 import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { gsap } from 'gsap';
@@ -399,4 +400,5 @@ export default function MaintenancePage() {
     </TooltipProvider>
   );
 }
+
 
