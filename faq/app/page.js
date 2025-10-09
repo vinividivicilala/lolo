@@ -3,10 +3,17 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { gsap } from 'gsap';
-import { Button } from '../components/ui/button';
-import { Progress } from '../components/ui/progress';
-import { Badge } from '../components/ui/badge';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../components/ui/tooltip';
+
+// ✅ IMPORT LANGSUNG DARI RADIX UI
+import * as ProgressPrimitive from '@radix-ui/react-progress';
+import * as TooltipPrimitive from '@radix-ui/react-tooltip';
+
+// ✅ IMPORT LANGSUNG DARI LUCIDE REACT (icons)
+import { Mail, Phone, Clock, Settings } from 'lucide-react';
+
+// ✅ IMPORT SHADCN UTILITIES LANGSUNG
+import { cva } from 'class-variance-authority';
+import { cn } from '@/lib/utils';
 
 export default function MaintenancePage() {
   const containerRef = useRef(null);
@@ -53,13 +60,104 @@ export default function MaintenancePage() {
 
   const handleEmailClick = () => {
     navigator.clipboard.writeText('support@example.com');
-    // Bisa tambahkan toast notification di sini
   };
 
   const handlePhoneClick = () => {
     navigator.clipboard.writeText('+1 (555) 123-4567');
-    // Bisa tambahkan toast notification di sini
   };
+
+  // ✅ SHADCN BUTTON COMPONENT LANGSUNG
+  const buttonVariants = cva(
+    "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 dark:ring-offset-slate-950 dark:focus-visible:ring-slate-300",
+    {
+      variants: {
+        variant: {
+          default: "bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700 shadow-lg hover:shadow-xl transition-all duration-300",
+          destructive: "bg-red-500 text-slate-50 hover:bg-red-500/90 dark:bg-red-900 dark:text-slate-50 dark:hover:bg-red-900/90",
+          outline: "border border-slate-200 bg-white hover:bg-slate-100 hover:text-slate-900 dark:border-slate-800 dark:bg-slate-950 dark:hover:bg-slate-800 dark:hover:text-slate-50",
+          secondary: "bg-slate-100 text-slate-900 hover:bg-slate-100/80 dark:bg-slate-800 dark:text-slate-50 dark:hover:bg-slate-800/80",
+          ghost: "hover:bg-slate-100 hover:text-slate-900 dark:hover:bg-slate-800 dark:hover:text-slate-50",
+          link: "text-slate-900 underline-offset-4 hover:underline dark:text-slate-50",
+        },
+        size: {
+          default: "h-10 px-4 py-2",
+          sm: "h-9 rounded-md px-3",
+          lg: "h-11 rounded-md px-8",
+          icon: "h-10 w-10",
+        },
+      },
+      defaultVariants: {
+        variant: "default",
+        size: "default",
+      },
+    }
+  );
+
+  const Button = ({ className, variant, size, ...props }) => {
+    return (
+      <button
+        className={cn(buttonVariants({ variant, size, className }))}
+        {...props}
+      />
+    );
+  };
+
+  // ✅ SHADCN BADGE COMPONENT LANGSUNG
+  const badgeVariants = cva(
+    "inline-flex items-center rounded-full border border-slate-200 px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-slate-950 focus:ring-offset-2 dark:border-slate-800 dark:focus:ring-slate-300",
+    {
+      variants: {
+        variant: {
+          default: "border-transparent bg-slate-900 text-slate-50 hover:bg-slate-900/80 dark:bg-slate-50 dark:text-slate-900 dark:hover:bg-slate-50/80",
+          secondary: "border-transparent bg-slate-100 text-slate-900 hover:bg-slate-100/80 dark:bg-slate-800 dark:text-slate-50 dark:hover:bg-slate-800/80",
+          destructive: "border-transparent bg-red-500 text-slate-50 hover:bg-red-500/80 dark:bg-red-900 dark:text-slate-50 dark:hover:bg-red-900/80",
+          outline: "text-slate-950 dark:text-slate-50",
+          warning: "border-transparent bg-yellow-500 text-white hover:bg-yellow-600",
+        },
+      },
+      defaultVariants: {
+        variant: "default",
+      },
+    }
+  );
+
+  const Badge = ({ className, variant, ...props }) => {
+    return (
+      <div className={cn(badgeVariants({ variant, className }))} {...props} />
+    );
+  };
+
+  // ✅ RADIX UI PROGRESS COMPONENT
+  const Progress = ({ value, className }) => (
+    <ProgressPrimitive.Root
+      className={cn(
+        "relative h-2 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800",
+        className
+      )}
+    >
+      <ProgressPrimitive.Indicator
+        className="h-full w-full flex-1 bg-gradient-to-r from-blue-500 to-purple-500 transition-all duration-1000"
+        style={{ transform: `translateX(-${100 - (value || 0)}%)` }}
+      />
+    </ProgressPrimitive.Root>
+  );
+
+  // ✅ RADIX UI TOOLTIP COMPONENTS
+  const TooltipProvider = TooltipPrimitive.Provider;
+  const Tooltip = TooltipPrimitive.Root;
+  const TooltipTrigger = TooltipPrimitive.Trigger;
+  const TooltipContent = React.forwardRef(({ className, sideOffset = 4, ...props }, ref) => (
+    <TooltipPrimitive.Content
+      ref={ref}
+      sideOffset={sideOffset}
+      className={cn(
+        "z-50 overflow-hidden rounded-md border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-950 shadow-md animate-in fade-in-0 zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-50",
+        className
+      )}
+      {...props}
+    />
+  ));
+  TooltipContent.displayName = TooltipPrimitive.Content.displayName;
 
   return (
     <TooltipProvider>
@@ -148,7 +246,7 @@ export default function MaintenancePage() {
                       </TooltipContent>
                     </Tooltip>
                   </div>
-                  <Progress value={progress} className="h-2" />
+                  <Progress value={progress} />
                 </motion.div>
 
                 {/* Estimated Time */}
@@ -159,9 +257,7 @@ export default function MaintenancePage() {
                   transition={{ duration: 0.8, delay: 1.4 }}
                 >
                   <div className="flex items-center space-x-2">
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
+                    <Clock className="w-5 h-5" />
                     <span>Estimated time: 2-3 hours</span>
                   </div>
                 </motion.div>
@@ -180,14 +276,12 @@ export default function MaintenancePage() {
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <Button 
-                          variant="gradient" 
+                          variant="default" 
                           size="lg"
-                          className="floating-element font-poppins transition-transform duration-300"
+                          className="floating-element font-poppins"
                           onClick={handleEmailClick}
                         >
-                          <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                          </svg>
+                          <Mail className="w-4 h-4 mr-2" />
                           support@example.com
                         </Button>
                       </TooltipTrigger>
@@ -201,12 +295,10 @@ export default function MaintenancePage() {
                         <Button 
                           variant="outline" 
                           size="lg"
-                          className="border-gray-700 text-gray-300 hover:bg-gray-800 font-poppins transition-transform duration-300"
+                          className="font-poppins"
                           onClick={handlePhoneClick}
                         >
-                          <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                          </svg>
+                          <Phone className="w-4 h-4 mr-2" />
                           +1 (555) 123-4567
                         </Button>
                       </TooltipTrigger>
@@ -246,9 +338,7 @@ export default function MaintenancePage() {
                           animate={{ rotate: 360 }}
                           transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
                         >
-                          <svg className="w-8 h-8 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-                          </svg>
+                          <Settings className="w-8 h-8 text-black" />
                         </motion.div>
                       </TooltipTrigger>
                       <TooltipContent>
@@ -309,4 +399,3 @@ export default function MaintenancePage() {
     </TooltipProvider>
   );
 }
-
