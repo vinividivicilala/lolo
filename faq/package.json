@@ -13,8 +13,8 @@
     "start:next": "next start",
     "lint": "next lint",
     "shadcn": "shadcn",
-    "dev": "npm-run-all --parallel watch:ts dev:css dev:next",
-    "export": "next export"
+    "dev": "npm-run-all --parallel watch:ts dev:css dev:next"
+    
   },
   "dependencies": {
     "@heroui/react": "^2.8.3",
