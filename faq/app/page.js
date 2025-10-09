@@ -2,11 +2,8 @@
 
 import { useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import gsap from 'gsap';
-
+import { gsap } from 'gsap'; // ✅ FIX PENTING — named import
 import anime from 'animejs';
-
-
 // 🔹 Import Lenis — pastikan tidak double import default
 import Lenis from '@studio-freight/lenis';
 
@@ -179,4 +176,5 @@ export default function Home() {
     </div>
   );
 }
+
 
