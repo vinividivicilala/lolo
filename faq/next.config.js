@@ -1,11 +1,11 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   experimental: {
-    appDir: true,
+    appDir: true,  // Enable the experimental appDir feature
   },
   images: {
     domains: ['localhost'],
   },
 }
 
-module.exports = nextConfig
+module.exports = nextConfig;
