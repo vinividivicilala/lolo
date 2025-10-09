@@ -8,10 +8,11 @@ const poppins = Poppins({
   variable: '--font-poppins',
 });
 
-const clashDisplay = ClashDisplay({
+const inter = Inter({
   subsets: ['latin'],
+  weight: ['100', '200', '300', '400', '500', '600', '700', '800', '900'],
   display: 'swap',
-  variable: '--font-clash',
+  variable: '--font-inter',
 });
 
 export const metadata = {
@@ -29,4 +30,5 @@ export default function RootLayout({ children }) {
   );
 
 }
+
 
