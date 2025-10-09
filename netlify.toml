@@ -6,8 +6,11 @@
 [build.environment]
   NODE_VERSION = "22"   # Pastikan menggunakan Node.js 20.x
 
-# Hapus bagian redirects yang tidak perlu
-# [[redirects]]
-#   from = "/*"
-#   to = "/index.html"
-#   status = 200
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+
+# Redirect semua route ke handler Next.js
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
