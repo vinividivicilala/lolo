@@ -1,36 +1,20 @@
-import { Inter, Poppins} from 'next/font/google';
+import type { Metadata } from 'next'
 
-const poppins = Poppins({
-  weight: ['300', '400', '500', '600', '700', '800'],
-  subsets: ['latin'],
-  display: 'swap',
-  variable: '--font-poppins',
-});
+export const metadata: Metadata = {
+  title: 'Your App',
+  description: 'Your app description',
+}
 
-const inter = Inter({
-  subsets: ['latin'],
-  weight: ['100', '200', '300', '400', '500', '600', '700', '800', '900'],
-  display: 'swap',
-  variable: '--font-inter',
-});
-
-export const metadata = {
-  title: 'Modern Homepage - Next.js & React',
-  description: 'Modern homepage built with Next.js, React, and advanced animations',
-};
-
-export default function RootLayout({ children }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
   return (
-    <html lang="en" className={`${poppins.variable} ${inter.variable}`}>
-      <body className="antialiased">
+    <html lang="en" style={{ margin: 0, padding: 0, height: '100%' }}>
+      <body style={{ margin: 0, padding: 0, height: '100%', backgroundColor: 'black' }}>
         {children}
       </body>
     </html>
-  );
-
+  )
 }
-
-
-
-
-
