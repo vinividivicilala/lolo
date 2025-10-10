@@ -1,6 +1,6 @@
 'use client';
 
-import React from "react"; // ⬅️ WAJIB UNTUK forwardRef DAN JSX
+import React from "react";
 import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { gsap } from 'gsap';
@@ -10,20 +10,24 @@ import * as ProgressPrimitive from '@radix-ui/react-progress';
 import * as TooltipPrimitive from '@radix-ui/react-tooltip';
 
 // ✅ IMPORT LANGSUNG DARI LUCIDE REACT (icons)
-import { Mail, Phone, Clock, Settings } from 'lucide-react';
+import { Mail, Phone, Clock, Settings, Wrench, Hammer, Cog, Sparkles } from 'lucide-react';
 
 // ✅ IMPORT SHADCN UTILITIES LANGSUNG
 import { cva } from 'class-variance-authority';
 import { cn } from '@/lib/utils';
 
-export default function MaintenancePage() {
+export default function DevelopmentPage() {
   const containerRef = useRef(null);
   const textRef = useRef(null);
   const imageRef = useRef(null);
+  const titleRef = useRef(null);
   const [progress, setProgress] = useState(0);
+  const [animatedText, setAnimatedText] = useState("");
+
+  const fullText = "🚧 Website Masih Dalam Pengembangan! 💻";
 
   useEffect(() => {
-    // GSAP Animations
+    // GSAP Animations untuk container
     const tl = gsap.timeline();
 
     if (textRef.current && imageRef.current) {
@@ -40,31 +44,51 @@ export default function MaintenancePage() {
       );
     }
 
+    // Animasi teks dengan emoticon
+    let currentIndex = 0;
+    const textInterval = setInterval(() => {
+      if (currentIndex <= fullText.length) {
+        setAnimatedText(fullText.slice(0, currentIndex));
+        currentIndex++;
+      } else {
+        clearInterval(textInterval);
+      }
+    }, 100);
+
     // Simulate progress animation
     const progressTimer = setTimeout(() => {
-      setProgress(85);
+      setProgress(65);
     }, 1000);
 
-    // Floating animation
+    // Floating animation untuk elemen tertentu
     gsap.to('.floating-element', {
-      y: -10,
+      y: -15,
       duration: 2,
       yoyo: true,
       repeat: -1,
       ease: "sine.inOut"
     });
 
+    // Animasi rotasi untuk icon tools
+    gsap.to('.rotating-icon', {
+      rotation: 360,
+      duration: 3,
+      repeat: -1,
+      ease: "none"
+    });
+
     return () => {
+      clearInterval(textInterval);
       clearTimeout(progressTimer);
     };
   }, []);
 
   const handleEmailClick = () => {
-    navigator.clipboard.writeText('support@example.com');
+    navigator.clipboard.writeText('developer@example.com');
   };
 
   const handlePhoneClick = () => {
-    navigator.clipboard.writeText('+1 (555) 123-4567');
+    navigator.clipboard.writeText('+62 812-3456-7890');
   };
 
   // ✅ SHADCN BUTTON COMPONENT LANGSUNG
@@ -114,6 +138,7 @@ export default function MaintenancePage() {
           destructive: "border-transparent bg-red-500 text-slate-50 hover:bg-red-500/80 dark:bg-red-900 dark:text-slate-50 dark:hover:bg-red-900/80",
           outline: "text-slate-950 dark:text-slate-50",
           warning: "border-transparent bg-yellow-500 text-white hover:bg-yellow-600",
+          development: "border-transparent bg-gradient-to-r from-blue-500 to-purple-500 text-white hover:from-blue-600 hover:to-purple-600",
         },
       },
       defaultVariants: {
@@ -132,7 +157,7 @@ export default function MaintenancePage() {
   const Progress = ({ value, className }) => (
     <ProgressPrimitive.Root
       className={cn(
-        "relative h-2 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800",
+        "relative h-3 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800",
         className
       )}
     >
@@ -181,169 +206,121 @@ export default function MaintenancePage() {
         {/* Main Content */}
         <section className="relative min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8">
           <div className="container mx-auto max-w-6xl">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+            <div className="flex flex-col items-center justify-center text-center space-y-12">
               
-              {/* Text Content */}
+              {/* Animated Title dengan Emoticon */}
               <motion.div
-                ref={textRef}
-                className="text-center lg:text-left space-y-8"
-                initial={{ opacity: 0, x: -50 }}
-                animate={{ opacity: 1, x: 0 }}
+                className="space-y-8"
+                initial={{ opacity: 0, y: -50 }}
+                animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 1 }}
               >
-                {/* Maintenance Badge */}
+                {/* Development Badge */}
                 <motion.div
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ duration: 0.6, delay: 0.3 }}
                 >
-                  <Badge variant="warning" className="mb-6 py-2 px-4 text-sm font-poppins">
-                    <div className="w-2 h-2 bg-white rounded-full mr-2 animate-pulse" />
-                    UNDER MAINTENANCE
+                  <Badge variant="development" className="mb-6 py-3 px-6 text-base font-bold">
+                    <Sparkles className="w-4 h-4 mr-2 rotating-icon" />
+                    DALAM PENGEMBANGAN
+                    <Sparkles className="w-4 h-4 ml-2 rotating-icon" />
                   </Badge>
                 </motion.div>
 
-                {/* Main Heading */}
+                {/* Main Heading dengan animasi ketikan */}
                 <motion.div
-                  initial={{ opacity: 0, y: 30 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.8, delay: 0.5 }}
-                >
-                  <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight font-poppins">
-                    <span className="text-white block">We&apos;ll Be Back</span>
-                    <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 block mt-2">
-                      Soon
-                    </span>
-                  </h1>
-                </motion.div>
-
-                {/* Description */}
-                <motion.p
-                  className="text-xl text-gray-300 leading-relaxed font-inter"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.8, delay: 0.8 }}
-                >
-                  Our website is currently undergoing scheduled maintenance. 
-                  We&apos;re working hard to improve your experience and will be back 
-                  shortly with exciting new features.
-                </motion.p>
-
-                {/* Progress Section */}
-                <motion.div
-                  className="space-y-4"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.8, delay: 1.1 }}
-                >
-                  <div className="flex justify-between text-sm font-inter">
-                    <span className="text-gray-400">Progress</span>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <span className="text-blue-400 font-medium cursor-help">{progress}%</span>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p className="font-inter">Estimated completion in 2-3 hours</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </div>
-                  <Progress value={progress} />
-                </motion.div>
-
-                {/* Estimated Time */}
-                <motion.div
-                  className="flex items-center justify-center lg:justify-start space-x-4 text-gray-400 font-inter text-sm"
+                  ref={textRef}
+                  className="space-y-6"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  transition={{ duration: 0.8, delay: 1.4 }}
+                  transition={{ duration: 1, delay: 0.5 }}
                 >
-                  <div className="flex items-center space-x-2">
-                    <Clock className="w-5 h-5" />
-                    <span>Estimated time: 2-3 hours</span>
-                  </div>
-                </motion.div>
-
-                {/* Contact Info */}
-                <motion.div
-                  className="pt-6 border-t border-gray-800"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.8, delay: 1.7 }}
-                >
-                  <p className="text-gray-400 font-inter mb-4">
-                    For urgent inquiries, please contact us:
-                  </p>
-                  <div className="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start">
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button 
-                          variant="default" 
-                          size="lg"
-                          className="floating-element font-poppins"
-                          onClick={handleEmailClick}
-                        >
-                          <Mail className="w-4 h-4 mr-2" />
-                          support@example.com
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p className="font-inter">Click to copy email address</p>
-                      </TooltipContent>
-                    </Tooltip>
-                    
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button 
-                          variant="outline" 
-                          size="lg"
-                          className="font-poppins"
-                          onClick={handlePhoneClick}
-                        >
-                          <Phone className="w-4 h-4 mr-2" />
-                          +1 (555) 123-4567
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p className="font-inter">24/7 Support Hotline</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </div>
+                  <h1 className="text-5xl sm:text-6xl lg:text-7xl xl:text-8xl font-black leading-tight font-poppins">
+                    <span className="text-white block">
+                      {animatedText}
+                      <span className="inline-block w-2 h-12 bg-yellow-400 ml-1 animate-pulse"></span>
+                    </span>
+                  </h1>
+                  
+                  <motion.p
+                    className="text-2xl text-gray-300 leading-relaxed font-inter max-w-4xl mx-auto"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.8, delay: 1.5 }}
+                  >
+                    Kami sedang bekerja keras untuk memberikan pengalaman terbaik! 
+                    ⚡ Stay tuned for amazing updates! 🚀
+                  </motion.p>
                 </motion.div>
               </motion.div>
 
-              {/* Image Section */}
+              {/* Image Section di Tengah */}
               <motion.div
                 ref={imageRef}
-                className="relative"
-                initial={{ opacity: 0, x: 50 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 1, delay: 0.5 }}
+                className="relative w-full max-w-2xl"
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 1, delay: 0.8 }}
               >
-                <div className="relative rounded-3xl overflow-hidden shadow-2xl floating-element">
+                <div className="relative rounded-3xl overflow-hidden shadow-2xl floating-element border-4 border-yellow-400">
                   <motion.img
                     src="/images/5.jpg"
-                    alt="Maintenance in Progress"
+                    alt="Development in Progress"
                     className="w-full h-auto object-cover"
-                    whileHover={{ scale: 1.03 }}
+                    whileHover={{ scale: 1.05 }}
                     transition={{ duration: 0.4 }}
                   />
-                  {/* Overlay Gradient */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/40 opacity-80" />
                   
-                  {/* Animated Maintenance Icon */}
+                  {/* Overlay Gradient */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/50 opacity-80" />
+                  
+                  {/* Animated Development Icons */}
+                  <div className="absolute top-6 left-6">
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <motion.div
+                          className="w-14 h-14 bg-blue-500 rounded-full flex items-center justify-center cursor-pointer shadow-lg rotating-icon"
+                          whileHover={{ scale: 1.2 }}
+                        >
+                          <Wrench className="w-6 h-6 text-white" />
+                        </motion.div>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p className="font-inter">Development Tools</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </div>
+
                   <div className="absolute top-6 right-6">
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <motion.div
-                          className="w-16 h-16 bg-yellow-400 rounded-full flex items-center justify-center cursor-pointer shadow-lg"
-                          animate={{ rotate: 360 }}
-                          transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
+                          className="w-14 h-14 bg-green-500 rounded-full flex items-center justify-center cursor-pointer shadow-lg rotating-icon"
+                          whileHover={{ scale: 1.2 }}
                         >
-                          <Settings className="w-8 h-8 text-black" />
+                          <Hammer className="w-6 h-6 text-white" />
                         </motion.div>
                       </TooltipTrigger>
                       <TooltipContent>
-                        <p className="font-inter">Maintenance in progress</p>
+                        <p className="font-inter">Building in Progress</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </div>
+
+                  <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2">
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <motion.div
+                          className="w-16 h-16 bg-yellow-400 rounded-full flex items-center justify-center cursor-pointer shadow-lg rotating-icon"
+                          animate={{ rotate: 360 }}
+                          transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                        >
+                          <Cog className="w-8 h-8 text-black" />
+                        </motion.div>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p className="font-inter">Development in Progress</p>
                       </TooltipContent>
                     </Tooltip>
                   </div>
@@ -351,10 +328,10 @@ export default function MaintenancePage() {
 
                 {/* Floating Elements */}
                 <motion.div
-                  className="absolute -top-4 -left-4 w-20 h-20 bg-blue-500 rounded-full opacity-30 blur-xl"
+                  className="absolute -top-4 -left-4 w-24 h-24 bg-blue-500 rounded-full opacity-40 blur-xl"
                   animate={{
-                    scale: [1, 1.3, 1],
-                    opacity: [0.3, 0.5, 0.3],
+                    scale: [1, 1.4, 1],
+                    opacity: [0.3, 0.6, 0.3],
                   }}
                   transition={{
                     duration: 3,
@@ -363,10 +340,10 @@ export default function MaintenancePage() {
                   }}
                 />
                 <motion.div
-                  className="absolute -bottom-4 -right-4 w-24 h-24 bg-purple-500 rounded-full opacity-30 blur-xl"
+                  className="absolute -bottom-4 -right-4 w-28 h-28 bg-purple-500 rounded-full opacity-40 blur-xl"
                   animate={{
-                    scale: [1.2, 1, 1.2],
-                    opacity: [0.3, 0.5, 0.3],
+                    scale: [1.3, 1, 1.3],
+                    opacity: [0.3, 0.6, 0.3],
                   }}
                   transition={{
                     duration: 4,
@@ -375,22 +352,111 @@ export default function MaintenancePage() {
                   }}
                 />
               </motion.div>
+
+              {/* Progress dan Info Section */}
+              <motion.div
+                className="w-full max-w-2xl space-y-8"
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 1, delay: 1.2 }}
+              >
+                {/* Progress Section */}
+                <motion.div
+                  className="space-y-4 bg-gray-900/50 rounded-2xl p-6 backdrop-blur-sm"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.8, delay: 1.5 }}
+                >
+                  <div className="flex justify-between text-lg font-inter font-semibold">
+                    <span className="text-gray-300">Progress Development</span>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <span className="text-blue-400 font-bold cursor-help">{progress}%</span>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p className="font-inter">Estimated completion in 2-3 weeks</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </div>
+                  <Progress value={progress} className="h-4" />
+                </motion.div>
+
+                {/* Estimated Time */}
+                <motion.div
+                  className="flex items-center justify-center space-x-6 text-gray-300 font-inter text-lg font-medium"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.8, delay: 1.8 }}
+                >
+                  <div className="flex items-center space-x-3 bg-gray-900/50 rounded-xl px-6 py-3">
+                    <Clock className="w-6 h-6 text-yellow-400 rotating-icon" />
+                    <span>Estimasi: 2-3 Minggu Lagi</span>
+                  </div>
+                </motion.div>
+
+                {/* Contact Info */}
+                <motion.div
+                  className="pt-6 border-t border-gray-700"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.8, delay: 2.1 }}
+                >
+                  <p className="text-gray-400 font-inter mb-6 text-lg">
+                    Butuh informasi lebih lanjut? Hubungi developer:
+                  </p>
+                  <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button 
+                          variant="default" 
+                          size="lg"
+                          className="floating-element font-poppins text-base font-semibold"
+                          onClick={handleEmailClick}
+                        >
+                          <Mail className="w-5 h-5 mr-3" />
+                          developer@example.com
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p className="font-inter">Klik untuk copy email developer</p>
+                      </TooltipContent>
+                    </Tooltip>
+                    
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button 
+                          variant="outline" 
+                          size="lg"
+                          className="font-poppins text-base font-semibold"
+                          onClick={handlePhoneClick}
+                        >
+                          <Phone className="w-5 h-5 mr-3" />
+                          +62 812-3456-7890
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p className="font-inter">WhatsApp Developer</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </div>
+                </motion.div>
+              </motion.div>
             </div>
           </div>
 
           {/* Scroll Indicator */}
           <motion.div
             className="absolute bottom-8 left-1/2 transform -translate-x-1/2 text-center"
-            animate={{ y: [0, 10, 0] }}
+            animate={{ y: [0, 15, 0] }}
             transition={{ duration: 2, repeat: Infinity }}
           >
-            <div className="text-gray-500 text-sm font-inter mb-2">
-              Thank you for your patience
+            <div className="text-gray-500 text-lg font-inter mb-3 font-medium">
+              ⏳ Terima kasih atas kesabaran Anda! 🙏
             </div>
-            <div className="w-8 h-12 border-2 border-gray-600 rounded-full flex justify-center mx-auto">
+            <div className="w-10 h-16 border-2 border-gray-600 rounded-full flex justify-center mx-auto">
               <motion.div
-                className="w-1 h-3 bg-gray-500 rounded-full mt-2"
-                animate={{ y: [0, 16, 0] }}
+                className="w-2 h-4 bg-yellow-400 rounded-full mt-3"
+                animate={{ y: [0, 24, 0] }}
                 transition={{ duration: 2, repeat: Infinity }}
               />
             </div>
@@ -400,5 +466,3 @@ export default function MaintenancePage() {
     </TooltipProvider>
   );
 }
-
-
