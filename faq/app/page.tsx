@@ -1,11 +1,14 @@
-'use client';
-
 import React from "react";
 
-export default function MaintenancePage(): React.JSX.Element {
+export default function HomePage(): React.JSX.Element {
   return (
-    <div className="min-h-screen bg-black">
+    <div style={{
+      minHeight: '100vh',
+      backgroundColor: 'black',
+      margin: 0,
+      padding: 0,
+      width: '100%'
+    }}>
     </div>
-  );
+  )
 }
-
