@@ -1,3 +1,5 @@
+'use client';
+
 import React from "react";
 
 export default function MaintenancePage(): React.JSX.Element {
@@ -6,3 +8,4 @@ export default function MaintenancePage(): React.JSX.Element {
     </div>
   );
 }
+
