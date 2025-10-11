@@ -1,32 +1,17 @@
 'use client';
 
 import React, { useState, useEffect } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function HomePage(): React.JSX.Element {
   const [showLoading, setShowLoading] = useState(true);
-  const [loadingText, setLoadingText] = useState("");
 
   useEffect(() => {
-    // Teks "Apa itu note" dalam gaya Jepang modern
-    const fullText = "ノートとは何ですか";
-    let currentIndex = 0;
+    const timer = setTimeout(() => {
+      setShowLoading(false);
+    }, 3000);
 
-    const typingInterval = setInterval(() => {
-      if (currentIndex <= fullText.length) {
-        setLoadingText(fullText.slice(0, currentIndex));
-        currentIndex++;
-      } else {
-        clearInterval(typingInterval);
-        
-        // Setelah selesai mengetik, tunggu sebentar lalu sembunyikan loading
-        setTimeout(() => {
-          setShowLoading(false);
-        }, 1500);
-      }
-    }, 100);
-
-    return () => clearInterval(typingInterval);
+    return () => clearTimeout(timer);
   }, []);
 
   return (
@@ -42,129 +27,274 @@ export default function HomePage(): React.JSX.Element {
       position: 'relative',
       overflow: 'hidden'
     }}>
-      {showLoading && (
-        <motion.div
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            width: '100%',
-            height: '100%',
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'center',
-            alignItems: 'center',
-            backgroundColor: 'black',
-            zIndex: 10
-          }}
-          initial={{ opacity: 1 }}
-          exit={{ 
-            opacity: 0,
-            transition: { duration: 0.8, ease: "easeInOut" }
-          }}
-        >
-          {/* Motion Graphic Background */}
+      <AnimatePresence>
+        {showLoading && (
           <motion.div
             style={{
               position: 'absolute',
-              width: '200px',
-              height: '200px',
-              borderRadius: '50%',
-              border: '2px solid rgba(255, 255, 255, 0.1)',
-            }}
-            animate={{
-              scale: [1, 1.5, 1],
-              rotate: [0, 180, 360],
-            }}
-            transition={{
-              duration: 4,
-              repeat: Infinity,
-              ease: "linear"
-            }}
-          />
-          
-          <motion.div
-            style={{
-              position: 'absolute',
-              width: '150px',
-              height: '150px',
-              border: '1px solid rgba(255, 255, 255, 0.2)',
-              borderRadius: '30% 70% 70% 30% / 30% 30% 70% 70%',
-            }}
-            animate={{
-              scale: [1.2, 0.8, 1.2],
-              rotate: [45, 135, 225, 315],
-            }}
-            transition={{
-              duration: 6,
-              repeat: Infinity,
-              ease: "easeInOut"
-            }}
-          />
-
-          {/* Loading Text */}
-          <motion.div
-            style={{
-              fontSize: '2.5rem',
-              fontWeight: 'bold',
-              color: 'white',
-              fontFamily: "'Noto Sans JP', 'Hiragino Sans', 'Yu Gothic', sans-serif",
-              textAlign: 'center',
-              position: 'relative',
-              zIndex: 2,
-              letterSpacing: '2px'
-            }}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-          >
-            {loadingText}
-            <motion.span
-              animate={{ opacity: [0, 1, 0] }}
-              transition={{ duration: 0.8, repeat: Infinity }}
-              style={{ marginLeft: '2px' }}
-            >
-              |
-            </motion.span>
-          </motion.div>
-
-          {/* Loading Dots */}
-          <motion.div
-            style={{
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
               display: 'flex',
-              gap: '8px',
-              marginTop: '20px'
+              flexDirection: 'column',
+              justifyContent: 'center',
+              alignItems: 'center',
+              backgroundColor: 'black',
+              zIndex: 10
+            }}
+            initial={{ opacity: 1 }}
+            exit={{ 
+              opacity: 0,
+              transition: { duration: 0.8, ease: "easeInOut" }
             }}
           >
-            {[0, 1, 2].map((index) => (
+            {/* Modern Geometric Motion Background */}
+            <motion.div
+              style={{
+                position: 'absolute',
+                width: '100%',
+                height: '100%',
+                background: 'linear-gradient(45deg, #000000 0%, #1a1a1a 100%)',
+              }}
+              animate={{
+                background: [
+                  'linear-gradient(45deg, #000000 0%, #1a1a1a 100%)',
+                  'linear-gradient(135deg, #000000 0%, #2a2a2a 100%)',
+                  'linear-gradient(225deg, #000000 0%, #1a1a1a 100%)',
+                ]
+              }}
+              transition={{
+                duration: 4,
+                repeat: Infinity,
+                ease: "easeInOut"
+              }}
+            />
+
+            {/* Animated Grid Lines */}
+            <motion.div
+              style={{
+                position: 'absolute',
+                width: '100%',
+                height: '100%',
+                backgroundImage: `
+                  linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+                  linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px)
+                `,
+                backgroundSize: '50px 50px',
+              }}
+              animate={{
+                backgroundPosition: ['0px 0px', '50px 50px'],
+              }}
+              transition={{
+                duration: 20,
+                repeat: Infinity,
+                ease: "linear"
+              }}
+            />
+
+            {/* Main Loading Text */}
+            <motion.div
+              style={{
+                fontSize: '3.5rem',
+                fontWeight: '900',
+                color: 'white',
+                fontFamily: "'Noto Sans JP', sans-serif",
+                textAlign: 'center',
+                position: 'relative',
+                zIndex: 2,
+                letterSpacing: '4px',
+                textShadow: '0 0 30px rgba(255,255,255,0.3)'
+              }}
+              initial={{ scale: 0.8, opacity: 0, rotateY: 90 }}
+              animate={{ 
+                scale: 1, 
+                opacity: 1, 
+                rotateY: 0,
+                textShadow: [
+                  '0 0 30px rgba(255,255,255,0.3)',
+                  '0 0 50px rgba(255,255,255,0.5)',
+                  '0 0 30px rgba(255,255,255,0.3)',
+                ]
+              }}
+              transition={{ 
+                duration: 1.5,
+                ease: "easeOut"
+              }}
+            >
+              ノートとは何ですか
+            </motion.div>
+
+            {/* Subtle Glow Effect */}
+            <motion.div
+              style={{
+                position: 'absolute',
+                width: '400px',
+                height: '200px',
+                background: 'radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%)',
+                filter: 'blur(20px)',
+                zIndex: 1
+              }}
+              animate={{
+                scale: [1, 1.2, 1],
+                opacity: [0.3, 0.6, 0.3],
+              }}
+              transition={{
+                duration: 3,
+                repeat: Infinity,
+                ease: "easeInOut"
+              }}
+            />
+
+            {/* Modern Loading Bar */}
+            <motion.div
+              style={{
+                width: '300px',
+                height: '3px',
+                backgroundColor: 'rgba(255,255,255,0.2)',
+                borderRadius: '2px',
+                marginTop: '40px',
+                overflow: 'hidden',
+                position: 'relative'
+              }}
+            >
               <motion.div
-                key={index}
                 style={{
-                  width: '12px',
-                  height: '12px',
-                  borderRadius: '50%',
-                  backgroundColor: 'white'
+                  width: '100%',
+                  height: '100%',
+                  backgroundColor: 'white',
+                  borderRadius: '2px',
+                  position: 'absolute',
+                  left: '-100%'
                 }}
                 animate={{
-                  scale: [0.8, 1.2, 0.8],
-                  opacity: [0.5, 1, 0.5],
+                  left: ['-100%', '100%'],
                 }}
                 transition={{
-                  duration: 1.5,
+                  duration: 2,
                   repeat: Infinity,
-                  delay: index * 0.2,
+                  ease: "easeInOut"
+                }}
+              />
+            </motion.div>
+
+            {/* Floating Particles */}
+            {[...Array(5)].map((_, i) => (
+              <motion.div
+                key={i}
+                style={{
+                  position: 'absolute',
+                  width: '4px',
+                  height: '4px',
+                  backgroundColor: 'white',
+                  borderRadius: '50%',
+                  opacity: 0.6
+                }}
+                animate={{
+                  y: [0, -100, 0],
+                  x: [0, Math.sin(i) * 50, 0],
+                  opacity: [0.3, 0.8, 0.3],
+                  scale: [1, 1.5, 1]
+                }}
+                transition={{
+                  duration: 2 + i * 0.5,
+                  repeat: Infinity,
+                  delay: i * 0.3,
+                  ease: "easeInOut"
                 }}
               />
             ))}
+
+            {/* Corner Accents */}
+            <motion.div
+              style={{
+                position: 'absolute',
+                top: '40px',
+                left: '40px',
+                width: '2px',
+                height: '40px',
+                backgroundColor: 'white'
+              }}
+              animate={{
+                height: ['40px', '60px', '40px'],
+                opacity: [0.5, 1, 0.5]
+              }}
+              transition={{
+                duration: 2,
+                repeat: Infinity,
+                ease: "easeInOut"
+              }}
+            />
+            <motion.div
+              style={{
+                position: 'absolute',
+                top: '40px',
+                left: '40px',
+                width: '40px',
+                height: '2px',
+                backgroundColor: 'white'
+              }}
+              animate={{
+                width: ['40px', '60px', '40px'],
+                opacity: [0.5, 1, 0.5]
+              }}
+              transition={{
+                duration: 2,
+                repeat: Infinity,
+                delay: 0.5,
+                ease: "easeInOut"
+              }}
+            />
+
+            <motion.div
+              style={{
+                position: 'absolute',
+                bottom: '40px',
+                right: '40px',
+                width: '2px',
+                height: '40px',
+                backgroundColor: 'white'
+              }}
+              animate={{
+                height: ['40px', '60px', '40px'],
+                opacity: [0.5, 1, 0.5]
+              }}
+              transition={{
+                duration: 2,
+                repeat: Infinity,
+                delay: 0.3,
+                ease: "easeInOut"
+              }}
+            />
+            <motion.div
+              style={{
+                position: 'absolute',
+                bottom: '40px',
+                right: '40px',
+                width: '40px',
+                height: '2px',
+                backgroundColor: 'white'
+              }}
+              animate={{
+                width: ['40px', '60px', '40px'],
+                opacity: [0.5, 1, 0.5]
+              }}
+              transition={{
+                duration: 2,
+                repeat: Infinity,
+                delay: 0.8,
+                ease: "easeInOut"
+              }}
+            />
           </motion.div>
-        </motion.div>
-      )}
+        )}
+      </AnimatePresence>
       
       {/* Konten utama setelah loading selesai */}
       <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: showLoading ? 0 : 1 }}
-        transition={{ duration: 0.5, delay: 0.2 }}
+        initial={{ opacity: 0, y: 50 }}
+        animate={{ opacity: showLoading ? 0 : 1, y: showLoading ? 50 : 0 }}
+        transition={{ duration: 0.8, delay: 0.3 }}
         style={{
           color: 'white',
           textAlign: 'center',
@@ -172,31 +302,27 @@ export default function HomePage(): React.JSX.Element {
         }}
       >
         <motion.h1
-          initial={{ y: 50, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ duration: 0.7, delay: 0.5 }}
           style={{
             fontSize: '3rem',
             marginBottom: '20px',
-            fontFamily: "'Noto Sans JP', sans-serif"
+            fontFamily: "'Noto Sans JP', sans-serif",
+            fontWeight: '700'
           }}
         >
           ようこそ
         </motion.h1>
         <motion.p
-          initial={{ y: 30, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ duration: 0.7, delay: 0.8 }}
           style={{
             fontSize: '1.2rem',
-            fontFamily: "'Noto Sans JP', sans-serif"
+            fontFamily: "'Noto Sans JP', sans-serif",
+            opacity: 0.8
           }}
         >
           ノートアプリへ
         </motion.p>
       </motion.div>
 
-      {/* Styles untuk font */}
+      {/* Font import */}
       <style jsx>{`
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap');
       `}</style>
