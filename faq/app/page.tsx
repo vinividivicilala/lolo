@@ -109,7 +109,8 @@ export default function HomePage(): React.JSX.Element {
               fontFamily: "'Noto Sans JP', 'Hiragino Sans', 'Yu Gothic', sans-serif",
               textAlign: 'center',
               position: 'relative',
-              zIndex: 2
+              zIndex: 2,
+              letterSpacing: '2px'
             }}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -164,12 +165,41 @@ export default function HomePage(): React.JSX.Element {
         transition={{ duration: 0.5, delay: 0.2 }}
         style={{
           color: 'white',
-          textAlign: 'center'
+          textAlign: 'center',
+          padding: '20px'
         }}
       >
-        {/* Konten halaman utama Anda di sini */}
-        <h1>Selamat Datang</h1>
+        <motion.h1
+          initial={{ y: 50, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ duration: 0.7, delay: 0.5 }}
+          style={{
+            fontSize: '3rem',
+            marginBottom: '20px',
+            fontFamily: "'Noto Sans JP', sans-serif"
+          }}
+        >
+          ようこそ
+        </motion.h1>
+        <motion.p
+          initial={{ y: 30, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ duration: 0.7, delay: 0.8 }}
+          style={{
+            fontSize: '1.2rem',
+            fontFamily: "'Noto Sans JP', sans-serif"
+          }}
+        >
+          ノートアプリへ
+        </motion.p>
       </motion.div>
+
+      {/* Styles untuk font */}
+      <style>
+        {`
+          @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap');
+        `}
+      </style>
     </div>
   );
 }
