@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 
@@ -195,11 +197,9 @@ export default function HomePage(): React.JSX.Element {
       </motion.div>
 
       {/* Styles untuk font */}
-      <style>
-        {`
-          @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap');
-        `}
-      </style>
+      <style jsx>{`
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap');
+      `}</style>
     </div>
   );
 }
