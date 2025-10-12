@@ -29,9 +29,10 @@ export default function HomePage(): React.JSX.Element {
   };
 
   const menuItems = [
-    { name: "catatan", delay: 0.3 },
-    { name: "about", delay: 0.4 },
-    { name: "contact", delay: 0.5 }
+    { name: "HOME", delay: 0.3 },
+    { name: "WORK", delay: 0.4 },
+    { name: "ABOUT", delay: 0.5 },
+    { name: "CONTACT", delay: 0.6 }
   ];
 
   return (
@@ -105,17 +106,43 @@ export default function HomePage(): React.JSX.Element {
                 ease: [0.76, 0, 0.24, 1]
               }}
             >
-              {/* Menu Items - Right Center */}
+              {/* Website Name - Top Right */}
               <motion.div
                 style={{
                   position: 'absolute',
-                  right: '4rem',
+                  right: '2rem',
+                  top: '2rem',
+                  fontSize: '1.8rem',
+                  fontWeight: '600',
+                  color: 'black',
+                  fontFamily: 'Saans Trial, sans-serif',
+                  lineHeight: 1,
+                  letterSpacing: '1px',
+                  WebkitFontSmoothing: 'antialiased',
+                  MozOsxFontSmoothing: 'grayscale'
+                }}
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ 
+                  duration: 0.6,
+                  delay: 0.4,
+                  ease: "easeOut"
+                }}
+              >
+                sorusuru
+              </motion.div>
+
+              {/* Menu Items - Center Left */}
+              <motion.div
+                style={{
+                  position: 'absolute',
+                  left: '4rem',
                   top: '50%',
                   transform: 'translateY(-50%)',
                   display: 'flex',
                   flexDirection: 'column',
-                  gap: '2rem',
-                  alignItems: 'flex-end'
+                  gap: '1.5rem'
                 }}
               >
                 {menuItems.map((item, index) => (
@@ -128,191 +155,84 @@ export default function HomePage(): React.JSX.Element {
                     }}
                     initial={{ 
                       opacity: 0, 
-                      x: 100,
-                      rotateX: 90 
+                      x: -50 
                     }}
                     animate={{ 
                       opacity: 1, 
-                      x: 0,
-                      rotateX: 0 
+                      x: 0 
                     }}
                     exit={{ 
                       opacity: 0, 
-                      x: 100,
-                      rotateX: -90 
+                      x: -50 
                     }}
                     transition={{ 
-                      duration: 0.8,
+                      duration: 0.6,
                       delay: item.delay,
-                      ease: [0.34, 1.56, 0.64, 1]
+                      ease: [0.25, 0.46, 0.45, 0.94]
                     }}
                     whileHover={{ 
-                      x: -15,
-                      transition: { duration: 0.4, ease: "easeOut" }
+                      x: 10,
+                      transition: { duration: 0.3, ease: "easeOut" }
                     }}
                   >
                     {/* Main Text */}
                     <motion.div
                       style={{
-                        fontSize: '2.5rem',
+                        fontSize: '3.5rem',
                         fontWeight: '400',
                         color: 'black',
                         fontFamily: 'Saans Trial, sans-serif',
                         lineHeight: 1,
-                        letterSpacing: '1px',
+                        letterSpacing: '0px',
                         WebkitFontSmoothing: 'antialiased',
                         MozOsxFontSmoothing: 'grayscale',
-                        textTransform: 'lowercase',
-                        padding: '0.5rem 0'
+                        textTransform: 'uppercase'
                       }}
                       whileHover={{ 
-                        color: '#000',
-                        fontWeight: '500'
+                        fontWeight: '500',
+                        letterSpacing: '1px'
                       }}
                     >
                       {item.name}
                     </motion.div>
 
-                    {/* Magnetic Line Effect */}
+                    {/* Number Indicator */}
                     <motion.div
                       style={{
                         position: 'absolute',
-                        bottom: '0',
-                        right: '0',
+                        left: '-2rem',
+                        top: '50%',
+                        transform: 'translateY(-50%)',
+                        fontSize: '0.9rem',
+                        fontWeight: '400',
+                        color: 'black',
+                        opacity: 0.6
+                      }}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 0.6 }}
+                      transition={{ delay: item.delay + 0.2 }}
+                    >
+                      {String(index + 1).padStart(2, '0')}
+                    </motion.div>
+
+                    {/* Hover Line */}
+                    <motion.div
+                      style={{
+                        position: 'absolute',
+                        bottom: '-5px',
+                        left: '0',
                         width: '0%',
                         height: '2px',
-                        backgroundColor: 'black',
-                        transformOrigin: 'right'
+                        backgroundColor: 'black'
                       }}
                       initial={{ width: 0 }}
                       whileHover={{ 
                         width: '100%',
-                        transition: { 
-                          duration: 0.6, 
-                          ease: [0.25, 0.46, 0.45, 0.94] 
-                        }
-                      }}
-                    />
-
-                    {/* Floating Particles */}
-                    <motion.div
-                      style={{
-                        position: 'absolute',
-                        left: '-40px',
-                        top: '50%',
-                        transform: 'translateY(-50%)',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: '4px'
-                      }}
-                      initial={{ opacity: 0, scale: 0 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ delay: item.delay + 0.3 }}
-                    >
-                      <motion.div
-                        style={{
-                          width: '4px',
-                          height: '4px',
-                          borderRadius: '50%',
-                          backgroundColor: 'black'
-                        }}
-                        animate={{
-                          scale: [0, 1, 0],
-                          opacity: [0, 1, 0]
-                        }}
-                        transition={{
-                          duration: 2,
-                          delay: item.delay,
-                          repeat: Infinity,
-                          ease: "easeInOut"
-                        }}
-                      />
-                      <motion.div
-                        style={{
-                          width: '4px',
-                          height: '4px',
-                          borderRadius: '50%',
-                          backgroundColor: 'black'
-                        }}
-                        animate={{
-                          scale: [0, 1, 0],
-                          opacity: [0, 1, 0]
-                        }}
-                        transition={{
-                          duration: 2,
-                          delay: item.delay + 0.2,
-                          repeat: Infinity,
-                          ease: "easeInOut"
-                        }}
-                      />
-                      <motion.div
-                        style={{
-                          width: '4px',
-                          height: '4px',
-                          borderRadius: '50%',
-                          backgroundColor: 'black'
-                        }}
-                        animate={{
-                          scale: [0, 1, 0],
-                          opacity: [0, 1, 0]
-                        }}
-                        transition={{
-                          duration: 2,
-                          delay: item.delay + 0.4,
-                          repeat: Infinity,
-                          ease: "easeInOut"
-                        }}
-                      />
-                    </motion.div>
-
-                    {/* Background Glow on Hover */}
-                    <motion.div
-                      style={{
-                        position: 'absolute',
-                        top: '50%',
-                        left: '50%',
-                        transform: 'translate(-50%, -50%)',
-                        width: '0%',
-                        height: '100%',
-                        backgroundColor: 'rgba(0,0,0,0.1)',
-                        borderRadius: '8px',
-                        zIndex: -1
-                      }}
-                      whileHover={{ 
-                        width: '120%',
                         transition: { duration: 0.4, ease: "easeOut" }
                       }}
                     />
                   </motion.div>
                 ))}
-              </motion.div>
-
-              {/* Website Name - sorusuru (Smaller) */}
-              <motion.div
-                style={{
-                  position: 'absolute',
-                  left: '2rem',
-                  bottom: '2rem',
-                  fontSize: '3rem',
-                  fontWeight: '300',
-                  color: 'black',
-                  fontFamily: 'Saans Trial, sans-serif',
-                  lineHeight: 1,
-                  letterSpacing: '-1px',
-                  WebkitFontSmoothing: 'antialiased',
-                  MozOsxFontSmoothing: 'grayscale',
-                  opacity: 0.7
-                }}
-                initial={{ opacity: 0, x: -50 }}
-                animate={{ opacity: 0.7, x: 0 }}
-                exit={{ opacity: 0, x: -50 }}
-                transition={{ 
-                  duration: 0.6,
-                  delay: 0.3,
-                  ease: "easeOut"
-                }}
-              >
-                sorusuru
               </motion.div>
             </motion.div>
             
