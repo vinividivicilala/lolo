@@ -39,7 +39,10 @@ export default function HomePage(): React.JSX.Element {
       justifyContent: 'center',
       alignItems: 'center',
       position: 'relative',
-      overflow: 'hidden'
+      overflow: 'hidden',
+      fontFamily: 'sans-serif',
+      WebkitFontSmoothing: 'antialiased',
+      MozOsxFontSmoothing: 'grayscale'
     }}>
       {/* Menu Button - Simple Text */}
       <motion.div
@@ -52,10 +55,12 @@ export default function HomePage(): React.JSX.Element {
           fontWeight: '700',
           color: 'white',
           cursor: 'pointer',
-          fontFamily: "'Noto Sans JP', sans-serif",
+          fontFamily: 'sans-serif',
           letterSpacing: '2px',
           zIndex: 20,
-          padding: '0.5rem 0'
+          padding: '0.5rem 0',
+          WebkitFontSmoothing: 'antialiased',
+          MozOsxFontSmoothing: 'grayscale'
         }}
         whileHover={{ 
           scale: 1.05,
@@ -93,15 +98,15 @@ export default function HomePage(): React.JSX.Element {
               }}
             />
             
-            {/* Close Button */}
+            {/* Close Button - Bigger Size */}
             <motion.button
               onClick={toggleMenu}
               style={{
                 position: 'fixed',
-                top: '2rem',
-                right: '2rem',
-                width: '60px',
-                height: '60px',
+                top: '1.5rem',
+                right: '1.5rem',
+                width: '80px',
+                height: '80px',
                 borderRadius: '50%',
                 border: 'none',
                 backgroundColor: 'black',
@@ -125,31 +130,31 @@ export default function HomePage(): React.JSX.Element {
                 delay: 0.2
               }}
             >
-              {/* X Icon */}
+              {/* Big X Icon */}
               <svg
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
+                width="40"
+                height="40"
+                viewBox="0 0 40 40"
                 fill="none"
                 stroke="#CCFF00"
-                strokeWidth="2"
+                strokeWidth="3"
                 strokeLinecap="round"
                 strokeLinejoin="round"
               >
                 <motion.line
-                  x1="18"
-                  y1="6"
-                  x2="6"
-                  y2="18"
+                  x1="12"
+                  y1="12"
+                  x2="28"
+                  y2="28"
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
                   transition={{ delay: 0.4, duration: 0.3 }}
                 />
                 <motion.line
-                  x1="6"
-                  y1="6"
-                  x2="18"
-                  y2="18"
+                  x1="28"
+                  y1="12"
+                  x2="12"
+                  y2="28"
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
                   transition={{ delay: 0.5, duration: 0.3 }}
@@ -173,7 +178,10 @@ export default function HomePage(): React.JSX.Element {
               justifyContent: 'center',
               alignItems: 'center',
               backgroundColor: 'black',
-              zIndex: 10
+              zIndex: 10,
+              fontFamily: 'sans-serif',
+              WebkitFontSmoothing: 'antialiased',
+              MozOsxFontSmoothing: 'grayscale'
             }}
             initial={{ opacity: 1 }}
             exit={{ 
@@ -187,10 +195,12 @@ export default function HomePage(): React.JSX.Element {
                 fontSize: '4rem',
                 fontWeight: '900',
                 color: 'white',
-                fontFamily: "'Noto Sans JP', sans-serif",
+                fontFamily: 'sans-serif',
                 textAlign: 'center',
                 letterSpacing: '8px',
-                position: 'relative'
+                position: 'relative',
+                WebkitFontSmoothing: 'antialiased',
+                MozOsxFontSmoothing: 'grayscale'
               }}
               initial={{ 
                 scale: 0.5, 
@@ -247,7 +257,9 @@ export default function HomePage(): React.JSX.Element {
                 fontSize: '1.2rem',
                 fontWeight: '700',
                 color: 'rgba(255,255,255,0.1)',
-                fontFamily: "'Noto Sans JP', sans-serif",
+                fontFamily: 'sans-serif',
+                WebkitFontSmoothing: 'antialiased',
+                MozOsxFontSmoothing: 'grayscale'
               }}
               animate={{
                 y: [0, -20, 0],
@@ -274,7 +286,10 @@ export default function HomePage(): React.JSX.Element {
               flexDirection: 'column',
               alignItems: 'center',
               gap: '2rem',
-              padding: '2rem'
+              padding: '2rem',
+              fontFamily: 'sans-serif',
+              WebkitFontSmoothing: 'antialiased',
+              MozOsxFontSmoothing: 'grayscale'
             }}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -285,9 +300,11 @@ export default function HomePage(): React.JSX.Element {
                 fontSize: '3rem',
                 fontWeight: '900',
                 color: 'white',
-                fontFamily: "'Noto Sans JP', sans-serif",
+                fontFamily: 'sans-serif',
                 textAlign: 'center',
-                marginBottom: '1rem'
+                marginBottom: '1rem',
+                WebkitFontSmoothing: 'antialiased',
+                MozOsxFontSmoothing: 'grayscale'
               }}
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -300,10 +317,12 @@ export default function HomePage(): React.JSX.Element {
               style={{
                 fontSize: '1.2rem',
                 color: 'rgba(255,255,255,0.8)',
-                fontFamily: "'Noto Sans JP', sans-serif",
+                fontFamily: 'sans-serif',
                 textAlign: 'center',
                 maxWidth: '500px',
-                lineHeight: '1.6'
+                lineHeight: '1.6',
+                WebkitFontSmoothing: 'antialiased',
+                MozOsxFontSmoothing: 'grayscale'
               }}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -323,9 +342,11 @@ export default function HomePage(): React.JSX.Element {
                 border: 'none',
                 borderRadius: '8px',
                 cursor: 'pointer',
-                fontFamily: "'Noto Sans JP', sans-serif",
+                fontFamily: 'sans-serif',
                 letterSpacing: '2px',
-                transition: 'all 0.3s ease'
+                transition: 'all 0.3s ease',
+                WebkitFontSmoothing: 'antialiased',
+                MozOsxFontSmoothing: 'grayscale'
               }}
               whileHover={{ 
                 scale: 1.05,
@@ -342,11 +363,6 @@ export default function HomePage(): React.JSX.Element {
           </motion.div>
         )}
       </AnimatePresence>
-
-      {/* Font import */}
-      <style jsx>{`
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap');
-      `}</style>
     </div>
   );
 }
