@@ -39,36 +39,20 @@ export default function HomePage(): React.JSX.Element {
         }
       );
 
-      // Animate social links with arrows
+      // Animate social links at the bottom
       tl.fromTo(".social-link",
         {
-          x: 50,
+          y: 50,
           opacity: 0
         },
         {
-          x: 0,
+          y: 0,
           opacity: 1,
           duration: 0.6,
-          stagger: 0.08,
+          stagger: 0.1,
           ease: "back.out(1.7)"
         },
         "-=0.4"
-      );
-
-      // Animate arrows separately
-      tl.fromTo(".social-arrow",
-        {
-          scale: 0,
-          rotation: -45
-        },
-        {
-          scale: 1,
-          rotation: 0,
-          duration: 0.5,
-          stagger: 0.08,
-          ease: "elastic.out(1, 0.8)"
-        },
-        "-=0.3"
       );
     }
   }, [showMenu]);
@@ -92,11 +76,11 @@ export default function HomePage(): React.JSX.Element {
   ];
 
   const socialLinks = [
-    { name: "Instagram", url: "https://instagram.com", handle: "@sorusuru" },
-    { name: "Twitter", url: "https://twitter.com", handle: "@sorusuru" },
-    { name: "LinkedIn", url: "https://linkedin.com", handle: "sorusuru" },
-    { name: "Dribbble", url: "https://dribbble.com", handle: "sorusuru" },
-    { name: "Behance", url: "https://behance.net", handle: "sorusuru" }
+    { name: "Instagram", url: "https://instagram.com" },
+    { name: "Twitter", url: "https://twitter.com" },
+    { name: "LinkedIn", url: "https://linkedin.com" },
+    { name: "Dribbble", url: "https://dribbble.com" },
+    { name: "Behance", url: "https://behance.net" }
   ];
 
   return (
@@ -161,6 +145,7 @@ export default function HomePage(): React.JSX.Element {
                 backgroundColor: '#CCFF00',
                 zIndex: 25,
                 display: 'flex',
+                flexDirection: 'column',
                 padding: '2rem'
               }}
               initial={{ scaleY: 0, transformOrigin: "top" }}
@@ -198,7 +183,7 @@ export default function HomePage(): React.JSX.Element {
                 sorusuru
               </motion.div>
 
-              {/* Left Section - Navigation Menu */}
+              {/* Main Content - Navigation Menu */}
               <div style={{
                 flex: 1,
                 display: 'flex',
@@ -256,34 +241,35 @@ export default function HomePage(): React.JSX.Element {
                 </div>
               </div>
 
-              {/* Right Section - Social Links with Arrows */}
+              {/* Social Links - Bottom Section */}
               <div style={{
-                width: '350px',
                 display: 'flex',
                 flexDirection: 'column',
-                justifyContent: 'center',
-                gap: '2rem'
+                gap: '1rem',
+                marginTop: 'auto',
+                paddingBottom: '2rem'
               }}>
                 {/* Social Links Title */}
                 <motion.div
                   className="social-link"
                   style={{
-                    fontSize: '1.2rem',
+                    fontSize: '1rem',
                     fontWeight: '600',
                     color: 'black',
                     letterSpacing: '2px',
                     textTransform: 'uppercase',
-                    marginBottom: '1rem'
+                    marginBottom: '0.5rem',
+                    opacity: 0.8
                   }}
                 >
-                  Connect
+                  Follow Us
                 </motion.div>
 
                 {/* Social Links with Arrows */}
                 <div style={{
                   display: 'flex',
                   flexDirection: 'column',
-                  gap: '1.5rem'
+                  gap: '0.8rem'
                 }}>
                   {socialLinks.map((social, index) => (
                     <a
@@ -298,18 +284,19 @@ export default function HomePage(): React.JSX.Element {
                         justifyContent: 'space-between',
                         textDecoration: 'none',
                         color: 'black',
-                        padding: '0.8rem 0',
+                        padding: '0.5rem 0',
                         cursor: 'pointer',
-                        borderBottom: '1px solid rgba(0,0,0,0.1)'
+                        borderBottom: '1px solid rgba(0,0,0,0.1)',
+                        width: '100%'
                       }}
                       onMouseEnter={(e) => {
                         gsap.to(e.currentTarget, {
-                          x: -10,
+                          x: 5,
                           duration: 0.3,
                           ease: "power2.out"
                         });
                         gsap.to(e.currentTarget.querySelector('.social-arrow'), {
-                          x: 8,
+                          x: 5,
                           duration: 0.3,
                           ease: "power2.out"
                         });
@@ -328,41 +315,27 @@ export default function HomePage(): React.JSX.Element {
                       }}
                     >
                       <div style={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: '0.3rem'
+                        fontSize: '1.1rem',
+                        fontWeight: '500',
+                        letterSpacing: '0.5px'
                       }}>
-                        <div style={{
-                          fontSize: '1.1rem',
-                          fontWeight: '600',
-                          letterSpacing: '0.5px'
-                        }}>
-                          {social.name}
-                        </div>
-                        <div style={{
-                          fontSize: '0.9rem',
-                          fontWeight: '400',
-                          opacity: 0.7,
-                          letterSpacing: '0.3px'
-                        }}>
-                          {social.handle}
-                        </div>
+                        {social.name}
                       </div>
                       
                       {/* Arrow SVG - Straight Diagonal Right */}
                       <div className="social-arrow">
                         <svg
-                          width="20"
-                          height="20"
-                          viewBox="0 0 20 20"
+                          width="18"
+                          height="18"
+                          viewBox="0 0 18 18"
                           fill="none"
                           stroke="currentColor"
                           strokeWidth="2"
                           strokeLinecap="round"
                           strokeLinejoin="round"
                         >
-                          <line x1="7" y1="7" x2="13" y2="13" />
-                          <polyline points="13 7 13 13 7 13" />
+                          <line x1="5" y1="5" x2="13" y2="13" />
+                          <polyline points="13 5 13 13 5 13" />
                         </svg>
                       </div>
                     </a>
