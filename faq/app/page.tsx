@@ -28,12 +28,10 @@ export default function HomePage(): React.JSX.Element {
         { 
           x: -100, 
           opacity: 0,
-          rotationY: 90 
         },
         { 
           x: 0, 
           opacity: 1,
-          rotationY: 0,
           duration: 0.8,
           stagger: 0.1,
           ease: "power3.out"
@@ -53,21 +51,6 @@ export default function HomePage(): React.JSX.Element {
           ease: "back.out(1.7)"
         },
         "-=0.3"
-      );
-
-      tl.fromTo(".arrow-icon",
-        {
-          scale: 0,
-          rotation: -45
-        },
-        {
-          scale: 1,
-          rotation: 0,
-          duration: 0.5,
-          stagger: 0.1,
-          ease: "elastic.out(1, 0.8)"
-        },
-        "-=0.2"
       );
     }
   }, [showMenu]);
@@ -170,18 +153,46 @@ export default function HomePage(): React.JSX.Element {
                 ease: [0.76, 0, 0.24, 1]
               }}
             >
+              {/* Website Name - Top Left */}
+              <motion.div
+                style={{
+                  position: 'absolute',
+                  left: '2rem',
+                  top: '2rem',
+                  fontSize: '1.8rem',
+                  fontWeight: '600',
+                  color: 'black',
+                  fontFamily: 'Saans Trial, sans-serif',
+                  lineHeight: 1,
+                  letterSpacing: '1px',
+                  WebkitFontSmoothing: 'antialiased',
+                  MozOsxFontSmoothing: 'grayscale'
+                }}
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ 
+                  duration: 0.6,
+                  delay: 0.4,
+                  ease: "easeOut"
+                }}
+              >
+                sorusuru
+              </motion.div>
+
               {/* Left Section - Navigation Menu */}
               <div style={{
                 flex: 1,
                 display: 'flex',
                 flexDirection: 'column',
-                justifyContent: 'center'
+                justifyContent: 'center',
+                paddingLeft: '2rem'
               }}>
                 {/* Menu Items */}
                 <div style={{
                   display: 'flex',
                   flexDirection: 'column',
-                  gap: '0.5rem'
+                  gap: '0.3rem'
                 }}>
                   {menuItems.map((item, index) => (
                     <div
@@ -196,7 +207,7 @@ export default function HomePage(): React.JSX.Element {
                       }}
                       onMouseEnter={(e) => {
                         gsap.to(e.currentTarget, {
-                          x: 20,
+                          x: 10,
                           duration: 0.3,
                           ease: "power2.out"
                         });
@@ -209,49 +220,18 @@ export default function HomePage(): React.JSX.Element {
                         });
                       }}
                     >
-                      {/* Number */}
+                      {/* Menu Text - Same style as website name */}
                       <div style={{
-                        fontSize: '0.9rem',
-                        fontWeight: '400',
-                        color: 'black',
-                        opacity: 0.6,
-                        minWidth: '30px'
-                      }}>
-                        {String(index + 1).padStart(2, '0')}
-                      </div>
-
-                      {/* Menu Text */}
-                      <div style={{
-                        fontSize: '4rem',
-                        fontWeight: '400',
+                        fontSize: '3.5rem',
+                        fontWeight: '600',
                         color: 'black',
                         fontFamily: 'Saans Trial, sans-serif',
                         lineHeight: 1,
-                        letterSpacing: '-1px',
+                        letterSpacing: '1px',
                         textTransform: 'uppercase',
-                        padding: '0.5rem 0'
+                        padding: '0.3rem 0'
                       }}>
                         {item.name}
-                      </div>
-
-                      {/* Arrow Icon */}
-                      <div className="arrow-icon" style={{
-                        opacity: 0,
-                        transition: 'opacity 0.3s ease'
-                      }}>
-                        <svg
-                          width="24"
-                          height="24"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        >
-                          <line x1="5" y1="12" x2="19" y2="12" />
-                          <polyline points="12 5 19 12 12 19" />
-                        </svg>
                       </div>
                     </div>
                   ))}
@@ -280,9 +260,7 @@ export default function HomePage(): React.JSX.Element {
                       rel="noopener noreferrer"
                       className="social-item"
                       style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
+                        display: 'block',
                         textDecoration: 'none',
                         color: 'black',
                         padding: '0.5rem 0',
@@ -295,21 +273,11 @@ export default function HomePage(): React.JSX.Element {
                           duration: 0.2,
                           ease: "power2.out"
                         });
-                        gsap.to(e.currentTarget.querySelector('.social-arrow'), {
-                          x: 5,
-                          duration: 0.3,
-                          ease: "power2.out"
-                        });
                       }}
                       onMouseLeave={(e) => {
                         gsap.to(e.currentTarget, {
                           y: 0,
                           duration: 0.2,
-                          ease: "power2.out"
-                        });
-                        gsap.to(e.currentTarget.querySelector('.social-arrow'), {
-                          x: 0,
-                          duration: 0.3,
                           ease: "power2.out"
                         });
                       }}
@@ -320,71 +288,25 @@ export default function HomePage(): React.JSX.Element {
                         gap: '0.2rem'
                       }}>
                         <div style={{
-                          fontSize: '0.9rem',
-                          fontWeight: '500',
-                          opacity: 0.8
+                          fontSize: '1rem',
+                          fontWeight: '600',
+                          letterSpacing: '0.5px'
                         }}>
                           {social.name}
                         </div>
                         <div style={{
                           fontSize: '0.8rem',
                           fontWeight: '400',
-                          opacity: 0.6
+                          opacity: 0.7,
+                          letterSpacing: '0.3px'
                         }}>
                           {social.handle}
                         </div>
-                      </div>
-                      
-                      {/* Social Arrow */}
-                      <div className="social-arrow">
-                        <svg
-                          width="16"
-                          height="16"
-                          viewBox="0 0 16 16"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="1.5"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          style={{
-                            opacity: 0.7
-                          }}
-                        >
-                          <line x1="3" y1="8" x2="13" y2="8" />
-                          <polyline points="10 5 13 8 10 11" />
-                        </svg>
                       </div>
                     </a>
                   ))}
                 </div>
               </div>
-
-              {/* Website Name - Top Right */}
-              <motion.div
-                style={{
-                  position: 'absolute',
-                  right: '2rem',
-                  top: '2rem',
-                  fontSize: '1.8rem',
-                  fontWeight: '600',
-                  color: 'black',
-                  fontFamily: 'Saans Trial, sans-serif',
-                  lineHeight: 1,
-                  letterSpacing: '1px',
-                  WebkitFontSmoothing: 'antialiased',
-                  MozOsxFontSmoothing: 'grayscale'
-                }}
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ 
-                  duration: 0.6,
-                  delay: 0.4,
-                  ease: "easeOut"
-                }}
-              >
-                sorusuru
-              </motion.div>
             </motion.div>
             
             {/* Close Button - Bigger Size */}
