@@ -24,6 +24,7 @@ export default function HomePage(): React.JSX.Element {
       // GSAP Animation for menu items
       const tl = gsap.timeline();
       
+      // Animate menu items
       tl.fromTo(".menu-item", 
         { 
           x: -100, 
@@ -38,17 +39,34 @@ export default function HomePage(): React.JSX.Element {
         }
       );
 
-      tl.fromTo(".social-item",
+      // Animate social links with arrows
+      tl.fromTo(".social-link",
         {
-          y: 30,
+          x: 50,
           opacity: 0
         },
         {
-          y: 0,
+          x: 0,
           opacity: 1,
           duration: 0.6,
-          stagger: 0.05,
+          stagger: 0.08,
           ease: "back.out(1.7)"
+        },
+        "-=0.4"
+      );
+
+      // Animate arrows separately
+      tl.fromTo(".social-arrow",
+        {
+          scale: 0,
+          rotation: -45
+        },
+        {
+          scale: 1,
+          rotation: 0,
+          duration: 0.5,
+          stagger: 0.08,
+          ease: "elastic.out(1, 0.8)"
         },
         "-=0.3"
       );
@@ -97,7 +115,7 @@ export default function HomePage(): React.JSX.Element {
       WebkitFontSmoothing: 'antialiased',
       MozOsxFontSmoothing: 'grayscale'
     }}>
-      {/* Menu Button - Simple Text */}
+      {/* Menu Button */}
       <motion.div
         onClick={toggleMenu}
         style={{
@@ -220,7 +238,7 @@ export default function HomePage(): React.JSX.Element {
                         });
                       }}
                     >
-                      {/* Menu Text - Same style as website name */}
+                      {/* Menu Text */}
                       <div style={{
                         fontSize: '3.5rem',
                         fontWeight: '600',
@@ -238,19 +256,34 @@ export default function HomePage(): React.JSX.Element {
                 </div>
               </div>
 
-              {/* Right Section - Social Links */}
+              {/* Right Section - Social Links with Arrows */}
               <div style={{
-                width: '300px',
+                width: '350px',
                 display: 'flex',
                 flexDirection: 'column',
-                justifyContent: 'flex-end',
-                paddingBottom: '2rem'
+                justifyContent: 'center',
+                gap: '2rem'
               }}>
-                {/* Social Links */}
+                {/* Social Links Title */}
+                <motion.div
+                  className="social-link"
+                  style={{
+                    fontSize: '1.2rem',
+                    fontWeight: '600',
+                    color: 'black',
+                    letterSpacing: '2px',
+                    textTransform: 'uppercase',
+                    marginBottom: '1rem'
+                  }}
+                >
+                  Connect
+                </motion.div>
+
+                {/* Social Links with Arrows */}
                 <div style={{
                   display: 'flex',
                   flexDirection: 'column',
-                  gap: '1rem'
+                  gap: '1.5rem'
                 }}>
                   {socialLinks.map((social, index) => (
                     <a
@@ -258,26 +291,38 @@ export default function HomePage(): React.JSX.Element {
                       href={social.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="social-item"
+                      className="social-link"
                       style={{
-                        display: 'block',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
                         textDecoration: 'none',
                         color: 'black',
-                        padding: '0.5rem 0',
-                        borderBottom: '1px solid rgba(0,0,0,0.1)',
-                        cursor: 'pointer'
+                        padding: '0.8rem 0',
+                        cursor: 'pointer',
+                        borderBottom: '1px solid rgba(0,0,0,0.1)'
                       }}
                       onMouseEnter={(e) => {
                         gsap.to(e.currentTarget, {
-                          y: -2,
-                          duration: 0.2,
+                          x: -10,
+                          duration: 0.3,
+                          ease: "power2.out"
+                        });
+                        gsap.to(e.currentTarget.querySelector('.social-arrow'), {
+                          x: 8,
+                          duration: 0.3,
                           ease: "power2.out"
                         });
                       }}
                       onMouseLeave={(e) => {
                         gsap.to(e.currentTarget, {
-                          y: 0,
-                          duration: 0.2,
+                          x: 0,
+                          duration: 0.3,
+                          ease: "power2.out"
+                        });
+                        gsap.to(e.currentTarget.querySelector('.social-arrow'), {
+                          x: 0,
+                          duration: 0.3,
                           ease: "power2.out"
                         });
                       }}
@@ -285,17 +330,17 @@ export default function HomePage(): React.JSX.Element {
                       <div style={{
                         display: 'flex',
                         flexDirection: 'column',
-                        gap: '0.2rem'
+                        gap: '0.3rem'
                       }}>
                         <div style={{
-                          fontSize: '1rem',
+                          fontSize: '1.1rem',
                           fontWeight: '600',
                           letterSpacing: '0.5px'
                         }}>
                           {social.name}
                         </div>
                         <div style={{
-                          fontSize: '0.8rem',
+                          fontSize: '0.9rem',
                           fontWeight: '400',
                           opacity: 0.7,
                           letterSpacing: '0.3px'
@@ -303,13 +348,30 @@ export default function HomePage(): React.JSX.Element {
                           {social.handle}
                         </div>
                       </div>
+                      
+                      {/* Arrow SVG - Straight Diagonal Right */}
+                      <div className="social-arrow">
+                        <svg
+                          width="20"
+                          height="20"
+                          viewBox="0 0 20 20"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <line x1="7" y1="7" x2="13" y2="13" />
+                          <polyline points="13 7 13 13 7 13" />
+                        </svg>
+                      </div>
                     </a>
                   ))}
                 </div>
               </div>
             </motion.div>
             
-            {/* Close Button - Bigger Size */}
+            {/* Close Button */}
             <motion.button
               onClick={toggleMenu}
               style={{
@@ -341,7 +403,6 @@ export default function HomePage(): React.JSX.Element {
                 delay: 0.2
               }}
             >
-              {/* Big X Icon */}
               <svg
                 width="40"
                 height="40"
@@ -376,6 +437,7 @@ export default function HomePage(): React.JSX.Element {
         )}
       </AnimatePresence>
 
+      {/* Loading and Main Content */}
       <AnimatePresence>
         {showLoading && (
           <motion.div
@@ -389,10 +451,7 @@ export default function HomePage(): React.JSX.Element {
               justifyContent: 'center',
               alignItems: 'center',
               backgroundColor: 'black',
-              zIndex: 10,
-              fontFamily: 'Saans Trial, sans-serif',
-              WebkitFontSmoothing: 'antialiased',
-              MozOsxFontSmoothing: 'grayscale'
+              zIndex: 10
             }}
             initial={{ opacity: 1 }}
             exit={{ 
@@ -400,7 +459,6 @@ export default function HomePage(): React.JSX.Element {
               transition: { duration: 0.6, ease: "easeInOut" }
             }}
           >
-            {/* Main Animated Text */}
             <motion.div
               style={{
                 fontSize: '4rem',
@@ -409,9 +467,7 @@ export default function HomePage(): React.JSX.Element {
                 fontFamily: 'Saans Trial, sans-serif',
                 textAlign: 'center',
                 letterSpacing: '8px',
-                position: 'relative',
-                WebkitFontSmoothing: 'antialiased',
-                MozOsxFontSmoothing: 'grayscale'
+                position: 'relative'
               }}
               initial={{ 
                 scale: 0.5, 
@@ -436,53 +492,6 @@ export default function HomePage(): React.JSX.Element {
               }}
             >
               ノートとは何ですか
-              
-              {/* Glow Effect */}
-              <motion.div
-                style={{
-                  position: 'absolute',
-                  top: '50%',
-                  left: '50%',
-                  transform: 'translate(-50%, -50%)',
-                  width: '400px',
-                  height: '150px',
-                  background: 'radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 70%)',
-                  filter: 'blur(30px)',
-                  zIndex: -1
-                }}
-                animate={{
-                  scale: [0.8, 1.2, 0.9],
-                  opacity: [0, 0.6, 0],
-                }}
-                transition={{
-                  duration: 2,
-                  ease: "easeOut"
-                }}
-              />
-            </motion.div>
-
-            {/* Floating Text Particles */}
-            <motion.div
-              style={{
-                position: 'absolute',
-                fontSize: '1.2rem',
-                fontWeight: '700',
-                color: 'rgba(255,255,255,0.1)',
-                fontFamily: 'Saans Trial, sans-serif',
-                WebkitFontSmoothing: 'antialiased',
-                MozOsxFontSmoothing: 'grayscale'
-              }}
-              animate={{
-                y: [0, -20, 0],
-                opacity: [0.1, 0.3, 0.1],
-              }}
-              transition={{
-                duration: 3,
-                repeat: Infinity,
-                ease: "easeInOut"
-              }}
-            >
-              ノート
             </motion.div>
           </motion.div>
         )}
@@ -497,10 +506,7 @@ export default function HomePage(): React.JSX.Element {
               flexDirection: 'column',
               alignItems: 'center',
               gap: '2rem',
-              padding: '2rem',
-              fontFamily: 'Saans Trial, sans-serif',
-              WebkitFontSmoothing: 'antialiased',
-              MozOsxFontSmoothing: 'grayscale'
+              padding: '2rem'
             }}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -513,9 +519,7 @@ export default function HomePage(): React.JSX.Element {
                 color: 'white',
                 fontFamily: 'Saans Trial, sans-serif',
                 textAlign: 'center',
-                marginBottom: '1rem',
-                WebkitFontSmoothing: 'antialiased',
-                MozOsxFontSmoothing: 'grayscale'
+                marginBottom: '1rem'
               }}
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -531,9 +535,7 @@ export default function HomePage(): React.JSX.Element {
                 fontFamily: 'Saans Trial, sans-serif',
                 textAlign: 'center',
                 maxWidth: '500px',
-                lineHeight: '1.6',
-                WebkitFontSmoothing: 'antialiased',
-                MozOsxFontSmoothing: 'grayscale'
+                lineHeight: '1.6'
               }}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -554,10 +556,7 @@ export default function HomePage(): React.JSX.Element {
                 borderRadius: '8px',
                 cursor: 'pointer',
                 fontFamily: 'Saans Trial, sans-serif',
-                letterSpacing: '2px',
-                transition: 'all 0.3s ease',
-                WebkitFontSmoothing: 'antialiased',
-                MozOsxFontSmoothing: 'grayscale'
+                letterSpacing: '2px'
               }}
               whileHover={{ 
                 scale: 1.05,
@@ -575,7 +574,7 @@ export default function HomePage(): React.JSX.Element {
         )}
       </AnimatePresence>
 
-      {/* Font import for Saans Trial */}
+      {/* Font import */}
       <style jsx>{`
         @import url('https://fonts.cdnfonts.com/css/saans-trial');
       `}</style>
