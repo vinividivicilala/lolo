@@ -40,7 +40,7 @@ export default function HomePage(): React.JSX.Element {
       alignItems: 'center',
       position: 'relative',
       overflow: 'hidden',
-      fontFamily: 'sans-serif',
+      fontFamily: 'Saans Trial, sans-serif',
       WebkitFontSmoothing: 'antialiased',
       MozOsxFontSmoothing: 'grayscale'
     }}>
@@ -55,7 +55,7 @@ export default function HomePage(): React.JSX.Element {
           fontWeight: '700',
           color: 'white',
           cursor: 'pointer',
-          fontFamily: 'sans-serif',
+          fontFamily: 'Saans Trial, sans-serif',
           letterSpacing: '2px',
           zIndex: 20,
           padding: '0.5rem 0',
@@ -87,7 +87,9 @@ export default function HomePage(): React.JSX.Element {
                 width: '100%',
                 height: '100%',
                 backgroundColor: '#CCFF00',
-                zIndex: 25
+                zIndex: 25,
+                display: 'flex',
+                alignItems: 'center'
               }}
               initial={{ scaleY: 0, transformOrigin: "top" }}
               animate={{ scaleY: 1 }}
@@ -96,7 +98,34 @@ export default function HomePage(): React.JSX.Element {
                 duration: 0.8,
                 ease: [0.76, 0, 0.24, 1]
               }}
-            />
+            >
+              {/* Website Name - sorusuru */}
+              <motion.div
+                style={{
+                  position: 'absolute',
+                  left: '2rem',
+                  bottom: '2rem',
+                  fontSize: '6rem',
+                  fontWeight: '900',
+                  color: 'black',
+                  fontFamily: 'Saans Trial, sans-serif',
+                  lineHeight: 1,
+                  letterSpacing: '-2px',
+                  WebkitFontSmoothing: 'antialiased',
+                  MozOsxFontSmoothing: 'grayscale'
+                }}
+                initial={{ opacity: 0, x: -50 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -50 }}
+                transition={{ 
+                  duration: 0.6,
+                  delay: 0.3,
+                  ease: "easeOut"
+                }}
+              >
+                sorusuru
+              </motion.div>
+            </motion.div>
             
             {/* Close Button - Bigger Size */}
             <motion.button
@@ -179,7 +208,7 @@ export default function HomePage(): React.JSX.Element {
               alignItems: 'center',
               backgroundColor: 'black',
               zIndex: 10,
-              fontFamily: 'sans-serif',
+              fontFamily: 'Saans Trial, sans-serif',
               WebkitFontSmoothing: 'antialiased',
               MozOsxFontSmoothing: 'grayscale'
             }}
@@ -195,7 +224,7 @@ export default function HomePage(): React.JSX.Element {
                 fontSize: '4rem',
                 fontWeight: '900',
                 color: 'white',
-                fontFamily: 'sans-serif',
+                fontFamily: 'Saans Trial, sans-serif',
                 textAlign: 'center',
                 letterSpacing: '8px',
                 position: 'relative',
@@ -257,7 +286,7 @@ export default function HomePage(): React.JSX.Element {
                 fontSize: '1.2rem',
                 fontWeight: '700',
                 color: 'rgba(255,255,255,0.1)',
-                fontFamily: 'sans-serif',
+                fontFamily: 'Saans Trial, sans-serif',
                 WebkitFontSmoothing: 'antialiased',
                 MozOsxFontSmoothing: 'grayscale'
               }}
@@ -287,7 +316,7 @@ export default function HomePage(): React.JSX.Element {
               alignItems: 'center',
               gap: '2rem',
               padding: '2rem',
-              fontFamily: 'sans-serif',
+              fontFamily: 'Saans Trial, sans-serif',
               WebkitFontSmoothing: 'antialiased',
               MozOsxFontSmoothing: 'grayscale'
             }}
@@ -300,7 +329,7 @@ export default function HomePage(): React.JSX.Element {
                 fontSize: '3rem',
                 fontWeight: '900',
                 color: 'white',
-                fontFamily: 'sans-serif',
+                fontFamily: 'Saans Trial, sans-serif',
                 textAlign: 'center',
                 marginBottom: '1rem',
                 WebkitFontSmoothing: 'antialiased',
@@ -317,7 +346,7 @@ export default function HomePage(): React.JSX.Element {
               style={{
                 fontSize: '1.2rem',
                 color: 'rgba(255,255,255,0.8)',
-                fontFamily: 'sans-serif',
+                fontFamily: 'Saans Trial, sans-serif',
                 textAlign: 'center',
                 maxWidth: '500px',
                 lineHeight: '1.6',
@@ -342,7 +371,7 @@ export default function HomePage(): React.JSX.Element {
                 border: 'none',
                 borderRadius: '8px',
                 cursor: 'pointer',
-                fontFamily: 'sans-serif',
+                fontFamily: 'Saans Trial, sans-serif',
                 letterSpacing: '2px',
                 transition: 'all 0.3s ease',
                 WebkitFontSmoothing: 'antialiased',
@@ -363,6 +392,11 @@ export default function HomePage(): React.JSX.Element {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Font import for Saans Trial */}
+      <style jsx>{`
+        @import url('https://fonts.cdnfonts.com/css/saans-trial');
+      `}</style>
     </div>
   );
 }
