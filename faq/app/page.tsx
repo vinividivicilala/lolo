@@ -248,11 +248,11 @@ export default function HomePage(): React.JSX.Element {
                 marginTop: 'auto',
                 paddingBottom: '2rem'
               }}>
-                {/* Social Links - Very tight spacing, no title, no border */}
+                {/* Social Links - Extremely tight spacing */}
                 <div style={{
                   display: 'flex',
                   flexDirection: 'column',
-                  gap: '0.1rem' // Very close gap between social items
+                  gap: '0.05rem' // Very very close gap
                 }}>
                   {socialLinks.map((social, index) => (
                     <a
@@ -267,8 +267,9 @@ export default function HomePage(): React.JSX.Element {
                         justifyContent: 'space-between',
                         textDecoration: 'none',
                         color: 'black',
-                        padding: '0.1rem 0', // Very thin padding
-                        cursor: 'pointer'
+                        padding: '0.05rem 0', // Very very thin padding
+                        cursor: 'pointer',
+                        lineHeight: 1.1 // Tight line height
                       }}
                       onMouseEnter={(e) => {
                         gsap.to(e.currentTarget, {
