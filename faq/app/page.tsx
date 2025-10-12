@@ -76,11 +76,11 @@ export default function HomePage(): React.JSX.Element {
   ];
 
   const socialLinks = [
-    { name: "Instagram", url: "https://instagram.com" },
-    { name: "Twitter", url: "https://twitter.com" },
-    { name: "LinkedIn", url: "https://linkedin.com" },
-    { name: "Dribbble", url: "https://dribbble.com" },
-    { name: "Behance", url: "https://behance.net" }
+    { name: "INSTAGRAM", url: "https://instagram.com" },
+    { name: "TWITTER", url: "https://twitter.com" },
+    { name: "LINKEDIN", url: "https://linkedin.com" },
+    { name: "DRIBBBLE", url: "https://dribbble.com" },
+    { name: "BEHANCE", url: "https://behance.net" }
   ];
 
   return (
@@ -163,7 +163,7 @@ export default function HomePage(): React.JSX.Element {
                   left: '2rem',
                   top: '2rem',
                   fontSize: '1.8rem',
-                  fontWeight: '600',
+                  fontWeight: '400', // Ketebalan lebih kecil
                   color: 'black',
                   fontFamily: 'Saans Trial, sans-serif',
                   lineHeight: 1,
@@ -191,11 +191,11 @@ export default function HomePage(): React.JSX.Element {
                 justifyContent: 'center',
                 paddingLeft: '2rem'
               }}>
-                {/* Menu Items - Tight spacing */}
+                {/* Menu Items - Very tight spacing */}
                 <div style={{
                   display: 'flex',
                   flexDirection: 'column',
-                  gap: '0.1rem' // Very tight gap between items
+                  gap: '0rem' // No gap between items
                 }}>
                   {menuItems.map((item, index) => (
                     <div
@@ -222,16 +222,17 @@ export default function HomePage(): React.JSX.Element {
                         });
                       }}
                     >
-                      {/* Menu Text */}
+                      {/* Menu Text - Smaller weight and very tight */}
                       <div style={{
                         fontSize: '3.5rem',
-                        fontWeight: '600',
+                        fontWeight: '400', // Ketebalan lebih kecil
                         color: 'black',
                         fontFamily: 'Saans Trial, sans-serif',
-                        lineHeight: 0.9, // Tight line height
-                        letterSpacing: '1px',
+                        lineHeight: 0.8, // Very tight line height
+                        letterSpacing: '0.5px',
                         textTransform: 'uppercase',
-                        padding: '0.1rem 0' // Minimal padding
+                        padding: '0rem 0', // No padding
+                        margin: '0rem 0' // No margin
                       }}>
                         {item.name}
                       </div>
@@ -244,7 +245,7 @@ export default function HomePage(): React.JSX.Element {
               <div style={{
                 display: 'flex',
                 flexDirection: 'column',
-                gap: '1rem',
+                gap: '0.5rem',
                 marginTop: 'auto',
                 paddingBottom: '2rem'
               }}>
@@ -252,23 +253,23 @@ export default function HomePage(): React.JSX.Element {
                 <motion.div
                   className="social-link"
                   style={{
-                    fontSize: '1rem',
+                    fontSize: '0.9rem',
                     fontWeight: '600',
                     color: 'black',
                     letterSpacing: '2px',
                     textTransform: 'uppercase',
-                    marginBottom: '0.5rem',
+                    marginBottom: '0.3rem',
                     opacity: 0.8
                   }}
                 >
                   IKUTI KAMI
                 </motion.div>
 
-                {/* Social Links with Correct Arrow SVG */}
+                {/* Social Links - Very tight spacing, bold, uppercase */}
                 <div style={{
                   display: 'flex',
                   flexDirection: 'column',
-                  gap: '0.8rem'
+                  gap: '0.2rem' // Very thin gap between social items
                 }}>
                   {socialLinks.map((social, index) => (
                     <a
@@ -283,7 +284,7 @@ export default function HomePage(): React.JSX.Element {
                         justifyContent: 'space-between',
                         textDecoration: 'none',
                         color: 'black',
-                        padding: '0.5rem 0',
+                        padding: '0.2rem 0', // Very thin padding
                         cursor: 'pointer',
                         borderBottom: '1px solid rgba(0,0,0,0.1)',
                         width: '100%'
@@ -314,27 +315,28 @@ export default function HomePage(): React.JSX.Element {
                       }}
                     >
                       <div style={{
-                        fontSize: '1.1rem',
-                        fontWeight: '500',
-                        letterSpacing: '0.5px'
+                        fontSize: '1rem',
+                        fontWeight: '700', // Bold
+                        letterSpacing: '1px',
+                        textTransform: 'uppercase' // All caps
                       }}>
                         {social.name}
                       </div>
                       
-                      {/* Correct Arrow SVG - Straight line to right */}
+                      {/* Arrow SVG */}
                       <div className="social-arrow">
                         <svg
-                          width="20"
-                          height="20"
-                          viewBox="0 0 20 20"
+                          width="18"
+                          height="18"
+                          viewBox="0 0 18 18"
                           fill="none"
                           stroke="currentColor"
                           strokeWidth="1.5"
                           strokeLinecap="round"
                           strokeLinejoin="round"
                         >
-                          <line x1="3" y1="10" x2="17" y2="10" />
-                          <polyline points="14 7 17 10 14 13" />
+                          <line x1="3" y1="9" x2="15" y2="9" />
+                          <polyline points="12 6 15 9 12 12" />
                         </svg>
                       </div>
                     </a>
