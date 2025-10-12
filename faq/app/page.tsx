@@ -163,7 +163,7 @@ export default function HomePage(): React.JSX.Element {
                   left: '2rem',
                   top: '2rem',
                   fontSize: '1.8rem',
-                  fontWeight: '400', // Ketebalan lebih kecil
+                  fontWeight: '400',
                   color: 'black',
                   fontFamily: 'Saans Trial, sans-serif',
                   lineHeight: 1,
@@ -195,7 +195,7 @@ export default function HomePage(): React.JSX.Element {
                 <div style={{
                   display: 'flex',
                   flexDirection: 'column',
-                  gap: '0rem' // No gap between items
+                  gap: '0rem'
                 }}>
                   {menuItems.map((item, index) => (
                     <div
@@ -222,17 +222,17 @@ export default function HomePage(): React.JSX.Element {
                         });
                       }}
                     >
-                      {/* Menu Text - Smaller weight and very tight */}
+                      {/* Menu Text */}
                       <div style={{
                         fontSize: '3.5rem',
-                        fontWeight: '400', // Ketebalan lebih kecil
+                        fontWeight: '400',
                         color: 'black',
                         fontFamily: 'Saans Trial, sans-serif',
-                        lineHeight: 0.8, // Very tight line height
+                        lineHeight: 0.8,
                         letterSpacing: '0.5px',
                         textTransform: 'uppercase',
-                        padding: '0rem 0', // No padding
-                        margin: '0rem 0' // No margin
+                        padding: '0rem 0',
+                        margin: '0rem 0'
                       }}>
                         {item.name}
                       </div>
@@ -245,31 +245,14 @@ export default function HomePage(): React.JSX.Element {
               <div style={{
                 display: 'flex',
                 flexDirection: 'column',
-                gap: '0.5rem',
                 marginTop: 'auto',
                 paddingBottom: '2rem'
               }}>
-                {/* Social Links Title */}
-                <motion.div
-                  className="social-link"
-                  style={{
-                    fontSize: '0.9rem',
-                    fontWeight: '600',
-                    color: 'black',
-                    letterSpacing: '2px',
-                    textTransform: 'uppercase',
-                    marginBottom: '0.3rem',
-                    opacity: 0.8
-                  }}
-                >
-                  IKUTI KAMI
-                </motion.div>
-
-                {/* Social Links - Very tight spacing, bold, uppercase */}
+                {/* Social Links - Very tight spacing, no title, no border */}
                 <div style={{
                   display: 'flex',
                   flexDirection: 'column',
-                  gap: '0.2rem' // Very thin gap between social items
+                  gap: '0.1rem' // Very close gap between social items
                 }}>
                   {socialLinks.map((social, index) => (
                     <a
@@ -284,10 +267,8 @@ export default function HomePage(): React.JSX.Element {
                         justifyContent: 'space-between',
                         textDecoration: 'none',
                         color: 'black',
-                        padding: '0.2rem 0', // Very thin padding
-                        cursor: 'pointer',
-                        borderBottom: '1px solid rgba(0,0,0,0.1)',
-                        width: '100%'
+                        padding: '0.1rem 0', // Very thin padding
+                        cursor: 'pointer'
                       }}
                       onMouseEnter={(e) => {
                         gsap.to(e.currentTarget, {
@@ -316,9 +297,9 @@ export default function HomePage(): React.JSX.Element {
                     >
                       <div style={{
                         fontSize: '1rem',
-                        fontWeight: '700', // Bold
+                        fontWeight: '700',
                         letterSpacing: '1px',
-                        textTransform: 'uppercase' // All caps
+                        textTransform: 'uppercase'
                       }}>
                         {social.name}
                       </div>
