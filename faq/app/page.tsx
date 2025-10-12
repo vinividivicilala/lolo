@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 
 export default function HomePage(): React.JSX.Element {
   const [showLoading, setShowLoading] = useState(true);
+  const [showMenu, setShowMenu] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -23,6 +24,10 @@ export default function HomePage(): React.JSX.Element {
     }, 1000);
   };
 
+  const toggleMenu = () => {
+    setShowMenu(!showMenu);
+  };
+
   return (
     <div style={{
       minHeight: '100vh',
@@ -36,6 +41,58 @@ export default function HomePage(): React.JSX.Element {
       position: 'relative',
       overflow: 'hidden'
     }}>
+      {/* Menu Button */}
+      <motion.button
+        onClick={toggleMenu}
+        style={{
+          position: 'absolute',
+          top: '2rem',
+          right: '2rem',
+          padding: '0.5rem 1rem',
+          fontSize: '1rem',
+          fontWeight: '700',
+          color: 'white',
+          backgroundColor: 'transparent',
+          border: '2px solid white',
+          borderRadius: '4px',
+          cursor: 'pointer',
+          fontFamily: "'Noto Sans JP', sans-serif",
+          letterSpacing: '1px',
+          zIndex: 20
+        }}
+        whileHover={{ 
+          scale: 1.05,
+          backgroundColor: 'rgba(255,255,255,0.1)'
+        }}
+        whileTap={{ scale: 0.95 }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 1.2, duration: 0.6 }}
+      >
+        メニュー
+      </motion.button>
+
+      {/* Menu Background */}
+      <AnimatePresence>
+        {showMenu && (
+          <motion.div
+            style={{
+              position: 'fixed',
+              top: 0,
+              right: 0,
+              width: '100%',
+              height: '100%',
+              backgroundColor: '#CCFF00', // Warna hijau stabilo
+              zIndex: 15
+            }}
+            initial={{ opacity: 0, x: '100%' }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: '100%' }}
+            transition={{ duration: 0.5, ease: "easeInOut" }}
+          />
+        )}
+      </AnimatePresence>
+
       <AnimatePresence>
         {showLoading && (
           <motion.div
