@@ -28,6 +28,12 @@ export default function HomePage(): React.JSX.Element {
     setShowMenu(!showMenu);
   };
 
+  const menuItems = [
+    { name: "catatan", delay: 0.3 },
+    { name: "about", delay: 0.5 },
+    { name: "contact", delay: 0.7 }
+  ];
+
   return (
     <div style={{
       minHeight: '100vh',
@@ -99,6 +105,115 @@ export default function HomePage(): React.JSX.Element {
                 ease: [0.76, 0, 0.24, 1]
               }}
             >
+              {/* Menu Items - Left Center */}
+              <motion.div
+                style={{
+                  position: 'absolute',
+                  left: '4rem',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '3rem'
+                }}
+              >
+                {menuItems.map((item, index) => (
+                  <motion.div
+                    key={item.name}
+                    style={{
+                      position: 'relative',
+                      cursor: 'pointer'
+                    }}
+                    initial={{ opacity: 0, x: -100 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -100 }}
+                    transition={{ 
+                      duration: 0.8,
+                      delay: item.delay,
+                      ease: [0.25, 0.46, 0.45, 0.94]
+                    }}
+                    whileHover={{ 
+                      x: 20,
+                      transition: { duration: 0.3 }
+                    }}
+                  >
+                    {/* Main Text */}
+                    <motion.div
+                      style={{
+                        fontSize: '5rem',
+                        fontWeight: '900',
+                        color: 'black',
+                        fontFamily: 'Saans Trial, sans-serif',
+                        lineHeight: 0.9,
+                        letterSpacing: '-2px',
+                        WebkitFontSmoothing: 'antialiased',
+                        MozOsxFontSmoothing: 'grayscale',
+                        textTransform: 'uppercase'
+                      }}
+                      whileHover={{ 
+                        color: '#000',
+                        scale: 1.05
+                      }}
+                    >
+                      {item.name}
+                    </motion.div>
+
+                    {/* Animated Line */}
+                    <motion.div
+                      style={{
+                        position: 'absolute',
+                        bottom: '-10px',
+                        left: '0',
+                        width: '0%',
+                        height: '4px',
+                        backgroundColor: 'black',
+                        borderRadius: '2px'
+                      }}
+                      initial={{ width: 0 }}
+                      whileHover={{ width: '100%' }}
+                      transition={{ duration: 0.4, ease: "easeOut" }}
+                    />
+
+                    {/* Floating Dots */}
+                    <motion.div
+                      style={{
+                        position: 'absolute',
+                        right: '-30px',
+                        top: '50%',
+                        transform: 'translateY(-50%)',
+                        display: 'flex',
+                        gap: '4px'
+                      }}
+                      initial={{ opacity: 0, scale: 0 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ delay: item.delay + 0.2 }}
+                    >
+                      {[0, 1, 2].map((dot) => (
+                        <motion.div
+                          key={dot}
+                          style={{
+                            width: '6px',
+                            height: '6px',
+                            borderRadius: '50%',
+                            backgroundColor: 'black'
+                          }}
+                          animate={{
+                            y: [0, -8, 0],
+                            opacity: [0.3, 1, 0.3]
+                          }}
+                          transition={{
+                            duration: 1.5,
+                            delay: dot * 0.2 + item.delay,
+                            repeat: Infinity,
+                            ease: "easeInOut"
+                          }}
+                        />
+                      ))}
+                    </motion.div>
+                  </motion.div>
+                ))}
+              </motion.div>
+
               {/* Website Name - sorusuru */}
               <motion.div
                 style={{
