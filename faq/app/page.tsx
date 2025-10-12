@@ -191,11 +191,11 @@ export default function HomePage(): React.JSX.Element {
                 justifyContent: 'center',
                 paddingLeft: '2rem'
               }}>
-                {/* Menu Items */}
+                {/* Menu Items - Tight spacing */}
                 <div style={{
                   display: 'flex',
                   flexDirection: 'column',
-                  gap: '0.3rem'
+                  gap: '0.1rem' // Very tight gap between items
                 }}>
                   {menuItems.map((item, index) => (
                     <div
@@ -205,8 +205,7 @@ export default function HomePage(): React.JSX.Element {
                         position: 'relative',
                         cursor: 'pointer',
                         display: 'flex',
-                        alignItems: 'center',
-                        gap: '2rem'
+                        alignItems: 'center'
                       }}
                       onMouseEnter={(e) => {
                         gsap.to(e.currentTarget, {
@@ -229,10 +228,10 @@ export default function HomePage(): React.JSX.Element {
                         fontWeight: '600',
                         color: 'black',
                         fontFamily: 'Saans Trial, sans-serif',
-                        lineHeight: 1,
+                        lineHeight: 0.9, // Tight line height
                         letterSpacing: '1px',
                         textTransform: 'uppercase',
-                        padding: '0.3rem 0'
+                        padding: '0.1rem 0' // Minimal padding
                       }}>
                         {item.name}
                       </div>
@@ -262,10 +261,10 @@ export default function HomePage(): React.JSX.Element {
                     opacity: 0.8
                   }}
                 >
-                  Follow Us
+                  IKUTI KAMI
                 </motion.div>
 
-                {/* Social Links with Arrows */}
+                {/* Social Links with Correct Arrow SVG */}
                 <div style={{
                   display: 'flex',
                   flexDirection: 'column',
@@ -322,20 +321,20 @@ export default function HomePage(): React.JSX.Element {
                         {social.name}
                       </div>
                       
-                      {/* Arrow SVG - Straight Diagonal Right */}
+                      {/* Correct Arrow SVG - Straight line to right */}
                       <div className="social-arrow">
                         <svg
-                          width="18"
-                          height="18"
-                          viewBox="0 0 18 18"
+                          width="20"
+                          height="20"
+                          viewBox="0 0 20 20"
                           fill="none"
                           stroke="currentColor"
-                          strokeWidth="2"
+                          strokeWidth="1.5"
                           strokeLinecap="round"
                           strokeLinejoin="round"
                         >
-                          <line x1="5" y1="5" x2="13" y2="13" />
-                          <polyline points="13 5 13 13 5 13" />
+                          <line x1="3" y1="10" x2="17" y2="10" />
+                          <polyline points="14 7 17 10 14 13" />
                         </svg>
                       </div>
                     </a>
