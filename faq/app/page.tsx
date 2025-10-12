@@ -1,13 +1,15 @@
 'use client';
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
+import gsap from "gsap";
 
 export default function HomePage(): React.JSX.Element {
   const [showLoading, setShowLoading] = useState(true);
   const [showMenu, setShowMenu] = useState(false);
   const router = useRouter();
+  const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -16,6 +18,59 @@ export default function HomePage(): React.JSX.Element {
 
     return () => clearTimeout(timer);
   }, []);
+
+  useEffect(() => {
+    if (showMenu && menuRef.current) {
+      // GSAP Animation for menu items
+      const tl = gsap.timeline();
+      
+      tl.fromTo(".menu-item", 
+        { 
+          x: -100, 
+          opacity: 0,
+          rotationY: 90 
+        },
+        { 
+          x: 0, 
+          opacity: 1,
+          rotationY: 0,
+          duration: 0.8,
+          stagger: 0.1,
+          ease: "power3.out"
+        }
+      );
+
+      tl.fromTo(".social-item",
+        {
+          y: 30,
+          opacity: 0
+        },
+        {
+          y: 0,
+          opacity: 1,
+          duration: 0.6,
+          stagger: 0.05,
+          ease: "back.out(1.7)"
+        },
+        "-=0.3"
+      );
+
+      tl.fromTo(".arrow-icon",
+        {
+          scale: 0,
+          rotation: -45
+        },
+        {
+          scale: 1,
+          rotation: 0,
+          duration: 0.5,
+          stagger: 0.1,
+          ease: "elastic.out(1, 0.8)"
+        },
+        "-=0.2"
+      );
+    }
+  }, [showMenu]);
 
   const navigateToNotes = () => {
     setShowLoading(true);
@@ -33,6 +88,14 @@ export default function HomePage(): React.JSX.Element {
     { name: "WORK", delay: 0.4 },
     { name: "ABOUT", delay: 0.5 },
     { name: "CONTACT", delay: 0.6 }
+  ];
+
+  const socialLinks = [
+    { name: "Instagram", url: "https://instagram.com", handle: "@sorusuru" },
+    { name: "Twitter", url: "https://twitter.com", handle: "@sorusuru" },
+    { name: "LinkedIn", url: "https://linkedin.com", handle: "sorusuru" },
+    { name: "Dribbble", url: "https://dribbble.com", handle: "sorusuru" },
+    { name: "Behance", url: "https://behance.net", handle: "sorusuru" }
   ];
 
   return (
@@ -87,6 +150,7 @@ export default function HomePage(): React.JSX.Element {
           <>
             {/* Background Overlay */}
             <motion.div
+              ref={menuRef}
               style={{
                 position: 'fixed',
                 top: 0,
@@ -96,7 +160,7 @@ export default function HomePage(): React.JSX.Element {
                 backgroundColor: '#CCFF00',
                 zIndex: 25,
                 display: 'flex',
-                alignItems: 'center'
+                padding: '2rem'
               }}
               initial={{ scaleY: 0, transformOrigin: "top" }}
               animate={{ scaleY: 1 }}
@@ -106,6 +170,195 @@ export default function HomePage(): React.JSX.Element {
                 ease: [0.76, 0, 0.24, 1]
               }}
             >
+              {/* Left Section - Navigation Menu */}
+              <div style={{
+                flex: 1,
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'center'
+              }}>
+                {/* Menu Items */}
+                <div style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '0.5rem'
+                }}>
+                  {menuItems.map((item, index) => (
+                    <div
+                      key={item.name}
+                      className="menu-item"
+                      style={{
+                        position: 'relative',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '2rem'
+                      }}
+                      onMouseEnter={(e) => {
+                        gsap.to(e.currentTarget, {
+                          x: 20,
+                          duration: 0.3,
+                          ease: "power2.out"
+                        });
+                      }}
+                      onMouseLeave={(e) => {
+                        gsap.to(e.currentTarget, {
+                          x: 0,
+                          duration: 0.3,
+                          ease: "power2.out"
+                        });
+                      }}
+                    >
+                      {/* Number */}
+                      <div style={{
+                        fontSize: '0.9rem',
+                        fontWeight: '400',
+                        color: 'black',
+                        opacity: 0.6,
+                        minWidth: '30px'
+                      }}>
+                        {String(index + 1).padStart(2, '0')}
+                      </div>
+
+                      {/* Menu Text */}
+                      <div style={{
+                        fontSize: '4rem',
+                        fontWeight: '400',
+                        color: 'black',
+                        fontFamily: 'Saans Trial, sans-serif',
+                        lineHeight: 1,
+                        letterSpacing: '-1px',
+                        textTransform: 'uppercase',
+                        padding: '0.5rem 0'
+                      }}>
+                        {item.name}
+                      </div>
+
+                      {/* Arrow Icon */}
+                      <div className="arrow-icon" style={{
+                        opacity: 0,
+                        transition: 'opacity 0.3s ease'
+                      }}>
+                        <svg
+                          width="24"
+                          height="24"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <line x1="5" y1="12" x2="19" y2="12" />
+                          <polyline points="12 5 19 12 12 19" />
+                        </svg>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Right Section - Social Links */}
+              <div style={{
+                width: '300px',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'flex-end',
+                paddingBottom: '2rem'
+              }}>
+                {/* Social Links */}
+                <div style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '1rem'
+                }}>
+                  {socialLinks.map((social, index) => (
+                    <a
+                      key={social.name}
+                      href={social.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="social-item"
+                      style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        textDecoration: 'none',
+                        color: 'black',
+                        padding: '0.5rem 0',
+                        borderBottom: '1px solid rgba(0,0,0,0.1)',
+                        cursor: 'pointer'
+                      }}
+                      onMouseEnter={(e) => {
+                        gsap.to(e.currentTarget, {
+                          y: -2,
+                          duration: 0.2,
+                          ease: "power2.out"
+                        });
+                        gsap.to(e.currentTarget.querySelector('.social-arrow'), {
+                          x: 5,
+                          duration: 0.3,
+                          ease: "power2.out"
+                        });
+                      }}
+                      onMouseLeave={(e) => {
+                        gsap.to(e.currentTarget, {
+                          y: 0,
+                          duration: 0.2,
+                          ease: "power2.out"
+                        });
+                        gsap.to(e.currentTarget.querySelector('.social-arrow'), {
+                          x: 0,
+                          duration: 0.3,
+                          ease: "power2.out"
+                        });
+                      }}
+                    >
+                      <div style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '0.2rem'
+                      }}>
+                        <div style={{
+                          fontSize: '0.9rem',
+                          fontWeight: '500',
+                          opacity: 0.8
+                        }}>
+                          {social.name}
+                        </div>
+                        <div style={{
+                          fontSize: '0.8rem',
+                          fontWeight: '400',
+                          opacity: 0.6
+                        }}>
+                          {social.handle}
+                        </div>
+                      </div>
+                      
+                      {/* Social Arrow */}
+                      <div className="social-arrow">
+                        <svg
+                          width="16"
+                          height="16"
+                          viewBox="0 0 16 16"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="1.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          style={{
+                            opacity: 0.7
+                          }}
+                        >
+                          <line x1="3" y1="8" x2="13" y2="8" />
+                          <polyline points="10 5 13 8 10 11" />
+                        </svg>
+                      </div>
+                    </a>
+                  ))}
+                </div>
+              </div>
+
               {/* Website Name - Top Right */}
               <motion.div
                 style={{
@@ -131,108 +384,6 @@ export default function HomePage(): React.JSX.Element {
                 }}
               >
                 sorusuru
-              </motion.div>
-
-              {/* Menu Items - Center Left */}
-              <motion.div
-                style={{
-                  position: 'absolute',
-                  left: '4rem',
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '1.5rem'
-                }}
-              >
-                {menuItems.map((item, index) => (
-                  <motion.div
-                    key={item.name}
-                    style={{
-                      position: 'relative',
-                      cursor: 'pointer',
-                      overflow: 'hidden'
-                    }}
-                    initial={{ 
-                      opacity: 0, 
-                      x: -50 
-                    }}
-                    animate={{ 
-                      opacity: 1, 
-                      x: 0 
-                    }}
-                    exit={{ 
-                      opacity: 0, 
-                      x: -50 
-                    }}
-                    transition={{ 
-                      duration: 0.6,
-                      delay: item.delay,
-                      ease: [0.25, 0.46, 0.45, 0.94]
-                    }}
-                    whileHover={{ 
-                      x: 10,
-                      transition: { duration: 0.3, ease: "easeOut" }
-                    }}
-                  >
-                    {/* Main Text */}
-                    <motion.div
-                      style={{
-                        fontSize: '3.5rem',
-                        fontWeight: '400',
-                        color: 'black',
-                        fontFamily: 'Saans Trial, sans-serif',
-                        lineHeight: 1,
-                        letterSpacing: '0px',
-                        WebkitFontSmoothing: 'antialiased',
-                        MozOsxFontSmoothing: 'grayscale',
-                        textTransform: 'uppercase'
-                      }}
-                      whileHover={{ 
-                        fontWeight: '500',
-                        letterSpacing: '1px'
-                      }}
-                    >
-                      {item.name}
-                    </motion.div>
-
-                    {/* Number Indicator */}
-                    <motion.div
-                      style={{
-                        position: 'absolute',
-                        left: '-2rem',
-                        top: '50%',
-                        transform: 'translateY(-50%)',
-                        fontSize: '0.9rem',
-                        fontWeight: '400',
-                        color: 'black',
-                        opacity: 0.6
-                      }}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 0.6 }}
-                      transition={{ delay: item.delay + 0.2 }}
-                    >
-                      {String(index + 1).padStart(2, '0')}
-                    </motion.div>
-
-                    {/* Hover Line */}
-                    <motion.div
-                      style={{
-                        position: 'absolute',
-                        bottom: '-5px',
-                        left: '0',
-                        width: '0%',
-                        height: '2px',
-                        backgroundColor: 'black'
-                      }}
-                      initial={{ width: 0 }}
-                      whileHover={{ 
-                        width: '100%',
-                        transition: { duration: 0.4, ease: "easeOut" }
-                      }}
-                    />
-                  </motion.div>
-                ))}
               </motion.div>
             </motion.div>
             
