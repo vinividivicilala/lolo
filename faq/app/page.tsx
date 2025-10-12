@@ -41,28 +41,25 @@ export default function HomePage(): React.JSX.Element {
       position: 'relative',
       overflow: 'hidden'
     }}>
-      {/* Menu Button */}
-      <motion.button
+      {/* Menu Button - Simple Text */}
+      <motion.div
         onClick={toggleMenu}
         style={{
           position: 'absolute',
           top: '2rem',
           right: '2rem',
-          padding: '0.5rem 1rem',
-          fontSize: '1rem',
+          fontSize: '1.2rem',
           fontWeight: '700',
           color: 'white',
-          backgroundColor: 'transparent',
-          border: '2px solid white',
-          borderRadius: '4px',
           cursor: 'pointer',
           fontFamily: "'Noto Sans JP', sans-serif",
-          letterSpacing: '1px',
-          zIndex: 20
+          letterSpacing: '2px',
+          zIndex: 20,
+          padding: '0.5rem 0'
         }}
         whileHover={{ 
           scale: 1.05,
-          backgroundColor: 'rgba(255,255,255,0.1)'
+          color: '#CCFF00'
         }}
         whileTap={{ scale: 0.95 }}
         initial={{ opacity: 0 }}
@@ -70,26 +67,96 @@ export default function HomePage(): React.JSX.Element {
         transition={{ delay: 1.2, duration: 0.6 }}
       >
         メニュー
-      </motion.button>
+      </motion.div>
 
-      {/* Menu Background */}
+      {/* Menu Overlay */}
       <AnimatePresence>
         {showMenu && (
-          <motion.div
-            style={{
-              position: 'fixed',
-              top: 0,
-              right: 0,
-              width: '100%',
-              height: '100%',
-              backgroundColor: '#CCFF00', // Warna hijau stabilo
-              zIndex: 15
-            }}
-            initial={{ opacity: 0, x: '100%' }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: '100%' }}
-            transition={{ duration: 0.5, ease: "easeInOut" }}
-          />
+          <>
+            {/* Background Overlay */}
+            <motion.div
+              style={{
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                width: '100%',
+                height: '100%',
+                backgroundColor: '#CCFF00',
+                zIndex: 25
+              }}
+              initial={{ scaleY: 0, transformOrigin: "top" }}
+              animate={{ scaleY: 1 }}
+              exit={{ scaleY: 0 }}
+              transition={{ 
+                duration: 0.8,
+                ease: [0.76, 0, 0.24, 1]
+              }}
+            />
+            
+            {/* Close Button */}
+            <motion.button
+              onClick={toggleMenu}
+              style={{
+                position: 'fixed',
+                top: '2rem',
+                right: '2rem',
+                width: '60px',
+                height: '60px',
+                borderRadius: '50%',
+                border: 'none',
+                backgroundColor: 'black',
+                cursor: 'pointer',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                zIndex: 30
+              }}
+              whileHover={{ 
+                scale: 1.1,
+                backgroundColor: '#333'
+              }}
+              whileTap={{ scale: 0.9 }}
+              initial={{ opacity: 0, rotate: -180 }}
+              animate={{ opacity: 1, rotate: 0 }}
+              exit={{ opacity: 0, rotate: 180 }}
+              transition={{ 
+                duration: 0.6,
+                ease: "easeOut",
+                delay: 0.2
+              }}
+            >
+              {/* X Icon */}
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="#CCFF00"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <motion.line
+                  x1="18"
+                  y1="6"
+                  x2="6"
+                  y2="18"
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ delay: 0.4, duration: 0.3 }}
+                />
+                <motion.line
+                  x1="6"
+                  y1="6"
+                  x2="18"
+                  y2="18"
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ delay: 0.5, duration: 0.3 }}
+                />
+              </svg>
+            </motion.button>
+          </>
         )}
       </AnimatePresence>
 
