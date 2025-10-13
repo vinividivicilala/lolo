@@ -205,7 +205,8 @@ export default function HomePage(): React.JSX.Element {
                         position: 'relative',
                         cursor: 'pointer',
                         display: 'flex',
-                        alignItems: 'center'
+                        alignItems: 'center',
+                        justifyContent: 'space-between'
                       }}
                       onMouseEnter={(e) => {
                         gsap.to(e.currentTarget, {
@@ -213,10 +214,24 @@ export default function HomePage(): React.JSX.Element {
                           duration: 0.3,
                           ease: "power2.out"
                         });
+                        // Show arrow on hover
+                        gsap.to(e.currentTarget.querySelector('.menu-arrow'), {
+                          opacity: 1,
+                          x: 0,
+                          duration: 0.3,
+                          ease: "power2.out"
+                        });
                       }}
                       onMouseLeave={(e) => {
                         gsap.to(e.currentTarget, {
                           x: 0,
+                          duration: 0.3,
+                          ease: "power2.out"
+                        });
+                        // Hide arrow on mouse leave
+                        gsap.to(e.currentTarget.querySelector('.menu-arrow'), {
+                          opacity: 0,
+                          x: -10,
                           duration: 0.3,
                           ease: "power2.out"
                         });
@@ -235,6 +250,30 @@ export default function HomePage(): React.JSX.Element {
                         margin: '0rem 0'
                       }}>
                         {item.name}
+                      </div>
+
+                      {/* Arrow SVG - Hidden by default */}
+                      <div 
+                        className="menu-arrow"
+                        style={{
+                          opacity: 0,
+                          transform: 'translateX(-10px)',
+                          transition: 'all 0.3s ease'
+                        }}
+                      >
+                        <svg
+                          width="24"
+                          height="24"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <line x1="5" y1="12" x2="19" y2="12" />
+                          <polyline points="12 5 19 12 12 19" />
+                        </svg>
                       </div>
                     </div>
                   ))}
@@ -537,4 +576,3 @@ export default function HomePage(): React.JSX.Element {
     </div>
   );
 }
-
