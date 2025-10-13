@@ -9,8 +9,10 @@ export default function HomePage(): React.JSX.Element {
   const [showLoading, setShowLoading] = useState(true);
   const [showMenu, setShowMenu] = useState(false);
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
+  const [isMenuHovered, setIsMenuHovered] = useState(false);
   const router = useRouter();
   const menuRef = useRef<HTMLDivElement>(null);
+  const menuButtonRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -58,6 +60,30 @@ export default function HomePage(): React.JSX.Element {
     }
   }, [showMenu]);
 
+  // GSAP Animation for menu button
+  useEffect(() => {
+    if (menuButtonRef.current && !showLoading) {
+      const menuText = menuButtonRef.current;
+      
+      // Initial animation when component mounts
+      gsap.fromTo(menuText,
+        {
+          opacity: 0,
+          y: -20,
+          rotation: -10
+        },
+        {
+          opacity: 1,
+          y: 0,
+          rotation: 0,
+          duration: 1,
+          delay: 1.2,
+          ease: "elastic.out(1, 0.5)"
+        }
+      );
+    }
+  }, [showLoading]);
+
   const navigateToNotes = () => {
     setShowLoading(true);
     setTimeout(() => {
@@ -67,6 +93,105 @@ export default function HomePage(): React.JSX.Element {
 
   const toggleMenu = () => {
     setShowMenu(!showMenu);
+  };
+
+  const handleMenuHover = () => {
+    if (!menuButtonRef.current) return;
+    
+    setIsMenuHovered(true);
+    
+    // Hover animation
+    gsap.to(menuButtonRef.current, {
+      scale: 1.1,
+      color: "#CCFF00",
+      duration: 0.3,
+      ease: "power2.out"
+    });
+    
+    // Add floating animation
+    gsap.to(menuButtonRef.current, {
+      y: -5,
+      duration: 0.6,
+      ease: "power1.inOut",
+      yoyo: true,
+      repeat: -1
+    });
+    
+    // Add glow effect
+    gsap.to(menuButtonRef.current, {
+      textShadow: "0 0 10px #CCFF00, 0 0 20px #CCFF00",
+      duration: 0.4,
+      ease: "power2.out"
+    });
+  };
+
+  const handleMenuLeave = () => {
+    if (!menuButtonRef.current) return;
+    
+    setIsMenuHovered(false);
+    
+    // Reset hover animation
+    gsap.to(menuButtonRef.current, {
+      scale: 1,
+      color: "white",
+      duration: 0.3,
+      ease: "power2.out"
+    });
+    
+    // Stop floating animation
+    gsap.killTweensOf(menuButtonRef.current);
+    gsap.to(menuButtonRef.current, {
+      y: 0,
+      duration: 0.3,
+      ease: "power2.out"
+    });
+    
+    // Remove glow effect
+    gsap.to(menuButtonRef.current, {
+      textShadow: "0 0 0px rgba(255,255,255,0)",
+      duration: 0.4,
+      ease: "power2.out"
+    });
+  };
+
+  const handleMenuClick = () => {
+    if (!menuButtonRef.current) return;
+    
+    // Click animation
+    gsap.to(menuButtonRef.current, {
+      scale: 0.9,
+      duration: 0.1,
+      ease: "power2.out",
+      onComplete: () => {
+        gsap.to(menuButtonRef.current, {
+          scale: 1,
+          duration: 0.2,
+          ease: "elastic.out(1, 0.5)"
+        });
+      }
+    });
+    
+    // Ripple effect
+    gsap.to(menuButtonRef.current, {
+      rotation: 360,
+      duration: 0.6,
+      ease: "power2.out"
+    });
+    
+    // Color flash
+    gsap.to(menuButtonRef.current, {
+      color: "#FF00FF",
+      duration: 0.1,
+      onComplete: () => {
+        gsap.to(menuButtonRef.current, {
+          color: isMenuHovered ? "#CCFF00" : "white",
+          duration: 0.3,
+          ease: "power2.out"
+        });
+      }
+    });
+    
+    toggleMenu();
   };
 
   const menuItems = [
@@ -100,9 +225,12 @@ export default function HomePage(): React.JSX.Element {
       WebkitFontSmoothing: 'antialiased',
       MozOsxFontSmoothing: 'grayscale'
     }}>
-      {/* Menu Button */}
-      <motion.div
-        onClick={toggleMenu}
+      {/* Menu Button with GSAP Animations */}
+      <div
+        ref={menuButtonRef}
+        onClick={handleMenuClick}
+        onMouseEnter={handleMenuHover}
+        onMouseLeave={handleMenuLeave}
         style={{
           position: 'absolute',
           top: '2rem',
@@ -114,21 +242,45 @@ export default function HomePage(): React.JSX.Element {
           fontFamily: 'Saans Trial, sans-serif',
           letterSpacing: '2px',
           zIndex: 20,
-          padding: '0.5rem 0',
+          padding: '0.5rem 1rem',
           WebkitFontSmoothing: 'antialiased',
-          MozOsxFontSmoothing: 'grayscale'
+          MozOsxFontSmoothing: 'grayscale',
+          borderRadius: '25px',
+          border: '2px solid rgba(255,255,255,0.2)',
+          background: 'rgba(0,0,0,0.3)',
+          backdropFilter: 'blur(10px)',
+          transition: 'all 0.3s ease',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '0.5rem'
         }}
-        whileHover={{ 
-          scale: 1.05,
-          color: '#CCFF00'
-        }}
-        whileTap={{ scale: 0.95 }}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1.2, duration: 0.6 }}
       >
+        {/* Animated dots */}
+        <div className="menu-dots" style={{
+          display: 'flex',
+          gap: '2px'
+        }}>
+          <div style={{
+            width: '4px',
+            height: '4px',
+            borderRadius: '50%',
+            backgroundColor: 'currentColor'
+          }}></div>
+          <div style={{
+            width: '4px',
+            height: '4px',
+            borderRadius: '50%',
+            backgroundColor: 'currentColor'
+          }}></div>
+          <div style={{
+            width: '4px',
+            height: '4px',
+            borderRadius: '50%',
+            backgroundColor: 'currentColor'
+          }}></div>
+        </div>
         メニュー
-      </motion.div>
+      </div>
 
       {/* Menu Overlay */}
       <AnimatePresence>
