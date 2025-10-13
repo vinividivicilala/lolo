@@ -13,6 +13,7 @@ export default function HomePage(): React.JSX.Element {
   const router = useRouter();
   const menuRef = useRef<HTMLDivElement>(null);
   const menuButtonRef = useRef<HTMLDivElement>(null);
+  const nameUnderlineRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -57,6 +58,23 @@ export default function HomePage(): React.JSX.Element {
         },
         "-=0.4"
       );
+
+      // Animate name underline
+      if (nameUnderlineRef.current) {
+        gsap.fromTo(nameUnderlineRef.current,
+          {
+            scaleX: 0,
+            opacity: 0
+          },
+          {
+            scaleX: 1,
+            opacity: 1,
+            duration: 1,
+            delay: 0.8,
+            ease: "power3.out"
+          }
+        );
+      }
     }
   }, [showMenu]);
 
@@ -309,32 +327,51 @@ export default function HomePage(): React.JSX.Element {
                 ease: [0.76, 0, 0.24, 1]
               }}
             >
-              {/* Website Name - Top Left */}
-              <motion.div
-                style={{
-                  position: 'absolute',
-                  left: '2rem',
-                  top: '2rem',
-                  fontSize: '1.8rem',
-                  fontWeight: '400',
-                  color: 'black',
-                  fontFamily: 'Saans Trial, sans-serif',
-                  lineHeight: 1,
-                  letterSpacing: '1px',
-                  WebkitFontSmoothing: 'antialiased',
-                  MozOsxFontSmoothing: 'grayscale'
-                }}
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ 
-                  duration: 0.6,
-                  delay: 0.4,
-                  ease: "easeOut"
-                }}
-              >
-                sorusuru
-              </motion.div>
+              {/* Website Name - Top Left with Underline */}
+              <div style={{
+                position: 'absolute',
+                left: '2rem',
+                top: '2rem',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'flex-start'
+              }}>
+                <motion.div
+                  style={{
+                    fontSize: '1.8rem',
+                    fontWeight: '400',
+                    color: 'black',
+                    fontFamily: 'Saans Trial, sans-serif',
+                    lineHeight: 1,
+                    letterSpacing: '1px',
+                    WebkitFontSmoothing: 'antialiased',
+                    MozOsxFontSmoothing: 'grayscale'
+                  }}
+                  initial={{ opacity: 0, y: -20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ 
+                    duration: 0.6,
+                    delay: 0.4,
+                    ease: "easeOut"
+                  }}
+                >
+                  sorusuru
+                </motion.div>
+                
+                {/* Black Underline */}
+                <div
+                  ref={nameUnderlineRef}
+                  style={{
+                    width: '100%',
+                    height: '3px',
+                    backgroundColor: 'black',
+                    marginTop: '0.5rem',
+                    borderRadius: '2px',
+                    transformOrigin: 'left center'
+                  }}
+                />
+              </div>
 
               {/* Main Content - Navigation Menu */}
               <div style={{
