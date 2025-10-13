@@ -8,6 +8,7 @@ import gsap from "gsap";
 export default function HomePage(): React.JSX.Element {
   const [showLoading, setShowLoading] = useState(true);
   const [showMenu, setShowMenu] = useState(false);
+  const [hoveredItem, setHoveredItem] = useState<string | null>(null);
   const router = useRouter();
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -208,34 +209,8 @@ export default function HomePage(): React.JSX.Element {
                         alignItems: 'center',
                         justifyContent: 'space-between'
                       }}
-                      onMouseEnter={(e) => {
-                        gsap.to(e.currentTarget, {
-                          x: 10,
-                          duration: 0.3,
-                          ease: "power2.out"
-                        });
-                        // Show arrow on hover
-                        gsap.to(e.currentTarget.querySelector('.menu-arrow'), {
-                          opacity: 1,
-                          x: 0,
-                          duration: 0.3,
-                          ease: "power2.out"
-                        });
-                      }}
-                      onMouseLeave={(e) => {
-                        gsap.to(e.currentTarget, {
-                          x: 0,
-                          duration: 0.3,
-                          ease: "power2.out"
-                        });
-                        // Hide arrow on mouse leave
-                        gsap.to(e.currentTarget.querySelector('.menu-arrow'), {
-                          opacity: 0,
-                          x: -10,
-                          duration: 0.3,
-                          ease: "power2.out"
-                        });
-                      }}
+                      onMouseEnter={() => setHoveredItem(item.name)}
+                      onMouseLeave={() => setHoveredItem(null)}
                     >
                       {/* Menu Text */}
                       <div style={{
@@ -247,33 +222,40 @@ export default function HomePage(): React.JSX.Element {
                         letterSpacing: '0.5px',
                         textTransform: 'uppercase',
                         padding: '0rem 0',
-                        margin: '0rem 0'
+                        margin: '0rem 0',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '1rem'
                       }}>
                         {item.name}
-                      </div>
-
-                      {/* Arrow SVG - Hidden by default */}
-                      <div 
-                        className="menu-arrow"
-                        style={{
-                          opacity: 0,
-                          transform: 'translateX(-10px)',
-                          transition: 'all 0.3s ease'
-                        }}
-                      >
-                        <svg
-                          width="24"
-                          height="24"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
+                        
+                        {/* Arrow SVG - Visible only on hover */}
+                        <motion.div
+                          initial={{ opacity: 0, x: -10 }}
+                          animate={{ 
+                            opacity: hoveredItem === item.name ? 1 : 0,
+                            x: hoveredItem === item.name ? 0 : -10
+                          }}
+                          transition={{ duration: 0.3, ease: "easeOut" }}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center'
+                          }}
                         >
-                          <line x1="5" y1="12" x2="19" y2="12" />
-                          <polyline points="12 5 19 12 12 19" />
-                        </svg>
+                          <svg
+                            width="28"
+                            height="28"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2.5"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
+                            <line x1="5" y1="12" x2="19" y2="12" />
+                            <polyline points="12 5 19 12 12 19" />
+                          </svg>
+                        </motion.div>
                       </div>
                     </div>
                   ))}
@@ -291,7 +273,7 @@ export default function HomePage(): React.JSX.Element {
                 <div style={{
                   display: 'flex',
                   flexDirection: 'column',
-                  gap: '0.02rem' // Very very close gap
+                  gap: '0.02rem'
                 }}>
                   {socialLinks.map((social, index) => (
                     <a
@@ -306,9 +288,9 @@ export default function HomePage(): React.JSX.Element {
                         justifyContent: 'space-between',
                         textDecoration: 'none',
                         color: 'black',
-                        padding: '0.02rem 0', // Very very thin padding
+                        padding: '0.02rem 0',
                         cursor: 'pointer',
-                        lineHeight: 0.9 // Tight line height
+                        lineHeight: 0.9
                       }}
                       onMouseEnter={(e) => {
                         gsap.to(e.currentTarget, {
