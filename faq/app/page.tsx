@@ -13,8 +13,6 @@ export default function HomePage(): React.JSX.Element {
   const router = useRouter();
   const menuRef = useRef<HTMLDivElement>(null);
   const menuButtonRef = useRef<HTMLDivElement>(null);
-  const socialLinksRef = useRef<HTMLDivElement>(null);
-  const copyrightRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -43,55 +41,6 @@ export default function HomePage(): React.JSX.Element {
           ease: "power3.out"
         }
       );
-
-      // Animate social links on the right side
-      if (socialLinksRef.current) {
-        tl.fromTo(socialLinksRef.current,
-          {
-            x: 100,
-            opacity: 0
-          },
-          {
-            x: 0,
-            opacity: 1,
-            duration: 0.8,
-            ease: "power3.out"
-          },
-          "-=0.4"
-        );
-      }
-
-      // Animate copyright with underline
-      if (copyrightRef.current) {
-        tl.fromTo(copyrightRef.current,
-          {
-            y: 50,
-            opacity: 0
-          },
-          {
-            y: 0,
-            opacity: 1,
-            duration: 0.6,
-            ease: "back.out(1.7)"
-          },
-          "-=0.2"
-        );
-
-        // Animate the underline
-        gsap.fromTo(copyrightRef.current.querySelector('.copyright-underline'),
-          {
-            scaleX: 0,
-            opacity: 0
-          },
-          {
-            scaleX: 1,
-            opacity: 1,
-            duration: 0.8,
-            delay: 0.3,
-            ease: "power3.out"
-          }
-        );
-      }
     }
   }, [showMenu]);
 
@@ -236,14 +185,6 @@ export default function HomePage(): React.JSX.Element {
     { name: "CONTACT", delay: 0.6 }
   ];
 
-  const socialLinks = [
-    { name: "INSTAGRAM", url: "https://instagram.com" },
-    { name: "TWITTER", url: "https://twitter.com" },
-    { name: "LINKEDIN", url: "https://linkedin.com" },
-    { name: "DRIBBBLE", url: "https://dribbble.com" },
-    { name: "BEHANCE", url: "https://behance.net" }
-  ];
-
   return (
     <div style={{
       minHeight: '100vh',
@@ -333,6 +274,7 @@ export default function HomePage(): React.JSX.Element {
                 backgroundColor: '#CCFF00',
                 zIndex: 25,
                 display: 'flex',
+                flexDirection: 'column',
                 padding: '2rem'
               }}
               initial={{ scaleY: 0, transformOrigin: "top" }}
@@ -446,135 +388,6 @@ export default function HomePage(): React.JSX.Element {
                     </div>
                   ))}
                 </div>
-              </div>
-
-              {/* Social Links - Right Side */}
-              <div 
-                ref={socialLinksRef}
-                style={{
-                  position: 'absolute',
-                  right: '2rem',
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'flex-end',
-                  gap: '1.5rem'
-                }}
-              >
-                {socialLinks.map((social, index) => (
-                  <a
-                    key={social.name}
-                    href={social.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="social-link-right"
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '0.8rem',
-                      textDecoration: 'none',
-                      color: 'black',
-                      cursor: 'pointer',
-                      padding: '0.5rem 0',
-                      fontFamily: 'Saans Trial, sans-serif'
-                    }}
-                    onMouseEnter={(e) => {
-                      gsap.to(e.currentTarget, {
-                        x: -5,
-                        duration: 0.3,
-                        ease: "power2.out"
-                      });
-                      gsap.to(e.currentTarget.querySelector('.social-arrow-right'), {
-                        opacity: 1,
-                        x: 0,
-                        duration: 0.3,
-                        ease: "power2.out"
-                      });
-                    }}
-                    onMouseLeave={(e) => {
-                      gsap.to(e.currentTarget, {
-                        x: 0,
-                        duration: 0.3,
-                        ease: "power2.out"
-                      });
-                      gsap.to(e.currentTarget.querySelector('.social-arrow-right'), {
-                        opacity: 0,
-                        x: 5,
-                        duration: 0.3,
-                        ease: "power2.out"
-                      });
-                    }}
-                  >
-                    <div style={{
-                      fontSize: '0.9rem',
-                      fontWeight: '700',
-                      letterSpacing: '1.5px',
-                      textTransform: 'uppercase'
-                    }}>
-                      {social.name}
-                    </div>
-                    
-                    {/* Arrow SVG */}
-                    <div 
-                      className="social-arrow-right"
-                      style={{
-                        opacity: 0,
-                        transform: 'translateX(5px)',
-                        transition: 'all 0.3s ease'
-                      }}
-                    >
-                      <svg
-                        width="16"
-                        height="16"
-                        viewBox="0 0 18 18"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <line x1="3" y1="9" x2="15" y2="9" />
-                        <polyline points="12 6 15 9 12 12" />
-                      </svg>
-                    </div>
-                  </a>
-                ))}
-              </div>
-
-              {/* Copyright with Black Underline - Bottom Right */}
-              <div 
-                ref={copyrightRef}
-                style={{
-                  position: 'absolute',
-                  right: '2rem',
-                  bottom: '2rem',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'flex-end',
-                  gap: '0.5rem'
-                }}
-              >
-                <div style={{
-                  fontSize: '0.8rem',
-                  fontWeight: '400',
-                  color: 'black',
-                  fontFamily: 'Saans Trial, sans-serif',
-                  letterSpacing: '1px'
-                }}>
-                  © 2024 SORUSURU. ALL RIGHTS RESERVED.
-                </div>
-                
-                {/* Black Underline */}
-                <div 
-                  className="copyright-underline"
-                  style={{
-                    width: '100%',
-                    height: '2px',
-                    backgroundColor: 'black',
-                    borderRadius: '1px'
-                  }}
-                />
               </div>
             </motion.div>
             
