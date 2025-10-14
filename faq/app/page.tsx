@@ -433,7 +433,7 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </motion.div>
             
-            {/* Close Button with Hover Text Effect */}
+            {/* Close Button with Hover Text Effect - Lebar diperbesar */}
             <motion.button
               onClick={toggleMenu}
               onMouseEnter={() => setIsCloseHovered(true)}
@@ -442,7 +442,7 @@ export default function HomePage(): React.JSX.Element {
                 position: 'fixed',
                 top: '1.8rem',
                 right: '1.8rem',
-                width: 'auto',
+                width: '100px', // Lebar diperbesar
                 height: '45px',
                 borderRadius: '25px',
                 border: 'none',
@@ -453,7 +453,7 @@ export default function HomePage(): React.JSX.Element {
                 alignItems: 'center',
                 zIndex: 30,
                 backdropFilter: 'blur(10px)',
-                padding: '0 1.2rem',
+                padding: '0 1.5rem', // Padding diperbesar
                 fontFamily: 'Arame Mono, monospace',
                 fontSize: '0.9rem',
                 fontWeight: '300',
@@ -476,7 +476,9 @@ export default function HomePage(): React.JSX.Element {
                   display: 'flex',
                   alignItems: 'center',
                   gap: '0.5rem',
-                  position: 'relative'
+                  position: 'relative',
+                  width: '100%',
+                  justifyContent: 'center'
                 }}
               >
                 {/* X Icon */}
@@ -506,7 +508,10 @@ export default function HomePage(): React.JSX.Element {
                     position: 'absolute',
                     left: '50%',
                     transform: 'translateX(-50%)',
-                    whiteSpace: 'nowrap'
+                    whiteSpace: 'nowrap',
+                    fontSize: '0.9rem',
+                    fontWeight: '300',
+                    letterSpacing: '0.5px'
                   }}
                   initial={{ scale: 0, opacity: 0 }}
                   animate={{ 
