@@ -185,6 +185,63 @@ export default function HomePage(): React.JSX.Element {
     { name: "CONTACT", delay: 0.6 }
   ];
 
+  // Variants for modern animations
+  const menuVariants = {
+    closed: {
+      scaleY: 0,
+      transformOrigin: "top",
+      transition: {
+        duration: 0.8,
+        ease: [0.76, 0, 0.24, 1]
+      }
+    },
+    open: {
+      scaleY: 1,
+      transformOrigin: "top",
+      transition: {
+        duration: 0.8,
+        ease: [0.76, 0, 0.24, 1]
+      }
+    }
+  };
+
+  const menuItemVariants = {
+    closed: {
+      x: -100,
+      opacity: 0,
+      transition: {
+        duration: 0.5
+      }
+    },
+    open: (i: number) => ({
+      x: 0,
+      opacity: 1,
+      transition: {
+        duration: 0.8,
+        delay: 0.1 * i,
+        ease: "circOut"
+      }
+    })
+  };
+
+  const closeButtonVariants = {
+    closed: {
+      opacity: 0,
+      rotate: -180,
+      scale: 0.5
+    },
+    open: {
+      opacity: 1,
+      rotate: 0,
+      scale: 1,
+      transition: {
+        duration: 0.6,
+        delay: 0.3,
+        ease: "backOut"
+      }
+    }
+  };
+
   return (
     <div style={{
       minHeight: '100vh',
@@ -262,7 +319,7 @@ export default function HomePage(): React.JSX.Element {
       <AnimatePresence>
         {showMenu && (
           <>
-            {/* Background Overlay - Modern Framer Motion Animation */}
+            {/* Background Overlay */}
             <motion.div
               ref={menuRef}
               style={{
@@ -271,19 +328,16 @@ export default function HomePage(): React.JSX.Element {
                 left: 0,
                 width: '100%',
                 height: '100%',
-                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                backgroundColor: '#CCFF00',
                 zIndex: 25,
                 display: 'flex',
                 flexDirection: 'column',
                 padding: '2rem'
               }}
-              initial={{ clipPath: 'circle(0% at 100% 0%)' }}
-              animate={{ clipPath: 'circle(150% at 100% 0%)' }}
-              exit={{ clipPath: 'circle(0% at 100% 0%)' }}
-              transition={{ 
-                duration: 1.2,
-                ease: [0.76, 0, 0.24, 1]
-              }}
+              variants={menuVariants}
+              initial="closed"
+              animate="open"
+              exit="closed"
             >
               {/* Website Name - Top Left */}
               <motion.div
@@ -293,7 +347,7 @@ export default function HomePage(): React.JSX.Element {
                   top: '2rem',
                   fontSize: '1.8rem',
                   fontWeight: '400',
-                  color: 'white',
+                  color: 'black',
                   fontFamily: 'Arame Mono, monospace',
                   lineHeight: 1,
                   letterSpacing: '1px',
@@ -339,14 +393,21 @@ export default function HomePage(): React.JSX.Element {
                       }}
                       onMouseEnter={() => setHoveredItem(item.name)}
                       onMouseLeave={() => setHoveredItem(null)}
-                      whileHover={{ x: 20 }}
-                      transition={{ type: "spring", stiffness: 300 }}
+                      variants={menuItemVariants}
+                      initial="closed"
+                      animate="open"
+                      exit="closed"
+                      custom={index}
+                      whileHover={{
+                        x: 30,
+                        transition: { duration: 0.3, ease: "easeOut" }
+                      }}
                     >
                       {/* Menu Text */}
                       <div style={{
                         fontSize: '3.5rem',
                         fontWeight: '400',
-                        color: 'white',
+                        color: 'black',
                         fontFamily: 'Arame Mono, monospace',
                         lineHeight: 0.8,
                         letterSpacing: '0.5px',
@@ -404,34 +465,30 @@ export default function HomePage(): React.JSX.Element {
                 height: '80px',
                 borderRadius: '50%',
                 border: 'none',
-                backgroundColor: 'rgba(255,255,255,0.1)',
-                backdropFilter: 'blur(10px)',
+                backgroundColor: 'black',
                 cursor: 'pointer',
                 display: 'flex',
                 justifyContent: 'center',
                 alignItems: 'center',
                 zIndex: 30
               }}
+              variants={closeButtonVariants}
+              initial="closed"
+              animate="open"
+              exit="closed"
               whileHover={{ 
                 scale: 1.1,
-                backgroundColor: 'rgba(255,255,255,0.2)'
+                backgroundColor: '#333',
+                transition: { duration: 0.2 }
               }}
               whileTap={{ scale: 0.9 }}
-              initial={{ opacity: 0, rotate: -180 }}
-              animate={{ opacity: 1, rotate: 0 }}
-              exit={{ opacity: 0, rotate: 180 }}
-              transition={{ 
-                duration: 0.6,
-                ease: "easeOut",
-                delay: 0.2
-              }}
             >
               <svg
                 width="40"
                 height="40"
                 viewBox="0 0 40 40"
                 fill="none"
-                stroke="white"
+                stroke="#CCFF00"
                 strokeWidth="3"
                 strokeLinecap="round"
                 strokeLinejoin="round"
