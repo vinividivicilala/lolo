@@ -332,11 +332,11 @@ export default function HomePage(): React.JSX.Element {
                 justifyContent: 'center',
                 paddingLeft: '2rem'
               }}>
-                {/* Menu Items with thin text and SVG icons */}
+                {/* Menu Items with very tight spacing */}
                 <div style={{
                   display: 'flex',
                   flexDirection: 'column',
-                  gap: '0.2rem'
+                  gap: '0rem' // Removed gap completely
                 }}>
                   {menuItems.map((item, index) => (
                     <motion.div
@@ -346,7 +346,8 @@ export default function HomePage(): React.JSX.Element {
                         cursor: 'pointer',
                         display: 'flex',
                         alignItems: 'center',
-                        padding: '0.3rem 0'
+                        padding: '0.1rem 0', // Reduced padding
+                        margin: '-0.2rem 0' // Negative margin to make it even tighter
                       }}
                       onMouseEnter={() => setHoveredItem(item.name)}
                       onMouseLeave={() => setHoveredItem(null)}
@@ -363,7 +364,7 @@ export default function HomePage(): React.JSX.Element {
                       {/* SVG Icon */}
                       <motion.div
                         style={{
-                          marginRight: '1rem',
+                          marginRight: '0.8rem', // Reduced margin
                           opacity: 0.8,
                           display: 'flex',
                           alignItems: 'center'
@@ -376,19 +377,19 @@ export default function HomePage(): React.JSX.Element {
                         {getIcon(item.name)}
                       </motion.div>
 
-                      {/* Menu Text - Thin and Light */}
+                      {/* Menu Text - Thin and Light with tighter spacing */}
                       <motion.div
                         style={{
                           fontSize: '2.8rem',
                           fontWeight: '300',
                           color: 'rgba(0,0,0,0.8)',
                           fontFamily: 'Arame Mono, monospace',
-                          lineHeight: 1,
+                          lineHeight: 0.8, // Reduced line height
                           letterSpacing: '-0.5px',
                           textTransform: 'uppercase',
                           display: 'flex',
                           alignItems: 'center',
-                          gap: '0.8rem'
+                          gap: '0.5rem' // Reduced gap
                         }}
                         animate={{
                           color: hoveredItem === item.name ? '#000' : 'rgba(0,0,0,0.8)',
@@ -411,8 +412,8 @@ export default function HomePage(): React.JSX.Element {
                           }}
                         >
                           <svg
-                            width="20"
-                            height="20"
+                            width="18" // Slightly smaller
+                            height="18"
                             viewBox="0 0 24 24"
                             fill="none"
                             stroke="currentColor"
