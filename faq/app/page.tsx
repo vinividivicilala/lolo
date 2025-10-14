@@ -197,7 +197,7 @@ export default function HomePage(): React.JSX.Element {
       alignItems: 'center',
       position: 'relative',
       overflow: 'hidden',
-      fontFamily: 'Saans Trial, sans-serif',
+      fontFamily: 'Arame Mono, monospace',
       WebkitFontSmoothing: 'antialiased',
       MozOsxFontSmoothing: 'grayscale'
     }}>
@@ -215,7 +215,7 @@ export default function HomePage(): React.JSX.Element {
           fontWeight: '500',
           color: 'white',
           cursor: 'pointer',
-          fontFamily: 'Saans Trial, sans-serif',
+          fontFamily: 'Arame Mono, monospace',
           letterSpacing: '2px',
           zIndex: 20,
           padding: '0.5rem 1rem',
@@ -255,14 +255,14 @@ export default function HomePage(): React.JSX.Element {
             backgroundColor: 'currentColor'
           }}></div>
         </div>
-        メニュー
+        MENU
       </div>
 
       {/* Menu Overlay */}
       <AnimatePresence>
         {showMenu && (
           <>
-            {/* Background Overlay */}
+            {/* Background Overlay - Modern Framer Motion Animation */}
             <motion.div
               ref={menuRef}
               style={{
@@ -271,17 +271,17 @@ export default function HomePage(): React.JSX.Element {
                 left: 0,
                 width: '100%',
                 height: '100%',
-                backgroundColor: '#CCFF00',
+                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
                 zIndex: 25,
                 display: 'flex',
                 flexDirection: 'column',
                 padding: '2rem'
               }}
-              initial={{ scaleY: 0, transformOrigin: "top" }}
-              animate={{ scaleY: 1 }}
-              exit={{ scaleY: 0 }}
+              initial={{ clipPath: 'circle(0% at 100% 0%)' }}
+              animate={{ clipPath: 'circle(150% at 100% 0%)' }}
+              exit={{ clipPath: 'circle(0% at 100% 0%)' }}
               transition={{ 
-                duration: 0.8,
+                duration: 1.2,
                 ease: [0.76, 0, 0.24, 1]
               }}
             >
@@ -293,8 +293,8 @@ export default function HomePage(): React.JSX.Element {
                   top: '2rem',
                   fontSize: '1.8rem',
                   fontWeight: '400',
-                  color: 'black',
-                  fontFamily: 'Saans Trial, sans-serif',
+                  color: 'white',
+                  fontFamily: 'Arame Mono, monospace',
                   lineHeight: 1,
                   letterSpacing: '1px',
                   WebkitFontSmoothing: 'antialiased',
@@ -309,7 +309,7 @@ export default function HomePage(): React.JSX.Element {
                   ease: "easeOut"
                 }}
               >
-                sorusuru
+                PORTFOLIO
               </motion.div>
 
               {/* Main Content - Navigation Menu */}
@@ -327,7 +327,7 @@ export default function HomePage(): React.JSX.Element {
                   gap: '0rem'
                 }}>
                   {menuItems.map((item, index) => (
-                    <div
+                    <motion.div
                       key={item.name}
                       className="menu-item"
                       style={{
@@ -339,13 +339,15 @@ export default function HomePage(): React.JSX.Element {
                       }}
                       onMouseEnter={() => setHoveredItem(item.name)}
                       onMouseLeave={() => setHoveredItem(null)}
+                      whileHover={{ x: 20 }}
+                      transition={{ type: "spring", stiffness: 300 }}
                     >
                       {/* Menu Text */}
                       <div style={{
                         fontSize: '3.5rem',
                         fontWeight: '400',
-                        color: 'black',
-                        fontFamily: 'Saans Trial, sans-serif',
+                        color: 'white',
+                        fontFamily: 'Arame Mono, monospace',
                         lineHeight: 0.8,
                         letterSpacing: '0.5px',
                         textTransform: 'uppercase',
@@ -385,7 +387,7 @@ export default function HomePage(): React.JSX.Element {
                           </svg>
                         </motion.div>
                       </div>
-                    </div>
+                    </motion.div>
                   ))}
                 </div>
               </div>
@@ -402,7 +404,8 @@ export default function HomePage(): React.JSX.Element {
                 height: '80px',
                 borderRadius: '50%',
                 border: 'none',
-                backgroundColor: 'black',
+                backgroundColor: 'rgba(255,255,255,0.1)',
+                backdropFilter: 'blur(10px)',
                 cursor: 'pointer',
                 display: 'flex',
                 justifyContent: 'center',
@@ -411,7 +414,7 @@ export default function HomePage(): React.JSX.Element {
               }}
               whileHover={{ 
                 scale: 1.1,
-                backgroundColor: '#333'
+                backgroundColor: 'rgba(255,255,255,0.2)'
               }}
               whileTap={{ scale: 0.9 }}
               initial={{ opacity: 0, rotate: -180 }}
@@ -428,7 +431,7 @@ export default function HomePage(): React.JSX.Element {
                 height="40"
                 viewBox="0 0 40 40"
                 fill="none"
-                stroke="#CCFF00"
+                stroke="white"
                 strokeWidth="3"
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -484,7 +487,7 @@ export default function HomePage(): React.JSX.Element {
                 fontSize: '4rem',
                 fontWeight: '900',
                 color: 'white',
-                fontFamily: 'Saans Trial, sans-serif',
+                fontFamily: 'Arame Mono, monospace',
                 textAlign: 'center',
                 letterSpacing: '8px',
                 position: 'relative'
@@ -511,7 +514,7 @@ export default function HomePage(): React.JSX.Element {
                 ease: [0.25, 0.46, 0.45, 0.94]
               }}
             >
-              ノートとは何ですか
+              WELCOME
             </motion.div>
           </motion.div>
         )}
@@ -537,7 +540,7 @@ export default function HomePage(): React.JSX.Element {
                 fontSize: '3rem',
                 fontWeight: '900',
                 color: 'white',
-                fontFamily: 'Saans Trial, sans-serif',
+                fontFamily: 'Arame Mono, monospace',
                 textAlign: 'center',
                 marginBottom: '1rem'
               }}
@@ -545,14 +548,14 @@ export default function HomePage(): React.JSX.Element {
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.3, duration: 0.6 }}
             >
-              ようこそ
+              WELCOME
             </motion.h1>
             
             <motion.p
               style={{
                 fontSize: '1.2rem',
                 color: 'rgba(255,255,255,0.8)',
-                fontFamily: 'Saans Trial, sans-serif',
+                fontFamily: 'Arame Mono, monospace',
                 textAlign: 'center',
                 maxWidth: '500px',
                 lineHeight: '1.6'
@@ -561,7 +564,7 @@ export default function HomePage(): React.JSX.Element {
               animate={{ opacity: 1 }}
               transition={{ delay: 0.6, duration: 0.6 }}
             >
-              あなたの思考を記録する場所へ
+              Your space for creative thoughts and ideas
             </motion.p>
 
             <motion.button
@@ -575,7 +578,7 @@ export default function HomePage(): React.JSX.Element {
                 border: 'none',
                 borderRadius: '8px',
                 cursor: 'pointer',
-                fontFamily: 'Saans Trial, sans-serif',
+                fontFamily: 'Arame Mono, monospace',
                 letterSpacing: '2px'
               }}
               whileHover={{ 
@@ -588,7 +591,7 @@ export default function HomePage(): React.JSX.Element {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.9, duration: 0.6 }}
             >
-              ノートを見る
+              VIEW NOTES
             </motion.button>
           </motion.div>
         )}
@@ -596,7 +599,7 @@ export default function HomePage(): React.JSX.Element {
 
       {/* Font import */}
       <style jsx>{`
-        @import url('https://fonts.cdnfonts.com/css/saans-trial');
+        @import url('https://fonts.cdnfonts.com/css/arame-mono');
       `}</style>
     </div>
   );
