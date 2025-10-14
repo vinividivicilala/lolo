@@ -3,16 +3,12 @@
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
-import gsap from "gsap";
 
 export default function HomePage(): React.JSX.Element {
   const [showLoading, setShowLoading] = useState(true);
   const [showMenu, setShowMenu] = useState(false);
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
-  const [isMenuHovered, setIsMenuHovered] = useState(false);
   const router = useRouter();
-  const menuRef = useRef<HTMLDivElement>(null);
-  const menuButtonRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -53,7 +49,7 @@ export default function HomePage(): React.JSX.Element {
 
   const menuItemVariants = {
     closed: {
-      x: -100,
+      x: -50,
       opacity: 0,
       transition: {
         duration: 0.5
@@ -63,7 +59,7 @@ export default function HomePage(): React.JSX.Element {
       x: 0,
       opacity: 1,
       transition: {
-        duration: 0.8,
+        duration: 0.6,
         delay: 0.1 + (i * 0.1),
         ease: "circOut"
       }
@@ -103,33 +99,41 @@ export default function HomePage(): React.JSX.Element {
       }
     },
     hover: {
-      scale: 1.1,
+      scale: 1.05,
       color: "#CCFF00",
-      textShadow: "0 0 10px #CCFF00, 0 0 20px #CCFF00",
-      y: [0, -5, 0],
       transition: {
-        duration: 0.6,
-        y: {
-          duration: 0.8,
-          repeat: Infinity,
-          ease: "easeInOut"
-        }
+        duration: 0.3
       }
     },
     tap: {
       scale: 0.95,
-      rotate: 360,
       transition: {
-        duration: 0.3
+        duration: 0.2
       }
     }
   };
 
   const menuItems = [
-    { name: "HOME", delay: 0.3 },
-    { name: "WORK", delay: 0.4 },
-    { name: "ABOUT", delay: 0.5 },
-    { name: "CONTACT", delay: 0.6 }
+    { 
+      name: "HOME", 
+      icon: "🏠",
+      delay: 0.1 
+    },
+    { 
+      name: "WORK", 
+      icon: "💼",
+      delay: 0.2 
+    },
+    { 
+      name: "ABOUT", 
+      icon: "👤",
+      delay: 0.3 
+    },
+    { 
+      name: "CONTACT", 
+      icon: "📱",
+      delay: 0.4 
+    }
   ];
 
   return (
@@ -155,21 +159,21 @@ export default function HomePage(): React.JSX.Element {
           position: 'absolute',
           top: '2rem',
           right: '2rem',
-          fontSize: '1.2rem',
-          fontWeight: '500',
+          fontSize: '1rem',
+          fontWeight: '300',
           color: 'white',
           cursor: 'pointer',
           fontFamily: 'Arame Mono, monospace',
-          letterSpacing: '2px',
+          letterSpacing: '1px',
           zIndex: 20,
-          padding: '0.8rem 1.5rem',
-          borderRadius: '50px',
-          border: '2px solid rgba(255,255,255,0.2)',
-          background: 'rgba(0,0,0,0.3)',
+          padding: '0.7rem 1.2rem',
+          borderRadius: '25px',
+          border: '1px solid rgba(255,255,255,0.1)',
+          background: 'rgba(0,0,0,0.2)',
           backdropFilter: 'blur(10px)',
           display: 'flex',
           alignItems: 'center',
-          gap: '0.8rem'
+          gap: '0.6rem'
         }}
         variants={menuButtonVariants}
         initial="initial"
@@ -182,30 +186,30 @@ export default function HomePage(): React.JSX.Element {
           style={{
             display: 'flex',
             flexDirection: 'column',
-            gap: '4px',
-            width: '20px'
+            gap: '3px',
+            width: '16px'
           }}
           animate={showMenu ? "open" : "closed"}
         >
           <motion.span
             style={{
               width: '100%',
-              height: '2px',
+              height: '1.5px',
               backgroundColor: 'currentColor',
-              borderRadius: '2px'
+              borderRadius: '1px'
             }}
             variants={{
               closed: { rotate: 0, y: 0 },
-              open: { rotate: 45, y: 6 }
+              open: { rotate: 45, y: 5 }
             }}
             transition={{ duration: 0.3 }}
           />
           <motion.span
             style={{
               width: '100%',
-              height: '2px',
+              height: '1.5px',
               backgroundColor: 'currentColor',
-              borderRadius: '2px'
+              borderRadius: '1px'
             }}
             variants={{
               closed: { opacity: 1 },
@@ -216,26 +220,22 @@ export default function HomePage(): React.JSX.Element {
           <motion.span
             style={{
               width: '100%',
-              height: '2px',
+              height: '1.5px',
               backgroundColor: 'currentColor',
-              borderRadius: '2px'
+              borderRadius: '1px'
             }}
             variants={{
               closed: { rotate: 0, y: 0 },
-              open: { rotate: -45, y: -6 }
+              open: { rotate: -45, y: -5 }
             }}
             transition={{ duration: 0.3 }}
           />
         </motion.div>
         
         <motion.span
-          animate={{
-            opacity: [1, 0.7, 1],
-            transition: {
-              duration: 2,
-              repeat: Infinity,
-              ease: "easeInOut"
-            }
+          style={{
+            fontSize: '0.9rem',
+            fontWeight: '300'
           }}
         >
           MENU
@@ -246,9 +246,8 @@ export default function HomePage(): React.JSX.Element {
       <AnimatePresence>
         {showMenu && (
           <>
-            {/* Background Overlay */}
+            {/* Background Overlay - Light Green */}
             <motion.div
-              ref={menuRef}
               style={{
                 position: 'fixed',
                 top: 0,
@@ -272,19 +271,19 @@ export default function HomePage(): React.JSX.Element {
                   position: 'absolute',
                   left: '2rem',
                   top: '2rem',
-                  fontSize: '1.8rem',
-                  fontWeight: '400',
-                  color: 'black',
+                  fontSize: '1.2rem',
+                  fontWeight: '300',
+                  color: 'rgba(0,0,0,0.6)',
                   fontFamily: 'Arame Mono, monospace',
                   lineHeight: 1,
-                  letterSpacing: '1px'
+                  letterSpacing: '0.5px'
                 }}
-                initial={{ opacity: 0, y: -20 }}
+                initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
+                exit={{ opacity: 0, y: -10 }}
                 transition={{ 
-                  duration: 0.6,
-                  delay: 0.4
+                  duration: 0.4,
+                  delay: 0.3
                 }}
               >
                 PORTFOLIO
@@ -298,11 +297,11 @@ export default function HomePage(): React.JSX.Element {
                 justifyContent: 'center',
                 paddingLeft: '2rem'
               }}>
-                {/* Menu Items */}
+                {/* Menu Items with thin text and icons */}
                 <div style={{
                   display: 'flex',
                   flexDirection: 'column',
-                  gap: '0.5rem'
+                  gap: '0.2rem'
                 }}>
                   {menuItems.map((item, index) => (
                     <motion.div
@@ -311,7 +310,8 @@ export default function HomePage(): React.JSX.Element {
                         position: 'relative',
                         cursor: 'pointer',
                         display: 'flex',
-                        alignItems: 'center'
+                        alignItems: 'center',
+                        padding: '0.3rem 0'
                       }}
                       onMouseEnter={() => setHoveredItem(item.name)}
                       onMouseLeave={() => setHoveredItem(null)}
@@ -321,51 +321,66 @@ export default function HomePage(): React.JSX.Element {
                       exit="closed"
                       custom={index}
                       whileHover={{
-                        x: 30,
-                        transition: { duration: 0.3, ease: "easeOut" }
+                        x: 15,
+                        transition: { duration: 0.2, ease: "easeOut" }
                       }}
                     >
-                      {/* Menu Text */}
+                      {/* Icon */}
+                      <motion.span
+                        style={{
+                          fontSize: '1.8rem',
+                          marginRight: '1rem',
+                          opacity: 0.8
+                        }}
+                        animate={{
+                          scale: hoveredItem === item.name ? 1.2 : 1,
+                          transition: { duration: 0.2 }
+                        }}
+                      >
+                        {item.icon}
+                      </motion.span>
+
+                      {/* Menu Text - Thin and Light */}
                       <motion.div
                         style={{
-                          fontSize: '4rem',
-                          fontWeight: '700',
-                          color: 'black',
+                          fontSize: '2.8rem',
+                          fontWeight: '300',
+                          color: 'rgba(0,0,0,0.8)',
                           fontFamily: 'Arame Mono, monospace',
-                          lineHeight: 0.9,
-                          letterSpacing: '-1px',
+                          lineHeight: 1,
+                          letterSpacing: '-0.5px',
                           textTransform: 'uppercase',
                           display: 'flex',
                           alignItems: 'center',
-                          gap: '1rem'
+                          gap: '0.8rem'
                         }}
-                        whileHover={{
-                          color: '#000',
+                        animate={{
+                          color: hoveredItem === item.name ? '#000' : 'rgba(0,0,0,0.8)',
                           transition: { duration: 0.2 }
                         }}
                       >
                         {item.name}
                         
-                        {/* Animated Arrow */}
+                        {/* Animated Arrow - Thin */}
                         <motion.div
-                          initial={{ opacity: 0, scale: 0 }}
+                          initial={{ opacity: 0, scale: 0.8 }}
                           animate={{ 
                             opacity: hoveredItem === item.name ? 1 : 0,
-                            scale: hoveredItem === item.name ? 1 : 0
+                            scale: hoveredItem === item.name ? 1 : 0.8
                           }}
-                          transition={{ duration: 0.3 }}
+                          transition={{ duration: 0.2 }}
                           style={{
                             display: 'flex',
                             alignItems: 'center'
                           }}
                         >
                           <svg
-                            width="32"
-                            height="32"
+                            width="20"
+                            height="20"
                             viewBox="0 0 24 24"
                             fill="none"
                             stroke="currentColor"
-                            strokeWidth="3"
+                            strokeWidth="1.5"
                             strokeLinecap="round"
                             strokeLinejoin="round"
                           >
@@ -385,18 +400,19 @@ export default function HomePage(): React.JSX.Element {
               onClick={toggleMenu}
               style={{
                 position: 'fixed',
-                top: '2rem',
-                right: '2rem',
-                width: '60px',
-                height: '60px',
+                top: '1.8rem',
+                right: '1.8rem',
+                width: '45px',
+                height: '45px',
                 borderRadius: '50%',
                 border: 'none',
-                backgroundColor: 'black',
+                backgroundColor: 'rgba(0,0,0,0.1)',
                 cursor: 'pointer',
                 display: 'flex',
                 justifyContent: 'center',
                 alignItems: 'center',
-                zIndex: 30
+                zIndex: 30,
+                backdropFilter: 'blur(10px)'
               }}
               variants={closeButtonVariants}
               initial="closed"
@@ -404,18 +420,18 @@ export default function HomePage(): React.JSX.Element {
               exit="closed"
               whileHover={{ 
                 scale: 1.1,
-                backgroundColor: '#333',
+                backgroundColor: 'rgba(0,0,0,0.2)',
                 transition: { duration: 0.2 }
               }}
               whileTap={{ scale: 0.9 }}
             >
               <motion.svg
-                width="24"
-                height="24"
+                width="18"
+                height="18"
                 viewBox="0 0 24 24"
                 fill="none"
-                stroke="#CCFF00"
-                strokeWidth="3"
+                stroke="rgba(0,0,0,0.7)"
+                strokeWidth="2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 initial={{ rotate: 0 }}
@@ -454,26 +470,25 @@ export default function HomePage(): React.JSX.Element {
           >
             <motion.div
               style={{
-                fontSize: '4rem',
-                fontWeight: '900',
+                fontSize: '3.5rem',
+                fontWeight: '300',
                 color: 'white',
                 fontFamily: 'Arame Mono, monospace',
                 textAlign: 'center',
-                letterSpacing: '8px'
+                letterSpacing: '3px'
               }}
               initial={{ 
-                scale: 0.5, 
+                scale: 0.8, 
                 opacity: 0,
-                filter: 'blur(20px)'
+                filter: 'blur(10px)'
               }}
               animate={{ 
                 scale: 1,
                 opacity: 1,
-                filter: 'blur(0px)',
-                textShadow: '0 0 20px rgba(255,255,255,0.4)'
+                filter: 'blur(0px)'
               }}
               transition={{ 
-                duration: 2,
+                duration: 1.5,
                 ease: "easeOut"
               }}
             >
@@ -491,41 +506,44 @@ export default function HomePage(): React.JSX.Element {
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              gap: '2rem',
+              gap: '1.5rem',
               padding: '2rem'
             }}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
+            transition={{ duration: 0.6 }}
           >
             <motion.h1
               style={{
-                fontSize: '3rem',
-                fontWeight: '900',
+                fontSize: '2.5rem',
+                fontWeight: '300',
                 color: 'white',
                 fontFamily: 'Arame Mono, monospace',
                 textAlign: 'center',
-                marginBottom: '1rem'
+                marginBottom: '0.5rem',
+                letterSpacing: '2px'
               }}
-              initial={{ opacity: 0, scale: 0.8 }}
+              initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.3, duration: 0.6 }}
+              transition={{ delay: 0.2, duration: 0.5 }}
             >
               WELCOME
             </motion.h1>
             
             <motion.p
               style={{
-                fontSize: '1.2rem',
-                color: 'rgba(255,255,255,0.8)',
+                fontSize: '1rem',
+                fontWeight: '300',
+                color: 'rgba(255,255,255,0.7)',
                 fontFamily: 'Arame Mono, monospace',
                 textAlign: 'center',
-                maxWidth: '500px',
-                lineHeight: '1.6'
+                maxWidth: '400px',
+                lineHeight: '1.5',
+                letterSpacing: '0.5px'
               }}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ delay: 0.6, duration: 0.6 }}
+              transition={{ delay: 0.4, duration: 0.5 }}
             >
               Your space for creative thoughts and ideas
             </motion.p>
@@ -533,26 +551,26 @@ export default function HomePage(): React.JSX.Element {
             <motion.button
               onClick={navigateToNotes}
               style={{
-                padding: '1rem 2rem',
-                fontSize: '1.1rem',
-                fontWeight: '700',
+                padding: '0.8rem 1.8rem',
+                fontSize: '0.9rem',
+                fontWeight: '300',
                 color: 'black',
                 backgroundColor: 'white',
                 border: 'none',
-                borderRadius: '8px',
+                borderRadius: '6px',
                 cursor: 'pointer',
                 fontFamily: 'Arame Mono, monospace',
-                letterSpacing: '2px'
+                letterSpacing: '1px'
               }}
               whileHover={{ 
-                scale: 1.05,
-                backgroundColor: '#f0f0f0',
-                boxShadow: '0 0 20px rgba(255,255,255,0.3)'
+                scale: 1.03,
+                backgroundColor: '#f8f8f8',
+                transition: { duration: 0.2 }
               }}
-              whileTap={{ scale: 0.95 }}
-              initial={{ opacity: 0, y: 20 }}
+              whileTap={{ scale: 0.97 }}
+              initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.9, duration: 0.6 }}
+              transition={{ delay: 0.6, duration: 0.5 }}
             >
               VIEW NOTES
             </motion.button>
