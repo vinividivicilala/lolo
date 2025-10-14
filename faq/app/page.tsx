@@ -11,6 +11,7 @@ export default function HomePage(): React.JSX.Element {
   const [isCloseHovered, setIsCloseHovered] = useState(false);
   const [menuText, setMenuText] = useState("MENU");
   const [isHovering, setIsHovering] = useState(false);
+  const animationRef = useRef<NodeJS.Timeout | null>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -18,7 +19,12 @@ export default function HomePage(): React.JSX.Element {
       setShowLoading(false);
     }, 2500);
 
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+      if (animationRef.current) {
+        clearTimeout(animationRef.current);
+      }
+    };
   }, []);
 
   const navigateToNotes = () => {
@@ -34,23 +40,26 @@ export default function HomePage(): React.JSX.Element {
 
   // Array teks menu yang akan berganti saat hover
   const menuTextVariants = [
-    "MENU",
     "EXPLORE",
-    "NAVIGATE",
+    "NAVIGATE", 
     "DISCOVER",
-    "BROWSE"
+    "BROWSE",
+    "MENU"
   ];
 
   const handleMenuHover = () => {
+    if (animationRef.current) {
+      clearTimeout(animationRef.current);
+    }
+    
     setIsHovering(true);
     let currentIndex = 0;
     
-    // Animasi teks berganti satu per satu
     const animateText = () => {
       if (currentIndex < menuTextVariants.length && isHovering) {
         setMenuText(menuTextVariants[currentIndex]);
         currentIndex++;
-        setTimeout(animateText, 150); // Delay 150ms antara setiap teks
+        animationRef.current = setTimeout(animateText, 80); // Delay sangat cepat
       }
     };
     
@@ -59,12 +68,11 @@ export default function HomePage(): React.JSX.Element {
 
   const handleMenuLeave = () => {
     setIsHovering(false);
-    // Kembali ke teks "MENU" dengan delay
-    setTimeout(() => {
-      if (!isHovering) {
-        setMenuText("MENU");
-      }
-    }, 300);
+    if (animationRef.current) {
+      clearTimeout(animationRef.current);
+    }
+    // Kembali ke teks "MENU" secara instan
+    setMenuText("MENU");
   };
 
   // Variants for modern animations
@@ -151,20 +159,20 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // Variants untuk animasi teks menu
+  // Variants untuk animasi teks menu yang sangat cepat
   const menuTextVariantsAnimation = {
     hidden: { 
       opacity: 0, 
-      y: 10,
+      y: 5,
       transition: {
-        duration: 0.1
+        duration: 0.05
       }
     },
     visible: { 
       opacity: 1, 
       y: 0,
       transition: {
-        duration: 0.2,
+        duration: 0.1,
         ease: "easeOut"
       }
     }
@@ -328,7 +336,7 @@ export default function HomePage(): React.JSX.Element {
           />
         </motion.div>
         
-        {/* Menu Text dengan animasi berganti satu per satu */}
+        {/* Menu Text dengan animasi berganti sangat cepat */}
         <motion.div
           style={{
             fontSize: '1.1rem',
@@ -341,18 +349,20 @@ export default function HomePage(): React.JSX.Element {
             justifyContent: 'center'
           }}
         >
-          <motion.span
-            key={menuText}
-            variants={menuTextVariantsAnimation}
-            initial="hidden"
-            animate="visible"
-            exit="hidden"
-            style={{
-              display: 'block'
-            }}
-          >
-            {menuText}
-          </motion.span>
+          <AnimatePresence mode="wait">
+            <motion.span
+              key={menuText}
+              variants={menuTextVariantsAnimation}
+              initial="hidden"
+              animate="visible"
+              exit="hidden"
+              style={{
+                display: 'block'
+              }}
+            >
+              {menuText}
+            </motion.span>
+          </AnimatePresence>
         </motion.div>
       </motion.div>
 
