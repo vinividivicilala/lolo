@@ -8,6 +8,7 @@ export default function HomePage(): React.JSX.Element {
   const [showLoading, setShowLoading] = useState(true);
   const [showMenu, setShowMenu] = useState(false);
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
+  const [isCloseHovered, setIsCloseHovered] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -336,7 +337,7 @@ export default function HomePage(): React.JSX.Element {
                 <div style={{
                   display: 'flex',
                   flexDirection: 'column',
-                  gap: '0rem' // Removed gap completely
+                  gap: '0rem'
                 }}>
                   {menuItems.map((item, index) => (
                     <motion.div
@@ -346,8 +347,8 @@ export default function HomePage(): React.JSX.Element {
                         cursor: 'pointer',
                         display: 'flex',
                         alignItems: 'center',
-                        padding: '0.1rem 0', // Reduced padding
-                        margin: '-0.2rem 0' // Negative margin to make it even tighter
+                        padding: '0.1rem 0',
+                        margin: '-0.2rem 0'
                       }}
                       onMouseEnter={() => setHoveredItem(item.name)}
                       onMouseLeave={() => setHoveredItem(null)}
@@ -364,7 +365,7 @@ export default function HomePage(): React.JSX.Element {
                       {/* SVG Icon */}
                       <motion.div
                         style={{
-                          marginRight: '0.8rem', // Reduced margin
+                          marginRight: '0.8rem',
                           opacity: 0.8,
                           display: 'flex',
                           alignItems: 'center'
@@ -384,12 +385,12 @@ export default function HomePage(): React.JSX.Element {
                           fontWeight: '300',
                           color: 'rgba(0,0,0,0.8)',
                           fontFamily: 'Arame Mono, monospace',
-                          lineHeight: 0.8, // Reduced line height
+                          lineHeight: 0.8,
                           letterSpacing: '-0.5px',
                           textTransform: 'uppercase',
                           display: 'flex',
                           alignItems: 'center',
-                          gap: '0.5rem' // Reduced gap
+                          gap: '0.5rem'
                         }}
                         animate={{
                           color: hoveredItem === item.name ? '#000' : 'rgba(0,0,0,0.8)',
@@ -412,7 +413,7 @@ export default function HomePage(): React.JSX.Element {
                           }}
                         >
                           <svg
-                            width="18" // Slightly smaller
+                            width="18"
                             height="18"
                             viewBox="0 0 24 24"
                             fill="none"
@@ -432,16 +433,18 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </motion.div>
             
-            {/* Close Button */}
+            {/* Close Button with Hover Text Effect */}
             <motion.button
               onClick={toggleMenu}
+              onMouseEnter={() => setIsCloseHovered(true)}
+              onMouseLeave={() => setIsCloseHovered(false)}
               style={{
                 position: 'fixed',
                 top: '1.8rem',
                 right: '1.8rem',
-                width: '45px',
+                width: 'auto',
                 height: '45px',
-                borderRadius: '50%',
+                borderRadius: '25px',
                 border: 'none',
                 backgroundColor: 'rgba(0,0,0,0.1)',
                 cursor: 'pointer',
@@ -449,35 +452,72 @@ export default function HomePage(): React.JSX.Element {
                 justifyContent: 'center',
                 alignItems: 'center',
                 zIndex: 30,
-                backdropFilter: 'blur(10px)'
+                backdropFilter: 'blur(10px)',
+                padding: '0 1.2rem',
+                fontFamily: 'Arame Mono, monospace',
+                fontSize: '0.9rem',
+                fontWeight: '300',
+                color: 'rgba(0,0,0,0.7)',
+                overflow: 'hidden'
               }}
               variants={closeButtonVariants}
               initial="closed"
               animate="open"
               exit="closed"
               whileHover={{ 
-                scale: 1.1,
+                scale: 1.05,
                 backgroundColor: 'rgba(0,0,0,0.2)',
                 transition: { duration: 0.2 }
               }}
-              whileTap={{ scale: 0.9 }}
+              whileTap={{ scale: 0.95 }}
             >
-              <motion.svg
-                width="18"
-                height="18"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="rgba(0,0,0,0.7)"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                initial={{ rotate: 0 }}
-                whileHover={{ rotate: 90 }}
-                transition={{ duration: 0.3 }}
+              <motion.div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  position: 'relative'
+                }}
               >
-                <line x1="18" y1="6" x2="6" y2="18" />
-                <line x1="6" y1="6" x2="18" y2="18" />
-              </motion.svg>
+                {/* X Icon */}
+                <motion.svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  initial={{ scale: 1, opacity: 1 }}
+                  animate={{ 
+                    scale: isCloseHovered ? 0 : 1,
+                    opacity: isCloseHovered ? 0 : 1
+                  }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
+                </motion.svg>
+
+                {/* Close Text */}
+                <motion.span
+                  style={{
+                    position: 'absolute',
+                    left: '50%',
+                    transform: 'translateX(-50%)',
+                    whiteSpace: 'nowrap'
+                  }}
+                  initial={{ scale: 0, opacity: 0 }}
+                  animate={{ 
+                    scale: isCloseHovered ? 1 : 0,
+                    opacity: isCloseHovered ? 1 : 0
+                  }}
+                  transition={{ duration: 0.2 }}
+                >
+                  CLOSE
+                </motion.span>
+              </motion.div>
             </motion.button>
           </>
         )}
