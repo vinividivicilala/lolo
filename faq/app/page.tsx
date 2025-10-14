@@ -116,25 +116,60 @@ export default function HomePage(): React.JSX.Element {
   const menuItems = [
     { 
       name: "HOME", 
-      icon: "🏠",
       delay: 0.1 
     },
     { 
       name: "WORK", 
-      icon: "💼",
       delay: 0.2 
     },
     { 
       name: "ABOUT", 
-      icon: "👤",
       delay: 0.3 
     },
     { 
       name: "CONTACT", 
-      icon: "📱",
       delay: 0.4 
     }
   ];
+
+  // SVG Icons
+  const HomeIcon = () => (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+      <polyline points="9 22 9 12 15 12 15 22"/>
+    </svg>
+  );
+
+  const WorkIcon = () => (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/>
+      <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
+    </svg>
+  );
+
+  const AboutIcon = () => (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/>
+      <circle cx="12" cy="7" r="4"/>
+    </svg>
+  );
+
+  const ContactIcon = () => (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+      <polyline points="22,6 12,13 2,6"/>
+    </svg>
+  );
+
+  const getIcon = (name: string) => {
+    switch (name) {
+      case "HOME": return <HomeIcon />;
+      case "WORK": return <WorkIcon />;
+      case "ABOUT": return <AboutIcon />;
+      case "CONTACT": return <ContactIcon />;
+      default: return <HomeIcon />;
+    }
+  };
 
   return (
     <div style={{
@@ -297,7 +332,7 @@ export default function HomePage(): React.JSX.Element {
                 justifyContent: 'center',
                 paddingLeft: '2rem'
               }}>
-                {/* Menu Items with thin text and icons */}
+                {/* Menu Items with thin text and SVG icons */}
                 <div style={{
                   display: 'flex',
                   flexDirection: 'column',
@@ -325,20 +360,21 @@ export default function HomePage(): React.JSX.Element {
                         transition: { duration: 0.2, ease: "easeOut" }
                       }}
                     >
-                      {/* Icon */}
-                      <motion.span
+                      {/* SVG Icon */}
+                      <motion.div
                         style={{
-                          fontSize: '1.8rem',
                           marginRight: '1rem',
-                          opacity: 0.8
+                          opacity: 0.8,
+                          display: 'flex',
+                          alignItems: 'center'
                         }}
                         animate={{
                           scale: hoveredItem === item.name ? 1.2 : 1,
                           transition: { duration: 0.2 }
                         }}
                       >
-                        {item.icon}
-                      </motion.span>
+                        {getIcon(item.name)}
+                      </motion.div>
 
                       {/* Menu Text - Thin and Light */}
                       <motion.div
