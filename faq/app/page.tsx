@@ -13,6 +13,7 @@ export default function HomePage(): React.JSX.Element {
   const router = useRouter();
   const menuRef = useRef<HTMLDivElement>(null);
   const menuButtonRef = useRef<HTMLDivElement>(null);
+  const menuContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -22,25 +23,74 @@ export default function HomePage(): React.JSX.Element {
     return () => clearTimeout(timer);
   }, []);
 
+  // GSAP Animation for menu toggle
   useEffect(() => {
-    if (showMenu && menuRef.current) {
-      // GSAP Animation for menu items
-      const tl = gsap.timeline();
-      
-      // Animate menu items
-      tl.fromTo(".menu-item", 
-        { 
-          x: -100, 
-          opacity: 0,
-        },
-        { 
-          x: 0, 
-          opacity: 1,
+    if (menuContainerRef.current) {
+      if (showMenu) {
+        // Open menu animation
+        const tl = gsap.timeline();
+        
+        // Animate menu background
+        tl.to(menuContainerRef.current, {
+          scaleY: 1,
           duration: 0.8,
-          stagger: 0.1,
-          ease: "power3.out"
-        }
-      );
+          ease: "power3.inOut",
+          transformOrigin: "top"
+        })
+        // Animate menu items with staggered effect
+        .fromTo(".menu-item", 
+          { 
+            x: -100, 
+            opacity: 0,
+            rotation: -5
+          },
+          { 
+            x: 0, 
+            opacity: 1,
+            rotation: 0,
+            duration: 0.6,
+            stagger: 0.08,
+            ease: "back.out(1.7)"
+          },
+          "-=0.3"
+        )
+        // Animate arrows
+        .fromTo(".menu-arrow", 
+          { 
+            scale: 0, 
+            rotation: -90 
+          },
+          { 
+            scale: 1, 
+            rotation: 0,
+            duration: 0.4,
+            stagger: 0.05,
+            ease: "back.out(1.7)"
+          },
+          "-=0.2"
+        );
+
+      } else {
+        // Close menu animation
+        const tl = gsap.timeline();
+        
+        // Animate menu items out
+        tl.to(".menu-item", {
+          x: -100,
+          opacity: 0,
+          rotation: -5,
+          duration: 0.4,
+          stagger: 0.05,
+          ease: "power3.in"
+        })
+        // Animate menu background
+        .to(menuContainerRef.current, {
+          scaleY: 0,
+          duration: 0.6,
+          ease: "power3.inOut",
+          transformOrigin: "top"
+        }, "-=0.2");
+      }
     }
   }, [showMenu]);
 
@@ -178,6 +228,81 @@ export default function HomePage(): React.JSX.Element {
     toggleMenu();
   };
 
+  const handleMenuItemClick = (itemName: string) => {
+    // GSAP animation for menu item click
+    const clickedItem = document.querySelector(`[data-item="${itemName}"]`);
+    
+    if (clickedItem) {
+      // Create ripple effect
+      gsap.to(clickedItem, {
+        scale: 0.95,
+        duration: 0.1,
+        ease: "power2.out",
+        onComplete: () => {
+          gsap.to(clickedItem, {
+            scale: 1,
+            duration: 0.3,
+            ease: "elastic.out(1, 0.5)"
+          });
+        }
+      });
+
+      // Color flash effect
+      gsap.to(clickedItem, {
+        color: "#FF00FF",
+        duration: 0.1,
+        onComplete: () => {
+          gsap.to(clickedItem, {
+            color: "black",
+            duration: 0.3,
+            ease: "power2.out"
+          });
+        }
+      });
+
+      // Animate arrow
+      const arrow = clickedItem.querySelector('.menu-arrow');
+      if (arrow) {
+        gsap.to(arrow, {
+          x: 20,
+          duration: 0.2,
+          ease: "power2.out",
+          onComplete: () => {
+            gsap.to(arrow, {
+              x: 0,
+              duration: 0.3,
+              ease: "power2.out"
+            });
+          }
+        });
+      }
+    }
+
+    // Close menu after animation
+    setTimeout(() => {
+      toggleMenu();
+      
+      // Navigate based on menu item
+      switch(itemName) {
+        case "HOME":
+          // Already on home, just close menu
+          break;
+        case "WORK":
+          // Add your navigation logic here
+          console.log("Navigate to Work");
+          break;
+        case "ABOUT":
+          // Add your navigation logic here
+          console.log("Navigate to About");
+          break;
+        case "CONTACT":
+          // Add your navigation logic here
+          console.log("Navigate to Contact");
+          break;
+      }
+    }, 400);
+  };
+
   const menuItems = [
     { name: "HOME", delay: 0.3 },
     { name: "WORK", delay: 0.4 },
@@ -201,7 +326,7 @@ export default function HomePage(): React.JSX.Element {
       WebkitFontSmoothing: 'antialiased',
       MozOsxFontSmoothing: 'grayscale'
     }}>
-      {/* Menu Button with GSAP Animations */}
+      {/* Modern Menu Button */}
       <div
         ref={menuButtonRef}
         onClick={handleMenuClick}
@@ -218,244 +343,221 @@ export default function HomePage(): React.JSX.Element {
           fontFamily: 'Saans Trial, sans-serif',
           letterSpacing: '2px',
           zIndex: 20,
-          padding: '0.5rem 1rem',
+          padding: '0.8rem 1.5rem',
           WebkitFontSmoothing: 'antialiased',
           MozOsxFontSmoothing: 'grayscale',
-          borderRadius: '25px',
-          border: '2px solid rgba(255,255,255,0.2)',
-          background: 'rgba(0,0,0,0.3)',
-          backdropFilter: 'blur(10px)',
+          borderRadius: '50px',
+          border: '2px solid rgba(255,255,255,0.3)',
+          background: 'rgba(0,0,0,0.4)',
+          backdropFilter: 'blur(15px)',
           transition: 'all 0.3s ease',
           display: 'flex',
           alignItems: 'center',
-          gap: '0.5rem'
+          gap: '0.8rem',
+          boxShadow: '0 8px 32px rgba(0,0,0,0.3)'
         }}
       >
-        {/* Animated dots */}
-        <div className="menu-dots" style={{
+        {/* Animated hamburger icon */}
+        <div className="menu-icon" style={{
           display: 'flex',
-          gap: '2px'
+          flexDirection: 'column',
+          gap: '4px',
+          width: '20px',
+          alignItems: 'center'
         }}>
           <div style={{
-            width: '4px',
-            height: '4px',
-            borderRadius: '50%',
-            backgroundColor: 'currentColor'
+            width: '18px',
+            height: '2px',
+            backgroundColor: 'currentColor',
+            borderRadius: '2px',
+            transition: 'all 0.3s ease'
           }}></div>
           <div style={{
-            width: '4px',
-            height: '4px',
-            borderRadius: '50%',
-            backgroundColor: 'currentColor'
+            width: '14px',
+            height: '2px',
+            backgroundColor: 'currentColor',
+            borderRadius: '2px',
+            transition: 'all 0.3s ease'
           }}></div>
           <div style={{
-            width: '4px',
-            height: '4px',
-            borderRadius: '50%',
-            backgroundColor: 'currentColor'
+            width: '18px',
+            height: '2px',
+            backgroundColor: 'currentColor',
+            borderRadius: '2px',
+            transition: 'all 0.3s ease'
           }}></div>
         </div>
         メニュー
       </div>
 
-      {/* Menu Overlay */}
-      <AnimatePresence>
-        {showMenu && (
-          <>
-            {/* Background Overlay */}
-            <motion.div
-              ref={menuRef}
-              style={{
-                position: 'fixed',
-                top: 0,
-                left: 0,
-                width: '100%',
-                height: '100%',
-                backgroundColor: '#CCFF00',
-                zIndex: 25,
-                display: 'flex',
-                flexDirection: 'column',
-                padding: '2rem'
-              }}
-              initial={{ scaleY: 0, transformOrigin: "top" }}
-              animate={{ scaleY: 1 }}
-              exit={{ scaleY: 0 }}
-              transition={{ 
-                duration: 0.8,
-                ease: [0.76, 0, 0.24, 1]
-              }}
-            >
-              {/* Website Name - Top Left */}
-              <motion.div
+      {/* Modern GSAP Menu Overlay */}
+      <div
+        ref={menuContainerRef}
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          backgroundColor: '#CCFF00',
+          zIndex: 25,
+          display: 'flex',
+          flexDirection: 'column',
+          padding: '2rem',
+          scaleY: 0,
+          transformOrigin: 'top'
+        }}
+      >
+        {/* Website Name - Top Left */}
+        <div
+          style={{
+            position: 'absolute',
+            left: '2rem',
+            top: '2rem',
+            fontSize: '1.8rem',
+            fontWeight: '400',
+            color: 'black',
+            fontFamily: 'Saans Trial, sans-serif',
+            lineHeight: 1,
+            letterSpacing: '1px',
+            WebkitFontSmoothing: 'antialiased',
+            MozOsxFontSmoothing: 'grayscale',
+            opacity: showMenu ? 1 : 0
+          }}
+        >
+          sorusuru
+        </div>
+
+        {/* Main Content - Navigation Menu */}
+        <div style={{
+          flex: 1,
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          paddingLeft: '2rem'
+        }}>
+          {/* Menu Items */}
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '0rem'
+          }}>
+            {menuItems.map((item, index) => (
+              <div
+                key={item.name}
+                data-item={item.name}
+                className="menu-item"
                 style={{
-                  position: 'absolute',
-                  left: '2rem',
-                  top: '2rem',
-                  fontSize: '1.8rem',
-                  fontWeight: '400',
+                  position: 'relative',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  opacity: 0 // Will be animated by GSAP
+                }}
+                onMouseEnter={() => setHoveredItem(item.name)}
+                onMouseLeave={() => setHoveredItem(null)}
+                onClick={() => handleMenuItemClick(item.name)}
+              >
+                {/* Menu Text */}
+                <div style={{
+                  fontSize: '4rem',
+                  fontWeight: '700',
                   color: 'black',
                   fontFamily: 'Saans Trial, sans-serif',
-                  lineHeight: 1,
+                  lineHeight: 0.8,
                   letterSpacing: '1px',
-                  WebkitFontSmoothing: 'antialiased',
-                  MozOsxFontSmoothing: 'grayscale'
-                }}
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ 
-                  duration: 0.6,
-                  delay: 0.4,
-                  ease: "easeOut"
-                }}
-              >
-                sorusuru
-              </motion.div>
-
-              {/* Main Content - Navigation Menu */}
-              <div style={{
-                flex: 1,
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'center',
-                paddingLeft: '2rem'
-              }}>
-                {/* Menu Items - Very tight spacing */}
-                <div style={{
+                  textTransform: 'uppercase',
+                  padding: '0.5rem 0',
+                  margin: '0rem 0',
                   display: 'flex',
-                  flexDirection: 'column',
-                  gap: '0rem'
+                  alignItems: 'center',
+                  gap: '2rem',
+                  transition: 'all 0.3s ease'
                 }}>
-                  {menuItems.map((item, index) => (
-                    <div
-                      key={item.name}
-                      className="menu-item"
-                      style={{
-                        position: 'relative',
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between'
-                      }}
-                      onMouseEnter={() => setHoveredItem(item.name)}
-                      onMouseLeave={() => setHoveredItem(null)}
+                  {item.name}
+                  
+                  {/* Arrow SVG */}
+                  <div className="menu-arrow"
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      opacity: hoveredItem === item.name ? 1 : 0.7,
+                      transform: hoveredItem === item.name ? 'translateX(10px)' : 'translateX(0)',
+                      transition: 'all 0.3s ease'
+                    }}
+                  >
+                    <svg
+                      width="32"
+                      height="32"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="3"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
                     >
-                      {/* Menu Text */}
-                      <div style={{
-                        fontSize: '3.5rem',
-                        fontWeight: '400',
-                        color: 'black',
-                        fontFamily: 'Saans Trial, sans-serif',
-                        lineHeight: 0.8,
-                        letterSpacing: '0.5px',
-                        textTransform: 'uppercase',
-                        padding: '0rem 0',
-                        margin: '0rem 0',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '1rem'
-                      }}>
-                        {item.name}
-                        
-                        {/* Arrow SVG - Visible only on hover */}
-                        <motion.div
-                          initial={{ opacity: 0, x: -10 }}
-                          animate={{ 
-                            opacity: hoveredItem === item.name ? 1 : 0,
-                            x: hoveredItem === item.name ? 0 : -10
-                          }}
-                          transition={{ duration: 0.3, ease: "easeOut" }}
-                          style={{
-                            display: 'flex',
-                            alignItems: 'center'
-                          }}
-                        >
-                          <svg
-                            width="28"
-                            height="28"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2.5"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          >
-                            <line x1="5" y1="12" x2="19" y2="12" />
-                            <polyline points="12 5 19 12 12 19" />
-                          </svg>
-                        </motion.div>
-                      </div>
-                    </div>
-                  ))}
+                      <line x1="5" y1="12" x2="19" y2="12" />
+                      <polyline points="12 5 19 12 12 19" />
+                    </svg>
+                  </div>
                 </div>
               </div>
-            </motion.div>
-            
-            {/* Close Button */}
-            <motion.button
-              onClick={toggleMenu}
-              style={{
-                position: 'fixed',
-                top: '1.5rem',
-                right: '1.5rem',
-                width: '80px',
-                height: '80px',
-                borderRadius: '50%',
-                border: 'none',
-                backgroundColor: 'black',
-                cursor: 'pointer',
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                zIndex: 30
-              }}
-              whileHover={{ 
-                scale: 1.1,
-                backgroundColor: '#333'
-              }}
-              whileTap={{ scale: 0.9 }}
-              initial={{ opacity: 0, rotate: -180 }}
-              animate={{ opacity: 1, rotate: 0 }}
-              exit={{ opacity: 0, rotate: 180 }}
-              transition={{ 
-                duration: 0.6,
-                ease: "easeOut",
-                delay: 0.2
-              }}
-            >
-              <svg
-                width="40"
-                height="40"
-                viewBox="0 0 40 40"
-                fill="none"
-                stroke="#CCFF00"
-                strokeWidth="3"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <motion.line
-                  x1="12"
-                  y1="12"
-                  x2="28"
-                  y2="28"
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  transition={{ delay: 0.4, duration: 0.3 }}
-                />
-                <motion.line
-                  x1="28"
-                  y1="12"
-                  x2="12"
-                  y2="28"
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  transition={{ delay: 0.5, duration: 0.3 }}
-                />
-              </svg>
-            </motion.button>
-          </>
-        )}
-      </AnimatePresence>
+            ))}
+          </div>
+        </div>
+
+        {/* Close Button with GSAP Animation */}
+        <button
+          onClick={toggleMenu}
+          style={{
+            position: 'absolute',
+            top: '1.5rem',
+            right: '1.5rem',
+            width: '70px',
+            height: '70px',
+            borderRadius: '50%',
+            border: 'none',
+            backgroundColor: 'black',
+            cursor: 'pointer',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            zIndex: 30,
+            boxShadow: '0 8px 32px rgba(0,0,0,0.3)'
+          }}
+          onMouseEnter={(e) => {
+            gsap.to(e.currentTarget, {
+              scale: 1.1,
+              backgroundColor: '#333',
+              duration: 0.3,
+              ease: "power2.out"
+            });
+          }}
+          onMouseLeave={(e) => {
+            gsap.to(e.currentTarget, {
+              scale: 1,
+              backgroundColor: 'black',
+              duration: 0.3,
+              ease: "power2.out"
+            });
+          }}
+        >
+          <svg
+            width="35"
+            height="35"
+            viewBox="0 0 40 40"
+            fill="none"
+            stroke="#CCFF00"
+            strokeWidth="3"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <line x1="12" y1="12" x2="28" y2="28" />
+            <line x1="28" y1="12" x2="12" y2="28" />
+          </svg>
+        </button>
+      </div>
 
       {/* Loading and Main Content */}
       <AnimatePresence>
