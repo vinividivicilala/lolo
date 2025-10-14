@@ -10,6 +10,7 @@ export default function HomePage(): React.JSX.Element {
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
   const [isCloseHovered, setIsCloseHovered] = useState(false);
   const [menuText, setMenuText] = useState("MENU");
+  const [isHovering, setIsHovering] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -41,22 +42,29 @@ export default function HomePage(): React.JSX.Element {
   ];
 
   const handleMenuHover = () => {
+    setIsHovering(true);
     let currentIndex = 0;
     
-    // Animasi teks berganti
-    const interval = setInterval(() => {
-      currentIndex = (currentIndex + 1) % menuTextVariants.length;
-      setMenuText(menuTextVariants[currentIndex]);
-      
-      // Hentikan setelah semua teks ditampilkan
-      if (currentIndex === menuTextVariants.length - 1) {
-        clearInterval(interval);
-        // Kembali ke "MENU" setelah selesai
-        setTimeout(() => {
-          setMenuText("MENU");
-        }, 500);
+    // Animasi teks berganti satu per satu
+    const animateText = () => {
+      if (currentIndex < menuTextVariants.length && isHovering) {
+        setMenuText(menuTextVariants[currentIndex]);
+        currentIndex++;
+        setTimeout(animateText, 150); // Delay 150ms antara setiap teks
       }
-    }, 100);
+    };
+    
+    animateText();
+  };
+
+  const handleMenuLeave = () => {
+    setIsHovering(false);
+    // Kembali ke teks "MENU" dengan delay
+    setTimeout(() => {
+      if (!isHovering) {
+        setMenuText("MENU");
+      }
+    }, 300);
   };
 
   // Variants for modern animations
@@ -143,6 +151,25 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
+  // Variants untuk animasi teks menu
+  const menuTextVariantsAnimation = {
+    hidden: { 
+      opacity: 0, 
+      y: 10,
+      transition: {
+        duration: 0.1
+      }
+    },
+    visible: { 
+      opacity: 1, 
+      y: 0,
+      transition: {
+        duration: 0.2,
+        ease: "easeOut"
+      }
+    }
+  };
+
   const menuItems = [
     { 
       name: "HOME", 
@@ -221,27 +248,27 @@ export default function HomePage(): React.JSX.Element {
       <motion.div
         onClick={toggleMenu}
         onMouseEnter={handleMenuHover}
-        onMouseLeave={() => setMenuText("MENU")}
+        onMouseLeave={handleMenuLeave}
         style={{
           position: 'absolute',
           top: '2rem',
           right: '2rem',
-          fontSize: '1.2rem', // Diperbesar
+          fontSize: '1.2rem',
           fontWeight: '300',
           color: 'white',
           cursor: 'pointer',
           fontFamily: 'Arame Mono, monospace',
-          letterSpacing: '1.5px', // Diperbesar
+          letterSpacing: '1.5px',
           zIndex: 20,
-          padding: '1rem 1.8rem', // Diperbesar
-          borderRadius: '30px', // Diperbesar
+          padding: '1rem 1.8rem',
+          borderRadius: '30px',
           border: '1px solid rgba(255,255,255,0.15)',
           background: 'rgba(0,0,0,0.3)',
           backdropFilter: 'blur(15px)',
           display: 'flex',
           alignItems: 'center',
-          gap: '1rem', // Diperbesar
-          minWidth: '160px', // Lebar minimum ditambahkan
+          gap: '1rem',
+          minWidth: '160px',
           justifyContent: 'center'
         }}
         variants={menuButtonVariants}
@@ -255,28 +282,28 @@ export default function HomePage(): React.JSX.Element {
           style={{
             display: 'flex',
             flexDirection: 'column',
-            gap: '4px', // Diperbesar
-            width: '20px' // Diperbesar
+            gap: '4px',
+            width: '20px'
           }}
           animate={showMenu ? "open" : "closed"}
         >
           <motion.span
             style={{
               width: '100%',
-              height: '2px', // Diperbesar
+              height: '2px',
               backgroundColor: 'currentColor',
               borderRadius: '1px'
             }}
             variants={{
               closed: { rotate: 0, y: 0 },
-              open: { rotate: 45, y: 6 } // Diperbesar
+              open: { rotate: 45, y: 6 }
             }}
             transition={{ duration: 0.3 }}
           />
           <motion.span
             style={{
               width: '100%',
-              height: '2px', // Diperbesar
+              height: '2px',
               backgroundColor: 'currentColor',
               borderRadius: '1px'
             }}
@@ -289,33 +316,44 @@ export default function HomePage(): React.JSX.Element {
           <motion.span
             style={{
               width: '100%',
-              height: '2px', // Diperbesar
+              height: '2px',
               backgroundColor: 'currentColor',
               borderRadius: '1px'
             }}
             variants={{
               closed: { rotate: 0, y: 0 },
-              open: { rotate: -45, y: -6 } // Diperbesar
+              open: { rotate: -45, y: -6 }
             }}
             transition={{ duration: 0.3 }}
           />
         </motion.div>
         
-        {/* Menu Text dengan animasi berganti */}
-        <motion.span
+        {/* Menu Text dengan animasi berganti satu per satu */}
+        <motion.div
           style={{
-            fontSize: '1.1rem', // Diperbesar
+            fontSize: '1.1rem',
             fontWeight: '300',
-            minWidth: '90px', // Lebar minimum untuk konsistensi
-            textAlign: 'center'
+            minWidth: '90px',
+            textAlign: 'center',
+            height: '24px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
           }}
-          key={menuText} // Key untuk memicu animasi ulang saat teks berubah
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.2 }}
         >
-          {menuText}
-        </motion.span>
+          <motion.span
+            key={menuText}
+            variants={menuTextVariantsAnimation}
+            initial="hidden"
+            animate="visible"
+            exit="hidden"
+            style={{
+              display: 'block'
+            }}
+          >
+            {menuText}
+          </motion.span>
+        </motion.div>
       </motion.div>
 
       {/* Menu Overlay */}
