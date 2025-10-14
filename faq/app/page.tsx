@@ -59,7 +59,7 @@ export default function HomePage(): React.JSX.Element {
       if (currentIndex < menuTextVariants.length && isHovering) {
         setMenuText(menuTextVariants[currentIndex]);
         currentIndex++;
-        animationRef.current = setTimeout(animateText, 80); // Delay sangat cepat
+        animationRef.current = setTimeout(animateText, 30); // Delay sangat cepat
       }
     };
     
@@ -755,3 +755,4 @@ export default function HomePage(): React.JSX.Element {
     </div>
   );
 }
+
