@@ -9,6 +9,7 @@ export default function HomePage(): React.JSX.Element {
   const [showMenu, setShowMenu] = useState(false);
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
   const [isCloseHovered, setIsCloseHovered] = useState(false);
+  const [menuText, setMenuText] = useState("MENU");
   const router = useRouter();
 
   useEffect(() => {
@@ -28,6 +29,34 @@ export default function HomePage(): React.JSX.Element {
 
   const toggleMenu = () => {
     setShowMenu(!showMenu);
+  };
+
+  // Array teks menu yang akan berganti saat hover
+  const menuTextVariants = [
+    "MENU",
+    "EXPLORE",
+    "NAVIGATE",
+    "DISCOVER",
+    "BROWSE"
+  ];
+
+  const handleMenuHover = () => {
+    let currentIndex = 0;
+    
+    // Animasi teks berganti
+    const interval = setInterval(() => {
+      currentIndex = (currentIndex + 1) % menuTextVariants.length;
+      setMenuText(menuTextVariants[currentIndex]);
+      
+      // Hentikan setelah semua teks ditampilkan
+      if (currentIndex === menuTextVariants.length - 1) {
+        clearInterval(interval);
+        // Kembali ke "MENU" setelah selesai
+        setTimeout(() => {
+          setMenuText("MENU");
+        }, 500);
+      }
+    }, 100);
   };
 
   // Variants for modern animations
@@ -188,28 +217,32 @@ export default function HomePage(): React.JSX.Element {
       WebkitFontSmoothing: 'antialiased',
       MozOsxFontSmoothing: 'grayscale'
     }}>
-      {/* Menu Button with Framer Motion */}
+      {/* Menu Button with Framer Motion - DIPERBESAR */}
       <motion.div
         onClick={toggleMenu}
+        onMouseEnter={handleMenuHover}
+        onMouseLeave={() => setMenuText("MENU")}
         style={{
           position: 'absolute',
           top: '2rem',
           right: '2rem',
-          fontSize: '1rem',
+          fontSize: '1.2rem', // Diperbesar
           fontWeight: '300',
           color: 'white',
           cursor: 'pointer',
           fontFamily: 'Arame Mono, monospace',
-          letterSpacing: '1px',
+          letterSpacing: '1.5px', // Diperbesar
           zIndex: 20,
-          padding: '0.7rem 1.2rem',
-          borderRadius: '25px',
-          border: '1px solid rgba(255,255,255,0.1)',
-          background: 'rgba(0,0,0,0.2)',
-          backdropFilter: 'blur(10px)',
+          padding: '1rem 1.8rem', // Diperbesar
+          borderRadius: '30px', // Diperbesar
+          border: '1px solid rgba(255,255,255,0.15)',
+          background: 'rgba(0,0,0,0.3)',
+          backdropFilter: 'blur(15px)',
           display: 'flex',
           alignItems: 'center',
-          gap: '0.6rem'
+          gap: '1rem', // Diperbesar
+          minWidth: '160px', // Lebar minimum ditambahkan
+          justifyContent: 'center'
         }}
         variants={menuButtonVariants}
         initial="initial"
@@ -217,33 +250,33 @@ export default function HomePage(): React.JSX.Element {
         whileHover="hover"
         whileTap="tap"
       >
-        {/* Animated hamburger icon */}
+        {/* Animated hamburger icon - DIPERBESAR */}
         <motion.div
           style={{
             display: 'flex',
             flexDirection: 'column',
-            gap: '3px',
-            width: '16px'
+            gap: '4px', // Diperbesar
+            width: '20px' // Diperbesar
           }}
           animate={showMenu ? "open" : "closed"}
         >
           <motion.span
             style={{
               width: '100%',
-              height: '1.5px',
+              height: '2px', // Diperbesar
               backgroundColor: 'currentColor',
               borderRadius: '1px'
             }}
             variants={{
               closed: { rotate: 0, y: 0 },
-              open: { rotate: 45, y: 5 }
+              open: { rotate: 45, y: 6 } // Diperbesar
             }}
             transition={{ duration: 0.3 }}
           />
           <motion.span
             style={{
               width: '100%',
-              height: '1.5px',
+              height: '2px', // Diperbesar
               backgroundColor: 'currentColor',
               borderRadius: '1px'
             }}
@@ -256,25 +289,32 @@ export default function HomePage(): React.JSX.Element {
           <motion.span
             style={{
               width: '100%',
-              height: '1.5px',
+              height: '2px', // Diperbesar
               backgroundColor: 'currentColor',
               borderRadius: '1px'
             }}
             variants={{
               closed: { rotate: 0, y: 0 },
-              open: { rotate: -45, y: -5 }
+              open: { rotate: -45, y: -6 } // Diperbesar
             }}
             transition={{ duration: 0.3 }}
           />
         </motion.div>
         
+        {/* Menu Text dengan animasi berganti */}
         <motion.span
           style={{
-            fontSize: '0.9rem',
-            fontWeight: '300'
+            fontSize: '1.1rem', // Diperbesar
+            fontWeight: '300',
+            minWidth: '90px', // Lebar minimum untuk konsistensi
+            textAlign: 'center'
           }}
+          key={menuText} // Key untuk memicu animasi ulang saat teks berubah
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.2 }}
         >
-          MENU
+          {menuText}
         </motion.span>
       </motion.div>
 
@@ -433,7 +473,7 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </motion.div>
             
-            {/* Close Button with Hover Text Effect - Lebar diperbesar */}
+            {/* Close Button dengan efek hover */}
             <motion.button
               onClick={toggleMenu}
               onMouseEnter={() => setIsCloseHovered(true)}
@@ -442,7 +482,7 @@ export default function HomePage(): React.JSX.Element {
                 position: 'fixed',
                 top: '1.8rem',
                 right: '1.8rem',
-                width: '100px', // Lebar diperbesar
+                width: '100px',
                 height: '45px',
                 borderRadius: '25px',
                 border: 'none',
@@ -453,7 +493,7 @@ export default function HomePage(): React.JSX.Element {
                 alignItems: 'center',
                 zIndex: 30,
                 backdropFilter: 'blur(10px)',
-                padding: '0 1.5rem', // Padding diperbesar
+                padding: '0 1.5rem',
                 fontFamily: 'Arame Mono, monospace',
                 fontSize: '0.9rem',
                 fontWeight: '300',
