@@ -17,11 +17,12 @@ export default function HomePage(): React.JSX.Element {
     timezone: "",
     date: ""
   });
+  const [randomNumber, setRandomNumber] = useState("0000");
   const router = useRouter();
   const timeRef = useRef<NodeJS.Timeout | null>(null);
   const loadingRef = useRef<HTMLDivElement>(null);
-  const numbersRef = useRef<(HTMLDivElement | null)[]>([]);
-  const photosRef = useRef<(HTMLDivElement | null)[]>([]);
+  const numberRef = useRef<HTMLDivElement>(null);
+  const photosContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (showLoading) {
@@ -58,160 +59,154 @@ export default function HomePage(): React.JSX.Element {
       }
     );
 
-    // Create 20 random numbers
-    const numbers = Array.from({ length: 20 }, () => 
-      Math.floor(Math.random() * 10000).toString().padStart(4, '0')
-    );
+    // Single random number animation
+    if (numberRef.current) {
+      // Initial position - center
+      gsap.set(numberRef.current, {
+        scale: 0,
+        rotation: 0,
+        opacity: 0
+      });
 
-    // Animate numbers in sequence
-    numbersRef.current.forEach((numberEl, index) => {
-      if (numberEl) {
-        // Position numbers randomly
-        const randomX = gsap.utils.random(-100, 100);
-        const randomY = gsap.utils.random(-100, 100);
-        const randomScale = gsap.utils.random(0.5, 2);
-        const randomRotation = gsap.utils.random(-180, 180);
+      // Big entrance animation
+      tl.fromTo(numberRef.current,
+        {
+          scale: 0,
+          opacity: 0,
+          rotation: -180
+        },
+        {
+          scale: 1,
+          opacity: 1,
+          rotation: 0,
+          duration: 1.5,
+          ease: "elastic.out(1.2, 0.8)"
+        }
+      );
 
-        // Set initial random position
-        gsap.set(numberEl, {
-          x: randomX,
-          y: randomY,
-          scale: randomScale,
-          rotation: randomRotation,
-          opacity: 0
-        });
+      // Continuous random number changes
+      const changeNumber = () => {
+        const newNumber = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+        setRandomNumber(newNumber);
+      };
 
-        // Staggered entrance animation
-        tl.fromTo(numberEl,
-          {
-            opacity: 0,
-            scale: 0
-          },
-          {
-            opacity: gsap.utils.random(0.3, 0.8),
-            scale: randomScale,
-            duration: 0.8,
-            ease: "elastic.out(1, 0.8)",
-            delay: index * 0.1
-          },
-          "-=0.5"
-        );
+      // Start rapid number changes
+      tl.to({}, {
+        duration: 0.1,
+        onRepeat: changeNumber,
+        repeat: 20
+      });
 
-        // Continuous random number changes
-        const changeNumber = () => {
-          if (numberEl) {
-            const newNumber = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
-            numberEl.textContent = newNumber;
-          }
-        };
+      // Final number and scaling
+      tl.to(numberRef.current, {
+        scale: 1.5,
+        duration: 0.5,
+        ease: "power2.out"
+      });
 
-        // Start continuous number changes
-        tl.call(changeNumber, null, `+=${gsap.utils.random(0.1, 0.5)}`);
-        tl.to({}, {
-          duration: gsap.utils.random(0.5, 1.5),
-          onRepeat: changeNumber,
-          repeat: -1
-        });
+      // Pulse animation
+      tl.to(numberRef.current, {
+        scale: 1.2,
+        duration: 0.3,
+        ease: "power1.inOut",
+        yoyo: true,
+        repeat: 3
+      });
+    }
 
-        // Floating animation
-        tl.to(numberEl, {
-          x: `+=${gsap.utils.random(-50, 50)}`,
-          y: `+=${gsap.utils.random(-50, 50)}`,
-          rotation: `+=${gsap.utils.random(-30, 30)}`,
-          duration: gsap.utils.random(2, 4),
-          ease: "sine.inOut",
-          yoyo: true,
-          repeat: -1
-        }, "-=1");
-      }
-    });
+    // Photos scroll animation
+    if (photosContainerRef.current) {
+      const photos = photosContainerRef.current.children;
+      
+      // First batch - bottom to top
+      gsap.set(Array.from(photos).slice(0, 4), {
+        y: 400,
+        opacity: 0,
+        scale: 0.8
+      });
 
-    // Photos animation (6 photos)
-    const photos = [
-      { emoji: "🚀", color: "#FF6B6B" },
-      { emoji: "🎨", color: "#4ECDC4" },
-      { emoji: "💻", color: "#FFD93D" },
-      { emoji: "🌟", color: "#6BCF7F" },
-      { emoji: "🔥", color: "#FF8B94" },
-      { emoji: "⚡", color: "#A8E6CF" }
-    ];
+      // Second batch - top to bottom  
+      gsap.set(Array.from(photos).slice(4), {
+        y: -400,
+        opacity: 0,
+        scale: 0.8
+      });
 
-    // Photos from top to bottom (first 3)
-    photos.slice(0, 3).forEach((photo, index) => {
-      const photoEl = photosRef.current[index];
-      if (photoEl) {
-        tl.fromTo(photoEl,
-          {
-            y: -500,
-            opacity: 0,
-            scale: 0,
-            rotation: -180
-          },
-          {
-            y: gsap.utils.random(-100, 100),
-            opacity: 1,
-            scale: 1,
-            rotation: 0,
-            duration: 1.5,
-            ease: "back.out(2)",
-            delay: index * 0.3
-          },
-          "+=0.5"
-        );
-      }
-    });
+      // Staggered entrance animation
+      tl.fromTo(Array.from(photos).slice(0, 4),
+        {
+          y: 400,
+          opacity: 0,
+          scale: 0.8
+        },
+        {
+          y: 0,
+          opacity: 1,
+          scale: 1,
+          duration: 1.2,
+          stagger: 0.2,
+          ease: "back.out(1.7)"
+        },
+        "-=1"
+      );
 
-    // Photos from bottom to top (last 3)
-    photos.slice(3).forEach((photo, index) => {
-      const photoIndex = index + 3;
-      const photoEl = photosRef.current[photoIndex];
-      if (photoEl) {
-        tl.fromTo(photoEl,
-          {
-            y: 500,
-            opacity: 0,
-            scale: 0,
-            rotation: 180
-          },
-          {
-            y: gsap.utils.random(-100, 100),
-            opacity: 1,
-            scale: 1,
-            rotation: 0,
-            duration: 1.5,
-            ease: "back.out(2)",
-            delay: index * 0.3
-          },
-          "-=1"
-        );
-      }
-    });
+      tl.fromTo(Array.from(photos).slice(4),
+        {
+          y: -400,
+          opacity: 0,
+          scale: 0.8
+        },
+        {
+          y: 0,
+          opacity: 1,
+          scale: 1,
+          duration: 1.2,
+          stagger: 0.2,
+          ease: "back.out(1.7)"
+        },
+        "-=1"
+      );
 
-    // Continuous floating for photos
-    photosRef.current.forEach((photoEl, index) => {
-      if (photoEl) {
-        tl.to(photoEl, {
-          y: `+=${gsap.utils.random(-40, 40)}`,
-          x: `+=${gsap.utils.random(-20, 20)}`,
-          rotation: `+=${gsap.utils.random(-15, 15)}`,
-          duration: gsap.utils.random(3, 6),
-          ease: "sine.inOut",
-          yoyo: true,
-          repeat: -1
-        }, "-=0.5");
-      }
-    });
+      // Continuous scroll animation
+      tl.to(Array.from(photos).slice(0, 4), {
+        y: -300,
+        duration: 3,
+        ease: "none",
+        stagger: 0.1
+      });
 
-    // Final countdown and exit
+      tl.to(Array.from(photos).slice(4), {
+        y: 300,
+        duration: 3,
+        ease: "none",
+        stagger: 0.1
+      }, "-=3");
+
+      // Loop the scroll animation
+      tl.to(Array.from(photos).slice(0, 4), {
+        y: 0,
+        duration: 3,
+        ease: "none",
+        stagger: 0.1
+      });
+
+      tl.to(Array.from(photos).slice(4), {
+        y: 0,
+        duration: 3,
+        ease: "none",
+        stagger: 0.1
+      }, "-=3");
+    }
+
+    // Final exit animation
     tl.to({}, {
-      duration: 3,
+      duration: 2,
       onComplete: () => {
-        // Exit animation
         gsap.to(loadingRef.current, {
           opacity: 0,
-          scale: 1.2,
+          scale: 1.1,
           duration: 1,
-          ease: "power2.in",
+          ease: "power2.inOut",
           onComplete: () => setShowLoading(false)
         });
       }
@@ -507,13 +502,16 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
+  // Sample photos data (replace with actual image URLs)
   const photos = [
-    { emoji: "🚀", color: "#FF6B6B", size: "100px" },
-    { emoji: "🎨", color: "#4ECDC4", size: "90px" },
-    { emoji: "💻", color: "#FFD93D", size: "110px" },
-    { emoji: "🌟", color: "#6BCF7F", size: "85px" },
-    { emoji: "🔥", color: "#FF8B94", size: "95px" },
-    { emoji: "⚡", color: "#A8E6CF", size: "80px" }
+    { id: 1, color: "#FF6B6B", gradient: "linear-gradient(135deg, #FF6B6B, #FF8E8E)" },
+    { id: 2, color: "#4ECDC4", gradient: "linear-gradient(135deg, #4ECDC4, #6CE5E5)" },
+    { id: 3, color: "#FFD93D", gradient: "linear-gradient(135deg, #FFD93D, #FFE870)" },
+    { id: 4, color: "#6BCF7F", gradient: "linear-gradient(135deg, #6BCF7F, #8AEA9D)" },
+    { id: 5, color: "#FF8B94", gradient: "linear-gradient(135deg, #FF8B94, #FFA8AF)" },
+    { id: 6, color: "#A8E6CF", gradient: "linear-gradient(135deg, #A8E6CF, #C5F4E2)" },
+    { id: 7, color: "#95E1D3", gradient: "linear-gradient(135deg, #95E1D3, #B4F0E4)" },
+    { id: 8, color: "#FCE38A", gradient: "linear-gradient(135deg, #FCE38A, #FFEEB3)" }
   ];
 
   return (
@@ -967,7 +965,7 @@ export default function HomePage(): React.JSX.Element {
         )}
       </AnimatePresence>
 
-      {/* GSAP Loading Screen dengan Angka Random dan Foto */}
+      {/* GSAP Loading Screen dengan 1 Angka Random dan Foto Scroll */}
       <AnimatePresence>
         {showLoading && (
           <div
@@ -986,70 +984,62 @@ export default function HomePage(): React.JSX.Element {
               overflow: 'hidden'
             }}
           >
-            {/* Random Numbers Container */}
-            <div style={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              width: '100%',
-              height: '100%',
-              display: 'flex',
-              flexWrap: 'wrap',
-              justifyContent: 'space-around',
-              alignItems: 'center',
-              padding: '2rem'
-            }}>
-              {Array.from({ length: 20 }).map((_, index) => (
-                <div
-                  key={index}
-                  ref={el => numbersRef.current[index] = el}
-                  style={{
-                    fontSize: '4rem',
-                    fontWeight: '900',
-                    color: '#CCFF00',
-                    fontFamily: 'Arame Mono, monospace',
-                    textShadow: '0 0 20px rgba(204, 255, 0, 0.7)',
-                    opacity: 0
-                  }}
-                >
-                  {Math.floor(Math.random() * 10000).toString().padStart(4, '0')}
-                </div>
-              ))}
+            {/* Single Random Number */}
+            <div
+              ref={numberRef}
+              style={{
+                position: 'absolute',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                fontSize: '8rem',
+                fontWeight: '900',
+                color: '#CCFF00',
+                fontFamily: 'Arame Mono, monospace',
+                textShadow: '0 0 30px rgba(204, 255, 0, 0.8)',
+                zIndex: 10,
+                opacity: 0
+              }}
+            >
+              {randomNumber}
             </div>
 
-            {/* Photos Container */}
-            <div style={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              width: '100%',
-              height: '100%',
-              display: 'flex',
-              flexWrap: 'wrap',
-              justifyContent: 'space-around',
-              alignItems: 'center',
-              padding: '4rem'
-            }}>
-              {photos.map((photo, index) => (
+            {/* Photos Scroll Container */}
+            <div
+              ref={photosContainerRef}
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: '100%',
+                height: '100%',
+                display: 'flex',
+                flexWrap: 'wrap',
+                justifyContent: 'space-around',
+                alignItems: 'center',
+                padding: '2rem',
+                gap: '1rem'
+              }}
+            >
+              {photos.map((photo) => (
                 <div
-                  key={index}
-                  ref={el => photosRef.current[index] = el}
+                  key={photo.id}
                   style={{
-                    width: photo.size,
-                    height: photo.size,
-                    borderRadius: '25px',
-                    background: `linear-gradient(135deg, ${photo.color}30, ${photo.color}60)`,
-                    border: `3px solid ${photo.color}80`,
+                    width: '120px',
+                    height: '160px',
+                    borderRadius: '15px',
+                    background: photo.gradient,
                     display: 'flex',
                     justifyContent: 'center',
                     alignItems: 'center',
-                    fontSize: '3rem',
-                    backdropFilter: 'blur(15px)',
-                    boxShadow: `0 10px 40px ${photo.color}40`,
+                    fontSize: '2rem',
+                    color: 'white',
+                    fontWeight: 'bold',
+                    boxShadow: '0 8px 25px rgba(0,0,0,0.3)',
                     opacity: 0
                   }}
                 >
-                  {photo.emoji}
+                  {photo.id}
                 </div>
               ))}
             </div>
