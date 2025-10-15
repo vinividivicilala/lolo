@@ -20,8 +20,17 @@ export default function HomePage(): React.JSX.Element {
   const router = useRouter();
   const timeRef = useRef<NodeJS.Timeout | null>(null);
   const loadingRef = useRef<HTMLDivElement>(null);
-  const numberRef = useRef<HTMLDivElement>(null);
-  const progressRef = useRef<HTMLDivElement>(null);
+  const photoStackRef = useRef<HTMLDivElement>(null);
+
+  // Sample photos - replace with your actual images
+  const photos = [
+    { id: 1, src: "/images/1.jpg", alt: "Photo 1" },
+    { id: 2, src: "/images/2.jpg", alt: "Photo 2" },
+    { id: 3, src: "/images/3.jpg", alt: "Photo 3" },
+    { id: 4, src: "/images/4.jpg", alt: "Photo 4" },
+    { id: 5, src: "/images/5.jpg", alt: "Photo 5" },
+    { id: 6, src: "/images/6.jpg", alt: "Photo 6" }
+  ];
 
   useEffect(() => {
     if (showLoading) {
@@ -56,75 +65,97 @@ export default function HomePage(): React.JSX.Element {
       }
     );
 
-    // Percentage counter animation
-    if (numberRef.current && progressRef.current) {
-      // Reset initial state
-      gsap.set(numberRef.current, {
+    // Photo stack animation
+    if (photoStackRef.current) {
+      const photos = photoStackRef.current.children;
+      
+      // Set initial positions - stacked dengan rotation random
+      gsap.set(Array.from(photos), {
         opacity: 0,
-        scale: 0.8
+        scale: 0.8,
+        rotation: () => gsap.utils.random(-10, 10),
+        y: 100
       });
 
-      gsap.set(progressRef.current, {
-        scaleX: 0,
-        opacity: 0
+      // Staggered entrance untuk semua foto
+      tl.fromTo(Array.from(photos),
+        {
+          opacity: 0,
+          scale: 0.8,
+          rotation: () => gsap.utils.random(-10, 10),
+          y: 100
+        },
+        {
+          opacity: 1,
+          scale: 1,
+          rotation: 0,
+          y: 0,
+          duration: 1.2,
+          stagger: 0.15,
+          ease: "back.out(1.7)"
+        },
+        "+=0.3"
+      );
+
+      // Sequential photo reveal animation
+      photos.forEach((photo, index) => {
+        // Scale up dan rotate sedikit untuk efek "active"
+        tl.to(photo, {
+          scale: 1.1,
+          rotation: gsap.utils.random(-5, 5),
+          duration: 0.4,
+          ease: "power2.inOut"
+        }, `+=${index * 0.1}`);
+
+        // Kembali ke normal
+        tl.to(photo, {
+          scale: 1,
+          rotation: 0,
+          duration: 0.4,
+          ease: "power2.inOut"
+        }, `+=0.1`);
+
+        // Move photo to side dengan fade out (kecuali foto terakhir)
+        if (index < photos.length - 1) {
+          tl.to(photo, {
+            x: gsap.utils.random(-200, 200),
+            y: gsap.utils.random(-100, 100),
+            rotation: gsap.utils.random(-45, 45),
+            opacity: 0,
+            scale: 0.5,
+            duration: 0.8,
+            ease: "power2.inOut"
+          }, `+=0.2`);
+        }
       });
 
-      // Percentage number animation
-      tl.to(numberRef.current, {
-        opacity: 1,
-        scale: 1,
-        duration: 0.8,
+      // Final photo animation (last photo stays)
+      const lastPhoto = photos[photos.length - 1];
+      tl.to(lastPhoto, {
+        scale: 1.2,
+        duration: 0.6,
         ease: "power2.out"
       }, "+=0.3");
 
-      // Animate percentage from 0 to 100
-      let percentage = 0;
-      const updatePercentage = () => {
-        if (percentage <= 100) {
-          numberRef.current!.textContent = `${percentage}%`;
-          percentage += 2;
-        }
-      };
-
-      // Fast percentage counting
-      tl.to({}, {
-        duration: 0.03,
-        onRepeat: updatePercentage,
-        repeat: 50
-      });
-
-      // Progress bar animation
-      tl.to(progressRef.current, {
-        opacity: 1,
-        scaleX: 1,
-        duration: 2,
-        ease: "power2.inOut"
-      }, "-=1.5");
-
-      // Final percentage set to 100%
-      tl.to(numberRef.current, {
-        textContent: "100%",
-        duration: 0.3,
-        ease: "power2.out"
-      }, "-=0.5");
-
-      // Scale up effect at completion
-      tl.to(numberRef.current, {
-        scale: 1.2,
-        duration: 0.3,
-        ease: "power2.out"
-      });
-
-      tl.to(numberRef.current, {
+      tl.to(lastPhoto, {
         scale: 1,
-        duration: 0.2,
+        duration: 0.4,
         ease: "power2.in"
+      });
+
+      // Floating animation untuk final photo
+      tl.to(lastPhoto, {
+        y: -10,
+        duration: 1.5,
+        ease: "sine.inOut",
+        yoyo: true,
+        repeat: 1
       });
     }
 
     // Final exit animation
     tl.to({}, {
-      duration: 0.5,
+      duration: 1,
       onComplete: () => {
         gsap.to(loadingRef.current, {
           opacity: 0,
@@ -876,7 +907,7 @@ export default function HomePage(): React.JSX.Element {
         )}
       </AnimatePresence>
 
-      {/* GSAP Loading Screen dengan Percentage Counter seperti rzkyprasetyo */}
+      {/* Photo Stack Preloader seperti rzkyprasetyo */}
       <AnimatePresence>
         {showLoading && (
           <div
@@ -890,70 +921,77 @@ export default function HomePage(): React.JSX.Element {
               backgroundColor: 'black',
               zIndex: 50,
               display: 'flex',
-              flexDirection: 'column',
               justifyContent: 'center',
               alignItems: 'center',
               overflow: 'hidden'
             }}
           >
-            {/* Percentage Counter - Center */}
+            {/* Photo Stack Container */}
             <div
-              ref={numberRef}
+              ref={photoStackRef}
               style={{
-                fontSize: '5rem',
-                fontWeight: '300',
-                color: 'white',
-                fontFamily: 'Arame Mono, monospace',
-                fontFeatureSettings: '"tnum"',
-                fontVariantNumeric: 'tabular-nums',
-                letterSpacing: '-2px',
-                marginBottom: '3rem',
-                opacity: 0
-              }}
-            >
-              0%
-            </div>
-
-            {/* Progress Bar */}
-            <div
-              style={{
+                position: 'relative',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
                 width: '300px',
-                height: '2px',
-                backgroundColor: 'rgba(255,255,255,0.2)',
-                borderRadius: '1px',
-                overflow: 'hidden',
-                position: 'relative'
+                height: '400px'
               }}
             >
-              <div
-                ref={progressRef}
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  backgroundColor: 'white',
-                  transformOrigin: 'left center',
-                  transform: 'scaleX(0)',
-                  opacity: 0
-                }}
-              />
+              {photos.map((photo, index) => (
+                <div
+                  key={photo.id}
+                  style={{
+                    position: 'absolute',
+                    width: '250px',
+                    height: '350px',
+                    borderRadius: '12px',
+                    overflow: 'hidden',
+                    boxShadow: '0 10px 30px rgba(0,0,0,0.5)',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    opacity: 0
+                  }}
+                >
+                  <img
+                    src={photo.src}
+                    alt={photo.alt}
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'cover'
+                    }}
+                    onError={(e) => {
+                      e.currentTarget.style.backgroundColor = '#333';
+                      e.currentTarget.style.display = 'flex';
+                      e.currentTarget.style.justifyContent = 'center';
+                      e.currentTarget.style.alignItems = 'center';
+                      e.currentTarget.style.color = '#CCFF00';
+                      e.currentTarget.style.fontFamily = 'Arame Mono, monospace';
+                      e.currentTarget.style.fontSize = '1rem';
+                      e.currentTarget.innerHTML = `Photo ${photo.id}`;
+                    }}
+                  />
+                </div>
+              ))}
             </div>
 
             {/* Loading Text */}
             <motion.div
               style={{
+                position: 'absolute',
+                bottom: '3rem',
                 fontSize: '0.9rem',
                 fontWeight: '300',
                 color: 'rgba(255,255,255,0.6)',
                 fontFamily: 'Arame Mono, monospace',
                 letterSpacing: '1px',
-                marginTop: '2rem',
                 textTransform: 'uppercase'
               }}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.5, duration: 0.5 }}
             >
-              Loading
+              Loading Portfolio
             </motion.div>
           </div>
         )}
