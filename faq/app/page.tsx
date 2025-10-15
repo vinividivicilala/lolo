@@ -22,7 +22,7 @@ export default function HomePage(): React.JSX.Element {
   const timeRef = useRef<NodeJS.Timeout | null>(null);
   const loadingRef = useRef<HTMLDivElement>(null);
   const numberRef = useRef<HTMLDivElement>(null);
-  const photosContainerRef = useRef<HTMLDivElement>(null);
+  const horizontalScrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (showLoading) {
@@ -49,12 +49,10 @@ export default function HomePage(): React.JSX.Element {
     tl.fromTo(loadingRef.current,
       {
         opacity: 0,
-        scale: 1.1
       },
       {
         opacity: 1,
-        scale: 1,
-        duration: 1,
+        duration: 0.5,
         ease: "power2.out"
       }
     );
@@ -73,139 +71,141 @@ export default function HomePage(): React.JSX.Element {
         {
           scale: 0,
           opacity: 0,
-          rotation: -180
         },
         {
           scale: 1,
           opacity: 1,
-          rotation: 0,
-          duration: 1.5,
-          ease: "elastic.out(1.2, 0.8)"
+          duration: 1,
+          ease: "back.out(1.7)"
         }
       );
 
-      // Continuous random number changes
+      // Continuous rapid random number changes
       const changeNumber = () => {
         const newNumber = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
         setRandomNumber(newNumber);
       };
 
-      // Start rapid number changes
+      // Very fast number changes (50 changes in 2 seconds)
       tl.to({}, {
-        duration: 0.1,
+        duration: 0.04, // Very fast changes
         onRepeat: changeNumber,
-        repeat: 20
+        repeat: 50
       });
 
-      // Final number and scaling
+      // Final number and scaling up
       tl.to(numberRef.current, {
-        scale: 1.5,
-        duration: 0.5,
-        ease: "power2.out"
-      });
-
-      // Pulse animation
-      tl.to(numberRef.current, {
-        scale: 1.2,
+        scale: 1.3,
         duration: 0.3,
-        ease: "power1.inOut",
-        yoyo: true,
-        repeat: 3
+        ease: "power2.out"
       });
     }
 
-    // Photos scroll animation
-    if (photosContainerRef.current) {
-      const photos = photosContainerRef.current.children;
+    // Horizontal scroll animation for images
+    if (horizontalScrollRef.current) {
+      const imageContainers = horizontalScrollRef.current.children;
       
-      // First batch - bottom to top
-      gsap.set(Array.from(photos).slice(0, 4), {
-        y: 400,
+      // Set initial positions for top row (scroll left to right)
+      gsap.set(Array.from(imageContainers).slice(0, 6), {
+        x: -2000, // Start from far left
         opacity: 0,
         scale: 0.8
       });
 
-      // Second batch - top to bottom  
-      gsap.set(Array.from(photos).slice(4), {
-        y: -400,
+      // Set initial positions for bottom row (scroll right to left)
+      gsap.set(Array.from(imageContainers).slice(6), {
+        x: 2000, // Start from far right
         opacity: 0,
         scale: 0.8
       });
 
-      // Staggered entrance animation
-      tl.fromTo(Array.from(photos).slice(0, 4),
+      // Staggered entrance for top row (left to right)
+      tl.fromTo(Array.from(imageContainers).slice(0, 6),
         {
-          y: 400,
+          x: -2000,
           opacity: 0,
           scale: 0.8
         },
         {
-          y: 0,
+          x: 0,
           opacity: 1,
           scale: 1,
-          duration: 1.2,
-          stagger: 0.2,
-          ease: "back.out(1.7)"
+          duration: 1.5,
+          stagger: 0.1,
+          ease: "power2.out"
         },
         "-=1"
       );
 
-      tl.fromTo(Array.from(photos).slice(4),
+      // Staggered entrance for bottom row (right to left)
+      tl.fromTo(Array.from(imageContainers).slice(6),
         {
-          y: -400,
+          x: 2000,
           opacity: 0,
           scale: 0.8
         },
         {
-          y: 0,
+          x: 0,
           opacity: 1,
           scale: 1,
-          duration: 1.2,
-          stagger: 0.2,
-          ease: "back.out(1.7)"
+          duration: 1.5,
+          stagger: 0.1,
+          ease: "power2.out"
         },
-        "-=1"
+        "-=1.2"
       );
 
-      // Continuous scroll animation
-      tl.to(Array.from(photos).slice(0, 4), {
-        y: -300,
-        duration: 3,
+      // Continuous fast horizontal scrolling
+      // Top row scroll right
+      tl.to(Array.from(imageContainers).slice(0, 6), {
+        x: 2000,
+        duration: 2,
         ease: "none",
-        stagger: 0.1
+        stagger: 0.05
+      }, "+=0.5");
+
+      // Bottom row scroll left
+      tl.to(Array.from(imageContainers).slice(6), {
+        x: -2000,
+        duration: 2,
+        ease: "none",
+        stagger: 0.05
+      }, "-=2");
+
+      // Reset positions and loop
+      tl.to(Array.from(imageContainers).slice(0, 6), {
+        x: -2000,
+        duration: 0,
       });
 
-      tl.to(Array.from(photos).slice(4), {
-        y: 300,
-        duration: 3,
-        ease: "none",
-        stagger: 0.1
-      }, "-=3");
-
-      // Loop the scroll animation
-      tl.to(Array.from(photos).slice(0, 4), {
-        y: 0,
-        duration: 3,
-        ease: "none",
-        stagger: 0.1
+      tl.to(Array.from(imageContainers).slice(6), {
+        x: 2000,
+        duration: 0,
       });
 
-      tl.to(Array.from(photos).slice(4), {
-        y: 0,
-        duration: 3,
+      // Second loop - even faster
+      tl.to(Array.from(imageContainers).slice(0, 6), {
+        x: 2000,
+        duration: 1.5,
         ease: "none",
-        stagger: 0.1
-      }, "-=3");
+        stagger: 0.03
+      });
+
+      tl.to(Array.from(imageContainers).slice(6), {
+        x: -2000,
+        duration: 1.5,
+        ease: "none",
+        stagger: 0.03
+      }, "-=1.5");
     }
 
     // Final exit animation
     tl.to({}, {
-      duration: 2,
+      duration: 1,
       onComplete: () => {
         gsap.to(loadingRef.current, {
           opacity: 0,
-          scale: 1.1,
-          duration: 1,
+          duration: 0.8,
           ease: "power2.inOut",
           onComplete: () => setShowLoading(false)
         });
@@ -502,16 +502,21 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // Sample photos data (replace with actual image URLs)
-  const photos = [
-    { id: 1, color: "#FF6B6B", gradient: "linear-gradient(135deg, #FF6B6B, #FF8E8E)" },
-    { id: 2, color: "#4ECDC4", gradient: "linear-gradient(135deg, #4ECDC4, #6CE5E5)" },
-    { id: 3, color: "#FFD93D", gradient: "linear-gradient(135deg, #FFD93D, #FFE870)" },
-    { id: 4, color: "#6BCF7F", gradient: "linear-gradient(135deg, #6BCF7F, #8AEA9D)" },
-    { id: 5, color: "#FF8B94", gradient: "linear-gradient(135deg, #FF8B94, #FFA8AF)" },
-    { id: 6, color: "#A8E6CF", gradient: "linear-gradient(135deg, #A8E6CF, #C5F4E2)" },
-    { id: 7, color: "#95E1D3", gradient: "linear-gradient(135deg, #95E1D3, #B4F0E4)" },
-    { id: 8, color: "#FCE38A", gradient: "linear-gradient(135deg, #FCE38A, #FFEEB3)" }
+  // Image data - using placeholder images from public folder
+  // Replace these with your actual image paths in public folder
+  const images = [
+    { id: 1, src: "/images/photo1.jpg", alt: "Photo 1" },
+    { id: 2, src: "/images/photo2.jpg", alt: "Photo 2" },
+    { id: 3, src: "/images/photo3.jpg", alt: "Photo 3" },
+    { id: 4, src: "/images/photo4.jpg", alt: "Photo 4" },
+    { id: 5, src: "/images/photo5.jpg", alt: "Photo 5" },
+    { id: 6, src: "/images/photo6.jpg", alt: "Photo 6" },
+    { id: 7, src: "/images/photo7.jpg", alt: "Photo 7" },
+    { id: 8, src: "/images/photo8.jpg", alt: "Photo 8" },
+    { id: 9, src: "/images/photo9.jpg", alt: "Photo 9" },
+    { id: 10, src: "/images/photo10.jpg", alt: "Photo 10" },
+    { id: 11, src: "/images/photo11.jpg", alt: "Photo 11" },
+    { id: 12, src: "/images/photo12.jpg", alt: "Photo 12" }
   ];
 
   return (
@@ -965,7 +970,7 @@ export default function HomePage(): React.JSX.Element {
         )}
       </AnimatePresence>
 
-      {/* GSAP Loading Screen dengan 1 Angka Random dan Foto Scroll */}
+      {/* GSAP Loading Screen dengan 1 Angka Random dan Horizontal Scroll */}
       <AnimatePresence>
         {showLoading && (
           <div
@@ -984,7 +989,7 @@ export default function HomePage(): React.JSX.Element {
               overflow: 'hidden'
             }}
           >
-            {/* Single Random Number */}
+            {/* Single Random Number - Center */}
             <div
               ref={numberRef}
               style={{
@@ -992,7 +997,7 @@ export default function HomePage(): React.JSX.Element {
                 top: '50%',
                 left: '50%',
                 transform: 'translate(-50%, -50%)',
-                fontSize: '8rem',
+                fontSize: '6rem',
                 fontWeight: '900',
                 color: '#CCFF00',
                 fontFamily: 'Arame Mono, monospace',
@@ -1004,9 +1009,9 @@ export default function HomePage(): React.JSX.Element {
               {randomNumber}
             </div>
 
-            {/* Photos Scroll Container */}
+            {/* Horizontal Scroll Container */}
             <div
-              ref={photosContainerRef}
+              ref={horizontalScrollRef}
               style={{
                 position: 'absolute',
                 top: 0,
@@ -1014,34 +1019,90 @@ export default function HomePage(): React.JSX.Element {
                 width: '100%',
                 height: '100%',
                 display: 'flex',
-                flexWrap: 'wrap',
+                flexDirection: 'column',
                 justifyContent: 'space-around',
-                alignItems: 'center',
-                padding: '2rem',
-                gap: '1rem'
+                padding: '2rem 0'
               }}
             >
-              {photos.map((photo) => (
-                <div
-                  key={photo.id}
-                  style={{
-                    width: '120px',
-                    height: '160px',
-                    borderRadius: '15px',
-                    background: photo.gradient,
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    fontSize: '2rem',
-                    color: 'white',
-                    fontWeight: 'bold',
-                    boxShadow: '0 8px 25px rgba(0,0,0,0.3)',
-                    opacity: 0
-                  }}
-                >
-                  {photo.id}
-                </div>
-              ))}
+              {/* Top Row - Scroll Left to Right */}
+              <div style={{
+                display: 'flex',
+                gap: '2rem',
+                marginBottom: '1rem'
+              }}>
+                {images.slice(0, 6).map((image) => (
+                  <div
+                    key={image.id}
+                    style={{
+                      width: '200px',
+                      height: '120px',
+                      borderRadius: '10px',
+                      overflow: 'hidden',
+                      flexShrink: 0,
+                      opacity: 0
+                    }}
+                  >
+                    <img
+                      src={image.src}
+                      alt={image.alt}
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover'
+                      }}
+                      onError={(e) => {
+                        // Fallback jika gambar tidak ada
+                        e.currentTarget.style.backgroundColor = '#333';
+                        e.currentTarget.style.display = 'flex';
+                        e.currentTarget.style.justifyContent = 'center';
+                        e.currentTarget.style.alignItems = 'center';
+                        e.currentTarget.style.color = '#666';
+                        e.currentTarget.innerHTML = 'Image';
+                      }}
+                    />
+                  </div>
+                ))}
+              </div>
+
+              {/* Bottom Row - Scroll Right to Left */}
+              <div style={{
+                display: 'flex',
+                gap: '2rem',
+                justifyContent: 'flex-end'
+              }}>
+                {images.slice(6).map((image) => (
+                  <div
+                    key={image.id}
+                    style={{
+                      width: '200px',
+                      height: '120px',
+                      borderRadius: '10px',
+                      overflow: 'hidden',
+                      flexShrink: 0,
+                      opacity: 0
+                    }}
+                  >
+                    <img
+                      src={image.src}
+                      alt={image.alt}
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover'
+                      }}
+                      onError={(e) => {
+                        // Fallback jika gambar tidak ada
+                        e.currentTarget.style.backgroundColor = '#333';
+                        e.currentTarget.style.display = 'flex';
+                        e.currentTarget.style.justifyContent = 'center';
+                        e.currentTarget.style.alignItems = 'center';
+                        e.currentTarget.style.color = '#666';
+                        e.currentTarget.innerHTML = 'Image';
+                      }}
+                    />
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         )}
