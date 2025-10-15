@@ -21,7 +21,7 @@ export default function HomePage(): React.JSX.Element {
   const router = useRouter();
   const timeRef = useRef<NodeJS.Timeout | null>(null);
   const loadingRef = useRef<HTMLDivElement>(null);
-  const horizontalScrollRef = useRef<HTMLDivElement>(null);
+  const verticalScrollRef = useRef<HTMLDivElement>(null);
   const finalImageRef = useRef<HTMLDivElement>(null);
 
   // Gunakan foto 5.jpg untuk semua gambar
@@ -35,9 +35,7 @@ export default function HomePage(): React.JSX.Element {
     { id: 7, src: "/images/5.jpg", alt: "Photo 7" },
     { id: 8, src: "/images/5.jpg", alt: "Photo 8" },
     { id: 9, src: "/images/5.jpg", alt: "Photo 9" },
-    { id: 10, src: "/images/5.jpg", alt: "Photo 10" },
-    { id: 11, src: "/images/5.jpg", alt: "Photo 11" },
-    { id: 12, src: "/images/5.jpg", alt: "Photo 12" }
+    { id: 10, src: "/images/5.jpg", alt: "Photo 10" }
   ];
 
   useEffect(() => {
@@ -73,136 +71,85 @@ export default function HomePage(): React.JSX.Element {
       }
     );
 
-    // Enhanced Horizontal scroll animation for portrait images
-    if (horizontalScrollRef.current) {
-      const rows = horizontalScrollRef.current.children;
+    // Enhanced VERTICAL scroll animation untuk satu baris portrait images
+    if (verticalScrollRef.current) {
+      const imageContainers = verticalScrollRef.current.children;
       
-      // Set initial positions for all rows and images - BLUR dan OPACITY 0
-      gsap.set(Array.from(rows), {
-        opacity: 1
-      });
-
-      // Top row images - start from left outside viewport dengan BLUR
-      const topRowImages = rows[0].children;
-      gsap.set(Array.from(topRowImages), {
-        x: -2000,
+      // Set initial positions untuk semua images - BLUR dan di bawah layar
+      gsap.set(Array.from(imageContainers), {
+        y: 800, // Mulai dari bawah
         opacity: 0,
         scale: 1,
-        filter: "blur(20px)"
+        filter: "blur(15px)"
       });
 
-      // Bottom row images - start from right outside viewport dengan BLUR
-      const bottomRowImages = rows[1].children;
-      gsap.set(Array.from(bottomRowImages), {
-        x: 2000,
-        opacity: 0,
-        scale: 1,
-        filter: "blur(20px)"
-      });
-
-      // ANIMASI 1: BOTTOM ROW DULU - dari bawah ke atas
-      tl.fromTo(Array.from(bottomRowImages),
+      // ANIMASI 1: MASUK DARI BAWAH dengan blur -> clear
+      tl.fromTo(Array.from(imageContainers),
         {
-          x: 2000,
+          y: 800,
           opacity: 0,
           scale: 1,
-          filter: "blur(20px)"
+          filter: "blur(15px)"
         },
         {
-          x: 0,
+          y: 0,
           opacity: 1,
           scale: 1,
           filter: "blur(0px)",
-          duration: 1.2,
-          stagger: 0.1,
+          duration: 1.5,
+          stagger: 0.08, // Stagger cepat untuk efek berurutan
           ease: "power2.out"
         },
-        "+=0.3"
+        "+=0.5"
       );
 
-      // ANIMASI 2: TOP ROW - dari atas ke bawah
-      tl.fromTo(Array.from(topRowImages),
-        {
-          x: -2000,
-          opacity: 0,
-          scale: 1,
-          filter: "blur(20px)"
-        },
-        {
-          x: 0,
-          opacity: 1,
-          scale: 1,
-          filter: "blur(0px)",
-          duration: 1.2,
-          stagger: 0.1,
-          ease: "power2.out"
-        },
-        "-=0.8"
-      );
-
-      // SCROLL CEPAT 1: BOTTOM ROW scroll kiri cepat
-      tl.to(Array.from(bottomRowImages), {
-        x: -2500,
-        duration: 1.5,
-        ease: "power2.inOut",
+      // SCROLL VERTICAL CEPAT 1: Scroll ke atas
+      tl.to(Array.from(imageContainers), {
+        y: -1200,
+        duration: 2,
+        ease: "power1.inOut",
         stagger: 0.05
-      }, "+=0.5");
-
-      // SCROLL CEPAT 2: TOP ROW scroll kanan cepat
-      tl.to(Array.from(topRowImages), {
-        x: 2500,
-        duration: 1.5,
-        ease: "power2.inOut",
-        stagger: 0.05
-      }, "-=1.5");
+      }, "+=0.3");
 
       // RESET POSISI untuk loop berikutnya
-      tl.set(Array.from(bottomRowImages), {
-        x: 2500,
-        opacity: 1,
-        filter: "blur(0px)"
+      tl.set(Array.from(imageContainers), {
+        y: 1000, // Reset ke bawah
+        opacity: 1
       }, "+=0.2");
 
-      tl.set(Array.from(topRowImages), {
-        x: -2500,
-        opacity: 1,
-        filter: "blur(0px)"
-      });
-
-      // SCROLL CEPAT 3: BOTTOM ROW scroll kiri lagi lebih cepat
-      tl.to(Array.from(bottomRowImages), {
-        x: -2500,
-        duration: 1.2,
+      // SCROLL VERTICAL CEPAT 2: Scroll ke atas lebih cepat
+      tl.to(Array.from(imageContainers), {
+        y: -1500,
+        duration: 1.5,
         ease: "power2.in",
         stagger: 0.03
       }, "+=0.1");
 
-      // SCROLL CEPAT 4: TOP ROW scroll kanan lagi lebih cepat
-      tl.to(Array.from(topRowImages), {
-        x: 2500,
+      // RESET POSISI untuk loop berikutnya
+      tl.set(Array.from(imageContainers), {
+        y: 1200, // Reset ke bawah
+        opacity: 1
+      }, "+=0.2");
+
+      // SCROLL VERTICAL CEPAT 3: Scroll ke atas paling cepat
+      tl.to(Array.from(imageContainers), {
+        y: -1800,
         duration: 1.2,
-        ease: "power2.in",
-        stagger: 0.03
-      }, "-=1.2");
+        ease: "power3.in",
+        stagger: 0.02
+      }, "+=0.1");
+
+      // FADE OUT semua gambar scroll
+      tl.to(Array.from(imageContainers), {
+        opacity: 0,
+        scale: 0.7,
+        duration: 0.8,
+        ease: "power2.out"
+      }, "+=0.3");
 
       // Select and prepare final image
       const finalImageData = images[images.length - 1];
       setFinalImage(finalImageData.src);
-
-      // FADE OUT semua gambar scroll
-      tl.to(Array.from(topRowImages), {
-        opacity: 0,
-        scale: 0.8,
-        duration: 0.6,
-        ease: "power2.out"
-      }, "+=0.3");
-
-      tl.to(Array.from(bottomRowImages), {
-        opacity: 0,
-        scale: 0.8,
-        duration: 0.6,
-        ease: "power2.out"
-      }, "-=0.6");
 
       // Show final image dengan animasi dari blur ke clear
       if (finalImageRef.current) {
@@ -217,14 +164,14 @@ export default function HomePage(): React.JSX.Element {
           opacity: 1,
           scale: 1,
           filter: "blur(0px)",
-          duration: 1.5,
+          duration: 1.8,
           ease: "power3.out"
-        }, "-=0.3");
+        }, "-=0.5");
 
         // Floating animation untuk final image
         tl.to(finalImageRef.current, {
-          y: -10,
-          duration: 2,
+          y: -15,
+          duration: 2.5,
           ease: "sine.inOut",
           yoyo: true,
           repeat: -1
@@ -986,7 +933,7 @@ export default function HomePage(): React.JSX.Element {
         )}
       </AnimatePresence>
 
-      {/* Enhanced GSAP Loading Screen dengan Horizontal Scroll Portrait */}
+      {/* Enhanced GSAP Loading Screen dengan VERTICAL Scroll Satu Baris */}
       <AnimatePresence>
         {showLoading && (
           <div
@@ -1047,106 +994,54 @@ export default function HomePage(): React.JSX.Element {
               </div>
             )}
 
-            {/* Horizontal Scroll Container untuk Portrait Images */}
+            {/* VERTICAL Scroll Container untuk SATU BARIS Portrait Images */}
             <div
-              ref={horizontalScrollRef}
+              ref={verticalScrollRef}
               style={{
                 position: 'absolute',
-                top: 0,
-                left: 0,
-                width: '100%',
-                height: '100%',
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'space-between',
-                padding: '3rem 0',
-                overflow: 'hidden'
-              }}
-            >
-              {/* Top Row - Scroll kanan */}
-              <div style={{
-                display: 'flex',
-                gap: '2rem',
-                width: 'max-content'
-              }}>
-                {images.slice(0, 6).map((image) => (
-                  <div
-                    key={image.id}
-                    style={{
-                      width: '200px', // Portrait width
-                      height: '300px', // Portrait height
-                      borderRadius: '12px',
-                      overflow: 'hidden',
-                      flexShrink: 0,
-                      opacity: 0,
-                      boxShadow: '0 8px 25px rgba(0,0,0,0.7)',
-                      border: '1px solid rgba(255,255,255,0.1)'
-                    }}
-                  >
-                    <img
-                      src={image.src}
-                      alt={image.alt}
-                      style={{
-                        width: '100%',
-                        height: '100%',
-                        objectFit: 'cover'
-                      }}
-                      onError={(e) => {
-                        e.currentTarget.style.backgroundColor = '#222';
-                        e.currentTarget.style.display = 'flex';
-                        e.currentTarget.style.justifyContent = 'center';
-                        e.currentTarget.style.alignItems = 'center';
-                        e.currentTarget.style.color = '#CCFF00';
-                        e.currentTarget.style.fontFamily = 'Arame Mono, monospace';
-                        e.currentTarget.innerHTML = `Photo ${image.id}`;
-                      }}
-                    />
-                  </div>
-                ))}
-              </div>
-
-              {/* Bottom Row - Scroll kiri */}
-              <div style={{
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
                 display: 'flex',
                 gap: '2rem',
                 width: 'max-content',
-                marginLeft: 'auto'
-              }}>
-                {images.slice(6).map((image) => (
-                  <div
-                    key={image.id}
+                height: 'max-content'
+              }}
+            >
+              {images.map((image) => (
+                <div
+                  key={image.id}
+                  style={{
+                    width: '180px', // Portrait width
+                    height: '270px', // Portrait height
+                    borderRadius: '10px',
+                    overflow: 'hidden',
+                    flexShrink: 0,
+                    opacity: 0,
+                    boxShadow: '0 8px 25px rgba(0,0,0,0.7)',
+                    border: '1px solid rgba(255,255,255,0.1)'
+                  }}
+                >
+                  <img
+                    src={image.src}
+                    alt={image.alt}
                     style={{
-                      width: '200px', // Portrait width
-                      height: '300px', // Portrait height
-                      borderRadius: '12px',
-                      overflow: 'hidden',
-                      flexShrink: 0,
-                      opacity: 0,
-                      boxShadow: '0 8px 25px rgba(0,0,0,0.7)',
-                      border: '1px solid rgba(255,255,255,0.1)'
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'cover'
                     }}
-                  >
-                    <img
-                      src={image.src}
-                      alt={image.alt}
-                      style={{
-                        width: '100%',
-                        height: '100%',
-                        objectFit: 'cover'
-                      }}
-                      onError={(e) => {
-                        e.currentTarget.style.backgroundColor = '#222';
-                        e.currentTarget.style.display = 'flex';
-                        e.currentTarget.style.justifyContent = 'center';
-                        e.currentTarget.style.alignItems = 'center';
-                        e.currentTarget.style.color = '#CCFF00';
-                        e.currentTarget.style.fontFamily = 'Arame Mono, monospace';
-                        e.currentTarget.innerHTML = `Photo ${image.id}`;
-                      }}
-                    />
-                  </div>
-                ))}
-              </div>
+                    onError={(e) => {
+                      e.currentTarget.style.backgroundColor = '#222';
+                      e.currentTarget.style.display = 'flex';
+                      e.currentTarget.style.justifyContent = 'center';
+                      e.currentTarget.style.alignItems = 'center';
+                      e.currentTarget.style.color = '#CCFF00';
+                      e.currentTarget.style.fontFamily = 'Arame Mono, monospace';
+                      e.currentTarget.innerHTML = `Photo ${image.id}`;
+                    }}
+                  />
+                </div>
+              ))}
             </div>
           </div>
         )}
