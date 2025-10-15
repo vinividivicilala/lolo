@@ -505,18 +505,12 @@ export default function HomePage(): React.JSX.Element {
   // Image data - using placeholder images from public folder
   // Replace these with your actual image paths in public folder
   const images = [
-    { id: 1, src: "/images/photo1.jpg", alt: "Photo 1" },
-    { id: 2, src: "/images/photo2.jpg", alt: "Photo 2" },
-    { id: 3, src: "/images/photo3.jpg", alt: "Photo 3" },
-    { id: 4, src: "/images/photo4.jpg", alt: "Photo 4" },
-    { id: 5, src: "/images/photo5.jpg", alt: "Photo 5" },
-    { id: 6, src: "/images/photo6.jpg", alt: "Photo 6" },
-    { id: 7, src: "/images/photo7.jpg", alt: "Photo 7" },
-    { id: 8, src: "/images/photo8.jpg", alt: "Photo 8" },
-    { id: 9, src: "/images/photo9.jpg", alt: "Photo 9" },
-    { id: 10, src: "/images/photo10.jpg", alt: "Photo 10" },
-    { id: 11, src: "/images/photo11.jpg", alt: "Photo 11" },
-    { id: 12, src: "/images/photo12.jpg", alt: "Photo 12" }
+    { id: 1, src: "/images/1.jpg", alt: "Photo 1" },
+    { id: 2, src: "/images/2.jpg", alt: "Photo 2" },
+    { id: 3, src: "/images/3.jpg", alt: "Photo 3" },
+    { id: 4, src: "/images/4.jpg", alt: "Photo 4" },
+    { id: 5, src: "/images/5.jpg", alt: "Photo 5" },
+    { id: 12, src: "/images/12.jpg", alt: "Photo 12" }
   ];
 
   return (
@@ -1196,3 +1190,4 @@ export default function HomePage(): React.JSX.Element {
     </div>
   );
 }
+
