@@ -18,11 +18,29 @@ export default function HomePage(): React.JSX.Element {
     date: ""
   });
   const [randomNumber, setRandomNumber] = useState("0000");
+  const [finalImage, setFinalImage] = useState<string | null>(null);
   const router = useRouter();
   const timeRef = useRef<NodeJS.Timeout | null>(null);
   const loadingRef = useRef<HTMLDivElement>(null);
   const numberRef = useRef<HTMLDivElement>(null);
   const horizontalScrollRef = useRef<HTMLDivElement>(null);
+  const finalImageRef = useRef<HTMLDivElement>(null);
+
+  // Image data - using placeholder images from public folder
+  const images = [
+    { id: 1, src: "/images/1.jpg", alt: "Photo 1" },
+    { id: 2, src: "/images/2.jpg", alt: "Photo 2" },
+    { id: 3, src: "/images/3.jpg", alt: "Photo 3" },
+    { id: 4, src: "/images/4.jpg", alt: "Photo 4" },
+    { id: 5, src: "/images/5.jpg", alt: "Photo 5" },
+    { id: 6, src: "/images/6.jpg", alt: "Photo 6" },
+    { id: 7, src: "/images/7.jpg", alt: "Photo 7" },
+    { id: 8, src: "/images/8.jpg", alt: "Photo 8" },
+    { id: 9, src: "/images/9.jpg", alt: "Photo 9" },
+    { id: 10, src: "/images/10.jpg", alt: "Photo 10" },
+    { id: 11, src: "/images/11.jpg", alt: "Photo 11" },
+    { id: 12, src: "/images/12.jpg", alt: "Photo 12" }
+  ];
 
   useEffect(() => {
     if (showLoading) {
@@ -101,102 +119,134 @@ export default function HomePage(): React.JSX.Element {
       });
     }
 
-    // Horizontal scroll animation for images
+    // Enhanced Horizontal scroll animation for images
     if (horizontalScrollRef.current) {
       const imageContainers = horizontalScrollRef.current.children;
       
-      // Set initial positions for top row (scroll left to right)
+      // Set initial positions for all images
+      gsap.set(Array.from(imageContainers), {
+        opacity: 0,
+        scale: 0.8
+      });
+
+      // Set initial positions for top row (start from top)
       gsap.set(Array.from(imageContainers).slice(0, 6), {
-        x: -2000, // Start from far left
-        opacity: 0,
-        scale: 0.8
+        y: -1000,
+        x: 0
       });
 
-      // Set initial positions for bottom row (scroll right to left)
+      // Set initial positions for bottom row (start from bottom)
       gsap.set(Array.from(imageContainers).slice(6), {
-        x: 2000, // Start from far right
-        opacity: 0,
-        scale: 0.8
+        y: 1000,
+        x: 0
       });
 
-      // Staggered entrance for top row (left to right)
+      // Staggered entrance for top row (from top to center)
       tl.fromTo(Array.from(imageContainers).slice(0, 6),
         {
-          x: -2000,
+          y: -1000,
           opacity: 0,
           scale: 0.8
         },
         {
-          x: 0,
+          y: 0,
           opacity: 1,
           scale: 1,
-          duration: 1.5,
-          stagger: 0.1,
+          duration: 1.2,
+          stagger: 0.15,
+          ease: "power2.out"
+        },
+        "-=0.8"
+      );
+
+      // Staggered entrance for bottom row (from bottom to center)
+      tl.fromTo(Array.from(imageContainers).slice(6),
+        {
+          y: 1000,
+          opacity: 0,
+          scale: 0.8
+        },
+        {
+          y: 0,
+          opacity: 1,
+          scale: 1,
+          duration: 1.2,
+          stagger: 0.15,
           ease: "power2.out"
         },
         "-=1"
       );
 
-      // Staggered entrance for bottom row (right to left)
-      tl.fromTo(Array.from(imageContainers).slice(6),
-        {
-          x: 2000,
-          opacity: 0,
-          scale: 0.8
-        },
-        {
-          x: 0,
-          opacity: 1,
-          scale: 1,
-          duration: 1.5,
-          stagger: 0.1,
-          ease: "power2.out"
-        },
-        "-=1.2"
-      );
-
-      // Continuous fast horizontal scrolling
+      // First horizontal scroll phase
       // Top row scroll right
       tl.to(Array.from(imageContainers).slice(0, 6), {
-        x: 2000,
-        duration: 2,
-        ease: "none",
-        stagger: 0.05
-      }, "+=0.5");
+        x: 800,
+        duration: 1.8,
+        ease: "power1.inOut",
+        stagger: 0.1
+      }, "+=0.3");
 
       // Bottom row scroll left
       tl.to(Array.from(imageContainers).slice(6), {
-        x: -2000,
-        duration: 2,
-        ease: "none",
-        stagger: 0.05
-      }, "-=2");
+        x: -800,
+        duration: 1.8,
+        ease: "power1.inOut",
+        stagger: 0.1
+      }, "-=1.8");
 
-      // Reset positions and loop
+      // Second horizontal scroll phase - reverse direction
+      // Top row scroll left
       tl.to(Array.from(imageContainers).slice(0, 6), {
-        x: -2000,
-        duration: 0,
-      });
-
-      tl.to(Array.from(imageContainers).slice(6), {
-        x: 2000,
-        duration: 0,
-      });
-
-      // Second loop - even faster
-      tl.to(Array.from(imageContainers).slice(0, 6), {
-        x: 2000,
+        x: -600,
         duration: 1.5,
-        ease: "none",
-        stagger: 0.03
-      });
+        ease: "power1.inOut",
+        stagger: 0.08
+      }, "+=0.2");
 
+      // Bottom row scroll right
       tl.to(Array.from(imageContainers).slice(6), {
-        x: -2000,
+        x: 600,
         duration: 1.5,
-        ease: "none",
-        stagger: 0.03
+        ease: "power1.inOut",
+        stagger: 0.08
       }, "-=1.5");
+
+      // Final horizontal scroll phase - fast
+      // Top row scroll right fast
+      tl.to(Array.from(imageContainers).slice(0, 6), {
+        x: 1200,
+        duration: 1.2,
+        ease: "power2.in",
+        stagger: 0.05
+      }, "+=0.1");
+
+      // Bottom row scroll left fast
+      tl.to(Array.from(imageContainers).slice(6), {
+        x: -1200,
+        duration: 1.2,
+        ease: "power2.in",
+        stagger: 0.05
+      }, "-=1.2");
+
+      // Select and prepare final image (last image from the array)
+      const finalImageData = images[images.length - 1];
+      setFinalImage(finalImageData.src);
+
+      // Hide all images except the final one
+      tl.to(Array.from(imageContainers), {
+        opacity: 0,
+        scale: 0.5,
+        duration: 0.5,
+        ease: "power2.out"
+      }, "+=0.3");
+
+      // Show final image with animation
+      tl.to(finalImageRef.current, {
+        opacity: 1,
+        scale: 1,
+        duration: 1,
+        ease: "back.out(1.5)"
+      }, "-=0.3");
     }
 
     // Final exit animation
@@ -501,17 +551,6 @@ export default function HomePage(): React.JSX.Element {
       default: return <HomeIcon />;
     }
   };
-
-  // Image data - using placeholder images from public folder
-  // Replace these with your actual image paths in public folder
-  const images = [
-    { id: 1, src: "/images/1.jpg", alt: "Photo 1" },
-    { id: 2, src: "/images/2.jpg", alt: "Photo 2" },
-    { id: 3, src: "/images/3.jpg", alt: "Photo 3" },
-    { id: 4, src: "/images/4.jpg", alt: "Photo 4" },
-    { id: 5, src: "/images/5.jpg", alt: "Photo 5" },
-    { id: 12, src: "/images/12.jpg", alt: "Photo 12" }
-  ];
 
   return (
     <div style={{
@@ -964,7 +1003,7 @@ export default function HomePage(): React.JSX.Element {
         )}
       </AnimatePresence>
 
-      {/* GSAP Loading Screen dengan 1 Angka Random dan Horizontal Scroll */}
+      {/* Enhanced GSAP Loading Screen dengan Horizontal Scroll dan Final Image */}
       <AnimatePresence>
         {showLoading && (
           <div
@@ -1003,7 +1042,46 @@ export default function HomePage(): React.JSX.Element {
               {randomNumber}
             </div>
 
-            {/* Horizontal Scroll Container */}
+            {/* Final Image Display */}
+            {finalImage && (
+              <div
+                ref={finalImageRef}
+                style={{
+                  position: 'absolute',
+                  top: '50%',
+                  left: '50%',
+                  transform: 'translate(-50%, -50%)',
+                  width: '300px',
+                  height: '200px',
+                  borderRadius: '15px',
+                  overflow: 'hidden',
+                  zIndex: 15,
+                  opacity: 0,
+                  scale: 0.8,
+                  boxShadow: '0 0 50px rgba(204, 255, 0, 0.3)'
+                }}
+              >
+                <img
+                  src={finalImage}
+                  alt="Final Preview"
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover'
+                  }}
+                  onError={(e) => {
+                    e.currentTarget.style.backgroundColor = '#333';
+                    e.currentTarget.style.display = 'flex';
+                    e.currentTarget.style.justifyContent = 'center';
+                    e.currentTarget.style.alignItems = 'center';
+                    e.currentTarget.style.color = '#666';
+                    e.currentTarget.innerHTML = 'Final Image';
+                  }}
+                />
+              </div>
+            )}
+
+            {/* Enhanced Horizontal Scroll Container */}
             <div
               ref={horizontalScrollRef}
               style={{
@@ -1045,7 +1123,6 @@ export default function HomePage(): React.JSX.Element {
                         objectFit: 'cover'
                       }}
                       onError={(e) => {
-                        // Fallback jika gambar tidak ada
                         e.currentTarget.style.backgroundColor = '#333';
                         e.currentTarget.style.display = 'flex';
                         e.currentTarget.style.justifyContent = 'center';
@@ -1085,7 +1162,6 @@ export default function HomePage(): React.JSX.Element {
                         objectFit: 'cover'
                       }}
                       onError={(e) => {
-                        // Fallback jika gambar tidak ada
                         e.currentTarget.style.backgroundColor = '#333';
                         e.currentTarget.style.display = 'flex';
                         e.currentTarget.style.justifyContent = 'center';
@@ -1102,92 +1178,80 @@ export default function HomePage(): React.JSX.Element {
         )}
       </AnimatePresence>
 
-      {/* Main Content After Loading */}
-      <AnimatePresence>
-        {!showLoading && (
-          <motion.div
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: '1.5rem',
-              padding: '2rem',
-              zIndex: 10
-            }}
+      {/* Main Content */}
+      {!showLoading && (
+        <div style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '2rem',
+          textAlign: 'center',
+          padding: '2rem',
+          maxWidth: '800px',
+          margin: '0 auto'
+        }}>
+          {/* Main Title */}
+          <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+            style={{
+              fontSize: '3.5rem',
+              fontWeight: '300',
+              color: 'white',
+              margin: 0,
+              fontFamily: 'Arame Mono, monospace',
+              letterSpacing: '-1px'
+            }}
           >
-            <motion.h1
-              style={{
-                fontSize: '2.5rem',
-                fontWeight: '300',
-                color: 'white',
-                fontFamily: 'Arame Mono, monospace',
-                textAlign: 'center',
-                marginBottom: '0.5rem',
-                letterSpacing: '2px'
-              }}
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.2, duration: 0.5 }}
-            >
-              WELCOME
-            </motion.h1>
-            
-            <motion.p
-              style={{
-                fontSize: '1rem',
-                fontWeight: '300',
-                color: 'rgba(255,255,255,0.7)',
-                fontFamily: 'Arame Mono, monospace',
-                textAlign: 'center',
-                maxWidth: '400px',
-                lineHeight: '1.5',
-                letterSpacing: '0.5px'
-              }}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.4, duration: 0.5 }}
-            >
-              Your space for creative thoughts and ideas
-            </motion.p>
+            Welcome to My Portfolio
+          </motion.h1>
 
-            <motion.button
-              onClick={navigateToNotes}
-              style={{
-                padding: '0.8rem 1.8rem',
-                fontSize: '0.9rem',
-                fontWeight: '300',
-                color: 'black',
-                backgroundColor: 'white',
-                border: 'none',
-                borderRadius: '6px',
-                cursor: 'pointer',
-                fontFamily: 'Arame Mono, monospace',
-                letterSpacing: '1px'
-              }}
-              whileHover={{ 
-                scale: 1.03,
-                backgroundColor: '#f8f8f8',
-                transition: { duration: 0.2 }
-              }}
-              whileTap={{ scale: 0.97 }}
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.6, duration: 0.5 }}
-            >
-              VIEW NOTES
-            </motion.button>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          {/* Subtitle */}
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.4 }}
+            style={{
+              fontSize: '1.2rem',
+              fontWeight: '300',
+              color: 'rgba(255,255,255,0.7)',
+              margin: 0,
+              fontFamily: 'Arame Mono, monospace',
+              lineHeight: 1.6
+            }}
+          >
+            Creative developer & designer crafting digital experiences
+          </motion.p>
 
-      {/* Font import */}
-      <style jsx>{`
-        @import url('https://fonts.cdnfonts.com/css/arame-mono');
-      `}</style>
+          {/* CTA Button */}
+          <motion.button
+            onClick={navigateToNotes}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.6 }}
+            whileHover={{ scale: 1.05, backgroundColor: '#CCFF00', color: 'black' }}
+            whileTap={{ scale: 0.95 }}
+            style={{
+              padding: '1rem 2.5rem',
+              fontSize: '1.1rem',
+              fontWeight: '300',
+              color: 'white',
+              backgroundColor: 'transparent',
+              border: '1px solid rgba(255,255,255,0.3)',
+              borderRadius: '30px',
+              cursor: 'pointer',
+              fontFamily: 'Arame Mono, monospace',
+              letterSpacing: '0.5px',
+              transition: 'all 0.3s ease',
+              marginTop: '1rem'
+            }}
+          >
+            View My Work
+          </motion.button>
+        </div>
+      )}
     </div>
   );
 }
-
