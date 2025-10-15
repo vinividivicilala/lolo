@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { gsap } from "gsap";
 
 export default function HomePage(): React.JSX.Element {
-  const [showLoading, setShowLoading] = useState(false); // Langsung false, tidak pakai loading
+  const [showLoading, setShowLoading] = useState(true);
   const [showMenu, setShowMenu] = useState(false);
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
   const [isCloseHovered, setIsCloseHovered] = useState(false);
@@ -17,90 +17,116 @@ export default function HomePage(): React.JSX.Element {
     timezone: "",
     date: ""
   });
-  const [randomNumbers, setRandomNumbers] = useState<string[]>([]);
   const router = useRouter();
   const timeRef = useRef<NodeJS.Timeout | null>(null);
+  const loadingRef = useRef<HTMLDivElement>(null);
   const numbersRef = useRef<(HTMLDivElement | null)[]>([]);
   const photosRef = useRef<(HTMLDivElement | null)[]>([]);
 
   useEffect(() => {
+    if (showLoading) {
+      startGSAPLoadingAnimation();
+    }
+
     // Initialize visitor time
     updateVisitorTime();
     
     // Update time every second
     timeRef.current = setInterval(updateVisitorTime, 1000);
 
-    // Start random numbers animation
-    startRandomNumbersAnimation();
-    
-    // Start photos animation
-    startPhotosAnimation();
-
     return () => {
       if (timeRef.current) {
         clearInterval(timeRef.current);
       }
     };
-  }, []);
+  }, [showLoading]);
 
-  const startRandomNumbersAnimation = () => {
-    // Generate initial random numbers
-    const initialNumbers = Array.from({ length: 12 }, () => 
+  const startGSAPLoadingAnimation = () => {
+    const tl = gsap.timeline();
+    
+    // Background animation
+    tl.fromTo(loadingRef.current,
+      {
+        opacity: 0,
+        scale: 1.1
+      },
+      {
+        opacity: 1,
+        scale: 1,
+        duration: 1,
+        ease: "power2.out"
+      }
+    );
+
+    // Create 20 random numbers
+    const numbers = Array.from({ length: 20 }, () => 
       Math.floor(Math.random() * 10000).toString().padStart(4, '0')
     );
-    setRandomNumbers(initialNumbers);
 
-    // Animate numbers with GSAP
-    const tl = gsap.timeline({ repeat: -1, repeatDelay: 0.5 });
-    
+    // Animate numbers in sequence
     numbersRef.current.forEach((numberEl, index) => {
       if (numberEl) {
+        // Position numbers randomly
+        const randomX = gsap.utils.random(-100, 100);
+        const randomY = gsap.utils.random(-100, 100);
+        const randomScale = gsap.utils.random(0.5, 2);
+        const randomRotation = gsap.utils.random(-180, 180);
+
+        // Set initial random position
+        gsap.set(numberEl, {
+          x: randomX,
+          y: randomY,
+          scale: randomScale,
+          rotation: randomRotation,
+          opacity: 0
+        });
+
         // Staggered entrance animation
         tl.fromTo(numberEl,
           {
             opacity: 0,
-            y: -100,
-            scale: 0.5,
-            rotation: -180
+            scale: 0
           },
           {
-            opacity: 1,
-            y: 0,
-            scale: 1,
-            rotation: 0,
-            duration: 1,
+            opacity: gsap.utils.random(0.3, 0.8),
+            scale: randomScale,
+            duration: 0.8,
             ease: "elastic.out(1, 0.8)",
             delay: index * 0.1
           },
-          "+=0.1"
+          "-=0.5"
         );
 
         // Continuous random number changes
-        tl.to(numberEl, {
-          duration: 2,
-          ease: "none",
-          onUpdate: () => {
+        const changeNumber = () => {
+          if (numberEl) {
             const newNumber = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
-            if (numberEl) {
-              numberEl.textContent = newNumber;
-            }
+            numberEl.textContent = newNumber;
           }
-        }, "-=0.5");
+        };
+
+        // Start continuous number changes
+        tl.call(changeNumber, null, `+=${gsap.utils.random(0.1, 0.5)}`);
+        tl.to({}, {
+          duration: gsap.utils.random(0.5, 1.5),
+          onRepeat: changeNumber,
+          repeat: -1
+        });
 
         // Floating animation
         tl.to(numberEl, {
-          y: -20,
-          rotation: 5,
-          duration: 1,
-          ease: "power1.inOut",
+          x: `+=${gsap.utils.random(-50, 50)}`,
+          y: `+=${gsap.utils.random(-50, 50)}`,
+          rotation: `+=${gsap.utils.random(-30, 30)}`,
+          duration: gsap.utils.random(2, 4),
+          ease: "sine.inOut",
           yoyo: true,
-          repeat: 1
-        }, "+=0.5");
+          repeat: -1
+        }, "-=1");
       }
     });
-  };
 
-  const startPhotosAnimation = () => {
+    // Photos animation (6 photos)
     const photos = [
       { emoji: "🚀", color: "#FF6B6B" },
       { emoji: "🎨", color: "#4ECDC4" },
@@ -110,29 +136,27 @@ export default function HomePage(): React.JSX.Element {
       { emoji: "⚡", color: "#A8E6CF" }
     ];
 
-    const tl = gsap.timeline();
-
     // Photos from top to bottom (first 3)
     photos.slice(0, 3).forEach((photo, index) => {
       const photoEl = photosRef.current[index];
       if (photoEl) {
         tl.fromTo(photoEl,
           {
-            y: -200,
+            y: -500,
             opacity: 0,
-            scale: 0.3,
-            rotation: -45
+            scale: 0,
+            rotation: -180
           },
           {
-            y: 0,
+            y: gsap.utils.random(-100, 100),
             opacity: 1,
             scale: 1,
             rotation: 0,
-            duration: 1.2,
-            ease: "back.out(1.7)",
-            delay: index * 0.2
+            duration: 1.5,
+            ease: "back.out(2)",
+            delay: index * 0.3
           },
-          "+=0.1"
+          "+=0.5"
         );
       }
     });
@@ -144,36 +168,52 @@ export default function HomePage(): React.JSX.Element {
       if (photoEl) {
         tl.fromTo(photoEl,
           {
-            y: 200,
+            y: 500,
             opacity: 0,
-            scale: 0.3,
-            rotation: 45
+            scale: 0,
+            rotation: 180
           },
           {
-            y: 0,
+            y: gsap.utils.random(-100, 100),
             opacity: 1,
             scale: 1,
             rotation: 0,
-            duration: 1.2,
-            ease: "back.out(1.7)",
-            delay: index * 0.2
+            duration: 1.5,
+            ease: "back.out(2)",
+            delay: index * 0.3
           },
-          "-=0.5"
+          "-=1"
         );
       }
     });
 
-    // Continuous floating animation for all photos
+    // Continuous floating for photos
     photosRef.current.forEach((photoEl, index) => {
       if (photoEl) {
         tl.to(photoEl, {
-          y: -15,
-          rotation: index % 2 === 0 ? 5 : -5,
-          duration: 2,
-          ease: "power1.inOut",
-          repeat: -1,
-          yoyo: true
-        }, "-=1");
+          y: `+=${gsap.utils.random(-40, 40)}`,
+          x: `+=${gsap.utils.random(-20, 20)}`,
+          rotation: `+=${gsap.utils.random(-15, 15)}`,
+          duration: gsap.utils.random(3, 6),
+          ease: "sine.inOut",
+          yoyo: true,
+          repeat: -1
+        }, "-=0.5");
+      }
+    });
+
+    // Final countdown and exit
+    tl.to({}, {
+      duration: 3,
+      onComplete: () => {
+        // Exit animation
+        gsap.to(loadingRef.current, {
+          opacity: 0,
+          scale: 1.2,
+          duration: 1,
+          ease: "power2.in",
+          onComplete: () => setShowLoading(false)
+        });
       }
     });
   };
@@ -236,7 +276,10 @@ export default function HomePage(): React.JSX.Element {
   };
 
   const navigateToNotes = () => {
-    router.push('/notes');
+    setShowLoading(true);
+    setTimeout(() => {
+      router.push('/notes');
+    }, 1000);
   };
 
   const toggleMenu = () => {
@@ -465,12 +508,12 @@ export default function HomePage(): React.JSX.Element {
   };
 
   const photos = [
-    { emoji: "🚀", color: "#FF6B6B", size: "80px" },
-    { emoji: "🎨", color: "#4ECDC4", size: "70px" },
-    { emoji: "💻", color: "#FFD93D", size: "90px" },
-    { emoji: "🌟", color: "#6BCF7F", size: "75px" },
-    { emoji: "🔥", color: "#FF8B94", size: "85px" },
-    { emoji: "⚡", color: "#A8E6CF", size: "65px" }
+    { emoji: "🚀", color: "#FF6B6B", size: "100px" },
+    { emoji: "🎨", color: "#4ECDC4", size: "90px" },
+    { emoji: "💻", color: "#FFD93D", size: "110px" },
+    { emoji: "🌟", color: "#6BCF7F", size: "85px" },
+    { emoji: "🔥", color: "#FF8B94", size: "95px" },
+    { emoji: "⚡", color: "#A8E6CF", size: "80px" }
   ];
 
   return (
@@ -489,80 +532,6 @@ export default function HomePage(): React.JSX.Element {
       WebkitFontSmoothing: 'antialiased',
       MozOsxFontSmoothing: 'grayscale'
     }}>
-      {/* Random Numbers Background */}
-      <div style={{
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        width: '100%',
-        height: '100%',
-        display: 'grid',
-        gridTemplateColumns: 'repeat(4, 1fr)',
-        gridTemplateRows: 'repeat(3, 1fr)',
-        gap: '2rem',
-        padding: '2rem',
-        opacity: 0.3,
-        pointerEvents: 'none'
-      }}>
-        {randomNumbers.map((number, index) => (
-          <div
-            key={index}
-            ref={el => numbersRef.current[index] = el}
-            style={{
-              fontSize: '3rem',
-              fontWeight: '900',
-              color: '#CCFF00',
-              fontFamily: 'Arame Mono, monospace',
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              textShadow: '0 0 20px rgba(204, 255, 0, 0.5)',
-              opacity: 0.7
-            }}
-          >
-            {number}
-          </div>
-        ))}
-      </div>
-
-      {/* Animated Photos */}
-      <div style={{
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        width: '100%',
-        height: '100%',
-        display: 'flex',
-        flexWrap: 'wrap',
-        justifyContent: 'space-around',
-        alignItems: 'center',
-        padding: '2rem',
-        pointerEvents: 'none'
-      }}>
-        {photos.map((photo, index) => (
-          <div
-            key={index}
-            ref={el => photosRef.current[index] = el}
-            style={{
-              width: photo.size,
-              height: photo.size,
-              borderRadius: '20px',
-              background: `linear-gradient(135deg, ${photo.color}20, ${photo.color}40)`,
-              border: `2px solid ${photo.color}60`,
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              fontSize: '2.5rem',
-              backdropFilter: 'blur(10px)',
-              boxShadow: `0 8px 32px ${photo.color}30`,
-              margin: '1rem'
-            }}
-          >
-            {photo.emoji}
-          </div>
-        ))}
-      </div>
-
       {/* Menu Button with Framer Motion */}
       <motion.div
         onClick={toggleMenu}
@@ -998,82 +967,176 @@ export default function HomePage(): React.JSX.Element {
         )}
       </AnimatePresence>
 
-      {/* Main Content */}
-      <motion.div
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          gap: '1.5rem',
-          padding: '2rem',
-          zIndex: 10
-        }}
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-      >
-        <motion.h1
-          style={{
-            fontSize: '2.5rem',
-            fontWeight: '300',
-            color: 'white',
-            fontFamily: 'Arame Mono, monospace',
-            textAlign: 'center',
-            marginBottom: '0.5rem',
-            letterSpacing: '2px'
-          }}
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.2, duration: 0.5 }}
-        >
-          WELCOME
-        </motion.h1>
-        
-        <motion.p
-          style={{
-            fontSize: '1rem',
-            fontWeight: '300',
-            color: 'rgba(255,255,255,0.7)',
-            fontFamily: 'Arame Mono, monospace',
-            textAlign: 'center',
-            maxWidth: '400px',
-            lineHeight: '1.5',
-            letterSpacing: '0.5px'
-          }}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.4, duration: 0.5 }}
-        >
-          Your space for creative thoughts and ideas
-        </motion.p>
+      {/* GSAP Loading Screen dengan Angka Random dan Foto */}
+      <AnimatePresence>
+        {showLoading && (
+          <div
+            ref={loadingRef}
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              backgroundColor: 'black',
+              zIndex: 50,
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              overflow: 'hidden'
+            }}
+          >
+            {/* Random Numbers Container */}
+            <div style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              display: 'flex',
+              flexWrap: 'wrap',
+              justifyContent: 'space-around',
+              alignItems: 'center',
+              padding: '2rem'
+            }}>
+              {Array.from({ length: 20 }).map((_, index) => (
+                <div
+                  key={index}
+                  ref={el => numbersRef.current[index] = el}
+                  style={{
+                    fontSize: '4rem',
+                    fontWeight: '900',
+                    color: '#CCFF00',
+                    fontFamily: 'Arame Mono, monospace',
+                    textShadow: '0 0 20px rgba(204, 255, 0, 0.7)',
+                    opacity: 0
+                  }}
+                >
+                  {Math.floor(Math.random() * 10000).toString().padStart(4, '0')}
+                </div>
+              ))}
+            </div>
 
-        <motion.button
-          onClick={navigateToNotes}
-          style={{
-            padding: '0.8rem 1.8rem',
-            fontSize: '0.9rem',
-            fontWeight: '300',
-            color: 'black',
-            backgroundColor: 'white',
-            border: 'none',
-            borderRadius: '6px',
-            cursor: 'pointer',
-            fontFamily: 'Arame Mono, monospace',
-            letterSpacing: '1px'
-          }}
-          whileHover={{ 
-            scale: 1.03,
-            backgroundColor: '#f8f8f8',
-            transition: { duration: 0.2 }
-          }}
-          whileTap={{ scale: 0.97 }}
-          initial={{ opacity: 0, y: 15 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.6, duration: 0.5 }}
-        >
-          VIEW NOTES
-        </motion.button>
-      </motion.div>
+            {/* Photos Container */}
+            <div style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              display: 'flex',
+              flexWrap: 'wrap',
+              justifyContent: 'space-around',
+              alignItems: 'center',
+              padding: '4rem'
+            }}>
+              {photos.map((photo, index) => (
+                <div
+                  key={index}
+                  ref={el => photosRef.current[index] = el}
+                  style={{
+                    width: photo.size,
+                    height: photo.size,
+                    borderRadius: '25px',
+                    background: `linear-gradient(135deg, ${photo.color}30, ${photo.color}60)`,
+                    border: `3px solid ${photo.color}80`,
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    fontSize: '3rem',
+                    backdropFilter: 'blur(15px)',
+                    boxShadow: `0 10px 40px ${photo.color}40`,
+                    opacity: 0
+                  }}
+                >
+                  {photo.emoji}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Main Content After Loading */}
+      <AnimatePresence>
+        {!showLoading && (
+          <motion.div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '1.5rem',
+              padding: '2rem',
+              zIndex: 10
+            }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+          >
+            <motion.h1
+              style={{
+                fontSize: '2.5rem',
+                fontWeight: '300',
+                color: 'white',
+                fontFamily: 'Arame Mono, monospace',
+                textAlign: 'center',
+                marginBottom: '0.5rem',
+                letterSpacing: '2px'
+              }}
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.2, duration: 0.5 }}
+            >
+              WELCOME
+            </motion.h1>
+            
+            <motion.p
+              style={{
+                fontSize: '1rem',
+                fontWeight: '300',
+                color: 'rgba(255,255,255,0.7)',
+                fontFamily: 'Arame Mono, monospace',
+                textAlign: 'center',
+                maxWidth: '400px',
+                lineHeight: '1.5',
+                letterSpacing: '0.5px'
+              }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.4, duration: 0.5 }}
+            >
+              Your space for creative thoughts and ideas
+            </motion.p>
+
+            <motion.button
+              onClick={navigateToNotes}
+              style={{
+                padding: '0.8rem 1.8rem',
+                fontSize: '0.9rem',
+                fontWeight: '300',
+                color: 'black',
+                backgroundColor: 'white',
+                border: 'none',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                fontFamily: 'Arame Mono, monospace',
+                letterSpacing: '1px'
+              }}
+              whileHover={{ 
+                scale: 1.03,
+                backgroundColor: '#f8f8f8',
+                transition: { duration: 0.2 }
+              }}
+              whileTap={{ scale: 0.97 }}
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.6, duration: 0.5 }}
+            >
+              VIEW NOTES
+            </motion.button>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Font import */}
       <style jsx>{`
