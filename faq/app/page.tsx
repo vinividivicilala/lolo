@@ -75,146 +75,152 @@ export default function HomePage(): React.JSX.Element {
 
     // Enhanced Horizontal scroll animation for images
     if (horizontalScrollRef.current) {
-      const imageContainers = horizontalScrollRef.current.children;
+      const rows = horizontalScrollRef.current.children;
       
-      // Set initial positions for all images
-      gsap.set(Array.from(imageContainers), {
+      // Set initial positions for all rows and images
+      gsap.set(Array.from(rows), {
+        opacity: 1
+      });
+
+      // Top row images - start from left outside viewport
+      const topRowImages = rows[0].children;
+      gsap.set(Array.from(topRowImages), {
+        x: -1500,
         opacity: 0,
         scale: 0.8
       });
 
-      // Set initial positions for top row (start from top - outside viewport)
-      gsap.set(Array.from(imageContainers).slice(0, 6), {
-        y: -800,
-        x: () => gsap.utils.random(-500, 500) // Random horizontal position
+      // Bottom row images - start from right outside viewport
+      const bottomRowImages = rows[1].children;
+      gsap.set(Array.from(bottomRowImages), {
+        x: 1500,
+        opacity: 0,
+        scale: 0.8
       });
 
-      // Set initial positions for bottom row (start from bottom - outside viewport)
-      gsap.set(Array.from(imageContainers).slice(6), {
-        y: 800,
-        x: () => gsap.utils.random(-500, 500) // Random horizontal position
-      });
-
-      // Staggered entrance for top row (from top to center)
-      tl.fromTo(Array.from(imageContainers).slice(0, 6),
+      // Staggered entrance for top row (from left to center)
+      tl.fromTo(Array.from(topRowImages),
         {
-          y: -800,
+          x: -1500,
           opacity: 0,
           scale: 0.8
         },
         {
-          y: 0,
+          x: 0,
           opacity: 1,
           scale: 1,
           duration: 1.5,
-          stagger: 0.2,
+          stagger: 0.15,
           ease: "power2.out"
         },
         "+=0.5"
       );
 
-      // Staggered entrance for bottom row (from bottom to center)
-      tl.fromTo(Array.from(imageContainers).slice(6),
+      // Staggered entrance for bottom row (from right to center)
+      tl.fromTo(Array.from(bottomRowImages),
         {
-          y: 800,
+          x: 1500,
           opacity: 0,
           scale: 0.8
         },
         {
-          y: 0,
+          x: 0,
           opacity: 1,
           scale: 1,
           duration: 1.5,
-          stagger: 0.2,
+          stagger: 0.15,
           ease: "power2.out"
         },
         "-=1.2"
       );
 
-      // First horizontal scroll phase - Slow and smooth
+      // First horizontal scroll phase
       // Top row scroll right
-      tl.to(Array.from(imageContainers).slice(0, 6), {
-        x: 600,
+      tl.to(Array.from(topRowImages), {
+        x: 800,
         duration: 2,
         ease: "power1.inOut",
-        stagger: 0.15
+        stagger: 0.1
       }, "+=0.5");
 
       // Bottom row scroll left
-      tl.to(Array.from(imageContainers).slice(6), {
-        x: -600,
+      tl.to(Array.from(bottomRowImages), {
+        x: -800,
         duration: 2,
         ease: "power1.inOut",
-        stagger: 0.15
+        stagger: 0.1
       }, "-=2");
 
-      // Second horizontal scroll phase - Reverse direction
+      // Second horizontal scroll phase - reverse direction
       // Top row scroll left
-      tl.to(Array.from(imageContainers).slice(0, 6), {
-        x: -400,
+      tl.to(Array.from(topRowImages), {
+        x: -600,
         duration: 1.8,
         ease: "power1.inOut",
-        stagger: 0.12
+        stagger: 0.08
       }, "+=0.3");
 
       // Bottom row scroll right
-      tl.to(Array.from(imageContainers).slice(6), {
-        x: 400,
+      tl.to(Array.from(bottomRowImages), {
+        x: 600,
         duration: 1.8,
         ease: "power1.inOut",
-        stagger: 0.12
+        stagger: 0.08
       }, "-=1.8");
 
-      // Third horizontal scroll phase - Fast and energetic
+      // Third horizontal scroll phase - fast
       // Top row scroll right fast
-      tl.to(Array.from(imageContainers).slice(0, 6), {
-        x: 1000,
+      tl.to(Array.from(topRowImages), {
+        x: 1200,
         duration: 1.2,
         ease: "power2.in",
-        stagger: 0.08
+        stagger: 0.05
       }, "+=0.2");
 
       // Bottom row scroll left fast
-      tl.to(Array.from(imageContainers).slice(6), {
-        x: -1000,
+      tl.to(Array.from(bottomRowImages), {
+        x: -1200,
         duration: 1.2,
         ease: "power2.in",
-        stagger: 0.08
+        stagger: 0.05
       }, "-=1.2");
 
-      // Select and prepare final image (last image from the array)
+      // Select and prepare final image
       const finalImageData = images[images.length - 1];
       setFinalImage(finalImageData.src);
 
-      // Hide all scrolling images with fade out
-      tl.to(Array.from(imageContainers), {
+      // Hide all scrolling images
+      tl.to(Array.from(topRowImages), {
         opacity: 0,
-        scale: 0.3,
-        duration: 0.8,
+        scale: 0.5,
+        duration: 0.6,
         ease: "power2.out"
-      }, "+=0.5");
+      }, "+=0.3");
 
-      // Show final image with beautiful animation in center
+      tl.to(Array.from(bottomRowImages), {
+        opacity: 0,
+        scale: 0.5,
+        duration: 0.6,
+        ease: "power2.out"
+      }, "-=0.6");
+
+      // Show final image with animation
       if (finalImageRef.current) {
-        // Reset final image position and style
         gsap.set(finalImageRef.current, {
           opacity: 0,
-          scale: 0.5,
-          x: 0,
-          y: 0
+          scale: 0.5
         });
 
-        // Final image entrance animation
         tl.to(finalImageRef.current, {
           opacity: 1,
           scale: 1,
           duration: 1.2,
           ease: "back.out(1.7)"
-        }, "-=0.5");
+        }, "-=0.3");
 
-        // Add some floating animation to final image
+        // Floating animation for final image
         tl.to(finalImageRef.current, {
-          y: -10,
+          y: -15,
           duration: 1.5,
           ease: "power1.inOut",
           yoyo: true,
@@ -1005,15 +1011,15 @@ export default function HomePage(): React.JSX.Element {
                   top: '50%',
                   left: '50%',
                   transform: 'translate(-50%, -50%)',
-                  width: '350px',
-                  height: '250px',
+                  width: '400px',
+                  height: '280px',
                   borderRadius: '20px',
                   overflow: 'hidden',
                   zIndex: 15,
                   opacity: 0,
                   scale: 0.5,
-                  boxShadow: '0 0 60px rgba(204, 255, 0, 0.4)',
-                  border: '2px solid rgba(204, 255, 0, 0.3)'
+                  boxShadow: '0 0 80px rgba(204, 255, 0, 0.5)',
+                  border: '3px solid rgba(204, 255, 0, 0.4)'
                 }}
               >
                 <img
@@ -1038,7 +1044,7 @@ export default function HomePage(): React.JSX.Element {
               </div>
             )}
 
-            {/* Enhanced Horizontal Scroll Container */}
+            {/* Enhanced Horizontal Scroll Container dengan struktur yang benar */}
             <div
               ref={horizontalScrollRef}
               style={{
@@ -1050,26 +1056,29 @@ export default function HomePage(): React.JSX.Element {
                 display: 'flex',
                 flexDirection: 'column',
                 justifyContent: 'space-around',
-                padding: '2rem 0'
+                padding: '4rem 0',
+                overflow: 'hidden'
               }}
             >
               {/* Top Row - Scroll Left to Right */}
               <div style={{
                 display: 'flex',
-                gap: '2rem',
-                marginBottom: '1rem'
+                gap: '3rem',
+                marginBottom: '2rem',
+                width: 'max-content'
               }}>
                 {images.slice(0, 6).map((image) => (
                   <div
                     key={image.id}
                     style={{
-                      width: '220px',
-                      height: '140px',
-                      borderRadius: '12px',
+                      width: '250px',
+                      height: '160px',
+                      borderRadius: '15px',
                       overflow: 'hidden',
                       flexShrink: 0,
                       opacity: 0,
-                      boxShadow: '0 8px 25px rgba(0,0,0,0.5)'
+                      boxShadow: '0 10px 30px rgba(0,0,0,0.6)',
+                      border: '2px solid rgba(255,255,255,0.1)'
                     }}
                   >
                     <img
@@ -1097,20 +1106,23 @@ export default function HomePage(): React.JSX.Element {
               {/* Bottom Row - Scroll Right to Left */}
               <div style={{
                 display: 'flex',
-                gap: '2rem',
-                justifyContent: 'flex-end'
+                gap: '3rem',
+                justifyContent: 'flex-end',
+                width: 'max-content',
+                marginLeft: 'auto'
               }}>
                 {images.slice(6).map((image) => (
                   <div
                     key={image.id}
                     style={{
-                      width: '220px',
-                      height: '140px',
-                      borderRadius: '12px',
+                      width: '250px',
+                      height: '160px',
+                      borderRadius: '15px',
                       overflow: 'hidden',
                       flexShrink: 0,
                       opacity: 0,
-                      boxShadow: '0 8px 25px rgba(0,0,0,0.5)'
+                      boxShadow: '0 10px 30px rgba(0,0,0,0.6)',
+                      border: '2px solid rgba(255,255,255,0.1)'
                     }}
                   >
                     <img
