@@ -16,14 +16,15 @@ export default function HomePage(): React.JSX.Element {
     timezone: "",
     date: ""
   });
+  const [loadingProgress, setLoadingProgress] = useState(0);
   const router = useRouter();
   const timeRef = useRef<NodeJS.Timeout | null>(null);
+  const loadingRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setShowLoading(false);
-    }, 2500);
-
+    // Initialize loading animation
+    startLoadingAnimation();
+    
     // Initialize visitor time
     updateVisitorTime();
     
@@ -31,12 +32,37 @@ export default function HomePage(): React.JSX.Element {
     timeRef.current = setInterval(updateVisitorTime, 1000);
 
     return () => {
-      clearTimeout(timer);
       if (timeRef.current) {
         clearInterval(timeRef.current);
       }
+      if (loadingRef.current) {
+        clearInterval(loadingRef.current);
+      }
     };
   }, []);
+
+  const startLoadingAnimation = () => {
+    let progress = 0;
+    const duration = 2500; // 2.5 seconds
+    const steps = 100;
+    const increment = 100 / (duration / (1000 / steps));
+
+    loadingRef.current = setInterval(() => {
+      progress += increment;
+      if (progress >= 100) {
+        progress = 100;
+        setLoadingProgress(progress);
+        clearInterval(loadingRef.current as NodeJS.Timeout);
+        
+        // Delay sebelum hide loading
+        setTimeout(() => {
+          setShowLoading(false);
+        }, 500);
+      } else {
+        setLoadingProgress(Math.min(progress, 100));
+      }
+    }, 1000 / steps);
+  };
 
   const updateVisitorTime = () => {
     const now = new Date();
@@ -97,6 +123,7 @@ export default function HomePage(): React.JSX.Element {
 
   const navigateToNotes = () => {
     setShowLoading(true);
+    startLoadingAnimation();
     setTimeout(() => {
       router.push('/notes');
     }, 1000);
@@ -269,6 +296,30 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
+  // Variants untuk animasi loading
+  const loadingVariants = {
+    hidden: {
+      opacity: 0,
+      scale: 0.8
+    },
+    visible: {
+      opacity: 1,
+      scale: 1,
+      transition: {
+        duration: 0.6,
+        ease: "easeOut"
+      }
+    },
+    exit: {
+      opacity: 0,
+      scale: 1.2,
+      transition: {
+        duration: 0.5,
+        ease: "easeIn"
+      }
+    }
+  };
+
   const menuItems = [
     { 
       name: "HOME", 
@@ -287,6 +338,82 @@ export default function HomePage(): React.JSX.Element {
       delay: 0.4 
     }
   ];
+
+  // Animated Emoticon SVG Component
+  const LoadingEmoticon = () => (
+    <motion.svg
+      width="80"
+      height="80"
+      viewBox="0 0 100 100"
+      initial="hidden"
+      animate="visible"
+    >
+      {/* Face circle */}
+      <motion.circle
+        cx="50"
+        cy="50"
+        r="40"
+        fill="#CCFF00"
+        stroke="#000"
+        strokeWidth="2"
+        initial={{ scale: 0 }}
+        animate={{ scale: 1 }}
+        transition={{ duration: 0.5, delay: 0.2 }}
+      />
+      
+      {/* Eyes */}
+      <motion.circle
+        cx="35"
+        cy="40"
+        r="5"
+        fill="#000"
+        initial={{ scale: 0 }}
+        animate={{ scale: 1 }}
+        transition={{ duration: 0.3, delay: 0.5 }}
+      />
+      <motion.circle
+        cx="65"
+        cy="40"
+        r="5"
+        fill="#000"
+        initial={{ scale: 0 }}
+        animate={{ scale: 1 }}
+        transition={{ duration: 0.3, delay: 0.6 }}
+      />
+      
+      {/* Smile */}
+      <motion.path
+        d="M 35 60 Q 50 75 65 60"
+        fill="none"
+        stroke="#000"
+        strokeWidth="3"
+        strokeLinecap="round"
+        initial={{ pathLength: 0 }}
+        animate={{ pathLength: 1 }}
+        transition={{ duration: 0.8, delay: 0.7 }}
+      />
+      
+      {/* Sparkles */}
+      <motion.circle
+        cx="25"
+        cy="30"
+        r="2"
+        fill="#FF6B6B"
+        initial={{ scale: 0, opacity: 0 }}
+        animate={{ scale: [0, 1.5, 1], opacity: [0, 1, 0] }}
+        transition={{ duration: 1.5, repeat: Infinity, delay: 1 }}
+      />
+      <motion.circle
+        cx="75"
+        cy="30"
+        r="2"
+        fill="#4ECDC4"
+        initial={{ scale: 0, opacity: 0 }}
+        animate={{ scale: [0, 1.5, 1], opacity: [0, 1, 0] }}
+        transition={{ duration: 1.5, repeat: Infinity, delay: 1.2 }}
+      />
+    </motion.svg>
+  );
 
   // SVG Icons
   const HomeIcon = () => (
@@ -778,53 +905,136 @@ export default function HomePage(): React.JSX.Element {
         )}
       </AnimatePresence>
 
-      {/* Loading and Main Content */}
+      {/* Modern Loading Screen dengan Angka dan Emoticon */}
       <AnimatePresence>
         {showLoading && (
           <motion.div
             style={{
-              position: 'absolute',
+              position: 'fixed',
               top: 0,
               left: 0,
               width: '100%',
               height: '100%',
               display: 'flex',
+              flexDirection: 'column',
               justifyContent: 'center',
               alignItems: 'center',
               backgroundColor: 'black',
-              zIndex: 10
+              zIndex: 50,
+              gap: '2rem'
             }}
-            initial={{ opacity: 1 }}
-            exit={{ 
-              opacity: 0,
-              transition: { duration: 0.6 }
-            }}
+            variants={loadingVariants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
           >
+            {/* Background Pattern */}
+            <div style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              background: 'radial-gradient(circle at 30% 30%, #1a1a1a 0%, #000 70%)',
+              opacity: 0.8
+            }} />
+
+            {/* Animated Emoticon */}
+            <LoadingEmoticon />
+
+            {/* Progress Number - Gaya GSAP Modern */}
             <motion.div
               style={{
-                fontSize: '3.5rem',
+                fontSize: '4rem',
                 fontWeight: '300',
-                color: 'white',
+                color: '#CCFF00',
                 fontFamily: 'Arame Mono, monospace',
-                textAlign: 'center',
-                letterSpacing: '3px'
+                fontFeatureSettings: '"tnum"',
+                fontVariantNumeric: 'tabular-nums',
+                textShadow: '0 0 20px rgba(204, 255, 0, 0.5)'
               }}
-              initial={{ 
-                scale: 0.8, 
-                opacity: 0,
-                filter: 'blur(10px)'
+              animate={{
+                scale: [1, 1.1, 1],
+                opacity: [0.7, 1, 0.7]
               }}
-              animate={{ 
-                scale: 1,
-                opacity: 1,
-                filter: 'blur(0px)'
-              }}
-              transition={{ 
-                duration: 1.5,
-                ease: "easeOut"
+              transition={{
+                duration: 1,
+                repeat: Infinity,
+                ease: "easeInOut"
               }}
             >
-              WELCOME
+              {Math.round(loadingProgress)}%
+            </motion.div>
+
+            {/* Progress Bar */}
+            <motion.div
+              style={{
+                width: '300px',
+                height: '2px',
+                backgroundColor: 'rgba(255,255,255,0.2)',
+                borderRadius: '1px',
+                overflow: 'hidden'
+              }}
+              initial={{ scaleX: 0 }}
+              animate={{ scaleX: 1 }}
+              transition={{ duration: 0.5 }}
+            >
+              <motion.div
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  backgroundColor: '#CCFF00',
+                  transformOrigin: 'left'
+                }}
+                initial={{ scaleX: 0 }}
+                animate={{ scaleX: loadingProgress / 100 }}
+                transition={{ duration: 0.1 }}
+              />
+            </motion.div>
+
+            {/* Loading Text dengan Animasi Typing */}
+            <motion.div
+              style={{
+                fontSize: '1rem',
+                fontWeight: '300',
+                color: 'rgba(255,255,255,0.7)',
+                fontFamily: 'Arame Mono, monospace',
+                letterSpacing: '2px'
+              }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.5 }}
+            >
+              LOADING CREATIVE SPACE
+            </motion.div>
+
+            {/* Animated Dots */}
+            <motion.div
+              style={{
+                display: 'flex',
+                gap: '0.5rem'
+              }}
+            >
+              {[0, 1, 2].map((dot) => (
+                <motion.div
+                  key={dot}
+                  style={{
+                    width: '6px',
+                    height: '6px',
+                    borderRadius: '50%',
+                    backgroundColor: '#CCFF00'
+                  }}
+                  animate={{
+                    scale: [1, 1.5, 1],
+                    opacity: [0.3, 1, 0.3]
+                  }}
+                  transition={{
+                    duration: 1,
+                    repeat: Infinity,
+                    delay: dot * 0.2
+                  }}
+                />
+              ))}
             </motion.div>
           </motion.div>
         )}
