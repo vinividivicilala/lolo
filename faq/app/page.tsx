@@ -17,26 +17,11 @@ export default function HomePage(): React.JSX.Element {
     timezone: "",
     date: ""
   });
-  const [finalImage, setFinalImage] = useState<string | null>(null);
   const router = useRouter();
   const timeRef = useRef<NodeJS.Timeout | null>(null);
   const loadingRef = useRef<HTMLDivElement>(null);
-  const verticalScrollRef = useRef<HTMLDivElement>(null);
-  const finalImageRef = useRef<HTMLDivElement>(null);
-
-  // Gunakan foto 5.jpg untuk semua gambar
-  const images = [
-    { id: 1, src: "/images/5.jpg", alt: "Photo 1" },
-    { id: 2, src: "/images/5.jpg", alt: "Photo 2" },
-    { id: 3, src: "/images/5.jpg", alt: "Photo 3" },
-    { id: 4, src: "/images/5.jpg", alt: "Photo 4" },
-    { id: 5, src: "/images/5.jpg", alt: "Photo 5" },
-    { id: 6, src: "/images/5.jpg", alt: "Photo 6" },
-    { id: 7, src: "/images/5.jpg", alt: "Photo 7" },
-    { id: 8, src: "/images/5.jpg", alt: "Photo 8" },
-    { id: 9, src: "/images/5.jpg", alt: "Photo 9" },
-    { id: 10, src: "/images/5.jpg", alt: "Photo 10" }
-  ];
+  const numberRef = useRef<HTMLDivElement>(null);
+  const progressRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (showLoading) {
@@ -71,117 +56,75 @@ export default function HomePage(): React.JSX.Element {
       }
     );
 
-    // Enhanced VERTICAL scroll animation untuk satu baris portrait images
-    if (verticalScrollRef.current) {
-      const imageContainers = verticalScrollRef.current.children;
-      
-      // Set initial positions untuk semua images - BLUR dan di bawah layar
-      gsap.set(Array.from(imageContainers), {
-        y: 800, // Mulai dari bawah
+    // Percentage counter animation
+    if (numberRef.current && progressRef.current) {
+      // Reset initial state
+      gsap.set(numberRef.current, {
         opacity: 0,
-        scale: 1,
-        filter: "blur(15px)"
+        scale: 0.8
       });
 
-      // ANIMASI 1: MASUK DARI BAWAH dengan blur -> clear
-      tl.fromTo(Array.from(imageContainers),
-        {
-          y: 800,
-          opacity: 0,
-          scale: 1,
-          filter: "blur(15px)"
-        },
-        {
-          y: 0,
-          opacity: 1,
-          scale: 1,
-          filter: "blur(0px)",
-          duration: 1.5,
-          stagger: 0.08, // Stagger cepat untuk efek berurutan
-          ease: "power2.out"
-        },
-        "+=0.5"
-      );
+      gsap.set(progressRef.current, {
+        scaleX: 0,
+        opacity: 0
+      });
 
-      // SCROLL VERTICAL CEPAT 1: Scroll ke atas
-      tl.to(Array.from(imageContainers), {
-        y: -1200,
-        duration: 2,
-        ease: "power1.inOut",
-        stagger: 0.05
-      }, "+=0.3");
-
-      // RESET POSISI untuk loop berikutnya
-      tl.set(Array.from(imageContainers), {
-        y: 1000, // Reset ke bawah
-        opacity: 1
-      }, "+=0.2");
-
-      // SCROLL VERTICAL CEPAT 2: Scroll ke atas lebih cepat
-      tl.to(Array.from(imageContainers), {
-        y: -1500,
-        duration: 1.5,
-        ease: "power2.in",
-        stagger: 0.03
-      }, "+=0.1");
-
-      // RESET POSISI untuk loop berikutnya
-      tl.set(Array.from(imageContainers), {
-        y: 1200, // Reset ke bawah
-        opacity: 1
-      }, "+=0.2");
-
-      // SCROLL VERTICAL CEPAT 3: Scroll ke atas paling cepat
-      tl.to(Array.from(imageContainers), {
-        y: -1800,
-        duration: 1.2,
-        ease: "power3.in",
-        stagger: 0.02
-      }, "+=0.1");
-
-      // FADE OUT semua gambar scroll
-      tl.to(Array.from(imageContainers), {
-        opacity: 0,
-        scale: 0.7,
+      // Percentage number animation
+      tl.to(numberRef.current, {
+        opacity: 1,
+        scale: 1,
         duration: 0.8,
         ease: "power2.out"
       }, "+=0.3");
 
-      // Select and prepare final image
-      const finalImageData = images[images.length - 1];
-      setFinalImage(finalImageData.src);
+      // Animate percentage from 0 to 100
+      let percentage = 0;
+      const updatePercentage = () => {
+        if (percentage <= 100) {
+          numberRef.current!.textContent = `${percentage}%`;
+          percentage += 2;
+        }
+      };
 
-      // Show final image dengan animasi dari blur ke clear
-      if (finalImageRef.current) {
-        gsap.set(finalImageRef.current, {
-          opacity: 0,
-          scale: 0.8,
-          filter: "blur(20px)"
-        });
+      // Fast percentage counting
+      tl.to({}, {
+        duration: 0.03,
+        onRepeat: updatePercentage,
+        repeat: 50
+      });
 
-        // Final image entrance animation - dari blur ke clear
-        tl.to(finalImageRef.current, {
-          opacity: 1,
-          scale: 1,
-          filter: "blur(0px)",
-          duration: 1.8,
-          ease: "power3.out"
-        }, "-=0.5");
+      // Progress bar animation
+      tl.to(progressRef.current, {
+        opacity: 1,
+        scaleX: 1,
+        duration: 2,
+        ease: "power2.inOut"
+      }, "-=1.5");
 
-        // Floating animation untuk final image
-        tl.to(finalImageRef.current, {
-          y: -15,
-          duration: 2.5,
-          ease: "sine.inOut",
-          yoyo: true,
-          repeat: -1
-        });
-      }
+      // Final percentage set to 100%
+      tl.to(numberRef.current, {
+        textContent: "100%",
+        duration: 0.3,
+        ease: "power2.out"
+      }, "-=0.5");
+
+      // Scale up effect at completion
+      tl.to(numberRef.current, {
+        scale: 1.2,
+        duration: 0.3,
+        ease: "power2.out"
+      });
+
+      tl.to(numberRef.current, {
+        scale: 1,
+        duration: 0.2,
+        ease: "power2.in"
+      });
     }
 
     // Final exit animation
     tl.to({}, {
-      duration: 2,
+      duration: 0.5,
       onComplete: () => {
         gsap.to(loadingRef.current, {
           opacity: 0,
@@ -933,7 +876,7 @@ export default function HomePage(): React.JSX.Element {
         )}
       </AnimatePresence>
 
-      {/* Enhanced GSAP Loading Screen dengan VERTICAL Scroll Satu Baris */}
+      {/* GSAP Loading Screen dengan Percentage Counter seperti rzkyprasetyo */}
       <AnimatePresence>
         {showLoading && (
           <div
@@ -947,180 +890,155 @@ export default function HomePage(): React.JSX.Element {
               backgroundColor: 'black',
               zIndex: 50,
               display: 'flex',
+              flexDirection: 'column',
               justifyContent: 'center',
               alignItems: 'center',
               overflow: 'hidden'
             }}
           >
-            {/* Final Image Display - CENTER */}
-            {finalImage && (
-              <div
-                ref={finalImageRef}
-                style={{
-                  position: 'absolute',
-                  top: '50%',
-                  left: '50%',
-                  transform: 'translate(-50%, -50%)',
-                  width: '280px', // Portrait size
-                  height: '400px', // Portrait size
-                  borderRadius: '15px',
-                  overflow: 'hidden',
-                  zIndex: 15,
-                  opacity: 0,
-                  scale: 0.8,
-                  boxShadow: '0 0 60px rgba(204, 255, 0, 0.5)',
-                  border: '2px solid rgba(204, 255, 0, 0.3)'
-                }}
-              >
-                <img
-                  src={finalImage}
-                  alt="Final Preview"
-                  style={{
-                    width: '100%',
-                    height: '100%',
-                    objectFit: 'cover'
-                  }}
-                  onError={(e) => {
-                    e.currentTarget.style.backgroundColor = '#333';
-                    e.currentTarget.style.display = 'flex';
-                    e.currentTarget.style.justifyContent = 'center';
-                    e.currentTarget.style.alignItems = 'center';
-                    e.currentTarget.style.color = '#CCFF00';
-                    e.currentTarget.style.fontFamily = 'Arame Mono, monospace';
-                    e.currentTarget.style.fontSize = '1.2rem';
-                    e.currentTarget.innerHTML = 'Final Image';
-                  }}
-                />
-              </div>
-            )}
-
-            {/* VERTICAL Scroll Container untuk SATU BARIS Portrait Images */}
+            {/* Percentage Counter - Center */}
             <div
-              ref={verticalScrollRef}
+              ref={numberRef}
               style={{
-                position: 'absolute',
-                top: '50%',
-                left: '50%',
-                transform: 'translate(-50%, -50%)',
-                display: 'flex',
-                gap: '2rem',
-                width: 'max-content',
-                height: 'max-content'
+                fontSize: '5rem',
+                fontWeight: '300',
+                color: 'white',
+                fontFamily: 'Arame Mono, monospace',
+                fontFeatureSettings: '"tnum"',
+                fontVariantNumeric: 'tabular-nums',
+                letterSpacing: '-2px',
+                marginBottom: '3rem',
+                opacity: 0
               }}
             >
-              {images.map((image) => (
-                <div
-                  key={image.id}
-                  style={{
-                    width: '180px', // Portrait width
-                    height: '270px', // Portrait height
-                    borderRadius: '10px',
-                    overflow: 'hidden',
-                    flexShrink: 0,
-                    opacity: 0,
-                    boxShadow: '0 8px 25px rgba(0,0,0,0.7)',
-                    border: '1px solid rgba(255,255,255,0.1)'
-                  }}
-                >
-                  <img
-                    src={image.src}
-                    alt={image.alt}
-                    style={{
-                      width: '100%',
-                      height: '100%',
-                      objectFit: 'cover'
-                    }}
-                    onError={(e) => {
-                      e.currentTarget.style.backgroundColor = '#222';
-                      e.currentTarget.style.display = 'flex';
-                      e.currentTarget.style.justifyContent = 'center';
-                      e.currentTarget.style.alignItems = 'center';
-                      e.currentTarget.style.color = '#CCFF00';
-                      e.currentTarget.style.fontFamily = 'Arame Mono, monospace';
-                      e.currentTarget.innerHTML = `Photo ${image.id}`;
-                    }}
-                  />
-                </div>
-              ))}
+              0%
             </div>
+
+            {/* Progress Bar */}
+            <div
+              style={{
+                width: '300px',
+                height: '2px',
+                backgroundColor: 'rgba(255,255,255,0.2)',
+                borderRadius: '1px',
+                overflow: 'hidden',
+                position: 'relative'
+              }}
+            >
+              <div
+                ref={progressRef}
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  backgroundColor: 'white',
+                  transformOrigin: 'left center',
+                  transform: 'scaleX(0)',
+                  opacity: 0
+                }}
+              />
+            </div>
+
+            {/* Loading Text */}
+            <motion.div
+              style={{
+                fontSize: '0.9rem',
+                fontWeight: '300',
+                color: 'rgba(255,255,255,0.6)',
+                fontFamily: 'Arame Mono, monospace',
+                letterSpacing: '1px',
+                marginTop: '2rem',
+                textTransform: 'uppercase'
+              }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.5, duration: 0.5 }}
+            >
+              Loading
+            </motion.div>
           </div>
         )}
       </AnimatePresence>
 
-      {/* Main Content */}
-      {!showLoading && (
-        <div style={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: '2rem',
-          textAlign: 'center',
-          padding: '2rem',
-          maxWidth: '800px',
-          margin: '0 auto'
-        }}>
-          {/* Main Title */}
-          <motion.h1
+      {/* Main Content After Loading */}
+      <AnimatePresence>
+        {!showLoading && (
+          <motion.div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '1.5rem',
+              padding: '2rem',
+              zIndex: 10
+            }}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            style={{
-              fontSize: '3.5rem',
-              fontWeight: '300',
-              color: 'white',
-              margin: 0,
-              fontFamily: 'Arame Mono, monospace',
-              letterSpacing: '-1px'
-            }}
+            transition={{ duration: 0.6 }}
           >
-            Welcome to My Portfolio
-          </motion.h1>
+            <motion.h1
+              style={{
+                fontSize: '2.5rem',
+                fontWeight: '300',
+                color: 'white',
+                fontFamily: 'Arame Mono, monospace',
+                textAlign: 'center',
+                marginBottom: '0.5rem',
+                letterSpacing: '2px'
+              }}
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.2, duration: 0.5 }}
+            >
+              WELCOME
+            </motion.h1>
+            
+            <motion.p
+              style={{
+                fontSize: '1rem',
+                fontWeight: '300',
+                color: 'rgba(255,255,255,0.7)',
+                fontFamily: 'Arame Mono, monospace',
+                textAlign: 'center',
+                maxWidth: '400px',
+                lineHeight: '1.5',
+                letterSpacing: '0.5px'
+              }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.4, duration: 0.5 }}
+            >
+              Your space for creative thoughts and ideas
+            </motion.p>
 
-          {/* Subtitle */}
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.4 }}
-            style={{
-              fontSize: '1.2rem',
-              fontWeight: '300',
-              color: 'rgba(255,255,255,0.7)',
-              margin: 0,
-              fontFamily: 'Arame Mono, monospace',
-              lineHeight: 1.6
-            }}
-          >
-            Creative developer & designer crafting digital experiences
-          </motion.p>
-
-          {/* CTA Button */}
-          <motion.button
-            onClick={navigateToNotes}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.6 }}
-            whileHover={{ scale: 1.05, backgroundColor: '#CCFF00', color: 'black' }}
-            whileTap={{ scale: 0.95 }}
-            style={{
-              padding: '1rem 2.5rem',
-              fontSize: '1.1rem',
-              fontWeight: '300',
-              color: 'white',
-              backgroundColor: 'transparent',
-              border: '1px solid rgba(255,255,255,0.3)',
-              borderRadius: '30px',
-              cursor: 'pointer',
-              fontFamily: 'Arame Mono, monospace',
-              letterSpacing: '0.5px',
-              transition: 'all 0.3s ease',
-              marginTop: '1rem'
-            }}
-          >
-            View My Work
-          </motion.button>
-        </div>
-      )}
+            <motion.button
+              onClick={navigateToNotes}
+              style={{
+                padding: '0.8rem 1.8rem',
+                fontSize: '0.9rem',
+                fontWeight: '300',
+                color: 'black',
+                backgroundColor: 'white',
+                border: 'none',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                fontFamily: 'Arame Mono, monospace',
+                letterSpacing: '1px'
+              }}
+              whileHover={{ 
+                scale: 1.03,
+                backgroundColor: '#f8f8f8',
+                transition: { duration: 0.2 }
+              }}
+              whileTap={{ scale: 0.97 }}
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.6, duration: 0.5 }}
+            >
+              VIEW NOTES
+            </motion.button>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
