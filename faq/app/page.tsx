@@ -11,11 +11,10 @@ export default function HomePage(): React.JSX.Element {
   const [isCloseHovered, setIsCloseHovered] = useState(false);
   const [menuText, setMenuText] = useState("MENU");
   const [isAnimating, setIsAnimating] = useState(false);
-  const [currentTime, setCurrentTime] = useState({
-    jakarta: "",
-    tokyo: "",
-    london: "",
-    newyork: ""
+  const [visitorTime, setVisitorTime] = useState({
+    time: "",
+    timezone: "",
+    date: ""
   });
   const router = useRouter();
   const timeRef = useRef<NodeJS.Timeout | null>(null);
@@ -25,11 +24,11 @@ export default function HomePage(): React.JSX.Element {
       setShowLoading(false);
     }, 2500);
 
-    // Initialize time
-    updateAllTimes();
+    // Initialize visitor time
+    updateVisitorTime();
     
     // Update time every second
-    timeRef.current = setInterval(updateAllTimes, 1000);
+    timeRef.current = setInterval(updateVisitorTime, 1000);
 
     return () => {
       clearTimeout(timer);
@@ -39,36 +38,61 @@ export default function HomePage(): React.JSX.Element {
     };
   }, []);
 
-  const updateAllTimes = () => {
+  const updateVisitorTime = () => {
     const now = new Date();
     
-    // Jakarta time (UTC+7)
-    const jakartaTime = new Date(now.getTime() + (7 * 60 * 60 * 1000));
+    // Get visitor's timezone automatically
+    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
     
-    // Tokyo time (UTC+9)
-    const tokyoTime = new Date(now.getTime() + (9 * 60 * 60 * 1000));
-    
-    // London time (UTC+0/+1)
-    const londonTime = new Date(now.getTime());
-    
-    // New York time (UTC-5/-4)
-    const newyorkTime = new Date(now.getTime() - (5 * 60 * 60 * 1000));
-
-    setCurrentTime({
-      jakarta: formatTime(jakartaTime),
-      tokyo: formatTime(tokyoTime),
-      london: formatTime(londonTime),
-      newyork: formatTime(newyorkTime)
-    });
-  };
-
-  const formatTime = (date: Date): string => {
-    return date.toLocaleTimeString('en-US', {
+    // Format time based on visitor's timezone
+    const time = now.toLocaleTimeString('en-US', {
+      timeZone: timezone,
       hour12: false,
       hour: '2-digit',
       minute: '2-digit',
       second: '2-digit'
     });
+
+    // Format date
+    const date = now.toLocaleDateString('en-US', {
+      timeZone: timezone,
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+
+    // Get timezone abbreviation (WIB, WITA, WIT, etc)
+    const timezoneAbbr = getTimezoneAbbreviation(timezone);
+
+    setVisitorTime({
+      time: time,
+      timezone: timezoneAbbr,
+      date: date
+    });
+  };
+
+  const getTimezoneAbbreviation = (timezone: string): string => {
+    const timezoneMap: { [key: string]: string } = {
+      'Asia/Jakarta': 'WIB',
+      'Asia/Pontianak': 'WIB',
+      'Asia/Makassar': 'WITA',
+      'Asia/Jayapura': 'WIT',
+      'Asia/Singapore': 'SGT',
+      'Asia/Tokyo': 'JST',
+      'Asia/Seoul': 'KST',
+      'Asia/Shanghai': 'CST',
+      'Asia/Bangkok': 'ICT',
+      'Asia/Kolkata': 'IST',
+      'Europe/London': 'GMT',
+      'Europe/Paris': 'CET',
+      'America/New_York': 'EST',
+      'America/Los_Angeles': 'PST',
+      'America/Chicago': 'CST',
+      'Australia/Sydney': 'AEST'
+    };
+
+    return timezoneMap[timezone] || timezone.split('/')[1] || 'LOCAL';
   };
 
   const navigateToNotes = () => {
@@ -230,16 +254,16 @@ export default function HomePage(): React.JSX.Element {
   const timeVariants = {
     hidden: {
       opacity: 0,
-      x: -20,
+      y: -20,
       transition: {
-        duration: 0.5
+        duration: 0.6
       }
     },
     visible: {
       opacity: 1,
-      x: 0,
+      y: 0,
       transition: {
-        duration: 0.5,
+        duration: 0.6,
         ease: "easeOut"
       }
     }
@@ -484,126 +508,68 @@ export default function HomePage(): React.JSX.Element {
                 PORTFOLIO
               </motion.div>
 
-              {/* Real-time Clock Section - Bottom Left */}
+              {/* Visitor Time Display - TOP CENTER */}
               <motion.div
                 style={{
                   position: 'absolute',
-                  left: '2rem',
-                  bottom: '2rem',
+                  top: '2rem',
+                  left: '50%',
+                  transform: 'translateX(-50%)',
                   display: 'flex',
                   flexDirection: 'column',
-                  gap: '0.5rem'
+                  alignItems: 'center',
+                  gap: '0.3rem'
                 }}
                 variants={timeVariants}
                 initial="hidden"
                 animate="visible"
                 exit="hidden"
               >
-                {/* Jakarta */}
+                {/* Time - Font Besar */}
                 <motion.div
                   style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '1rem',
-                    fontSize: '0.9rem',
-                    fontWeight: '300',
-                    color: 'rgba(0,0,0,0.8)',
-                    fontFamily: 'Arame Mono, monospace'
-                  }}
-                  whileHover={{ 
-                    color: '#000',
-                    x: 5,
-                    transition: { duration: 0.2 }
-                  }}
-                >
-                  <span style={{ minWidth: '80px' }}>JAKARTA</span>
-                  <span style={{ 
+                    fontSize: '2.5rem',
+                    fontWeight: '400',
+                    color: 'rgba(0,0,0,0.9)',
+                    fontFamily: 'Arame Mono, monospace',
                     fontFeatureSettings: '"tnum"',
                     fontVariantNumeric: 'tabular-nums',
-                    minWidth: '70px'
-                  }}>
-                    {currentTime.jakarta}
-                  </span>
+                    letterSpacing: '2px'
+                  }}
+                  animate={{
+                    scale: [1, 1.02, 1],
+                    transition: {
+                      duration: 1,
+                      repeat: Infinity,
+                      repeatType: "reverse"
+                    }
+                  }}
+                >
+                  {visitorTime.time}
                 </motion.div>
 
-                {/* Tokyo */}
+                {/* Timezone & Date */}
                 <motion.div
                   style={{
                     display: 'flex',
                     alignItems: 'center',
                     gap: '1rem',
                     fontSize: '0.9rem',
-                    fontWeight: '300',
+                    fontWeight: '400',
                     color: 'rgba(0,0,0,0.8)',
                     fontFamily: 'Arame Mono, monospace'
                   }}
-                  whileHover={{ 
-                    color: '#000',
-                    x: 5,
-                    transition: { duration: 0.2 }
-                  }}
                 >
-                  <span style={{ minWidth: '80px' }}>TOKYO</span>
                   <span style={{ 
-                    fontFeatureSettings: '"tnum"',
-                    fontVariantNumeric: 'tabular-nums',
-                    minWidth: '70px'
+                    backgroundColor: 'rgba(0,0,0,0.1)',
+                    padding: '0.2rem 0.6rem',
+                    borderRadius: '12px',
+                    fontWeight: '500'
                   }}>
-                    {currentTime.tokyo}
+                    {visitorTime.timezone}
                   </span>
-                </motion.div>
-
-                {/* London */}
-                <motion.div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '1rem',
-                    fontSize: '0.9rem',
-                    fontWeight: '300',
-                    color: 'rgba(0,0,0,0.8)',
-                    fontFamily: 'Arame Mono, monospace'
-                  }}
-                  whileHover={{ 
-                    color: '#000',
-                    x: 5,
-                    transition: { duration: 0.2 }
-                  }}
-                >
-                  <span style={{ minWidth: '80px' }}>LONDON</span>
-                  <span style={{ 
-                    fontFeatureSettings: '"tnum"',
-                    fontVariantNumeric: 'tabular-nums',
-                    minWidth: '70px'
-                  }}>
-                    {currentTime.london}
-                  </span>
-                </motion.div>
-
-                {/* New York */}
-                <motion.div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '1rem',
-                    fontSize: '0.9rem',
-                    fontWeight: '300',
-                    color: 'rgba(0,0,0,0.8)',
-                    fontFamily: 'Arame Mono, monospace'
-                  }}
-                  whileHover={{ 
-                    color: '#000',
-                    x: 5,
-                    transition: { duration: 0.2 }
-                  }}
-                >
-                  <span style={{ minWidth: '80px' }}>NEW YORK</span>
-                  <span style={{ 
-                    fontFeatureSettings: '"tnum"',
-                    fontVariantNumeric: 'tabular-nums',
-                    minWidth: '70px'
-                  }}>
-                    {currentTime.newyork}
+                  <span>
+                    {visitorTime.date}
                   </span>
                 </motion.div>
               </motion.div>
@@ -614,7 +580,8 @@ export default function HomePage(): React.JSX.Element {
                 display: 'flex',
                 flexDirection: 'column',
                 justifyContent: 'center',
-                paddingLeft: '2rem'
+                paddingLeft: '2rem',
+                marginTop: '6rem' // Memberi space untuk waktu di atas
               }}>
                 {/* Menu Items with very tight spacing */}
                 <div style={{
