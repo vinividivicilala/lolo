@@ -17,12 +17,10 @@ export default function HomePage(): React.JSX.Element {
     timezone: "",
     date: ""
   });
-  const [randomNumber, setRandomNumber] = useState("0000");
   const [finalImage, setFinalImage] = useState<string | null>(null);
   const router = useRouter();
   const timeRef = useRef<NodeJS.Timeout | null>(null);
   const loadingRef = useRef<HTMLDivElement>(null);
-  const numberRef = useRef<HTMLDivElement>(null);
   const horizontalScrollRef = useRef<HTMLDivElement>(null);
   const finalImageRef = useRef<HTMLDivElement>(null);
 
@@ -75,50 +73,6 @@ export default function HomePage(): React.JSX.Element {
       }
     );
 
-    // Single random number animation
-    if (numberRef.current) {
-      // Initial position - center
-      gsap.set(numberRef.current, {
-        scale: 0,
-        rotation: 0,
-        opacity: 0
-      });
-
-      // Big entrance animation
-      tl.fromTo(numberRef.current,
-        {
-          scale: 0,
-          opacity: 0,
-        },
-        {
-          scale: 1,
-          opacity: 1,
-          duration: 1,
-          ease: "back.out(1.7)"
-        }
-      );
-
-      // Continuous rapid random number changes
-      const changeNumber = () => {
-        const newNumber = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
-        setRandomNumber(newNumber);
-      };
-
-      // Very fast number changes (50 changes in 2 seconds)
-      tl.to({}, {
-        duration: 0.04, // Very fast changes
-        onRepeat: changeNumber,
-        repeat: 50
-      });
-
-      // Final number and scaling up
-      tl.to(numberRef.current, {
-        scale: 1.3,
-        duration: 0.3,
-        ease: "power2.out"
-      });
-    }
-
     // Enhanced Horizontal scroll animation for images
     if (horizontalScrollRef.current) {
       const imageContainers = horizontalScrollRef.current.children;
@@ -129,22 +83,22 @@ export default function HomePage(): React.JSX.Element {
         scale: 0.8
       });
 
-      // Set initial positions for top row (start from top)
+      // Set initial positions for top row (start from top - outside viewport)
       gsap.set(Array.from(imageContainers).slice(0, 6), {
-        y: -1000,
-        x: 0
+        y: -800,
+        x: () => gsap.utils.random(-500, 500) // Random horizontal position
       });
 
-      // Set initial positions for bottom row (start from bottom)
+      // Set initial positions for bottom row (start from bottom - outside viewport)
       gsap.set(Array.from(imageContainers).slice(6), {
-        y: 1000,
-        x: 0
+        y: 800,
+        x: () => gsap.utils.random(-500, 500) // Random horizontal position
       });
 
       // Staggered entrance for top row (from top to center)
       tl.fromTo(Array.from(imageContainers).slice(0, 6),
         {
-          y: -1000,
+          y: -800,
           opacity: 0,
           scale: 0.8
         },
@@ -152,17 +106,17 @@ export default function HomePage(): React.JSX.Element {
           y: 0,
           opacity: 1,
           scale: 1,
-          duration: 1.2,
-          stagger: 0.15,
+          duration: 1.5,
+          stagger: 0.2,
           ease: "power2.out"
         },
-        "-=0.8"
+        "+=0.5"
       );
 
       // Staggered entrance for bottom row (from bottom to center)
       tl.fromTo(Array.from(imageContainers).slice(6),
         {
-          y: 1000,
+          y: 800,
           opacity: 0,
           scale: 0.8
         },
@@ -170,83 +124,103 @@ export default function HomePage(): React.JSX.Element {
           y: 0,
           opacity: 1,
           scale: 1,
-          duration: 1.2,
-          stagger: 0.15,
+          duration: 1.5,
+          stagger: 0.2,
           ease: "power2.out"
         },
-        "-=1"
+        "-=1.2"
       );
 
-      // First horizontal scroll phase
+      // First horizontal scroll phase - Slow and smooth
       // Top row scroll right
       tl.to(Array.from(imageContainers).slice(0, 6), {
-        x: 800,
-        duration: 1.8,
+        x: 600,
+        duration: 2,
         ease: "power1.inOut",
-        stagger: 0.1
-      }, "+=0.3");
+        stagger: 0.15
+      }, "+=0.5");
 
       // Bottom row scroll left
       tl.to(Array.from(imageContainers).slice(6), {
-        x: -800,
-        duration: 1.8,
+        x: -600,
+        duration: 2,
         ease: "power1.inOut",
-        stagger: 0.1
-      }, "-=1.8");
+        stagger: 0.15
+      }, "-=2");
 
-      // Second horizontal scroll phase - reverse direction
+      // Second horizontal scroll phase - Reverse direction
       // Top row scroll left
       tl.to(Array.from(imageContainers).slice(0, 6), {
-        x: -600,
-        duration: 1.5,
+        x: -400,
+        duration: 1.8,
         ease: "power1.inOut",
-        stagger: 0.08
-      }, "+=0.2");
+        stagger: 0.12
+      }, "+=0.3");
 
       // Bottom row scroll right
       tl.to(Array.from(imageContainers).slice(6), {
-        x: 600,
-        duration: 1.5,
+        x: 400,
+        duration: 1.8,
         ease: "power1.inOut",
-        stagger: 0.08
-      }, "-=1.5");
+        stagger: 0.12
+      }, "-=1.8");
 
-      // Final horizontal scroll phase - fast
+      // Third horizontal scroll phase - Fast and energetic
       // Top row scroll right fast
       tl.to(Array.from(imageContainers).slice(0, 6), {
-        x: 1200,
+        x: 1000,
         duration: 1.2,
         ease: "power2.in",
-        stagger: 0.05
-      }, "+=0.1");
+        stagger: 0.08
+      }, "+=0.2");
 
       // Bottom row scroll left fast
       tl.to(Array.from(imageContainers).slice(6), {
-        x: -1200,
+        x: -1000,
         duration: 1.2,
         ease: "power2.in",
-        stagger: 0.05
+        stagger: 0.08
       }, "-=1.2");
 
       // Select and prepare final image (last image from the array)
       const finalImageData = images[images.length - 1];
       setFinalImage(finalImageData.src);
 
-      // Hide all images except the final one
+      // Hide all scrolling images with fade out
       tl.to(Array.from(imageContainers), {
         opacity: 0,
-        scale: 0.5,
-        duration: 0.5,
+        scale: 0.3,
+        duration: 0.8,
         ease: "power2.out"
-      }, "+=0.3");
+      }, "+=0.5");
 
-      // Show final image with animation
-      tl.to(finalImageRef.current, {
-        opacity: 1,
-        scale: 1,
-        duration: 1,
-        ease: "back.out(1.5)"
-      }, "-=0.3");
+      // Show final image with beautiful animation in center
+      if (finalImageRef.current) {
+        // Reset final image position and style
+        gsap.set(finalImageRef.current, {
+          opacity: 0,
+          scale: 0.5,
+          x: 0,
+          y: 0
+        });
+
+        // Final image entrance animation
+        tl.to(finalImageRef.current, {
+          opacity: 1,
+          scale: 1,
+          duration: 1.2,
+          ease: "back.out(1.7)"
+        }, "-=0.5");
+
+        // Add some floating animation to final image
+        tl.to(finalImageRef.current, {
+          y: -10,
+          duration: 1.5,
+          ease: "power1.inOut",
+          yoyo: true,
+          repeat: 1
+        }, "-=1");
+      }
     }
 
     // Final exit animation
@@ -1022,27 +996,7 @@ export default function HomePage(): React.JSX.Element {
               overflow: 'hidden'
             }}
           >
-            {/* Single Random Number - Center */}
-            <div
-              ref={numberRef}
-              style={{
-                position: 'absolute',
-                top: '50%',
-                left: '50%',
-                transform: 'translate(-50%, -50%)',
-                fontSize: '6rem',
-                fontWeight: '900',
-                color: '#CCFF00',
-                fontFamily: 'Arame Mono, monospace',
-                textShadow: '0 0 30px rgba(204, 255, 0, 0.8)',
-                zIndex: 10,
-                opacity: 0
-              }}
-            >
-              {randomNumber}
-            </div>
-
-            {/* Final Image Display */}
+            {/* Final Image Display - CENTER */}
             {finalImage && (
               <div
                 ref={finalImageRef}
@@ -1051,14 +1005,15 @@ export default function HomePage(): React.JSX.Element {
                   top: '50%',
                   left: '50%',
                   transform: 'translate(-50%, -50%)',
-                  width: '300px',
-                  height: '200px',
-                  borderRadius: '15px',
+                  width: '350px',
+                  height: '250px',
+                  borderRadius: '20px',
                   overflow: 'hidden',
                   zIndex: 15,
                   opacity: 0,
-                  scale: 0.8,
-                  boxShadow: '0 0 50px rgba(204, 255, 0, 0.3)'
+                  scale: 0.5,
+                  boxShadow: '0 0 60px rgba(204, 255, 0, 0.4)',
+                  border: '2px solid rgba(204, 255, 0, 0.3)'
                 }}
               >
                 <img
@@ -1074,7 +1029,9 @@ export default function HomePage(): React.JSX.Element {
                     e.currentTarget.style.display = 'flex';
                     e.currentTarget.style.justifyContent = 'center';
                     e.currentTarget.style.alignItems = 'center';
-                    e.currentTarget.style.color = '#666';
+                    e.currentTarget.style.color: '#CCFF00';
+                    e.currentTarget.style.fontFamily = 'Arame Mono, monospace';
+                    e.currentTarget.style.fontSize = '1.2rem';
                     e.currentTarget.innerHTML = 'Final Image';
                   }}
                 />
@@ -1106,12 +1063,13 @@ export default function HomePage(): React.JSX.Element {
                   <div
                     key={image.id}
                     style={{
-                      width: '200px',
-                      height: '120px',
-                      borderRadius: '10px',
+                      width: '220px',
+                      height: '140px',
+                      borderRadius: '12px',
                       overflow: 'hidden',
                       flexShrink: 0,
-                      opacity: 0
+                      opacity: 0,
+                      boxShadow: '0 8px 25px rgba(0,0,0,0.5)'
                     }}
                   >
                     <img
@@ -1123,12 +1081,13 @@ export default function HomePage(): React.JSX.Element {
                         objectFit: 'cover'
                       }}
                       onError={(e) => {
-                        e.currentTarget.style.backgroundColor = '#333';
+                        e.currentTarget.style.backgroundColor = '#222';
                         e.currentTarget.style.display = 'flex';
                         e.currentTarget.style.justifyContent = 'center';
                         e.currentTarget.style.alignItems = 'center';
-                        e.currentTarget.style.color = '#666';
-                        e.currentTarget.innerHTML = 'Image';
+                        e.currentTarget.style.color = '#CCFF00';
+                        e.currentTarget.style.fontFamily = 'Arame Mono, monospace';
+                        e.currentTarget.innerHTML = `Photo ${image.id}`;
                       }}
                     />
                   </div>
@@ -1145,12 +1104,13 @@ export default function HomePage(): React.JSX.Element {
                   <div
                     key={image.id}
                     style={{
-                      width: '200px',
-                      height: '120px',
-                      borderRadius: '10px',
+                      width: '220px',
+                      height: '140px',
+                      borderRadius: '12px',
                       overflow: 'hidden',
                       flexShrink: 0,
-                      opacity: 0
+                      opacity: 0,
+                      boxShadow: '0 8px 25px rgba(0,0,0,0.5)'
                     }}
                   >
                     <img
@@ -1162,12 +1122,13 @@ export default function HomePage(): React.JSX.Element {
                         objectFit: 'cover'
                       }}
                       onError={(e) => {
-                        e.currentTarget.style.backgroundColor = '#333';
+                        e.currentTarget.style.backgroundColor = '#222';
                         e.currentTarget.style.display = 'flex';
                         e.currentTarget.style.justifyContent = 'center';
                         e.currentTarget.style.alignItems = 'center';
-                        e.currentTarget.style.color = '#666';
-                        e.currentTarget.innerHTML = 'Image';
+                        e.currentTarget.style.color = '#CCFF00';
+                        e.currentTarget.style.fontFamily = 'Arame Mono, monospace';
+                        e.currentTarget.innerHTML = `Photo ${image.id}`;
                       }}
                     />
                   </div>
