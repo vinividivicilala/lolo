@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
+import { gsap } from "gsap";
 
 export default function HomePage(): React.JSX.Element {
   const [showLoading, setShowLoading] = useState(true);
@@ -16,15 +17,18 @@ export default function HomePage(): React.JSX.Element {
     timezone: "",
     date: ""
   });
-  const [loadingProgress, setLoadingProgress] = useState(0);
   const router = useRouter();
   const timeRef = useRef<NodeJS.Timeout | null>(null);
-  const loadingRef = useRef<NodeJS.Timeout | null>(null);
+  const loadingRef = useRef<HTMLDivElement>(null);
+  const numberRef = useRef<HTMLDivElement>(null);
+  const emoticonRef = useRef<SVGSVGElement>(null);
+  const photoRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Initialize loading animation
-    startLoadingAnimation();
-    
+    if (showLoading) {
+      startGSAPLoading();
+    }
+
     // Initialize visitor time
     updateVisitorTime();
     
@@ -35,33 +39,100 @@ export default function HomePage(): React.JSX.Element {
       if (timeRef.current) {
         clearInterval(timeRef.current);
       }
-      if (loadingRef.current) {
-        clearInterval(loadingRef.current);
-      }
     };
-  }, []);
+  }, [showLoading]);
 
-  const startLoadingAnimation = () => {
-    let progress = 0;
-    const duration = 2500; // 2.5 seconds
-    const steps = 100;
-    const increment = 100 / (duration / (1000 / steps));
-
-    loadingRef.current = setInterval(() => {
-      progress += increment;
-      if (progress >= 100) {
-        progress = 100;
-        setLoadingProgress(progress);
-        clearInterval(loadingRef.current as NodeJS.Timeout);
-        
-        // Delay sebelum hide loading
-        setTimeout(() => {
-          setShowLoading(false);
-        }, 500);
-      } else {
-        setLoadingProgress(Math.min(progress, 100));
+  const startGSAPLoading = () => {
+    const tl = gsap.timeline();
+    
+    // Animasi background gradient
+    tl.fromTo(loadingRef.current, 
+      { 
+        opacity: 0,
+        background: "radial-gradient(circle at 20% 20%, #0a0a0a 0%, #000000 100%)"
+      },
+      { 
+        opacity: 1,
+        background: "radial-gradient(circle at 80% 80%, #1a1a1a 0%, #000000 100%)",
+        duration: 2,
+        ease: "power2.inOut"
       }
-    }, 1000 / steps);
+    );
+
+    // Animasi foto muncul dari blur
+    tl.fromTo(photoRef.current,
+      {
+        scale: 0.8,
+        opacity: 0,
+        filter: "blur(20px)"
+      },
+      {
+        scale: 1,
+        opacity: 1,
+        filter: "blur(0px)",
+        duration: 1.5,
+        ease: "back.out(1.7)"
+      },
+      "-=1.5"
+    );
+
+    // Animasi emoticon
+    tl.fromTo(emoticonRef.current,
+      {
+        scale: 0,
+        rotation: -180,
+        opacity: 0
+      },
+      {
+        scale: 1,
+        rotation: 0,
+        opacity: 1,
+        duration: 1,
+        ease: "elastic.out(1, 0.5)"
+      },
+      "-=1"
+    );
+
+    // Animasi angka counting
+    tl.fromTo(numberRef.current,
+      {
+        scale: 0,
+        y: 100,
+        opacity: 0
+      },
+      {
+        scale: 1,
+        y: 0,
+        opacity: 1,
+        duration: 1,
+        ease: "power3.out"
+      },
+      "-=0.5"
+    );
+
+    // Counting animation 0-100
+    const numbers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
+    numbers.forEach((num, index) => {
+      tl.to(numberRef.current, {
+        innerText: num,
+        duration: 0.1,
+        snap: { innerText: 1 },
+        ease: "power1.out"
+      }, `+=${index * 0.05}`);
+    });
+
+    // Final animation sebelum hide
+    tl.to({}, {
+      duration: 0.5,
+      onComplete: () => {
+        gsap.to(loadingRef.current, {
+          opacity: 0,
+          duration: 0.8,
+          ease: "power2.in",
+          onComplete: () => setShowLoading(false)
+        });
+      }
+    });
   };
 
   const updateVisitorTime = () => {
@@ -123,7 +194,6 @@ export default function HomePage(): React.JSX.Element {
 
   const navigateToNotes = () => {
     setShowLoading(true);
-    startLoadingAnimation();
     setTimeout(() => {
       router.push('/notes');
     }, 1000);
@@ -296,30 +366,6 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // Variants untuk animasi loading
-  const loadingVariants = {
-    hidden: {
-      opacity: 0,
-      scale: 0.8
-    },
-    visible: {
-      opacity: 1,
-      scale: 1,
-      transition: {
-        duration: 0.6,
-        ease: "easeOut"
-      }
-    },
-    exit: {
-      opacity: 0,
-      scale: 1.2,
-      transition: {
-        duration: 0.5,
-        ease: "easeIn"
-      }
-    }
-  };
-
   const menuItems = [
     { 
       name: "HOME", 
@@ -339,80 +385,79 @@ export default function HomePage(): React.JSX.Element {
     }
   ];
 
-  // Animated Emoticon SVG Component
+  // Animated Emoticon SVG Component dengan GSAP
   const LoadingEmoticon = () => (
-    <motion.svg
-      width="80"
-      height="80"
+    <svg
+      ref={emoticonRef}
+      width="120"
+      height="120"
       viewBox="0 0 100 100"
-      initial="hidden"
-      animate="visible"
+      style={{
+        filter: "drop-shadow(0 0 20px rgba(204, 255, 0, 0.5))"
+      }}
     >
-      {/* Face circle */}
-      <motion.circle
+      {/* Face circle dengan gradient */}
+      <defs>
+        <linearGradient id="faceGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#CCFF00" />
+          <stop offset="100%" stopColor="#A8E6CF" />
+        </linearGradient>
+        <filter id="glow">
+          <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+          <feMerge>
+            <feMergeNode in="coloredBlur"/>
+            <feMergeNode in="SourceGraphic"/>
+          </feMerge>
+        </filter>
+      </defs>
+      
+      <circle
         cx="50"
         cy="50"
         r="40"
-        fill="#CCFF00"
+        fill="url(#faceGradient)"
         stroke="#000"
         strokeWidth="2"
-        initial={{ scale: 0 }}
-        animate={{ scale: 1 }}
-        transition={{ duration: 0.5, delay: 0.2 }}
+        filter="url(#glow)"
       />
       
-      {/* Eyes */}
-      <motion.circle
+      {/* Eyes dengan animasi blink */}
+      <circle
         cx="35"
         cy="40"
-        r="5"
+        r="6"
         fill="#000"
-        initial={{ scale: 0 }}
-        animate={{ scale: 1 }}
-        transition={{ duration: 0.3, delay: 0.5 }}
       />
-      <motion.circle
+      <circle
         cx="65"
         cy="40"
-        r="5"
+        r="6"
         fill="#000"
-        initial={{ scale: 0 }}
-        animate={{ scale: 1 }}
-        transition={{ duration: 0.3, delay: 0.6 }}
       />
       
-      {/* Smile */}
-      <motion.path
-        d="M 35 60 Q 50 75 65 60"
+      {/* Smile dengan path animasi */}
+      <path
+        d="M 30 65 Q 50 80 70 65"
         fill="none"
         stroke="#000"
         strokeWidth="3"
         strokeLinecap="round"
-        initial={{ pathLength: 0 }}
-        animate={{ pathLength: 1 }}
-        transition={{ duration: 0.8, delay: 0.7 }}
       />
       
-      {/* Sparkles */}
-      <motion.circle
-        cx="25"
-        cy="30"
-        r="2"
-        fill="#FF6B6B"
-        initial={{ scale: 0, opacity: 0 }}
-        animate={{ scale: [0, 1.5, 1], opacity: [0, 1, 0] }}
-        transition={{ duration: 1.5, repeat: Infinity, delay: 1 }}
-      />
-      <motion.circle
-        cx="75"
-        cy="30"
-        r="2"
-        fill="#4ECDC4"
-        initial={{ scale: 0, opacity: 0 }}
-        animate={{ scale: [0, 1.5, 1], opacity: [0, 1, 0] }}
-        transition={{ duration: 1.5, repeat: Infinity, delay: 1.2 }}
-      />
-    </motion.svg>
+      {/* Sparkles particles */}
+      <circle cx="20" cy="25" r="1.5" fill="#FF6B6B">
+        <animate attributeName="opacity" values="0;1;0" dur="2s" repeatCount="indefinite" begin="0s" />
+      </circle>
+      <circle cx="80" cy="25" r="1.5" fill="#4ECDC4">
+        <animate attributeName="opacity" values="0;1;0" dur="2s" repeatCount="indefinite" begin="0.5s" />
+      </circle>
+      <circle cx="25" cy="70" r="1.5" fill="#FFD93D">
+        <animate attributeName="opacity" values="0;1;0" dur="2s" repeatCount="indefinite" begin="1s" />
+      </circle>
+      <circle cx="75" cy="70" r="1.5" fill="#6BCF7F">
+        <animate attributeName="opacity" values="0;1;0" dur="2s" repeatCount="indefinite" begin="1.5s" />
+      </circle>
+    </svg>
   );
 
   // SVG Icons
@@ -470,7 +515,7 @@ export default function HomePage(): React.JSX.Element {
       WebkitFontSmoothing: 'antialiased',
       MozOsxFontSmoothing: 'grayscale'
     }}>
-      {/* Menu Button with Framer Motion - DIPERBESAR */}
+      {/* Menu Button with Framer Motion */}
       <motion.div
         onClick={toggleMenu}
         onMouseEnter={handleMenuHover}
@@ -503,7 +548,7 @@ export default function HomePage(): React.JSX.Element {
         whileHover="hover"
         whileTap="tap"
       >
-        {/* Animated hamburger icon - DIPERBESAR */}
+        {/* Animated hamburger icon */}
         <motion.div
           style={{
             display: 'flex',
@@ -708,9 +753,9 @@ export default function HomePage(): React.JSX.Element {
                 flexDirection: 'column',
                 justifyContent: 'center',
                 paddingLeft: '2rem',
-                marginTop: '6rem' // Memberi space untuk waktu di atas
+                marginTop: '6rem'
               }}>
-                {/* Menu Items with very tight spacing */}
+                {/* Menu Items */}
                 <div style={{
                   display: 'flex',
                   flexDirection: 'column',
@@ -755,7 +800,7 @@ export default function HomePage(): React.JSX.Element {
                         {getIcon(item.name)}
                       </motion.div>
 
-                      {/* Menu Text - Thin and Light with tighter spacing */}
+                      {/* Menu Text */}
                       <motion.div
                         style={{
                           fontSize: '2.8rem',
@@ -776,7 +821,7 @@ export default function HomePage(): React.JSX.Element {
                       >
                         {item.name}
                         
-                        {/* Animated Arrow - Thin */}
+                        {/* Animated Arrow */}
                         <motion.div
                           initial={{ opacity: 0, scale: 0.8 }}
                           animate={{ 
@@ -810,7 +855,7 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </motion.div>
             
-            {/* Close Button dengan efek hover */}
+            {/* Close Button */}
             <motion.button
               onClick={toggleMenu}
               onMouseEnter={() => setIsCloseHovered(true)}
@@ -905,10 +950,11 @@ export default function HomePage(): React.JSX.Element {
         )}
       </AnimatePresence>
 
-      {/* Modern Loading Screen dengan Angka dan Emoticon */}
+      {/* GSAP Modern Loading Screen */}
       <AnimatePresence>
         {showLoading && (
-          <motion.div
+          <div
+            ref={loadingRef}
             style={{
               position: 'fixed',
               top: 0,
@@ -923,120 +969,81 @@ export default function HomePage(): React.JSX.Element {
               zIndex: 50,
               gap: '2rem'
             }}
-            variants={loadingVariants}
-            initial="hidden"
-            animate="visible"
-            exit="exit"
           >
-            {/* Background Pattern */}
-            <div style={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              width: '100%',
-              height: '100%',
-              background: 'radial-gradient(circle at 30% 30%, #1a1a1a 0%, #000 70%)',
-              opacity: 0.8
-            }} />
+            {/* Background Photo dengan efek */}
+            <div
+              ref={photoRef}
+              style={{
+                width: '200px',
+                height: '200px',
+                borderRadius: '50%',
+                background: 'linear-gradient(45deg, #CCFF00, #A8E6CF)',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                overflow: 'hidden',
+                border: '3px solid rgba(204, 255, 0, 0.3)',
+                boxShadow: '0 0 50px rgba(204, 255, 0, 0.2)'
+              }}
+            >
+              <div style={{
+                width: '180px',
+                height: '180px',
+                borderRadius: '50%',
+                background: 'conic-gradient(from 0deg, #CCFF00, #A8E6CF, #FF6B6B, #4ECDC4, #CCFF00)',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center'
+              }}>
+                <div style={{
+                  width: '160px',
+                  height: '160px',
+                  borderRadius: '50%',
+                  backgroundColor: '#000',
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  fontSize: '3rem',
+                  color: '#CCFF00',
+                  fontFamily: 'Arame Mono, monospace'
+                }}>
+                  👨‍💻
+                </div>
+              </div>
+            </div>
 
             {/* Animated Emoticon */}
             <LoadingEmoticon />
 
-            {/* Progress Number - Gaya GSAP Modern */}
-            <motion.div
+            {/* Big Number Counting */}
+            <div
+              ref={numberRef}
               style={{
-                fontSize: '4rem',
-                fontWeight: '300',
+                fontSize: '8rem',
+                fontWeight: '700',
                 color: '#CCFF00',
                 fontFamily: 'Arame Mono, monospace',
                 fontFeatureSettings: '"tnum"',
                 fontVariantNumeric: 'tabular-nums',
-                textShadow: '0 0 20px rgba(204, 255, 0, 0.5)'
-              }}
-              animate={{
-                scale: [1, 1.1, 1],
-                opacity: [0.7, 1, 0.7]
-              }}
-              transition={{
-                duration: 1,
-                repeat: Infinity,
-                ease: "easeInOut"
+                textShadow: '0 0 30px rgba(204, 255, 0, 0.8)',
+                lineHeight: 1
               }}
             >
-              {Math.round(loadingProgress)}%
-            </motion.div>
+              0
+            </div>
 
-            {/* Progress Bar */}
-            <motion.div
-              style={{
-                width: '300px',
-                height: '2px',
-                backgroundColor: 'rgba(255,255,255,0.2)',
-                borderRadius: '1px',
-                overflow: 'hidden'
-              }}
-              initial={{ scaleX: 0 }}
-              animate={{ scaleX: 1 }}
-              transition={{ duration: 0.5 }}
-            >
-              <motion.div
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  backgroundColor: '#CCFF00',
-                  transformOrigin: 'left'
-                }}
-                initial={{ scaleX: 0 }}
-                animate={{ scaleX: loadingProgress / 100 }}
-                transition={{ duration: 0.1 }}
-              />
-            </motion.div>
-
-            {/* Loading Text dengan Animasi Typing */}
-            <motion.div
-              style={{
-                fontSize: '1rem',
-                fontWeight: '300',
-                color: 'rgba(255,255,255,0.7)',
-                fontFamily: 'Arame Mono, monospace',
-                letterSpacing: '2px'
-              }}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.5 }}
-            >
-              LOADING CREATIVE SPACE
-            </motion.div>
-
-            {/* Animated Dots */}
-            <motion.div
-              style={{
-                display: 'flex',
-                gap: '0.5rem'
-              }}
-            >
-              {[0, 1, 2].map((dot) => (
-                <motion.div
-                  key={dot}
-                  style={{
-                    width: '6px',
-                    height: '6px',
-                    borderRadius: '50%',
-                    backgroundColor: '#CCFF00'
-                  }}
-                  animate={{
-                    scale: [1, 1.5, 1],
-                    opacity: [0.3, 1, 0.3]
-                  }}
-                  transition={{
-                    duration: 1,
-                    repeat: Infinity,
-                    delay: dot * 0.2
-                  }}
-                />
-              ))}
-            </motion.div>
-          </motion.div>
+            {/* Loading Text */}
+            <div style={{
+              fontSize: '1.2rem',
+              fontWeight: '300',
+              color: 'rgba(255,255,255,0.8)',
+              fontFamily: 'Arame Mono, monospace',
+              letterSpacing: '3px',
+              textTransform: 'uppercase'
+            }}>
+              INITIALIZING CREATIVE SPACE
+            </div>
+          </div>
         )}
       </AnimatePresence>
 
