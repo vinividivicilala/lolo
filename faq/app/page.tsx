@@ -1029,7 +1029,7 @@ export default function HomePage(): React.JSX.Element {
                     e.currentTarget.style.display = 'flex';
                     e.currentTarget.style.justifyContent = 'center';
                     e.currentTarget.style.alignItems = 'center';
-                    e.currentTarget.style.color: '#CCFF00';
+                    e.currentTarget.style.color = '#CCFF00';
                     e.currentTarget.style.fontFamily = 'Arame Mono, monospace';
                     e.currentTarget.style.fontSize = '1.2rem';
                     e.currentTarget.innerHTML = 'Final Image';
