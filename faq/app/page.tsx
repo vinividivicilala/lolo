@@ -24,20 +24,20 @@ export default function HomePage(): React.JSX.Element {
   const horizontalScrollRef = useRef<HTMLDivElement>(null);
   const finalImageRef = useRef<HTMLDivElement>(null);
 
-  // Image data - using placeholder images from public folder
+  // Gunakan foto 5.jpg untuk semua gambar
   const images = [
-    { id: 1, src: "/images/1.jpg", alt: "Photo 1" },
-    { id: 2, src: "/images/2.jpg", alt: "Photo 2" },
-    { id: 3, src: "/images/3.jpg", alt: "Photo 3" },
-    { id: 4, src: "/images/4.jpg", alt: "Photo 4" },
+    { id: 1, src: "/images/5.jpg", alt: "Photo 1" },
+    { id: 2, src: "/images/5.jpg", alt: "Photo 2" },
+    { id: 3, src: "/images/5.jpg", alt: "Photo 3" },
+    { id: 4, src: "/images/5.jpg", alt: "Photo 4" },
     { id: 5, src: "/images/5.jpg", alt: "Photo 5" },
-    { id: 6, src: "/images/6.jpg", alt: "Photo 6" },
-    { id: 7, src: "/images/7.jpg", alt: "Photo 7" },
-    { id: 8, src: "/images/8.jpg", alt: "Photo 8" },
-    { id: 9, src: "/images/9.jpg", alt: "Photo 9" },
-    { id: 10, src: "/images/10.jpg", alt: "Photo 10" },
-    { id: 11, src: "/images/11.jpg", alt: "Photo 11" },
-    { id: 12, src: "/images/12.jpg", alt: "Photo 12" }
+    { id: 6, src: "/images/5.jpg", alt: "Photo 6" },
+    { id: 7, src: "/images/5.jpg", alt: "Photo 7" },
+    { id: 8, src: "/images/5.jpg", alt: "Photo 8" },
+    { id: 9, src: "/images/5.jpg", alt: "Photo 9" },
+    { id: 10, src: "/images/5.jpg", alt: "Photo 10" },
+    { id: 11, src: "/images/5.jpg", alt: "Photo 11" },
+    { id: 12, src: "/images/5.jpg", alt: "Photo 12" }
   ];
 
   useEffect(() => {
@@ -73,165 +73,168 @@ export default function HomePage(): React.JSX.Element {
       }
     );
 
-    // Enhanced Horizontal scroll animation for images
+    // Enhanced Horizontal scroll animation for portrait images
     if (horizontalScrollRef.current) {
       const rows = horizontalScrollRef.current.children;
       
-      // Set initial positions for all rows and images
+      // Set initial positions for all rows and images - BLUR dan OPACITY 0
       gsap.set(Array.from(rows), {
         opacity: 1
       });
 
-      // Top row images - start from left outside viewport
+      // Top row images - start from left outside viewport dengan BLUR
       const topRowImages = rows[0].children;
       gsap.set(Array.from(topRowImages), {
-        x: -1500,
+        x: -2000,
         opacity: 0,
-        scale: 0.8
+        scale: 1,
+        filter: "blur(20px)"
       });
 
-      // Bottom row images - start from right outside viewport
+      // Bottom row images - start from right outside viewport dengan BLUR
       const bottomRowImages = rows[1].children;
       gsap.set(Array.from(bottomRowImages), {
-        x: 1500,
+        x: 2000,
         opacity: 0,
-        scale: 0.8
+        scale: 1,
+        filter: "blur(20px)"
       });
 
-      // Staggered entrance for top row (from left to center)
-      tl.fromTo(Array.from(topRowImages),
-        {
-          x: -1500,
-          opacity: 0,
-          scale: 0.8
-        },
-        {
-          x: 0,
-          opacity: 1,
-          scale: 1,
-          duration: 1.5,
-          stagger: 0.15,
-          ease: "power2.out"
-        },
-        "+=0.5"
-      );
-
-      // Staggered entrance for bottom row (from right to center)
+      // ANIMASI 1: BOTTOM ROW DULU - dari bawah ke atas
       tl.fromTo(Array.from(bottomRowImages),
         {
-          x: 1500,
+          x: 2000,
           opacity: 0,
-          scale: 0.8
+          scale: 1,
+          filter: "blur(20px)"
         },
         {
           x: 0,
           opacity: 1,
           scale: 1,
-          duration: 1.5,
-          stagger: 0.15,
+          filter: "blur(0px)",
+          duration: 1.2,
+          stagger: 0.1,
           ease: "power2.out"
         },
-        "-=1.2"
+        "+=0.3"
       );
 
-      // First horizontal scroll phase
-      // Top row scroll right
-      tl.to(Array.from(topRowImages), {
-        x: 800,
-        duration: 2,
-        ease: "power1.inOut",
-        stagger: 0.1
+      // ANIMASI 2: TOP ROW - dari atas ke bawah
+      tl.fromTo(Array.from(topRowImages),
+        {
+          x: -2000,
+          opacity: 0,
+          scale: 1,
+          filter: "blur(20px)"
+        },
+        {
+          x: 0,
+          opacity: 1,
+          scale: 1,
+          filter: "blur(0px)",
+          duration: 1.2,
+          stagger: 0.1,
+          ease: "power2.out"
+        },
+        "-=0.8"
+      );
+
+      // SCROLL CEPAT 1: BOTTOM ROW scroll kiri cepat
+      tl.to(Array.from(bottomRowImages), {
+        x: -2500,
+        duration: 1.5,
+        ease: "power2.inOut",
+        stagger: 0.05
       }, "+=0.5");
 
-      // Bottom row scroll left
-      tl.to(Array.from(bottomRowImages), {
-        x: -800,
-        duration: 2,
-        ease: "power1.inOut",
-        stagger: 0.1
-      }, "-=2");
-
-      // Second horizontal scroll phase - reverse direction
-      // Top row scroll left
+      // SCROLL CEPAT 2: TOP ROW scroll kanan cepat
       tl.to(Array.from(topRowImages), {
-        x: -600,
-        duration: 1.8,
-        ease: "power1.inOut",
-        stagger: 0.08
-      }, "+=0.3");
-
-      // Bottom row scroll right
-      tl.to(Array.from(bottomRowImages), {
-        x: 600,
-        duration: 1.8,
-        ease: "power1.inOut",
-        stagger: 0.08
-      }, "-=1.8");
-
-      // Third horizontal scroll phase - fast
-      // Top row scroll right fast
-      tl.to(Array.from(topRowImages), {
-        x: 1200,
-        duration: 1.2,
-        ease: "power2.in",
+        x: 2500,
+        duration: 1.5,
+        ease: "power2.inOut",
         stagger: 0.05
+      }, "-=1.5");
+
+      // RESET POSISI untuk loop berikutnya
+      tl.set(Array.from(bottomRowImages), {
+        x: 2500,
+        opacity: 1,
+        filter: "blur(0px)"
       }, "+=0.2");
 
-      // Bottom row scroll left fast
+      tl.set(Array.from(topRowImages), {
+        x: -2500,
+        opacity: 1,
+        filter: "blur(0px)"
+      });
+
+      // SCROLL CEPAT 3: BOTTOM ROW scroll kiri lagi lebih cepat
       tl.to(Array.from(bottomRowImages), {
-        x: -1200,
+        x: -2500,
         duration: 1.2,
         ease: "power2.in",
-        stagger: 0.05
+        stagger: 0.03
+      }, "+=0.1");
+
+      // SCROLL CEPAT 4: TOP ROW scroll kanan lagi lebih cepat
+      tl.to(Array.from(topRowImages), {
+        x: 2500,
+        duration: 1.2,
+        ease: "power2.in",
+        stagger: 0.03
       }, "-=1.2");
 
       // Select and prepare final image
       const finalImageData = images[images.length - 1];
       setFinalImage(finalImageData.src);
 
-      // Hide all scrolling images
+      // FADE OUT semua gambar scroll
       tl.to(Array.from(topRowImages), {
         opacity: 0,
-        scale: 0.5,
+        scale: 0.8,
         duration: 0.6,
         ease: "power2.out"
       }, "+=0.3");
 
       tl.to(Array.from(bottomRowImages), {
         opacity: 0,
-        scale: 0.5,
+        scale: 0.8,
         duration: 0.6,
         ease: "power2.out"
       }, "-=0.6");
 
-      // Show final image with animation
+      // Show final image dengan animasi dari blur ke clear
       if (finalImageRef.current) {
         gsap.set(finalImageRef.current, {
           opacity: 0,
-          scale: 0.5
+          scale: 0.8,
+          filter: "blur(20px)"
         });
 
+        // Final image entrance animation - dari blur ke clear
         tl.to(finalImageRef.current, {
           opacity: 1,
           scale: 1,
-          duration: 1.2,
-          ease: "back.out(1.7)"
+          filter: "blur(0px)",
+          duration: 1.5,
+          ease: "power3.out"
         }, "-=0.3");
 
-        // Floating animation for final image
+        // Floating animation untuk final image
         tl.to(finalImageRef.current, {
-          y: -15,
-          duration: 1.5,
-          ease: "power1.inOut",
+          y: -10,
+          duration: 2,
+          ease: "sine.inOut",
           yoyo: true,
-          repeat: 1
-        }, "-=1");
+          repeat: -1
+        });
       }
     }
 
     // Final exit animation
     tl.to({}, {
-      duration: 1,
+      duration: 2,
       onComplete: () => {
         gsap.to(loadingRef.current, {
           opacity: 0,
@@ -983,7 +986,7 @@ export default function HomePage(): React.JSX.Element {
         )}
       </AnimatePresence>
 
-      {/* Enhanced GSAP Loading Screen dengan Horizontal Scroll dan Final Image */}
+      {/* Enhanced GSAP Loading Screen dengan Horizontal Scroll Portrait */}
       <AnimatePresence>
         {showLoading && (
           <div
@@ -1011,15 +1014,15 @@ export default function HomePage(): React.JSX.Element {
                   top: '50%',
                   left: '50%',
                   transform: 'translate(-50%, -50%)',
-                  width: '400px',
-                  height: '280px',
-                  borderRadius: '20px',
+                  width: '280px', // Portrait size
+                  height: '400px', // Portrait size
+                  borderRadius: '15px',
                   overflow: 'hidden',
                   zIndex: 15,
                   opacity: 0,
-                  scale: 0.5,
-                  boxShadow: '0 0 80px rgba(204, 255, 0, 0.5)',
-                  border: '3px solid rgba(204, 255, 0, 0.4)'
+                  scale: 0.8,
+                  boxShadow: '0 0 60px rgba(204, 255, 0, 0.5)',
+                  border: '2px solid rgba(204, 255, 0, 0.3)'
                 }}
               >
                 <img
@@ -1044,7 +1047,7 @@ export default function HomePage(): React.JSX.Element {
               </div>
             )}
 
-            {/* Enhanced Horizontal Scroll Container dengan struktur yang benar */}
+            {/* Horizontal Scroll Container untuk Portrait Images */}
             <div
               ref={horizontalScrollRef}
               style={{
@@ -1055,30 +1058,29 @@ export default function HomePage(): React.JSX.Element {
                 height: '100%',
                 display: 'flex',
                 flexDirection: 'column',
-                justifyContent: 'space-around',
-                padding: '4rem 0',
+                justifyContent: 'space-between',
+                padding: '3rem 0',
                 overflow: 'hidden'
               }}
             >
-              {/* Top Row - Scroll Left to Right */}
+              {/* Top Row - Scroll kanan */}
               <div style={{
                 display: 'flex',
-                gap: '3rem',
-                marginBottom: '2rem',
+                gap: '2rem',
                 width: 'max-content'
               }}>
                 {images.slice(0, 6).map((image) => (
                   <div
                     key={image.id}
                     style={{
-                      width: '250px',
-                      height: '160px',
-                      borderRadius: '15px',
+                      width: '200px', // Portrait width
+                      height: '300px', // Portrait height
+                      borderRadius: '12px',
                       overflow: 'hidden',
                       flexShrink: 0,
                       opacity: 0,
-                      boxShadow: '0 10px 30px rgba(0,0,0,0.6)',
-                      border: '2px solid rgba(255,255,255,0.1)'
+                      boxShadow: '0 8px 25px rgba(0,0,0,0.7)',
+                      border: '1px solid rgba(255,255,255,0.1)'
                     }}
                   >
                     <img
@@ -1103,11 +1105,10 @@ export default function HomePage(): React.JSX.Element {
                 ))}
               </div>
 
-              {/* Bottom Row - Scroll Right to Left */}
+              {/* Bottom Row - Scroll kiri */}
               <div style={{
                 display: 'flex',
-                gap: '3rem',
-                justifyContent: 'flex-end',
+                gap: '2rem',
                 width: 'max-content',
                 marginLeft: 'auto'
               }}>
@@ -1115,14 +1116,14 @@ export default function HomePage(): React.JSX.Element {
                   <div
                     key={image.id}
                     style={{
-                      width: '250px',
-                      height: '160px',
-                      borderRadius: '15px',
+                      width: '200px', // Portrait width
+                      height: '300px', // Portrait height
+                      borderRadius: '12px',
                       overflow: 'hidden',
                       flexShrink: 0,
                       opacity: 0,
-                      boxShadow: '0 10px 30px rgba(0,0,0,0.6)',
-                      border: '2px solid rgba(255,255,255,0.1)'
+                      boxShadow: '0 8px 25px rgba(0,0,0,0.7)',
+                      border: '1px solid rgba(255,255,255,0.1)'
                     }}
                   >
                     <img
