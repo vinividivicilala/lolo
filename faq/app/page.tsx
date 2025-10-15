@@ -11,15 +11,65 @@ export default function HomePage(): React.JSX.Element {
   const [isCloseHovered, setIsCloseHovered] = useState(false);
   const [menuText, setMenuText] = useState("MENU");
   const [isAnimating, setIsAnimating] = useState(false);
+  const [currentTime, setCurrentTime] = useState({
+    jakarta: "",
+    tokyo: "",
+    london: "",
+    newyork: ""
+  });
   const router = useRouter();
+  const timeRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     const timer = setTimeout(() => {
       setShowLoading(false);
     }, 2500);
 
-    return () => clearTimeout(timer);
+    // Initialize time
+    updateAllTimes();
+    
+    // Update time every second
+    timeRef.current = setInterval(updateAllTimes, 1000);
+
+    return () => {
+      clearTimeout(timer);
+      if (timeRef.current) {
+        clearInterval(timeRef.current);
+      }
+    };
   }, []);
+
+  const updateAllTimes = () => {
+    const now = new Date();
+    
+    // Jakarta time (UTC+7)
+    const jakartaTime = new Date(now.getTime() + (7 * 60 * 60 * 1000));
+    
+    // Tokyo time (UTC+9)
+    const tokyoTime = new Date(now.getTime() + (9 * 60 * 60 * 1000));
+    
+    // London time (UTC+0/+1)
+    const londonTime = new Date(now.getTime());
+    
+    // New York time (UTC-5/-4)
+    const newyorkTime = new Date(now.getTime() - (5 * 60 * 60 * 1000));
+
+    setCurrentTime({
+      jakarta: formatTime(jakartaTime),
+      tokyo: formatTime(tokyoTime),
+      london: formatTime(londonTime),
+      newyork: formatTime(newyorkTime)
+    });
+  };
+
+  const formatTime = (date: Date): string => {
+    return date.toLocaleTimeString('en-US', {
+      hour12: false,
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    });
+  };
 
   const navigateToNotes = () => {
     setShowLoading(true);
@@ -172,6 +222,25 @@ export default function HomePage(): React.JSX.Element {
       opacity: 0,
       transition: {
         duration: 0.1
+      }
+    }
+  };
+
+  // Variants untuk animasi waktu
+  const timeVariants = {
+    hidden: {
+      opacity: 0,
+      x: -20,
+      transition: {
+        duration: 0.5
+      }
+    },
+    visible: {
+      opacity: 1,
+      x: 0,
+      transition: {
+        duration: 0.5,
+        ease: "easeOut"
       }
     }
   };
@@ -413,6 +482,130 @@ export default function HomePage(): React.JSX.Element {
                 }}
               >
                 PORTFOLIO
+              </motion.div>
+
+              {/* Real-time Clock Section - Bottom Left */}
+              <motion.div
+                style={{
+                  position: 'absolute',
+                  left: '2rem',
+                  bottom: '2rem',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '0.5rem'
+                }}
+                variants={timeVariants}
+                initial="hidden"
+                animate="visible"
+                exit="hidden"
+              >
+                {/* Jakarta */}
+                <motion.div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '1rem',
+                    fontSize: '0.9rem',
+                    fontWeight: '300',
+                    color: 'rgba(0,0,0,0.8)',
+                    fontFamily: 'Arame Mono, monospace'
+                  }}
+                  whileHover={{ 
+                    color: '#000',
+                    x: 5,
+                    transition: { duration: 0.2 }
+                  }}
+                >
+                  <span style={{ minWidth: '80px' }}>JAKARTA</span>
+                  <span style={{ 
+                    fontFeatureSettings: '"tnum"',
+                    fontVariantNumeric: 'tabular-nums',
+                    minWidth: '70px'
+                  }}>
+                    {currentTime.jakarta}
+                  </span>
+                </motion.div>
+
+                {/* Tokyo */}
+                <motion.div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '1rem',
+                    fontSize: '0.9rem',
+                    fontWeight: '300',
+                    color: 'rgba(0,0,0,0.8)',
+                    fontFamily: 'Arame Mono, monospace'
+                  }}
+                  whileHover={{ 
+                    color: '#000',
+                    x: 5,
+                    transition: { duration: 0.2 }
+                  }}
+                >
+                  <span style={{ minWidth: '80px' }}>TOKYO</span>
+                  <span style={{ 
+                    fontFeatureSettings: '"tnum"',
+                    fontVariantNumeric: 'tabular-nums',
+                    minWidth: '70px'
+                  }}>
+                    {currentTime.tokyo}
+                  </span>
+                </motion.div>
+
+                {/* London */}
+                <motion.div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '1rem',
+                    fontSize: '0.9rem',
+                    fontWeight: '300',
+                    color: 'rgba(0,0,0,0.8)',
+                    fontFamily: 'Arame Mono, monospace'
+                  }}
+                  whileHover={{ 
+                    color: '#000',
+                    x: 5,
+                    transition: { duration: 0.2 }
+                  }}
+                >
+                  <span style={{ minWidth: '80px' }}>LONDON</span>
+                  <span style={{ 
+                    fontFeatureSettings: '"tnum"',
+                    fontVariantNumeric: 'tabular-nums',
+                    minWidth: '70px'
+                  }}>
+                    {currentTime.london}
+                  </span>
+                </motion.div>
+
+                {/* New York */}
+                <motion.div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '1rem',
+                    fontSize: '0.9rem',
+                    fontWeight: '300',
+                    color: 'rgba(0,0,0,0.8)',
+                    fontFamily: 'Arame Mono, monospace'
+                  }}
+                  whileHover={{ 
+                    color: '#000',
+                    x: 5,
+                    transition: { duration: 0.2 }
+                  }}
+                >
+                  <span style={{ minWidth: '80px' }}>NEW YORK</span>
+                  <span style={{ 
+                    fontFeatureSettings: '"tnum"',
+                    fontVariantNumeric: 'tabular-nums',
+                    minWidth: '70px'
+                  }}>
+                    {currentTime.newyork}
+                  </span>
+                </motion.div>
               </motion.div>
 
               {/* Main Content - Navigation Menu */}
