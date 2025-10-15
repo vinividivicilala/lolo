@@ -10,8 +10,7 @@ export default function HomePage(): React.JSX.Element {
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
   const [isCloseHovered, setIsCloseHovered] = useState(false);
   const [menuText, setMenuText] = useState("MENU");
-  const [isHovering, setIsHovering] = useState(false);
-  const animationRef = useRef<NodeJS.Timeout | null>(null);
+  const [isAnimating, setIsAnimating] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -19,12 +18,7 @@ export default function HomePage(): React.JSX.Element {
       setShowLoading(false);
     }, 2500);
 
-    return () => {
-      clearTimeout(timer);
-      if (animationRef.current) {
-        clearTimeout(animationRef.current);
-      }
-    };
+    return () => clearTimeout(timer);
   }, []);
 
   const navigateToNotes = () => {
@@ -39,39 +33,37 @@ export default function HomePage(): React.JSX.Element {
   };
 
   // Array teks menu yang akan berganti saat hover
-  const menuTextVariants = [
-    "EXPLORE",
-    "NAVIGATE", 
-    "DISCOVER",
-    "BROWSE",
-    "MENU"
-  ];
+  const menuTextVariants = ["EXPLORE", "NAVIGATE", "DISCOVER", "BROWSE"];
+  const animationRef = useRef<NodeJS.Timeout | null>(null);
 
   const handleMenuHover = () => {
-    if (animationRef.current) {
-      clearTimeout(animationRef.current);
-    }
+    if (isAnimating) return;
     
-    setIsHovering(true);
+    setIsAnimating(true);
     let currentIndex = 0;
-    
+
     const animateText = () => {
-      if (currentIndex < menuTextVariants.length && isHovering) {
+      if (currentIndex < menuTextVariants.length) {
         setMenuText(menuTextVariants[currentIndex]);
         currentIndex++;
-        animationRef.current = setTimeout(animateText, 30); // Delay sangat cepat
+        animationRef.current = setTimeout(animateText, 100);
+      } else {
+        // Setelah selesai, kembali ke MENU
+        setTimeout(() => {
+          setMenuText("MENU");
+          setIsAnimating(false);
+        }, 100);
       }
     };
-    
+
     animateText();
   };
 
   const handleMenuLeave = () => {
-    setIsHovering(false);
     if (animationRef.current) {
       clearTimeout(animationRef.current);
     }
-    // Kembali ke teks "MENU" secara instan
+    setIsAnimating(false);
     setMenuText("MENU");
   };
 
@@ -159,21 +151,27 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // Variants untuk animasi teks menu yang sangat cepat
-  const menuTextVariantsAnimation = {
-    hidden: { 
-      opacity: 0, 
-      y: 5,
+  // Variants untuk animasi teks menu
+  const textVariants = {
+    enter: {
+      y: -10,
+      opacity: 0,
       transition: {
-        duration: 0.05
+        duration: 0.1
       }
     },
-    visible: { 
-      opacity: 1, 
+    center: {
       y: 0,
+      opacity: 1,
       transition: {
-        duration: 0.1,
-        ease: "easeOut"
+        duration: 0.1
+      }
+    },
+    exit: {
+      y: 10,
+      opacity: 0,
+      transition: {
+        duration: 0.1
       }
     }
   };
@@ -336,8 +334,8 @@ export default function HomePage(): React.JSX.Element {
           />
         </motion.div>
         
-        {/* Menu Text dengan animasi berganti sangat cepat */}
-        <motion.div
+        {/* Menu Text dengan animasi berganti */}
+        <div
           style={{
             fontSize: '1.1rem',
             fontWeight: '300',
@@ -346,24 +344,28 @@ export default function HomePage(): React.JSX.Element {
             height: '24px',
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'center'
+            justifyContent: 'center',
+            position: 'relative'
           }}
         >
-          <AnimatePresence mode="wait">
+          <AnimatePresence mode="popLayout">
             <motion.span
               key={menuText}
-              variants={menuTextVariantsAnimation}
-              initial="hidden"
-              animate="visible"
-              exit="hidden"
+              variants={textVariants}
+              initial="enter"
+              animate="center"
+              exit="exit"
               style={{
-                display: 'block'
+                position: 'absolute',
+                left: '50%',
+                transform: 'translateX(-50%)',
+                whiteSpace: 'nowrap'
               }}
             >
               {menuText}
             </motion.span>
           </AnimatePresence>
-        </motion.div>
+        </div>
       </motion.div>
 
       {/* Menu Overlay */}
@@ -755,4 +757,3 @@ export default function HomePage(): React.JSX.Element {
     </div>
   );
 }
-
