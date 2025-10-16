@@ -62,7 +62,7 @@ export default function HomePage(): React.JSX.Element {
         gsap.set(previewImageRef.current, {
           scale: 0.8,
           opacity: 0,
-          rotation: -5
+          x: 100
         });
 
         gsap.set(viewCircleRef.current, {
@@ -95,7 +95,7 @@ export default function HomePage(): React.JSX.Element {
       tl.to(previewImageRef.current, {
         scale: 1,
         opacity: 1,
-        rotation: 0,
+        x: 0,
         duration: 0.6,
         ease: "back.out(1.7)"
       });
@@ -129,7 +129,7 @@ export default function HomePage(): React.JSX.Element {
       tl.to(previewImageRef.current, {
         scale: 0.8,
         opacity: 0,
-        rotation: 5,
+        x: 100,
         duration: 0.4,
         ease: "power2.in"
       });
@@ -582,13 +582,6 @@ export default function HomePage(): React.JSX.Element {
     </svg>
   );
 
-  const ArrowIcon = () => (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <line x1="5" y1="12" x2="19" y2="12"/>
-      <polyline points="12 5 19 12 12 19"/>
-    </svg>
-  );
-
   const getIcon = (name: string) => {
     switch (name) {
       case "HOME": return <HomeIcon />;
@@ -755,233 +748,14 @@ export default function HomePage(): React.JSX.Element {
               animate="open"
               exit="closed"
             >
-              {/* Coming Soon Section - Left Side */}
-              <div
-                ref={comingSoonRef}
-                style={{
-                  flex: 1,
-                  display: 'flex',
-                  flexDirection: 'column',
-                  justifyContent: 'center',
-                  alignItems: 'flex-start',
-                  paddingLeft: '2rem',
-                  position: 'relative'
-                }}
-                onMouseEnter={handleComingSoonHover}
-                onMouseLeave={handleComingSoonLeave}
-              >
-                {/* Coming Soon Text */}
-                <motion.div
-                  style={{
-                    fontSize: '5rem',
-                    fontWeight: '900',
-                    color: 'rgba(0,0,0,0.8)',
-                    fontFamily: 'Arame Mono, monospace',
-                    lineHeight: 0.9,
-                    letterSpacing: '-2px',
-                    textTransform: 'uppercase',
-                    marginBottom: '1rem',
-                    cursor: 'pointer'
-                  }}
-                  initial={{ opacity: 0, x: -50 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.6, delay: 0.3 }}
-                  whileHover={{ color: '#000' }}
-                >
-                  COMING<br />SOON
-                </motion.div>
-
-                {/* Black Line with Arrow */}
-                <motion.div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '1rem',
-                    marginTop: '2rem'
-                  }}
-                  initial={{ opacity: 0, x: -50 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.6, delay: 0.5 }}
-                >
-                  <div style={{
-                    width: '100px',
-                    height: '2px',
-                    backgroundColor: 'black'
-                  }} />
-                  <motion.div
-                    whileHover={{ x: 10 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <ArrowIcon />
-                  </motion.div>
-                </motion.div>
-
-                {/* Preview Image - Hidden by default */}
-                <div
-                  ref={previewImageRef}
-                  style={{
-                    position: 'absolute',
-                    top: '50%',
-                    left: '120%',
-                    transform: 'translateY(-50%)',
-                    width: '300px',
-                    height: '400px',
-                    borderRadius: '15px',
-                    overflow: 'hidden',
-                    boxShadow: '0 20px 50px rgba(0,0,0,0.3)',
-                    border: '2px solid rgba(0,0,0,0.1)',
-                    opacity: 0,
-                    scale: 0.8
-                  }}
-                >
-                  <img
-                    src=""
-                    alt="Project Preview"
-                    style={{
-                      width: '100%',
-                      height: '100%',
-                      objectFit: 'cover'
-                    }}
-                    onError={(e) => {
-                      e.currentTarget.style.backgroundColor = '#222';
-                      e.currentTarget.style.display = 'flex';
-                      e.currentTarget.style.justifyContent = 'center';
-                      e.currentTarget.style.alignItems = 'center';
-                      e.currentTarget.style.color = '#CCFF00';
-                      e.currentTarget.style.fontFamily = 'Arame Mono, monospace';
-                      e.currentTarget.style.fontSize = '1rem';
-                      e.currentTarget.innerHTML = 'Project Preview';
-                    }}
-                  />
-                </div>
-
-                {/* View Circle with Text - Hidden by default */}
-                <div
-                  ref={viewCircleRef}
-                  style={{
-                    position: 'absolute',
-                    top: '50%',
-                    left: '150%',
-                    transform: 'translateY(-50%)',
-                    width: '120px',
-                    height: '120px',
-                    borderRadius: '50%',
-                    backgroundColor: 'black',
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    color: '#CCFF00',
-                    fontSize: '0.8rem',
-                    fontWeight: '600',
-                    fontFamily: 'Arame Mono, monospace',
-                    textTransform: 'uppercase',
-                    letterSpacing: '1px',
-                    opacity: 0,
-                    scale: 0
-                  }}
-                >
-                  VIEW
-                </div>
-              </div>
-
-              {/* Main Content - Navigation Menu */}
+              {/* Navigation Menu - Left Side */}
               <div style={{
                 flex: 1,
                 display: 'flex',
                 flexDirection: 'column',
                 justifyContent: 'center',
-                paddingLeft: '2rem',
-                marginTop: '6rem'
+                paddingLeft: '2rem'
               }}>
-                {/* Website Name - Top Left */}
-                <motion.div
-                  style={{
-                    position: 'absolute',
-                    left: '2rem',
-                    top: '2rem',
-                    fontSize: '1.2rem',
-                    fontWeight: '300',
-                    color: 'rgba(0,0,0,0.6)',
-                    fontFamily: 'Arame Mono, monospace',
-                    lineHeight: 1,
-                    letterSpacing: '0.5px'
-                  }}
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ 
-                    duration: 0.4,
-                    delay: 0.3
-                  }}
-                >
-                  PORTFOLIO
-                </motion.div>
-
-                {/* Visitor Time Display - TOP CENTER */}
-                <motion.div
-                  style={{
-                    position: 'absolute',
-                    top: '2rem',
-                    left: '50%',
-                    transform: 'translateX(-50%)',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    gap: '0.3rem'
-                  }}
-                  variants={timeVariants}
-                  initial="hidden"
-                  animate="visible"
-                  exit="hidden"
-                >
-                  {/* Time - Font Besar */}
-                  <motion.div
-                    style={{
-                      fontSize: '2.5rem',
-                      fontWeight: '400',
-                      color: 'rgba(0,0,0,0.9)',
-                      fontFamily: 'Arame Mono, monospace',
-                      fontFeatureSettings: '"tnum"',
-                      fontVariantNumeric: 'tabular-nums',
-                      letterSpacing: '2px'
-                    }}
-                    animate={{
-                      scale: [1, 1.02, 1],
-                      transition: {
-                        duration: 1,
-                        repeat: Infinity,
-                        repeatType: "reverse"
-                      }
-                    }}
-                  >
-                    {visitorTime.time}
-                  </motion.div>
-
-                  {/* Timezone & Date */}
-                  <motion.div
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '1rem',
-                      fontSize: '0.9rem',
-                      fontWeight: '400',
-                      color: 'rgba(0,0,0,0.8)',
-                      fontFamily: 'Arame Mono, monospace'
-                    }}
-                  >
-                    <span style={{ 
-                      backgroundColor: 'rgba(0,0,0,0.1)',
-                      padding: '0.2rem 0.6rem',
-                      borderRadius: '12px',
-                      fontWeight: '500'
-                    }}>
-                      {visitorTime.timezone}
-                    </span>
-                    <span>
-                      {visitorTime.date}
-                    </span>
-                  </motion.div>
-                </motion.div>
-
                 {/* Menu Items */}
                 <div style={{
                   display: 'flex',
@@ -1080,6 +854,212 @@ export default function HomePage(): React.JSX.Element {
                   ))}
                 </div>
               </div>
+
+              {/* Coming Soon Section - Right Side */}
+              <div
+                ref={comingSoonRef}
+                style={{
+                  flex: 1,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'center',
+                  alignItems: 'flex-end',
+                  paddingRight: '2rem',
+                  position: 'relative'
+                }}
+              >
+                {/* Coming Soon Text */}
+                <motion.div
+                  style={{
+                    fontSize: '5rem',
+                    fontWeight: '300',
+                    color: 'rgba(0,0,0,0.8)',
+                    fontFamily: 'Arame Mono, monospace',
+                    lineHeight: 0.9,
+                    letterSpacing: '-2px',
+                    textTransform: 'uppercase',
+                    cursor: 'pointer',
+                    textAlign: 'right'
+                  }}
+                  initial={{ opacity: 0, x: 50 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.6, delay: 0.3 }}
+                  whileHover={{ color: '#000' }}
+                  onMouseEnter={handleComingSoonHover}
+                  onMouseLeave={handleComingSoonLeave}
+                >
+                  COMING<br />SOON
+                  <motion.span
+                    style={{
+                      fontSize: '1.5rem',
+                      fontWeight: '300',
+                      color: 'rgba(0,0,0,0.6)',
+                      marginLeft: '0.5rem'
+                    }}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.8 }}
+                  >
+                    (1)
+                  </motion.span>
+                </motion.div>
+
+                {/* Preview Image - Hidden by default */}
+                <div
+                  ref={previewImageRef}
+                  style={{
+                    position: 'absolute',
+                    top: '50%',
+                    right: '120%',
+                    transform: 'translateY(-50%)',
+                    width: '300px',
+                    height: '400px',
+                    borderRadius: '15px',
+                    overflow: 'hidden',
+                    boxShadow: '0 20px 50px rgba(0,0,0,0.3)',
+                    border: '2px solid rgba(0,0,0,0.1)',
+                    opacity: 0,
+                    scale: 0.8
+                  }}
+                >
+                  <img
+                    src=""
+                    alt="Project Preview"
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'cover'
+                    }}
+                    onError={(e) => {
+                      e.currentTarget.style.backgroundColor = '#222';
+                      e.currentTarget.style.display = 'flex';
+                      e.currentTarget.style.justifyContent = 'center';
+                      e.currentTarget.style.alignItems = 'center';
+                      e.currentTarget.style.color = '#CCFF00';
+                      e.currentTarget.style.fontFamily = 'Arame Mono, monospace';
+                      e.currentTarget.style.fontSize = '1rem';
+                      e.currentTarget.innerHTML = 'Project Preview';
+                    }}
+                  />
+                </div>
+
+                {/* View Circle with Text - Hidden by default */}
+                <div
+                  ref={viewCircleRef}
+                  style={{
+                    position: 'absolute',
+                    top: '50%',
+                    right: '150%',
+                    transform: 'translateY(-50%)',
+                    width: '120px',
+                    height: '120px',
+                    borderRadius: '50%',
+                    backgroundColor: 'black',
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    color: '#CCFF00',
+                    fontSize: '0.8rem',
+                    fontWeight: '600',
+                    fontFamily: 'Arame Mono, monospace',
+                    textTransform: 'uppercase',
+                    letterSpacing: '1px',
+                    opacity: 0,
+                    scale: 0
+                  }}
+                >
+                  VIEW
+                </div>
+              </div>
+
+              {/* Website Name - Top Left */}
+              <motion.div
+                style={{
+                  position: 'absolute',
+                  left: '2rem',
+                  top: '2rem',
+                  fontSize: '1.2rem',
+                  fontWeight: '300',
+                  color: 'rgba(0,0,0,0.6)',
+                  fontFamily: 'Arame Mono, monospace',
+                  lineHeight: 1,
+                  letterSpacing: '0.5px'
+                }}
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ 
+                  duration: 0.4,
+                  delay: 0.3
+                }}
+              >
+                PORTFOLIO
+              </motion.div>
+
+              {/* Visitor Time Display - TOP CENTER */}
+              <motion.div
+                style={{
+                  position: 'absolute',
+                  top: '2rem',
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: '0.3rem'
+                }}
+                variants={timeVariants}
+                initial="hidden"
+                animate="visible"
+                exit="hidden"
+              >
+                {/* Time - Font Besar */}
+                <motion.div
+                  style={{
+                    fontSize: '2.5rem',
+                    fontWeight: '400',
+                    color: 'rgba(0,0,0,0.9)',
+                    fontFamily: 'Arame Mono, monospace',
+                    fontFeatureSettings: '"tnum"',
+                    fontVariantNumeric: 'tabular-nums',
+                    letterSpacing: '2px'
+                  }}
+                  animate={{
+                    scale: [1, 1.02, 1],
+                    transition: {
+                      duration: 1,
+                      repeat: Infinity,
+                      repeatType: "reverse"
+                    }
+                  }}
+                >
+                  {visitorTime.time}
+                </motion.div>
+
+                {/* Timezone & Date */}
+                <motion.div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '1rem',
+                    fontSize: '0.9rem',
+                    fontWeight: '400',
+                    color: 'rgba(0,0,0,0.8)',
+                    fontFamily: 'Arame Mono, monospace'
+                  }}
+                >
+                  <span style={{ 
+                    backgroundColor: 'rgba(0,0,0,0.1)',
+                    padding: '0.2rem 0.6rem',
+                    borderRadius: '12px',
+                    fontWeight: '500'
+                  }}>
+                    {visitorTime.timezone}
+                  </span>
+                  <span>
+                    {visitorTime.date}
+                  </span>
+                </motion.div>
+              </motion.div>
             </motion.div>
             
             {/* Close Button */}
@@ -1172,206 +1152,4 @@ export default function HomePage(): React.JSX.Element {
                   CLOSE
                 </motion.span>
               </motion.div>
-            </motion.button>
-          </>
-        )}
-      </AnimatePresence>
-
-      {/* High-Speed Text Scroll Loading Animation */}
-      <AnimatePresence>
-        {showLoading && (
-          <div
-            ref={loadingRef}
-            style={{
-              position: 'fixed',
-              top: 0,
-              left: 0,
-              width: '100%',
-              height: '100%',
-              backgroundColor: 'black',
-              zIndex: 50,
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'center',
-              alignItems: 'center',
-              overflow: 'hidden'
-            }}
-          >
-            {/* Text Scroll Container */}
-            <div
-              ref={textScrollRef}
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                gap: '0rem'
-              }}
-            >
-              {/* High-speed scrolling text lines */}
-              <div style={{
-                fontSize: '8rem',
-                fontWeight: '900',
-                color: 'white',
-                fontFamily: 'Arame Mono, monospace',
-                textTransform: 'uppercase',
-                letterSpacing: '-3px',
-                lineHeight: 0.8,
-                opacity: 0
-              }}>
-                CREATIVE
-              </div>
-              
-              <div style={{
-                fontSize: '8rem',
-                fontWeight: '900',
-                color: 'white',
-                fontFamily: 'Arame Mono, monospace',
-                textTransform: 'uppercase',
-                letterSpacing: '-3px',
-                lineHeight: 0.8,
-                opacity: 0
-              }}>
-                PORTFOLIO
-              </div>
-              
-              <div style={{
-                fontSize: '8rem',
-                fontWeight: '900',
-                color: 'white',
-                fontFamily: 'Arame Mono, monospace',
-                textTransform: 'uppercase',
-                letterSpacing: '-3px',
-                lineHeight: 0.8,
-                opacity: 0
-              }}>
-                INNOVATION
-              </div>
-              
-              <div style={{
-                fontSize: '8rem',
-                fontWeight: '900',
-                color: 'white',
-                fontFamily: 'Arame Mono, monospace',
-                textTransform: 'uppercase',
-                letterSpacing: '-3px',
-                lineHeight: 0.8,
-                opacity: 0
-              }}>
-                DESIGN
-              </div>
-              
-              <div style={{
-                fontSize: '8rem',
-                fontWeight: '900',
-                color: 'white',
-                fontFamily: 'Arame Mono, monospace',
-                textTransform: 'uppercase',
-                letterSpacing: '-3px',
-                lineHeight: 0.8,
-                opacity: 0
-              }}>
-                VISION
-              </div>
-              
-              {/* Final text that stays */}
-              <div style={{
-                fontSize: '8rem',
-                fontWeight: '900',
-                color: '#CCFF00',
-                fontFamily: 'Arame Mono, monospace',
-                textTransform: 'uppercase',
-                letterSpacing: '-3px',
-                lineHeight: 0.8,
-                opacity: 0,
-                textShadow: '0 0 30px rgba(204, 255, 0, 0.5)'
-              }}>
-                WELCOME
-              </div>
-            </div>
-          </div>
-        )}
-      </AnimatePresence>
-
-      {/* Main Content After Loading */}
-      <AnimatePresence>
-        {!showLoading && (
-          <motion.div
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: '1.5rem',
-              padding: '2rem',
-              zIndex: 10
-            }}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-          >
-            <motion.h1
-              style={{
-                fontSize: '2.5rem',
-                fontWeight: '300',
-                color: 'white',
-                fontFamily: 'Arame Mono, monospace',
-                textAlign: 'center',
-                marginBottom: '0.5rem',
-                letterSpacing: '2px'
-              }}
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.2, duration: 0.5 }}
-            >
-              WELCOME
-            </motion.h1>
-            
-            <motion.p
-              style={{
-                fontSize: '1rem',
-                fontWeight: '300',
-                color: 'rgba(255,255,255,0.7)',
-                fontFamily: 'Arame Mono, monospace',
-                textAlign: 'center',
-                maxWidth: '400px',
-                lineHeight: '1.5',
-                letterSpacing: '0.5px'
-              }}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.4, duration: 0.5 }}
-            >
-              Your space for creative thoughts and ideas
-            </motion.p>
-
-            <motion.button
-              onClick={navigateToNotes}
-              style={{
-                padding: '0.8rem 1.8rem',
-                fontSize: '0.9rem',
-                fontWeight: '300',
-                color: 'black',
-                backgroundColor: 'white',
-                border: 'none',
-                borderRadius: '6px',
-                cursor: 'pointer',
-                fontFamily: 'Arame Mono, monospace',
-                letterSpacing: '1px'
-              }}
-              whileHover={{ 
-                scale: 1.03,
-                backgroundColor: '#f8f8f8',
-                transition: { duration: 0.2 }
-              }}
-              whileTap={{ scale: 0.97 }}
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.6, duration: 0.5 }}
-            >
-              VIEW NOTES
-            </motion.button>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  );
-}
+            </
