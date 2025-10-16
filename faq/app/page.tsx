@@ -65,12 +65,13 @@ export default function HomePage(): React.JSX.Element {
       }
     );
 
-    // Photo stack animation
+    // Photo stack animation - FIXED VERSION
     if (photoStackRef.current) {
-      const photos = photoStackRef.current.children;
+      const photoElements = photoStackRef.current.children;
+      const photosArray = Array.from(photoElements); // Convert to array
       
       // Set initial positions - stacked dengan rotation random
-      gsap.set(Array.from(photos), {
+      gsap.set(photosArray, {
         opacity: 0,
         scale: 0.8,
         rotation: () => gsap.utils.random(-10, 10),
@@ -78,7 +79,7 @@ export default function HomePage(): React.JSX.Element {
       });
 
       // Staggered entrance untuk semua foto
-      tl.fromTo(Array.from(photos),
+      tl.fromTo(photosArray,
         {
           opacity: 0,
           scale: 0.8,
@@ -97,8 +98,8 @@ export default function HomePage(): React.JSX.Element {
         "+=0.3"
       );
 
-      // Sequential photo reveal animation
-      photos.forEach((photo, index) => {
+      // Sequential photo reveal animation - FIXED: Use array instead of HTMLCollection
+      photosArray.forEach((photo, index) => {
         // Scale up dan rotate sedikit untuk efek "active"
         tl.to(photo, {
           scale: 1.1,
@@ -116,7 +117,7 @@ export default function HomePage(): React.JSX.Element {
         }, `+=0.1`);
 
         // Move photo to side dengan fade out (kecuali foto terakhir)
-        if (index < photos.length - 1) {
+        if (index < photosArray.length - 1) {
           tl.to(photo, {
             x: gsap.utils.random(-200, 200),
             y: gsap.utils.random(-100, 100),
@@ -130,7 +131,7 @@ export default function HomePage(): React.JSX.Element {
       });
 
       // Final photo animation (last photo stays)
-      const lastPhoto = photos[photos.length - 1];
+      const lastPhoto = photosArray[photosArray.length - 1];
       tl.to(lastPhoto, {
         scale: 1.2,
         duration: 0.6,
@@ -907,7 +908,7 @@ export default function HomePage(): React.JSX.Element {
         )}
       </AnimatePresence>
 
-      {/* Photo Stack Preloader seperti rzkyprasetyo */}
+      {/* Photo Stack Preloader */}
       <AnimatePresence>
         {showLoading && (
           <div
