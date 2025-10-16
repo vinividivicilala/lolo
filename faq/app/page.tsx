@@ -20,23 +20,11 @@ export default function HomePage(): React.JSX.Element {
   const router = useRouter();
   const timeRef = useRef<NodeJS.Timeout | null>(null);
   const loadingRef = useRef<HTMLDivElement>(null);
-  const photoContainerRef = useRef<HTMLDivElement>(null);
-  const currentPhotoRef = useRef<HTMLDivElement>(null);
-  const nextPhotoRef = useRef<HTMLDivElement>(null);
-
-  // Sample photos - replace with your actual portrait images
-  const photos = [
-    { id: 1, src: "/images/1.jpg", alt: "Portrait 1" },
-    { id: 2, src: "/images/2.jpg", alt: "Portrait 2" },
-    { id: 3, src: "/images/3.jpg", alt: "Portrait 3" },
-    { id: 4, src: "/images/4.jpg", alt: "Portrait 4" },
-    { id: 5, src: "/images/5.jpg", alt: "Portrait 5" },
-    { id: 6, src: "/images/6.jpg", alt: "Portrait 6" }
-  ];
+  const textScrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (showLoading) {
-      startPhotographicLoadingAnimation();
+      startTextScrollAnimation();
     }
 
     // Initialize visitor time
@@ -52,7 +40,7 @@ export default function HomePage(): React.JSX.Element {
     };
   }, [showLoading]);
 
-  const startPhotographicLoadingAnimation = () => {
+  const startTextScrollAnimation = () => {
     const tl = gsap.timeline();
     
     // Background animation
@@ -62,130 +50,153 @@ export default function HomePage(): React.JSX.Element {
       },
       {
         opacity: 1,
-        duration: 0.5,
+        duration: 0.3,
         ease: "power2.out"
       }
     );
 
-    // Photographic loading animation
-    if (photoContainerRef.current && currentPhotoRef.current) {
-      let currentIndex = 0;
+    // High-speed text scroll animation
+    if (textScrollRef.current) {
+      const textLines = textScrollRef.current.children;
+      const textArray = Array.from(textLines);
       
-      // Function to show next photo
-      const showNextPhoto = () => {
-        if (currentIndex >= photos.length) {
-          // All photos shown, complete the animation
-          completeLoading();
-          return;
-        }
+      // Set initial positions - semua teks di atas layar
+      gsap.set(textArray, {
+        y: -1000,
+        opacity: 0,
+        scale: 1
+      });
 
-        const currentPhoto = currentPhotoRef.current;
-        const nextPhoto = nextPhotoRef.current;
-        const photoData = photos[currentIndex];
+      // ANIMASI SCROLL CEPAT: Teks masuk dari atas dengan kecepatan tinggi
+      // Line 1: Scroll ultra cepat
+      tl.to(textArray[0], {
+        y: 0,
+        opacity: 1,
+        duration: 0.4,
+        ease: "power2.out"
+      }, "+=0.1");
 
-        if (currentPhoto && nextPhoto) {
-          // Set current photo
-          const img = currentPhoto.querySelector('img');
-          if (img) {
-            img.src = photoData.src;
-            img.alt = photoData.alt;
-          }
+      tl.to(textArray[0], {
+        y: 1000,
+        opacity: 0,
+        duration: 0.3,
+        ease: "power2.in"
+      }, "+=0.1");
 
-          // Animation for current photo
-          gsap.set(currentPhoto, {
-            opacity: 0,
-            scale: 1.2,
-            rotation: 0
-          });
+      // Line 2: Scroll lebih cepat
+      tl.to(textArray[1], {
+        y: 0,
+        opacity: 1,
+        duration: 0.35,
+        ease: "power2.out"
+      }, "-=0.2");
 
-          // Photo entrance animation
-          tl.to(currentPhoto, {
-            opacity: 1,
-            scale: 1,
-            duration: 1.2,
-            ease: "power2.out"
-          }, "+=0.3");
+      tl.to(textArray[1], {
+        y: 1000,
+        opacity: 0,
+        duration: 0.25,
+        ease: "power2.in"
+      }, "+=0.1");
 
-          // Photo subtle movement
-          tl.to(currentPhoto, {
-            rotation: gsap.utils.random(-2, 2),
-            y: gsap.utils.random(-10, 10),
-            duration: 2,
-            ease: "sine.inOut"
-          });
+      // Line 3: Scroll sangat cepat
+      tl.to(textArray[2], {
+        y: 0,
+        opacity: 1,
+        duration: 0.3,
+        ease: "power2.out"
+      }, "-=0.15");
 
-          // Hold for a moment
-          tl.to({}, {
-            duration: 0.8
-          });
+      tl.to(textArray[2], {
+        y: 1000,
+        opacity: 0,
+        duration: 0.2,
+        ease: "power2.in"
+      }, "+=0.1");
 
-          // Photo exit animation (except for last photo)
-          if (currentIndex < photos.length - 1) {
-            tl.to(currentPhoto, {
-              opacity: 0,
-              scale: 0.8,
-              rotation: gsap.utils.random(-10, 10),
-              duration: 1,
-              ease: "power2.in"
-            });
-          }
+      // Line 4: Scroll hyper cepat
+      tl.to(textArray[3], {
+        y: 0,
+        opacity: 1,
+        duration: 0.25,
+        ease: "power2.out"
+      }, "-=0.1");
 
-          currentIndex++;
-          
-          // Schedule next photo
-          if (currentIndex < photos.length) {
-            tl.call(showNextPhoto);
-          } else {
-            tl.call(completeLoading);
-          }
-        }
-      };
+      tl.to(textArray[3], {
+        y: 1000,
+        opacity: 0,
+        duration: 0.15,
+        ease: "power2.in"
+      }, "+=0.1");
 
-      // Complete loading animation
-      const completeLoading = () => {
-        const currentPhoto = currentPhotoRef.current;
-        
-        if (currentPhoto) {
-          // Final photo emphasis
-          tl.to(currentPhoto, {
-            scale: 1.1,
-            duration: 0.6,
-            ease: "power2.out"
-          });
+      // Line 5: Scroll paling cepat
+      tl.to(textArray[4], {
+        y: 0,
+        opacity: 1,
+        duration: 0.2,
+        ease: "power2.out"
+      }, "-=0.05");
 
-          tl.to(currentPhoto, {
-            scale: 1,
-            duration: 0.4,
-            ease: "power2.in"
-          });
+      tl.to(textArray[4], {
+        y: 1000,
+        opacity: 0,
+        duration: 0.1,
+        ease: "power2.in"
+      }, "+=0.1");
 
-          // Floating effect
-          tl.to(currentPhoto, {
-            y: -15,
-            duration: 2,
-            ease: "sine.inOut",
-            yoyo: true,
-            repeat: 1
-          });
-        }
+      // FINAL TEXT: Muncul dan tetap
+      tl.to(textArray[5], {
+        y: 0,
+        opacity: 1,
+        scale: 1,
+        duration: 0.6,
+        ease: "back.out(1.7)"
+      }, "+=0.2");
 
-        // Final exit
-        tl.to({}, {
-          duration: 1,
-          onComplete: () => {
-            gsap.to(loadingRef.current, {
-              opacity: 0,
-              duration: 1,
-              ease: "power2.inOut",
-              onComplete: () => setShowLoading(false)
-            });
-          }
-        });
-      };
+      // Final text animation
+      tl.to(textArray[5], {
+        scale: 1.1,
+        duration: 0.3,
+        ease: "power2.out"
+      }, "+=0.5");
 
-      // Start the photo sequence
-      showNextPhoto();
+      tl.to(textArray[5], {
+        scale: 1,
+        duration: 0.2,
+        ease: "power2.in"
+      });
+
+      // Glitch effect pada final text
+      tl.to(textArray[5], {
+        x: 10,
+        duration: 0.05,
+        ease: "power1.inOut"
+      });
+
+      tl.to(textArray[5], {
+        x: -10,
+        duration: 0.05,
+        ease: "power1.inOut"
+      });
+
+      tl.to(textArray[5], {
+        x: 0,
+        duration: 0.05,
+        ease: "power1.inOut"
+      });
     }
+
+    // Final exit animation
+    tl.to({}, {
+      duration: 1,
+      onComplete: () => {
+        gsap.to(loadingRef.current, {
+          opacity: 0,
+          duration: 0.5,
+          ease: "power2.inOut",
+          onComplete: () => setShowLoading(false)
+        });
+      }
+    });
   };
 
   const updateVisitorTime = () => {
@@ -928,7 +939,7 @@ export default function HomePage(): React.JSX.Element {
         )}
       </AnimatePresence>
 
-      {/* Photographic Loading Animation */}
+      {/* High-Speed Text Scroll Loading Animation */}
       <AnimatePresence>
         {showLoading && (
           <div
@@ -948,95 +959,97 @@ export default function HomePage(): React.JSX.Element {
               overflow: 'hidden'
             }}
           >
-            {/* Photo Container */}
+            {/* Text Scroll Container */}
             <div
-              ref={photoContainerRef}
+              ref={textScrollRef}
               style={{
-                position: 'relative',
-                width: '400px',
-                height: '600px',
                 display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center'
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: '0rem'
               }}
             >
-              {/* Current Photo */}
-              <div
-                ref={currentPhotoRef}
-                style={{
-                  position: 'absolute',
-                  width: '100%',
-                  height: '100%',
-                  borderRadius: '20px',
-                  overflow: 'hidden',
-                  boxShadow: '0 20px 50px rgba(0,0,0,0.8)',
-                  border: '2px solid rgba(255,255,255,0.1)',
-                  opacity: 0
-                }}
-              >
-                <img
-                  src=""
-                  alt="Loading..."
-                  style={{
-                    width: '100%',
-                    height: '100%',
-                    objectFit: 'cover'
-                  }}
-                  onError={(e) => {
-                    e.currentTarget.style.backgroundColor = '#222';
-                    e.currentTarget.style.display = 'flex';
-                    e.currentTarget.style.justifyContent = 'center';
-                    e.currentTarget.style.alignItems = 'center';
-                    e.currentTarget.style.color = '#CCFF00';
-                    e.currentTarget.style.fontFamily = 'Arame Mono, monospace';
-                    e.currentTarget.style.fontSize = '1.2rem';
-                    e.currentTarget.innerHTML = 'Portrait Photo';
-                  }}
-                />
+              {/* High-speed scrolling text lines */}
+              <div style={{
+                fontSize: '8rem',
+                fontWeight: '900',
+                color: 'white',
+                fontFamily: 'Arame Mono, monospace',
+                textTransform: 'uppercase',
+                letterSpacing: '-3px',
+                lineHeight: 0.8,
+                opacity: 0
+              }}>
+                CREATIVE
               </div>
-
-              {/* Next Photo (hidden) */}
-              <div
-                ref={nextPhotoRef}
-                style={{
-                  position: 'absolute',
-                  width: '100%',
-                  height: '100%',
-                  borderRadius: '20px',
-                  overflow: 'hidden',
-                  opacity: 0,
-                  visibility: 'hidden'
-                }}
-              >
-                <img
-                  src=""
-                  alt="Next"
-                  style={{
-                    width: '100%',
-                    height: '100%',
-                    objectFit: 'cover'
-                  }}
-                />
+              
+              <div style={{
+                fontSize: '8rem',
+                fontWeight: '900',
+                color: 'white',
+                fontFamily: 'Arame Mono, monospace',
+                textTransform: 'uppercase',
+                letterSpacing: '-3px',
+                lineHeight: 0.8,
+                opacity: 0
+              }}>
+                PORTFOLIO
+              </div>
+              
+              <div style={{
+                fontSize: '8rem',
+                fontWeight: '900',
+                color: 'white',
+                fontFamily: 'Arame Mono, monospace',
+                textTransform: 'uppercase',
+                letterSpacing: '-3px',
+                lineHeight: 0.8,
+                opacity: 0
+              }}>
+                INNOVATION
+              </div>
+              
+              <div style={{
+                fontSize: '8rem',
+                fontWeight: '900',
+                color: 'white',
+                fontFamily: 'Arame Mono, monospace',
+                textTransform: 'uppercase',
+                letterSpacing: '-3px',
+                lineHeight: 0.8,
+                opacity: 0
+              }}>
+                DESIGN
+              </div>
+              
+              <div style={{
+                fontSize: '8rem',
+                fontWeight: '900',
+                color: 'white',
+                fontFamily: 'Arame Mono, monospace',
+                textTransform: 'uppercase',
+                letterSpacing: '-3px',
+                lineHeight: 0.8,
+                opacity: 0
+              }}>
+                VISION
+              </div>
+              
+              {/* Final text that stays */}
+              <div style={{
+                fontSize: '8rem',
+                fontWeight: '900',
+                color: '#CCFF00',
+                fontFamily: 'Arame Mono, monospace',
+                textTransform: 'uppercase',
+                letterSpacing: '-3px',
+                lineHeight: 0.8,
+                opacity: 0,
+                textShadow: '0 0 30px rgba(204, 255, 0, 0.5)'
+              }}>
+                WELCOME
               </div>
             </div>
-
-            {/* Loading Progress */}
-            <motion.div
-              style={{
-                marginTop: '3rem',
-                fontSize: '1rem',
-                fontWeight: '300',
-                color: 'rgba(255,255,255,0.7)',
-                fontFamily: 'Arame Mono, monospace',
-                letterSpacing: '2px',
-                textTransform: 'uppercase'
-              }}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.5, duration: 0.5 }}
-            >
-              Loading Portfolio
-            </motion.div>
           </div>
         )}
       </AnimatePresence>
