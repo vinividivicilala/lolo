@@ -20,21 +20,23 @@ export default function HomePage(): React.JSX.Element {
   const router = useRouter();
   const timeRef = useRef<NodeJS.Timeout | null>(null);
   const loadingRef = useRef<HTMLDivElement>(null);
-  const photoStackRef = useRef<HTMLDivElement>(null);
+  const photoContainerRef = useRef<HTMLDivElement>(null);
+  const currentPhotoRef = useRef<HTMLDivElement>(null);
+  const nextPhotoRef = useRef<HTMLDivElement>(null);
 
-  // Sample photos - replace with your actual images
+  // Sample photos - replace with your actual portrait images
   const photos = [
-    { id: 1, src: "/images/1.jpg", alt: "Photo 1" },
-    { id: 2, src: "/images/2.jpg", alt: "Photo 2" },
-    { id: 3, src: "/images/3.jpg", alt: "Photo 3" },
-    { id: 4, src: "/images/4.jpg", alt: "Photo 4" },
-    { id: 5, src: "/images/5.jpg", alt: "Photo 5" },
-    { id: 6, src: "/images/6.jpg", alt: "Photo 6" }
+    { id: 1, src: "/images/1.jpg", alt: "Portrait 1" },
+    { id: 2, src: "/images/2.jpg", alt: "Portrait 2" },
+    { id: 3, src: "/images/3.jpg", alt: "Portrait 3" },
+    { id: 4, src: "/images/4.jpg", alt: "Portrait 4" },
+    { id: 5, src: "/images/5.jpg", alt: "Portrait 5" },
+    { id: 6, src: "/images/6.jpg", alt: "Portrait 6" }
   ];
 
   useEffect(() => {
     if (showLoading) {
-      startGSAPLoadingAnimation();
+      startPhotographicLoadingAnimation();
     }
 
     // Initialize visitor time
@@ -50,7 +52,7 @@ export default function HomePage(): React.JSX.Element {
     };
   }, [showLoading]);
 
-  const startGSAPLoadingAnimation = () => {
+  const startPhotographicLoadingAnimation = () => {
     const tl = gsap.timeline();
     
     // Background animation
@@ -65,107 +67,125 @@ export default function HomePage(): React.JSX.Element {
       }
     );
 
-    // Photo stack animation - FIXED VERSION
-    if (photoStackRef.current) {
-      const photoElements = photoStackRef.current.children;
-      const photosArray = Array.from(photoElements); // Convert to array
+    // Photographic loading animation
+    if (photoContainerRef.current && currentPhotoRef.current) {
+      let currentIndex = 0;
       
-      // Set initial positions - stacked dengan rotation random
-      gsap.set(photosArray, {
-        opacity: 0,
-        scale: 0.8,
-        rotation: () => gsap.utils.random(-10, 10),
-        y: 100
-      });
-
-      // Staggered entrance untuk semua foto
-      tl.fromTo(photosArray,
-        {
-          opacity: 0,
-          scale: 0.8,
-          rotation: () => gsap.utils.random(-10, 10),
-          y: 100
-        },
-        {
-          opacity: 1,
-          scale: 1,
-          rotation: 0,
-          y: 0,
-          duration: 1.2,
-          stagger: 0.15,
-          ease: "back.out(1.7)"
-        },
-        "+=0.3"
-      );
-
-      // Sequential photo reveal animation - FIXED: Use array instead of HTMLCollection
-      photosArray.forEach((photo, index) => {
-        // Scale up dan rotate sedikit untuk efek "active"
-        tl.to(photo, {
-          scale: 1.1,
-          rotation: gsap.utils.random(-5, 5),
-          duration: 0.4,
-          ease: "power2.inOut"
-        }, `+=${index * 0.1}`);
-
-        // Kembali ke normal
-        tl.to(photo, {
-          scale: 1,
-          rotation: 0,
-          duration: 0.4,
-          ease: "power2.inOut"
-        }, `+=0.1`);
-
-        // Move photo to side dengan fade out (kecuali foto terakhir)
-        if (index < photosArray.length - 1) {
-          tl.to(photo, {
-            x: gsap.utils.random(-200, 200),
-            y: gsap.utils.random(-100, 100),
-            rotation: gsap.utils.random(-45, 45),
-            opacity: 0,
-            scale: 0.5,
-            duration: 0.8,
-            ease: "power2.inOut"
-          }, `+=0.2`);
+      // Function to show next photo
+      const showNextPhoto = () => {
+        if (currentIndex >= photos.length) {
+          // All photos shown, complete the animation
+          completeLoading();
+          return;
         }
-      });
 
-      // Final photo animation (last photo stays)
-      const lastPhoto = photosArray[photosArray.length - 1];
-      tl.to(lastPhoto, {
-        scale: 1.2,
-        duration: 0.6,
-        ease: "power2.out"
-      }, "+=0.3");
+        const currentPhoto = currentPhotoRef.current;
+        const nextPhoto = nextPhotoRef.current;
+        const photoData = photos[currentIndex];
 
-      tl.to(lastPhoto, {
-        scale: 1,
-        duration: 0.4,
-        ease: "power2.in"
-      });
+        if (currentPhoto && nextPhoto) {
+          // Set current photo
+          const img = currentPhoto.querySelector('img');
+          if (img) {
+            img.src = photoData.src;
+            img.alt = photoData.alt;
+          }
 
-      // Floating animation untuk final photo
-      tl.to(lastPhoto, {
-        y: -10,
-        duration: 1.5,
-        ease: "sine.inOut",
-        yoyo: true,
-        repeat: 1
-      });
-    }
+          // Animation for current photo
+          gsap.set(currentPhoto, {
+            opacity: 0,
+            scale: 1.2,
+            rotation: 0
+          });
 
-    // Final exit animation
-    tl.to({}, {
-      duration: 1,
-      onComplete: () => {
-        gsap.to(loadingRef.current, {
-          opacity: 0,
-          duration: 0.8,
-          ease: "power2.inOut",
-          onComplete: () => setShowLoading(false)
+          // Photo entrance animation
+          tl.to(currentPhoto, {
+            opacity: 1,
+            scale: 1,
+            duration: 1.2,
+            ease: "power2.out"
+          }, "+=0.3");
+
+          // Photo subtle movement
+          tl.to(currentPhoto, {
+            rotation: gsap.utils.random(-2, 2),
+            y: gsap.utils.random(-10, 10),
+            duration: 2,
+            ease: "sine.inOut"
+          });
+
+          // Hold for a moment
+          tl.to({}, {
+            duration: 0.8
+          });
+
+          // Photo exit animation (except for last photo)
+          if (currentIndex < photos.length - 1) {
+            tl.to(currentPhoto, {
+              opacity: 0,
+              scale: 0.8,
+              rotation: gsap.utils.random(-10, 10),
+              duration: 1,
+              ease: "power2.in"
+            });
+          }
+
+          currentIndex++;
+          
+          // Schedule next photo
+          if (currentIndex < photos.length) {
+            tl.call(showNextPhoto);
+          } else {
+            tl.call(completeLoading);
+          }
+        }
+      };
+
+      // Complete loading animation
+      const completeLoading = () => {
+        const currentPhoto = currentPhotoRef.current;
+        
+        if (currentPhoto) {
+          // Final photo emphasis
+          tl.to(currentPhoto, {
+            scale: 1.1,
+            duration: 0.6,
+            ease: "power2.out"
+          });
+
+          tl.to(currentPhoto, {
+            scale: 1,
+            duration: 0.4,
+            ease: "power2.in"
+          });
+
+          // Floating effect
+          tl.to(currentPhoto, {
+            y: -15,
+            duration: 2,
+            ease: "sine.inOut",
+            yoyo: true,
+            repeat: 1
+          });
+        }
+
+        // Final exit
+        tl.to({}, {
+          duration: 1,
+          onComplete: () => {
+            gsap.to(loadingRef.current, {
+              opacity: 0,
+              duration: 1,
+              ease: "power2.inOut",
+              onComplete: () => setShowLoading(false)
+            });
+          }
         });
-      }
-    });
+      };
+
+      // Start the photo sequence
+      showNextPhoto();
+    }
   };
 
   const updateVisitorTime = () => {
@@ -908,7 +928,7 @@ export default function HomePage(): React.JSX.Element {
         )}
       </AnimatePresence>
 
-      {/* Photo Stack Preloader */}
+      {/* Photographic Loading Animation */}
       <AnimatePresence>
         {showLoading && (
           <div
@@ -922,70 +942,93 @@ export default function HomePage(): React.JSX.Element {
               backgroundColor: 'black',
               zIndex: 50,
               display: 'flex',
+              flexDirection: 'column',
               justifyContent: 'center',
               alignItems: 'center',
               overflow: 'hidden'
             }}
           >
-            {/* Photo Stack Container */}
+            {/* Photo Container */}
             <div
-              ref={photoStackRef}
+              ref={photoContainerRef}
               style={{
                 position: 'relative',
+                width: '400px',
+                height: '600px',
                 display: 'flex',
                 justifyContent: 'center',
-                alignItems: 'center',
-                width: '300px',
-                height: '400px'
+                alignItems: 'center'
               }}
             >
-              {photos.map((photo, index) => (
-                <div
-                  key={photo.id}
+              {/* Current Photo */}
+              <div
+                ref={currentPhotoRef}
+                style={{
+                  position: 'absolute',
+                  width: '100%',
+                  height: '100%',
+                  borderRadius: '20px',
+                  overflow: 'hidden',
+                  boxShadow: '0 20px 50px rgba(0,0,0,0.8)',
+                  border: '2px solid rgba(255,255,255,0.1)',
+                  opacity: 0
+                }}
+              >
+                <img
+                  src=""
+                  alt="Loading..."
                   style={{
-                    position: 'absolute',
-                    width: '250px',
-                    height: '350px',
-                    borderRadius: '12px',
-                    overflow: 'hidden',
-                    boxShadow: '0 10px 30px rgba(0,0,0,0.5)',
-                    border: '1px solid rgba(255,255,255,0.1)',
-                    opacity: 0
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover'
                   }}
-                >
-                  <img
-                    src={photo.src}
-                    alt={photo.alt}
-                    style={{
-                      width: '100%',
-                      height: '100%',
-                      objectFit: 'cover'
-                    }}
-                    onError={(e) => {
-                      e.currentTarget.style.backgroundColor = '#333';
-                      e.currentTarget.style.display = 'flex';
-                      e.currentTarget.style.justifyContent = 'center';
-                      e.currentTarget.style.alignItems = 'center';
-                      e.currentTarget.style.color = '#CCFF00';
-                      e.currentTarget.style.fontFamily = 'Arame Mono, monospace';
-                      e.currentTarget.style.fontSize = '1rem';
-                      e.currentTarget.innerHTML = `Photo ${photo.id}`;
-                    }}
-                  />
-                </div>
-              ))}
+                  onError={(e) => {
+                    e.currentTarget.style.backgroundColor = '#222';
+                    e.currentTarget.style.display = 'flex';
+                    e.currentTarget.style.justifyContent = 'center';
+                    e.currentTarget.style.alignItems = 'center';
+                    e.currentTarget.style.color = '#CCFF00';
+                    e.currentTarget.style.fontFamily = 'Arame Mono, monospace';
+                    e.currentTarget.style.fontSize = '1.2rem';
+                    e.currentTarget.innerHTML = 'Portrait Photo';
+                  }}
+                />
+              </div>
+
+              {/* Next Photo (hidden) */}
+              <div
+                ref={nextPhotoRef}
+                style={{
+                  position: 'absolute',
+                  width: '100%',
+                  height: '100%',
+                  borderRadius: '20px',
+                  overflow: 'hidden',
+                  opacity: 0,
+                  visibility: 'hidden'
+                }}
+              >
+                <img
+                  src=""
+                  alt="Next"
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover'
+                  }}
+                />
+              </div>
             </div>
 
-            {/* Loading Text */}
+            {/* Loading Progress */}
             <motion.div
               style={{
-                position: 'absolute',
-                bottom: '3rem',
-                fontSize: '0.9rem',
+                marginTop: '3rem',
+                fontSize: '1rem',
                 fontWeight: '300',
-                color: 'rgba(255,255,255,0.6)',
+                color: 'rgba(255,255,255,0.7)',
                 fontFamily: 'Arame Mono, monospace',
-                letterSpacing: '1px',
+                letterSpacing: '2px',
                 textTransform: 'uppercase'
               }}
               initial={{ opacity: 0 }}
