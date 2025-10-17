@@ -709,7 +709,7 @@ export default function HomePage(): React.JSX.Element {
                 <div style={{
                   display: 'flex',
                   flexDirection: 'column',
-                  gap: '0rem'
+                  gap: '2rem'
                 }}>
                   {menuItems.map((item, index) => (
                     <motion.div
@@ -718,9 +718,9 @@ export default function HomePage(): React.JSX.Element {
                         position: 'relative',
                         cursor: 'pointer',
                         display: 'flex',
-                        alignItems: 'center',
-                        padding: '0.1rem 0',
-                        margin: '-0.2rem 0'
+                        flexDirection: 'column',
+                        alignItems: 'flex-start',
+                        padding: '0.5rem 0'
                       }}
                       onMouseEnter={() => setHoveredItem(item.name)}
                       onMouseLeave={() => setHoveredItem(null)}
@@ -734,20 +734,20 @@ export default function HomePage(): React.JSX.Element {
                         transition: { duration: 0.2, ease: "easeOut" }
                       }}
                     >
-                      {/* Menu Text dengan font besar */}
+                      {/* Menu Text dengan font besar 80px */}
                       <motion.div
                         style={{
-                          fontSize: '40px',
+                          fontSize: '80px',
                           fontWeight: '300',
                           color: 'rgba(0,0,0,0.8)',
                           fontFamily: 'Arame Mono, monospace',
-                          lineHeight: 1.2,
-                          letterSpacing: '-0.5px',
+                          lineHeight: 1,
+                          letterSpacing: '-2px',
                           textTransform: 'uppercase',
                           display: 'flex',
                           flexDirection: 'column',
                           alignItems: 'flex-start',
-                          gap: '0.5rem'
+                          gap: '1rem'
                         }}
                         animate={{
                           color: hoveredItem === item.name ? '#000' : 'rgba(0,0,0,0.8)',
@@ -756,16 +756,17 @@ export default function HomePage(): React.JSX.Element {
                       >
                         {item.name}
                         
-                        {/* Line bawah */}
+                        {/* Line bawah - TETAP ADA TANPA HOVER */}
                         <motion.div
                           style={{
-                            width: hoveredItem === item.name ? '100%' : '0%',
-                            height: '2px',
-                            backgroundColor: '#000',
-                            transition: 'width 0.3s ease'
+                            width: '100%',
+                            height: '3px',
+                            backgroundColor: hoveredItem === item.name ? '#000' : 'rgba(0,0,0,0.3)',
+                            transition: 'all 0.3s ease'
                           }}
                           animate={{
-                            width: hoveredItem === item.name ? '100%' : '0%'
+                            backgroundColor: hoveredItem === item.name ? '#000' : 'rgba(0,0,0,0.3)',
+                            height: hoveredItem === item.name ? '4px' : '3px'
                           }}
                           transition={{ duration: 0.3 }}
                         />
