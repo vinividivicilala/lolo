@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect, useRef } from "react";
@@ -608,120 +609,6 @@ export default function HomePage(): React.JSX.Element {
       WebkitFontSmoothing: 'antialiased',
       MozOsxFontSmoothing: 'grayscale'
     }}>
-      {/* Loading Screen */}
-      <AnimatePresence>
-        {showLoading && (
-          <motion.div
-            ref={loadingRef}
-            style={{
-              position: 'fixed',
-              top: 0,
-              left: 0,
-              width: '100%',
-              height: '100%',
-              backgroundColor: 'black',
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              zIndex: 50,
-              color: 'white',
-              fontFamily: 'Arame Mono, monospace'
-            }}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-          >
-            <div ref={textScrollRef} style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: '1rem',
-              fontSize: '2rem',
-              fontWeight: '300'
-            }}>
-              <div>WELCOME</div>
-              <div>TO MY</div>
-              <div>PORTFOLIO</div>
-              <div>CREATIVE</div>
-              <div>DESIGN</div>
-              <div style={{
-                fontSize: '3rem',
-                fontWeight: '400',
-                color: '#CCFF00',
-                marginTop: '2rem'
-              }}>
-                SFGHAR
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Main Content */}
-      {!showLoading && (
-        <div style={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: '2rem',
-          color: 'white',
-          textAlign: 'center'
-        }}>
-          <motion.h1
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            style={{
-              fontSize: '4rem',
-              fontWeight: '300',
-              margin: 0
-            }}
-          >
-            SFGHAR
-          </motion.h1>
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.4 }}
-            style={{
-              fontSize: '1.2rem',
-              fontWeight: '300',
-              opacity: 0.8,
-              maxWidth: '500px',
-              lineHeight: 1.6
-            }}
-          >
-            Creative developer & designer crafting digital experiences
-          </motion.p>
-          <motion.button
-            onClick={navigateToNotes}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.6 }}
-            style={{
-              padding: '1rem 2rem',
-              fontSize: '1rem',
-              fontWeight: '300',
-              backgroundColor: 'transparent',
-              color: 'white',
-              border: '1px solid rgba(255,255,255,0.3)',
-              borderRadius: '30px',
-              cursor: 'pointer',
-              fontFamily: 'Arame Mono, monospace',
-              letterSpacing: '1px'
-            }}
-            whileHover={{
-              backgroundColor: '#CCFF00',
-              color: 'black',
-              borderColor: '#CCFF00'
-            }}
-          >
-            VIEW NOTES
-          </motion.button>
-        </div>
-      )}
-
       {/* Menu Button with Framer Motion */}
       <motion.div
         onClick={toggleMenu}
@@ -1158,71 +1045,165 @@ export default function HomePage(): React.JSX.Element {
                     fontSize: '0.9rem',
                     fontWeight: '400',
                     color: 'rgba(0,0,0,0.8)',
-                    fontFamily: 'Arame Mono, monospace',
-                    textTransform: 'uppercase',
-                    letterSpacing: '1px'
+                    fontFamily: 'Arame Mono, monospace'
                   }}
                 >
-                  <span>{visitorTime.timezone}</span>
-                  <span style={{ opacity: 0.5 }}>•</span>
-                  <span>{visitorTime.date}</span>
+                  <span style={{ 
+                    backgroundColor: 'rgba(0,0,0,0.1)',
+                    padding: '0.2rem 0.6rem',
+                    borderRadius: '12px',
+                    fontWeight: '500'
+                  }}>
+                    {visitorTime.timezone}
+                  </span>
+                  <span>
+                    {visitorTime.date}
+                  </span>
                 </motion.div>
               </motion.div>
-
-              {/* Close Button - Top Right */}
+            </motion.div>
+            
+            {/* Close Button */}
+            <motion.button
+              onClick={toggleMenu}
+              onMouseEnter={() => setIsCloseHovered(true)}
+              onMouseLeave={() => setIsCloseHovered(false)}
+              style={{
+                position: 'fixed',
+                top: '1.8rem',
+                right: '1.8rem',
+                width: '100px',
+                height: '45px',
+                borderRadius: '25px',
+                border: 'none',
+                backgroundColor: 'rgba(0,0,0,0.1)',
+                cursor: 'pointer',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                zIndex: 30,
+                backdropFilter: 'blur(10px)',
+                padding: '0 1.5rem',
+                fontFamily: 'Arame Mono, monospace',
+                fontSize: '0.9rem',
+                fontWeight: '300',
+                color: 'rgba(0,0,0,0.7)',
+                overflow: 'hidden'
+              }}
+              variants={closeButtonVariants}
+              initial="closed"
+              animate="open"
+              exit="closed"
+              whileHover={{ 
+                scale: 1.05,
+                backgroundColor: 'rgba(0,0,0,0.2)',
+                transition: { duration: 0.2 }
+              }}
+              whileTap={{ scale: 0.95 }}
+            >
               <motion.div
-                onClick={toggleMenu}
-                onMouseEnter={() => setIsCloseHovered(true)}
-                onMouseLeave={() => setIsCloseHovered(false)}
                 style={{
-                  position: 'absolute',
-                  right: '2rem',
-                  top: '2rem',
-                  width: '50px',
-                  height: '50px',
-                  borderRadius: '50%',
-                  border: '1px solid rgba(0,0,0,0.2)',
                   display: 'flex',
-                  justifyContent: 'center',
                   alignItems: 'center',
-                  cursor: 'pointer',
-                  backgroundColor: 'rgba(0,0,0,0.05)',
-                  backdropFilter: 'blur(10px)'
-                }}
-                variants={closeButtonVariants}
-                initial="closed"
-                animate="open"
-                exit="closed"
-                whileHover={{
-                  backgroundColor: 'rgba(0,0,0,0.1)',
-                  borderColor: 'rgba(0,0,0,0.4)',
-                  scale: 1.05
-                }}
-                whileTap={{
-                  scale: 0.95
+                  gap: '0.5rem',
+                  position: 'relative',
+                  width: '100%',
+                  justifyContent: 'center'
                 }}
               >
+                {/* X Icon */}
                 <motion.svg
-                  width="20"
-                  height="20"
+                  width="16"
+                  height="16"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
-                  strokeWidth="1.5"
+                  strokeWidth="2.5"
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  animate={{
-                    rotate: isCloseHovered ? 90 : 0,
-                    scale: isCloseHovered ? 1.1 : 1
+                  initial={{ scale: 1, opacity: 1 }}
+                  animate={{ 
+                    scale: isCloseHovered ? 0 : 1,
+                    opacity: isCloseHovered ? 0 : 1
                   }}
                   transition={{ duration: 0.2 }}
                 >
                   <line x1="18" y1="6" x2="6" y2="18" />
                   <line x1="6" y1="6" x2="18" y2="18" />
                 </motion.svg>
+
+                {/* Close Text */}
+                <motion.span
+                  style={{
+                    position: 'absolute',
+                    left: '50%',
+                    transform: 'translateX(-50%)',
+                    whiteSpace: 'nowrap',
+                    fontSize: '0.9rem',
+                    fontWeight: '300',
+                    letterSpacing: '0.5px'
+                  }}
+                  initial={{ scale: 0, opacity: 0 }}
+                  animate={{ 
+                    scale: isCloseHovered ? 1 : 0,
+                    opacity: isCloseHovered ? 1 : 0
+                  }}
+                  transition={{ duration: 0.2 }}
+                >
+                  CLOSE
+                </motion.span>
               </motion.div>
-            </motion.div>
-          </>
+                        </motion.button>
+            
+            {/* Loading Screen */}
+            <AnimatePresence>
+              {showLoading && (
+                <motion.div
+                  ref={loadingRef}
+                  style={{
+                    position: 'fixed',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: '100%',
+                    backgroundColor: 'black',
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    zIndex: 50,
+                    color: 'white',
+                    fontFamily: 'Arame Mono, monospace'
+                  }}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                >
+                  <div ref={textScrollRef} style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    gap: '1rem',
+                    fontSize: '2rem',
+                    fontWeight: '300'
+                  }}>
+                    <div>WELCOME</div>
+                    <div>TO MY</div>
+                    <div>PORTFOLIO</div>
+                    <div>CREATIVE</div>
+                    <div>DESIGN</div>
+                    <div style={{
+                      fontSize: '3rem',
+                      fontWeight: '400',
+                      color: '#CCFF00',
+                      marginTop: '2rem'
+                    }}>
+                      SFGHAR
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
         )}
       </AnimatePresence>
     </div>
