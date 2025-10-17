@@ -343,6 +343,7 @@ export default function HomePage(): React.JSX.Element {
       'Asia/Jakarta': 'WIB',
       'Asia/Pontianak': 'WIB',
       'Asia/Makassar': 'WITA',
+      'Asia/Bali': 'WITA',
       'Asia/Jayapura': 'WIT',
       'Asia/Singapore': 'SGT',
       'Asia/Tokyo': 'JST',
@@ -1352,3 +1353,4 @@ export default function HomePage(): React.JSX.Element {
     </div>
   );
 }
+
