@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect, useRef } from "react";
@@ -63,7 +62,7 @@ export default function HomePage(): React.JSX.Element {
         gsap.set(previewImageRef.current, {
           scale: 0.8,
           opacity: 0,
-          x: 100
+          rotation: -5
         });
 
         gsap.set(viewCircleRef.current, {
@@ -96,7 +95,7 @@ export default function HomePage(): React.JSX.Element {
       tl.to(previewImageRef.current, {
         scale: 1,
         opacity: 1,
-        x: 0,
+        rotation: 0,
         duration: 0.6,
         ease: "back.out(1.7)"
       });
@@ -130,7 +129,7 @@ export default function HomePage(): React.JSX.Element {
       tl.to(previewImageRef.current, {
         scale: 0.8,
         opacity: 0,
-        x: 100,
+        rotation: 5,
         duration: 0.4,
         ease: "power2.in"
       });
@@ -749,14 +748,104 @@ export default function HomePage(): React.JSX.Element {
               animate="open"
               exit="closed"
             >
-              {/* Navigation Menu - Left Side */}
+              {/* Main Content - Navigation Menu - SISI KIRI */}
               <div style={{
                 flex: 1,
                 display: 'flex',
                 flexDirection: 'column',
                 justifyContent: 'center',
-                paddingLeft: '2rem'
+                paddingLeft: '2rem',
+                marginTop: '6rem'
               }}>
+                {/* Website Name - Top Left */}
+                <motion.div
+                  style={{
+                    position: 'absolute',
+                    left: '2rem',
+                    top: '2rem',
+                    fontSize: '1.2rem',
+                    fontWeight: '300',
+                    color: 'rgba(0,0,0,0.6)',
+                    fontFamily: 'Arame Mono, monospace',
+                    lineHeight: 1,
+                    letterSpacing: '0.5px'
+                  }}
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ 
+                    duration: 0.4,
+                    delay: 0.3
+                  }}
+                >
+                  PORTFOLIO
+                </motion.div>
+
+                {/* Visitor Time Display - TOP CENTER */}
+                <motion.div
+                  style={{
+                    position: 'absolute',
+                    top: '2rem',
+                    left: '50%',
+                    transform: 'translateX(-50%)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    gap: '0.3rem'
+                  }}
+                  variants={timeVariants}
+                  initial="hidden"
+                  animate="visible"
+                  exit="hidden"
+                >
+                  {/* Time - Font Besar */}
+                  <motion.div
+                    style={{
+                      fontSize: '2.5rem',
+                      fontWeight: '400',
+                      color: 'rgba(0,0,0,0.9)',
+                      fontFamily: 'Arame Mono, monospace',
+                      fontFeatureSettings: '"tnum"',
+                      fontVariantNumeric: 'tabular-nums',
+                      letterSpacing: '2px'
+                    }}
+                    animate={{
+                      scale: [1, 1.02, 1],
+                      transition: {
+                        duration: 1,
+                        repeat: Infinity,
+                        repeatType: "reverse"
+                      }
+                    }}
+                  >
+                    {visitorTime.time}
+                  </motion.div>
+
+                  {/* Timezone & Date */}
+                  <motion.div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '1rem',
+                      fontSize: '0.9rem',
+                      fontWeight: '400',
+                      color: 'rgba(0,0,0,0.8)',
+                      fontFamily: 'Arame Mono, monospace'
+                    }}
+                  >
+                    <span style={{ 
+                      backgroundColor: 'rgba(0,0,0,0.1)',
+                      padding: '0.2rem 0.6rem',
+                      borderRadius: '12px',
+                      fontWeight: '500'
+                    }}>
+                      {visitorTime.timezone}
+                    </span>
+                    <span>
+                      {visitorTime.date}
+                    </span>
+                  </motion.div>
+                </motion.div>
+
                 {/* Menu Items */}
                 <div style={{
                   display: 'flex',
@@ -856,7 +945,7 @@ export default function HomePage(): React.JSX.Element {
                 </div>
               </div>
 
-              {/* Coming Soon Section - Right Side */}
+              {/* Coming Soon Section - SISI KANAN */}
               <div
                 ref={comingSoonRef}
                 style={{
@@ -865,20 +954,21 @@ export default function HomePage(): React.JSX.Element {
                   flexDirection: 'column',
                   justifyContent: 'center',
                   alignItems: 'flex-end',
-                  paddingRight: '2rem',
+                  paddingRight: '4rem',
                   position: 'relative'
                 }}
               >
-                {/* Coming Soon Text */}
+                {/* Coming Soon Text - SEJAJAR */}
                 <motion.div
                   style={{
                     fontSize: '5rem',
-                    fontWeight: '300',
+                    fontWeight: '300', // Font tipis
                     color: 'rgba(0,0,0,0.8)',
                     fontFamily: 'Arame Mono, monospace',
-                    lineHeight: 0.9,
+                    lineHeight: 1, // Sejajar
                     letterSpacing: '-2px',
                     textTransform: 'uppercase',
+                    marginBottom: '0.5rem',
                     cursor: 'pointer',
                     textAlign: 'right'
                   }}
@@ -889,20 +979,7 @@ export default function HomePage(): React.JSX.Element {
                   onMouseEnter={handleComingSoonHover}
                   onMouseLeave={handleComingSoonLeave}
                 >
-                  COMING<br />SOON
-                  <motion.span
-                    style={{
-                      fontSize: '1.5rem',
-                      fontWeight: '300',
-                      color: 'rgba(0,0,0,0.6)',
-                      marginLeft: '0.5rem'
-                    }}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.8 }}
-                  >
-                    (1)
-                  </motion.span>
+                  COMING SOON (1)
                 </motion.div>
 
                 {/* Preview Image - Hidden by default */}
@@ -972,95 +1049,6 @@ export default function HomePage(): React.JSX.Element {
                   VIEW
                 </div>
               </div>
-
-              {/* Website Name - Top Left */}
-              <motion.div
-                style={{
-                  position: 'absolute',
-                  left: '2rem',
-                  top: '2rem',
-                  fontSize: '1.2rem',
-                  fontWeight: '300',
-                  color: 'rgba(0,0,0,0.6)',
-                  fontFamily: 'Arame Mono, monospace',
-                  lineHeight: 1,
-                  letterSpacing: '0.5px'
-                }}
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ 
-                  duration: 0.4,
-                  delay: 0.3
-                }}
-              >
-                PORTFOLIO
-              </motion.div>
-
-              {/* Visitor Time Display - TOP CENTER */}
-              <motion.div
-                style={{
-                  position: 'absolute',
-                  top: '2rem',
-                  left: '50%',
-                  transform: 'translateX(-50%)',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  gap: '0.3rem'
-                }}
-                variants={timeVariants}
-                initial="hidden"
-                animate="visible"
-                exit="hidden"
-              >
-                {/* Time - Font Besar */}
-                <motion.div
-                  style={{
-                    fontSize: '2.5rem',
-                    fontWeight: '400',
-                    color: 'rgba(0,0,0,0.9)',
-                    fontFamily: 'Arame Mono, monospace',
-                    fontFeatureSettings: '"tnum"',
-                    fontVariantNumeric: 'tabular-nums',
-                    letterSpacing: '2px'
-                  }}
-                  animate={{
-                    scale: [1, 1.02, 1],
-                    transition: {
-                      duration: 1,
-                      repeat: Infinity,
-                      repeatType: "reverse"
-                    }
-                  }}
-                >
-                  {visitorTime.time}
-                </motion.div>
-
-                {/* Timezone & Date */}
-                <motion.div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '1rem',
-                    fontSize: '0.9rem',
-                    fontWeight: '400',
-                    color: 'rgba(0,0,0,0.8)',
-                    fontFamily: 'Arame Mono, monospace'
-                  }}
-                >
-                  <span style={{ 
-                    backgroundColor: 'rgba(0,0,0,0.1)',
-                    padding: '0.2rem 0.6rem',
-                    borderRadius: '12px',
-                    fontWeight: '500'
-                  }}>
-                    {visitorTime.timezone}
-                  </span>
-                  <span>
-                    {visitorTime.date}
-                  </span>
-                </motion.div>
-              </motion.div>
             </motion.div>
             
             {/* Close Button */}
@@ -1153,56 +1141,58 @@ export default function HomePage(): React.JSX.Element {
                   CLOSE
                 </motion.span>
               </motion.div>
-                        </motion.button>
-            
-            {/* Loading Screen */}
-            <AnimatePresence>
-              {showLoading && (
-                <motion.div
-                  ref={loadingRef}
-                  style={{
-                    position: 'fixed',
-                    top: 0,
-                    left: 0,
-                    width: '100%',
-                    height: '100%',
-                    backgroundColor: 'black',
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    zIndex: 50,
-                    color: 'white',
-                    fontFamily: 'Arame Mono, monospace'
-                  }}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                >
-                  <div ref={textScrollRef} style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    gap: '1rem',
-                    fontSize: '2rem',
-                    fontWeight: '300'
-                  }}>
-                    <div>WELCOME</div>
-                    <div>TO MY</div>
-                    <div>PORTFOLIO</div>
-                    <div>CREATIVE</div>
-                    <div>DESIGN</div>
-                    <div style={{
-                      fontSize: '3rem',
-                      fontWeight: '400',
-                      color: '#CCFF00',
-                      marginTop: '2rem'
-                    }}>
-                      SFGHAR
-                    </div>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
+            </motion.button>
+          </>
+        )}
+      </AnimatePresence>
+
+      {/* High-Speed Text Scroll Loading Animation */}
+      <AnimatePresence>
+        {showLoading && (
+          <div
+            ref={loadingRef}
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              backgroundColor: 'black',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              zIndex: 50,
+              fontFamily: 'Arame Mono, monospace'
+            }}
+          >
+            <div
+              ref={textScrollRef}
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: '0.5rem',
+                color: 'white',
+                fontSize: '2.5rem',
+                fontWeight: '300',
+                textTransform: 'uppercase',
+                letterSpacing: '2px'
+              }}
+            >
+              <div>Creative Studio</div>
+              <div>Digital Design</div>
+              <div>Visual Experience</div>
+              <div>Portfolio 2024</div>
+              <div>Innovation</div>
+              <div style={{ 
+                fontSize: '3rem',
+                fontWeight: '400',
+                letterSpacing: '3px',
+                textAlign: 'center'
+              }}>
+                Welcome
+              </div>
+            </div>
           </div>
         )}
       </AnimatePresence>
