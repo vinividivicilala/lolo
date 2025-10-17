@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { gsap } from "gsap";
 
 export default function HomePage(): React.JSX.Element {
+  // ... semua state dan ref yang sudah ada tetap sama ...
   const [showLoading, setShowLoading] = useState(true);
   const [showMenu, setShowMenu] = useState(false);
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
@@ -582,6 +583,13 @@ export default function HomePage(): React.JSX.Element {
     </svg>
   );
 
+  const ArrowIcon = () => (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <line x1="5" y1="12" x2="19" y2="12"/>
+      <polyline points="12 5 19 12 12 19"/>
+    </svg>
+  );
+
   const getIcon = (name: string) => {
     switch (name) {
       case "HOME": return <HomeIcon />;
@@ -754,8 +762,8 @@ export default function HomePage(): React.JSX.Element {
                 display: 'flex',
                 flexDirection: 'column',
                 justifyContent: 'center',
-                paddingLeft: '2rem',
-                marginTop: '6rem'
+                paddingLeft: '4rem',
+                position: 'relative'
               }}>
                 {/* Website Name - Top Left */}
                 <motion.div
@@ -1158,42 +1166,187 @@ export default function HomePage(): React.JSX.Element {
               width: '100%',
               height: '100%',
               backgroundColor: 'black',
+              zIndex: 50,
               display: 'flex',
+              flexDirection: 'column',
               justifyContent: 'center',
               alignItems: 'center',
-              zIndex: 50,
-              fontFamily: 'Arame Mono, monospace'
+              overflow: 'hidden'
             }}
           >
+            {/* Text Scroll Container */}
             <div
               ref={textScrollRef}
               style={{
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
-                gap: '0.5rem',
-                color: 'white',
-                fontSize: '2.5rem',
-                fontWeight: '300',
-                textTransform: 'uppercase',
-                letterSpacing: '2px'
+                gap: '0rem'
               }}
             >
-              <div>Creative Studio</div>
-              <div>Digital Design</div>
-              <div>Visual Experience</div>
-              <div>Portfolio 2024</div>
-              <div>Innovation</div>
-              <div style={{ 
-                fontSize: '3rem',
-                fontWeight: '400',
-                letterSpacing: '3px',
-                textAlign: 'center'
+              {/* High-speed scrolling text lines */}
+              <div style={{
+                fontSize: '8rem',
+                fontWeight: '900',
+                color: 'white',
+                fontFamily: 'Arame Mono, monospace',
+                textTransform: 'uppercase',
+                letterSpacing: '-3px',
+                lineHeight: 0.8,
+                opacity: 0
               }}>
-                Welcome
+                CREATIVE
+              </div>
+              
+              <div style={{
+                fontSize: '8rem',
+                fontWeight: '900',
+                color: 'white',
+                fontFamily: 'Arame Mono, monospace',
+                textTransform: 'uppercase',
+                letterSpacing: '-3px',
+                lineHeight: 0.8,
+                opacity: 0
+              }}>
+                PORTFOLIO
+              </div>
+              
+              <div style={{
+                fontSize: '8rem',
+                fontWeight: '900',
+                color: 'white',
+                fontFamily: 'Arame Mono, monospace',
+                textTransform: 'uppercase',
+                letterSpacing: '-3px',
+                lineHeight: 0.8,
+                opacity: 0
+              }}>
+                INNOVATION
+              </div>
+              
+              <div style={{
+                fontSize: '8rem',
+                fontWeight: '900',
+                color: 'white',
+                fontFamily: 'Arame Mono, monospace',
+                textTransform: 'uppercase',
+                letterSpacing: '-3px',
+                lineHeight: 0.8,
+                opacity: 0
+              }}>
+                DESIGN
+              </div>
+              
+              <div style={{
+                fontSize: '8rem',
+                fontWeight: '900',
+                color: 'white',
+                fontFamily: 'Arame Mono, monospace',
+                textTransform: 'uppercase',
+                letterSpacing: '-3px',
+                lineHeight: 0.8,
+                opacity: 0
+              }}>
+                VISION
+              </div>
+              
+              {/* Final text that stays */}
+              <div style={{
+                fontSize: '8rem',
+                fontWeight: '900',
+                color: '#CCFF00',
+                fontFamily: 'Arame Mono, monospace',
+                textTransform: 'uppercase',
+                letterSpacing: '-3px',
+                lineHeight: 0.8,
+                opacity: 0,
+                textShadow: '0 0 30px rgba(204, 255, 0, 0.5)'
+              }}>
+                WELCOME
               </div>
             </div>
           </div>
+        )}
+      </AnimatePresence>
+
+      {/* Main Content After Loading */}
+      <AnimatePresence>
+        {!showLoading && (
+          <motion.div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '1.5rem',
+              padding: '2rem',
+              zIndex: 10
+            }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+          >
+            <motion.h1
+              style={{
+                fontSize: '2.5rem',
+                fontWeight: '300',
+                color: 'white',
+                fontFamily: 'Arame Mono, monospace',
+                textAlign: 'center',
+                marginBottom: '0.5rem',
+                letterSpacing: '2px'
+              }}
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.2, duration: 0.5 }}
+            >
+              WELCOME
+            </motion.h1>
+            
+            <motion.p
+              style={{
+                fontSize: '1rem',
+                fontWeight: '300',
+                color: 'rgba(255,255,255,0.7)',
+                fontFamily: 'Arame Mono, monospace',
+                textAlign: 'center',
+                maxWidth: '400px',
+                lineHeight: '1.5',
+                letterSpacing: '0.5px'
+              }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.4, duration: 0.5 }}
+            >
+              Your space for creative thoughts and ideas
+            </motion.p>
+
+            <motion.button
+              onClick={navigateToNotes}
+              style={{
+                padding: '0.8rem 1.8rem',
+                fontSize: '0.9rem',
+                fontWeight: '300',
+                color: 'black',
+                backgroundColor: 'white',
+                border: 'none',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                fontFamily: 'Arame Mono, monospace',
+                letterSpacing: '1px'
+              }}
+              whileHover={{ 
+                scale: 1.03,
+                backgroundColor: '#f8f8f8',
+                transition: { duration: 0.2 }
+              }}
+              whileTap={{ scale: 0.97 }}
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.6, duration: 0.5 }}
+            >
+              VIEW NOTES
+            </motion.button>
+          </motion.div>
         )}
       </AnimatePresence>
     </div>
