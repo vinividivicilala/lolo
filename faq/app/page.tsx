@@ -18,24 +18,10 @@ export default function HomePage(): React.JSX.Element {
     timezone: "",
     date: ""
   });
-  const [isComingSoonHovered, setIsComingSoonHovered] = useState(false);
   const router = useRouter();
   const timeRef = useRef<NodeJS.Timeout | null>(null);
   const loadingRef = useRef<HTMLDivElement>(null);
   const textScrollRef = useRef<HTMLDivElement>(null);
-  const comingSoonRef = useRef<HTMLDivElement>(null);
-  const previewImageRef = useRef<HTMLDivElement>(null);
-  const viewCircleRef = useRef<HTMLDivElement>(null);
-
-  // Sample project images for coming soon preview
-  const projectImages = [
-    { id: 1, src: "/images/1.jpg", alt: "Project 1", title: "Creative Studio" },
-    { id: 2, src: "/images/2.jpg", alt: "Project 2", title: "Brand Identity" },
-    { id: 3, src: "/images/3.jpg", alt: "Project 3", title: "Web Design" },
-    { id: 4, src: "/images/4.jpg", alt: "Project 4", title: "Photography" },
-    { id: 5, src: "/images/5.jpg", alt: "Project 5", title: "Motion Graphics" },
-    { id: 6, src: "/images/6.jpg", alt: "Project 6", title: "UI/UX Design" }
-  ];
 
   useEffect(() => {
     if (showLoading) {
@@ -54,96 +40,6 @@ export default function HomePage(): React.JSX.Element {
       }
     };
   }, [showLoading]);
-
-  // GSAP animation for coming soon hover effect
-  useEffect(() => {
-    if (comingSoonRef.current && previewImageRef.current && viewCircleRef.current) {
-      const ctx = gsap.context(() => {
-        // Initial state
-        gsap.set(previewImageRef.current, {
-          scale: 0.8,
-          opacity: 0,
-          rotation: -5
-        });
-
-        gsap.set(viewCircleRef.current, {
-          scale: 0,
-          opacity: 0
-        });
-      }, comingSoonRef);
-
-      return () => ctx.revert();
-    }
-  }, []);
-
-  const handleComingSoonHover = () => {
-    setIsComingSoonHovered(true);
-    
-    if (previewImageRef.current && viewCircleRef.current) {
-      const tl = gsap.timeline();
-      
-      // Random project image
-      const randomImage = projectImages[Math.floor(Math.random() * projectImages.length)];
-      
-      // Update preview image
-      const img = previewImageRef.current.querySelector('img');
-      if (img) {
-        img.src = randomImage.src;
-        img.alt = randomImage.alt;
-      }
-
-      // Preview image animation
-      tl.to(previewImageRef.current, {
-        scale: 1,
-        opacity: 1,
-        rotation: 0,
-        duration: 0.6,
-        ease: "back.out(1.7)"
-      });
-
-      // View circle animation
-      tl.to(viewCircleRef.current, {
-        scale: 1,
-        opacity: 1,
-        duration: 0.4,
-        ease: "power2.out"
-      }, "-=0.3");
-
-      // Floating animation
-      tl.to(previewImageRef.current, {
-        y: -10,
-        duration: 2,
-        ease: "sine.inOut",
-        yoyo: true,
-        repeat: -1
-      });
-    }
-  };
-
-  const handleComingSoonLeave = () => {
-    setIsComingSoonHovered(false);
-    
-    if (previewImageRef.current && viewCircleRef.current) {
-      const tl = gsap.timeline();
-      
-      // Hide preview image
-      tl.to(previewImageRef.current, {
-        scale: 0.8,
-        opacity: 0,
-        rotation: 5,
-        duration: 0.4,
-        ease: "power2.in"
-      });
-
-      // Hide view circle
-      tl.to(viewCircleRef.current, {
-        scale: 0,
-        opacity: 0,
-        duration: 0.3,
-        ease: "power2.in"
-      }, "-=0.4");
-    }
-  };
 
   const startTextScrollAnimation = () => {
     const tl = gsap.timeline();
@@ -538,68 +434,22 @@ export default function HomePage(): React.JSX.Element {
 
   const menuItems = [
     { 
-      name: "HOME", 
+      name: "(01) HOME", 
       delay: 0.1 
     },
     { 
-      name: "WORK", 
+      name: "(02) WORK", 
       delay: 0.2 
     },
     { 
-      name: "ABOUT", 
+      name: "(03) ABOUT", 
       delay: 0.3 
     },
     { 
-      name: "CONTACT", 
+      name: "(04) CONTACT", 
       delay: 0.4 
     }
   ];
-
-  // SVG Icons
-  const HomeIcon = () => (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-      <polyline points="9 22 9 12 15 12 15 22"/>
-    </svg>
-  );
-
-  const WorkIcon = () => (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/>
-      <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
-    </svg>
-  );
-
-  const AboutIcon = () => (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/>
-      <circle cx="12" cy="7" r="4"/>
-    </svg>
-  );
-
-  const ContactIcon = () => (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
-      <polyline points="22,6 12,13 2,6"/>
-    </svg>
-  );
-
-  const ArrowIcon = () => (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <line x1="5" y1="12" x2="19" y2="12"/>
-      <polyline points="12 5 19 12 12 19"/>
-    </svg>
-  );
-
-  const getIcon = (name: string) => {
-    switch (name) {
-      case "HOME": return <HomeIcon />;
-      case "WORK": return <WorkIcon />;
-      case "ABOUT": return <AboutIcon />;
-      case "CONTACT": return <ContactIcon />;
-      default: return <HomeIcon />;
-    }
-  };
 
   return (
     <div style={{
@@ -757,7 +607,7 @@ export default function HomePage(): React.JSX.Element {
               animate="open"
               exit="closed"
             >
-              {/* Main Content - Navigation Menu - SISI KIRI */}
+              {/* Main Content - Navigation Menu - FULL WIDTH */}
               <div style={{
                 flex: 1,
                 display: 'flex',
@@ -884,34 +734,19 @@ export default function HomePage(): React.JSX.Element {
                         transition: { duration: 0.2, ease: "easeOut" }
                       }}
                     >
-                      {/* SVG Icon */}
+                      {/* Menu Text dengan font besar */}
                       <motion.div
                         style={{
-                          marginRight: '0.8rem',
-                          opacity: 0.8,
-                          display: 'flex',
-                          alignItems: 'center'
-                        }}
-                        animate={{
-                          scale: hoveredItem === item.name ? 1.2 : 1,
-                          transition: { duration: 0.2 }
-                        }}
-                      >
-                        {getIcon(item.name)}
-                      </motion.div>
-
-                      {/* Menu Text */}
-                      <motion.div
-                        style={{
-                          fontSize: '2.8rem',
+                          fontSize: '40px',
                           fontWeight: '300',
                           color: 'rgba(0,0,0,0.8)',
                           fontFamily: 'Arame Mono, monospace',
-                          lineHeight: 0.8,
+                          lineHeight: 1.2,
                           letterSpacing: '-0.5px',
                           textTransform: 'uppercase',
                           display: 'flex',
-                          alignItems: 'center',
+                          flexDirection: 'column',
+                          alignItems: 'flex-start',
                           gap: '0.5rem'
                         }}
                         animate={{
@@ -921,141 +756,22 @@ export default function HomePage(): React.JSX.Element {
                       >
                         {item.name}
                         
-                        {/* Animated Arrow */}
+                        {/* Line bawah */}
                         <motion.div
-                          initial={{ opacity: 0, scale: 0.8 }}
-                          animate={{ 
-                            opacity: hoveredItem === item.name ? 1 : 0,
-                            scale: hoveredItem === item.name ? 1 : 0.8
-                          }}
-                          transition={{ duration: 0.2 }}
                           style={{
-                            display: 'flex',
-                            alignItems: 'center'
+                            width: hoveredItem === item.name ? '100%' : '0%',
+                            height: '2px',
+                            backgroundColor: '#000',
+                            transition: 'width 0.3s ease'
                           }}
-                        >
-                          <svg
-                            width="18"
-                            height="18"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="1.5"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          >
-                            <line x1="5" y1="12" x2="19" y2="12" />
-                            <polyline points="12 5 19 12 12 19" />
-                          </svg>
-                        </motion.div>
+                          animate={{
+                            width: hoveredItem === item.name ? '100%' : '0%'
+                          }}
+                          transition={{ duration: 0.3 }}
+                        />
                       </motion.div>
                     </motion.div>
                   ))}
-                </div>
-              </div>
-
-              {/* Coming Soon Section - SISI KANAN */}
-              <div
-                ref={comingSoonRef}
-                style={{
-                  flex: 1,
-                  display: 'flex',
-                  flexDirection: 'column',
-                  justifyContent: 'center',
-                  alignItems: 'flex-end',
-                  paddingRight: '4rem',
-                  position: 'relative'
-                }}
-              >
-                {/* Coming Soon Text - SEJAJAR */}
-                <motion.div
-                  style={{
-                    fontSize: '5rem',
-                    fontWeight: '300', // Font tipis
-                    color: 'rgba(0,0,0,0.8)',
-                    fontFamily: 'Arame Mono, monospace',
-                    lineHeight: 1, // Sejajar
-                    letterSpacing: '-2px',
-                    textTransform: 'uppercase',
-                    marginBottom: '0.5rem',
-                    cursor: 'pointer',
-                    textAlign: 'right'
-                  }}
-                  initial={{ opacity: 0, x: 50 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.6, delay: 0.3 }}
-                  whileHover={{ color: '#000' }}
-                  onMouseEnter={handleComingSoonHover}
-                  onMouseLeave={handleComingSoonLeave}
-                >
-                  COMING SOON (1)
-                </motion.div>
-
-                {/* Preview Image - Hidden by default */}
-                <div
-                  ref={previewImageRef}
-                  style={{
-                    position: 'absolute',
-                    top: '50%',
-                    right: '120%',
-                    transform: 'translateY(-50%)',
-                    width: '300px',
-                    height: '400px',
-                    borderRadius: '15px',
-                    overflow: 'hidden',
-                    boxShadow: '0 20px 50px rgba(0,0,0,0.3)',
-                    border: '2px solid rgba(0,0,0,0.1)',
-                    opacity: 0,
-                    scale: 0.8
-                  }}
-                >
-                  <img
-                    src=""
-                    alt="Project Preview"
-                    style={{
-                      width: '100%',
-                      height: '100%',
-                      objectFit: 'cover'
-                    }}
-                    onError={(e) => {
-                      e.currentTarget.style.backgroundColor = '#222';
-                      e.currentTarget.style.display = 'flex';
-                      e.currentTarget.style.justifyContent = 'center';
-                      e.currentTarget.style.alignItems = 'center';
-                      e.currentTarget.style.color = '#CCFF00';
-                      e.currentTarget.style.fontFamily = 'Arame Mono, monospace';
-                      e.currentTarget.style.fontSize = '1rem';
-                      e.currentTarget.innerHTML = 'Project Preview';
-                    }}
-                  />
-                </div>
-
-                {/* View Circle with Text - Hidden by default */}
-                <div
-                  ref={viewCircleRef}
-                  style={{
-                    position: 'absolute',
-                    top: '50%',
-                    right: '150%',
-                    transform: 'translateY(-50%)',
-                    width: '120px',
-                    height: '120px',
-                    borderRadius: '50%',
-                    backgroundColor: 'black',
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    color: '#CCFF00',
-                    fontSize: '0.8rem',
-                    fontWeight: '600',
-                    fontFamily: 'Arame Mono, monospace',
-                    textTransform: 'uppercase',
-                    letterSpacing: '1px',
-                    opacity: 0,
-                    scale: 0
-                  }}
-                >
-                  VIEW
                 </div>
               </div>
             </motion.div>
@@ -1353,4 +1069,3 @@ export default function HomePage(): React.JSX.Element {
     </div>
   );
 }
-
