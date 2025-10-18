@@ -122,7 +122,6 @@ export default function HomePage(): React.JSX.Element {
     { city: "Magelang", region: "Jawa Tengah" },
     { city: "Teluknaga", region: "Banten" },
     { city: "Ternate", region: "Maluku Utara" },
-    { city: "Kendari", region: "Sulawesi Tenggara" },
     { city: "Banjarbaru", region: "Kalimantan Selatan" },
     { city: "Pangkal Pinang", region: "Kepulauan Bangka Belitung" },
     { city: "Tarakan", region: "Kalimantan Utara" },
@@ -1975,7 +1974,8 @@ export default function HomePage(): React.JSX.Element {
     </div>
   );
 }
-[file content end]
+
+
 
 
 
