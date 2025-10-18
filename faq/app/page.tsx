@@ -928,7 +928,7 @@ export default function HomePage(): React.JSX.Element {
               style={{
                 fontSize: '6rem',
                 fontWeight: '900',
-                color: 'rgba(255,255,255,0.03)',
+                color: 'white',
                 fontFamily: 'Arame Mono, monospace',
                 textTransform: 'uppercase',
                 letterSpacing: '-2px',
@@ -1974,3 +1974,4 @@ export default function HomePage(): React.JSX.Element {
   );
 }
 [file content end]
+
