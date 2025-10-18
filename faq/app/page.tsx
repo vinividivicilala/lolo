@@ -1,5 +1,4 @@
-[file name]: sfghar.txt
-[file content begin]
+
 'use client';
 
 import React, { useState, useEffect, useRef } from "react";
@@ -889,61 +888,67 @@ export default function HomePage(): React.JSX.Element {
         </motion.div>
       </motion.div>
 
-      {/* Marquee Text MENURU - TAMBAHAN BARU */}
-      <motion.div
-        ref={marqueeRef}
+
+
+{/* Marquee Text MENURU */}
+<motion.div
+  style={{
+    position: 'absolute',
+    top: showBanner ? '9rem' : '6.5rem',
+    left: 0,
+    width: '100%',
+    overflow: 'hidden',
+    zIndex: 5,
+    pointerEvents: 'none'
+  }}
+  initial={{ opacity: 0 }}
+  animate={{ opacity: 1 }}
+  transition={{ delay: 1.2, duration: 0.8 }}
+>
+  <motion.div
+    style={{
+      display: 'flex',
+      width: 'fit-content'
+    }}
+    animate={{
+      x: [0, -1030],
+    }}
+    transition={{
+      x: {
+        duration: 15,
+        repeat: Infinity,
+        repeatType: "loop",
+        ease: "linear"
+      }
+    }}
+  >
+    {[...Array(6)].map((_, index) => (
+      <div
+        key={index}
         style={{
-          position: 'absolute',
-          top: showBanner ? '9rem' : '6.5rem',
-          left: 0,
-          width: '100%',
-          overflow: 'hidden',
-          zIndex: 5,
-          pointerEvents: 'none'
+          fontSize: '6rem',
+          fontWeight: '900',
+          color: 'rgba(255,255,255,0.03)',
+          fontFamily: 'Arame Mono, monospace',
+          textTransform: 'uppercase',
+          letterSpacing: '-2px',
+          lineHeight: 1,
+          whiteSpace: 'nowrap',
+          padding: '0 1rem',
+          WebkitTextStroke: '1px rgba(255,255,255,0.05)',
+          textShadow: '0 0 30px rgba(255,255,255,0.1)'
         }}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1.2, duration: 0.8 }}
       >
-        <motion.div
-          style={{
-            display: 'flex',
-            width: 'fit-content'
-          }}
-          animate={{
-            x: [0, -1030],
-          }}
-          transition={{
-            x: {
-              duration: 15,
-              repeat: Infinity,
-              repeatType: "loop",
-              ease: "linear"
-            }
-          }}
-        >
-          {[...Array(6)].map((_, index) => (
-            <div
-              key={index}
-              style={{
-                fontSize: '6rem',
-                fontWeight: '900',
-                color: 'white',
-                fontFamily: 'Arame Mono, monospace',
-                textTransform: 'uppercase',
-                letterSpacing: '-2px',
-                lineHeight: 1,
-                whiteSpace: 'nowrap',
-                padding: '0 1rem',
-                WebkitTextStroke: '1px rgba(255,255,255,0.05)',
-                textShadow: '0 0 30px rgba(255,255,255,0.1)'
-              }}
-            >
-              MENURU
-            </div>
-          ))}
-        </motion.div>
-      </motion.div>
+        MENURU
+      </div>
+    ))}
+  </motion.div>
+</motion.div>
+
+
+
+
+      
 
       {/* Button untuk melihat semua users */}
       <motion.button
@@ -1974,4 +1979,5 @@ export default function HomePage(): React.JSX.Element {
   );
 }
 [file content end]
+
 
