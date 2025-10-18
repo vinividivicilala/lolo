@@ -889,7 +889,6 @@ export default function HomePage(): React.JSX.Element {
       </motion.div>
 
 
-
 {/* Marquee Text MENURU */}
 <motion.div
   style={{
@@ -911,7 +910,7 @@ export default function HomePage(): React.JSX.Element {
       width: 'fit-content'
     }}
     animate={{
-      x: [0, -1030],
+      x: [0, -1030]
     }}
     transition={{
       x: {
@@ -944,8 +943,6 @@ export default function HomePage(): React.JSX.Element {
     ))}
   </motion.div>
 </motion.div>
-
-
 
 
       
@@ -1979,5 +1976,6 @@ export default function HomePage(): React.JSX.Element {
   );
 }
 [file content end]
+
 
 
