@@ -1298,6 +1298,79 @@ export default function HomePage(): React.JSX.Element {
         )}
       </AnimatePresence>
 
+
+{/* Marquee Text MENURU */}
+        <motion.div
+          style={{
+            position: 'absolute',
+            top: showBanner ? '9rem' : '6.5rem',
+            left: 0,
+            width: '100%',
+            overflow: 'hidden',
+            zIndex: 5
+          }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1.2, duration: 0.8 }}
+        >
+          {/* Marquee Container */}
+          <motion.div
+            style={{
+              display: 'flex',
+              width: 'fit-content'
+            }}
+            animate={{
+              x: [0, -1000],
+            }}
+            transition={{
+              x: {
+                duration: 20,
+                repeat: Infinity,
+                repeatType: "loop",
+                ease: "linear"
+              }
+            }}
+            whileInView={{
+              x: [-1000, 0],
+              transition: {
+                x: {
+                  duration: 15,
+                  ease: "linear"
+                }
+              }
+            }}
+            viewport={{ once: false }}
+          >
+            {/* Multiple instances for seamless loop */}
+            {[...Array(8)].map((_, index) => (
+              <div
+                key={index}
+                style={{
+                  fontSize: '8rem',
+                  fontWeight: '900',
+                  color: 'rgba(255,255,255,0.03)',
+                  fontFamily: 'Arame Mono, monospace',
+                  textTransform: 'uppercase',
+                  letterSpacing: '-2px',
+                  lineHeight: 1,
+                  whiteSpace: 'nowrap',
+                  padding: '0 2rem',
+                  WebkitTextStroke: '1px rgba(255,255,255,0.05)',
+                  textShadow: '0 0 30px rgba(255,255,255,0.1)'
+                }}
+              >
+                MENURU
+              </div>
+            ))}
+          </motion.div>
+        </motion.div>
+
+
+
+
+
+      
+
       {/* Menu Button dengan Framer Motion */}
       <motion.div
         onClick={toggleMenu}
@@ -1914,3 +1987,4 @@ export default function HomePage(): React.JSX.Element {
     </div>
   );
 }
+
