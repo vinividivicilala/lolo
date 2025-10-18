@@ -735,22 +735,18 @@ export default function HomePage(): React.JSX.Element {
             exit={{ y: -100, opacity: 0 }}
             transition={{ duration: 0.6, ease: "back.out(1.7)" }}
           >
-            {/* SVG Icon Sorak Pengumuman */}
+            {/* SVG Icon */}
             <motion.div
               animate={{
                 rotate: [0, -5, 5, 0],
-                scale: [1, 1.2, 1]
+                scale: [1, 1.1, 1]
               }}
-              transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
+              transition={{ duration: 2, repeat: Infinity, repeatDelay: 5 }}
             >
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M18 8C18 4.68629 15.3137 2 12 2C8.68629 2 6 4.68629 6 8C6 8.80877 6.15567 9.58143 6.44076 10.291C6.77857 11.1424 6.5 12.1678 6.5 13C6.5 14.933 7.567 16 9.5 16H14.5C16.433 16 17.5 14.933 17.5 13C17.5 12.1678 17.2214 11.1424 17.5592 10.291C17.8443 9.58143 18 8.80877 18 8Z"/>
-                <path d="M12 18V22"/>
-                <path d="M8 22H16"/>
-                <path d="M9.5 16L10.5 18"/>
-                <path d="M14.5 16L13.5 18"/>
-                <path d="M10 8H14"/>
-                <path d="M9 11H15"/>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                <line x1="12" y1="9" x2="12" y2="13"/>
+                <line x1="12" y1="17" x2="12.01" y2="17"/>
               </svg>
             </motion.div>
 
@@ -814,63 +810,12 @@ export default function HomePage(): React.JSX.Element {
         )}
       </AnimatePresence>
 
-      {/* Judul Website MENURU - Font Besar dan Tebal */}
-      <motion.div
-        style={{
-          position: 'absolute',
-          top: showBanner ? '5rem' : '2rem',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          zIndex: 15
-        }}
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.5, duration: 0.8 }}
-      >
-        <motion.h1
-          style={{
-            fontSize: '4rem',
-            fontWeight: '900',
-            color: 'white',
-            fontFamily: 'Arame Mono, monospace',
-            textAlign: 'center',
-            margin: 0,
-            letterSpacing: '3px',
-            textTransform: 'uppercase',
-            textShadow: '0 0 30px rgba(204, 255, 0, 0.3)',
-            lineHeight: 1
-          }}
-          animate={{
-            textShadow: [
-              '0 0 30px rgba(204, 255, 0, 0.3)',
-              '0 0 40px rgba(204, 255, 0, 0.5)',
-              '0 0 30px rgba(204, 255, 0, 0.3)'
-            ]
-          }}
-          transition={{ duration: 2, repeat: Infinity }}
-        >
-          MENURU
-        </motion.h1>
-        <motion.div
-          style={{
-            width: '100%',
-            height: '4px',
-            background: 'linear-gradient(90deg, transparent, #CCFF00, transparent)',
-            marginTop: '0.5rem',
-            borderRadius: '2px'
-          }}
-          initial={{ scaleX: 0 }}
-          animate={{ scaleX: 1 }}
-          transition={{ delay: 1, duration: 1 }}
-        />
-      </motion.div>
-
       {/* Location Display - Bisa diklik untuk edit */}
       <motion.div
         onClick={openLocationModal}
         style={{
           position: 'absolute',
-          top: showBanner ? '12rem' : '9rem',
+          top: showBanner ? '4.5rem' : '2rem',
           left: '2rem',
           display: 'flex',
           flexDirection: 'column',
@@ -946,7 +891,7 @@ export default function HomePage(): React.JSX.Element {
         onClick={openAllUsersModal}
         style={{
           position: 'absolute',
-          top: showBanner ? '12rem' : '9rem',
+          top: showBanner ? '4.5rem' : '2rem',
           left: '16rem',
           padding: '0.6rem 1.2rem',
           fontSize: '0.8rem',
@@ -1360,7 +1305,7 @@ export default function HomePage(): React.JSX.Element {
         onMouseLeave={handleMenuLeave}
         style={{
           position: 'absolute',
-          top: showBanner ? '12rem' : '9rem',
+          top: showBanner ? '4.5rem' : '2rem',
           right: '2rem',
           fontSize: '1.2rem',
           fontWeight: '300',
@@ -1896,13 +1841,29 @@ export default function HomePage(): React.JSX.Element {
               alignItems: 'center',
               gap: '1.5rem',
               padding: '2rem',
-              zIndex: 10,
-              marginTop: '8rem'
+              zIndex: 10
             }}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
+            <motion.h1
+              style={{
+                fontSize: '2.5rem',
+                fontWeight: '300',
+                color: 'white',
+                fontFamily: 'Arame Mono, monospace',
+                textAlign: 'center',
+                marginBottom: '0.5rem',
+                letterSpacing: '2px'
+              }}
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.2, duration: 0.5 }}
+            >
+              WELCOME
+            </motion.h1>
+            
             <motion.p
               style={{
                 fontSize: '1rem',
