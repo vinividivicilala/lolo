@@ -890,72 +890,6 @@ export default function HomePage(): React.JSX.Element {
 
 
 
-{/* Marquee Text MENURU - Continuous Loop */}
-<motion.div
-  style={{
-    position: 'absolute',
-    top: showBanner ? '8rem' : '5rem',
-    left: 0,
-    width: '100%',
-    overflow: 'hidden',
-    zIndex: 5,
-    pointerEvents: 'none'
-  }}
-  initial={{ opacity: 0 }}
-  animate={{ opacity: 1 }}
-  transition={{ delay: 1.2, duration: 0.8 }}
->
-  <motion.div
-    style={{
-      display: 'flex',
-      width: 'fit-content'
-    }}
-    animate={{
-      x: [-2000, 0]
-    }}
-    transition={{
-      x: {
-        duration: 25,
-        repeat: Infinity,
-        repeatType: "loop",
-        ease: "linear"
-      }
-    }}
-  >
-    {[...Array(8)].map((_, index) => (
-      <div
-        key={index}
-        style={{
-          fontSize: '15rem',
-          fontWeight: '900',
-          color: 'rgba(255,255,255,0.9)',
-          fontFamily: 'Arame Mono, monospace',
-          textTransform: 'uppercase',
-          letterSpacing: '-4px',
-          lineHeight: 0.8,
-          whiteSpace: 'nowrap',
-          padding: '0 3rem',
-          WebkitTextStroke: '3px rgba(255,255,255,1)',
-          textShadow: `
-            0 0 60px rgba(255,255,255,0.6),
-            0 0 100px rgba(255,255,255,0.4),
-            0 0 150px rgba(255,255,255,0.2)
-          `,
-          background: 'linear-gradient(45deg, #FFFFFF, #E0E0E0, #FFFFFF)',
-          WebkitBackgroundClip: 'text',
-          backgroundClip: 'text',
-          color: 'transparent',
-          fontStyle: 'italic'
-        }}
-      >
-        MENURU
-      </div>
-    ))}
-  </motion.div>
-</motion.div>
-
-
-
 
 
 
@@ -1990,6 +1924,7 @@ export default function HomePage(): React.JSX.Element {
     </div>
   );
 }
+
 
 
 
