@@ -5,12 +5,13 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { gsap } from "gsap";
 import { initializeApp } from "firebase/app";
-import { getDatabase, ref, set, onValue, off } from "firebase/database";
+import { getFirestore, doc, setDoc, getDoc, onSnapshot } from "firebase/firestore";
 
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
   apiKey: "AIzaSyCYbxo8n1zn-Y3heCIn_PmrsK44_OrdEw4",
   authDomain: "noted-a3498.firebaseapp.com",
+  databaseURL: "https://noted-a3498-default-rtdb.asia-southeast1.firebasedatabase.app",
   projectId: "noted-a3498",
   storageBucket: "noted-a3498.firebasestorage.app",
   messagingSenderId: "1077214793842",
@@ -20,7 +21,7 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const database = getDatabase(app);
+const db = getFirestore(app);
 
 export default function HomePage(): React.JSX.Element {
   const [showLoading, setShowLoading] = useState(true);
@@ -43,27 +44,13 @@ export default function HomePage(): React.JSX.Element {
   const [showLocationModal, setShowLocationModal] = useState(false);
   const [tempLocation, setTempLocation] = useState({ city: "", region: "" });
   const [currentUserId, setCurrentUserId] = useState<string>("");
+  const [isLoadingLocation, setIsLoadingLocation] = useState(true);
   const router = useRouter();
   const timeRef = useRef<NodeJS.Timeout | null>(null);
   const loadingRef = useRef<HTMLDivElement>(null);
   const textScrollRef = useRef<HTMLDivElement>(null);
 
-  // Generate unique user ID
-  useEffect(() => {
-    // Coba dapatkan user ID dari localStorage
-    let userId = localStorage.getItem('userId');
-    if (!userId) {
-      // Generate new user ID
-      userId = 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-      localStorage.setItem('userId', userId);
-    }
-    setCurrentUserId(userId);
-    
-    // Load location dari Firebase
-    loadLocationFromFirebase(userId);
-  }, []);
-
-  // Database kota-kota Indonesia (sama seperti sebelumnya)
+  // Database kota-kota Indonesia
   const indonesiaCities = [
     { city: "Jakarta", region: "DKI Jakarta" },
     { city: "Surabaya", region: "Jawa Timur" },
@@ -75,61 +62,198 @@ export default function HomePage(): React.JSX.Element {
     { city: "Palembang", region: "Sumatera Selatan" },
     { city: "Semarang", region: "Jawa Tengah" },
     { city: "Makassar", region: "Sulawesi Selatan" },
-    // ... (tambahkan kota lainnya sesuai kebutuhan)
+    { city: "South Tangerang", region: "Banten" },
+    { city: "Batam", region: "Kepulauan Riau" },
+    { city: "Bandar Lampung", region: "Lampung" },
+    { city: "Bogor", region: "Jawa Barat" },
+    { city: "Pekanbaru", region: "Riau" },
+    { city: "Padang", region: "Sumatera Barat" },
+    { city: "Malang", region: "Jawa Timur" },
+    { city: "Samarinda", region: "Kalimantan Timur" },
+    { city: "Denpasar", region: "Bali" },
+    { city: "Tasikmalaya", region: "Jawa Barat" },
+    { city: "Serang", region: "Banten" },
+    { city: "Balikpapan", region: "Kalimantan Timur" },
+    { city: "Pontianak", region: "Kalimantan Barat" },
+    { city: "Banjarmasin", region: "Kalimantan Selatan" },
+    { city: "Jambi", region: "Jambi" },
+    { city: "Surakarta", region: "Jawa Tengah" },
+    { city: "Cimahi", region: "Jawa Barat" },
+    { city: "Manado", region: "Sulawesi Utara" },
+    { city: "Mataram", region: "Nusa Tenggara Barat" },
+    { city: "Yogyakarta", region: "DI Yogyakarta" },
+    { city: "Cilegon", region: "Banten" },
+    { city: "Palu", region: "Sulawesi Tengah" },
+    { city: "Kupang", region: "Nusa Tenggara Timur" },
+    { city: "Bengkulu", region: "Bengkulu" },
+    { city: "Majalengka", region: "Jawa Barat" },
+    { city: "Tegal", region: "Jawa Tengah" },
+    { city: "Kediri", region: "Jawa Timur" },
+    { city: "Binjai", region: "Sumatera Utara" },
+    { city: "Pematang Siantar", region: "Sumatera Utara" },
+    { city: "Karawang", region: "Jawa Barat" },
+    { city: "Cirebon", region: "Jawa Barat" },
+    { city: "Lhokseumawe", region: "Aceh" },
+    { city: "Pekalongan", region: "Jawa Tengah" },
+    { city: "Cibinong", region: "Jawa Barat" },
+    { city: "Madiun", region: "Jawa Timur" },
+    { city: "Ambon", region: "Maluku" },
+    { city: "Langsa", region: "Aceh" },
+    { city: "Banda Aceh", region: "Aceh" },
+    { city: "Bontang", region: "Kalimantan Timur" },
+    { city: "Probolinggo", region: "Jawa Timur" },
+    { city: "Singkawang", region: "Kalimantan Barat" },
+    { city: "Batu", region: "Jawa Timur" },
+    { city: "Sungaipenuh", region: "Jambi" },
+    { city: "Blitar", region: "Jawa Timur" },
+    { city: "Bitung", region: "Sulawesi Utara" },
+    { city: "Tanjung Pinang", region: "Kepulauan Riau" },
+    { city: "Mojokerto", region: "Jawa Timur" },
+    { city: "Gorontalo", region: "Gorontalo" },
+    { city: "Magelang", region: "Jawa Tengah" },
+    { city: "Teluknaga", region: "Banten" },
+    { city: "Ternate", region: "Maluku Utara" },
+    { city: "Kendari", region: "Sulawesi Tenggara" },
+    { city: "Banjarbaru", region: "Kalimantan Selatan" },
+    { city: "Pangkal Pinang", region: "Kepulauan Bangka Belitung" },
+    { city: "Tarakan", region: "Kalimantan Utara" },
+    { city: "Lubuklinggau", region: "Sumatera Selatan" },
+    { city: "Palangkaraya", region: "Kalimantan Tengah" },
+    { city: "Metro", region: "Lampung" },
+    { city: "Tebing Tinggi", region: "Sumatera Utara" },
+    { city: "Bima", region: "Nusa Tenggara Barat" },
+    { city: "Pasuruan", region: "Jawa Timur" },
+    { city: "Salatiga", region: "Jawa Tengah" },
+    { city: "Ciamis", region: "Jawa Barat" },
+    { city: "Lahat", region: "Sumatera Selatan" },
+    { city: "Sampit", region: "Kalimantan Tengah" },
+    { city: "Rantau Prapat", region: "Sumatera Utara" },
+    { city: "Cikarang", region: "Jawa Barat" },
+    { city: "Purwakarta", region: "Jawa Barat" },
+    { city: "Sorong", region: "Papua Barat" },
+    { city: "Subang", region: "Jawa Barat" },
+    { city: "Indramayu", region: "Jawa Barat" },
+    { city: "Sumber", region: "Jawa Barat" },
+    { city: "Pandeglang", region: "Banten" },
+    { city: "Kuningan", region: "Jawa Barat" },
+    { city: "Sumedang", region: "Jawa Barat" },
+    { city: "Banyuwangi", region: "Jawa Timur" },
+    { city: "Purwodadi", region: "Jawa Tengah" },
+    { city: "Bondowoso", region: "Jawa Timur" },
+    { city: "Jayapura", region: "Papua" },
+    { city: "Sleman", region: "DI Yogyakarta" },
+    { city: "Bantul", region: "DI Yogyakarta" },
+    { city: "Gunungsitoli", region: "Sumatera Utara" },
+    { city: "Padang Sidempuan", region: "Sumatera Utara" },
+    { city: "Sawangan", region: "Jawa Barat" },
+    { city: "Sibolga", region: "Sumatera Utara" },
+    { city: "Tanjung Balai", region: "Sumatera Utara" },
+    { city: "Singaraja", region: "Bali" },
+    { city: "Martapura", region: "Kalimantan Selatan" },
+    { city: "Kuta", region: "Bali" },
+    { city: "Meulaboh", region: "Aceh" },
+    { city: "Sabang", region: "Aceh" },
+    { city: "Tanjung Pandan", region: "Kepulauan Bangka Belitung" },
+    { city: "Sumbawa Besar", region: "Nusa Tenggara Barat" },
+    { city: "Raba", region: "Nusa Tenggara Barat" },
+    { city: "Waingapu", region: "Nusa Tenggara Timur" },
+    { city: "Maumere", region: "Nusa Tenggara Timur" },
+    { city: "Ende", region: "Nusa Tenggara Timur" },
+    { city: "Labuhan Bajo", region: "Nusa Tenggara Timur" },
+    { city: "Ruteng", region: "Nusa Tenggara Timur" },
+    { city: "Bau-Bau", region: "Sulawesi Tenggara" },
+    { city: "Buton", region: "Sulawesi Tenggara" },
+    { city: "Kendari", region: "Sulawesi Tenggara" },
+    { city: "Parepare", region: "Sulawesi Selatan" },
+    { city: "Palopo", region: "Sulawesi Selatan" },
+    { city: "Masohi", region: "Maluku" },
+    { city: "Dobo", region: "Maluku" },
+    { city: "Tual", region: "Maluku" },
+    { city: "Soe", region: "Nusa Tenggara Timur" },
+    { city: "Kefamenanu", region: "Nusa Tenggara Timur" },
+    { city: "Atambua", region: "Nusa Tenggara Timur" },
+    { city: "Kalabahi", region: "Nusa Tenggara Timur" },
+    { city: "Merauke", region: "Papua" },
+    { city: "Wamena", region: "Papua" },
+    { city: "Biak", region: "Papua" },
+    { city: "Nabire", region: "Papua" },
+    { city: "Timika", region: "Papua" },
+    { city: "Agats", region: "Papua" },
+    { city: "Manokwari", region: "Papua Barat" },
+    { city: "Sorong", region: "Papua Barat" },
+    { city: "Fakfak", region: "Papua Barat" },
+    { city: "Kaimana", region: "Papua Barat" },
+    { city: "Bintuni", region: "Papua Barat" },
+    { city: "Tempuran", region: "Jawa Barat" }
   ];
 
-  // Load location dari Firebase
-  const loadLocationFromFirebase = (userId: string) => {
-    const locationRef = ref(database, 'userLocations/' + userId);
-    
-    onValue(locationRef, (snapshot) => {
-      const data = snapshot.val();
-      if (data) {
+  // Generate atau load user ID
+  useEffect(() => {
+    const initializeUser = async () => {
+      let userId = localStorage.getItem('userId');
+      if (!userId) {
+        userId = 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        localStorage.setItem('userId', userId);
+      }
+      setCurrentUserId(userId);
+      
+      // Load location dari Firestore
+      await loadLocationFromFirestore(userId);
+    };
+
+    initializeUser();
+  }, []);
+
+  // Load location dari Firestore
+  const loadLocationFromFirestore = async (userId: string) => {
+    try {
+      setIsLoadingLocation(true);
+      const userDocRef = doc(db, 'userLocations', userId);
+      const userSnapshot = await getDoc(userDocRef);
+      
+      if (userSnapshot.exists()) {
+        const userData = userSnapshot.data();
         setVisitorLocation({
-          city: data.city,
-          region: data.region,
-          country: data.country || "Indonesia",
+          city: userData.city,
+          region: userData.region,
+          country: userData.country || "Indonesia",
           isManual: true
         });
       } else {
-        // Jika tidak ada data di Firebase, coba localStorage
-        const savedLocation = localStorage.getItem('visitorLocation');
-        if (savedLocation) {
-          const locationData = JSON.parse(savedLocation);
-          setVisitorLocation(locationData);
-          // Simpan ke Firebase juga
-          saveLocationToFirebase(userId, locationData);
-        } else {
-          // Coba deteksi lokasi otomatis
-          tryAutoLocation(userId);
-        }
+        // Jika tidak ada data di Firestore, coba deteksi otomatis
+        tryAutoLocation(userId);
       }
-    });
-
-    // Cleanup listener ketika component unmount
-    return () => {
-      off(locationRef);
-    };
+    } catch (error) {
+      console.error('Error loading location from Firestore:', error);
+      // Fallback ke deteksi otomatis
+      tryAutoLocation(userId);
+    } finally {
+      setIsLoadingLocation(false);
+    }
   };
 
-  // Save location ke Firebase
-  const saveLocationToFirebase = async (userId: string, location: any) => {
+  // Save location ke Firestore
+  const saveLocationToFirestore = async (userId: string, location: any) => {
     try {
-      const locationRef = ref(database, 'userLocations/' + userId);
-      await set(locationRef, {
+      const userDocRef = doc(db, 'userLocations', userId);
+      await setDoc(userDocRef, {
         city: location.city,
         region: location.region,
         country: location.country || "Indonesia",
-        lastUpdated: Date.now()
-      });
-      console.log('Location saved to Firebase');
+        lastUpdated: new Date().toISOString(),
+        userId: userId
+      }, { merge: true });
+      
+      console.log('Location saved to Firestore successfully');
+      return true;
     } catch (error) {
-      console.error('Error saving location to Firebase:', error);
+      console.error('Error saving location to Firestore:', error);
+      return false;
     }
   };
 
   // Coba deteksi lokasi otomatis sederhana
-  const tryAutoLocation = (userId: string) => {
+  const tryAutoLocation = async (userId: string) => {
     const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
     
     const timezoneMap: { [key: string]: { city: string, region: string } } = {
@@ -148,9 +272,18 @@ export default function HomePage(): React.JSX.Element {
         isManual: false
       };
       setVisitorLocation(location);
-      // Simpan ke localStorage dan Firebase
-      localStorage.setItem('visitorLocation', JSON.stringify(location));
-      saveLocationToFirebase(userId, location);
+      // Simpan ke Firestore juga
+      await saveLocationToFirestore(userId, location);
+    } else {
+      // Default location
+      const defaultLocation = {
+        city: "Jakarta",
+        region: "DKI Jakarta",
+        country: "Indonesia",
+        isManual: false
+      };
+      setVisitorLocation(defaultLocation);
+      await saveLocationToFirestore(userId, defaultLocation);
     }
   };
 
@@ -273,22 +406,24 @@ export default function HomePage(): React.JSX.Element {
   };
 
   // Fungsi untuk menyimpan lokasi manual
-  const saveManualLocation = () => {
-    if (tempLocation.city && tempLocation.region) {
+  const saveManualLocation = async () => {
+    if (tempLocation.city && tempLocation.region && currentUserId) {
       const newLocation = {
         ...tempLocation,
         country: "Indonesia",
         isManual: true
       };
+      
       setVisitorLocation(newLocation);
       
-      // Simpan ke localStorage dan Firebase
-      localStorage.setItem('visitorLocation', JSON.stringify(newLocation));
-      if (currentUserId) {
-        saveLocationToFirebase(currentUserId, newLocation);
-      }
+      // Simpan ke Firestore
+      const success = await saveLocationToFirestore(currentUserId, newLocation);
       
-      setShowLocationModal(false);
+      if (success) {
+        setShowLocationModal(false);
+      } else {
+        alert('Gagal menyimpan lokasi. Silakan coba lagi.');
+      }
     }
   };
 
@@ -537,7 +672,15 @@ export default function HomePage(): React.JSX.Element {
             <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
             <circle cx="12" cy="10" r="3"/>
           </svg>
-          {visitorLocation.city ? (
+          {isLoadingLocation ? (
+            <motion.span
+              initial={{ opacity: 0.5 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.5, repeat: Infinity, repeatType: "reverse" }}
+            >
+              Loading...
+            </motion.span>
+          ) : visitorLocation.city ? (
             `${visitorLocation.city}, ${visitorLocation.country}`
           ) : (
             <span style={{ opacity: 0.7 }}>Klik untuk set lokasi</span>
