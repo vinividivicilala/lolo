@@ -889,7 +889,8 @@ export default function HomePage(): React.JSX.Element {
 
 
 
-{/* Marquee Text MENURU */}
+
+{/* Marquee Text MENURU - Continuous Loop */}
 <motion.div
   style={{
     position: 'absolute',
@@ -910,28 +911,18 @@ export default function HomePage(): React.JSX.Element {
       width: 'fit-content'
     }}
     animate={{
-      x: [0, -2000]
+      x: [-2000, 0]
     }}
     transition={{
       x: {
-        duration: 20,
+        duration: 25,
         repeat: Infinity,
         repeatType: "loop",
         ease: "linear"
       }
     }}
-    whileInView={{
-      x: [-2000, 0],
-      transition: {
-        x: {
-          duration: 18,
-          ease: "linear"
-        }
-      }
-    }}
-    viewport={{ once: false }}
   >
-    {[...Array(6)].map((_, index) => (
+    {[...Array(8)].map((_, index) => (
       <div
         key={index}
         style={{
@@ -964,8 +955,11 @@ export default function HomePage(): React.JSX.Element {
 </motion.div>
 
 
-          
 
+
+
+
+      
       
 
       {/* Button untuk melihat semua users */}
@@ -1996,6 +1990,7 @@ export default function HomePage(): React.JSX.Element {
     </div>
   );
 }
+
 
 
 
