@@ -1304,7 +1304,7 @@ export default function HomePage(): React.JSX.Element {
                 paddingLeft: '4rem',
                 position: 'relative'
               }}>
-               // Versi dengan efek shadow
+            
 <motion.div
   style={{
     position: 'absolute',
@@ -1771,4 +1771,5 @@ export default function HomePage(): React.JSX.Element {
     </div>
   );
 }
+
 
