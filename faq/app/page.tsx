@@ -216,30 +216,19 @@ export default function HomePage(): React.JSX.Element {
     if (showBanner && bannerRef.current) {
       const tl = gsap.timeline();
       
-      // Animasi masuk banner
+      // Animasi masuk banner dari atas
       tl.fromTo(bannerRef.current,
         { 
           y: -100,
-          opacity: 0,
-          scale: 0.8
+          opacity: 0
         },
         {
           y: 0,
           opacity: 1,
-          scale: 1,
           duration: 0.8,
           ease: "back.out(1.7)"
         }
       );
-
-      // Animasi continuous floating
-      tl.to(bannerRef.current, {
-        y: -5,
-        duration: 2,
-        repeat: -1,
-        yoyo: true,
-        ease: "sine.inOut"
-      }, "-=0.5");
     }
   }, [showBanner]);
 
@@ -249,7 +238,6 @@ export default function HomePage(): React.JSX.Element {
       gsap.to(bannerRef.current, {
         y: -100,
         opacity: 0,
-        scale: 0.8,
         duration: 0.6,
         ease: "back.in(1.7)",
         onComplete: () => setShowBanner(false)
@@ -259,15 +247,7 @@ export default function HomePage(): React.JSX.Element {
 
   // Fungsi untuk handle click banner (ke halaman notes)
   const handleBannerClick = () => {
-    if (bannerRef.current) {
-      gsap.to(bannerRef.current, {
-        scale: 0.95,
-        duration: 0.2,
-        onComplete: navigateToNotes
-      });
-    } else {
-      navigateToNotes();
-    }
+    navigateToNotes();
   };
 
   // Load location dari Firestore
@@ -729,108 +709,89 @@ export default function HomePage(): React.JSX.Element {
       WebkitFontSmoothing: 'antialiased',
       MozOsxFontSmoothing: 'grayscale'
     }}>
-      {/* Banner Persiapan dengan GSAP Animation */}
+      {/* Top Banner */}
       <AnimatePresence>
         {showBanner && (
           <motion.div
             ref={bannerRef}
-            onClick={handleBannerClick}
-            onMouseEnter={() => setIsBannerHovered(true)}
-            onMouseLeave={() => setIsBannerHovered(false)}
             style={{
               position: 'fixed',
-              top: '50%',
-              left: '50%',
-              transform: 'translate(-50%, -50%)',
-              backgroundColor: 'rgba(204, 255, 0, 0.95)',
-              padding: '1.5rem 2rem',
-              borderRadius: '20px',
-              border: '2px solid rgba(0,0,0,0.1)',
-              cursor: 'pointer',
-              zIndex: 40,
-              backdropFilter: 'blur(10px)',
-              boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
+              top: 0,
+              left: 0,
+              width: '100%',
+              backgroundColor: '#CCFF00',
+              padding: '0.8rem 2rem',
+              zIndex: 45,
               display: 'flex',
               alignItems: 'center',
+              justifyContent: 'center',
               gap: '1rem',
-              minWidth: '400px',
-              maxWidth: '500px',
-              fontFamily: 'Arame Mono, monospace'
+              fontFamily: 'Arame Mono, monospace',
+              boxShadow: '0 2px 20px rgba(0,0,0,0.1)',
+              borderBottom: '1px solid rgba(0,0,0,0.1)'
             }}
-            initial={false}
-            whileHover={{
-              scale: 1.05,
-              backgroundColor: 'rgba(204, 255, 0, 1)',
-              transition: { duration: 0.3 }
-            }}
+            initial={{ y: -100, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: -100, opacity: 0 }}
+            transition={{ duration: 0.6, ease: "back.out(1.7)" }}
           >
-            {/* SVG Icon Pengumuman */}
+            {/* SVG Icon */}
             <motion.div
-              style={{
-                flexShrink: 0,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}
               animate={{
-                rotate: isBannerHovered ? [0, -10, 10, 0] : 0,
-                scale: isBannerHovered ? 1.2 : 1
+                rotate: [0, -5, 5, 0],
+                scale: [1, 1.1, 1]
               }}
-              transition={{ duration: 0.5 }}
+              transition={{ duration: 2, repeat: Infinity, repeatDelay: 5 }}
             >
-              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
                 <line x1="12" y1="9" x2="12" y2="13"/>
                 <line x1="12" y1="17" x2="12.01" y2="17"/>
               </svg>
             </motion.div>
 
-            {/* Text Content */}
-            <div style={{ flex: 1 }}>
-              <motion.div
+            {/* Banner Text */}
+            <motion.div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                fontSize: '0.9rem',
+                fontWeight: '500',
+                color: 'black'
+              }}
+            >
+              <span>WEBSITE NOTE SEDANG DALAM PERSIAPAN -</span>
+              <motion.span
+                onClick={handleBannerClick}
                 style={{
-                  fontSize: '1.1rem',
-                  fontWeight: '700',
                   color: 'black',
-                  marginBottom: '0.3rem',
-                  letterSpacing: '0.5px'
+                  textDecoration: 'underline',
+                  cursor: 'pointer',
+                  fontWeight: '600'
                 }}
-                animate={{
-                  color: isBannerHovered ? ['#000', '#333', '#000'] : '#000'
-                }}
-                transition={{ duration: 1, repeat: isBannerHovered ? Infinity : 0 }}
+                whileHover={{ color: '#333' }}
+                whileTap={{ scale: 0.95 }}
               >
-                WEBSITE NOTE SEDANG DALAM PERSIAPAN
-              </motion.div>
-              <motion.div
-                style={{
-                  fontSize: '0.85rem',
-                  fontWeight: '400',
-                  color: 'rgba(0,0,0,0.7)',
-                  lineHeight: 1.3
-                }}
-              >
-                Rencana pengembangan fitur lengkap sedang berjalan. Klik untuk melihat progress terbaru →
-              </motion.div>
-            </div>
+                Klik untuk melihat progress
+              </motion.span>
+            </motion.div>
 
             {/* Close Button */}
             <motion.button
-              onClick={(e) => {
-                e.stopPropagation();
-                closeBanner();
-              }}
+              onClick={closeBanner}
               style={{
+                position: 'absolute',
+                right: '1rem',
                 background: 'rgba(0,0,0,0.1)',
                 border: 'none',
                 borderRadius: '50%',
-                width: '28px',
-                height: '28px',
+                width: '24px',
+                height: '24px',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 cursor: 'pointer',
-                flexShrink: 0,
                 color: 'rgba(0,0,0,0.6)'
               }}
               whileHover={{
@@ -840,78 +801,11 @@ export default function HomePage(): React.JSX.Element {
               }}
               whileTap={{ scale: 0.9 }}
             >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
                 <line x1="18" y1="6" x2="6" y2="18"/>
                 <line x1="6" y1="6" x2="18" y2="18"/>
               </svg>
             </motion.button>
-
-            {/* Animated Border Effect */}
-            <motion.div
-              style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                borderRadius: '20px',
-                border: '2px solid transparent',
-                background: 'linear-gradient(45deg, #CCFF00, #000, #CCFF00)',
-                backgroundSize: '400% 400%',
-                WebkitBackgroundClip: 'padding-box',
-                backgroundClip: 'padding-box',
-                zIndex: -1
-              }}
-              animate={{
-                backgroundPosition: ['0% 0%', '100% 100%']
-              }}
-              transition={{
-                duration: 3,
-                repeat: Infinity,
-                repeatType: 'reverse'
-              }}
-            />
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Floating Mini Banner */}
-      <AnimatePresence>
-        {showBanner && (
-          <motion.div
-            style={{
-              position: 'fixed',
-              bottom: '2rem',
-              right: '2rem',
-              backgroundColor: 'rgba(204, 255, 0, 0.9)',
-              padding: '0.8rem 1.2rem',
-              borderRadius: '12px',
-              border: '1px solid rgba(0,0,0,0.2)',
-              cursor: 'pointer',
-              zIndex: 35,
-              backdropFilter: 'blur(5px)',
-              boxShadow: '0 10px 30px rgba(0,0,0,0.2)',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              fontFamily: 'Arame Mono, monospace',
-              fontSize: '0.8rem',
-              fontWeight: '500'
-            }}
-            initial={{ opacity: 0, x: 50, scale: 0.8 }}
-            animate={{ opacity: 1, x: 0, scale: 1 }}
-            exit={{ opacity: 0, x: 50, scale: 0.8 }}
-            transition={{ duration: 0.5, delay: 0.5 }}
-            whileHover={{ 
-              scale: 1.05,
-              backgroundColor: 'rgba(204, 255, 0, 1)'
-            }}
-            onClick={handleBannerClick}
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
-            </svg>
-            Persiapan Rencana
           </motion.div>
         )}
       </AnimatePresence>
@@ -921,7 +815,7 @@ export default function HomePage(): React.JSX.Element {
         onClick={openLocationModal}
         style={{
           position: 'absolute',
-          top: '2rem',
+          top: showBanner ? '4.5rem' : '2rem',
           left: '2rem',
           display: 'flex',
           flexDirection: 'column',
@@ -997,7 +891,7 @@ export default function HomePage(): React.JSX.Element {
         onClick={openAllUsersModal}
         style={{
           position: 'absolute',
-          top: '2rem',
+          top: showBanner ? '4.5rem' : '2rem',
           left: '16rem',
           padding: '0.6rem 1.2rem',
           fontSize: '0.8rem',
@@ -1411,7 +1305,7 @@ export default function HomePage(): React.JSX.Element {
         onMouseLeave={handleMenuLeave}
         style={{
           position: 'absolute',
-          top: '2rem',
+          top: showBanner ? '4.5rem' : '2rem',
           right: '2rem',
           fontSize: '1.2rem',
           fontWeight: '300',
