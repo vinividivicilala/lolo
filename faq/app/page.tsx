@@ -887,7 +887,6 @@ export default function HomePage(): React.JSX.Element {
         </motion.div>
       </motion.div>
 
-
 {/* Marquee Text MENURU */}
 <motion.div
   style={{
@@ -906,10 +905,10 @@ export default function HomePage(): React.JSX.Element {
   <motion.div
     style={{
       display: 'flex',
-      width: 'fit-content'
+      width: 'fit-content',
     }}
     animate={{
-      x: [0, -1030]
+      x: isScrollingDown ? [0, -1030] : [0, 1030] // Arah berubah tergantung scroll
     }}
     transition={{
       x: {
@@ -924,8 +923,8 @@ export default function HomePage(): React.JSX.Element {
       <div
         key={index}
         style={{
-          fontSize: '6rem',
-          fontWeight: '900',
+          fontSize: '8rem',  // Memperbesar ukuran huruf
+          fontWeight: 'bold',  // Menebalkan huruf
           color: 'white',
           fontFamily: 'Arame Mono, monospace',
           textTransform: 'uppercase',
@@ -1974,6 +1973,7 @@ export default function HomePage(): React.JSX.Element {
     </div>
   );
 }
+
 
 
 
