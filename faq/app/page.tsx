@@ -893,7 +893,7 @@ export default function HomePage(): React.JSX.Element {
 <motion.div
   style={{
     position: 'absolute',
-    top: showBanner ? '50rem' : '30rem',
+    top: showBanner ? '8rem' : '5rem',
     left: 0,
     width: '100%',
     overflow: 'hidden',
@@ -910,50 +910,51 @@ export default function HomePage(): React.JSX.Element {
       width: 'fit-content'
     }}
     animate={{
-      x: [0, -1500]
+      x: [0, -2000]
     }}
     transition={{
       x: {
-        duration: 25,
+        duration: 20,
         repeat: Infinity,
         repeatType: "loop",
         ease: "linear"
       }
     }}
     whileInView={{
-      x: [-1500, 0],
+      x: [-2000, 0],
       transition: {
         x: {
-          duration: 20,
+          duration: 18,
           ease: "linear"
         }
       }
     }}
     viewport={{ once: false }}
   >
-    {[...Array(8)].map((_, index) => (
+    {[...Array(6)].map((_, index) => (
       <div
         key={index}
         style={{
-          fontSize: '12rem',
+          fontSize: '15rem',
           fontWeight: '900',
-          color: 'rgba(255,255,255,0.8)',
+          color: 'rgba(255,255,255,0.9)',
           fontFamily: 'Arame Mono, monospace',
           textTransform: 'uppercase',
-          letterSpacing: '-3px',
-          lineHeight: 0.9,
+          letterSpacing: '-4px',
+          lineHeight: 0.8,
           whiteSpace: 'nowrap',
-          padding: '0 2rem',
-          WebkitTextStroke: '2px rgba(255,255,255,0.9)',
+          padding: '0 3rem',
+          WebkitTextStroke: '3px rgba(255,255,255,1)',
           textShadow: `
-            0 0 50px rgba(255,255,255,0.3),
-            0 0 80px rgba(255,255,255,0.2),
-            0 0 120px rgba(255,255,255,0.1)
+            0 0 60px rgba(255,255,255,0.6),
+            0 0 100px rgba(255,255,255,0.4),
+            0 0 150px rgba(255,255,255,0.2)
           `,
-          background: 'linear-gradient(45deg, #ffffff, #cccccc)',
+          background: 'linear-gradient(45deg, #FFFFFF, #E0E0E0, #FFFFFF)',
           WebkitBackgroundClip: 'text',
           backgroundClip: 'text',
-          color: 'transparent'
+          color: 'transparent',
+          fontStyle: 'italic'
         }}
       >
         MENURU
@@ -961,7 +962,6 @@ export default function HomePage(): React.JSX.Element {
     ))}
   </motion.div>
 </motion.div>
-
 
 
           
@@ -1996,6 +1996,7 @@ export default function HomePage(): React.JSX.Element {
     </div>
   );
 }
+
 
 
 
