@@ -48,10 +48,14 @@ export default function HomePage(): React.JSX.Element {
   const [allUsersData, setAllUsersData] = useState<any[]>([]);
   const [showAllUsers, setShowAllUsers] = useState(false);
   const [isLoadingAllUsers, setIsLoadingAllUsers] = useState(false);
+  const [showBanner, setShowBanner] = useState(true);
+  const [isBannerHovered, setIsBannerHovered] = useState(false);
   const router = useRouter();
   const timeRef = useRef<NodeJS.Timeout | null>(null);
   const loadingRef = useRef<HTMLDivElement>(null);
   const textScrollRef = useRef<HTMLDivElement>(null);
+  const bannerRef = useRef<HTMLDivElement>(null);
+  const animationRef = useRef<NodeJS.Timeout | null>(null);
 
   // Database kota-kota Indonesia
   const indonesiaCities = [
@@ -206,6 +210,65 @@ export default function HomePage(): React.JSX.Element {
 
     initializeUser();
   }, []);
+
+  // Animasi banner dengan GSAP
+  useEffect(() => {
+    if (showBanner && bannerRef.current) {
+      const tl = gsap.timeline();
+      
+      // Animasi masuk banner
+      tl.fromTo(bannerRef.current,
+        { 
+          y: -100,
+          opacity: 0,
+          scale: 0.8
+        },
+        {
+          y: 0,
+          opacity: 1,
+          scale: 1,
+          duration: 0.8,
+          ease: "back.out(1.7)"
+        }
+      );
+
+      // Animasi continuous floating
+      tl.to(bannerRef.current, {
+        y: -5,
+        duration: 2,
+        repeat: -1,
+        yoyo: true,
+        ease: "sine.inOut"
+      }, "-=0.5");
+    }
+  }, [showBanner]);
+
+  // Fungsi untuk close banner
+  const closeBanner = () => {
+    if (bannerRef.current) {
+      gsap.to(bannerRef.current, {
+        y: -100,
+        opacity: 0,
+        scale: 0.8,
+        duration: 0.6,
+        ease: "back.in(1.7)",
+        onComplete: () => setShowBanner(false)
+      });
+    }
+  };
+
+  // Fungsi untuk handle click banner (ke halaman notes)
+  const handleBannerClick = () => {
+    if (bannerRef.current) {
+      gsap.to(bannerRef.current, {
+        scale: 0.95,
+        duration: 0.2,
+        onComplete: navigateToNotes
+      });
+    } else {
+      navigateToNotes();
+    }
+  };
 
   // Load location dari Firestore
   const loadLocationFromFirestore = async (userId: string) => {
@@ -472,7 +535,6 @@ export default function HomePage(): React.JSX.Element {
 
   // Array teks menu yang akan berganti saat hover
   const menuTextVariants = ["EXPLORE", "NAVIGATE", "DISCOVER", "BROWSE"];
-  const animationRef = useRef<NodeJS.Timeout | null>(null);
 
   const handleMenuHover = () => {
     if (isAnimating) return;
@@ -667,6 +729,193 @@ export default function HomePage(): React.JSX.Element {
       WebkitFontSmoothing: 'antialiased',
       MozOsxFontSmoothing: 'grayscale'
     }}>
+      {/* Banner Persiapan dengan GSAP Animation */}
+      <AnimatePresence>
+        {showBanner && (
+          <motion.div
+            ref={bannerRef}
+            onClick={handleBannerClick}
+            onMouseEnter={() => setIsBannerHovered(true)}
+            onMouseLeave={() => setIsBannerHovered(false)}
+            style={{
+              position: 'fixed',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              backgroundColor: 'rgba(204, 255, 0, 0.95)',
+              padding: '1.5rem 2rem',
+              borderRadius: '20px',
+              border: '2px solid rgba(0,0,0,0.1)',
+              cursor: 'pointer',
+              zIndex: 40,
+              backdropFilter: 'blur(10px)',
+              boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '1rem',
+              minWidth: '400px',
+              maxWidth: '500px',
+              fontFamily: 'Arame Mono, monospace'
+            }}
+            initial={false}
+            whileHover={{
+              scale: 1.05,
+              backgroundColor: 'rgba(204, 255, 0, 1)',
+              transition: { duration: 0.3 }
+            }}
+          >
+            {/* SVG Icon Pengumuman */}
+            <motion.div
+              style={{
+                flexShrink: 0,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+              animate={{
+                rotate: isBannerHovered ? [0, -10, 10, 0] : 0,
+                scale: isBannerHovered ? 1.2 : 1
+              }}
+              transition={{ duration: 0.5 }}
+            >
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                <line x1="12" y1="9" x2="12" y2="13"/>
+                <line x1="12" y1="17" x2="12.01" y2="17"/>
+              </svg>
+            </motion.div>
+
+            {/* Text Content */}
+            <div style={{ flex: 1 }}>
+              <motion.div
+                style={{
+                  fontSize: '1.1rem',
+                  fontWeight: '700',
+                  color: 'black',
+                  marginBottom: '0.3rem',
+                  letterSpacing: '0.5px'
+                }}
+                animate={{
+                  color: isBannerHovered ? ['#000', '#333', '#000'] : '#000'
+                }}
+                transition={{ duration: 1, repeat: isBannerHovered ? Infinity : 0 }}
+              >
+                WEBSITE NOTE SEDANG DALAM PERSIAPAN
+              </motion.div>
+              <motion.div
+                style={{
+                  fontSize: '0.85rem',
+                  fontWeight: '400',
+                  color: 'rgba(0,0,0,0.7)',
+                  lineHeight: 1.3
+                }}
+              >
+                Rencana pengembangan fitur lengkap sedang berjalan. Klik untuk melihat progress terbaru →
+              </motion.div>
+            </div>
+
+            {/* Close Button */}
+            <motion.button
+              onClick={(e) => {
+                e.stopPropagation();
+                closeBanner();
+              }}
+              style={{
+                background: 'rgba(0,0,0,0.1)',
+                border: 'none',
+                borderRadius: '50%',
+                width: '28px',
+                height: '28px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                flexShrink: 0,
+                color: 'rgba(0,0,0,0.6)'
+              }}
+              whileHover={{
+                backgroundColor: 'rgba(0,0,0,0.2)',
+                scale: 1.1,
+                color: 'rgba(0,0,0,0.9)'
+              }}
+              whileTap={{ scale: 0.9 }}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                <line x1="18" y1="6" x2="6" y2="18"/>
+                <line x1="6" y1="6" x2="18" y2="18"/>
+              </svg>
+            </motion.button>
+
+            {/* Animated Border Effect */}
+            <motion.div
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                borderRadius: '20px',
+                border: '2px solid transparent',
+                background: 'linear-gradient(45deg, #CCFF00, #000, #CCFF00)',
+                backgroundSize: '400% 400%',
+                WebkitBackgroundClip: 'padding-box',
+                backgroundClip: 'padding-box',
+                zIndex: -1
+              }}
+              animate={{
+                backgroundPosition: ['0% 0%', '100% 100%']
+              }}
+              transition={{
+                duration: 3,
+                repeat: Infinity,
+                repeatType: 'reverse'
+              }}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Floating Mini Banner */}
+      <AnimatePresence>
+        {showBanner && (
+          <motion.div
+            style={{
+              position: 'fixed',
+              bottom: '2rem',
+              right: '2rem',
+              backgroundColor: 'rgba(204, 255, 0, 0.9)',
+              padding: '0.8rem 1.2rem',
+              borderRadius: '12px',
+              border: '1px solid rgba(0,0,0,0.2)',
+              cursor: 'pointer',
+              zIndex: 35,
+              backdropFilter: 'blur(5px)',
+              boxShadow: '0 10px 30px rgba(0,0,0,0.2)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              fontFamily: 'Arame Mono, monospace',
+              fontSize: '0.8rem',
+              fontWeight: '500'
+            }}
+            initial={{ opacity: 0, x: 50, scale: 0.8 }}
+            animate={{ opacity: 1, x: 0, scale: 1 }}
+            exit={{ opacity: 0, x: 50, scale: 0.8 }}
+            transition={{ duration: 0.5, delay: 0.5 }}
+            whileHover={{ 
+              scale: 1.05,
+              backgroundColor: 'rgba(204, 255, 0, 1)'
+            }}
+            onClick={handleBannerClick}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+            </svg>
+            Persiapan Rencana
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Location Display - Bisa diklik untuk edit */}
       <motion.div
         onClick={openLocationModal}
@@ -1304,29 +1553,29 @@ export default function HomePage(): React.JSX.Element {
                 paddingLeft: '4rem',
                 position: 'relative'
               }}>
-            
-<motion.div
-  style={{
-    position: 'absolute',
-    left: '2rem',
-    top: '2rem',
-    fontSize: '4rem',
-    fontWeight: '800',
-    color: 'rgba(0,0,0,1)',
-    fontFamily: 'Arame Mono, monospace',
-    lineHeight: 1,
-    letterSpacing: '1.5px',
-    textShadow: '2px 2px 4px rgba(0,0,0,0.1)'
-  }}
-  initial={{ opacity: 0, y: -10 }}
-  animate={{ opacity: 1, y: 0 }}
-  transition={{ 
-    duration: 0.4,
-    delay: 0.3
-  }}
->
-  MENURU
-</motion.div>
+                {/* Website Name - Top Left - DIUBAH MENJADI MENURU */}
+                <motion.div
+                  style={{
+                    position: 'absolute',
+                    left: '2rem',
+                    top: '2rem',
+                    fontSize: '4rem',
+                    fontWeight: '800',
+                    color: 'rgba(0,0,0,1)',
+                    fontFamily: 'Arame Mono, monospace',
+                    lineHeight: 1,
+                    letterSpacing: '1.5px',
+                    textShadow: '2px 2px 4px rgba(0,0,0,0.1)'
+                  }}
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ 
+                    duration: 0.4,
+                    delay: 0.3
+                  }}
+                >
+                  MENURU
+                </motion.div>
 
                 {/* Visitor Time & Location Display - TOP CENTER */}
                 <motion.div
@@ -1771,5 +2020,3 @@ export default function HomePage(): React.JSX.Element {
     </div>
   );
 }
-
-
