@@ -18,58 +18,15 @@ export default function HomePage(): React.JSX.Element {
     date: ""
   });
   const [visitorLocation, setVisitorLocation] = useState({
-    city: "",
-    region: "",
+    city: "Jakarta",
+    region: "DKI Jakarta", 
     country: "Indonesia"
   });
+  const [isDetectingLocation, setIsDetectingLocation] = useState(true);
   const router = useRouter();
   const timeRef = useRef<NodeJS.Timeout | null>(null);
   const loadingRef = useRef<HTMLDivElement>(null);
   const textScrollRef = useRef<HTMLDivElement>(null);
-
-  // Database lokasi Indonesia
-  const indonesiaLocations = [
-    // Jakarta
-    { city: "Ciracas", region: "Jakarta Timur" },
-    { city: "Pasar Minggu", region: "Jakarta Selatan" },
-    { city: "Tanah Abang", region: "Jakarta Pusat" },
-    { city: "Cengkareng", region: "Jakarta Barat" },
-    { city: "Cilincing", region: "Jakarta Utara" },
-    
-    // Jawa Barat
-    { city: "Bandung", region: "Jawa Barat" },
-    { city: "Bekasi", region: "Jawa Barat" },
-    { city: "Bogor", region: "Jawa Barat" },
-    { city: "Depok", region: "Jawa Barat" },
-    { city: "Cimahi", region: "Jawa Barat" },
-    
-    // Jawa Tengah
-    { city: "Semarang", region: "Jawa Tengah" },
-    { city: "Surakarta", region: "Jawa Tengah" },
-    
-    // Jawa Timur
-    { city: "Surabaya", region: "Jawa Timur" },
-    { city: "Malang", region: "Jawa Timur" },
-    
-    // Bali
-    { city: "Denpasar", region: "Bali" },
-    
-    // Sumatera
-    { city: "Medan", region: "Sumatera Utara" },
-    { city: "Palembang", region: "Sumatera Selatan" },
-    { city: "Padang", region: "Sumatera Barat" },
-    
-    // Kalimantan
-    { city: "Samarinda", region: "Kalimantan Timur" },
-    { city: "Balikpapan", region: "Kalimantan Timur" },
-    
-    // Sulawesi
-    { city: "Makassar", region: "Sulawesi Selatan" },
-    { city: "Manado", region: "Sulawesi Utara" },
-    
-    // Papua
-    { city: "Jayapura", region: "Papua" }
-  ];
 
   useEffect(() => {
     if (showLoading) {
@@ -90,68 +47,206 @@ export default function HomePage(): React.JSX.Element {
     };
   }, [showLoading]);
 
-  // Fungsi mendeteksi lokasi berdasarkan IP
-  const detectVisitorLocation = () => {
+  // Fungsi utama untuk mendeteksi lokasi berdasarkan IP
+  const detectVisitorLocation = async () => {
+    setIsDetectingLocation(true);
+    
     try {
-      // Method 1: Geolocation browser
+      // Method 1: Coba gunakan IPAPI untuk deteksi IP-based (free service)
+      const ipBasedLocation = await fetchLocationFromIP();
+      if (ipBasedLocation) {
+        setVisitorLocation(ipBasedLocation);
+        setIsDetectingLocation(false);
+        return;
+      }
+
+      // Method 2: Geolocation browser (jika diizinkan)
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
-          (position) => {
-            const { latitude, longitude } = position.coords;
-            const location = getNearestLocation(latitude, longitude);
-            setVisitorLocation(location);
+          async (position) => {
+            const location = await getLocationFromCoordinates(
+              position.coords.latitude, 
+              position.coords.longitude
+            );
+            if (location) {
+              setVisitorLocation(location);
+            }
+            setIsDetectingLocation(false);
           },
-          // Fallback ke IP-based
           () => {
-            const location = getIPBasedLocation();
-            setVisitorLocation(location);
+            // Jika geolocation gagal, gunakan timezone-based
+            const timezoneLocation = getLocationFromTimezone();
+            setVisitorLocation(timezoneLocation);
+            setIsDetectingLocation(false);
+          },
+          {
+            enableHighAccuracy: true,
+            timeout: 5000,
+            maximumAge: 300000
           }
         );
       } else {
-        // Langsung gunakan IP-based
-        const location = getIPBasedLocation();
-        setVisitorLocation(location);
+        // Fallback ke timezone-based
+        const timezoneLocation = getLocationFromTimezone();
+        setVisitorLocation(timezoneLocation);
+        setIsDetectingLocation(false);
       }
     } catch (error) {
-      // Default location
-      setVisitorLocation({
-        city: "Jakarta",
-        region: "DKI Jakarta",
-        country: "Indonesia"
-      });
+      console.log('Location detection failed:', error);
+      const timezoneLocation = getLocationFromTimezone();
+      setVisitorLocation(timezoneLocation);
+      setIsDetectingLocation(false);
     }
   };
 
-  const getNearestLocation = (lat: number, lng: number) => {
-    // Untuk simplicity, kita random pilih lokasi dari database
-    const randomLocation = indonesiaLocations[Math.floor(Math.random() * indonesiaLocations.length)];
+  // Fetch location dari IP menggunakan service gratis
+  const fetchLocationFromIP = async () => {
+    try {
+      // Coba beberapa free IP geolocation services
+      const services = [
+        'https://ipapi.co/json/',
+        'https://api.ipgeolocation.io/ipgeo?apiKey=',
+        'https://json.geoiplookup.io/'
+      ];
+
+      for (const service of services) {
+        try {
+          const response = await fetch(service, {
+            method: 'GET',
+            headers: {
+              'Accept': 'application/json',
+            },
+            timeout: 5000
+          });
+          
+          if (response.ok) {
+            const data = await response.json();
+            
+            // Parse response berdasarkan service yang berbeda
+            let city, region, country;
+            
+            if (service.includes('ipapi.co')) {
+              city = data.city;
+              region = data.region;
+              country = data.country_name;
+            } else if (service.includes('ipgeolocation')) {
+              city = data.city;
+              region = data.state_prov;
+              country = data.country_name;
+            } else if (service.includes('geoiplookup')) {
+              city = data.city;
+              region = data.region;
+              country = data.country_name;
+            }
+            
+            if (city && country === 'Indonesia') {
+              return {
+                city: city,
+                region: region || getRegionFromCity(city),
+                country: 'Indonesia'
+              };
+            }
+          }
+        } catch (e) {
+          continue; // Coba service berikutnya
+        }
+      }
+      
+      return null;
+    } catch (error) {
+      return null;
+    }
+  };
+
+  // Get location dari coordinates (reverse geocoding sederhana)
+  const getLocationFromCoordinates = async (lat: number, lng: number) => {
+    // Mapping koordinat ke kota-kota utama Indonesia
+    const cityCoordinates = [
+      { city: "Jakarta", region: "DKI Jakarta", lat: -6.2088, lng: 106.8456 },
+      { city: "Surabaya", region: "Jawa Timur", lat: -7.2504, lng: 112.7688 },
+      { city: "Bandung", region: "Jawa Barat", lat: -6.9175, lng: 107.6191 },
+      { city: "Medan", region: "Sumatera Utara", lat: 3.5952, lng: 98.6722 },
+      { city: "Makassar", region: "Sulawesi Selatan", lat: -5.1477, lng: 119.4327 },
+      { city: "Semarang", region: "Jawa Tengah", lat: -6.9667, lng: 110.4167 },
+      { city: "Palembang", region: "Sumatera Selatan", lat: -2.9761, lng: 104.7754 },
+      { city: "Denpasar", region: "Bali", lat: -8.6705, lng: 115.2126 },
+      { city: "Balikpapan", region: "Kalimantan Timur", lat: -1.2379, lng: 116.8529 },
+      { city: "Manado", region: "Sulawesi Utara", lat: 1.4748, lng: 124.8421 },
+      { city: "Yogyakarta", region: "DI Yogyakarta", lat: -7.7956, lng: 110.3695 },
+      { city: "Malang", region: "Jawa Timur", lat: -7.9666, lng: 112.6326 },
+      { city: "Bekasi", region: "Jawa Barat", lat: -6.2383, lng: 106.9756 },
+      { city: "Tangerang", region: "Banten", lat: -6.1783, lng: 106.6319 },
+      { city: "Bogor", region: "Jawa Barat", lat: -6.5971, lng: 106.8060 }
+    ];
+
+    // Cari kota terdekat
+    let nearestCity = cityCoordinates[0];
+    let minDistance = Number.MAX_SAFE_INTEGER;
+
+    for (const city of cityCoordinates) {
+      const distance = Math.sqrt(
+        Math.pow(city.lat - lat, 2) + Math.pow(city.lng - lng, 2)
+      );
+      if (distance < minDistance) {
+        minDistance = distance;
+        nearestCity = city;
+      }
+    }
+
     return {
-      city: randomLocation.city,
-      region: randomLocation.region,
+      city: nearestCity.city,
+      region: nearestCity.region,
       country: "Indonesia"
     };
   };
 
-  const getIPBasedLocation = () => {
+  // Get location dari timezone
+  const getLocationFromTimezone = () => {
     const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
     
-    // Mapping timezone ke lokasi
     const timezoneMap: { [key: string]: { city: string, region: string } } = {
       'Asia/Jakarta': { city: "Jakarta", region: "DKI Jakarta" },
       'Asia/Makassar': { city: "Makassar", region: "Sulawesi Selatan" },
-      'Asia/Jayapura': { city: "Jayapura", region: "Papua" }
+      'Asia/Jayapura': { city: "Jayapura", region: "Papua" },
+      'Asia/Pontianak': { city: "Pontianak", region: "Kalimantan Barat" }
     };
 
-    const detectedLocation = timezoneMap[timezone] || { 
+    return timezoneMap[timezone] || { 
       city: "Jakarta", 
-      region: "DKI Jakarta" 
-    };
-
-    return {
-      city: detectedLocation.city,
-      region: detectedLocation.region,
+      region: "DKI Jakarta",
       country: "Indonesia"
     };
+  };
+
+  // Helper function untuk mendapatkan region dari city
+  const getRegionFromCity = (city: string) => {
+    const cityRegionMap: { [key: string]: string } = {
+      'Jakarta': 'DKI Jakarta',
+      'Surabaya': 'Jawa Timur',
+      'Bandung': 'Jawa Barat',
+      'Medan': 'Sumatera Utara',
+      'Makassar': 'Sulawesi Selatan',
+      'Semarang': 'Jawa Tengah',
+      'Palembang': 'Sumatera Selatan',
+      'Denpasar': 'Bali',
+      'Balikpapan': 'Kalimantan Timur',
+      'Manado': 'Sulawesi Utara',
+      'Yogyakarta': 'DI Yogyakarta',
+      'Malang': 'Jawa Timur',
+      'Bekasi': 'Jawa Barat',
+      'Tangerang': 'Banten',
+      'Bogor': 'Jawa Barat',
+      'Depok': 'Jawa Barat',
+      'Cimahi': 'Jawa Barat',
+      'Padang': 'Sumatera Barat',
+      'Bandar Lampung': 'Lampung',
+      'Pekanbaru': 'Riau',
+      'Batam': 'Kepulauan Riau',
+      'Banjarmasin': 'Kalimantan Selatan',
+      'Samarinda': 'Kalimantan Timur'
+    };
+
+    return cityRegionMap[city] || 'Indonesia';
   };
 
   const startTextScrollAnimation = () => {
@@ -1020,7 +1115,17 @@ export default function HomePage(): React.JSX.Element {
                   <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
                   <circle cx="12" cy="10" r="3"/>
                 </svg>
-                {visitorLocation.city}, {visitorLocation.country}
+                {isDetectingLocation ? (
+                  <motion.span
+                    initial={{ opacity: 0.5 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.5, repeat: Infinity, repeatType: "reverse" }}
+                  >
+                    Mendeteksi lokasi...
+                  </motion.span>
+                ) : (
+                  `${visitorLocation.city}, ${visitorLocation.country}`
+                )}
               </motion.div>
               <motion.div
                 style={{
