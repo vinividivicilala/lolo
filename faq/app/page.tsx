@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { gsap } from "gsap";
 import { initializeApp } from "firebase/app";
-import { getFirestore, doc, setDoc, getDoc, onSnapshot } from "firebase/firestore";
+import { getFirestore, doc, setDoc, getDoc, onSnapshot, collection, getDocs } from "firebase/firestore";
 
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
@@ -45,6 +45,9 @@ export default function HomePage(): React.JSX.Element {
   const [tempLocation, setTempLocation] = useState({ city: "", region: "" });
   const [currentUserId, setCurrentUserId] = useState<string>("");
   const [isLoadingLocation, setIsLoadingLocation] = useState(true);
+  const [allUsersData, setAllUsersData] = useState<any[]>([]);
+  const [showAllUsers, setShowAllUsers] = useState(false);
+  const [isLoadingAllUsers, setIsLoadingAllUsers] = useState(false);
   const router = useRouter();
   const timeRef = useRef<NodeJS.Timeout | null>(null);
   const loadingRef = useRef<HTMLDivElement>(null);
@@ -285,6 +288,40 @@ export default function HomePage(): React.JSX.Element {
       setVisitorLocation(defaultLocation);
       await saveLocationToFirestore(userId, defaultLocation);
     }
+  };
+
+  // Fungsi untuk mengambil semua data user
+  const fetchAllUsersData = async () => {
+    try {
+      setIsLoadingAllUsers(true);
+      const usersCollection = collection(db, 'userLocations');
+      const usersSnapshot = await getDocs(usersCollection);
+      
+      const usersData = usersSnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      
+      // Urutkan berdasarkan lastUpdated (terbaru pertama)
+      usersData.sort((a: any, b: any) => {
+        const dateA = a.lastUpdated ? new Date(a.lastUpdated).getTime() : 0;
+        const dateB = b.lastUpdated ? new Date(b.lastUpdated).getTime() : 0;
+        return dateB - dateA;
+      });
+      
+      setAllUsersData(usersData);
+      setShowAllUsers(true);
+    } catch (error) {
+      console.error('Error fetching all users data:', error);
+      alert('Gagal mengambil data users. Silakan coba lagi.');
+    } finally {
+      setIsLoadingAllUsers(false);
+    }
+  };
+
+  // Fungsi untuk membuka modal semua users
+  const openAllUsersModal = () => {
+    fetchAllUsersData();
   };
 
   useEffect(() => {
@@ -706,6 +743,38 @@ export default function HomePage(): React.JSX.Element {
         </motion.div>
       </motion.div>
 
+      {/* Button untuk melihat semua users */}
+      <motion.button
+        onClick={openAllUsersModal}
+        style={{
+          position: 'absolute',
+          top: '2rem',
+          left: '16rem',
+          padding: '0.6rem 1.2rem',
+          fontSize: '0.8rem',
+          fontWeight: '300',
+          color: 'white',
+          backgroundColor: 'rgba(255,255,255,0.1)',
+          border: '1px solid rgba(255,255,255,0.2)',
+          borderRadius: '8px',
+          cursor: 'pointer',
+          fontFamily: 'Arame Mono, monospace',
+          backdropFilter: 'blur(10px)',
+          whiteSpace: 'nowrap'
+        }}
+        initial={{ opacity: 0, x: -20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ delay: 1.0, duration: 0.6 }}
+        whileHover={{ 
+          backgroundColor: 'rgba(255,255,255,0.15)',
+          scale: 1.05,
+          transition: { duration: 0.2 }
+        }}
+        whileTap={{ scale: 0.95 }}
+      >
+        VIEW ALL USERS
+      </motion.button>
+
       {/* Modal untuk set lokasi manual */}
       <AnimatePresence>
         {showLocationModal && (
@@ -833,6 +902,254 @@ export default function HomePage(): React.JSX.Element {
                   Simpan
                 </motion.button>
               </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Modal untuk menampilkan semua users */}
+      <AnimatePresence>
+        {showAllUsers && (
+          <motion.div
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              backgroundColor: 'rgba(0,0,0,0.9)',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              zIndex: 100,
+              padding: '2rem'
+            }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <motion.div
+              style={{
+                background: 'white',
+                borderRadius: '15px',
+                padding: '2rem',
+                maxWidth: '700px',
+                width: '100%',
+                maxHeight: '80vh',
+                overflow: 'hidden',
+                display: 'flex',
+                flexDirection: 'column'
+              }}
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.8, opacity: 0 }}
+            >
+              <div style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                marginBottom: '1.5rem'
+              }}>
+                <h3 style={{ 
+                  color: 'black',
+                  fontFamily: 'Arame Mono, monospace',
+                  fontWeight: '400',
+                  margin: 0
+                }}>
+                  All Users Location Data
+                </h3>
+                <motion.button
+                  onClick={() => setShowAllUsers(false)}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    fontSize: '1.5rem',
+                    cursor: 'pointer',
+                    color: '#666',
+                    padding: '0.5rem',
+                    borderRadius: '50%',
+                    width: '40px',
+                    height: '40px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}
+                  whileHover={{ 
+                    backgroundColor: '#f0f0f0',
+                    color: '#000'
+                  }}
+                >
+                  ×
+                </motion.button>
+              </div>
+
+              {isLoadingAllUsers ? (
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  padding: '3rem',
+                  flexDirection: 'column',
+                  gap: '1rem'
+                }}>
+                  <motion.div
+                    style={{
+                      width: '40px',
+                      height: '40px',
+                      border: '3px solid #f0f0f0',
+                      borderTop: '3px solid #CCFF00',
+                      borderRadius: '50%'
+                    }}
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                  />
+                  <div style={{
+                    fontFamily: 'Arame Mono, monospace',
+                    color: '#666',
+                    fontSize: '0.9rem'
+                  }}>
+                    Loading users data...
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <div style={{ 
+                    flex: 1, 
+                    overflowY: 'auto',
+                    maxHeight: '400px',
+                    marginBottom: '1rem'
+                  }}>
+                    {allUsersData.length === 0 ? (
+                      <div style={{
+                        textAlign: 'center',
+                        padding: '3rem',
+                        color: '#666',
+                        fontFamily: 'Arame Mono, monospace'
+                      }}>
+                        No users data found
+                      </div>
+                    ) : (
+                      allUsersData.map((user, index) => (
+                        <motion.div
+                          key={user.id}
+                          style={{
+                            padding: '1.2rem',
+                            borderBottom: '1px solid #f0f0f0',
+                            backgroundColor: user.id === currentUserId ? '#f8f8f8' : 'transparent',
+                            fontFamily: 'Arame Mono, monospace',
+                            borderLeft: user.id === currentUserId ? '4px solid #CCFF00' : '4px solid transparent'
+                          }}
+                          initial={{ opacity: 0, x: -20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: index * 0.1 }}
+                          whileHover={{ backgroundColor: '#fafafa' }}
+                        >
+                          <div style={{ 
+                            display: 'flex', 
+                            justifyContent: 'space-between',
+                            alignItems: 'flex-start',
+                            marginBottom: '0.8rem'
+                          }}>
+                            <div style={{ 
+                              fontWeight: '500', 
+                              color: 'black',
+                              fontSize: '1rem'
+                            }}>
+                              User {index + 1} 
+                              {user.id === currentUserId && (
+                                <span style={{ 
+                                  marginLeft: '0.5rem',
+                                  backgroundColor: '#CCFF00',
+                                  color: 'black',
+                                  padding: '0.2rem 0.6rem',
+                                  borderRadius: '12px',
+                                  fontSize: '0.7rem',
+                                  fontWeight: '500'
+                                }}>
+                                  YOU
+                                </span>
+                              )}
+                            </div>
+                            <div style={{ 
+                              fontSize: '0.7rem', 
+                              color: '#666',
+                              backgroundColor: '#f0f0f0',
+                              padding: '0.3rem 0.6rem',
+                              borderRadius: '8px',
+                              fontFamily: 'monospace'
+                            }}>
+                              ID: {user.id.substring(0, 10)}...
+                            </div>
+                          </div>
+                          
+                          <div style={{ 
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.8rem',
+                            marginBottom: '0.5rem'
+                          }}>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                              <circle cx="12" cy="10" r="3"/>
+                            </svg>
+                            <span style={{ fontSize: '0.9rem', color: '#333', fontWeight: '500' }}>
+                              {user.city || 'Unknown'}, {user.region || 'Unknown'}
+                            </span>
+                          </div>
+                          
+                          <div style={{ 
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.8rem',
+                            marginBottom: '0.5rem'
+                          }}>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                              <line x1="16" y1="2" x2="16" y2="6"/>
+                              <line x1="8" y1="2" x2="8" y2="6"/>
+                              <line x1="3" y1="10" x2="21" y2="10"/>
+                            </svg>
+                            <span style={{ fontSize: '0.8rem', color: '#666' }}>
+                              {user.lastUpdated ? new Date(user.lastUpdated).toLocaleString('id-ID') : 'No timestamp'}
+                            </span>
+                          </div>
+
+                          {user.isManual && (
+                            <div style={{ 
+                              fontSize: '0.7rem', 
+                              color: '#CCFF00',
+                              backgroundColor: 'rgba(204, 255, 0, 0.1)',
+                              padding: '0.2rem 0.6rem',
+                              borderRadius: '8px',
+                              display: 'inline-block',
+                              marginTop: '0.3rem'
+                            }}>
+                              Manual Location
+                            </div>
+                          )}
+                        </motion.div>
+                      ))
+                    )}
+                  </div>
+
+                  <div style={{ 
+                    marginTop: '1rem',
+                    fontSize: '0.8rem',
+                    color: '#666',
+                    textAlign: 'center',
+                    padding: '1rem',
+                    backgroundColor: '#f8f8f8',
+                    borderRadius: '8px'
+                  }}>
+                    Total <strong>{allUsersData.length}</strong> users found
+                    {allUsersData.length > 0 && (
+                      <span style={{ marginLeft: '1rem' }}>
+                        • Last updated: {new Date().toLocaleString('id-ID')}
+                      </span>
+                    )}
+                  </div>
+                </>
+              )}
             </motion.div>
           </motion.div>
         )}
