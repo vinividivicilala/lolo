@@ -1304,28 +1304,29 @@ export default function HomePage(): React.JSX.Element {
                 paddingLeft: '4rem',
                 position: 'relative'
               }}>
-                {/* Website Name - Top Left */}
-                <motion.div
-                  style={{
-                    position: 'absolute',
-                    left: '2rem',
-                    top: '2rem',
-                    fontSize: '1.2rem',
-                    fontWeight: '300',
-                    color: 'rgba(0,0,0,0.6)',
-                    fontFamily: 'Arame Mono, monospace',
-                    lineHeight: 1,
-                    letterSpacing: '0.5px'
-                  }}
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ 
-                    duration: 0.4,
-                    delay: 0.3
-                  }}
-                >
-                  PORTFOLIO
-                </motion.div>
+               // Versi dengan efek shadow
+<motion.div
+  style={{
+    position: 'absolute',
+    left: '2rem',
+    top: '2rem',
+    fontSize: '4rem',
+    fontWeight: '800',
+    color: 'rgba(0,0,0,1)',
+    fontFamily: 'Arame Mono, monospace',
+    lineHeight: 1,
+    letterSpacing: '1.5px',
+    textShadow: '2px 2px 4px rgba(0,0,0,0.1)'
+  }}
+  initial={{ opacity: 0, y: -10 }}
+  animate={{ opacity: 1, y: 0 }}
+  transition={{ 
+    duration: 0.4,
+    delay: 0.3
+  }}
+>
+  MENURU
+</motion.div>
 
                 {/* Visitor Time & Location Display - TOP CENTER */}
                 <motion.div
@@ -1770,3 +1771,4 @@ export default function HomePage(): React.JSX.Element {
     </div>
   );
 }
+
