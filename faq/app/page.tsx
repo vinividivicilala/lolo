@@ -892,9 +892,9 @@ export default function HomePage(): React.JSX.Element {
 <motion.div
   style={{
     position: 'absolute',
-    top: showBanner ? '9rem' : '6.5rem',
+    top: showBanner ? '50rem' : '30rem',
     left: 0,
-    width: '100%',
+    width: '300%',
     overflow: 'hidden',
     zIndex: 5,
     pointerEvents: 'none'
@@ -1974,6 +1974,7 @@ export default function HomePage(): React.JSX.Element {
     </div>
   );
 }
+
 
 
 
