@@ -887,13 +887,15 @@ export default function HomePage(): React.JSX.Element {
         </motion.div>
       </motion.div>
 
+
+
 {/* Marquee Text MENURU */}
 <motion.div
   style={{
     position: 'absolute',
     top: showBanner ? '50rem' : '30rem',
     left: 0,
-    width: '300%',
+    width: '100%',
     overflow: 'hidden',
     zIndex: 5,
     pointerEvents: 'none'
@@ -905,35 +907,53 @@ export default function HomePage(): React.JSX.Element {
   <motion.div
     style={{
       display: 'flex',
-      width: 'fit-content',
+      width: 'fit-content'
     }}
     animate={{
-      x: isScrollingDown ? [0, -1030] : [0, 1030] // Arah berubah tergantung scroll
+      x: [0, -1500]
     }}
     transition={{
       x: {
-        duration: 15,
+        duration: 25,
         repeat: Infinity,
         repeatType: "loop",
         ease: "linear"
       }
     }}
+    whileInView={{
+      x: [-1500, 0],
+      transition: {
+        x: {
+          duration: 20,
+          ease: "linear"
+        }
+      }
+    }}
+    viewport={{ once: false }}
   >
-    {[...Array(6)].map((_, index) => (
+    {[...Array(8)].map((_, index) => (
       <div
         key={index}
         style={{
-          fontSize: '8rem',  // Memperbesar ukuran huruf
-          fontWeight: 'bold',  // Menebalkan huruf
-          color: 'white',
+          fontSize: '12rem',
+          fontWeight: '900',
+          color: 'rgba(255,255,255,0.8)',
           fontFamily: 'Arame Mono, monospace',
           textTransform: 'uppercase',
-          letterSpacing: '-2px',
-          lineHeight: 1,
+          letterSpacing: '-3px',
+          lineHeight: 0.9,
           whiteSpace: 'nowrap',
-          padding: '0 1rem',
-          WebkitTextStroke: '1px rgba(255,255,255,0.05)',
-          textShadow: '0 0 30px rgba(255,255,255,0.1)'
+          padding: '0 2rem',
+          WebkitTextStroke: '2px rgba(255,255,255,0.9)',
+          textShadow: `
+            0 0 50px rgba(255,255,255,0.3),
+            0 0 80px rgba(255,255,255,0.2),
+            0 0 120px rgba(255,255,255,0.1)
+          `,
+          background: 'linear-gradient(45deg, #ffffff, #cccccc)',
+          WebkitBackgroundClip: 'text',
+          backgroundClip: 'text',
+          color: 'transparent'
         }}
       >
         MENURU
@@ -942,6 +962,9 @@ export default function HomePage(): React.JSX.Element {
   </motion.div>
 </motion.div>
 
+
+
+          
 
       
 
@@ -1973,6 +1996,7 @@ export default function HomePage(): React.JSX.Element {
     </div>
   );
 }
+
 
 
 
