@@ -18,24 +18,172 @@ export default function HomePage(): React.JSX.Element {
     date: ""
   });
   const [visitorLocation, setVisitorLocation] = useState({
-    city: "Jakarta",
-    region: "DKI Jakarta", 
-    country: "Indonesia"
+    city: "",
+    region: "",
+    country: "Indonesia",
+    isManual: false
   });
-  const [isDetectingLocation, setIsDetectingLocation] = useState(true);
+  const [showLocationModal, setShowLocationModal] = useState(false);
+  const [tempLocation, setTempLocation] = useState({ city: "", region: "" });
   const router = useRouter();
   const timeRef = useRef<NodeJS.Timeout | null>(null);
   const loadingRef = useRef<HTMLDivElement>(null);
   const textScrollRef = useRef<HTMLDivElement>(null);
+
+  // Database kota-kota Indonesia
+  const indonesiaCities = [
+    // Jawa
+    { city: "Jakarta", region: "DKI Jakarta" },
+    { city: "Surabaya", region: "Jawa Timur" },
+    { city: "Bandung", region: "Jawa Barat" },
+    { city: "Bekasi", region: "Jawa Barat" },
+    { city: "Medan", region: "Sumatera Utara" },
+    { city: "Depok", region: "Jawa Barat" },
+    { city: "Tangerang", region: "Banten" },
+    { city: "Palembang", region: "Sumatera Selatan" },
+    { city: "Semarang", region: "Jawa Tengah" },
+    { city: "Makassar", region: "Sulawesi Selatan" },
+    { city: "South Tangerang", region: "Banten" },
+    { city: "Batam", region: "Kepulauan Riau" },
+    { city: "Bandar Lampung", region: "Lampung" },
+    { city: "Bogor", region: "Jawa Barat" },
+    { city: "Pekanbaru", region: "Riau" },
+    { city: "Padang", region: "Sumatera Barat" },
+    { city: "Malang", region: "Jawa Timur" },
+    { city: "Samarinda", region: "Kalimantan Timur" },
+    { city: "Denpasar", region: "Bali" },
+    { city: "Tasikmalaya", region: "Jawa Barat" },
+    { city: "Serang", region: "Banten" },
+    { city: "Balikpapan", region: "Kalimantan Timur" },
+    { city: "Pontianak", region: "Kalimantan Barat" },
+    { city: "Banjarmasin", region: "Kalimantan Selatan" },
+    { city: "Jambi", region: "Jambi" },
+    { city: "Surakarta", region: "Jawa Tengah" },
+    { city: "Cimahi", region: "Jawa Barat" },
+    { city: "Manado", region: "Sulawesi Utara" },
+    { city: "Mataram", region: "Nusa Tenggara Barat" },
+    { city: "Yogyakarta", region: "DI Yogyakarta" },
+    { city: "Cilegon", region: "Banten" },
+    { city: "Palu", region: "Sulawesi Tengah" },
+    { city: "Kupang", region: "Nusa Tenggara Timur" },
+    { city: "Bengkulu", region: "Bengkulu" },
+    { city: "Majalengka", region: "Jawa Barat" },
+    { city: "Tegal", region: "Jawa Tengah" },
+    { city: "Kediri", region: "Jawa Timur" },
+    { city: "Binjai", region: "Sumatera Utara" },
+    { city: "Pematang Siantar", region: "Sumatera Utara" },
+    { city: "Karawang", region: "Jawa Barat" },
+    { city: "Cirebon", region: "Jawa Barat" },
+    { city: "Lhokseumawe", region: "Aceh" },
+    { city: "Pekalongan", region: "Jawa Tengah" },
+    { city: "Cibinong", region: "Jawa Barat" },
+    { city: "Madiun", region: "Jawa Timur" },
+    { city: "Ambon", region: "Maluku" },
+    { city: "Langsa", region: "Aceh" },
+    { city: "Banda Aceh", region: "Aceh" },
+    { city: "Bontang", region: "Kalimantan Timur" },
+    { city: "Probolinggo", region: "Jawa Timur" },
+    { city: "Singkawang", region: "Kalimantan Barat" },
+    { city: "Batu", region: "Jawa Timur" },
+    { city: "Sungaipenuh", region: "Jambi" },
+    { city: "Blitar", region: "Jawa Timur" },
+    { city: "Bitung", region: "Sulawesi Utara" },
+    { city: "Tanjung Pinang", region: "Kepulauan Riau" },
+    { city: "Mojokerto", region: "Jawa Timur" },
+    { city: "Gorontalo", region: "Gorontalo" },
+    { city: "Magelang", region: "Jawa Tengah" },
+    { city: "Teluknaga", region: "Banten" },
+    { city: "Ternate", region: "Maluku Utara" },
+    { city: "Kendari", region: "Sulawesi Tenggara" },
+    { city: "Banjarbaru", region: "Kalimantan Selatan" },
+    { city: "Pangkal Pinang", region: "Kepulauan Bangka Belitung" },
+    { city: "Tarakan", region: "Kalimantan Utara" },
+    { city: "Lubuklinggau", region: "Sumatera Selatan" },
+    { city: "Palangkaraya", region: "Kalimantan Tengah" },
+    { city: "Metro", region: "Lampung" },
+    { city: "Tebing Tinggi", region: "Sumatera Utara" },
+    { city: "Bima", region: "Nusa Tenggara Barat" },
+    { city: "Pasuruan", region: "Jawa Timur" },
+    { city: "Salatiga", region: "Jawa Tengah" },
+    { city: "Ciamis", region: "Jawa Barat" },
+    { city: "Lahat", region: "Sumatera Selatan" },
+    { city: "Sampit", region: "Kalimantan Tengah" },
+    { city: "Rantau Prapat", region: "Sumatera Utara" },
+    { city: "Cikarang", region: "Jawa Barat" },
+    { city: "Purwakarta", region: "Jawa Barat" },
+    { city: "Sorong", region: "Papua Barat" },
+    { city: "Subang", region: "Jawa Barat" },
+    { city: "Indramayu", region: "Jawa Barat" },
+    { city: "Sumber", region: "Jawa Barat" },
+    { city: "Pandeglang", region: "Banten" },
+    { city: "Kuningan", region: "Jawa Barat" },
+    { city: "Sumedang", region: "Jawa Barat" },
+    { city: "Banyuwangi", region: "Jawa Timur" },
+    { city: "Purwodadi", region: "Jawa Tengah" },
+    { city: "Bondowoso", region: "Jawa Timur" },
+    { city: "Jayapura", region: "Papua" },
+    { city: "Sleman", region: "DI Yogyakarta" },
+    { city: "Bantul", region: "DI Yogyakarta" },
+    { city: "Gunungsitoli", region: "Sumatera Utara" },
+    { city: "Padang Sidempuan", region: "Sumatera Utara" },
+    { city: "Sawangan", region: "Jawa Barat" },
+    { city: "Sibolga", region: "Sumatera Utara" },
+    { city: "Tanjung Balai", region: "Sumatera Utara" },
+    { city: "Singaraja", region: "Bali" },
+    { city: "Martapura", region: "Kalimantan Selatan" },
+    { city: "Kuta", region: "Bali" },
+    { city: "Meulaboh", region: "Aceh" },
+    { city: "Sabang", region: "Aceh" },
+    { city: "Tanjung Pandan", region: "Kepulauan Bangka Belitung" },
+    { city: "Sumbawa Besar", region: "Nusa Tenggara Barat" },
+    { city: "Raba", region: "Nusa Tenggara Barat" },
+    { city: "Waingapu", region: "Nusa Tenggara Timur" },
+    { city: "Maumere", region: "Nusa Tenggara Timur" },
+    { city: "Ende", region: "Nusa Tenggara Timur" },
+    { city: "Labuhan Bajo", region: "Nusa Tenggara Timur" },
+    { city: "Ruteng", region: "Nusa Tenggara Timur" },
+    { city: "Bau-Bau", region: "Sulawesi Tenggara" },
+    { city: "Buton", region: "Sulawesi Tenggara" },
+    { city: "Kendari", region: "Sulawesi Tenggara" },
+    { city: "Parepare", region: "Sulawesi Selatan" },
+    { city: "Palopo", region: "Sulawesi Selatan" },
+    { city: "Masohi", region: "Maluku" },
+    { city: "Dobo", region: "Maluku" },
+    { city: "Tual", region: "Maluku" },
+    { city: "Soe", region: "Nusa Tenggara Timur" },
+    { city: "Kefamenanu", region: "Nusa Tenggara Timur" },
+    { city: "Atambua", region: "Nusa Tenggara Timur" },
+    { city: "Kalabahi", region: "Nusa Tenggara Timur" },
+    { city: "Merauke", region: "Papua" },
+    { city: "Wamena", region: "Papua" },
+    { city: "Biak", region: "Papua" },
+    { city: "Nabire", region: "Papua" },
+    { city: "Timika", region: "Papua" },
+    { city: "Agats", region: "Papua" },
+    { city: "Manokwari", region: "Papua Barat" },
+    { city: "Sorong", region: "Papua Barat" },
+    { city: "Fakfak", region: "Papua Barat" },
+    { city: "Kaimana", region: "Papua Barat" },
+    { city: "Bintuni", region: "Papua Barat" },
+    { city: "Tempuran", region: "Jawa Barat" }
+  ];
 
   useEffect(() => {
     if (showLoading) {
       startTextScrollAnimation();
     }
 
-    // Initialize visitor time and location
+    // Initialize visitor time
     updateVisitorTime();
-    detectVisitorLocation();
+    
+    // Load saved location dari localStorage
+    const savedLocation = localStorage.getItem('visitorLocation');
+    if (savedLocation) {
+      setVisitorLocation(JSON.parse(savedLocation));
+    } else {
+      // Coba deteksi lokasi otomatis
+      tryAutoLocation();
+    }
     
     // Update time every second
     timeRef.current = setInterval(updateVisitorTime, 1000);
@@ -47,120 +195,11 @@ export default function HomePage(): React.JSX.Element {
     };
   }, [showLoading]);
 
-  // Fungsi utama untuk mendeteksi lokasi berdasarkan informasi browser
-  const detectVisitorLocation = async () => {
-    setIsDetectingLocation(true);
-    
-    try {
-      // Method 1: Geolocation browser (paling akurat jika diizinkan)
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-          async (position) => {
-            const location = getLocationFromCoordinates(
-              position.coords.latitude, 
-              position.coords.longitude
-            );
-            setVisitorLocation(location);
-            setIsDetectingLocation(false);
-          },
-          () => {
-            // Jika geolocation ditolak, gunakan metode lain
-            const location = getLocationFromBrowserInfo();
-            setVisitorLocation(location);
-            setIsDetectingLocation(false);
-          },
-          {
-            enableHighAccuracy: false, // Tidak perlu high accuracy untuk kota
-            timeout: 3000,
-            maximumAge: 300000 // 5 menit cache
-          }
-        );
-      } else {
-        // Browser tidak support geolocation
-        const location = getLocationFromBrowserInfo();
-        setVisitorLocation(location);
-        setIsDetectingLocation(false);
-      }
-    } catch (error) {
-      console.log('Location detection failed:', error);
-      const location = getLocationFromBrowserInfo();
-      setVisitorLocation(location);
-      setIsDetectingLocation(false);
-    }
-  };
-
-  // Deteksi lokasi dari koordinat GPS
-  const getLocationFromCoordinates = (lat: number, lng: number) => {
-    // Mapping koordinat ke kota-kota utama Indonesia
-    const cityCoordinates = [
-      { city: "Jakarta", region: "DKI Jakarta", lat: -6.2088, lng: 106.8456 },
-      { city: "Surabaya", region: "Jawa Timur", lat: -7.2504, lng: 112.7688 },
-      { city: "Bandung", region: "Jawa Barat", lat: -6.9175, lng: 107.6191 },
-      { city: "Medan", region: "Sumatera Utara", lat: 3.5952, lng: 98.6722 },
-      { city: "Makassar", region: "Sulawesi Selatan", lat: -5.1477, lng: 119.4327 },
-      { city: "Semarang", region: "Jawa Tengah", lat: -6.9667, lng: 110.4167 },
-      { city: "Palembang", region: "Sumatera Selatan", lat: -2.9761, lng: 104.7754 },
-      { city: "Denpasar", region: "Bali", lat: -8.6705, lng: 115.2126 },
-      { city: "Balikpapan", region: "Kalimantan Timur", lat: -1.2379, lng: 116.8529 },
-      { city: "Manado", region: "Sulawesi Utara", lat: 1.4748, lng: 124.8421 },
-      { city: "Yogyakarta", region: "DI Yogyakarta", lat: -7.7956, lng: 110.3695 },
-      { city: "Malang", region: "Jawa Timur", lat: -7.9666, lng: 112.6326 },
-      { city: "Bekasi", region: "Jawa Barat", lat: -6.2383, lng: 106.9756 },
-      { city: "Tangerang", region: "Banten", lat: -6.1783, lng: 106.6319 },
-      { city: "Bogor", region: "Jawa Barat", lat: -6.5971, lng: 106.8060 },
-      { city: "Depok", region: "Jawa Barat", lat: -6.4025, lng: 106.7942 },
-      { city: "Cimahi", region: "Jawa Barat", lat: -6.8722, lng: 107.5422 },
-      { city: "Padang", region: "Sumatera Barat", lat: -0.9471, lng: 100.4172 },
-      { city: "Bandar Lampung", region: "Lampung", lat: -5.4294, lng: 105.2621 },
-      { city: "Pekanbaru", region: "Riau", lat: 0.5071, lng: 101.4478 },
-      { city: "Batam", region: "Kepulauan Riau", lat: 1.0456, lng: 104.0305 },
-      { city: "Banjarmasin", region: "Kalimantan Selatan", lat: -3.3194, lng: 114.5911 },
-      { city: "Samarinda", region: "Kalimantan Timur", lat: -0.5022, lng: 117.1536 },
-      { city: "Pontianak", region: "Kalimantan Barat", lat: -0.0226, lng: 109.3307 },
-      { city: "Cirebon", region: "Jawa Barat", lat: -6.7320, lng: 108.5523 },
-      { city: "Sukabumi", region: "Jawa Barat", lat: -6.9197, lng: 106.9272 },
-      { city: "Tasikmalaya", region: "Jawa Barat", lat: -7.3257, lng: 108.2144 },
-      { city: "Serang", region: "Banten", lat: -6.1153, lng: 106.1544 },
-      { city: "Purwokerto", region: "Jawa Tengah", lat: -7.4244, lng: 109.2344 },
-      { city: "Kediri", region: "Jawa Timur", lat: -7.8467, lng: 112.0178 },
-      { city: "Jambi", region: "Jambi", lat: -1.6100, lng: 103.6071 },
-      { city: "Bengkulu", region: "Bengkulu", lat: -3.7956, lng: 102.2592 },
-      { city: "Palu", region: "Sulawesi Tengah", lat: -0.8950, lng: 119.8594 },
-      { city: "Kendari", region: "Sulawesi Tenggara", lat: -3.9675, lng: 122.5947 },
-      { city: "Gorontalo", region: "Gorontalo", lat: 0.5333, lng: 123.0667 },
-      { city: "Ambon", region: "Maluku", lat: -3.6954, lng: 128.1814 },
-      { city: "Ternate", region: "Maluku Utara", lat: 0.7833, lng: 127.3667 },
-      { city: "Manokwari", region: "Papua Barat", lat: -0.8667, lng: 134.0833 },
-      { city: "Jayapura", region: "Papua", lat: -2.5333, lng: 140.7167 }
-    ];
-
-    // Cari kota terdekat berdasarkan koordinat
-    let nearestCity = cityCoordinates[0];
-    let minDistance = Number.MAX_SAFE_INTEGER;
-
-    for (const city of cityCoordinates) {
-      const distance = Math.sqrt(
-        Math.pow(city.lat - lat, 2) + Math.pow(city.lng - lng, 2)
-      );
-      if (distance < minDistance) {
-        minDistance = distance;
-        nearestCity = city;
-      }
-    }
-
-    return {
-      city: nearestCity.city,
-      region: nearestCity.region,
-      country: "Indonesia"
-    };
-  };
-
-  // Deteksi lokasi dari informasi browser (timezone, language, dll)
-  const getLocationFromBrowserInfo = () => {
+  // Coba deteksi lokasi otomatis sederhana
+  const tryAutoLocation = () => {
     const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    const language = navigator.language;
     
-    // Mapping timezone ke kota di Indonesia
+    // Mapping sederhana timezone ke kota
     const timezoneMap: { [key: string]: { city: string, region: string } } = {
       'Asia/Jakarta': { city: "Jakarta", region: "DKI Jakarta" },
       'Asia/Makassar': { city: "Makassar", region: "Sulawesi Selatan" },
@@ -168,36 +207,17 @@ export default function HomePage(): React.JSX.Element {
       'Asia/Pontianak': { city: "Pontianak", region: "Kalimantan Barat" }
     };
 
-    // Coba deteksi dari timezone
-    if (timezoneMap[timezone]) {
-      return {
-        ...timezoneMap[timezone],
-        country: "Indonesia"
+    const detectedLocation = timezoneMap[timezone];
+    
+    if (detectedLocation) {
+      const location = {
+        ...detectedLocation,
+        country: "Indonesia",
+        isManual: false
       };
+      setVisitorLocation(location);
+      localStorage.setItem('visitorLocation', JSON.stringify(location));
     }
-
-    // Jika bahasa Indonesia, beri prioritas kota besar di Indonesia
-    if (language.includes('id')) {
-      const indonesianCities = [
-        { city: "Jakarta", region: "DKI Jakarta" },
-        { city: "Surabaya", region: "Jawa Timur" },
-        { city: "Bandung", region: "Jawa Barat" },
-        { city: "Medan", region: "Sumatera Utara" },
-        { city: "Makassar", region: "Sulawesi Selatan" }
-      ];
-      const randomCity = indonesianCities[Math.floor(Math.random() * indonesianCities.length)];
-      return {
-        ...randomCity,
-        country: "Indonesia"
-      };
-    }
-
-    // Default fallback
-    return {
-      city: "Jakarta",
-      region: "DKI Jakarta",
-      country: "Indonesia"
-    };
   };
 
   const startTextScrollAnimation = () => {
@@ -290,6 +310,35 @@ export default function HomePage(): React.JSX.Element {
   const toggleMenu = () => {
     setShowMenu(!showMenu);
   };
+
+  // Fungsi untuk membuka modal set lokasi
+  const openLocationModal = () => {
+    setTempLocation({
+      city: visitorLocation.city,
+      region: visitorLocation.region
+    });
+    setShowLocationModal(true);
+  };
+
+  // Fungsi untuk menyimpan lokasi manual
+  const saveManualLocation = () => {
+    if (tempLocation.city && tempLocation.region) {
+      const newLocation = {
+        ...tempLocation,
+        country: "Indonesia",
+        isManual: true
+      };
+      setVisitorLocation(newLocation);
+      localStorage.setItem('visitorLocation', JSON.stringify(newLocation));
+      setShowLocationModal(false);
+    }
+  };
+
+  // Filter kota berdasarkan input
+  const filteredCities = indonesiaCities.filter(city =>
+    city.city.toLowerCase().includes(tempLocation.city.toLowerCase()) ||
+    city.region.toLowerCase().includes(tempLocation.city.toLowerCase())
+  );
 
   // Array teks menu yang akan berganti saat hover
   const menuTextVariants = ["EXPLORE", "NAVIGATE", "DISCOVER", "BROWSE"];
@@ -488,7 +537,207 @@ export default function HomePage(): React.JSX.Element {
       WebkitFontSmoothing: 'antialiased',
       MozOsxFontSmoothing: 'grayscale'
     }}>
-      {/* Menu Button with Framer Motion */}
+      {/* Location Display - Bisa diklik untuk edit */}
+      <motion.div
+        onClick={openLocationModal}
+        style={{
+          position: 'absolute',
+          top: '2rem',
+          left: '2rem',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'flex-start',
+          gap: '0.3rem',
+          cursor: 'pointer',
+          padding: '0.8rem 1.2rem',
+          borderRadius: '12px',
+          background: 'rgba(255,255,255,0.05)',
+          backdropFilter: 'blur(10px)',
+          border: '1px solid rgba(255,255,255,0.1)',
+          maxWidth: '250px'
+        }}
+        initial={{ opacity: 0, x: -20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ delay: 0.8, duration: 0.6 }}
+        whileHover={{
+          background: 'rgba(255,255,255,0.08)',
+          transition: { duration: 0.2 }
+        }}
+      >
+        <motion.div
+          style={{
+            fontSize: '1rem',
+            fontWeight: '400',
+            color: 'white',
+            fontFamily: 'Arame Mono, monospace',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem'
+          }}
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+            <circle cx="12" cy="10" r="3"/>
+          </svg>
+          {visitorLocation.city ? (
+            `${visitorLocation.city}, ${visitorLocation.country}`
+          ) : (
+            <span style={{ opacity: 0.7 }}>Klik untuk set lokasi</span>
+          )}
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.5 }}>
+            <polyline points="6 9 12 15 18 9"/>
+          </svg>
+        </motion.div>
+        <motion.div
+          style={{
+            fontSize: '0.8rem',
+            fontWeight: '300',
+            color: 'rgba(255,255,255,0.7)',
+            fontFamily: 'Arame Mono, monospace'
+          }}
+        >
+          {visitorTime.time} • {visitorTime.timezone}
+          {visitorLocation.isManual && (
+            <span style={{ marginLeft: '0.5rem', fontSize: '0.7rem', opacity: 0.5 }}>
+              (manual)
+            </span>
+          )}
+        </motion.div>
+      </motion.div>
+
+      {/* Modal untuk set lokasi manual */}
+      <AnimatePresence>
+        {showLocationModal && (
+          <motion.div
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              backgroundColor: 'rgba(0,0,0,0.8)',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              zIndex: 100,
+              padding: '2rem'
+            }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <motion.div
+              style={{
+                background: 'white',
+                borderRadius: '15px',
+                padding: '2rem',
+                maxWidth: '500px',
+                width: '100%',
+                maxHeight: '80vh',
+                overflow: 'hidden',
+                display: 'flex',
+                flexDirection: 'column'
+              }}
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.8, opacity: 0 }}
+            >
+              <h3 style={{ 
+                marginBottom: '1.5rem', 
+                color: 'black',
+                fontFamily: 'Arame Mono, monospace',
+                fontWeight: '400'
+              }}>
+                Set Lokasi Anda
+              </h3>
+              
+              <div style={{ marginBottom: '1rem' }}>
+                <input
+                  type="text"
+                  placeholder="Cari kota atau provinsi..."
+                  value={tempLocation.city}
+                  onChange={(e) => setTempLocation(prev => ({ ...prev, city: e.target.value }))}
+                  style={{
+                    width: '100%',
+                    padding: '0.8rem',
+                    border: '1px solid #ddd',
+                    borderRadius: '8px',
+                    fontFamily: 'Arame Mono, monospace',
+                    fontSize: '0.9rem'
+                  }}
+                />
+              </div>
+
+              <div style={{ 
+                flex: 1, 
+                overflowY: 'auto',
+                maxHeight: '300px',
+                marginBottom: '1.5rem'
+              }}>
+                {filteredCities.slice(0, 10).map((city, index) => (
+                  <motion.div
+                    key={`${city.city}-${city.region}`}
+                    onClick={() => {
+                      setTempLocation({
+                        city: city.city,
+                        region: city.region
+                      });
+                    }}
+                    style={{
+                      padding: '0.8rem',
+                      borderBottom: '1px solid #f0f0f0',
+                      cursor: 'pointer',
+                      backgroundColor: tempLocation.city === city.city ? '#f8f8f8' : 'transparent',
+                      fontFamily: 'Arame Mono, monospace',
+                      fontSize: '0.9rem'
+                    }}
+                    whileHover={{ backgroundColor: '#f0f0f0' }}
+                  >
+                    <div style={{ fontWeight: '500', color: 'black' }}>{city.city}</div>
+                    <div style={{ fontSize: '0.8rem', color: '#666' }}>{city.region}</div>
+                  </motion.div>
+                ))}
+              </div>
+
+              <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
+                <motion.button
+                  onClick={() => setShowLocationModal(false)}
+                  style={{
+                    padding: '0.6rem 1.2rem',
+                    border: '1px solid #ddd',
+                    background: 'transparent',
+                    borderRadius: '6px',
+                    cursor: 'pointer',
+                    fontFamily: 'Arame Mono, monospace'
+                  }}
+                  whileHover={{ background: '#f8f8f8' }}
+                >
+                  Batal
+                </motion.button>
+                <motion.button
+                  onClick={saveManualLocation}
+                  disabled={!tempLocation.city}
+                  style={{
+                    padding: '0.6rem 1.2rem',
+                    border: 'none',
+                    background: tempLocation.city ? '#CCFF00' : '#ccc',
+                    color: 'black',
+                    borderRadius: '6px',
+                    cursor: tempLocation.city ? 'pointer' : 'not-allowed',
+                    fontFamily: 'Arame Mono, monospace',
+                    fontWeight: '500'
+                  }}
+                  whileHover={tempLocation.city ? { scale: 1.05 } : {}}
+                >
+                  Simpan
+                </motion.button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Menu Button dengan Framer Motion */}
       <motion.div
         onClick={toggleMenu}
         onMouseEnter={handleMenuHover}
@@ -721,7 +970,7 @@ export default function HomePage(): React.JSX.Element {
                       {visitorTime.timezone}
                     </span>
                     <span>
-                      {visitorLocation.city}, {visitorLocation.country}
+                      {visitorLocation.city ? `${visitorLocation.city}, ${visitorLocation.country}` : 'Lokasi belum diatur'}
                     </span>
                   </motion.div>
 
@@ -1036,60 +1285,6 @@ export default function HomePage(): React.JSX.Element {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
-            {/* Location Display - Automatic di halaman utama */}
-            <motion.div
-              style={{
-                position: 'absolute',
-                top: '2rem',
-                left: '2rem',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'flex-start',
-                gap: '0.3rem'
-              }}
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.8, duration: 0.6 }}
-            >
-              <motion.div
-                style={{
-                  fontSize: '1.1rem',
-                  fontWeight: '400',
-                  color: 'white',
-                  fontFamily: 'Arame Mono, monospace',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.5rem'
-                }}
-              >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
-                  <circle cx="12" cy="10" r="3"/>
-                </svg>
-                {isDetectingLocation ? (
-                  <motion.span
-                    initial={{ opacity: 0.5 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ duration: 0.5, repeat: Infinity, repeatType: "reverse" }}
-                  >
-                    Mendeteksi lokasi...
-                  </motion.span>
-                ) : (
-                  `${visitorLocation.city}, ${visitorLocation.country}`
-                )}
-              </motion.div>
-              <motion.div
-                style={{
-                  fontSize: '0.8rem',
-                  fontWeight: '300',
-                  color: 'rgba(255,255,255,0.7)',
-                  fontFamily: 'Arame Mono, monospace'
-                }}
-              >
-                {visitorTime.time} • {visitorTime.timezone}
-              </motion.div>
-            </motion.div>
-
             <motion.h1
               style={{
                 fontSize: '2.5rem',
