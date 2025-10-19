@@ -174,6 +174,16 @@ export default function HomePage(): React.JSX.Element {
   const contentContainerRef = useRef<HTMLDivElement>(null);
   const contentItemsRef = useRef<(HTMLDivElement | null)[]>([]);
 
+  // PERBAIKAN: Sistem z-index terorganisir
+  const zIndexes = {
+    banner: 100,
+    search: 90,
+    content: 85,
+    menu: 80,
+    modal: 200,
+    loading: 300
+  };
+
   // Database kota-kota Indonesia
   const indonesiaCities = [
     { city: "Jakarta", region: "DKI Jakarta" },
@@ -1033,7 +1043,7 @@ export default function HomePage(): React.JSX.Element {
       WebkitFontSmoothing: 'antialiased',
       MozOsxFontSmoothing: 'grayscale'
     }}>
-      {/* Search Component - DIPINDAHKAN KE ATAS */}
+      {/* Search Component - PERBAIKAN z-index */}
       <AnimatePresence>
         {showSearch && (
           <motion.div
@@ -1049,7 +1059,7 @@ export default function HomePage(): React.JSX.Element {
               border: '1px solid rgba(255, 255, 255, 0.1)',
               borderRadius: '12px',
               padding: '2rem',
-              zIndex: 1000,
+              zIndex: zIndexes.search,
               boxShadow: '0 20px 60px rgba(0, 0, 0, 0.3)',
               backdropFilter: 'blur(10px)'
             }}
@@ -1293,29 +1303,27 @@ export default function HomePage(): React.JSX.Element {
         )}
       </AnimatePresence>
 
-      {/* Content Overlay untuk Home dan Topics */}
+      {/* Content Overlay untuk Home dan Topics - PERBAIKAN z-index */}
       <AnimatePresence>
         {showContent && (
           <motion.div
             ref={contentContainerRef}
             style={{
-               position: 'fixed',
-        top: '50%',
-        left: '50%',
-        transform: 'translate(-50%, -50%)',
-        width: '90%',
-        maxWidth: '1000px',
-        maxHeight: '80vh',
-        backgroundColor: 'rgba(0, 0, 0, 0.95)',
-        border: '1px solid rgba(255, 255, 255, 0.1)',
-        borderRadius: '20px',
-        padding: '2rem',
-        zIndex: 999, // TINGKATKAN zIndex
-        boxShadow: '0 25px 50px rgba(0, 0, 0, 0.5)',
-        backdropFilter: 'blur(20px)',
-        overflowY: 'auto'
-
-              
+              position: 'fixed',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              width: '90%',
+              maxWidth: '1000px',
+              maxHeight: '80vh',
+              backgroundColor: 'rgba(0, 0, 0, 0.95)',
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+              borderRadius: '20px',
+              padding: '2rem',
+              zIndex: zIndexes.content,
+              boxShadow: '0 25px 50px rgba(0, 0, 0, 0.5)',
+              backdropFilter: 'blur(20px)',
+              overflowY: 'auto'
             }}
             initial={{ scale: 0.8, opacity: 0, y: 50 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
@@ -1483,28 +1491,27 @@ export default function HomePage(): React.JSX.Element {
         )}
       </AnimatePresence>
 
-      {/* Search Trigger Button - DIPINDAHKAN KE ATAS */}
+      {/* Search Trigger Button - PERBAIKAN z-index */}
       {!showSearch && !showLoading && (
         <motion.button
           onClick={toggleSearch}
           style={{
-           position: 'fixed',
-      top: '2rem',
-      right: '8rem',
-      backgroundColor: 'rgba(255,255,255,0.1)',
-      border: '1px solid rgba(255,255,255,0.2)',
-      borderRadius: '8px',
-      padding: '0.75rem 1rem',
-      color: 'white',
-      cursor: 'pointer',
-      display: 'flex',
-      alignItems: 'center',
-      gap: '0.5rem',
-      fontFamily: 'Arame Mono, monospace',
-      fontSize: '0.85rem',
-      backdropFilter: 'blur(10px)',
-      zIndex: 40 // TURUNKAN zIndex (banner punya 45)
-            
+            position: 'fixed',
+            top: '2rem',
+            right: '8rem',
+            backgroundColor: 'rgba(255,255,255,0.1)',
+            border: '1px solid rgba(255,255,255,0.2)',
+            borderRadius: '8px',
+            padding: '0.75rem 1rem',
+            color: 'white',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            fontFamily: 'Arame Mono, monospace',
+            fontSize: '0.85rem',
+            backdropFilter: 'blur(10px)',
+            zIndex: zIndexes.banner - 5
           }}
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -1533,8 +1540,7 @@ export default function HomePage(): React.JSX.Element {
         </motion.button>
       )}
 
-      {/* Kode asli yang sudah ada - TIDAK DIUBAH */}
-      {/* Top Banner */}
+      {/* Top Banner - PERBAIKAN: GANTI WARNA MENJADI MERAH STABILO */}
       <AnimatePresence>
         {showBanner && (
           <motion.div
@@ -1544,9 +1550,9 @@ export default function HomePage(): React.JSX.Element {
               top: 0,
               left: 0,
               width: '100%',
-              backgroundColor: '#CCFF00',
+              backgroundColor: '#FF4444',
               padding: '0.8rem 2rem',
-              zIndex: 45,
+              zIndex: zIndexes.banner,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -1583,19 +1589,19 @@ export default function HomePage(): React.JSX.Element {
                 gap: '0.5rem',
                 fontSize: '0.9rem',
                 fontWeight: '500',
-                color: 'black'
+                color: 'white'
               }}
             >
               <span>WEBSITE NOTE SEDANG DALAM PERSIAPAN -</span>
               <motion.span
                 onClick={handleBannerClick}
                 style={{
-                  color: 'black',
+                  color: 'white',
                   textDecoration: 'underline',
                   cursor: 'pointer',
                   fontWeight: '600'
                 }}
-                whileHover={{ color: '#333' }}
+                whileHover={{ color: '#FFCCCB' }}
                 whileTap={{ scale: 0.95 }}
               >
                 Klik untuk melihat progress
@@ -1608,7 +1614,7 @@ export default function HomePage(): React.JSX.Element {
               style={{
                 position: 'absolute',
                 right: '1rem',
-                background: 'rgba(0,0,0,0.1)',
+                background: 'rgba(255,255,255,0.2)',
                 border: 'none',
                 borderRadius: '50%',
                 width: '24px',
@@ -1617,12 +1623,12 @@ export default function HomePage(): React.JSX.Element {
                 alignItems: 'center',
                 justifyContent: 'center',
                 cursor: 'pointer',
-                color: 'rgba(0,0,0,0.6)'
+                color: 'white'
               }}
               whileHover={{
-                backgroundColor: 'rgba(0,0,0,0.2)',
+                backgroundColor: 'rgba(255,255,255,0.3)',
                 scale: 1.1,
-                color: 'rgba(0,0,0,0.9)'
+                color: 'white'
               }}
               whileTap={{ scale: 0.9 }}
             >
@@ -1635,7 +1641,7 @@ export default function HomePage(): React.JSX.Element {
         )}
       </AnimatePresence>
 
-      {/* Location Display - Bisa diklik untuk edit */}
+      {/* Location Display - PERBAIKAN z-index */}
       <motion.div
         onClick={openLocationModal}
         style={{
@@ -1652,7 +1658,8 @@ export default function HomePage(): React.JSX.Element {
           background: 'rgba(255,255,255,0.05)',
           backdropFilter: 'blur(10px)',
           border: '1px solid rgba(255,255,255,0.1)',
-          maxWidth: '250px'
+          maxWidth: '250px',
+          zIndex: zIndexes.banner - 10
         }}
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
@@ -1711,25 +1718,25 @@ export default function HomePage(): React.JSX.Element {
         </motion.div>
       </motion.div>
 
-      {/* Button untuk melihat semua users */}
+      {/* Button untuk melihat semua users - PERBAIKAN z-index */}
       <motion.button
         onClick={openAllUsersModal}
         style={{
-           position: 'absolute',
-    top: showBanner ? '4.5rem' : '2rem',
-    left: '16rem',
-    padding: '0.6rem 1.2rem',
-    fontSize: '0.8rem',
-    fontWeight: '300',
-    color: 'white',
-    backgroundColor: 'rgba(255,255,255,0.1)',
-    border: '1px solid rgba(255,255,255,0.2)',
-    borderRadius: '8px',
-    cursor: 'pointer',
-    fontFamily: 'Arame Mono, monospace',
-    backdropFilter: 'blur(10px)',
-    whiteSpace: 'nowrap',
-    zIndex: 35 // TURUNKAN zIndex
+          position: 'absolute',
+          top: showBanner ? '4.5rem' : '2rem',
+          left: '16rem',
+          padding: '0.6rem 1.2rem',
+          fontSize: '0.8rem',
+          fontWeight: '300',
+          color: 'white',
+          backgroundColor: 'rgba(255,255,255,0.1)',
+          border: '1px solid rgba(255,255,255,0.2)',
+          borderRadius: '8px',
+          cursor: 'pointer',
+          fontFamily: 'Arame Mono, monospace',
+          backdropFilter: 'blur(10px)',
+          whiteSpace: 'nowrap',
+          zIndex: zIndexes.banner - 10
         }}
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
@@ -1744,7 +1751,7 @@ export default function HomePage(): React.JSX.Element {
         VIEW ALL USERS
       </motion.button>
 
-      {/* Menu Button dengan Framer Motion */}
+      {/* Menu Button - PERBAIKAN z-index */}
       <motion.div
         onClick={toggleMenu}
         onMouseEnter={handleMenuHover}
@@ -1759,7 +1766,7 @@ export default function HomePage(): React.JSX.Element {
           cursor: 'pointer',
           fontFamily: 'Arame Mono, monospace',
           letterSpacing: '1.5px',
-          zIndex: 20,
+          zIndex: zIndexes.banner - 5,
           padding: '1rem 1.8rem',
           borderRadius: '30px',
           border: '1px solid rgba(255,255,255,0.15)',
@@ -1874,7 +1881,7 @@ export default function HomePage(): React.JSX.Element {
               width: '100%',
               height: '100%',
               backgroundColor: 'black',
-              zIndex: 50,
+              zIndex: zIndexes.loading,
               display: 'flex',
               flexDirection: 'column',
               justifyContent: 'center',
@@ -2058,11 +2065,11 @@ export default function HomePage(): React.JSX.Element {
         )}
       </AnimatePresence>
 
-      {/* Menu Overlay */}
+      {/* Menu Overlay - PERBAIKAN: GANTI WARNA DAN ATUR z-index */}
       <AnimatePresence>
         {showMenu && (
           <>
-            {/* Background Overlay - Light Green */}
+            {/* Background Overlay - MERAH STABILO */}
             <motion.div
               style={{
                 position: 'fixed',
@@ -2070,8 +2077,8 @@ export default function HomePage(): React.JSX.Element {
                 left: 0,
                 width: '100%',
                 height: '100%',
-                backgroundColor: '#CCFF00',
-                zIndex: 25,
+                backgroundColor: '#FF4444',
+                zIndex: zIndexes.menu,
                 display: 'flex',
                 padding: '2rem'
               }}
@@ -2097,11 +2104,11 @@ export default function HomePage(): React.JSX.Element {
                     top: '2rem',
                     fontSize: '4rem',
                     fontWeight: '800',
-                    color: 'rgba(0,0,0,1)',
+                    color: 'rgba(255,255,255,1)',
                     fontFamily: 'Arame Mono, monospace',
                     lineHeight: 1,
                     letterSpacing: '1.5px',
-                    textShadow: '2px 2px 4px rgba(0,0,0,0.1)'
+                    textShadow: '2px 2px 4px rgba(0,0,0,0.2)'
                   }}
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -2135,7 +2142,7 @@ export default function HomePage(): React.JSX.Element {
                     style={{
                       fontSize: '2.5rem',
                       fontWeight: '400',
-                      color: 'rgba(0,0,0,0.9)',
+                      color: 'rgba(255,255,255,0.9)',
                       fontFamily: 'Arame Mono, monospace',
                       fontFeatureSettings: '"tnum"',
                       fontVariantNumeric: 'tabular-nums',
@@ -2161,12 +2168,12 @@ export default function HomePage(): React.JSX.Element {
                       gap: '1rem',
                       fontSize: '0.9rem',
                       fontWeight: '400',
-                      color: 'rgba(0,0,0,0.8)',
+                      color: 'rgba(255,255,255,0.8)',
                       fontFamily: 'Arame Mono, monospace'
                     }}
                   >
                     <span style={{ 
-                      backgroundColor: 'rgba(0,0,0,0.1)',
+                      backgroundColor: 'rgba(255,255,255,0.2)',
                       padding: '0.2rem 0.6rem',
                       borderRadius: '12px',
                       fontWeight: '500'
@@ -2183,7 +2190,7 @@ export default function HomePage(): React.JSX.Element {
                     style={{
                       fontSize: '0.8rem',
                       fontWeight: '300',
-                      color: 'rgba(0,0,0,0.7)',
+                      color: 'rgba(255,255,255,0.7)',
                       fontFamily: 'Arame Mono, monospace'
                     }}
                   >
@@ -2226,7 +2233,7 @@ export default function HomePage(): React.JSX.Element {
                         style={{
                           fontSize: '80px',
                           fontWeight: '300',
-                          color: 'rgba(0,0,0,0.8)',
+                          color: 'rgba(255,255,255,0.8)',
                           fontFamily: 'Arame Mono, monospace',
                           lineHeight: 1,
                           letterSpacing: '-2px',
@@ -2237,7 +2244,7 @@ export default function HomePage(): React.JSX.Element {
                           gap: '1rem'
                         }}
                         animate={{
-                          color: hoveredItem === item.name ? '#000' : 'rgba(0,0,0,0.8)',
+                          color: hoveredItem === item.name ? '#FFFFFF' : 'rgba(255,255,255,0.8)',
                           transition: { duration: 0.2 }
                         }}
                       >
@@ -2248,11 +2255,11 @@ export default function HomePage(): React.JSX.Element {
                           style={{
                             width: '100%',
                             height: '3px',
-                            backgroundColor: hoveredItem === item.name ? '#000' : 'rgba(0,0,0,0.3)',
+                            backgroundColor: hoveredItem === item.name ? '#FFFFFF' : 'rgba(255,255,255,0.3)',
                             transition: 'all 0.3s ease'
                           }}
                           animate={{
-                            backgroundColor: hoveredItem === item.name ? '#000' : 'rgba(0,0,0,0.3)',
+                            backgroundColor: hoveredItem === item.name ? '#FFFFFF' : 'rgba(255,255,255,0.3)',
                             height: hoveredItem === item.name ? '4px' : '3px'
                           }}
                           transition={{ duration: 0.3 }}
@@ -2264,7 +2271,7 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </motion.div>
             
-            {/* Close Button */}
+            {/* Close Button - PERBAIKAN z-index */}
             <motion.button
               onClick={toggleMenu}
               onMouseEnter={() => setIsCloseHovered(true)}
@@ -2277,18 +2284,18 @@ export default function HomePage(): React.JSX.Element {
                 height: '45px',
                 borderRadius: '25px',
                 border: 'none',
-                backgroundColor: 'rgba(0,0,0,0.1)',
+                backgroundColor: 'rgba(255,255,255,0.2)',
                 cursor: 'pointer',
                 display: 'flex',
                 justifyContent: 'center',
                 alignItems: 'center',
-                zIndex: 30,
+                zIndex: zIndexes.menu + 10,
                 backdropFilter: 'blur(10px)',
                 padding: '0 1.5rem',
                 fontFamily: 'Arame Mono, monospace',
                 fontSize: '0.9rem',
                 fontWeight: '300',
-                color: 'rgba(0,0,0,0.7)',
+                color: 'rgba(255,255,255,0.9)',
                 overflow: 'hidden'
               }}
               variants={closeButtonVariants}
@@ -2297,7 +2304,7 @@ export default function HomePage(): React.JSX.Element {
               exit="closed"
               whileHover={{ 
                 scale: 1.05,
-                backgroundColor: 'rgba(0,0,0,0.2)',
+                backgroundColor: 'rgba(255,255,255,0.3)',
                 transition: { duration: 0.2 }
               }}
               whileTap={{ scale: 0.95 }}
@@ -2373,7 +2380,7 @@ export default function HomePage(): React.JSX.Element {
               display: 'flex',
               justifyContent: 'center',
               alignItems: 'center',
-              zIndex: 100,
+              zIndex: zIndexes.modal,
               padding: '2rem'
             }}
             initial={{ opacity: 0 }}
@@ -2474,8 +2481,8 @@ export default function HomePage(): React.JSX.Element {
                   style={{
                     padding: '0.6rem 1.2rem',
                     border: 'none',
-                    background: tempLocation.city ? '#CCFF00' : '#ccc',
-                    color: 'black',
+                    background: tempLocation.city ? '#FF4444' : '#ccc',
+                    color: 'white',
                     borderRadius: '6px',
                     cursor: tempLocation.city ? 'pointer' : 'not-allowed',
                     fontFamily: 'Arame Mono, monospace',
@@ -2505,7 +2512,7 @@ export default function HomePage(): React.JSX.Element {
               display: 'flex',
               justifyContent: 'center',
               alignItems: 'center',
-              zIndex: 100,
+              zIndex: zIndexes.modal,
               padding: '2rem'
             }}
             initial={{ opacity: 0 }}
@@ -2581,7 +2588,7 @@ export default function HomePage(): React.JSX.Element {
                       width: '40px',
                       height: '40px',
                       border: '3px solid #f0f0f0',
-                      borderTop: '3px solid #CCFF00',
+                      borderTop: '3px solid #FF4444',
                       borderRadius: '50%'
                     }}
                     animate={{ rotate: 360 }}
@@ -2621,7 +2628,7 @@ export default function HomePage(): React.JSX.Element {
                             borderBottom: '1px solid #f0f0f0',
                             backgroundColor: user.id === currentUserId ? '#f8f8f8' : 'transparent',
                             fontFamily: 'Arame Mono, monospace',
-                            borderLeft: user.id === currentUserId ? '4px solid #CCFF00' : '4px solid transparent'
+                            borderLeft: user.id === currentUserId ? '4px solid #FF4444' : '4px solid transparent'
                           }}
                           initial={{ opacity: 0, x: -20 }}
                           animate={{ opacity: 1, x: 0 }}
@@ -2643,8 +2650,8 @@ export default function HomePage(): React.JSX.Element {
                               {user.id === currentUserId && (
                                 <span style={{ 
                                   marginLeft: '0.5rem',
-                                  backgroundColor: '#CCFF00',
-                                  color: 'black',
+                                  backgroundColor: '#FF4444',
+                                  color: 'white',
                                   padding: '0.2rem 0.6rem',
                                   borderRadius: '12px',
                                   fontSize: '0.7rem',
@@ -2701,8 +2708,8 @@ export default function HomePage(): React.JSX.Element {
                           {user.isManual && (
                             <div style={{ 
                               fontSize: '0.7rem', 
-                              color: '#CCFF00',
-                              backgroundColor: 'rgba(204, 255, 0, 0.1)',
+                              color: '#FF4444',
+                              backgroundColor: 'rgba(255, 68, 68, 0.1)',
                               padding: '0.2rem 0.6rem',
                               borderRadius: '8px',
                               display: 'inline-block',
