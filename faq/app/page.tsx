@@ -1491,54 +1491,58 @@ export default function HomePage(): React.JSX.Element {
         )}
       </AnimatePresence>
 
-      {/* Search Trigger Button - PERBAIKAN z-index */}
-      {!showSearch && !showLoading && (
-        <motion.button
-          onClick={toggleSearch}
-          style={{
-            position: 'fixed',
-            top: '2rem',
-            right: '8rem',
-            backgroundColor: 'rgba(255,255,255,0.1)',
-            border: '1px solid rgba(255,255,255,0.2)',
-            borderRadius: '8px',
-            padding: '0.75rem 1rem',
-            color: 'white',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.5rem',
-            fontFamily: 'Arame Mono, monospace',
-            fontSize: '0.85rem',
-            backdropFilter: 'blur(10px)',
-            zIndex: zIndexes.banner - 5
-          }}
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 1.5, duration: 0.5 }}
-          whileHover={{
-            backgroundColor: 'rgba(255,255,255,0.15)',
-            scale: 1.05
-          }}
-          whileTap={{ scale: 0.95 }}
-        >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M21 21L16.514 16.506L21 21ZM19 10.5C19 15.194 15.194 19 10.5 19C5.806 19 2 15.194 2 10.5C2 5.806 5.806 2 10.5 2C15.194 2 19 5.806 19 10.5Z" 
-              stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-          Search
-          <span style={{
-            fontSize: '0.7rem',
-            color: 'rgba(255,255,255,0.5)',
-            backgroundColor: 'rgba(255,255,255,0.1)',
-            padding: '2px 6px',
-            borderRadius: '4px',
-            marginLeft: '0.25rem'
-          }}>
-            ⌘K
-          </span>
-        </motion.button>
-      )}
+
+      {/* Search Trigger Button - PERBAIKAN: POSISI SEJAJAR DENGAN MENU */}
+{!showSearch && !showLoading && (
+  <motion.button
+    onClick={toggleSearch}
+    style={{
+      position: 'fixed',
+      top: showBanner ? '4.5rem' : '2rem',
+      right: '11rem', // DIUBAH: dari 8rem ke 11rem agar sejajar dengan menu
+      backgroundColor: 'rgba(255,255,255,0.1)',
+      border: '1px solid rgba(255,255,255,0.2)',
+      borderRadius: '8px',
+      padding: '0.75rem 1rem',
+      color: 'white',
+      cursor: 'pointer',
+      display: 'flex',
+      alignItems: 'center',
+      gap: '0.5rem',
+      fontFamily: 'Arame Mono, monospace',
+      fontSize: '0.85rem',
+      backdropFilter: 'blur(10px)',
+      zIndex: zIndexes.banner - 5,
+      height: '48px' // DIUBAH: tambah height konsisten
+    }}
+    initial={{ opacity: 0, scale: 0.8 }}
+    animate={{ opacity: 1, scale: 1 }}
+    transition={{ delay: 1.5, duration: 0.5 }}
+    whileHover={{
+      backgroundColor: 'rgba(255,255,255,0.15)',
+      scale: 1.05
+    }}
+    whileTap={{ scale: 0.95 }}
+  >
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M21 21L16.514 16.506L21 21ZM19 10.5C19 15.194 15.194 19 10.5 19C5.806 19 2 15.194 2 10.5C2 5.806 5.806 2 10.5 2C15.194 2 19 5.806 19 10.5Z" 
+        stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+    Search
+    <span style={{
+      fontSize: '0.7rem',
+      color: 'rgba(255,255,255,0.5)',
+      backgroundColor: 'rgba(255,255,255,0.1)',
+      padding: '2px 6px',
+      borderRadius: '4px',
+      marginLeft: '0.25rem'
+    }}>
+      ⌘K
+    </span>
+  </motion.button>
+)}
+
+
 
       {/* Top Banner - PERBAIKAN: GANTI WARNA MENJADI MERAH STABILO */}
       <AnimatePresence>
@@ -2065,306 +2069,319 @@ export default function HomePage(): React.JSX.Element {
         )}
       </AnimatePresence>
 
-      {/* Menu Overlay - PERBAIKAN: GANTI WARNA DAN ATUR z-index */}
-      <AnimatePresence>
-        {showMenu && (
-          <>
-            {/* Background Overlay - MERAH STABILO */}
+
+
+      {/* Menu Overlay - PERBAIKAN: BACKGROUND SOLID TIDAK TRANSPARAN */}
+<AnimatePresence>
+  {showMenu && (
+    <>
+      {/* Background Overlay - SOLID COLOR TANPA TRANSPARANSI */}
+      <motion.div
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          backgroundColor: '#FF4444', // SOLID COLOR - tidak ada transparansi
+          zIndex: zIndexes.menu,
+          display: 'flex',
+          padding: '2rem'
+        }}
+        variants={menuVariants}
+        initial="closed"
+        animate="open"
+        exit="closed"
+      >
+        {/* Main Content - Navigation Menu - FULL WIDTH */}
+        <div style={{
+          flex: 1,
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          paddingLeft: '4rem',
+          position: 'relative'
+        }}>
+          {/* Website Name - Top Left - DIUBAH MENJADI MENURU */}
+          <motion.div
+            style={{
+              position: 'absolute',
+              left: '2rem',
+              top: '2rem',
+              fontSize: '4rem',
+              fontWeight: '800',
+              color: 'rgba(255,255,255,1)',
+              fontFamily: 'Arame Mono, monospace',
+              lineHeight: 1,
+              letterSpacing: '1.5px',
+              textShadow: '2px 2px 4px rgba(0,0,0,0.2)'
+            }}
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ 
+              duration: 0.4,
+              delay: 0.3
+            }}
+          >
+            MENURU
+          </motion.div>
+
+          {/* Visitor Time & Location Display - TOP CENTER */}
+          <motion.div
+            style={{
+              position: 'absolute',
+              top: '2rem',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '0.3rem'
+            }}
+            variants={timeVariants}
+            initial="hidden"
+            animate="visible"
+            exit="hidden"
+          >
+            {/* Time - Font Besar */}
             <motion.div
               style={{
-                position: 'fixed',
-                top: 0,
-                left: 0,
-                width: '100%',
-                height: '100%',
-                backgroundColor: '#FF4444',
-                zIndex: zIndexes.menu,
-                display: 'flex',
-                padding: '2rem'
+                fontSize: '2.5rem',
+                fontWeight: '400',
+                color: 'rgba(255,255,255,0.9)',
+                fontFamily: 'Arame Mono, monospace',
+                fontFeatureSettings: '"tnum"',
+                fontVariantNumeric: 'tabular-nums',
+                letterSpacing: '2px'
               }}
-              variants={menuVariants}
-              initial="closed"
-              animate="open"
-              exit="closed"
+              animate={{
+                scale: [1, 1.02, 1],
+                transition: {
+                  duration: 1,
+                  repeat: Infinity,
+                  repeatType: "reverse"
+                }
+              }}
             >
-              {/* Main Content - Navigation Menu - FULL WIDTH */}
-              <div style={{
-                flex: 1,
+              {visitorTime.time}
+            </motion.div>
+
+            {/* Location & Timezone */}
+            <motion.div
+              style={{
                 display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'center',
-                paddingLeft: '4rem',
-                position: 'relative'
+                alignItems: 'center',
+                gap: '1rem',
+                fontSize: '0.9rem',
+                fontWeight: '400',
+                color: 'rgba(255,255,255,0.8)',
+                fontFamily: 'Arame Mono, monospace'
+              }}
+            >
+              <span style={{ 
+                backgroundColor: 'rgba(255,255,255,0.2)',
+                padding: '0.2rem 0.6rem',
+                borderRadius: '12px',
+                fontWeight: '500'
               }}>
-                {/* Website Name - Top Left - DIUBAH MENJADI MENURU */}
-                <motion.div
-                  style={{
-                    position: 'absolute',
-                    left: '2rem',
-                    top: '2rem',
-                    fontSize: '4rem',
-                    fontWeight: '800',
-                    color: 'rgba(255,255,255,1)',
-                    fontFamily: 'Arame Mono, monospace',
-                    lineHeight: 1,
-                    letterSpacing: '1.5px',
-                    textShadow: '2px 2px 4px rgba(0,0,0,0.2)'
-                  }}
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ 
-                    duration: 0.4,
-                    delay: 0.3
-                  }}
-                >
-                  MENURU
-                </motion.div>
+                {visitorTime.timezone}
+              </span>
+              <span>
+                {visitorLocation.city ? `${visitorLocation.city}, ${visitorLocation.country}` : 'Lokasi belum diatur'}
+              </span>
+            </motion.div>
 
-                {/* Visitor Time & Location Display - TOP CENTER */}
-                <motion.div
-                  style={{
-                    position: 'absolute',
-                    top: '2rem',
-                    left: '50%',
-                    transform: 'translateX(-50%)',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    gap: '0.3rem'
-                  }}
-                  variants={timeVariants}
-                  initial="hidden"
-                  animate="visible"
-                  exit="hidden"
-                >
-                  {/* Time - Font Besar */}
-                  <motion.div
-                    style={{
-                      fontSize: '2.5rem',
-                      fontWeight: '400',
-                      color: 'rgba(255,255,255,0.9)',
-                      fontFamily: 'Arame Mono, monospace',
-                      fontFeatureSettings: '"tnum"',
-                      fontVariantNumeric: 'tabular-nums',
-                      letterSpacing: '2px'
-                    }}
-                    animate={{
-                      scale: [1, 1.02, 1],
-                      transition: {
-                        duration: 1,
-                        repeat: Infinity,
-                        repeatType: "reverse"
-                      }
-                    }}
-                  >
-                    {visitorTime.time}
-                  </motion.div>
+            {/* Date */}
+            <motion.div
+              style={{
+                fontSize: '0.8rem',
+                fontWeight: '300',
+                color: 'rgba(255,255,255,0.7)',
+                fontFamily: 'Arame Mono, monospace'
+              }}
+            >
+              {visitorTime.date}
+            </motion.div>
+          </motion.div>
 
-                  {/* Location & Timezone */}
-                  <motion.div
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '1rem',
-                      fontSize: '0.9rem',
-                      fontWeight: '400',
-                      color: 'rgba(255,255,255,0.8)',
-                      fontFamily: 'Arame Mono, monospace'
-                    }}
-                  >
-                    <span style={{ 
-                      backgroundColor: 'rgba(255,255,255,0.2)',
-                      padding: '0.2rem 0.6rem',
-                      borderRadius: '12px',
-                      fontWeight: '500'
-                    }}>
-                      {visitorTime.timezone}
-                    </span>
-                    <span>
-                      {visitorLocation.city ? `${visitorLocation.city}, ${visitorLocation.country}` : 'Lokasi belum diatur'}
-                    </span>
-                  </motion.div>
-
-                  {/* Date */}
-                  <motion.div
-                    style={{
-                      fontSize: '0.8rem',
-                      fontWeight: '300',
-                      color: 'rgba(255,255,255,0.7)',
-                      fontFamily: 'Arame Mono, monospace'
-                    }}
-                  >
-                    {visitorTime.date}
-                  </motion.div>
-                </motion.div>
-
-                {/* Menu Items */}
-                <div style={{
+          {/* Menu Items */}
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '2rem'
+          }}>
+            {menuItems.map((item, index) => (
+              <motion.div
+                key={item.name}
+                style={{
+                  position: 'relative',
+                  cursor: 'pointer',
                   display: 'flex',
                   flexDirection: 'column',
-                  gap: '2rem'
-                }}>
-                  {menuItems.map((item, index) => (
-                    <motion.div
-                      key={item.name}
-                      style={{
-                        position: 'relative',
-                        cursor: 'pointer',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'flex-start',
-                        padding: '0.5rem 0'
-                      }}
-                      onMouseEnter={() => setHoveredItem(item.name)}
-                      onMouseLeave={() => setHoveredItem(null)}
-                      variants={menuItemVariants}
-                      initial="closed"
-                      animate="open"
-                      exit="closed"
-                      custom={index}
-                      whileHover={{
-                        x: 15,
-                        transition: { duration: 0.2, ease: "easeOut" }
-                      }}
-                      onClick={item.action}
-                    >
-                      {/* Menu Text dengan font besar 80px */}
-                      <motion.div
-                        style={{
-                          fontSize: '80px',
-                          fontWeight: '300',
-                          color: 'rgba(255,255,255,0.8)',
-                          fontFamily: 'Arame Mono, monospace',
-                          lineHeight: 1,
-                          letterSpacing: '-2px',
-                          textTransform: 'uppercase',
-                          display: 'flex',
-                          flexDirection: 'column',
-                          alignItems: 'flex-start',
-                          gap: '1rem'
-                        }}
-                        animate={{
-                          color: hoveredItem === item.name ? '#FFFFFF' : 'rgba(255,255,255,0.8)',
-                          transition: { duration: 0.2 }
-                        }}
-                      >
-                        {item.name}
-                        
-                        {/* Line bawah - TETAP ADA TANPA HOVER */}
-                        <motion.div
-                          style={{
-                            width: '100%',
-                            height: '3px',
-                            backgroundColor: hoveredItem === item.name ? '#FFFFFF' : 'rgba(255,255,255,0.3)',
-                            transition: 'all 0.3s ease'
-                          }}
-                          animate={{
-                            backgroundColor: hoveredItem === item.name ? '#FFFFFF' : 'rgba(255,255,255,0.3)',
-                            height: hoveredItem === item.name ? '4px' : '3px'
-                          }}
-                          transition={{ duration: 0.3 }}
-                        />
-                      </motion.div>
-                    </motion.div>
-                  ))}
-                </div>
-              </div>
-            </motion.div>
-            
-            {/* Close Button - PERBAIKAN z-index */}
-            <motion.button
-              onClick={toggleMenu}
-              onMouseEnter={() => setIsCloseHovered(true)}
-              onMouseLeave={() => setIsCloseHovered(false)}
-              style={{
-                position: 'fixed',
-                top: '1.8rem',
-                right: '1.8rem',
-                width: '100px',
-                height: '45px',
-                borderRadius: '25px',
-                border: 'none',
-                backgroundColor: 'rgba(255,255,255,0.2)',
-                cursor: 'pointer',
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                zIndex: zIndexes.menu + 10,
-                backdropFilter: 'blur(10px)',
-                padding: '0 1.5rem',
-                fontFamily: 'Arame Mono, monospace',
-                fontSize: '0.9rem',
-                fontWeight: '300',
-                color: 'rgba(255,255,255,0.9)',
-                overflow: 'hidden'
-              }}
-              variants={closeButtonVariants}
-              initial="closed"
-              animate="open"
-              exit="closed"
-              whileHover={{ 
-                scale: 1.05,
-                backgroundColor: 'rgba(255,255,255,0.3)',
-                transition: { duration: 0.2 }
-              }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <motion.div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.5rem',
-                  position: 'relative',
-                  width: '100%',
-                  justifyContent: 'center'
+                  alignItems: 'flex-start',
+                  padding: '0.5rem 0'
                 }}
+                onMouseEnter={() => setHoveredItem(item.name)}
+                onMouseLeave={() => setHoveredItem(null)}
+                variants={menuItemVariants}
+                initial="closed"
+                animate="open"
+                exit="closed"
+                custom={index}
+                whileHover={{
+                  x: 15,
+                  transition: { duration: 0.2, ease: "easeOut" }
+                }}
+                onClick={item.action}
               >
-                {/* X Icon */}
-                <motion.svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  initial={{ scale: 1, opacity: 1 }}
-                  animate={{ 
-                    scale: isCloseHovered ? 0 : 1,
-                    opacity: isCloseHovered ? 0 : 1
-                  }}
-                  transition={{ duration: 0.2 }}
-                >
-                  <line x1="18" y1="6" x2="6" y2="18" />
-                  <line x1="6" y1="6" x2="18" y2="18" />
-                </motion.svg>
-
-                {/* Close Text */}
-                <motion.span
+                {/* Menu Text dengan font besar 80px */}
+                <motion.div
                   style={{
-                    position: 'absolute',
-                    left: '50%',
-                    transform: 'translateX(-50%)',
-                    whiteSpace: 'nowrap',
-                    fontSize: '0.9rem',
+                    fontSize: '80px',
                     fontWeight: '300',
-                    letterSpacing: '0.5px'
+                    color: 'rgba(255,255,255,0.8)',
+                    fontFamily: 'Arame Mono, monospace',
+                    lineHeight: 1,
+                    letterSpacing: '-2px',
+                    textTransform: 'uppercase',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'flex-start',
+                    gap: '1rem'
                   }}
-                  initial={{ scale: 0, opacity: 0 }}
-                  animate={{ 
-                    scale: isCloseHovered ? 1 : 0,
-                    opacity: isCloseHovered ? 1 : 0
+                  animate={{
+                    color: hoveredItem === item.name ? '#FFFFFF' : 'rgba(255,255,255,0.8)',
+                    transition: { duration: 0.2 }
                   }}
-                  transition={{ duration: 0.2 }}
                 >
-                  CLOSE
-                </motion.span>
+                  {item.name}
+                  
+                  {/* Line bawah - TETAP ADA TANPA HOVER */}
+                  <motion.div
+                    style={{
+                      width: '100%',
+                      height: '3px',
+                      backgroundColor: hoveredItem === item.name ? '#FFFFFF' : 'rgba(255,255,255,0.3)',
+                      transition: 'all 0.3s ease'
+                    }}
+                    animate={{
+                      backgroundColor: hoveredItem === item.name ? '#FFFFFF' : 'rgba(255,255,255,0.3)',
+                      height: hoveredItem === item.name ? '4px' : '3px'
+                    }}
+                    transition={{ duration: 0.3 }}
+                  />
+                </motion.div>
               </motion.div>
-            </motion.button>
-          </>
-        )}
-      </AnimatePresence>
+            ))}
+          </div>
+        </div>
+      </motion.div>
+      
+      {/* Close Button */}
+      <motion.button
+        onClick={toggleMenu}
+        onMouseEnter={() => setIsCloseHovered(true)}
+        onMouseLeave={() => setIsCloseHovered(false)}
+        style={{
+          position: 'fixed',
+          top: '1.8rem',
+          right: '1.8rem',
+          width: '100px',
+          height: '45px',
+          borderRadius: '25px',
+          border: 'none',
+          backgroundColor: 'rgba(255,255,255,0.2)',
+          cursor: 'pointer',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          zIndex: zIndexes.menu + 10,
+          backdropFilter: 'blur(10px)',
+          padding: '0 1.5rem',
+          fontFamily: 'Arame Mono, monospace',
+          fontSize: '0.9rem',
+          fontWeight: '300',
+          color: 'rgba(255,255,255,0.9)',
+          overflow: 'hidden'
+        }}
+        variants={closeButtonVariants}
+        initial="closed"
+        animate="open"
+        exit="closed"
+        whileHover={{ 
+          scale: 1.05,
+          backgroundColor: 'rgba(255,255,255,0.3)',
+          transition: { duration: 0.2 }
+        }}
+        whileTap={{ scale: 0.95 }}
+      >
+        <motion.div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            position: 'relative',
+            width: '100%',
+            justifyContent: 'center'
+          }}
+        >
+          {/* X Icon */}
+          <motion.svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            initial={{ scale: 1, opacity: 1 }}
+            animate={{ 
+              scale: isCloseHovered ? 0 : 1,
+              opacity: isCloseHovered ? 0 : 1
+            }}
+            transition={{ duration: 0.2 }}
+          >
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </motion.svg>
+
+          {/* Close Text */}
+          <motion.span
+            style={{
+              position: 'absolute',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              whiteSpace: 'nowrap',
+              fontSize: '0.9rem',
+              fontWeight: '300',
+              letterSpacing: '0.5px'
+            }}
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ 
+              scale: isCloseHovered ? 1 : 0,
+              opacity: isCloseHovered ? 1 : 0
+            }}
+            transition={{ duration: 0.2 }}
+          >
+            CLOSE
+          </motion.span>
+        </motion.div>
+      </motion.button>
+    </>
+  )}
+</AnimatePresence>
+
+
+
+
+
+
+
+
+
+
+      
 
       {/* Modal untuk set lokasi manual */}
       <AnimatePresence>
@@ -2748,3 +2765,4 @@ export default function HomePage(): React.JSX.Element {
     </div>
   );
 }
+
