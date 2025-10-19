@@ -871,7 +871,60 @@ export default function HomePage(): React.JSX.Element {
     setMenuText("MENU");
   };
 
+  // Variants for modern animations
+  const menuVariants = {
+    closed: {
+      clipPath: "circle(0% at 95% 5%)",
+      transition: {
+        duration: 0.8,
+        ease: [0.76, 0, 0.24, 1]
+      }
+    },
+    open: {
+      clipPath: "circle(150% at 95% 5%)",
+      transition: {
+        duration: 0.8,
+        ease: [0.76, 0, 0.24, 1]
+      }
+    }
+  };
 
+  const menuItemVariants = {
+    closed: {
+      x: -50,
+      opacity: 0,
+      transition: {
+        duration: 0.5
+      }
+    },
+    open: (i: number) => ({
+      x: 0,
+      opacity: 1,
+      transition: {
+        duration: 0.6,
+        delay: 0.1 + (i * 0.1),
+        ease: "circOut"
+      }
+    })
+  };
+
+  const closeButtonVariants = {
+    closed: {
+      opacity: 0,
+      rotate: -90,
+      scale: 0
+    },
+    open: {
+      opacity: 1,
+      rotate: 0,
+      scale: 1,
+      transition: {
+        duration: 0.6,
+        delay: 0.4,
+        ease: "backOut"
+      }
+    }
+  };
 
   const menuButtonVariants = {
     initial: {
@@ -1446,8 +1499,7 @@ export default function HomePage(): React.JSX.Element {
     style={{
       position: 'fixed',
       top: showBanner ? '4.5rem' : '2rem',
-      right: '12rem', // DIUBAH: dari 8rem ke 11rem agar sejajar dengan menu
-      marginRight: '1rem', // Memberikan jarak antara tombol search dan menu
+      right: '11rem', // DIUBAH: dari 8rem ke 11rem agar sejajar dengan menu
       backgroundColor: 'rgba(255,255,255,0.1)',
       border: '1px solid rgba(255,255,255,0.2)',
       borderRadius: '8px',
@@ -2019,11 +2071,11 @@ export default function HomePage(): React.JSX.Element {
 
 
 
-   {/* Menu Component - SOLID BACKGROUND */}
+      {/* Menu Overlay - PERBAIKAN: BACKGROUND SOLID TIDAK TRANSPARAN */}
 <AnimatePresence>
   {showMenu && (
     <>
-      {/* Solid Background Overlay - TANPA TRANSPARANSI */}
+      {/* Background Overlay - SOLID COLOR TANPA TRANSPARANSI */}
       <motion.div
         style={{
           position: 'fixed',
@@ -2031,208 +2083,200 @@ export default function HomePage(): React.JSX.Element {
           left: 0,
           width: '100%',
           height: '100%',
-          backgroundColor: '#FF4444', // SOLID COLOR
+          backgroundColor: '#FF4444', // SOLID COLOR - tidak ada transparansi
           zIndex: zIndexes.menu,
-        }}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 0.5 }}
-      />
-
-      {/* Main Menu Content */}
-      <motion.div
-        style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          width: '100%',
-          height: '100%',
-          zIndex: zIndexes.menu + 1,
-          padding: '2rem',
           display: 'flex',
-          flexDirection: 'column'
+          padding: '2rem'
         }}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 0.5, delay: 0.1 }}
+        variants={menuVariants}
+        initial="closed"
+        animate="open"
+        exit="closed"
       >
-        {/* Website Name - Top Left */}
-        <motion.div
-          style={{
-            position: 'absolute',
-            left: '2rem',
-            top: '2rem',
-            fontSize: '4rem',
-            fontWeight: '800',
-            color: 'rgba(255,255,255,1)',
-            fontFamily: 'Arame Mono, monospace',
-            lineHeight: 1,
-            letterSpacing: '1.5px',
-            textShadow: '2px 2px 4px rgba(0,0,0,0.2)'
-          }}
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.3 }}
-        >
-          MENURU
-        </motion.div>
-
-        {/* Visitor Time & Location Display - Top Center */}
-        <motion.div
-          style={{
-            position: 'absolute',
-            top: '2rem',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            gap: '0.3rem'
-          }}
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.4 }}
-        >
-          <motion.div
-            style={{
-              fontSize: '2.5rem',
-              fontWeight: '400',
-              color: 'rgba(255,255,255,0.9)',
-              fontFamily: 'Arame Mono, monospace',
-              fontFeatureSettings: '"tnum"',
-              fontVariantNumeric: 'tabular-nums',
-              letterSpacing: '2px'
-            }}
-            animate={{
-              scale: [1, 1.02, 1],
-              transition: {
-                duration: 1,
-                repeat: Infinity,
-                repeatType: "reverse"
-              }
-            }}
-          >
-            {visitorTime.time}
-          </motion.div>
-
-          <motion.div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '1rem',
-              fontSize: '0.9rem',
-              fontWeight: '400',
-              color: 'rgba(255,255,255,0.8)',
-              fontFamily: 'Arame Mono, monospace'
-            }}
-          >
-            <span
-              style={{
-                backgroundColor: 'rgba(255,255,255,0.2)',
-                padding: '0.2rem 0.6rem',
-                borderRadius: '12px',
-                fontWeight: '500'
-              }}
-            >
-              {visitorTime.timezone}
-            </span>
-            <span>
-              {visitorLocation.city ? `${visitorLocation.city}, ${visitorLocation.country}` : 'Lokasi belum diatur'}
-            </span>
-          </motion.div>
-
-          <motion.div
-            style={{
-              fontSize: '0.8rem',
-              fontWeight: '300',
-              color: 'rgba(255,255,255,0.7)',
-              fontFamily: 'Arame Mono, monospace'
-            }}
-          >
-            {visitorTime.date}
-          </motion.div>
-        </motion.div>
-
-        {/* Menu Items - Center */}
+        {/* Main Content - Navigation Menu - FULL WIDTH */}
         <div style={{
           flex: 1,
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'center',
-          gap: '2rem',
-          maxWidth: '800px',
-          margin: '0 auto',
-          paddingTop: '6rem'
+          paddingLeft: '4rem',
+          position: 'relative'
         }}>
-          {menuItems.map((item, index) => (
+          {/* Website Name - Top Left - DIUBAH MENJADI MENURU */}
+          <motion.div
+            style={{
+              position: 'absolute',
+              left: '2rem',
+              top: '2rem',
+              fontSize: '4rem',
+              fontWeight: '800',
+              color: 'rgba(255,255,255,1)',
+              fontFamily: 'Arame Mono, monospace',
+              lineHeight: 1,
+              letterSpacing: '1.5px',
+              textShadow: '2px 2px 4px rgba(0,0,0,0.2)'
+            }}
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ 
+              duration: 0.4,
+              delay: 0.3
+            }}
+          >
+            MENURU
+          </motion.div>
+
+          {/* Visitor Time & Location Display - TOP CENTER */}
+          <motion.div
+            style={{
+              position: 'absolute',
+              top: '2rem',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '0.3rem'
+            }}
+            variants={timeVariants}
+            initial="hidden"
+            animate="visible"
+            exit="hidden"
+          >
+            {/* Time - Font Besar */}
             <motion.div
-              key={item.name}
               style={{
-                position: 'relative',
-                cursor: 'pointer',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'flex-start',
-                padding: '0.5rem 0'
+                fontSize: '2.5rem',
+                fontWeight: '400',
+                color: 'rgba(255,255,255,0.9)',
+                fontFamily: 'Arame Mono, monospace',
+                fontFeatureSettings: '"tnum"',
+                fontVariantNumeric: 'tabular-nums',
+                letterSpacing: '2px'
               }}
-              onMouseEnter={() => setHoveredItem(item.name)}
-              onMouseLeave={() => setHoveredItem(null)}
-              initial={{ opacity: 0, x: -50 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ 
-                duration: 0.6,
-                delay: 0.1 + (index * 0.1),
-                ease: "circOut"
+              animate={{
+                scale: [1, 1.02, 1],
+                transition: {
+                  duration: 1,
+                  repeat: Infinity,
+                  repeatType: "reverse"
+                }
               }}
-              whileHover={{
-                x: 15,
-                transition: { duration: 0.2, ease: "easeOut" }
-              }}
-              onClick={item.action}
             >
+              {visitorTime.time}
+            </motion.div>
+
+            {/* Location & Timezone */}
+            <motion.div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '1rem',
+                fontSize: '0.9rem',
+                fontWeight: '400',
+                color: 'rgba(255,255,255,0.8)',
+                fontFamily: 'Arame Mono, monospace'
+              }}
+            >
+              <span style={{ 
+                backgroundColor: 'rgba(255,255,255,0.2)',
+                padding: '0.2rem 0.6rem',
+                borderRadius: '12px',
+                fontWeight: '500'
+              }}>
+                {visitorTime.timezone}
+              </span>
+              <span>
+                {visitorLocation.city ? `${visitorLocation.city}, ${visitorLocation.country}` : 'Lokasi belum diatur'}
+              </span>
+            </motion.div>
+
+            {/* Date */}
+            <motion.div
+              style={{
+                fontSize: '0.8rem',
+                fontWeight: '300',
+                color: 'rgba(255,255,255,0.7)',
+                fontFamily: 'Arame Mono, monospace'
+              }}
+            >
+              {visitorTime.date}
+            </motion.div>
+          </motion.div>
+
+          {/* Menu Items */}
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '2rem'
+          }}>
+            {menuItems.map((item, index) => (
               <motion.div
+                key={item.name}
                 style={{
-                  fontSize: '80px',
-                  fontWeight: '300',
-                  color: 'rgba(255,255,255,0.8)',
-                  fontFamily: 'Arame Mono, monospace',
-                  lineHeight: 1,
-                  letterSpacing: '-2px',
-                  textTransform: 'uppercase',
+                  position: 'relative',
+                  cursor: 'pointer',
                   display: 'flex',
                   flexDirection: 'column',
                   alignItems: 'flex-start',
-                  gap: '1rem'
+                  padding: '0.5rem 0'
                 }}
-                animate={{
-                  color: hoveredItem === item.name ? '#FFFFFF' : 'rgba(255,255,255,0.8)',
-                  transition: { duration: 0.2 }
+                onMouseEnter={() => setHoveredItem(item.name)}
+                onMouseLeave={() => setHoveredItem(null)}
+                variants={menuItemVariants}
+                initial="closed"
+                animate="open"
+                exit="closed"
+                custom={index}
+                whileHover={{
+                  x: 15,
+                  transition: { duration: 0.2, ease: "easeOut" }
                 }}
+                onClick={item.action}
               >
-                {item.name}
-                
-                {/* Line bawah tetap ada tanpa hover */}
+                {/* Menu Text dengan font besar 80px */}
                 <motion.div
                   style={{
-                    width: '100%',
-                    height: '3px',
-                    backgroundColor: hoveredItem === item.name ? '#FFFFFF' : 'rgba(255,255,255,0.3)',
-                    transition: 'all 0.3s ease'
+                    fontSize: '80px',
+                    fontWeight: '300',
+                    color: 'rgba(255,255,255,0.8)',
+                    fontFamily: 'Arame Mono, monospace',
+                    lineHeight: 1,
+                    letterSpacing: '-2px',
+                    textTransform: 'uppercase',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'flex-start',
+                    gap: '1rem'
                   }}
                   animate={{
-                    backgroundColor: hoveredItem === item.name ? '#FFFFFF' : 'rgba(255,255,255,0.3)',
-                    height: hoveredItem === item.name ? '4px' : '3px'
+                    color: hoveredItem === item.name ? '#FFFFFF' : 'rgba(255,255,255,0.8)',
+                    transition: { duration: 0.2 }
                   }}
-                  transition={{ duration: 0.3 }}
-                />
+                >
+                  {item.name}
+                  
+                  {/* Line bawah - TETAP ADA TANPA HOVER */}
+                  <motion.div
+                    style={{
+                      width: '100%',
+                      height: '3px',
+                      backgroundColor: hoveredItem === item.name ? '#FFFFFF' : 'rgba(255,255,255,0.3)',
+                      transition: 'all 0.3s ease'
+                    }}
+                    animate={{
+                      backgroundColor: hoveredItem === item.name ? '#FFFFFF' : 'rgba(255,255,255,0.3)',
+                      height: hoveredItem === item.name ? '4px' : '3px'
+                    }}
+                    transition={{ duration: 0.3 }}
+                  />
+                </motion.div>
               </motion.div>
-            </motion.div>
-          ))}
+            ))}
+          </div>
         </div>
       </motion.div>
-
+      
       {/* Close Button */}
       <motion.button
         onClick={toggleMenu}
@@ -2260,11 +2304,11 @@ export default function HomePage(): React.JSX.Element {
           color: 'rgba(255,255,255,0.9)',
           overflow: 'hidden'
         }}
-        initial={{ opacity: 0, rotate: -90, scale: 0 }}
-        animate={{ opacity: 1, rotate: 0, scale: 1 }}
-        exit={{ opacity: 0, rotate: -90, scale: 0 }}
-        transition={{ duration: 0.6, delay: 0.4 }}
-        whileHover={{
+        variants={closeButtonVariants}
+        initial="closed"
+        animate="open"
+        exit="closed"
+        whileHover={{ 
           scale: 1.05,
           backgroundColor: 'rgba(255,255,255,0.3)',
           transition: { duration: 0.2 }
@@ -2292,7 +2336,7 @@ export default function HomePage(): React.JSX.Element {
             strokeLinecap="round"
             strokeLinejoin="round"
             initial={{ scale: 1, opacity: 1 }}
-            animate={{
+            animate={{ 
               scale: isCloseHovered ? 0 : 1,
               opacity: isCloseHovered ? 0 : 1
             }}
@@ -2314,7 +2358,7 @@ export default function HomePage(): React.JSX.Element {
               letterSpacing: '0.5px'
             }}
             initial={{ scale: 0, opacity: 0 }}
-            animate={{
+            animate={{ 
               scale: isCloseHovered ? 1 : 0,
               opacity: isCloseHovered ? 1 : 0
             }}
@@ -2327,6 +2371,9 @@ export default function HomePage(): React.JSX.Element {
     </>
   )}
 </AnimatePresence>
+
+
+
 
 
 
@@ -2718,6 +2765,3 @@ export default function HomePage(): React.JSX.Element {
     </div>
   );
 }
-
-
-
