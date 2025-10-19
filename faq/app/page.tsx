@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect, useRef } from "react";
@@ -23,6 +22,103 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+
+// Data untuk Home dan Topics
+const homeContent = [
+  {
+    id: 1,
+    title: "Creative Design",
+    description: "Innovative design solutions that transform ideas into visually stunning experiences",
+    color: "#FF6B6B"
+  },
+  {
+    id: 2,
+    title: "Digital Strategy",
+    description: "Comprehensive digital strategies to elevate your brand in the online space",
+    color: "#4ECDC4"
+  },
+  {
+    id: 3,
+    title: "User Experience",
+    description: "Creating seamless and intuitive user experiences that drive engagement",
+    color: "#45B7D1"
+  },
+  {
+    id: 4,
+    title: "Brand Identity",
+    description: "Developing unique brand identities that resonate with your target audience",
+    color: "#96CEB4"
+  },
+  {
+    id: 5,
+    title: "Web Development",
+    description: "Modern web development using cutting-edge technologies and best practices",
+    color: "#FFEAA7"
+  }
+];
+
+const topicsContent = [
+  {
+    id: 1,
+    title: "Artificial Intelligence",
+    description: "Exploring the future of AI and machine learning technologies",
+    color: "#6C5CE7"
+  },
+  {
+    id: 2,
+    title: "Blockchain Technology",
+    description: "Understanding decentralized systems and cryptocurrency innovations",
+    color: "#FD79A8"
+  },
+  {
+    id: 3,
+    title: "Sustainable Design",
+    description: "Eco-friendly design principles for a better tomorrow",
+    color: "#00B894"
+  },
+  {
+    id: 4,
+    title: "Mobile Development",
+    description: "Creating powerful mobile applications for iOS and Android",
+    color: "#FDCB6E"
+  },
+  {
+    id: 5,
+    title: "Data Analytics",
+    description: "Transforming raw data into actionable insights and intelligence",
+    color: "#E17055"
+  },
+  {
+    id: 6,
+    title: "Cloud Computing",
+    description: "Leveraging cloud infrastructure for scalable solutions",
+    color: "#74B9FF"
+  },
+  {
+    id: 7,
+    title: "Cybersecurity",
+    description: "Protecting digital assets with advanced security measures",
+    color: "#A29BFE"
+  },
+  {
+    id: 8,
+    title: "IoT Solutions",
+    description: "Connecting devices and creating smart ecosystems",
+    color: "#55E6C1"
+  },
+  {
+    id: 9,
+    title: "AR/VR Development",
+    description: "Building immersive augmented and virtual reality experiences",
+    color: "#FF7675"
+  },
+  {
+    id: 10,
+    title: "Quantum Computing",
+    description: "Exploring the next frontier in computational power",
+    color: "#BADCDD"
+  }
+];
 
 export default function HomePage(): React.JSX.Element {
   const [showLoading, setShowLoading] = useState(true);
@@ -52,6 +148,10 @@ export default function HomePage(): React.JSX.Element {
   const [showBanner, setShowBanner] = useState(true);
   const [isBannerHovered, setIsBannerHovered] = useState(false);
   
+  // State untuk menu Home dan Topics
+  const [activeSection, setActiveSection] = useState<"home" | "topics" | null>(null);
+  const [showContent, setShowContent] = useState(false);
+  
   // State untuk search
   const [showSearch, setShowSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -69,11 +169,111 @@ export default function HomePage(): React.JSX.Element {
   const searchContainerRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const searchStatusRef = useRef<HTMLDivElement>(null);
+  
+  // Refs untuk content
+  const contentContainerRef = useRef<HTMLDivElement>(null);
+  const contentItemsRef = useRef<(HTMLDivElement | null)[]>([]);
 
   // Database kota-kota Indonesia
   const indonesiaCities = [
     { city: "Jakarta", region: "DKI Jakarta" },
-    // ... (array cities tetap sama)
+    { city: "Surabaya", region: "Jawa Timur" },
+    { city: "Bandung", region: "Jawa Barat" },
+    { city: "Medan", region: "Sumatera Utara" },
+    { city: "Semarang", region: "Jawa Tengah" },
+    { city: "Makassar", region: "Sulawesi Selatan" },
+    { city: "Palembang", region: "Sumatera Selatan" },
+    { city: "Denpasar", region: "Bali" },
+    { city: "Batam", region: "Kepulauan Riau" },
+    { city: "Pekanbaru", region: "Riau" },
+    { city: "Bandar Lampung", region: "Lampung" },
+    { city: "Padang", region: "Sumatera Barat" },
+    { city: "Malang", region: "Jawa Timur" },
+    { city: "Samarinda", region: "Kalimantan Timur" },
+    { city: "Banjarmasin", region: "Kalimantan Selatan" },
+    { city: "Serang", region: "Banten" },
+    { city: "Jambi", region: "Jambi" },
+    { city: "Pontianak", region: "Kalimantan Barat" },
+    { city: "Manado", region: "Sulawesi Utara" },
+    { city: "Cirebon", region: "Jawa Barat" },
+    { city: "Balikpapan", region: "Kalimantan Timur" },
+    { city: "Bogor", region: "Jawa Barat" },
+    { city: "Yogyakarta", region: "DI Yogyakarta" },
+    { city: "Tangerang", region: "Banten" },
+    { city: "Bekasi", region: "Jawa Barat" },
+    { city: "Sukabumi", region: "Jawa Barat" },
+    { city: "Tasikmalaya", region: "Jawa Barat" },
+    { city: "Pekalongan", region: "Jawa Tengah" },
+    { city: "Depok", region: "Jawa Barat" },
+    { city: "Cimahi", region: "Jawa Barat" },
+    { city: "Palu", region: "Sulawesi Tengah" },
+    { city: "Kupang", region: "Nusa Tenggara Timur" },
+    { city: "Binjai", region: "Sumatera Utara" },
+    { city: "Mataram", region: "Nusa Tenggara Barat" },
+    { city: "Banda Aceh", region: "Aceh" },
+    { city: "Jayapura", region: "Papua" },
+    { city: "Singkawang", region: "Kalimantan Barat" },
+    { city: "Tegal", region: "Jawa Tengah" },
+    { city: "Kediri", region: "Jawa Timur" },
+    { city: "Blitar", region: "Jawa Timur" },
+    { city: "Madiun", region: "Jawa Timur" },
+    { city: "Pasuruan", region: "Jawa Timur" },
+    { city: "Magelang", region: "Jawa Tengah" },
+    { city: "Probolinggo", region: "Jawa Timur" },
+    { city: "Salatiga", region: "Jawa Tengah" },
+    { city: "Bitung", region: "Sulawesi Utara" },
+    { city: "Tanjung Pinang", region: "Kepulauan Riau" },
+    { city: "Ternate", region: "Maluku Utara" },
+    { city: "Bontang", region: "Kalimantan Timur" },
+    { city: "Bau-bau", region: "Sulawesi Tenggara" },
+    { city: "Tidore", region: "Maluku Utara" },
+    { city: "Gorontalo", region: "Gorontalo" },
+    { city: "Prabumulih", region: "Sumatera Selatan" },
+    { city: "Lubuklinggau", region: "Sumatera Selatan" },
+    { city: "Pageralam", region: "Sumatera Selatan" },
+    { city: "Pagaralam", region: "Sumatera Selatan" },
+    { city: "Sawahlunto", region: "Sumatera Barat" },
+    { city: "Solok", region: "Sumatera Barat" },
+    { city: "Payakumbuh", region: "Sumatera Barat" },
+    { city: "Bukittinggi", region: "Sumatera Barat" },
+    { city: "Pariaman", region: "Sumatera Barat" },
+    { city: "Padang Panjang", region: "Sumatera Barat" },
+    { city: "Sibolga", region: "Sumatera Utara" },
+    { city: "Tanjungbalai", region: "Sumatera Utara" },
+    { city: "Pematangsiantar", region: "Sumatera Utara" },
+    { city: "Tebing Tinggi", region: "Sumatera Utara" },
+    { city: "Kisaran", region: "Sumatera Utara" },
+    { city: "Gunungsitoli", region: "Sumatera Utara" },
+    { city: "Padangsidempuan", region: "Sumatera Utara" },
+    { city: "Sungai Penuh", region: "Jambi" },
+    { city: "Jambi", region: "Jambi" },
+    { city: "Bengkulu", region: "Bengkulu" },
+    { city: "Curup", region: "Bengkulu" },
+    { city: "Manna", region: "Bengkulu" },
+    { city: "Argamakmur", region: "Bengkulu" },
+    { city: "Muko-muko", region: "Bengkulu" },
+    { city: "Kaur", region: "Bengkulu" },
+    { city: "Kepahiang", region: "Bengkulu" },
+    { city: "Lebong", region: "Bengkulu" },
+    { city: "Seluma", region: "Bengkulu" },
+    { city: "Lahat", region: "Sumatera Selatan" },
+    { city: "Lubuk Linggau", region: "Sumatera Selatan" },
+    { city: "Pagar Alam", region: "Sumatera Selatan" },
+    { city: "Prabumulih", region: "Sumatera Selatan" },
+    { city: "Muara Enim", region: "Sumatera Selatan" },
+    { city: "Banyuasin", region: "Sumatera Selatan" },
+    { city: "Ogan Komering Ilir", region: "Sumatera Selatan" },
+    { city: "Ogan Komering Ulu", region: "Sumatera Selatan" },
+    { city: "Empat Lawang", region: "Sumatera Selatan" },
+    { city: "Musi Rawas", region: "Sumatera Selatan" },
+    { city: "Musi Banyuasin", region: "Sumatera Selatan" },
+    { city: "Bangka", region: "Kepulauan Bangka Belitung" },
+    { city: "Belitung", region: "Kepulauan Bangka Belitung" },
+    { city: "Pangkal Pinang", region: "Kepulauan Bangka Belitung" },
+    { city: "Sungai Liat", region: "Kepulauan Bangka Belitung" },
+    { city: "Tanjung Pandan", region: "Kepulauan Bangka Belitung" },
+    { city: "Manggar", region: "Kepulauan Bangka Belitung" },
+    { city: "Koba", region: "Kepulauan Bangka Belitung" },
     { city: "Tempuran", region: "Jawa Barat" }
   ];
 
@@ -408,6 +608,80 @@ export default function HomePage(): React.JSX.Element {
     }
   }, [searchStatus]);
 
+  // Fungsi untuk membuka section Home atau Topics
+  const openSection = (section: "home" | "topics") => {
+    setActiveSection(section);
+    setShowContent(true);
+    
+    // Tutup menu
+    setShowMenu(false);
+    
+    // Animasi GSAP untuk content
+    setTimeout(() => {
+      if (contentContainerRef.current) {
+        const tl = gsap.timeline();
+        
+        // Animasi container
+        tl.fromTo(contentContainerRef.current,
+          {
+            scale: 0.9,
+            opacity: 0,
+            y: 50
+          },
+          {
+            scale: 1,
+            opacity: 1,
+            y: 0,
+            duration: 0.6,
+            ease: "back.out(1.7)"
+          }
+        );
+        
+        // Animasi untuk setiap item content
+        const items = contentItemsRef.current.filter(Boolean);
+        items.forEach((item, index) => {
+          if (item) {
+            tl.fromTo(item,
+              {
+                x: -100,
+                opacity: 0
+              },
+              {
+                x: 0,
+                opacity: 1,
+                duration: 0.5,
+                ease: "power2.out"
+              },
+              `-=${0.3}`
+            );
+          }
+        });
+      }
+    }, 100);
+  };
+
+  // Fungsi untuk menutup content
+  const closeContent = () => {
+    if (contentContainerRef.current) {
+      const tl = gsap.timeline();
+      
+      tl.to(contentContainerRef.current, {
+        scale: 0.9,
+        opacity: 0,
+        y: 50,
+        duration: 0.4,
+        ease: "back.in(1.7)",
+        onComplete: () => {
+          setShowContent(false);
+          setActiveSection(null);
+        }
+      });
+    } else {
+      setShowContent(false);
+      setActiveSection(null);
+    }
+  };
+
   useEffect(() => {
     if (showLoading) {
       startTextScrollAnimation();
@@ -718,19 +992,28 @@ export default function HomePage(): React.JSX.Element {
   const menuItems = [
     { 
       name: "(01) HOME", 
-      delay: 0.1 
+      delay: 0.1,
+      action: () => openSection("home")
     },
     { 
-      name: "(02) WORK", 
-      delay: 0.2 
+      name: "(02) TOPICS", 
+      delay: 0.2,
+      action: () => openSection("topics")
     },
     { 
-      name: "(03) ABOUT", 
-      delay: 0.3 
+      name: "(03) NOTES", 
+      delay: 0.3,
+      action: navigateToNotes
     },
     { 
-      name: "(04) CONTACT", 
-      delay: 0.4 
+      name: "(04) ABOUT", 
+      delay: 0.4,
+      action: () => console.log("About clicked")
+    },
+    { 
+      name: "(05) CONTACT", 
+      delay: 0.5,
+      action: () => console.log("Contact clicked")
     }
   ];
 
@@ -750,14 +1033,14 @@ export default function HomePage(): React.JSX.Element {
       WebkitFontSmoothing: 'antialiased',
       MozOsxFontSmoothing: 'grayscale'
     }}>
-      {/* Search Component */}
+      {/* Search Component - DIPINDAHKAN KE ATAS */}
       <AnimatePresence>
         {showSearch && (
           <motion.div
             ref={searchContainerRef}
             style={{
               position: 'fixed',
-              top: '50%',
+              top: '20%',
               left: '50%',
               transform: 'translate(-50%, -50%)',
               width: '90%',
@@ -1010,14 +1293,202 @@ export default function HomePage(): React.JSX.Element {
         )}
       </AnimatePresence>
 
-      {/* Search Trigger Button */}
+      {/* Content Overlay untuk Home dan Topics */}
+      <AnimatePresence>
+        {showContent && (
+          <motion.div
+            ref={contentContainerRef}
+            style={{
+              position: 'fixed',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              width: '90%',
+              maxWidth: '1000px',
+              maxHeight: '80vh',
+              backgroundColor: 'rgba(0, 0, 0, 0.95)',
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+              borderRadius: '20px',
+              padding: '2rem',
+              zIndex: 999,
+              boxShadow: '0 25px 50px rgba(0, 0, 0, 0.5)',
+              backdropFilter: 'blur(20px)',
+              overflowY: 'auto'
+            }}
+            initial={{ scale: 0.8, opacity: 0, y: 50 }}
+            animate={{ scale: 1, opacity: 1, y: 0 }}
+            exit={{ scale: 0.8, opacity: 0, y: 50 }}
+            transition={{ duration: 0.6, ease: "back.out(1.7)" }}
+          >
+            {/* Header */}
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginBottom: '2rem',
+              borderBottom: '1px solid rgba(255,255,255,0.1)',
+              paddingBottom: '1rem'
+            }}>
+              <h2 style={{
+                color: 'white',
+                fontSize: '2rem',
+                fontWeight: '600',
+                margin: 0,
+                fontFamily: 'Arame Mono, monospace'
+              }}>
+                {activeSection === 'home' ? 'HOME CONTENT' : 'TOPICS'}
+              </h2>
+              
+              <motion.button
+                onClick={closeContent}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: 'rgba(255,255,255,0.6)',
+                  cursor: 'pointer',
+                  padding: '0.5rem',
+                  borderRadius: '8px',
+                  fontSize: '1.5rem',
+                  width: '40px',
+                  height: '40px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
+                whileHover={{
+                  color: 'white',
+                  backgroundColor: 'rgba(255,255,255,0.1)',
+                  scale: 1.1
+                }}
+                whileTap={{ scale: 0.9 }}
+              >
+                ×
+              </motion.button>
+            </div>
+
+            {/* Content Grid */}
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+              gap: '1.5rem',
+              padding: '1rem 0'
+            }}>
+              {(activeSection === 'home' ? homeContent : topicsContent).map((item, index) => (
+                <motion.div
+                  key={item.id}
+                  ref={el => contentItemsRef.current[index] = el}
+                  style={{
+                    backgroundColor: 'rgba(255,255,255,0.05)',
+                    border: `1px solid ${item.color}20`,
+                    borderRadius: '15px',
+                    padding: '1.5rem',
+                    cursor: 'pointer',
+                    transition: 'all 0.3s ease',
+                    position: 'relative',
+                    overflow: 'hidden'
+                  }}
+                  whileHover={{
+                    scale: 1.02,
+                    borderColor: `${item.color}60`,
+                    boxShadow: `0 10px 30px ${item.color}20`
+                  }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  {/* Color Accent */}
+                  <div style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: '4px',
+                    backgroundColor: item.color
+                  }} />
+                  
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'flex-start',
+                    gap: '1rem'
+                  }}>
+                    <div style={{
+                      width: '20px',
+                      height: '20px',
+                      borderRadius: '50%',
+                      backgroundColor: item.color,
+                      flexShrink: 0,
+                      marginTop: '0.2rem'
+                    }} />
+                    
+                    <div style={{ flex: 1 }}>
+                      <h3 style={{
+                        color: 'white',
+                        fontSize: '1.3rem',
+                        fontWeight: '600',
+                        margin: '0 0 0.5rem 0',
+                        fontFamily: 'Arame Mono, monospace'
+                      }}>
+                        {item.title}
+                      </h3>
+                      <p style={{
+                        color: 'rgba(255,255,255,0.7)',
+                        fontSize: '0.9rem',
+                        lineHeight: '1.5',
+                        margin: 0,
+                        fontFamily: 'Arame Mono, monospace'
+                      }}>
+                        {item.description}
+                      </p>
+                    </div>
+                  </div>
+                  
+                  {/* Hover Effect */}
+                  <motion.div
+                    style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      width: '100%',
+                      height: '100%',
+                      background: `linear-gradient(135deg, ${item.color}10, transparent)`,
+                      opacity: 0
+                    }}
+                    whileHover={{ opacity: 1 }}
+                    transition={{ duration: 0.3 }}
+                  />
+                </motion.div>
+              ))}
+            </div>
+
+            {/* Footer */}
+            <div style={{
+              marginTop: '2rem',
+              paddingTop: '1rem',
+              borderTop: '1px solid rgba(255,255,255,0.1)',
+              textAlign: 'center'
+            }}>
+              <p style={{
+                color: 'rgba(255,255,255,0.5)',
+                fontSize: '0.8rem',
+                fontFamily: 'Arame Mono, monospace',
+                margin: 0
+              }}>
+                {activeSection === 'home' 
+                  ? '5 items in Home section' 
+                  : '10 items in Topics section'
+                }
+              </p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Search Trigger Button - DIPINDAHKAN KE ATAS */}
       {!showSearch && !showLoading && (
         <motion.button
           onClick={toggleSearch}
           style={{
             position: 'fixed',
-            bottom: '2rem',
-            right: '2rem',
+            top: '2rem',
+            right: '8rem',
             backgroundColor: 'rgba(255,255,255,0.1)',
             border: '1px solid rgba(255,255,255,0.2)',
             borderRadius: '8px',
@@ -1040,7 +1511,6 @@ export default function HomePage(): React.JSX.Element {
             scale: 1.05
           }}
           whileTap={{ scale: 0.95 }}
-          transition={{ duration: 0.2 }}
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M21 21L16.514 16.506L21 21ZM19 10.5C19 15.194 15.194 19 10.5 19C5.806 19 2 15.194 2 10.5C2 5.806 5.806 2 10.5 2C15.194 2 19 5.806 19 10.5Z" 
@@ -1745,6 +2215,7 @@ export default function HomePage(): React.JSX.Element {
                         x: 15,
                         transition: { duration: 0.2, ease: "easeOut" }
                       }}
+                      onClick={item.action}
                     >
                       {/* Menu Text dengan font besar 80px */}
                       <motion.div
@@ -2266,5 +2737,3 @@ export default function HomePage(): React.JSX.Element {
     </div>
   );
 }
-
-
