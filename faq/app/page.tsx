@@ -1299,21 +1299,23 @@ export default function HomePage(): React.JSX.Element {
           <motion.div
             ref={contentContainerRef}
             style={{
-              position: 'fixed',
-              top: '50%',
-              left: '50%',
-              transform: 'translate(-50%, -50%)',
-              width: '90%',
-              maxWidth: '1000px',
-              maxHeight: '80vh',
-              backgroundColor: 'rgba(0, 0, 0, 0.95)',
-              border: '1px solid rgba(255, 255, 255, 0.1)',
-              borderRadius: '20px',
-              padding: '2rem',
-              zIndex: 999,
-              boxShadow: '0 25px 50px rgba(0, 0, 0, 0.5)',
-              backdropFilter: 'blur(20px)',
-              overflowY: 'auto'
+               position: 'fixed',
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)',
+        width: '90%',
+        maxWidth: '1000px',
+        maxHeight: '80vh',
+        backgroundColor: 'rgba(0, 0, 0, 0.95)',
+        border: '1px solid rgba(255, 255, 255, 0.1)',
+        borderRadius: '20px',
+        padding: '2rem',
+        zIndex: 999, // TINGKATKAN zIndex
+        boxShadow: '0 25px 50px rgba(0, 0, 0, 0.5)',
+        backdropFilter: 'blur(20px)',
+        overflowY: 'auto'
+
+              
             }}
             initial={{ scale: 0.8, opacity: 0, y: 50 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
@@ -1486,22 +1488,23 @@ export default function HomePage(): React.JSX.Element {
         <motion.button
           onClick={toggleSearch}
           style={{
-            position: 'fixed',
-            top: '2rem',
-            right: '8rem',
-            backgroundColor: 'rgba(255,255,255,0.1)',
-            border: '1px solid rgba(255,255,255,0.2)',
-            borderRadius: '8px',
-            padding: '0.75rem 1rem',
-            color: 'white',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.5rem',
-            fontFamily: 'Arame Mono, monospace',
-            fontSize: '0.85rem',
-            backdropFilter: 'blur(10px)',
-            zIndex: 40
+           position: 'fixed',
+      top: '2rem',
+      right: '8rem',
+      backgroundColor: 'rgba(255,255,255,0.1)',
+      border: '1px solid rgba(255,255,255,0.2)',
+      borderRadius: '8px',
+      padding: '0.75rem 1rem',
+      color: 'white',
+      cursor: 'pointer',
+      display: 'flex',
+      alignItems: 'center',
+      gap: '0.5rem',
+      fontFamily: 'Arame Mono, monospace',
+      fontSize: '0.85rem',
+      backdropFilter: 'blur(10px)',
+      zIndex: 40 // TURUNKAN zIndex (banner punya 45)
+            
           }}
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -1712,20 +1715,21 @@ export default function HomePage(): React.JSX.Element {
       <motion.button
         onClick={openAllUsersModal}
         style={{
-          position: 'absolute',
-          top: showBanner ? '4.5rem' : '2rem',
-          left: '16rem',
-          padding: '0.6rem 1.2rem',
-          fontSize: '0.8rem',
-          fontWeight: '300',
-          color: 'white',
-          backgroundColor: 'rgba(255,255,255,0.1)',
-          border: '1px solid rgba(255,255,255,0.2)',
-          borderRadius: '8px',
-          cursor: 'pointer',
-          fontFamily: 'Arame Mono, monospace',
-          backdropFilter: 'blur(10px)',
-          whiteSpace: 'nowrap'
+           position: 'absolute',
+    top: showBanner ? '4.5rem' : '2rem',
+    left: '16rem',
+    padding: '0.6rem 1.2rem',
+    fontSize: '0.8rem',
+    fontWeight: '300',
+    color: 'white',
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    border: '1px solid rgba(255,255,255,0.2)',
+    borderRadius: '8px',
+    cursor: 'pointer',
+    fontFamily: 'Arame Mono, monospace',
+    backdropFilter: 'blur(10px)',
+    whiteSpace: 'nowrap',
+    zIndex: 35 // TURUNKAN zIndex
         }}
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
