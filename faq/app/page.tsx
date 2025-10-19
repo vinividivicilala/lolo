@@ -1499,7 +1499,8 @@ export default function HomePage(): React.JSX.Element {
     style={{
       position: 'fixed',
       top: showBanner ? '4.5rem' : '2rem',
-      right: '11rem', // DIUBAH: dari 8rem ke 11rem agar sejajar dengan menu
+      right: '12rem', // DIUBAH: dari 8rem ke 11rem agar sejajar dengan menu
+      marginRight: '1rem', // Memberikan jarak antara tombol search dan menu
       backgroundColor: 'rgba(255,255,255,0.1)',
       border: '1px solid rgba(255,255,255,0.2)',
       borderRadius: '8px',
@@ -2071,11 +2072,10 @@ export default function HomePage(): React.JSX.Element {
 
 
 
-      {/* Menu Overlay - PERBAIKAN: BACKGROUND SOLID TIDAK TRANSPARAN */}
-<AnimatePresence>
+   <AnimatePresence>
   {showMenu && (
     <>
-      {/* Background Overlay - SOLID COLOR TANPA TRANSPARANSI */}
+      {/* Background Overlay - Solid Color Tanpa Transparansi */}
       <motion.div
         style={{
           position: 'fixed',
@@ -2083,26 +2083,29 @@ export default function HomePage(): React.JSX.Element {
           left: 0,
           width: '100%',
           height: '100%',
-          backgroundColor: '#FF4444', // SOLID COLOR - tidak ada transparansi
+          backgroundColor: '#FF4444', // Solid color tanpa transparansi
           zIndex: zIndexes.menu,
           display: 'flex',
-          padding: '2rem'
+          padding: '2rem', // Memberikan jarak untuk menu
+          justifyContent: 'center', // Memastikan menu tetap terpusat
+          alignItems: 'center' // Memastikan menu terpusat vertikal
         }}
         variants={menuVariants}
         initial="closed"
         animate="open"
         exit="closed"
       >
-        {/* Main Content - Navigation Menu - FULL WIDTH */}
+        {/* Main Content - Navigation Menu - Full Width */}
         <div style={{
           flex: 1,
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'center',
           paddingLeft: '4rem',
-          position: 'relative'
+          paddingRight: '4rem',
+          position: 'relative',
         }}>
-          {/* Website Name - Top Left - DIUBAH MENJADI MENURU */}
+          {/* Website Name - Top Left */}
           <motion.div
             style={{
               position: 'absolute',
@@ -2118,15 +2121,12 @@ export default function HomePage(): React.JSX.Element {
             }}
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ 
-              duration: 0.4,
-              delay: 0.3
-            }}
+            transition={{ duration: 0.4, delay: 0.3 }}
           >
             MENURU
           </motion.div>
 
-          {/* Visitor Time & Location Display - TOP CENTER */}
+          {/* Visitor Time & Location Display - Top Center */}
           <motion.div
             style={{
               position: 'absolute',
@@ -2143,7 +2143,6 @@ export default function HomePage(): React.JSX.Element {
             animate="visible"
             exit="hidden"
           >
-            {/* Time - Font Besar */}
             <motion.div
               style={{
                 fontSize: '2.5rem',
@@ -2166,7 +2165,6 @@ export default function HomePage(): React.JSX.Element {
               {visitorTime.time}
             </motion.div>
 
-            {/* Location & Timezone */}
             <motion.div
               style={{
                 display: 'flex',
@@ -2178,12 +2176,14 @@ export default function HomePage(): React.JSX.Element {
                 fontFamily: 'Arame Mono, monospace'
               }}
             >
-              <span style={{ 
-                backgroundColor: 'rgba(255,255,255,0.2)',
-                padding: '0.2rem 0.6rem',
-                borderRadius: '12px',
-                fontWeight: '500'
-              }}>
+              <span
+                style={{
+                  backgroundColor: 'rgba(255,255,255,0.2)',
+                  padding: '0.2rem 0.6rem',
+                  borderRadius: '12px',
+                  fontWeight: '500'
+                }}
+              >
                 {visitorTime.timezone}
               </span>
               <span>
@@ -2191,7 +2191,6 @@ export default function HomePage(): React.JSX.Element {
               </span>
             </motion.div>
 
-            {/* Date */}
             <motion.div
               style={{
                 fontSize: '0.8rem',
@@ -2208,7 +2207,8 @@ export default function HomePage(): React.JSX.Element {
           <div style={{
             display: 'flex',
             flexDirection: 'column',
-            gap: '2rem'
+            gap: '2rem',
+            paddingTop: '4rem'  // Memberikan jarak antara konten menu dan elemen atas
           }}>
             {menuItems.map((item, index) => (
               <motion.div
@@ -2234,7 +2234,6 @@ export default function HomePage(): React.JSX.Element {
                 }}
                 onClick={item.action}
               >
-                {/* Menu Text dengan font besar 80px */}
                 <motion.div
                   style={{
                     fontSize: '80px',
@@ -2256,7 +2255,7 @@ export default function HomePage(): React.JSX.Element {
                 >
                   {item.name}
                   
-                  {/* Line bawah - TETAP ADA TANPA HOVER */}
+                  {/* Line bawah tetap ada tanpa hover */}
                   <motion.div
                     style={{
                       width: '100%',
@@ -2276,7 +2275,7 @@ export default function HomePage(): React.JSX.Element {
           </div>
         </div>
       </motion.div>
-      
+
       {/* Close Button */}
       <motion.button
         onClick={toggleMenu}
@@ -2308,7 +2307,7 @@ export default function HomePage(): React.JSX.Element {
         initial="closed"
         animate="open"
         exit="closed"
-        whileHover={{ 
+        whileHover={{
           scale: 1.05,
           backgroundColor: 'rgba(255,255,255,0.3)',
           transition: { duration: 0.2 }
@@ -2336,7 +2335,7 @@ export default function HomePage(): React.JSX.Element {
             strokeLinecap="round"
             strokeLinejoin="round"
             initial={{ scale: 1, opacity: 1 }}
-            animate={{ 
+            animate={{
               scale: isCloseHovered ? 0 : 1,
               opacity: isCloseHovered ? 0 : 1
             }}
@@ -2358,7 +2357,7 @@ export default function HomePage(): React.JSX.Element {
               letterSpacing: '0.5px'
             }}
             initial={{ scale: 0, opacity: 0 }}
-            animate={{ 
+            animate={{
               scale: isCloseHovered ? 1 : 0,
               opacity: isCloseHovered ? 1 : 0
             }}
@@ -2765,4 +2764,5 @@ export default function HomePage(): React.JSX.Element {
     </div>
   );
 }
+
 
