@@ -33,16 +33,18 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
           overflow: 'hidden'
         }}
       >
-        {/* Portrait Image - Even Larger Size (80%) on Left */}
+        {/* Portrait Image - Scaled Larger (130%) on Left */}
         <div
           style={{
             width: '80%',
             height: '100%',
             backgroundImage: 'url(/images/5.jpg)',
-            backgroundSize: 'cover',
+            backgroundSize: '130%', // Diperbesar 130%
             backgroundPosition: 'center',
             backgroundRepeat: 'no-repeat',
-            borderRadius: '20px 0 0 20px'
+            borderRadius: '20px 0 0 20px',
+            transform: 'scale(1.1)', // Additional scaling
+            transformOrigin: 'left center'
           }}
         />
         
@@ -56,19 +58,22 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
             flexDirection: 'column',
             justifyContent: 'center',
             alignItems: 'center',
-            padding: '2rem',
-            borderRadius: '0 20px 20px 0'
+            padding: '1.5rem',
+            borderRadius: '0 20px 20px 0',
+            position: 'relative',
+            zIndex: 2
           }}
         >
           <h1
             style={{
               fontFamily: "'Inter', 'Arial', sans-serif",
-              fontSize: '2.5rem',
+              fontSize: '2rem',
               fontWeight: 'bold',
               color: '#ffffff',
-              marginBottom: '1rem',
+              marginBottom: '0.8rem',
               textAlign: 'center',
-              lineHeight: '1.2'
+              lineHeight: '1.1',
+              wordWrap: 'break-word'
             }}
           >
             Welcome back
@@ -76,10 +81,11 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
           <p
             style={{
               fontFamily: "'Inter', 'Arial', sans-serif",
-              fontSize: '1rem',
+              fontSize: '0.9rem',
               color: '#cccccc',
               textAlign: 'center',
-              lineHeight: '1.4'
+              lineHeight: '1.3',
+              wordWrap: 'break-word'
             }}
           >
             Sign in to your account to continue
