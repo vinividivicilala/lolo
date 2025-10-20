@@ -191,9 +191,6 @@ export default function HomePage(): React.JSX.Element {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchStatus, setSearchStatus] = useState<"empty" | "recent" | "updated" | "loading">("empty");
 
-  const [showSignIn, setShowSignIn] = useState(false);
-const [showSignUp, setShowSignUp] = useState(false);
-const [showForgotPassword, setShowForgotPassword] = useState(false);
   
   const router = useRouter();
   const timeRef = useRef<NodeJS.Timeout | null>(null);
@@ -212,31 +209,7 @@ const [showForgotPassword, setShowForgotPassword] = useState(false);
   const contentContainerRef = useRef<HTMLDivElement>(null);
   const contentItemsRef = useRef<(HTMLDivElement | null)[]>([]);
 
-  const handleOpenSignIn = () => {
-  setShowSignIn(true);
-};
 
-const handleCloseAuth = () => {
-  setShowSignIn(false);
-  setShowSignUp(false);
-  setShowForgotPassword(false);
-};
-
-const handleSwitchToSignUp = () => {
-  setShowSignIn(false);
-  setShowSignUp(true);
-};
-
-const handleSwitchToSignIn = () => {
-  setShowSignUp(false);
-  setShowForgotPassword(false);
-  setShowSignIn(true);
-};
-
-const handleSwitchToForgotPassword = () => {
-  setShowSignIn(false);
-  setShowForgotPassword(true);
-};
 
   // PERBAIKAN: Sistem z-index terorganisir
   const zIndexes = {
@@ -1900,30 +1873,7 @@ onClick={handleOpenSignIn}  // Ganti console.log dengan ini
 </motion.button>
 
 
-{/* Auth Modals */}
-<AnimatePresence>
-  {showSignIn && (
-    <SignInPage
-      onClose={handleCloseAuth}
-      onSwitchToSignUp={handleSwitchToSignUp}
-      onSwitchToForgotPassword={handleSwitchToForgotPassword}
-    />
-  )}
-  
-  {showSignUp && (
-    <SignUpPage
-      onClose={handleCloseAuth}
-      onSwitchToSignIn={handleSwitchToSignIn}
-    />
-  )}
-  
-  {showForgotPassword && (
-    <ForgotPasswordPage
-      onClose={handleCloseAuth}
-      onSwitchToSignIn={handleSwitchToSignIn}
-    />
-  )}
-</AnimatePresence>
+
 
       
 
@@ -2957,6 +2907,7 @@ onClick={handleOpenSignIn}  // Ganti console.log dengan ini
     </div>
   );
 }
+
 
 
 
