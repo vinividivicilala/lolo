@@ -33,76 +33,59 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
           overflow: 'hidden'
         }}
       >
-        {/* Portrait Image - Full Width with Border Radius */}
+        {/* Portrait Image - Large with Partial Border Radius */}
         <div
           style={{
-            width: '75%',
+            width: '85%',
             height: '100%',
             backgroundImage: 'url(/images/5.jpg)',
             backgroundSize: 'cover',
             backgroundPosition: 'center',
             backgroundRepeat: 'no-repeat',
-            borderRadius: '20px' // Full border radius
+            borderRadius: '20px 0 0 20px' // Radius hanya di kiri
           }}
         />
         
-        {/* Text Section with Black Background - Overlay on Right */}
+        {/* Text Section - Positioned to the right */}
         <div
           style={{
-            width: '30%',
-            height: '100%',
-            backgroundColor: '#000000',
+            position: 'absolute',
+            right: '5%',
+            top: '50%',
+            transform: 'translateY(-50%)',
             display: 'flex',
             flexDirection: 'column',
-            justifyContent: 'center',
-            alignItems: 'center',
-            padding: '2rem',
-            position: 'absolute',
-            right: 0,
-            top: 0,
-            borderRadius: '0 20px 20px 0',
-            zIndex: 3
+            alignItems: 'flex-end',
+            zIndex: 3,
+            maxWidth: '40%'
           }}
         >
-          <div
+          <h1
             style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              width: '100%',
-              textAlign: 'center'
+              fontFamily: "'Inter', 'Arial', sans-serif",
+              fontSize: '50px',
+              fontWeight: 'bold',
+              color: '#ffffff',
+              marginBottom: '1rem',
+              textAlign: 'right',
+              lineHeight: '1',
+              textShadow: '2px 2px 4px rgba(0,0,0,0.5)'
             }}
           >
-            <h1
-              style={{
-                fontFamily: "'Inter', 'Arial', sans-serif",
-                fontSize: '36px',
-                fontWeight: 'bold',
-                color: '#ffffff',
-                marginBottom: '1rem',
-                textAlign: 'center',
-                lineHeight: '1.1',
-                width: '100%',
-                wordBreak: 'keep-all'
-              }}
-            >
-              Welcome back
-            </h1>
-            <p
-              style={{
-                fontFamily: "'Inter', 'Arial', sans-serif",
-                fontSize: '14px',
-                color: '#cccccc',
-                textAlign: 'center',
-                lineHeight: '1.3',
-                width: '100%',
-                wordBreak: 'keep-all'
-              }}
-            >
-              Sign in to your account to continue
-            </p>
-          </div>
+            Welcome back
+          </h1>
+          <p
+            style={{
+              fontFamily: "'Inter', 'Arial', sans-serif",
+              fontSize: '20px',
+              color: '#ffffff',
+              textAlign: 'right',
+              lineHeight: '1.2',
+              textShadow: '2px 2px 4px rgba(0,0,0,0.5)'
+            }}
+          >
+            Sign in to your account to continue
+          </p>
         </div>
       </div>
     </div>
