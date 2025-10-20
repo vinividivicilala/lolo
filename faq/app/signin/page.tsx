@@ -21,19 +21,58 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
         zIndex: 1000,
       }}
     >
-      {/* Foto Portrait dengan Border Radius di Tengah */}
       <div
         style={{
-          width: '500px',
-          height: '700px',
-          backgroundImage: 'url(/images/5.jpg)',
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '40px',
+          backgroundColor: 'white',
           borderRadius: '20px',
+          padding: '40px',
           boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
         }}
-      />
+      >
+        {/* Foto Portrait di Kiri */}
+        <div
+          style={{
+            width: '400px',
+            height: '500px',
+            backgroundImage: 'url(/images/5.jpg)',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat',
+            borderRadius: '15px',
+          }}
+        />
+
+        {/* Teks di Sebelah Kanan */}
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'flex-start',
+          }}
+        >
+          <h1
+            style={{
+              fontSize: '36px',
+              fontWeight: 'bold',
+              color: '#000000',
+              marginBottom: '10px',
+            }}
+          >
+            Welcome back
+          </h1>
+          <p
+            style={{
+              fontSize: '16px',
+              color: '#666666',
+            }}
+          >
+            Sign in to your account to continue
+          </p>
+        </div>
+      </div>
     </div>
   );
 }
