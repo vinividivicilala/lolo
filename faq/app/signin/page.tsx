@@ -25,8 +25,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
       <div
         style={{
           width: '1300px',
-          height: '1000px',
-          backgroundColor: 'rgba(255, 255, 255, 0.1)', // Putih transparan tipis
+          height: '800px',
           borderRadius: '20px',
           border: '1px solid rgba(255, 255, 255, 0.3)', // Border putih transparan
           boxShadow: '0 4px 15px rgba(0,0,0,0.1)', // Shadow lebih soft
@@ -36,3 +35,4 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
     </div>
   );
 }
+
