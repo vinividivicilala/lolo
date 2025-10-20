@@ -349,7 +349,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
               alignItems: 'center',
               fontFamily: "'Roboto', sans-serif",
               fontSize: '14px',
-              marginBottom: '30px',
+              marginBottom: '40px',
             }}
           >
             {/* Lupa Password Link */}
@@ -406,93 +406,112 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
             </div>
           </div>
 
-          {/* Footer Links - Kebijakan Privasi, Ketentuan, dan Tentang Kami */}
+          {/* Footer Links - Kebijakan Privasi, Ketentuan, dan Tentang Kami di Sisi Kanan */}
           <div
             style={{
               display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              gap: '20px',
-              fontFamily: "'Roboto', sans-serif",
-              fontSize: '12px',
-              borderTop: '1px solid rgba(255, 255, 255, 0.2)',
-              paddingTop: '20px',
+              flexDirection: 'column',
+              gap: '15px',
+              alignItems: 'flex-start',
             }}
           >
+            {/* Kebijakan Privasi */}
             <button
               onClick={handlePrivacyPolicy}
               style={{
                 border: 'none',
                 background: 'none',
-                color: 'rgba(255, 255, 255, 0.7)',
+                color: '#ffffff',
                 cursor: 'pointer',
                 textDecoration: 'none',
                 transition: 'all 0.3s ease',
                 fontFamily: "'Roboto', sans-serif",
-                fontSize: '12px',
+                fontSize: '16px',
+                fontWeight: '500',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '10px',
+                padding: '8px 0',
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.color = '#ffffff';
-                e.currentTarget.style.textDecoration = 'underline';
+                e.currentTarget.style.color = 'rgba(255, 255, 255, 0.8)';
+                e.currentTarget.style.transform = 'translateX(5px)';
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.color = 'rgba(255, 255, 255, 0.7)';
-                e.currentTarget.style.textDecoration = 'none';
+                e.currentTarget.style.color = '#ffffff';
+                e.currentTarget.style.transform = 'translateX(0)';
               }}
             >
-              Kebijakan Privasi
+              <span>Kebijakan Privasi</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M5 12h14M12 5l7 7-7 7" />
+              </svg>
             </button>
 
-            <span style={{ color: 'rgba(255, 255, 255, 0.5)' }}>•</span>
-
+            {/* Ketentuan Kami */}
             <button
               onClick={handleTerms}
               style={{
                 border: 'none',
                 background: 'none',
-                color: 'rgba(255, 255, 255, 0.7)',
+                color: '#ffffff',
                 cursor: 'pointer',
                 textDecoration: 'none',
                 transition: 'all 0.3s ease',
                 fontFamily: "'Roboto', sans-serif",
-                fontSize: '12px',
+                fontSize: '16px',
+                fontWeight: '500',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '10px',
+                padding: '8px 0',
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.color = '#ffffff';
-                e.currentTarget.style.textDecoration = 'underline';
+                e.currentTarget.style.color = 'rgba(255, 255, 255, 0.8)';
+                e.currentTarget.style.transform = 'translateX(5px)';
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.color = 'rgba(255, 255, 255, 0.7)';
-                e.currentTarget.style.textDecoration = 'none';
+                e.currentTarget.style.color = '#ffffff';
+                e.currentTarget.style.transform = 'translateX(0)';
               }}
             >
-              Ketentuan Kami
+              <span>Ketentuan Kami</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M5 12h14M12 5l7 7-7 7" />
+              </svg>
             </button>
 
-            <span style={{ color: 'rgba(255, 255, 255, 0.5)' }}>•</span>
-
+            {/* Tentang Kami */}
             <button
               onClick={handleAbout}
               style={{
                 border: 'none',
                 background: 'none',
-                color: 'rgba(255, 255, 255, 0.7)',
+                color: '#ffffff',
                 cursor: 'pointer',
                 textDecoration: 'none',
                 transition: 'all 0.3s ease',
                 fontFamily: "'Roboto', sans-serif",
-                fontSize: '12px',
+                fontSize: '16px',
+                fontWeight: '500',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '10px',
+                padding: '8px 0',
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.color = '#ffffff';
-                e.currentTarget.style.textDecoration = 'underline';
+                e.currentTarget.style.color = 'rgba(255, 255, 255, 0.8)';
+                e.currentTarget.style.transform = 'translateX(5px)';
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.color = 'rgba(255, 255, 255, 0.7)';
-                e.currentTarget.style.textDecoration = 'none';
+                e.currentTarget.style.color = '#ffffff';
+                e.currentTarget.style.transform = 'translateX(0)';
               }}
             >
-              Tentang Kami
+              <span>Tentang Kami</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M5 12h14M12 5l7 7-7 7" />
+              </svg>
             </button>
           </div>
         </div>
