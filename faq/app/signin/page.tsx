@@ -57,41 +57,50 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'center',
-            alignItems: 'flex-start', // Diubah ke flex-start untuk sejajar kiri
-            padding: '2rem',
+            alignItems: 'center',
+            padding: '1rem',
             borderRadius: '0 20px 20px 0',
             position: 'relative',
             zIndex: 2
           }}
         >
-          <h1
+          <div
             style={{
-              fontFamily: "'Inter', 'Arial', sans-serif",
-              fontSize: '50px', // Minimal 50px
-              fontWeight: 'bold',
-              color: '#ffffff',
-              marginBottom: '1.5rem',
-              textAlign: 'left', // Diubah ke left
-              lineHeight: '1.1',
-              wordWrap: 'break-word',
-              width: '100%'
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '100%',
+              textAlign: 'center'
             }}
           >
-            Welcome back
-          </h1>
-          <p
-            style={{
-              fontFamily: "'Inter', 'Arial', sans-serif",
-              fontSize: '20px', // Diperbesar
-              color: '#cccccc',
-              textAlign: 'left', // Diubah ke left
-              lineHeight: '1.3',
-              wordWrap: 'break-word',
-              width: '100%'
-            }}
-          >
-            Sign in to your account to continue
-          </p>
+            <h1
+              style={{
+                fontFamily: "'Inter', 'Arial', sans-serif",
+                fontSize: '42px',
+                fontWeight: 'bold',
+                color: '#ffffff',
+                marginBottom: '1rem',
+                textAlign: 'center',
+                lineHeight: '1',
+                whiteSpace: 'nowrap'
+              }}
+            >
+              Welcome back
+            </h1>
+            <p
+              style={{
+                fontFamily: "'Inter', 'Arial', sans-serif",
+                fontSize: '16px',
+                color: '#cccccc',
+                textAlign: 'center',
+                lineHeight: '1.2',
+                whiteSpace: 'nowrap'
+              }}
+            >
+              Sign in to your account to continue
+            </p>
+          </div>
         </div>
       </div>
     </div>
