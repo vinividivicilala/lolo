@@ -24,15 +24,12 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
     setTimeout(() => {
       setIsLoading(false);
       onClose();
-      // Redirect setelah login berhasil
-      router.push('/dashboard'); // Ganti dengan route yang sesuai
+      router.push('/dashboard');
     }, 1500);
   };
 
   const handleSocialLogin = (provider: string) => {
     console.log(`Login with ${provider}`);
-    // Implementasi login social
-    // router.push(`/api/auth/${provider}`); // Contoh redirect ke auth provider
   };
 
   return (
@@ -44,12 +41,12 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
           left: 0,
           width: '100%',
           height: '100%',
-          backgroundColor: 'rgba(0,0,0,0.9)',
+          backgroundColor: 'rgba(0,0,0,0.5)',
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
           zIndex: 1000,
-          padding: '2rem'
+          padding: '1rem'
         }}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -57,42 +54,40 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
       >
         <motion.div
           style={{
-            background: 'rgba(255,255,255,0.95)',
-            borderRadius: '20px',
-            padding: '3rem',
-            maxWidth: '450px',
+            background: 'white',
+            borderRadius: '12px',
+            padding: '2rem',
+            maxWidth: '400px',
             width: '100%',
-            maxHeight: '90vh',
-            overflowY: 'auto',
             position: 'relative',
-            backdropFilter: 'blur(20px)',
-            border: '1px solid rgba(255,255,255,0.2)'
+            boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)'
           }}
-          initial={{ scale: 0.8, opacity: 0, y: 50 }}
+          initial={{ scale: 0.9, opacity: 0, y: 20 }}
           animate={{ scale: 1, opacity: 1, y: 0 }}
-          exit={{ scale: 0.8, opacity: 0, y: 50 }}
-          transition={{ duration: 0.5, ease: "back.out(1.7)" }}
+          exit={{ scale: 0.9, opacity: 0, y: 20 }}
+          transition={{ duration: 0.3, ease: "easeOut" }}
         >
           {/* Close Button */}
           <motion.button
             onClick={onClose}
             style={{
               position: 'absolute',
-              top: '1.5rem',
-              right: '1.5rem',
-              background: 'rgba(0,0,0,0.1)',
+              top: '1rem',
+              right: '1rem',
+              background: 'transparent',
               border: 'none',
               borderRadius: '50%',
-              width: '40px',
-              height: '40px',
+              width: '32px',
+              height: '32px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               cursor: 'pointer',
-              color: '#333',
-              fontSize: '1.2rem'
+              color: '#6B7280',
+              fontSize: '1.5rem',
+              fontWeight: '300'
             }}
-            whileHover={{ backgroundColor: 'rgba(0,0,0,0.2)', scale: 1.1 }}
+            whileHover={{ backgroundColor: 'rgba(0,0,0,0.05)', scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
           >
             ×
@@ -100,85 +95,69 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
 
           {/* Header Section */}
           <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-            <motion.div
-              style={{
-                width: '80px',
-                height: '80px',
-                borderRadius: '50%',
-                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                margin: '0 auto 1rem',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: 'white',
-                fontSize: '2rem',
-                fontWeight: 'bold'
-              }}
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ delay: 0.2, duration: 0.5 }}
-            >
-              M
-            </motion.div>
-            
             <motion.h2
               style={{
-                fontSize: '2rem',
-                fontWeight: '600',
-                color: '#333',
+                fontSize: '1.875rem',
+                fontWeight: '700',
+                color: '#111827',
                 margin: '0 0 0.5rem 0',
-                fontFamily: 'Arame Mono, monospace'
+                fontFamily: 'system-ui, -apple-system, sans-serif'
               }}
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3, duration: 0.5 }}
+              transition={{ delay: 0.1, duration: 0.3 }}
             >
-              Welcome Back
+              Welcome back
             </motion.h2>
             
             <motion.p
               style={{
-                fontSize: '1rem',
-                color: '#666',
+                fontSize: '0.875rem',
+                color: '#6B7280',
                 margin: 0,
-                fontFamily: 'Arame Mono, monospace',
+                fontFamily: 'system-ui, -apple-system, sans-serif',
                 lineHeight: '1.5'
               }}
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4, duration: 0.5 }}
+              transition={{ delay: 0.2, duration: 0.3 }}
             >
-              Sign in to your MENURU account to continue your creative journey
+              Sign in to your account to continue
             </motion.p>
           </div>
 
           {/* Social Login Buttons */}
           <motion.div
-            style={{ marginBottom: '2rem' }}
-            initial={{ opacity: 0, y: 20 }}
+            style={{ marginBottom: '1.5rem' }}
+            initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5, duration: 0.5 }}
+            transition={{ delay: 0.3, duration: 0.3 }}
           >
-            <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
               <motion.button
                 type="button"
                 onClick={() => handleSocialLogin('google')}
                 style={{
-                  flex: 1,
-                  padding: '0.8rem',
-                  border: '1px solid #ddd',
+                  width: '100%',
+                  padding: '0.75rem 1rem',
+                  border: '1px solid #D1D5DB',
                   background: 'white',
                   borderRadius: '8px',
                   cursor: 'pointer',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  gap: '0.5rem',
-                  fontFamily: 'Arame Mono, monospace',
-                  fontSize: '0.9rem',
-                  fontWeight: '500'
+                  gap: '0.75rem',
+                  fontFamily: 'system-ui, -apple-system, sans-serif',
+                  fontSize: '0.875rem',
+                  fontWeight: '500',
+                  color: '#374151',
+                  transition: 'all 0.2s ease'
                 }}
-                whileHover={{ scale: 1.02, boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
+                whileHover={{ 
+                  backgroundColor: '#F9FAFB',
+                  borderColor: '#9CA3AF'
+                }}
                 whileTap={{ scale: 0.98 }}
               >
                 <svg width="18" height="18" viewBox="0 0 24 24">
@@ -194,21 +173,26 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
                 type="button"
                 onClick={() => handleSocialLogin('github')}
                 style={{
-                  flex: 1,
-                  padding: '0.8rem',
-                  border: '1px solid #ddd',
+                  width: '100%',
+                  padding: '0.75rem 1rem',
+                  border: '1px solid #D1D5DB',
                   background: 'white',
                   borderRadius: '8px',
                   cursor: 'pointer',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  gap: '0.5rem',
-                  fontFamily: 'Arame Mono, monospace',
-                  fontSize: '0.9rem',
-                  fontWeight: '500'
+                  gap: '0.75rem',
+                  fontFamily: 'system-ui, -apple-system, sans-serif',
+                  fontSize: '0.875rem',
+                  fontWeight: '500',
+                  color: '#374151',
+                  transition: 'all 0.2s ease'
                 }}
-                whileHover={{ scale: 1.02, boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
+                whileHover={{ 
+                  backgroundColor: '#F9FAFB',
+                  borderColor: '#9CA3AF'
+                }}
                 whileTap={{ scale: 0.98 }}
               >
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
@@ -216,35 +200,39 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
                 </svg>
                 GitHub
               </motion.button>
+
+              <motion.button
+                type="button"
+                onClick={() => handleSocialLogin('discord')}
+                style={{
+                  width: '100%',
+                  padding: '0.75rem 1rem',
+                  border: '1px solid #D1D5DB',
+                  background: 'white',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.75rem',
+                  fontFamily: 'system-ui, -apple-system, sans-serif',
+                  fontSize: '0.875rem',
+                  fontWeight: '500',
+                  color: '#374151',
+                  transition: 'all 0.2s ease'
+                }}
+                whileHover={{ 
+                  backgroundColor: '#F9FAFB',
+                  borderColor: '#9CA3AF'
+                }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="#7289da">
+                  <path d="M19.27 5.33C17.94 4.71 16.5 4.26 15 4a.09.09 0 0 0-.07.03c-.18.33-.39.76-.53 1.09a16.09 16.09 0 0 0-4.8 0c-.14-.34-.35-.76-.54-1.09c-.01-.02-.04-.03-.07-.03c-1.5.26-2.93.71-4.27 1.33c-.01 0-.02.01-.03.02c-2.72 4.07-3.47 8.03-3.1 11.95c0 .02.01.04.03.05c1.8 1.32 3.53 2.12 5.24 2.65c.03.01.06 0 .07-.02c.4-.55.76-1.13 1.07-1.74c.02-.04 0-.08-.04-.09c-.57-.22-1.11-.48-1.64-.78c-.04-.02-.04-.08-.01-.11c.11-.08.22-.17.33-.25c.02-.02.05-.02.07-.01c3.44 1.57 7.15 1.57 10.55 0c.02-.01.05-.01.07.01c.11.09.22.17.33.26c.04.03.04.09-.01.11c-.52.31-1.07.56-1.64.78c-.04.01-.05.06-.04.09c.32.61.68 1.19 1.07 1.74c.03.01.06.02.09.01c1.72-.53 3.45-1.33 5.25-2.65c.02-.01.03-.03.03-.05c.44-4.53-.73-8.46-3.1-11.95c-.01-.01-.02-.02-.04-.02zM8.52 14.91c-1.03 0-1.89-.95-1.89-2.12s.84-2.12 1.89-2.12c1.06 0 1.9.96 1.89 2.12c0 1.17-.84 2.12-1.89 2.12zm6.97 0c-1.03 0-1.89-.95-1.89-2.12s.84-2.12 1.89-2.12c1.06 0 1.9.96 1.89 2.12c0 1.17-.83 2.12-1.89 2.12z"/>
+                </svg>
+                Discord
+              </motion.button>
             </div>
-            
-            <motion.button
-              type="button"
-              onClick={() => handleSocialLogin('discord')}
-              style={{
-                width: '100%',
-                padding: '0.8rem',
-                border: '1px solid #7289da',
-                background: 'white',
-                borderRadius: '8px',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '0.5rem',
-                fontFamily: 'Arame Mono, monospace',
-                fontSize: '0.9rem',
-                fontWeight: '500',
-                color: '#7289da'
-              }}
-              whileHover={{ scale: 1.02, boxShadow: '0 4px 12px rgba(114,137,218,0.2)' }}
-              whileTap={{ scale: 0.98 }}
-            >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="#7289da">
-                <path d="M19.27 5.33C17.94 4.71 16.5 4.26 15 4a.09.09 0 0 0-.07.03c-.18.33-.39.76-.53 1.09a16.09 16.09 0 0 0-4.8 0c-.14-.34-.35-.76-.54-1.09c-.01-.02-.04-.03-.07-.03c-1.5.26-2.93.71-4.27 1.33c-.01 0-.02.01-.03.02c-2.72 4.07-3.47 8.03-3.1 11.95c0 .02.01.04.03.05c1.8 1.32 3.53 2.12 5.24 2.65c.03.01.06 0 .07-.02c.4-.55.76-1.13 1.07-1.74c.02-.04 0-.08-.04-.09c-.57-.22-1.11-.48-1.64-.78c-.04-.02-.04-.08-.01-.11c.11-.08.22-.17.33-.25c.02-.02.05-.02.07-.01c3.44 1.57 7.15 1.57 10.55 0c.02-.01.05-.01.07.01c.11.09.22.17.33.26c.04.03.04.09-.01.11c-.52.31-1.07.56-1.64.78c-.04.01-.05.06-.04.09c.32.61.68 1.19 1.07 1.74c.03.01.06.02.09.01c1.72-.53 3.45-1.33 5.25-2.65c.02-.01.03-.03.03-.05c.44-4.53-.73-8.46-3.1-11.95c-.01-.01-.02-.02-.04-.02zM8.52 14.91c-1.03 0-1.89-.95-1.89-2.12s.84-2.12 1.89-2.12c1.06 0 1.9.96 1.89 2.12c0 1.17-.84 2.12-1.89 2.12zm6.97 0c-1.03 0-1.89-.95-1.89-2.12s.84-2.12 1.89-2.12c1.06 0 1.9.96 1.89 2.12c0 1.17-.83 2.12-1.89 2.12z"/>
-              </svg>
-              Discord
-            </motion.button>
           </motion.div>
 
           {/* Divider */}
@@ -252,33 +240,42 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
             style={{
               display: 'flex',
               alignItems: 'center',
-              margin: '2rem 0',
-              color: '#999'
+              margin: '1.5rem 0',
+              color: '#6B7280'
             }}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 0.6, duration: 0.5 }}
+            transition={{ delay: 0.4, duration: 0.3 }}
           >
-            <div style={{ flex: 1, height: '1px', backgroundColor: '#ddd' }}></div>
-            <span style={{ padding: '0 1rem', fontSize: '0.9rem', fontFamily: 'Arame Mono, monospace' }}>atau</span>
-            <div style={{ flex: 1, height: '1px', backgroundColor: '#ddd' }}></div>
+            <div style={{ flex: 1, height: '1px', backgroundColor: '#E5E7EB' }}></div>
+            <span style={{ 
+              padding: '0 1rem', 
+              fontSize: '0.75rem', 
+              fontFamily: 'system-ui, -apple-system, sans-serif',
+              fontWeight: '500',
+              textTransform: 'uppercase',
+              letterSpacing: '0.05em'
+            }}>
+              OR CONTINUE WITH
+            </span>
+            <div style={{ flex: 1, height: '1px', backgroundColor: '#E5E7EB' }}></div>
           </motion.div>
 
           {/* Login Form */}
           <motion.form
             onSubmit={handleSignIn}
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.7, duration: 0.5 }}
+            transition={{ delay: 0.5, duration: 0.3 }}
           >
-            <div style={{ marginBottom: '1.5rem' }}>
+            <div style={{ marginBottom: '1rem' }}>
               <label style={{
                 display: 'block',
                 marginBottom: '0.5rem',
-                fontSize: '0.9rem',
+                fontSize: '0.875rem',
                 fontWeight: '500',
-                color: '#333',
-                fontFamily: 'Arame Mono, monospace'
+                color: '#374151',
+                fontFamily: 'system-ui, -apple-system, sans-serif'
               }}>
                 Email
               </label>
@@ -289,14 +286,24 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
                 required
                 style={{
                   width: '100%',
-                  padding: '0.8rem',
-                  border: '1px solid #ddd',
+                  padding: '0.75rem 1rem',
+                  border: '1px solid #D1D5DB',
                   borderRadius: '8px',
-                  fontSize: '1rem',
-                  fontFamily: 'Arame Mono, monospace',
-                  transition: 'all 0.3s ease'
+                  fontSize: '0.875rem',
+                  fontFamily: 'system-ui, -apple-system, sans-serif',
+                  transition: 'all 0.2s ease',
+                  backgroundColor: 'white',
+                  outline: 'none'
                 }}
-                placeholder="masukkan email anda"
+                placeholder="example@gmail.com"
+                onFocus={(e) => {
+                  e.target.style.borderColor = '#3B82F6';
+                  e.target.style.boxShadow = '0 0 0 3px rgba(59, 130, 246, 0.1)';
+                }}
+                onBlur={(e) => {
+                  e.target.style.borderColor = '#D1D5DB';
+                  e.target.style.boxShadow = 'none';
+                }}
               />
             </div>
 
@@ -304,10 +311,10 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
               <label style={{
                 display: 'block',
                 marginBottom: '0.5rem',
-                fontSize: '0.9rem',
+                fontSize: '0.875rem',
                 fontWeight: '500',
-                color: '#333',
-                fontFamily: 'Arame Mono, monospace'
+                color: '#374151',
+                fontFamily: 'system-ui, -apple-system, sans-serif'
               }}>
                 Password
               </label>
@@ -318,36 +325,26 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
                 required
                 style={{
                   width: '100%',
-                  padding: '0.8rem',
-                  border: '1px solid #ddd',
+                  padding: '0.75rem 1rem',
+                  border: '1px solid #D1D5DB',
                   borderRadius: '8px',
-                  fontSize: '1rem',
-                  fontFamily: 'Arame Mono, monospace',
-                  transition: 'all 0.3s ease'
+                  fontSize: '0.875rem',
+                  fontFamily: 'system-ui, -apple-system, sans-serif',
+                  transition: 'all 0.2s ease',
+                  backgroundColor: 'white',
+                  outline: 'none'
                 }}
-                placeholder="masukkan password anda"
+                placeholder="••••••••"
+                onFocus={(e) => {
+                  e.target.style.borderColor = '#3B82F6';
+                  e.target.style.boxShadow = '0 0 0 3px rgba(59, 130, 246, 0.1)';
+                }}
+                onBlur={(e) => {
+                  e.target.style.borderColor = '#D1D5DB';
+                  e.target.style.boxShadow = 'none';
+                }}
               />
             </div>
-
-            {/* Forgot Password Link */}
-            <motion.button
-              type="button"
-              onClick={onSwitchToForgotPassword}
-              style={{
-                background: 'none',
-                border: 'none',
-                color: '#667eea',
-                fontSize: '0.85rem',
-                cursor: 'pointer',
-                fontFamily: 'Arame Mono, monospace',
-                padding: '0.5rem 0',
-                marginBottom: '1.5rem',
-                textDecoration: 'underline'
-              }}
-              whileHover={{ color: '#764ba2' }}
-            >
-              Lupa password?
-            </motion.button>
 
             {/* Sign In Button */}
             <motion.button
@@ -355,54 +352,90 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
               disabled={isLoading}
               style={{
                 width: '100%',
-                padding: '1rem',
-                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                padding: '0.75rem 1rem',
+                background: '#111827',
                 border: 'none',
                 borderRadius: '8px',
                 color: 'white',
-                fontSize: '1rem',
+                fontSize: '0.875rem',
                 fontWeight: '600',
                 cursor: isLoading ? 'not-allowed' : 'pointer',
-                fontFamily: 'Arame Mono, monospace',
-                marginBottom: '1.5rem',
-                opacity: isLoading ? 0.7 : 1
+                fontFamily: 'system-ui, -apple-system, sans-serif',
+                marginBottom: '1rem',
+                opacity: isLoading ? 0.7 : 1,
+                transition: 'all 0.2s ease'
               }}
-              whileHover={!isLoading ? { scale: 1.02, boxShadow: '0 4px 15px rgba(102,126,234,0.4)' } : {}}
+              whileHover={!isLoading ? { 
+                backgroundColor: '#374151',
+                boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
+              } : {}}
               whileTap={!isLoading ? { scale: 0.98 } : {}}
             >
-              {isLoading ? 'Memproses...' : 'Masuk'}
+              {isLoading ? 'Signing in...' : 'Sign In with Email'}
             </motion.button>
           </motion.form>
+
+          {/* Forgot Password Link */}
+          <motion.div
+            style={{
+              textAlign: 'center',
+              marginBottom: '1.5rem'
+            }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.6, duration: 0.3 }}
+          >
+            <motion.button
+              type="button"
+              onClick={onSwitchToForgotPassword}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: '#6B7280',
+                fontSize: '0.875rem',
+                cursor: 'pointer',
+                fontFamily: 'system-ui, -apple-system, sans-serif',
+                textDecoration: 'underline',
+                transition: 'color 0.2s ease'
+              }}
+              whileHover={{ color: '#374151' }}
+            >
+              Forgot your password?
+            </motion.button>
+          </motion.div>
 
           {/* Sign Up Link */}
           <motion.div
             style={{
               textAlign: 'center',
-              fontSize: '0.9rem',
-              color: '#666',
-              fontFamily: 'Arame Mono, monospace'
+              fontSize: '0.875rem',
+              color: '#6B7280',
+              fontFamily: 'system-ui, -apple-system, sans-serif',
+              borderTop: '1px solid #E5E7EB',
+              paddingTop: '1.5rem'
             }}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 0.8, duration: 0.5 }}
+            transition={{ delay: 0.7, duration: 0.3 }}
           >
-            Belum punya akun?{' '}
+            Don't have an account?{' '}
             <motion.button
               type="button"
               onClick={onSwitchToSignUp}
               style={{
                 background: 'none',
                 border: 'none',
-                color: '#667eea',
+                color: '#111827',
                 cursor: 'pointer',
-                fontFamily: 'Arame Mono, monospace',
-                fontSize: '0.9rem',
+                fontFamily: 'system-ui, -apple-system, sans-serif',
+                fontSize: '0.875rem',
                 fontWeight: '600',
-                textDecoration: 'underline'
+                textDecoration: 'underline',
+                transition: 'color 0.2s ease'
               }}
-              whileHover={{ color: '#764ba2' }}
+              whileHover={{ color: '#374151' }}
             >
-              Daftar sekarang
+              Sign up
             </motion.button>
           </motion.div>
         </motion.div>
