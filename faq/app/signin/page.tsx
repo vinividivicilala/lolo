@@ -29,12 +29,14 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
         zIndex: 1000,
       }}
     >
-      {/* Container untuk foto dan teks sejajar */}
+      {/* Container utama horizontal */}
       <div
         style={{
           display: 'flex',
           alignItems: 'flex-start',
-          gap: '60px',
+          gap: '40px',
+          maxWidth: '1200px',
+          width: '90%',
         }}
       >
         {/* Container untuk Foto dan Card */}
@@ -43,13 +45,14 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
             display: 'flex',
             flexDirection: 'column',
             gap: '30px',
+            flex: '1',
           }}
         >
           {/* Foto Portrait */}
           <div
             style={{
-              width: '500px',
-              height: '700px',
+              width: '100%',
+              height: '500px',
               backgroundImage: 'url(/images/5.jpg)',
               backgroundSize: 'cover',
               backgroundPosition: 'center',
@@ -59,11 +62,11 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
             }}
           />
 
-          {/* Card Design - Mirip dengan contoh di foto */}
+          {/* Card Design - Horizontal di bawah foto */}
           <div
             style={{
-              width: '500px',
-              padding: '40px',
+              width: '100%',
+              padding: '35px',
               backgroundColor: 'rgba(255, 255, 255, 0.95)',
               borderRadius: '20px',
               boxShadow: '0 10px 30px rgba(0,0,0,0.2)',
@@ -78,10 +81,10 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
               <h3
                 style={{
                   fontFamily: "'Roboto', sans-serif",
-                  fontSize: '28px',
+                  fontSize: '32px',
                   fontWeight: 'bold',
                   color: '#1a1a1a',
-                  marginBottom: '8px',
+                  marginBottom: '10px',
                   letterSpacing: '-0.5px',
                 }}
               >
@@ -90,7 +93,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
               <p
                 style={{
                   fontFamily: "'Roboto', sans-serif",
-                  fontSize: '16px',
+                  fontSize: '18px',
                   color: '#666666',
                   lineHeight: '1.5',
                 }}
@@ -104,7 +107,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
               <p
                 style={{
                   fontFamily: "'Roboto', sans-serif",
-                  fontSize: '18px',
+                  fontSize: '20px',
                   fontWeight: '600',
                   color: '#1a1a1a',
                   marginBottom: '5px',
@@ -119,10 +122,10 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
               <p
                 style={{
                   fontFamily: "'Roboto', sans-serif",
-                  fontSize: '14px',
+                  fontSize: '16px',
                   fontWeight: '600',
                   color: '#999999',
-                  marginBottom: '10px',
+                  marginBottom: '12px',
                   textTransform: 'uppercase',
                   letterSpacing: '1px',
                 }}
@@ -132,9 +135,9 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
               <p
                 style={{
                   fontFamily: "'Roboto', sans-serif",
-                  fontSize: '16px',
+                  fontSize: '18px',
                   color: '#1a1a1a',
-                  marginBottom: '5px',
+                  marginBottom: '8px',
                 }}
               >
                 Madrid, ES
@@ -142,7 +145,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
               <p
                 style={{
                   fontFamily: "'Roboto', sans-serif",
-                  fontSize: '16px',
+                  fontSize: '18px',
                   color: '#1a1a1a',
                 }}
               >
@@ -155,7 +158,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
               <p
                 style={{
                   fontFamily: "'Roboto', sans-serif",
-                  fontSize: '14px',
+                  fontSize: '16px',
                   fontWeight: '600',
                   color: '#999999',
                   marginBottom: '15px',
@@ -169,13 +172,13 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
                 style={{
                   display: 'flex',
                   flexDirection: 'column',
-                  gap: '8px',
+                  gap: '10px',
                 }}
               >
                 <span
                   style={{
                     fontFamily: "'Roboto', sans-serif",
-                    fontSize: '16px',
+                    fontSize: '18px',
                     color: '#1a1a1a',
                     cursor: 'pointer',
                     transition: 'color 0.3s ease',
@@ -192,7 +195,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
                 <span
                   style={{
                     fontFamily: "'Roboto', sans-serif",
-                    fontSize: '16px',
+                    fontSize: '18px',
                     color: '#1a1a1a',
                     cursor: 'pointer',
                     transition: 'color 0.3s ease',
@@ -209,7 +212,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
                 <span
                   style={{
                     fontFamily: "'Roboto', sans-serif",
-                    fontSize: '16px',
+                    fontSize: '18px',
                     color: '#1a1a1a',
                     cursor: 'pointer',
                     transition: 'color 0.3s ease',
@@ -226,7 +229,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
                 <span
                   style={{
                     fontFamily: "'Roboto', sans-serif",
-                    fontSize: '16px',
+                    fontSize: '18px',
                     color: '#1a1a1a',
                     cursor: 'pointer',
                     transition: 'color 0.3s ease',
@@ -246,7 +249,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
             {/* Footer Section */}
             <div
               style={{
-                marginTop: '20px',
+                marginTop: '25px',
                 paddingTop: '25px',
                 borderTop: '1px solid rgba(0, 0, 0, 0.1)',
               }}
@@ -254,10 +257,10 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
               <p
                 style={{
                   fontFamily: "'Roboto', sans-serif",
-                  fontSize: '16px',
+                  fontSize: '18px',
                   fontWeight: 'bold',
                   color: '#1a1a1a',
-                  marginBottom: '8px',
+                  marginBottom: '10px',
                 }}
               >
                 Simple Studio*
@@ -265,7 +268,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
               <p
                 style={{
                   fontFamily: "'Roboto', sans-serif",
-                  fontSize: '12px',
+                  fontSize: '14px',
                   color: '#999999',
                 }}
               >
@@ -275,24 +278,26 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
           </div>
         </div>
 
-        {/* Container Teks dan Login Options */}
+        {/* Container Form Sign In */}
         <div
           style={{
             display: 'flex',
             flexDirection: 'column',
-            marginTop: '40px',
+            flex: '1',
+            minWidth: '400px',
           }}
         >
-          {/* Teks Welcome */}
+          {/* Teks Welcome - Diperbesar */}
           <div style={{ marginBottom: '40px' }}>
             <h1
               style={{
                 fontFamily: "'Roboto', sans-serif",
-                fontSize: '48px',
+                fontSize: '52px',
                 fontWeight: 'bold',
                 color: '#ffffff',
-                marginBottom: '15px',
+                marginBottom: '20px',
                 textShadow: '2px 2px 4px rgba(0,0,0,0.5)',
+                lineHeight: '1.1',
               }}
             >
               Welcome back
@@ -300,22 +305,23 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
             <p
               style={{
                 fontFamily: "'Roboto', sans-serif",
-                fontSize: '18px',
+                fontSize: '20px',
                 color: '#ffffff',
                 textShadow: '1px 1px 2px rgba(0,0,0,0.5)',
+                opacity: '0.9',
               }}
             >
               Sign in to your account to continue
             </p>
           </div>
 
-          {/* Social Login Options */}
+          {/* Social Login Options - Diperbesar */}
           <div
             style={{
               display: 'flex',
               flexDirection: 'column',
-              gap: '15px',
-              marginBottom: '30px',
+              gap: '18px',
+              marginBottom: '35px',
             }}
           >
             {/* Google Login */}
@@ -323,7 +329,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
               style={{
                 display: 'flex',
                 alignItems: 'center',
-                padding: '15px 20px',
+                padding: '18px 25px',
                 border: '2px solid rgba(255, 255, 255, 0.3)',
                 borderRadius: '12px',
                 backgroundColor: 'rgba(255, 255, 255, 0.1)',
@@ -341,7 +347,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
               }}
             >
               {/* Google SVG Icon */}
-              <svg width="24" height="24" viewBox="0 0 24 24" style={{ marginRight: '12px' }}>
+              <svg width="28" height="28" viewBox="0 0 24 24" style={{ marginRight: '15px' }}>
                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
                 <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
                 <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
@@ -349,7 +355,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
               </svg>
               <span style={{ 
                 fontFamily: "'Roboto', sans-serif",
-                fontSize: '16px', 
+                fontSize: '18px', 
                 color: '#ffffff',
                 fontWeight: '500'
               }}>
@@ -362,7 +368,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
               style={{
                 display: 'flex',
                 alignItems: 'center',
-                padding: '15px 20px',
+                padding: '18px 25px',
                 border: '2px solid rgba(255, 255, 255, 0.3)',
                 borderRadius: '12px',
                 backgroundColor: 'rgba(255, 255, 255, 0.1)',
@@ -380,12 +386,12 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
               }}
             >
               {/* Discord SVG Icon */}
-              <svg width="24" height="24" viewBox="0 0 24 24" style={{ marginRight: '12px' }}>
+              <svg width="28" height="28" viewBox="0 0 24 24" style={{ marginRight: '15px' }}>
                 <path fill="#5865F2" d="M19.73 4.87a18.2 18.2 0 0 0-4.6-1.44c-.21.4-.4.8-.58 1.21a16.6 16.6 0 0 0-4.33 0c-.18-.41-.38-.81-.59-1.21-1.62.27-3.14.77-4.6 1.44A19 19 0 0 0 .96 17.07a18.4 18.4 0 0 0 5.63 2.87c.45-.6.85-1.24 1.2-1.92a12 12 0 0 1-1.89-.92c.16-.12.31-.24.46-.37 3.58 1.68 7.46 1.68 11 0 .15.13.3.25.46.37-.61.37-1.25.69-1.89.92.35.68.75 1.32 1.2 1.92a18.4 18.4 0 0 0 5.63-2.87c-.42-4.4-2.1-8.3-4.73-12.2zM8.3 15.12c-1.1 0-2-1.02-2-2.27 0-1.25.89-2.27 2-2.27 1.1 0 2 1.02 2 2.27 0 1.25-.9 2.27-2 2.27zm7.4 0c-1.1 0-2-1.02-2-2.27 0-1.25.9-2.27 2-2.27 1.1 0 2 1.02 2 2.27 0 1.25-.89 2.27-2 2.27z"/>
               </svg>
               <span style={{ 
                 fontFamily: "'Roboto', sans-serif",
-                fontSize: '16px', 
+                fontSize: '18px', 
                 color: '#ffffff',
                 fontWeight: '500'
               }}>
@@ -398,7 +404,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
               style={{
                 display: 'flex',
                 alignItems: 'center',
-                padding: '15px 20px',
+                padding: '18px 25px',
                 border: '2px solid rgba(255, 255, 255, 0.3)',
                 borderRadius: '12px',
                 backgroundColor: 'rgba(255, 255, 255, 0.1)',
@@ -416,12 +422,12 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
               }}
             >
               {/* GitHub SVG Icon */}
-              <svg width="24" height="24" viewBox="0 0 24 24" style={{ marginRight: '12px' }}>
+              <svg width="28" height="28" viewBox="0 0 24 24" style={{ marginRight: '15px' }}>
                 <path fill="#ffffff" d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/>
               </svg>
               <span style={{ 
                 fontFamily: "'Roboto', sans-serif",
-                fontSize: '16px', 
+                fontSize: '18px', 
                 color: '#ffffff',
                 fontWeight: '500'
               }}>
@@ -430,18 +436,18 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
             </div>
           </div>
 
-          {/* Email dan Password Form */}
+          {/* Email dan Password Form - Diperbesar */}
           <div
             style={{
               display: 'flex',
               flexDirection: 'column',
-              gap: '20px',
-              padding: '25px',
+              gap: '25px',
+              padding: '30px',
               border: '2px solid rgba(255, 255, 255, 0.3)',
               borderRadius: '12px',
               backgroundColor: 'rgba(255, 255, 255, 0.1)',
               backdropFilter: 'blur(10px)',
-              marginBottom: '20px',
+              marginBottom: '25px',
             }}
           >
             {/* Email Input */}
@@ -450,10 +456,10 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
                 style={{
                   display: 'block',
                   fontFamily: "'Roboto', sans-serif",
-                  fontSize: '14px',
+                  fontSize: '16px',
                   fontWeight: '500',
                   color: '#ffffff',
-                  marginBottom: '8px',
+                  marginBottom: '10px',
                 }}
               >
                 Email
@@ -463,13 +469,13 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
                 placeholder="Enter your email"
                 style={{
                   width: '100%',
-                  padding: '12px 15px',
+                  padding: '15px 18px',
                   border: '1px solid rgba(255, 255, 255, 0.3)',
                   borderRadius: '8px',
                   backgroundColor: 'rgba(255, 255, 255, 0.1)',
                   color: '#ffffff',
                   fontFamily: "'Roboto', sans-serif",
-                  fontSize: '14px',
+                  fontSize: '16px',
                   outline: 'none',
                   transition: 'all 0.3s ease',
                 }}
@@ -490,10 +496,10 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
                 style={{
                   display: 'block',
                   fontFamily: "'Roboto', sans-serif",
-                  fontSize: '14px',
+                  fontSize: '16px',
                   fontWeight: '500',
                   color: '#ffffff',
-                  marginBottom: '8px',
+                  marginBottom: '10px',
                 }}
               >
                 Password
@@ -503,13 +509,13 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
                 placeholder="Enter your password"
                 style={{
                   width: '100%',
-                  padding: '12px 15px',
+                  padding: '15px 18px',
                   border: '1px solid rgba(255, 255, 255, 0.3)',
                   borderRadius: '8px',
                   backgroundColor: 'rgba(255, 255, 255, 0.1)',
                   color: '#ffffff',
                   fontFamily: "'Roboto', sans-serif",
-                  fontSize: '14px',
+                  fontSize: '16px',
                   outline: 'none',
                   transition: 'all 0.3s ease',
                 }}
@@ -524,21 +530,21 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
               />
             </div>
 
-            {/* Submit Button */}
+            {/* Submit Button - Diperbesar */}
             <button
               style={{
                 width: '100%',
-                padding: '14px',
+                padding: '16px',
                 border: 'none',
                 borderRadius: '8px',
                 backgroundColor: '#ffffff',
                 color: '#000000',
                 fontFamily: "'Roboto', sans-serif",
-                fontSize: '16px',
+                fontSize: '18px',
                 fontWeight: '600',
                 cursor: 'pointer',
                 transition: 'all 0.3s ease',
-                marginTop: '10px',
+                marginTop: '15px',
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.9)';
@@ -553,14 +559,14 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
             </button>
           </div>
 
-          {/* Footer Links */}
+          {/* Footer Links - Diperbesar */}
           <div
             style={{
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
               fontFamily: "'Roboto', sans-serif",
-              fontSize: '14px',
+              fontSize: '16px',
             }}
           >
             {/* Lupa Password Link */}
@@ -575,7 +581,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
                 opacity: '0.8',
                 transition: 'all 0.3s ease',
                 fontFamily: "'Roboto', sans-serif",
-                fontSize: '14px',
+                fontSize: '16px',
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.opacity = '1';
@@ -603,7 +609,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
                   fontWeight: '600',
                   transition: 'all 0.3s ease',
                   fontFamily: "'Roboto', sans-serif",
-                  fontSize: '14px',
+                  fontSize: '16px',
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.opacity = '0.9';
