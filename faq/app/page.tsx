@@ -1822,6 +1822,54 @@ export default function HomePage(): React.JSX.Element {
         </motion.div>
       </motion.div>
 
+
+
+{/* Sign In Button - Navbar Tengah */}
+<motion.button
+  onClick={() => console.log("Sign In clicked")}
+  style={{
+    position: 'fixed',
+    top: showBanner ? '4.5rem' : '2rem',
+    left: '50%',
+    transform: 'translateX(-50%)',
+    padding: '0.6rem 1.5rem',
+    fontSize: '0.85rem',
+    fontWeight: '400',
+    color: 'white',
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    border: '1px solid rgba(255,255,255,0.2)',
+    borderRadius: '8px',
+    cursor: 'pointer',
+    fontFamily: 'Arame Mono, monospace',
+    backdropFilter: 'blur(10px)',
+    whiteSpace: 'nowrap',
+    zIndex: zIndexes.banner - 5,
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem'
+  }}
+  initial={{ opacity: 0, y: -10 }}
+  animate={{ opacity: 1, y: 0 }}
+  transition={{ delay: 1.2, duration: 0.6 }}
+  whileHover={{ 
+    backgroundColor: 'rgba(255,255,255,0.15)',
+    scale: 1.05,
+    transition: { duration: 0.2 }
+  }}
+  whileTap={{ scale: 0.95 }}
+>
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+    <circle cx="12" cy="7" r="4"/>
+  </svg>
+  SIGN IN
+</motion.button>
+
+
+
+
+      
+
       {/* Button untuk melihat semua users - PERBAIKAN z-index */}
       <motion.button
         onClick={openAllUsersModal}
@@ -2852,3 +2900,4 @@ export default function HomePage(): React.JSX.Element {
     </div>
   );
 }
+
