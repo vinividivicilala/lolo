@@ -3,11 +3,6 @@
 import React from "react";
 import { useRouter } from "next/navigation";
 
-interface SignInPageProps {
-  onClose: () => void;
-  onSwitchToSignUp: () => void;
-  onSwitchToForgotPassword: () => void;
-}
 
 export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgotPassword }: SignInPageProps) {
   const router = useRouter();
@@ -22,8 +17,8 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
         height: '100%',
         backgroundColor: 'rgba(0,0,0,0.5)',
         display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
+        justifyContent: 'left',
+        alignItems: 'left',
         zIndex: 1000,
         padding: '1rem'
       }}
@@ -32,8 +27,8 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
         style={{
           background: 'white',
           borderRadius: '20px',
-          width: '400px',
-          height: '600px',
+          width: '1000px',
+          height: '900px',
           position: 'relative',
           display: 'flex',
           overflow: 'hidden'
@@ -42,11 +37,11 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
         {/* Portrait Image - Half Page Size */}
         <div
           style={{
-            width: '600%',
-            height: '600%',
+            width: '100%',
+            height: '100%',
             backgroundImage: 'url(/images/5.jpg)',
             backgroundSize: 'cover',
-            backgroundPosition: 'left',
+            backgroundPosition: 'center',
             backgroundRepeat: 'no-repeat',
             borderRadius: '20px'
           }}
@@ -55,4 +50,5 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
     </div>
   );
 }
+
 
