@@ -36,7 +36,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
         {/* Portrait Image - Half Page Size */}
         <div
           style={{
-            width: '50%',
+            width: '100%',
             height: '100%',
             backgroundImage: 'url(/images/5.jpg)',
             backgroundSize: 'cover',
@@ -49,7 +49,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
         {/* Text Section with Black Background */}
         <div
           style={{
-            width: '50%',
+            width: '100%',
             height: '100%',
             backgroundColor: '#000000',
             display: 'flex',
@@ -88,3 +88,4 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
     </div>
   );
 }
+
