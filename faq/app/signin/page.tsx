@@ -37,19 +37,118 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
           gap: '60px',
         }}
       >
-        {/* Foto Portrait */}
+        {/* Container untuk Foto dan Card */}
         <div
           style={{
-            width: '500px',
-            height: '700px',
-            backgroundImage: 'url(/images/5.jpg)',
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            backgroundRepeat: 'no-repeat',
-            borderRadius: '20px',
-            boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '30px',
           }}
-        />
+        >
+          {/* Foto Portrait */}
+          <div
+            style={{
+              width: '500px',
+              height: '700px',
+              backgroundImage: 'url(/images/5.jpg)',
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              backgroundRepeat: 'no-repeat',
+              borderRadius: '20px',
+              boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
+            }}
+          />
+
+          {/* Card Design - Besar ke atas, bawah, dan samping */}
+          <div
+            style={{
+              width: '500px',
+              padding: '30px',
+              backgroundColor: '#1E90FF', // Warna biru stabilo
+              borderRadius: '20px',
+              boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
+              border: '2px solid rgba(255, 255, 255, 0.3)',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              textAlign: 'center',
+            }}
+          >
+            <h3
+              style={{
+                fontFamily: "'Roboto', sans-serif",
+                fontSize: '24px',
+                fontWeight: 'bold',
+                color: '#ffffff',
+                marginBottom: '15px',
+                textShadow: '1px 1px 2px rgba(0,0,0,0.3)',
+              }}
+            >
+              Special Offer
+            </h3>
+            <p
+              style={{
+                fontFamily: "'Roboto', sans-serif",
+                fontSize: '16px',
+                color: '#ffffff',
+                lineHeight: '1.6',
+                marginBottom: '20px',
+                opacity: '0.9',
+              }}
+            >
+              Get exclusive access to premium features and content when you sign in to your account.
+            </p>
+            <div
+              style={{
+                display: 'flex',
+                gap: '10px',
+                flexWrap: 'wrap',
+                justifyContent: 'center',
+              }}
+            >
+              <span
+                style={{
+                  padding: '8px 16px',
+                  backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                  borderRadius: '20px',
+                  color: '#ffffff',
+                  fontSize: '14px',
+                  fontFamily: "'Roboto', sans-serif",
+                  fontWeight: '500',
+                }}
+              >
+                Premium Features
+              </span>
+              <span
+                style={{
+                  padding: '8px 16px',
+                  backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                  borderRadius: '20px',
+                  color: '#ffffff',
+                  fontSize: '14px',
+                  fontFamily: "'Roboto', sans-serif",
+                  fontWeight: '500',
+                }}
+              >
+                Exclusive Content
+              </span>
+              <span
+                style={{
+                  padding: '8px 16px',
+                  backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                  borderRadius: '20px',
+                  color: '#ffffff',
+                  fontSize: '14px',
+                  fontFamily: "'Roboto', sans-serif",
+                  fontWeight: '500',
+                }}
+              >
+                24/7 Support
+              </span>
+            </div>
+          </div>
+        </div>
 
         {/* Container Teks dan Login Options */}
         <div
