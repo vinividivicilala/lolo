@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface ForgotPasswordPageProps {
   onClose: () => void;
@@ -19,160 +19,167 @@ export default function ForgotPasswordPage({ onClose, onSwitchToSignIn }: Forgot
   };
 
   return (
-    <motion.div
-      style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        width: '100%',
-        height: '100%',
-        backgroundColor: 'rgba(0,0,0,0.9)',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        zIndex: 1000
-      }}
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-    >
+    <AnimatePresence>
       <motion.div
         style={{
-          background: 'rgba(255,255,255,0.95)',
-          borderRadius: '20px',
-          padding: '3rem',
-          maxWidth: '450px',
+          position: 'fixed',
+          top: 0,
+          left: 0,
           width: '100%',
-          position: 'relative',
-          backdropFilter: 'blur(20px)'
+          height: '100%',
+          backgroundColor: 'rgba(0,0,0,0.9)',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          zIndex: 1000
         }}
-        initial={{ scale: 0.8, opacity: 0, y: 50 }}
-        animate={{ scale: 1, opacity: 1, y: 0 }}
-        exit={{ scale: 0.8, opacity: 0, y: 50 }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
       >
-        {/* Close Button */}
-        <motion.button
-          onClick={onClose}
+        <motion.div
           style={{
-            position: 'absolute',
-            top: '1.5rem',
-            right: '1.5rem',
-            background: 'rgba(0,0,0,0.1)',
-            border: 'none',
-            borderRadius: '50%',
-            width: '40px',
-            height: '40px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            cursor: 'pointer',
-            color: '#333',
-            fontSize: '1.2rem'
+            background: 'rgba(255,255,255,0.95)',
+            borderRadius: '20px',
+            padding: '3rem',
+            maxWidth: '450px',
+            width: '100%',
+            position: 'relative',
+            backdropFilter: 'blur(20px)',
+            border: '1px solid rgba(255,255,255,0.2)'
           }}
-          whileHover={{ backgroundColor: 'rgba(0,0,0,0.2)', scale: 1.1 }}
+          initial={{ scale: 0.8, opacity: 0, y: 50 }}
+          animate={{ scale: 1, opacity: 1, y: 0 }}
+          exit={{ scale: 0.8, opacity: 0, y: 50 }}
+          transition={{ duration: 0.5, ease: "back.out(1.7)" }}
         >
-          ×
-        </motion.button>
-
-        {/* Header */}
-        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-          <motion.h2
+          {/* Close Button */}
+          <motion.button
+            onClick={onClose}
             style={{
-              fontSize: '2rem',
-              fontWeight: '600',
+              position: 'absolute',
+              top: '1.5rem',
+              right: '1.5rem',
+              background: 'rgba(0,0,0,0.1)',
+              border: 'none',
+              borderRadius: '50%',
+              width: '40px',
+              height: '40px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
               color: '#333',
-              margin: '0 0 0.5rem 0',
-              fontFamily: 'Arame Mono, monospace'
+              fontSize: '1.2rem'
             }}
+            whileHover={{ backgroundColor: 'rgba(0,0,0,0.2)', scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
           >
-            Lupa Password
-          </motion.h2>
-          <motion.p
-            style={{
-              fontSize: '1rem',
-              color: '#666',
-              margin: 0,
-              fontFamily: 'Arame Mono, monospace'
-            }}
-          >
-            {isSubmitted 
-              ? "Cek email Anda untuk link reset password" 
-              : "Masukkan email Anda untuk reset password"
-            }
-          </motion.p>
-        </div>
+            ×
+          </motion.button>
 
-        {!isSubmitted ? (
-          <form onSubmit={handleSubmit}>
-            <div style={{ marginBottom: '1.5rem' }}>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Masukkan email Anda"
-                style={{
-                  width: '100%',
-                  padding: '0.8rem',
-                  border: '1px solid #ddd',
-                  borderRadius: '8px',
-                  fontSize: '1rem',
-                  fontFamily: 'Arame Mono, monospace'
-                }}
-              />
-            </div>
-
-            <motion.button
-              type="submit"
+          {/* Header */}
+          <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+            <motion.h2
               style={{
-                width: '100%',
-                padding: '1rem',
-                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                border: 'none',
-                borderRadius: '8px',
-                color: 'white',
-                fontSize: '1rem',
+                fontSize: '2rem',
                 fontWeight: '600',
-                cursor: 'pointer',
+                color: '#333',
+                margin: '0 0 0.5rem 0',
                 fontFamily: 'Arame Mono, monospace'
               }}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
             >
-              Kirim Link Reset
-            </motion.button>
-          </form>
-        ) : (
-          <motion.div
-            style={{ textAlign: 'center' }}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-          >
-            <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>📧</div>
-            <p style={{ color: '#666', marginBottom: '1.5rem' }}>
-              Link reset password telah dikirim ke email Anda
-            </p>
-          </motion.div>
-        )}
+              Lupa Password
+            </motion.h2>
+            <motion.p
+              style={{
+                fontSize: '1rem',
+                color: '#666',
+                margin: 0,
+                fontFamily: 'Arame Mono, monospace'
+              }}
+            >
+              {isSubmitted 
+                ? "Cek email Anda untuk link reset password" 
+                : "Masukkan email Anda untuk reset password"
+              }
+            </motion.p>
+          </div>
 
-        {/* Back to Sign In */}
-        <div style={{ textAlign: 'center', marginTop: '1.5rem' }}>
-          <motion.button
-            onClick={onSwitchToSignIn}
-            style={{
-              background: 'none',
-              border: 'none',
-              color: '#667eea',
-              cursor: 'pointer',
-              fontFamily: 'Arame Mono, monospace',
-              fontSize: '0.9rem',
-              textDecoration: 'underline'
-            }}
-            whileHover={{ color: '#764ba2' }}
-          >
-            Kembali ke halaman Masuk
-          </motion.button>
-        </div>
+          {!isSubmitted ? (
+            <form onSubmit={handleSubmit}>
+              <div style={{ marginBottom: '1.5rem' }}>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Masukkan email Anda"
+                  required
+                  style={{
+                    width: '100%',
+                    padding: '0.8rem',
+                    border: '1px solid #ddd',
+                    borderRadius: '8px',
+                    fontSize: '1rem',
+                    fontFamily: 'Arame Mono, monospace',
+                    transition: 'all 0.3s ease'
+                  }}
+                />
+              </div>
+
+              <motion.button
+                type="submit"
+                style={{
+                  width: '100%',
+                  padding: '1rem',
+                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                  border: 'none',
+                  borderRadius: '8px',
+                  color: 'white',
+                  fontSize: '1rem',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  fontFamily: 'Arame Mono, monospace'
+                }}
+                whileHover={{ scale: 1.02, boxShadow: '0 4px 15px rgba(102,126,234,0.4)' }}
+                whileTap={{ scale: 0.98 }}
+              >
+                Kirim Link Reset
+              </motion.button>
+            </form>
+          ) : (
+            <motion.div
+              style={{ textAlign: 'center' }}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+            >
+              <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>📧</div>
+              <p style={{ color: '#666', marginBottom: '1.5rem', fontFamily: 'Arame Mono, monospace' }}>
+                Link reset password telah dikirim ke email Anda
+              </p>
+            </motion.div>
+          )}
+
+          {/* Back to Sign In */}
+          <div style={{ textAlign: 'center', marginTop: '1.5rem' }}>
+            <motion.button
+              onClick={onSwitchToSignIn}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: '#667eea',
+                cursor: 'pointer',
+                fontFamily: 'Arame Mono, monospace',
+                fontSize: '0.9rem',
+                textDecoration: 'underline'
+              }}
+              whileHover={{ color: '#764ba2' }}
+            >
+              Kembali ke halaman Masuk
+            </motion.button>
+          </div>
+        </motion.div>
       </motion.div>
-    </motion.div>
+    </AnimatePresence>
   );
 }
