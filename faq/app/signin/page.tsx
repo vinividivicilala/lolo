@@ -33,7 +33,20 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
           overflow: 'hidden'
         }}
       >
-        {/* Left Side - Text Content */}
+        {/* Portrait Image - Left Side */}
+        <div
+          style={{
+            width: '50%',
+            height: '100%',
+            backgroundImage: 'url(/images/5.jpg)',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat',
+            borderRadius: '20px'
+          }}
+        />
+
+        {/* Text Content - Right Side */}
         <div
           style={{
             width: '50%',
@@ -44,16 +57,15 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
             backgroundColor: 'white'
           }}
         >
-          {/* Judul Besar - Arame */}
+          {/* Judul Besar dengan font Arame */}
           <h1
             style={{
-              fontFamily: 'Arial, sans-serif',
-              fontSize: '6rem',
+              fontFamily: "'Arame', Arial, sans-serif",
+              fontSize: '5rem',
               fontWeight: 'bold',
               color: '#000',
               margin: '0 0 3rem 0',
-              lineHeight: '1',
-              letterSpacing: '2px'
+              lineHeight: '1'
             }}
           >
             ARAME
@@ -62,8 +74,8 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
           {/* Welcome Back Title */}
           <h2
             style={{
-              fontFamily: 'Arial, sans-serif',
-              fontSize: '3.5rem',
+              fontFamily: "'Arame', Arial, sans-serif",
+              fontSize: '3rem',
               fontWeight: '700',
               color: '#000',
               margin: '0 0 1.5rem 0',
@@ -76,30 +88,16 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
           {/* Description */}
           <p
             style={{
-              fontFamily: 'Arial, sans-serif',
-              fontSize: '1.8rem',
+              fontFamily: "'Arame', Arial, sans-serif",
+              fontSize: '1.5rem',
               color: '#666',
               margin: '0',
-              lineHeight: '1.4',
-              fontWeight: '400'
+              lineHeight: '1.4'
             }}
           >
             Sign in to your account to continue
           </p>
         </div>
-
-        {/* Right Side - Portrait Image */}
-        <div
-          style={{
-            width: '50%',
-            height: '100%',
-            backgroundImage: 'url(/images/5.jpg)',
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            backgroundRepeat: 'no-repeat',
-            borderRadius: '20px'
-          }}
-        />
       </div>
     </div>
   );
