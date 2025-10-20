@@ -7,23 +7,11 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
   const router = useRouter();
 
   const handleSignUp = () => {
-    router.push('/signup');
+    router.push('/signup'); // Navigasi ke halaman signup
   };
 
   const handleForgotPassword = () => {
-    router.push('/forgot-password');
-  };
-
-  const handlePrivacyPolicy = () => {
-    router.push('/privacy-policy');
-  };
-
-  const handleTerms = () => {
-    router.push('/terms');
-  };
-
-  const handleAbout = () => {
-    router.push('/about');
+    router.push('/forgot-password'); // Navigasi ke halaman forgot-password
   };
 
   return (
@@ -63,157 +51,38 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
           }}
         />
 
-        {/* Container utama untuk konten kanan */}
+        {/* Container Teks dan Login Options */}
         <div
           style={{
             display: 'flex',
             flexDirection: 'column',
-            width: '500px',
+            marginTop: '40px',
           }}
         >
-          {/* Header dengan Welcome dan Links */}
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'flex-start',
-              marginBottom: '40px',
-            }}
-          >
-            {/* Teks Welcome */}
-            <div>
-              <h1
-                style={{
-                  fontFamily: "'Roboto', sans-serif",
-                  fontSize: '48px',
-                  fontWeight: 'bold',
-                  color: '#ffffff',
-                  marginBottom: '15px',
-                  textShadow: '2px 2px 4px rgba(0,0,0,0.5)',
-                }}
-              >
-                Welcome back
-              </h1>
-              <p
-                style={{
-                  fontFamily: "'Roboto', sans-serif",
-                  fontSize: '18px',
-                  color: '#ffffff',
-                  textShadow: '1px 1px 2px rgba(0,0,0,0.5)',
-                }}
-              >
-                Sign in to your account to continue
-              </p>
-            </div>
-
-            {/* Links di samping kanan - sejajar dengan Welcome */}
-            <div
+          {/* Teks Welcome */}
+          <div style={{ marginBottom: '40px' }}>
+            <h1
               style={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '12px',
-                alignItems: 'flex-end',
+                fontFamily: "'Roboto', sans-serif",
+                fontSize: '48px',
+                fontWeight: 'bold',
+                color: '#ffffff',
+                marginBottom: '15px',
+                textShadow: '2px 2px 4px rgba(0,0,0,0.5)',
               }}
             >
-              {/* Kebijakan Privasi */}
-              <button
-                onClick={handlePrivacyPolicy}
-                style={{
-                  border: 'none',
-                  background: 'none',
-                  color: '#ffffff',
-                  cursor: 'pointer',
-                  textDecoration: 'none',
-                  transition: 'all 0.3s ease',
-                  fontFamily: "'Roboto', sans-serif",
-                  fontSize: '18px',
-                  fontWeight: '500',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  padding: '5px 0',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.color = 'rgba(255, 255, 255, 0.8)';
-                  e.currentTarget.style.transform = 'translateX(3px)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.color = '#ffffff';
-                  e.currentTarget.style.transform = 'translateX(0)';
-                }}
-              >
-                <span>Kebijakan Privasi</span>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M5 12h14M12 5l7 7-7 7" />
-                </svg>
-              </button>
-
-              {/* Ketentuan Kami */}
-              <button
-                onClick={handleTerms}
-                style={{
-                  border: 'none',
-                  background: 'none',
-                  color: '#ffffff',
-                  cursor: 'pointer',
-                  textDecoration: 'none',
-                  transition: 'all 0.3s ease',
-                  fontFamily: "'Roboto', sans-serif",
-                  fontSize: '18px',
-                  fontWeight: '500',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  padding: '5px 0',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.color = 'rgba(255, 255, 255, 0.8)';
-                  e.currentTarget.style.transform = 'translateX(3px)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.color = '#ffffff';
-                  e.currentTarget.style.transform = 'translateX(0)';
-                }}
-              >
-                <span>Ketentuan Kami</span>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M5 12h14M12 5l7 7-7 7" />
-                </svg>
-              </button>
-
-              {/* Tentang Kami */}
-              <button
-                onClick={handleAbout}
-                style={{
-                  border: 'none',
-                  background: 'none',
-                  color: '#ffffff',
-                  cursor: 'pointer',
-                  textDecoration: 'none',
-                  transition: 'all 0.3s ease',
-                  fontFamily: "'Roboto', sans-serif",
-                  fontSize: '18px',
-                  fontWeight: '500',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  padding: '5px 0',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.color = 'rgba(255, 255, 255, 0.8)';
-                  e.currentTarget.style.transform = 'translateX(3px)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.color = '#ffffff';
-                  e.currentTarget.style.transform = 'translateX(0)';
-                }}
-              >
-                <span>Tentang Kami</span>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M5 12h14M12 5l7 7-7 7" />
-                </svg>
-              </button>
-            </div>
+              Welcome back
+            </h1>
+            <p
+              style={{
+                fontFamily: "'Roboto', sans-serif",
+                fontSize: '18px',
+                color: '#ffffff',
+                textShadow: '1px 1px 2px rgba(0,0,0,0.5)',
+              }}
+            >
+              Sign in to your account to continue
+            </p>
           </div>
 
           {/* Social Login Options */}
@@ -460,7 +329,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
             </button>
           </div>
 
-          {/* Footer Links - Sign Up dan Forgot Password */}
+          {/* Footer Links */}
           <div
             style={{
               display: 'flex',
