@@ -6,6 +6,9 @@ import { useRouter } from "next/navigation";
 import { gsap } from "gsap";
 import { initializeApp } from "firebase/app";
 import { getFirestore, doc, setDoc, getDoc, onSnapshot, collection, getDocs } from "firebase/firestore";
+import SignInPage from './components/auth/signin-page';
+import SignUpPage from './components/auth/signup-page';
+import ForgotPasswordPage from './components/auth/forgot-password-page';
 
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
@@ -186,6 +189,10 @@ export default function HomePage(): React.JSX.Element {
   const [showSearch, setShowSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchStatus, setSearchStatus] = useState<"empty" | "recent" | "updated" | "loading">("empty");
+
+  const [showSignIn, setShowSignIn] = useState(false);
+const [showSignUp, setShowSignUp] = useState(false);
+const [showForgotPassword, setShowForgotPassword] = useState(false);
   
   const router = useRouter();
   const timeRef = useRef<NodeJS.Timeout | null>(null);
@@ -203,6 +210,32 @@ export default function HomePage(): React.JSX.Element {
   // Refs untuk content
   const contentContainerRef = useRef<HTMLDivElement>(null);
   const contentItemsRef = useRef<(HTMLDivElement | null)[]>([]);
+
+  const handleOpenSignIn = () => {
+  setShowSignIn(true);
+};
+
+const handleCloseAuth = () => {
+  setShowSignIn(false);
+  setShowSignUp(false);
+  setShowForgotPassword(false);
+};
+
+const handleSwitchToSignUp = () => {
+  setShowSignIn(false);
+  setShowSignUp(true);
+};
+
+const handleSwitchToSignIn = () => {
+  setShowSignUp(false);
+  setShowForgotPassword(false);
+  setShowSignIn(true);
+};
+
+const handleSwitchToForgotPassword = () => {
+  setShowSignIn(false);
+  setShowForgotPassword(true);
+};
 
   // PERBAIKAN: Sistem z-index terorganisir
   const zIndexes = {
@@ -1826,7 +1859,7 @@ export default function HomePage(): React.JSX.Element {
 
 {/* Sign In Button - Navbar Tengah */}
 <motion.button
-  onClick={() => console.log("Sign In clicked")}
+onClick={handleOpenSignIn}  // Ganti console.log dengan ini
   style={{
     position: 'fixed',
     top: showBanner ? '4.5rem' : '2rem',
@@ -1866,7 +1899,30 @@ export default function HomePage(): React.JSX.Element {
 </motion.button>
 
 
-
+{/* Auth Modals */}
+<AnimatePresence>
+  {showSignIn && (
+    <SignInPage
+      onClose={handleCloseAuth}
+      onSwitchToSignUp={handleSwitchToSignUp}
+      onSwitchToForgotPassword={handleSwitchToForgotPassword}
+    />
+  )}
+  
+  {showSignUp && (
+    <SignUpPage
+      onClose={handleCloseAuth}
+      onSwitchToSignIn={handleSwitchToSignIn}
+    />
+  )}
+  
+  {showForgotPassword && (
+    <ForgotPasswordPage
+      onClose={handleCloseAuth}
+      onSwitchToSignIn={handleSwitchToSignIn}
+    />
+  )}
+</AnimatePresence>
 
       
 
@@ -2900,4 +2956,5 @@ export default function HomePage(): React.JSX.Element {
     </div>
   );
 }
+
 
