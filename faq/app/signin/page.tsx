@@ -21,18 +21,19 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
         zIndex: 1000,
       }}
     >
-      {/* Line Box Container dengan Border Radius */}
+      {/* Foto Portrait dengan Border Radius di Tengah */}
       <div
         style={{
-          width: '1300px',
-          height: '800px',
+          width: '500px',
+          height: '700px',
+          backgroundImage: 'url(/images/5.jpg)',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
           borderRadius: '20px',
-          border: '1px solid rgba(255, 255, 255, 0.3)', // Border putih transparan
-          boxShadow: '0 4px 15px rgba(0,0,0,0.1)', // Shadow lebih soft
-          backdropFilter: 'blur(10px)', // Efek blur untuk transparansi
+          boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
         }}
       />
     </div>
   );
 }
-
