@@ -52,11 +52,12 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
         >
           <h1
             style={{
-              fontSize: '48px',
+              fontSize: '80px',
               fontWeight: 'bold',
               color: '#ffffff',
               marginBottom: '15px',
               textShadow: '2px 2px 4px rgba(0,0,0,0.5)',
+               marginTop: '50px',
             }}
           >
             Welcome back
@@ -75,3 +76,4 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
     </div>
   );
 }
+
