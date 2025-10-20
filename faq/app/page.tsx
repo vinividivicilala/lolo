@@ -1,14 +1,15 @@
 'use client';
 
+import SignInPage from '../components/auth/signin-page';
+import SignUpPage from '../components/auth/signup-page';
+import ForgotPasswordPage from '../components/auth/forgot-password-page';
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { gsap } from "gsap";
 import { initializeApp } from "firebase/app";
 import { getFirestore, doc, setDoc, getDoc, onSnapshot, collection, getDocs } from "firebase/firestore";
-import SignInPage from '../../components/auth/signin-page.tsx';
-import SignUpPage from '../../components/auth/signup-page.tsx';
-import ForgotPasswordPage from '../../components/auth/forgot-password-page.tsx';
+
 
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
@@ -2956,6 +2957,7 @@ onClick={handleOpenSignIn}  // Ganti console.log dengan ini
     </div>
   );
 }
+
 
 
 
