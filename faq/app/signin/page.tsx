@@ -33,28 +33,32 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
           boxShadow: '0 10px 30px rgba(0,0,0,0.3)'
         }}
       >
-        {/* Left Side - Image */}
+        {/* Full Size Image - Cover Entire Container */}
         <div
           style={{
-            width: '45%',
+            width: '100%',
             height: '100%',
             backgroundImage: 'url(/images/5.jpg)',
-            backgroundSize: 'cover',
+            backgroundSize: '120%', // Diperbesar
             backgroundPosition: 'center',
             backgroundRepeat: 'no-repeat',
+            borderRadius: '20px'
           }}
         />
         
-        {/* Right Side - Login Form */}
+        {/* Line Box Overlay */}
         <div
           style={{
-            width: '55%',
-            height: '100%',
-            backgroundColor: '#ffffff',
+            position: 'absolute',
+            top: '50%',
+            right: '40px',
+            transform: 'translateY(-50%)',
+            width: '380px',
+            backgroundColor: 'white',
+            borderRadius: '12px',
             padding: '40px',
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'center'
+            boxShadow: '0 8px 25px rgba(0,0,0,0.15)',
+            border: '1px solid #e1e1e1'
           }}
         >
           {/* Title */}
