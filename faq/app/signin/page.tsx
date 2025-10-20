@@ -33,40 +33,27 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
           overflow: 'hidden'
         }}
       >
-        {/* Portrait Image - Half Page Size */}
+        {/* Left Side - Text Content */}
         <div
           style={{
-            width: '100%',
-            height: '100%',
-            backgroundImage: 'url(/images/5.jpg)',
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            backgroundRepeat: 'no-repeat',
-            borderRadius: '20px'
-          }}
-        />
-
-        {/* Content Overlay - Right Side */}
-        <div
-          style={{
-            position: 'absolute',
-            right: '4rem',
-            top: '50%',
-            transform: 'translateY(-50%)',
-            textAlign: 'right',
-            color: 'white',
-            maxWidth: '400px'
+            width: '50%',
+            padding: '4rem',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            backgroundColor: 'white'
           }}
         >
           {/* Judul Besar - Arame */}
           <h1
             style={{
-              fontFamily: 'Roboto',
-              fontSize: '4rem',
+              fontFamily: 'Arial, sans-serif',
+              fontSize: '6rem',
               fontWeight: 'bold',
-              margin: '0 0 2rem 0',
-              lineHeight: '1.1',
-              textShadow: '2px 2px 4px rgba(0,0,0,0.5)'
+              color: '#000',
+              margin: '0 0 3rem 0',
+              lineHeight: '1',
+              letterSpacing: '2px'
             }}
           >
             ARAME
@@ -75,11 +62,12 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
           {/* Welcome Back Title */}
           <h2
             style={{
-              fontFamily: 'Roboto',
-              fontSize: '2.5rem',
-              fontWeight: '600',
-              margin: '0 0 1rem 0',
-              textShadow: '2px 2px 4px rgba(0,0,0,0.5)'
+              fontFamily: 'Arial, sans-serif',
+              fontSize: '3.5rem',
+              fontWeight: '700',
+              color: '#000',
+              margin: '0 0 1.5rem 0',
+              lineHeight: '1.2'
             }}
           >
             Welcome Back
@@ -88,16 +76,30 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
           {/* Description */}
           <p
             style={{
-              fontFamily: 'Roboto',
-              fontSize: '1.1rem',
+              fontFamily: 'Arial, sans-serif',
+              fontSize: '1.8rem',
+              color: '#666',
               margin: '0',
-              lineHeight: '1.5',
-              textShadow: '1px 1px 2px rgba(0,0,0,0.5)'
+              lineHeight: '1.4',
+              fontWeight: '400'
             }}
           >
             Sign in to your account to continue
           </p>
         </div>
+
+        {/* Right Side - Portrait Image */}
+        <div
+          style={{
+            width: '50%',
+            height: '100%',
+            backgroundImage: 'url(/images/5.jpg)',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat',
+            borderRadius: '20px'
+          }}
+        />
       </div>
     </div>
   );
