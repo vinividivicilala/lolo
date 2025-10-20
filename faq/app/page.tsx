@@ -1829,8 +1829,13 @@ export default function HomePage(): React.JSX.Element {
         </motion.div>
       </motion.div>
 
+// Di dalam komponen Anda, tambahkan function ini:
+const handleOpenSignIn = () => {
+  const router = useRouter();
+  router.push('/signin'); // Ganti dengan path halaman sign in yang benar
+};
 
-
+      
 {/* Sign In Button - Navbar Tengah */}
 <motion.button
 onClick={handleOpenSignIn}  // Ganti console.log dengan ini
@@ -2907,6 +2912,7 @@ onClick={handleOpenSignIn}  // Ganti console.log dengan ini
     </div>
   );
 }
+
 
 
 
