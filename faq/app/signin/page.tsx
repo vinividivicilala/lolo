@@ -33,10 +33,10 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
           overflow: 'hidden'
         }}
       >
-        {/* Portrait Image - Half Page Size */}
+        {/* Portrait Image - Larger Size (70%) on Left */}
         <div
           style={{
-            width: '100%',
+            width: '70%',
             height: '100%',
             backgroundImage: 'url(/images/5.jpg)',
             backgroundSize: 'cover',
@@ -46,10 +46,10 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
           }}
         />
         
-        {/* Text Section with Black Background */}
+        {/* Text Section with Black Background - Smaller (30%) on Right */}
         <div
           style={{
-            width: '100%',
+            width: '30%',
             height: '100%',
             backgroundColor: '#000000',
             display: 'flex',
@@ -88,4 +88,3 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
     </div>
   );
 }
-
