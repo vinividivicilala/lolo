@@ -33,10 +33,10 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
           overflow: 'hidden'
         }}
       >
-        {/* Portrait Image - Left Side */}
+        {/* Portrait Image - Full Left Side */}
         <div
           style={{
-            width: '50%',
+            width: '100%',
             height: '100%',
             backgroundImage: 'url(/images/5.jpg)',
             backgroundSize: 'cover',
@@ -45,54 +45,47 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
             borderRadius: '20px'
           }}
         />
-
-        {/* Text Content - Right Side */}
+        
+        {/* Text Overlay on Right Side */}
         <div
           style={{
+            position: 'absolute',
+            right: '0',
+            top: '0',
             width: '50%',
-            padding: '4rem',
+            height: '100%',
+            background: 'linear-gradient(to left, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.7) 100%)',
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'center',
-            backgroundColor: 'white'
+            alignItems: 'flex-start',
+            padding: '0 4rem'
           }}
         >
-          {/* Judul Besar dengan font Arame */}
+          {/* Judul Besar + Tebal */}
           <h1
             style={{
-              fontFamily: "'Arame', Arial, sans-serif",
-              fontSize: '5rem',
+              fontFamily: 'Arial, sans-serif', // Ganti dengan 'Arame' jika font tersedia
+              fontSize: '3.5rem',
               fontWeight: 'bold',
               color: '#000',
-              margin: '0 0 3rem 0',
-              lineHeight: '1'
+              marginBottom: '1rem',
+              lineHeight: '1.2',
+              textAlign: 'left'
             }}
           >
-            ARAME
+            Welcome back
           </h1>
           
-          {/* Welcome Back Title */}
-          <h2
-            style={{
-              fontFamily: "'Arame', Arial, sans-serif",
-              fontSize: '3rem',
-              fontWeight: '700',
-              color: '#000',
-              margin: '0 0 1.5rem 0',
-              lineHeight: '1.2'
-            }}
-          >
-            Welcome Back
-          </h2>
-          
-          {/* Description */}
+          {/* Deskripsi */}
           <p
             style={{
-              fontFamily: "'Arame', Arial, sans-serif",
-              fontSize: '1.5rem',
+              fontFamily: 'Arial, sans-serif', // Ganti dengan 'Arame' jika font tersedia
+              fontSize: '1.2rem',
               color: '#666',
-              margin: '0',
-              lineHeight: '1.4'
+              margin: 0,
+              lineHeight: '1.5',
+              textAlign: 'left'
             }}
           >
             Sign in to your account to continue
