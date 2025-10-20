@@ -307,17 +307,36 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
               />
             </div>
 
-            <div style={{ marginBottom: '1rem' }}>
-              <label style={{
-                display: 'block',
-                marginBottom: '0.5rem',
-                fontSize: '0.875rem',
-                fontWeight: '500',
-                color: '#374151',
-                fontFamily: 'system-ui, -apple-system, sans-serif'
-              }}>
-                Password
-              </label>
+            <div style={{ marginBottom: '1.5rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                <label style={{
+                  display: 'block',
+                  fontSize: '0.875rem',
+                  fontWeight: '500',
+                  color: '#374151',
+                  fontFamily: 'system-ui, -apple-system, sans-serif'
+                }}>
+                  Password
+                </label>
+                <motion.button
+                  type="button"
+                  onClick={onSwitchToForgotPassword}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: '#6B7280',
+                    fontSize: '0.75rem',
+                    cursor: 'pointer',
+                    fontFamily: 'system-ui, -apple-system, sans-serif',
+                    textDecoration: 'underline',
+                    transition: 'color 0.2s ease',
+                    padding: 0
+                  }}
+                  whileHover={{ color: '#374151' }}
+                >
+                  Forgot your password?
+                </motion.button>
+              </div>
               <input
                 type="password"
                 value={password}
@@ -361,7 +380,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
                 fontWeight: '600',
                 cursor: isLoading ? 'not-allowed' : 'pointer',
                 fontFamily: 'system-ui, -apple-system, sans-serif',
-                marginBottom: '1rem',
+                marginBottom: '1.5rem',
                 opacity: isLoading ? 0.7 : 1,
                 transition: 'all 0.2s ease'
               }}
@@ -374,35 +393,6 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
               {isLoading ? 'Signing in...' : 'Sign In with Email'}
             </motion.button>
           </motion.form>
-
-          {/* Forgot Password Link */}
-          <motion.div
-            style={{
-              textAlign: 'center',
-              marginBottom: '1.5rem'
-            }}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.6, duration: 0.3 }}
-          >
-            <motion.button
-              type="button"
-              onClick={onSwitchToForgotPassword}
-              style={{
-                background: 'none',
-                border: 'none',
-                color: '#6B7280',
-                fontSize: '0.875rem',
-                cursor: 'pointer',
-                fontFamily: 'system-ui, -apple-system, sans-serif',
-                textDecoration: 'underline',
-                transition: 'color 0.2s ease'
-              }}
-              whileHover={{ color: '#374151' }}
-            >
-              Forgot your password?
-            </motion.button>
-          </motion.div>
 
           {/* Sign Up Link */}
           <motion.div
