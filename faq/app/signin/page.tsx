@@ -209,6 +209,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
               borderRadius: '12px',
               backgroundColor: 'rgba(255, 255, 255, 0.1)',
               backdropFilter: 'blur(10px)',
+              marginBottom: '20px',
             }}
           >
             {/* Email Input */}
@@ -318,6 +319,70 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
             >
               Sign In
             </button>
+          </div>
+
+          {/* Footer Links */}
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              fontFamily: "'Roboto', sans-serif",
+              fontSize: '14px',
+            }}
+          >
+            {/* Lupa Password Link */}
+            <button
+              onClick={onSwitchToForgotPassword}
+              style={{
+                border: 'none',
+                background: 'none',
+                color: '#ffffff',
+                cursor: 'pointer',
+                textDecoration: 'underline',
+                opacity: '0.8',
+                transition: 'all 0.3s ease',
+                fontFamily: "'Roboto', sans-serif",
+                fontSize: '14px',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.opacity = '1';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.opacity = '0.8';
+              }}
+            >
+              Forgot your password?
+            </button>
+
+            {/* Sign Up Link */}
+            <div>
+              <span style={{ color: '#ffffff', opacity: '0.8' }}>
+                Don't have an account?{' '}
+              </span>
+              <button
+                onClick={onSwitchToSignUp}
+                style={{
+                  border: 'none',
+                  background: 'none',
+                  color: '#ffffff',
+                  cursor: 'pointer',
+                  textDecoration: 'underline',
+                  fontWeight: '600',
+                  transition: 'all 0.3s ease',
+                  fontFamily: "'Roboto', sans-serif",
+                  fontSize: '14px',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.opacity = '0.9';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.opacity = '1';
+                }}
+              >
+                Sign up
+              </button>
+            </div>
           </div>
         </div>
       </div>
