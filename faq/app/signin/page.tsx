@@ -6,6 +6,14 @@ import { useRouter } from "next/navigation";
 export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgotPassword }: SignInPageProps) {
   const router = useRouter();
 
+  const handleSignUp = () => {
+    router.push('/signup'); // Navigasi ke halaman signup
+  };
+
+  const handleForgotPassword = () => {
+    router.push('/forgot-password'); // Navigasi ke halaman forgot-password
+  };
+
   return (
     <div
       style={{
@@ -333,7 +341,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
           >
             {/* Lupa Password Link */}
             <button
-              onClick={onSwitchToForgotPassword}
+              onClick={handleForgotPassword}
               style={{
                 border: 'none',
                 background: 'none',
@@ -361,7 +369,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
                 Don't have an account?{' '}
               </span>
               <button
-                onClick={onSwitchToSignUp}
+                onClick={handleSignUp}
                 style={{
                   border: 'none',
                   background: 'none',
