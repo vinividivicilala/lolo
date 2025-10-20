@@ -83,6 +83,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
               display: 'flex',
               flexDirection: 'column',
               gap: '15px',
+              marginBottom: '30px',
             }}
           >
             {/* Google Login */}
@@ -195,6 +196,128 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
                 Continue with GitHub
               </span>
             </div>
+          </div>
+
+          {/* Email dan Password Form */}
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '20px',
+              padding: '25px',
+              border: '2px solid rgba(255, 255, 255, 0.3)',
+              borderRadius: '12px',
+              backgroundColor: 'rgba(255, 255, 255, 0.1)',
+              backdropFilter: 'blur(10px)',
+            }}
+          >
+            {/* Email Input */}
+            <div>
+              <label
+                style={{
+                  display: 'block',
+                  fontFamily: "'Roboto', sans-serif",
+                  fontSize: '14px',
+                  fontWeight: '500',
+                  color: '#ffffff',
+                  marginBottom: '8px',
+                }}
+              >
+                Email
+              </label>
+              <input
+                type="email"
+                placeholder="Enter your email"
+                style={{
+                  width: '100%',
+                  padding: '12px 15px',
+                  border: '1px solid rgba(255, 255, 255, 0.3)',
+                  borderRadius: '8px',
+                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                  color: '#ffffff',
+                  fontFamily: "'Roboto', sans-serif",
+                  fontSize: '14px',
+                  outline: 'none',
+                  transition: 'all 0.3s ease',
+                }}
+                onFocus={(e) => {
+                  e.target.style.borderColor = 'rgba(255, 255, 255, 0.7)';
+                  e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.15)';
+                }}
+                onBlur={(e) => {
+                  e.target.style.borderColor = 'rgba(255, 255, 255, 0.3)';
+                  e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+                }}
+              />
+            </div>
+
+            {/* Password Input */}
+            <div>
+              <label
+                style={{
+                  display: 'block',
+                  fontFamily: "'Roboto', sans-serif",
+                  fontSize: '14px',
+                  fontWeight: '500',
+                  color: '#ffffff',
+                  marginBottom: '8px',
+                }}
+              >
+                Password
+              </label>
+              <input
+                type="password"
+                placeholder="Enter your password"
+                style={{
+                  width: '100%',
+                  padding: '12px 15px',
+                  border: '1px solid rgba(255, 255, 255, 0.3)',
+                  borderRadius: '8px',
+                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                  color: '#ffffff',
+                  fontFamily: "'Roboto', sans-serif",
+                  fontSize: '14px',
+                  outline: 'none',
+                  transition: 'all 0.3s ease',
+                }}
+                onFocus={(e) => {
+                  e.target.style.borderColor = 'rgba(255, 255, 255, 0.7)';
+                  e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.15)';
+                }}
+                onBlur={(e) => {
+                  e.target.style.borderColor = 'rgba(255, 255, 255, 0.3)';
+                  e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+                }}
+              />
+            </div>
+
+            {/* Submit Button */}
+            <button
+              style={{
+                width: '100%',
+                padding: '14px',
+                border: 'none',
+                borderRadius: '8px',
+                backgroundColor: '#ffffff',
+                color: '#000000',
+                fontFamily: "'Roboto', sans-serif",
+                fontSize: '16px',
+                fontWeight: '600',
+                cursor: 'pointer',
+                transition: 'all 0.3s ease',
+                marginTop: '10px',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.9)';
+                e.currentTarget.style.transform = 'translateY(-2px)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = '#ffffff';
+                e.currentTarget.style.transform = 'translateY(0)';
+              }}
+            >
+              Sign In
+            </button>
           </div>
         </div>
       </div>
