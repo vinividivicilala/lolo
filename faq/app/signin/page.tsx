@@ -7,11 +7,23 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
   const router = useRouter();
 
   const handleSignUp = () => {
-    router.push('/signup'); // Navigasi ke halaman signup
+    router.push('/signup');
   };
 
   const handleForgotPassword = () => {
-    router.push('/forgot-password'); // Navigasi ke halaman forgot-password
+    router.push('/forgot-password');
+  };
+
+  const handlePrivacyPolicy = () => {
+    router.push('/privacy-policy');
+  };
+
+  const handleTerms = () => {
+    router.push('/terms');
+  };
+
+  const handleAbout = () => {
+    router.push('/about');
   };
 
   return (
@@ -329,7 +341,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
             </button>
           </div>
 
-          {/* Footer Links */}
+          {/* Footer Links - Sign Up dan Forgot Password */}
           <div
             style={{
               display: 'flex',
@@ -337,6 +349,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
               alignItems: 'center',
               fontFamily: "'Roboto', sans-serif",
               fontSize: '14px',
+              marginBottom: '30px',
             }}
           >
             {/* Lupa Password Link */}
@@ -391,6 +404,96 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
                 Sign up
               </button>
             </div>
+          </div>
+
+          {/* Footer Links - Kebijakan Privasi, Ketentuan, dan Tentang Kami */}
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              gap: '20px',
+              fontFamily: "'Roboto', sans-serif",
+              fontSize: '12px',
+              borderTop: '1px solid rgba(255, 255, 255, 0.2)',
+              paddingTop: '20px',
+            }}
+          >
+            <button
+              onClick={handlePrivacyPolicy}
+              style={{
+                border: 'none',
+                background: 'none',
+                color: 'rgba(255, 255, 255, 0.7)',
+                cursor: 'pointer',
+                textDecoration: 'none',
+                transition: 'all 0.3s ease',
+                fontFamily: "'Roboto', sans-serif",
+                fontSize: '12px',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.color = '#ffffff';
+                e.currentTarget.style.textDecoration = 'underline';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.color = 'rgba(255, 255, 255, 0.7)';
+                e.currentTarget.style.textDecoration = 'none';
+              }}
+            >
+              Kebijakan Privasi
+            </button>
+
+            <span style={{ color: 'rgba(255, 255, 255, 0.5)' }}>•</span>
+
+            <button
+              onClick={handleTerms}
+              style={{
+                border: 'none',
+                background: 'none',
+                color: 'rgba(255, 255, 255, 0.7)',
+                cursor: 'pointer',
+                textDecoration: 'none',
+                transition: 'all 0.3s ease',
+                fontFamily: "'Roboto', sans-serif",
+                fontSize: '12px',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.color = '#ffffff';
+                e.currentTarget.style.textDecoration = 'underline';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.color = 'rgba(255, 255, 255, 0.7)';
+                e.currentTarget.style.textDecoration = 'none';
+              }}
+            >
+              Ketentuan Kami
+            </button>
+
+            <span style={{ color: 'rgba(255, 255, 255, 0.5)' }}>•</span>
+
+            <button
+              onClick={handleAbout}
+              style={{
+                border: 'none',
+                background: 'none',
+                color: 'rgba(255, 255, 255, 0.7)',
+                cursor: 'pointer',
+                textDecoration: 'none',
+                transition: 'all 0.3s ease',
+                fontFamily: "'Roboto', sans-serif",
+                fontSize: '12px',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.color = '#ffffff';
+                e.currentTarget.style.textDecoration = 'underline';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.color = 'rgba(255, 255, 255, 0.7)';
+                e.currentTarget.style.textDecoration = 'none';
+              }}
+            >
+              Tentang Kami
+            </button>
           </div>
         </div>
       </div>
