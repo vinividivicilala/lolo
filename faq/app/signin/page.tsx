@@ -16,10 +16,9 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
         height: '100%',
         backgroundColor: 'rgba(0,0,0,0.5)',
         display: 'flex',
-        justifyContent: 'left',
-        alignItems: 'left',
+        justifyContent: 'center',
+        alignItems: 'center',
         zIndex: 1000,
-        padding: '1rem'
       }}
     >
       <div
@@ -27,65 +26,230 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
           background: 'white',
           borderRadius: '20px',
           width: '1000px',
-          height: '900px',
+          height: '600px',
           position: 'relative',
           display: 'flex',
-          overflow: 'hidden'
+          overflow: 'hidden',
+          boxShadow: '0 10px 30px rgba(0,0,0,0.3)'
         }}
       >
-        {/* Portrait Image - Large with Partial Border Radius */}
+        {/* Left Side - Image */}
         <div
           style={{
-            width: '85%',
+            width: '45%',
             height: '100%',
             backgroundImage: 'url(/images/5.jpg)',
             backgroundSize: 'cover',
             backgroundPosition: 'center',
             backgroundRepeat: 'no-repeat',
-            borderRadius: '20px 0 0 20px' // Radius hanya di kiri
           }}
         />
         
-        {/* Text Section - Positioned to the right */}
+        {/* Right Side - Login Form */}
         <div
           style={{
-            position: 'absolute',
-            right: '5%',
-            top: '50%',
-            transform: 'translateY(-50%)',
+            width: '55%',
+            height: '100%',
+            backgroundColor: '#ffffff',
+            padding: '40px',
             display: 'flex',
             flexDirection: 'column',
-            alignItems: 'flex-end',
-            zIndex: 3,
-            maxWidth: '40%'
+            justifyContent: 'center'
           }}
         >
-          <h1
-            style={{
-              fontFamily: "'Inter', 'Arial', sans-serif",
-              fontSize: '50px',
+          {/* Title */}
+          <div style={{ marginBottom: '30px' }}>
+            <h1 style={{
+              fontSize: '32px',
               fontWeight: 'bold',
-              color: '#ffffff',
-              marginBottom: '1rem',
-              textAlign: 'right',
-              lineHeight: '1',
-              textShadow: '2px 2px 4px rgba(0,0,0,0.5)'
-            }}
-          >
-            Welcome back
-          </h1>
-          <p
-            style={{
-              fontFamily: "'Inter', 'Arial', sans-serif",
-              fontSize: '20px',
-              color: '#ffffff',
-              textAlign: 'right',
-              lineHeight: '1.2',
-              textShadow: '2px 2px 4px rgba(0,0,0,0.5)'
-            }}
-          >
-            Sign in to your account to continue
-          </p>
+              color: '#000000',
+              marginBottom: '8px'
+            }}>
+              Welcome back
+            </h1>
+            <p style={{
+              fontSize: '14px',
+              color: '#666666'
+            }}>
+              Sign in to your account to continue
+            </p>
+          </div>
+
+          {/* Social Login Buttons */}
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: '1fr 1fr',
+            gap: '10px',
+            marginBottom: '20px'
+          }}>
+            <button style={{
+              padding: '12px',
+              border: '1px solid #e1e1e1',
+              borderRadius: '8px',
+              backgroundColor: 'white',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '14px',
+              fontWeight: '500',
+              cursor: 'pointer'
+            }}>
+              Google
+            </button>
+            <button style={{
+              padding: '12px',
+              border: '1px solid #e1e1e1',
+              borderRadius: '8px',
+              backgroundColor: 'white',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '14px',
+              fontWeight: '500',
+              cursor: 'pointer'
+            }}>
+              GitHub
+            </button>
+          </div>
+
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: '1fr 1fr',
+            gap: '10px',
+            marginBottom: '30px'
+          }}>
+            <button style={{
+              padding: '12px',
+              border: '1px solid #e1e1e1',
+              borderRadius: '8px',
+              backgroundColor: 'white',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '14px',
+              fontWeight: '500',
+              cursor: 'pointer'
+            }}>
+              Discord
+            </button>
+            <button style={{
+              padding: '12px',
+              border: '1px solid #e1e1e1',
+              borderRadius: '8px',
+              backgroundColor: 'white',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '14px',
+              fontWeight: '500',
+              cursor: 'pointer'
+            }}>
+              OR CONTINUE WITH
+            </button>
+          </div>
+
+          {/* Email Input */}
+          <div style={{ marginBottom: '20px' }}>
+            <label style={{
+              display: 'block',
+              fontSize: '14px',
+              fontWeight: '500',
+              marginBottom: '8px',
+              color: '#333333'
+            }}>
+              Email
+            </label>
+            <input
+              type="email"
+              placeholder="example@gmail.com"
+              style={{
+                width: '100%',
+                padding: '12px',
+                border: '1px solid #e1e1e1',
+                borderRadius: '8px',
+                fontSize: '14px',
+                outline: 'none'
+              }}
+            />
+          </div>
+
+          {/* Password Input */}
+          <div style={{ marginBottom: '20px' }}>
+            <label style={{
+              display: 'block',
+              fontSize: '14px',
+              fontWeight: '500',
+              marginBottom: '8px',
+              color: '#333333'
+            }}>
+              Password
+            </label>
+            <input
+              type="password"
+              placeholder="***********"
+              style={{
+                width: '100%',
+                padding: '12px',
+                border: '1px solid #e1e1e1',
+                borderRadius: '8px',
+                fontSize: '14px',
+                outline: 'none'
+              }}
+            />
+          </div>
+
+          {/* Sign In Button */}
+          <button style={{
+            width: '100%',
+            padding: '12px',
+            backgroundColor: '#000000',
+            color: 'white',
+            border: 'none',
+            borderRadius: '8px',
+            fontSize: '14px',
+            fontWeight: '500',
+            cursor: 'pointer',
+            marginBottom: '20px'
+          }}>
+            Sign In with Email
+          </button>
+
+          {/* Footer Links */}
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            fontSize: '14px'
+          }}>
+            <button 
+              onClick={onSwitchToForgotPassword}
+              style={{
+                border: 'none',
+                background: 'none',
+                color: '#666666',
+                cursor: 'pointer',
+                textDecoration: 'underline'
+              }}
+            >
+              Forgot your password?
+            </button>
+            <div>
+              <span style={{ color: '#666666' }}>Don't have an account? </span>
+              <button 
+                onClick={onSwitchToSignUp}
+                style={{
+                  border: 'none',
+                  background: 'none',
+                  color: '#000000',
+                  fontWeight: '500',
+                  cursor: 'pointer',
+                  textDecoration: 'underline'
+                }}
+              >
+                Sign up
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
