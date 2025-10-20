@@ -27,10 +27,11 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
           width: '1000px',
           height: '600px',
           borderRadius: '20px',
-          border: '2px solid #e1e1e1',
+          border: '2px solid black',
         }}
       />
     </div>
   );
 }
+
 
