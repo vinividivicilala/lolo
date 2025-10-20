@@ -30,22 +30,8 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
           borderRadius: '20px',
           border: '2px solid #e1e1e1',
           boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
-          overflow: 'hidden',
-          position: 'relative'
         }}
-      >
-        {/* Background Image Inside Line Box */}
-        <div
-          style={{
-            width: '100%',
-            height: '100%',
-            backgroundImage: 'url(/images/5.jpg)',
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            backgroundRepeat: 'no-repeat',
-          }}
-        />
-      </div>
+      />
     </div>
   );
 }
