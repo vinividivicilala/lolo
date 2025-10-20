@@ -33,35 +33,35 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
           overflow: 'hidden'
         }}
       >
-        {/* Portrait Image - Scaled Larger (130%) on Left */}
+        {/* Portrait Image - Full Width with Border Radius */}
         <div
           style={{
-            width: '80%',
+            width: '75%',
             height: '100%',
             backgroundImage: 'url(/images/5.jpg)',
-            backgroundSize: '130%',
+            backgroundSize: 'cover',
             backgroundPosition: 'center',
             backgroundRepeat: 'no-repeat',
-            borderRadius: '20px 0 0 20px',
-            transform: 'scale(1.1)',
-            transformOrigin: 'left center'
+            borderRadius: '20px' // Full border radius
           }}
         />
         
-        {/* Text Section with Black Background - Smaller (20%) on Right */}
+        {/* Text Section with Black Background - Overlay on Right */}
         <div
           style={{
-            width: '20%',
+            width: '30%',
             height: '100%',
             backgroundColor: '#000000',
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'center',
             alignItems: 'center',
-            padding: '1rem',
+            padding: '2rem',
+            position: 'absolute',
+            right: 0,
+            top: 0,
             borderRadius: '0 20px 20px 0',
-            position: 'relative',
-            zIndex: 2
+            zIndex: 3
           }}
         >
           <div
@@ -77,13 +77,14 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
             <h1
               style={{
                 fontFamily: "'Inter', 'Arial', sans-serif",
-                fontSize: '42px',
+                fontSize: '36px',
                 fontWeight: 'bold',
                 color: '#ffffff',
                 marginBottom: '1rem',
                 textAlign: 'center',
-                lineHeight: '1',
-                whiteSpace: 'nowrap'
+                lineHeight: '1.1',
+                width: '100%',
+                wordBreak: 'keep-all'
               }}
             >
               Welcome back
@@ -91,11 +92,12 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
             <p
               style={{
                 fontFamily: "'Inter', 'Arial', sans-serif",
-                fontSize: '16px',
+                fontSize: '14px',
                 color: '#cccccc',
                 textAlign: 'center',
-                lineHeight: '1.2',
-                whiteSpace: 'nowrap'
+                lineHeight: '1.3',
+                width: '100%',
+                wordBreak: 'keep-all'
               }}
             >
               Sign in to your account to continue
