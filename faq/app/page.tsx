@@ -6,9 +6,9 @@ import { useRouter } from "next/navigation";
 import { gsap } from "gsap";
 import { initializeApp } from "firebase/app";
 import { getFirestore, doc, setDoc, getDoc, onSnapshot, collection, getDocs } from "firebase/firestore";
-import SignInPage from './components/auth/signin-page';
-import SignUpPage from './components/auth/signup-page';
-import ForgotPasswordPage from './components/auth/forgot-password-page';
+import SignInPage from '../../components/auth/signin-page';
+import SignUpPage from '../../components/auth/signup-page';
+import ForgotPasswordPage from '../../components/auth/forgot-password-page';
 
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
@@ -2956,5 +2956,6 @@ onClick={handleOpenSignIn}  // Ganti console.log dengan ini
     </div>
   );
 }
+
 
 
