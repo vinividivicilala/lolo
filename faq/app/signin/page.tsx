@@ -32,24 +32,23 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
         style={{
           background: 'white',
           borderRadius: '20px',
-          maxWidth: '1000px',
-          width: '100%',
+          width: '400px',
           height: '600px',
           position: 'relative',
           display: 'flex',
           overflow: 'hidden'
         }}
       >
-        {/* Left Side - Large Image */}
+        {/* Portrait Image - Half Page Size */}
         <div
           style={{
-            flex: 1,
+            width: '100%',
+            height: '100%',
             backgroundImage: 'url(/images/5.jpg)',
             backgroundSize: 'cover',
             backgroundPosition: 'center',
             backgroundRepeat: 'no-repeat',
-            borderTopLeftRadius: '20px',
-            borderBottomLeftRadius: '20px'
+            borderRadius: '20px'
           }}
         />
       </div>
