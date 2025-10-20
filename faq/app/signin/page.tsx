@@ -59,93 +59,218 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
             }}
           />
 
-          {/* Card Design - Besar ke atas, bawah, dan samping */}
+          {/* Card Design - Mirip dengan contoh di foto */}
           <div
             style={{
               width: '500px',
-              padding: '30px',
-              backgroundColor: '#1E90FF', // Warna biru stabilo
+              padding: '40px',
+              backgroundColor: 'rgba(255, 255, 255, 0.95)',
               borderRadius: '20px',
-              boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
-              border: '2px solid rgba(255, 255, 255, 0.3)',
+              boxShadow: '0 10px 30px rgba(0,0,0,0.2)',
+              border: '1px solid rgba(0, 0, 0, 0.1)',
               display: 'flex',
               flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              textAlign: 'center',
+              gap: '25px',
             }}
           >
-            <h3
-              style={{
-                fontFamily: "'Roboto', sans-serif",
-                fontSize: '24px',
-                fontWeight: 'bold',
-                color: '#ffffff',
-                marginBottom: '15px',
-                textShadow: '1px 1px 2px rgba(0,0,0,0.3)',
-              }}
-            >
-              Special Offer
-            </h3>
-            <p
-              style={{
-                fontFamily: "'Roboto', sans-serif",
-                fontSize: '16px',
-                color: '#ffffff',
-                lineHeight: '1.6',
-                marginBottom: '20px',
-                opacity: '0.9',
-              }}
-            >
-              Get exclusive access to premium features and content when you sign in to your account.
-            </p>
+            {/* Header Section */}
+            <div>
+              <h3
+                style={{
+                  fontFamily: "'Roboto', sans-serif",
+                  fontSize: '28px',
+                  fontWeight: 'bold',
+                  color: '#1a1a1a',
+                  marginBottom: '8px',
+                  letterSpacing: '-0.5px',
+                }}
+              >
+                Get in touch.
+              </h3>
+              <p
+                style={{
+                  fontFamily: "'Roboto', sans-serif",
+                  fontSize: '16px',
+                  color: '#666666',
+                  lineHeight: '1.5',
+                }}
+              >
+                Let's start a conversation
+              </p>
+            </div>
+
+            {/* Email Section */}
+            <div>
+              <p
+                style={{
+                  fontFamily: "'Roboto', sans-serif",
+                  fontSize: '18px',
+                  fontWeight: '600',
+                  color: '#1a1a1a',
+                  marginBottom: '5px',
+                }}
+              >
+                higsimplestudio.is
+              </p>
+            </div>
+
+            {/* Locations Section */}
+            <div>
+              <p
+                style={{
+                  fontFamily: "'Roboto', sans-serif",
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  color: '#999999',
+                  marginBottom: '10px',
+                  textTransform: 'uppercase',
+                  letterSpacing: '1px',
+                }}
+              >
+                Based on
+              </p>
+              <p
+                style={{
+                  fontFamily: "'Roboto', sans-serif",
+                  fontSize: '16px',
+                  color: '#1a1a1a',
+                  marginBottom: '5px',
+                }}
+              >
+                Madrid, ES
+              </p>
+              <p
+                style={{
+                  fontFamily: "'Roboto', sans-serif",
+                  fontSize: '16px',
+                  color: '#1a1a1a',
+                }}
+              >
+                Montevideo, UY
+              </p>
+            </div>
+
+            {/* Social Media Section */}
+            <div>
+              <p
+                style={{
+                  fontFamily: "'Roboto', sans-serif",
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  color: '#999999',
+                  marginBottom: '15px',
+                  textTransform: 'uppercase',
+                  letterSpacing: '1px',
+                }}
+              >
+                Follow us
+              </p>
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '8px',
+                }}
+              >
+                <span
+                  style={{
+                    fontFamily: "'Roboto', sans-serif",
+                    fontSize: '16px',
+                    color: '#1a1a1a',
+                    cursor: 'pointer',
+                    transition: 'color 0.3s ease',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.color = '#666666';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.color = '#1a1a1a';
+                  }}
+                >
+                  dribbble
+                </span>
+                <span
+                  style={{
+                    fontFamily: "'Roboto', sans-serif",
+                    fontSize: '16px',
+                    color: '#1a1a1a',
+                    cursor: 'pointer',
+                    transition: 'color 0.3s ease',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.color = '#666666';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.color = '#1a1a1a';
+                  }}
+                >
+                  linkedin
+                </span>
+                <span
+                  style={{
+                    fontFamily: "'Roboto', sans-serif",
+                    fontSize: '16px',
+                    color: '#1a1a1a',
+                    cursor: 'pointer',
+                    transition: 'color 0.3s ease',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.color = '#666666';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.color = '#1a1a1a';
+                  }}
+                >
+                  instagram
+                </span>
+                <span
+                  style={{
+                    fontFamily: "'Roboto', sans-serif",
+                    fontSize: '16px',
+                    color: '#1a1a1a',
+                    cursor: 'pointer',
+                    transition: 'color 0.3s ease',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.color = '#666666';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.color = '#1a1a1a';
+                  }}
+                >
+                  twitter
+                </span>
+              </div>
+            </div>
+
+            {/* Footer Section */}
             <div
               style={{
-                display: 'flex',
-                gap: '10px',
-                flexWrap: 'wrap',
-                justifyContent: 'center',
+                marginTop: '20px',
+                paddingTop: '25px',
+                borderTop: '1px solid rgba(0, 0, 0, 0.1)',
               }}
             >
-              <span
+              <p
                 style={{
-                  padding: '8px 16px',
-                  backgroundColor: 'rgba(255, 255, 255, 0.2)',
-                  borderRadius: '20px',
-                  color: '#ffffff',
-                  fontSize: '14px',
                   fontFamily: "'Roboto', sans-serif",
-                  fontWeight: '500',
+                  fontSize: '16px',
+                  fontWeight: 'bold',
+                  color: '#1a1a1a',
+                  marginBottom: '8px',
                 }}
               >
-                Premium Features
-              </span>
-              <span
+                Simple Studio*
+              </p>
+              <p
                 style={{
-                  padding: '8px 16px',
-                  backgroundColor: 'rgba(255, 255, 255, 0.2)',
-                  borderRadius: '20px',
-                  color: '#ffffff',
-                  fontSize: '14px',
                   fontFamily: "'Roboto', sans-serif",
-                  fontWeight: '500',
+                  fontSize: '12px',
+                  color: '#999999',
                 }}
               >
-                Exclusive Content
-              </span>
-              <span
-                style={{
-                  padding: '8px 16px',
-                  backgroundColor: 'rgba(255, 255, 255, 0.2)',
-                  borderRadius: '20px',
-                  color: '#ffffff',
-                  fontSize: '14px',
-                  fontFamily: "'Roboto', sans-serif",
-                  fontWeight: '500',
-                }}
-              >
-                24/7 Support
-              </span>
+                © 2025 Simple Studio LLC. All Rights Reserved
+              </p>
             </div>
           </div>
         </div>
