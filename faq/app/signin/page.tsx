@@ -42,11 +42,11 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
         {/* Portrait Image - Half Page Size */}
         <div
           style={{
-            width: '100%',
-            height: '100%',
+            width: '600%',
+            height: '600%',
             backgroundImage: 'url(/images/5.jpg)',
             backgroundSize: 'cover',
-            backgroundPosition: 'center',
+            backgroundPosition: 'left',
             backgroundRepeat: 'no-repeat',
             borderRadius: '20px'
           }}
@@ -55,3 +55,4 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
     </div>
   );
 }
+
