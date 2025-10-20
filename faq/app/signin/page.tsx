@@ -33,11 +33,11 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
           overflow: 'hidden'
         }}
       >
-        {/* Portrait Image - Larger Size (70%) on Left */}
+        {/* Portrait Image - Even Larger Size (80%) on Left */}
         <div
           style={{
-            width: '150%',
-            height: '150%',
+            width: '80%',
+            height: '100%',
             backgroundImage: 'url(/images/5.jpg)',
             backgroundSize: 'cover',
             backgroundPosition: 'center',
@@ -46,10 +46,10 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
           }}
         />
         
-        {/* Text Section with Black Background - Smaller (30%) on Right */}
+        {/* Text Section with Black Background - Smaller (20%) on Right */}
         <div
           style={{
-            width: '30%',
+            width: '20%',
             height: '100%',
             backgroundColor: '#000000',
             display: 'flex',
@@ -63,11 +63,12 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
           <h1
             style={{
               fontFamily: "'Inter', 'Arial', sans-serif",
-              fontSize: '3.5rem',
+              fontSize: '2.5rem',
               fontWeight: 'bold',
               color: '#ffffff',
               marginBottom: '1rem',
-              textAlign: 'center'
+              textAlign: 'center',
+              lineHeight: '1.2'
             }}
           >
             Welcome back
@@ -75,10 +76,10 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
           <p
             style={{
               fontFamily: "'Inter', 'Arial', sans-serif",
-              fontSize: '1.2rem',
+              fontSize: '1rem',
               color: '#cccccc',
               textAlign: 'center',
-              lineHeight: '1.6'
+              lineHeight: '1.4'
             }}
           >
             Sign in to your account to continue
@@ -88,4 +89,3 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
     </div>
   );
 }
-
