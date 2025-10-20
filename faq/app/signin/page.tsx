@@ -21,13 +21,12 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
         zIndex: 1000,
       }}
     >
-      {/* Container untuk foto dan teks */}
+      {/* Container untuk foto dan teks sejajar */}
       <div
         style={{
-          position: 'absolute',
-            top: '40px',
-            left: '40px',
-            right: '40px',
+          display: 'flex',
+          alignItems: 'flex-start', // Sejajar di atas
+          gap: '60px',
         }}
       >
         {/* Foto Portrait */}
@@ -44,21 +43,21 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
           }}
         />
 
-        {/* Teks di Sebelah Kanan */}
+        {/* Teks di Sebelah Kanan - Sejajar dengan atas foto */}
         <div
           style={{
             display: 'flex',
             flexDirection: 'column',
+            marginTop: '40px', // Sesuaikan dengan posisi atas foto
           }}
         >
           <h1
             style={{
-              fontSize: '80px',
+              fontSize: '48px',
               fontWeight: 'bold',
               color: '#ffffff',
               marginBottom: '15px',
               textShadow: '2px 2px 4px rgba(0,0,0,0.5)',
-               marginTop: '50px',
             }}
           >
             Welcome back
@@ -77,5 +76,3 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
     </div>
   );
 }
-
-
