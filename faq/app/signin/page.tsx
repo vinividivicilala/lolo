@@ -63,38 +63,157 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
           }}
         />
 
-        {/* Container Teks dan Login Options */}
+        {/* Container utama untuk konten kanan */}
         <div
           style={{
             display: 'flex',
             flexDirection: 'column',
-            marginTop: '40px',
+            width: '500px',
           }}
         >
-          {/* Teks Welcome */}
-          <div style={{ marginBottom: '40px' }}>
-            <h1
+          {/* Header dengan Welcome dan Links */}
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'flex-start',
+              marginBottom: '40px',
+            }}
+          >
+            {/* Teks Welcome */}
+            <div>
+              <h1
+                style={{
+                  fontFamily: "'Roboto', sans-serif",
+                  fontSize: '48px',
+                  fontWeight: 'bold',
+                  color: '#ffffff',
+                  marginBottom: '15px',
+                  textShadow: '2px 2px 4px rgba(0,0,0,0.5)',
+                }}
+              >
+                Welcome back
+              </h1>
+              <p
+                style={{
+                  fontFamily: "'Roboto', sans-serif",
+                  fontSize: '18px',
+                  color: '#ffffff',
+                  textShadow: '1px 1px 2px rgba(0,0,0,0.5)',
+                }}
+              >
+                Sign in to your account to continue
+              </p>
+            </div>
+
+            {/* Links di samping kanan - sejajar dengan Welcome */}
+            <div
               style={{
-                fontFamily: "'Roboto', sans-serif",
-                fontSize: '48px',
-                fontWeight: 'bold',
-                color: '#ffffff',
-                marginBottom: '15px',
-                textShadow: '2px 2px 4px rgba(0,0,0,0.5)',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '12px',
+                alignItems: 'flex-end',
               }}
             >
-              Welcome back
-            </h1>
-            <p
-              style={{
-                fontFamily: "'Roboto', sans-serif",
-                fontSize: '18px',
-                color: '#ffffff',
-                textShadow: '1px 1px 2px rgba(0,0,0,0.5)',
-              }}
-            >
-              Sign in to your account to continue
-            </p>
+              {/* Kebijakan Privasi */}
+              <button
+                onClick={handlePrivacyPolicy}
+                style={{
+                  border: 'none',
+                  background: 'none',
+                  color: '#ffffff',
+                  cursor: 'pointer',
+                  textDecoration: 'none',
+                  transition: 'all 0.3s ease',
+                  fontFamily: "'Roboto', sans-serif",
+                  fontSize: '18px',
+                  fontWeight: '500',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '5px 0',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.color = 'rgba(255, 255, 255, 0.8)';
+                  e.currentTarget.style.transform = 'translateX(3px)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.color = '#ffffff';
+                  e.currentTarget.style.transform = 'translateX(0)';
+                }}
+              >
+                <span>Kebijakan Privasi</span>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M5 12h14M12 5l7 7-7 7" />
+                </svg>
+              </button>
+
+              {/* Ketentuan Kami */}
+              <button
+                onClick={handleTerms}
+                style={{
+                  border: 'none',
+                  background: 'none',
+                  color: '#ffffff',
+                  cursor: 'pointer',
+                  textDecoration: 'none',
+                  transition: 'all 0.3s ease',
+                  fontFamily: "'Roboto', sans-serif",
+                  fontSize: '18px',
+                  fontWeight: '500',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '5px 0',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.color = 'rgba(255, 255, 255, 0.8)';
+                  e.currentTarget.style.transform = 'translateX(3px)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.color = '#ffffff';
+                  e.currentTarget.style.transform = 'translateX(0)';
+                }}
+              >
+                <span>Ketentuan Kami</span>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M5 12h14M12 5l7 7-7 7" />
+                </svg>
+              </button>
+
+              {/* Tentang Kami */}
+              <button
+                onClick={handleAbout}
+                style={{
+                  border: 'none',
+                  background: 'none',
+                  color: '#ffffff',
+                  cursor: 'pointer',
+                  textDecoration: 'none',
+                  transition: 'all 0.3s ease',
+                  fontFamily: "'Roboto', sans-serif",
+                  fontSize: '18px',
+                  fontWeight: '500',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '5px 0',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.color = 'rgba(255, 255, 255, 0.8)';
+                  e.currentTarget.style.transform = 'translateX(3px)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.color = '#ffffff';
+                  e.currentTarget.style.transform = 'translateX(0)';
+                }}
+              >
+                <span>Tentang Kami</span>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M5 12h14M12 5l7 7-7 7" />
+                </svg>
+              </button>
+            </div>
           </div>
 
           {/* Social Login Options */}
@@ -349,7 +468,6 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
               alignItems: 'center',
               fontFamily: "'Roboto', sans-serif",
               fontSize: '14px',
-              marginBottom: '40px',
             }}
           >
             {/* Lupa Password Link */}
@@ -404,115 +522,6 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
                 Sign up
               </button>
             </div>
-          </div>
-
-          {/* Footer Links - Kebijakan Privasi, Ketentuan, dan Tentang Kami di Sisi Kanan */}
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '15px',
-              alignItems: 'flex-start',
-            }}
-          >
-            {/* Kebijakan Privasi */}
-            <button
-              onClick={handlePrivacyPolicy}
-              style={{
-                border: 'none',
-                background: 'none',
-                color: '#ffffff',
-                cursor: 'pointer',
-                textDecoration: 'none',
-                transition: 'all 0.3s ease',
-                fontFamily: "'Roboto', sans-serif",
-                fontSize: '16px',
-                fontWeight: '500',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '10px',
-                padding: '8px 0',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.color = 'rgba(255, 255, 255, 0.8)';
-                e.currentTarget.style.transform = 'translateX(5px)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.color = '#ffffff';
-                e.currentTarget.style.transform = 'translateX(0)';
-              }}
-            >
-              <span>Kebijakan Privasi</span>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M5 12h14M12 5l7 7-7 7" />
-              </svg>
-            </button>
-
-            {/* Ketentuan Kami */}
-            <button
-              onClick={handleTerms}
-              style={{
-                border: 'none',
-                background: 'none',
-                color: '#ffffff',
-                cursor: 'pointer',
-                textDecoration: 'none',
-                transition: 'all 0.3s ease',
-                fontFamily: "'Roboto', sans-serif",
-                fontSize: '16px',
-                fontWeight: '500',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '10px',
-                padding: '8px 0',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.color = 'rgba(255, 255, 255, 0.8)';
-                e.currentTarget.style.transform = 'translateX(5px)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.color = '#ffffff';
-                e.currentTarget.style.transform = 'translateX(0)';
-              }}
-            >
-              <span>Ketentuan Kami</span>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M5 12h14M12 5l7 7-7 7" />
-              </svg>
-            </button>
-
-            {/* Tentang Kami */}
-            <button
-              onClick={handleAbout}
-              style={{
-                border: 'none',
-                background: 'none',
-                color: '#ffffff',
-                cursor: 'pointer',
-                textDecoration: 'none',
-                transition: 'all 0.3s ease',
-                fontFamily: "'Roboto', sans-serif",
-                fontSize: '16px',
-                fontWeight: '500',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '10px',
-                padding: '8px 0',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.color = 'rgba(255, 255, 255, 0.8)';
-                e.currentTarget.style.transform = 'translateX(5px)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.color = '#ffffff';
-                e.currentTarget.style.transform = 'translateX(0)';
-              }}
-            >
-              <span>Tentang Kami</span>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M5 12h14M12 5l7 7-7 7" />
-              </svg>
-            </button>
           </div>
         </div>
       </div>
