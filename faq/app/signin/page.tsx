@@ -21,27 +21,25 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
         zIndex: 1000,
       }}
     >
+      {/* Container untuk foto dan teks */}
       <div
         style={{
           display: 'flex',
           alignItems: 'center',
-          gap: '40px',
-          backgroundColor: 'white',
-          borderRadius: '20px',
-          padding: '40px',
-          boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
+          gap: '60px',
         }}
       >
-        {/* Foto Portrait di Kiri */}
+        {/* Foto Portrait */}
         <div
           style={{
-            width: '400px',
-            height: '500px',
+            width: '500px',
+            height: '700px',
             backgroundImage: 'url(/images/5.jpg)',
             backgroundSize: 'cover',
             backgroundPosition: 'center',
             backgroundRepeat: 'no-repeat',
-            borderRadius: '15px',
+            borderRadius: '20px',
+            boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
           }}
         />
 
@@ -50,23 +48,24 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
           style={{
             display: 'flex',
             flexDirection: 'column',
-            alignItems: 'flex-start',
           }}
         >
           <h1
             style={{
-              fontSize: '36px',
+              fontSize: '48px',
               fontWeight: 'bold',
-              color: '#000000',
-              marginBottom: '10px',
+              color: '#ffffff',
+              marginBottom: '15px',
+              textShadow: '2px 2px 4px rgba(0,0,0,0.5)',
             }}
           >
             Welcome back
           </h1>
           <p
             style={{
-              fontSize: '16px',
-              color: '#666666',
+              fontSize: '18px',
+              color: '#ffffff',
+              textShadow: '1px 1px 2px rgba(0,0,0,0.5)',
             }}
           >
             Sign in to your account to continue
