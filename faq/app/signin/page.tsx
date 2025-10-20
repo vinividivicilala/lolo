@@ -39,11 +39,11 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
             width: '80%',
             height: '100%',
             backgroundImage: 'url(/images/5.jpg)',
-            backgroundSize: '130%', // Diperbesar 130%
+            backgroundSize: '130%',
             backgroundPosition: 'center',
             backgroundRepeat: 'no-repeat',
             borderRadius: '20px 0 0 20px',
-            transform: 'scale(1.1)', // Additional scaling
+            transform: 'scale(1.1)',
             transformOrigin: 'left center'
           }}
         />
@@ -57,8 +57,8 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'center',
-            alignItems: 'center',
-            padding: '1.5rem',
+            alignItems: 'flex-start', // Diubah ke flex-start untuk sejajar kiri
+            padding: '2rem',
             borderRadius: '0 20px 20px 0',
             position: 'relative',
             zIndex: 2
@@ -67,13 +67,14 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
           <h1
             style={{
               fontFamily: "'Inter', 'Arial', sans-serif",
-              fontSize: '2rem',
+              fontSize: '50px', // Minimal 50px
               fontWeight: 'bold',
               color: '#ffffff',
-              marginBottom: '0.8rem',
-              textAlign: 'center',
+              marginBottom: '1.5rem',
+              textAlign: 'left', // Diubah ke left
               lineHeight: '1.1',
-              wordWrap: 'break-word'
+              wordWrap: 'break-word',
+              width: '100%'
             }}
           >
             Welcome back
@@ -81,11 +82,12 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
           <p
             style={{
               fontFamily: "'Inter', 'Arial', sans-serif",
-              fontSize: '0.9rem',
+              fontSize: '20px', // Diperbesar
               color: '#cccccc',
-              textAlign: 'center',
+              textAlign: 'left', // Diubah ke left
               lineHeight: '1.3',
-              wordWrap: 'break-word'
+              wordWrap: 'break-word',
+              width: '100%'
             }}
           >
             Sign in to your account to continue
