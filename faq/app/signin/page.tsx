@@ -26,12 +26,11 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
         style={{
           width: '1000px',
           height: '600px',
-          backgroundColor: 'white',
           borderRadius: '20px',
           border: '2px solid #e1e1e1',
-          boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
         }}
       />
     </div>
   );
 }
+
