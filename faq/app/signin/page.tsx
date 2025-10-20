@@ -24,9 +24,10 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
       {/* Container untuk foto dan teks */}
       <div
         style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '60px',
+          position: 'absolute',
+            top: '40px',
+            left: '40px',
+            right: '40px',
         }}
       >
         {/* Foto Portrait */}
@@ -76,4 +77,5 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
     </div>
   );
 }
+
 
