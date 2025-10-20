@@ -36,8 +36,8 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
         {/* Portrait Image - Larger Size (70%) on Left */}
         <div
           style={{
-            width: '70%',
-            height: '100%',
+            width: '150%',
+            height: '150%',
             backgroundImage: 'url(/images/5.jpg)',
             backgroundSize: 'cover',
             backgroundPosition: 'center',
@@ -88,3 +88,4 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
     </div>
   );
 }
+
