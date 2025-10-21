@@ -33,7 +33,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
           display: 'flex',
           alignItems: 'flex-start',
           gap: '60px',
-          marginBottom: '80px', // Space untuk card di bawah
+          marginBottom: '80px',
         }}
       >
         {/* Foto Portrait */}
@@ -391,89 +391,88 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
         </div>
       </div>
 
-      {/* Card Footer seperti di foto - VERTICAL LAYOUT */}
+      {/* Card Footer seperti di foto - WHITE BACKGROUND */}
       <div
         style={{
           width: '100%',
           maxWidth: '1200px',
-          backgroundColor: 'red',
-          color: '#ffffff',
-          padding: '60px 40px',
-          borderRadius: '0px', // No border radius seperti di foto
+          backgroundColor: '#ffffff', // Background putih
+          color: '#000000', // Text hitam
+          padding: '80px 60px', // Padding lebih besar
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'flex-start',
-          gap: '40px',
+          gap: '60px',
+          fontFamily: "'Inter', sans-serif",
         }}
       >
-        {/* Left Column - Main Content */}
-        <div style={{ flex: '2' }}>
+        {/* Left Section - Main Content */}
+        <div style={{ flex: '1' }}>
           <h1
             style={{
-              fontSize: '64px', // Lebih besar seperti di foto
+              fontSize: '72px', // Font sangat besar
               fontWeight: 'bold',
-              lineHeight: '1',
-              marginBottom: '20px',
-              letterSpacing: '-0.02em',
+              lineHeight: '0.9',
+              marginBottom: '30px',
+              letterSpacing: '-0.03em',
             }}
           >
             Get in touch.
           </h1>
-          <p
-            style={{
-              fontSize: '18px',
-              opacity: '0.8',
-              marginBottom: '10px',
-              lineHeight: '1.5',
-            }}
-          >
-            Let's start a conversation
-          </p>
-          <p
-            style={{
-              fontSize: '16px',
-              opacity: '0.8',
-              marginBottom: '40px',
-            }}
-          >
-            higsimplestudio.is
-          </p>
+          
+          <div style={{ marginBottom: '50px' }}>
+            <p
+              style={{
+                fontSize: '20px',
+                marginBottom: '8px',
+                opacity: '0.8',
+              }}
+            >
+              Let's start a conversation
+            </p>
+            <p
+              style={{
+                fontSize: '18px',
+                opacity: '0.8',
+              }}
+            >
+              higsimplestudio.is
+            </p>
+          </div>
 
-          {/* Location */}
           <div style={{ marginBottom: '40px' }}>
             <p
               style={{
-                fontSize: '14px',
+                fontSize: '16px',
                 opacity: '0.7',
-                marginBottom: '8px',
+                marginBottom: '12px',
               }}
             >
               Based on
             </p>
             <p
               style={{
-                fontSize: '16px',
-                marginBottom: '4px',
+                fontSize: '18px',
+                marginBottom: '6px',
               }}
             >
               Madrid, ES
             </p>
             <p
               style={{
-                fontSize: '16px',
+                fontSize: '18px',
               }}
             >
               Montevideo, UY
             </p>
           </div>
 
-          {/* Social Links */}
           <div>
             <p
               style={{
-                fontSize: '14px',
+                fontSize: '16px',
                 opacity: '0.7',
-                marginBottom: '12px',
+                marginBottom: '15px',
               }}
             >
               Follow us
@@ -481,14 +480,14 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
             <div
               style={{
                 display: 'flex',
-                gap: '20px',
+                gap: '25px',
               }}
             >
               {['dribbble', 'linkedin', 'instagram', 'twitter'].map((platform) => (
                 <span
                   key={platform}
                   style={{
-                    fontSize: '16px',
+                    fontSize: '18px',
                     cursor: 'pointer',
                     transition: 'opacity 0.3s ease',
                   }}
@@ -506,20 +505,23 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
           </div>
         </div>
 
-        {/* Right Column - Studio Info */}
-        <div style={{ flex: '1', textAlign: 'right' }}>
+        {/* Right Section - Studio Info */}
+        <div style={{ 
+          textAlign: 'right',
+          alignSelf: 'flex-end', // Posisi di bagian bawah
+        }}>
           <p
             style={{
-              fontSize: '24px',
+              fontSize: '28px',
               fontWeight: 'bold',
-              marginBottom: '10px',
+              marginBottom: '15px',
             }}
           >
             Simple Studio*
           </p>
           <p
             style={{
-              fontSize: '12px',
+              fontSize: '14px',
               opacity: '0.6',
             }}
           >
