@@ -55,10 +55,10 @@ export default function SignUpPage({ onClose, onSwitchToSignIn }: SignUpPageProp
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
       >
-        {/* Foto Portrait di Kiri - Full Height */}
+        {/* Foto Portrait di Kiri - Diperkecil */}
         <motion.div
           style={{
-            flex: 1,
+            flex: 0.7,
             position: 'relative',
             height: '100vh'
           }}
@@ -163,7 +163,7 @@ export default function SignUpPage({ onClose, onSwitchToSignIn }: SignUpPageProp
                 onFocus={(e) => {
                   e.target.style.background = 'rgba(255,255,255,0.12)';
                   e.target.style.borderColor = 'rgba(255,255,255,0.4)';
-                  e.target.style.boxShadow = '0 0 0 3px rgba(102, 126, 234, 0.1)';
+                  e.target.style.boxShadow = '0 0 0 3px rgba(0, 0, 0, 0.1)';
                 }}
                 onBlur={(e) => {
                   e.target.style.background = 'rgba(255,255,255,0.08)';
@@ -197,7 +197,7 @@ export default function SignUpPage({ onClose, onSwitchToSignIn }: SignUpPageProp
                 onFocus={(e) => {
                   e.target.style.background = 'rgba(255,255,255,0.12)';
                   e.target.style.borderColor = 'rgba(255,255,255,0.4)';
-                  e.target.style.boxShadow = '0 0 0 3px rgba(102, 126, 234, 0.1)';
+                  e.target.style.boxShadow = '0 0 0 3px rgba(0, 0, 0, 0.1)';
                 }}
                 onBlur={(e) => {
                   e.target.style.background = 'rgba(255,255,255,0.08)';
@@ -231,7 +231,7 @@ export default function SignUpPage({ onClose, onSwitchToSignIn }: SignUpPageProp
                 onFocus={(e) => {
                   e.target.style.background = 'rgba(255,255,255,0.12)';
                   e.target.style.borderColor = 'rgba(255,255,255,0.4)';
-                  e.target.style.boxShadow = '0 0 0 3px rgba(102, 126, 234, 0.1)';
+                  e.target.style.boxShadow = '0 0 0 3px rgba(0, 0, 0, 0.1)';
                 }}
                 onBlur={(e) => {
                   e.target.style.background = 'rgba(255,255,255,0.08)';
@@ -241,14 +241,14 @@ export default function SignUpPage({ onClose, onSwitchToSignIn }: SignUpPageProp
               />
             </div>
 
-            {/* Modern Sign Up Button */}
+            {/* Modern Sign Up Button - Warna Hitam */}
             <motion.button
               type="submit"
               disabled={isLoading}
               style={{
                 width: '100%',
                 padding: '1.2rem 2rem',
-                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                background: '#000000',
                 border: 'none',
                 borderRadius: '12px',
                 color: 'white',
@@ -263,7 +263,8 @@ export default function SignUpPage({ onClose, onSwitchToSignIn }: SignUpPageProp
               }}
               whileHover={!isLoading ? { 
                 scale: 1.02,
-                boxShadow: '0 10px 30px rgba(102, 126, 234, 0.4)'
+                boxShadow: '0 10px 30px rgba(0, 0, 0, 0.4)',
+                background: '#333333'
               } : {}}
               whileTap={!isLoading ? { scale: 0.98 } : {}}
             >
@@ -335,20 +336,21 @@ export default function SignUpPage({ onClose, onSwitchToSignIn }: SignUpPageProp
               style={{
                 background: 'none',
                 border: 'none',
-                color: '#667eea',
+                color: '#ffffff',
                 cursor: 'pointer',
                 fontFamily: 'Arame Mono, monospace',
                 fontSize: '1rem',
                 fontWeight: '600',
-                textDecoration: 'none',
+                textDecoration: 'underline',
                 padding: '0.25rem 0.5rem',
                 borderRadius: '6px',
                 transition: 'all 0.3s ease'
               }}
               whileHover={{ 
-                color: '#764ba2',
-                background: 'rgba(102, 126, 234, 0.1)'
+                color: '#cccccc',
+                background: 'rgba(255, 255, 255, 0.1)'
               }}
+              whileTap={{ scale: 0.95 }}
             >
               Sign in
             </motion.button>
