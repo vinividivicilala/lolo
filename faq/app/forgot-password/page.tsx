@@ -37,6 +37,22 @@ export default function ForgotPasswordPage({ onClose, onSwitchToSignIn }: Forgot
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
       >
+        {/* Background Image */}
+        <div
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            backgroundImage: 'url(images/5.jpg)',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat'
+          }}
+        />
+        
+        {/* White Box Container */}
         <motion.div
           style={{
             background: 'rgba(255,255,255,0.95)',
@@ -46,7 +62,8 @@ export default function ForgotPasswordPage({ onClose, onSwitchToSignIn }: Forgot
             width: '100%',
             position: 'relative',
             backdropFilter: 'blur(20px)',
-            border: '1px solid rgba(255,255,255,0.2)'
+            border: '1px solid rgba(255,255,255,0.2)',
+            boxShadow: '0 8px 32px rgba(0,0,0,0.1)'
           }}
           initial={{ scale: 0.8, opacity: 0, y: 50 }}
           animate={{ scale: 1, opacity: 1, y: 0 }}
