@@ -21,132 +21,84 @@ export default function SignUpPage({ onClose, onSwitchToSignIn }: SignUpPageProp
           height: '100%',
           backgroundColor: 'rgba(0,0,0,0.9)',
           display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          zIndex: 1000,
-          padding: '2rem'
+          zIndex: 1000
         }}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
       >
+        {/* Foto Portrait di Kiri - Full Height */}
         <motion.div
           style={{
-            background: 'rgba(255,255,255,0.95)',
-            borderRadius: '20px',
-            padding: '0',
-            maxWidth: '1000px',
-            width: '100%',
-            maxHeight: '90vh',
-            overflow: 'hidden',
+            flex: 1,
             position: 'relative',
-            backdropFilter: 'blur(20px)',
-            border: '1px solid rgba(255,255,255,0.2)',
-            display: 'flex'
+            height: '100vh'
           }}
-          initial={{ scale: 0.8, opacity: 0, y: 50 }}
-          animate={{ scale: 1, opacity: 1, y: 0 }}
-          exit={{ scale: 0.8, opacity: 0, y: 50 }}
-          transition={{ duration: 0.5, ease: "back.out(1.7)" }}
+          initial={{ opacity: 0, x: -50 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.2, duration: 0.5 }}
         >
-          {/* Foto Portrait di Kiri */}
-          <motion.div
+          <Image
+            src="/images/5.jpg"
+            alt="Portrait"
+            fill
             style={{
-              flex: 1,
-              position: 'relative',
-              minHeight: '600px'
+              objectFit: 'cover',
+              display: 'block'
             }}
-            initial={{ opacity: 0, x: -50 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.2, duration: 0.5 }}
-          >
-            {/* Close Button di atas foto */}
-            <motion.button
-              onClick={onClose}
-              style={{
-                position: 'absolute',
-                top: '1.5rem',
-                left: '1.5rem',
-                background: 'rgba(0,0,0,0.5)',
-                border: 'none',
-                borderRadius: '50%',
-                width: '40px',
-                height: '40px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                cursor: 'pointer',
-                color: 'white',
-                fontSize: '1.2rem',
-                zIndex: 10
-              }}
-              whileHover={{ backgroundColor: 'rgba(0,0,0,0.7)', scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-            >
-              ×
-            </motion.button>
+            priority
+          />
+        </motion.div>
 
-            <Image
-              src="/images/5.jpg"
-              alt="Portrait"
-              fill
-              style={{
-                objectFit: 'cover',
-                display: 'block'
-              }}
-              priority
-            />
-          </motion.div>
-
-          {/* Konten Teks di Kanan */}
-          <motion.div
+        {/* Konten Teks di Kanan - Tanpa Background */}
+        <motion.div
+          style={{
+            flex: 1,
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            alignItems: 'center',
+            textAlign: 'center'
+          }}
+          initial={{ opacity: 0, x: 50 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.4, duration: 0.5 }}
+        >
+          {/* Judul Besar */}
+          <motion.h1
             style={{
-              flex: 1,
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'center',
-              alignItems: 'center',
-              padding: '3rem',
-              textAlign: 'center'
+              fontSize: '4rem',
+              fontWeight: '700',
+              color: 'white',
+              margin: '0 0 2rem 0',
+              fontFamily: 'Arame Mono, monospace',
+              lineHeight: '1.2',
+              textShadow: '0 2px 10px rgba(0,0,0,0.5)'
             }}
-            initial={{ opacity: 0, x: 50 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.4, duration: 0.5 }}
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6, duration: 0.5 }}
           >
-            {/* Judul Besar */}
-            <motion.h1
-              style={{
-                fontSize: '3.5rem',
-                fontWeight: '700',
-                color: '#333',
-                margin: '0 0 1rem 0',
-                fontFamily: 'Arame Mono, monospace',
-                lineHeight: '1.2'
-              }}
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.6, duration: 0.5 }}
-            >
-              Create an account
-            </motion.h1>
+            Create an account
+          </motion.h1>
 
-            {/* Deskripsi */}
-            <motion.p
-              style={{
-                fontSize: '1.4rem',
-                color: '#666',
-                margin: 0,
-                fontFamily: 'Arame Mono, monospace',
-                lineHeight: '1.6',
-                maxWidth: '400px'
-              }}
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.8, duration: 0.5 }}
-            >
-              Sign up to join our community
-            </motion.p>
-          </motion.div>
+          {/* Deskripsi */}
+          <motion.p
+            style={{
+              fontSize: '1.8rem',
+              color: 'rgba(255,255,255,0.9)',
+              margin: 0,
+              fontFamily: 'Arame Mono, monospace',
+              lineHeight: '1.6',
+              maxWidth: '500px',
+              textShadow: '0 2px 8px rgba(0,0,0,0.5)'
+            }}
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.8, duration: 0.5 }}
+          >
+            Sign up to join our community
+          </motion.p>
         </motion.div>
       </motion.div>
     </AnimatePresence>
