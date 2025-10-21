@@ -41,12 +41,12 @@ export default function SignUpPage({ onClose, onSwitchToSignIn }: SignUpPageProp
           left: 0,
           width: '100%',
           height: '100%',
-          backgroundColor: 'rgba(0,0,0,0.9)',
+          backgroundColor: 'rgba(0,0,0,0.5)',
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
           zIndex: 1000,
-          padding: '2rem'
+          padding: '1rem'
         }}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -54,43 +54,40 @@ export default function SignUpPage({ onClose, onSwitchToSignIn }: SignUpPageProp
       >
         <motion.div
           style={{
-            background: 'rgba(255,255,255,0.95)',
-            borderRadius: '20px',
-            padding: '3rem',
-            maxWidth: '1200px',
+            background: 'white',
+            borderRadius: '12px',
+            padding: '0',
+            maxWidth: '900px',
             width: '100%',
             maxHeight: '90vh',
-            overflowY: 'auto',
+            overflow: 'hidden',
             position: 'relative',
-            backdropFilter: 'blur(20px)',
-            border: '1px solid rgba(255,255,255,0.2)',
-            display: 'grid',
-            gridTemplateColumns: '1fr 1fr',
-            gap: '3rem'
+            display: 'flex',
+            boxShadow: '0 20px 40px rgba(0,0,0,0.1)'
           }}
-          initial={{ scale: 0.8, opacity: 0, y: 50 }}
+          initial={{ scale: 0.9, opacity: 0, y: 20 }}
           animate={{ scale: 1, opacity: 1, y: 0 }}
-          exit={{ scale: 0.8, opacity: 0, y: 50 }}
-          transition={{ duration: 0.5, ease: "back.out(1.7)" }}
+          exit={{ scale: 0.9, opacity: 0, y: 20 }}
+          transition={{ duration: 0.3, ease: "easeOut" }}
         >
           {/* Close Button */}
           <motion.button
             onClick={onClose}
             style={{
               position: 'absolute',
-              top: '1.5rem',
-              right: '1.5rem',
+              top: '1rem',
+              right: '1rem',
               background: 'rgba(0,0,0,0.1)',
               border: 'none',
               borderRadius: '50%',
-              width: '40px',
-              height: '40px',
+              width: '32px',
+              height: '32px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               cursor: 'pointer',
               color: '#333',
-              fontSize: '1.2rem',
+              fontSize: '1rem',
               zIndex: 1001
             }}
             whileHover={{ backgroundColor: 'rgba(0,0,0,0.2)', scale: 1.1 }}
@@ -100,89 +97,62 @@ export default function SignUpPage({ onClose, onSwitchToSignIn }: SignUpPageProp
           </motion.button>
 
           {/* Left Side - Image */}
-          <motion.div
+          <div
             style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
+              flex: 1,
+              minHeight: '600px',
+              backgroundImage: 'url(images/5.jpg)',
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              backgroundRepeat: 'no-repeat'
             }}
-            initial={{ opacity: 0, x: -50 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.2, duration: 0.5 }}
-          >
-            <motion.img
-              src="images/5.jpg"
-              alt="Portrait"
-              style={{
-                width: '100%',
-                height: '500px',
-                objectFit: 'cover',
-                borderRadius: '15px',
-                boxShadow: '0 10px 30px rgba(0,0,0,0.3)'
-              }}
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ delay: 0.4, duration: 0.5 }}
-            />
-          </motion.div>
+          />
 
           {/* Right Side - Form */}
-          <motion.div
+          <div
             style={{
+              flex: 1,
+              padding: '3rem 2rem',
               display: 'flex',
               flexDirection: 'column',
               justifyContent: 'center'
             }}
-            initial={{ opacity: 0, x: 50 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.3, duration: 0.5 }}
           >
             {/* Header Section */}
-            <div style={{ textAlign: 'left', marginBottom: '2rem' }}>
-              <motion.h2
+            <div style={{ marginBottom: '2rem' }}>
+              <h2
                 style={{
-                  fontSize: '3rem',
+                  fontSize: '2rem',
                   fontWeight: '700',
                   color: '#333',
-                  margin: '0 0 1rem 0',
+                  margin: '0 0 0.5rem 0',
                   fontFamily: 'Arame Mono, monospace',
                   lineHeight: '1.2'
                 }}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4, duration: 0.5 }}
               >
                 Create an account
-              </motion.h2>
+              </h2>
               
-              <motion.p
+              <p
                 style={{
-                  fontSize: '1.3rem',
+                  fontSize: '1rem',
                   color: '#666',
                   margin: 0,
                   fontFamily: 'Arame Mono, monospace',
                   lineHeight: '1.5'
                 }}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.5, duration: 0.5 }}
               >
                 Sign up to join our community
-              </motion.p>
+              </p>
             </div>
 
             {/* Sign Up Form */}
-            <motion.form
-              onSubmit={handleSignUp}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.6, duration: 0.5 }}
-            >
-              <div style={{ marginBottom: '1.5rem' }}>
+            <form onSubmit={handleSignUp}>
+              <div style={{ marginBottom: '1rem' }}>
                 <label style={{
                   display: 'block',
                   marginBottom: '0.5rem',
-                  fontSize: '1rem',
+                  fontSize: '0.9rem',
                   fontWeight: '500',
                   color: '#333',
                   fontFamily: 'Arame Mono, monospace'
@@ -197,21 +167,24 @@ export default function SignUpPage({ onClose, onSwitchToSignIn }: SignUpPageProp
                   required
                   style={{
                     width: '100%',
-                    padding: '1rem',
+                    padding: '0.8rem',
                     border: '1px solid #ddd',
-                    borderRadius: '8px',
-                    fontSize: '1rem',
+                    borderRadius: '6px',
+                    fontSize: '0.9rem',
                     fontFamily: 'Arame Mono, monospace',
-                    transition: 'all 0.3s ease'
+                    transition: 'border-color 0.3s ease',
+                    boxSizing: 'border-box'
                   }}
+                  onFocus={(e) => e.target.style.borderColor = '#667eea'}
+                  onBlur={(e) => e.target.style.borderColor = '#ddd'}
                 />
               </div>
 
-              <div style={{ marginBottom: '1.5rem' }}>
+              <div style={{ marginBottom: '1rem' }}>
                 <label style={{
                   display: 'block',
                   marginBottom: '0.5rem',
-                  fontSize: '1rem',
+                  fontSize: '0.9rem',
                   fontWeight: '500',
                   color: '#333',
                   fontFamily: 'Arame Mono, monospace'
@@ -226,21 +199,24 @@ export default function SignUpPage({ onClose, onSwitchToSignIn }: SignUpPageProp
                   required
                   style={{
                     width: '100%',
-                    padding: '1rem',
+                    padding: '0.8rem',
                     border: '1px solid #ddd',
-                    borderRadius: '8px',
-                    fontSize: '1rem',
+                    borderRadius: '6px',
+                    fontSize: '0.9rem',
                     fontFamily: 'Arame Mono, monospace',
-                    transition: 'all 0.3s ease'
+                    transition: 'border-color 0.3s ease',
+                    boxSizing: 'border-box'
                   }}
+                  onFocus={(e) => e.target.style.borderColor = '#667eea'}
+                  onBlur={(e) => e.target.style.borderColor = '#ddd'}
                 />
               </div>
 
-              <div style={{ marginBottom: '2rem' }}>
+              <div style={{ marginBottom: '1.5rem' }}>
                 <label style={{
                   display: 'block',
                   marginBottom: '0.5rem',
-                  fontSize: '1rem',
+                  fontSize: '0.9rem',
                   fontWeight: '500',
                   color: '#333',
                   fontFamily: 'Arame Mono, monospace'
@@ -255,13 +231,16 @@ export default function SignUpPage({ onClose, onSwitchToSignIn }: SignUpPageProp
                   required
                   style={{
                     width: '100%',
-                    padding: '1rem',
+                    padding: '0.8rem',
                     border: '1px solid #ddd',
-                    borderRadius: '8px',
-                    fontSize: '1rem',
+                    borderRadius: '6px',
+                    fontSize: '0.9rem',
                     fontFamily: 'Arame Mono, monospace',
-                    transition: 'all 0.3s ease'
+                    transition: 'border-color 0.3s ease',
+                    boxSizing: 'border-box'
                   }}
+                  onFocus={(e) => e.target.style.borderColor = '#667eea'}
+                  onBlur={(e) => e.target.style.borderColor = '#ddd'}
                 />
               </div>
 
@@ -270,39 +249,37 @@ export default function SignUpPage({ onClose, onSwitchToSignIn }: SignUpPageProp
                 disabled={isLoading}
                 style={{
                   width: '100%',
-                  padding: '1.2rem',
-                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                  padding: '0.8rem',
+                  background: '#667eea',
                   border: 'none',
-                  borderRadius: '8px',
+                  borderRadius: '6px',
                   color: 'white',
-                  fontSize: '1.1rem',
+                  fontSize: '0.9rem',
                   fontWeight: '600',
                   cursor: isLoading ? 'not-allowed' : 'pointer',
                   fontFamily: 'Arame Mono, monospace',
-                  marginBottom: '2rem',
-                  opacity: isLoading ? 0.7 : 1
+                  marginBottom: '1.5rem',
+                  opacity: isLoading ? 0.7 : 1,
+                  transition: 'background-color 0.3s ease'
                 }}
-                whileHover={!isLoading ? { scale: 1.02, boxShadow: '0 4px 15px rgba(102,126,234,0.4)' } : {}}
+                whileHover={!isLoading ? { backgroundColor: '#5a6fd8' } : {}}
                 whileTap={!isLoading ? { scale: 0.98 } : {}}
               >
                 {isLoading ? 'Signing Up...' : 'Sign Up'}
               </motion.button>
-            </motion.form>
+            </form>
 
             {/* Sign In Link */}
-            <motion.div
+            <div
               style={{
                 textAlign: 'center',
-                fontSize: '1rem',
+                fontSize: '0.9rem',
                 color: '#666',
                 fontFamily: 'Arame Mono, monospace'
               }}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.8, duration: 0.5 }}
             >
               Already have an account?{' '}
-              <motion.button
+              <button
                 type="button"
                 onClick={onSwitchToSignIn}
                 style={{
@@ -311,16 +288,16 @@ export default function SignUpPage({ onClose, onSwitchToSignIn }: SignUpPageProp
                   color: '#667eea',
                   cursor: 'pointer',
                   fontFamily: 'Arame Mono, monospace',
-                  fontSize: '1rem',
+                  fontSize: '0.9rem',
                   fontWeight: '600',
-                  textDecoration: 'underline'
+                  textDecoration: 'underline',
+                  padding: 0
                 }}
-                whileHover={{ color: '#764ba2' }}
               >
                 Sign in
-              </motion.button>
-            </motion.div>
-          </motion.div>
+              </button>
+            </div>
+          </div>
         </motion.div>
       </motion.div>
     </AnimatePresence>
