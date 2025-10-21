@@ -46,9 +46,7 @@ export default function ForgotPasswordPage({ onClose, onSwitchToSignIn }: Forgot
             border: '1px solid rgba(255,255,255,0.3)',
             display: 'flex',
             flexDirection: 'column',
-            justifyContent: 'center',
-            alignItems: 'center',
-            padding: '2rem'
+            padding: '3rem'
           }}
           initial={{ scale: 0.9, opacity: 0, y: 20 }}
           animate={{ scale: 1, opacity: 1, y: 0 }}
@@ -61,7 +59,8 @@ export default function ForgotPasswordPage({ onClose, onSwitchToSignIn }: Forgot
             fontSize: '2rem',
             fontWeight: '600',
             marginBottom: '1rem',
-            textAlign: 'center'
+            textAlign: 'left',
+            fontFamily: 'Arame Mono, monospace'
           }}>
             Forgot Password
           </h2>
@@ -71,20 +70,22 @@ export default function ForgotPasswordPage({ onClose, onSwitchToSignIn }: Forgot
             color: 'rgba(255,255,255,0.8)',
             fontSize: '1rem',
             marginBottom: '2rem',
-            textAlign: 'center'
+            textAlign: 'left',
+            fontFamily: 'Arame Mono, monospace'
           }}>
             Enter your email to receive a password reset link
           </p>
 
           {/* Form */}
-          <form onSubmit={handleSubmit} style={{ width: '80%' }}>
+          <form onSubmit={handleSubmit} style={{ width: '100%' }}>
             {/* Email Input */}
             <div style={{ marginBottom: '1.5rem' }}>
               <label style={{
                 display: 'block',
                 color: 'white',
                 marginBottom: '0.5rem',
-                fontSize: '0.9rem'
+                fontSize: '0.9rem',
+                fontFamily: 'Arame Mono, monospace'
               }}>
                 Email
               </label>
@@ -102,7 +103,8 @@ export default function ForgotPasswordPage({ onClose, onSwitchToSignIn }: Forgot
                   borderRadius: '6px',
                   color: 'white',
                   fontSize: '1rem',
-                  outline: 'none'
+                  outline: 'none',
+                  fontFamily: 'Arame Mono, monospace'
                 }}
               />
             </div>
@@ -119,7 +121,8 @@ export default function ForgotPasswordPage({ onClose, onSwitchToSignIn }: Forgot
                 color: 'white',
                 fontSize: '1rem',
                 cursor: 'pointer',
-                marginBottom: '1rem'
+                marginBottom: '1rem',
+                fontFamily: 'Arame Mono, monospace'
               }}
             >
               Send Reset Email
@@ -135,7 +138,9 @@ export default function ForgotPasswordPage({ onClose, onSwitchToSignIn }: Forgot
               color: 'rgba(255,255,255,0.8)',
               cursor: 'pointer',
               fontSize: '0.9rem',
-              textDecoration: 'underline'
+              textDecoration: 'underline',
+              fontFamily: 'Arame Mono, monospace',
+              alignSelf: 'flex-start'
             }}
           >
             Back to Sign In
