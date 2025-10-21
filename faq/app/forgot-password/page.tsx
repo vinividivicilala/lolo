@@ -16,6 +16,10 @@ export default function ForgotPasswordPage({ onClose, onSwitchToSignIn }: Forgot
     // Logic untuk reset password
   };
 
+  const handleBackToSignIn = () => {
+    onSwitchToSignIn(); // Panggil fungsi untuk kembali ke sign in
+  };
+
   return (
     <AnimatePresence>
       <motion.div
@@ -129,9 +133,9 @@ export default function ForgotPasswordPage({ onClose, onSwitchToSignIn }: Forgot
             </button>
           </form>
 
-          {/* Tombol Kembali */}
+          {/* Tombol Kembali - dengan event handler yang benar */}
           <button
-            onClick={onSwitchToSignIn}
+            onClick={handleBackToSignIn}
             style={{
               background: 'none',
               border: 'none',
@@ -140,7 +144,8 @@ export default function ForgotPasswordPage({ onClose, onSwitchToSignIn }: Forgot
               fontSize: '0.9rem',
               textDecoration: 'underline',
               fontFamily: 'Arame Mono, monospace',
-              alignSelf: 'flex-start'
+              alignSelf: 'flex-start',
+              padding: 0
             }}
           >
             Back to Sign In
