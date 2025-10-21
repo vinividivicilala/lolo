@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 
 interface SignUpPageProps {
   onClose: () => void;
-  onSwitchToSignIn: () => void;
+  onSwitchToSignIn?: () => void; // Jadikan optional
 }
 
 export default function SignUpPage({ onClose, onSwitchToSignIn }: SignUpPageProps) {
@@ -37,19 +37,8 @@ export default function SignUpPage({ onClose, onSwitchToSignIn }: SignUpPageProp
     console.log("Tombol sign in diklik");
     onClose(); // Tutup modal sign up dulu
     
-    // Coba kedua metode navigasi
-    try {
-      // Method 1: Gunakan prop dari parent component
-      if (onSwitchToSignIn) {
-        onSwitchToSignIn();
-      } else {
-        // Method 2: Gunakan router langsung
-        router.push('/signin');
-      }
-    } catch (error) {
-      // Method 3: Fallback ke window location
-      window.location.href = '/signin';
-    }
+    // Gunakan router langsung tanpa dependensi pada prop
+    router.push('/signin');
   };
 
   return (
