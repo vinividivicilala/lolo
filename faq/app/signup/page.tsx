@@ -33,6 +33,11 @@ export default function SignUpPage({ onClose, onSwitchToSignIn }: SignUpPageProp
     }, 1500);
   };
 
+  const handleSignIn = () => {
+    onClose();
+    router.push('/signin');
+  };
+
   return (
     <AnimatePresence>
       <motion.div
@@ -80,15 +85,16 @@ export default function SignUpPage({ onClose, onSwitchToSignIn }: SignUpPageProp
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'center',
-            alignItems: 'center',
-            padding: '3rem'
+            padding: '3rem',
+            maxWidth: '500px',
+            margin: '0 auto'
           }}
           initial={{ opacity: 0, x: 50 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.4, duration: 0.5 }}
         >
-          {/* Judul dan Deskripsi */}
-          <div style={{ textAlign: 'center', marginBottom: '3rem', width: '100%', maxWidth: '400px' }}>
+          {/* Judul dan Deskripsi - Rata Kiri */}
+          <div style={{ marginBottom: '3rem' }}>
             <motion.h1
               style={{
                 fontSize: '3rem',
@@ -96,7 +102,8 @@ export default function SignUpPage({ onClose, onSwitchToSignIn }: SignUpPageProp
                 color: 'white',
                 margin: '0 0 1rem 0',
                 fontFamily: 'Arame Mono, monospace',
-                lineHeight: '1.2'
+                lineHeight: '1.2',
+                textAlign: 'left'
               }}
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
@@ -111,7 +118,8 @@ export default function SignUpPage({ onClose, onSwitchToSignIn }: SignUpPageProp
                 color: 'rgba(255,255,255,0.8)',
                 margin: 0,
                 fontFamily: 'Arame Mono, monospace',
-                lineHeight: '1.5'
+                lineHeight: '1.5',
+                textAlign: 'left'
               }}
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
@@ -125,8 +133,7 @@ export default function SignUpPage({ onClose, onSwitchToSignIn }: SignUpPageProp
           <motion.form
             onSubmit={handleSignUp}
             style={{
-              width: '100%',
-              maxWidth: '400px'
+              width: '100%'
             }}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -142,23 +149,26 @@ export default function SignUpPage({ onClose, onSwitchToSignIn }: SignUpPageProp
                 required
                 style={{
                   width: '100%',
-                  padding: '1rem',
-                  border: '1px solid rgba(255,255,255,0.3)',
-                  borderRadius: '8px',
+                  padding: '1rem 1.5rem',
+                  border: '1px solid rgba(255,255,255,0.2)',
+                  borderRadius: '12px',
                   fontSize: '1rem',
                   fontFamily: 'Arame Mono, monospace',
-                  background: 'rgba(255,255,255,0.1)',
+                  background: 'rgba(255,255,255,0.08)',
                   color: 'white',
                   outline: 'none',
-                  transition: 'all 0.3s ease'
+                  transition: 'all 0.3s ease',
+                  backdropFilter: 'blur(10px)'
                 }}
                 onFocus={(e) => {
-                  e.target.style.background = 'rgba(255,255,255,0.2)';
-                  e.target.style.borderColor = 'rgba(255,255,255,0.5)';
+                  e.target.style.background = 'rgba(255,255,255,0.12)';
+                  e.target.style.borderColor = 'rgba(255,255,255,0.4)';
+                  e.target.style.boxShadow = '0 0 0 3px rgba(102, 126, 234, 0.1)';
                 }}
                 onBlur={(e) => {
-                  e.target.style.background = 'rgba(255,255,255,0.1)';
-                  e.target.style.borderColor = 'rgba(255,255,255,0.3)';
+                  e.target.style.background = 'rgba(255,255,255,0.08)';
+                  e.target.style.borderColor = 'rgba(255,255,255,0.2)';
+                  e.target.style.boxShadow = 'none';
                 }}
               />
             </div>
@@ -173,29 +183,32 @@ export default function SignUpPage({ onClose, onSwitchToSignIn }: SignUpPageProp
                 required
                 style={{
                   width: '100%',
-                  padding: '1rem',
-                  border: '1px solid rgba(255,255,255,0.3)',
-                  borderRadius: '8px',
+                  padding: '1rem 1.5rem',
+                  border: '1px solid rgba(255,255,255,0.2)',
+                  borderRadius: '12px',
                   fontSize: '1rem',
                   fontFamily: 'Arame Mono, monospace',
-                  background: 'rgba(255,255,255,0.1)',
+                  background: 'rgba(255,255,255,0.08)',
                   color: 'white',
                   outline: 'none',
-                  transition: 'all 0.3s ease'
+                  transition: 'all 0.3s ease',
+                  backdropFilter: 'blur(10px)'
                 }}
                 onFocus={(e) => {
-                  e.target.style.background = 'rgba(255,255,255,0.2)';
-                  e.target.style.borderColor = 'rgba(255,255,255,0.5)';
+                  e.target.style.background = 'rgba(255,255,255,0.12)';
+                  e.target.style.borderColor = 'rgba(255,255,255,0.4)';
+                  e.target.style.boxShadow = '0 0 0 3px rgba(102, 126, 234, 0.1)';
                 }}
                 onBlur={(e) => {
-                  e.target.style.background = 'rgba(255,255,255,0.1)';
-                  e.target.style.borderColor = 'rgba(255,255,255,0.3)';
+                  e.target.style.background = 'rgba(255,255,255,0.08)';
+                  e.target.style.borderColor = 'rgba(255,255,255,0.2)';
+                  e.target.style.boxShadow = 'none';
                 }}
               />
             </div>
 
             {/* Password Input */}
-            <div style={{ marginBottom: '2rem' }}>
+            <div style={{ marginBottom: '2.5rem' }}>
               <input
                 type="password"
                 placeholder="Password"
@@ -204,49 +217,102 @@ export default function SignUpPage({ onClose, onSwitchToSignIn }: SignUpPageProp
                 required
                 style={{
                   width: '100%',
-                  padding: '1rem',
-                  border: '1px solid rgba(255,255,255,0.3)',
-                  borderRadius: '8px',
+                  padding: '1rem 1.5rem',
+                  border: '1px solid rgba(255,255,255,0.2)',
+                  borderRadius: '12px',
                   fontSize: '1rem',
                   fontFamily: 'Arame Mono, monospace',
-                  background: 'rgba(255,255,255,0.1)',
+                  background: 'rgba(255,255,255,0.08)',
                   color: 'white',
                   outline: 'none',
-                  transition: 'all 0.3s ease'
+                  transition: 'all 0.3s ease',
+                  backdropFilter: 'blur(10px)'
                 }}
                 onFocus={(e) => {
-                  e.target.style.background = 'rgba(255,255,255,0.2)';
-                  e.target.style.borderColor = 'rgba(255,255,255,0.5)';
+                  e.target.style.background = 'rgba(255,255,255,0.12)';
+                  e.target.style.borderColor = 'rgba(255,255,255,0.4)';
+                  e.target.style.boxShadow = '0 0 0 3px rgba(102, 126, 234, 0.1)';
                 }}
                 onBlur={(e) => {
-                  e.target.style.background = 'rgba(255,255,255,0.1)';
-                  e.target.style.borderColor = 'rgba(255,255,255,0.3)';
+                  e.target.style.background = 'rgba(255,255,255,0.08)';
+                  e.target.style.borderColor = 'rgba(255,255,255,0.2)';
+                  e.target.style.boxShadow = 'none';
                 }}
               />
             </div>
 
-            {/* Sign Up Button */}
+            {/* Modern Sign Up Button */}
             <motion.button
               type="submit"
               disabled={isLoading}
               style={{
                 width: '100%',
-                padding: '1rem',
+                padding: '1.2rem 2rem',
                 background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
                 border: 'none',
-                borderRadius: '8px',
+                borderRadius: '12px',
                 color: 'white',
-                fontSize: '1rem',
+                fontSize: '1.1rem',
                 fontWeight: '600',
                 cursor: isLoading ? 'not-allowed' : 'pointer',
                 fontFamily: 'Arame Mono, monospace',
                 marginBottom: '2rem',
-                opacity: isLoading ? 0.7 : 1
+                opacity: isLoading ? 0.7 : 1,
+                position: 'relative',
+                overflow: 'hidden'
               }}
-              whileHover={!isLoading ? { scale: 1.02 } : {}}
+              whileHover={!isLoading ? { 
+                scale: 1.02,
+                boxShadow: '0 10px 30px rgba(102, 126, 234, 0.4)'
+              } : {}}
               whileTap={!isLoading ? { scale: 0.98 } : {}}
             >
-              {isLoading ? 'Creating Account...' : 'Sign Up'}
+              {isLoading ? (
+                <motion.div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '0.5rem'
+                  }}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                >
+                  <motion.div
+                    style={{
+                      width: '16px',
+                      height: '16px',
+                      border: '2px solid transparent',
+                      borderTop: '2px solid white',
+                      borderRadius: '50%'
+                    }}
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                  />
+                  Creating Account...
+                </motion.div>
+              ) : (
+                <motion.div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '0.5rem'
+                  }}
+                >
+                  Get Started
+                  <motion.svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
+                    <path d="M5 12h14M12 5l7 7-7 7"/>
+                  </motion.svg>
+                </motion.div>
+              )}
             </motion.button>
           </motion.form>
 
@@ -254,7 +320,7 @@ export default function SignUpPage({ onClose, onSwitchToSignIn }: SignUpPageProp
           <motion.div
             style={{
               textAlign: 'center',
-              fontSize: '0.9rem',
+              fontSize: '1rem',
               color: 'rgba(255,255,255,0.7)',
               fontFamily: 'Arame Mono, monospace'
             }}
@@ -265,18 +331,24 @@ export default function SignUpPage({ onClose, onSwitchToSignIn }: SignUpPageProp
             Already have an account?{' '}
             <motion.button
               type="button"
-              onClick={onSwitchToSignIn}
+              onClick={handleSignIn}
               style={{
                 background: 'none',
                 border: 'none',
                 color: '#667eea',
                 cursor: 'pointer',
                 fontFamily: 'Arame Mono, monospace',
-                fontSize: '0.9rem',
+                fontSize: '1rem',
                 fontWeight: '600',
-                textDecoration: 'underline'
+                textDecoration: 'none',
+                padding: '0.25rem 0.5rem',
+                borderRadius: '6px',
+                transition: 'all 0.3s ease'
               }}
-              whileHover={{ color: '#764ba2' }}
+              whileHover={{ 
+                color: '#764ba2',
+                background: 'rgba(102, 126, 234, 0.1)'
+              }}
             >
               Sign in
             </motion.button>
