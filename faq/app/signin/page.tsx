@@ -390,49 +390,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
           </div>
         </div>
       </div>
-
-      {/* Card dengan Design Persis Seperti di Foto - Hanya Teks yang Diganti */}
-      <div
-        style={{
-          width: '100%',
-          maxWidth: '1200px',
-          backgroundColor: 'red', // Background hitam seperti di foto
-          color: '#ffffff', // Text putih
-          padding: '60px 40px', // Padding seperti di foto
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'flex-start',
-          gap: '40px',
-          fontFamily: "'Inter', sans-serif",
-        }}
-      >
-        {/* Left Section - Teks Besar di Pojok Kiri */}
-        <div style={{ flex: '1' }}>
-          <p
-            style={{
-              fontSize: '64px', // Font besar seperti "Get in touch." di foto
-              fontWeight: 'bold',
-              lineHeight: '1',
-              marginBottom: '20px',
-              letterSpacing: '-0.02em',
-            }}
-          >
-            "Mari mencatat sebuah kegiatan yang kamu inginkan."
-          </p>
-        </div>
-
-        {/* Right Section - Tetap Ada Tapi Kosong atau Bisa Dihapus */}
-        <div style={{ 
-          flex: '1',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'flex-end',
-          gap: '20px'
-        }}>
-          {/* Section ini bisa dikosongkan atau diisi dengan elemen lain */}
-        </div>
-      </div>
-    </div>
   );
 }
+
 
