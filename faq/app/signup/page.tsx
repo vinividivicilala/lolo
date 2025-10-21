@@ -5,11 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 
-interface SignUpPageProps {
-  onClose: () => void;
-}
-
-export default function SignUpPage({ onClose }: SignUpPageProps) {
+export default function SignUpPage() {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -20,26 +16,19 @@ export default function SignUpPage({ onClose }: SignUpPageProps) {
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
-    
     setIsLoading(true);
-    
+
     // Simulasi proses pendaftaran
     setTimeout(() => {
       setIsLoading(false);
-      onClose();
       router.push('/dashboard');
     }, 1500);
   };
 
-  // Fungsi sederhana untuk handle sign in
+  // Klik "Sign in" langsung pindah halaman
   const handleSignInClick = (e: React.MouseEvent) => {
     e.preventDefault();
-    console.log("Navigating to sign in...");
-    onClose();
-    // Gunakan setTimeout untuk memastikan modal tertutup dulu
-    setTimeout(() => {
-      router.push('/signin');
-    }, 100);
+    router.push('/signin');
   };
 
   return (
@@ -59,7 +48,7 @@ export default function SignUpPage({ onClose }: SignUpPageProps) {
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
       >
-        {/* Foto Portrait di Kiri - Diperkecil */}
+        {/* Foto di kiri */}
         <motion.div
           style={{
             flex: 0.7,
@@ -74,15 +63,12 @@ export default function SignUpPage({ onClose }: SignUpPageProps) {
             src="/images/5.jpg"
             alt="Portrait"
             fill
-            style={{
-              objectFit: 'cover',
-              display: 'block'
-            }}
+            style={{ objectFit: 'cover', display: 'block' }}
             priority
           />
         </motion.div>
 
-        {/* Konten Form di Kanan */}
+        {/* Konten form di kanan */}
         <motion.div
           style={{
             flex: 1,
@@ -97,7 +83,7 @@ export default function SignUpPage({ onClose }: SignUpPageProps) {
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.4, duration: 0.5 }}
         >
-          {/* Judul dan Deskripsi - Rata Kiri */}
+          {/* Judul */}
           <div style={{ marginBottom: '3rem' }}>
             <motion.h1
               style={{
@@ -106,7 +92,6 @@ export default function SignUpPage({ onClose }: SignUpPageProps) {
                 color: 'white',
                 margin: '0 0 1rem 0',
                 fontFamily: 'Arame Mono, monospace',
-                lineHeight: '1.2',
                 textAlign: 'left'
               }}
               initial={{ opacity: 0, y: 30 }}
@@ -122,7 +107,6 @@ export default function SignUpPage({ onClose }: SignUpPageProps) {
                 color: 'rgba(255,255,255,0.8)',
                 margin: 0,
                 fontFamily: 'Arame Mono, monospace',
-                lineHeight: '1.5',
                 textAlign: 'left'
               }}
               initial={{ opacity: 0, y: 30 }}
@@ -133,163 +117,55 @@ export default function SignUpPage({ onClose }: SignUpPageProps) {
             </motion.p>
           </div>
 
-          {/* Form Sign Up */}
+          {/* Form */}
           <motion.form
             onSubmit={handleSignUp}
-            style={{
-              width: '100%'
-            }}
+            style={{ width: '100%' }}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.8, duration: 0.5 }}
           >
-            {/* Full Name Input */}
-            <div style={{ marginBottom: '1.5rem' }}>
-              <input
-                type="text"
-                placeholder="Full Name"
-                value={formData.name}
-                onChange={(e) => setFormData({...formData, name: e.target.value})}
-                required
-                style={{
-                  width: '100%',
-                  padding: '1rem 1.5rem',
-                  border: '1px solid rgba(255,255,255,0.2)',
-                  borderRadius: '12px',
-                  fontSize: '1rem',
-                  fontFamily: 'Arame Mono, monospace',
-                  background: 'rgba(255,255,255,0.08)',
-                  color: 'white',
-                  outline: 'none',
-                  transition: 'all 0.3s ease',
-                  backdropFilter: 'blur(10px)'
-                }}
-              />
-            </div>
+            <input
+              type="text"
+              placeholder="Full Name"
+              value={formData.name}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              required
+              style={inputStyle}
+            />
+            <input
+              type="email"
+              placeholder="Email"
+              value={formData.email}
+              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+              required
+              style={inputStyle}
+            />
+            <input
+              type="password"
+              placeholder="Password"
+              value={formData.password}
+              onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+              required
+              style={inputStyle}
+            />
 
-            {/* Email Input */}
-            <div style={{ marginBottom: '1.5rem' }}>
-              <input
-                type="email"
-                placeholder="Email"
-                value={formData.email}
-                onChange={(e) => setFormData({...formData, email: e.target.value})}
-                required
-                style={{
-                  width: '100%',
-                  padding: '1rem 1.5rem',
-                  border: '1px solid rgba(255,255,255,0.2)',
-                  borderRadius: '12px',
-                  fontSize: '1rem',
-                  fontFamily: 'Arame Mono, monospace',
-                  background: 'rgba(255,255,255,0.08)',
-                  color: 'white',
-                  outline: 'none',
-                  transition: 'all 0.3s ease',
-                  backdropFilter: 'blur(10px)'
-                }}
-              />
-            </div>
-
-            {/* Password Input */}
-            <div style={{ marginBottom: '2.5rem' }}>
-              <input
-                type="password"
-                placeholder="Password"
-                value={formData.password}
-                onChange={(e) => setFormData({...formData, password: e.target.value})}
-                required
-                style={{
-                  width: '100%',
-                  padding: '1rem 1.5rem',
-                  border: '1px solid rgba(255,255,255,0.2)',
-                  borderRadius: '12px',
-                  fontSize: '1rem',
-                  fontFamily: 'Arame Mono, monospace',
-                  background: 'rgba(255,255,255,0.08)',
-                  color: 'white',
-                  outline: 'none',
-                  transition: 'all 0.3s ease',
-                  backdropFilter: 'blur(10px)'
-                }}
-              />
-            </div>
-
-            {/* Modern Sign Up Button - Warna Hitam */}
             <motion.button
               type="submit"
               disabled={isLoading}
               style={{
-                width: '100%',
-                padding: '1.2rem 2rem',
-                background: '#000000',
-                border: 'none',
-                borderRadius: '12px',
-                color: 'white',
-                fontSize: '1.1rem',
-                fontWeight: '600',
+                ...buttonStyle,
                 cursor: isLoading ? 'not-allowed' : 'pointer',
-                fontFamily: 'Arame Mono, monospace',
-                marginBottom: '2rem',
-                opacity: isLoading ? 0.7 : 1,
-                position: 'relative',
-                overflow: 'hidden'
+                opacity: isLoading ? 0.7 : 1
               }}
-              whileHover={!isLoading ? { 
-                scale: 1.02,
-                boxShadow: '0 10px 30px rgba(0, 0, 0, 0.4)',
-                background: '#333333'
-              } : {}}
+              whileHover={!isLoading ? { scale: 1.02, background: '#333' } : {}}
               whileTap={!isLoading ? { scale: 0.98 } : {}}
             >
-              {isLoading ? (
-                <motion.div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '0.5rem'
-                  }}
-                >
-                  <motion.div
-                    style={{
-                      width: '16px',
-                      height: '16px',
-                      border: '2px solid transparent',
-                      borderTop: '2px solid white',
-                      borderRadius: '50%'
-                    }}
-                    animate={{ rotate: 360 }}
-                    transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                  />
-                  Creating Account...
-                </motion.div>
-              ) : (
-                <motion.div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '0.5rem'
-                  }}
-                >
-                  Get Started
-                  <motion.svg
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  >
-                    <path d="M5 12h14M12 5l7 7-7 7"/>
-                  </motion.svg>
-                </motion.div>
-              )}
+              {isLoading ? 'Creating Account...' : 'Get Started'}
             </motion.button>
           </motion.form>
 
-          {/* Sign In Link - Gunakan anchor tag sederhana */}
+          {/* Link ke Sign in */}
           <motion.div
             style={{
               textAlign: 'center',
@@ -308,21 +184,7 @@ export default function SignUpPage({ onClose }: SignUpPageProps) {
               style={{
                 color: '#ffffff',
                 cursor: 'pointer',
-                fontFamily: 'Arame Mono, monospace',
-                fontSize: '1rem',
-                fontWeight: '600',
-                textDecoration: 'underline',
-                padding: '0.25rem 0.5rem',
-                borderRadius: '6px',
-                transition: 'all 0.3s ease'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.color = '#cccccc';
-                e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.color = '#ffffff';
-                e.currentTarget.style.backgroundColor = 'transparent';
+                textDecoration: 'underline'
               }}
             >
               Sign in
@@ -333,3 +195,32 @@ export default function SignUpPage({ onClose }: SignUpPageProps) {
     </AnimatePresence>
   );
 }
+
+// 🔹 Style terpisah biar rapi
+const inputStyle: React.CSSProperties = {
+  width: '100%',
+  padding: '1rem 1.5rem',
+  border: '1px solid rgba(255,255,255,0.2)',
+  borderRadius: '12px',
+  fontSize: '1rem',
+  fontFamily: 'Arame Mono, monospace',
+  background: 'rgba(255,255,255,0.08)',
+  color: 'white',
+  outline: 'none',
+  marginBottom: '1.5rem',
+  backdropFilter: 'blur(10px)'
+};
+
+const buttonStyle: React.CSSProperties = {
+  width: '100%',
+  padding: '1.2rem 2rem',
+  background: '#000',
+  border: 'none',
+  borderRadius: '12px',
+  color: 'white',
+  fontSize: '1.1rem',
+  fontWeight: '600',
+  fontFamily: 'Arame Mono, monospace',
+  marginBottom: '2rem',
+  transition: 'all 0.3s ease'
+};
