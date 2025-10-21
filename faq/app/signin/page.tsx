@@ -396,7 +396,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
         style={{
           width: '100%',
           maxWidth: '1200px',
-          backgroundColor: '#000000', // Background hitam seperti di foto
+          backgroundColor: 'red', // Background hitam seperti di foto
           color: '#ffffff', // Text putih
           padding: '60px 40px', // Padding seperti di foto
           display: 'flex',
@@ -435,3 +435,4 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
     </div>
   );
 }
+
