@@ -391,145 +391,36 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
         </div>
       </div>
 
-      {/* Card Footer dengan Border Radius seperti di foto */}
+      {/* Card Baru dengan Design Minimalis */}
       <div
         style={{
           width: '100%',
           maxWidth: '1200px',
-          backgroundColor: '#ffffff',
+          backgroundColor: '#CCFF90', // Warna hijau stabilo
           color: '#000000',
-          padding: '80px 60px',
-          borderRadius: '24px', // Border radius seperti di foto
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'flex-start',
-          gap: '60px',
+          padding: '60px 40px',
+          borderRadius: '16px',
           fontFamily: "'Inter', sans-serif",
-          boxShadow: '0 10px 30px rgba(0,0,0,0.1)',
+          boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
+          minHeight: '200px',
+          display: 'flex',
+          alignItems: 'flex-start',
         }}
       >
-        {/* Left Section - Main Content */}
-        <div style={{ flex: '1' }}>
-          <h1
-            style={{
-              fontSize: '72px',
-              fontWeight: 'bold',
-              lineHeight: '0.9',
-              marginBottom: '30px',
-              letterSpacing: '-0.03em',
-            }}
-          >
-            Get in touch.
-          </h1>
-          
-          <div style={{ marginBottom: '50px' }}>
-            <p
-              style={{
-                fontSize: '20px',
-                marginBottom: '8px',
-                opacity: '0.8',
-              }}
-            >
-              Let's start a conversation
-            </p>
-            <p
-              style={{
-                fontSize: '18px',
-                opacity: '0.8',
-              }}
-            >
-              higsimplestudio.is
-            </p>
-          </div>
-
-          <div style={{ marginBottom: '40px' }}>
-            <p
-              style={{
-                fontSize: '16px',
-                opacity: '0.7',
-                marginBottom: '12px',
-              }}
-            >
-              Based on
-            </p>
-            <p
-              style={{
-                fontSize: '18px',
-                marginBottom: '6px',
-              }}
-            >
-              Madrid, ES
-            </p>
-            <p
-              style={{
-                fontSize: '18px',
-              }}
-            >
-              Montevideo, UY
-            </p>
-          </div>
-
-          <div>
-            <p
-              style={{
-                fontSize: '16px',
-                opacity: '0.7',
-                marginBottom: '15px',
-              }}
-            >
-              Follow us
-            </p>
-            <div
-              style={{
-                display: 'flex',
-                gap: '25px',
-              }}
-            >
-              {['dribbble', 'linkedin', 'instagram', 'twitter'].map((platform) => (
-                <span
-                  key={platform}
-                  style={{
-                    fontSize: '18px',
-                    cursor: 'pointer',
-                    transition: 'opacity 0.3s ease',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.opacity = '0.7';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.opacity = '1';
-                  }}
-                >
-                  {platform}
-                </span>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Right Section - Studio Info */}
-        <div style={{ 
-          textAlign: 'right',
-          alignSelf: 'flex-end',
-        }}>
-          <p
-            style={{
-              fontSize: '28px',
-              fontWeight: 'bold',
-              marginBottom: '15px',
-            }}
-          >
-            Simple Studio*
-          </p>
-          <p
-            style={{
-              fontSize: '14px',
-              opacity: '0.6',
-            }}
-          >
-            © 2025 Simple Studio LLC. All Rights Reserved
-          </p>
-        </div>
+        {/* Teks di pojok kiri */}
+        <p
+          style={{
+            fontSize: '32px',
+            fontWeight: '300', // Font minimalis dan tipis
+            lineHeight: '1.2',
+            margin: '0',
+            letterSpacing: '-0.02em',
+            fontStyle: 'italic', // Gaya minimalis
+            maxWidth: '600px',
+          }}
+        >
+          "Mari mencatat sebuah kegiatan yang kamu inginkan."
+        </p>
       </div>
     </div>
   );
