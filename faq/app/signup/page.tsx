@@ -7,10 +7,9 @@ import { useRouter } from "next/navigation";
 
 interface SignUpPageProps {
   onClose: () => void;
-  onSwitchToSignIn?: () => void; // Jadikan optional
 }
 
-export default function SignUpPage({ onClose, onSwitchToSignIn }: SignUpPageProps) {
+export default function SignUpPage({ onClose }: SignUpPageProps) {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -28,17 +27,19 @@ export default function SignUpPage({ onClose, onSwitchToSignIn }: SignUpPageProp
     setTimeout(() => {
       setIsLoading(false);
       onClose();
-      // Redirect setelah sign up berhasil
       router.push('/dashboard');
     }, 1500);
   };
 
-  const handleSignIn = () => {
-    console.log("Tombol sign in diklik");
-    onClose(); // Tutup modal sign up dulu
-    
-    // Gunakan router langsung tanpa dependensi pada prop
-    router.push('/signin');
+  // Fungsi sederhana untuk handle sign in
+  const handleSignInClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    console.log("Navigating to sign in...");
+    onClose();
+    // Gunakan setTimeout untuk memastikan modal tertutup dulu
+    setTimeout(() => {
+      router.push('/signin');
+    }, 100);
   };
 
   return (
@@ -163,16 +164,6 @@ export default function SignUpPage({ onClose, onSwitchToSignIn }: SignUpPageProp
                   transition: 'all 0.3s ease',
                   backdropFilter: 'blur(10px)'
                 }}
-                onFocus={(e) => {
-                  e.target.style.background = 'rgba(255,255,255,0.12)';
-                  e.target.style.borderColor = 'rgba(255,255,255,0.4)';
-                  e.target.style.boxShadow = '0 0 0 3px rgba(0, 0, 0, 0.1)';
-                }}
-                onBlur={(e) => {
-                  e.target.style.background = 'rgba(255,255,255,0.08)';
-                  e.target.style.borderColor = 'rgba(255,255,255,0.2)';
-                  e.target.style.boxShadow = 'none';
-                }}
               />
             </div>
 
@@ -197,16 +188,6 @@ export default function SignUpPage({ onClose, onSwitchToSignIn }: SignUpPageProp
                   transition: 'all 0.3s ease',
                   backdropFilter: 'blur(10px)'
                 }}
-                onFocus={(e) => {
-                  e.target.style.background = 'rgba(255,255,255,0.12)';
-                  e.target.style.borderColor = 'rgba(255,255,255,0.4)';
-                  e.target.style.boxShadow = '0 0 0 3px rgba(0, 0, 0, 0.1)';
-                }}
-                onBlur={(e) => {
-                  e.target.style.background = 'rgba(255,255,255,0.08)';
-                  e.target.style.borderColor = 'rgba(255,255,255,0.2)';
-                  e.target.style.boxShadow = 'none';
-                }}
               />
             </div>
 
@@ -230,16 +211,6 @@ export default function SignUpPage({ onClose, onSwitchToSignIn }: SignUpPageProp
                   outline: 'none',
                   transition: 'all 0.3s ease',
                   backdropFilter: 'blur(10px)'
-                }}
-                onFocus={(e) => {
-                  e.target.style.background = 'rgba(255,255,255,0.12)';
-                  e.target.style.borderColor = 'rgba(255,255,255,0.4)';
-                  e.target.style.boxShadow = '0 0 0 3px rgba(0, 0, 0, 0.1)';
-                }}
-                onBlur={(e) => {
-                  e.target.style.background = 'rgba(255,255,255,0.08)';
-                  e.target.style.borderColor = 'rgba(255,255,255,0.2)';
-                  e.target.style.boxShadow = 'none';
                 }}
               />
             </div>
@@ -279,8 +250,6 @@ export default function SignUpPage({ onClose, onSwitchToSignIn }: SignUpPageProp
                     justifyContent: 'center',
                     gap: '0.5rem'
                   }}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
                 >
                   <motion.div
                     style={{
@@ -320,7 +289,7 @@ export default function SignUpPage({ onClose, onSwitchToSignIn }: SignUpPageProp
             </motion.button>
           </motion.form>
 
-          {/* Sign In Link */}
+          {/* Sign In Link - Gunakan anchor tag sederhana */}
           <motion.div
             style={{
               textAlign: 'center',
@@ -333,12 +302,10 @@ export default function SignUpPage({ onClose, onSwitchToSignIn }: SignUpPageProp
             transition={{ delay: 1, duration: 0.5 }}
           >
             Already have an account?{' '}
-            <motion.button
-              type="button"
-              onClick={handleSignIn}
+            <a
+              href="/signin"
+              onClick={handleSignInClick}
               style={{
-                background: 'none',
-                border: 'none',
                 color: '#ffffff',
                 cursor: 'pointer',
                 fontFamily: 'Arame Mono, monospace',
@@ -349,14 +316,17 @@ export default function SignUpPage({ onClose, onSwitchToSignIn }: SignUpPageProp
                 borderRadius: '6px',
                 transition: 'all 0.3s ease'
               }}
-              whileHover={{ 
-                color: '#cccccc',
-                background: 'rgba(255, 255, 255, 0.1)'
+              onMouseEnter={(e) => {
+                e.currentTarget.style.color = '#cccccc';
+                e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
               }}
-              whileTap={{ scale: 0.95 }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.color = '#ffffff';
+                e.currentTarget.style.backgroundColor = 'transparent';
+              }}
             >
               Sign in
-            </motion.button>
+            </a>
           </motion.div>
         </motion.div>
       </motion.div>
