@@ -396,7 +396,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
         style={{
           width: '100%',
           maxWidth: '1200px',
-          backgroundColor: '#000000',
+          backgroundColor: 'green',
           color: '#ffffff',
           padding: '60px 40px',
           borderRadius: '20px',
@@ -537,3 +537,4 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
     </div>
   );
 }
+
