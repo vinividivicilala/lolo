@@ -390,7 +390,6 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
           </div>
         </div>
       </div>
+    </div> {/* This closing div was missing */}
   );
 }
-
-
