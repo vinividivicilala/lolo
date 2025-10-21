@@ -125,7 +125,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
                 fontFamily: "'Roboto', sans-serif",
                 fontSize: '16px', 
                 color: '#ffffff',
-                fontWeight: '500'
+                fontWeight: '500',
               }}>
                 Continue with Google
               </span>
@@ -160,7 +160,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
                 fontFamily: "'Roboto', sans-serif",
                 fontSize: '16px', 
                 color: '#ffffff',
-                fontWeight: '500'
+                fontWeight: '500',
               }}>
                 Continue with Discord
               </span>
@@ -195,7 +195,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
                 fontFamily: "'Roboto', sans-serif",
                 fontSize: '16px', 
                 color: '#ffffff',
-                fontWeight: '500'
+                fontWeight: '500',
               }}>
                 Continue with GitHub
               </span>
@@ -390,6 +390,6 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
           </div>
         </div>
       </div>
-    </div> {/* This closing div was missing */}
+    </div>
   );
 }
