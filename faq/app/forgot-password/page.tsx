@@ -17,7 +17,22 @@ export default function ForgotPasswordPage({ onClose, onSwitchToSignIn }: Forgot
   };
 
   const handleBackToSignIn = () => {
-    onSwitchToSignIn(); // Panggil fungsi untuk kembali ke sign in
+    // Pastikan onSwitchToSignIn adalah function sebelum dipanggil
+    if (typeof onSwitchToSignIn === 'function') {
+      onSwitchToSignIn();
+    } else {
+      console.error('onSwitchToSignIn is not a function');
+      // Fallback: tutup modal jika onSwitchToSignIn tidak tersedia
+      if (typeof onClose === 'function') {
+        onClose();
+      }
+    }
+  };
+
+  const handleClose = () => {
+    if (typeof onClose === 'function') {
+      onClose();
+    }
   };
 
   return (
@@ -57,6 +72,29 @@ export default function ForgotPasswordPage({ onClose, onSwitchToSignIn }: Forgot
           exit={{ scale: 0.9, opacity: 0, y: 20 }}
           transition={{ duration: 0.3, ease: "easeOut" }}
         >
+          {/* Close Button */}
+          <button
+            onClick={handleClose}
+            style={{
+              position: 'absolute',
+              top: '1rem',
+              right: '1rem',
+              background: 'rgba(255,255,255,0.1)',
+              border: '1px solid rgba(255,255,255,0.3)',
+              borderRadius: '50%',
+              width: '30px',
+              height: '30px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              color: 'white',
+              fontSize: '1.2rem'
+            }}
+          >
+            ×
+          </button>
+
           {/* Judul */}
           <h2 style={{
             color: 'white',
@@ -133,7 +171,7 @@ export default function ForgotPasswordPage({ onClose, onSwitchToSignIn }: Forgot
             </button>
           </form>
 
-          {/* Tombol Kembali - dengan event handler yang benar */}
+          {/* Tombol Kembali dengan pengecekan */}
           <button
             onClick={handleBackToSignIn}
             style={{
