@@ -391,36 +391,62 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
         </div>
       </div>
 
-      {/* Card Baru dengan Design Minimalis */}
+      {/* Card dengan Design Tetap Sama (Seperti Sebelumnya) */}
       <div
         style={{
           width: '100%',
           maxWidth: '1200px',
-          backgroundColor: '#CCFF90', // Warna hijau stabilo
+          backgroundColor: '#ffffff',
           color: '#000000',
-          padding: '60px 40px',
-          borderRadius: '16px',
-          fontFamily: "'Inter', sans-serif",
-          boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
-          minHeight: '200px',
+          padding: '80px 60px',
+          borderRadius: '24px',
           display: 'flex',
+          justifyContent: 'space-between',
           alignItems: 'flex-start',
+          gap: '60px',
+          fontFamily: "'Inter', sans-serif",
+          boxShadow: '0 10px 30px rgba(0,0,0,0.1)',
         }}
       >
-        {/* Teks di pojok kiri */}
-        <p
-          style={{
-            fontSize: '32px',
-            fontWeight: '300', // Font minimalis dan tipis
-            lineHeight: '1.2',
-            margin: '0',
-            letterSpacing: '-0.02em',
-            fontStyle: 'italic', // Gaya minimalis
-            maxWidth: '600px',
-          }}
-        >
-          "Mari mencatat sebuah kegiatan yang kamu inginkan."
-        </p>
+        {/* Left Section - Teks Besar di Pojok Kiri */}
+        <div style={{ flex: '1' }}>
+          <p
+            style={{
+              fontSize: '48px',
+              fontWeight: '300', // Font minimalis dan tipis
+              lineHeight: '1.1',
+              margin: '0',
+              letterSpacing: '-0.02em',
+              fontStyle: 'italic', // Gaya minimalis
+            }}
+          >
+            "Mari mencatat sebuah kegiatan yang kamu inginkan."
+          </p>
+        </div>
+
+        {/* Right Section - Studio Info (Tetap Ada) */}
+        <div style={{ 
+          textAlign: 'right',
+          alignSelf: 'flex-end',
+        }}>
+          <p
+            style={{
+              fontSize: '24px',
+              fontWeight: 'bold',
+              marginBottom: '10px',
+            }}
+          >
+            Simple Studio*
+          </p>
+          <p
+            style={{
+              fontSize: '12px',
+              opacity: '0.6',
+            }}
+          >
+            © 2025 Simple Studio LLC. All Rights Reserved
+          </p>
+        </div>
       </div>
     </div>
   );
