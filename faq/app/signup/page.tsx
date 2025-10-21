@@ -60,29 +60,14 @@ export default function SignUpPage({ onClose, onSwitchToSignIn }: SignUpPageProp
             maxWidth: '500px',
             width: '100%',
             position: 'relative',
-            boxShadow: '0 20px 40px rgba(0,0,0,0.1)'
+            boxShadow: '0 20px 40px rgba(0,0,0,0.1)',
+            border: '2px solid #667eea'
           }}
           initial={{ scale: 0.9, opacity: 0, y: 20 }}
           animate={{ scale: 1, opacity: 1, y: 0 }}
           exit={{ scale: 0.9, opacity: 0, y: 20 }}
           transition={{ duration: 0.3, ease: "easeOut" }}
         >
-          {/* Background Image - Full Screen */}
-          <div
-            style={{
-              position: 'fixed',
-              top: 0,
-              left: 0,
-              width: '100%',
-              height: '100%',
-              backgroundImage: 'url(images/5.jpg)',
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-              backgroundRepeat: 'no-repeat',
-              zIndex: -1
-            }}
-          />
-
           {/* Close Button */}
           <motion.button
             onClick={onClose}
@@ -139,64 +124,23 @@ export default function SignUpPage({ onClose, onSwitchToSignIn }: SignUpPageProp
 
           {/* Sign Up Form */}
           <form onSubmit={handleSignUp}>
-            <div style={{ marginBottom: '1rem' }}>
-              <label style={{
-                display: 'block',
-                marginBottom: '0.5rem',
-                fontSize: '0.9rem',
-                fontWeight: '500',
-                color: '#333',
-                fontFamily: 'Arame Mono, monospace'
-              }}>
-                Full Name
-              </label>
+            <div style={{ marginBottom: '1.5rem' }}>
               <input
                 type="text"
-                placeholder="Enter your full name"
+                placeholder="Full Name"
                 value={formData.name}
                 onChange={(e) => setFormData({...formData, name: e.target.value})}
                 required
                 style={{
                   width: '100%',
                   padding: '0.8rem',
-                  border: '1px solid #ddd',
-                  borderRadius: '6px',
-                  fontSize: '0.9rem',
+                  border: '2px solid #ddd',
+                  borderRadius: '8px',
+                  fontSize: '1rem',
                   fontFamily: 'Arame Mono, monospace',
-                  transition: 'border-color 0.3s ease',
-                  boxSizing: 'border-box'
-                }}
-                onFocus={(e) => e.target.style.borderColor = '#667eea'}
-                onBlur={(e) => e.target.style.borderColor = '#ddd'}
-              />
-            </div>
-
-            <div style={{ marginBottom: '1rem' }}>
-              <label style={{
-                display: 'block',
-                marginBottom: '0.5rem',
-                fontSize: '0.9rem',
-                fontWeight: '500',
-                color: '#333',
-                fontFamily: 'Arame Mono, monospace'
-              }}>
-                Email
-              </label>
-              <input
-                type="email"
-                placeholder="Enter your email"
-                value={formData.email}
-                onChange={(e) => setFormData({...formData, email: e.target.value})}
-                required
-                style={{
-                  width: '100%',
-                  padding: '0.8rem',
-                  border: '1px solid #ddd',
-                  borderRadius: '6px',
-                  fontSize: '0.9rem',
-                  fontFamily: 'Arame Mono, monospace',
-                  transition: 'border-color 0.3s ease',
-                  boxSizing: 'border-box'
+                  transition: 'all 0.3s ease',
+                  boxSizing: 'border-box',
+                  outline: 'none'
                 }}
                 onFocus={(e) => e.target.style.borderColor = '#667eea'}
                 onBlur={(e) => e.target.style.borderColor = '#ddd'}
@@ -204,31 +148,45 @@ export default function SignUpPage({ onClose, onSwitchToSignIn }: SignUpPageProp
             </div>
 
             <div style={{ marginBottom: '1.5rem' }}>
-              <label style={{
-                display: 'block',
-                marginBottom: '0.5rem',
-                fontSize: '0.9rem',
-                fontWeight: '500',
-                color: '#333',
-                fontFamily: 'Arame Mono, monospace'
-              }}>
-                Password
-              </label>
+              <input
+                type="email"
+                placeholder="Email"
+                value={formData.email}
+                onChange={(e) => setFormData({...formData, email: e.target.value})}
+                required
+                style={{
+                  width: '100%',
+                  padding: '0.8rem',
+                  border: '2px solid #ddd',
+                  borderRadius: '8px',
+                  fontSize: '1rem',
+                  fontFamily: 'Arame Mono, monospace',
+                  transition: 'all 0.3s ease',
+                  boxSizing: 'border-box',
+                  outline: 'none'
+                }}
+                onFocus={(e) => e.target.style.borderColor = '#667eea'}
+                onBlur={(e) => e.target.style.borderColor = '#ddd'}
+              />
+            </div>
+
+            <div style={{ marginBottom: '2rem' }}>
               <input
                 type="password"
-                placeholder="Enter your password"
+                placeholder="Password"
                 value={formData.password}
                 onChange={(e) => setFormData({...formData, password: e.target.value})}
                 required
                 style={{
                   width: '100%',
                   padding: '0.8rem',
-                  border: '1px solid #ddd',
-                  borderRadius: '6px',
-                  fontSize: '0.9rem',
+                  border: '2px solid #ddd',
+                  borderRadius: '8px',
+                  fontSize: '1rem',
                   fontFamily: 'Arame Mono, monospace',
-                  transition: 'border-color 0.3s ease',
-                  boxSizing: 'border-box'
+                  transition: 'all 0.3s ease',
+                  boxSizing: 'border-box',
+                  outline: 'none'
                 }}
                 onFocus={(e) => e.target.style.borderColor = '#667eea'}
                 onBlur={(e) => e.target.style.borderColor = '#ddd'}
@@ -240,20 +198,24 @@ export default function SignUpPage({ onClose, onSwitchToSignIn }: SignUpPageProp
               disabled={isLoading}
               style={{
                 width: '100%',
-                padding: '0.8rem',
+                padding: '1rem',
                 background: '#667eea',
-                border: 'none',
-                borderRadius: '6px',
+                border: '2px solid #667eea',
+                borderRadius: '8px',
                 color: 'white',
-                fontSize: '0.9rem',
+                fontSize: '1rem',
                 fontWeight: '600',
                 cursor: isLoading ? 'not-allowed' : 'pointer',
                 fontFamily: 'Arame Mono, monospace',
                 marginBottom: '1.5rem',
                 opacity: isLoading ? 0.7 : 1,
-                transition: 'background-color 0.3s ease'
+                transition: 'all 0.3s ease'
               }}
-              whileHover={!isLoading ? { backgroundColor: '#5a6fd8' } : {}}
+              whileHover={!isLoading ? { 
+                backgroundColor: 'white', 
+                color: '#667eea',
+                scale: 1.02
+              } : {}}
               whileTap={!isLoading ? { scale: 0.98 } : {}}
             >
               {isLoading ? 'Signing Up...' : 'Sign Up'}
@@ -264,7 +226,7 @@ export default function SignUpPage({ onClose, onSwitchToSignIn }: SignUpPageProp
           <div
             style={{
               textAlign: 'center',
-              fontSize: '0.9rem',
+              fontSize: '1rem',
               color: '#666',
               fontFamily: 'Arame Mono, monospace'
             }}
@@ -279,7 +241,7 @@ export default function SignUpPage({ onClose, onSwitchToSignIn }: SignUpPageProp
                 color: '#667eea',
                 cursor: 'pointer',
                 fontFamily: 'Arame Mono, monospace',
-                fontSize: '0.9rem',
+                fontSize: '1rem',
                 fontWeight: '600',
                 textDecoration: 'underline',
                 padding: 0
