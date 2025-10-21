@@ -391,61 +391,45 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
         </div>
       </div>
 
-      {/* Card dengan Design Tetap Sama (Seperti Sebelumnya) */}
+      {/* Card dengan Design Persis Seperti di Foto - Hanya Teks yang Diganti */}
       <div
         style={{
           width: '100%',
           maxWidth: '1200px',
-          backgroundColor: '#ffffff',
-          color: '#000000',
-          padding: '80px 60px',
-          borderRadius: '24px',
+          backgroundColor: '#000000', // Background hitam seperti di foto
+          color: '#ffffff', // Text putih
+          padding: '60px 40px', // Padding seperti di foto
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'flex-start',
-          gap: '60px',
+          gap: '40px',
           fontFamily: "'Inter', sans-serif",
-          boxShadow: '0 10px 30px rgba(0,0,0,0.1)',
         }}
       >
         {/* Left Section - Teks Besar di Pojok Kiri */}
         <div style={{ flex: '1' }}>
           <p
             style={{
-              fontSize: '48px',
-              fontWeight: '300', // Font minimalis dan tipis
-              lineHeight: '1.1',
-              margin: '0',
+              fontSize: '64px', // Font besar seperti "Get in touch." di foto
+              fontWeight: 'bold',
+              lineHeight: '1',
+              marginBottom: '20px',
               letterSpacing: '-0.02em',
-              fontStyle: 'italic', // Gaya minimalis
             }}
           >
             "Mari mencatat sebuah kegiatan yang kamu inginkan."
           </p>
         </div>
 
-        {/* Right Section - Studio Info (Tetap Ada) */}
+        {/* Right Section - Tetap Ada Tapi Kosong atau Bisa Dihapus */}
         <div style={{ 
-          textAlign: 'right',
-          alignSelf: 'flex-end',
+          flex: '1',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'flex-end',
+          gap: '20px'
         }}>
-          <p
-            style={{
-              fontSize: '24px',
-              fontWeight: 'bold',
-              marginBottom: '10px',
-            }}
-          >
-            Simple Studio*
-          </p>
-          <p
-            style={{
-              fontSize: '12px',
-              opacity: '0.6',
-            }}
-          >
-            © 2025 Simple Studio LLC. All Rights Reserved
-          </p>
+          {/* Section ini bisa dikosongkan atau diisi dengan elemen lain */}
         </div>
       </div>
     </div>
