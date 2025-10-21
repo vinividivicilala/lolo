@@ -2223,11 +2223,13 @@ export default function HomePage(): React.JSX.Element {
       </AnimatePresence>
 
 
-// PERBAIKAN: Menu Overlay - BACKGROUND HANYA PADA AREA MENU
+
+
+// PERBAIKAN: Menu Overlay - BACKGROUND SOLID TANPA TRANSPARANSI
 <AnimatePresence>
   {showMenu && (
     <>
-      {/* Background Overlay - DIPISAH DARI BODY UTAMA */}
+      {/* Menu Content dengan Background SOLID - MENUTUPI SEMUA KONTEN */}
       <motion.div
         style={{
           position: 'fixed',
@@ -2235,27 +2237,10 @@ export default function HomePage(): React.JSX.Element {
           left: 0,
           width: '100%',
           height: '100%',
-          backgroundColor: 'rgba(0,0,0,0.8)', // Overlay semi-transparan
-          zIndex: zIndexes.menu - 1, // Di bawah menu content
-        }}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-      />
-
-      {/* Menu Content dengan Background Solid - AREA MENU SAJA */}
-      <motion.div
-        style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          width: '100%',
-          height: '100%',
-          backgroundColor: '#FF4444', // Background merah hanya untuk menu
+          backgroundColor: '#FF4444', // Background merah SOLID
           zIndex: zIndexes.menu,
           display: 'flex',
           padding: '2rem',
-          clipPath: 'circle(0% at 95% 5%)', // Shape animation
         }}
         variants={menuVariants}
         initial="closed"
@@ -2271,7 +2256,7 @@ export default function HomePage(): React.JSX.Element {
           paddingLeft: '4rem',
           position: 'relative'
         }}>
-          {/* Website Name - Top Left - DIUBAH MENJADI MENURU */}
+          {/* Website Name - Top Left */}
           <motion.div
             style={{
               position: 'absolute',
@@ -2401,7 +2386,10 @@ export default function HomePage(): React.JSX.Element {
                   x: 15,
                   transition: { duration: 0.2, ease: "easeOut" }
                 }}
-                onClick={item.action}
+                onClick={() => {
+                  item.action();
+                  setShowMenu(false); // Tutup menu setelah klik
+                }}
               >
                 {/* Menu Text dengan font besar 80px */}
                 <motion.div
@@ -2540,10 +2528,6 @@ export default function HomePage(): React.JSX.Element {
     </>
   )}
 </AnimatePresence>
-
-
-
-
 
 
 
@@ -2933,6 +2917,7 @@ export default function HomePage(): React.JSX.Element {
     </div>
   );
 }
+
 
 
 
