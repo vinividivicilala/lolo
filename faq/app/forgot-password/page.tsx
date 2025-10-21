@@ -37,15 +37,17 @@ export default function ForgotPasswordPage({ onClose, onSwitchToSignIn }: Forgot
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
       >
+        {/* Line Box Container */}
         <motion.div
           style={{
             background: 'white',
-            borderRadius: '12px',
-            padding: '2.5rem',
+            borderRadius: '8px',
+            padding: '2rem',
             maxWidth: '400px',
             width: '90%',
             position: 'relative',
-            boxShadow: '0 20px 60px rgba(0,0,0,0.2)'
+            border: '2px solid #e0e0e0',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
           }}
           initial={{ scale: 0.9, opacity: 0, y: 20 }}
           animate={{ scale: 1, opacity: 1, y: 0 }}
@@ -57,29 +59,34 @@ export default function ForgotPasswordPage({ onClose, onSwitchToSignIn }: Forgot
             onClick={onClose}
             style={{
               position: 'absolute',
-              top: '1rem',
-              right: '1rem',
+              top: '0.5rem',
+              right: '0.5rem',
               background: 'none',
               border: 'none',
               borderRadius: '50%',
-              width: '32px',
-              height: '32px',
+              width: '30px',
+              height: '30px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               cursor: 'pointer',
               color: '#666',
-              fontSize: '1.5rem',
+              fontSize: '1.2rem',
               fontWeight: '300'
             }}
-            whileHover={{ backgroundColor: 'rgba(0,0,0,0.05)', scale: 1.1 }}
+            whileHover={{ backgroundColor: 'rgba(0,0,0,0.05)' }}
             whileTap={{ scale: 0.9 }}
           >
             ×
           </motion.button>
 
-          {/* Header */}
-          <div style={{ textAlign: 'left', marginBottom: '2rem' }}>
+          {/* Header Section inside Line Box */}
+          <div style={{ 
+            textAlign: 'left', 
+            marginBottom: '1.5rem',
+            borderBottom: '1px solid #f0f0f0',
+            paddingBottom: '1rem'
+          }}>
             <motion.h2
               style={{
                 fontSize: '1.5rem',
@@ -134,18 +141,11 @@ export default function ForgotPasswordPage({ onClose, onSwitchToSignIn }: Forgot
                     width: '100%',
                     padding: '0.75rem',
                     border: '1px solid #ddd',
-                    borderRadius: '6px',
+                    borderRadius: '4px',
                     fontSize: '0.9rem',
                     fontFamily: 'system-ui, -apple-system, sans-serif',
                     transition: 'all 0.2s ease',
                     boxSizing: 'border-box'
-                  }}
-                  onFocus={(e) => {
-                    e.target.style.borderColor = '#007bff';
-                    e.target.style.outline = 'none';
-                  }}
-                  onBlur={(e) => {
-                    e.target.style.borderColor = '#ddd';
                   }}
                 />
               </div>
@@ -158,13 +158,13 @@ export default function ForgotPasswordPage({ onClose, onSwitchToSignIn }: Forgot
                   padding: '0.75rem',
                   background: '#007bff',
                   border: 'none',
-                  borderRadius: '6px',
+                  borderRadius: '4px',
                   color: 'white',
                   fontSize: '0.9rem',
                   fontWeight: '500',
                   cursor: 'pointer',
                   fontFamily: 'system-ui, -apple-system, sans-serif',
-                  marginBottom: '1.5rem'
+                  marginBottom: '1rem'
                 }}
                 whileHover={{ backgroundColor: '#0056b3' }}
                 whileTap={{ scale: 0.98 }}
@@ -174,7 +174,7 @@ export default function ForgotPasswordPage({ onClose, onSwitchToSignIn }: Forgot
             </form>
           ) : (
             <motion.div
-              style={{ textAlign: 'center', padding: '2rem 0' }}
+              style={{ textAlign: 'center', padding: '1rem 0' }}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
             >
@@ -191,7 +191,7 @@ export default function ForgotPasswordPage({ onClose, onSwitchToSignIn }: Forgot
           )}
 
           {/* Back to Sign In */}
-          <div style={{ textAlign: 'center' }}>
+          <div style={{ textAlign: 'center', paddingTop: '1rem', borderTop: '1px solid #f0f0f0' }}>
             <motion.button
               onClick={onSwitchToSignIn}
               style={{
@@ -201,11 +201,9 @@ export default function ForgotPasswordPage({ onClose, onSwitchToSignIn }: Forgot
                 cursor: 'pointer',
                 fontFamily: 'system-ui, -apple-system, sans-serif',
                 fontSize: '0.9rem',
-                textDecoration: 'none',
-                padding: '0.5rem 1rem',
-                borderRadius: '4px'
+                textDecoration: 'none'
               }}
-              whileHover={{ backgroundColor: 'rgba(0,123,255,0.05)' }}
+              whileHover={{ color: '#0056b3' }}
             >
               Back to Sign In
             </motion.button>
