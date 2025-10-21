@@ -28,14 +28,13 @@ export default function ForgotPasswordPage({ onClose, onSwitchToSignIn }: Forgot
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
       >
-        {/* Line Box saja */}
+        {/* Line Box yang lebih besar */}
         <motion.div
           style={{
             background: 'transparent',
             borderRadius: '12px',
-            padding: '2rem',
-            maxWidth: '400px',
-            width: '90%',
+            width: '600px',
+            height: '400px',
             position: 'relative',
             border: '1px solid rgba(255,255,255,0.3)',
           }}
