@@ -210,16 +210,17 @@ export default function HomePage(): React.JSX.Element {
   const contentItemsRef = useRef<(HTMLDivElement | null)[]>([]);
 
 
-
-  // PERBAIKAN: Sistem z-index terorganisir
-  const zIndexes = {
-    banner: 100,
-    search: 90,
-    content: 85,
-    menu: 80,
-    modal: 200,
-    loading: 300
-  };
+// PERBAIKAN: Sistem z-index terorganisir - FIXED
+const zIndexes = {
+  base: 10,        // Element biasa
+  navbar: 50,      // Semua elemen navbar
+  banner: 100,     // Banner
+  search: 150,     // Search overlay
+  content: 200,    // Content overlay
+  menu: 1000,      // Menu overlay - HARUS PALING TINGGI
+  modal: 1100,     // Modal
+  loading: 1200    // Loading screen
+};
 
   // Database kota-kota Indonesia
   const indonesiaCities = [
@@ -1621,7 +1622,7 @@ export default function HomePage(): React.JSX.Element {
             fontFamily: 'Arame Mono, monospace',
             fontSize: '0.85rem',
             backdropFilter: 'blur(10px)',
-            zIndex: zIndexes.banner - 5,
+            zIndex: zIndexes.banner,
             height: '48px'
           }}
           initial={{ opacity: 0, scale: 0.8 }}
@@ -1770,7 +1771,7 @@ export default function HomePage(): React.JSX.Element {
           backdropFilter: 'blur(10px)',
           border: '1px solid rgba(255,255,255,0.1)',
           maxWidth: '250px',
-          zIndex: zIndexes.banner - 10
+          zIndex: zIndexes.banner
         }}
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
@@ -1848,7 +1849,7 @@ export default function HomePage(): React.JSX.Element {
     fontFamily: 'Arame Mono, monospace',
     backdropFilter: 'blur(10px)',
     whiteSpace: 'nowrap',
-    zIndex: zIndexes.banner - 5,
+    zIndex: zIndexes.banner,
     display: 'flex',
     alignItems: 'center',
     gap: '0.5rem'
@@ -1893,7 +1894,7 @@ export default function HomePage(): React.JSX.Element {
           fontFamily: 'Arame Mono, monospace',
           backdropFilter: 'blur(10px)',
           whiteSpace: 'nowrap',
-          zIndex: zIndexes.banner - 10
+          zIndex: zIndexes.banner
         }}
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
@@ -1923,7 +1924,7 @@ export default function HomePage(): React.JSX.Element {
           cursor: 'pointer',
           fontFamily: 'Arame Mono, monospace',
           letterSpacing: '1.5px',
-          zIndex: zIndexes.banner - 5,
+          zIndex: zIndexes.banner,
           padding: '1rem 1.8rem',
           borderRadius: '30px',
           border: '1px solid rgba(255,255,255,0.15)',
@@ -2225,11 +2226,11 @@ export default function HomePage(): React.JSX.Element {
 
 
 
-// PERBAIKAN: Menu Overlay - BACKGROUND SOLID TANPA TRANSPARANSI
+{/* Menu Overlay - PERBAIKAN TOTAL: Background solid dengan z-index tinggi */}
 <AnimatePresence>
   {showMenu && (
     <>
-      {/* Menu Content dengan Background SOLID - MENUTUPI SEMUA KONTEN */}
+      {/* Background Overlay - COVER SEMUA ELEMEN */}
       <motion.div
         style={{
           position: 'fixed',
@@ -2237,17 +2238,34 @@ export default function HomePage(): React.JSX.Element {
           left: 0,
           width: '100%',
           height: '100%',
-          backgroundColor: '#FF4444', // Background merah SOLID
+          backgroundColor: '#FF4444',
+          zIndex: zIndexes.menu - 1,
+        }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.3 }}
+      />
+      
+      {/* Main Menu Content */}
+      <motion.div
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
           zIndex: zIndexes.menu,
           display: 'flex',
           padding: '2rem',
+          pointerEvents: 'auto'
         }}
         variants={menuVariants}
         initial="closed"
         animate="open"
         exit="closed"
       >
-        {/* Main Content - Navigation Menu - FULL WIDTH */}
+        {/* Main Content - Navigation Menu */}
         <div style={{
           flex: 1,
           display: 'flex',
@@ -2268,14 +2286,12 @@ export default function HomePage(): React.JSX.Element {
               fontFamily: 'Arame Mono, monospace',
               lineHeight: 1,
               letterSpacing: '1.5px',
-              textShadow: '2px 2px 4px rgba(0,0,0,0.2)'
+              textShadow: '2px 2px 4px rgba(0,0,0,0.2)',
+              zIndex: zIndexes.menu + 1
             }}
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ 
-              duration: 0.4,
-              delay: 0.3
-            }}
+            transition={{ duration: 0.4, delay: 0.3 }}
           >
             MENURU
           </motion.div>
@@ -2290,14 +2306,15 @@ export default function HomePage(): React.JSX.Element {
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              gap: '0.3rem'
+              gap: '0.3rem',
+              zIndex: zIndexes.menu + 1
             }}
             variants={timeVariants}
             initial="hidden"
             animate="visible"
             exit="hidden"
           >
-            {/* Time - Font Besar */}
+            {/* Time */}
             <motion.div
               style={{
                 fontSize: '2.5rem',
@@ -2310,12 +2327,8 @@ export default function HomePage(): React.JSX.Element {
               }}
               animate={{
                 scale: [1, 1.02, 1],
-                transition: {
-                  duration: 1,
-                  repeat: Infinity,
-                  repeatType: "reverse"
-                }
               }}
+              transition={{ duration: 1, repeat: Infinity, repeatType: "reverse" }}
             >
               {visitorTime.time}
             </motion.div>
@@ -2386,12 +2399,9 @@ export default function HomePage(): React.JSX.Element {
                   x: 15,
                   transition: { duration: 0.2, ease: "easeOut" }
                 }}
-                onClick={() => {
-                  item.action();
-                  setShowMenu(false); // Tutup menu setelah klik
-                }}
+                onClick={item.action}
               >
-                {/* Menu Text dengan font besar 80px */}
+                {/* Menu Text */}
                 <motion.div
                   style={{
                     fontSize: '80px',
@@ -2408,18 +2418,17 @@ export default function HomePage(): React.JSX.Element {
                   }}
                   animate={{
                     color: hoveredItem === item.name ? '#FFFFFF' : 'rgba(255,255,255,0.8)',
-                    transition: { duration: 0.2 }
                   }}
+                  transition={{ duration: 0.2 }}
                 >
                   {item.name}
                   
-                  {/* Line bawah - TETAP ADA TANPA HOVER */}
+                  {/* Line bawah */}
                   <motion.div
                     style={{
                       width: '100%',
                       height: '3px',
                       backgroundColor: hoveredItem === item.name ? '#FFFFFF' : 'rgba(255,255,255,0.3)',
-                      transition: 'all 0.3s ease'
                     }}
                     animate={{
                       backgroundColor: hoveredItem === item.name ? '#FFFFFF' : 'rgba(255,255,255,0.3)',
@@ -2434,7 +2443,7 @@ export default function HomePage(): React.JSX.Element {
         </div>
       </motion.div>
       
-      {/* Close Button */}
+      {/* Close Button - PALING ATAS */}
       <motion.button
         onClick={toggleMenu}
         onMouseEnter={() => setIsCloseHovered(true)}
@@ -2452,7 +2461,7 @@ export default function HomePage(): React.JSX.Element {
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
-          zIndex: zIndexes.menu + 10,
+          zIndex: zIndexes.menu + 10, // PALING TINGGI
           backdropFilter: 'blur(10px)',
           padding: '0 1.5rem',
           fontFamily: 'Arame Mono, monospace',
@@ -2468,9 +2477,9 @@ export default function HomePage(): React.JSX.Element {
         whileHover={{ 
           scale: 1.05,
           backgroundColor: 'rgba(255,255,255,0.3)',
-          transition: { duration: 0.2 }
         }}
         whileTap={{ scale: 0.95 }}
+        transition={{ duration: 0.2 }}
       >
         <motion.div
           style={{
@@ -2529,6 +2538,7 @@ export default function HomePage(): React.JSX.Element {
   )}
 </AnimatePresence>
 
+      
 
 
 
@@ -2917,6 +2927,7 @@ export default function HomePage(): React.JSX.Element {
     </div>
   );
 }
+
 
 
 
