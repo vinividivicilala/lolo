@@ -391,26 +391,28 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
         </div>
       </div>
 
-      {/* Card Footer seperti di foto - WHITE BACKGROUND */}
+      {/* Card Footer dengan Border Radius seperti di foto */}
       <div
         style={{
           width: '100%',
           maxWidth: '1200px',
-          backgroundColor: '#ffffff', // Background putih
-          color: '#000000', // Text hitam
-          padding: '80px 60px', // Padding lebih besar
+          backgroundColor: '#ffffff',
+          color: '#000000',
+          padding: '80px 60px',
+          borderRadius: '24px', // Border radius seperti di foto
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'flex-start',
           gap: '60px',
           fontFamily: "'Inter', sans-serif",
+          boxShadow: '0 10px 30px rgba(0,0,0,0.1)',
         }}
       >
         {/* Left Section - Main Content */}
         <div style={{ flex: '1' }}>
           <h1
             style={{
-              fontSize: '72px', // Font sangat besar
+              fontSize: '72px',
               fontWeight: 'bold',
               lineHeight: '0.9',
               marginBottom: '30px',
@@ -508,7 +510,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
         {/* Right Section - Studio Info */}
         <div style={{ 
           textAlign: 'right',
-          alignSelf: 'flex-end', // Posisi di bagian bawah
+          alignSelf: 'flex-end',
         }}>
           <p
             style={{
