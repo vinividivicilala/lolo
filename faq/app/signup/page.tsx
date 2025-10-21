@@ -56,13 +56,10 @@ export default function SignUpPage({ onClose, onSwitchToSignIn }: SignUpPageProp
           style={{
             background: 'white',
             borderRadius: '12px',
-            padding: '0',
-            maxWidth: '900px',
+            padding: '3rem',
+            maxWidth: '500px',
             width: '100%',
-            maxHeight: '90vh',
-            overflow: 'hidden',
             position: 'relative',
-            display: 'flex',
             boxShadow: '0 20px 40px rgba(0,0,0,0.1)'
           }}
           initial={{ scale: 0.9, opacity: 0, y: 20 }}
@@ -70,6 +67,22 @@ export default function SignUpPage({ onClose, onSwitchToSignIn }: SignUpPageProp
           exit={{ scale: 0.9, opacity: 0, y: 20 }}
           transition={{ duration: 0.3, ease: "easeOut" }}
         >
+          {/* Background Image - Full Screen */}
+          <div
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              backgroundImage: 'url(images/5.jpg)',
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              backgroundRepeat: 'no-repeat',
+              zIndex: -1
+            }}
+          />
+
           {/* Close Button */}
           <motion.button
             onClick={onClose}
@@ -96,207 +109,184 @@ export default function SignUpPage({ onClose, onSwitchToSignIn }: SignUpPageProp
             ×
           </motion.button>
 
-          {/* Left Side - Image */}
-          <div
-            style={{
-              flex: 1,
-              minHeight: '600px',
-              backgroundImage: 'url(images/5.jpg)',
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-              backgroundRepeat: 'no-repeat'
-            }}
-          />
+          {/* Header Section */}
+          <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+            <h2
+              style={{
+                fontSize: '2.5rem',
+                fontWeight: '700',
+                color: '#333',
+                margin: '0 0 0.5rem 0',
+                fontFamily: 'Arame Mono, monospace',
+                lineHeight: '1.2'
+              }}
+            >
+              Create an account
+            </h2>
+            
+            <p
+              style={{
+                fontSize: '1.1rem',
+                color: '#666',
+                margin: 0,
+                fontFamily: 'Arame Mono, monospace',
+                lineHeight: '1.5'
+              }}
+            >
+              Sign up to join our community
+            </p>
+          </div>
 
-          {/* Right Side - Form */}
-          <div
-            style={{
-              flex: 1,
-              padding: '3rem 2rem',
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'center'
-            }}
-          >
-            {/* Header Section */}
-            <div style={{ marginBottom: '2rem' }}>
-              <h2
-                style={{
-                  fontSize: '2rem',
-                  fontWeight: '700',
-                  color: '#333',
-                  margin: '0 0 0.5rem 0',
-                  fontFamily: 'Arame Mono, monospace',
-                  lineHeight: '1.2'
-                }}
-              >
-                Create an account
-              </h2>
-              
-              <p
-                style={{
-                  fontSize: '1rem',
-                  color: '#666',
-                  margin: 0,
-                  fontFamily: 'Arame Mono, monospace',
-                  lineHeight: '1.5'
-                }}
-              >
-                Sign up to join our community
-              </p>
-            </div>
-
-            {/* Sign Up Form */}
-            <form onSubmit={handleSignUp}>
-              <div style={{ marginBottom: '1rem' }}>
-                <label style={{
-                  display: 'block',
-                  marginBottom: '0.5rem',
-                  fontSize: '0.9rem',
-                  fontWeight: '500',
-                  color: '#333',
-                  fontFamily: 'Arame Mono, monospace'
-                }}>
-                  Full Name
-                </label>
-                <input
-                  type="text"
-                  placeholder="Enter your full name"
-                  value={formData.name}
-                  onChange={(e) => setFormData({...formData, name: e.target.value})}
-                  required
-                  style={{
-                    width: '100%',
-                    padding: '0.8rem',
-                    border: '1px solid #ddd',
-                    borderRadius: '6px',
-                    fontSize: '0.9rem',
-                    fontFamily: 'Arame Mono, monospace',
-                    transition: 'border-color 0.3s ease',
-                    boxSizing: 'border-box'
-                  }}
-                  onFocus={(e) => e.target.style.borderColor = '#667eea'}
-                  onBlur={(e) => e.target.style.borderColor = '#ddd'}
-                />
-              </div>
-
-              <div style={{ marginBottom: '1rem' }}>
-                <label style={{
-                  display: 'block',
-                  marginBottom: '0.5rem',
-                  fontSize: '0.9rem',
-                  fontWeight: '500',
-                  color: '#333',
-                  fontFamily: 'Arame Mono, monospace'
-                }}>
-                  Email
-                </label>
-                <input
-                  type="email"
-                  placeholder="Enter your email"
-                  value={formData.email}
-                  onChange={(e) => setFormData({...formData, email: e.target.value})}
-                  required
-                  style={{
-                    width: '100%',
-                    padding: '0.8rem',
-                    border: '1px solid #ddd',
-                    borderRadius: '6px',
-                    fontSize: '0.9rem',
-                    fontFamily: 'Arame Mono, monospace',
-                    transition: 'border-color 0.3s ease',
-                    boxSizing: 'border-box'
-                  }}
-                  onFocus={(e) => e.target.style.borderColor = '#667eea'}
-                  onBlur={(e) => e.target.style.borderColor = '#ddd'}
-                />
-              </div>
-
-              <div style={{ marginBottom: '1.5rem' }}>
-                <label style={{
-                  display: 'block',
-                  marginBottom: '0.5rem',
-                  fontSize: '0.9rem',
-                  fontWeight: '500',
-                  color: '#333',
-                  fontFamily: 'Arame Mono, monospace'
-                }}>
-                  Password
-                </label>
-                <input
-                  type="password"
-                  placeholder="Enter your password"
-                  value={formData.password}
-                  onChange={(e) => setFormData({...formData, password: e.target.value})}
-                  required
-                  style={{
-                    width: '100%',
-                    padding: '0.8rem',
-                    border: '1px solid #ddd',
-                    borderRadius: '6px',
-                    fontSize: '0.9rem',
-                    fontFamily: 'Arame Mono, monospace',
-                    transition: 'border-color 0.3s ease',
-                    boxSizing: 'border-box'
-                  }}
-                  onFocus={(e) => e.target.style.borderColor = '#667eea'}
-                  onBlur={(e) => e.target.style.borderColor = '#ddd'}
-                />
-              </div>
-
-              <motion.button
-                type="submit"
-                disabled={isLoading}
+          {/* Sign Up Form */}
+          <form onSubmit={handleSignUp}>
+            <div style={{ marginBottom: '1rem' }}>
+              <label style={{
+                display: 'block',
+                marginBottom: '0.5rem',
+                fontSize: '0.9rem',
+                fontWeight: '500',
+                color: '#333',
+                fontFamily: 'Arame Mono, monospace'
+              }}>
+                Full Name
+              </label>
+              <input
+                type="text"
+                placeholder="Enter your full name"
+                value={formData.name}
+                onChange={(e) => setFormData({...formData, name: e.target.value})}
+                required
                 style={{
                   width: '100%',
                   padding: '0.8rem',
-                  background: '#667eea',
-                  border: 'none',
+                  border: '1px solid #ddd',
                   borderRadius: '6px',
-                  color: 'white',
                   fontSize: '0.9rem',
-                  fontWeight: '600',
-                  cursor: isLoading ? 'not-allowed' : 'pointer',
                   fontFamily: 'Arame Mono, monospace',
-                  marginBottom: '1.5rem',
-                  opacity: isLoading ? 0.7 : 1,
-                  transition: 'background-color 0.3s ease'
+                  transition: 'border-color 0.3s ease',
+                  boxSizing: 'border-box'
                 }}
-                whileHover={!isLoading ? { backgroundColor: '#5a6fd8' } : {}}
-                whileTap={!isLoading ? { scale: 0.98 } : {}}
-              >
-                {isLoading ? 'Signing Up...' : 'Sign Up'}
-              </motion.button>
-            </form>
+                onFocus={(e) => e.target.style.borderColor = '#667eea'}
+                onBlur={(e) => e.target.style.borderColor = '#ddd'}
+              />
+            </div>
 
-            {/* Sign In Link */}
-            <div
-              style={{
-                textAlign: 'center',
+            <div style={{ marginBottom: '1rem' }}>
+              <label style={{
+                display: 'block',
+                marginBottom: '0.5rem',
                 fontSize: '0.9rem',
-                color: '#666',
+                fontWeight: '500',
+                color: '#333',
                 fontFamily: 'Arame Mono, monospace'
+              }}>
+                Email
+              </label>
+              <input
+                type="email"
+                placeholder="Enter your email"
+                value={formData.email}
+                onChange={(e) => setFormData({...formData, email: e.target.value})}
+                required
+                style={{
+                  width: '100%',
+                  padding: '0.8rem',
+                  border: '1px solid #ddd',
+                  borderRadius: '6px',
+                  fontSize: '0.9rem',
+                  fontFamily: 'Arame Mono, monospace',
+                  transition: 'border-color 0.3s ease',
+                  boxSizing: 'border-box'
+                }}
+                onFocus={(e) => e.target.style.borderColor = '#667eea'}
+                onBlur={(e) => e.target.style.borderColor = '#ddd'}
+              />
+            </div>
+
+            <div style={{ marginBottom: '1.5rem' }}>
+              <label style={{
+                display: 'block',
+                marginBottom: '0.5rem',
+                fontSize: '0.9rem',
+                fontWeight: '500',
+                color: '#333',
+                fontFamily: 'Arame Mono, monospace'
+              }}>
+                Password
+              </label>
+              <input
+                type="password"
+                placeholder="Enter your password"
+                value={formData.password}
+                onChange={(e) => setFormData({...formData, password: e.target.value})}
+                required
+                style={{
+                  width: '100%',
+                  padding: '0.8rem',
+                  border: '1px solid #ddd',
+                  borderRadius: '6px',
+                  fontSize: '0.9rem',
+                  fontFamily: 'Arame Mono, monospace',
+                  transition: 'border-color 0.3s ease',
+                  boxSizing: 'border-box'
+                }}
+                onFocus={(e) => e.target.style.borderColor = '#667eea'}
+                onBlur={(e) => e.target.style.borderColor = '#ddd'}
+              />
+            </div>
+
+            <motion.button
+              type="submit"
+              disabled={isLoading}
+              style={{
+                width: '100%',
+                padding: '0.8rem',
+                background: '#667eea',
+                border: 'none',
+                borderRadius: '6px',
+                color: 'white',
+                fontSize: '0.9rem',
+                fontWeight: '600',
+                cursor: isLoading ? 'not-allowed' : 'pointer',
+                fontFamily: 'Arame Mono, monospace',
+                marginBottom: '1.5rem',
+                opacity: isLoading ? 0.7 : 1,
+                transition: 'background-color 0.3s ease'
+              }}
+              whileHover={!isLoading ? { backgroundColor: '#5a6fd8' } : {}}
+              whileTap={!isLoading ? { scale: 0.98 } : {}}
+            >
+              {isLoading ? 'Signing Up...' : 'Sign Up'}
+            </motion.button>
+          </form>
+
+          {/* Sign In Link */}
+          <div
+            style={{
+              textAlign: 'center',
+              fontSize: '0.9rem',
+              color: '#666',
+              fontFamily: 'Arame Mono, monospace'
+            }}
+          >
+            Already have an account?{' '}
+            <button
+              type="button"
+              onClick={onSwitchToSignIn}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: '#667eea',
+                cursor: 'pointer',
+                fontFamily: 'Arame Mono, monospace',
+                fontSize: '0.9rem',
+                fontWeight: '600',
+                textDecoration: 'underline',
+                padding: 0
               }}
             >
-              Already have an account?{' '}
-              <button
-                type="button"
-                onClick={onSwitchToSignIn}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  color: '#667eea',
-                  cursor: 'pointer',
-                  fontFamily: 'Arame Mono, monospace',
-                  fontSize: '0.9rem',
-                  fontWeight: '600',
-                  textDecoration: 'underline',
-                  padding: 0
-                }}
-              >
-                Sign in
-              </button>
-            </div>
+              Sign in
+            </button>
           </div>
         </motion.div>
       </motion.div>
