@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState } from "react";
+import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 interface SignUpPageProps {
   onClose: () => void;
@@ -10,28 +10,6 @@ interface SignUpPageProps {
 }
 
 export default function SignUpPage({ onClose, onSwitchToSignIn }: SignUpPageProps) {
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    password: ""
-  });
-  const [isLoading, setIsLoading] = useState(false);
-  const router = useRouter();
-
-  const handleSignUp = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    setIsLoading(true);
-    
-    // Simulasi proses pendaftaran
-    setTimeout(() => {
-      setIsLoading(false);
-      onClose();
-      // Redirect setelah sign up berhasil
-      router.push('/dashboard');
-    }, 1500);
-  };
-
   return (
     <AnimatePresence>
       <motion.div
@@ -41,12 +19,12 @@ export default function SignUpPage({ onClose, onSwitchToSignIn }: SignUpPageProp
           left: 0,
           width: '100%',
           height: '100%',
-          backgroundColor: 'rgba(0,0,0,0.5)',
+          backgroundColor: 'rgba(0,0,0,0.9)',
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
           zIndex: 1000,
-          padding: '1rem'
+          padding: '2rem'
         }}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -54,202 +32,76 @@ export default function SignUpPage({ onClose, onSwitchToSignIn }: SignUpPageProp
       >
         <motion.div
           style={{
-            background: 'white',
-            borderRadius: '12px',
-            padding: '3rem',
-            maxWidth: '500px',
+            background: 'rgba(255,255,255,0.95)',
+            borderRadius: '20px',
+            padding: '0',
+            maxWidth: '600px',
             width: '100%',
+            maxHeight: '90vh',
+            overflow: 'hidden',
             position: 'relative',
-            boxShadow: '0 20px 40px rgba(0,0,0,0.1)',
-            border: '2px solid #667eea'
+            backdropFilter: 'blur(20px)',
+            border: '1px solid rgba(255,255,255,0.2)'
           }}
-          initial={{ scale: 0.9, opacity: 0, y: 20 }}
+          initial={{ scale: 0.8, opacity: 0, y: 50 }}
           animate={{ scale: 1, opacity: 1, y: 0 }}
-          exit={{ scale: 0.9, opacity: 0, y: 20 }}
-          transition={{ duration: 0.3, ease: "easeOut" }}
+          exit={{ scale: 0.8, opacity: 0, y: 50 }}
+          transition={{ duration: 0.5, ease: "back.out(1.7)" }}
         >
           {/* Close Button */}
           <motion.button
             onClick={onClose}
             style={{
               position: 'absolute',
-              top: '1rem',
-              right: '1rem',
-              background: 'rgba(0,0,0,0.1)',
+              top: '1.5rem',
+              right: '1.5rem',
+              background: 'rgba(0,0,0,0.5)',
               border: 'none',
               borderRadius: '50%',
-              width: '32px',
-              height: '32px',
+              width: '40px',
+              height: '40px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               cursor: 'pointer',
-              color: '#333',
-              fontSize: '1rem',
-              zIndex: 1001
+              color: 'white',
+              fontSize: '1.2rem',
+              zIndex: 10
             }}
-            whileHover={{ backgroundColor: 'rgba(0,0,0,0.2)', scale: 1.1 }}
+            whileHover={{ backgroundColor: 'rgba(0,0,0,0.7)', scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
           >
             ×
           </motion.button>
 
-          {/* Header Section */}
-          <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-            <h2
-              style={{
-                fontSize: '2.5rem',
-                fontWeight: '700',
-                color: '#333',
-                margin: '0 0 0.5rem 0',
-                fontFamily: 'Arame Mono, monospace',
-                lineHeight: '1.2'
-              }}
-            >
-              Create an account
-            </h2>
-            
-            <p
-              style={{
-                fontSize: '1.1rem',
-                color: '#666',
-                margin: 0,
-                fontFamily: 'Arame Mono, monospace',
-                lineHeight: '1.5'
-              }}
-            >
-              Sign up to join our community
-            </p>
-          </div>
-
-          {/* Sign Up Form */}
-          <form onSubmit={handleSignUp}>
-            <div style={{ marginBottom: '1.5rem' }}>
-              <input
-                type="text"
-                placeholder="Full Name"
-                value={formData.name}
-                onChange={(e) => setFormData({...formData, name: e.target.value})}
-                required
-                style={{
-                  width: '100%',
-                  padding: '0.8rem',
-                  border: '2px solid #ddd',
-                  borderRadius: '8px',
-                  fontSize: '1rem',
-                  fontFamily: 'Arame Mono, monospace',
-                  transition: 'all 0.3s ease',
-                  boxSizing: 'border-box',
-                  outline: 'none'
-                }}
-                onFocus={(e) => e.target.style.borderColor = '#667eea'}
-                onBlur={(e) => e.target.style.borderColor = '#ddd'}
-              />
-            </div>
-
-            <div style={{ marginBottom: '1.5rem' }}>
-              <input
-                type="email"
-                placeholder="Email"
-                value={formData.email}
-                onChange={(e) => setFormData({...formData, email: e.target.value})}
-                required
-                style={{
-                  width: '100%',
-                  padding: '0.8rem',
-                  border: '2px solid #ddd',
-                  borderRadius: '8px',
-                  fontSize: '1rem',
-                  fontFamily: 'Arame Mono, monospace',
-                  transition: 'all 0.3s ease',
-                  boxSizing: 'border-box',
-                  outline: 'none'
-                }}
-                onFocus={(e) => e.target.style.borderColor = '#667eea'}
-                onBlur={(e) => e.target.style.borderColor = '#ddd'}
-              />
-            </div>
-
-            <div style={{ marginBottom: '2rem' }}>
-              <input
-                type="password"
-                placeholder="Password"
-                value={formData.password}
-                onChange={(e) => setFormData({...formData, password: e.target.value})}
-                required
-                style={{
-                  width: '100%',
-                  padding: '0.8rem',
-                  border: '2px solid #ddd',
-                  borderRadius: '8px',
-                  fontSize: '1rem',
-                  fontFamily: 'Arame Mono, monospace',
-                  transition: 'all 0.3s ease',
-                  boxSizing: 'border-box',
-                  outline: 'none'
-                }}
-                onFocus={(e) => e.target.style.borderColor = '#667eea'}
-                onBlur={(e) => e.target.style.borderColor = '#ddd'}
-              />
-            </div>
-
-            <motion.button
-              type="submit"
-              disabled={isLoading}
+          {/* Foto Portrait Besar di Tengah */}
+          <motion.div
+            style={{
+              width: '100%',
+              height: '100%',
+              minHeight: '500px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.2, duration: 0.5 }}
+          >
+            <Image
+              src="/images/5.jpg"
+              alt="Portrait"
+              width={600}
+              height={600}
               style={{
                 width: '100%',
-                padding: '1rem',
-                background: '#667eea',
-                border: '2px solid #667eea',
-                borderRadius: '8px',
-                color: 'white',
-                fontSize: '1rem',
-                fontWeight: '600',
-                cursor: isLoading ? 'not-allowed' : 'pointer',
-                fontFamily: 'Arame Mono, monospace',
-                marginBottom: '1.5rem',
-                opacity: isLoading ? 0.7 : 1,
-                transition: 'all 0.3s ease'
+                height: '100%',
+                objectFit: 'cover',
+                display: 'block'
               }}
-              whileHover={!isLoading ? { 
-                backgroundColor: 'white', 
-                color: '#667eea',
-                scale: 1.02
-              } : {}}
-              whileTap={!isLoading ? { scale: 0.98 } : {}}
-            >
-              {isLoading ? 'Signing Up...' : 'Sign Up'}
-            </motion.button>
-          </form>
-
-          {/* Sign In Link */}
-          <div
-            style={{
-              textAlign: 'center',
-              fontSize: '1rem',
-              color: '#666',
-              fontFamily: 'Arame Mono, monospace'
-            }}
-          >
-            Already have an account?{' '}
-            <button
-              type="button"
-              onClick={onSwitchToSignIn}
-              style={{
-                background: 'none',
-                border: 'none',
-                color: '#667eea',
-                cursor: 'pointer',
-                fontFamily: 'Arame Mono, monospace',
-                fontSize: '1rem',
-                fontWeight: '600',
-                textDecoration: 'underline',
-                padding: 0
-              }}
-            >
-              Sign in
-            </button>
-          </div>
+              priority
+            />
+          </motion.div>
         </motion.div>
       </motion.div>
     </AnimatePresence>
