@@ -4,11 +4,10 @@ import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface ForgotPasswordPageProps {
-  onClose?: () => void;
   onSwitchToSignIn?: () => void;
 }
 
-export default function ForgotPasswordPage({ onClose, onSwitchToSignIn }: ForgotPasswordPageProps) {
+export default function ForgotPasswordPage({ onSwitchToSignIn }: ForgotPasswordPageProps) {
   const [email, setEmail] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -18,29 +17,13 @@ export default function ForgotPasswordPage({ onClose, onSwitchToSignIn }: Forgot
   };
 
   const handleBackToSignIn = () => {
-    console.log("Back to Sign In clicked");
-    
-    // Prioritaskan onSwitchToSignIn jika ada
+    // Jika ada function dari props, gunakan itu
     if (onSwitchToSignIn && typeof onSwitchToSignIn === 'function') {
-      console.log("Calling onSwitchToSignIn");
       onSwitchToSignIn();
     } 
-    // Fallback ke onClose jika onSwitchToSignIn tidak ada
-    else if (onClose && typeof onClose === 'function') {
-      console.log("Calling onClose as fallback");
-      onClose();
-    }
-    // Ultimate fallback - log warning
+    // Jika tidak, log saja
     else {
-      console.warn('No navigation function provided. Please provide onSwitchToSignIn or onClose prop.');
-    }
-  };
-
-  const handleClose = () => {
-    if (onClose && typeof onClose === 'function') {
-      onClose();
-    } else {
-      console.warn('onClose function not provided');
+      console.log("Navigate to Sign In page");
     }
   };
 
@@ -62,9 +45,8 @@ export default function ForgotPasswordPage({ onClose, onSwitchToSignIn }: Forgot
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        onClick={handleClose} // Close ketika klik di luar modal
       >
-        {/* Line Box yang lebih besar */}
+        {/* Line Box */}
         <motion.div
           style={{
             background: 'transparent',
@@ -76,38 +58,13 @@ export default function ForgotPasswordPage({ onClose, onSwitchToSignIn }: Forgot
             display: 'flex',
             flexDirection: 'column',
             padding: '3rem',
-            backgroundColor: 'rgba(0,0,0,0.7)' // Tambahkan background agar konten terbaca
+            backgroundColor: 'rgba(0,0,0,0.7)'
           }}
           initial={{ scale: 0.9, opacity: 0, y: 20 }}
           animate={{ scale: 1, opacity: 1, y: 0 }}
           exit={{ scale: 0.9, opacity: 0, y: 20 }}
           transition={{ duration: 0.3, ease: "easeOut" }}
-          onClick={(e) => e.stopPropagation()} // Prevent close ketika klik di dalam modal
         >
-          {/* Close Button */}
-          <button
-            onClick={handleClose}
-            style={{
-              position: 'absolute',
-              top: '1rem',
-              right: '1rem',
-              background: 'rgba(255,255,255,0.1)',
-              border: '1px solid rgba(255,255,255,0.3)',
-              borderRadius: '50%',
-              width: '30px',
-              height: '30px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              cursor: 'pointer',
-              color: 'white',
-              fontSize: '1.2rem',
-              fontFamily: 'Arame Mono, monospace'
-            }}
-          >
-            ×
-          </button>
-
           {/* Judul */}
           <h2 style={{
             color: 'white',
