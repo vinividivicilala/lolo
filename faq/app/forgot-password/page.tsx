@@ -4,8 +4,8 @@ import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface ForgotPasswordPageProps {
-  onClose: () => void;
-  onSwitchToSignIn: () => void;
+  onClose?: () => void;
+  onSwitchToSignIn?: () => void;
 }
 
 export default function ForgotPasswordPage({ onClose, onSwitchToSignIn }: ForgotPasswordPageProps) {
@@ -14,24 +14,33 @@ export default function ForgotPasswordPage({ onClose, onSwitchToSignIn }: Forgot
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     // Logic untuk reset password
+    console.log("Reset password for:", email);
   };
 
   const handleBackToSignIn = () => {
-    // Pastikan onSwitchToSignIn adalah function sebelum dipanggil
-    if (typeof onSwitchToSignIn === 'function') {
+    console.log("Back to Sign In clicked");
+    
+    // Prioritaskan onSwitchToSignIn jika ada
+    if (onSwitchToSignIn && typeof onSwitchToSignIn === 'function') {
+      console.log("Calling onSwitchToSignIn");
       onSwitchToSignIn();
-    } else {
-      console.error('onSwitchToSignIn is not a function');
-      // Fallback: tutup modal jika onSwitchToSignIn tidak tersedia
-      if (typeof onClose === 'function') {
-        onClose();
-      }
+    } 
+    // Fallback ke onClose jika onSwitchToSignIn tidak ada
+    else if (onClose && typeof onClose === 'function') {
+      console.log("Calling onClose as fallback");
+      onClose();
+    }
+    // Ultimate fallback - log warning
+    else {
+      console.warn('No navigation function provided. Please provide onSwitchToSignIn or onClose prop.');
     }
   };
 
   const handleClose = () => {
-    if (typeof onClose === 'function') {
+    if (onClose && typeof onClose === 'function') {
       onClose();
+    } else {
+      console.warn('onClose function not provided');
     }
   };
 
@@ -53,6 +62,7 @@ export default function ForgotPasswordPage({ onClose, onSwitchToSignIn }: Forgot
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
+        onClick={handleClose} // Close ketika klik di luar modal
       >
         {/* Line Box yang lebih besar */}
         <motion.div
@@ -65,12 +75,14 @@ export default function ForgotPasswordPage({ onClose, onSwitchToSignIn }: Forgot
             border: '1px solid rgba(255,255,255,0.3)',
             display: 'flex',
             flexDirection: 'column',
-            padding: '3rem'
+            padding: '3rem',
+            backgroundColor: 'rgba(0,0,0,0.7)' // Tambahkan background agar konten terbaca
           }}
           initial={{ scale: 0.9, opacity: 0, y: 20 }}
           animate={{ scale: 1, opacity: 1, y: 0 }}
           exit={{ scale: 0.9, opacity: 0, y: 20 }}
           transition={{ duration: 0.3, ease: "easeOut" }}
+          onClick={(e) => e.stopPropagation()} // Prevent close ketika klik di dalam modal
         >
           {/* Close Button */}
           <button
@@ -89,7 +101,8 @@ export default function ForgotPasswordPage({ onClose, onSwitchToSignIn }: Forgot
               justifyContent: 'center',
               cursor: 'pointer',
               color: 'white',
-              fontSize: '1.2rem'
+              fontSize: '1.2rem',
+              fontFamily: 'Arame Mono, monospace'
             }}
           >
             ×
@@ -171,7 +184,7 @@ export default function ForgotPasswordPage({ onClose, onSwitchToSignIn }: Forgot
             </button>
           </form>
 
-          {/* Tombol Kembali dengan pengecekan */}
+          {/* Tombol Kembali */}
           <button
             onClick={handleBackToSignIn}
             style={{
