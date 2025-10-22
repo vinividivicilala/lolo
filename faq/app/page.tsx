@@ -10,7 +10,6 @@ import { gsap } from "gsap";
 import { initializeApp } from "firebase/app";
 import { getFirestore, doc, setDoc, getDoc, onSnapshot, collection, getDocs } from "firebase/firestore";
 
-
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
   apiKey: "AIzaSyCYbxo8n1zn-Y3heCIn_PmrsK44_OrdEw4",
@@ -26,133 +25,6 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
-
-// Data untuk Home dan Topics dengan gambar
-const homeContent = [
-  {
-    id: 1,
-    title: "Creative Design",
-    description: "Innovative design solutions that transform ideas into visually stunning experiences",
-    color: "#FF6B6B",
-    image: "https://images.unsplash.com/photo-1561070791-2526d30994b5?w=400&h=300&fit=crop",
-    category: "Design"
-  },
-  {
-    id: 2,
-    title: "Digital Strategy",
-    description: "Comprehensive digital strategies to elevate your brand in the online space",
-    color: "#4ECDC4",
-    image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=300&fit=crop",
-    category: "Strategy"
-  },
-  {
-    id: 3,
-    title: "User Experience",
-    description: "Creating seamless and intuitive user experiences that drive engagement",
-    color: "#45B7D1",
-    image: "https://images.unsplash.com/photo-1551650975-87deedd944c3?w=400&h=300&fit=crop",
-    category: "UX/UI"
-  },
-  {
-    id: 4,
-    title: "Brand Identity",
-    description: "Developing unique brand identities that resonate with your target audience",
-    color: "#96CEB4",
-    image: "https://images.unsplash.com/photo-1567446537711-4302c76c2904?w=400&h=300&fit=crop",
-    category: "Branding"
-  },
-  {
-    id: 5,
-    title: "Web Development",
-    description: "Modern web development using cutting-edge technologies and best practices",
-    color: "#FFEAA7",
-    image: "https://images.unsplash.com/photo-1627398242454-45a1465c2479?w=400&h=300&fit=crop",
-    category: "Development"
-  }
-];
-
-const topicsContent = [
-  {
-    id: 1,
-    title: "Artificial Intelligence",
-    description: "Exploring the future of AI and machine learning technologies",
-    color: "#6C5CE7",
-    image: "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=400&h=300&fit=crop",
-    category: "Technology"
-  },
-  {
-    id: 2,
-    title: "Blockchain Technology",
-    description: "Understanding decentralized systems and cryptocurrency innovations",
-    color: "#FD79A8",
-    image: "https://images.unsplash.com/photo-1639762681485-074b7f938ba0?w=400&h=300&fit=crop",
-    category: "Technology"
-  },
-  {
-    id: 3,
-    title: "Sustainable Design",
-    description: "Eco-friendly design principles for a better tomorrow",
-    color: "#00B894",
-    image: "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=400&h=300&fit=crop",
-    category: "Design"
-  },
-  {
-    id: 4,
-    title: "Mobile Development",
-    description: "Creating powerful mobile applications for iOS and Android",
-    color: "#FDCB6E",
-    image: "https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=400&h=300&fit=crop",
-    category: "Development"
-  },
-  {
-    id: 5,
-    title: "Data Analytics",
-    description: "Transforming raw data into actionable insights and intelligence",
-    color: "#E17055",
-    image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=300&fit=crop",
-    category: "Analytics"
-  },
-  {
-    id: 6,
-    title: "Cloud Computing",
-    description: "Leveraging cloud infrastructure for scalable solutions",
-    color: "#74B9FF",
-    image: "https://images.unsplash.com/photo-1544197150-b99a580bb7a8?w=400&h=300&fit=crop",
-    category: "Technology"
-  },
-  {
-    id: 7,
-    title: "Cybersecurity",
-    description: "Protecting digital assets with advanced security measures",
-    color: "#A29BFE",
-    image: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=400&h=300&fit=crop",
-    category: "Security"
-  },
-  {
-    id: 8,
-    title: "IoT Solutions",
-    description: "Connecting devices and creating smart ecosystems",
-    color: "#55E6C1",
-    image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=300&fit=crop",
-    category: "Technology"
-  },
-  {
-    id: 9,
-    title: "AR/VR Development",
-    description: "Building immersive augmented and virtual reality experiences",
-    color: "#FF7675",
-    image: "https://images.unsplash.com/photo-1592478411213-6153e4ebc696?w=400&h=300&fit=crop",
-    category: "Development"
-  },
-  {
-    id: 10,
-    title: "Quantum Computing",
-    description: "Exploring the next frontier in computational power",
-    color: "#BADCDD",
-    image: "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=400&h=300&fit=crop",
-    category: "Technology"
-  }
-];
 
 export default function HomePage(): React.JSX.Element {
   const [showLoading, setShowLoading] = useState(true);
@@ -182,16 +54,15 @@ export default function HomePage(): React.JSX.Element {
   const [showBanner, setShowBanner] = useState(true);
   const [isBannerHovered, setIsBannerHovered] = useState(false);
   
-  // State untuk menu Home dan Topics
-  const [activeSection, setActiveSection] = useState<"home" | "topics" | null>(null);
-  const [showContent, setShowContent] = useState(false);
+  // State untuk navbar dropdown
+  const [showNavDropdown, setShowNavDropdown] = useState(false);
+  const [navDropdownType, setNavDropdownType] = useState<"home" | "topics" | null>(null);
   
   // State untuk search
   const [showSearch, setShowSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchStatus, setSearchStatus] = useState<"empty" | "recent" | "updated" | "loading">("empty");
 
-  
   const router = useRouter();
   const timeRef = useRef<NodeJS.Timeout | null>(null);
   const loadingRef = useRef<HTMLDivElement>(null);
@@ -205,22 +76,20 @@ export default function HomePage(): React.JSX.Element {
   const searchInputRef = useRef<HTMLInputElement>(null);
   const searchStatusRef = useRef<HTMLDivElement>(null);
   
-  // Refs untuk content
-  const contentContainerRef = useRef<HTMLDivElement>(null);
-  const contentItemsRef = useRef<(HTMLDivElement | null)[]>([]);
+  // Refs untuk dropdown
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
-
-// PERBAIKAN: Sistem z-index terorganisir - FIXED
-const zIndexes = {
-  base: 10,        // Element biasa
-  navbar: 50,      // Semua elemen navbar
-  banner: 100,     // Banner
-  search: 150,     // Search overlay
-  content: 200,    // Content overlay
-  menu: 1000,      // Menu overlay - HARUS PALING TINGGI
-  modal: 1100,     // Modal
-  loading: 1200    // Loading screen
-};
+  // PERBAIKAN: Sistem z-index terorganisir - FIXED
+  const zIndexes = {
+    base: 10,        // Element biasa
+    navbar: 50,      // Semua elemen navbar
+    banner: 100,     // Banner
+    dropdown: 150,   // Dropdown navbar
+    search: 200,     // Search overlay
+    menu: 1000,      // Menu overlay - HARUS PALING TINGGI
+    modal: 1100,     // Modal
+    loading: 1200    // Loading screen
+  };
 
   // Database kota-kota Indonesia
   const indonesiaCities = [
@@ -656,95 +525,36 @@ const zIndexes = {
     }
   }, [searchStatus]);
 
-  // Fungsi untuk membuka section Home atau Topics dengan animasi GSAP
-  const openSection = (section: "home" | "topics") => {
-    setActiveSection(section);
-    setShowContent(true);
-    
-    // Tutup menu
-    setShowMenu(false);
-    
-    // Animasi GSAP untuk content
-    setTimeout(() => {
-      if (contentContainerRef.current) {
-        const tl = gsap.timeline();
-        
-        // Animasi container
-        tl.fromTo(contentContainerRef.current,
-          {
-            scale: 0.9,
-            opacity: 0,
-            y: 50
-          },
-          {
-            scale: 1,
-            opacity: 1,
-            y: 0,
-            duration: 0.6,
-            ease: "back.out(1.7)"
-          }
-        );
-        
-        // Animasi untuk setiap item content dengan efek staggered
-        const items = contentItemsRef.current.filter(Boolean);
-        items.forEach((item, index) => {
-          if (item) {
-            tl.fromTo(item,
-              {
-                x: -100,
-                opacity: 0,
-                scale: 0.8
-              },
-              {
-                x: 0,
-                opacity: 1,
-                scale: 1,
-                duration: 0.6,
-                ease: "back.out(1.7)"
-              },
-              `-=${0.4}`
-            );
-          }
-        });
-      }
-    }, 100);
-  };
-
-  // Fungsi untuk menutup content dengan animasi GSAP
-  const closeContent = () => {
-    if (contentContainerRef.current) {
-      const tl = gsap.timeline();
-      
-      // Animasi keluar untuk setiap item content
-      const items = contentItemsRef.current.filter(Boolean);
-      items.forEach((item, index) => {
-        if (item) {
-          tl.to(item, {
-            x: 100,
-            opacity: 0,
-            scale: 0.8,
-            duration: 0.3,
-            ease: "back.in(1.7)"
-          }, `-=${0.2}`);
-        }
-      });
-      
-      tl.to(contentContainerRef.current, {
-        scale: 0.9,
-        opacity: 0,
-        y: 50,
-        duration: 0.4,
-        ease: "back.in(1.7)",
-        onComplete: () => {
-          setShowContent(false);
-          setActiveSection(null);
-        }
-      });
+  // Fungsi untuk toggle navbar dropdown
+  const toggleNavDropdown = (type: "home" | "topics") => {
+    if (showNavDropdown && navDropdownType === type) {
+      setShowNavDropdown(false);
+      setNavDropdownType(null);
     } else {
-      setShowContent(false);
-      setActiveSection(null);
+      setShowNavDropdown(true);
+      setNavDropdownType(type);
     }
   };
+
+  // Fungsi untuk menutup dropdown
+  const closeNavDropdown = () => {
+    setShowNavDropdown(false);
+    setNavDropdownType(null);
+  };
+
+  // Effect untuk menutup dropdown ketika klik di luar
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        closeNavDropdown();
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   useEffect(() => {
     if (showLoading) {
@@ -1053,17 +863,8 @@ const zIndexes = {
     }
   };
 
+  // Menu items yang disederhanakan - HAPUS HOME DAN TOPICS
   const menuItems = [
-    { 
-      name: "(01) HOME", 
-      delay: 0.1,
-      action: () => openSection("home")
-    },
-    { 
-      name: "(02) TOPICS", 
-      delay: 0.2,
-      action: () => openSection("topics")
-    },
     { 
       name: "(03) NOTES", 
       delay: 0.3,
@@ -1136,901 +937,111 @@ const zIndexes = {
                 margin: 0,
                 fontFamily: 'Arame Mono, monospace'
               }}>
-                Search
+                SEARCH
               </h3>
-              
-              {/* Close Button */}
               <motion.button
                 onClick={closeSearch}
                 style={{
                   background: 'none',
                   border: 'none',
-                  color: 'rgba(255,255,255,0.6)',
+                  color: 'rgba(255, 255, 255, 0.6)',
+                  fontSize: '1.5rem',
                   cursor: 'pointer',
                   padding: '0.5rem',
-                  borderRadius: '6px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
+                  borderRadius: '4px'
                 }}
-                whileHover={{
+                whileHover={{ 
                   color: 'white',
-                  backgroundColor: 'rgba(255,255,255,0.1)'
+                  backgroundColor: 'rgba(255, 255, 255, 0.1)'
                 }}
-                whileTap={{ scale: 0.9 }}
                 transition={{ duration: 0.2 }}
               >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M18 6L6 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  <path d="M6 6L18 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
+                ✕
               </motion.button>
             </div>
 
-            {/* Search Form */}
-            <form onSubmit={handleSearchSubmit} style={{ marginBottom: '1rem' }}>
-              <div style={{
-                position: 'relative',
-                display: 'flex',
-                alignItems: 'center'
-              }}>
-                {/* Search Icon */}
-                <motion.div
-                  style={{
-                    position: 'absolute',
-                    left: '12px',
-                    color: 'rgba(255,255,255,0.4)'
-                  }}
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: 0.1, duration: 0.3 }}
-                >
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M21 21L16.514 16.506L21 21ZM19 10.5C19 15.194 15.194 19 10.5 19C5.806 19 2 15.194 2 10.5C2 5.806 5.806 2 10.5 2C15.194 2 19 5.806 19 10.5Z" 
-                      stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                </motion.div>
-
-                {/* Search Input */}
-                <motion.input
-                  ref={searchInputRef}
-                  type="text"
-                  value={searchQuery}
-                  onChange={handleSearchChange}
-                  placeholder="Search for anything..."
-                  style={{
-                    width: '100%',
-                    padding: '12px 12px 12px 40px',
-                    backgroundColor: 'rgba(255,255,255,0.05)',
-                    border: '1px solid rgba(255,255,255,0.1)',
-                    borderRadius: '8px',
-                    color: 'white',
-                    fontSize: '1rem',
-                    fontFamily: 'Arame Mono, monospace',
-                    outline: 'none',
-                    transition: 'all 0.3s ease'
-                  }}
-                  whileFocus={{
-                    backgroundColor: 'rgba(255,255,255,0.08)',
-                    border: '1px solid rgba(255,255,255,0.3)'
-                  }}
-                />
-
-                {/* Keyboard Shortcut Hint */}
-                <motion.div
-                  style={{
-                    position: 'absolute',
-                    right: '12px',
-                    color: 'rgba(255,255,255,0.3)',
-                    fontSize: '0.75rem',
-                    border: '1px solid rgba(255,255,255,0.1)',
-                    padding: '2px 6px',
-                    borderRadius: '4px',
-                    fontFamily: 'Arame Mono, monospace'
-                  }}
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: 0.2, duration: 0.3 }}
-                >
-                  ⌘K
-                </motion.div>
-              </div>
+            {/* Search Input */}
+            <form onSubmit={handleSearchSubmit}>
+              <motion.input
+                ref={searchInputRef}
+                type="text"
+                placeholder="Type to search..."
+                value={searchQuery}
+                onChange={handleSearchChange}
+                style={{
+                  width: '100%',
+                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                  border: '1px solid rgba(255, 255, 255, 0.1)',
+                  borderRadius: '8px',
+                  padding: '1rem 1.5rem',
+                  color: 'white',
+                  fontSize: '1.1rem',
+                  fontFamily: 'Arame Mono, monospace',
+                  outline: 'none',
+                  transition: 'all 0.3s ease'
+                }}
+                whileFocus={{
+                  borderColor: 'rgba(204, 255, 0, 0.5)',
+                  backgroundColor: 'rgba(255, 255, 255, 0.08)'
+                }}
+              />
             </form>
 
             {/* Search Status */}
             <AnimatePresence mode="wait">
-              <motion.div
-                ref={searchStatusRef}
-                key={searchStatus}
-                style={{
-                  padding: '0.75rem',
-                  borderRadius: '6px',
-                  fontSize: '0.85rem',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.5rem',
-                  fontFamily: 'Arame Mono, monospace'
-                }}
-                initial={{ y: 10, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                exit={{ y: -10, opacity: 0 }}
-                transition={{ duration: 0.3 }}
-              >
-                {/* Status Icon */}
-                {searchStatus === "empty" && (
-                  <>
-                    <motion.div
-                      animate={{ rotate: [0, 10, -10, 0] }}
-                      transition={{ duration: 2, repeat: Infinity, repeatDelay: 5 }}
-                    >
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M12 16V12M12 8H12.01M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z" 
-                          stroke="rgba(255,255,255,0.5)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                    </motion.div>
-                    <span style={{ color: 'rgba(255,255,255,0.5)' }}>
-                      Type to start searching...
-                    </span>
-                  </>
-                )}
-                
-                {searchStatus === "loading" && (
-                  <>
-                    <motion.div
-                      animate={{ rotate: 360 }}
-                      transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                    >
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M12 2V6M12 18V22M6 12H2M22 12H18M19.07 4.93L16.24 7.76M7.76 16.24L4.93 19.07M19.07 19.07L16.24 16.24M7.76 7.76L4.93 4.93" 
-                          stroke="#CCFF00" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                    </motion.div>
-                    <span style={{ color: '#CCFF00' }}>
-                      Searching...
-                    </span>
-                  </>
-                )}
-                
-                {searchStatus === "recent" && (
-                  <>
-                    <motion.div
-                      animate={{ scale: [1, 1.2, 1] }}
-                      transition={{ duration: 1, repeat: Infinity }}
-                    >
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M12 8V12L14 14M20 12C20 16.4183 16.4183 20 12 20C7.58172 20 4 16.4183 4 12C4 7.58172 7.58172 4 12 4C16.4183 4 20 7.58172 20 12Z" 
-                          stroke="#CCFF00" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                    </motion.div>
-                    <span style={{ color: '#CCFF00' }}>
-                      Showing recent results...
-                    </span>
-                  </>
-                )}
-                
-                {searchStatus === "updated" && (
-                  <>
-                    <motion.div
-                      animate={{ 
-                        scale: [1, 1.3, 1],
-                        color: ['#CCFF00', '#88FF00', '#CCFF00']
-                      }}
-                      transition={{ duration: 0.6 }}
-                    >
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M20 6L9 17L4 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                    </motion.div>
-                    <span style={{ color: '#88FF00' }}>
-                      Results updated successfully!
-                    </span>
-                  </>
-                )}
-              </motion.div>
+              {searchStatus !== "empty" && (
+                <motion.div
+                  ref={searchStatusRef}
+                  style={{
+                    marginTop: '1rem',
+                    padding: '1rem',
+                    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+                    borderRadius: '8px',
+                    border: '1px solid rgba(255, 255, 255, 0.05)'
+                  }}
+                  initial={{ y: 10, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  exit={{ y: -10, opacity: 0 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <p style={{
+                    color: 'rgba(255, 255, 255, 0.7)',
+                    fontSize: '0.9rem',
+                    margin: 0,
+                    fontFamily: 'Arame Mono, monospace'
+                  }}>
+                    {searchStatus === "loading" && "Searching..."}
+                    {searchStatus === "recent" && "Recent searches will appear here"}
+                    {searchStatus === "updated" && `Search results for "${searchQuery}"`}
+                  </p>
+                </motion.div>
+              )}
             </AnimatePresence>
 
             {/* Search Tips */}
-            <motion.div
-              style={{
-                marginTop: '1rem',
-                padding: '1rem',
-                backgroundColor: 'rgba(255,255,255,0.02)',
-                borderRadius: '6px',
-                border: '1px solid rgba(255,255,255,0.05)'
-              }}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.4, duration: 0.5 }}
-            >
-              <div style={{
-                color: 'rgba(255,255,255,0.4)',
-                fontSize: '0.8rem',
-                fontFamily: 'Arame Mono, monospace'
-              }}>
-                <div style={{ marginBottom: '0.5rem', fontWeight: '500' }}>Quick tips:</div>
-                <div>• Press <span style={{ color: 'rgba(255,255,255,0.6)' }}>⌘K</span> to open search anytime</div>
-                <div>• Use <span style={{ color: 'rgba(255,255,255,0.6)' }}>ESC</span> to close</div>
-                <div>• Type at least 3 characters for better results</div>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Content Overlay untuk Home dan Topics - PERBAIKAN z-index */}
-      <AnimatePresence>
-        {showContent && (
-          <motion.div
-            ref={contentContainerRef}
-            style={{
-              position: 'fixed',
-              top: '50%',
-              left: '50%',
-              transform: 'translate(-50%, -50%)',
-              width: '90%',
-              maxWidth: '1200px',
-              maxHeight: '90vh',
-              backgroundColor: 'rgba(0, 0, 0, 0.95)',
-              border: '1px solid rgba(255, 255, 255, 0.1)',
-              borderRadius: '20px',
-              padding: '2rem',
-              zIndex: zIndexes.content,
-              boxShadow: '0 25px 50px rgba(0, 0, 0, 0.5)',
-              backdropFilter: 'blur(20px)',
-              overflowY: 'auto'
-            }}
-            initial={{ scale: 0.8, opacity: 0, y: 50 }}
-            animate={{ scale: 1, opacity: 1, y: 0 }}
-            exit={{ scale: 0.8, opacity: 0, y: 50 }}
-            transition={{ duration: 0.6, ease: "back.out(1.7)" }}
-          >
-            {/* Header */}
             <div style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              marginBottom: '2rem',
-              borderBottom: '1px solid rgba(255,255,255,0.1)',
-              paddingBottom: '1rem'
+              marginTop: '1.5rem',
+              paddingTop: '1rem',
+              borderTop: '1px solid rgba(255, 255, 255, 0.1)'
             }}>
-              <h2 style={{
-                color: 'white',
-                fontSize: '2.5rem',
-                fontWeight: '600',
+              <p style={{
+                color: 'rgba(255, 255, 255, 0.5)',
+                fontSize: '0.8rem',
                 margin: 0,
                 fontFamily: 'Arame Mono, monospace'
               }}>
-                {activeSection === 'home' ? 'HOME CONTENT' : 'TOPICS COLLECTION'}
-              </h2>
-              
-              <motion.button
-                onClick={closeContent}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  color: 'rgba(255,255,255,0.6)',
-                  cursor: 'pointer',
-                  padding: '0.5rem',
-                  borderRadius: '8px',
-                  fontSize: '1.5rem',
-                  width: '40px',
-                  height: '40px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}
-                whileHover={{
-                  color: 'white',
-                  backgroundColor: 'rgba(255,255,255,0.1)',
-                  scale: 1.1
-                }}
-                whileTap={{ scale: 0.9 }}
-              >
-                ×
-              </motion.button>
-            </div>
-
-            {/* Content Grid */}
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))',
-              gap: '2rem',
-              padding: '1rem 0'
-            }}>
-              {(activeSection === 'home' ? homeContent : topicsContent).map((item, index) => (
-                <motion.div
-                  key={item.id}
-                  ref={el => contentItemsRef.current[index] = el}
-                  style={{
-                    backgroundColor: 'rgba(255,255,255,0.05)',
-                    border: `1px solid ${item.color}20`,
-                    borderRadius: '15px',
-                    overflow: 'hidden',
-                    cursor: 'pointer',
-                    transition: 'all 0.3s ease',
-                    position: 'relative'
-                  }}
-                  initial={{ opacity: 0, x: -100, scale: 0.8 }}
-                  animate={{ opacity: 1, x: 0, scale: 1 }}
-                  transition={{ duration: 0.6, delay: index * 0.1, ease: "back.out(1.7)" }}
-                  whileHover={{
-                    scale: 1.02,
-                    borderColor: `${item.color}60`,
-                    boxShadow: `0 10px 30px ${item.color}20`
-                  }}
-                  whileTap={{ scale: 0.98 }}
-                >
-                  {/* Image Section */}
-                  <div style={{
-                    height: '200px',
-                    backgroundImage: `url(${item.image})`,
-                    backgroundSize: 'cover',
-                    backgroundPosition: 'center',
-                    position: 'relative'
-                  }}>
-                    {/* Overlay */}
-                    <div style={{
-                      position: 'absolute',
-                      top: 0,
-                      left: 0,
-                      right: 0,
-                      bottom: 0,
-                      background: 'linear-gradient(to bottom, transparent, rgba(0,0,0,0.7))'
-                    }}></div>
-                    
-                    {/* Category Badge */}
-                    <div style={{
-                      position: 'absolute',
-                      top: '1rem',
-                      right: '1rem',
-                      backgroundColor: item.color,
-                      color: 'white',
-                      padding: '0.3rem 0.8rem',
-                      borderRadius: '20px',
-                      fontSize: '0.8rem',
-                      fontWeight: '600',
-                      fontFamily: 'Arame Mono, monospace'
-                    }}>
-                      {item.category}
-                    </div>
-                  </div>
-
-                  {/* Content Section */}
-                  <div style={{
-                    padding: '1.5rem'
-                  }}>
-                    <div style={{
-                      display: 'flex',
-                      alignItems: 'flex-start',
-                      gap: '1rem',
-                      marginBottom: '1rem'
-                    }}>
-                      <div style={{
-                        width: '20px',
-                        height: '20px',
-                        borderRadius: '50%',
-                        backgroundColor: item.color,
-                        flexShrink: 0,
-                        marginTop: '0.2rem'
-                      }} />
-                      
-                      <div style={{ flex: 1 }}>
-                        <h3 style={{
-                          color: 'white',
-                          fontSize: '1.4rem',
-                          fontWeight: '600',
-                          margin: '0 0 0.5rem 0',
-                          fontFamily: 'Arame Mono, monospace'
-                        }}>
-                          {item.title}
-                        </h3>
-                        <p style={{
-                          color: 'rgba(255,255,255,0.7)',
-                          fontSize: '0.95rem',
-                          lineHeight: '1.5',
-                          margin: 0,
-                          fontFamily: 'Arame Mono, monospace'
-                        }}>
-                          {item.description}
-                        </p>
-                      </div>
-                    </div>
-                    
-                    {/* Action Button */}
-                    <motion.button
-                      style={{
-                        width: '100%',
-                        padding: '0.8rem',
-                        backgroundColor: 'rgba(255,255,255,0.1)',
-                        border: `1px solid ${item.color}40`,
-                        borderRadius: '8px',
-                        color: item.color,
-                        cursor: 'pointer',
-                        fontFamily: 'Arame Mono, monospace',
-                        fontSize: '0.9rem',
-                        fontWeight: '500',
-                        transition: 'all 0.3s ease'
-                      }}
-                      whileHover={{
-                        backgroundColor: item.color,
-                        color: 'black'
-                      }}
-                      whileTap={{ scale: 0.95 }}
-                    >
-                      Explore More
-                    </motion.button>
-                  </div>
-                  
-                  {/* Hover Effect */}
-                  <motion.div
-                    style={{
-                      position: 'absolute',
-                      top: 0,
-                      left: 0,
-                      width: '100%',
-                      height: '100%',
-                      background: `linear-gradient(135deg, ${item.color}10, transparent)`,
-                      opacity: 0
-                    }}
-                    whileHover={{ opacity: 1 }}
-                    transition={{ duration: 0.3 }}
-                  />
-                </motion.div>
-              ))}
-            </div>
-
-            {/* Footer */}
-            <div style={{
-              marginTop: '2rem',
-              paddingTop: '1rem',
-              borderTop: '1px solid rgba(255,255,255,0.1)',
-              textAlign: 'center'
-            }}>
-              <p style={{
-                color: 'rgba(255,255,255,0.5)',
-                fontSize: '0.9rem',
-                fontFamily: 'Arame Mono, monospace',
-                margin: 0
-              }}>
-                {activeSection === 'home' 
-                  ? `${homeContent.length} items in Home section` 
-                  : `${topicsContent.length} items in Topics section`
-                }
+                Press <span style={{ color: 'rgba(204, 255, 0, 0.8)' }}>ESC</span> to close • 
+                Press <span style={{ color: 'rgba(204, 255, 0, 0.8)' }}>⌘K</span> or <span style={{ color: 'rgba(204, 255, 0, 0.8)' }}>Ctrl+K</span> to open
               </p>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Search Trigger Button - PERBAIKAN: POSISI SEJAJAR DENGAN MENU */}
-      {!showSearch && !showLoading && (
-        <motion.button
-          onClick={toggleSearch}
-          style={{
-            position: 'fixed',
-            top: showBanner ? '4.5rem' : '2rem',
-            right: '11rem',
-            backgroundColor: 'rgba(255,255,255,0.1)',
-            border: '1px solid rgba(255,255,255,0.2)',
-            borderRadius: '8px',
-            padding: '0.75rem 1rem',
-            color: 'white',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.5rem',
-            fontFamily: 'Arame Mono, monospace',
-            fontSize: '0.85rem',
-            backdropFilter: 'blur(10px)',
-            zIndex: zIndexes.banner,
-            height: '48px'
-          }}
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 1.5, duration: 0.5 }}
-          whileHover={{
-            backgroundColor: 'rgba(255,255,255,0.15)',
-            scale: 1.05
-          }}
-          whileTap={{ scale: 0.95 }}
-        >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M21 21L16.514 16.506L21 21ZM19 10.5C19 15.194 15.194 19 10.5 19C5.806 19 2 15.194 2 10.5C2 5.806 5.806 2 10.5 2C15.194 2 19 5.806 19 10.5Z" 
-              stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-          Search
-          <span style={{
-            fontSize: '0.7rem',
-            color: 'rgba(255,255,255,0.5)',
-            backgroundColor: 'rgba(255,255,255,0.1)',
-            padding: '2px 6px',
-            borderRadius: '4px',
-            marginLeft: '0.25rem'
-          }}>
-            ⌘K
-          </span>
-        </motion.button>
-      )}
-
-      {/* Top Banner - PERBAIKAN: GANTI WARNA MENJADI MERAH STABILO */}
-      <AnimatePresence>
-        {showBanner && (
-          <motion.div
-            ref={bannerRef}
-            style={{
-              position: 'fixed',
-              top: 0,
-              left: 0,
-              width: '100%',
-              backgroundColor: '#FF4444',
-              padding: '0.8rem 2rem',
-              zIndex: zIndexes.banner,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '1rem',
-              fontFamily: 'Arame Mono, monospace',
-              boxShadow: '0 2px 20px rgba(0,0,0,0.1)',
-              borderBottom: '1px solid rgba(0,0,0,0.1)'
-            }}
-            initial={{ y: -100, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: -100, opacity: 0 }}
-            transition={{ duration: 0.6, ease: "back.out(1.7)" }}
-          >
-            {/* SVG Icon */}
-            <motion.div
-              animate={{
-                rotate: [0, -5, 5, 0],
-                scale: [1, 1.1, 1]
-              }}
-              transition={{ duration: 2, repeat: Infinity, repeatDelay: 5 }}
-            >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
-                <line x1="12" y1="9" x2="12" y2="13"/>
-                <line x1="12" y1="17" x2="12.01" y2="17"/>
-              </svg>
-            </motion.div>
-
-            {/* Banner Text */}
-            <motion.div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem',
-                fontSize: '0.9rem',
-                fontWeight: '500',
-                color: 'white'
-              }}
-            >
-              <span>WEBSITE NOTE SEDANG DALAM PERSIAPAN -</span>
-              <motion.span
-                onClick={handleBannerClick}
-                style={{
-                  color: 'white',
-                  textDecoration: 'underline',
-                  cursor: 'pointer',
-                  fontWeight: '600'
-                }}
-                whileHover={{ color: '#FFCCCB' }}
-                whileTap={{ scale: 0.95 }}
-              >
-                Klik untuk melihat progress
-              </motion.span>
-            </motion.div>
-
-            {/* Close Button */}
-            <motion.button
-              onClick={closeBanner}
-              style={{
-                position: 'absolute',
-                right: '1rem',
-                background: 'rgba(255,255,255,0.2)',
-                border: 'none',
-                borderRadius: '50%',
-                width: '24px',
-                height: '24px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                cursor: 'pointer',
-                color: 'white'
-              }}
-              whileHover={{
-                backgroundColor: 'rgba(255,255,255,0.3)',
-                scale: 1.1,
-                color: 'white'
-              }}
-              whileTap={{ scale: 0.9 }}
-            >
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
-                <line x1="18" y1="6" x2="6" y2="18"/>
-                <line x1="6" y1="6" x2="18" y2="18"/>
-              </svg>
-            </motion.button>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Location Display - PERBAIKAN z-index */}
-      <motion.div
-        onClick={openLocationModal}
-        style={{
-          position: 'absolute',
-          top: showBanner ? '4.5rem' : '2rem',
-          left: '2rem',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'flex-start',
-          gap: '0.3rem',
-          cursor: 'pointer',
-          padding: '0.8rem 1.2rem',
-          borderRadius: '12px',
-          background: 'rgba(255,255,255,0.05)',
-          backdropFilter: 'blur(10px)',
-          border: '1px solid rgba(255,255,255,0.1)',
-          maxWidth: '250px',
-          zIndex: zIndexes.banner
-        }}
-        initial={{ opacity: 0, x: -20 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ delay: 0.8, duration: 0.6 }}
-        whileHover={{
-          background: 'rgba(255,255,255,0.08)',
-          transition: { duration: 0.2 }
-        }}
-      >
-        <motion.div
-          style={{
-            fontSize: '1rem',
-            fontWeight: '400',
-            color: 'white',
-            fontFamily: 'Arame Mono, monospace',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.5rem'
-          }}
-        >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
-            <circle cx="12" cy="10" r="3"/>
-          </svg>
-          {isLoadingLocation ? (
-            <motion.span
-              initial={{ opacity: 0.5 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.5, repeat: Infinity, repeatType: "reverse" }}
-            >
-              Loading...
-            </motion.span>
-          ) : visitorLocation.city ? (
-            `${visitorLocation.city}, ${visitorLocation.country}`
-          ) : (
-            <span style={{ opacity: 0.7 }}>Klik untuk set lokasi</span>
-          )}
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.5 }}>
-            <polyline points="6 9 12 15 18 9"/>
-          </svg>
-        </motion.div>
-        <motion.div
-          style={{
-            fontSize: '0.8rem',
-            fontWeight: '300',
-            color: 'rgba(255,255,255,0.7)',
-            fontFamily: 'Arame Mono, monospace'
-          }}
-        >
-          {visitorTime.time} • {visitorTime.timezone}
-          {visitorLocation.isManual && (
-            <span style={{ marginLeft: '0.5rem', fontSize: '0.7rem', opacity: 0.5 }}>
-              (manual)
-            </span>
-          )}
-        </motion.div>
-      </motion.div>
-
-{/* Sign In Button - Navbar Tengah */}
-<motion.button
-  onClick={() => router.push('/signin')}  // Langsung panggil router.push di sini
-  style={{
-    position: 'fixed',
-    top: showBanner ? '4.5rem' : '2rem',
-    left: '50%',
-    transform: 'translateX(-50%)',
-    padding: '0.6rem 1.5rem',
-    fontSize: '0.85rem',
-    fontWeight: '400',
-    color: 'white',
-    backgroundColor: 'rgba(255,255,255,0.1)',
-    border: '1px solid rgba(255,255,255,0.2)',
-    borderRadius: '8px',
-    cursor: 'pointer',
-    fontFamily: 'Arame Mono, monospace',
-    backdropFilter: 'blur(10px)',
-    whiteSpace: 'nowrap',
-    zIndex: zIndexes.banner,
-    display: 'flex',
-    alignItems: 'center',
-    gap: '0.5rem'
-  }}
-  initial={{ opacity: 0, y: -10 }}
-  animate={{ opacity: 1, y: 0 }}
-  transition={{ delay: 1.2, duration: 0.6 }}
-  whileHover={{ 
-    backgroundColor: 'rgba(255,255,255,0.15)',
-    scale: 1.05,
-    transition: { duration: 0.2 }
-  }}
-  whileTap={{ scale: 0.95 }}
->
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-    <circle cx="12" cy="7" r="4"/>
-  </svg>
-  SIGN IN
-</motion.button>
-
-
-
-
-      
-
-      {/* Button untuk melihat semua users - PERBAIKAN z-index */}
-      <motion.button
-        onClick={openAllUsersModal}
-        style={{
-          position: 'absolute',
-          top: showBanner ? '4.5rem' : '2rem',
-          left: '16rem',
-          padding: '0.6rem 1.2rem',
-          fontSize: '0.8rem',
-          fontWeight: '300',
-          color: 'white',
-          backgroundColor: 'rgba(255,255,255,0.1)',
-          border: '1px solid rgba(255,255,255,0.2)',
-          borderRadius: '8px',
-          cursor: 'pointer',
-          fontFamily: 'Arame Mono, monospace',
-          backdropFilter: 'blur(10px)',
-          whiteSpace: 'nowrap',
-          zIndex: zIndexes.banner
-        }}
-        initial={{ opacity: 0, x: -20 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ delay: 1.0, duration: 0.6 }}
-        whileHover={{ 
-          backgroundColor: 'rgba(255,255,255,0.15)',
-          scale: 1.05,
-          transition: { duration: 0.2 }
-        }}
-        whileTap={{ scale: 0.95 }}
-      >
-        VIEW ALL USERS
-      </motion.button>
-
-      {/* Menu Button - PERBAIKAN z-index */}
-      <motion.div
-        onClick={toggleMenu}
-        onMouseEnter={handleMenuHover}
-        onMouseLeave={handleMenuLeave}
-        style={{
-          position: 'absolute',
-          top: showBanner ? '4.5rem' : '2rem',
-          right: '2rem',
-          fontSize: '1.2rem',
-          fontWeight: '300',
-          color: 'white',
-          cursor: 'pointer',
-          fontFamily: 'Arame Mono, monospace',
-          letterSpacing: '1.5px',
-          zIndex: zIndexes.banner,
-          padding: '1rem 1.8rem',
-          borderRadius: '30px',
-          border: '1px solid rgba(255,255,255,0.15)',
-          background: 'rgba(0,0,0,0.3)',
-          backdropFilter: 'blur(15px)',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '1rem',
-          minWidth: '160px',
-          justifyContent: 'center'
-        }}
-        variants={menuButtonVariants}
-        initial="initial"
-        animate="animate"
-        whileHover="hover"
-        whileTap="tap"
-      >
-        {/* Animated hamburger icon */}
-        <motion.div
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '4px',
-            width: '20px'
-          }}
-          animate={showMenu ? "open" : "closed"}
-        >
-          <motion.span
-            style={{
-              width: '100%',
-              height: '2px',
-              backgroundColor: 'currentColor',
-              borderRadius: '1px'
-            }}
-            variants={{
-              closed: { rotate: 0, y: 0 },
-              open: { rotate: 45, y: 6 }
-            }}
-            transition={{ duration: 0.3 }}
-          />
-          <motion.span
-            style={{
-              width: '100%',
-              height: '2px',
-              backgroundColor: 'currentColor',
-              borderRadius: '1px'
-            }}
-            variants={{
-              closed: { opacity: 1 },
-              open: { opacity: 0 }
-            }}
-            transition={{ duration: 0.3 }}
-          />
-          <motion.span
-            style={{
-              width: '100%',
-              height: '2px',
-              backgroundColor: 'currentColor',
-              borderRadius: '1px'
-            }}
-            variants={{
-              closed: { rotate: 0, y: 0 },
-              open: { rotate: -45, y: -6 }
-            }}
-            transition={{ duration: 0.3 }}
-          />
-        </motion.div>
-        
-        {/* Menu Text dengan animasi berganti */}
-        <div
-          style={{
-            fontSize: '1.1rem',
-            fontWeight: '300',
-            minWidth: '90px',
-            textAlign: 'center',
-            height: '24px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            position: 'relative'
-          }}
-        >
-          <AnimatePresence mode="popLayout">
-            <motion.span
-              key={menuText}
-              variants={textVariants}
-              initial="enter"
-              animate="center"
-              exit="exit"
-              style={{
-                position: 'absolute',
-                left: '50%',
-                transform: 'translateX(-50%)',
-                whiteSpace: 'nowrap'
-              }}
-            >
-              {menuText}
-            </motion.span>
-          </AnimatePresence>
-        </div>
-      </motion.div>
-
-      {/* High-Speed Text Scroll Loading Animation */}
+      {/* Loading Screen */}
       <AnimatePresence>
         {showLoading && (
-          <div
+          <motion.div
             ref={loadingRef}
             style={{
               position: 'fixed',
@@ -2039,902 +1050,1047 @@ const zIndexes = {
               width: '100%',
               height: '100%',
               backgroundColor: 'black',
-              zIndex: zIndexes.loading,
               display: 'flex',
               flexDirection: 'column',
               justifyContent: 'center',
               alignItems: 'center',
-              overflow: 'hidden'
+              zIndex: zIndexes.loading,
+              color: 'white',
+              fontFamily: 'Arame Mono, monospace'
             }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.5 }}
           >
-            {/* Text Scroll Container */}
-            <div
-              ref={textScrollRef}
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                gap: '0rem'
-              }}
-            >
-              {/* High-speed scrolling text lines */}
-              <div style={{
-                fontSize: '8rem',
-                fontWeight: '900',
-                color: 'white',
-                fontFamily: 'Arame Mono, monospace',
-                textTransform: 'uppercase',
-                letterSpacing: '-3px',
-                lineHeight: 0.8,
-                opacity: 0
-              }}>
-                CREATIVE
-              </div>
-              
-              <div style={{
-                fontSize: '8rem',
-                fontWeight: '900',
-                color: 'white',
-                fontFamily: 'Arame Mono, monospace',
-                textTransform: 'uppercase',
-                letterSpacing: '-3px',
-                lineHeight: 0.8,
-                opacity: 0
-              }}>
-                PORTFOLIO
-              </div>
-              
-              <div style={{
-                fontSize: '8rem',
-                fontWeight: '900',
-                color: 'white',
-                fontFamily: 'Arame Mono, monospace',
-                textTransform: 'uppercase',
-                letterSpacing: '-3px',
-                lineHeight: 0.8,
-                opacity: 0
-              }}>
-                INNOVATION
-              </div>
-              
-              <div style={{
-                fontSize: '8rem',
-                fontWeight: '900',
-                color: 'white',
-                fontFamily: 'Arame Mono, monospace',
-                textTransform: 'uppercase',
-                letterSpacing: '-3px',
-                lineHeight: 0.8,
-                opacity: 0
-              }}>
-                DESIGN
-              </div>
-              
-              <div style={{
-                fontSize: '8rem',
-                fontWeight: '900',
-                color: 'white',
-                fontFamily: 'Arame Mono, monospace',
-                textTransform: 'uppercase',
-                letterSpacing: '-3px',
-                lineHeight: 0.8,
-                opacity: 0
-              }}>
-                VISION
-              </div>
-              
-              {/* Final text that stays */}
-              <div style={{
-                fontSize: '8rem',
-                fontWeight: '900',
+            <div ref={textScrollRef} style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '0.5rem',
+              overflow: 'hidden',
+              height: '60px'
+            }}>
+              <div style={{ fontSize: '1rem', fontWeight: 'bold' }}>WELCOME TO</div>
+              <div style={{ fontSize: '1rem', fontWeight: 'bold' }}>NOTED</div>
+              <div style={{ fontSize: '1rem', fontWeight: 'bold' }}>YOUR ULTIMATE</div>
+              <div style={{ fontSize: '1rem', fontWeight: 'bold' }}>NOTE-TAKING</div>
+              <div style={{ fontSize: '1rem', fontWeight: 'bold' }}>COMPANION</div>
+              <div style={{ 
+                fontSize: '1.5rem', 
+                fontWeight: 'bold',
                 color: '#CCFF00',
-                fontFamily: 'Arame Mono, monospace',
-                textTransform: 'uppercase',
-                letterSpacing: '-3px',
-                lineHeight: 0.8,
-                opacity: 0,
-                textShadow: '0 0 30px rgba(204, 255, 0, 0.5)'
+                marginTop: '1rem'
               }}>
-                WELCOME
+                NOTED
               </div>
             </div>
-          </div>
-        )}
-      </AnimatePresence>
-
-      {/* Main Content After Loading */}
-      <AnimatePresence>
-        {!showLoading && (
-          <motion.div
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: '1.5rem',
-              padding: '2rem',
-              zIndex: 10
-            }}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-          >
-            <motion.h1
-              style={{
-                fontSize: '2.5rem',
-                fontWeight: '300',
-                color: 'white',
-                fontFamily: 'Arame Mono, monospace',
-                textAlign: 'center',
-                marginBottom: '0.5rem',
-                letterSpacing: '2px'
-              }}
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.2, duration: 0.5 }}
-            >
-              WELCOME
-            </motion.h1>
-            
-            <motion.p
-              style={{
-                fontSize: '1rem',
-                fontWeight: '300',
-                color: 'rgba(255,255,255,0.7)',
-                fontFamily: 'Arame Mono, monospace',
-                textAlign: 'center',
-                maxWidth: '400px',
-                lineHeight: '1.5',
-                letterSpacing: '0.5px'
-              }}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.4, duration: 0.5 }}
-            >
-              Your space for creative thoughts and ideas
-            </motion.p>
-
-            <motion.button
-              onClick={navigateToNotes}
-              style={{
-                padding: '0.8rem 1.8rem',
-                fontSize: '0.9rem',
-                fontWeight: '300',
-                color: 'black',
-                backgroundColor: 'white',
-                border: 'none',
-                borderRadius: '6px',
-                cursor: 'pointer',
-                fontFamily: 'Arame Mono, monospace',
-                letterSpacing: '1px'
-              }}
-              whileHover={{ 
-                scale: 1.03,
-                backgroundColor: '#f8f8f8',
-                transition: { duration: 0.2 }
-              }}
-              whileTap={{ scale: 0.97 }}
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.6, duration: 0.5 }}
-            >
-              VIEW NOTES
-            </motion.button>
           </motion.div>
         )}
       </AnimatePresence>
 
-
-
-
-{/* Menu Overlay - PERBAIKAN TOTAL: Background solid dengan z-index tinggi */}
-<AnimatePresence>
-  {showMenu && (
-    <>
-      {/* Background Overlay - COVER SEMUA ELEMEN */}
-      <motion.div
-        style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          width: '100%',
-          height: '100%',
-          backgroundColor: '#FF4444',
-          zIndex: zIndexes.menu - 1,
-        }}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 0.3 }}
-      />
-      
-      {/* Main Menu Content */}
-      <motion.div
-        style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          width: '100%',
-          height: '100%',
-          zIndex: zIndexes.menu,
-          display: 'flex',
-          padding: '2rem',
-          pointerEvents: 'auto'
-        }}
-        variants={menuVariants}
-        initial="closed"
-        animate="open"
-        exit="closed"
-      >
-        {/* Main Content - Navigation Menu */}
+      {/* Main Content */}
+      {!showLoading && (
         <div style={{
-          flex: 1,
+          width: '100%',
+          minHeight: '100vh',
           display: 'flex',
           flexDirection: 'column',
-          justifyContent: 'center',
-          paddingLeft: '4rem',
           position: 'relative'
         }}>
-          {/* Website Name - Top Left */}
-          <motion.div
-            style={{
-              position: 'absolute',
-              left: '2rem',
-              top: '2rem',
-              fontSize: '4rem',
-              fontWeight: '800',
-              color: 'rgba(255,255,255,1)',
-              fontFamily: 'Arame Mono, monospace',
-              lineHeight: 1,
-              letterSpacing: '1.5px',
-              textShadow: '2px 2px 4px rgba(0,0,0,0.2)',
-              zIndex: zIndexes.menu + 1
-            }}
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 0.3 }}
-          >
-            MENURU
-          </motion.div>
-
-          {/* Visitor Time & Location Display - TOP CENTER */}
-          <motion.div
-            style={{
-              position: 'absolute',
-              top: '2rem',
-              left: '50%',
-              transform: 'translateX(-50%)',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: '0.3rem',
-              zIndex: zIndexes.menu + 1
-            }}
-            variants={timeVariants}
-            initial="hidden"
-            animate="visible"
-            exit="hidden"
-          >
-            {/* Time */}
-            <motion.div
-              style={{
-                fontSize: '2.5rem',
-                fontWeight: '400',
-                color: 'rgba(255,255,255,0.9)',
-                fontFamily: 'Arame Mono, monospace',
-                fontFeatureSettings: '"tnum"',
-                fontVariantNumeric: 'tabular-nums',
-                letterSpacing: '2px'
-              }}
-              animate={{
-                scale: [1, 1.02, 1],
-              }}
-              transition={{ duration: 1, repeat: Infinity, repeatType: "reverse" }}
-            >
-              {visitorTime.time}
-            </motion.div>
-
-            {/* Location & Timezone */}
-            <motion.div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '1rem',
-                fontSize: '0.9rem',
-                fontWeight: '400',
-                color: 'rgba(255,255,255,0.8)',
-                fontFamily: 'Arame Mono, monospace'
-              }}
-            >
-              <span style={{ 
-                backgroundColor: 'rgba(255,255,255,0.2)',
-                padding: '0.2rem 0.6rem',
-                borderRadius: '12px',
-                fontWeight: '500'
-              }}>
-                {visitorTime.timezone}
-              </span>
-              <span>
-                {visitorLocation.city ? `${visitorLocation.city}, ${visitorLocation.country}` : 'Lokasi belum diatur'}
-              </span>
-            </motion.div>
-
-            {/* Date */}
-            <motion.div
-              style={{
-                fontSize: '0.8rem',
-                fontWeight: '300',
-                color: 'rgba(255,255,255,0.7)',
-                fontFamily: 'Arame Mono, monospace'
-              }}
-            >
-              {visitorTime.date}
-            </motion.div>
-          </motion.div>
-
-          {/* Menu Items */}
-          <div style={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '2rem'
-          }}>
-            {menuItems.map((item, index) => (
+          {/* Banner */}
+          <AnimatePresence>
+            {showBanner && (
               <motion.div
-                key={item.name}
+                ref={bannerRef}
                 style={{
-                  position: 'relative',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'flex-start',
-                  padding: '0.5rem 0'
-                }}
-                onMouseEnter={() => setHoveredItem(item.name)}
-                onMouseLeave={() => setHoveredItem(null)}
-                variants={menuItemVariants}
-                initial="closed"
-                animate="open"
-                exit="closed"
-                custom={index}
-                whileHover={{
-                  x: 15,
-                  transition: { duration: 0.2, ease: "easeOut" }
-                }}
-                onClick={item.action}
-              >
-                {/* Menu Text */}
-                <motion.div
-                  style={{
-                    fontSize: '80px',
-                    fontWeight: '300',
-                    color: 'rgba(255,255,255,0.8)',
-                    fontFamily: 'Arame Mono, monospace',
-                    lineHeight: 1,
-                    letterSpacing: '-2px',
-                    textTransform: 'uppercase',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'flex-start',
-                    gap: '1rem'
-                  }}
-                  animate={{
-                    color: hoveredItem === item.name ? '#FFFFFF' : 'rgba(255,255,255,0.8)',
-                  }}
-                  transition={{ duration: 0.2 }}
-                >
-                  {item.name}
-                  
-                  {/* Line bawah */}
-                  <motion.div
-                    style={{
-                      width: '100%',
-                      height: '3px',
-                      backgroundColor: hoveredItem === item.name ? '#FFFFFF' : 'rgba(255,255,255,0.3)',
-                    }}
-                    animate={{
-                      backgroundColor: hoveredItem === item.name ? '#FFFFFF' : 'rgba(255,255,255,0.3)',
-                      height: hoveredItem === item.name ? '4px' : '3px'
-                    }}
-                    transition={{ duration: 0.3 }}
-                  />
-                </motion.div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </motion.div>
-      
-      {/* Close Button - PALING ATAS */}
-      <motion.button
-        onClick={toggleMenu}
-        onMouseEnter={() => setIsCloseHovered(true)}
-        onMouseLeave={() => setIsCloseHovered(false)}
-        style={{
-          position: 'fixed',
-          top: '1.8rem',
-          right: '1.8rem',
-          width: '100px',
-          height: '45px',
-          borderRadius: '25px',
-          border: 'none',
-          backgroundColor: 'rgba(255,255,255,0.2)',
-          cursor: 'pointer',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          zIndex: zIndexes.menu + 10, // PALING TINGGI
-          backdropFilter: 'blur(10px)',
-          padding: '0 1.5rem',
-          fontFamily: 'Arame Mono, monospace',
-          fontSize: '0.9rem',
-          fontWeight: '300',
-          color: 'rgba(255,255,255,0.9)',
-          overflow: 'hidden'
-        }}
-        variants={closeButtonVariants}
-        initial="closed"
-        animate="open"
-        exit="closed"
-        whileHover={{ 
-          scale: 1.05,
-          backgroundColor: 'rgba(255,255,255,0.3)',
-        }}
-        whileTap={{ scale: 0.95 }}
-        transition={{ duration: 0.2 }}
-      >
-        <motion.div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.5rem',
-            position: 'relative',
-            width: '100%',
-            justifyContent: 'center'
-          }}
-        >
-          {/* X Icon */}
-          <motion.svg
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            initial={{ scale: 1, opacity: 1 }}
-            animate={{ 
-              scale: isCloseHovered ? 0 : 1,
-              opacity: isCloseHovered ? 0 : 1
-            }}
-            transition={{ duration: 0.2 }}
-          >
-            <line x1="18" y1="6" x2="6" y2="18" />
-            <line x1="6" y1="6" x2="18" y2="18" />
-          </motion.svg>
-
-          {/* Close Text */}
-          <motion.span
-            style={{
-              position: 'absolute',
-              left: '50%',
-              transform: 'translateX(-50%)',
-              whiteSpace: 'nowrap',
-              fontSize: '0.9rem',
-              fontWeight: '300',
-              letterSpacing: '0.5px'
-            }}
-            initial={{ scale: 0, opacity: 0 }}
-            animate={{ 
-              scale: isCloseHovered ? 1 : 0,
-              opacity: isCloseHovered ? 1 : 0
-            }}
-            transition={{ duration: 0.2 }}
-          >
-            CLOSE
-          </motion.span>
-        </motion.div>
-      </motion.button>
-    </>
-  )}
-</AnimatePresence>
-
-      
-
-
-
-
-      
-
-      {/* Modal untuk set lokasi manual */}
-      <AnimatePresence>
-        {showLocationModal && (
-          <motion.div
-            style={{
-              position: 'fixed',
-              top: 0,
-              left: 0,
-              width: '100%',
-              height: '100%',
-              backgroundColor: 'rgba(0,0,0,0.8)',
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              zIndex: zIndexes.modal,
-              padding: '2rem'
-            }}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-          >
-            <motion.div
-              style={{
-                background: 'white',
-                borderRadius: '15px',
-                padding: '2rem',
-                maxWidth: '500px',
-                width: '100%',
-                maxHeight: '80vh',
-                overflow: 'hidden',
-                display: 'flex',
-                flexDirection: 'column'
-              }}
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.8, opacity: 0 }}
-            >
-              <h3 style={{ 
-                marginBottom: '1.5rem', 
-                color: 'black',
-                fontFamily: 'Arame Mono, monospace',
-                fontWeight: '400'
-              }}>
-                Set Lokasi Anda
-              </h3>
-              
-              <div style={{ marginBottom: '1rem' }}>
-                <input
-                  type="text"
-                  placeholder="Cari kota atau provinsi..."
-                  value={tempLocation.city}
-                  onChange={(e) => setTempLocation(prev => ({ ...prev, city: e.target.value }))}
-                  style={{
-                    width: '100%',
-                    padding: '0.8rem',
-                    border: '1px solid #ddd',
-                    borderRadius: '8px',
-                    fontFamily: 'Arame Mono, monospace',
-                    fontSize: '0.9rem'
-                  }}
-                />
-              </div>
-
-              <div style={{ 
-                flex: 1, 
-                overflowY: 'auto',
-                maxHeight: '300px',
-                marginBottom: '1.5rem'
-              }}>
-                {filteredCities.slice(0, 10).map((city, index) => (
-                  <motion.div
-                    key={`${city.city}-${city.region}`}
-                    onClick={() => {
-                      setTempLocation({
-                        city: city.city,
-                        region: city.region
-                      });
-                    }}
-                    style={{
-                      padding: '0.8rem',
-                      borderBottom: '1px solid #f0f0f0',
-                      cursor: 'pointer',
-                      backgroundColor: tempLocation.city === city.city ? '#f8f8f8' : 'transparent',
-                      fontFamily: 'Arame Mono, monospace',
-                      fontSize: '0.9rem'
-                    }}
-                    whileHover={{ backgroundColor: '#f0f0f0' }}
-                  >
-                    <div style={{ fontWeight: '500', color: 'black' }}>{city.city}</div>
-                    <div style={{ fontSize: '0.8rem', color: '#666' }}>{city.region}</div>
-                  </motion.div>
-                ))}
-              </div>
-
-              <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
-                <motion.button
-                  onClick={() => setShowLocationModal(false)}
-                  style={{
-                    padding: '0.6rem 1.2rem',
-                    border: '1px solid #ddd',
-                    background: 'transparent',
-                    borderRadius: '6px',
-                    cursor: 'pointer',
-                    fontFamily: 'Arame Mono, monospace'
-                  }}
-                  whileHover={{ background: '#f8f8f8' }}
-                >
-                  Batal
-                </motion.button>
-                <motion.button
-                  onClick={saveManualLocation}
-                  disabled={!tempLocation.city}
-                  style={{
-                    padding: '0.6rem 1.2rem',
-                    border: 'none',
-                    background: tempLocation.city ? '#FF4444' : '#ccc',
-                    color: 'white',
-                    borderRadius: '6px',
-                    cursor: tempLocation.city ? 'pointer' : 'not-allowed',
-                    fontFamily: 'Arame Mono, monospace',
-                    fontWeight: '500'
-                  }}
-                  whileHover={tempLocation.city ? { scale: 1.05 } : {}}
-                >
-                  Simpan
-                </motion.button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Modal untuk menampilkan semua users */}
-      <AnimatePresence>
-        {showAllUsers && (
-          <motion.div
-            style={{
-              position: 'fixed',
-              top: 0,
-              left: 0,
-              width: '100%',
-              height: '100%',
-              backgroundColor: 'rgba(0,0,0,0.9)',
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              zIndex: zIndexes.modal,
-              padding: '2rem'
-            }}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-          >
-            <motion.div
-              style={{
-                background: 'white',
-                borderRadius: '15px',
-                padding: '2rem',
-                maxWidth: '700px',
-                width: '100%',
-                maxHeight: '80vh',
-                overflow: 'hidden',
-                display: 'flex',
-                flexDirection: 'column'
-              }}
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.8, opacity: 0 }}
-            >
-              <div style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                marginBottom: '1.5rem'
-              }}>
-                <h3 style={{ 
+                  position: 'fixed',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  backgroundColor: '#CCFF00',
                   color: 'black',
+                  padding: '1rem 2rem',
+                  textAlign: 'center',
+                  zIndex: zIndexes.banner,
+                  cursor: isBannerHovered ? 'pointer' : 'default',
                   fontFamily: 'Arame Mono, monospace',
-                  fontWeight: '400',
-                  margin: 0
-                }}>
-                  All Users Location Data
-                </h3>
+                  fontWeight: 'bold',
+                  fontSize: '0.9rem',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center'
+                }}
+                initial={{ y: -100, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                exit={{ y: -100, opacity: 0 }}
+                transition={{ duration: 0.8, ease: "back.out(1.7)" }}
+                onMouseEnter={() => setIsBannerHovered(true)}
+                onMouseLeave={() => setIsBannerHovered(false)}
+                onClick={handleBannerClick}
+              >
+                <span style={{ flex: 1, textAlign: 'center' }}>
+                  🚀 CREATE YOUR FIRST NOTE - CLICK HERE TO GET STARTED
+                </span>
                 <motion.button
-                  onClick={() => setShowAllUsers(false)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    closeBanner();
+                  }}
                   style={{
                     background: 'none',
                     border: 'none',
-                    fontSize: '1.5rem',
+                    color: 'black',
+                    fontSize: '1.2rem',
                     cursor: 'pointer',
-                    color: '#666',
                     padding: '0.5rem',
-                    borderRadius: '50%',
-                    width: '40px',
-                    height: '40px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
+                    borderRadius: '4px',
+                    marginLeft: '1rem'
                   }}
                   whileHover={{ 
-                    backgroundColor: '#f0f0f0',
-                    color: '#000'
+                    backgroundColor: 'rgba(0, 0, 0, 0.1)',
+                    scale: 1.1
                   }}
+                  transition={{ duration: 0.2 }}
                 >
-                  ×
+                  ✕
                 </motion.button>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Navbar */}
+          <nav style={{
+            position: 'fixed',
+            top: showBanner ? '60px' : '0',
+            left: 0,
+            right: 0,
+            padding: '1rem 2rem',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            zIndex: zIndexes.navbar,
+            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+            backdropFilter: 'blur(10px)',
+            borderBottom: '1px solid rgba(255, 255, 255, 0.1)'
+          }}>
+            {/* Left Section - Logo */}
+            <motion.div
+              style={{
+                color: 'white',
+                fontSize: '1.5rem',
+                fontWeight: 'bold',
+                fontFamily: 'Arame Mono, monospace'
+              }}
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+            >
+              NOTED
+            </motion.div>
+
+            {/* Center Section - Navigation Links */}
+            <div style={{
+              display: 'flex',
+              gap: '3rem',
+              alignItems: 'center'
+            }}>
+              {/* Home Dropdown */}
+              <div ref={dropdownRef} style={{ position: 'relative' }}>
+                <motion.button
+                  onClick={() => toggleNavDropdown("home")}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: 'white',
+                    fontSize: '0.9rem',
+                    fontFamily: 'Arame Mono, monospace',
+                    cursor: 'pointer',
+                    padding: '0.5rem 1rem',
+                    borderRadius: '6px',
+                    backgroundColor: showNavDropdown && navDropdownType === "home" ? 'rgba(255, 255, 255, 0.1)' : 'transparent'
+                  }}
+                  whileHover={{
+                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                    color: '#CCFF00'
+                  }}
+                  transition={{ duration: 0.3 }}
+                >
+                  HOME
+                </motion.button>
+
+                {/* Home Dropdown Menu */}
+                <AnimatePresence>
+                  {showNavDropdown && navDropdownType === "home" && (
+                    <motion.div
+                      style={{
+                        position: 'absolute',
+                        top: '100%',
+                        left: 0,
+                        backgroundColor: 'rgba(0, 0, 0, 0.95)',
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                        borderRadius: '8px',
+                        padding: '0.5rem 0',
+                        minWidth: '200px',
+                        zIndex: zIndexes.dropdown,
+                        backdropFilter: 'blur(10px)',
+                        marginTop: '0.5rem'
+                      }}
+                      initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                      transition={{ duration: 0.3, ease: "easeOut" }}
+                    >
+                      <motion.button
+                        style={{
+                          width: '100%',
+                          background: 'none',
+                          border: 'none',
+                          color: 'white',
+                          fontSize: '0.9rem',
+                          fontFamily: 'Arame Mono, monospace',
+                          textAlign: 'left',
+                          padding: '0.75rem 1.5rem',
+                          cursor: 'pointer'
+                        }}
+                        whileHover={{
+                          backgroundColor: 'rgba(204, 255, 0, 0.1)',
+                          color: '#CCFF00'
+                        }}
+                        transition={{ duration: 0.2 }}
+                      >
+                        HOME
+                      </motion.button>
+                      <motion.button
+                        style={{
+                          width: '100%',
+                          background: 'none',
+                          border: 'none',
+                          color: 'white',
+                          fontSize: '0.9rem',
+                          fontFamily: 'Arame Mono, monospace',
+                          textAlign: 'left',
+                          padding: '0.75rem 1.5rem',
+                          cursor: 'pointer'
+                        }}
+                        whileHover={{
+                          backgroundColor: 'rgba(204, 255, 0, 0.1)',
+                          color: '#CCFF00'
+                        }}
+                        transition={{ duration: 0.2 }}
+                      >
+                        TOPICS
+                      </motion.button>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
 
-              {isLoadingAllUsers ? (
+              {/* Topics Dropdown */}
+              <div style={{ position: 'relative' }}>
+                <motion.button
+                  onClick={() => toggleNavDropdown("topics")}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: 'white',
+                    fontSize: '0.9rem',
+                    fontFamily: 'Arame Mono, monospace',
+                    cursor: 'pointer',
+                    padding: '0.5rem 1rem',
+                    borderRadius: '6px',
+                    backgroundColor: showNavDropdown && navDropdownType === "topics" ? 'rgba(255, 255, 255, 0.1)' : 'transparent'
+                  }}
+                  whileHover={{
+                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                    color: '#CCFF00'
+                  }}
+                  transition={{ duration: 0.3 }}
+                >
+                  TOPICS
+                </motion.button>
+
+                {/* Topics Dropdown Menu */}
+                <AnimatePresence>
+                  {showNavDropdown && navDropdownType === "topics" && (
+                    <motion.div
+                      style={{
+                        position: 'absolute',
+                        top: '100%',
+                        left: 0,
+                        backgroundColor: 'rgba(0, 0, 0, 0.95)',
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                        borderRadius: '8px',
+                        padding: '0.5rem 0',
+                        minWidth: '200px',
+                        zIndex: zIndexes.dropdown,
+                        backdropFilter: 'blur(10px)',
+                        marginTop: '0.5rem'
+                      }}
+                      initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                      transition={{ duration: 0.3, ease: "easeOut" }}
+                    >
+                      <motion.button
+                        style={{
+                          width: '100%',
+                          background: 'none',
+                          border: 'none',
+                          color: 'white',
+                          fontSize: '0.9rem',
+                          fontFamily: 'Arame Mono, monospace',
+                          textAlign: 'left',
+                          padding: '0.75rem 1.5rem',
+                          cursor: 'pointer'
+                        }}
+                        whileHover={{
+                          backgroundColor: 'rgba(204, 255, 0, 0.1)',
+                          color: '#CCFF00'
+                        }}
+                        transition={{ duration: 0.2 }}
+                      >
+                        TECHNOLOGY
+                      </motion.button>
+                      <motion.button
+                        style={{
+                          width: '100%',
+                          background: 'none',
+                          border: 'none',
+                          color: 'white',
+                          fontSize: '0.9rem',
+                          fontFamily: 'Arame Mono, monospace',
+                          textAlign: 'left',
+                          padding: '0.75rem 1.5rem',
+                          cursor: 'pointer'
+                        }}
+                        whileHover={{
+                          backgroundColor: 'rgba(204, 255, 0, 0.1)',
+                          color: '#CCFF00'
+                        }}
+                        transition={{ duration: 0.2 }}
+                      >
+                        DESIGN
+                      </motion.button>
+                      <motion.button
+                        style={{
+                          width: '100%',
+                          background: 'none',
+                          border: 'none',
+                          color: 'white',
+                          fontSize: '0.9rem',
+                          fontFamily: 'Arame Mono, monospace',
+                          textAlign: 'left',
+                          padding: '0.75rem 1.5rem',
+                          cursor: 'pointer'
+                        }}
+                        whileHover={{
+                          backgroundColor: 'rgba(204, 255, 0, 0.1)',
+                          color: '#CCFF00'
+                        }}
+                        transition={{ duration: 0.2 }}
+                      >
+                        BUSINESS
+                      </motion.button>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+
+              {/* Regular Links */}
+              <motion.button
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: 'white',
+                  fontSize: '0.9rem',
+                  fontFamily: 'Arame Mono, monospace',
+                  cursor: 'pointer',
+                  padding: '0.5rem 1rem',
+                  borderRadius: '6px'
+                }}
+                whileHover={{
+                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                  color: '#CCFF00'
+                }}
+                transition={{ duration: 0.3 }}
+              >
+                NOTES
+              </motion.button>
+              <motion.button
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: 'white',
+                  fontSize: '0.9rem',
+                  fontFamily: 'Arame Mono, monospace',
+                  cursor: 'pointer',
+                  padding: '0.5rem 1rem',
+                  borderRadius: '6px'
+                }}
+                whileHover={{
+                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                  color: '#CCFF00'
+                }}
+                transition={{ duration: 0.3 }}
+              >
+                ABOUT
+              </motion.button>
+            </div>
+
+            {/* Right Section - Search & Menu */}
+            <div style={{
+              display: 'flex',
+              gap: '1rem',
+              alignItems: 'center'
+            }}>
+              {/* Search Button */}
+              <motion.button
+                onClick={toggleSearch}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: 'white',
+                  fontSize: '0.9rem',
+                  fontFamily: 'Arame Mono, monospace',
+                  cursor: 'pointer',
+                  padding: '0.5rem 1rem',
+                  borderRadius: '6px'
+                }}
+                whileHover={{
+                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                  color: '#CCFF00'
+                }}
+                transition={{ duration: 0.3 }}
+              >
+                SEARCH
+              </motion.button>
+
+              {/* Menu Button */}
+              <motion.button
+                onClick={toggleMenu}
+                onMouseEnter={handleMenuHover}
+                onMouseLeave={handleMenuLeave}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: 'white',
+                  fontSize: '0.9rem',
+                  fontFamily: 'Arame Mono, monospace',
+                  cursor: 'pointer',
+                  padding: '0.5rem 1rem',
+                  borderRadius: '6px',
+                  backgroundColor: 'rgba(204, 255, 0, 0.1)',
+                  border: '1px solid rgba(204, 255, 0, 0.3)'
+                }}
+                variants={menuButtonVariants}
+                initial="initial"
+                animate="animate"
+                whileHover="hover"
+                whileTap="tap"
+              >
+                <AnimatePresence mode="wait">
+                  <motion.span
+                    key={menuText}
+                    variants={textVariants}
+                    initial="enter"
+                    animate="center"
+                    exit="exit"
+                  >
+                    {menuText}
+                  </motion.span>
+                </AnimatePresence>
+              </motion.button>
+            </div>
+          </nav>
+
+          {/* Main Content Area */}
+          <div style={{
+            marginTop: showBanner ? '120px' : '60px',
+            padding: '2rem',
+            width: '100%',
+            minHeight: 'calc(100vh - 120px)',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}>
+            {/* Visitor Info */}
+            <motion.div
+              style={{
+                color: 'white',
+                textAlign: 'center',
+                marginBottom: '3rem'
+              }}
+              initial="hidden"
+              animate="visible"
+              variants={timeVariants}
+            >
+              <div style={{
+                fontSize: '1.2rem',
+                fontWeight: 'bold',
+                marginBottom: '0.5rem',
+                color: '#CCFF00'
+              }}>
+                {visitorTime.time} {visitorTime.timezone}
+              </div>
+              <div style={{
+                fontSize: '0.9rem',
+                color: 'rgba(255, 255, 255, 0.7)',
+                marginBottom: '1rem'
+              }}>
+                {visitorTime.date}
+              </div>
+              <div style={{
+                fontSize: '0.8rem',
+                color: 'rgba(255, 255, 255, 0.5)'
+              }}>
+                {visitorLocation.city}, {visitorLocation.region}, {visitorLocation.country}
+                {visitorLocation.isManual && ' • Manual'}
+              </div>
+            </motion.div>
+
+            {/* Main Title */}
+            <motion.h1
+              style={{
+                color: 'white',
+                fontSize: '4rem',
+                fontWeight: 'bold',
+                textAlign: 'center',
+                marginBottom: '1rem',
+                fontFamily: 'Arame Mono, monospace'
+              }}
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.3 }}
+            >
+              NOTED
+            </motion.h1>
+
+            <motion.p
+              style={{
+                color: 'rgba(255, 255, 255, 0.8)',
+                fontSize: '1.2rem',
+                textAlign: 'center',
+                maxWidth: '600px',
+                marginBottom: '3rem',
+                fontFamily: 'Arame Mono, monospace'
+              }}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.5 }}
+            >
+              Your ultimate note-taking companion for organized thoughts and ideas.
+            </motion.p>
+
+            {/* CTA Buttons */}
+            <motion.div
+              style={{
+                display: 'flex',
+                gap: '1rem',
+                marginBottom: '3rem'
+              }}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.7 }}
+            >
+              <motion.button
+                onClick={navigateToNotes}
+                style={{
+                  backgroundColor: '#CCFF00',
+                  color: 'black',
+                  border: 'none',
+                  padding: '1rem 2rem',
+                  borderRadius: '8px',
+                  fontSize: '1rem',
+                  fontWeight: 'bold',
+                  fontFamily: 'Arame Mono, monospace',
+                  cursor: 'pointer'
+                }}
+                whileHover={{
+                  scale: 1.05,
+                  backgroundColor: '#E8FF66'
+                }}
+                whileTap={{
+                  scale: 0.95
+                }}
+                transition={{ duration: 0.3 }}
+              >
+                GET STARTED
+              </motion.button>
+
+              <motion.button
+                onClick={openLocationModal}
+                style={{
+                  backgroundColor: 'transparent',
+                  color: 'white',
+                  border: '1px solid rgba(255, 255, 255, 0.3)',
+                  padding: '1rem 2rem',
+                  borderRadius: '8px',
+                  fontSize: '1rem',
+                  fontWeight: 'bold',
+                  fontFamily: 'Arame Mono, monospace',
+                  cursor: 'pointer'
+                }}
+                whileHover={{
+                  scale: 1.05,
+                  backgroundColor: 'rgba(255, 255, 255, 0.1)'
+                }}
+                whileTap={{
+                  scale: 0.95
+                }}
+                transition={{ duration: 0.3 }}
+              >
+                SET LOCATION
+              </motion.button>
+            </motion.div>
+
+            {/* Stats */}
+            <motion.div
+              style={{
+                display: 'flex',
+                gap: '3rem',
+                color: 'rgba(255, 255, 255, 0.7)',
+                fontSize: '0.9rem'
+              }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.8, delay: 0.9 }}
+            >
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#CCFF00' }}>10K+</div>
+                <div>ACTIVE USERS</div>
+              </div>
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#CCFF00' }}>50K+</div>
+                <div>NOTES CREATED</div>
+              </div>
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#CCFF00' }}>99%</div>
+                <div>SATISFACTION</div>
+              </div>
+            </motion.div>
+          </div>
+
+          {/* Menu Overlay - PERBAIKAN: z-index menu harus paling tinggi */}
+          <AnimatePresence>
+            {showMenu && (
+              <motion.div
+                style={{
+                  position: 'fixed',
+                  top: 0,
+                  left: 0,
+                  width: '100%',
+                  height: '100%',
+                  backgroundColor: 'black',
+                  zIndex: zIndexes.menu,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  padding: '2rem'
+                }}
+                variants={menuVariants}
+                initial="closed"
+                animate="open"
+                exit="closed"
+              >
+                {/* Close Button */}
+                <motion.button
+                  onClick={toggleMenu}
+                  onMouseEnter={() => setIsCloseHovered(true)}
+                  onMouseLeave={() => setIsCloseHovered(false)}
+                  style={{
+                    position: 'absolute',
+                    top: '2rem',
+                    right: '2rem',
+                    background: 'none',
+                    border: 'none',
+                    color: isCloseHovered ? '#CCFF00' : 'white',
+                    fontSize: '1.5rem',
+                    cursor: 'pointer',
+                    padding: '0.5rem',
+                    borderRadius: '4px'
+                  }}
+                  variants={closeButtonVariants}
+                  initial="closed"
+                  animate="open"
+                  exit="closed"
+                  whileHover={{
+                    scale: 1.1,
+                    rotate: 90
+                  }}
+                  whileTap={{
+                    scale: 0.9
+                  }}
+                >
+                  CLOSE
+                </motion.button>
+
+                {/* Menu Items */}
                 <div style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'center',
+                  alignItems: 'flex-start',
+                  height: '100%',
+                  gap: '1.5rem',
+                  marginLeft: '4rem'
+                }}>
+                  {menuItems.map((item, index) => (
+                    <motion.button
+                      key={item.name}
+                      onClick={item.action}
+                      onMouseEnter={() => setHoveredItem(item.name)}
+                      onMouseLeave={() => setHoveredItem(null)}
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        color: hoveredItem === item.name ? '#CCFF00' : 'white',
+                        fontSize: '3rem',
+                        fontWeight: 'bold',
+                        cursor: 'pointer',
+                        fontFamily: 'Arame Mono, monospace',
+                        textAlign: 'left',
+                        padding: '0.5rem 0'
+                      }}
+                      variants={menuItemVariants}
+                      initial="closed"
+                      animate="open"
+                      exit="closed"
+                      custom={index}
+                      whileHover={{
+                        x: 20,
+                        transition: { duration: 0.3 }
+                      }}
+                    >
+                      {item.name}
+                    </motion.button>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Location Modal */}
+          <AnimatePresence>
+            {showLocationModal && (
+              <motion.div
+                style={{
+                  position: 'fixed',
+                  top: 0,
+                  left: 0,
+                  width: '100%',
+                  height: '100%',
+                  backgroundColor: 'rgba(0, 0, 0, 0.8)',
                   display: 'flex',
                   justifyContent: 'center',
                   alignItems: 'center',
-                  padding: '3rem',
-                  flexDirection: 'column',
-                  gap: '1rem'
-                }}>
-                  <motion.div
-                    style={{
-                      width: '40px',
-                      height: '40px',
-                      border: '3px solid #f0f0f0',
-                      borderTop: '3px solid #FF4444',
-                      borderRadius: '50%'
-                    }}
-                    animate={{ rotate: 360 }}
-                    transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                  />
-                  <div style={{
-                    fontFamily: 'Arame Mono, monospace',
-                    color: '#666',
-                    fontSize: '0.9rem'
+                  zIndex: zIndexes.modal,
+                  padding: '2rem'
+                }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+              >
+                <motion.div
+                  style={{
+                    backgroundColor: 'rgba(20, 20, 20, 0.95)',
+                    padding: '2rem',
+                    borderRadius: '12px',
+                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                    maxWidth: '500px',
+                    width: '100%',
+                    backdropFilter: 'blur(10px)'
+                  }}
+                  initial={{ scale: 0.8, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  exit={{ scale: 0.8, opacity: 0 }}
+                  transition={{ duration: 0.5, ease: "back.out(1.7)" }}
+                >
+                  <h3 style={{
+                    color: 'white',
+                    fontSize: '1.5rem',
+                    marginBottom: '1rem',
+                    fontFamily: 'Arame Mono, monospace'
                   }}>
-                    Loading users data...
+                    SET YOUR LOCATION
+                  </h3>
+                  
+                  <div style={{ marginBottom: '1.5rem' }}>
+                    <label style={{
+                      color: 'rgba(255, 255, 255, 0.7)',
+                      fontSize: '0.9rem',
+                      marginBottom: '0.5rem',
+                      display: 'block',
+                      fontFamily: 'Arame Mono, monospace'
+                    }}>
+                      City
+                    </label>
+                    <input
+                      type="text"
+                      value={tempLocation.city}
+                      onChange={(e) => setTempLocation(prev => ({ ...prev, city: e.target.value }))}
+                      style={{
+                        width: '100%',
+                        backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                        borderRadius: '6px',
+                        padding: '0.75rem',
+                        color: 'white',
+                        fontSize: '1rem',
+                        fontFamily: 'Arame Mono, monospace',
+                        outline: 'none'
+                      }}
+                      placeholder="Type your city..."
+                    />
                   </div>
-                </div>
-              ) : (
-                <>
-                  <div style={{ 
-                    flex: 1, 
-                    overflowY: 'auto',
-                    maxHeight: '400px',
-                    marginBottom: '1rem'
+
+                  <div style={{ marginBottom: '2rem' }}>
+                    <label style={{
+                      color: 'rgba(255, 255, 255, 0.7)',
+                      fontSize: '0.9rem',
+                      marginBottom: '0.5rem',
+                      display: 'block',
+                      fontFamily: 'Arame Mono, monospace'
+                    }}>
+                      Region
+                    </label>
+                    <select
+                      value={tempLocation.region}
+                      onChange={(e) => setTempLocation(prev => ({ ...prev, region: e.target.value }))}
+                      style={{
+                        width: '100%',
+                        backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                        borderRadius: '6px',
+                        padding: '0.75rem',
+                        color: 'white',
+                        fontSize: '1rem',
+                        fontFamily: 'Arame Mono, monospace',
+                        outline: 'none',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      <option value="">Select region</option>
+                      {Array.from(new Set(indonesiaCities.map(city => city.region))).map(region => (
+                        <option key={region} value={region}>{region}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* City Suggestions */}
+                  {tempLocation.city.length > 0 && (
+                    <div style={{
+                      maxHeight: '200px',
+                      overflowY: 'auto',
+                      marginBottom: '1.5rem',
+                      border: '1px solid rgba(255, 255, 255, 0.1)',
+                      borderRadius: '6px'
+                    }}>
+                      {filteredCities.slice(0, 10).map((city, index) => (
+                        <div
+                          key={index}
+                          onClick={() => setTempLocation({ city: city.city, region: city.region })}
+                          style={{
+                            padding: '0.75rem',
+                            cursor: 'pointer',
+                            color: 'white',
+                            fontFamily: 'Arame Mono, monospace',
+                            fontSize: '0.9rem',
+                            borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
+                            backgroundColor: tempLocation.city === city.city && tempLocation.region === city.region 
+                              ? 'rgba(204, 255, 0, 0.1)' 
+                              : 'transparent'
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.backgroundColor = 
+                              tempLocation.city === city.city && tempLocation.region === city.region 
+                                ? 'rgba(204, 255, 0, 0.1)' 
+                                : 'transparent';
+                          }}
+                        >
+                          {city.city}, {city.region}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  <div style={{
+                    display: 'flex',
+                    gap: '1rem',
+                    justifyContent: 'flex-end'
                   }}>
-                    {allUsersData.length === 0 ? (
-                      <div style={{
-                        textAlign: 'center',
-                        padding: '3rem',
-                        color: '#666',
-                        fontFamily: 'Arame Mono, monospace'
-                      }}>
-                        No users data found
-                      </div>
-                    ) : (
-                      allUsersData.map((user, index) => (
+                    <motion.button
+                      onClick={() => setShowLocationModal(false)}
+                      style={{
+                        backgroundColor: 'transparent',
+                        color: 'white',
+                        border: '1px solid rgba(255, 255, 255, 0.3)',
+                        padding: '0.75rem 1.5rem',
+                        borderRadius: '6px',
+                        fontSize: '0.9rem',
+                        fontFamily: 'Arame Mono, monospace',
+                        cursor: 'pointer'
+                      }}
+                      whileHover={{
+                        backgroundColor: 'rgba(255, 255, 255, 0.1)'
+                      }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      CANCEL
+                    </motion.button>
+                    <motion.button
+                      onClick={saveManualLocation}
+                      disabled={!tempLocation.city || !tempLocation.region}
+                      style={{
+                        backgroundColor: tempLocation.city && tempLocation.region ? '#CCFF00' : 'rgba(255, 255, 255, 0.1)',
+                        color: tempLocation.city && tempLocation.region ? 'black' : 'rgba(255, 255, 255, 0.3)',
+                        border: 'none',
+                        padding: '0.75rem 1.5rem',
+                        borderRadius: '6px',
+                        fontSize: '0.9rem',
+                        fontFamily: 'Arame Mono, monospace',
+                        cursor: tempLocation.city && tempLocation.region ? 'pointer' : 'not-allowed'
+                      }}
+                      whileHover={tempLocation.city && tempLocation.region ? {
+                        backgroundColor: '#E8FF66'
+                      } : {}}
+                      transition={{ duration: 0.2 }}
+                    >
+                      SAVE LOCATION
+                    </motion.button>
+                  </div>
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* All Users Modal */}
+          <AnimatePresence>
+            {showAllUsers && (
+              <motion.div
+                style={{
+                  position: 'fixed',
+                  top: 0,
+                  left: 0,
+                  width: '100%',
+                  height: '100%',
+                  backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  zIndex: zIndexes.modal,
+                  padding: '2rem'
+                }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+              >
+                <motion.div
+                  style={{
+                    backgroundColor: 'rgba(20, 20, 20, 0.95)',
+                    padding: '2rem',
+                    borderRadius: '12px',
+                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                    maxWidth: '800px',
+                    width: '100%',
+                    maxHeight: '80vh',
+                    overflowY: 'auto',
+                    backdropFilter: 'blur(10px)'
+                  }}
+                  initial={{ scale: 0.8, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  exit={{ scale: 0.8, opacity: 0 }}
+                  transition={{ duration: 0.5, ease: "back.out(1.7)" }}
+                >
+                  <div style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    marginBottom: '2rem'
+                  }}>
+                    <h3 style={{
+                      color: 'white',
+                      fontSize: '1.5rem',
+                      fontFamily: 'Arame Mono, monospace'
+                    }}>
+                      ALL USERS ({allUsersData.length})
+                    </h3>
+                    <motion.button
+                      onClick={() => setShowAllUsers(false)}
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        color: 'rgba(255, 255, 255, 0.6)',
+                        fontSize: '1.5rem',
+                        cursor: 'pointer',
+                        padding: '0.5rem',
+                        borderRadius: '4px'
+                      }}
+                      whileHover={{
+                        color: 'white',
+                        backgroundColor: 'rgba(255, 255, 255, 0.1)'
+                      }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      ✕
+                    </motion.button>
+                  </div>
+
+                  {isLoadingAllUsers ? (
+                    <div style={{
+                      color: 'white',
+                      textAlign: 'center',
+                      padding: '2rem',
+                      fontFamily: 'Arame Mono, monospace'
+                    }}>
+                      Loading users data...
+                    </div>
+                  ) : (
+                    <div style={{
+                      display: 'grid',
+                      gap: '1rem'
+                    }}>
+                      {allUsersData.map((user, index) => (
                         <motion.div
                           key={user.id}
                           style={{
-                            padding: '1.2rem',
-                            borderBottom: '1px solid #f0f0f0',
-                            backgroundColor: user.id === currentUserId ? '#f8f8f8' : 'transparent',
-                            fontFamily: 'Arame Mono, monospace',
-                            borderLeft: user.id === currentUserId ? '4px solid #FF4444' : '4px solid transparent'
+                            backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                            padding: '1rem',
+                            borderRadius: '8px',
+                            border: '1px solid rgba(255, 255, 255, 0.1)'
                           }}
-                          initial={{ opacity: 0, x: -20 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: index * 0.1 }}
-                          whileHover={{ backgroundColor: '#fafafa' }}
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.3, delay: index * 0.1 }}
                         >
-                          <div style={{ 
-                            display: 'flex', 
-                            justifyContent: 'space-between',
-                            alignItems: 'flex-start',
-                            marginBottom: '0.8rem'
+                          <div style={{
+                            color: 'white',
+                            fontFamily: 'Arame Mono, monospace',
+                            fontSize: '0.9rem'
                           }}>
-                            <div style={{ 
-                              fontWeight: '500', 
-                              color: 'black',
-                              fontSize: '1rem'
-                            }}>
-                              User {index + 1} 
-                              {user.id === currentUserId && (
-                                <span style={{ 
-                                  marginLeft: '0.5rem',
-                                  backgroundColor: '#FF4444',
-                                  color: 'white',
-                                  padding: '0.2rem 0.6rem',
-                                  borderRadius: '12px',
-                                  fontSize: '0.7rem',
-                                  fontWeight: '500'
-                                }}>
-                                  YOU
-                                </span>
-                              )}
+                            <div style={{ marginBottom: '0.5rem' }}>
+                              <strong>User ID:</strong> {user.id.substring(0, 8)}...
                             </div>
-                            <div style={{ 
-                              fontSize: '0.7rem', 
-                              color: '#666',
-                              backgroundColor: '#f0f0f0',
-                              padding: '0.3rem 0.6rem',
-                              borderRadius: '8px',
-                              fontFamily: 'monospace'
-                            }}>
-                              ID: {user.id.substring(0, 10)}...
+                            <div style={{ marginBottom: '0.5rem' }}>
+                              <strong>Location:</strong> {user.city}, {user.region}, {user.country}
+                            </div>
+                            <div style={{ color: 'rgba(255, 255, 255, 0.6)' }}>
+                              <strong>Last Updated:</strong> {user.lastUpdated ? new Date(user.lastUpdated).toLocaleString() : 'Unknown'}
                             </div>
                           </div>
-                          
-                          <div style={{ 
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '0.8rem',
-                            marginBottom: '0.5rem'
-                          }}>
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
-                              <circle cx="12" cy="10" r="3"/>
-                            </svg>
-                            <span style={{ fontSize: '0.9rem', color: '#333', fontWeight: '500' }}>
-                              {user.city || 'Unknown'}, {user.region || 'Unknown'}
-                            </span>
-                          </div>
-                          
-                          <div style={{ 
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '0.8rem',
-                            marginBottom: '0.5rem'
-                          }}>
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-                              <line x1="16" y1="2" x2="16" y2="6"/>
-                              <line x1="8" y1="2" x2="8" y2="6"/>
-                              <line x1="3" y1="10" x2="21" y2="10"/>
-                            </svg>
-                            <span style={{ fontSize: '0.8rem', color: '#666' }}>
-                              {user.lastUpdated ? new Date(user.lastUpdated).toLocaleString('id-ID') : 'No timestamp'}
-                            </span>
-                          </div>
-
-                          {user.isManual && (
-                            <div style={{ 
-                              fontSize: '0.7rem', 
-                              color: '#FF4444',
-                              backgroundColor: 'rgba(255, 68, 68, 0.1)',
-                              padding: '0.2rem 0.6rem',
-                              borderRadius: '8px',
-                              display: 'inline-block',
-                              marginTop: '0.3rem'
-                            }}>
-                              Manual Location
-                            </div>
-                          )}
                         </motion.div>
-                      ))
-                    )}
-                  </div>
-
-                  <div style={{ 
-                    marginTop: '1rem',
-                    fontSize: '0.8rem',
-                    color: '#666',
-                    textAlign: 'center',
-                    padding: '1rem',
-                    backgroundColor: '#f8f8f8',
-                    borderRadius: '8px'
-                  }}>
-                    Total <strong>{allUsersData.length}</strong> users found
-                    {allUsersData.length > 0 && (
-                      <span style={{ marginLeft: '1rem' }}>
-                        • Last updated: {new Date().toLocaleString('id-ID')}
-                      </span>
-                    )}
-                  </div>
-                </>
-              )}
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+                      ))}
+                    </div>
+                  )}
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      )}
     </div>
   );
 }
-
-
-
-
-
-
-
-
-
-
-
