@@ -161,6 +161,7 @@ const topicsContent = [
   }
 ];
 
+
 export default function HomePage(): React.JSX.Element {
   const [showLoading, setShowLoading] = useState(true);
   const [showMenu, setShowMenu] = useState(false);
@@ -451,112 +452,261 @@ useEffect(() => {
     initializeUser();
   }, []);
 
-  // Setup GSAP ScrollTrigger untuk horizontal scroll
-  useEffect(() => {
-    if (showContent && horizontalScrollRef.current) {
-      const sections = gsap.utils.toArray('.scroll-section');
-      const container = horizontalScrollRef.current;
-
-      // Kill existing ScrollTriggers to avoid conflicts
-      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
-
-      gsap.to(sections, {
-        xPercent: -100 * (sections.length - 1),
-        ease: "none",
-        scrollTrigger: {
-          trigger: container,
-          pin: true,
-          scrub: 1,
-          snap: 1 / (sections.length - 1),
-          end: () => "+=" + (container.offsetWidth * (sections.length - 1)),
-          invalidateOnRefresh: true
-        }
-      });
-    }
-
-    return () => {
-      // Cleanup ScrollTriggers when component unmounts or content closes
-      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
-    };
-  }, [showContent, activeSection]);
-  
-  
-  
-  
 
 
-  // Fungsi untuk mendeteksi tipe koneksi
-  const detectNetworkType = () => {
-    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+// GSAP Scroll Animation untuk Navigasi - SIMPLE VERSION
+useEffect(() => {
+  if (showContent && horizontalScrollRef.current) {
+    const container = horizontalScrollRef.current;
+    const sections = container.querySelectorAll('.scroll-section');
     
-    if (isMobile) {
-      if ('connection' in navigator) {
-        const conn = (navigator as any).connection;
-        if (conn) {
-          const type = conn.type || 'unknown';
-          if (type === 'wifi') return 'WiFi Mobile';
-          if (type === 'cellular') return 'Mobile Data';
-          return type;
+    // Simple snap scroll dengan GSAP
+    gsap.to(container, {
+      x: () => -(container.scrollWidth - window.innerWidth),
+      ease: "none",
+      scrollTrigger: {
+        trigger: container,
+        start: "top top",
+        end: () => `+=${container.scrollWidth - window.innerWidth}`,
+        scrub: 1,
+        pin: true,
+        snap: {
+          snapTo: 1 / (sections.length - 1),
+          inertia: false,
+          duration: { min: 0.1, max: 0.3 }
         }
-      }
-      return 'Mobile Device';
-    } else {
-      return 'WiFi/LAN Desktop';
-    }
-  };
-
-  // Fungsi untuk mendapatkan IP real melalui WebRTC
-  const getRealIPFromWebRTC = (): Promise<string> => {
-    return new Promise((resolve) => {
-      const RTCPeerConnection = (window as any).RTCPeerConnection || 
-                               (window as any).mozRTCPeerConnection || 
-                               (window as any).webkitRTCPeerConnection;
-      
-      if (!RTCPeerConnection) {
-        resolve("unknown");
-        return;
-      }
-
-      try {
-        const pc = new RTCPeerConnection({ iceServers: [] });
-        pc.createDataChannel("");
-        
-        pc.createOffer()
-          .then(offer => pc.setLocalDescription(offer))
-          .catch(() => resolve("unknown"));
-
-        let foundIP = false;
-        
-        pc.onicecandidate = (ice) => {
-          if (!ice || !ice.candidate || !ice.candidate.candidate) {
-            if (!foundIP) resolve("unknown");
-            return;
-          }
-
-          const candidate = ice.candidate.candidate;
-          const ipRegex = /([0-9]{1,3}(\.[0-9]{1,3}){3}|[a-f0-9]{1,4}(:[a-f0-9]{1,4}){7})/;
-          const ipMatch = candidate.match(ipRegex);
-          
-          if (ipMatch) {
-            const ip = ipMatch[1];
-            foundIP = true;
-            if (!ip.match(/^(192\.168\.|10\.|172\.(1[6-9]|2[0-9]|3[0-1])\.|169\.254\.|127\.|::1|fe80::)/)) {
-              resolve(ip);
-            } else {
-              resolve(ip);
-            }
-          }
-        };
-
-        setTimeout(() => {
-          if (!foundIP) resolve("unknown");
-        }, 3000);
-
-      } catch (error) {
-        resolve("unknown");
       }
     });
-  };
+  }
+}, [showContent, activeSection]);
+
+
+
+// Alternatif: Manual scroll dengan button navigation
+const scrollToSection = (index: number) => {
+  if (horizontalScrollRef.current) {
+    const container = horizontalScrollRef.current;
+    const sectionWidth = window.innerWidth;
+    
+    gsap.to(container, {
+      scrollLeft: sectionWidth * index,
+      duration: 0.8,
+      ease: "power2.inOut"
+    });
+  }
+};
+
+
+
+
+
+
+
+
+
+
+
+// Fungsi untuk membuka section dengan perbaikan scroll
+const openSection = (section: "home" | "topics") => {
+  setActiveSection(section);
+  setShowContent(true);
+  
+  // Tutup menu
+  setShowMenu(false);
+  
+  // Tunggu DOM update sebelum setup GSAP
+  setTimeout(() => {
+    if (contentContainerRef.current) {
+      const tl = gsap.timeline();
+      
+      // Animasi container
+      tl.fromTo(contentContainerRef.current,
+        {
+          scale: 0.9,
+          opacity: 0,
+          y: 50
+        },
+        {
+          scale: 1,
+          opacity: 1,
+          y: 0,
+          duration: 0.6,
+          ease: "easeOut",
+          onComplete: () => {
+            // Refresh ScrollTrigger setelah animasi selesai
+            setTimeout(() => {
+              ScrollTrigger.refresh();
+            }, 100);
+          }
+        }
+      );
+    }
+  }, 100);
+};
+
+// Fungsi untuk menutup content dengan cleanup yang benar
+const closeContent = () => {
+  // Kill all ScrollTriggers when closing content
+  ScrollTrigger.getAll().forEach(trigger => trigger.kill());
+
+  if (contentContainerRef.current) {
+    const tl = gsap.timeline();
+    
+    tl.to(contentContainerRef.current, {
+      scale: 0.9,
+      opacity: 0,
+      y: 50,
+      duration: 0.4,
+      ease: "back.in(1.7)",
+      onComplete: () => {
+        setShowContent(false);
+        setActiveSection(null);
+      }
+    });
+  } else {
+    setShowContent(false);
+    setActiveSection(null);
+  }
+};
+
+
+
+
+  
+  
+// ✅ Enhanced Network Type Detection (modern + fallback)
+const detectNetworkType = (): string => {
+  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+    navigator.userAgent
+  );
+
+  // Check for modern browser connection info
+  const nav = navigator as any;
+  if ("connection" in nav && nav.connection) {
+    const conn = nav.connection;
+    const effectiveType = conn.effectiveType || "unknown";
+    const type = conn.type || "unknown";
+
+    if (type === "wifi") return "WiFi";
+    if (type === "cellular") return "Mobile Data";
+    if (type === "ethernet") return "Ethernet";
+
+    // Fallback ke effectiveType (kecepatan)
+    if (effectiveType === "4g") return "4G Network";
+    if (effectiveType === "3g") return "3G Network";
+    if (effectiveType === "2g") return "2G Network";
+  }
+
+  // Fallback detection sederhana
+  if (isMobile) {
+    return "Mobile Device";
+  } else {
+    const platform = navigator.platform.toLowerCase();
+    if (platform.includes("win")) return "Windows Desktop";
+    if (platform.includes("mac")) return "Mac Desktop";
+    if (platform.includes("linux")) return "Linux Desktop";
+    return "Desktop Computer";
+  }
+};
+
+
+
+// ✅ Improved WebRTC IP detection (Cross-browser)
+const getRealIPFromWebRTC = (): Promise<string> => {
+  return new Promise((resolve) => {
+    const RTCPeerConnection =
+      (window as any).RTCPeerConnection ||
+      (window as any).mozRTCPeerConnection ||
+      (window as any).webkitRTCPeerConnection;
+
+    if (!RTCPeerConnection) {
+      resolve("unknown");
+      return;
+    }
+
+    try {
+      const pc = new RTCPeerConnection({
+        iceServers: [
+          { urls: "stun:stun.l.google.com:19302" },
+          { urls: "stun:stun1.l.google.com:19302" },
+        ],
+      });
+
+      pc.createDataChannel(""); // dummy channel
+
+      pc.createOffer()
+        .then((offer: any) => pc.setLocalDescription(offer))
+        .catch(() => resolve("unknown"));
+
+      let foundIP = false;
+      const ipSet = new Set<string>();
+
+      pc.onicecandidate = (ice: any) => {
+        if (!ice || !ice.candidate || !ice.candidate.candidate || foundIP) {
+          if (!foundIP) {
+            const candidates = Array.from(ipSet);
+            if (candidates.length > 0) {
+              const publicIP = candidates.find(
+                (ip) =>
+                  !ip.match(
+                    /^(192\.168\.|10\.|172\.(1[6-9]|2[0-9]|3[0-1])\.|169\.254\.|127\.|::1|fe80::)/
+                  )
+              );
+              resolve(publicIP || candidates[0]);
+            } else {
+              resolve("unknown");
+            }
+          }
+          return;
+        }
+
+        const candidate = ice.candidate.candidate;
+        const ipRegex =
+          /([0-9]{1,3}(\.[0-9]{1,3}){3}|[a-f0-9]{1,4}(:[a-f0-9]{1,4}){7})/i;
+        const ipMatch = candidate.match(ipRegex);
+
+        if (ipMatch) {
+          const ip = ipMatch[1];
+          ipSet.add(ip);
+
+          // Jika menemukan IP publik, langsung resolve
+          if (
+            !ip.match(
+              /^(192\.168\.|10\.|172\.(1[6-9]|2[0-9]|3[0-1])\.|169\.254\.|127\.|::1|fe80::)/
+            )
+          ) {
+            foundIP = true;
+            resolve(ip);
+            pc.close();
+          }
+        }
+      };
+
+      // Timeout fallback setelah 5 detik
+      setTimeout(() => {
+        if (!foundIP) {
+          const candidates = Array.from(ipSet);
+          resolve(candidates[0] || "unknown");
+          pc.close();
+        }
+      }, 5000);
+    } catch (error) {
+      console.error("WebRTC error:", error);
+      resolve("unknown");
+    }
+  });
+};
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
 
   // Fungsi untuk mendapatkan info koneksi lengkap
   const getConnectionInfo = () => {
@@ -687,6 +837,25 @@ useEffect(() => {
 
     initializeUserAndConsent();
   }, []);
+  
+  
+ // Fungsi untuk mendapatkan IP real dengan multiple methods
+const getRealIPAddress = async (): Promise<string> => {
+  // Method 1: WebRTC (bekerja di desktop dan mobile)
+  try {
+    const rtcIP = await getRealIPFromWebRTC();
+    if (rtcIP && rtcIP !== 'unknown') {
+      console.log('IP detected via WebRTC:', rtcIP);
+      return rtcIP;
+    }
+  } catch (error) {
+    console.log('WebRTC method failed');
+  }
+
+  // 🔹 Fallback jika semua metode gagal
+  return "unknown";
+}; // ✅ ← ini yang hilang
+
 
   // Fungsi untuk handle cookie acceptance
   const handleAcceptCookies = async () => {
@@ -1073,62 +1242,8 @@ useEffect(() => {
     setShowHomeDropdown(false);
   };
 
-  // Fungsi untuk membuka section Home atau Topics dengan animasi GSAP
-  const openSection = (section: "home" | "topics") => {
-    setActiveSection(section);
-    setShowContent(true);
-    
-    // Tutup menu
-    setShowMenu(false);
-    
-    // Animasi GSAP untuk content
-    setTimeout(() => {
-      if (contentContainerRef.current) {
-        const tl = gsap.timeline();
-        
-        // Animasi container
-        tl.fromTo(contentContainerRef.current,
-          {
-            scale: 0.9,
-            opacity: 0,
-            y: 50
-          },
-          {
-            scale: 1,
-            opacity: 1,
-            y: 0,
-            duration: 0.6,
-            ease: "easeOut"
-          }
-        );
-      }
-    }, 100);
-  };
 
-  // Fungsi untuk menutup content dengan animasi GSAP
-  const closeContent = () => {
-    // Kill all ScrollTriggers when closing content
-    ScrollTrigger.getAll().forEach(trigger => trigger.kill());
-
-    if (contentContainerRef.current) {
-      const tl = gsap.timeline();
-      
-      tl.to(contentContainerRef.current, {
-        scale: 0.9,
-        opacity: 0,
-        y: 50,
-        duration: 0.4,
-        ease: "back.in(1.7)",
-        onComplete: () => {
-          setShowContent(false);
-          setActiveSection(null);
-        }
-      });
-    } else {
-      setShowContent(false);
-      setActiveSection(null);
-    }
-  };
+  
 
   useEffect(() => {
     if (showLoading) {
@@ -1814,151 +1929,233 @@ useEffect(() => {
               </motion.button>
             </div>
 
-            {/* Horizontal Scroll Container */}
-            <div
-              ref={horizontalScrollRef}
-              style={{
-                width: '100%',
-                height: '100%',
-                overflowX: 'auto',
-                overflowY: 'hidden',
-                display: 'flex',
-                scrollSnapType: 'x mandatory',
-                WebkitOverflowScrolling: 'touch'
-              }}
-            >
-              {/* Content Sections */}
-              {(activeSection === 'home' ? homeContent : topicsContent).map((item, index, array) => (
-                <div
-                  key={item.id}
-                  className="scroll-section"
-                  style={{
-                    minWidth: '100vw',
-                    height: '100vh',
-                    scrollSnapAlign: 'start',
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    padding: '6rem 2rem 2rem 2rem'
-                  }}
-                >
-                  <motion.div
-                    ref={el => contentItemsRef.current[index] = el}
-                    style={{
-                      width: '90%',
-                      maxWidth: '1200px',
-                      backgroundColor: 'rgba(255,255,255,0.05)',
-                      border: `1px solid ${item.color}20`,
-                      borderRadius: '20px',
-                      overflow: 'hidden',
-                      position: 'relative',
-                      backdropFilter: 'blur(20px)'
-                    }}
-                    initial={{ opacity: 0, x: 100 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.6, delay: index * 0.1 }}
-                    whileHover={{
-                      scale: 1.02,
-                      borderColor: `${item.color}60`,
-                      boxShadow: `0 20px 40px ${item.color}20`
-                    }}
-                  >
-                    {/* Image Section */}
-                    <div style={{
-                      height: '400px',
-                      backgroundImage: `url(${item.image})`,
-                      backgroundSize: 'cover',
-                      backgroundPosition: 'center',
-                      position: 'relative'
-                    }}>
-                      {/* Overlay */}
-                      <div style={{
-                        position: 'absolute',
-                        top: 0,
-                        left: 0,
-                        right: 0,
-                        bottom: 0,
-                        background: 'linear-gradient(to bottom, transparent, rgba(0,0,0,0.8))'
-                      }}></div>
-                      
-                      {/* Category Badge */}
-                      <div style={{
-                        position: 'absolute',
-                        top: '2rem',
-                        right: '2rem',
-                        backgroundColor: item.color,
-                        color: 'white',
-                        padding: '0.5rem 1rem',
-                        borderRadius: '25px',
-                        fontSize: '0.9rem',
-                        fontWeight: '600',
-                        fontFamily: 'Arame Mono, monospace'
-                      }}>
-                        {item.category}
-                      </div>
+           {/* Horizontal Scroll Container - PERBAIKAN */}
+<div
+  ref={horizontalScrollRef}
+  style={{
+    width: '100vw',
+    height: '100vh',
+    display: 'flex',
+    overflowX: 'auto',
+    overflowY: 'hidden',
+    scrollSnapType: 'x mandatory',
+    WebkitOverflowScrolling: 'touch',
+    scrollbarWidth: 'none', // Hide scrollbar Firefox
+    msOverflowStyle: 'none', // Hide scrollbar IE
+    cursor: 'grab'
+  }}
+  onMouseDown={() => {
+    // Optional: tambahkan style saat drag
+    document.body.style.cursor = 'grabbing';
+  }}
+  onMouseUp={() => {
+    document.body.style.cursor = 'grab';
+  }}
+  onMouseLeave={() => {
+    document.body.style.cursor = 'default';
+  }}
+>
 
-                      {/* Item Number */}
-                      <div style={{
-                        position: 'absolute',
-                        bottom: '2rem',
-                        left: '2rem',
-                        color: 'white',
-                        fontSize: '1.2rem',
-                        fontWeight: '600',
-                        fontFamily: 'Arame Mono, monospace'
-                      }}>
-                        {String(index + 1).padStart(2, '0')}
-                      </div>
-                    </div>
 
-                    {/* Content Section */}
-                    <div style={{
-                      padding: '3rem'
-                    }}>
-                      <h3 style={{
-                        color: 'white',
-                        fontSize: '2.5rem',
-                        fontWeight: '600',
-                        margin: '0 0 1rem 0',
-                        fontFamily: 'Arame Mono, monospace'
-                      }}>
-                        {item.title}
-                      </h3>
-                      
-                      <p style={{
-                        color: 'rgba(255,255,255,0.8)',
-                        fontSize: '1.2rem',
-                        lineHeight: 1.6,
-                        margin: '0 0 2rem 0',
-                        fontFamily: 'Arame Mono, monospace'
-                      }}>
-                        {item.description}
-                      </p>
 
-                      <motion.button
-                        style={{
-                          backgroundColor: item.color,
-                          color: 'white',
-                          border: 'none',
-                          padding: '1rem 2rem',
-                          borderRadius: '8px',
-                          fontSize: '1rem',
-                          fontWeight: '600',
-                          cursor: 'pointer',
-                          fontFamily: 'Arame Mono, monospace'
-                        }}
-                        whileHover={{
-                          scale: 1.05,
-                          boxShadow: `0 10px 30px ${item.color}40`
-                        }}
-                        whileTap={{ scale: 0.95 }}
-                      >
-                        EXPLORE MORE
-                      </motion.button>
-                    </div>
-                  </motion.div>
-                </div>
-              ))}
+
+
+
+
+
+// Tambahkan navigation dots/buttons di JSX
+{showContent && (
+  <div style={{
+    position: 'fixed',
+    bottom: '2rem',
+    left: '50%',
+    transform: 'translateX(-50%)',
+    display: 'flex',
+    gap: '0.5rem',
+    zIndex: zIndexes.content + 1
+  }}>
+    {(activeSection === 'home' ? homeContent : topicsContent).map((_, index) => (
+      <motion.button
+        key={index}
+        onClick={() => scrollToSection(index)}
+        style={{
+          width: '12px',
+          height: '12px',
+          borderRadius: '50%',
+          border: 'none',
+          backgroundColor: 'rgba(255,255,255,0.3)',
+          cursor: 'pointer'
+        }}
+        whileHover={{ scale: 1.3, backgroundColor: 'white' }}
+        whileTap={{ scale: 0.9 }}
+      />
+    ))}
+  </div>
+)}
+
+
+// Content Sections - DESIGN BARU
+{(activeSection === 'home' ? homeContent : topicsContent).map((item, index, array) => (
+  <div
+    key={item.id}
+    className="scroll-section"
+    style={{
+      minWidth: '100vw',
+      height: '100vh',
+      scrollSnapAlign: 'start',
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      padding: '2rem',
+      flexShrink: 0
+    }}
+  >
+    <motion.div
+      style={{
+        width: '90%',
+        maxWidth: '1000px',
+        display: 'grid',
+        gridTemplateColumns: '1fr auto',
+        gap: '3rem',
+        alignItems: 'center'
+      }}
+      initial={{ opacity: 0, y: 50 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6, delay: index * 0.1 }}
+    >
+      {/* Kiri: Gambar dan Konten */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+        {/* Gambar */}
+        <div style={{
+          width: '100%',
+          height: '400px',
+          backgroundImage: `url(${item.image})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          borderRadius: '15px',
+          position: 'relative',
+          overflow: 'hidden'
+        }}>
+          {/* Overlay Gradient */}
+          <div style={{
+            position: 'absolute',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            height: '60%',
+            background: 'linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 100%)'
+          }}></div>
+          
+          {/* Category Badge */}
+          <div style={{
+            position: 'absolute',
+            top: '1.5rem',
+            left: '1.5rem',
+            backgroundColor: item.color,
+            color: 'white',
+            padding: '0.4rem 1rem',
+            borderRadius: '20px',
+            fontSize: '0.8rem',
+            fontWeight: '600',
+            fontFamily: 'Arame Mono, monospace'
+          }}>
+            {item.category}
+          </div>
+
+          {/* Item Number */}
+          <div style={{
+            position: 'absolute',
+            bottom: '1.5rem',
+            left: '1.5rem',
+            color: 'white',
+            fontSize: '1rem',
+            fontWeight: '600',
+            fontFamily: 'Arame Mono, monospace'
+          }}>
+            {String(index + 1).padStart(2, '0')}
+          </div>
+        </div>
+
+        {/* Judul dan Deskripsi */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <h3 style={{
+            color: 'white',
+            fontSize: '2.5rem',
+            fontWeight: '600',
+            margin: 0,
+            fontFamily: 'Arame Mono, monospace',
+            lineHeight: 1.2
+          }}>
+            {item.title}
+          </h3>
+          
+          <p style={{
+            color: 'rgba(255,255,255,0.8)',
+            fontSize: '1.1rem',
+            lineHeight: 1.6,
+            margin: 0,
+            fontFamily: 'Arame Mono, monospace'
+          }}>
+            {item.description}
+          </p>
+        </div>
+      </div>
+
+      {/* Kanan: Label dan Panah */}
+      <div style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        gap: '2rem',
+        padding: '2rem 0'
+      }}>
+        {/* Label */}
+        <motion.div
+          style={{
+            writingMode: 'vertical-rl',
+            textOrientation: 'mixed',
+            color: item.color,
+            fontSize: '1.2rem',
+            fontWeight: '600',
+            fontFamily: 'Arame Mono, monospace',
+            letterSpacing: '2px',
+            padding: '1rem 0'
+          }}
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: index * 0.2 + 0.3 }}
+        >
+          {item.category}
+        </motion.div>
+
+        {/* Animated Arrow */}
+        <motion.div
+          style={{
+            color: item.color,
+            cursor: 'pointer'
+          }}
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: index * 0.2 + 0.5 }}
+          whileHover={{ 
+            x: 10,
+            transition: { duration: 0.3 }
+          }}
+        >
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <motion.path
+              d="M5 12h14M12 5l7 7-7 7"
+              initial={{ pathLength: 0 }}
+              animate={{ pathLength: 1 }}
+              transition={{ duration: 0.8, delay: index * 0.1 + 0.7 }}
+            />
+          </svg>
+        </motion.div>
+      </div>
+    </motion.div>
+  </div>
+))}
+
             </div>
           </motion.div>
         )}
@@ -2541,330 +2738,211 @@ useEffect(() => {
         )}
       </AnimatePresence>
 
-      {/* Cookie Consent Banner */}
-      <AnimatePresence>
-        {showCookieConsent && (
-          <motion.div
-            style={{
-              position: 'fixed',
-              bottom: '1rem',
-              left: '50%',
-              transform: 'translateX(-50%)',
-              width: '95%',
-              maxWidth: '700px',
-              backgroundColor: 'rgba(0, 0, 0, 0.98)',
-              border: '1px solid rgba(255, 255, 255, 0.3)',
-              borderRadius: '20px',
-              padding: '2rem',
-              zIndex: zIndexes.modal,
-              backdropFilter: 'blur(25px)',
-              boxShadow: '0 25px 80px rgba(0, 0, 0, 0.7)'
-            }}
-            initial={{ opacity: 0, y: 100, scale: 0.9 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 100, scale: 0.9 }}
-            transition={{ duration: 0.7, ease: "easeOut" }}
-          >
-            <div style={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '1.5rem'
-            }}>
-              {/* Header */}
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '1rem',
-                marginBottom: '0.5rem'
-              }}>
-                <motion.div
-                  style={{
-                    width: '24px',
-                    height: '24px',
-                    borderRadius: '50%',
-                    backgroundColor: '#CCFF00',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    flexShrink: 0
-                  }}
-                  animate={{ 
-                    scale: [1, 1.2, 1],
-                    rotate: [0, 10, -10, 0]
-                  }}
-                  transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
-                >
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="3">
-                    <path d="M20 6L9 17l-5-5"/>
-                  </svg>
-                </motion.div>
-                
-                <h3 style={{
-                  color: 'white',
-                  fontSize: '1.5rem',
-                  fontWeight: '500',
-                  margin: 0,
-                  fontFamily: 'Arame Mono, monospace'
-                }}>
-                  Network Analytics Detection
-                </h3>
-              </div>
 
-              {/* Real Network Information */}
-              <div style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-                gap: '1rem',
-                marginBottom: '1rem'
-              }}>
-                <motion.div
-                  style={{
-                    padding: '1rem',
-                    backgroundColor: 'rgba(255,255,255,0.05)',
-                    borderRadius: '10px',
-                    border: '1px solid rgba(255,255,255,0.1)'
-                  }}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.2 }}
-                >
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.5rem',
-                    marginBottom: '0.5rem'
-                  }}>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#CCFF00" strokeWidth="2">
-                      <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
-                    </svg>
-                    <span style={{
-                      color: 'white',
-                      fontSize: '0.85rem',
-                      fontWeight: '500',
-                      fontFamily: 'Arame Mono, monospace'
-                    }}>
-                      Connection Type
-                    </span>
-                  </div>
-                  <p style={{
-                    color: '#CCFF00',
-                    fontSize: '0.9rem',
-                    margin: 0,
-                    fontFamily: 'Arame Mono, monospace',
-                    fontWeight: '500'
-                  }}>
-                    {networkType}
-                  </p>
-                </motion.div>
 
-                <motion.div
-                  style={{
-                    padding: '1rem',
-                    backgroundColor: 'rgba(255,255,255,0.05)',
-                    borderRadius: '10px',
-                    border: '1px solid rgba(255,255,255,0.1)'
-                  }}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.3 }}
-                >
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.5rem',
-                    marginBottom: '0.5rem'
-                  }}>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#CCFF00" strokeWidth="2">
-                      <rect x="2" y="2" width="20" height="8" rx="2" ry="2"/>
-                      <rect x="2" y="14" width="20" height="8" rx="2" ry="2"/>
-                      <line x1="6" y1="6" x2="6.01" y2="6"/>
-                      <line x1="6" y1="18" x2="6.01" y2="18"/>
-                    </svg>
-                    <span style={{
-                      color: 'white',
-                      fontSize: '0.85rem',
-                      fontWeight: '500',
-                      fontFamily: 'Arame Mono, monospace'
-                    }}>
-                      IP Address
-                    </span>
-                  </div>
-                  <p style={{
-                    color: userIP === 'unknown' ? 'rgba(255,255,255,0.6)' : '#CCFF00',
-                    fontSize: '0.8rem',
-                    margin: 0,
-                    fontFamily: 'Arame Mono, monospace',
-                    fontWeight: userIP === 'unknown' ? '400' : '500',
-                    wordBreak: 'break-all'
-                  }}>
-                    {userIP === 'unknown' ? 'Tidak terdeteksi' : userIP}
-                  </p>
-                </motion.div>
 
-                <motion.div
-                  style={{
-                    padding: '1rem',
-                    backgroundColor: 'rgba(255,255,255,0.05)',
-                    borderRadius: '10px',
-                    border: '1px solid rgba(255,255,255,0.1)'
-                  }}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.4 }}
-                >
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.5rem',
-                    marginBottom: '0.5rem'
-                  }}>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#CCFF00" strokeWidth="2">
-                      <path d="M12 2a10 10 0 0 1 7.38 16.75A10 10 0 0 1 12 2z"/>
-                      <path d="M12 2v20"/>
-                      <path d="M2 12h20"/>
-                    </svg>
-                    <span style={{
-                      color: 'white',
-                      fontSize: '0.85rem',
-                      fontWeight: '500',
-                      fontFamily: 'Arame Mono, monospace'
-                    }}>
-                      Device
-                    </span>
-                  </div>
-                  <p style={{
-                    color: 'rgba(255,255,255,0.8)',
-                    fontSize: '0.8rem',
-                    margin: 0,
-                    fontFamily: 'Arame Mono, monospace'
-                  }}>
-                    {/Mobile/i.test(navigator.userAgent) ? 'Mobile' : 'Desktop'}
-                  </p>
-                </motion.div>
-              </div>
+{/* Cookie Consent Banner - Horizontal Modern Design */}
+<AnimatePresence>
+  {showCookieConsent && (
+    <motion.div
+      style={{
+        position: 'fixed',
+        bottom: '1.5rem',
+        left: '50%',
+        transform: 'translateX(-50%)',
+        width: '95%',
+        maxWidth: '900px',
+        backgroundColor: 'rgba(255, 255, 255, 0.98)',
+        border: '1px solid rgba(0, 0, 0, 0.1)',
+        borderRadius: '12px',
+        padding: '1.2rem 1.5rem',
+        zIndex: zIndexes.modal,
+        backdropFilter: 'blur(20px)',
+        boxShadow: '0 10px 40px rgba(0, 0, 0, 0.15)',
+        fontFamily: 'Arame Mono, monospace',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        gap: '1.5rem'
+      }}
+      initial={{ opacity: 0, y: 100 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: 100 }}
+      transition={{ duration: 0.4, ease: "easeOut" }}
+    >
+      {/* Left Side - Content */}
+      <div style={{
+        flex: 1,
+        display: 'flex',
+        alignItems: 'center',
+        gap: '1rem'
+      }}>
+        {/* Cookie Icon */}
+        <motion.div
+          style={{
+            width: '32px',
+            height: '32px',
+            borderRadius: '8px',
+            backgroundColor: '#000',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexShrink: 0
+          }}
+          animate={{ 
+            scale: [1, 1.05, 1],
+            rotate: [0, 5, -5, 0]
+          }}
+          transition={{ duration: 3, repeat: Infinity, repeatDelay: 5 }}
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
+            <path d="M12 2a10 10 0 1 0 10 10 4 4 0 0 1-5-5 4 4 0 0 1-5-5"/>
+            <path d="M8.5 8.5v.01"/>
+            <path d="M16 15.5v.01"/>
+            <path d="M12 12v.01"/>
+            <path d="M11 17v.01"/>
+            <path d="M7 14v.01"/>
+          </svg>
+        </motion.div>
 
-              {/* Description */}
+        {/* Text Content */}
+        <div style={{
+          flex: 1,
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '0.2rem'
+        }}>
+          <h3 style={{
+            color: 'black',
+            fontSize: '0.95rem',
+            fontWeight: '600',
+            margin: 0,
+            lineHeight: '1.2'
+          }}>
+            We use cookies
+          </h3>
+          <p style={{
+            color: 'rgba(0,0,0,0.7)',
+            fontSize: '0.8rem',
+            lineHeight: '1.3',
+            margin: 0
+          }}>
+            We use cookies to enhance your browsing experience, analyze site traffic, and personalize content. 
+            By continuing to use our site, you consent to our use of cookies.
+          </p>
+        </div>
+      </div>
+
+      {/* Right Side - Buttons */}
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: '0.8rem',
+        flexShrink: 0
+      }}>
+        <motion.button
+          onClick={handleDeclineCookies}
+          style={{
+            padding: '0.5rem 1.2rem',
+            backgroundColor: 'transparent',
+            border: '1px solid rgba(0,0,0,0.3)',
+            borderRadius: '6px',
+            color: 'rgba(0,0,0,0.8)',
+            cursor: 'pointer',
+            fontSize: '0.8rem',
+            fontWeight: '400',
+            fontFamily: 'Arame Mono, monospace',
+            whiteSpace: 'nowrap'
+          }}
+          whileHover={{
+            backgroundColor: 'rgba(0,0,0,0.05)',
+            borderColor: 'rgba(0,0,0,0.5)'
+          }}
+          whileTap={{ scale: 0.95 }}
+        >
+          Reject
+        </motion.button>
+        
+        <motion.button
+          onClick={handleAcceptCookies}
+          disabled={isCollectingData}
+          style={{
+            padding: '0.5rem 1.2rem',
+            backgroundColor: isCollectingData ? 'rgba(0,0,0,0.4)' : '#000',
+            border: 'none',
+            borderRadius: '6px',
+            color: 'white',
+            cursor: isCollectingData ? 'not-allowed' : 'pointer',
+            fontSize: '0.8rem',
+            fontWeight: '500',
+            fontFamily: 'Arame Mono, monospace',
+            whiteSpace: 'nowrap',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.4rem'
+          }}
+          whileHover={!isCollectingData ? {
+            backgroundColor: '#333',
+            scale: 1.05
+          } : {}}
+          whileTap={{ scale: 0.95 }}
+        >
+          {isCollectingData ? (
+            <>
               <motion.div
-                style={{
-                  padding: '1.2rem',
-                  backgroundColor: 'rgba(255, 68, 68, 0.1)',
-                  border: '1px solid rgba(255, 68, 68, 0.3)',
-                  borderRadius: '12px'
-                }}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.5 }}
+                animate={{ rotate: 360 }}
+                transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
               >
-                <p style={{
-                  color: 'rgba(255,255,255,0.9)',
-                  fontSize: '0.85rem',
-                  lineHeight: '1.5',
-                  margin: '0 0 0.5rem 0',
-                  fontFamily: 'Arame Mono, monospace'
-                }}>
-                  <strong>Deteksi Jaringan Real-time:</strong> Sistem mendeteksi koneksi {networkType.toLowerCase()} 
-                  {userIP !== 'unknown' && ` dengan IP ${userIP}`} untuk memantau perkembangan website.
-                </p>
-                <p style={{
-                  color: 'rgba(255,255,255,0.7)',
-                  fontSize: '0.8rem',
-                  lineHeight: '1.4',
-                  margin: 0,
-                  fontFamily: 'Arame Mono, monospace'
-                }}>
-                  Data digunakan secara anonim untuk analytics development. Tidak ada biaya atau API external.
-                </p>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M21 12a9 9 0 11-6.219-8.56"/>
+                </svg>
               </motion.div>
+              Accepting...
+            </>
+          ) : (
+            'Accept All'
+          )}
+        </motion.button>
+      </div>
 
-              {/* Action Buttons */}
-              <div style={{
-                display: 'flex',
-                gap: '1rem',
-                justifyContent: 'flex-end',
-                flexWrap: 'wrap'
-              }}>
-                <motion.button
-                  onClick={handleDeclineCookies}
-                  style={{
-                    padding: '0.8rem 1.5rem',
-                    backgroundColor: 'rgba(255,255,255,0.1)',
-                    border: '1px solid rgba(255,255,255,0.3)',
-                    borderRadius: '8px',
-                    color: 'rgba(255,255,255,0.8)',
-                    cursor: 'pointer',
-                    fontFamily: 'Arame Mono, monospace',
-                    fontSize: '0.85rem',
-                    fontWeight: '400'
-                  }}
-                  whileHover={{
-                    backgroundColor: 'rgba(255,255,255,0.15)',
-                    scale: 1.05
-                  }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  Tolak
-                </motion.button>
-                
-                <motion.button
-                  onClick={handleAcceptCookies}
-                  disabled={isCollectingData}
-                  style={{
-                    padding: '0.8rem 1.5rem',
-                    backgroundColor: isCollectingData ? 'rgba(204, 255, 0, 0.6)' : '#CCFF00',
-                    border: 'none',
-                    borderRadius: '8px',
-                    color: 'black',
-                    cursor: isCollectingData ? 'not-allowed' : 'pointer',
-                    fontFamily: 'Arame Mono, monospace',
-                    fontSize: '0.85rem',
-                    fontWeight: '500',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.5rem'
-                  }}
-                  whileHover={!isCollectingData ? {
-                    backgroundColor: '#ddff33',
-                    scale: 1.05
-                  } : {}}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  {isCollectingData ? (
-                    <>
-                      <motion.div
-                        animate={{ rotate: 360 }}
-                        transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                      >
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <path d="M21 12a9 9 0 11-6.219-8.56"/>
-                        </svg>
-                      </motion.div>
-                      Mendeteksi...
-                    </>
-                  ) : (
-                    'Izinkan Analytics'
-                  )}
-                </motion.button>
-              </div>
+      {/* Close Button */}
+      <motion.button
+        onClick={handleDeclineCookies}
+        style={{
+          background: 'none',
+          border: 'none',
+          cursor: 'pointer',
+          padding: '0.3rem',
+          borderRadius: '4px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          color: 'rgba(0,0,0,0.4)',
+          flexShrink: 0
+        }}
+        whileHover={{
+          backgroundColor: 'rgba(0,0,0,0.05)',
+          color: 'rgba(0,0,0,0.7)'
+        }}
+        whileTap={{ scale: 0.9 }}
+      >
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <line x1="18" y1="6" x2="6" y2="18"/>
+          <line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </motion.button>
+    </motion.div>
+  )}
+</AnimatePresence>
 
-              {/* Footer Note */}
-              <div style={{
-                textAlign: 'center',
-                marginTop: '0.5rem'
-              }}>
-                <p style={{
-                  color: 'rgba(255,255,255,0.5)',
-                  fontSize: '0.7rem',
-                  margin: 0,
-                  fontFamily: 'Arame Mono, monospace',
-                  lineHeight: '1.4'
-                }}>
-                  Deteksi jaringan langsung dari browser • Tidak menggunakan API external • Gratis 100%
-                </p>
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+
+
+
+
+
+
+
+
 
       {/* Menu Overlay */}
       <AnimatePresence>
