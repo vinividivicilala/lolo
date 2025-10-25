@@ -7,9 +7,15 @@ import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { initializeApp } from "firebase/app";
 import { getFirestore, doc, setDoc, getDoc, onSnapshot, collection, getDocs } from "firebase/firestore";
+import { signInAnonymously, getAuth } from "firebase/auth";
 
+// Register ScrollTrigger plugin
+if (typeof window !== 'undefined') {
+  gsap.registerPlugin(ScrollTrigger);
+}
 
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
@@ -26,6 +32,7 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+const auth = getAuth(app);
 
 // Data untuk Home dan Topics dengan gambar
 const homeContent = [
@@ -186,11 +193,17 @@ export default function HomePage(): React.JSX.Element {
   const [activeSection, setActiveSection] = useState<"home" | "topics" | null>(null);
   const [showContent, setShowContent] = useState(false);
   
+  // State untuk navbar dropdown
+  const [showHomeDropdown, setShowHomeDropdown] = useState(false);
+  const [showTopicsDropdown, setShowTopicsDropdown] = useState(false);
+  
   // State untuk search
   const [showSearch, setShowSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchStatus, setSearchStatus] = useState<"empty" | "recent" | "updated" | "loading">("empty");
 
+  // State untuk update label
+  const [isUpdateBlinking, setIsUpdateBlinking] = useState(true);
   
   const router = useRouter();
   const timeRef = useRef<NodeJS.Timeout | null>(null);
@@ -208,19 +221,40 @@ export default function HomePage(): React.JSX.Element {
   // Refs untuk content
   const contentContainerRef = useRef<HTMLDivElement>(null);
   const contentItemsRef = useRef<(HTMLDivElement | null)[]>([]);
+  const horizontalScrollRef = useRef<HTMLDivElement>(null);
+  
+  // Refs untuk dropdown
+  const homeDropdownRef = useRef<HTMLDivElement>(null);
+  const topicsDropdownRef = useRef<HTMLDivElement>(null);
+
+  // State untuk cookie consent
+  const [showCookieConsent, setShowCookieConsent] = useState(false);
+  const [cookiesAccepted, setCookiesAccepted] = useState(false);
+  const [userIP, setUserIP] = useState("");
+  const [isCollectingData, setIsCollectingData] = useState(false);
+  const [networkType, setNetworkType] = useState("");
+  
+  
+  
+  // State untuk animasi teks personal branding
+const [brandText, setBrandText] = useState("");
+const [isBrandAnimating, setIsBrandAnimating] = useState(false);
+const [showCursor, setShowCursor] = useState(true);
 
 
-// PERBAIKAN: Sistem z-index terorganisir - FIXED
-const zIndexes = {
-  base: 10,        // Element biasa
-  navbar: 50,      // Semua elemen navbar
-  banner: 100,     // Banner
-  search: 150,     // Search overlay
-  content: 200,    // Content overlay
-  menu: 1000,      // Menu overlay - HARUS PALING TINGGI
-  modal: 1100,     // Modal
-  loading: 1200    // Loading screen
-};
+
+  // PERBAIKAN: Sistem z-index terorganisir - FIXED
+  const zIndexes = {
+    base: 10,        // Element biasa
+    navbar: 50,      // Semua elemen navbar
+    banner: 100,     // Banner
+    dropdown: 150,   // Dropdown navbar
+    search: 200,     // Search overlay
+    content: 250,    // Content overlay
+    menu: 1000,      // Menu overlay - HARUS PALING TINGGI
+    modal: 1100,     // Modal
+    loading: 1200    // Loading screen
+  };
 
   // Database kota-kota Indonesia
   const indonesiaCities = [
@@ -325,7 +359,82 @@ const zIndexes = {
     { city: "Tempuran", region: "Jawa Barat" }
   ];
 
-  // Generate atau load user ID
+ 
+ 
+ 
+ 
+ // Data untuk dropdown Home dengan label UPDATE dan blink
+const homeDropdownItems = [
+  {
+    title: "Home Overview",
+    description: "Welcome to your personal dashboard",
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+        <polyline points="9 22 9 12 15 12 15 22"/>
+      </svg>
+    ),
+    label: "UPDATE", // Label baru
+    labelColor: "#FF4444" // Warna merah untuk UPDATE
+  },
+  {
+    title: "Dashboard", 
+    description: "Your main control center",
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <rect x="3" y="3" width="7" height="7"/>
+        <rect x="14" y="3" width="7" height="7"/>
+        <rect x="14" y="14" width="7" height="7"/>
+        <rect x="3" y="14" width="7" height="7"/>
+      </svg>
+    )
+  }
+];
+
+// Data untuk dropdown Topics dengan label UPDATE dan blink  
+const topicsDropdownItems = [
+  {
+    title: "All Topics",
+    description: "Browse all available topics",
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+        <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+      </svg>
+    ),
+    label: "UPDATE", // Label baru
+    labelColor: "#4ECDC4" // Warna hijau muda untuk UPDATE
+  },
+  {
+    title: "Popular Topics",
+    description: "Most viewed topics this week",
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+        <circle cx="9" cy="7" r="4"/>
+        <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+        <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+      </svg>
+    )
+  }
+];
+  
+  
+  
+  
+  // Effect untuk animasi blink
+useEffect(() => {
+  const blinkInterval = setInterval(() => {
+    setIsUpdateBlinking(prev => !prev);
+  }, 800); // Blink setiap 800ms
+
+  return () => clearInterval(blinkInterval);
+}, []);
+  
+  
+  
+
+  // Initialize user dan setup
   useEffect(() => {
     const initializeUser = async () => {
       let userId = localStorage.getItem('userId');
@@ -342,12 +451,292 @@ const zIndexes = {
     initializeUser();
   }, []);
 
+  // Setup GSAP ScrollTrigger untuk horizontal scroll
+  useEffect(() => {
+    if (showContent && horizontalScrollRef.current) {
+      const sections = gsap.utils.toArray('.scroll-section');
+      const container = horizontalScrollRef.current;
+
+      // Kill existing ScrollTriggers to avoid conflicts
+      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
+
+      gsap.to(sections, {
+        xPercent: -100 * (sections.length - 1),
+        ease: "none",
+        scrollTrigger: {
+          trigger: container,
+          pin: true,
+          scrub: 1,
+          snap: 1 / (sections.length - 1),
+          end: () => "+=" + (container.offsetWidth * (sections.length - 1)),
+          invalidateOnRefresh: true
+        }
+      });
+    }
+
+    return () => {
+      // Cleanup ScrollTriggers when component unmounts or content closes
+      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
+    };
+  }, [showContent, activeSection]);
+  
+  
+  
+  
+
+
+  // Fungsi untuk mendeteksi tipe koneksi
+  const detectNetworkType = () => {
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    
+    if (isMobile) {
+      if ('connection' in navigator) {
+        const conn = (navigator as any).connection;
+        if (conn) {
+          const type = conn.type || 'unknown';
+          if (type === 'wifi') return 'WiFi Mobile';
+          if (type === 'cellular') return 'Mobile Data';
+          return type;
+        }
+      }
+      return 'Mobile Device';
+    } else {
+      return 'WiFi/LAN Desktop';
+    }
+  };
+
+  // Fungsi untuk mendapatkan IP real melalui WebRTC
+  const getRealIPFromWebRTC = (): Promise<string> => {
+    return new Promise((resolve) => {
+      const RTCPeerConnection = (window as any).RTCPeerConnection || 
+                               (window as any).mozRTCPeerConnection || 
+                               (window as any).webkitRTCPeerConnection;
+      
+      if (!RTCPeerConnection) {
+        resolve("unknown");
+        return;
+      }
+
+      try {
+        const pc = new RTCPeerConnection({ iceServers: [] });
+        pc.createDataChannel("");
+        
+        pc.createOffer()
+          .then(offer => pc.setLocalDescription(offer))
+          .catch(() => resolve("unknown"));
+
+        let foundIP = false;
+        
+        pc.onicecandidate = (ice) => {
+          if (!ice || !ice.candidate || !ice.candidate.candidate) {
+            if (!foundIP) resolve("unknown");
+            return;
+          }
+
+          const candidate = ice.candidate.candidate;
+          const ipRegex = /([0-9]{1,3}(\.[0-9]{1,3}){3}|[a-f0-9]{1,4}(:[a-f0-9]{1,4}){7})/;
+          const ipMatch = candidate.match(ipRegex);
+          
+          if (ipMatch) {
+            const ip = ipMatch[1];
+            foundIP = true;
+            if (!ip.match(/^(192\.168\.|10\.|172\.(1[6-9]|2[0-9]|3[0-1])\.|169\.254\.|127\.|::1|fe80::)/)) {
+              resolve(ip);
+            } else {
+              resolve(ip);
+            }
+          }
+        };
+
+        setTimeout(() => {
+          if (!foundIP) resolve("unknown");
+        }, 3000);
+
+      } catch (error) {
+        resolve("unknown");
+      }
+    });
+  };
+
+  // Fungsi untuk mendapatkan info koneksi lengkap
+  const getConnectionInfo = () => {
+    const info = {
+      userAgent: navigator.userAgent,
+      platform: navigator.platform,
+      language: navigator.language,
+      languages: navigator.languages,
+      cookieEnabled: navigator.cookieEnabled,
+      deviceMemory: (navigator as any).deviceMemory || 'unknown',
+      hardwareConcurrency: navigator.hardwareConcurrency || 'unknown',
+      screen: `${window.screen.width}x${window.screen.height}`,
+      colorDepth: window.screen.colorDepth,
+      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      networkType: detectNetworkType()
+    };
+    
+    return info;
+  };
+
+  // Fungsi untuk check cookie consent dari Firebase
+  const checkCookieConsentFromFirebase = async (userId: string) => {
+    try {
+      const userDocRef = doc(db, 'userConsents', userId);
+      const userSnapshot = await getDoc(userDocRef);
+      
+      if (userSnapshot.exists()) {
+        const userData = userSnapshot.data();
+        if (userData.cookieConsent === 'accepted') {
+          setCookiesAccepted(true);
+          setShowCookieConsent(false);
+          return true;
+        } else if (userData.cookieConsent === 'declined') {
+          setCookiesAccepted(false);
+          setShowCookieConsent(false);
+          return true;
+        }
+      }
+      return false;
+    } catch (error) {
+      console.error('Error checking cookie consent from Firebase:', error);
+      return false;
+    }
+  };
+
+  // Fungsi untuk save cookie consent ke Firebase
+  const saveCookieConsentToFirebase = async (userId: string, consent: string, ipAddress: string, connectionInfo: any) => {
+    try {
+      const userDocRef = doc(db, 'userConsents', userId);
+      await setDoc(userDocRef, {
+        cookieConsent: consent,
+        ipAddress: ipAddress,
+        connectionInfo: connectionInfo,
+        timestamp: new Date().toISOString(),
+        lastUpdated: new Date().toISOString()
+      }, { merge: true });
+      
+      console.log('Cookie consent saved to Firebase');
+      return true;
+    } catch (error) {
+      console.error('Error saving cookie consent to Firebase:', error);
+      return false;
+    }
+  };
+
+  // Fungsi untuk collect user data setelah consent
+  const collectUserData = async (userId: string, ipAddress: string) => {
+    try {
+      setIsCollectingData(true);
+      
+      const connectionInfo = getConnectionInfo();
+      
+      // Simpan data analytics ke Firebase
+      const analyticsDocRef = doc(db, 'userAnalytics', userId);
+      await setDoc(analyticsDocRef, {
+        ipAddress: ipAddress,
+        connectionInfo: connectionInfo,
+        timestamp: new Date().toISOString(),
+        lastActivity: new Date().toISOString()
+      }, { merge: true });
+      
+      console.log('User analytics data collected');
+    } catch (error) {
+      console.error('Error collecting user data:', error);
+    } finally {
+      setIsCollectingData(false);
+    }
+  };
+
+  // Effect untuk initialize user dan cookie consent
+  useEffect(() => {
+    const initializeUserAndConsent = async () => {
+      try {
+        // Sign in anonymously ke Firebase Auth
+        const userCredential = await signInAnonymously(auth);
+        const user = userCredential.user;
+        
+        setCurrentUserId(user.uid);
+        
+        // Deteksi tipe jaringan
+        const network = detectNetworkType();
+        setNetworkType(network);
+        
+        // Get real IP address dari WebRTC
+        const ip = await getRealIPFromWebRTC();
+        setUserIP(ip);
+        
+        console.log('Network detected:', network);
+        console.log('IP detected:', ip);
+        
+        // Check cookie consent dari Firebase
+        const hasConsent = await checkCookieConsentFromFirebase(user.uid);
+        
+        if (!hasConsent) {
+          // Tampilkan banner cookie setelah loading selesai
+          setTimeout(() => {
+            setShowCookieConsent(true);
+          }, 2000);
+        } else if (cookiesAccepted) {
+          // Jika sudah accept, collect data
+          await collectUserData(user.uid, ip);
+        }
+        
+      } catch (error) {
+        console.error('Error initializing user:', error);
+      }
+    };
+
+    initializeUserAndConsent();
+  }, []);
+
+  // Fungsi untuk handle cookie acceptance
+  const handleAcceptCookies = async () => {
+    if (!currentUserId) return;
+    
+    try {
+      const connectionInfo = getConnectionInfo();
+      
+      // Save consent ke Firebase
+      const success = await saveCookieConsentToFirebase(currentUserId, 'accepted', userIP, connectionInfo);
+      
+      if (success) {
+        setCookiesAccepted(true);
+        setShowCookieConsent(false);
+        
+        // Collect user data setelah consent
+        await collectUserData(currentUserId, userIP);
+        
+        console.log('Cookies accepted - user data collected');
+      }
+    } catch (error) {
+      console.error('Error accepting cookies:', error);
+    }
+  };
+
+  // Fungsi untuk handle decline cookies
+  const handleDeclineCookies = async () => {
+    if (!currentUserId) return;
+    
+    try {
+      const connectionInfo = getConnectionInfo();
+      
+      // Save decline consent ke Firebase
+      const success = await saveCookieConsentToFirebase(currentUserId, 'declined', userIP || 'unknown', connectionInfo);
+      
+      if (success) {
+        setCookiesAccepted(false);
+        setShowCookieConsent(false);
+        console.log('Cookies declined');
+      }
+    } catch (error) {
+      console.error('Error declining cookies:', error);
+    }
+  };
+
   // Animasi banner dengan GSAP
   useEffect(() => {
     if (showBanner && bannerRef.current) {
       const tl = gsap.timeline();
       
-      // Animasi masuk banner dari atas
       tl.fromTo(bannerRef.current,
         { 
           y: -100,
@@ -357,11 +746,28 @@ const zIndexes = {
           y: 0,
           opacity: 1,
           duration: 0.8,
-          ease: "back.out(1.7)"
+          ease: "easeOut"
         }
       );
     }
   }, [showBanner]);
+
+  // Effect untuk menutup dropdown ketika klik di luar
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (homeDropdownRef.current && !homeDropdownRef.current.contains(event.target as Node)) {
+        setShowHomeDropdown(false);
+      }
+      if (topicsDropdownRef.current && !topicsDropdownRef.current.contains(event.target as Node)) {
+        setShowTopicsDropdown(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   // Fungsi untuk close banner
   const closeBanner = () => {
@@ -531,7 +937,7 @@ const zIndexes = {
             opacity: 1,
             y: 0,
             duration: 0.5,
-            ease: "back.out(1.7)"
+            ease: "easeOut"
           }
         );
         
@@ -656,6 +1062,17 @@ const zIndexes = {
     }
   }, [searchStatus]);
 
+  // Fungsi untuk toggle dropdown
+  const toggleHomeDropdown = () => {
+    setShowHomeDropdown(!showHomeDropdown);
+    setShowTopicsDropdown(false);
+  };
+
+  const toggleTopicsDropdown = () => {
+    setShowTopicsDropdown(!showTopicsDropdown);
+    setShowHomeDropdown(false);
+  };
+
   // Fungsi untuk membuka section Home atau Topics dengan animasi GSAP
   const openSection = (section: "home" | "topics") => {
     setActiveSection(section);
@@ -681,53 +1098,20 @@ const zIndexes = {
             opacity: 1,
             y: 0,
             duration: 0.6,
-            ease: "back.out(1.7)"
+            ease: "easeOut"
           }
         );
-        
-        // Animasi untuk setiap item content dengan efek staggered
-        const items = contentItemsRef.current.filter(Boolean);
-        items.forEach((item, index) => {
-          if (item) {
-            tl.fromTo(item,
-              {
-                x: -100,
-                opacity: 0,
-                scale: 0.8
-              },
-              {
-                x: 0,
-                opacity: 1,
-                scale: 1,
-                duration: 0.6,
-                ease: "back.out(1.7)"
-              },
-              `-=${0.4}`
-            );
-          }
-        });
       }
     }, 100);
   };
 
   // Fungsi untuk menutup content dengan animasi GSAP
   const closeContent = () => {
+    // Kill all ScrollTriggers when closing content
+    ScrollTrigger.getAll().forEach(trigger => trigger.kill());
+
     if (contentContainerRef.current) {
       const tl = gsap.timeline();
-      
-      // Animasi keluar untuk setiap item content
-      const items = contentItemsRef.current.filter(Boolean);
-      items.forEach((item, index) => {
-        if (item) {
-          tl.to(item, {
-            x: 100,
-            opacity: 0,
-            scale: 0.8,
-            duration: 0.3,
-            ease: "back.in(1.7)"
-          }, `-=${0.2}`);
-        }
-      });
       
       tl.to(contentContainerRef.current, {
         scale: 0.9,
@@ -788,7 +1172,7 @@ const zIndexes = {
       tl.to(textArray[3], { y: 1000, opacity: 0, duration: 0.15, ease: "power2.in" }, "+=0.1");
       tl.to(textArray[4], { y: 0, opacity: 1, duration: 0.2, ease: "power2.out" }, "-=0.05");
       tl.to(textArray[4], { y: 1000, opacity: 0, duration: 0.1, ease: "power2.in" }, "+=0.1");
-      tl.to(textArray[5], { y: 0, opacity: 1, scale: 1, duration: 0.6, ease: "back.out(1.7)" }, "+=0.2");
+     tl.to(textArray[5], { y: 0, opacity: 1, scale: 1, duration: 0.6, ease: "easeOut" }, "+=0.2");
       tl.to(textArray[5], { scale: 1.1, duration: 0.3, ease: "power2.out" }, "+=0.5");
       tl.to(textArray[5], { scale: 1, duration: 0.2, ease: "power2.in" });
     }
@@ -1053,33 +1437,39 @@ const zIndexes = {
     }
   };
 
-  const menuItems = [
-    { 
-      name: "(01) HOME", 
-      delay: 0.1,
-      action: () => openSection("home")
-    },
-    { 
-      name: "(02) TOPICS", 
-      delay: 0.2,
-      action: () => openSection("topics")
-    },
-    { 
-      name: "(03) NOTES", 
-      delay: 0.3,
-      action: navigateToNotes
-    },
-    { 
-      name: "(04) ABOUT", 
-      delay: 0.4,
-      action: () => console.log("About clicked")
-    },
-    { 
-      name: "(05) CONTACT", 
-      delay: 0.5,
-      action: () => console.log("Contact clicked")
-    }
-  ];
+ const menuItems = [
+  { 
+    name: "(01) HOME", 
+    delay: 0.1,
+    action: () => openSection("home"),
+    label: "UPDATE", // Label baru
+    labelColor: "#00ff00", // Warna merah
+    hasUpdate: true // Flag untuk menampilkan label UPDATE
+  },
+  { 
+    name: "(02) TOPICS", 
+    delay: 0.2,
+    action: () => openSection("topics"), 
+    label: "UPDATE", // Label baru
+    labelColor: "#4ECDC4", // Warna hijau muda
+    hasUpdate: true // Flag untuk menampilkan label UPDATE
+  },
+  { 
+    name: "(03) NOTES", 
+    delay: 0.3,
+    action: navigateToNotes
+  },
+  { 
+    name: "(04) ABOUT", 
+    delay: 0.4,
+    action: () => console.log("About clicked")
+  },
+  { 
+    name: "(05) CONTACT", 
+    delay: 0.5,
+    action: () => console.log("Contact clicked")
+  }
+];
 
   return (
     <div style={{
@@ -1097,7 +1487,8 @@ const zIndexes = {
       WebkitFontSmoothing: 'antialiased',
       MozOsxFontSmoothing: 'grayscale'
     }}>
-      {/* Search Component - PERBAIKAN z-index */}
+      
+      {/* Search Component */}
       <AnimatePresence>
         {showSearch && (
           <motion.div
@@ -1120,7 +1511,7 @@ const zIndexes = {
             initial={{ scale: 0.8, opacity: 0, y: -20 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.8, opacity: 0, y: -20 }}
-            transition={{ duration: 0.5, ease: "back.out(1.7)" }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
           >
             {/* Search Header */}
             <div style={{
@@ -1357,41 +1748,38 @@ const zIndexes = {
         )}
       </AnimatePresence>
 
-      {/* Content Overlay untuk Home dan Topics - PERBAIKAN z-index */}
+      {/* Content Overlay untuk Home dan Topics dengan Horizontal Scroll */}
       <AnimatePresence>
         {showContent && (
           <motion.div
             ref={contentContainerRef}
             style={{
               position: 'fixed',
-              top: '50%',
-              left: '50%',
-              transform: 'translate(-50%, -50%)',
-              width: '90%',
-              maxWidth: '1200px',
-              maxHeight: '90vh',
-              backgroundColor: 'rgba(0, 0, 0, 0.95)',
-              border: '1px solid rgba(255, 255, 255, 0.1)',
-              borderRadius: '20px',
-              padding: '2rem',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              backgroundColor: 'rgba(0, 0, 0, 0.98)',
               zIndex: zIndexes.content,
-              boxShadow: '0 25px 50px rgba(0, 0, 0, 0.5)',
-              backdropFilter: 'blur(20px)',
-              overflowY: 'auto'
+              overflow: 'hidden'
             }}
-            initial={{ scale: 0.8, opacity: 0, y: 50 }}
-            animate={{ scale: 1, opacity: 1, y: 0 }}
-            exit={{ scale: 0.8, opacity: 0, y: 50 }}
-            transition={{ duration: 0.6, ease: "back.out(1.7)" }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
           >
             {/* Header */}
             <div style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              width: '100%',
+              padding: '2rem',
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
-              marginBottom: '2rem',
-              borderBottom: '1px solid rgba(255,255,255,0.1)',
-              paddingBottom: '1rem'
+              zIndex: zIndexes.content + 1,
+              background: 'linear-gradient(to bottom, rgba(0,0,0,0.9) 0%, transparent 100%)'
             }}>
               <h2 style={{
                 color: 'white',
@@ -1406,203 +1794,177 @@ const zIndexes = {
               <motion.button
                 onClick={closeContent}
                 style={{
-                  background: 'none',
-                  border: 'none',
-                  color: 'rgba(255,255,255,0.6)',
+                  background: 'rgba(255,255,255,0.1)',
+                  border: '1px solid rgba(255,255,255,0.2)',
+                  color: 'white',
                   cursor: 'pointer',
-                  padding: '0.5rem',
+                  padding: '0.8rem 1.5rem',
                   borderRadius: '8px',
-                  fontSize: '1.5rem',
-                  width: '40px',
-                  height: '40px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
+                  fontSize: '1rem',
+                  fontFamily: 'Arame Mono, monospace',
+                  backdropFilter: 'blur(10px)'
                 }}
                 whileHover={{
-                  color: 'white',
-                  backgroundColor: 'rgba(255,255,255,0.1)',
-                  scale: 1.1
+                  backgroundColor: 'rgba(255,255,255,0.2)',
+                  scale: 1.05
                 }}
-                whileTap={{ scale: 0.9 }}
+                whileTap={{ scale: 0.95 }}
               >
-                ×
+                CLOSE
               </motion.button>
             </div>
 
-            {/* Content Grid */}
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))',
-              gap: '2rem',
-              padding: '1rem 0'
-            }}>
-              {(activeSection === 'home' ? homeContent : topicsContent).map((item, index) => (
-                <motion.div
+            {/* Horizontal Scroll Container */}
+            <div
+              ref={horizontalScrollRef}
+              style={{
+                width: '100%',
+                height: '100%',
+                overflowX: 'auto',
+                overflowY: 'hidden',
+                display: 'flex',
+                scrollSnapType: 'x mandatory',
+                WebkitOverflowScrolling: 'touch'
+              }}
+            >
+              {/* Content Sections */}
+              {(activeSection === 'home' ? homeContent : topicsContent).map((item, index, array) => (
+                <div
                   key={item.id}
-                  ref={el => contentItemsRef.current[index] = el}
+                  className="scroll-section"
                   style={{
-                    backgroundColor: 'rgba(255,255,255,0.05)',
-                    border: `1px solid ${item.color}20`,
-                    borderRadius: '15px',
-                    overflow: 'hidden',
-                    cursor: 'pointer',
-                    transition: 'all 0.3s ease',
-                    position: 'relative'
+                    minWidth: '100vw',
+                    height: '100vh',
+                    scrollSnapAlign: 'start',
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    padding: '6rem 2rem 2rem 2rem'
                   }}
-                  initial={{ opacity: 0, x: -100, scale: 0.8 }}
-                  animate={{ opacity: 1, x: 0, scale: 1 }}
-                  transition={{ duration: 0.6, delay: index * 0.1, ease: "back.out(1.7)" }}
-                  whileHover={{
-                    scale: 1.02,
-                    borderColor: `${item.color}60`,
-                    boxShadow: `0 10px 30px ${item.color}20`
-                  }}
-                  whileTap={{ scale: 0.98 }}
                 >
-                  {/* Image Section */}
-                  <div style={{
-                    height: '200px',
-                    backgroundImage: `url(${item.image})`,
-                    backgroundSize: 'cover',
-                    backgroundPosition: 'center',
-                    position: 'relative'
-                  }}>
-                    {/* Overlay */}
-                    <div style={{
-                      position: 'absolute',
-                      top: 0,
-                      left: 0,
-                      right: 0,
-                      bottom: 0,
-                      background: 'linear-gradient(to bottom, transparent, rgba(0,0,0,0.7))'
-                    }}></div>
-                    
-                    {/* Category Badge */}
-                    <div style={{
-                      position: 'absolute',
-                      top: '1rem',
-                      right: '1rem',
-                      backgroundColor: item.color,
-                      color: 'white',
-                      padding: '0.3rem 0.8rem',
+                  <motion.div
+                    ref={el => contentItemsRef.current[index] = el}
+                    style={{
+                      width: '90%',
+                      maxWidth: '1200px',
+                      backgroundColor: 'rgba(255,255,255,0.05)',
+                      border: `1px solid ${item.color}20`,
                       borderRadius: '20px',
-                      fontSize: '0.8rem',
-                      fontWeight: '600',
-                      fontFamily: 'Arame Mono, monospace'
-                    }}>
-                      {item.category}
-                    </div>
-                  </div>
-
-                  {/* Content Section */}
-                  <div style={{
-                    padding: '1.5rem'
-                  }}>
+                      overflow: 'hidden',
+                      position: 'relative',
+                      backdropFilter: 'blur(20px)'
+                    }}
+                    initial={{ opacity: 0, x: 100 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.6, delay: index * 0.1 }}
+                    whileHover={{
+                      scale: 1.02,
+                      borderColor: `${item.color}60`,
+                      boxShadow: `0 20px 40px ${item.color}20`
+                    }}
+                  >
+                    {/* Image Section */}
                     <div style={{
-                      display: 'flex',
-                      alignItems: 'flex-start',
-                      gap: '1rem',
-                      marginBottom: '1rem'
+                      height: '400px',
+                      backgroundImage: `url(${item.image})`,
+                      backgroundSize: 'cover',
+                      backgroundPosition: 'center',
+                      position: 'relative'
                     }}>
+                      {/* Overlay */}
                       <div style={{
-                        width: '20px',
-                        height: '20px',
-                        borderRadius: '50%',
-                        backgroundColor: item.color,
-                        flexShrink: 0,
-                        marginTop: '0.2rem'
-                      }} />
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        background: 'linear-gradient(to bottom, transparent, rgba(0,0,0,0.8))'
+                      }}></div>
                       
-                      <div style={{ flex: 1 }}>
-                        <h3 style={{
-                          color: 'white',
-                          fontSize: '1.4rem',
-                          fontWeight: '600',
-                          margin: '0 0 0.5rem 0',
-                          fontFamily: 'Arame Mono, monospace'
-                        }}>
-                          {item.title}
-                        </h3>
-                        <p style={{
-                          color: 'rgba(255,255,255,0.7)',
-                          fontSize: '0.95rem',
-                          lineHeight: '1.5',
-                          margin: 0,
-                          fontFamily: 'Arame Mono, monospace'
-                        }}>
-                          {item.description}
-                        </p>
+                      {/* Category Badge */}
+                      <div style={{
+                        position: 'absolute',
+                        top: '2rem',
+                        right: '2rem',
+                        backgroundColor: item.color,
+                        color: 'white',
+                        padding: '0.5rem 1rem',
+                        borderRadius: '25px',
+                        fontSize: '0.9rem',
+                        fontWeight: '600',
+                        fontFamily: 'Arame Mono, monospace'
+                      }}>
+                        {item.category}
+                      </div>
+
+                      {/* Item Number */}
+                      <div style={{
+                        position: 'absolute',
+                        bottom: '2rem',
+                        left: '2rem',
+                        color: 'white',
+                        fontSize: '1.2rem',
+                        fontWeight: '600',
+                        fontFamily: 'Arame Mono, monospace'
+                      }}>
+                        {String(index + 1).padStart(2, '0')}
                       </div>
                     </div>
-                    
-                    {/* Action Button */}
-                    <motion.button
-                      style={{
-                        width: '100%',
-                        padding: '0.8rem',
-                        backgroundColor: 'rgba(255,255,255,0.1)',
-                        border: `1px solid ${item.color}40`,
-                        borderRadius: '8px',
-                        color: item.color,
-                        cursor: 'pointer',
-                        fontFamily: 'Arame Mono, monospace',
-                        fontSize: '0.9rem',
-                        fontWeight: '500',
-                        transition: 'all 0.3s ease'
-                      }}
-                      whileHover={{
-                        backgroundColor: item.color,
-                        color: 'black'
-                      }}
-                      whileTap={{ scale: 0.95 }}
-                    >
-                      Explore More
-                    </motion.button>
-                  </div>
-                  
-                  {/* Hover Effect */}
-                  <motion.div
-                    style={{
-                      position: 'absolute',
-                      top: 0,
-                      left: 0,
-                      width: '100%',
-                      height: '100%',
-                      background: `linear-gradient(135deg, ${item.color}10, transparent)`,
-                      opacity: 0
-                    }}
-                    whileHover={{ opacity: 1 }}
-                    transition={{ duration: 0.3 }}
-                  />
-                </motion.div>
-              ))}
-            </div>
 
-            {/* Footer */}
-            <div style={{
-              marginTop: '2rem',
-              paddingTop: '1rem',
-              borderTop: '1px solid rgba(255,255,255,0.1)',
-              textAlign: 'center'
-            }}>
-              <p style={{
-                color: 'rgba(255,255,255,0.5)',
-                fontSize: '0.9rem',
-                fontFamily: 'Arame Mono, monospace',
-                margin: 0
-              }}>
-                {activeSection === 'home' 
-                  ? `${homeContent.length} items in Home section` 
-                  : `${topicsContent.length} items in Topics section`
-                }
-              </p>
+                    {/* Content Section */}
+                    <div style={{
+                      padding: '3rem'
+                    }}>
+                      <h3 style={{
+                        color: 'white',
+                        fontSize: '2.5rem',
+                        fontWeight: '600',
+                        margin: '0 0 1rem 0',
+                        fontFamily: 'Arame Mono, monospace'
+                      }}>
+                        {item.title}
+                      </h3>
+                      
+                      <p style={{
+                        color: 'rgba(255,255,255,0.8)',
+                        fontSize: '1.2rem',
+                        lineHeight: 1.6,
+                        margin: '0 0 2rem 0',
+                        fontFamily: 'Arame Mono, monospace'
+                      }}>
+                        {item.description}
+                      </p>
+
+                      <motion.button
+                        style={{
+                          backgroundColor: item.color,
+                          color: 'white',
+                          border: 'none',
+                          padding: '1rem 2rem',
+                          borderRadius: '8px',
+                          fontSize: '1rem',
+                          fontWeight: '600',
+                          cursor: 'pointer',
+                          fontFamily: 'Arame Mono, monospace'
+                        }}
+                        whileHover={{
+                          scale: 1.05,
+                          boxShadow: `0 10px 30px ${item.color}40`
+                        }}
+                        whileTap={{ scale: 0.95 }}
+                      >
+                        EXPLORE MORE
+                      </motion.button>
+                    </div>
+                  </motion.div>
+                </div>
+              ))}
             </div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Search Trigger Button - PERBAIKAN: POSISI SEJAJAR DENGAN MENU */}
+      {/* Search Trigger Button */}
       {!showSearch && !showLoading && (
         <motion.button
           onClick={toggleSearch}
@@ -1652,7 +2014,7 @@ const zIndexes = {
         </motion.button>
       )}
 
-      {/* Top Banner - PERBAIKAN: GANTI WARNA MENJADI MERAH STABILO */}
+      {/* Top Banner */}
       <AnimatePresence>
         {showBanner && (
           <motion.div
@@ -1676,7 +2038,7 @@ const zIndexes = {
             initial={{ y: -100, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: -100, opacity: 0 }}
-            transition={{ duration: 0.6, ease: "back.out(1.7)" }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
           >
             {/* SVG Icon */}
             <motion.div
@@ -1753,7 +2115,7 @@ const zIndexes = {
         )}
       </AnimatePresence>
 
-      {/* Location Display - PERBAIKAN z-index */}
+      {/* Location Display */}
       <motion.div
         onClick={openLocationModal}
         style={{
@@ -1829,54 +2191,91 @@ const zIndexes = {
           )}
         </motion.div>
       </motion.div>
-
-{/* Sign In Button - Navbar Tengah */}
-<motion.button
-  onClick={() => router.push('/signin')}  // Langsung panggil router.push di sini
-  style={{
-    position: 'fixed',
-    top: showBanner ? '4.5rem' : '2rem',
-    left: '50%',
-    transform: 'translateX(-50%)',
-    padding: '0.6rem 1.5rem',
-    fontSize: '0.85rem',
-    fontWeight: '400',
-    color: 'white',
-    backgroundColor: 'rgba(255,255,255,0.1)',
-    border: '1px solid rgba(255,255,255,0.2)',
-    borderRadius: '8px',
-    cursor: 'pointer',
-    fontFamily: 'Arame Mono, monospace',
-    backdropFilter: 'blur(10px)',
-    whiteSpace: 'nowrap',
-    zIndex: zIndexes.banner,
-    display: 'flex',
-    alignItems: 'center',
-    gap: '0.5rem'
-  }}
-  initial={{ opacity: 0, y: -10 }}
-  animate={{ opacity: 1, y: 0 }}
-  transition={{ delay: 1.2, duration: 0.6 }}
-  whileHover={{ 
-    backgroundColor: 'rgba(255,255,255,0.15)',
-    scale: 1.05,
-    transition: { duration: 0.2 }
-  }}
-  whileTap={{ scale: 0.95 }}
->
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-    <circle cx="12" cy="7" r="4"/>
-  </svg>
-  SIGN IN
-</motion.button>
+	  
+	  
 
 
 
 
-      
+{/* Personal Branding "MENUURUU" - Di Bawah Display Lokasi */}
+{!showLoading && (
+  <div
+    style={{
+      position: 'absolute',
+      top: showBanner ? '15rem' : '9rem', // Di bawah display lokasi
+      left: '2rem',
+      zIndex: zIndexes.base,
+      cursor: 'default'
+    }}
+  >
+    {/* Semua teks dalam satu baris panjang */}
+    <div
+      style={{
+        fontSize: '2.5rem',
+        fontWeight: '900',
+        color: 'white',
+        fontFamily: 'Arame Mono, monospace',
+        lineHeight: 1,
+        letterSpacing: '2px',
+        whiteSpace: 'nowrap',
+        textShadow: '2px 2px 4px rgba(0,0,0,0.5)'
+      }}
+    >
+      MENURU adalah personal branding catatan dari seorang penyendiri
+    </div>
+  </div>
+)}
 
-      {/* Button untuk melihat semua users - PERBAIKAN z-index */}
+
+
+
+
+
+
+
+    
+      {/* Sign In Button - Navbar Tengah */}
+      <motion.button
+        onClick={() => router.push('/signin')}
+        style={{
+          position: 'fixed',
+          top: showBanner ? '4.5rem' : '2rem',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          padding: '0.6rem 1.5rem',
+          fontSize: '0.85rem',
+          fontWeight: '400',
+          color: 'white',
+          backgroundColor: 'rgba(255,255,255,0.1)',
+          border: '1px solid rgba(255,255,255,0.2)',
+          borderRadius: '8px',
+          cursor: 'pointer',
+          fontFamily: 'Arame Mono, monospace',
+          backdropFilter: 'blur(10px)',
+          whiteSpace: 'nowrap',
+          zIndex: zIndexes.banner,
+          display: 'flex',
+          alignItems: 'center',
+          gap: '0.5rem'
+        }}
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 1.2, duration: 0.6 }}
+        whileHover={{ 
+          backgroundColor: 'rgba(255,255,255,0.15)',
+          scale: 1.05,
+          transition: { duration: 0.2 }
+        }}
+        whileTap={{ scale: 0.95 }}
+      >
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+          <circle cx="12" cy="7" r="4"/>
+        </svg>
+        SIGN IN
+      </motion.button>
+
+      {/* Button untuk melihat semua users */}
       <motion.button
         onClick={openAllUsersModal}
         style={{
@@ -1909,7 +2308,7 @@ const zIndexes = {
         VIEW ALL USERS
       </motion.button>
 
-      {/* Menu Button - PERBAIKAN z-index */}
+      {/* Menu Button */}
       <motion.div
         onClick={toggleMenu}
         onMouseEnter={handleMenuHover}
@@ -2142,408 +2541,695 @@ const zIndexes = {
         )}
       </AnimatePresence>
 
-      {/* Main Content After Loading */}
+      {/* Cookie Consent Banner */}
       <AnimatePresence>
-        {!showLoading && (
+        {showCookieConsent && (
           <motion.div
             style={{
+              position: 'fixed',
+              bottom: '1rem',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              width: '95%',
+              maxWidth: '700px',
+              backgroundColor: 'rgba(0, 0, 0, 0.98)',
+              border: '1px solid rgba(255, 255, 255, 0.3)',
+              borderRadius: '20px',
+              padding: '2rem',
+              zIndex: zIndexes.modal,
+              backdropFilter: 'blur(25px)',
+              boxShadow: '0 25px 80px rgba(0, 0, 0, 0.7)'
+            }}
+            initial={{ opacity: 0, y: 100, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 100, scale: 0.9 }}
+            transition={{ duration: 0.7, ease: "easeOut" }}
+          >
+            <div style={{
               display: 'flex',
               flexDirection: 'column',
-              alignItems: 'center',
-              gap: '1.5rem',
-              padding: '2rem',
-              zIndex: 10
-            }}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-          >
-            <motion.h1
-              style={{
-                fontSize: '2.5rem',
-                fontWeight: '300',
-                color: 'white',
-                fontFamily: 'Arame Mono, monospace',
-                textAlign: 'center',
-                marginBottom: '0.5rem',
-                letterSpacing: '2px'
-              }}
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.2, duration: 0.5 }}
-            >
-              WELCOME
-            </motion.h1>
-            
-            <motion.p
-              style={{
-                fontSize: '1rem',
-                fontWeight: '300',
-                color: 'rgba(255,255,255,0.7)',
-                fontFamily: 'Arame Mono, monospace',
-                textAlign: 'center',
-                maxWidth: '400px',
-                lineHeight: '1.5',
-                letterSpacing: '0.5px'
-              }}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.4, duration: 0.5 }}
-            >
-              Your space for creative thoughts and ideas
-            </motion.p>
+              gap: '1.5rem'
+            }}>
+              {/* Header */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '1rem',
+                marginBottom: '0.5rem'
+              }}>
+                <motion.div
+                  style={{
+                    width: '24px',
+                    height: '24px',
+                    borderRadius: '50%',
+                    backgroundColor: '#CCFF00',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0
+                  }}
+                  animate={{ 
+                    scale: [1, 1.2, 1],
+                    rotate: [0, 10, -10, 0]
+                  }}
+                  transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
+                >
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="3">
+                    <path d="M20 6L9 17l-5-5"/>
+                  </svg>
+                </motion.div>
+                
+                <h3 style={{
+                  color: 'white',
+                  fontSize: '1.5rem',
+                  fontWeight: '500',
+                  margin: 0,
+                  fontFamily: 'Arame Mono, monospace'
+                }}>
+                  Network Analytics Detection
+                </h3>
+              </div>
 
-            <motion.button
-              onClick={navigateToNotes}
-              style={{
-                padding: '0.8rem 1.8rem',
-                fontSize: '0.9rem',
-                fontWeight: '300',
-                color: 'black',
-                backgroundColor: 'white',
-                border: 'none',
-                borderRadius: '6px',
-                cursor: 'pointer',
-                fontFamily: 'Arame Mono, monospace',
-                letterSpacing: '1px'
-              }}
-              whileHover={{ 
-                scale: 1.03,
-                backgroundColor: '#f8f8f8',
-                transition: { duration: 0.2 }
-              }}
-              whileTap={{ scale: 0.97 }}
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.6, duration: 0.5 }}
-            >
-              VIEW NOTES
-            </motion.button>
+              {/* Real Network Information */}
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+                gap: '1rem',
+                marginBottom: '1rem'
+              }}>
+                <motion.div
+                  style={{
+                    padding: '1rem',
+                    backgroundColor: 'rgba(255,255,255,0.05)',
+                    borderRadius: '10px',
+                    border: '1px solid rgba(255,255,255,0.1)'
+                  }}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.2 }}
+                >
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                    marginBottom: '0.5rem'
+                  }}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#CCFF00" strokeWidth="2">
+                      <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+                    </svg>
+                    <span style={{
+                      color: 'white',
+                      fontSize: '0.85rem',
+                      fontWeight: '500',
+                      fontFamily: 'Arame Mono, monospace'
+                    }}>
+                      Connection Type
+                    </span>
+                  </div>
+                  <p style={{
+                    color: '#CCFF00',
+                    fontSize: '0.9rem',
+                    margin: 0,
+                    fontFamily: 'Arame Mono, monospace',
+                    fontWeight: '500'
+                  }}>
+                    {networkType}
+                  </p>
+                </motion.div>
+
+                <motion.div
+                  style={{
+                    padding: '1rem',
+                    backgroundColor: 'rgba(255,255,255,0.05)',
+                    borderRadius: '10px',
+                    border: '1px solid rgba(255,255,255,0.1)'
+                  }}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.3 }}
+                >
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                    marginBottom: '0.5rem'
+                  }}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#CCFF00" strokeWidth="2">
+                      <rect x="2" y="2" width="20" height="8" rx="2" ry="2"/>
+                      <rect x="2" y="14" width="20" height="8" rx="2" ry="2"/>
+                      <line x1="6" y1="6" x2="6.01" y2="6"/>
+                      <line x1="6" y1="18" x2="6.01" y2="18"/>
+                    </svg>
+                    <span style={{
+                      color: 'white',
+                      fontSize: '0.85rem',
+                      fontWeight: '500',
+                      fontFamily: 'Arame Mono, monospace'
+                    }}>
+                      IP Address
+                    </span>
+                  </div>
+                  <p style={{
+                    color: userIP === 'unknown' ? 'rgba(255,255,255,0.6)' : '#CCFF00',
+                    fontSize: '0.8rem',
+                    margin: 0,
+                    fontFamily: 'Arame Mono, monospace',
+                    fontWeight: userIP === 'unknown' ? '400' : '500',
+                    wordBreak: 'break-all'
+                  }}>
+                    {userIP === 'unknown' ? 'Tidak terdeteksi' : userIP}
+                  </p>
+                </motion.div>
+
+                <motion.div
+                  style={{
+                    padding: '1rem',
+                    backgroundColor: 'rgba(255,255,255,0.05)',
+                    borderRadius: '10px',
+                    border: '1px solid rgba(255,255,255,0.1)'
+                  }}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.4 }}
+                >
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                    marginBottom: '0.5rem'
+                  }}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#CCFF00" strokeWidth="2">
+                      <path d="M12 2a10 10 0 0 1 7.38 16.75A10 10 0 0 1 12 2z"/>
+                      <path d="M12 2v20"/>
+                      <path d="M2 12h20"/>
+                    </svg>
+                    <span style={{
+                      color: 'white',
+                      fontSize: '0.85rem',
+                      fontWeight: '500',
+                      fontFamily: 'Arame Mono, monospace'
+                    }}>
+                      Device
+                    </span>
+                  </div>
+                  <p style={{
+                    color: 'rgba(255,255,255,0.8)',
+                    fontSize: '0.8rem',
+                    margin: 0,
+                    fontFamily: 'Arame Mono, monospace'
+                  }}>
+                    {/Mobile/i.test(navigator.userAgent) ? 'Mobile' : 'Desktop'}
+                  </p>
+                </motion.div>
+              </div>
+
+              {/* Description */}
+              <motion.div
+                style={{
+                  padding: '1.2rem',
+                  backgroundColor: 'rgba(255, 68, 68, 0.1)',
+                  border: '1px solid rgba(255, 68, 68, 0.3)',
+                  borderRadius: '12px'
+                }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.5 }}
+              >
+                <p style={{
+                  color: 'rgba(255,255,255,0.9)',
+                  fontSize: '0.85rem',
+                  lineHeight: '1.5',
+                  margin: '0 0 0.5rem 0',
+                  fontFamily: 'Arame Mono, monospace'
+                }}>
+                  <strong>Deteksi Jaringan Real-time:</strong> Sistem mendeteksi koneksi {networkType.toLowerCase()} 
+                  {userIP !== 'unknown' && ` dengan IP ${userIP}`} untuk memantau perkembangan website.
+                </p>
+                <p style={{
+                  color: 'rgba(255,255,255,0.7)',
+                  fontSize: '0.8rem',
+                  lineHeight: '1.4',
+                  margin: 0,
+                  fontFamily: 'Arame Mono, monospace'
+                }}>
+                  Data digunakan secara anonim untuk analytics development. Tidak ada biaya atau API external.
+                </p>
+              </motion.div>
+
+              {/* Action Buttons */}
+              <div style={{
+                display: 'flex',
+                gap: '1rem',
+                justifyContent: 'flex-end',
+                flexWrap: 'wrap'
+              }}>
+                <motion.button
+                  onClick={handleDeclineCookies}
+                  style={{
+                    padding: '0.8rem 1.5rem',
+                    backgroundColor: 'rgba(255,255,255,0.1)',
+                    border: '1px solid rgba(255,255,255,0.3)',
+                    borderRadius: '8px',
+                    color: 'rgba(255,255,255,0.8)',
+                    cursor: 'pointer',
+                    fontFamily: 'Arame Mono, monospace',
+                    fontSize: '0.85rem',
+                    fontWeight: '400'
+                  }}
+                  whileHover={{
+                    backgroundColor: 'rgba(255,255,255,0.15)',
+                    scale: 1.05
+                  }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  Tolak
+                </motion.button>
+                
+                <motion.button
+                  onClick={handleAcceptCookies}
+                  disabled={isCollectingData}
+                  style={{
+                    padding: '0.8rem 1.5rem',
+                    backgroundColor: isCollectingData ? 'rgba(204, 255, 0, 0.6)' : '#CCFF00',
+                    border: 'none',
+                    borderRadius: '8px',
+                    color: 'black',
+                    cursor: isCollectingData ? 'not-allowed' : 'pointer',
+                    fontFamily: 'Arame Mono, monospace',
+                    fontSize: '0.85rem',
+                    fontWeight: '500',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem'
+                  }}
+                  whileHover={!isCollectingData ? {
+                    backgroundColor: '#ddff33',
+                    scale: 1.05
+                  } : {}}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  {isCollectingData ? (
+                    <>
+                      <motion.div
+                        animate={{ rotate: 360 }}
+                        transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                      >
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path d="M21 12a9 9 0 11-6.219-8.56"/>
+                        </svg>
+                      </motion.div>
+                      Mendeteksi...
+                    </>
+                  ) : (
+                    'Izinkan Analytics'
+                  )}
+                </motion.button>
+              </div>
+
+              {/* Footer Note */}
+              <div style={{
+                textAlign: 'center',
+                marginTop: '0.5rem'
+              }}>
+                <p style={{
+                  color: 'rgba(255,255,255,0.5)',
+                  fontSize: '0.7rem',
+                  margin: 0,
+                  fontFamily: 'Arame Mono, monospace',
+                  lineHeight: '1.4'
+                }}>
+                  Deteksi jaringan langsung dari browser • Tidak menggunakan API external • Gratis 100%
+                </p>
+              </div>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
 
-
-
-
-{/* Menu Overlay - PERBAIKAN TOTAL: Background solid dengan z-index tinggi */}
-<AnimatePresence>
-  {showMenu && (
-    <>
-      {/* Background Overlay - COVER SEMUA ELEMEN */}
-      <motion.div
-        style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          width: '100%',
-          height: '100%',
-          backgroundColor: '#FF4444',
-          zIndex: zIndexes.menu - 1,
-        }}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 0.3 }}
-      />
-      
-      {/* Main Menu Content */}
-      <motion.div
-        style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          width: '100%',
-          height: '100%',
-          zIndex: zIndexes.menu,
-          display: 'flex',
-          padding: '2rem',
-          pointerEvents: 'auto'
-        }}
-        variants={menuVariants}
-        initial="closed"
-        animate="open"
-        exit="closed"
-      >
-        {/* Main Content - Navigation Menu */}
-        <div style={{
-          flex: 1,
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'center',
-          paddingLeft: '4rem',
-          position: 'relative'
-        }}>
-          {/* Website Name - Top Left */}
-          <motion.div
-            style={{
-              position: 'absolute',
-              left: '2rem',
-              top: '2rem',
-              fontSize: '4rem',
-              fontWeight: '800',
-              color: 'rgba(255,255,255,1)',
-              fontFamily: 'Arame Mono, monospace',
-              lineHeight: 1,
-              letterSpacing: '1.5px',
-              textShadow: '2px 2px 4px rgba(0,0,0,0.2)',
-              zIndex: zIndexes.menu + 1
-            }}
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 0.3 }}
-          >
-            MENURU
-          </motion.div>
-
-          {/* Visitor Time & Location Display - TOP CENTER */}
-          <motion.div
-            style={{
-              position: 'absolute',
-              top: '2rem',
-              left: '50%',
-              transform: 'translateX(-50%)',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: '0.3rem',
-              zIndex: zIndexes.menu + 1
-            }}
-            variants={timeVariants}
-            initial="hidden"
-            animate="visible"
-            exit="hidden"
-          >
-            {/* Time */}
+      {/* Menu Overlay */}
+      <AnimatePresence>
+        {showMenu && (
+          <>
+            {/* Background Overlay - COVER SEMUA ELEMEN */}
             <motion.div
               style={{
-                fontSize: '2.5rem',
-                fontWeight: '400',
-                color: 'rgba(255,255,255,0.9)',
-                fontFamily: 'Arame Mono, monospace',
-                fontFeatureSettings: '"tnum"',
-                fontVariantNumeric: 'tabular-nums',
-                letterSpacing: '2px'
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                width: '100%',
+                height: '100%',
+                backgroundColor: '#FF4444',
+                zIndex: zIndexes.menu - 1,
               }}
-              animate={{
-                scale: [1, 1.02, 1],
-              }}
-              transition={{ duration: 1, repeat: Infinity, repeatType: "reverse" }}
-            >
-              {visitorTime.time}
-            </motion.div>
-
-            {/* Location & Timezone */}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+            />
+            
+            {/* Main Menu Content */}
             <motion.div
               style={{
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                width: '100%',
+                height: '100%',
+                zIndex: zIndexes.menu,
                 display: 'flex',
-                alignItems: 'center',
-                gap: '1rem',
-                fontSize: '0.9rem',
-                fontWeight: '400',
-                color: 'rgba(255,255,255,0.8)',
-                fontFamily: 'Arame Mono, monospace'
+                padding: '2rem',
+                pointerEvents: 'auto'
               }}
+              variants={menuVariants}
+              initial="closed"
+              animate="open"
+              exit="closed"
             >
-              <span style={{ 
-                backgroundColor: 'rgba(255,255,255,0.2)',
-                padding: '0.2rem 0.6rem',
-                borderRadius: '12px',
-                fontWeight: '500'
+              {/* Main Content - Navigation Menu */}
+              <div style={{
+                flex: 1,
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'center',
+                paddingLeft: '4rem',
+                position: 'relative'
               }}>
-                {visitorTime.timezone}
-              </span>
-              <span>
-                {visitorLocation.city ? `${visitorLocation.city}, ${visitorLocation.country}` : 'Lokasi belum diatur'}
-              </span>
-            </motion.div>
-
-            {/* Date */}
-            <motion.div
-              style={{
-                fontSize: '0.8rem',
-                fontWeight: '300',
-                color: 'rgba(255,255,255,0.7)',
-                fontFamily: 'Arame Mono, monospace'
-              }}
-            >
-              {visitorTime.date}
-            </motion.div>
-          </motion.div>
-
-          {/* Menu Items */}
-          <div style={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '2rem'
-          }}>
-            {menuItems.map((item, index) => (
-              <motion.div
-                key={item.name}
-                style={{
-                  position: 'relative',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'flex-start',
-                  padding: '0.5rem 0'
-                }}
-                onMouseEnter={() => setHoveredItem(item.name)}
-                onMouseLeave={() => setHoveredItem(null)}
-                variants={menuItemVariants}
-                initial="closed"
-                animate="open"
-                exit="closed"
-                custom={index}
-                whileHover={{
-                  x: 15,
-                  transition: { duration: 0.2, ease: "easeOut" }
-                }}
-                onClick={item.action}
-              >
-                {/* Menu Text */}
+                {/* Website Name - Top Left */}
                 <motion.div
                   style={{
-                    fontSize: '80px',
-                    fontWeight: '300',
-                    color: 'rgba(255,255,255,0.8)',
+                    position: 'absolute',
+                    left: '2rem',
+                    top: '2rem',
+                    fontSize: '4rem',
+                    fontWeight: '800',
+                    color: 'rgba(255,255,255,1)',
                     fontFamily: 'Arame Mono, monospace',
                     lineHeight: 1,
-                    letterSpacing: '-2px',
-                    textTransform: 'uppercase',
+                    letterSpacing: '1.5px',
+                    textShadow: '2px 2px 4px rgba(0,0,0,0.2)',
+                    zIndex: zIndexes.menu + 1
+                  }}
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4, delay: 0.3 }}
+                >
+                  MENURU
+                </motion.div>
+
+                {/* Visitor Time & Location Display - TOP CENTER */}
+                <motion.div
+                  style={{
+                    position: 'absolute',
+                    top: '2rem',
+                    left: '50%',
+                    transform: 'translateX(-50%)',
                     display: 'flex',
                     flexDirection: 'column',
-                    alignItems: 'flex-start',
-                    gap: '1rem'
+                    alignItems: 'center',
+                    gap: '0.3rem',
+                    zIndex: zIndexes.menu + 1
                   }}
-                  animate={{
-                    color: hoveredItem === item.name ? '#FFFFFF' : 'rgba(255,255,255,0.8)',
-                  }}
-                  transition={{ duration: 0.2 }}
+                  variants={timeVariants}
+                  initial="hidden"
+                  animate="visible"
+                  exit="hidden"
                 >
-                  {item.name}
-                  
-                  {/* Line bawah */}
+                  {/* Time */}
                   <motion.div
                     style={{
-                      width: '100%',
-                      height: '3px',
-                      backgroundColor: hoveredItem === item.name ? '#FFFFFF' : 'rgba(255,255,255,0.3)',
+                      fontSize: '2.5rem',
+                      fontWeight: '400',
+                      color: 'rgba(255,255,255,0.9)',
+                      fontFamily: 'Arame Mono, monospace',
+                      fontFeatureSettings: '"tnum"',
+                      fontVariantNumeric: 'tabular-nums',
+                      letterSpacing: '2px'
                     }}
                     animate={{
-                      backgroundColor: hoveredItem === item.name ? '#FFFFFF' : 'rgba(255,255,255,0.3)',
-                      height: hoveredItem === item.name ? '4px' : '3px'
+                      scale: [1, 1.02, 1],
                     }}
-                    transition={{ duration: 0.3 }}
-                  />
+                    transition={{ duration: 1, repeat: Infinity, repeatType: "reverse" }}
+                  >
+                    {visitorTime.time}
+                  </motion.div>
+
+                  {/* Location & Timezone */}
+                  <motion.div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '1rem',
+                      fontSize: '0.9rem',
+                      fontWeight: '400',
+                      color: 'rgba(255,255,255,0.8)',
+                      fontFamily: 'Arame Mono, monospace'
+                    }}
+                  >
+                    <span style={{ 
+                      backgroundColor: 'rgba(255,255,255,0.2)',
+                      padding: '0.2rem 0.6rem',
+                      borderRadius: '12px',
+                      fontWeight: '500'
+                    }}>
+                      {visitorTime.timezone}
+                    </span>
+                    <span>
+                      {visitorLocation.city ? `${visitorLocation.city}, ${visitorLocation.country}` : 'Lokasi belum diatur'}
+                    </span>
+                  </motion.div>
+
+                  {/* Date */}
+                  <motion.div
+                    style={{
+                      fontSize: '0.8rem',
+                      fontWeight: '300',
+                      color: 'rgba(255,255,255,0.7)',
+                      fontFamily: 'Arame Mono, monospace'
+                    }}
+                  >
+                    {visitorTime.date}
+                  </motion.div>
                 </motion.div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </motion.div>
-      
-      {/* Close Button - PALING ATAS */}
-      <motion.button
-        onClick={toggleMenu}
-        onMouseEnter={() => setIsCloseHovered(true)}
-        onMouseLeave={() => setIsCloseHovered(false)}
+
+                {/* Menu Items */}
+                <div style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '2rem'
+                }}>
+                 {menuItems.map((item, index) => (
+  <motion.div
+    key={item.name}
+    style={{
+      position: 'relative',
+      cursor: 'pointer',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'flex-start',
+      padding: '0.5rem 0'
+    }}
+    onMouseEnter={() => setHoveredItem(item.name)}
+    onMouseLeave={() => setHoveredItem(null)}
+    variants={menuItemVariants}
+    initial="closed"
+    animate="open"
+    exit="closed"
+    custom={index}
+    whileHover={{
+      x: 15,
+      transition: { duration: 0.2, ease: "easeOut" }
+    }}
+    onClick={item.action}
+  >
+    {/* Container untuk teks menu dan label UPDATE */}
+    <div style={{
+      display: 'flex',
+      alignItems: 'center',
+      gap: '1rem',
+      marginBottom: '1rem'
+    }}>
+      {/* Menu Text */}
+      <motion.div
         style={{
-          position: 'fixed',
-          top: '1.8rem',
-          right: '1.8rem',
-          width: '100px',
-          height: '45px',
-          borderRadius: '25px',
-          border: 'none',
-          backgroundColor: 'rgba(255,255,255,0.2)',
-          cursor: 'pointer',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          zIndex: zIndexes.menu + 10, // PALING TINGGI
-          backdropFilter: 'blur(10px)',
-          padding: '0 1.5rem',
-          fontFamily: 'Arame Mono, monospace',
-          fontSize: '0.9rem',
+          fontSize: '80px',
           fontWeight: '300',
-          color: 'rgba(255,255,255,0.9)',
-          overflow: 'hidden'
+          color: 'rgba(255,255,255,0.8)',
+          fontFamily: 'Arame Mono, monospace',
+          lineHeight: 1,
+          letterSpacing: '-2px',
+          textTransform: 'uppercase',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'flex-start',
+          gap: '1rem'
         }}
-        variants={closeButtonVariants}
-        initial="closed"
-        animate="open"
-        exit="closed"
-        whileHover={{ 
-          scale: 1.05,
-          backgroundColor: 'rgba(255,255,255,0.3)',
+        animate={{
+          color: hoveredItem === item.name ? '#FFFFFF' : 'rgba(255,255,255,0.8)',
         }}
-        whileTap={{ scale: 0.95 }}
         transition={{ duration: 0.2 }}
       >
+        {item.name}
+      </motion.div>
+
+      {/* Label UPDATE dengan animasi blink */}
+      {item.hasUpdate && (
         <motion.div
           style={{
             display: 'flex',
             alignItems: 'center',
             gap: '0.5rem',
-            position: 'relative',
-            width: '100%',
-            justifyContent: 'center'
+            padding: '0.4rem 1rem',
+            backgroundColor: item.labelColor,
+            borderRadius: '20px',
+            fontSize: '0.9rem',
+            fontWeight: '600',
+            color: 'black',
+            fontFamily: 'Arame Mono, monospace',
+            letterSpacing: '1px'
           }}
+          animate={{
+            opacity: isUpdateBlinking ? 1 : 0.3,
+            scale: isUpdateBlinking ? 1 : 0.95
+          }}
+          transition={{ duration: 0.4 }}
         >
-          {/* X Icon */}
-          <motion.svg
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            initial={{ scale: 1, opacity: 1 }}
-            animate={{ 
-              scale: isCloseHovered ? 0 : 1,
-              opacity: isCloseHovered ? 0 : 1
-            }}
-            transition={{ duration: 0.2 }}
-          >
-            <line x1="18" y1="6" x2="6" y2="18" />
-            <line x1="6" y1="6" x2="18" y2="18" />
-          </motion.svg>
-
-          {/* Close Text */}
-          <motion.span
+          {/* Dot pemancar besar */}
+          <motion.div
             style={{
-              position: 'absolute',
-              left: '50%',
-              transform: 'translateX(-50%)',
-              whiteSpace: 'nowrap',
-              fontSize: '0.9rem',
-              fontWeight: '300',
-              letterSpacing: '0.5px'
+              width: '12px',
+              height: '12px',
+              borderRadius: '50%',
+              backgroundColor: 'white',
+              position: 'relative'
             }}
-            initial={{ scale: 0, opacity: 0 }}
-            animate={{ 
-              scale: isCloseHovered ? 1 : 0,
-              opacity: isCloseHovered ? 1 : 0
+            animate={{
+              scale: [1, 1.5, 1],
+              opacity: [0.7, 1, 0.7]
             }}
-            transition={{ duration: 0.2 }}
-          >
-            CLOSE
-          </motion.span>
+            transition={{
+              duration: 1.5,
+              repeat: Infinity,
+              ease: "easeInOut"
+            }}
+          />
+          {item.label}
         </motion.div>
-      </motion.button>
-    </>
-  )}
-</AnimatePresence>
+      )}
+    </div>
+    
+    {/* Line bawah */}
+    <motion.div
+      style={{
+        width: '100%',
+        height: '3px',
+        backgroundColor: hoveredItem === item.name ? '#FFFFFF' : 'rgba(255,255,255,0.3)',
+      }}
+      animate={{
+        backgroundColor: hoveredItem === item.name ? '#FFFFFF' : 'rgba(255,255,255,0.3)',
+        height: hoveredItem === item.name ? '4px' : '3px'
+      }}
+      transition={{ duration: 0.3 }}
+    />
+  </motion.div>
+))}
+                </div>
+              </div>
+            </motion.div>
+            
+            {/* Close Button - PALING ATAS */}
+            <motion.button
+              onClick={toggleMenu}
+              onMouseEnter={() => setIsCloseHovered(true)}
+              onMouseLeave={() => setIsCloseHovered(false)}
+              style={{
+                position: 'fixed',
+                top: '1.8rem',
+                right: '1.8rem',
+                width: '100px',
+                height: '45px',
+                borderRadius: '25px',
+                border: 'none',
+                backgroundColor: 'black',
+                cursor: 'pointer',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                zIndex: zIndexes.menu + 10, // PALING TINGGI
+                backdropFilter: 'blur(10px)',
+                padding: '0 1.5rem',
+                fontFamily: 'Arame Mono, monospace',
+                fontSize: '0.9rem',
+                fontWeight: '300',
+                color: 'yellow',
+                overflow: 'hidden'
+              }}
+              variants={closeButtonVariants}
+              initial="closed"
+              animate="open"
+              exit="closed"
+              whileHover={{ 
+                scale: 1.05,
+                backgroundColor: 'greenn',
+              }}
+              whileTap={{ scale: 0.95 }}
+              transition={{ duration: 0.2 }}
+            >
+              <motion.div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  position: 'relative',
+                  width: '100%',
+                  justifyContent: 'center'
+                }}
+              >
+                {/* X Icon */}
+                <motion.svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  initial={{ scale: 1, opacity: 1 }}
+                  animate={{ 
+                    scale: isCloseHovered ? 0 : 1,
+                    opacity: isCloseHovered ? 0 : 1
+                  }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
+                </motion.svg>
 
-      
-
-
-
-
-      
+                {/* Close Text */}
+                <motion.span
+                  style={{
+                    position: 'absolute',
+                    left: '50%',
+                    transform: 'translateX(-50%)',
+                    whiteSpace: 'nowrap',
+                    fontSize: '0.9rem',
+                    fontWeight: '300',
+                    letterSpacing: '0.5px'
+                  }}
+                  initial={{ scale: 0, opacity: 0 }}
+                  animate={{ 
+                    scale: isCloseHovered ? 1 : 0,
+                    opacity: isCloseHovered ? 1 : 0
+                  }}
+                  transition={{ duration: 0.2 }}
+                >
+                  CLOSE
+                </motion.span>
+              </motion.div>
+            </motion.button>
+          </>
+        )}
+      </AnimatePresence>
 
       {/* Modal untuk set lokasi manual */}
       <AnimatePresence>
@@ -2927,13 +3613,3 @@ const zIndexes = {
     </div>
   );
 }
-
-
-
-
-
-
-
-
-
-
