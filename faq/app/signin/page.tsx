@@ -1,10 +1,22 @@
 'use client';
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgotPassword }: any) {
   const router = useRouter();
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkScreenSize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    checkScreenSize();
+    window.addEventListener('resize', checkScreenSize);
+    
+    return () => window.removeEventListener('resize', checkScreenSize);
+  }, []);
 
   const handleSignUp = () => {
     router.push('/signup');
@@ -21,9 +33,9 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
         backgroundColor: 'rgba(0,0,0,0.5)',
         display: 'flex',
         flexDirection: 'column',
-        justifyContent: 'center',
+        justifyContent: isMobile ? 'flex-start' : 'center',
         alignItems: 'center',
-        padding: '40px 20px',
+        padding: isMobile ? '20px 15px' : '40px 20px',
         fontFamily: "'Inter', sans-serif",
       }}
     >
@@ -31,39 +43,49 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
       <div
         style={{
           display: 'flex',
-          alignItems: 'flex-start',
-          gap: '60px',
-          marginBottom: '80px',
+          flexDirection: isMobile ? 'column' : 'row',
+          alignItems: isMobile ? 'center' : 'flex-start',
+          gap: isMobile ? '30px' : '60px',
+          marginBottom: isMobile ? '30px' : '40px',
+          width: '100%',
+          maxWidth: isMobile ? '100%' : '1200px',
         }}
       >
-        {/* Foto Portrait */}
-        <div
-          style={{
-            width: '500px',
-            height: '700px',
-            backgroundImage: 'url(/images/5.jpg)',
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            backgroundRepeat: 'no-repeat',
-            borderRadius: '20px',
-            boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
-          }}
-        />
+        {/* Foto Portrait - Hidden on mobile */}
+        {!isMobile && (
+          <div
+            style={{
+              width: '500px',
+              height: '700px',
+              backgroundImage: 'url(/images/5.jpg)',
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              backgroundRepeat: 'no-repeat',
+              borderRadius: '20px',
+              boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
+            }}
+          />
+        )}
 
         {/* Container Teks dan Login Options */}
         <div
           style={{
             display: 'flex',
             flexDirection: 'column',
-            marginTop: '40px',
+            marginTop: isMobile ? '0' : '40px',
+            width: isMobile ? '100%' : 'auto',
+            maxWidth: isMobile ? '400px' : 'none',
           }}
         >
           {/* Teks Welcome */}
-          <div style={{ marginBottom: '40px' }}>
+          <div style={{ 
+            marginBottom: isMobile ? '30px' : '40px',
+            textAlign: isMobile ? 'center' : 'left'
+          }}>
             <h1
               style={{
                 fontFamily: "'Roboto', sans-serif",
-                fontSize: '48px',
+                fontSize: isMobile ? '32px' : '48px',
                 fontWeight: 'bold',
                 color: '#ffffff',
                 marginBottom: '15px',
@@ -75,7 +97,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
             <p
               style={{
                 fontFamily: "'Roboto', sans-serif",
-                fontSize: '18px',
+                fontSize: isMobile ? '16px' : '18px',
                 color: '#ffffff',
                 textShadow: '1px 1px 2px rgba(0,0,0,0.5)',
               }}
@@ -98,6 +120,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
               style={{
                 display: 'flex',
                 alignItems: 'center',
+                justifyContent: 'center',
                 padding: '15px 20px',
                 border: '2px solid rgba(255, 255, 255, 0.3)',
                 borderRadius: '12px',
@@ -123,7 +146,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
               </svg>
               <span style={{ 
                 fontFamily: "'Roboto', sans-serif",
-                fontSize: '16px', 
+                fontSize: isMobile ? '14px' : '16px', 
                 color: '#ffffff',
                 fontWeight: '500',
               }}>
@@ -136,6 +159,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
               style={{
                 display: 'flex',
                 alignItems: 'center',
+                justifyContent: 'center',
                 padding: '15px 20px',
                 border: '2px solid rgba(255, 255, 255, 0.3)',
                 borderRadius: '12px',
@@ -158,7 +182,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
               </svg>
               <span style={{ 
                 fontFamily: "'Roboto', sans-serif",
-                fontSize: '16px', 
+                fontSize: isMobile ? '14px' : '16px', 
                 color: '#ffffff',
                 fontWeight: '500',
               }}>
@@ -171,6 +195,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
               style={{
                 display: 'flex',
                 alignItems: 'center',
+                justifyContent: 'center',
                 padding: '15px 20px',
                 border: '2px solid rgba(255, 255, 255, 0.3)',
                 borderRadius: '12px',
@@ -193,7 +218,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
               </svg>
               <span style={{ 
                 fontFamily: "'Roboto', sans-serif",
-                fontSize: '16px', 
+                fontSize: isMobile ? '14px' : '16px', 
                 color: '#ffffff',
                 fontWeight: '500',
               }}>
@@ -208,7 +233,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
               display: 'flex',
               flexDirection: 'column',
               gap: '20px',
-              padding: '25px',
+              padding: isMobile ? '20px' : '25px',
               border: '2px solid rgba(255, 255, 255, 0.3)',
               borderRadius: '12px',
               backgroundColor: 'rgba(255, 255, 255, 0.1)',
@@ -306,7 +331,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
                 backgroundColor: '#ffffff',
                 color: '#000000',
                 fontFamily: "'Roboto', sans-serif",
-                fontSize: '16px',
+                fontSize: isMobile ? '14px' : '16px',
                 fontWeight: '600',
                 cursor: 'pointer',
                 transition: 'all 0.3s ease',
@@ -329,8 +354,10 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
           <div
             style={{
               display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
+              flexDirection: isMobile ? 'column' : 'row',
+              justifyContent: isMobile ? 'center' : 'space-between',
+              alignItems: isMobile ? 'center' : 'center',
+              gap: isMobile ? '15px' : '0',
               fontFamily: "'Roboto', sans-serif",
               fontSize: '14px',
             }}
@@ -347,7 +374,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
                 opacity: '0.8',
                 transition: 'all 0.3s ease',
                 fontFamily: "'Roboto', sans-serif",
-                fontSize: '14px',
+                fontSize: isMobile ? '13px' : '14px',
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.opacity = '1';
@@ -361,7 +388,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
 
             {/* Sign Up Link */}
             <div>
-              <span style={{ color: '#ffffff', opacity: '0.8' }}>
+              <span style={{ color: '#ffffff', opacity: '0.8', fontSize: isMobile ? '13px' : '14px' }}>
                 Don't have an account?{' '}
               </span>
               <button
@@ -375,7 +402,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
                   fontWeight: '600',
                   transition: 'all 0.3s ease',
                   fontFamily: "'Roboto', sans-serif",
-                  fontSize: '14px',
+                  fontSize: isMobile ? '13px' : '14px',
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.opacity = '0.9';
@@ -387,6 +414,130 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
                 Sign up
               </button>
             </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Teks LETS JOIN US NOTE THINK dan kelompok di bawah */}
+      <div
+        style={{
+          position: 'relative',
+          textAlign: isMobile ? 'center' : 'left',
+          marginTop: isMobile ? '2rem' : '4rem',
+          width: '100%',
+          maxWidth: isMobile ? '100%' : '1200px',
+          padding: isMobile ? '1rem' : '2rem',
+          marginLeft: isMobile ? '0' : '2rem',
+          marginBottom: isMobile ? '1rem' : '2rem'
+        }}
+      >
+        {/* Teks LETS JOIN US NOTE THINK 2 baris */}
+        <div style={{ 
+          marginBottom: isMobile ? '2rem' : '4rem',
+          padding: isMobile ? '0 1rem' : '0'
+        }}>
+          <p style={{
+            color: 'rgba(255,255,255,0.9)',
+            fontSize: isMobile ? '2.5rem' : '5rem',
+            fontFamily: 'Arame Mono, monospace',
+            margin: '0 0 0.3rem 0',
+            lineHeight: '1.1',
+            fontWeight: '600'
+          }}>
+            LETS JOIN US
+          </p>
+          <p style={{
+            color: 'rgba(255,255,255,0.9)',
+            fontSize: isMobile ? '2.5rem' : '5rem',
+            fontFamily: 'Arame Mono, monospace',
+            margin: 0,
+            lineHeight: '1.1',
+            fontWeight: '600'
+          }}>
+            NOTE THINK.
+          </p>
+        </div>
+
+        {/* 6 Kelompok Menu */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(3, auto)',
+          gap: isMobile ? '2rem 3rem' : '2rem 8rem',
+          marginTop: '0rem',
+          padding: isMobile ? '0 1rem' : '0',
+          justifyContent: isMobile ? 'center' : 'flex-start'
+        }}>
+          <div>
+            <h4 style={{
+              color: 'white',
+              fontSize: isMobile ? '1.8rem' : '4rem',
+              fontWeight: '600',
+              margin: '0 0 0.5rem 0',
+              marginBottom: isMobile ? '3rem' : '5rem',
+              fontFamily: 'Arame Mono, monospace'
+            }}>
+              MENU
+            </h4>
+          </div>
+          <div>
+            <h4 style={{
+              color: 'white',
+              fontSize: isMobile ? '1.8rem' : '4rem',
+              fontWeight: '600',
+              margin: '0 0 0.5rem 0',
+              marginBottom: isMobile ? '3rem' : '5rem',
+              fontFamily: 'Arame Mono, monospace'
+            }}>
+              PRODUCT
+            </h4>
+          </div>
+          <div>
+            <h4 style={{
+              color: 'white',
+              fontSize: isMobile ? '1.8rem' : '4rem',
+              fontWeight: '600',
+              margin: '0 0 0.5rem 0',
+              marginBottom: isMobile ? '3rem' : '5rem',
+              fontFamily: 'Arame Mono, monospace'
+            }}>
+              CONNECT
+            </h4>
+          </div>
+          <div>
+            <h4 style={{
+              color: 'white',
+              fontSize: isMobile ? '1.8rem' : '4rem',
+              fontWeight: '600',
+              margin: '0 0 0.5rem 0',
+              marginBottom: isMobile ? '8rem' : '15rem',
+              fontFamily: 'Arame Mono, monospace'
+            }}>
+              Features
+            </h4>
+          </div>
+          <div>
+            <h4 style={{
+              color: 'white',
+              fontSize: isMobile ? '1.8rem' : '4rem',
+              fontWeight: '600',
+              margin: '0 0 0.5rem 0',
+              marginBottom: isMobile ? '8rem' : '15rem',
+              fontFamily: 'Arame Mono, monospace'
+            }}>
+              Community
+            </h4>
+          </div>
+          <div>
+            <h4 style={{
+              color: 'white',
+              fontSize: isMobile ? '1.8rem' : '4rem',
+              fontWeight: '600',
+              margin: '0 0 0.5rem 0',
+              marginBottom: isMobile ? '8rem' : '15rem',
+              fontFamily: 'Arame Mono, monospace'
+            }}>
+              BLOG
+            </h4>
           </div>
         </div>
       </div>
