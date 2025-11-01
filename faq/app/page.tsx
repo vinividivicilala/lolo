@@ -28,7 +28,7 @@ export default function HomePage(): React.JSX.Element {
       width: '100%',
       display: 'flex',
       flexDirection: 'column',
-      justifyContent: 'center',
+      justifyContent: 'flex-end', // Mengubah menjadi flex-end agar konten di bawah
       alignItems: 'center',
       position: 'relative',
       overflow: 'hidden',
@@ -115,26 +115,26 @@ export default function HomePage(): React.JSX.Element {
           {isMobile ? 'SIGN IN' : 'SIGN IN'}
         </motion.button>
       </div>
-	  
-	  {/* Main Card - Tetap sama besar di PC, responsive di mobile */}
+
+      {/* Card Design - Posisi Paling Bawah Menempel */}
       <motion.div
         style={{
-          width: isMobile ? '95%' : '90%',
-          maxWidth: isMobile ? '400px' : '1900px', // Max width lebih kecil di mobile
-          height: isMobile ? '350px' : '480px', // Height tetap sama di PC
+          width: isMobile ? '100%' : '90%',
+          maxWidth: isMobile ? '100%' : '1900px',
+          height: 'auto',
           backgroundColor: '#CCFF00',
-          borderRadius: isMobile ? '20px' : '40px',
-          padding: isMobile ? '1.5rem' : '3rem',
+          borderRadius: isMobile ? '30px 30px 0 0' : '40px',
+          padding: isMobile ? '2rem 1.5rem 3rem' : '3rem',
           display: 'flex',
-          flexDirection: isMobile ? 'column' : 'row',
-          alignItems: isMobile ? 'center' : 'left',
+          alignItems: 'left',
           gap: isMobile ? '1.5rem' : '3rem',
           cursor: 'pointer',
-          margin: isMobile ? '5rem auto 2rem' : '4rem auto 2rem',
-          boxShadow: '0 10px 40px rgba(204, 255, 0, 0.3)',
+          margin: 0,
+          boxShadow: '0 -10px 40px rgba(204, 255, 0, 0.3)',
+          flexDirection: 'column',
           boxSizing: 'border-box'
         }}
-        initial={{ opacity: 0, y: 30 }}
+        initial={{ opacity: 0, y: 100 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, delay: 0.7 }}
         whileHover={{
@@ -146,136 +146,386 @@ export default function HomePage(): React.JSX.Element {
       >
         {/* Content Section */}
         <div style={{
-          flex: 1,
           display: 'flex',
-          flexDirection: 'column',
-          gap: isMobile ? '1rem' : '1.5rem',
-          textAlign: isMobile ? 'center' : 'left',
-          width: '100%'
+          width: '100%',
+          gap: isMobile ? '1.5rem' : '3rem',
+          flexDirection: isMobile ? 'column' : 'row'
         }}>
-          <h3 style={{
-            color: 'black',
-            fontSize: isMobile ? '1.8rem' : '3rem', // Font size tetap besar di PC
-            fontWeight: '800',
-            fontFamily: 'Arame Mono, monospace',
-            margin: 0,
-            lineHeight: 1.1,
-            letterSpacing: isMobile ? '-0.5px' : '-1px'
-          }}>
-            INNOVATIVE{isMobile ? ' ' : <br/>}SOLUTIONS
-          </h3>
-          
-          <p style={{
-            color: 'rgba(0,0,0,0.8)',
-            fontSize: isMobile ? '0.9rem' : '1.2rem', // Font size tetap di PC
-            lineHeight: 1.5,
-            fontFamily: 'Arame Mono, monospace',
-            margin: 0,
-            maxWidth: '600px',
-            width: '100%'
-          }}>
-            Transforming ideas into visually stunning experiences with cutting-edge technology and modern design approach.
-          </p>
-          
+          {/* Left Section - MENURU */}
           <div style={{
+            flex: 1,
             display: 'flex',
-            flexDirection: isMobile ? 'column' : 'row',
-            alignItems: 'center',
-            gap: isMobile ? '1rem' : '1.5rem',
-            marginTop: isMobile ? '0.5rem' : '1rem',
-            justifyContent: isMobile ? 'center' : 'flex-start',
-            width: '100%'
+            flexDirection: 'column',
+            gap: isMobile ? '1rem' : '1.5rem'
           }}>
+            <h3 style={{
+              color: 'black',
+              fontSize: isMobile ? '3rem' : '10rem',
+              fontWeight: isMobile ? '800' : '2800',
+              fontFamily: 'Verdana, Geneva, sans-serif',
+              margin: 0,
+              lineHeight: 1.1,
+              letterSpacing: isMobile ? '-0.5px' : '-1px'
+            }}>
+              MENURU{isMobile ? '' : <br/>}
+            </h3>
+
+            {/* Daftar Website Pribadi Section - Responsive */}
             <motion.div
               style={{
+                width: '100%',
+                marginTop: isMobile ? '0.5rem' : '1rem',
                 display: 'flex',
-                alignItems: 'center',
-                gap: isMobile ? '0.5rem' : '0.8rem',
-                color: 'black'
+                flexDirection: 'column',
+                gap: isMobile ? '0.3rem' : '0.5rem'
               }}
-              whileHover={{ x: isMobile ? 0 : 8 }}
-              transition={{ duration: 0.2 }}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4 }}
             >
-              <span style={{
-                fontSize: isMobile ? '0.9rem' : '1rem', // Font size tetap di PC
-                fontWeight: '600',
-                fontFamily: 'Arame Mono, monospace'
+              <div style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: isMobile ? '0.2rem' : '0.3rem'
               }}>
-                DISCOVER MORE
+                {/* Portfolio */}
+                <motion.div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: isMobile ? '0.8rem' : '1.5rem',
+                    padding: isMobile ? '0.6rem 0' : '0.8rem 0',
+                    borderBottom: '1px solid rgba(0,0,0,0.1)',
+                    cursor: 'pointer',
+                    flexWrap: isMobile ? 'wrap' : 'nowrap'
+                  }}
+                  whileHover={{ 
+                    x: isMobile ? 0 : 10,
+                    transition: { duration: 0.2 }
+                  }}
+                >
+                  <span style={{
+                    color: 'black',
+                    fontSize: isMobile ? '1rem' : '3rem',
+                    fontFamily: 'Verdana, Geneva, sans-serif',
+                    minWidth: isMobile ? '25px' : '30px'
+                  }}>
+                    01
+                  </span>
+                  
+                  <span style={{
+                    color: 'black',
+                    fontSize: isMobile ? '1.2rem' : '3rem',
+                    fontWeight: '500',
+                    fontFamily: 'Verdana, Geneva, sans-serif',
+                    flex: 1
+                  }}>
+                    Portfolio
+                  </span>
+
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: isMobile ? '0.4rem' : '0.8rem',
+                    color: 'black',
+                    fontSize: isMobile ? '0.9rem' : '3rem',
+                    fontFamily: 'Verdana, Geneva, sans-serif'
+                  }}>
+                    <svg 
+                      width={isMobile ? "20" : "40"} 
+                      height={isMobile ? "20" : "40"} 
+                      viewBox="0 0 24 24" 
+                      fill="none" 
+                      stroke="currentColor" 
+                      strokeWidth="2"
+                    >
+                      <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                      <line x1="16" y1="2" x2="16" y2="6"/>
+                      <line x1="8" y1="2" x2="8" y2="6"/>
+                      <line x1="3" y1="10" x2="21" y2="10"/>
+                    </svg>
+                    <span>{isMobile ? 'Dec 24' : 'Dec 2024'}</span>
+                  </div>
+
+                  <motion.svg
+                    width={isMobile ? "20" : "40"}
+                    height={isMobile ? "20" : "40"}
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="black"
+                    strokeWidth="2"
+                    whileHover={{ x: isMobile ? 0 : 3 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <path d="M5 12h14M12 5l7 7-7 7"/>
+                  </motion.svg>
+                </motion.div>
+
+                {/* Photography */}
+                <motion.div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: isMobile ? '0.8rem' : '1.5rem',
+                    padding: isMobile ? '0.6rem 0' : '0.8rem 0',
+                    borderBottom: '1px solid rgba(0,0,0,0.1)',
+                    cursor: 'pointer',
+                    flexWrap: isMobile ? 'wrap' : 'nowrap'
+                  }}
+                  whileHover={{ 
+                    x: isMobile ? 0 : 10,
+                    transition: { duration: 0.2 }
+                  }}
+                >
+                  <span style={{
+                    color: 'black',
+                    fontSize: isMobile ? '1rem' : '3rem',
+                    fontFamily: 'Verdana, Geneva, sans-serif',
+                    minWidth: isMobile ? '25px' : '30px'
+                  }}>
+                    02
+                  </span>
+                  
+                  <span style={{
+                    color: 'black',
+                    fontSize: isMobile ? '1.2rem' : '3rem',
+                    fontWeight: '500',
+                    fontFamily: 'Verdana, Geneva, sans-serif',
+                    flex: 1
+                  }}>
+                    Photography
+                  </span>
+
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: isMobile ? '0.4rem' : '0.8rem',
+                    color: 'black',
+                    fontSize: isMobile ? '0.9rem' : '3rem',
+                    fontFamily: 'Verdana, Geneva, sans-serif'
+                  }}>
+                    <svg 
+                      width={isMobile ? "20" : "40"} 
+                      height={isMobile ? "20" : "40"} 
+                      viewBox="0 0 24 24" 
+                      fill="none" 
+                      stroke="currentColor" 
+                      strokeWidth="2"
+                    >
+                      <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                      <line x1="16" y1="2" x2="16" y2="6"/>
+                      <line x1="8" y1="2" x2="8" y2="6"/>
+                      <line x1="3" y1="10" x2="21" y2="10"/>
+                    </svg>
+                    <span>{isMobile ? 'Jan 25' : 'Jan 2025'}</span>
+                  </div>
+
+                  <motion.svg
+                    width={isMobile ? "20" : "40"}
+                    height={isMobile ? "20" : "40"}
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="black"
+                    strokeWidth="2"
+                    whileHover={{ x: isMobile ? 0 : 3 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <path d="M5 12h14M12 5l7 7-7 7"/>
+                  </motion.svg>
+                </motion.div>
+
+                {/* Forum */}
+                <motion.div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: isMobile ? '0.8rem' : '1.5rem',
+                    padding: isMobile ? '0.6rem 0' : '0.8rem 0',
+                    borderBottom: '1px solid rgba(0,0,0,0.1)',
+                    cursor: 'pointer',
+                    flexWrap: isMobile ? 'wrap' : 'nowrap'
+                  }}
+                  whileHover={{ 
+                    x: isMobile ? 0 : 10,
+                    transition: { duration: 0.2 }
+                  }}
+                >
+                  <span style={{
+                    color: 'black',
+                    fontSize: isMobile ? '1rem' : '3rem',
+                    fontFamily: 'Verdana, Geneva, sans-serif',
+                    minWidth: isMobile ? '25px' : '30px'
+                  }}>
+                    03
+                  </span>
+                  
+                  <span style={{
+                    color: 'black',
+                    fontSize: isMobile ? '1.2rem' : '3rem',
+                    fontWeight: '500',
+                    fontFamily: 'Verdana, Geneva, sans-serif',
+                    flex: 1
+                  }}>
+                    Forum
+                  </span>
+
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: isMobile ? '0.4rem' : '0.8rem',
+                    color: 'black',
+                    fontSize: isMobile ? '0.9rem' : '3rem',
+                    fontFamily: 'Verdana, Geneva, sans-serif'
+                  }}>
+                    <svg 
+                      width={isMobile ? "20" : "40"} 
+                      height={isMobile ? "20" : "40"} 
+                      viewBox="0 0 24 24" 
+                      fill="none" 
+                      stroke="currentColor" 
+                      strokeWidth="2"
+                    >
+                      <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                      <line x1="16" y1="2" x2="16" y2="6"/>
+                      <line x1="8" y1="2" x2="8" y2="6"/>
+                      <line x1="3" y1="10" x2="21" y2="10"/>
+                    </svg>
+                    <span>{isMobile ? 'Feb 25' : 'Feb 2025'}</span>
+                  </div>
+
+                  <motion.svg
+                    width={isMobile ? "20" : "40"}
+                    height={isMobile ? "20" : "40"}
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="black"
+                    strokeWidth="2"
+                    whileHover={{ x: isMobile ? 0 : 3 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <path d="M5 12h14M12 5l7 7-7 7"/>
+                  </motion.svg>
+                </motion.div>
+              </div>
+            </motion.div>
+          </div>
+
+          {/* Right Section - LETS COLLABORATE */}
+          <div style={{
+            flex: isMobile ? 1 : 0.6,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: isMobile ? 'center' : 'flex-start',
+            justifyContent: 'center',
+            gap: isMobile ? '1rem' : '2rem',
+            textAlign: isMobile ? 'center' : 'left'
+          }}>
+            <h3 style={{
+              color: 'black',
+              fontSize: isMobile ? '2rem' : '5rem',
+              fontWeight: '800',
+              fontFamily: 'Verdana, Geneva, sans-serif',
+              margin: 0,
+              lineHeight: 1.1,
+              letterSpacing: isMobile ? '-0.5px' : '-1px'
+            }}>
+              LETS
+              <br />
+              COLLABORATE
+            </h3>
+            
+            <a href="/book-call" style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: isMobile ? '0.8rem' : '1.5rem',
+              cursor: 'pointer',
+              textDecoration: 'none',
+              color: 'black',
+              padding: '0.5rem 0'
+            }}>
+              <span style={{
+                fontSize: isMobile ? '1rem' : '1.5rem',
+                fontWeight: '600',
+                fontFamily: 'Verdana, Geneva, sans-serif'
+              }}>
+                BOOK A CALL
               </span>
+              
               <svg 
-                width={isMobile ? "20" : "24"} 
-                height={isMobile ? "20" : "24"} 
+                width={isMobile ? "18" : "24"} 
+                height={isMobile ? "18" : "24"} 
                 viewBox="0 0 24 24" 
                 fill="none" 
                 stroke="currentColor" 
                 strokeWidth="2"
               >
-                <path d="M5 12h14M12 5l7 7-7 7"/>
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                <line x1="16" y1="2" x2="16" y2="6"/>
+                <line x1="8" y1="2" x2="8" y2="6"/>
+                <line x1="3" y1="10" x2="21" y2="10"/>
               </svg>
-            </motion.div>
-            
-            <span style={{
-              color: 'rgba(0,0,0,0.6)',
-              fontSize: isMobile ? '0.8rem' : '0.9rem', // Font size tetap di PC
-              fontWeight: '500',
-              fontFamily: 'Arame Mono, monospace',
-              backgroundColor: 'rgba(0,0,0,0.1)',
-              padding: isMobile ? '0.4rem 1rem' : '0.6rem 1.2rem',
-              borderRadius: '15px',
-              textAlign: 'center'
+            </a>
+
+            <div style={{
+              display: 'flex',
+              flexDirection: isMobile ? 'column' : 'row',
+              alignItems: 'center',
+              gap: isMobile ? '0.8rem' : '2rem',
+              marginTop: isMobile ? '0.5rem' : '1rem'
             }}>
-              LATEST PROJECT
-            </span>
+              <a href="/terms" style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: isMobile ? '0.3rem' : '0.5rem',
+                textDecoration: 'none',
+                color: 'rgba(0,0,0,0.7)',
+                fontSize: isMobile ? '0.9rem' : '3rem',
+                fontFamily: 'Verdana, Geneva, sans-serif',
+                transition: 'color 0.3s ease'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.color = 'black'}
+              onMouseLeave={(e) => e.currentTarget.style.color = 'rgba(0,0,0,0.7)'}>
+                {isMobile ? 'Terms' : 'Ketentuan Kami'}
+                <svg 
+                  width={isMobile ? "16" : "100"} 
+                  height={isMobile ? "16" : "100"} 
+                  viewBox="0 0 24 24" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  strokeWidth="2"
+                >
+                  <path d="M7 17L17 7M17 7H7M17 7V17"/>
+                </svg>
+              </a>
+              
+              <a href="/privacy" style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: isMobile ? '0.3rem' : '0.5rem',
+                textDecoration: 'none',
+                color: 'rgba(0,0,0,0.7)',
+                fontSize: isMobile ? '0.9rem' : '3rem',
+                fontFamily: 'Verdana, Geneva, sans-serif',
+                transition: 'color 0.3s ease'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.color = 'black'}
+              onMouseLeave={(e) => e.currentTarget.style.color = 'rgba(0,0,0,0.7)'}>
+                {isMobile ? 'Privacy' : 'Kebijakan Privasi'}
+                <svg 
+                  width={isMobile ? "16" : "100"} 
+                  height={isMobile ? "16" : "100"} 
+                  viewBox="0 0 24 24" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  strokeWidth="2"
+                >
+                  <path d="M7 17L17 7M17 7H7M17 7V17"/>
+                </svg>
+              </a>
+            </div>
           </div>
         </div>
-        
-        {/* Decorative Element - Hidden on Mobile */}
-        {!isMobile && (
-          <motion.div
-            style={{
-              width: '80px',
-              height: '80px',
-              backgroundColor: 'black',
-              borderRadius: '20px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              flexShrink: 0
-            }}
-            whileHover={{ rotate: 90 }}
-            transition={{ duration: 0.3 }}
-          >
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#CCFF00" strokeWidth="2">
-              <path d="M5 12h14M12 5l7 7-7 7"/>
-            </svg>
-          </motion.div>
-        )}
       </motion.div>
-
-      {/* Additional Mobile-only Elements */}
-      {isMobile && (
-        <motion.div
-          style={{
-            width: '60px',
-            height: '60px',
-            backgroundColor: 'black',
-            borderRadius: '15px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            marginTop: '1rem'
-          }}
-          initial={{ opacity: 0, scale: 0 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.5, delay: 1 }}
-          whileTap={{ scale: 0.9 }}
-        >
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#CCFF00" strokeWidth="2">
-            <path d="M5 12h14M12 5l7 7-7 7"/>
-          </svg>
-        </motion.div>
-      )}
     </div>
   );
 }
