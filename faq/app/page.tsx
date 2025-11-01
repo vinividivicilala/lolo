@@ -116,12 +116,12 @@ export default function HomePage(): React.JSX.Element {
         </motion.button>
       </div>
 	  
-	  {/* Main Card */}
+	  {/* Main Card - Tetap sama besar di PC, responsive di mobile */}
       <motion.div
         style={{
           width: isMobile ? '95%' : '90%',
-          maxWidth: '2800px',
-          height: isMobile ? '350px' : '480px',
+          maxWidth: isMobile ? '400px' : '1900px', // Max width lebih kecil di mobile
+          height: isMobile ? '350px' : '480px', // Height tetap sama di PC
           backgroundColor: '#CCFF00',
           borderRadius: isMobile ? '20px' : '40px',
           padding: isMobile ? '1.5rem' : '3rem',
@@ -155,7 +155,7 @@ export default function HomePage(): React.JSX.Element {
         }}>
           <h3 style={{
             color: 'black',
-            fontSize: isMobile ? '1.8rem' : '3rem',
+            fontSize: isMobile ? '1.8rem' : '3rem', // Font size tetap besar di PC
             fontWeight: '800',
             fontFamily: 'Arame Mono, monospace',
             margin: 0,
@@ -167,7 +167,7 @@ export default function HomePage(): React.JSX.Element {
           
           <p style={{
             color: 'rgba(0,0,0,0.8)',
-            fontSize: isMobile ? '0.9rem' : '1.2rem',
+            fontSize: isMobile ? '0.9rem' : '1.2rem', // Font size tetap di PC
             lineHeight: 1.5,
             fontFamily: 'Arame Mono, monospace',
             margin: 0,
@@ -197,7 +197,7 @@ export default function HomePage(): React.JSX.Element {
               transition={{ duration: 0.2 }}
             >
               <span style={{
-                fontSize: isMobile ? '0.9rem' : '1rem',
+                fontSize: isMobile ? '0.9rem' : '1rem', // Font size tetap di PC
                 fontWeight: '600',
                 fontFamily: 'Arame Mono, monospace'
               }}>
@@ -217,7 +217,7 @@ export default function HomePage(): React.JSX.Element {
             
             <span style={{
               color: 'rgba(0,0,0,0.6)',
-              fontSize: isMobile ? '0.8rem' : '0.9rem',
+              fontSize: isMobile ? '0.8rem' : '0.9rem', // Font size tetap di PC
               fontWeight: '500',
               fontFamily: 'Arame Mono, monospace',
               backgroundColor: 'rgba(0,0,0,0.1)',
