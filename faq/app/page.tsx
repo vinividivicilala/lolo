@@ -1,12 +1,21 @@
 'use client';
 
 import React, { useState, useEffect } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 
 export default function HomePage(): React.JSX.Element {
   const router = useRouter();
   const [isMobile, setIsMobile] = useState(false);
+  const [loadingText, setLoadingText] = useState("NURU");
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Animasi loading text - hanya bagian setelah ME yang berubah
+  const loadingTexts = [
+    "NURU", "MBACA", "NULIS", "NGEXPLORASI", 
+    "NEMUKAN", "NCIPTA", "NGGALI", "NARIK",
+    "NGAMATI", "NANCANG", "NGEMBANGKAN", "NYUSUN"
+  ];
 
   useEffect(() => {
     const checkMobile = () => {
@@ -16,7 +25,24 @@ export default function HomePage(): React.JSX.Element {
     checkMobile();
     window.addEventListener('resize', checkMobile);
 
-    return () => window.removeEventListener('resize', checkMobile);
+    // Animasi loading text yang lebih pelan
+    let currentIndex = 0;
+    const textInterval = setInterval(() => {
+      currentIndex = (currentIndex + 1) % loadingTexts.length;
+      setLoadingText(loadingTexts[currentIndex]);
+    }, 500); // Ganti teks setiap 500ms untuk lebih pelan
+
+    // Hentikan loading setelah selesai
+    const loadingTimeout = setTimeout(() => {
+      setIsLoading(false);
+      clearInterval(textInterval);
+    }, 3000); // Loading selama 3 detik
+
+    return () => {
+      window.removeEventListener('resize', checkMobile);
+      clearInterval(textInterval);
+      clearTimeout(loadingTimeout);
+    };
   }, []);
 
   return (
@@ -28,7 +54,7 @@ export default function HomePage(): React.JSX.Element {
       width: '100%',
       display: 'flex',
       flexDirection: 'column',
-      justifyContent: 'flex-end', // Mengubah menjadi flex-end agar konten di bawah
+      justifyContent: 'flex-end',
       alignItems: 'center',
       position: 'relative',
       overflow: 'hidden',
@@ -50,13 +76,13 @@ export default function HomePage(): React.JSX.Element {
         zIndex: 100,
         boxSizing: 'border-box'
       }}>
-        {/* Teks "MENURU" */}
+        {/* Teks "MENURU" dengan animasi loading hanya di bagian NURU */}
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.8, delay: 0.5 }}
         >
-          <h1 style={{
+          <div style={{
             fontSize: isMobile ? '1.5rem' : '2.5rem',
             fontWeight: '300',
             fontFamily: 'Helvetica, Arial, sans-serif',
@@ -64,10 +90,38 @@ export default function HomePage(): React.JSX.Element {
             letterSpacing: '2px',
             lineHeight: 1,
             textTransform: 'uppercase',
-            color: 'white'
+            color: 'white',
+            minHeight: isMobile ? '1.8rem' : '2.8rem',
+            display: 'flex',
+            alignItems: 'center'
           }}>
-            MENURU
-          </h1>
+            ME
+            <AnimatePresence mode="wait">
+              {isLoading ? (
+                <motion.span
+                  key={loadingText}
+                  initial={{ opacity: 0, y: 5 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -5 }}
+                  transition={{ duration: 0.3 }}
+                  style={{
+                    display: 'inline-block'
+                  }}
+                >
+                  {loadingText}
+                </motion.span>
+              ) : (
+                <motion.span
+                  key="nuru-final"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.5 }}
+                >
+                  NURU
+                </motion.span>
+              )}
+            </AnimatePresence>
+          </div>
         </motion.div>
 
         {/* Sign In Button */}
