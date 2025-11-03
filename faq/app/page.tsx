@@ -115,22 +115,19 @@ export default function HomePage(): React.JSX.Element {
     setHoveredLink("");
   };
 
-  // Warna cursor yang tidak tabrakan
+  // Warna cursor - DIPERBAIKI: Warna cerah yang bagus
   const getCursorColors = () => {
-    // Default: dot putih dengan border hitam (terlihat di semua background)
-    if (cursorType === "default") {
+    if (cursorType === "link") {
       return {
-        dotColor: 'white',
-        borderColor: 'black',
-        textColor: 'black'
+        dotColor: '#6366F1', // Indigo cerah
+        textColor: 'white'
       };
     }
     
-    // Link: background putih dengan teks hitam (terlihat di semua background)
+    // Default cursor
     return {
-      dotColor: 'white',
-      borderColor: 'black',
-      textColor: 'black'
+      dotColor: '#EC4899', // Pink cerah
+      textColor: 'white'
     };
   };
 
@@ -148,7 +145,7 @@ export default function HomePage(): React.JSX.Element {
   return (
     <div style={{
       minHeight: '100vh',
-      backgroundColor: isDarkMode ? 'black' : '#CCFF00',
+      backgroundColor: isDarkMode ? 'black' : '#ff0028',
       margin: 0,
       padding: 0,
       width: '100%',
@@ -165,7 +162,7 @@ export default function HomePage(): React.JSX.Element {
       cursor: 'none'
     }}>
 
-      {/* Custom Cursor */}
+      {/* Custom Cursor - DIPERBAIKI: Warna cerah yang bagus */}
       <div
         ref={cursorRef}
         style={{
@@ -187,9 +184,9 @@ export default function HomePage(): React.JSX.Element {
           textAlign: 'center',
           transition: 'all 0.2s ease',
           transform: 'translate(-50%, -50%)',
-          border: `2px solid ${cursorColors.borderColor}`,
           padding: cursorType === "link" ? '0 20px' : '0',
-          boxShadow: '0 2px 10px rgba(0,0,0,0.3)'
+          boxShadow: '0 2px 10px rgba(0,0,0,0.3)',
+          border: 'none'
         }}
       >
         {cursorType === "link" && (
@@ -222,7 +219,7 @@ export default function HomePage(): React.JSX.Element {
         )}
       </div>
 
-      {/* Top Navigation Bar - Baru Ditambahkan */}
+      {/* Top Navigation Bar - DIPERBAIKI: Warna biru agar tidak tabrakan dengan background hijau */}
       <div 
         ref={topNavRef}
         style={{
@@ -242,15 +239,16 @@ export default function HomePage(): React.JSX.Element {
           display: 'flex',
           alignItems: 'center',
           gap: isMobile ? '1rem' : '2rem',
-          backgroundColor: isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
+          backgroundColor: isDarkMode ? 'rgba(99, 102, 241, 0.9)' : 'rgba(99, 102, 241, 0.9)', // Biru indigo
           backdropFilter: 'blur(20px)',
           borderRadius: '50px',
           padding: isMobile ? '0.6rem 1rem' : '0.8rem 1.5rem',
-          border: `1px solid ${isDarkMode ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)'}`,
+          border: `1px solid rgba(255,255,255,0.2)`,
+          boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
         }}>
-          {/* Docs */}
+          {/* Docs - DIPERBAIKI: Background biru muda */}
           <motion.div
-		   onClick={() => router.push('/docs')}
+            onClick={() => router.push('/docs')}
             onMouseEnter={() => handleLinkHover("link", "VIEW", "docs")}
             onMouseLeave={handleLinkLeave}
             style={{
@@ -260,11 +258,11 @@ export default function HomePage(): React.JSX.Element {
               cursor: 'none',
               padding: '0.4rem 0.8rem',
               borderRadius: '25px',
-              backgroundColor: isDarkMode ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
+              backgroundColor: 'rgba(255,255,255,0.9)', // Putih solid
               transition: 'all 0.3s ease'
             }}
             whileHover={{ 
-              backgroundColor: isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
+              backgroundColor: 'white',
               scale: 1.05
             }}
           >
@@ -273,7 +271,7 @@ export default function HomePage(): React.JSX.Element {
               height={isMobile ? "18" : "20"} 
               viewBox="0 0 24 24" 
               fill="none" 
-              stroke={isDarkMode ? 'white' : 'black'}
+              stroke="#6366F1" // Biru indigo
               strokeWidth="2"
             >
               <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
@@ -283,16 +281,16 @@ export default function HomePage(): React.JSX.Element {
               <polyline points="10,9 9,9 8,9"/>
             </svg>
             <span style={{
-              color: isDarkMode ? 'white' : 'black',
+              color: '#6366F1', // Biru indigo
               fontSize: isMobile ? '0.8rem' : '0.9rem',
-              fontWeight: '500',
+              fontWeight: '600',
               fontFamily: 'Helvetica, Arial, sans-serif'
             }}>
               Docs
             </span>
             <div style={{
-              backgroundColor: '#00FF88',
-              color: 'black',
+              backgroundColor: '#EC4899', // Pink cerah
+              color: 'white',
               fontSize: '0.7rem',
               fontWeight: '700',
               padding: '0.1rem 0.4rem',
@@ -303,9 +301,9 @@ export default function HomePage(): React.JSX.Element {
             </div>
           </motion.div>
 
-          {/* Chatbot */}
+          {/* Chatbot - DIPERBAIKI: Background biru muda */}
           <motion.div
-		   onClick={() => router.push('/chatbot')}
+            onClick={() => router.push('/chatbot')}
             onMouseEnter={() => handleLinkHover("link", "VIEW", "chatbot")}
             onMouseLeave={handleLinkLeave}
             style={{
@@ -315,11 +313,11 @@ export default function HomePage(): React.JSX.Element {
               cursor: 'none',
               padding: '0.4rem 0.8rem',
               borderRadius: '25px',
-              backgroundColor: isDarkMode ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
+              backgroundColor: 'rgba(255,255,255,0.9)', // Putih solid
               transition: 'all 0.3s ease'
             }}
             whileHover={{ 
-              backgroundColor: isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
+              backgroundColor: 'white',
               scale: 1.05
             }}
           >
@@ -328,7 +326,7 @@ export default function HomePage(): React.JSX.Element {
               height={isMobile ? "18" : "20"} 
               viewBox="0 0 24 24" 
               fill="none" 
-              stroke={isDarkMode ? 'white' : 'black'}
+              stroke="#6366F1" // Biru indigo
               strokeWidth="2"
             >
               <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
@@ -336,16 +334,16 @@ export default function HomePage(): React.JSX.Element {
               <line x1="8" y1="11" x2="12" y2="11"/>
             </svg>
             <span style={{
-              color: isDarkMode ? 'white' : 'black',
+              color: '#6366F1', // Biru indigo
               fontSize: isMobile ? '0.8rem' : '0.9rem',
-              fontWeight: '500',
+              fontWeight: '600',
               fontFamily: 'Helvetica, Arial, sans-serif'
             }}>
               Chatbot
             </span>
             <div style={{
-              backgroundColor: '#00FF88',
-              color: 'black',
+              backgroundColor: '#EC4899', // Pink cerah
+              color: 'white',
               fontSize: '0.7rem',
               fontWeight: '700',
               padding: '0.1rem 0.4rem',
@@ -355,11 +353,10 @@ export default function HomePage(): React.JSX.Element {
               NEW
             </div>
           </motion.div>
-		  
-		  
-		    {/* Update */}
+          
+          {/* Update - DIPERBAIKI: Background biru muda */}
           <motion.div
-		   onClick={() => router.push('/update')}
+            onClick={() => router.push('/update')}
             onMouseEnter={() => handleLinkHover("link", "VIEW", "update")}
             onMouseLeave={handleLinkLeave}
             style={{
@@ -369,11 +366,11 @@ export default function HomePage(): React.JSX.Element {
               cursor: 'none',
               padding: '0.4rem 0.8rem',
               borderRadius: '25px',
-              backgroundColor: isDarkMode ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
+              backgroundColor: 'rgba(255,255,255,0.9)', // Putih solid
               transition: 'all 0.3s ease'
             }}
             whileHover={{ 
-              backgroundColor: isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
+              backgroundColor: 'white',
               scale: 1.05
             }}
           >
@@ -382,7 +379,7 @@ export default function HomePage(): React.JSX.Element {
               height={isMobile ? "18" : "20"} 
               viewBox="0 0 24 24" 
               fill="none" 
-              stroke={isDarkMode ? 'white' : 'black'}
+              stroke="#6366F1" // Biru indigo
               strokeWidth="2"
             >
               <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
@@ -392,16 +389,16 @@ export default function HomePage(): React.JSX.Element {
               <polyline points="10,9 9,9 8,9"/>
             </svg>
             <span style={{
-              color: isDarkMode ? 'white' : 'black',
+              color: '#6366F1', // Biru indigo
               fontSize: isMobile ? '0.8rem' : '0.9rem',
-              fontWeight: '500',
+              fontWeight: '600',
               fontFamily: 'Helvetica, Arial, sans-serif'
             }}>
               Update
             </span>
             <div style={{
-              backgroundColor: '#00FF88',
-              color: 'black',
+              backgroundColor: '#EC4899', // Pink cerah
+              color: 'white',
               fontSize: '0.7rem',
               fontWeight: '700',
               padding: '0.1rem 0.4rem',
@@ -412,9 +409,9 @@ export default function HomePage(): React.JSX.Element {
             </div>
           </motion.div>
 
-          {/* Timeline */}
+          {/* Timeline - DIPERBAIKI: Background biru muda */}
           <motion.div
-		    onClick={() => router.push('/timeline')}
+            onClick={() => router.push('/timeline')}
             onMouseEnter={() => handleLinkHover("link", "VIEW", "timeline")}
             onMouseLeave={handleLinkLeave}
             style={{
@@ -424,11 +421,11 @@ export default function HomePage(): React.JSX.Element {
               cursor: 'none',
               padding: '0.4rem 0.8rem',
               borderRadius: '25px',
-              backgroundColor: isDarkMode ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
+              backgroundColor: 'rgba(255,255,255,0.9)', // Putih solid
               transition: 'all 0.3s ease'
             }}
             whileHover={{ 
-              backgroundColor: isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
+              backgroundColor: 'white',
               scale: 1.05
             }}
           >
@@ -437,7 +434,7 @@ export default function HomePage(): React.JSX.Element {
               height={isMobile ? "18" : "20"} 
               viewBox="0 0 24 24" 
               fill="none" 
-              stroke={isDarkMode ? 'white' : 'black'}
+              stroke="#6366F1" // Biru indigo
               strokeWidth="2"
             >
               <polyline points="1 4 1 10 7 10"/>
@@ -446,16 +443,16 @@ export default function HomePage(): React.JSX.Element {
               <line x1="16" y1="11" x2="12" y2="7"/>
             </svg>
             <span style={{
-              color: isDarkMode ? 'white' : 'black',
+              color: '#6366F1', // Biru indigo
               fontSize: isMobile ? '0.8rem' : '0.9rem',
-              fontWeight: '500',
+              fontWeight: '600',
               fontFamily: 'Helvetica, Arial, sans-serif'
             }}>
               Timeline
             </span>
             <div style={{
-              backgroundColor: '#00FF88',
-              color: 'black',
+              backgroundColor: '#EC4899', // Pink cerah
+              color: 'white',
               fontSize: '0.7rem',
               fontWeight: '700',
               padding: '0.1rem 0.4rem',
@@ -547,10 +544,10 @@ export default function HomePage(): React.JSX.Element {
             style={{
               padding: isMobile ? '0.4rem 0.8rem' : '0.6rem 1rem',
               fontSize: isMobile ? '0.8rem' : '1rem',
-              fontWeight: '500',
-              color: isDarkMode ? 'white' : 'black',
-              backgroundColor: isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
-              border: `1px solid ${isDarkMode ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)'}`,
+              fontWeight: '600',
+              color: 'black',
+              backgroundColor: '#CCFF00',
+              border: 'none',
               borderRadius: '50px',
               cursor: 'none',
               fontFamily: 'Helvetica, Arial, sans-serif',
@@ -560,13 +557,14 @@ export default function HomePage(): React.JSX.Element {
               alignItems: 'center',
               gap: isMobile ? '0.3rem' : '0.5rem',
               margin: 0,
-              transition: 'all 0.3s ease'
+              transition: 'all 0.3s ease',
+              boxShadow: '0 4px 15px rgba(0,0,0,0.1)'
             }}
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 1, duration: 0.6 }}
             whileHover={{ 
-              backgroundColor: isDarkMode ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.15)',
+              backgroundColor: '#D4FF33',
               scale: 1.05,
               transition: { duration: 0.2 }
             }}
@@ -589,11 +587,11 @@ export default function HomePage(): React.JSX.Element {
             style={{
               padding: isMobile ? '0.4rem 1rem' : '0.6rem 1.5rem',
               fontSize: isMobile ? '0.9rem' : '1.5rem',
-              fontWeight: '300',
-              color: isDarkMode ? 'white' : 'black',
-              backgroundColor: isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
-              border: `1px solid ${isDarkMode ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)'}`,
-              borderRadius: '8px',
+              fontWeight: '600',
+              color: 'black',
+              backgroundColor: '#CCFF00',
+              border: 'none',
+              borderRadius: '50px',
               cursor: 'none',
               fontFamily: 'Helvetica, Arial, sans-serif',
               backdropFilter: 'blur(10px)',
@@ -603,13 +601,14 @@ export default function HomePage(): React.JSX.Element {
               gap: isMobile ? '0.3rem' : '0.5rem',
               margin: 0,
               maxWidth: isMobile ? '120px' : 'none',
-              transition: 'all 0.3s ease'
+              transition: 'all 0.3s ease',
+              boxShadow: '0 4px 15px rgba(0,0,0,0.1)'
             }}
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 1.2, duration: 0.6 }}
             whileHover={{ 
-              backgroundColor: isDarkMode ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.15)',
+              backgroundColor: '#D4FF33',
               scale: 1.05,
               transition: { duration: 0.2 }
             }}
@@ -631,7 +630,7 @@ export default function HomePage(): React.JSX.Element {
         </div>
       </div>
 
-      {/* Card Design - Posisi Paling Bawah Menempel - TETAP SAMA */}
+      {/* Card Design - TETAP SAMA seperti design awal */}
       <motion.div
         ref={cardRef}
         style={{
@@ -663,14 +662,14 @@ export default function HomePage(): React.JSX.Element {
         }}
         whileTap={{ scale: 0.98 }}
       >
-        {/* Content Section */}
+        {/* Content Section - TETAP SAMA */}
         <div style={{
           display: 'flex',
           width: '100%',
           gap: isMobile ? '1.5rem' : '3rem',
           flexDirection: isMobile ? 'column' : 'row'
         }}>
-          {/* Left Section - MENURU */}
+          {/* Left Section - MENURU - TETAP SAMA */}
           <div style={{
             flex: 1,
             display: 'flex',
@@ -690,7 +689,7 @@ export default function HomePage(): React.JSX.Element {
               MENURU{isMobile ? '' : <br/>}
             </h3>
 
-            {/* Daftar Website Pribadi Section - Responsive */}
+            {/* Daftar Website Pribadi Section - Responsive - TETAP SAMA */}
             <motion.div
               style={{
                 width: '100%',
@@ -945,7 +944,7 @@ export default function HomePage(): React.JSX.Element {
             </motion.div>
           </div>
 
-          {/* Right Section - LETS COLLABORATE */}
+          {/* Right Section - LETS COLLABORATE - DIPERBAIKI: Book a Call seperti design awal tapi lebih besar */}
           <div style={{
             flex: isMobile ? 1 : 0.6,
             display: 'flex',
@@ -970,6 +969,7 @@ export default function HomePage(): React.JSX.Element {
               COLLABORATE
             </h3>
             
+            {/* Book a Call - DIPERBAIKI: Design seperti awal tapi lebih besar dengan pemancar di samping icon */}
             <a 
               href="/book-call" 
               onMouseEnter={() => handleLinkHover("link", "VIEW", "bookcall")}
@@ -981,31 +981,42 @@ export default function HomePage(): React.JSX.Element {
                 cursor: 'none',
                 textDecoration: 'none',
                 color: getLinkColor("bookcall"),
-                padding: '0.5rem 0',
-                transition: 'color 0.3s ease'
+                padding: isMobile ? '0.5rem 0' : '0.5rem 0',
+                transition: 'color 0.3s ease',
+                position: 'relative'
               }}
             >
               <span style={{
-                fontSize: isMobile ? '1rem' : '1.5rem',
+                fontSize: isMobile ? '1.2rem' : '2.5rem', // Teks lebih besar
                 fontWeight: '600',
                 fontFamily: 'Verdana, Geneva, sans-serif'
               }}>
                 BOOK A CALL
               </span>
               
-              <svg 
-                width={isMobile ? "18" : "24"} 
-                height={isMobile ? "18" : "24"} 
-                viewBox="0 0 24 24" 
-                fill="none" 
-                stroke="currentColor" 
-                strokeWidth="2"
-              >
-                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-                <line x1="16" y1="2" x2="16" y2="6"/>
-                <line x1="8" y1="2" x2="8" y2="6"/>
-                <line x1="3" y1="10" x2="21" y2="10"/>
-              </svg>
+              {/* Container untuk icon dan pemancar */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                position: 'relative'
+              }}>
+               
+               
+                <svg 
+                  width={isMobile ? "20" : "40"} 
+                  height={isMobile ? "20" : "40"} 
+                  viewBox="0 0 24 24" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  strokeWidth="2"
+                >
+                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                  <line x1="16" y1="2" x2="16" y2="6"/>
+                  <line x1="8" y1="2" x2="8" y2="6"/>
+                  <line x1="3" y1="10" x2="21" y2="10"/>
+                </svg>
+              </div>
             </a>
 
             <div style={{
