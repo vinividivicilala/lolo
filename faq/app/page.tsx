@@ -23,6 +23,7 @@ export default function HomePage(): React.JSX.Element {
   const headerRef = useRef<HTMLDivElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
   const cursorRef = useRef<HTMLDivElement>(null);
+  const topNavRef = useRef<HTMLDivElement>(null);
 
   // Animasi loading text
   const loadingTexts = [
@@ -52,9 +53,9 @@ export default function HomePage(): React.JSX.Element {
       clearInterval(textInterval);
     }, 3000);
 
-    // GSAP Scroll Animation untuk header
-    if (headerRef.current) {
-      gsap.to(headerRef.current, {
+    // GSAP Scroll Animation untuk header dan top nav
+    if (headerRef.current && topNavRef.current) {
+      gsap.to([headerRef.current, topNavRef.current], {
         opacity: 0,
         y: -100,
         duration: 0.5,
@@ -64,10 +65,10 @@ export default function HomePage(): React.JSX.Element {
           end: "bottom 20%",
           scrub: true,
           onEnter: () => {
-            gsap.to(headerRef.current, { opacity: 0, y: -100, duration: 0.3 });
+            gsap.to([headerRef.current, topNavRef.current], { opacity: 0, y: -100, duration: 0.3 });
           },
           onLeaveBack: () => {
-            gsap.to(headerRef.current, { opacity: 1, y: 0, duration: 0.3 });
+            gsap.to([headerRef.current, topNavRef.current], { opacity: 1, y: 0, duration: 0.3 });
           }
         }
       });
@@ -221,12 +222,258 @@ export default function HomePage(): React.JSX.Element {
         )}
       </div>
 
+      {/* Top Navigation Bar - Baru Ditambahkan */}
+      <div 
+        ref={topNavRef}
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100%',
+          padding: isMobile ? '0.8rem 1rem' : '1rem 2rem',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          zIndex: 101,
+          boxSizing: 'border-box'
+        }}
+      >
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: isMobile ? '1rem' : '2rem',
+          backgroundColor: isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
+          backdropFilter: 'blur(20px)',
+          borderRadius: '50px',
+          padding: isMobile ? '0.6rem 1rem' : '0.8rem 1.5rem',
+          border: `1px solid ${isDarkMode ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)'}`,
+        }}>
+          {/* Docs */}
+          <motion.div
+		   onClick={() => router.push('/docs')}
+            onMouseEnter={() => handleLinkHover("link", "VIEW", "docs")}
+            onMouseLeave={handleLinkLeave}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              cursor: 'none',
+              padding: '0.4rem 0.8rem',
+              borderRadius: '25px',
+              backgroundColor: isDarkMode ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
+              transition: 'all 0.3s ease'
+            }}
+            whileHover={{ 
+              backgroundColor: isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
+              scale: 1.05
+            }}
+          >
+            <svg 
+              width={isMobile ? "18" : "20"} 
+              height={isMobile ? "18" : "20"} 
+              viewBox="0 0 24 24" 
+              fill="none" 
+              stroke={isDarkMode ? 'white' : 'black'}
+              strokeWidth="2"
+            >
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14,2 14,8 20,8"/>
+              <line x1="16" y1="13" x2="8" y2="13"/>
+              <line x1="16" y1="17" x2="8" y2="17"/>
+              <polyline points="10,9 9,9 8,9"/>
+            </svg>
+            <span style={{
+              color: isDarkMode ? 'white' : 'black',
+              fontSize: isMobile ? '0.8rem' : '0.9rem',
+              fontWeight: '500',
+              fontFamily: 'Helvetica, Arial, sans-serif'
+            }}>
+              Docs
+            </span>
+            <div style={{
+              backgroundColor: '#00FF88',
+              color: 'black',
+              fontSize: '0.7rem',
+              fontWeight: '700',
+              padding: '0.1rem 0.4rem',
+              borderRadius: '10px',
+              marginLeft: '0.3rem'
+            }}>
+              NEW
+            </div>
+          </motion.div>
+
+          {/* Chatbot */}
+          <motion.div
+		   onClick={() => router.push('/chatbot')}
+            onMouseEnter={() => handleLinkHover("link", "VIEW", "chatbot")}
+            onMouseLeave={handleLinkLeave}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              cursor: 'none',
+              padding: '0.4rem 0.8rem',
+              borderRadius: '25px',
+              backgroundColor: isDarkMode ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
+              transition: 'all 0.3s ease'
+            }}
+            whileHover={{ 
+              backgroundColor: isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
+              scale: 1.05
+            }}
+          >
+            <svg 
+              width={isMobile ? "18" : "20"} 
+              height={isMobile ? "18" : "20"} 
+              viewBox="0 0 24 24" 
+              fill="none" 
+              stroke={isDarkMode ? 'white' : 'black'}
+              strokeWidth="2"
+            >
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+              <line x1="8" y1="7" x2="16" y2="7"/>
+              <line x1="8" y1="11" x2="12" y2="11"/>
+            </svg>
+            <span style={{
+              color: isDarkMode ? 'white' : 'black',
+              fontSize: isMobile ? '0.8rem' : '0.9rem',
+              fontWeight: '500',
+              fontFamily: 'Helvetica, Arial, sans-serif'
+            }}>
+              Chatbot
+            </span>
+            <div style={{
+              backgroundColor: '#00FF88',
+              color: 'black',
+              fontSize: '0.7rem',
+              fontWeight: '700',
+              padding: '0.1rem 0.4rem',
+              borderRadius: '10px',
+              marginLeft: '0.3rem'
+            }}>
+              NEW
+            </div>
+          </motion.div>
+		  
+		  
+		    {/* Update */}
+          <motion.div
+		   onClick={() => router.push('/update')}
+            onMouseEnter={() => handleLinkHover("link", "VIEW", "update")}
+            onMouseLeave={handleLinkLeave}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              cursor: 'none',
+              padding: '0.4rem 0.8rem',
+              borderRadius: '25px',
+              backgroundColor: isDarkMode ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
+              transition: 'all 0.3s ease'
+            }}
+            whileHover={{ 
+              backgroundColor: isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
+              scale: 1.05
+            }}
+          >
+            <svg 
+              width={isMobile ? "18" : "20"} 
+              height={isMobile ? "18" : "20"} 
+              viewBox="0 0 24 24" 
+              fill="none" 
+              stroke={isDarkMode ? 'white' : 'black'}
+              strokeWidth="2"
+            >
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14,2 14,8 20,8"/>
+              <line x1="16" y1="13" x2="8" y2="13"/>
+              <line x1="16" y1="17" x2="8" y2="17"/>
+              <polyline points="10,9 9,9 8,9"/>
+            </svg>
+            <span style={{
+              color: isDarkMode ? 'white' : 'black',
+              fontSize: isMobile ? '0.8rem' : '0.9rem',
+              fontWeight: '500',
+              fontFamily: 'Helvetica, Arial, sans-serif'
+            }}>
+              Update
+            </span>
+            <div style={{
+              backgroundColor: '#00FF88',
+              color: 'black',
+              fontSize: '0.7rem',
+              fontWeight: '700',
+              padding: '0.1rem 0.4rem',
+              borderRadius: '10px',
+              marginLeft: '0.3rem'
+            }}>
+              NEW
+            </div>
+          </motion.div>
+
+          {/* Timeline */}
+          <motion.div
+		    onClick={() => router.push('/timeline')}
+            onMouseEnter={() => handleLinkHover("link", "VIEW", "timeline")}
+            onMouseLeave={handleLinkLeave}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              cursor: 'none',
+              padding: '0.4rem 0.8rem',
+              borderRadius: '25px',
+              backgroundColor: isDarkMode ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
+              transition: 'all 0.3s ease'
+            }}
+            whileHover={{ 
+              backgroundColor: isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
+              scale: 1.05
+            }}
+          >
+            <svg 
+              width={isMobile ? "18" : "20"} 
+              height={isMobile ? "18" : "20"} 
+              viewBox="0 0 24 24" 
+              fill="none" 
+              stroke={isDarkMode ? 'white' : 'black'}
+              strokeWidth="2"
+            >
+              <polyline points="1 4 1 10 7 10"/>
+              <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>
+              <line x1="12" y1="7" x2="12" y2="13"/>
+              <line x1="16" y1="11" x2="12" y2="7"/>
+            </svg>
+            <span style={{
+              color: isDarkMode ? 'white' : 'black',
+              fontSize: isMobile ? '0.8rem' : '0.9rem',
+              fontWeight: '500',
+              fontFamily: 'Helvetica, Arial, sans-serif'
+            }}>
+              Timeline
+            </span>
+            <div style={{
+              backgroundColor: '#00FF88',
+              color: 'black',
+              fontSize: '0.7rem',
+              fontWeight: '700',
+              padding: '0.1rem 0.4rem',
+              borderRadius: '10px',
+              marginLeft: '0.3rem'
+            }}>
+              NEW
+            </div>
+          </motion.div>
+        </div>
+      </div>
+
       {/* Header Section */}
       <div 
         ref={headerRef}
         style={{
           position: 'fixed',
-          top: 0,
+          top: isMobile ? '3.5rem' : '4.5rem',
           left: 0,
           width: '100%',
           padding: isMobile ? '1rem' : '2rem',
@@ -384,7 +631,7 @@ export default function HomePage(): React.JSX.Element {
         </div>
       </div>
 
-      {/* Card Design - Posisi Paling Bawah Menempel */}
+      {/* Card Design - Posisi Paling Bawah Menempel - TETAP SAMA */}
       <motion.div
         ref={cardRef}
         style={{
