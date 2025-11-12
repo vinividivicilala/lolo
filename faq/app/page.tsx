@@ -36,50 +36,64 @@ export default function HomePage(): React.JSX.Element {
   ];
   
   
-  const [cursorImages, setCursorImages] = useState([]);
-const cursorCount = 10; // Number of images in the cursor trail
+  const [cursorTrail, setCursorTrail] = useState([]);
+const cursorCount = 10; // Total number of images in the trail
 
 useEffect(() => {
-  // Initialize array for cursor images
-  const images = [];
-  for (let i = 0; i < cursorCount; i++) {
-    images.push({ id: i, x: 0, y: 0 });
-  }
-  setCursorImages(images);
+  // Create the initial array for cursor images
+  setCursorTrail(Array.from({ length: cursorCount }).map((_, i) => ({
+    id: i,
+    x: 0,
+    y: 0,
+    isActive: false, // Track whether image is in the trail
+  })));
 }, []);
 
 const moveCursor = (e: MouseEvent) => {
-  // Update position of all images in the trail
-  setCursorImages(prevImages => {
-    const updatedImages = [...prevImages];
-    updatedImages.forEach((image, index) => {
-      if (index === 0) {
-        image.x = e.clientX;
-        image.y = e.clientY;
-      } else {
-        image.x = updatedImages[index - 1].x;
-        image.y = updatedImages[index - 1].y;
+  // Update the trail with the current cursor position
+  setCursorTrail((prevTrail) => {
+    const newTrail = [...prevTrail];
+
+    // Shift positions of images in the trail
+    for (let i = cursorCount - 1; i > 0; i--) {
+      newTrail[i] = newTrail[i - 1];
+    }
+
+    // Add the new image at the front of the trail
+    newTrail[0] = {
+      ...newTrail[0],
+      x: e.clientX,
+      y: e.clientY,
+      isActive: true, // Activate this image
+    };
+
+    // Deactivate images that move off the trail
+    newTrail.forEach((image, index) => {
+      if (index === cursorCount - 1) {
+        image.isActive = false;
       }
     });
 
-    // Animate each image with GSAP
-    updatedImages.forEach((image, index) => {
-      gsap.to(`#cursor-image-${image.id}`, {
-        x: image.x,
-        y: image.y,
-        duration: 0.1,
-        ease: "power2.out",
-        delay: index * 0.05 // Stagger the animation for trailing effect
-      });
+    // Animate the images to follow the cursor
+    newTrail.forEach((image, index) => {
+      if (image.isActive) {
+        gsap.to(`#cursor-image-${image.id}`, {
+          x: image.x,
+          y: image.y,
+          duration: 0.1,
+          ease: "power2.out",
+          delay: index * 0.05, // Add stagger effect for the trail
+        });
+      }
     });
 
-    return updatedImages;
+    return newTrail;
   });
 };
 
 useEffect(() => {
-  document.addEventListener('mousemove', moveCursor);
-  return () => document.removeEventListener('mousemove', moveCursor);
+  document.addEventListener("mousemove", moveCursor);
+  return () => document.removeEventListener("mousemove", moveCursor);
 }, []);
 
   
@@ -215,24 +229,26 @@ useEffect(() => {
       cursor: 'none'
     }}>
 	
+	
 	<div>
-  {cursorImages.map((image, index) => (
-    <img
-      key={image.id}
-      id={`cursor-image-${image.id}`}
-      src="/images/5.jpg"  // Your image path
-      style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        width: '20px',  // Adjust size
-        height: '20px', // Adjust size
-        pointerEvents: 'none',
-        zIndex: 9999,
-        opacity: 0.8,
-        transformOrigin: 'center center',
-      }}
-    />
+  {cursorTrail.map((image, index) => (
+    image.isActive && (
+      <img
+        key={image.id}
+        id={`cursor-image-${image.id}`}
+        src="/images/5.jpg" // Your image path
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '30px', // Adjust size of each image
+          height: '30px', // Adjust size of each image
+          pointerEvents: 'none',
+          zIndex: 9999,
+          opacity: 0.8, // You can adjust the opacity to make it more subtle
+        }}
+      />
+    )
   ))}
 </div>
 
