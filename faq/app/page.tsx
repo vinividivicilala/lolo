@@ -5,6 +5,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import Lenis from '@studio-freight/lenis';
+import LocomotiveScroll from "locomotive-scroll";
+
 
 // Register GSAP plugins
 if (typeof window !== 'undefined') {
@@ -31,6 +34,56 @@ export default function HomePage(): React.JSX.Element {
     "NEMUKAN", "NCIPTA", "NGGALI", "NARIK",
     "NGAMATI", "NANCANG", "NGEMBANGKAN", "NYUSUN"
   ];
+  
+  
+  const [cursorImages, setCursorImages] = useState([]);
+const cursorCount = 10; // Number of images in the cursor trail
+
+useEffect(() => {
+  // Initialize array for cursor images
+  const images = [];
+  for (let i = 0; i < cursorCount; i++) {
+    images.push({ id: i, x: 0, y: 0 });
+  }
+  setCursorImages(images);
+}, []);
+
+const moveCursor = (e: MouseEvent) => {
+  // Update position of all images in the trail
+  setCursorImages(prevImages => {
+    const updatedImages = [...prevImages];
+    updatedImages.forEach((image, index) => {
+      if (index === 0) {
+        image.x = e.clientX;
+        image.y = e.clientY;
+      } else {
+        image.x = updatedImages[index - 1].x;
+        image.y = updatedImages[index - 1].y;
+      }
+    });
+
+    // Animate each image with GSAP
+    updatedImages.forEach((image, index) => {
+      gsap.to(`#cursor-image-${image.id}`, {
+        x: image.x,
+        y: image.y,
+        duration: 0.1,
+        ease: "power2.out",
+        delay: index * 0.05 // Stagger the animation for trailing effect
+      });
+    });
+
+    return updatedImages;
+  });
+};
+
+useEffect(() => {
+  document.addEventListener('mousemove', moveCursor);
+  return () => document.removeEventListener('mousemove', moveCursor);
+}, []);
+
+  
+  
 
   useEffect(() => {
     const checkMobile = () => {
@@ -154,13 +207,35 @@ export default function HomePage(): React.JSX.Element {
       justifyContent: 'flex-end',
       alignItems: 'center',
       position: 'relative',
-      overflow: 'hidden',
+      overflow: 'auto', // Ubah dari 'hidden' ke 'auto' untuk enable scroll
       fontFamily: 'Helvetica, Arial, sans-serif',
       WebkitFontSmoothing: 'antialiased',
       MozOsxFontSmoothing: 'grayscale',
       transition: 'background-color 0.5s ease',
       cursor: 'none'
     }}>
+	
+	<div>
+  {cursorImages.map((image, index) => (
+    <img
+      key={image.id}
+      id={`cursor-image-${image.id}`}
+      src="/images/5.jpg"  // Your image path
+      style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        width: '20px',  // Adjust size
+        height: '20px', // Adjust size
+        pointerEvents: 'none',
+        zIndex: 9999,
+        opacity: 0.8,
+        transformOrigin: 'center center',
+      }}
+    />
+  ))}
+</div>
+
 
       {/* Custom Cursor - DIPERBAIKI: Warna cerah yang bagus */}
       <div
@@ -239,8 +314,8 @@ export default function HomePage(): React.JSX.Element {
           display: 'flex',
           alignItems: 'center',
           gap: isMobile ? '1rem' : '2rem',
-          backgroundColor: isDarkMode ? 'rgba(99, 102, 241, 0.9)' : 'rgba(99, 102, 241, 0.9)', // Biru indigo
-          backdropFilter: 'blur(20px)',
+          backgroundColor: 'transparent', // Biru indigo
+          backdropFilter: '#FF007F',
           borderRadius: '50px',
           padding: isMobile ? '0.6rem 1rem' : '0.8rem 1.5rem',
           border: `1px solid rgba(255,255,255,0.2)`,
@@ -353,7 +428,7 @@ export default function HomePage(): React.JSX.Element {
               NEW
             </div>
           </motion.div>
-          
+
           {/* Update - DIPERBAIKI: Background biru muda */}
           <motion.div
             onClick={() => router.push('/update')}
@@ -630,27 +705,63 @@ export default function HomePage(): React.JSX.Element {
         </div>
       </div>
 
-      {/* Card Design - TETAP SAMA seperti design awal */}
+      {/* Deskripsi MENURU di Body Halaman Utama - TAMBAHAN BARU */}
+<motion.div
+  initial={{ opacity: 0, y: 20 }}
+  animate={{ opacity: 1, y: 0 }}
+  transition={{ duration: 0.6, delay: 0.9 }}
+  style={{
+    position: 'fixed',
+    top: isMobile ? '7rem' : '10rem',
+    left: isMobile ? '1rem' : '2rem',
+    width: isMobile ? 'calc(100% - 2rem)' : '800px', // Lebar lebih besar untuk font besar
+    maxWidth: '800px',
+    textAlign: 'left'
+  }}
+>
+  <p style={{
+    color: isDarkMode ? 'white' : 'black',
+    fontSize: isMobile ? '1.8rem' : '3.5rem', // FONT SANGAT BESAR
+    fontWeight: '400',
+    fontFamily: 'HelveticaNowDisplay, Arial, sans-serif',
+    lineHeight: 1.1, // Line height sangat ketat agar tidak turun
+    margin: 0,
+    transition: 'color 0.5s ease',
+    wordWrap: 'break-word',
+    overflowWrap: 'break-word'
+  }}>
+    Menuru is a branding personal journal life with a experiences of self about happy, sad, angry, etc.
+  </p>
+</motion.div>
+
+
+	 
+	  {/* Card Design - TETAP SAMA seperti design awal */}
       <motion.div
         ref={cardRef}
         style={{
           width: isMobile ? '100%' : '90%',
-          maxWidth: isMobile ? '100%' : '1900px',
-          height: 'auto',
-          backgroundColor: isDarkMode ? '#CCFF00' : 'black',
-          borderRadius: isMobile ? '30px 30px 0 0' : '40px',
-          padding: isMobile ? '2rem 1.5rem 3rem' : '3rem',
-          display: 'flex',
-          alignItems: 'left',
-          gap: isMobile ? '1.5rem' : '3rem',
-          cursor: 'none',
-          margin: 0,
-          boxShadow: isDarkMode 
-            ? '0 -10px 40px rgba(204, 255, 0, 0.3)' 
-            : '0 -10px 40px rgba(0, 0, 0, 0.3)',
-          flexDirection: 'column',
-          boxSizing: 'border-box',
-          transition: 'all 0.5s ease'
+    maxWidth: isMobile ? '100%' : '1900px',
+    height: 'auto',
+    backgroundColor: isDarkMode ? '#CCFF00' : 'black',
+    borderRadius: isMobile ? '30px 30px 0 0' : '40px',
+    padding: isMobile ? '2rem 1.5rem 3rem' : '3rem',
+    display: 'flex',
+    alignItems: 'left',
+    gap: isMobile ? '1.5rem' : '3rem',
+    cursor: 'none',
+    margin: 0,
+    boxShadow: isDarkMode 
+      ? '0 -10px 40px rgba(204, 255, 0, 0.3)' 
+      : '0 -10px 40px rgba(0, 0, 0, 0.3)',
+    flexDirection: 'column',
+    boxSizing: 'border-box',
+    transition: 'all 0.5s ease',
+    position: 'sticky',
+    bottom: 0,
+    zIndex: 98,
+    marginTop: '100vh' // TAMBAHKAN margin top
+	
         }}
         initial={{ opacity: 0, y: 100 }}
         animate={{ opacity: 1, y: 0 }}
