@@ -1,18 +1,10 @@
+
 'use client';
 
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import Lenis from '@studio-freight/lenis';
-import LocomotiveScroll from "locomotive-scroll";
-
-
-// Register GSAP plugins
-if (typeof window !== 'undefined') {
-  gsap.registerPlugin(ScrollTrigger);
-}
 
 export default function HomePage(): React.JSX.Element {
   const router = useRouter();
@@ -23,10 +15,12 @@ export default function HomePage(): React.JSX.Element {
   const [cursorType, setCursorType] = useState("default");
   const [cursorText, setCursorText] = useState("");
   const [hoveredLink, setHoveredLink] = useState("");
+  const [showDescription, setShowDescription] = useState(true);
   const headerRef = useRef<HTMLDivElement>(null);
-  const cardRef = useRef<HTMLDivElement>(null);
   const cursorRef = useRef<HTMLDivElement>(null);
   const topNavRef = useRef<HTMLDivElement>(null);
+  const scrollTextRef = useRef<HTMLDivElement>(null);
+  const descriptionRef = useRef<HTMLDivElement>(null);
 
   // Animasi loading text
   const loadingTexts = [
@@ -34,11 +28,6 @@ export default function HomePage(): React.JSX.Element {
     "NEMUKAN", "NCIPTA", "NGGALI", "NARIK",
     "NGAMATI", "NANCANG", "NGEMBANGKAN", "NYUSUN"
   ];
-  
-  
-  
-  
-  
 
   useEffect(() => {
     const checkMobile = () => {
@@ -61,26 +50,44 @@ export default function HomePage(): React.JSX.Element {
       clearInterval(textInterval);
     }, 3000);
 
-    // GSAP Scroll Animation untuk header dan top nav
-    if (headerRef.current && topNavRef.current) {
-      gsap.to([headerRef.current, topNavRef.current], {
-        opacity: 0,
-        y: -100,
-        duration: 0.5,
-        scrollTrigger: {
-          trigger: cardRef.current,
-          start: "top 10%",
-          end: "bottom 20%",
-          scrub: true,
-          onEnter: () => {
-            gsap.to([headerRef.current, topNavRef.current], { opacity: 0, y: -100, duration: 0.3 });
-          },
-          onLeaveBack: () => {
-            gsap.to([headerRef.current, topNavRef.current], { opacity: 1, y: 0, duration: 0.3 });
-          }
+    // Animasi teks berjalan dari atas ke bawah
+    const setupAutoScroll = () => {
+      if (scrollTextRef.current) {
+        const itemHeight = isMobile ? 80 : 100;
+        const totalItems = 15;
+        const totalScrollDistance = totalItems * itemHeight - window.innerHeight;
+        
+        // Hapus animasi sebelumnya jika ada
+        gsap.killTweensOf(scrollTextRef.current);
+        
+        // Animasi infinite loop dari atas ke bawah
+        gsap.to(scrollTextRef.current, {
+          y: -totalScrollDistance,
+          duration: 20,
+          ease: "none",
+          repeat: -1,
+          yoyo: false
+        });
+      }
+    };
+
+    // Handle scroll untuk hide/show description
+    const handleScroll = () => {
+      if (descriptionRef.current) {
+        const descriptionRect = descriptionRef.current.getBoundingClientRect();
+        // Jika deskripsi sudah hampir keluar dari viewport (atas), sembunyikan
+        if (descriptionRect.top < -50) {
+          setShowDescription(false);
+        } else {
+          setShowDescription(true);
         }
-      });
-    }
+      }
+    };
+
+    // Setup auto scroll setelah component mount
+    setTimeout(setupAutoScroll, 100);
+    window.addEventListener('resize', setupAutoScroll);
+    window.addEventListener('scroll', handleScroll);
 
     // Custom cursor animation
     const moveCursor = (e: MouseEvent) => {
@@ -98,12 +105,16 @@ export default function HomePage(): React.JSX.Element {
 
     return () => {
       window.removeEventListener('resize', checkMobile);
+      window.removeEventListener('resize', setupAutoScroll);
+      window.removeEventListener('scroll', handleScroll);
       clearInterval(textInterval);
       clearTimeout(loadingTimeout);
       document.removeEventListener('mousemove', moveCursor);
-      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
+      if (scrollTextRef.current) {
+        gsap.killTweensOf(scrollTextRef.current);
+      }
     };
-  }, []);
+  }, [isMobile]);
 
   // Fungsi toggle dark/light mode
   const toggleColorMode = () => {
@@ -123,34 +134,22 @@ export default function HomePage(): React.JSX.Element {
     setHoveredLink("");
   };
 
-  // Warna cursor - DIPERBAIKI: Warna cerah yang bagus
+  // Warna cursor
   const getCursorColors = () => {
     if (cursorType === "link") {
       return {
-        dotColor: '#6366F1', // Indigo cerah
+        dotColor: '#6366F1',
         textColor: 'white'
       };
     }
     
-    // Default cursor
     return {
-      dotColor: '#EC4899', // Pink cerah
+      dotColor: '#EC4899',
       textColor: 'white'
     };
   };
 
   const cursorColors = getCursorColors();
-
-  // Fungsi untuk mendapatkan warna teks berdasarkan hover state
-  const getLinkColor = (linkName: string) => {
-    const isHovered = hoveredLink === linkName;
-    if (isHovered) {
-      return isDarkMode ? 'black' : '#CCFF00';
-    }
-    return isDarkMode ? 'rgba(0,0,0,0.7)' : 'rgba(204,255,0,0.7)';
-  };
-  
-
 
   return (
     <div style={{
@@ -161,10 +160,10 @@ export default function HomePage(): React.JSX.Element {
       width: '100%',
       display: 'flex',
       flexDirection: 'column',
-      justifyContent: 'flex-end',
+      justifyContent: 'flex-start',
       alignItems: 'center',
       position: 'relative',
-      overflow: 'auto', // Ubah dari 'hidden' ke 'auto' untuk enable scroll
+      overflow: 'hidden',
       fontFamily: 'Helvetica, Arial, sans-serif',
       WebkitFontSmoothing: 'antialiased',
       MozOsxFontSmoothing: 'grayscale',
@@ -172,8 +171,7 @@ export default function HomePage(): React.JSX.Element {
       cursor: 'none'
     }}>
 
-
-      {/* Custom Cursor - DIPERBAIKI: Warna cerah yang bagus */}
+      {/* Custom Cursor */}
       <div
         ref={cursorRef}
         style={{
@@ -230,7 +228,7 @@ export default function HomePage(): React.JSX.Element {
         )}
       </div>
 
-      {/* Top Navigation Bar - DIPERBAIKI: Warna biru agar tidak tabrakan dengan background hijau */}
+      {/* Top Navigation Bar */}
       <div 
         ref={topNavRef}
         style={{
@@ -243,21 +241,22 @@ export default function HomePage(): React.JSX.Element {
           justifyContent: 'center',
           alignItems: 'center',
           zIndex: 101,
-          boxSizing: 'border-box'
+          boxSizing: 'border-box',
+          opacity: 1
         }}
       >
         <div style={{
           display: 'flex',
           alignItems: 'center',
           gap: isMobile ? '1rem' : '2rem',
-          backgroundColor: 'transparent', // Biru indigo
-          backdropFilter: '#FF007F',
+          backgroundColor: 'transparent',
+          backdropFilter: 'blur(10px)',
           borderRadius: '50px',
           padding: isMobile ? '0.6rem 1rem' : '0.8rem 1.5rem',
           border: `1px solid rgba(255,255,255,0.2)`,
           boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
         }}>
-          {/* Docs - DIPERBAIKI: Background biru muda */}
+          {/* Docs */}
           <motion.div
             onClick={() => router.push('/docs')}
             onMouseEnter={() => handleLinkHover("link", "VIEW", "docs")}
@@ -269,7 +268,7 @@ export default function HomePage(): React.JSX.Element {
               cursor: 'none',
               padding: '0.4rem 0.8rem',
               borderRadius: '25px',
-              backgroundColor: 'rgba(255,255,255,0.9)', // Putih solid
+              backgroundColor: 'rgba(255,255,255,0.9)',
               transition: 'all 0.3s ease'
             }}
             whileHover={{ 
@@ -282,7 +281,7 @@ export default function HomePage(): React.JSX.Element {
               height={isMobile ? "18" : "20"} 
               viewBox="0 0 24 24" 
               fill="none" 
-              stroke="#6366F1" // Biru indigo
+              stroke="#6366F1"
               strokeWidth="2"
             >
               <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
@@ -292,7 +291,7 @@ export default function HomePage(): React.JSX.Element {
               <polyline points="10,9 9,9 8,9"/>
             </svg>
             <span style={{
-              color: '#6366F1', // Biru indigo
+              color: '#6366F1',
               fontSize: isMobile ? '0.8rem' : '0.9rem',
               fontWeight: '600',
               fontFamily: 'Helvetica, Arial, sans-serif'
@@ -300,7 +299,7 @@ export default function HomePage(): React.JSX.Element {
               Docs
             </span>
             <div style={{
-              backgroundColor: '#EC4899', // Pink cerah
+              backgroundColor: '#EC4899',
               color: 'white',
               fontSize: '0.7rem',
               fontWeight: '700',
@@ -312,7 +311,7 @@ export default function HomePage(): React.JSX.Element {
             </div>
           </motion.div>
 
-          {/* Chatbot - DIPERBAIKI: Background biru muda */}
+          {/* Chatbot */}
           <motion.div
             onClick={() => router.push('/chatbot')}
             onMouseEnter={() => handleLinkHover("link", "VIEW", "chatbot")}
@@ -324,7 +323,7 @@ export default function HomePage(): React.JSX.Element {
               cursor: 'none',
               padding: '0.4rem 0.8rem',
               borderRadius: '25px',
-              backgroundColor: 'rgba(255,255,255,0.9)', // Putih solid
+              backgroundColor: 'rgba(255,255,255,0.9)',
               transition: 'all 0.3s ease'
             }}
             whileHover={{ 
@@ -337,7 +336,7 @@ export default function HomePage(): React.JSX.Element {
               height={isMobile ? "18" : "20"} 
               viewBox="0 0 24 24" 
               fill="none" 
-              stroke="#6366F1" // Biru indigo
+              stroke="#6366F1"
               strokeWidth="2"
             >
               <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
@@ -345,7 +344,7 @@ export default function HomePage(): React.JSX.Element {
               <line x1="8" y1="11" x2="12" y2="11"/>
             </svg>
             <span style={{
-              color: '#6366F1', // Biru indigo
+              color: '#6366F1',
               fontSize: isMobile ? '0.8rem' : '0.9rem',
               fontWeight: '600',
               fontFamily: 'Helvetica, Arial, sans-serif'
@@ -353,7 +352,7 @@ export default function HomePage(): React.JSX.Element {
               Chatbot
             </span>
             <div style={{
-              backgroundColor: '#EC4899', // Pink cerah
+              backgroundColor: '#EC4899',
               color: 'white',
               fontSize: '0.7rem',
               fontWeight: '700',
@@ -365,7 +364,7 @@ export default function HomePage(): React.JSX.Element {
             </div>
           </motion.div>
 
-          {/* Update - DIPERBAIKI: Background biru muda */}
+          {/* Update */}
           <motion.div
             onClick={() => router.push('/update')}
             onMouseEnter={() => handleLinkHover("link", "VIEW", "update")}
@@ -377,7 +376,7 @@ export default function HomePage(): React.JSX.Element {
               cursor: 'none',
               padding: '0.4rem 0.8rem',
               borderRadius: '25px',
-              backgroundColor: 'rgba(255,255,255,0.9)', // Putih solid
+              backgroundColor: 'rgba(255,255,255,0.9)',
               transition: 'all 0.3s ease'
             }}
             whileHover={{ 
@@ -390,7 +389,7 @@ export default function HomePage(): React.JSX.Element {
               height={isMobile ? "18" : "20"} 
               viewBox="0 0 24 24" 
               fill="none" 
-              stroke="#6366F1" // Biru indigo
+              stroke="#6366F1"
               strokeWidth="2"
             >
               <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
@@ -400,7 +399,7 @@ export default function HomePage(): React.JSX.Element {
               <polyline points="10,9 9,9 8,9"/>
             </svg>
             <span style={{
-              color: '#6366F1', // Biru indigo
+              color: '#6366F1',
               fontSize: isMobile ? '0.8rem' : '0.9rem',
               fontWeight: '600',
               fontFamily: 'Helvetica, Arial, sans-serif'
@@ -408,7 +407,7 @@ export default function HomePage(): React.JSX.Element {
               Update
             </span>
             <div style={{
-              backgroundColor: '#EC4899', // Pink cerah
+              backgroundColor: '#EC4899',
               color: 'white',
               fontSize: '0.7rem',
               fontWeight: '700',
@@ -420,7 +419,7 @@ export default function HomePage(): React.JSX.Element {
             </div>
           </motion.div>
 
-          {/* Timeline - DIPERBAIKI: Background biru muda */}
+          {/* Timeline */}
           <motion.div
             onClick={() => router.push('/timeline')}
             onMouseEnter={() => handleLinkHover("link", "VIEW", "timeline")}
@@ -432,7 +431,7 @@ export default function HomePage(): React.JSX.Element {
               cursor: 'none',
               padding: '0.4rem 0.8rem',
               borderRadius: '25px',
-              backgroundColor: 'rgba(255,255,255,0.9)', // Putih solid
+              backgroundColor: 'rgba(255,255,255,0.9)',
               transition: 'all 0.3s ease'
             }}
             whileHover={{ 
@@ -445,7 +444,7 @@ export default function HomePage(): React.JSX.Element {
               height={isMobile ? "18" : "20"} 
               viewBox="0 0 24 24" 
               fill="none" 
-              stroke="#6366F1" // Biru indigo
+              stroke="#6366F1"
               strokeWidth="2"
             >
               <polyline points="1 4 1 10 7 10"/>
@@ -454,7 +453,7 @@ export default function HomePage(): React.JSX.Element {
               <line x1="16" y1="11" x2="12" y2="7"/>
             </svg>
             <span style={{
-              color: '#6366F1', // Biru indigo
+              color: '#6366F1',
               fontSize: isMobile ? '0.8rem' : '0.9rem',
               fontWeight: '600',
               fontFamily: 'Helvetica, Arial, sans-serif'
@@ -462,7 +461,7 @@ export default function HomePage(): React.JSX.Element {
               Timeline
             </span>
             <div style={{
-              backgroundColor: '#EC4899', // Pink cerah
+              backgroundColor: '#EC4899',
               color: 'white',
               fontSize: '0.7rem',
               fontWeight: '700',
@@ -489,7 +488,8 @@ export default function HomePage(): React.JSX.Element {
           justifyContent: 'space-between',
           alignItems: 'center',
           zIndex: 100,
-          boxSizing: 'border-box'
+          boxSizing: 'border-box',
+          opacity: 1
         }}
       >
         {/* Teks "MENURU" dengan animasi loading hanya di bagian NURU */}
@@ -641,34 +641,66 @@ export default function HomePage(): React.JSX.Element {
         </div>
       </div>
 
-      {/* Deskripsi MENURU di Body Halaman Utama - TAMBAHAN BARU */}
-<motion.div
-  initial={{ opacity: 0, y: 20 }}
-  animate={{ opacity: 1, y: 0 }}
-  transition={{ duration: 0.6, delay: 0.9 }}
-  style={{
-    position: 'fixed',
-    top: isMobile ? '7rem' : '10rem',
-    left: isMobile ? '1rem' : '2rem',
-    width: isMobile ? 'calc(100% - 2rem)' : '800px', // Lebar lebih besar untuk font besar
-    maxWidth: '800px',
-    textAlign: 'left'
-  }}
->
-  <p style={{
-    color: isDarkMode ? 'white' : 'black',
-    fontSize: isMobile ? '1.8rem' : '3.5rem', // FONT SANGAT BESAR
-    fontWeight: '400',
-    fontFamily: 'HelveticaNowDisplay, Arial, sans-serif',
-    lineHeight: 1.1, // Line height sangat ketat agar tidak turun
-    margin: 0,
-    transition: 'color 0.5s ease',
-    wordWrap: 'break-word',
-    overflowWrap: 'break-word'
-  }}>
-    Menuru is a branding personal journal life with a experiences of self about happy, sad, angry, etc.
-  </p>
-</motion.div>
+      {/* Deskripsi MENURU di Body Halaman Utama - DIBUAT HILANG SAAT SCROLL */}
+      <motion.div
+        ref={descriptionRef}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: showDescription ? 1 : 0, y: showDescription ? 0 : -20 }}
+        transition={{ duration: 0.5 }}
+        style={{
+          position: 'absolute',
+          top: isMobile ? '8rem' : '12rem',
+          left: isMobile ? '1rem' : '2rem',
+          width: isMobile ? 'calc(100% - 2rem)' : '800px',
+          maxWidth: '800px',
+          textAlign: 'left',
+          marginBottom: '2rem',
+          zIndex: 20,
+          pointerEvents: showDescription ? 'auto' : 'none'
+        }}
+      >
+        <p style={{
+          color: isDarkMode ? 'white' : 'black',
+          fontSize: isMobile ? '1.8rem' : '3.5rem',
+          fontWeight: '400',
+          fontFamily: 'HelveticaNowDisplay, Arial, sans-serif',
+          lineHeight: 1.1,
+          margin: 0,
+          transition: 'color 0.5s ease',
+          wordWrap: 'break-word',
+          overflowWrap: 'break-word'
+        }}>
+          Menuru is a branding personal journal life with a experiences of self about happy, sad, angry, etc.
+        </p>
+      </motion.div>
+
+      {/* Content tambahan untuk membuat halaman lebih panjang */}
+      <div style={{
+        height: '150vh', // DIPERPANJANG AGAR BISA SCROLL
+        width: '100%',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginTop: isMobile ? '40vh' : '50vh', // JARAK DARI ATAS AGAR TIDAK DEMPET
+        zIndex: 10,
+        position: 'relative'
+      }}>
+        <motion.p
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          transition={{ duration: 0.8 }}
+          style={{
+            color: isDarkMode ? 'white' : 'black',
+            fontSize: isMobile ? '1.5rem' : '2rem',
+            fontWeight: '300',
+            textAlign: 'center',
+            maxWidth: '600px',
+            padding: '0 2rem'
+          }}
+        >
+          More content coming soon...
+        </motion.p>
+      </div>
     </div>
   );
 }
