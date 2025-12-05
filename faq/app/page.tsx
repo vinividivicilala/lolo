@@ -666,23 +666,23 @@ export default function HomePage(): React.JSX.Element {
             Menuru is a branding personal journal life with a experiences of self about happy, sad, angry, etc. It's a creative exploration of personal growth and emotional journey. Through visual storytelling we capture moments of transformation and self-discovery.
           </p>
 
-          {/* Container untuk 2 foto memanjang ke samping */}
+          {/* Container untuk 2 foto - SANGAT DEKAT */}
           <div style={{
             display: 'flex',
             flexDirection: isMobile ? 'column' : 'row',
-            gap: isMobile ? '1rem' : '0.5rem', // Jarak sangat dekat
+            gap: isMobile ? '1rem' : '0.3rem', // JARAK SANGAT DEKAT
             width: '100%',
             marginTop: '1rem'
           }}>
-            {/* Foto 1 - memanjang ke kiri layar */}
+            {/* Foto 1 - Sisi kiri, tidak mentok */}
             <div style={{
               flex: 1,
               overflow: 'hidden',
-              borderRadius: '25px', // Border radius lebih jelas
-              boxShadow: '0 20px 50px rgba(0,0,0,0.5)', // Shadow lebih tebal
-              border: `3px solid ${isDarkMode ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)'}`, // Border lebih tebal
-              width: isMobile ? '100%' : 'calc(50% + 2rem)', // Lebih lebar untuk memanjang
-              marginLeft: isMobile ? '0' : '-2rem', // Memanjang ke kiri
+              borderRadius: '25px',
+              boxShadow: '0 20px 50px rgba(0,0,0,0.5)',
+              border: `3px solid ${isDarkMode ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)'}`,
+              width: '100%',
+              marginLeft: isMobile ? '0' : '0.5rem', // TIDAK MENTOK, sedikit margin
               position: 'relative',
               zIndex: 1
             }}>
@@ -691,10 +691,10 @@ export default function HomePage(): React.JSX.Element {
                 alt="Menuru Visual Left"
                 style={{
                   width: '100%',
-                  height: isMobile ? '400px' : '900px', // Sangat panjang ke bawah
+                  height: isMobile ? '400px' : '900px',
                   display: 'block',
                   objectFit: 'cover',
-                  borderRadius: '22px' // Border radius di dalam
+                  borderRadius: '22px'
                 }}
                 onError={(e) => {
                   console.error("Gambar kiri tidak ditemukan:", e);
@@ -709,15 +709,15 @@ export default function HomePage(): React.JSX.Element {
               />
             </div>
 
-            {/* Foto 2 - memanjang ke kanan layar */}
+            {/* Foto 2 - Sisi kanan, tidak mentok */}
             <div style={{
               flex: 1,
               overflow: 'hidden',
-              borderRadius: '25px', // Border radius lebih jelas
-              boxShadow: '0 20px 50px rgba(0,0,0,0.5)', // Shadow lebih tebal
-              border: `3px solid ${isDarkMode ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)'}`, // Border lebih tebal
-              width: isMobile ? '100%' : 'calc(50% + 2rem)', // Lebih lebar untuk memanjang
-              marginRight: isMobile ? '0' : '-2rem', // Memanjang ke kanan
+              borderRadius: '25px',
+              boxShadow: '0 20px 50px rgba(0,0,0,0.5)',
+              border: `3px solid ${isDarkMode ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)'}`,
+              width: '100%',
+              marginRight: isMobile ? '0' : '0.5rem', // TIDAK MENTOK, sedikit margin
               position: 'relative',
               zIndex: 1
             }}>
@@ -726,10 +726,10 @@ export default function HomePage(): React.JSX.Element {
                 alt="Menuru Visual Right"
                 style={{
                   width: '100%',
-                  height: isMobile ? '400px' : '900px', // Sangat panjang ke bawah
+                  height: isMobile ? '400px' : '900px',
                   display: 'block',
                   objectFit: 'cover',
-                  borderRadius: '22px' // Border radius di dalam
+                  borderRadius: '22px'
                 }}
                 onError={(e) => {
                   console.error("Gambar kanan tidak ditemukan:", e);
@@ -745,19 +745,20 @@ export default function HomePage(): React.JSX.Element {
             </div>
           </div>
 
-          {/* Card persegi panjang #0050B7 di bawah 2 foto - POLOS TANPA TEKS */}
+          {/* Card #0050B7 - DEKAT dengan foto di atas, tidak mentok ke layar */}
           <div
             style={{
-              width: '100vw',
-              marginLeft: 'calc(-50vw + 50%)',
+              width: 'calc(100% - 4rem)', // TIDAK MENTOK KE LAYAR
+              marginLeft: isMobile ? '1rem' : '2rem',
+              marginRight: isMobile ? '1rem' : '2rem',
               backgroundColor: '#0050B7',
-              borderRadius: '25px', // Border radius jelas
-              height: isMobile ? '300px' : '500px', // Lebih panjang ke bawah
-              marginTop: isMobile ? '2rem' : '3rem',
+              borderRadius: '25px',
+              height: isMobile ? '400px' : '800px', // SANGAT PANJANG KE BAWAH
+              marginTop: isMobile ? '1rem' : '1.5rem', // JARAK DEKAT DENGAN FOTO
               boxShadow: '0 20px 50px rgba(0,0,0,0.3)',
               position: 'relative',
               overflow: 'hidden',
-              border: '3px solid rgba(255,255,255,0.1)' // Border tipis
+              border: '3px solid rgba(255,255,255,0.1)'
             }}
           >
             {/* Hanya background polos tanpa konten */}
