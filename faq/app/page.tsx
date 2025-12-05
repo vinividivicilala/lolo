@@ -666,37 +666,77 @@ export default function HomePage(): React.JSX.Element {
             Menuru is a branding personal journal life with a experiences of self about happy, sad, angry, etc.
           </p>
 
-          {/* Foto di bawah teks deskripsi */}
+          {/* Container untuk 2 foto berdampingan */}
           <div style={{
-            width: isMobile ? 'calc(100% - 0.5rem)' : '650px',
-            marginLeft: isMobile ? '0.5rem' : '1.5rem',
-            overflow: 'hidden',
-            borderRadius: '15px',
-            boxShadow: '0 15px 40px rgba(0,0,0,0.4)',
-            border: `2px solid ${isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}`,
+            display: 'flex',
+            flexDirection: isMobile ? 'column' : 'row',
+            gap: isMobile ? '1rem' : '0.5rem', // Jarak sangat dekat di desktop
+            width: '100%',
             marginTop: '1rem'
           }}>
-            <img 
-              src="images/5.jpg" 
-              alt="Menuru Visual"
-              style={{
-                width: '100%',
-                height: 'auto',
-                display: 'block',
-                objectFit: 'cover',
-                borderRadius: '13px'
-              }}
-              onError={(e) => {
-                console.error("Gambar tidak ditemukan:", e);
-                e.currentTarget.style.backgroundColor = isDarkMode ? '#333' : '#eee';
-                e.currentTarget.style.display = 'flex';
-                e.currentTarget.style.alignItems = 'center';
-                e.currentTarget.style.justifyContent = 'center';
-                e.currentTarget.style.color = isDarkMode ? '#fff' : '#000';
-                e.currentTarget.style.height = '400px';
-                e.currentTarget.innerHTML = '<div style="padding: 2rem; text-align: center;">Image: 5.jpg</div>';
-              }}
-            />
+            {/* Foto kiri */}
+            <div style={{
+              flex: 1,
+              overflow: 'hidden',
+              borderRadius: '15px',
+              boxShadow: '0 15px 40px rgba(0,0,0,0.4)',
+              border: `2px solid ${isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}`,
+              marginLeft: isMobile ? '0.5rem' : '1.5rem'
+            }}>
+              <img 
+                src="images/5.jpg" 
+                alt="Menuru Visual Left"
+                style={{
+                  width: '100%',
+                  height: isMobile ? 'auto' : '700px', // Tinggi besar di desktop
+                  display: 'block',
+                  objectFit: 'cover',
+                  borderRadius: '13px'
+                }}
+                onError={(e) => {
+                  console.error("Gambar kiri tidak ditemukan:", e);
+                  e.currentTarget.style.backgroundColor = isDarkMode ? '#333' : '#eee';
+                  e.currentTarget.style.display = 'flex';
+                  e.currentTarget.style.alignItems = 'center';
+                  e.currentTarget.style.justifyContent = 'center';
+                  e.currentTarget.style.color = isDarkMode ? '#fff' : '#000';
+                  e.currentTarget.style.height = '400px';
+                  e.currentTarget.innerHTML = '<div style="padding: 2rem; text-align: center;">Left Image</div>';
+                }}
+              />
+            </div>
+
+            {/* Foto kanan */}
+            <div style={{
+              flex: 1,
+              overflow: 'hidden',
+              borderRadius: '15px',
+              boxShadow: '0 15px 40px rgba(0,0,0,0.4)',
+              border: `2px solid ${isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}`,
+              marginRight: isMobile ? '0.5rem' : '1.5rem'
+            }}>
+              <img 
+                src="images/6.jpg" 
+                alt="Menuru Visual Right"
+                style={{
+                  width: '100%',
+                  height: isMobile ? 'auto' : '700px', // Tinggi besar di desktop
+                  display: 'block',
+                  objectFit: 'cover',
+                  borderRadius: '13px'
+                }}
+                onError={(e) => {
+                  console.error("Gambar kanan tidak ditemukan:", e);
+                  e.currentTarget.style.backgroundColor = isDarkMode ? '#333' : '#eee';
+                  e.currentTarget.style.display = 'flex';
+                  e.currentTarget.style.alignItems = 'center';
+                  e.currentTarget.style.justifyContent = 'center';
+                  e.currentTarget.style.color = isDarkMode ? '#fff' : '#000';
+                  e.currentTarget.style.height = '400px';
+                  e.currentTarget.innerHTML = '<div style="padding: 2rem; text-align: center;">Right Image</div>';
+                }}
+              />
+            </div>
           </div>
         </div>
 
