@@ -744,6 +744,125 @@ export default function HomePage(): React.JSX.Element {
               />
             </div>
           </div>
+
+          {/* Card persegi panjang #0050B7 di bawah 2 foto */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            style={{
+              width: '100vw',
+              marginLeft: 'calc(-50vw + 50%)',
+              backgroundColor: '#0050B7',
+              borderRadius: '20px',
+              padding: isMobile ? '2rem 1rem' : '4rem 2rem',
+              marginTop: isMobile ? '2rem' : '3rem',
+              boxShadow: '0 20px 50px rgba(0,0,0,0.3)',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              textAlign: 'center',
+              position: 'relative',
+              overflow: 'hidden'
+            }}
+          >
+            {/* Konten dalam card */}
+            <div style={{
+              maxWidth: '800px',
+              width: '100%'
+            }}>
+              <h2 style={{
+                color: 'white',
+                fontSize: isMobile ? '2rem' : '3.5rem',
+                fontWeight: '700',
+                margin: 0,
+                marginBottom: isMobile ? '1rem' : '1.5rem',
+                fontFamily: 'HelveticaNowDisplay, Arial, sans-serif',
+                lineHeight: 1.2
+              }}>
+                Explore More Content
+              </h2>
+              
+              <p style={{
+                color: 'rgba(255,255,255,0.9)',
+                fontSize: isMobile ? '1.1rem' : '1.5rem',
+                fontWeight: '400',
+                margin: 0,
+                marginBottom: isMobile ? '1.5rem' : '2rem',
+                fontFamily: 'Helvetica, Arial, sans-serif',
+                lineHeight: 1.6
+              }}>
+                Discover more stories, insights, and creative works from the Menuru journal. Dive deeper into personal experiences and visual narratives that inspire growth and self-reflection.
+              </p>
+              
+              <motion.button
+                onClick={() => router.push('/explore')}
+                onMouseEnter={() => handleLinkHover("link", "EXPLORE", "explore")}
+                onMouseLeave={handleLinkLeave}
+                style={{
+                  padding: isMobile ? '0.8rem 1.5rem' : '1rem 2rem',
+                  fontSize: isMobile ? '1rem' : '1.2rem',
+                  fontWeight: '600',
+                  color: '#0050B7',
+                  backgroundColor: 'white',
+                  border: 'none',
+                  borderRadius: '50px',
+                  cursor: 'none',
+                  fontFamily: 'Helvetica, Arial, sans-serif',
+                  whiteSpace: 'nowrap',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  margin: 0,
+                  transition: 'all 0.3s ease',
+                  boxShadow: '0 5px 15px rgba(0,0,0,0.2)'
+                }}
+                whileHover={{ 
+                  backgroundColor: '#f0f0f0',
+                  scale: 1.05,
+                  boxShadow: '0 8px 20px rgba(0,0,0,0.3)'
+                }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <span>Explore Now</span>
+                <svg 
+                  width="20" 
+                  height="20" 
+                  viewBox="0 0 24 24" 
+                  fill="none" 
+                  stroke="#0050B7"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M5 12h14M12 5l7 7-7 7"/>
+                </svg>
+              </motion.button>
+            </div>
+            
+            {/* Dekorasi background */}
+            <div style={{
+              position: 'absolute',
+              top: '-50px',
+              right: '-50px',
+              width: '200px',
+              height: '200px',
+              backgroundColor: 'rgba(255,255,255,0.1)',
+              borderRadius: '50%',
+              zIndex: 0
+            }} />
+            <div style={{
+              position: 'absolute',
+              bottom: '-30px',
+              left: '-30px',
+              width: '150px',
+              height: '150px',
+              backgroundColor: 'rgba(255,255,255,0.08)',
+              borderRadius: '50%',
+              zIndex: 0
+            }} />
+          </motion.div>
         </div>
 
         {/* Content tambahan untuk membuat halaman lebih panjang */}
@@ -776,4 +895,4 @@ export default function HomePage(): React.JSX.Element {
       </div>
     </div>
   );
-} 
+}
