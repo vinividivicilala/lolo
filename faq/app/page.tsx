@@ -682,19 +682,19 @@ export default function HomePage(): React.JSX.Element {
     transition: 'color 0.5s ease',
     wordWrap: 'break-word',
     overflowWrap: 'break-word',
-    marginBottom: isMobile ? '1.5rem' : '2rem' // Memberi jarak antara teks dan foto
+    marginBottom: isMobile ? '2rem' : '3rem' // Memberi jarak lebih besar antara teks dan foto
   }}>
     Menuru is a branding personal journal life with a experiences of self about happy, sad, angry, etc.
   </p>
 
-  {/* Foto di bawah teks deskripsi */}
+  {/* Foto di bawah teks deskripsi - diperbesar dengan border radius */}
   <div style={{
-    width: isMobile ? '100%' : '400px', // Lebar foto di desktop lebih kecil dari teks di atasnya
+    width: isMobile ? 'calc(100% - 2rem)' : '700px', // Lebar lebih besar, hampir sama dengan teks
+    marginLeft: isMobile ? '1rem' : '2rem', // Jarak dari sisi kiri
     overflow: 'hidden',
-    borderRadius: '4px',
-    boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
-    marginTop: isMobile ? '0' : '0', // Jarak sudah diatur di marginBottom teks
-    marginLeft: 0 // Pastikan foto rata kiri
+    borderRadius: '20px', // Border radius lebih besar
+    boxShadow: '0 15px 40px rgba(0,0,0,0.4)', // Shadow lebih tebal
+    border: `2px solid ${isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}` // Border halus
   }}>
     <img 
       src="images/5.jpg" 
@@ -704,7 +704,18 @@ export default function HomePage(): React.JSX.Element {
         height: 'auto',
         display: 'block',
         objectFit: 'cover',
-        borderRadius: '4px'
+        borderRadius: '18px' // Border radius sedikit lebih kecil dari container
+      }}
+      onError={(e) => {
+        console.error("Gambar tidak ditemukan:", e);
+        // Fallback jika gambar tidak ditemukan
+        e.currentTarget.style.backgroundColor = isDarkMode ? '#333' : '#eee';
+        e.currentTarget.style.display = 'flex';
+        e.currentTarget.style.alignItems = 'center';
+        e.currentTarget.style.justifyContent = 'center';
+        e.currentTarget.style.color = isDarkMode ? '#fff' : '#000';
+        e.currentTarget.style.height = '400px';
+        e.currentTarget.innerHTML = '<div style="padding: 2rem; text-align: center;">Image: 5.jpg</div>';
       }}
     />
   </div>
