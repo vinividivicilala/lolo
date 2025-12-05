@@ -686,33 +686,32 @@ export default function HomePage(): React.JSX.Element {
           Menuru is a branding personal journal life with a experiences of self about happy, sad, angry, etc.
         </p>
       </motion.div>
-	  
-	  
-	  
-	  
-  {/* Dua Foto Sisi Kiri dan Kanan - Portrait */}
+
+      {/* Dua Foto Sisi Kiri dan Kanan - Portrait Full Height */}
       <div style={{
-        position: 'absolute',
-        top: isMobile ? '18rem' : '22rem',
+        position: 'fixed',
+        top: 0,
         left: 0,
         width: '100%',
-        height: isMobile ? '300px' : '500px',
+        height: '100vh',
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
-        zIndex: 15,
-        pointerEvents: 'none'
+        zIndex: 5,
+        pointerEvents: 'none',
+        padding: isMobile ? '8rem 0.5rem 0' : '12rem 1rem 0'
       }}>
         {/* Foto Kiri */}
         <motion.div
-          initial={{ opacity: 0, x: -50 }}
+          initial={{ opacity: 0, x: -100 }}
           animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.8, delay: 0.3 }}
+          transition={{ duration: 1, delay: 0.8 }}
           style={{
-            width: isMobile ? '40%' : '35%',
-            height: '100%',
+            width: isMobile ? '40vw' : '30vw',
+            height: 'calc(100vh - 12rem)',
             overflow: 'hidden',
-            position: 'relative'
+            position: 'relative',
+            marginTop: isMobile ? '4rem' : '6rem'
           }}
         >
           <img 
@@ -722,21 +721,23 @@ export default function HomePage(): React.JSX.Element {
               width: '100%',
               height: '100%',
               objectFit: 'cover',
-              objectPosition: 'center'
+              objectPosition: 'center',
+              borderRadius: '10px'
             }}
           />
         </motion.div>
 
         {/* Foto Kanan */}
         <motion.div
-          initial={{ opacity: 0, x: 50 }}
+          initial={{ opacity: 0, x: 100 }}
           animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.8, delay: 0.5 }}
+          transition={{ duration: 1, delay: 1 }}
           style={{
-            width: isMobile ? '40%' : '35%',
-            height: '100%',
+            width: isMobile ? '40vw' : '30vw',
+            height: 'calc(100vh - 12rem)',
             overflow: 'hidden',
-            position: 'relative'
+            position: 'relative',
+            marginTop: isMobile ? '4rem' : '6rem'
           }}
         >
           <img 
@@ -746,21 +747,12 @@ export default function HomePage(): React.JSX.Element {
               width: '100%',
               height: '100%',
               objectFit: 'cover',
-              objectPosition: 'center'
+              objectPosition: 'center',
+              borderRadius: '10px'
             }}
           />
         </motion.div>
       </div>
-
-	  
-	  
-	  
-	  
-	  
-	  
-	  
-	  
-	  
 
       {/* Content tambahan untuk membuat halaman lebih panjang */}
       <div style={{
