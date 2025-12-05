@@ -666,7 +666,7 @@ export default function HomePage(): React.JSX.Element {
             Menuru is a branding personal journal life with a experiences of self about happy, sad, angry, etc. It's a creative exploration of personal growth and emotional journey. Through visual storytelling we capture moments of transformation and self-discovery.
           </p>
 
-          {/* Container untuk 2 foto - DIGESER DARI LAYAR */}
+          {/* Container untuk 2 foto - SANGAT PANJANG KE BAWAH */}
           <div style={{
             display: 'flex',
             flexDirection: isMobile ? 'column' : 'row',
@@ -676,7 +676,7 @@ export default function HomePage(): React.JSX.Element {
             marginRight: isMobile ? '1rem' : '2rem',
             marginTop: '1rem'
           }}>
-            {/* Foto 1 - Sisi kiri */}
+            {/* Foto 1 - Sisi kiri, SANGAT PANJANG */}
             <div style={{
               flex: 1,
               overflow: 'hidden',
@@ -685,14 +685,15 @@ export default function HomePage(): React.JSX.Element {
               border: `3px solid ${isDarkMode ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)'}`,
               width: '100%',
               position: 'relative',
-              zIndex: 1
+              zIndex: 1,
+              height: isMobile ? '500px' : '1200px' // SANGAT PANJANG KE BAWAH
             }}>
               <img 
                 src="images/5.jpg" 
                 alt="Menuru Visual Left"
                 style={{
                   width: '100%',
-                  height: isMobile ? '400px' : '900px',
+                  height: '100%',
                   display: 'block',
                   objectFit: 'cover',
                   borderRadius: '22px'
@@ -704,13 +705,13 @@ export default function HomePage(): React.JSX.Element {
                   e.currentTarget.style.alignItems = 'center';
                   e.currentTarget.style.justifyContent = 'center';
                   e.currentTarget.style.color = isDarkMode ? '#fff' : '#000';
-                  e.currentTarget.style.height = '400px';
+                  e.currentTarget.style.height = '100%';
                   e.currentTarget.innerHTML = '<div style="padding: 2rem; text-align: center;">Left Image</div>';
                 }}
               />
             </div>
 
-            {/* Foto 2 - Sisi kanan */}
+            {/* Foto 2 - Sisi kanan, SANGAT PANJANG */}
             <div style={{
               flex: 1,
               overflow: 'hidden',
@@ -719,14 +720,15 @@ export default function HomePage(): React.JSX.Element {
               border: `3px solid ${isDarkMode ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)'}`,
               width: '100%',
               position: 'relative',
-              zIndex: 1
+              zIndex: 1,
+              height: isMobile ? '500px' : '1200px' // SANGAT PANJANG KE BAWAH
             }}>
               <img 
                 src="images/6.jpg" 
                 alt="Menuru Visual Right"
                 style={{
                   width: '100%',
-                  height: isMobile ? '400px' : '900px',
+                  height: '100%',
                   display: 'block',
                   objectFit: 'cover',
                   borderRadius: '22px'
@@ -738,14 +740,14 @@ export default function HomePage(): React.JSX.Element {
                   e.currentTarget.style.alignItems = 'center';
                   e.currentTarget.style.justifyContent = 'center';
                   e.currentTarget.style.color = isDarkMode ? '#fff' : '#000';
-                  e.currentTarget.style.height = '400px';
+                  e.currentTarget.style.height = '100%';
                   e.currentTarget.innerHTML = '<div style="padding: 2rem; text-align: center;">Right Image</div>';
                 }}
               />
             </div>
           </div>
 
-          {/* Card #0050B7 dengan 4 foto portrait di dalamnya */}
+          {/* Card #0050B7 dengan 4 foto images/5.jpg di dalamnya */}
           <div
             style={{
               width: 'calc(100% - 6rem)',
@@ -753,13 +755,13 @@ export default function HomePage(): React.JSX.Element {
               marginRight: isMobile ? '1.5rem' : '3rem',
               backgroundColor: '#0050B7',
               borderRadius: '25px',
-              height: isMobile ? '400px' : '900px',
+              height: isMobile ? '400px' : '800px',
               marginTop: isMobile ? '1rem' : '1.5rem',
               boxShadow: '0 20px 50px rgba(0,0,0,0.3)',
               position: 'relative',
               overflow: 'hidden',
               border: '3px solid rgba(255,255,255,0.1)',
-              padding: isMobile ? '1.5rem' : '3rem',
+              padding: isMobile ? '1.5rem' : '2rem',
               boxSizing: 'border-box',
               display: 'flex',
               flexDirection: 'column',
@@ -767,28 +769,28 @@ export default function HomePage(): React.JSX.Element {
               justifyContent: 'center'
             }}
           >
-            {/* Container untuk 4 foto portrait */}
+            {/* Container untuk 4 foto images/5.jpg */}
             <div style={{
               display: 'grid',
               gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)',
-              gap: isMobile ? '1rem' : '2rem',
+              gap: isMobile ? '1rem' : '1.5rem',
               width: '100%',
               height: '100%',
               alignItems: 'center',
               justifyContent: 'center'
             }}>
-              {/* Foto Portrait 1 */}
+              {/* Foto 1 - images/5.jpg */}
               <div style={{
                 overflow: 'hidden',
                 borderRadius: '20px',
                 boxShadow: '0 10px 30px rgba(0,0,0,0.4)',
                 border: '2px solid rgba(255,255,255,0.2)',
                 width: '100%',
-                height: isMobile ? '150px' : '300px',
+                height: isMobile ? '150px' : '250px',
                 position: 'relative'
               }}>
                 <img 
-                  src="images/portrait1.jpg" 
+                  src="images/5.jpg" 
                   alt="Portrait 1"
                   style={{
                     width: '100%',
@@ -804,23 +806,23 @@ export default function HomePage(): React.JSX.Element {
                     e.currentTarget.style.alignItems = 'center';
                     e.currentTarget.style.justifyContent = 'center';
                     e.currentTarget.style.color = 'white';
-                    e.currentTarget.innerHTML = '<div style="padding: 1rem; text-align: center;">Portrait 1</div>';
+                    e.currentTarget.innerHTML = '<div style="padding: 1rem; text-align: center;">Image 5</div>';
                   }}
                 />
               </div>
 
-              {/* Foto Portrait 2 */}
+              {/* Foto 2 - images/5.jpg */}
               <div style={{
                 overflow: 'hidden',
                 borderRadius: '20px',
                 boxShadow: '0 10px 30px rgba(0,0,0,0.4)',
                 border: '2px solid rgba(255,255,255,0.2)',
                 width: '100%',
-                height: isMobile ? '150px' : '300px',
+                height: isMobile ? '150px' : '250px',
                 position: 'relative'
               }}>
                 <img 
-                  src="images/portrait2.jpg" 
+                  src="images/5.jpg" 
                   alt="Portrait 2"
                   style={{
                     width: '100%',
@@ -836,23 +838,23 @@ export default function HomePage(): React.JSX.Element {
                     e.currentTarget.style.alignItems = 'center';
                     e.currentTarget.style.justifyContent = 'center';
                     e.currentTarget.style.color = 'white';
-                    e.currentTarget.innerHTML = '<div style="padding: 1rem; text-align: center;">Portrait 2</div>';
+                    e.currentTarget.innerHTML = '<div style="padding: 1rem; text-align: center;">Image 5</div>';
                   }}
                 />
               </div>
 
-              {/* Foto Portrait 3 */}
+              {/* Foto 3 - images/5.jpg */}
               <div style={{
                 overflow: 'hidden',
                 borderRadius: '20px',
                 boxShadow: '0 10px 30px rgba(0,0,0,0.4)',
                 border: '2px solid rgba(255,255,255,0.2)',
                 width: '100%',
-                height: isMobile ? '150px' : '300px',
+                height: isMobile ? '150px' : '250px',
                 position: 'relative'
               }}>
                 <img 
-                  src="images/portrait3.jpg" 
+                  src="images/5.jpg" 
                   alt="Portrait 3"
                   style={{
                     width: '100%',
@@ -868,23 +870,23 @@ export default function HomePage(): React.JSX.Element {
                     e.currentTarget.style.alignItems = 'center';
                     e.currentTarget.style.justifyContent = 'center';
                     e.currentTarget.style.color = 'white';
-                    e.currentTarget.innerHTML = '<div style="padding: 1rem; text-align: center;">Portrait 3</div>';
+                    e.currentTarget.innerHTML = '<div style="padding: 1rem; text-align: center;">Image 5</div>';
                   }}
                 />
               </div>
 
-              {/* Foto Portrait 4 */}
+              {/* Foto 4 - images/5.jpg */}
               <div style={{
                 overflow: 'hidden',
                 borderRadius: '20px',
                 boxShadow: '0 10px 30px rgba(0,0,0,0.4)',
                 border: '2px solid rgba(255,255,255,0.2)',
                 width: '100%',
-                height: isMobile ? '150px' : '300px',
+                height: isMobile ? '150px' : '250px',
                 position: 'relative'
               }}>
                 <img 
-                  src="images/portrait4.jpg" 
+                  src="images/5.jpg" 
                   alt="Portrait 4"
                   style={{
                     width: '100%',
@@ -900,7 +902,7 @@ export default function HomePage(): React.JSX.Element {
                     e.currentTarget.style.alignItems = 'center';
                     e.currentTarget.style.justifyContent = 'center';
                     e.currentTarget.style.color = 'white';
-                    e.currentTarget.innerHTML = '<div style="padding: 1rem; text-align: center;">Portrait 4</div>';
+                    e.currentTarget.innerHTML = '<div style="padding: 1rem; text-align: center;">Image 5</div>';
                   }}
                 />
               </div>
