@@ -14,12 +14,12 @@ export default function HomePage(): React.JSX.Element {
   const [cursorType, setCursorType] = useState("default");
   const [cursorText, setCursorText] = useState("");
   const [hoveredLink, setHoveredLink] = useState("");
-  const [scrollProgress, setScrollProgress] = useState(0);
+  const [showDescription, setShowDescription] = useState(true);
   const headerRef = useRef<HTMLDivElement>(null);
   const cursorRef = useRef<HTMLDivElement>(null);
   const topNavRef = useRef<HTMLDivElement>(null);
   const scrollTextRef = useRef<HTMLDivElement>(null);
-  const mainContentRef = useRef<HTMLDivElement>(null);
+  const descriptionRef = useRef<HTMLDivElement>(null);
 
   // Animasi loading text
   const loadingTexts = [
@@ -70,12 +70,17 @@ export default function HomePage(): React.JSX.Element {
       }
     };
 
-    // Handle scroll untuk semua komponen
+    // Handle scroll untuk hide/show description
     const handleScroll = () => {
-      const scrollY = window.scrollY;
-      const windowHeight = window.innerHeight;
-      const progress = Math.min(scrollY / (windowHeight * 0.5), 1);
-      setScrollProgress(progress);
+      if (descriptionRef.current) {
+        const descriptionRect = descriptionRef.current.getBoundingClientRect();
+        // Jika deskripsi sudah hampir keluar dari viewport (atas), sembunyikan
+        if (descriptionRect.top < -50) {
+          setShowDescription(false);
+        } else {
+          setShowDescription(true);
+        }
+      }
     };
 
     // Setup auto scroll setelah component mount
@@ -144,9 +149,6 @@ export default function HomePage(): React.JSX.Element {
   };
 
   const cursorColors = getCursorColors();
-
-  // Hitung opacity berdasarkan scroll
-  const mainContentOpacity = Math.max(0, 1 - scrollProgress * 1.5);
 
   return (
     <div style={{
@@ -239,8 +241,7 @@ export default function HomePage(): React.JSX.Element {
           alignItems: 'center',
           zIndex: 101,
           boxSizing: 'border-box',
-          opacity: mainContentOpacity,
-          transition: 'opacity 0.3s ease'
+          opacity: 1
         }}
       >
         <div style={{
@@ -499,8 +500,7 @@ export default function HomePage(): React.JSX.Element {
           alignItems: 'center',
           zIndex: 100,
           boxSizing: 'border-box',
-          opacity: mainContentOpacity,
-          transition: 'opacity 0.3s ease'
+          opacity: 1
         }}
       >
         {/* Teks "MENURU" dengan animasi loading hanya di bagian NURU */}
@@ -654,98 +654,99 @@ export default function HomePage(): React.JSX.Element {
         </div>
       </div>
 
-      {/* Main Content Area - Semua konten utama di sini */}
-      <div 
-        ref={mainContentRef}
-        style={{
-          width: '100%',
-          paddingTop: isMobile ? '8rem' : '12rem',
-          paddingLeft: isMobile ? '1rem' : '2rem',
-          paddingRight: isMobile ? '1rem' : '2rem',
-          boxSizing: 'border-box',
-          opacity: mainContentOpacity,
-          transition: 'opacity 0.3s ease'
-        }}
-      >
-        {/* Deskripsi MENURU */}
-        <div style={{
-          marginBottom: isMobile ? '2rem' : '3rem'
-        }}>
-          <p style={{
+{/* Deskripsi MENURU di Body Halaman Utama - DIBUAT HILANG SAAT SCROLL */}
+<motion.div
+  ref={descriptionRef}
+  initial={{ opacity: 0, y: 20 }}
+  animate={{ opacity: showDescription ? 1 : 0, y: showDescription ? 0 : -20 }}
+  transition={{ duration: 0.5 }}
+  style={{
+    position: 'absolute',
+    top: isMobile ? '8rem' : '12rem',
+    left: isMobile ? '1rem' : '2rem',
+    width: isMobile ? 'calc(100% - 2rem)' : '800px',
+    maxWidth: '800px',
+    textAlign: 'left',
+    marginBottom: '2rem',
+    zIndex: 20,
+    pointerEvents: showDescription ? 'auto' : 'none'
+  }}
+>
+  <p style={{
+    color: isDarkMode ? 'white' : 'black',
+    fontSize: isMobile ? '1.8rem' : '3.5rem',
+    fontWeight: '400',
+    fontFamily: 'HelveticaNowDisplay, Arial, sans-serif',
+    lineHeight: 1.1,
+    margin: 0,
+    transition: 'color 0.5s ease',
+    wordWrap: 'break-word',
+    overflowWrap: 'break-word',
+    marginBottom: isMobile ? '2rem' : '3rem' // Memberi jarak lebih besar antara teks dan foto
+  }}>
+    Menuru is a branding personal journal life with a experiences of self about happy, sad, angry, etc.
+  </p>
+
+  {/* Foto di bawah teks deskripsi - diperbesar dengan border radius */}
+  <div style={{
+    width: isMobile ? 'calc(100% - 2rem)' : '700px', // Lebar lebih besar, hampir sama dengan teks
+    marginLeft: isMobile ? '1rem' : '2rem', // Jarak dari sisi kiri
+    overflow: 'hidden',
+    borderRadius: '20px', // Border radius lebih besar
+    boxShadow: '0 15px 40px rgba(0,0,0,0.4)', // Shadow lebih tebal
+    border: `2px solid ${isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}` // Border halus
+  }}>
+    <img 
+      src="images/5.jpg" 
+      alt="Menuru Visual"
+      style={{
+        width: '100%',
+        height: 'auto',
+        display: 'block',
+        objectFit: 'cover',
+        borderRadius: '18px' // Border radius sedikit lebih kecil dari container
+      }}
+      onError={(e) => {
+        console.error("Gambar tidak ditemukan:", e);
+        // Fallback jika gambar tidak ditemukan
+        e.currentTarget.style.backgroundColor = isDarkMode ? '#333' : '#eee';
+        e.currentTarget.style.display = 'flex';
+        e.currentTarget.style.alignItems = 'center';
+        e.currentTarget.style.justifyContent = 'center';
+        e.currentTarget.style.color = isDarkMode ? '#fff' : '#000';
+        e.currentTarget.style.height = '400px';
+        e.currentTarget.innerHTML = '<div style="padding: 2rem; text-align: center;">Image: 5.jpg</div>';
+      }}
+    />
+  </div>
+</motion.div>
+
+      {/* Content tambahan untuk membuat halaman lebih panjang */}
+      <div style={{
+        height: '150vh', // DIPERPANJANG AGAR BISA SCROLL
+        width: '100%',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginTop: isMobile ? '40vh' : '50vh', // JARAK DARI ATAS AGAR TIDAK DEMPET
+        zIndex: 10,
+        position: 'relative'
+      }}>
+        <motion.p
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          transition={{ duration: 0.8 }}
+          style={{
             color: isDarkMode ? 'white' : 'black',
-            fontSize: isMobile ? '1.8rem' : '3.5rem',
-            fontWeight: '400',
-            fontFamily: 'HelveticaNowDisplay, Arial, sans-serif',
-            lineHeight: 1.1,
-            margin: 0,
-            marginBottom: isMobile ? '1.5rem' : '2rem',
-            transition: 'color 0.5s ease',
-            wordWrap: 'break-word',
-            overflowWrap: 'break-word'
-          }}>
-            Menuru is a branding personal journal life with a experiences of self about happy, sad, angry, etc.
-          </p>
-
-          {/* Foto di bawah teks deskripsi */}
-          <div style={{
-            width: isMobile ? '100%' : 'calc(100% - 4rem)',
-            marginLeft: isMobile ? '0' : '2rem',
-            overflow: 'hidden',
-            borderRadius: '20px',
-            boxShadow: '0 15px 40px rgba(0,0,0,0.4)',
-            border: `2px solid ${isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}`
-          }}>
-            <img 
-              src="images/5.jpg" 
-              alt="Menuru Visual"
-              style={{
-                width: '100%',
-                height: 'auto',
-                display: 'block',
-                objectFit: 'cover',
-                borderRadius: '18px'
-              }}
-              onError={(e) => {
-                console.error("Gambar tidak ditemukan:", e);
-                e.currentTarget.style.backgroundColor = isDarkMode ? '#333' : '#eee';
-                e.currentTarget.style.display = 'flex';
-                e.currentTarget.style.alignItems = 'center';
-                e.currentTarget.style.justifyContent = 'center';
-                e.currentTarget.style.color = isDarkMode ? '#fff' : '#000';
-                e.currentTarget.style.height = '400px';
-                e.currentTarget.innerHTML = '<div style="padding: 2rem; text-align: center;">Image: 5.jpg</div>';
-              }}
-            />
-          </div>
-        </div>
-
-        {/* Content tambahan untuk membuat halaman lebih panjang */}
-        <div style={{
-          height: '100vh',
-          width: '100%',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          marginTop: isMobile ? '3rem' : '5rem',
-          zIndex: 10,
-          position: 'relative'
-        }}>
-          <motion.p
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            transition={{ duration: 0.8 }}
-            style={{
-              color: isDarkMode ? 'white' : 'black',
-              fontSize: isMobile ? '1.5rem' : '2rem',
-              fontWeight: '300',
-              textAlign: 'center',
-              maxWidth: '600px',
-              padding: '0 2rem'
-            }}
-          >
-            More content coming soon...
-          </motion.p>
-        </div>
+            fontSize: isMobile ? '1.5rem' : '2rem',
+            fontWeight: '300',
+            textAlign: 'center',
+            maxWidth: '600px',
+            padding: '0 2rem'
+          }}
+        >
+          More content coming soon...
+        </motion.p>
       </div>
     </div>
   );
