@@ -654,81 +654,81 @@ export default function HomePage(): React.JSX.Element {
         </div>
       </div>
 
-{/* Deskripsi MENURU di Body Halaman Utama - DIBUAT HILANG SAAT SCROLL */}
-<motion.div
-  ref={descriptionRef}
-  initial={{ opacity: 0, y: 20 }}
-  animate={{ opacity: showDescription ? 1 : 0, y: showDescription ? 0 : -20 }}
-  transition={{ duration: 0.5 }}
-  style={{
-    position: 'absolute',
-    top: isMobile ? '8rem' : '12rem',
-    left: isMobile ? '1rem' : '2rem',
-    width: isMobile ? 'calc(100% - 2rem)' : '800px',
-    maxWidth: '800px',
-    textAlign: 'left',
-    marginBottom: '2rem',
-    zIndex: 20,
-    pointerEvents: showDescription ? 'auto' : 'none'
-  }}
->
-  <p style={{
-    color: isDarkMode ? 'white' : 'black',
-    fontSize: isMobile ? '1.8rem' : '3.5rem',
-    fontWeight: '400',
-    fontFamily: 'HelveticaNowDisplay, Arial, sans-serif',
-    lineHeight: 1.1,
-    margin: 0,
-    transition: 'color 0.5s ease',
-    wordWrap: 'break-word',
-    overflowWrap: 'break-word',
-    marginBottom: isMobile ? '2rem' : '3rem' // Memberi jarak lebih besar antara teks dan foto
-  }}>
-    Menuru is a branding personal journal life with a experiences of self about happy, sad, angry, etc.
-  </p>
+      {/* Deskripsi MENURU di Body Halaman Utama - DIBUAT HILANG SAAT SCROLL */}
+      <motion.div
+        ref={descriptionRef}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: showDescription ? 1 : 0, y: showDescription ? 0 : -20 }}
+        transition={{ duration: 0.5 }}
+        style={{
+          position: 'absolute',
+          top: isMobile ? '8rem' : '12rem',
+          left: isMobile ? '1rem' : '2rem',
+          width: isMobile ? 'calc(100% - 2rem)' : '800px',
+          maxWidth: '800px',
+          textAlign: 'left',
+          marginBottom: '2rem',
+          zIndex: 20,
+          pointerEvents: showDescription ? 'auto' : 'none'
+        }}
+      >
+        <p style={{
+          color: isDarkMode ? 'white' : 'black',
+          fontSize: isMobile ? '1.8rem' : '3.5rem',
+          fontWeight: '400',
+          fontFamily: 'HelveticaNowDisplay, Arial, sans-serif',
+          lineHeight: 1.1,
+          margin: 0,
+          marginBottom: isMobile ? '1.5rem' : '2rem',
+          transition: 'color 0.5s ease',
+          wordWrap: 'break-word',
+          overflowWrap: 'break-word'
+        }}>
+          Menuru is a branding personal journal life with a experiences of self about happy, sad, angry, etc.
+        </p>
 
-  {/* Foto di bawah teks deskripsi - diperbesar dengan border radius */}
-  <div style={{
-    width: isMobile ? 'calc(100% - 2rem)' : '700px', // Lebar lebih besar, hampir sama dengan teks
-    marginLeft: isMobile ? '1rem' : '2rem', // Jarak dari sisi kiri
-    overflow: 'hidden',
-    borderRadius: '20px', // Border radius lebih besar
-    boxShadow: '0 15px 40px rgba(0,0,0,0.4)', // Shadow lebih tebal
-    border: `2px solid ${isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}` // Border halus
-  }}>
-    <img 
-      src="images/5.jpg" 
-      alt="Menuru Visual"
-      style={{
-        width: '100%',
-        height: 'auto',
-        display: 'block',
-        objectFit: 'cover',
-        borderRadius: '18px' // Border radius sedikit lebih kecil dari container
-      }}
-      onError={(e) => {
-        console.error("Gambar tidak ditemukan:", e);
-        // Fallback jika gambar tidak ditemukan
-        e.currentTarget.style.backgroundColor = isDarkMode ? '#333' : '#eee';
-        e.currentTarget.style.display = 'flex';
-        e.currentTarget.style.alignItems = 'center';
-        e.currentTarget.style.justifyContent = 'center';
-        e.currentTarget.style.color = isDarkMode ? '#fff' : '#000';
-        e.currentTarget.style.height = '400px';
-        e.currentTarget.innerHTML = '<div style="padding: 2rem; text-align: center;">Image: 5.jpg</div>';
-      }}
-    />
-  </div>
-</motion.div>
+        {/* Foto di bawah teks deskripsi */}
+        <div style={{
+          width: isMobile ? 'calc(100% - 1rem)' : '650px', // Lebar sedikit lebih kecil
+          marginLeft: isMobile ? '0.5rem' : '1.5rem', // Geser ke kiri sedikit
+          overflow: 'hidden',
+          borderRadius: '15px',
+          boxShadow: '0 15px 40px rgba(0,0,0,0.4)',
+          border: `2px solid ${isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}`,
+          marginTop: '1rem' // Jarak dari teks
+        }}>
+          <img 
+            src="images/5.jpg" 
+            alt="Menuru Visual"
+            style={{
+              width: '100%',
+              height: 'auto',
+              display: 'block',
+              objectFit: 'cover',
+              borderRadius: '13px'
+            }}
+            onError={(e) => {
+              console.error("Gambar tidak ditemukan:", e);
+              e.currentTarget.style.backgroundColor = isDarkMode ? '#333' : '#eee';
+              e.currentTarget.style.display = 'flex';
+              e.currentTarget.style.alignItems = 'center';
+              e.currentTarget.style.justifyContent = 'center';
+              e.currentTarget.style.color = isDarkMode ? '#fff' : '#000';
+              e.currentTarget.style.height = '400px';
+              e.currentTarget.innerHTML = '<div style="padding: 2rem; text-align: center;">Image: 5.jpg</div>';
+            }}
+          />
+        </div>
+      </motion.div>
 
       {/* Content tambahan untuk membuat halaman lebih panjang */}
       <div style={{
-        height: '150vh', // DIPERPANJANG AGAR BISA SCROLL
+        height: '150vh',
         width: '100%',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        marginTop: isMobile ? '40vh' : '50vh', // JARAK DARI ATAS AGAR TIDAK DEMPET
+        marginTop: isMobile ? '90vh' : '80vh', // Disesuaikan agar ada jarak dengan foto
         zIndex: 10,
         position: 'relative'
       }}>
