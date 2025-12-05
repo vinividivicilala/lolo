@@ -641,15 +641,15 @@ export default function HomePage(): React.JSX.Element {
       <div style={{
         width: '100%',
         paddingTop: isMobile ? '8rem' : '12rem',
-        paddingLeft: isMobile ? '1rem' : '2rem',
-        paddingRight: isMobile ? '1rem' : '2rem',
         boxSizing: 'border-box',
         zIndex: 10,
         position: 'relative'
       }}>
         {/* Deskripsi MENURU - 3 baris */}
         <div style={{
-          marginBottom: isMobile ? '2rem' : '3rem'
+          marginBottom: isMobile ? '2rem' : '3rem',
+          paddingLeft: isMobile ? '1.5rem' : '3rem', // GESER KE KANAN
+          paddingRight: isMobile ? '1.5rem' : '3rem' // GESER KE KIRI
         }}>
           <p style={{
             color: isDarkMode ? 'white' : 'black',
@@ -666,15 +666,17 @@ export default function HomePage(): React.JSX.Element {
             Menuru is a branding personal journal life with a experiences of self about happy, sad, angry, etc. It's a creative exploration of personal growth and emotional journey. Through visual storytelling we capture moments of transformation and self-discovery.
           </p>
 
-          {/* Container untuk 2 foto - SANGAT DEKAT */}
+          {/* Container untuk 2 foto - DIGESER DARI LAYAR */}
           <div style={{
             display: 'flex',
             flexDirection: isMobile ? 'column' : 'row',
-            gap: isMobile ? '1rem' : '0.3rem', // JARAK SANGAT DEKAT
-            width: '100%',
+            gap: isMobile ? '1rem' : '0.3rem', // SANGAT DEKAT
+            width: 'calc(100% - 4rem)', // GESER DARI LAYAR
+            marginLeft: isMobile ? '1rem' : '2rem', // GESER KE KANAN
+            marginRight: isMobile ? '1rem' : '2rem', // GESER KE KIRI
             marginTop: '1rem'
           }}>
-            {/* Foto 1 - Sisi kiri, tidak mentok */}
+            {/* Foto 1 - Sisi kiri */}
             <div style={{
               flex: 1,
               overflow: 'hidden',
@@ -682,7 +684,6 @@ export default function HomePage(): React.JSX.Element {
               boxShadow: '0 20px 50px rgba(0,0,0,0.5)',
               border: `3px solid ${isDarkMode ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)'}`,
               width: '100%',
-              marginLeft: isMobile ? '0' : '0.5rem', // TIDAK MENTOK, sedikit margin
               position: 'relative',
               zIndex: 1
             }}>
@@ -709,7 +710,7 @@ export default function HomePage(): React.JSX.Element {
               />
             </div>
 
-            {/* Foto 2 - Sisi kanan, tidak mentok */}
+            {/* Foto 2 - Sisi kanan */}
             <div style={{
               flex: 1,
               overflow: 'hidden',
@@ -717,7 +718,6 @@ export default function HomePage(): React.JSX.Element {
               boxShadow: '0 20px 50px rgba(0,0,0,0.5)',
               border: `3px solid ${isDarkMode ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)'}`,
               width: '100%',
-              marginRight: isMobile ? '0' : '0.5rem', // TIDAK MENTOK, sedikit margin
               position: 'relative',
               zIndex: 1
             }}>
@@ -745,16 +745,16 @@ export default function HomePage(): React.JSX.Element {
             </div>
           </div>
 
-          {/* Card #0050B7 - DEKAT dengan foto di atas, tidak mentok ke layar */}
+          {/* Card #0050B7 - DIGESER DARI LAYAR */}
           <div
             style={{
-              width: 'calc(100% - 4rem)', // TIDAK MENTOK KE LAYAR
-              marginLeft: isMobile ? '1rem' : '2rem',
-              marginRight: isMobile ? '1rem' : '2rem',
+              width: 'calc(100% - 6rem)', // GESER LEBIH DARI LAYAR
+              marginLeft: isMobile ? '1.5rem' : '3rem', // GESER KE KANAN
+              marginRight: isMobile ? '1.5rem' : '3rem', // GESER KE KIRI
               backgroundColor: '#0050B7',
               borderRadius: '25px',
-              height: isMobile ? '400px' : '800px', // SANGAT PANJANG KE BAWAH
-              marginTop: isMobile ? '1rem' : '1.5rem', // JARAK DEKAT DENGAN FOTO
+              height: isMobile ? '400px' : '900px', // SANGAT PANJANG KE BAWAH
+              marginTop: isMobile ? '1rem' : '1.5rem', // DEKAT DENGAN FOTO
               boxShadow: '0 20px 50px rgba(0,0,0,0.3)',
               position: 'relative',
               overflow: 'hidden',
