@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect, useRef } from "react";
@@ -253,7 +252,7 @@ export default function HomePage(): React.JSX.Element {
           backdropFilter: 'blur(10px)',
           borderRadius: '50px',
           padding: isMobile ? '0.6rem 1rem' : '0.8rem 1.5rem',
-          border: `1px solid rgba(255,255,255,0.2)`,
+          border: `1px solid ${isDarkMode ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.3)'}`,
           boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
         }}>
           {/* Docs */}
@@ -268,12 +267,14 @@ export default function HomePage(): React.JSX.Element {
               cursor: 'none',
               padding: '0.4rem 0.8rem',
               borderRadius: '25px',
-              backgroundColor: 'rgba(255,255,255,0.9)',
+              backgroundColor: isDarkMode ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.95)',
+              border: isDarkMode ? '1px solid rgba(255,255,255,0.2)' : '1px solid rgba(255,255,255,0.3)',
               transition: 'all 0.3s ease'
             }}
             whileHover={{ 
               backgroundColor: 'white',
-              scale: 1.05
+              scale: 1.05,
+              border: '1px solid white'
             }}
           >
             <svg 
@@ -305,7 +306,8 @@ export default function HomePage(): React.JSX.Element {
               fontWeight: '700',
               padding: '0.1rem 0.4rem',
               borderRadius: '10px',
-              marginLeft: '0.3rem'
+              marginLeft: '0.3rem',
+              border: 'none'
             }}>
               NEW
             </div>
@@ -323,12 +325,14 @@ export default function HomePage(): React.JSX.Element {
               cursor: 'none',
               padding: '0.4rem 0.8rem',
               borderRadius: '25px',
-              backgroundColor: 'rgba(255,255,255,0.9)',
+              backgroundColor: isDarkMode ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.95)',
+              border: isDarkMode ? '1px solid rgba(255,255,255,0.2)' : '1px solid rgba(255,255,255,0.3)',
               transition: 'all 0.3s ease'
             }}
             whileHover={{ 
               backgroundColor: 'white',
-              scale: 1.05
+              scale: 1.05,
+              border: '1px solid white'
             }}
           >
             <svg 
@@ -358,7 +362,8 @@ export default function HomePage(): React.JSX.Element {
               fontWeight: '700',
               padding: '0.1rem 0.4rem',
               borderRadius: '10px',
-              marginLeft: '0.3rem'
+              marginLeft: '0.3rem',
+              border: 'none'
             }}>
               NEW
             </div>
@@ -376,12 +381,14 @@ export default function HomePage(): React.JSX.Element {
               cursor: 'none',
               padding: '0.4rem 0.8rem',
               borderRadius: '25px',
-              backgroundColor: 'rgba(255,255,255,0.9)',
+              backgroundColor: isDarkMode ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.95)',
+              border: isDarkMode ? '1px solid rgba(255,255,255,0.2)' : '1px solid rgba(255,255,255,0.3)',
               transition: 'all 0.3s ease'
             }}
             whileHover={{ 
               backgroundColor: 'white',
-              scale: 1.05
+              scale: 1.05,
+              border: '1px solid white'
             }}
           >
             <svg 
@@ -413,7 +420,8 @@ export default function HomePage(): React.JSX.Element {
               fontWeight: '700',
               padding: '0.1rem 0.4rem',
               borderRadius: '10px',
-              marginLeft: '0.3rem'
+              marginLeft: '0.3rem',
+              border: 'none'
             }}>
               NEW
             </div>
@@ -431,12 +439,14 @@ export default function HomePage(): React.JSX.Element {
               cursor: 'none',
               padding: '0.4rem 0.8rem',
               borderRadius: '25px',
-              backgroundColor: 'rgba(255,255,255,0.9)',
+              backgroundColor: isDarkMode ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.95)',
+              border: isDarkMode ? '1px solid rgba(255,255,255,0.2)' : '1px solid rgba(255,255,255,0.3)',
               transition: 'all 0.3s ease'
             }}
             whileHover={{ 
               backgroundColor: 'white',
-              scale: 1.05
+              scale: 1.05,
+              border: '1px solid white'
             }}
           >
             <svg 
@@ -467,7 +477,8 @@ export default function HomePage(): React.JSX.Element {
               fontWeight: '700',
               padding: '0.1rem 0.4rem',
               borderRadius: '10px',
-              marginLeft: '0.3rem'
+              marginLeft: '0.3rem',
+              border: 'none'
             }}>
               NEW
             </div>
@@ -556,9 +567,9 @@ export default function HomePage(): React.JSX.Element {
               padding: isMobile ? '0.4rem 0.8rem' : '0.6rem 1rem',
               fontSize: isMobile ? '0.8rem' : '1rem',
               fontWeight: '600',
-              color: 'black',
-              backgroundColor: '#39FF14',
-              border: 'none',
+              color: 'white',
+              backgroundColor: 'transparent',
+              border: `1px solid ${isDarkMode ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.3)'}`,
               borderRadius: '50px',
               cursor: 'none',
               fontFamily: 'Helvetica, Arial, sans-serif',
@@ -575,8 +586,9 @@ export default function HomePage(): React.JSX.Element {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 1, duration: 0.6 }}
             whileHover={{ 
-              backgroundColor: '#D4FF33',
+              backgroundColor: isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.2)',
               scale: 1.05,
+              border: `1px solid ${isDarkMode ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.5)'}`,
               transition: { duration: 0.2 }
             }}
             whileTap={{ scale: 0.95 }}
@@ -599,9 +611,9 @@ export default function HomePage(): React.JSX.Element {
               padding: isMobile ? '0.4rem 1rem' : '0.6rem 1.5rem',
               fontSize: isMobile ? '0.9rem' : '1.5rem',
               fontWeight: '600',
-              color: 'black',
-              backgroundColor: '#39FF14',
-              border: 'none',
+              color: 'white',
+              backgroundColor: 'transparent',
+              border: `1px solid ${isDarkMode ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.3)'}`,
               borderRadius: '50px',
               cursor: 'none',
               fontFamily: 'Helvetica, Arial, sans-serif',
@@ -619,8 +631,9 @@ export default function HomePage(): React.JSX.Element {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 1.2, duration: 0.6 }}
             whileHover={{ 
-              backgroundColor: '#D4FF33',
+              backgroundColor: isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.2)',
               scale: 1.05,
+              border: `1px solid ${isDarkMode ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.5)'}`,
               transition: { duration: 0.2 }
             }}
             whileTap={{ scale: 0.95 }}
@@ -673,6 +686,81 @@ export default function HomePage(): React.JSX.Element {
           Menuru is a branding personal journal life with a experiences of self about happy, sad, angry, etc.
         </p>
       </motion.div>
+	  
+	  
+	  
+	  
+  {/* Dua Foto Sisi Kiri dan Kanan - Portrait */}
+      <div style={{
+        position: 'absolute',
+        top: isMobile ? '18rem' : '22rem',
+        left: 0,
+        width: '100%',
+        height: isMobile ? '300px' : '500px',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        zIndex: 15,
+        pointerEvents: 'none'
+      }}>
+        {/* Foto Kiri */}
+        <motion.div
+          initial={{ opacity: 0, x: -50 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.8, delay: 0.3 }}
+          style={{
+            width: isMobile ? '40%' : '35%',
+            height: '100%',
+            overflow: 'hidden',
+            position: 'relative'
+          }}
+        >
+          <img 
+            src="/images/5.jpg" 
+            alt="Left Portrait"
+            style={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+              objectPosition: 'center'
+            }}
+          />
+        </motion.div>
+
+        {/* Foto Kanan */}
+        <motion.div
+          initial={{ opacity: 0, x: 50 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.8, delay: 0.5 }}
+          style={{
+            width: isMobile ? '40%' : '35%',
+            height: '100%',
+            overflow: 'hidden',
+            position: 'relative'
+          }}
+        >
+          <img 
+            src="/images/5.jpg" 
+            alt="Right Portrait"
+            style={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+              objectPosition: 'center'
+            }}
+          />
+        </motion.div>
+      </div>
+
+	  
+	  
+	  
+	  
+	  
+	  
+	  
+	  
+	  
 
       {/* Content tambahan untuk membuat halaman lebih panjang */}
       <div style={{
