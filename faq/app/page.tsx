@@ -641,62 +641,108 @@ export default function HomePage(): React.JSX.Element {
       <div style={{
         width: '100%',
         paddingTop: isMobile ? '8rem' : '12rem',
+        paddingLeft: isMobile ? '1rem' : '2rem',
+        paddingRight: isMobile ? '1rem' : '2rem',
         boxSizing: 'border-box',
         zIndex: 10,
         position: 'relative'
       }}>
-        {/* Deskripsi MENURU - 2 baris */}
+        {/* Deskripsi MENURU - 3 baris */}
         <div style={{
-          marginBottom: isMobile ? '2rem' : '3rem',
-          paddingLeft: isMobile ? '1rem' : '2rem',
-          paddingRight: isMobile ? '1rem' : '2rem'
+          marginBottom: isMobile ? '2rem' : '3rem'
         }}>
           <p style={{
             color: isDarkMode ? 'white' : 'black',
             fontSize: isMobile ? '1.8rem' : '3.5rem',
             fontWeight: '400',
             fontFamily: 'HelveticaNowDisplay, Arial, sans-serif',
-            lineHeight: 1.2,
+            lineHeight: 1.3,
             margin: 0,
             marginBottom: isMobile ? '1.5rem' : '2rem',
             transition: 'color 0.5s ease',
             wordWrap: 'break-word',
             overflowWrap: 'break-word'
           }}>
-            Menuru is a branding personal journal life with a experiences of self about happy, sad, angry, etc. It's a creative exploration of personal growth and emotional journey through visual storytelling.
+            Menuru is a branding personal journal life with a experiences of self about happy, sad, angry, etc. It's a creative exploration of personal growth and emotional journey. Through visual storytelling we capture moments of transformation and self-discovery.
           </p>
 
-          {/* 1 Foto besar memanjang ke samping kiri dan kanan layar */}
+          {/* Container untuk 2 foto memanjang ke samping */}
           <div style={{
-            width: '100vw',
-            marginLeft: 'calc(-50vw + 50%)',
-            overflow: 'hidden',
-            borderRadius: isMobile ? '10px' : '0',
-            boxShadow: '0 15px 40px rgba(0,0,0,0.4)',
-            border: isMobile ? `2px solid ${isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}` : 'none',
+            display: 'flex',
+            flexDirection: isMobile ? 'column' : 'row',
+            gap: isMobile ? '1rem' : '0.5rem', // Jarak sangat dekat
+            width: '100%',
             marginTop: '1rem'
           }}>
-            <img 
-              src="images/5.jpg" 
-              alt="Menuru Visual Full Width"
-              style={{
-                width: '100%',
-                height: isMobile ? 'auto' : '700px',
-                display: 'block',
-                objectFit: 'cover',
-                borderRadius: isMobile ? '8px' : '0'
-              }}
-              onError={(e) => {
-                console.error("Gambar tidak ditemukan:", e);
-                e.currentTarget.style.backgroundColor = isDarkMode ? '#333' : '#eee';
-                e.currentTarget.style.display = 'flex';
-                e.currentTarget.style.alignItems = 'center';
-                e.currentTarget.style.justifyContent = 'center';
-                e.currentTarget.style.color = isDarkMode ? '#fff' : '#000';
-                e.currentTarget.style.height = '400px';
-                e.currentTarget.innerHTML = '<div style="padding: 2rem; text-align: center;">Full Width Image</div>';
-              }}
-            />
+            {/* Foto 1 - memanjang ke kiri layar */}
+            <div style={{
+              flex: 1,
+              overflow: 'hidden',
+              borderRadius: '15px',
+              boxShadow: '0 15px 40px rgba(0,0,0,0.4)',
+              border: `2px solid ${isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}`,
+              width: isMobile ? '100%' : 'calc(50% + 2rem)', // Lebih lebar untuk memanjang
+              marginLeft: isMobile ? '0' : '-2rem', // Memanjang ke kiri
+              position: 'relative',
+              zIndex: 1
+            }}>
+              <img 
+                src="images/5.jpg" 
+                alt="Menuru Visual Left"
+                style={{
+                  width: '100%',
+                  height: isMobile ? '400px' : '900px', // Sangat panjang ke bawah
+                  display: 'block',
+                  objectFit: 'cover',
+                  borderRadius: '13px'
+                }}
+                onError={(e) => {
+                  console.error("Gambar kiri tidak ditemukan:", e);
+                  e.currentTarget.style.backgroundColor = isDarkMode ? '#333' : '#eee';
+                  e.currentTarget.style.display = 'flex';
+                  e.currentTarget.style.alignItems = 'center';
+                  e.currentTarget.style.justifyContent = 'center';
+                  e.currentTarget.style.color = isDarkMode ? '#fff' : '#000';
+                  e.currentTarget.style.height = '400px';
+                  e.currentTarget.innerHTML = '<div style="padding: 2rem; text-align: center;">Left Image</div>';
+                }}
+              />
+            </div>
+
+            {/* Foto 2 - memanjang ke kanan layar */}
+            <div style={{
+              flex: 1,
+              overflow: 'hidden',
+              borderRadius: '15px',
+              boxShadow: '0 15px 40px rgba(0,0,0,0.4)',
+              border: `2px solid ${isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}`,
+              width: isMobile ? '100%' : 'calc(50% + 2rem)', // Lebih lebar untuk memanjang
+              marginRight: isMobile ? '0' : '-2rem', // Memanjang ke kanan
+              position: 'relative',
+              zIndex: 1
+            }}>
+              <img 
+                src="images/6.jpg" 
+                alt="Menuru Visual Right"
+                style={{
+                  width: '100%',
+                  height: isMobile ? '400px' : '900px', // Sangat panjang ke bawah
+                  display: 'block',
+                  objectFit: 'cover',
+                  borderRadius: '13px'
+                }}
+                onError={(e) => {
+                  console.error("Gambar kanan tidak ditemukan:", e);
+                  e.currentTarget.style.backgroundColor = isDarkMode ? '#333' : '#eee';
+                  e.currentTarget.style.display = 'flex';
+                  e.currentTarget.style.alignItems = 'center';
+                  e.currentTarget.style.justifyContent = 'center';
+                  e.currentTarget.style.color = isDarkMode ? '#fff' : '#000';
+                  e.currentTarget.style.height = '400px';
+                  e.currentTarget.innerHTML = '<div style="padding: 2rem; text-align: center;">Right Image</div>';
+                }}
+              />
+            </div>
           </div>
         </div>
 
@@ -730,4 +776,4 @@ export default function HomePage(): React.JSX.Element {
       </div>
     </div>
   );
-}
+} 
