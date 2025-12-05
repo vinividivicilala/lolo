@@ -654,38 +654,61 @@ export default function HomePage(): React.JSX.Element {
         </div>
       </div>
 
-      {/* Deskripsi MENURU di Body Halaman Utama - DIBUAT HILANG SAAT SCROLL */}
-      <motion.div
-        ref={descriptionRef}
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: showDescription ? 1 : 0, y: showDescription ? 0 : -20 }}
-        transition={{ duration: 0.5 }}
-        style={{
-          position: 'absolute',
-          top: isMobile ? '8rem' : '12rem',
-          left: isMobile ? '1rem' : '2rem',
-          width: isMobile ? 'calc(100% - 2rem)' : '800px',
-          maxWidth: '800px',
-          textAlign: 'left',
-          marginBottom: '2rem',
-          zIndex: 20,
-          pointerEvents: showDescription ? 'auto' : 'none'
-        }}
-      >
-        <p style={{
-          color: isDarkMode ? 'white' : 'black',
-          fontSize: isMobile ? '1.8rem' : '3.5rem',
-          fontWeight: '400',
-          fontFamily: 'HelveticaNowDisplay, Arial, sans-serif',
-          lineHeight: 1.1,
-          margin: 0,
-          transition: 'color 0.5s ease',
-          wordWrap: 'break-word',
-          overflowWrap: 'break-word'
-        }}>
-          Menuru is a branding personal journal life with a experiences of self about happy, sad, angry, etc.
-        </p>
-      </motion.div>
+{/* Deskripsi MENURU di Body Halaman Utama - DIBUAT HILANG SAAT SCROLL */}
+<motion.div
+  ref={descriptionRef}
+  initial={{ opacity: 0, y: 20 }}
+  animate={{ opacity: showDescription ? 1 : 0, y: showDescription ? 0 : -20 }}
+  transition={{ duration: 0.5 }}
+  style={{
+    position: 'absolute',
+    top: isMobile ? '8rem' : '12rem',
+    left: isMobile ? '1rem' : '2rem',
+    width: isMobile ? 'calc(100% - 2rem)' : '800px',
+    maxWidth: '800px',
+    textAlign: 'left',
+    marginBottom: '2rem',
+    zIndex: 20,
+    pointerEvents: showDescription ? 'auto' : 'none'
+  }}
+>
+  <p style={{
+    color: isDarkMode ? 'white' : 'black',
+    fontSize: isMobile ? '1.8rem' : '3.5rem',
+    fontWeight: '400',
+    fontFamily: 'HelveticaNowDisplay, Arial, sans-serif',
+    lineHeight: 1.1,
+    margin: 0,
+    transition: 'color 0.5s ease',
+    wordWrap: 'break-word',
+    overflowWrap: 'break-word',
+    marginBottom: isMobile ? '1.5rem' : '2rem' // Memberi jarak antara teks dan foto
+  }}>
+    Menuru is a branding personal journal life with a experiences of self about happy, sad, angry, etc.
+  </p>
+
+  {/* Foto di bawah teks deskripsi */}
+  <div style={{
+    width: isMobile ? '100%' : '400px', // Lebar foto di desktop lebih kecil dari teks di atasnya
+    overflow: 'hidden',
+    borderRadius: '4px',
+    boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
+    marginTop: isMobile ? '0' : '0', // Jarak sudah diatur di marginBottom teks
+    marginLeft: 0 // Pastikan foto rata kiri
+  }}>
+    <img 
+      src="images/5.jpg" 
+      alt="Menuru Visual"
+      style={{
+        width: '100%',
+        height: 'auto',
+        display: 'block',
+        objectFit: 'cover',
+        borderRadius: '4px'
+      }}
+    />
+  </div>
+</motion.div>
 
       {/* Content tambahan untuk membuat halaman lebih panjang */}
       <div style={{
