@@ -747,7 +747,7 @@ export default function HomePage(): React.JSX.Element {
             </div>
           </div>
 
-          {/* Card #0050B7 dengan 4 foto images/5.jpg - FOTO LEBIH PANJANG KE BAWAH */}
+          {/* Card #0050B7 dengan 4 foto images/5.jpg - FOTO LEBIH LEBAR KE SAMPING */}
           <div
             style={{
               width: 'calc(100% - 4rem)', // TIDAK MENTOK
@@ -755,7 +755,7 @@ export default function HomePage(): React.JSX.Element {
               marginRight: isMobile ? '1rem' : '2rem',
               backgroundColor: '#0050B7',
               borderRadius: '25px',
-              height: isMobile ? '600px' : '1000px', // CARD TINGGI KARENA FOTO PANJANG
+              height: isMobile ? '500px' : '800px', // CARD TINGGI SEDIKIT
               marginTop: isMobile ? '1rem' : '1.5rem',
               boxShadow: '0 20px 50px rgba(0,0,0,0.3)',
               position: 'relative',
@@ -780,14 +780,14 @@ export default function HomePage(): React.JSX.Element {
               alignItems: 'flex-start',
               justifyContent: 'center'
             }}>
-              {/* Foto 1 - images/5.jpg - LEBIH PANJANG KE BAWAH */}
+              {/* Foto 1 - images/5.jpg - LEBIH LEBAR KE SAMPING */}
               <div style={{
                 overflow: 'hidden',
                 borderRadius: '20px',
                 boxShadow: '0 10px 30px rgba(0,0,0,0.4)',
                 border: '2px solid rgba(255,255,255,0.2)',
                 width: '100%',
-                height: isMobile ? '850px' : '800px', // FOTO LEBIH PANJANG
+                height: isMobile ? '200px' : '300px', // TINGGI SEDIKIT
                 position: 'relative'
               }}>
                 <img 
@@ -812,14 +812,14 @@ export default function HomePage(): React.JSX.Element {
                 />
               </div>
 
-              {/* Foto 2 - images/5.jpg - LEBIH PANJANG KE BAWAH */}
+              {/* Foto 2 - images/5.jpg - LEBIH LEBAR KE SAMPING */}
               <div style={{
                 overflow: 'hidden',
                 borderRadius: '20px',
                 boxShadow: '0 10px 30px rgba(0,0,0,0.4)',
                 border: '2px solid rgba(255,255,255,0.2)',
                 width: '100%',
-                height: isMobile ? '850px' : '800px', // FOTO LEBIH PANJANG
+                height: isMobile ? '200px' : '300px', // TINGGI SEDIKIT
                 position: 'relative'
               }}>
                 <img 
@@ -844,14 +844,14 @@ export default function HomePage(): React.JSX.Element {
                 />
               </div>
 
-              {/* Foto 3 - images/5.jpg - LEBIH PANJANG KE BAWAH */}
+              {/* Foto 3 - images/5.jpg - LEBIH LEBAR KE SAMPING */}
               <div style={{
                 overflow: 'hidden',
                 borderRadius: '20px',
                 boxShadow: '0 10px 30px rgba(0,0,0,0.4)',
                 border: '2px solid rgba(255,255,255,0.2)',
                 width: '100%',
-                height: isMobile ? '850px' : '800px', // FOTO LEBIH PANJANG
+                height: isMobile ? '200px' : '300px', // TINGGI SEDIKIT
                 position: 'relative'
               }}>
                 <img 
@@ -876,14 +876,14 @@ export default function HomePage(): React.JSX.Element {
                 />
               </div>
 
-              {/* Foto 4 - images/5.jpg - LEBIH PANJANG KE BAWAH */}
+              {/* Foto 4 - images/5.jpg - LEBIH LEBAR KE SAMPING */}
               <div style={{
                 overflow: 'hidden',
                 borderRadius: '20px',
                 boxShadow: '0 10px 30px rgba(0,0,0,0.4)',
                 border: '2px solid rgba(255,255,255,0.2)',
                 width: '100%',
-                height: isMobile ? '850px' : '800px', // FOTO LEBIH PANJANG
+                height: isMobile ? '200px' : '300px', // TINGGI SEDIKIT
                 position: 'relative'
               }}>
                 <img 
@@ -942,4 +942,3 @@ export default function HomePage(): React.JSX.Element {
     </div>
   );
 }
-
