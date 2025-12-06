@@ -648,8 +648,8 @@ export default function HomePage(): React.JSX.Element {
         {/* Deskripsi MENURU - 3 baris */}
         <div style={{
           marginBottom: isMobile ? '2rem' : '3rem',
-          paddingLeft: isMobile ? '1.5rem' : '3rem',
-          paddingRight: isMobile ? '1.5rem' : '3rem'
+          paddingLeft: isMobile ? '0.5rem' : '1rem', // MENTOK TAPI TIDAK BANGET
+          paddingRight: isMobile ? '0.5rem' : '1rem'
         }}>
           <p style={{
             color: isDarkMode ? 'white' : 'black',
@@ -666,14 +666,14 @@ export default function HomePage(): React.JSX.Element {
             Menuru is a branding personal journal life with a experiences of self about happy, sad, angry, etc. It's a creative exploration of personal growth and emotional journey. Through visual storytelling we capture moments of transformation and self-discovery.
           </p>
 
-          {/* Container untuk 2 foto - SANGAT PANJANG KE BAWAH */}
+          {/* Container untuk 2 foto - LEBIH MENTOK KE LAYAR */}
           <div style={{
             display: 'flex',
             flexDirection: isMobile ? 'column' : 'row',
             gap: isMobile ? '1rem' : '0.3rem',
-            width: 'calc(100% - 4rem)',
-            marginLeft: isMobile ? '1rem' : '2rem',
-            marginRight: isMobile ? '1rem' : '2rem',
+            width: 'calc(100% - 2rem)', // LEBIH MENTOK (hanya 2rem margin)
+            marginLeft: isMobile ? '0.5rem' : '1rem', // LEBIH MENTOK
+            marginRight: isMobile ? '0.5rem' : '1rem', // LEBIH MENTOK
             marginTop: '1rem'
           }}>
             {/* Foto 1 - Sisi kiri, SANGAT PANJANG */}
@@ -686,7 +686,7 @@ export default function HomePage(): React.JSX.Element {
               width: '100%',
               position: 'relative',
               zIndex: 1,
-              height: isMobile ? '500px' : '1200px' // SANGAT PANJANG KE BAWAH
+              height: isMobile ? '500px' : '1200px'
             }}>
               <img 
                 src="images/5.jpg" 
@@ -721,7 +721,7 @@ export default function HomePage(): React.JSX.Element {
               width: '100%',
               position: 'relative',
               zIndex: 1,
-              height: isMobile ? '500px' : '1200px' // SANGAT PANJANG KE BAWAH
+              height: isMobile ? '500px' : '1200px'
             }}>
               <img 
                 src="images/6.jpg" 
@@ -747,35 +747,37 @@ export default function HomePage(): React.JSX.Element {
             </div>
           </div>
 
-          {/* Card #0050B7 dengan 4 foto images/5.jpg di dalamnya */}
+          {/* Card #0050B7 dengan 4 foto images/5.jpg - LEBIH PENDEK, FOTO DITARIK KE ATAS */}
           <div
             style={{
-              width: 'calc(100% - 6rem)',
-              marginLeft: isMobile ? '1.5rem' : '3rem',
-              marginRight: isMobile ? '1.5rem' : '3rem',
+              width: 'calc(100% - 4rem)', // TIDAK MENTOK
+              marginLeft: isMobile ? '1rem' : '2rem',
+              marginRight: isMobile ? '1rem' : '2rem',
               backgroundColor: '#0050B7',
               borderRadius: '25px',
-              height: isMobile ? '400px' : '800px',
+              height: isMobile ? '300px' : '600px', // LEBIH PENDEK
               marginTop: isMobile ? '1rem' : '1.5rem',
               boxShadow: '0 20px 50px rgba(0,0,0,0.3)',
               position: 'relative',
               overflow: 'hidden',
               border: '3px solid rgba(255,255,255,0.1)',
-              padding: isMobile ? '1.5rem' : '2rem',
+              padding: isMobile ? '1rem' : '2rem',
               boxSizing: 'border-box',
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              justifyContent: 'center'
+              justifyContent: 'flex-start', // FOTO DITARIK KE ATAS
+              paddingTop: isMobile ? '1rem' : '2rem' // PADDING ATAS LEBIH BANYAK
             }}
           >
-            {/* Container untuk 4 foto images/5.jpg */}
+            {/* Container untuk 4 foto images/5.jpg - GRID PANJANG KE BAWAH */}
             <div style={{
               display: 'grid',
               gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)',
+              gridTemplateRows: isMobile ? 'repeat(2, 1fr)' : '1fr',
               gap: isMobile ? '1rem' : '1.5rem',
               width: '100%',
-              height: '100%',
+              height: isMobile ? 'calc(100% - 2rem)' : 'calc(100% - 4rem)',
               alignItems: 'center',
               justifyContent: 'center'
             }}>
@@ -786,7 +788,7 @@ export default function HomePage(): React.JSX.Element {
                 boxShadow: '0 10px 30px rgba(0,0,0,0.4)',
                 border: '2px solid rgba(255,255,255,0.2)',
                 width: '100%',
-                height: isMobile ? '150px' : '250px',
+                height: isMobile ? '120px' : '200px', // LEBIH TINGGI
                 position: 'relative'
               }}>
                 <img 
@@ -818,7 +820,7 @@ export default function HomePage(): React.JSX.Element {
                 boxShadow: '0 10px 30px rgba(0,0,0,0.4)',
                 border: '2px solid rgba(255,255,255,0.2)',
                 width: '100%',
-                height: isMobile ? '150px' : '250px',
+                height: isMobile ? '120px' : '200px', // LEBIH TINGGI
                 position: 'relative'
               }}>
                 <img 
@@ -850,7 +852,7 @@ export default function HomePage(): React.JSX.Element {
                 boxShadow: '0 10px 30px rgba(0,0,0,0.4)',
                 border: '2px solid rgba(255,255,255,0.2)',
                 width: '100%',
-                height: isMobile ? '150px' : '250px',
+                height: isMobile ? '120px' : '200px', // LEBIH TINGGI
                 position: 'relative'
               }}>
                 <img 
@@ -882,7 +884,7 @@ export default function HomePage(): React.JSX.Element {
                 boxShadow: '0 10px 30px rgba(0,0,0,0.4)',
                 border: '2px solid rgba(255,255,255,0.2)',
                 width: '100%',
-                height: isMobile ? '150px' : '250px',
+                height: isMobile ? '120px' : '200px', // LEBIH TINGGI
                 position: 'relative'
               }}>
                 <img 
