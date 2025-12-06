@@ -787,7 +787,7 @@ export default function HomePage(): React.JSX.Element {
                 boxShadow: '0 10px 30px rgba(0,0,0,0.4)',
                 border: '2px solid rgba(255,255,255,0.2)',
                 width: '100%',
-                height: isMobile ? '250px' : '400px', // FOTO LEBIH PANJANG
+                height: isMobile ? '850px' : '800px', // FOTO LEBIH PANJANG
                 position: 'relative'
               }}>
                 <img 
@@ -819,7 +819,7 @@ export default function HomePage(): React.JSX.Element {
                 boxShadow: '0 10px 30px rgba(0,0,0,0.4)',
                 border: '2px solid rgba(255,255,255,0.2)',
                 width: '100%',
-                height: isMobile ? '250px' : '400px', // FOTO LEBIH PANJANG
+                height: isMobile ? '850px' : '800px', // FOTO LEBIH PANJANG
                 position: 'relative'
               }}>
                 <img 
@@ -851,7 +851,7 @@ export default function HomePage(): React.JSX.Element {
                 boxShadow: '0 10px 30px rgba(0,0,0,0.4)',
                 border: '2px solid rgba(255,255,255,0.2)',
                 width: '100%',
-                height: isMobile ? '250px' : '400px', // FOTO LEBIH PANJANG
+                height: isMobile ? '850px' : '800px', // FOTO LEBIH PANJANG
                 position: 'relative'
               }}>
                 <img 
@@ -883,7 +883,7 @@ export default function HomePage(): React.JSX.Element {
                 boxShadow: '0 10px 30px rgba(0,0,0,0.4)',
                 border: '2px solid rgba(255,255,255,0.2)',
                 width: '100%',
-                height: isMobile ? '250px' : '400px', // FOTO LEBIH PANJANG
+                height: isMobile ? '850px' : '800px', // FOTO LEBIH PANJANG
                 position: 'relative'
               }}>
                 <img 
@@ -942,3 +942,4 @@ export default function HomePage(): React.JSX.Element {
     </div>
   );
 }
+
