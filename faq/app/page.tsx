@@ -15,7 +15,7 @@ export default function HomePage(): React.JSX.Element {
   const [cursorText, setCursorText] = useState("");
   const [hoveredLink, setHoveredLink] = useState("");
   const [currentView, setCurrentView] = useState<"main" | "index" | "grid">("main");
-  const [sliderPosition, setSliderPosition] = useState<"index" | "grid">("grid"); // index = kiri, grid = kanan
+  const [sliderPosition, setSliderPosition] = useState<"index" | "grid">("grid");
   const headerRef = useRef<HTMLDivElement>(null);
   const cursorRef = useRef<HTMLDivElement>(null);
   const topNavRef = useRef<HTMLDivElement>(null);
@@ -129,18 +129,6 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // Fungsi untuk langsung ke index
-  const goToIndex = () => {
-    setSliderPosition("index");
-    setCurrentView("index");
-  };
-
-  // Fungsi untuk langsung ke grid/main
-  const goToGrid = () => {
-    setSliderPosition("grid");
-    setCurrentView("main");
-  };
-
   // Warna cursor
   const getCursorColors = () => {
     if (cursorType === "link") {
@@ -163,31 +151,31 @@ export default function HomePage(): React.JSX.Element {
     {
       id: 1,
       title: "Personal Journey",
-      description: "A deep exploration of self-discovery through daily reflections and emotional documentation.",
+      description: "Exploring self-discovery.",
       date: "2024-03-15"
     },
     {
       id: 2,
       title: "Creative Process",
-      description: "Documenting the evolution of ideas from conception to execution in various creative projects.",
+      description: "Ideas evolution documentation.",
       date: "2024-03-10"
     },
     {
       id: 3,
       title: "Visual Storytelling",
-      description: "Using photography and design to capture moments of personal significance and growth.",
+      description: "Photography for personal growth.",
       date: "2024-03-05"
     },
     {
       id: 4,
       title: "Emotional Archive",
-      description: "A collection of feelings, thoughts, and experiences categorized for future reflection.",
+      description: "Collection of feelings.",
       date: "2024-02-28"
     },
     {
       id: 5,
       title: "Growth Metrics",
-      description: "Tracking personal development through measurable goals and achievement milestones.",
+      description: "Tracking development goals.",
       date: "2024-02-20"
     }
   ];
@@ -1025,12 +1013,21 @@ export default function HomePage(): React.JSX.Element {
                 boxSizing: 'border-box'
               }}
             >
-              {/* Container utama untuk halaman Index - Layout 3 kolom sederhana */}
+              {/* Garis bawah di atas MENURU - putih pudar */}
+              <div style={{
+                width: '100%',
+                height: '1px',
+                backgroundColor: isDarkMode ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)',
+                marginBottom: '3rem'
+              }}></div>
+
+              {/* Container utama untuk halaman Index - Layout 3 kolom dengan font sama rata */}
               <div style={{
                 display: 'flex',
                 flexDirection: isMobile ? 'column' : 'row',
-                gap: isMobile ? '2rem' : '4rem',
-                width: '100%'
+                gap: isMobile ? '3rem' : '6rem',
+                width: '100%',
+                fontFamily: 'Helvetica, Arial, sans-serif'
               }}>
                 {/* Kolom kiri - MENURU */}
                 <div style={{
@@ -1041,7 +1038,8 @@ export default function HomePage(): React.JSX.Element {
                     fontSize: isMobile ? '1.8rem' : '2.5rem',
                     fontWeight: '300',
                     textTransform: 'uppercase',
-                    letterSpacing: '2px'
+                    letterSpacing: '2px',
+                    fontFamily: 'Helvetica, Arial, sans-serif'
                   }}>
                     MENURU
                   </div>
@@ -1054,7 +1052,8 @@ export default function HomePage(): React.JSX.Element {
                   <div style={{
                     display: 'flex',
                     flexDirection: 'column',
-                    gap: '1.5rem'
+                    gap: '2rem',
+                    fontFamily: 'Helvetica, Arial, sans-serif'
                   }}>
                     {indexTopics.map((topic) => (
                       <div key={topic.id} style={{
@@ -1066,11 +1065,8 @@ export default function HomePage(): React.JSX.Element {
                           color: isDarkMode ? 'white' : 'black',
                           fontSize: isMobile ? '1.2rem' : '1.5rem',
                           fontWeight: '400',
-                          cursor: 'pointer'
-                        }}
-                        onMouseEnter={() => handleLinkHover("link", "VIEW", `topic-${topic.id}`)}
-                        onMouseLeave={handleLinkLeave}
-                        >
+                          fontFamily: 'Helvetica, Arial, sans-serif'
+                        }}>
                           {topic.title}
                         </div>
                       </div>
@@ -1085,7 +1081,8 @@ export default function HomePage(): React.JSX.Element {
                   <div style={{
                     display: 'flex',
                     flexDirection: 'column',
-                    gap: '1.5rem'
+                    gap: '2rem',
+                    fontFamily: 'Helvetica, Arial, sans-serif'
                   }}>
                     {indexTopics.map((topic) => (
                       <div key={topic.id} style={{
@@ -1093,19 +1090,24 @@ export default function HomePage(): React.JSX.Element {
                         flexDirection: 'column',
                         gap: '0.3rem'
                       }}>
+                        {/* Deskripsi teks pendek - font sama dengan topics */}
+                        <div style={{
+                          color: isDarkMode ? 'white' : 'black',
+                          fontSize: isMobile ? '1.2rem' : '1.5rem',
+                          fontWeight: '400',
+                          fontFamily: 'Helvetica, Arial, sans-serif',
+                          marginBottom: '0.5rem'
+                        }}>
+                          {topic.description}
+                        </div>
+                        {/* Tanggal - font lebih kecil */}
                         <div style={{
                           color: isDarkMode ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.6)',
                           fontSize: '0.9rem',
-                          fontWeight: '400'
+                          fontWeight: '400',
+                          fontFamily: 'Helvetica, Arial, sans-serif'
                         }}>
                           {topic.date}
-                        </div>
-                        <div style={{
-                          color: isDarkMode ? 'rgba(255,255,255,0.8)' : 'rgba(0,0,0,0.8)',
-                          fontSize: '0.95rem',
-                          lineHeight: 1.4
-                        }}>
-                          {topic.description}
                         </div>
                       </div>
                     ))}
@@ -1191,14 +1193,16 @@ export default function HomePage(): React.JSX.Element {
             <span style={{
               color: isDarkMode ? 'white' : 'black',
               fontSize: '0.8rem',
-              fontWeight: '600'
+              fontWeight: '600',
+              fontFamily: 'Helvetica, Arial, sans-serif'
             }}>
               INDEX
             </span>
             <span style={{
               color: isDarkMode ? 'white' : 'black',
               fontSize: '0.8rem',
-              fontWeight: '600'
+              fontWeight: '600',
+              fontFamily: 'Helvetica, Arial, sans-serif'
             }}>
               GRID
             </span>
@@ -1223,7 +1227,8 @@ export default function HomePage(): React.JSX.Element {
         <div style={{
           color: isDarkMode ? 'white' : 'black',
           fontSize: '0.9rem',
-          fontWeight: '500'
+          fontWeight: '500',
+          fontFamily: 'Helvetica, Arial, sans-serif'
         }}>
           {sliderPosition === "index" ? "Index View" : "Grid View"}
         </div>
