@@ -21,6 +21,7 @@ export default function HomePage(): React.JSX.Element {
   const cursorRef = useRef<HTMLDivElement>(null);
   const topNavRef = useRef<HTMLDivElement>(null);
   const scrollTextRef = useRef<HTMLDivElement>(null);
+  const topicContainerRef = useRef<HTMLDivElement>(null);
 
   // Animasi loading text
   const loadingTexts = [
@@ -1121,77 +1122,16 @@ export default function HomePage(): React.JSX.Element {
                 marginBottom: '3rem'
               }}></div>
 
-              {/* Gambar hover - muncul di sebelah kiri topics */}
-              <AnimatePresence>
-                {hoveredTopic !== null && (
-                  <motion.div
-                    key="hovered-image"
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -20 }}
-                    transition={{ duration: 0.3 }}
-                    style={{
-                      position: 'absolute',
-                      left: isMobile ? '1rem' : 'calc(33.33% + 4rem)', // Posisi di sebelah kiri kolom tengah
-                      top: '50%',
-                      transform: 'translateY(-50%)',
-                      zIndex: 5,
-                      pointerEvents: 'none',
-                      width: isMobile ? '100px' : '300px', // Lebar portrait
-                      height: isMobile ? '400px' : '800px', // Tinggi portrait panjang
-                      overflow: 'hidden'
-                    }}
-                  >
-                    {/* Gambar portrait panjang */}
-                    <motion.div
-                      initial={{ scale: 0.95 }}
-                      animate={{ scale: 1 }}
-                      exit={{ scale: 0.95 }}
-                      transition={{ duration: 0.4 }}
-                      style={{
-                        width: '100%',
-                        height: '100%',
-                        overflow: 'hidden',
-                        borderRadius: '15px',
-                        boxShadow: '0 15px 40px rgba(0,0,0,0.6)',
-                        border: '2px solid rgba(255,255,255,0.15)'
-                      }}
-                    >
-                      <img 
-                        src="images/5.jpg" 
-                        alt={`Topic ${hoveredTopic}`}
-                        style={{
-                          width: '100%',
-                          height: '100%',
-                          display: 'block',
-                          objectFit: 'cover'
-                        }}
-                        onError={(e) => {
-                          console.error("Gambar topic tidak ditemukan:", e);
-                          e.currentTarget.style.backgroundColor = isDarkMode ? '#333' : '#eee';
-                          e.currentTarget.style.display = 'flex';
-                          e.currentTarget.style.alignItems = 'center';
-                          e.currentTarget.style.justifyContent = 'center';
-                          e.currentTarget.style.color = isDarkMode ? '#fff' : '#000';
-                          e.currentTarget.innerHTML = '<div style="padding: 2rem; text-align: center;">Topic Image</div>';
-                        }}
-                      />
-                    </motion.div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-
-              {/* Container utama untuk halaman Index */}
-              <div style={{
+              {/* Container utama untuk halaman Index - 4 kolom (MENURU + Gambar + Topics + Deskripsi) */}
+              <div ref={topicContainerRef} style={{
                 display: 'flex',
                 flexDirection: isMobile ? 'column' : 'row',
-                gap: isMobile ? '1.5rem' : '3rem',
+                gap: isMobile ? '1.5rem' : '4rem',
                 width: '100%',
                 fontFamily: 'Helvetica, Arial, sans-serif',
-                position: 'relative',
-                zIndex: 10
+                position: 'relative'
               }}>
-                {/* Kolom kiri - MENURU */}
+                {/* Kolom 1 - MENURU */}
                 <div style={{
                   flex: 1
                 }}>
@@ -1208,7 +1148,69 @@ export default function HomePage(): React.JSX.Element {
                   </div>
                 </div>
 
-                {/* Kolom tengah - Topics dengan garis hover */}
+                {/* Kolom 2 - Gambar Hover */}
+                <div style={{
+                  flex: 1,
+                  position: 'relative',
+                  minHeight: isMobile ? '400px' : '600px'
+                }}>
+                  <AnimatePresence>
+                    {hoveredTopic !== null && (
+                      <motion.div
+                        key="hovered-image"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.3 }}
+                        style={{
+                          position: 'absolute',
+                          top: 0,
+                          left: 0,
+                          width: '100%',
+                          height: '100%'
+                        }}
+                      >
+                        {/* Gambar normal */}
+                        <motion.div
+                          initial={{ scale: 0.95 }}
+                          animate={{ scale: 1 }}
+                          exit={{ scale: 0.95 }}
+                          transition={{ duration: 0.4 }}
+                          style={{
+                            width: '100%',
+                            height: '100%',
+                            overflow: 'hidden',
+                            borderRadius: '15px',
+                            boxShadow: '0 10px 30px rgba(0,0,0,0.5)',
+                            border: '1px solid rgba(255,255,255,0.1)'
+                          }}
+                        >
+                          <img 
+                            src="images/5.jpg" 
+                            alt={`Topic ${hoveredTopic}`}
+                            style={{
+                              width: '100%',
+                              height: '100%',
+                              display: 'block',
+                              objectFit: 'cover'
+                            }}
+                            onError={(e) => {
+                              console.error("Gambar topic tidak ditemukan:", e);
+                              e.currentTarget.style.backgroundColor = isDarkMode ? '#333' : '#eee';
+                              e.currentTarget.style.display = 'flex';
+                              e.currentTarget.style.alignItems = 'center';
+                              e.currentTarget.style.justifyContent = 'center';
+                              e.currentTarget.style.color = isDarkMode ? '#fff' : '#000';
+                              e.currentTarget.innerHTML = '<div style="padding: 2rem; text-align: center;">Topic Image</div>';
+                            }}
+                          />
+                        </motion.div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+
+                {/* Kolom 3 - Topics */}
                 <div style={{
                   flex: 1,
                   position: 'relative'
@@ -1228,7 +1230,7 @@ export default function HomePage(): React.JSX.Element {
                           display: 'flex',
                           flexDirection: 'column',
                           position: 'relative',
-                          padding: '0.5rem 0',
+                          padding: isMobile ? '0.8rem 0' : '1rem 0',
                           cursor: 'pointer'
                         }}
                       >
@@ -1237,7 +1239,7 @@ export default function HomePage(): React.JSX.Element {
                           {hoveredTopic === topic.id && (
                             <motion.div
                               initial={{ width: 0, opacity: 0 }}
-                              animate={{ width: 'calc(100vw - 100px)', opacity: 1 }}
+                              animate={{ width: '100%', opacity: 1 }}
                               exit={{ width: 0, opacity: 0 }}
                               transition={{ duration: 0.3 }}
                               style={{
@@ -1274,7 +1276,7 @@ export default function HomePage(): React.JSX.Element {
                   </div>
                 </div>
 
-                {/* Kolom kanan - Deskripsi dan Tanggal SEJAJAR */}
+                {/* Kolom 4 - Deskripsi dan Tanggal SEJAJAR */}
                 <div style={{
                   flex: 1
                 }}>
@@ -1284,7 +1286,7 @@ export default function HomePage(): React.JSX.Element {
                     gap: '0.3rem',
                     fontFamily: 'Helvetica, Arial, sans-serif'
                   }}>
-                    {indexTopics.map((topic) => (
+                    {indexTopics.map((topic, index) => (
                       <div 
                         key={topic.id}
                         onMouseEnter={() => handleTopicHover(topic.id)}
@@ -1292,7 +1294,7 @@ export default function HomePage(): React.JSX.Element {
                         style={{
                           display: 'flex',
                           flexDirection: 'column',
-                          padding: '0.5rem 0',
+                          padding: isMobile ? '0.8rem 0' : '1rem 0',
                           cursor: 'pointer'
                         }}
                       >
@@ -1338,8 +1340,7 @@ export default function HomePage(): React.JSX.Element {
                 marginTop: '4rem',
                 marginBottom: '4rem',
                 paddingLeft: isMobile ? '1rem' : '2rem',
-                paddingRight: isMobile ? '1rem' : '2rem',
-                zIndex: 10
+                paddingRight: isMobile ? '1rem' : '2rem'
               }}>
                 <div style={{
                   display: 'flex',
