@@ -119,10 +119,6 @@ export default function HomePage(): React.JSX.Element {
   const nextPhoto = () => {
     setCurrentPhotoIndex((prev) => {
       const nextIndex = (prev + 1) % progressPhotos.length;
-      // Reset progress untuk memulai dari kosong lagi
-      if (progressAnimationRef.current) {
-        progressAnimationRef.current.kill();
-      }
       return nextIndex;
     });
   };
@@ -131,16 +127,13 @@ export default function HomePage(): React.JSX.Element {
   const prevPhoto = () => {
     setCurrentPhotoIndex((prev) => {
       const prevIndex = (prev - 1 + progressPhotos.length) % progressPhotos.length;
-      // Reset progress untuk memulai dari kosong lagi
-      if (progressAnimationRef.current) {
-        progressAnimationRef.current.kill();
-      }
       return prevIndex;
     });
   };
 
   // Start progress animation
   const startProgressAnimation = () => {
+    // Hentikan animasi sebelumnya
     if (progressAnimationRef.current) {
       progressAnimationRef.current.kill();
     }
@@ -157,7 +150,7 @@ export default function HomePage(): React.JSX.Element {
     if (currentFill) {
       progressAnimationRef.current = gsap.to(currentFill, {
         width: '100%',
-        duration: 10, // LAMBAT: 10 detik
+        duration: 15, // SANGAT LAMBAT: 15 detik
         ease: "linear",
         onComplete: () => {
           // Setelah bar penuh, pindah ke foto berikutnya
@@ -267,12 +260,12 @@ export default function HomePage(): React.JSX.Element {
     const clickX = e.clientX - rect.left;
     const width = rect.width;
     
-    // Klik di bagian kiri foto (30% pertama) -> previous
-    if (clickX < width * 0.3) {
+    // Klik di bagian kiri foto (40% pertama) -> previous
+    if (clickX < width * 0.4) {
       prevPhoto();
     }
-    // Klik di bagian kanan foto (30% terakhir) -> next
-    else if (clickX > width * 0.7) {
+    // Klik di bagian kanan foto (40% terakhir) -> next
+    else if (clickX > width * 0.6) {
       nextPhoto();
     }
     // Klik di tengah -> tidak melakukan apa-apa
@@ -1159,7 +1152,7 @@ export default function HomePage(): React.JSX.Element {
                 </div>
               </div>
 
-              {/* Progress Bar dengan 3 Foto - DESAIN SEPERTI CARD */}
+              {/* Progress Bar dengan 3 Foto - VERSI BENAR */}
               <div style={{
                 width: '100%',
                 padding: isMobile ? '1rem' : '2rem',
@@ -1172,30 +1165,30 @@ export default function HomePage(): React.JSX.Element {
                   flexDirection: 'column',
                   gap: isMobile ? '1rem' : '1.5rem',
                   alignItems: 'center',
-                  maxWidth: '1000px',
+                  maxWidth: '800px',
                   margin: '0 auto'
                 }}>
-                  {/* Container Progress Bar - PENDEK */}
+                  {/* Container Progress Bar - GEMUK dan LEBAR */}
                   <div style={{
                     width: '100%',
                     display: 'flex',
                     alignItems: 'center',
-                    gap: isMobile ? '0.3rem' : '0.5rem',
-                    marginBottom: '0.5rem'
+                    gap: isMobile ? '0.5rem' : '0.8rem',
+                    marginBottom: '0.8rem'
                   }}>
                     {progressPhotos.map((_, index) => (
                       <div 
                         key={index}
                         style={{
                           flex: 1,
-                          height: '2px', // SANGAT PENDEK
-                          backgroundColor: isDarkMode ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.15)', // BACKGROUND KOSONG TERLIHAT
-                          borderRadius: '1px',
+                          height: '8px', // GEMUK
+                          backgroundColor: isDarkMode ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.2)', // BACKGROUND KOSONG TERLIHAT
+                          borderRadius: '4px', // BORDER RADIUS UNTUK GEMUK
                           overflow: 'hidden',
                           position: 'relative'
                         }}
                       >
-                        {/* Progress Fill - PUTIH */}
+                        {/* Progress Fill - PUTIH GEMUK */}
                         <div
                           className="progress-fill"
                           data-index={index}
@@ -1205,7 +1198,7 @@ export default function HomePage(): React.JSX.Element {
                             top: 0,
                             bottom: 0,
                             backgroundColor: 'white', // WARNA PUTIH
-                            borderRadius: '1px',
+                            borderRadius: '4px',
                             width: '0%' // AWAL KOSONG
                           }}
                         />
@@ -1213,19 +1206,20 @@ export default function HomePage(): React.JSX.Element {
                     ))}
                   </div>
 
-                  {/* Foto Card Style - SEPERTI DESIGN CARD */}
+                  {/* Foto Portrait - TIDAK TERLALU LEBAR, PANJANG KE BAWAH */}
                   <motion.div
                     onClick={handlePhotoClick}
                     style={{
                       position: 'relative',
                       width: '100%',
-                      height: isMobile ? '400px' : '500px', // UKURAN CARD
-                      borderRadius: '15px',
+                      maxWidth: '600px', // TIDAK TERLALU LEBAR
+                      height: isMobile ? '500px' : '700px', // PANJANG KE BAWAH
+                      borderRadius: '10px',
                       overflow: 'hidden',
-                      boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
+                      boxShadow: '0 8px 25px rgba(0,0,0,0.4)',
                       border: `1px solid ${isDarkMode ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.15)'}`,
                       cursor: 'none',
-                      backgroundColor: isDarkMode ? 'rgba(30, 30, 30, 0.5)' : 'rgba(250, 250, 250, 0.5)'
+                      margin: '0 auto'
                     }}
                     onMouseEnter={() => handleLinkHover("link", "CLICK LEFT/RIGHT", "photo-nav")}
                     onMouseLeave={handleLinkLeave}
@@ -1275,10 +1269,10 @@ export default function HomePage(): React.JSX.Element {
                       display: 'flex',
                       pointerEvents: 'none'
                     }}>
-                      {/* Area klik kiri (30% pertama) */}
+                      {/* Area klik kiri (40% pertama) */}
                       <div 
                         style={{
-                          flex: 3,
+                          flex: 4,
                           backgroundColor: 'transparent',
                           pointerEvents: 'auto',
                           cursor: 'none'
@@ -1289,16 +1283,16 @@ export default function HomePage(): React.JSX.Element {
                         }}
                       />
                       
-                      {/* Area tengah (40%) - tidak melakukan apa-apa */}
+                      {/* Area tengah (20%) - tidak melakukan apa-apa */}
                       <div style={{
-                        flex: 4,
+                        flex: 2,
                         backgroundColor: 'transparent'
                       }} />
                       
-                      {/* Area klik kanan (30% terakhir) */}
+                      {/* Area klik kanan (40% terakhir) */}
                       <div 
                         style={{
-                          flex: 3,
+                          flex: 4,
                           backgroundColor: 'transparent',
                           pointerEvents: 'auto',
                           cursor: 'none'
@@ -1310,7 +1304,7 @@ export default function HomePage(): React.JSX.Element {
                       />
                     </div>
 
-                    {/* Indikator posisi */}
+                    {/* Indikator posisi sederhana - TANPA ANGKA */}
                     <div style={{
                       position: 'absolute',
                       top: '1rem',
@@ -1322,9 +1316,10 @@ export default function HomePage(): React.JSX.Element {
                       fontSize: '0.8rem',
                       color: 'white',
                       fontWeight: '500',
-                      pointerEvents: 'none'
+                      pointerEvents: 'none',
+                      opacity: 0.7
                     }}>
-                      {currentPhotoIndex + 1} / {progressPhotos.length}
+                      Click left/right
                     </div>
                   </motion.div>
                 </div>
