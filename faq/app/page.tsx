@@ -14,15 +14,13 @@ export default function HomePage(): React.JSX.Element {
   const [cursorType, setCursorType] = useState("default");
   const [cursorText, setCursorText] = useState("");
   const [hoveredLink, setHoveredLink] = useState("");
-  const [isDescriptionVisible, setIsDescriptionVisible] = useState(true);
-  const [lastScrollY, setLastScrollY] = useState(0);
+  const [showDescription, setShowDescription] = useState(true); // Hanya untuk teks deskripsi
   const [hasScrolled, setHasScrolled] = useState(false);
   
   const headerRef = useRef<HTMLDivElement>(null);
   const cursorRef = useRef<HTMLDivElement>(null);
   const topNavRef = useRef<HTMLDivElement>(null);
   const scrollTextRef = useRef<HTMLDivElement>(null);
-  const descriptionRef = useRef<HTMLDivElement>(null);
 
   // Animasi loading text
   const loadingTexts = [
@@ -31,37 +29,11 @@ export default function HomePage(): React.JSX.Element {
     "NGAMATI", "NANCANG", "NGEMBANGKAN", "NYUSUN"
   ];
 
-  // Fungsi untuk menangani scroll
-  const handleScroll = () => {
-    const currentScrollY = window.scrollY;
-    
-    // Set flag bahwa user sudah scroll
-    if (currentScrollY > 0 && !hasScrolled) {
-      setHasScrolled(true);
-    }
-    
-    // Tampilkan deskripsi jika scroll di atas 50px
-    if (currentScrollY < 50) {
-      setIsDescriptionVisible(true);
-    } 
-    // Sembunyikan deskripsi jika scroll ke bawah dan sudah melewati threshold
-    else if (currentScrollY > lastScrollY && currentScrollY > 100 && hasScrolled) {
-      setIsDescriptionVisible(false);
-    } 
-    // Tampilkan deskripsi jika scroll ke atas
-    else if (currentScrollY < lastScrollY && hasScrolled) {
-      setIsDescriptionVisible(true);
-    }
-    
-    setLastScrollY(currentScrollY);
-  };
-
   useEffect(() => {
-    // Reset semua state scroll-related saat reload
-    setIsDescriptionVisible(true);
-    setLastScrollY(0);
+    // Reset state saat reload
+    setShowDescription(true);
     setHasScrolled(false);
-    
+
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 768);
     };
@@ -119,28 +91,36 @@ export default function HomePage(): React.JSX.Element {
       }
     };
 
-    // Event listener untuk scroll - throttled
+    // Handle scroll untuk hide teks deskripsi
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      
+      // Set flag bahwa user sudah scroll
+      if (currentScrollY > 50 && !hasScrolled) {
+        setHasScrolled(true);
+        // Hilangkan teks deskripsi PERMANEN setelah scroll pertama
+        setShowDescription(false);
+      }
+    };
+
+    // Throttle scroll handler
     let scrollTimeout: NodeJS.Timeout;
-    const throttledScroll = () => {
+    const throttledHandleScroll = () => {
       if (!scrollTimeout) {
         scrollTimeout = setTimeout(() => {
           handleScroll();
           scrollTimeout = null as any;
-        }, 50); // Throttle 50ms
+        }, 100);
       }
     };
 
-    window.addEventListener('scroll', throttledScroll, { passive: true });
-
-    // Tampilkan deskripsi saat pertama kali load
-    setIsDescriptionVisible(true);
-
+    window.addEventListener('scroll', throttledHandleScroll, { passive: true });
     document.addEventListener('mousemove', moveCursor);
 
     return () => {
       window.removeEventListener('resize', checkMobile);
       window.removeEventListener('resize', setupAutoScroll);
-      window.removeEventListener('scroll', throttledScroll);
+      window.removeEventListener('scroll', throttledHandleScroll);
       clearInterval(textInterval);
       clearTimeout(loadingTimeout);
       if (scrollTimeout) clearTimeout(scrollTimeout);
@@ -149,7 +129,7 @@ export default function HomePage(): React.JSX.Element {
         gsap.killTweensOf(scrollTextRef.current);
       }
     };
-  }, [isMobile]);
+  }, [isMobile, hasScrolled]);
 
   // Fungsi toggle dark/light mode
   const toggleColorMode = () => {
@@ -698,16 +678,15 @@ export default function HomePage(): React.JSX.Element {
         zIndex: 10,
         position: 'relative'
       }}>
-        {/* Deskripsi MENURU - 3 baris - HANYA INI YANG HILANG */}
+        {/* HANYA TEKS DESKRIPSI YANG MUNCUL/HILANG */}
         <AnimatePresence>
-          {isDescriptionVisible && (
+          {showDescription && (
             <motion.div
-              ref={descriptionRef}
               key="description-text"
               initial={{ opacity: 1, height: "auto" }}
               animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.4 }}
+              transition={{ duration: 0.3 }}
               style={{
                 marginBottom: isMobile ? '2rem' : '3rem',
                 paddingLeft: isMobile ? '0.5rem' : '1rem',
@@ -733,7 +712,8 @@ export default function HomePage(): React.JSX.Element {
           )}
         </AnimatePresence>
 
-        {/* Container untuk 2 foto - FOTO TETAP TAMPIL */}
+        {/* FOTO-FOTO TETAP TAMPIL (TIDAK DIBUNGKUS ANIMATION) */}
+        {/* Container untuk 2 foto */}
         <div style={{
           display: 'flex',
           flexDirection: isMobile ? 'column' : 'row',
@@ -744,7 +724,7 @@ export default function HomePage(): React.JSX.Element {
           marginTop: '1rem',
           marginBottom: isMobile ? '2rem' : '3rem'
         }}>
-          {/* Foto 1 - Sisi kiri, SANGAT PANJANG */}
+          {/* Foto 1 - Sisi kiri */}
           <div style={{
             flex: 1,
             overflow: 'hidden',
@@ -767,7 +747,6 @@ export default function HomePage(): React.JSX.Element {
                 borderRadius: '22px'
               }}
               onError={(e) => {
-                console.error("Gambar kiri tidak ditemukan:", e);
                 e.currentTarget.style.backgroundColor = isDarkMode ? '#333' : '#eee';
                 e.currentTarget.style.display = 'flex';
                 e.currentTarget.style.alignItems = 'center';
@@ -779,7 +758,7 @@ export default function HomePage(): React.JSX.Element {
             />
           </div>
 
-          {/* Foto 2 - Sisi kanan, SANGAT PANJANG */}
+          {/* Foto 2 - Sisi kanan */}
           <div style={{
             flex: 1,
             overflow: 'hidden',
@@ -802,7 +781,6 @@ export default function HomePage(): React.JSX.Element {
                 borderRadius: '22px'
               }}
               onError={(e) => {
-                console.error("Gambar kanan tidak ditemukan:", e);
                 e.currentTarget.style.backgroundColor = isDarkMode ? '#333' : '#eee';
                 e.currentTarget.style.display = 'flex';
                 e.currentTarget.style.alignItems = 'center';
@@ -815,7 +793,7 @@ export default function HomePage(): React.JSX.Element {
           </div>
         </div>
 
-        {/* Card #0050B7 dengan 4 foto images/5.jpg - FOTO TETAP TAMPIL */}
+        {/* Card #0050B7 dengan 4 foto */}
         <div
           style={{
             width: 'calc(100% - 4rem)',
@@ -838,7 +816,7 @@ export default function HomePage(): React.JSX.Element {
             justifyContent: 'flex-start'
           }}
         >
-          {/* Container untuk 4 foto images/5.jpg - GRID TETAP SAMA */}
+          {/* Container untuk 4 foto */}
           <div style={{
             display: 'grid',
             gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)',
@@ -849,7 +827,7 @@ export default function HomePage(): React.JSX.Element {
             alignItems: 'flex-start',
             justifyContent: 'center'
           }}>
-            {/* Foto 1 - images/5.jpg - LEBIH LEBAR KE SAMPING */}
+            {/* Foto 1 */}
             <div style={{
               overflow: 'hidden',
               borderRadius: '20px',
@@ -870,7 +848,6 @@ export default function HomePage(): React.JSX.Element {
                   borderRadius: '18px'
                 }}
                 onError={(e) => {
-                  console.error("Gambar portrait 1 tidak ditemukan:", e);
                   e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.1)';
                   e.currentTarget.style.display = 'flex';
                   e.currentTarget.style.alignItems = 'center';
@@ -881,7 +858,7 @@ export default function HomePage(): React.JSX.Element {
               />
             </div>
 
-            {/* Foto 2 - images/5.jpg - LEBIH LEBAR KE SAMPING */}
+            {/* Foto 2 */}
             <div style={{
               overflow: 'hidden',
               borderRadius: '20px',
@@ -902,7 +879,6 @@ export default function HomePage(): React.JSX.Element {
                   borderRadius: '18px'
                 }}
                 onError={(e) => {
-                  console.error("Gambar portrait 2 tidak ditemukan:", e);
                   e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.1)';
                   e.currentTarget.style.display = 'flex';
                   e.currentTarget.style.alignItems = 'center';
@@ -913,7 +889,7 @@ export default function HomePage(): React.JSX.Element {
               />
             </div>
 
-            {/* Foto 3 - images/5.jpg - LEBIH LEBAR KE SAMPING */}
+            {/* Foto 3 */}
             <div style={{
               overflow: 'hidden',
               borderRadius: '20px',
@@ -934,7 +910,6 @@ export default function HomePage(): React.JSX.Element {
                   borderRadius: '18px'
                 }}
                 onError={(e) => {
-                  console.error("Gambar portrait 3 tidak ditemukan:", e);
                   e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.1)';
                   e.currentTarget.style.display = 'flex';
                   e.currentTarget.style.alignItems = 'center';
@@ -945,7 +920,7 @@ export default function HomePage(): React.JSX.Element {
               />
             </div>
 
-            {/* Foto 4 - images/5.jpg - LEBIH LEBAR KE SAMPING */}
+            {/* Foto 4 */}
             <div style={{
               overflow: 'hidden',
               borderRadius: '20px',
@@ -966,7 +941,6 @@ export default function HomePage(): React.JSX.Element {
                   borderRadius: '18px'
                 }}
                 onError={(e) => {
-                  console.error("Gambar portrait 4 tidak ditemukan:", e);
                   e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.1)';
                   e.currentTarget.style.display = 'flex';
                   e.currentTarget.style.alignItems = 'center';
@@ -979,7 +953,7 @@ export default function HomePage(): React.JSX.Element {
           </div>
         </div>
 
-        {/* Content tambahan untuk membuat halaman lebih panjang */}
+        {/* Content tambahan */}
         <div style={{
           height: '100vh',
           width: '100%',
