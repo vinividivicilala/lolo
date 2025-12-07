@@ -18,13 +18,13 @@ export default function HomePage(): React.JSX.Element {
   const [sliderPosition, setSliderPosition] = useState<"index" | "grid">("grid");
   const [hoveredTopic, setHoveredTopic] = useState<number | null>(null);
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
-  const [isProgressActive, setIsProgressActive] = useState(true);
+  const [progressAnimationKey, setProgressAnimationKey] = useState(0);
   const headerRef = useRef<HTMLDivElement>(null);
   const cursorRef = useRef<HTMLDivElement>(null);
   const topNavRef = useRef<HTMLDivElement>(null);
   const scrollTextRef = useRef<HTMLDivElement>(null);
   const topicContainerRef = useRef<HTMLDivElement>(null);
-  const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const progressFillRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   // Animasi loading text
   const loadingTexts = [
@@ -109,9 +109,6 @@ export default function HomePage(): React.JSX.Element {
       if (scrollTextRef.current) {
         gsap.killTweensOf(scrollTextRef.current);
       }
-      if (progressIntervalRef.current) {
-        clearInterval(progressIntervalRef.current);
-      }
     };
   }, [isMobile]);
 
@@ -119,48 +116,21 @@ export default function HomePage(): React.JSX.Element {
   const nextPhoto = () => {
     setCurrentPhotoIndex((prev) => {
       const nextIndex = (prev + 1) % progressPhotos.length;
-      // Reset progress untuk bar berikutnya
-      if (nextIndex === 0) {
-        // Jika sudah di foto terakhir, reset semua bar
-        return 0;
-      }
+      // Reset progress animation key untuk memicu animasi baru
+      setProgressAnimationKey(prev => prev + 1);
       return nextIndex;
     });
-    setIsProgressActive(true);
   };
 
   // Fungsi untuk mundur ke foto sebelumnya
   const prevPhoto = () => {
     setCurrentPhotoIndex((prev) => {
       const prevIndex = (prev - 1 + progressPhotos.length) % progressPhotos.length;
+      // Reset progress animation key untuk memicu animasi baru
+      setProgressAnimationKey(prev => prev + 1);
       return prevIndex;
     });
-    setIsProgressActive(true);
   };
-
-  // Reset progress interval
-  useEffect(() => {
-    if (progressIntervalRef.current) {
-      clearTimeout(progressIntervalRef.current);
-    }
-
-    if (isProgressActive && currentPhotoIndex < progressPhotos.length) {
-      progressIntervalRef.current = setTimeout(() => {
-        if (currentPhotoIndex === progressPhotos.length - 1) {
-          // Jika sudah di foto terakhir, kembali ke awal
-          setCurrentPhotoIndex(0);
-        } else {
-          nextPhoto();
-        }
-      }, 7000); // 7 detik untuk setiap foto (lebih lambat)
-    }
-
-    return () => {
-      if (progressIntervalRef.current) {
-        clearTimeout(progressIntervalRef.current);
-      }
-    };
-  }, [currentPhotoIndex, isProgressActive]);
 
   // Fungsi toggle dark/light mode
   const toggleColorMode = () => {
@@ -253,16 +223,67 @@ export default function HomePage(): React.JSX.Element {
     const clickX = e.clientX - rect.left;
     const width = rect.width;
     
-    // Klik di bagian kiri foto (25% pertama) -> previous
-    if (clickX < width * 0.25) {
+    // Klik di bagian kiri foto (30% pertama) -> previous
+    if (clickX < width * 0.3) {
       prevPhoto();
     }
-    // Klik di bagian kanan foto (25% terakhir) -> next
-    else if (clickX > width * 0.75) {
+    // Klik di bagian kanan foto (30% terakhir) -> next
+    else if (clickX > width * 0.7) {
       nextPhoto();
     }
     // Klik di tengah -> tidak melakukan apa-apa
   };
+
+  // Reset semua bar progress ke kosong
+  const resetAllProgressBars = () => {
+    progressFillRefs.current.forEach((ref, index) => {
+      if (ref) {
+        ref.style.width = '0%';
+      }
+    });
+  };
+
+  // Efek untuk memulai animasi progress bar
+  useEffect(() => {
+    // Reset semua bar terlebih dahulu
+    resetAllProgressBars();
+
+    // Mulai animasi untuk bar yang aktif
+    const currentFillRef = progressFillRefs.current[currentPhotoIndex];
+    if (currentFillRef) {
+      // Hapus animasi sebelumnya jika ada
+      gsap.killTweensOf(currentFillRef);
+      
+      // Mulai animasi baru
+      gsap.to(currentFillRef, {
+        width: '100%',
+        duration: 8, // LAMBAT: 8 detik
+        ease: "linear",
+        onComplete: () => {
+          // Setelah bar penuh, pindah ke foto berikutnya
+          setTimeout(() => {
+            nextPhoto();
+          }, 300); // Tunggu sebentar sebelum pindah
+        }
+      });
+    }
+
+    // Set bar sebelumnya tetap penuh
+    for (let i = 0; i < currentPhotoIndex; i++) {
+      const prevFillRef = progressFillRefs.current[i];
+      if (prevFillRef) {
+        prevFillRef.style.width = '100%';
+      }
+    }
+
+    // Set bar setelahnya tetap kosong
+    for (let i = currentPhotoIndex + 1; i < progressPhotos.length; i++) {
+      const nextFillRef = progressFillRefs.current[i];
+      if (nextFillRef) {
+        nextFillRef.style.width = '0%';
+      }
+    }
+  }, [currentPhotoIndex, progressAnimationKey]);
 
   return (
     <div style={{
@@ -1145,7 +1166,7 @@ export default function HomePage(): React.JSX.Element {
                 </div>
               </div>
 
-              {/* Progress Bar dengan 3 Foto - VERSI BENAR */}
+              {/* Progress Bar dengan 3 Foto - VERSI BENAR SEKALI */}
               <div style={{
                 width: '100%',
                 padding: isMobile ? '1rem' : '2rem',
@@ -1161,12 +1182,12 @@ export default function HomePage(): React.JSX.Element {
                   maxWidth: '1200px',
                   margin: '0 auto'
                 }}>
-                  {/* Container Progress Bar - LEBAR dan TIDAK PANJANG */}
+                  {/* Container Progress Bar - PENDEK dan LEBAR */}
                   <div style={{
                     width: '100%',
                     display: 'flex',
                     alignItems: 'center',
-                    gap: isMobile ? '0.8rem' : '1rem',
+                    gap: isMobile ? '0.5rem' : '0.8rem',
                     marginBottom: '1rem'
                   }}>
                     {progressPhotos.map((_, index) => (
@@ -1174,60 +1195,38 @@ export default function HomePage(): React.JSX.Element {
                         key={index}
                         style={{
                           flex: 1,
-                          height: '6px', // TEBAL SEDANG
-                          backgroundColor: isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
-                          borderRadius: '3px',
+                          height: '4px', // PENDEK
+                          backgroundColor: isDarkMode ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.2)', // BACKGROUND KOSONG TERLIHAT
+                          borderRadius: '2px',
                           overflow: 'hidden',
                           position: 'relative'
                         }}
                       >
-                        {/* Progress Fill - hanya untuk bar yang aktif atau sudah terisi */}
-                        {index <= currentPhotoIndex && (
-                          <motion.div
-                            style={{
-                              position: 'absolute',
-                              left: 0,
-                              top: 0,
-                              bottom: 0,
-                              backgroundColor: '#00FF00',
-                              borderRadius: '3px',
-                              width: index === currentPhotoIndex ? '0%' : '100%'
-                            }}
-                            initial={index === currentPhotoIndex ? { width: "0%" } : { width: "100%" }}
-                            animate={index === currentPhotoIndex ? { width: "100%" } : { width: "100%" }}
-                            transition={index === currentPhotoIndex ? { 
-                              duration: 7, // SANGAT LAMBAT
-                              ease: "linear"
-                            } : { duration: 0 }}
-                            onAnimationComplete={() => {
-                              // Setelah animasi selesai di bar aktif, pindah ke foto berikutnya
-                              if (index === currentPhotoIndex) {
-                                if (currentPhotoIndex === progressPhotos.length - 1) {
-                                  // Jika sudah di foto terakhir, kembali ke awal
-                                  setTimeout(() => {
-                                    setCurrentPhotoIndex(0);
-                                  }, 500);
-                                } else {
-                                  setTimeout(() => {
-                                    nextPhoto();
-                                  }, 500);
-                                }
-                              }
-                            }}
-                          />
-                        )}
+                        {/* Progress Fill - PUTIH */}
+                        <div
+                          ref={el => progressFillRefs.current[index] = el}
+                          style={{
+                            position: 'absolute',
+                            left: 0,
+                            top: 0,
+                            bottom: 0,
+                            backgroundColor: 'white', // WARNA PUTIH
+                            borderRadius: '2px',
+                            width: '0%' // AWAL KOSONG
+                          }}
+                        />
                       </div>
                     ))}
                   </div>
 
-                  {/* Foto Besar - PANJANG KE BAWAH dan LEBAR */}
+                  {/* Foto Portrait Besar - PANJANG KE BAWAH dan SAMPING */}
                   <motion.div
                     onClick={handlePhotoClick}
                     style={{
                       position: 'relative',
                       width: '100%',
-                      height: isMobile ? '500px' : '700px', // TINGGI
-                      borderRadius: '15px',
+                      height: isMobile ? '600px' : '800px', // TINGGI - PANJANG KE BAWAH
+                      borderRadius: '10px',
                       overflow: 'hidden',
                       boxShadow: '0 15px 40px rgba(0,0,0,0.4)',
                       border: `2px solid ${isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}`,
@@ -1244,7 +1243,7 @@ export default function HomePage(): React.JSX.Element {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        transition={{ duration: 0.5 }}
+                        transition={{ duration: 0.3 }}
                         style={{
                           width: '100%',
                           height: '100%'
@@ -1256,7 +1255,7 @@ export default function HomePage(): React.JSX.Element {
                           style={{
                             width: '100%',
                             height: '100%',
-                            objectFit: 'cover',
+                            objectFit: 'cover', // COVER UNTUK PORTRAIT BESAR
                             display: 'block'
                           }}
                           onError={(e) => {
@@ -1281,44 +1280,56 @@ export default function HomePage(): React.JSX.Element {
                       display: 'flex',
                       pointerEvents: 'none'
                     }}>
-                      {/* Area klik kiri (25% pertama) */}
-                      <div style={{
-                        flex: 1,
-                        backgroundColor: 'transparent',
-                        pointerEvents: 'auto',
-                        cursor: 'none'
-                      }} />
+                      {/* Area klik kiri (30% pertama) */}
+                      <div 
+                        style={{
+                          flex: 3,
+                          backgroundColor: 'transparent',
+                          pointerEvents: 'auto',
+                          cursor: 'none'
+                        }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          prevPhoto();
+                        }}
+                      />
                       
-                      {/* Area tengah (50%) - tidak melakukan apa-apa */}
+                      {/* Area tengah (40%) - tidak melakukan apa-apa */}
                       <div style={{
-                        flex: 2,
+                        flex: 4,
                         backgroundColor: 'transparent'
                       }} />
                       
-                      {/* Area klik kanan (25% terakhir) */}
-                      <div style={{
-                        flex: 1,
-                        backgroundColor: 'transparent',
-                        pointerEvents: 'auto',
-                        cursor: 'none'
-                      }} />
+                      {/* Area klik kanan (30% terakhir) */}
+                      <div 
+                        style={{
+                          flex: 3,
+                          backgroundColor: 'transparent',
+                          pointerEvents: 'auto',
+                          cursor: 'none'
+                        }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          nextPhoto();
+                        }}
+                      />
                     </div>
 
                     {/* Indikator klik sederhana */}
                     <div style={{
                       position: 'absolute',
-                      bottom: '1.5rem',
+                      bottom: '1rem',
                       left: '50%',
                       transform: 'translateX(-50%)',
-                      backgroundColor: 'rgba(0, 0, 0, 0.6)',
+                      backgroundColor: 'rgba(0, 0, 0, 0.7)',
                       padding: '0.5rem 1.5rem',
                       borderRadius: '20px',
-                      border: '1px solid rgba(255, 255, 255, 0.2)',
+                      border: '1px solid rgba(255, 255, 255, 0.3)',
                       fontSize: '0.9rem',
                       color: 'white',
                       fontWeight: '500',
-                      opacity: 0.7,
-                      pointerEvents: 'none'
+                      pointerEvents: 'none',
+                      opacity: 0.8
                     }}>
                       Click left/right to navigate
                     </div>
