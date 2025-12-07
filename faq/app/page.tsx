@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect, useRef } from "react";
@@ -14,13 +15,10 @@ export default function HomePage(): React.JSX.Element {
   const [cursorType, setCursorType] = useState("default");
   const [cursorText, setCursorText] = useState("");
   const [hoveredLink, setHoveredLink] = useState("");
-  const [showIndex, setShowIndex] = useState(false); // State untuk halaman index
   const headerRef = useRef<HTMLDivElement>(null);
   const cursorRef = useRef<HTMLDivElement>(null);
   const topNavRef = useRef<HTMLDivElement>(null);
   const scrollTextRef = useRef<HTMLDivElement>(null);
-  const descriptionRef = useRef<HTMLParagraphElement>(null);
-  const contentRef = useRef<HTMLDivElement>(null);
 
   // Animasi loading text
   const loadingTexts = [
@@ -87,27 +85,7 @@ export default function HomePage(): React.JSX.Element {
       }
     };
 
-    // Fungsi untuk menjaga deskripsi tetap terlihat
-    const ensureDescriptionVisible = () => {
-      if (descriptionRef.current && !showIndex) {
-        // Reset posisi dan tampilan deskripsi
-        descriptionRef.current.style.opacity = '1';
-        descriptionRef.current.style.visibility = 'visible';
-        descriptionRef.current.style.position = 'relative';
-        descriptionRef.current.style.zIndex = '10';
-      }
-    };
-
-    // Panggil fungsi saat scroll atau resize
-    const handleScroll = () => {
-      ensureDescriptionVisible();
-    };
-
-    // Panggil fungsi saat mount
-    ensureDescriptionVisible();
-
     document.addEventListener('mousemove', moveCursor);
-    window.addEventListener('scroll', handleScroll);
 
     return () => {
       window.removeEventListener('resize', checkMobile);
@@ -115,12 +93,11 @@ export default function HomePage(): React.JSX.Element {
       clearInterval(textInterval);
       clearTimeout(loadingTimeout);
       document.removeEventListener('mousemove', moveCursor);
-      window.removeEventListener('scroll', handleScroll);
       if (scrollTextRef.current) {
         gsap.killTweensOf(scrollTextRef.current);
       }
     };
-  }, [isMobile, showIndex]);
+  }, [isMobile]);
 
   // Fungsi toggle dark/light mode
   const toggleColorMode = () => {
@@ -140,11 +117,6 @@ export default function HomePage(): React.JSX.Element {
     setHoveredLink("");
   };
 
-  // Fungsi untuk toggle halaman index
-  const toggleIndex = () => {
-    setShowIndex(!showIndex);
-  };
-
   // Warna cursor
   const getCursorColors = () => {
     if (cursorType === "link") {
@@ -162,435 +134,6 @@ export default function HomePage(): React.JSX.Element {
 
   const cursorColors = getCursorColors();
 
-  // Data untuk halaman index
-  const indexTopics = [
-    { id: 1, title: "Personal Journey", date: "2024-01-15", description: "Catatan perjalanan pribadi dan refleksi diri" },
-    { id: 2, title: "Creative Exploration", date: "2024-02-03", description: "Eksplorasi kreatif dalam seni dan desain" },
-    { id: 3, title: "Emotional Diary", date: "2024-02-20", description: "Jurnal emosional tentang kebahagiaan dan kesedihan" },
-    { id: 4, title: "Visual Storytelling", date: "2024-03-10", description: "Bercerita melalui visual dan fotografi" },
-    { id: 5, title: "Self-Discovery", date: "2024-03-25", description: "Proses menemukan jati diri dan potensi" },
-    { id: 6, title: "Growth Moments", date: "2024-04-05", description: "Momen-momen transformasi dan pertumbuhan" },
-  ];
-
-  // Render halaman index
-  if (showIndex) {
-    return (
-      <div style={{
-        minHeight: '100vh',
-        backgroundColor: isDarkMode ? 'black' : '#ff0028',
-        margin: 0,
-        padding: 0,
-        width: '100%',
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'flex-start',
-        alignItems: 'center',
-        position: 'relative',
-        overflow: 'auto',
-        fontFamily: 'Helvetica, Arial, sans-serif',
-        WebkitFontSmoothing: 'antialiased',
-        MozOsxFontSmoothing: 'grayscale',
-        transition: 'background-color 0.5s ease',
-        cursor: 'none'
-      }}>
-        {/* Custom Cursor */}
-        <div
-          ref={cursorRef}
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            width: cursorType === "link" ? '140px' : '20px',
-            height: cursorType === "link" ? '60px' : '20px',
-            backgroundColor: cursorColors.dotColor,
-            borderRadius: cursorType === "link" ? '30px' : '50%',
-            pointerEvents: 'none',
-            zIndex: 9999,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: '14px',
-            fontWeight: '700',
-            color: cursorColors.textColor,
-            textAlign: 'center',
-            transition: 'all 0.2s ease',
-            transform: 'translate(-50%, -50%)',
-            padding: cursorType === "link" ? '0 20px' : '0',
-            boxShadow: '0 2px 10px rgba(0,0,0,0.3)',
-            border: 'none'
-          }}
-        >
-          {cursorType === "link" && (
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px'
-            }}>
-              <span style={{ 
-                fontSize: '14px', 
-                fontWeight: '700',
-                letterSpacing: '0.5px',
-                whiteSpace: 'nowrap'
-              }}>
-                {cursorText}
-              </span>
-              <svg 
-                width="20" 
-                height="20" 
-                viewBox="0 0 24 24" 
-                fill="none" 
-                stroke={cursorColors.textColor}
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M7 17L17 7M17 7H7M17 7V17"/>
-              </svg>
-            </div>
-          )}
-        </div>
-
-        {/* Header Section untuk Index - TANPA NAVBAR */}
-        <div 
-          ref={headerRef}
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            width: '100%',
-            padding: isMobile ? '1.5rem 1rem' : '2rem',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            zIndex: 100,
-            boxSizing: 'border-box',
-            opacity: 1,
-            borderBottom: '1px solid black'
-          }}
-        >
-          {/* Label Kiri: "MENURU" */}
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8, delay: 0.5 }}
-          >
-            <div style={{
-              fontSize: isMobile ? '1.5rem' : '2.5rem',
-              fontWeight: '300',
-              fontFamily: 'Helvetica, Arial, sans-serif',
-              margin: 0,
-              letterSpacing: '2px',
-              lineHeight: 1,
-              textTransform: 'uppercase',
-              color: isDarkMode ? 'white' : 'black',
-              minHeight: isMobile ? '1.8rem' : '2.8rem',
-              display: 'flex',
-              alignItems: 'center',
-              transition: 'color 0.5s ease'
-            }}>
-              MENURU
-            </div>
-          </motion.div>
-
-          {/* Label Tengah: "TOPICS MENURU" */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.8, delay: 0.7 }}
-            style={{
-              textAlign: 'center'
-            }}
-          >
-            <div style={{
-              fontSize: isMobile ? '1.2rem' : '2rem',
-              fontWeight: '500',
-              fontFamily: 'Helvetica, Arial, sans-serif',
-              color: isDarkMode ? 'white' : 'black',
-              textTransform: 'uppercase',
-              letterSpacing: '1px'
-            }}>
-              TOPICS MENURU
-            </div>
-          </motion.div>
-
-          {/* Label Kanan: Deskripsi + Tanggal */}
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8, delay: 0.9 }}
-            style={{
-              textAlign: 'right',
-              maxWidth: isMobile ? '150px' : '300px'
-            }}
-          >
-            <div style={{
-              fontSize: isMobile ? '0.8rem' : '1rem',
-              fontWeight: '300',
-              fontFamily: 'Helvetica, Arial, sans-serif',
-              color: isDarkMode ? 'white' : 'black',
-              lineHeight: 1.3
-            }}>
-              <div>Index of personal journal topics</div>
-              <div style={{
-                marginTop: '0.5rem',
-                fontSize: isMobile ? '0.7rem' : '0.9rem',
-                color: isDarkMode ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.7)'
-              }}>
-                Updated: {new Date().toLocaleDateString('en-US', { 
-                  year: 'numeric', 
-                  month: 'long', 
-                  day: 'numeric' 
-                })}
-              </div>
-            </div>
-          </motion.div>
-        </div>
-
-        {/* Main Content untuk Index */}
-        <div style={{
-          width: '100%',
-          paddingTop: isMobile ? '8rem' : '10rem',
-          boxSizing: 'border-box',
-          zIndex: 10,
-          position: 'relative',
-          padding: isMobile ? '1rem' : '2rem'
-        }}>
-          {/* Tombol Back (Ke Kiri) */}
-          <motion.div
-            onClick={toggleIndex}
-            onMouseEnter={() => handleLinkHover("link", "BACK", "home")}
-            onMouseLeave={handleLinkLeave}
-            style={{
-              position: 'fixed',
-              left: isMobile ? '1rem' : '2rem',
-              top: '50%',
-              transform: 'translateY(-50%)',
-              cursor: 'none',
-              zIndex: 101,
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: '0.5rem'
-            }}
-            whileHover={{ x: -10 }}
-            transition={{ type: "spring", stiffness: 300 }}
-          >
-            <div style={{
-              width: '50px',
-              height: '50px',
-              borderRadius: '50%',
-              backgroundColor: isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.2)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              border: `1px solid ${isDarkMode ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.3)'}`
-            }}>
-              <svg 
-                width="24" 
-                height="24" 
-                viewBox="0 0 24 24" 
-                fill="none" 
-                stroke={isDarkMode ? 'white' : 'black'}
-                strokeWidth="2"
-              >
-                <path d="M19 12H5M12 19l-7-7 7-7"/>
-              </svg>
-            </div>
-            <span style={{
-              color: isDarkMode ? 'white' : 'black',
-              fontSize: '0.8rem',
-              fontWeight: '500',
-              writingMode: 'vertical-rl',
-              textOrientation: 'mixed'
-            }}>
-              BACK
-            </span>
-          </motion.div>
-
-          {/* List Topics - DESIGN SIMPLE TANPA BOX */}
-          <div style={{
-            maxWidth: '800px',
-            margin: '0 auto',
-            paddingLeft: isMobile ? '4rem' : '6rem'
-          }}>
-            {indexTopics.map((topic, index) => (
-              <motion.div
-                key={topic.id}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-                style={{
-                  padding: isMobile ? '1.5rem 0' : '2rem 0',
-                  borderBottom: '1px solid black',
-                  cursor: 'none'
-                }}
-                onMouseEnter={() => handleLinkHover("link", "VIEW", `topic-${topic.id}`)}
-                onMouseLeave={handleLinkLeave}
-              >
-                <div style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'flex-start',
-                  marginBottom: '0.5rem'
-                }}>
-                  <h3 style={{
-                    fontSize: isMobile ? '1.2rem' : '1.5rem',
-                    fontWeight: '600',
-                    color: isDarkMode ? 'white' : 'black',
-                    margin: 0
-                  }}>
-                    {topic.title}
-                  </h3>
-                  <span style={{
-                    fontSize: isMobile ? '0.8rem' : '0.9rem',
-                    color: isDarkMode ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.6)',
-                  }}>
-                    {topic.date}
-                  </span>
-                </div>
-                <p style={{
-                  fontSize: isMobile ? '0.9rem' : '1rem',
-                  color: isDarkMode ? 'rgba(255,255,255,0.8)' : 'rgba(0,0,0,0.8)',
-                  lineHeight: 1.5,
-                  margin: 0
-                }}>
-                  {topic.description}
-                </p>
-              </motion.div>
-            ))}
-          </div>
-
-          {/* Footer Index */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.8, delay: 1 }}
-            style={{
-              textAlign: 'center',
-              marginTop: isMobile ? '3rem' : '5rem',
-              padding: '2rem',
-              borderTop: `1px solid black`
-            }}
-          >
-            <p style={{
-              color: isDarkMode ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.6)',
-              fontSize: isMobile ? '0.9rem' : '1rem'
-            }}>
-              {indexTopics.length} topics • Last updated: {new Date().toLocaleDateString()}
-            </p>
-          </motion.div>
-        </div>
-
-        {/* Tombol Right Side untuk Index */}
-        <div style={{
-          position: 'fixed',
-          right: isMobile ? '1rem' : '2rem',
-          top: isMobile ? '5rem' : '6rem',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          gap: '1rem',
-          zIndex: 101
-        }}>
-          {/* Color Mode Toggle Button */}
-          <motion.button
-            onClick={toggleColorMode}
-            onMouseEnter={() => handleLinkHover("link", "VIEW", "theme")}
-            onMouseLeave={handleLinkLeave}
-            style={{
-              padding: isMobile ? '0.4rem 0.8rem' : '0.6rem 1rem',
-              fontSize: isMobile ? '0.8rem' : '1rem',
-              fontWeight: '600',
-              color: 'white',
-              backgroundColor: 'transparent',
-              border: `1px solid ${isDarkMode ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.3)'}`,
-              borderRadius: '50px',
-              cursor: 'none',
-              fontFamily: 'Helvetica, Arial, sans-serif',
-              backdropFilter: 'blur(10px)',
-              whiteSpace: 'nowrap',
-              display: 'flex',
-              alignItems: 'center',
-              gap: isMobile ? '0.3rem' : '0.5rem',
-              margin: 0,
-              transition: 'all 0.3s ease',
-              boxShadow: '0 4px 15px rgba(0,0,0,0.1)'
-            }}
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1, duration: 0.6 }}
-            whileHover={{ 
-              backgroundColor: isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.2)',
-              scale: 1.05,
-              border: `1px solid ${isDarkMode ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.5)'}`,
-              transition: { duration: 0.2 }
-            }}
-            whileTap={{ scale: 0.95 }}
-          >
-            <motion.div
-              animate={{ rotate: isDarkMode ? 0 : 180 }}
-              transition={{ duration: 0.5 }}
-            >
-              {isDarkMode ? '☀️' : '🌙'}
-            </motion.div>
-            {isMobile ? '' : (isDarkMode ? 'LIGHT' : 'DARK')}
-          </motion.button>
-
-          {/* Sign In Button */}
-          <motion.button
-            onClick={() => router.push('/signin')}
-            onMouseEnter={() => handleLinkHover("link", "VIEW", "signin")}
-            onMouseLeave={handleLinkLeave}
-            style={{
-              padding: isMobile ? '0.4rem 1rem' : '0.6rem 1.5rem',
-              fontSize: isMobile ? '0.9rem' : '1.5rem',
-              fontWeight: '600',
-              color: 'white',
-              backgroundColor: 'transparent',
-              border: `1px solid ${isDarkMode ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.3)'}`,
-              borderRadius: '50px',
-              cursor: 'none',
-              fontFamily: 'Helvetica, Arial, sans-serif',
-              backdropFilter: 'blur(10px)',
-              whiteSpace: 'nowrap',
-              display: 'flex',
-              alignItems: 'center',
-              gap: isMobile ? '0.3rem' : '0.5rem',
-              margin: 0,
-              maxWidth: isMobile ? '120px' : 'none',
-              transition: 'all 0.3s ease',
-              boxShadow: '0 4px 15px rgba(0,0,0,0.1)'
-            }}
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1.2, duration: 0.6 }}
-            whileHover={{ 
-              backgroundColor: isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.2)',
-              scale: 1.05,
-              border: `1px solid ${isDarkMode ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.5)'}`,
-              transition: { duration: 0.2 }
-            }}
-            whileTap={{ scale: 0.95 }}
-          >
-            <svg 
-              width={isMobile ? "18" : "30"} 
-              height={isMobile ? "18" : "30"} 
-              viewBox="0 0 24 24" 
-              fill="none" 
-              stroke="currentColor" 
-              strokeWidth="2"
-            >
-              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-              <circle cx="12" cy="7" r="4"/>
-            </svg>
-            {isMobile ? 'SIGN IN' : 'SIGN IN'}
-          </motion.button>
-        </div>
-      </div>
-    );
-  }
-
-  // Render halaman utama
   return (
     <div style={{
       minHeight: '100vh',
@@ -668,62 +211,7 @@ export default function HomePage(): React.JSX.Element {
         )}
       </div>
 
-      {/* Tombol Index (Ke Kiri) */}
-      <motion.div
-        onClick={toggleIndex}
-        onMouseEnter={() => handleLinkHover("link", "INDEX", "index")}
-        onMouseLeave={handleLinkLeave}
-        style={{
-          position: 'fixed',
-          left: isMobile ? '1rem' : '2rem',
-          top: '50%',
-          transform: 'translateY(-50%)',
-          cursor: 'none',
-          zIndex: 101,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          gap: '0.5rem'
-        }}
-        whileHover={{ x: -10 }}
-        transition={{ type: "spring", stiffness: 300 }}
-      >
-        <div style={{
-          width: '50px',
-          height: '50px',
-          borderRadius: '50%',
-          backgroundColor: isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.2)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          border: `1px solid ${isDarkMode ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.3)'}`
-        }}>
-          <svg 
-            width="24" 
-            height="24" 
-            viewBox="0 0 24 24" 
-            fill="none" 
-            stroke={isDarkMode ? 'white' : 'black'}
-            strokeWidth="2"
-          >
-            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-            <line x1="9" y1="9" x2="15" y2="9"/>
-            <line x1="9" y1="12" x2="15" y2="12"/>
-            <line x1="9" y1="15" x2="15" y2="15"/>
-          </svg>
-        </div>
-        <span style={{
-          color: isDarkMode ? 'white' : 'black',
-          fontSize: '0.8rem',
-          fontWeight: '500',
-          writingMode: 'vertical-rl',
-          textOrientation: 'mixed'
-        }}>
-          INDEX
-        </span>
-      </motion.div>
-
-      {/* Top Navigation Bar (TANPA TOMBOL INDEX) */}
+      {/* Top Navigation Bar */}
       <div 
         ref={topNavRef}
         style={{
@@ -1151,43 +639,31 @@ export default function HomePage(): React.JSX.Element {
       </div>
 
       {/* Main Content Container */}
-      <div 
-        ref={contentRef}
-        style={{
-          width: '100%',
-          paddingTop: isMobile ? '8rem' : '12rem',
-          boxSizing: 'border-box',
-          zIndex: 10,
-          position: 'relative'
-        }}
-      >
+      <div style={{
+        width: '100%',
+        paddingTop: isMobile ? '8rem' : '12rem',
+        boxSizing: 'border-box',
+        zIndex: 10,
+        position: 'relative'
+      }}>
         {/* Deskripsi MENURU - 3 baris */}
         <div style={{
           marginBottom: isMobile ? '2rem' : '3rem',
-          paddingLeft: isMobile ? '0.5rem' : '1rem',
-          paddingRight: isMobile ? '0.5rem' : '1rem',
-          position: 'relative',
-          zIndex: 10
+          paddingLeft: isMobile ? '0.5rem' : '1rem', // MENTOK TAPI TIDAK BANGET
+          paddingRight: isMobile ? '0.5rem' : '1rem'
         }}>
-          <p 
-            ref={descriptionRef}
-            style={{
-              color: isDarkMode ? 'white' : 'black',
-              fontSize: isMobile ? '1.8rem' : '3.5rem',
-              fontWeight: '400',
-              fontFamily: 'HelveticaNowDisplay, Arial, sans-serif',
-              lineHeight: 1.3,
-              margin: 0,
-              marginBottom: isMobile ? '1.5rem' : '2rem',
-              transition: 'color 0.5s ease',
-              wordWrap: 'break-word',
-              overflowWrap: 'break-word',
-              opacity: 1,
-              visibility: 'visible',
-              position: 'relative',
-              zIndex: 10
-            }}
-          >
+          <p style={{
+            color: isDarkMode ? 'white' : 'black',
+            fontSize: isMobile ? '1.8rem' : '3.5rem',
+            fontWeight: '400',
+            fontFamily: 'HelveticaNowDisplay, Arial, sans-serif',
+            lineHeight: 1.3,
+            margin: 0,
+            marginBottom: isMobile ? '1.5rem' : '2rem',
+            transition: 'color 0.5s ease',
+            wordWrap: 'break-word',
+            overflowWrap: 'break-word'
+          }}>
             Menuru is a branding personal journal life with a experiences of self about happy, sad, angry, etc. It's a creative exploration of personal growth and emotional journey. Through visual storytelling we capture moments of transformation and self-discovery.
           </p>
 
@@ -1196,9 +672,9 @@ export default function HomePage(): React.JSX.Element {
             display: 'flex',
             flexDirection: isMobile ? 'column' : 'row',
             gap: isMobile ? '1rem' : '0.3rem',
-            width: 'calc(100% - 2rem)',
-            marginLeft: isMobile ? '0.5rem' : '1rem',
-            marginRight: isMobile ? '0.5rem' : '1rem',
+            width: 'calc(100% - 2rem)', // LEBIH MENTOK (hanya 2rem margin)
+            marginLeft: isMobile ? '0.5rem' : '1rem', // LEBIH MENTOK
+            marginRight: isMobile ? '0.5rem' : '1rem', // LEBIH MENTOK
             marginTop: '1rem'
           }}>
             {/* Foto 1 - Sisi kiri, SANGAT PANJANG */}
@@ -1275,12 +751,12 @@ export default function HomePage(): React.JSX.Element {
           {/* Card #0050B7 dengan 4 foto images/5.jpg - FOTO LEBIH LEBAR KE SAMPING */}
           <div
             style={{
-              width: 'calc(100% - 4rem)',
+              width: 'calc(100% - 4rem)', // TIDAK MENTOK
               marginLeft: isMobile ? '1rem' : '2rem',
               marginRight: isMobile ? '1rem' : '2rem',
               backgroundColor: '#0050B7',
               borderRadius: '25px',
-              height: isMobile ? '500px' : '800px',
+              height: isMobile ? '500px' : '800px', // CARD TINGGI SEDIKIT
               marginTop: isMobile ? '1rem' : '1.5rem',
               boxShadow: '0 20px 50px rgba(0,0,0,0.3)',
               position: 'relative',
@@ -1312,7 +788,7 @@ export default function HomePage(): React.JSX.Element {
                 boxShadow: '0 10px 30px rgba(0,0,0,0.4)',
                 border: '2px solid rgba(255,255,255,0.2)',
                 width: '100%',
-                height: isMobile ? '600px' : '600px',
+                height: isMobile ? '600px' : '600px', // TINGGI SEDIKIT
                 position: 'relative'
               }}>
                 <img 
@@ -1344,7 +820,7 @@ export default function HomePage(): React.JSX.Element {
                 boxShadow: '0 10px 30px rgba(0,0,0,0.4)',
                 border: '2px solid rgba(255,255,255,0.2)',
                 width: '100%',
-                height: isMobile ? '600px' : '600px',
+                height: isMobile ? '600px' : '600px', // TINGGI SEDIKIT
                 position: 'relative'
               }}>
                 <img 
@@ -1376,7 +852,7 @@ export default function HomePage(): React.JSX.Element {
                 boxShadow: '0 10px 30px rgba(0,0,0,0.4)',
                 border: '2px solid rgba(255,255,255,0.2)',
                 width: '100%',
-                height: isMobile ? '600px' : '600px',
+                height: isMobile ? '600px' : '600px', // TINGGI SEDIKIT
                 position: 'relative'
               }}>
                 <img 
@@ -1408,7 +884,7 @@ export default function HomePage(): React.JSX.Element {
                 boxShadow: '0 10px 30px rgba(0,0,0,0.4)',
                 border: '2px solid rgba(255,255,255,0.2)',
                 width: '100%',
-                height: isMobile ? '600px' : '600px',
+                height: isMobile ? '600px' : '600px', // TINGGI SEDIKIT
                 position: 'relative'
               }}>
                 <img 
@@ -1467,3 +943,4 @@ export default function HomePage(): React.JSX.Element {
     </div>
   );
 }
+
