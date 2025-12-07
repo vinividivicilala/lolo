@@ -21,7 +21,6 @@ export default function HomePage(): React.JSX.Element {
   const cursorRef = useRef<HTMLDivElement>(null);
   const topNavRef = useRef<HTMLDivElement>(null);
   const scrollTextRef = useRef<HTMLDivElement>(null);
-  const topicRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   // Animasi loading text
   const loadingTexts = [
@@ -1122,41 +1121,40 @@ export default function HomePage(): React.JSX.Element {
                 marginBottom: '3rem'
               }}></div>
 
-              {/* Gambar hover - muncul saat topic dihover */}
+              {/* Gambar hover - muncul di sebelah kiri topics */}
               <AnimatePresence>
                 {hoveredTopic !== null && (
                   <motion.div
                     key="hovered-image"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
                     transition={{ duration: 0.3 }}
                     style={{
-                      position: 'fixed',
-                      top: 0,
-                      left: 0,
-                      width: '100vw',
-                      height: '100vh',
+                      position: 'absolute',
+                      left: isMobile ? '1rem' : 'calc(33.33% + 4rem)', // Posisi di sebelah kiri kolom tengah
+                      top: '50%',
+                      transform: 'translateY(-50%)',
                       zIndex: 5,
                       pointerEvents: 'none',
-                      display: 'flex',
-                      justifyContent: 'center',
-                      alignItems: 'center'
+                      width: isMobile ? '100px' : '300px', // Lebar portrait
+                      height: isMobile ? '400px' : '800px', // Tinggi portrait panjang
+                      overflow: 'hidden'
                     }}
                   >
-                    {/* Gambar */}
+                    {/* Gambar portrait panjang */}
                     <motion.div
-                      initial={{ scale: 0.9, opacity: 0 }}
-                      animate={{ scale: 1, opacity: 1 }}
-                      exit={{ scale: 0.9, opacity: 0 }}
+                      initial={{ scale: 0.95 }}
+                      animate={{ scale: 1 }}
+                      exit={{ scale: 0.95 }}
                       transition={{ duration: 0.4 }}
                       style={{
-                        width: isMobile ? '90vw' : '70vw',
-                        height: isMobile ? '60vh' : '80vh',
+                        width: '100%',
+                        height: '100%',
                         overflow: 'hidden',
-                        borderRadius: '20px',
-                        boxShadow: '0 20px 60px rgba(0,0,0,0.8)',
-                        border: '2px solid rgba(255,255,255,0.2)'
+                        borderRadius: '15px',
+                        boxShadow: '0 15px 40px rgba(0,0,0,0.6)',
+                        border: '2px solid rgba(255,255,255,0.15)'
                       }}
                     >
                       <img 
@@ -1224,7 +1222,6 @@ export default function HomePage(): React.JSX.Element {
                     {indexTopics.map((topic, index) => (
                       <div 
                         key={topic.id}
-                        ref={(el) => { topicRefs.current[index] = el; }}
                         onMouseEnter={() => handleTopicHover(topic.id)}
                         onMouseLeave={() => handleTopicHover(null)}
                         style={{
@@ -1235,12 +1232,12 @@ export default function HomePage(): React.JSX.Element {
                           cursor: 'pointer'
                         }}
                       >
-                        {/* Garis putih pudar saat hover */}
+                        {/* Garis putih pudar saat hover - mentok ke kanan */}
                         <AnimatePresence>
                           {hoveredTopic === topic.id && (
                             <motion.div
                               initial={{ width: 0, opacity: 0 }}
-                              animate={{ width: '100vw', opacity: 1 }}
+                              animate={{ width: 'calc(100vw - 100px)', opacity: 1 }}
                               exit={{ width: 0, opacity: 0 }}
                               transition={{ duration: 0.3 }}
                               style={{
