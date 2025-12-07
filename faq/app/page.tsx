@@ -20,6 +20,7 @@ export default function HomePage(): React.JSX.Element {
   const topNavRef = useRef<HTMLDivElement>(null);
   const scrollTextRef = useRef<HTMLDivElement>(null);
   const descriptionRef = useRef<HTMLParagraphElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
 
   // Animasi loading text
   const loadingTexts = [
@@ -86,18 +87,24 @@ export default function HomePage(): React.JSX.Element {
       }
     };
 
-    // Simpan posisi scroll untuk menjaga deskripsi tetap terlihat
-    const handleScroll = () => {
-      if (descriptionRef.current) {
-        const descriptionRect = descriptionRef.current.getBoundingClientRect();
-        const windowHeight = window.innerHeight;
-        
-        // Jika deskripsi berada di viewport, pastikan tetap terlihat
-        if (descriptionRect.top < windowHeight && descriptionRect.bottom > 0) {
-          // Deskripsi dalam viewport, tidak perlu melakukan apa-apa
-        }
+    // Fungsi untuk menjaga deskripsi tetap terlihat
+    const ensureDescriptionVisible = () => {
+      if (descriptionRef.current && !showIndex) {
+        // Reset posisi dan tampilan deskripsi
+        descriptionRef.current.style.opacity = '1';
+        descriptionRef.current.style.visibility = 'visible';
+        descriptionRef.current.style.position = 'relative';
+        descriptionRef.current.style.zIndex = '10';
       }
     };
+
+    // Panggil fungsi saat scroll atau resize
+    const handleScroll = () => {
+      ensureDescriptionVisible();
+    };
+
+    // Panggil fungsi saat mount
+    ensureDescriptionVisible();
 
     document.addEventListener('mousemove', moveCursor);
     window.addEventListener('scroll', handleScroll);
@@ -113,7 +120,7 @@ export default function HomePage(): React.JSX.Element {
         gsap.killTweensOf(scrollTextRef.current);
       }
     };
-  }, [isMobile]);
+  }, [isMobile, showIndex]);
 
   // Fungsi toggle dark/light mode
   const toggleColorMode = () => {
@@ -243,184 +250,22 @@ export default function HomePage(): React.JSX.Element {
           )}
         </div>
 
-        {/* Top Navigation Bar untuk Index */}
+        {/* Header Section untuk Index - TANPA NAVBAR */}
         <div 
-          ref={topNavRef}
+          ref={headerRef}
           style={{
             position: 'fixed',
             top: 0,
             left: 0,
             width: '100%',
-            padding: isMobile ? '0.8rem 1rem' : '1rem 2rem',
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            zIndex: 101,
-            boxSizing: 'border-box',
-            opacity: 1
-          }}
-        >
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: isMobile ? '1rem' : '2rem',
-            backgroundColor: 'transparent',
-            backdropFilter: 'blur(10px)',
-            borderRadius: '50px',
-            padding: isMobile ? '0.6rem 1rem' : '0.8rem 1.5rem',
-            border: `1px solid ${isDarkMode ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.3)'}`,
-            boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
-          }}>
-            {/* Back to Home Button */}
-            <motion.div
-              onClick={toggleIndex}
-              onMouseEnter={() => handleLinkHover("link", "BACK", "home")}
-              onMouseLeave={handleLinkLeave}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem',
-                cursor: 'none',
-                padding: '0.4rem 0.8rem',
-                borderRadius: '25px',
-                backgroundColor: isDarkMode ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.95)',
-                border: isDarkMode ? '1px solid rgba(255,255,255,0.2)' : '1px solid rgba(255,255,255,0.3)',
-                transition: 'all 0.3s ease'
-              }}
-              whileHover={{ 
-                backgroundColor: 'white',
-                scale: 1.05,
-                border: '1px solid white'
-              }}
-            >
-              <svg 
-                width={isMobile ? "18" : "20"} 
-                height={isMobile ? "18" : "20"} 
-                viewBox="0 0 24 24" 
-                fill="none" 
-                stroke="#6366F1"
-                strokeWidth="2"
-              >
-                <path d="M19 12H5M12 19l-7-7 7-7"/>
-              </svg>
-              <span style={{
-                color: '#6366F1',
-                fontSize: isMobile ? '0.8rem' : '0.9rem',
-                fontWeight: '600',
-                fontFamily: 'Helvetica, Arial, sans-serif'
-              }}>
-                Back to Home
-              </span>
-            </motion.div>
-
-            {/* Existing navigation items */}
-            {/* Docs */}
-            <motion.div
-              onClick={() => router.push('/docs')}
-              onMouseEnter={() => handleLinkHover("link", "VIEW", "docs")}
-              onMouseLeave={handleLinkLeave}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem',
-                cursor: 'none',
-                padding: '0.4rem 0.8rem',
-                borderRadius: '25px',
-                backgroundColor: isDarkMode ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.95)',
-                border: isDarkMode ? '1px solid rgba(255,255,255,0.2)' : '1px solid rgba(255,255,255,0.3)',
-                transition: 'all 0.3s ease'
-              }}
-              whileHover={{ 
-                backgroundColor: 'white',
-                scale: 1.05,
-                border: '1px solid white'
-              }}
-            >
-              <svg 
-                width={isMobile ? "18" : "20"} 
-                height={isMobile ? "18" : "20"} 
-                viewBox="0 0 24 24" 
-                fill="none" 
-                stroke="#6366F1"
-                strokeWidth="2"
-              >
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                <polyline points="14,2 14,8 20,8"/>
-                <line x1="16" y1="13" x2="8" y2="13"/>
-                <line x1="16" y1="17" x2="8" y2="17"/>
-                <polyline points="10,9 9,9 8,9"/>
-              </svg>
-              <span style={{
-                color: '#6366F1',
-                fontSize: isMobile ? '0.8rem' : '0.9rem',
-                fontWeight: '600',
-                fontFamily: 'Helvetica, Arial, sans-serif'
-              }}>
-                Docs
-              </span>
-            </motion.div>
-
-            {/* Chatbot */}
-            <motion.div
-              onClick={() => router.push('/chatbot')}
-              onMouseEnter={() => handleLinkHover("link", "VIEW", "chatbot")}
-              onMouseLeave={handleLinkLeave}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem',
-                cursor: 'none',
-                padding: '0.4rem 0.8rem',
-                borderRadius: '25px',
-                backgroundColor: isDarkMode ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.95)',
-                border: isDarkMode ? '1px solid rgba(255,255,255,0.2)' : '1px solid rgba(255,255,255,0.3)',
-                transition: 'all 0.3s ease'
-              }}
-              whileHover={{ 
-                backgroundColor: 'white',
-                scale: 1.05,
-                border: '1px solid white'
-              }}
-            >
-              <svg 
-                width={isMobile ? "18" : "20"} 
-                height={isMobile ? "18" : "20"} 
-                viewBox="0 0 24 24" 
-                fill="none" 
-                stroke="#6366F1"
-                strokeWidth="2"
-              >
-                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-                <line x1="8" y1="7" x2="16" y2="7"/>
-                <line x1="8" y1="11" x2="12" y2="11"/>
-              </svg>
-              <span style={{
-                color: '#6366F1',
-                fontSize: isMobile ? '0.8rem' : '0.9rem',
-                fontWeight: '600',
-                fontFamily: 'Helvetica, Arial, sans-serif'
-              }}>
-                Chatbot
-              </span>
-            </motion.div>
-          </div>
-        </div>
-
-        {/* Header Section untuk Index */}
-        <div 
-          ref={headerRef}
-          style={{
-            position: 'fixed',
-            top: isMobile ? '3.5rem' : '4.5rem',
-            left: 0,
-            width: '100%',
-            padding: isMobile ? '1rem' : '2rem',
+            padding: isMobile ? '1.5rem 1rem' : '2rem',
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
             zIndex: 100,
             boxSizing: 'border-box',
-            opacity: 1
+            opacity: 1,
+            borderBottom: '1px solid black'
           }}
         >
           {/* Label Kiri: "MENURU" */}
@@ -504,50 +349,92 @@ export default function HomePage(): React.JSX.Element {
         {/* Main Content untuk Index */}
         <div style={{
           width: '100%',
-          paddingTop: isMobile ? '10rem' : '15rem',
+          paddingTop: isMobile ? '8rem' : '10rem',
           boxSizing: 'border-box',
           zIndex: 10,
           position: 'relative',
           padding: isMobile ? '1rem' : '2rem'
         }}>
-          {/* Grid Topics */}
+          {/* Tombol Back (Ke Kiri) */}
+          <motion.div
+            onClick={toggleIndex}
+            onMouseEnter={() => handleLinkHover("link", "BACK", "home")}
+            onMouseLeave={handleLinkLeave}
+            style={{
+              position: 'fixed',
+              left: isMobile ? '1rem' : '2rem',
+              top: '50%',
+              transform: 'translateY(-50%)',
+              cursor: 'none',
+              zIndex: 101,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '0.5rem'
+            }}
+            whileHover={{ x: -10 }}
+            transition={{ type: "spring", stiffness: 300 }}
+          >
+            <div style={{
+              width: '50px',
+              height: '50px',
+              borderRadius: '50%',
+              backgroundColor: isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.2)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              border: `1px solid ${isDarkMode ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.3)'}`
+            }}>
+              <svg 
+                width="24" 
+                height="24" 
+                viewBox="0 0 24 24" 
+                fill="none" 
+                stroke={isDarkMode ? 'white' : 'black'}
+                strokeWidth="2"
+              >
+                <path d="M19 12H5M12 19l-7-7 7-7"/>
+              </svg>
+            </div>
+            <span style={{
+              color: isDarkMode ? 'white' : 'black',
+              fontSize: '0.8rem',
+              fontWeight: '500',
+              writingMode: 'vertical-rl',
+              textOrientation: 'mixed'
+            }}>
+              BACK
+            </span>
+          </motion.div>
+
+          {/* List Topics - DESIGN SIMPLE TANPA BOX */}
           <div style={{
-            display: 'grid',
-            gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, 1fr)',
-            gap: isMobile ? '1.5rem' : '2rem',
-            maxWidth: '1200px',
-            margin: '0 auto'
+            maxWidth: '800px',
+            margin: '0 auto',
+            paddingLeft: isMobile ? '4rem' : '6rem'
           }}>
             {indexTopics.map((topic, index) => (
               <motion.div
                 key={topic.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.5, delay: index * 0.1 }}
                 style={{
-                  backgroundColor: isDarkMode ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.1)',
-                  borderRadius: '15px',
-                  padding: isMobile ? '1.2rem' : '1.5rem',
-                  border: `1px solid ${isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.2)'}`,
-                  cursor: 'none',
-                  transition: 'all 0.3s ease'
+                  padding: isMobile ? '1.5rem 0' : '2rem 0',
+                  borderBottom: '1px solid black',
+                  cursor: 'none'
                 }}
-                onMouseEnter={() => handleLinkHover("link", "READ", `topic-${topic.id}`)}
+                onMouseEnter={() => handleLinkHover("link", "VIEW", `topic-${topic.id}`)}
                 onMouseLeave={handleLinkLeave}
-                whileHover={{ 
-                  backgroundColor: isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.2)',
-                  transform: 'translateY(-5px)',
-                  border: `1px solid ${isDarkMode ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.4)'}`
-                }}
               >
                 <div style={{
                   display: 'flex',
                   justifyContent: 'space-between',
                   alignItems: 'flex-start',
-                  marginBottom: '0.8rem'
+                  marginBottom: '0.5rem'
                 }}>
                   <h3 style={{
-                    fontSize: isMobile ? '1.1rem' : '1.3rem',
+                    fontSize: isMobile ? '1.2rem' : '1.5rem',
                     fontWeight: '600',
                     color: isDarkMode ? 'white' : 'black',
                     margin: 0
@@ -555,11 +442,8 @@ export default function HomePage(): React.JSX.Element {
                     {topic.title}
                   </h3>
                   <span style={{
-                    fontSize: isMobile ? '0.7rem' : '0.8rem',
+                    fontSize: isMobile ? '0.8rem' : '0.9rem',
                     color: isDarkMode ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.6)',
-                    backgroundColor: isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
-                    padding: '0.2rem 0.5rem',
-                    borderRadius: '10px'
                   }}>
                     {topic.date}
                   </span>
@@ -585,7 +469,7 @@ export default function HomePage(): React.JSX.Element {
               textAlign: 'center',
               marginTop: isMobile ? '3rem' : '5rem',
               padding: '2rem',
-              borderTop: `1px solid ${isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.2)'}`
+              borderTop: `1px solid black`
             }}
           >
             <p style={{
@@ -595,6 +479,112 @@ export default function HomePage(): React.JSX.Element {
               {indexTopics.length} topics • Last updated: {new Date().toLocaleDateString()}
             </p>
           </motion.div>
+        </div>
+
+        {/* Tombol Right Side untuk Index */}
+        <div style={{
+          position: 'fixed',
+          right: isMobile ? '1rem' : '2rem',
+          top: isMobile ? '5rem' : '6rem',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: '1rem',
+          zIndex: 101
+        }}>
+          {/* Color Mode Toggle Button */}
+          <motion.button
+            onClick={toggleColorMode}
+            onMouseEnter={() => handleLinkHover("link", "VIEW", "theme")}
+            onMouseLeave={handleLinkLeave}
+            style={{
+              padding: isMobile ? '0.4rem 0.8rem' : '0.6rem 1rem',
+              fontSize: isMobile ? '0.8rem' : '1rem',
+              fontWeight: '600',
+              color: 'white',
+              backgroundColor: 'transparent',
+              border: `1px solid ${isDarkMode ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.3)'}`,
+              borderRadius: '50px',
+              cursor: 'none',
+              fontFamily: 'Helvetica, Arial, sans-serif',
+              backdropFilter: 'blur(10px)',
+              whiteSpace: 'nowrap',
+              display: 'flex',
+              alignItems: 'center',
+              gap: isMobile ? '0.3rem' : '0.5rem',
+              margin: 0,
+              transition: 'all 0.3s ease',
+              boxShadow: '0 4px 15px rgba(0,0,0,0.1)'
+            }}
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1, duration: 0.6 }}
+            whileHover={{ 
+              backgroundColor: isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.2)',
+              scale: 1.05,
+              border: `1px solid ${isDarkMode ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.5)'}`,
+              transition: { duration: 0.2 }
+            }}
+            whileTap={{ scale: 0.95 }}
+          >
+            <motion.div
+              animate={{ rotate: isDarkMode ? 0 : 180 }}
+              transition={{ duration: 0.5 }}
+            >
+              {isDarkMode ? '☀️' : '🌙'}
+            </motion.div>
+            {isMobile ? '' : (isDarkMode ? 'LIGHT' : 'DARK')}
+          </motion.button>
+
+          {/* Sign In Button */}
+          <motion.button
+            onClick={() => router.push('/signin')}
+            onMouseEnter={() => handleLinkHover("link", "VIEW", "signin")}
+            onMouseLeave={handleLinkLeave}
+            style={{
+              padding: isMobile ? '0.4rem 1rem' : '0.6rem 1.5rem',
+              fontSize: isMobile ? '0.9rem' : '1.5rem',
+              fontWeight: '600',
+              color: 'white',
+              backgroundColor: 'transparent',
+              border: `1px solid ${isDarkMode ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.3)'}`,
+              borderRadius: '50px',
+              cursor: 'none',
+              fontFamily: 'Helvetica, Arial, sans-serif',
+              backdropFilter: 'blur(10px)',
+              whiteSpace: 'nowrap',
+              display: 'flex',
+              alignItems: 'center',
+              gap: isMobile ? '0.3rem' : '0.5rem',
+              margin: 0,
+              maxWidth: isMobile ? '120px' : 'none',
+              transition: 'all 0.3s ease',
+              boxShadow: '0 4px 15px rgba(0,0,0,0.1)'
+            }}
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1.2, duration: 0.6 }}
+            whileHover={{ 
+              backgroundColor: isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.2)',
+              scale: 1.05,
+              border: `1px solid ${isDarkMode ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.5)'}`,
+              transition: { duration: 0.2 }
+            }}
+            whileTap={{ scale: 0.95 }}
+          >
+            <svg 
+              width={isMobile ? "18" : "30"} 
+              height={isMobile ? "18" : "30"} 
+              viewBox="0 0 24 24" 
+              fill="none" 
+              stroke="currentColor" 
+              strokeWidth="2"
+            >
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+              <circle cx="12" cy="7" r="4"/>
+            </svg>
+            {isMobile ? 'SIGN IN' : 'SIGN IN'}
+          </motion.button>
         </div>
       </div>
     );
@@ -678,7 +668,62 @@ export default function HomePage(): React.JSX.Element {
         )}
       </div>
 
-      {/* Top Navigation Bar */}
+      {/* Tombol Index (Ke Kiri) */}
+      <motion.div
+        onClick={toggleIndex}
+        onMouseEnter={() => handleLinkHover("link", "INDEX", "index")}
+        onMouseLeave={handleLinkLeave}
+        style={{
+          position: 'fixed',
+          left: isMobile ? '1rem' : '2rem',
+          top: '50%',
+          transform: 'translateY(-50%)',
+          cursor: 'none',
+          zIndex: 101,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: '0.5rem'
+        }}
+        whileHover={{ x: -10 }}
+        transition={{ type: "spring", stiffness: 300 }}
+      >
+        <div style={{
+          width: '50px',
+          height: '50px',
+          borderRadius: '50%',
+          backgroundColor: isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.2)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          border: `1px solid ${isDarkMode ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.3)'}`
+        }}>
+          <svg 
+            width="24" 
+            height="24" 
+            viewBox="0 0 24 24" 
+            fill="none" 
+            stroke={isDarkMode ? 'white' : 'black'}
+            strokeWidth="2"
+          >
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+            <line x1="9" y1="9" x2="15" y2="9"/>
+            <line x1="9" y1="12" x2="15" y2="12"/>
+            <line x1="9" y1="15" x2="15" y2="15"/>
+          </svg>
+        </div>
+        <span style={{
+          color: isDarkMode ? 'white' : 'black',
+          fontSize: '0.8rem',
+          fontWeight: '500',
+          writingMode: 'vertical-rl',
+          textOrientation: 'mixed'
+        }}>
+          INDEX
+        </span>
+      </motion.div>
+
+      {/* Top Navigation Bar (TANPA TOMBOL INDEX) */}
       <div 
         ref={topNavRef}
         style={{
@@ -706,51 +751,6 @@ export default function HomePage(): React.JSX.Element {
           border: `1px solid ${isDarkMode ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.3)'}`,
           boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
         }}>
-          {/* Index Button */}
-          <motion.div
-            onClick={toggleIndex}
-            onMouseEnter={() => handleLinkHover("link", "VIEW", "index")}
-            onMouseLeave={handleLinkLeave}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              cursor: 'none',
-              padding: '0.4rem 0.8rem',
-              borderRadius: '25px',
-              backgroundColor: isDarkMode ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.95)',
-              border: isDarkMode ? '1px solid rgba(255,255,255,0.2)' : '1px solid rgba(255,255,255,0.3)',
-              transition: 'all 0.3s ease'
-            }}
-            whileHover={{ 
-              backgroundColor: 'white',
-              scale: 1.05,
-              border: '1px solid white'
-            }}
-          >
-            <svg 
-              width={isMobile ? "18" : "20"} 
-              height={isMobile ? "18" : "20"} 
-              viewBox="0 0 24 24" 
-              fill="none" 
-              stroke="#6366F1"
-              strokeWidth="2"
-            >
-              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-              <line x1="9" y1="9" x2="15" y2="9"/>
-              <line x1="9" y1="12" x2="15" y2="12"/>
-              <line x1="9" y1="15" x2="15" y2="15"/>
-            </svg>
-            <span style={{
-              color: '#6366F1',
-              fontSize: isMobile ? '0.8rem' : '0.9rem',
-              fontWeight: '600',
-              fontFamily: 'Helvetica, Arial, sans-serif'
-            }}>
-              Index
-            </span>
-          </motion.div>
-
           {/* Docs */}
           <motion.div
             onClick={() => router.push('/docs')}
@@ -1151,18 +1151,23 @@ export default function HomePage(): React.JSX.Element {
       </div>
 
       {/* Main Content Container */}
-      <div style={{
-        width: '100%',
-        paddingTop: isMobile ? '8rem' : '12rem',
-        boxSizing: 'border-box',
-        zIndex: 10,
-        position: 'relative'
-      }}>
+      <div 
+        ref={contentRef}
+        style={{
+          width: '100%',
+          paddingTop: isMobile ? '8rem' : '12rem',
+          boxSizing: 'border-box',
+          zIndex: 10,
+          position: 'relative'
+        }}
+      >
         {/* Deskripsi MENURU - 3 baris */}
         <div style={{
           marginBottom: isMobile ? '2rem' : '3rem',
           paddingLeft: isMobile ? '0.5rem' : '1rem',
-          paddingRight: isMobile ? '0.5rem' : '1rem'
+          paddingRight: isMobile ? '0.5rem' : '1rem',
+          position: 'relative',
+          zIndex: 10
         }}>
           <p 
             ref={descriptionRef}
@@ -1177,8 +1182,10 @@ export default function HomePage(): React.JSX.Element {
               transition: 'color 0.5s ease',
               wordWrap: 'break-word',
               overflowWrap: 'break-word',
-              opacity: 1, // Pastikan selalu terlihat
-              visibility: 'visible' // Pastikan selalu terlihat
+              opacity: 1,
+              visibility: 'visible',
+              position: 'relative',
+              zIndex: 10
             }}
           >
             Menuru is a branding personal journal life with a experiences of self about happy, sad, angry, etc. It's a creative exploration of personal growth and emotional journey. Through visual storytelling we capture moments of transformation and self-discovery.
