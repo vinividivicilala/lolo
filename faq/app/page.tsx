@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect, useRef } from "react";
@@ -14,9 +15,6 @@ export default function HomePage(): React.JSX.Element {
   const [cursorType, setCursorType] = useState("default");
   const [cursorText, setCursorText] = useState("");
   const [hoveredLink, setHoveredLink] = useState("");
-  const [showDescription, setShowDescription] = useState(true); // Hanya untuk teks deskripsi
-  const [hasScrolled, setHasScrolled] = useState(false);
-  
   const headerRef = useRef<HTMLDivElement>(null);
   const cursorRef = useRef<HTMLDivElement>(null);
   const topNavRef = useRef<HTMLDivElement>(null);
@@ -30,10 +28,6 @@ export default function HomePage(): React.JSX.Element {
   ];
 
   useEffect(() => {
-    // Reset state saat reload
-    setShowDescription(true);
-    setHasScrolled(false);
-
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 768);
     };
@@ -91,45 +85,19 @@ export default function HomePage(): React.JSX.Element {
       }
     };
 
-    // Handle scroll untuk hide teks deskripsi
-    const handleScroll = () => {
-      const currentScrollY = window.scrollY;
-      
-      // Set flag bahwa user sudah scroll
-      if (currentScrollY > 50 && !hasScrolled) {
-        setHasScrolled(true);
-        // Hilangkan teks deskripsi PERMANEN setelah scroll pertama
-        setShowDescription(false);
-      }
-    };
-
-    // Throttle scroll handler
-    let scrollTimeout: NodeJS.Timeout;
-    const throttledHandleScroll = () => {
-      if (!scrollTimeout) {
-        scrollTimeout = setTimeout(() => {
-          handleScroll();
-          scrollTimeout = null as any;
-        }, 100);
-      }
-    };
-
-    window.addEventListener('scroll', throttledHandleScroll, { passive: true });
     document.addEventListener('mousemove', moveCursor);
 
     return () => {
       window.removeEventListener('resize', checkMobile);
       window.removeEventListener('resize', setupAutoScroll);
-      window.removeEventListener('scroll', throttledHandleScroll);
       clearInterval(textInterval);
       clearTimeout(loadingTimeout);
-      if (scrollTimeout) clearTimeout(scrollTimeout);
       document.removeEventListener('mousemove', moveCursor);
       if (scrollTextRef.current) {
         gsap.killTweensOf(scrollTextRef.current);
       }
     };
-  }, [isMobile, hasScrolled]);
+  }, [isMobile]);
 
   // Fungsi toggle dark/light mode
   const toggleColorMode = () => {
@@ -678,282 +646,273 @@ export default function HomePage(): React.JSX.Element {
         zIndex: 10,
         position: 'relative'
       }}>
-        {/* HANYA TEKS DESKRIPSI YANG MUNCUL/HILANG */}
-        <AnimatePresence>
-          {showDescription && (
-            <motion.div
-              key="description-text"
-              initial={{ opacity: 1, height: "auto" }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.3 }}
-              style={{
-                marginBottom: isMobile ? '2rem' : '3rem',
-                paddingLeft: isMobile ? '0.5rem' : '1rem',
-                paddingRight: isMobile ? '0.5rem' : '1rem',
-                overflow: 'hidden'
-              }}
-            >
-              <p style={{
-                color: isDarkMode ? 'white' : 'black',
-                fontSize: isMobile ? '1.8rem' : '3.5rem',
-                fontWeight: '400',
-                fontFamily: 'HelveticaNowDisplay, Arial, sans-serif',
-                lineHeight: 1.3,
-                margin: 0,
-                marginBottom: isMobile ? '1.5rem' : '2rem',
-                transition: 'color 0.5s ease',
-                wordWrap: 'break-word',
-                overflowWrap: 'break-word'
-              }}>
-                Menuru is a branding personal journal life with a experiences of self about happy, sad, angry, etc. It's a creative exploration of personal growth and emotional journey. Through visual storytelling we capture moments of transformation and self-discovery.
-              </p>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* FOTO-FOTO TETAP TAMPIL (TIDAK DIBUNGKUS ANIMATION) */}
-        {/* Container untuk 2 foto */}
+        {/* Deskripsi MENURU - 3 baris */}
         <div style={{
-          display: 'flex',
-          flexDirection: isMobile ? 'column' : 'row',
-          gap: isMobile ? '1rem' : '0.3rem',
-          width: 'calc(100% - 2rem)',
-          marginLeft: isMobile ? '0.5rem' : '1rem',
-          marginRight: isMobile ? '0.5rem' : '1rem',
-          marginTop: '1rem',
-          marginBottom: isMobile ? '2rem' : '3rem'
+          marginBottom: isMobile ? '2rem' : '3rem',
+          paddingLeft: isMobile ? '0.5rem' : '1rem', // MENTOK TAPI TIDAK BANGET
+          paddingRight: isMobile ? '0.5rem' : '1rem'
         }}>
-          {/* Foto 1 - Sisi kiri */}
-          <div style={{
-            flex: 1,
-            overflow: 'hidden',
-            borderRadius: '25px',
-            boxShadow: '0 20px 50px rgba(0,0,0,0.5)',
-            border: `3px solid ${isDarkMode ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)'}`,
-            width: '100%',
-            position: 'relative',
-            zIndex: 1,
-            height: isMobile ? '500px' : '1200px'
+          <p style={{
+            color: isDarkMode ? 'white' : 'black',
+            fontSize: isMobile ? '1.8rem' : '3.5rem',
+            fontWeight: '400',
+            fontFamily: 'HelveticaNowDisplay, Arial, sans-serif',
+            lineHeight: 1.3,
+            margin: 0,
+            marginBottom: isMobile ? '1.5rem' : '2rem',
+            transition: 'color 0.5s ease',
+            wordWrap: 'break-word',
+            overflowWrap: 'break-word'
           }}>
-            <img 
-              src="images/5.jpg" 
-              alt="Menuru Visual Left"
-              style={{
-                width: '100%',
-                height: '100%',
-                display: 'block',
-                objectFit: 'cover',
-                borderRadius: '22px'
-              }}
-              onError={(e) => {
-                e.currentTarget.style.backgroundColor = isDarkMode ? '#333' : '#eee';
-                e.currentTarget.style.display = 'flex';
-                e.currentTarget.style.alignItems = 'center';
-                e.currentTarget.style.justifyContent = 'center';
-                e.currentTarget.style.color = isDarkMode ? '#fff' : '#000';
-                e.currentTarget.style.height = '100%';
-                e.currentTarget.innerHTML = '<div style="padding: 2rem; text-align: center;">Left Image</div>';
-              }}
-            />
-          </div>
+            Menuru is a branding personal journal life with a experiences of self about happy, sad, angry, etc. It's a creative exploration of personal growth and emotional journey. Through visual storytelling we capture moments of transformation and self-discovery.
+          </p>
 
-          {/* Foto 2 - Sisi kanan */}
+          {/* Container untuk 2 foto - LEBIH MENTOK KE LAYAR */}
           <div style={{
-            flex: 1,
-            overflow: 'hidden',
-            borderRadius: '25px',
-            boxShadow: '0 20px 50px rgba(0,0,0,0.5)',
-            border: `3px solid ${isDarkMode ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)'}`,
-            width: '100%',
-            position: 'relative',
-            zIndex: 1,
-            height: isMobile ? '500px' : '1200px'
-          }}>
-            <img 
-              src="images/6.jpg" 
-              alt="Menuru Visual Right"
-              style={{
-                width: '100%',
-                height: '100%',
-                display: 'block',
-                objectFit: 'cover',
-                borderRadius: '22px'
-              }}
-              onError={(e) => {
-                e.currentTarget.style.backgroundColor = isDarkMode ? '#333' : '#eee';
-                e.currentTarget.style.display = 'flex';
-                e.currentTarget.style.alignItems = 'center';
-                e.currentTarget.style.justifyContent = 'center';
-                e.currentTarget.style.color = isDarkMode ? '#fff' : '#000';
-                e.currentTarget.style.height = '100%';
-                e.currentTarget.innerHTML = '<div style="padding: 2rem; text-align: center;">Right Image</div>';
-              }}
-            />
-          </div>
-        </div>
-
-        {/* Card #0050B7 dengan 4 foto */}
-        <div
-          style={{
-            width: 'calc(100% - 4rem)',
-            marginLeft: isMobile ? '1rem' : '2rem',
-            marginRight: isMobile ? '1rem' : '2rem',
-            backgroundColor: '#0050B7',
-            borderRadius: '25px',
-            height: isMobile ? '500px' : '800px',
-            marginTop: isMobile ? '1rem' : '1.5rem',
-            marginBottom: isMobile ? '2rem' : '3rem',
-            boxShadow: '0 20px 50px rgba(0,0,0,0.3)',
-            position: 'relative',
-            overflow: 'hidden',
-            border: '3px solid rgba(255,255,255,0.1)',
-            padding: isMobile ? '1.5rem' : '2rem',
-            boxSizing: 'border-box',
             display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'flex-start'
-          }}
-        >
-          {/* Container untuk 4 foto */}
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)',
-            gridTemplateRows: '1fr',
-            gap: isMobile ? '1rem' : '1.5rem',
-            width: '100%',
-            height: '100%',
-            alignItems: 'flex-start',
-            justifyContent: 'center'
+            flexDirection: isMobile ? 'column' : 'row',
+            gap: isMobile ? '1rem' : '0.3rem',
+            width: 'calc(100% - 2rem)', // LEBIH MENTOK (hanya 2rem margin)
+            marginLeft: isMobile ? '0.5rem' : '1rem', // LEBIH MENTOK
+            marginRight: isMobile ? '0.5rem' : '1rem', // LEBIH MENTOK
+            marginTop: '1rem'
           }}>
-            {/* Foto 1 */}
+            {/* Foto 1 - Sisi kiri, SANGAT PANJANG */}
             <div style={{
+              flex: 1,
               overflow: 'hidden',
-              borderRadius: '20px',
-              boxShadow: '0 10px 30px rgba(0,0,0,0.4)',
-              border: '2px solid rgba(255,255,255,0.2)',
+              borderRadius: '25px',
+              boxShadow: '0 20px 50px rgba(0,0,0,0.5)',
+              border: `3px solid ${isDarkMode ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)'}`,
               width: '100%',
-              height: isMobile ? '600px' : '600px',
-              position: 'relative'
+              position: 'relative',
+              zIndex: 1,
+              height: isMobile ? '500px' : '1200px'
             }}>
               <img 
                 src="images/5.jpg" 
-                alt="Portrait 1"
+                alt="Menuru Visual Left"
                 style={{
                   width: '100%',
                   height: '100%',
                   display: 'block',
                   objectFit: 'cover',
-                  borderRadius: '18px'
+                  borderRadius: '22px'
                 }}
                 onError={(e) => {
-                  e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.1)';
+                  console.error("Gambar kiri tidak ditemukan:", e);
+                  e.currentTarget.style.backgroundColor = isDarkMode ? '#333' : '#eee';
                   e.currentTarget.style.display = 'flex';
                   e.currentTarget.style.alignItems = 'center';
                   e.currentTarget.style.justifyContent = 'center';
-                  e.currentTarget.style.color = 'white';
-                  e.currentTarget.innerHTML = '<div style="padding: 1rem; text-align: center;">Image 5</div>';
+                  e.currentTarget.style.color = isDarkMode ? '#fff' : '#000';
+                  e.currentTarget.style.height = '100%';
+                  e.currentTarget.innerHTML = '<div style="padding: 2rem; text-align: center;">Left Image</div>';
                 }}
               />
             </div>
 
-            {/* Foto 2 */}
+            {/* Foto 2 - Sisi kanan, SANGAT PANJANG */}
             <div style={{
+              flex: 1,
               overflow: 'hidden',
-              borderRadius: '20px',
-              boxShadow: '0 10px 30px rgba(0,0,0,0.4)',
-              border: '2px solid rgba(255,255,255,0.2)',
+              borderRadius: '25px',
+              boxShadow: '0 20px 50px rgba(0,0,0,0.5)',
+              border: `3px solid ${isDarkMode ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)'}`,
               width: '100%',
-              height: isMobile ? '600px' : '600px',
-              position: 'relative'
+              position: 'relative',
+              zIndex: 1,
+              height: isMobile ? '500px' : '1200px'
             }}>
               <img 
-                src="images/5.jpg" 
-                alt="Portrait 2"
+                src="images/6.jpg" 
+                alt="Menuru Visual Right"
                 style={{
                   width: '100%',
                   height: '100%',
                   display: 'block',
                   objectFit: 'cover',
-                  borderRadius: '18px'
+                  borderRadius: '22px'
                 }}
                 onError={(e) => {
-                  e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.1)';
+                  console.error("Gambar kanan tidak ditemukan:", e);
+                  e.currentTarget.style.backgroundColor = isDarkMode ? '#333' : '#eee';
                   e.currentTarget.style.display = 'flex';
                   e.currentTarget.style.alignItems = 'center';
                   e.currentTarget.style.justifyContent = 'center';
-                  e.currentTarget.style.color = 'white';
-                  e.currentTarget.innerHTML = '<div style="padding: 1rem; text-align: center;">Image 5</div>';
-                }}
-              />
-            </div>
-
-            {/* Foto 3 */}
-            <div style={{
-              overflow: 'hidden',
-              borderRadius: '20px',
-              boxShadow: '0 10px 30px rgba(0,0,0,0.4)',
-              border: '2px solid rgba(255,255,255,0.2)',
-              width: '100%',
-              height: isMobile ? '600px' : '600px',
-              position: 'relative'
-            }}>
-              <img 
-                src="images/5.jpg" 
-                alt="Portrait 3"
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  display: 'block',
-                  objectFit: 'cover',
-                  borderRadius: '18px'
-                }}
-                onError={(e) => {
-                  e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.1)';
-                  e.currentTarget.style.display = 'flex';
-                  e.currentTarget.style.alignItems = 'center';
-                  e.currentTarget.style.justifyContent = 'center';
-                  e.currentTarget.style.color = 'white';
-                  e.currentTarget.innerHTML = '<div style="padding: 1rem; text-align: center;">Image 5</div>';
-                }}
-              />
-            </div>
-
-            {/* Foto 4 */}
-            <div style={{
-              overflow: 'hidden',
-              borderRadius: '20px',
-              boxShadow: '0 10px 30px rgba(0,0,0,0.4)',
-              border: '2px solid rgba(255,255,255,0.2)',
-              width: '100%',
-              height: isMobile ? '600px' : '600px',
-              position: 'relative'
-            }}>
-              <img 
-                src="images/5.jpg" 
-                alt="Portrait 4"
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  display: 'block',
-                  objectFit: 'cover',
-                  borderRadius: '18px'
-                }}
-                onError={(e) => {
-                  e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.1)';
-                  e.currentTarget.style.display = 'flex';
-                  e.currentTarget.style.alignItems = 'center';
-                  e.currentTarget.style.justifyContent = 'center';
-                  e.currentTarget.style.color = 'white';
-                  e.currentTarget.innerHTML = '<div style="padding: 1rem; text-align: center;">Image 5</div>';
+                  e.currentTarget.style.color = isDarkMode ? '#fff' : '#000';
+                  e.currentTarget.style.height = '100%';
+                  e.currentTarget.innerHTML = '<div style="padding: 2rem; text-align: center;">Right Image</div>';
                 }}
               />
             </div>
           </div>
+
+          {/* Card #0050B7 dengan 4 foto images/5.jpg - FOTO LEBIH LEBAR KE SAMPING */}
+          <div
+            style={{
+              width: 'calc(100% - 4rem)', // TIDAK MENTOK
+              marginLeft: isMobile ? '1rem' : '2rem',
+              marginRight: isMobile ? '1rem' : '2rem',
+              backgroundColor: '#0050B7',
+              borderRadius: '25px',
+              height: isMobile ? '500px' : '800px', // CARD TINGGI SEDIKIT
+              marginTop: isMobile ? '1rem' : '1.5rem',
+              boxShadow: '0 20px 50px rgba(0,0,0,0.3)',
+              position: 'relative',
+              overflow: 'hidden',
+              border: '3px solid rgba(255,255,255,0.1)',
+              padding: isMobile ? '1.5rem' : '2rem',
+              boxSizing: 'border-box',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'flex-start'
+            }}
+          >
+            {/* Container untuk 4 foto images/5.jpg - GRID TETAP SAMA */}
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)',
+              gridTemplateRows: '1fr',
+              gap: isMobile ? '1rem' : '1.5rem',
+              width: '100%',
+              height: '100%',
+              alignItems: 'flex-start',
+              justifyContent: 'center'
+            }}>
+              {/* Foto 1 - images/5.jpg - LEBIH LEBAR KE SAMPING */}
+              <div style={{
+                overflow: 'hidden',
+                borderRadius: '20px',
+                boxShadow: '0 10px 30px rgba(0,0,0,0.4)',
+                border: '2px solid rgba(255,255,255,0.2)',
+                width: '100%',
+                height: isMobile ? '600px' : '600px', // TINGGI SEDIKIT
+                position: 'relative'
+              }}>
+                <img 
+                  src="images/5.jpg" 
+                  alt="Portrait 1"
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    display: 'block',
+                    objectFit: 'cover',
+                    borderRadius: '18px'
+                  }}
+                  onError={(e) => {
+                    console.error("Gambar portrait 1 tidak ditemukan:", e);
+                    e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.1)';
+                    e.currentTarget.style.display = 'flex';
+                    e.currentTarget.style.alignItems = 'center';
+                    e.currentTarget.style.justifyContent = 'center';
+                    e.currentTarget.style.color = 'white';
+                    e.currentTarget.innerHTML = '<div style="padding: 1rem; text-align: center;">Image 5</div>';
+                  }}
+                />
+              </div>
+
+              {/* Foto 2 - images/5.jpg - LEBIH LEBAR KE SAMPING */}
+              <div style={{
+                overflow: 'hidden',
+                borderRadius: '20px',
+                boxShadow: '0 10px 30px rgba(0,0,0,0.4)',
+                border: '2px solid rgba(255,255,255,0.2)',
+                width: '100%',
+                height: isMobile ? '600px' : '600px', // TINGGI SEDIKIT
+                position: 'relative'
+              }}>
+                <img 
+                  src="images/5.jpg" 
+                  alt="Portrait 2"
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    display: 'block',
+                    objectFit: 'cover',
+                    borderRadius: '18px'
+                  }}
+                  onError={(e) => {
+                    console.error("Gambar portrait 2 tidak ditemukan:", e);
+                    e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.1)';
+                    e.currentTarget.style.display = 'flex';
+                    e.currentTarget.style.alignItems = 'center';
+                    e.currentTarget.style.justifyContent = 'center';
+                    e.currentTarget.style.color = 'white';
+                    e.currentTarget.innerHTML = '<div style="padding: 1rem; text-align: center;">Image 5</div>';
+                  }}
+                />
+              </div>
+
+              {/* Foto 3 - images/5.jpg - LEBIH LEBAR KE SAMPING */}
+              <div style={{
+                overflow: 'hidden',
+                borderRadius: '20px',
+                boxShadow: '0 10px 30px rgba(0,0,0,0.4)',
+                border: '2px solid rgba(255,255,255,0.2)',
+                width: '100%',
+                height: isMobile ? '600px' : '600px', // TINGGI SEDIKIT
+                position: 'relative'
+              }}>
+                <img 
+                  src="images/5.jpg" 
+                  alt="Portrait 3"
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    display: 'block',
+                    objectFit: 'cover',
+                    borderRadius: '18px'
+                  }}
+                  onError={(e) => {
+                    console.error("Gambar portrait 3 tidak ditemukan:", e);
+                    e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.1)';
+                    e.currentTarget.style.display = 'flex';
+                    e.currentTarget.style.alignItems = 'center';
+                    e.currentTarget.style.justifyContent = 'center';
+                    e.currentTarget.style.color = 'white';
+                    e.currentTarget.innerHTML = '<div style="padding: 1rem; text-align: center;">Image 5</div>';
+                  }}
+                />
+              </div>
+
+              {/* Foto 4 - images/5.jpg - LEBIH LEBAR KE SAMPING */}
+              <div style={{
+                overflow: 'hidden',
+                borderRadius: '20px',
+                boxShadow: '0 10px 30px rgba(0,0,0,0.4)',
+                border: '2px solid rgba(255,255,255,0.2)',
+                width: '100%',
+                height: isMobile ? '600px' : '600px', // TINGGI SEDIKIT
+                position: 'relative'
+              }}>
+                <img 
+                  src="images/5.jpg" 
+                  alt="Portrait 4"
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    display: 'block',
+                    objectFit: 'cover',
+                    borderRadius: '18px'
+                  }}
+                  onError={(e) => {
+                    console.error("Gambar portrait 4 tidak ditemukan:", e);
+                    e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.1)';
+                    e.currentTarget.style.display = 'flex';
+                    e.currentTarget.style.alignItems = 'center';
+                    e.currentTarget.style.justifyContent = 'center';
+                    e.currentTarget.style.color = 'white';
+                    e.currentTarget.innerHTML = '<div style="padding: 1rem; text-align: center;">Image 5</div>';
+                  }}
+                />
+              </div>
+            </div>
+          </div>
         </div>
 
-        {/* Content tambahan */}
+        {/* Content tambahan untuk membuat halaman lebih panjang */}
         <div style={{
           height: '100vh',
           width: '100%',
@@ -984,3 +943,4 @@ export default function HomePage(): React.JSX.Element {
     </div>
   );
 }
+
