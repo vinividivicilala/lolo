@@ -20,6 +20,7 @@ export default function HomePage(): React.JSX.Element {
   const cursorRef = useRef<HTMLDivElement>(null);
   const topNavRef = useRef<HTMLDivElement>(null);
   const scrollTextRef = useRef<HTMLDivElement>(null);
+  const sliderContainerRef = useRef<HTMLDivElement>(null);
 
   // Animasi loading text
   const loadingTexts = [
@@ -968,6 +969,102 @@ export default function HomePage(): React.JSX.Element {
                 </div>
               </div>
 
+              {/* Tombol Slider Index/Grid - Di bawah card dalam posisi scroll */}
+              <div 
+                ref={sliderContainerRef}
+                style={{
+                  position: 'relative',
+                  marginTop: isMobile ? '2rem' : '3rem',
+                  marginBottom: isMobile ? '4rem' : '6rem',
+                  paddingLeft: isMobile ? '1rem' : '2rem',
+                  paddingRight: isMobile ? '1rem' : '2rem'
+                }}
+              >
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '1rem'
+                }}>
+                  {/* Tombol Slider */}
+                  <motion.button
+                    onClick={toggleSlider}
+                    onMouseEnter={() => handleLinkHover("link", sliderPosition === "index" ? "TO GRID" : "TO INDEX", "slider")}
+                    onMouseLeave={handleLinkLeave}
+                    style={{
+                      width: '100px',
+                      height: '40px',
+                      backgroundColor: '#0050B7', // Biru
+                      border: 'none',
+                      borderRadius: '20px',
+                      cursor: 'none',
+                      padding: 0,
+                      position: 'relative',
+                      display: 'flex',
+                      alignItems: 'center',
+                      overflow: 'hidden'
+                    }}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    {/* Track */}
+                    <div style={{
+                      position: 'absolute',
+                      width: '100%',
+                      height: '100%',
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      padding: '0 10px',
+                      boxSizing: 'border-box'
+                    }}>
+                      <span style={{
+                        color: 'white',
+                        fontSize: '0.8rem',
+                        fontWeight: '600',
+                        fontFamily: 'Helvetica, Arial, sans-serif',
+                        opacity: sliderPosition === "index" ? 1 : 0.5
+                      }}>
+                        INDEX
+                      </span>
+                      <span style={{
+                        color: 'white',
+                        fontSize: '0.8rem',
+                        fontWeight: '600',
+                        fontFamily: 'Helvetica, Arial, sans-serif',
+                        opacity: sliderPosition === "grid" ? 1 : 0.5
+                      }}>
+                        GRID
+                      </span>
+                    </div>
+                    
+                    {/* Slider Dot - Hijau cerah */}
+                    <motion.div
+                      animate={{ x: sliderPosition === "index" ? 10 : 50 }}
+                      transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                      style={{
+                        width: '30px',
+                        height: '30px',
+                        backgroundColor: '#00FF00', // Hijau cerah
+                        borderRadius: '50%',
+                        position: 'absolute',
+                        left: '5px',
+                        boxShadow: '0 0 10px rgba(0, 255, 0, 0.5)'
+                      }}
+                    />
+                  </motion.button>
+
+                  {/* Label status */}
+                  <div style={{
+                    color: isDarkMode ? 'white' : 'black',
+                    fontSize: '0.9rem',
+                    fontWeight: '500',
+                    fontFamily: 'Helvetica, Arial, sans-serif'
+                  }}>
+                    {sliderPosition === "index" ? "Index View" : "Grid View"}
+                  </div>
+                </div>
+              </div>
+
               {/* Content tambahan untuk membuat halaman lebih panjang */}
               <div style={{
                 height: '100vh',
@@ -1021,11 +1118,11 @@ export default function HomePage(): React.JSX.Element {
                 marginBottom: '3rem'
               }}></div>
 
-              {/* Container utama untuk halaman Index - Layout 3 kolom dengan font sama rata */}
+              {/* Container utama untuk halaman Index - Layout 3 kolom dengan jarak spasi dekat */}
               <div style={{
                 display: 'flex',
                 flexDirection: isMobile ? 'column' : 'row',
-                gap: isMobile ? '3rem' : '6rem',
+                gap: isMobile ? '2rem' : '4rem',
                 width: '100%',
                 fontFamily: 'Helvetica, Arial, sans-serif'
               }}>
@@ -1045,27 +1142,27 @@ export default function HomePage(): React.JSX.Element {
                   </div>
                 </div>
 
-                {/* Kolom tengah - Topics */}
+                {/* Kolom tengah - Topics dengan jarak spasi dekat */}
                 <div style={{
                   flex: 1
                 }}>
                   <div style={{
                     display: 'flex',
                     flexDirection: 'column',
-                    gap: '2rem',
+                    gap: '0.8rem', // Jarak spasi sangat dekat
                     fontFamily: 'Helvetica, Arial, sans-serif'
                   }}>
                     {indexTopics.map((topic) => (
                       <div key={topic.id} style={{
                         display: 'flex',
-                        flexDirection: 'column',
-                        gap: '0.3rem'
+                        flexDirection: 'column'
                       }}>
                         <div style={{
                           color: isDarkMode ? 'white' : 'black',
                           fontSize: isMobile ? '1.2rem' : '1.5rem',
                           fontWeight: '400',
-                          fontFamily: 'Helvetica, Arial, sans-serif'
+                          fontFamily: 'Helvetica, Arial, sans-serif',
+                          lineHeight: 1.2
                         }}>
                           {topic.title}
                         </div>
@@ -1074,43 +1171,137 @@ export default function HomePage(): React.JSX.Element {
                   </div>
                 </div>
 
-                {/* Kolom kanan - Deskripsi dan Tanggal sejajar */}
+                {/* Kolom kanan - Deskripsi dan Tanggal sejajar dengan jarak spasi dekat */}
                 <div style={{
                   flex: 1
                 }}>
                   <div style={{
                     display: 'flex',
                     flexDirection: 'column',
-                    gap: '2rem',
+                    gap: '0.8rem', // Jarak spasi sangat dekat
                     fontFamily: 'Helvetica, Arial, sans-serif'
                   }}>
                     {indexTopics.map((topic) => (
                       <div key={topic.id} style={{
                         display: 'flex',
                         flexDirection: 'column',
-                        gap: '0.3rem'
+                        gap: '0.1rem' // Jarak antar baris sangat dekat
                       }}>
-                        {/* Deskripsi teks pendek - font sama dengan topics */}
                         <div style={{
                           color: isDarkMode ? 'white' : 'black',
                           fontSize: isMobile ? '1.2rem' : '1.5rem',
                           fontWeight: '400',
                           fontFamily: 'Helvetica, Arial, sans-serif',
-                          marginBottom: '0.5rem'
+                          lineHeight: 1.2
                         }}>
                           {topic.description}
                         </div>
-                        {/* Tanggal - font lebih kecil */}
+                        {/* Tanggal sejajar dengan deskripsi */}
                         <div style={{
                           color: isDarkMode ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.6)',
                           fontSize: '0.9rem',
                           fontWeight: '400',
-                          fontFamily: 'Helvetica, Arial, sans-serif'
+                          fontFamily: 'Helvetica, Arial, sans-serif',
+                          lineHeight: 1.2,
+                          marginTop: '0.1rem'
                         }}>
                           {topic.date}
                         </div>
                       </div>
                     ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Tombol Slider Index/Grid - Di bawah content dalam posisi scroll */}
+              <div style={{
+                position: 'relative',
+                marginTop: '4rem',
+                marginBottom: '4rem',
+                paddingLeft: isMobile ? '1rem' : '2rem',
+                paddingRight: isMobile ? '1rem' : '2rem'
+              }}>
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '1rem'
+                }}>
+                  {/* Tombol Slider */}
+                  <motion.button
+                    onClick={toggleSlider}
+                    onMouseEnter={() => handleLinkHover("link", sliderPosition === "index" ? "TO GRID" : "TO INDEX", "slider")}
+                    onMouseLeave={handleLinkLeave}
+                    style={{
+                      width: '100px',
+                      height: '40px',
+                      backgroundColor: '#0050B7', // Biru
+                      border: 'none',
+                      borderRadius: '20px',
+                      cursor: 'none',
+                      padding: 0,
+                      position: 'relative',
+                      display: 'flex',
+                      alignItems: 'center',
+                      overflow: 'hidden'
+                    }}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    {/* Track */}
+                    <div style={{
+                      position: 'absolute',
+                      width: '100%',
+                      height: '100%',
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      padding: '0 10px',
+                      boxSizing: 'border-box'
+                    }}>
+                      <span style={{
+                        color: 'white',
+                        fontSize: '0.8rem',
+                        fontWeight: '600',
+                        fontFamily: 'Helvetica, Arial, sans-serif',
+                        opacity: sliderPosition === "index" ? 1 : 0.5
+                      }}>
+                        INDEX
+                      </span>
+                      <span style={{
+                        color: 'white',
+                        fontSize: '0.8rem',
+                        fontWeight: '600',
+                        fontFamily: 'Helvetica, Arial, sans-serif',
+                        opacity: sliderPosition === "grid" ? 1 : 0.5
+                      }}>
+                        GRID
+                      </span>
+                    </div>
+                    
+                    {/* Slider Dot - Hijau cerah */}
+                    <motion.div
+                      animate={{ x: 10 }} // Selalu di kiri karena di Index view
+                      transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                      style={{
+                        width: '30px',
+                        height: '30px',
+                        backgroundColor: '#00FF00', // Hijau cerah
+                        borderRadius: '50%',
+                        position: 'absolute',
+                        left: '5px',
+                        boxShadow: '0 0 10px rgba(0, 255, 0, 0.5)'
+                      }}
+                    />
+                  </motion.button>
+
+                  {/* Label status */}
+                  <div style={{
+                    color: isDarkMode ? 'white' : 'black',
+                    fontSize: '0.9rem',
+                    fontWeight: '500',
+                    fontFamily: 'Helvetica, Arial, sans-serif'
+                  }}>
+                    Index View
                   </div>
                 </div>
               </div>
@@ -1144,94 +1335,98 @@ export default function HomePage(): React.JSX.Element {
               }}>
                 Grid View - Coming Soon
               </h2>
+              
+              {/* Tombol Slider di bawah content */}
+              <div style={{
+                marginTop: '3rem'
+              }}>
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '1rem'
+                }}>
+                  {/* Tombol Slider */}
+                  <motion.button
+                    onClick={toggleSlider}
+                    onMouseEnter={() => handleLinkHover("link", sliderPosition === "index" ? "TO GRID" : "TO INDEX", "slider")}
+                    onMouseLeave={handleLinkLeave}
+                    style={{
+                      width: '100px',
+                      height: '40px',
+                      backgroundColor: '#0050B7', // Biru
+                      border: 'none',
+                      borderRadius: '20px',
+                      cursor: 'none',
+                      padding: 0,
+                      position: 'relative',
+                      display: 'flex',
+                      alignItems: 'center',
+                      overflow: 'hidden'
+                    }}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    {/* Track */}
+                    <div style={{
+                      position: 'absolute',
+                      width: '100%',
+                      height: '100%',
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      padding: '0 10px',
+                      boxSizing: 'border-box'
+                    }}>
+                      <span style={{
+                        color: 'white',
+                        fontSize: '0.8rem',
+                        fontWeight: '600',
+                        fontFamily: 'Helvetica, Arial, sans-serif',
+                        opacity: sliderPosition === "index" ? 1 : 0.5
+                      }}>
+                        INDEX
+                      </span>
+                      <span style={{
+                        color: 'white',
+                        fontSize: '0.8rem',
+                        fontWeight: '600',
+                        fontFamily: 'Helvetica, Arial, sans-serif',
+                        opacity: sliderPosition === "grid" ? 1 : 0.5
+                      }}>
+                        GRID
+                      </span>
+                    </div>
+                    
+                    {/* Slider Dot - Hijau cerah */}
+                    <motion.div
+                      animate={{ x: 50 }} // Selalu di kanan karena di Grid view
+                      transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                      style={{
+                        width: '30px',
+                        height: '30px',
+                        backgroundColor: '#00FF00', // Hijau cerah
+                        borderRadius: '50%',
+                        position: 'absolute',
+                        left: '5px',
+                        boxShadow: '0 0 10px rgba(0, 255, 0, 0.5)'
+                      }}
+                    />
+                  </motion.button>
+
+                  {/* Label status */}
+                  <div style={{
+                    color: isDarkMode ? 'white' : 'black',
+                    fontSize: '0.9rem',
+                    fontWeight: '500',
+                    fontFamily: 'Helvetica, Arial, sans-serif'
+                  }}>
+                    Grid View
+                  </div>
+                </div>
+              </div>
             </motion.div>
           )}
         </AnimatePresence>
-      </div>
-
-      {/* Tombol Slider Index/Grid - Satu tombol geser di kiri bawah */}
-      <div style={{
-        position: 'fixed',
-        bottom: '2rem',
-        left: '2rem',
-        zIndex: 50,
-        display: 'flex',
-        alignItems: 'center',
-        gap: '1rem'
-      }}>
-        {/* Tombol Slider */}
-        <motion.button
-          onClick={toggleSlider}
-          onMouseEnter={() => handleLinkHover("link", sliderPosition === "index" ? "TO GRID" : "TO INDEX", "slider")}
-          onMouseLeave={handleLinkLeave}
-          style={{
-            width: '100px',
-            height: '40px',
-            backgroundColor: isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
-            border: `2px solid ${isDarkMode ? 'white' : 'black'}`,
-            borderRadius: '20px',
-            cursor: 'none',
-            padding: 0,
-            position: 'relative',
-            display: 'flex',
-            alignItems: 'center'
-          }}
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-        >
-          {/* Track */}
-          <div style={{
-            position: 'absolute',
-            width: '100%',
-            height: '100%',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            padding: '0 10px',
-            boxSizing: 'border-box'
-          }}>
-            <span style={{
-              color: isDarkMode ? 'white' : 'black',
-              fontSize: '0.8rem',
-              fontWeight: '600',
-              fontFamily: 'Helvetica, Arial, sans-serif'
-            }}>
-              INDEX
-            </span>
-            <span style={{
-              color: isDarkMode ? 'white' : 'black',
-              fontSize: '0.8rem',
-              fontWeight: '600',
-              fontFamily: 'Helvetica, Arial, sans-serif'
-            }}>
-              GRID
-            </span>
-          </div>
-          
-          {/* Slider Dot */}
-          <motion.div
-            animate={{ x: sliderPosition === "index" ? 10 : 50 }}
-            transition={{ type: "spring", stiffness: 300, damping: 20 }}
-            style={{
-              width: '30px',
-              height: '30px',
-              backgroundColor: 'white',
-              borderRadius: '50%',
-              position: 'absolute',
-              left: '5px'
-            }}
-          />
-        </motion.button>
-
-        {/* Label status */}
-        <div style={{
-          color: isDarkMode ? 'white' : 'black',
-          fontSize: '0.9rem',
-          fontWeight: '500',
-          fontFamily: 'Helvetica, Arial, sans-serif'
-        }}>
-          {sliderPosition === "index" ? "Index View" : "Grid View"}
-        </div>
       </div>
     </div>
   );
