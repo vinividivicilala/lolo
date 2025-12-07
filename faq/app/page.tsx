@@ -15,6 +15,7 @@ export default function HomePage(): React.JSX.Element {
   const [cursorText, setCursorText] = useState("");
   const [hoveredLink, setHoveredLink] = useState("");
   const [currentView, setCurrentView] = useState<"main" | "index" | "grid">("main");
+  const [sliderPosition, setSliderPosition] = useState<"index" | "grid">("grid"); // index = kiri, grid = kanan
   const headerRef = useRef<HTMLDivElement>(null);
   const cursorRef = useRef<HTMLDivElement>(null);
   const topNavRef = useRef<HTMLDivElement>(null);
@@ -117,9 +118,27 @@ export default function HomePage(): React.JSX.Element {
     setHoveredLink("");
   };
 
-  // Fungsi untuk mengubah view
-  const handleViewChange = (view: "main" | "index" | "grid") => {
-    setCurrentView(view);
+  // Fungsi untuk toggle slider
+  const toggleSlider = () => {
+    if (sliderPosition === "index") {
+      setSliderPosition("grid");
+      setCurrentView("main");
+    } else {
+      setSliderPosition("index");
+      setCurrentView("index");
+    }
+  };
+
+  // Fungsi untuk langsung ke index
+  const goToIndex = () => {
+    setSliderPosition("index");
+    setCurrentView("index");
+  };
+
+  // Fungsi untuk langsung ke grid/main
+  const goToGrid = () => {
+    setSliderPosition("grid");
+    setCurrentView("main");
   };
 
   // Warna cursor
@@ -961,111 +980,6 @@ export default function HomePage(): React.JSX.Element {
                 </div>
               </div>
 
-              {/* Tombol Navigasi Index/Grid di sebelah kiri bawah card */}
-              <div style={{
-                position: 'fixed',
-                bottom: '2rem',
-                left: '2rem',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '1rem',
-                zIndex: 50
-              }}>
-                {/* Tombol Index dengan animasi geser */}
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.5rem'
-                }}>
-                  <motion.button
-                    onClick={() => handleViewChange("index")}
-                    onMouseEnter={() => handleLinkHover("link", "INDEX", "index")}
-                    onMouseLeave={handleLinkLeave}
-                    style={{
-                      width: '60px',
-                      height: '30px',
-                      backgroundColor: isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
-                      border: `2px solid ${isDarkMode ? 'white' : 'black'}`,
-                      borderRadius: '15px',
-                      cursor: 'none',
-                      padding: 0,
-                      position: 'relative',
-                      display: 'flex',
-                      alignItems: 'center'
-                    }}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    <motion.div
-                      animate={{ x: currentView === "index" ? 30 : 0 }}
-                      transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                      style={{
-                        width: '24px',
-                        height: '24px',
-                        backgroundColor: 'black',
-                        borderRadius: '50%',
-                        marginLeft: '3px'
-                      }}
-                    />
-                  </motion.button>
-                  <span style={{
-                    color: isDarkMode ? 'white' : 'black',
-                    fontSize: '0.9rem',
-                    fontWeight: '600',
-                    marginLeft: '0.5rem'
-                  }}>
-                    INDEX
-                  </span>
-                </div>
-
-                {/* Tombol Grid dengan animasi geser */}
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.5rem'
-                }}>
-                  <motion.button
-                    onClick={() => handleViewChange("grid")}
-                    onMouseEnter={() => handleLinkHover("link", "GRID", "grid")}
-                    onMouseLeave={handleLinkLeave}
-                    style={{
-                      width: '60px',
-                      height: '30px',
-                      backgroundColor: isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
-                      border: `2px solid ${isDarkMode ? 'white' : 'black'}`,
-                      borderRadius: '15px',
-                      cursor: 'none',
-                      padding: 0,
-                      position: 'relative',
-                      display: 'flex',
-                      alignItems: 'center'
-                    }}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    <motion.div
-                      animate={{ x: currentView === "grid" ? 30 : 0 }}
-                      transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                      style={{
-                        width: '24px',
-                        height: '24px',
-                        backgroundColor: 'black',
-                        borderRadius: '50%',
-                        marginLeft: '3px'
-                      }}
-                    />
-                  </motion.button>
-                  <span style={{
-                    color: isDarkMode ? 'white' : 'black',
-                    fontSize: '0.9rem',
-                    fontWeight: '600',
-                    marginLeft: '0.5rem'
-                  }}>
-                    GRID
-                  </span>
-                </div>
-              </div>
-
               {/* Content tambahan untuk membuat halaman lebih panjang */}
               <div style={{
                 height: '100vh',
@@ -1111,212 +1025,91 @@ export default function HomePage(): React.JSX.Element {
                 boxSizing: 'border-box'
               }}
             >
-              {/* Garis horizontal di atas MENURU */}
-              <div style={{
-                width: '100%',
-                height: '2px',
-                backgroundColor: isDarkMode ? 'white' : 'black',
-                marginBottom: '1.5rem'
-              }}></div>
-
-              {/* Container utama untuk halaman Index - Layout sederhana */}
+              {/* Container utama untuk halaman Index - Layout 3 kolom sederhana */}
               <div style={{
                 display: 'flex',
-                flexDirection: 'column',
-                gap: '2rem'
+                flexDirection: isMobile ? 'column' : 'row',
+                gap: isMobile ? '2rem' : '4rem',
+                width: '100%'
               }}>
-                {/* Header MENURU */}
-                <div>
-                  <h2 style={{
+                {/* Kolom kiri - MENURU */}
+                <div style={{
+                  flex: 1
+                }}>
+                  <div style={{
                     color: isDarkMode ? 'white' : 'black',
-                    fontSize: isMobile ? '2rem' : '3rem',
+                    fontSize: isMobile ? '1.8rem' : '2.5rem',
                     fontWeight: '300',
-                    margin: '0 0 1rem 0',
                     textTransform: 'uppercase',
                     letterSpacing: '2px'
                   }}>
                     MENURU
-                  </h2>
+                  </div>
                 </div>
 
-                {/* Container untuk Topics dan Deskripsi */}
+                {/* Kolom tengah - Topics */}
                 <div style={{
-                  display: 'flex',
-                  flexDirection: isMobile ? 'column' : 'row',
-                  gap: isMobile ? '1.5rem' : '3rem'
+                  flex: 1
                 }}>
-                  {/* Kolom kiri - Topics */}
                   <div style={{
-                    flex: 1
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '1.5rem'
                   }}>
-                    <div style={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: '1rem'
-                    }}>
-                      {indexTopics.map((topic) => (
-                        <motion.div
-                          key={topic.id}
-                          whileHover={{ x: 5 }}
-                          transition={{ duration: 0.2 }}
-                          style={{
-                            padding: '0.5rem 0',
-                            cursor: 'pointer'
-                          }}
-                          onMouseEnter={() => handleLinkHover("link", "VIEW", `topic-${topic.id}`)}
-                          onMouseLeave={handleLinkLeave}
+                    {indexTopics.map((topic) => (
+                      <div key={topic.id} style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '0.3rem'
+                      }}>
+                        <div style={{
+                          color: isDarkMode ? 'white' : 'black',
+                          fontSize: isMobile ? '1.2rem' : '1.5rem',
+                          fontWeight: '400',
+                          cursor: 'pointer'
+                        }}
+                        onMouseEnter={() => handleLinkHover("link", "VIEW", `topic-${topic.id}`)}
+                        onMouseLeave={handleLinkLeave}
                         >
-                          <div style={{
-                            color: isDarkMode ? 'white' : 'black',
-                            fontSize: isMobile ? '1.2rem' : '1.5rem',
-                            fontWeight: '400',
-                            marginBottom: '0.2rem'
-                          }}>
-                            {topic.title}
-                          </div>
-                        </motion.div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Kolom kanan - Deskripsi dan Tanggal sejajar */}
-                  <div style={{
-                    flex: 1
-                  }}>
-                    <div style={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: '2rem'
-                    }}>
-                      {indexTopics.map((topic) => (
-                        <div key={topic.id} style={{
-                          display: 'flex',
-                          flexDirection: 'column',
-                          gap: '0.3rem'
-                        }}>
-                          <div style={{
-                            color: isDarkMode ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.6)',
-                            fontSize: '0.9rem',
-                            fontWeight: '500'
-                          }}>
-                            {topic.date}
-                          </div>
-                          <div style={{
-                            color: isDarkMode ? 'rgba(255,255,255,0.8)' : 'rgba(0,0,0,0.8)',
-                            fontSize: '0.95rem',
-                            lineHeight: 1.4
-                          }}>
-                            {topic.description}
-                          </div>
+                          {topic.title}
                         </div>
-                      ))}
-                    </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
-              </div>
 
-              {/* Tombol Index/Grid tetap di posisi kiri bawah */}
-              <div style={{
-                position: 'fixed',
-                bottom: '2rem',
-                left: '2rem',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '1rem',
-                zIndex: 50
-              }}>
-                {/* Tombol Index dengan animasi geser */}
+                {/* Kolom kanan - Deskripsi dan Tanggal sejajar */}
                 <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.5rem'
+                  flex: 1
                 }}>
-                  <motion.button
-                    onClick={() => handleViewChange("index")}
-                    onMouseEnter={() => handleLinkHover("link", "INDEX", "index")}
-                    onMouseLeave={handleLinkLeave}
-                    style={{
-                      width: '60px',
-                      height: '30px',
-                      backgroundColor: isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
-                      border: `2px solid ${isDarkMode ? 'white' : 'black'}`,
-                      borderRadius: '15px',
-                      cursor: 'none',
-                      padding: 0,
-                      position: 'relative',
-                      display: 'flex',
-                      alignItems: 'center'
-                    }}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    <motion.div
-                      animate={{ x: 30 }}
-                      transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                      style={{
-                        width: '24px',
-                        height: '24px',
-                        backgroundColor: 'black',
-                        borderRadius: '50%',
-                        marginLeft: '3px'
-                      }}
-                    />
-                  </motion.button>
-                  <span style={{
-                    color: isDarkMode ? 'white' : 'black',
-                    fontSize: '0.9rem',
-                    fontWeight: '600',
-                    marginLeft: '0.5rem'
+                  <div style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '1.5rem'
                   }}>
-                    INDEX
-                  </span>
-                </div>
-
-                {/* Tombol Grid dengan animasi geser */}
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.5rem'
-                }}>
-                  <motion.button
-                    onClick={() => handleViewChange("main")}
-                    onMouseEnter={() => handleLinkHover("link", "GRID", "grid")}
-                    onMouseLeave={handleLinkLeave}
-                    style={{
-                      width: '60px',
-                      height: '30px',
-                      backgroundColor: isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
-                      border: `2px solid ${isDarkMode ? 'white' : 'black'}`,
-                      borderRadius: '15px',
-                      cursor: 'none',
-                      padding: 0,
-                      position: 'relative',
-                      display: 'flex',
-                      alignItems: 'center'
-                    }}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    <motion.div
-                      animate={{ x: 0 }}
-                      transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                      style={{
-                        width: '24px',
-                        height: '24px',
-                        backgroundColor: 'black',
-                        borderRadius: '50%',
-                        marginLeft: '3px'
-                      }}
-                    />
-                  </motion.button>
-                  <span style={{
-                    color: isDarkMode ? 'white' : 'black',
-                    fontSize: '0.9rem',
-                    fontWeight: '600',
-                    marginLeft: '0.5rem'
-                  }}>
-                    GRID
-                  </span>
+                    {indexTopics.map((topic) => (
+                      <div key={topic.id} style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '0.3rem'
+                      }}>
+                        <div style={{
+                          color: isDarkMode ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.6)',
+                          fontSize: '0.9rem',
+                          fontWeight: '400'
+                        }}>
+                          {topic.date}
+                        </div>
+                        <div style={{
+                          color: isDarkMode ? 'rgba(255,255,255,0.8)' : 'rgba(0,0,0,0.8)',
+                          fontSize: '0.95rem',
+                          lineHeight: 1.4
+                        }}>
+                          {topic.description}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
             </motion.div>
@@ -1349,114 +1142,91 @@ export default function HomePage(): React.JSX.Element {
               }}>
                 Grid View - Coming Soon
               </h2>
-              
-              {/* Tombol Index/Grid tetap di posisi kiri bawah */}
-              <div style={{
-                position: 'fixed',
-                bottom: '2rem',
-                left: '2rem',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '1rem',
-                zIndex: 50
-              }}>
-                {/* Tombol Index dengan animasi geser */}
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.5rem'
-                }}>
-                  <motion.button
-                    onClick={() => handleViewChange("index")}
-                    onMouseEnter={() => handleLinkHover("link", "INDEX", "index")}
-                    onMouseLeave={handleLinkLeave}
-                    style={{
-                      width: '60px',
-                      height: '30px',
-                      backgroundColor: isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
-                      border: `2px solid ${isDarkMode ? 'white' : 'black'}`,
-                      borderRadius: '15px',
-                      cursor: 'none',
-                      padding: 0,
-                      position: 'relative',
-                      display: 'flex',
-                      alignItems: 'center'
-                    }}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    <motion.div
-                      animate={{ x: 0 }}
-                      transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                      style={{
-                        width: '24px',
-                        height: '24px',
-                        backgroundColor: 'black',
-                        borderRadius: '50%',
-                        marginLeft: '3px'
-                      }}
-                    />
-                  </motion.button>
-                  <span style={{
-                    color: isDarkMode ? 'white' : 'black',
-                    fontSize: '0.9rem',
-                    fontWeight: '600',
-                    marginLeft: '0.5rem'
-                  }}>
-                    INDEX
-                  </span>
-                </div>
-
-                {/* Tombol Grid dengan animasi geser */}
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.5rem'
-                }}>
-                  <motion.button
-                    onClick={() => handleViewChange("main")}
-                    onMouseEnter={() => handleLinkHover("link", "GRID", "grid")}
-                    onMouseLeave={handleLinkLeave}
-                    style={{
-                      width: '60px',
-                      height: '30px',
-                      backgroundColor: isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
-                      border: `2px solid ${isDarkMode ? 'white' : 'black'}`,
-                      borderRadius: '15px',
-                      cursor: 'none',
-                      padding: 0,
-                      position: 'relative',
-                      display: 'flex',
-                      alignItems: 'center'
-                    }}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    <motion.div
-                      animate={{ x: 30 }}
-                      transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                      style={{
-                        width: '24px',
-                        height: '24px',
-                        backgroundColor: 'black',
-                        borderRadius: '50%',
-                        marginLeft: '3px'
-                      }}
-                    />
-                  </motion.button>
-                  <span style={{
-                    color: isDarkMode ? 'white' : 'black',
-                    fontSize: '0.9rem',
-                    fontWeight: '600',
-                    marginLeft: '0.5rem'
-                  }}>
-                    GRID
-                  </span>
-                </div>
-              </div>
             </motion.div>
           )}
         </AnimatePresence>
+      </div>
+
+      {/* Tombol Slider Index/Grid - Satu tombol geser di kiri bawah */}
+      <div style={{
+        position: 'fixed',
+        bottom: '2rem',
+        left: '2rem',
+        zIndex: 50,
+        display: 'flex',
+        alignItems: 'center',
+        gap: '1rem'
+      }}>
+        {/* Tombol Slider */}
+        <motion.button
+          onClick={toggleSlider}
+          onMouseEnter={() => handleLinkHover("link", sliderPosition === "index" ? "TO GRID" : "TO INDEX", "slider")}
+          onMouseLeave={handleLinkLeave}
+          style={{
+            width: '100px',
+            height: '40px',
+            backgroundColor: isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
+            border: `2px solid ${isDarkMode ? 'white' : 'black'}`,
+            borderRadius: '20px',
+            cursor: 'none',
+            padding: 0,
+            position: 'relative',
+            display: 'flex',
+            alignItems: 'center'
+          }}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+        >
+          {/* Track */}
+          <div style={{
+            position: 'absolute',
+            width: '100%',
+            height: '100%',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            padding: '0 10px',
+            boxSizing: 'border-box'
+          }}>
+            <span style={{
+              color: isDarkMode ? 'white' : 'black',
+              fontSize: '0.8rem',
+              fontWeight: '600'
+            }}>
+              INDEX
+            </span>
+            <span style={{
+              color: isDarkMode ? 'white' : 'black',
+              fontSize: '0.8rem',
+              fontWeight: '600'
+            }}>
+              GRID
+            </span>
+          </div>
+          
+          {/* Slider Dot */}
+          <motion.div
+            animate={{ x: sliderPosition === "index" ? 10 : 50 }}
+            transition={{ type: "spring", stiffness: 300, damping: 20 }}
+            style={{
+              width: '30px',
+              height: '30px',
+              backgroundColor: 'white',
+              borderRadius: '50%',
+              position: 'absolute',
+              left: '5px'
+            }}
+          />
+        </motion.button>
+
+        {/* Label status */}
+        <div style={{
+          color: isDarkMode ? 'white' : 'black',
+          fontSize: '0.9rem',
+          fontWeight: '500'
+        }}>
+          {sliderPosition === "index" ? "Index View" : "Grid View"}
+        </div>
       </div>
     </div>
   );
