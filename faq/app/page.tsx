@@ -17,18 +17,27 @@ export default function HomePage(): React.JSX.Element {
   const [currentView, setCurrentView] = useState<"main" | "index" | "grid">("main");
   const [sliderPosition, setSliderPosition] = useState<"index" | "grid">("grid");
   const [hoveredTopic, setHoveredTopic] = useState<number | null>(null);
-  const [activePhotoIndex, setActivePhotoIndex] = useState(0);
+  const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
+  const [isProgressActive, setIsProgressActive] = useState(true);
   const headerRef = useRef<HTMLDivElement>(null);
   const cursorRef = useRef<HTMLDivElement>(null);
   const topNavRef = useRef<HTMLDivElement>(null);
   const scrollTextRef = useRef<HTMLDivElement>(null);
   const topicContainerRef = useRef<HTMLDivElement>(null);
+  const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // Animasi loading text
   const loadingTexts = [
     "NURU", "MBACA", "NULIS", "NGEXPLORASI", 
     "NEMUKAN", "NCIPTA", "NGGALI", "NARIK",
     "NGAMATI", "NANCANG", "NGEMBANGKAN", "NYUSUN"
+  ];
+
+  // Data foto untuk progress bar
+  const progressPhotos = [
+    { id: 1, src: "images/5.jpg", alt: "Photo 1" },
+    { id: 2, src: "images/6.jpg", alt: "Photo 2" },
+    { id: 3, src: "images/5.jpg", alt: "Photo 3" }
   ];
 
   useEffect(() => {
@@ -100,17 +109,42 @@ export default function HomePage(): React.JSX.Element {
       if (scrollTextRef.current) {
         gsap.killTweensOf(scrollTextRef.current);
       }
+      if (progressIntervalRef.current) {
+        clearInterval(progressIntervalRef.current);
+      }
     };
   }, [isMobile]);
 
-  // Progress bar auto rotation
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setActivePhotoIndex((prevIndex) => (prevIndex + 1) % 3);
-    }, 3000); // Setiap 3 detik pindah foto
+  // Fungsi untuk maju ke foto berikutnya
+  const nextPhoto = () => {
+    setCurrentPhotoIndex((prev) => (prev + 1) % progressPhotos.length);
+    setIsProgressActive(true);
+  };
 
-    return () => clearInterval(interval);
-  }, []);
+  // Fungsi untuk mundur ke foto sebelumnya
+  const prevPhoto = () => {
+    setCurrentPhotoIndex((prev) => (prev - 1 + progressPhotos.length) % progressPhotos.length);
+    setIsProgressActive(true);
+  };
+
+  // Reset progress interval
+  useEffect(() => {
+    if (progressIntervalRef.current) {
+      clearInterval(progressIntervalRef.current);
+    }
+
+    if (isProgressActive) {
+      progressIntervalRef.current = setTimeout(() => {
+        nextPhoto();
+      }, 5000); // 5 detik untuk setiap foto
+    }
+
+    return () => {
+      if (progressIntervalRef.current) {
+        clearTimeout(progressIntervalRef.current);
+      }
+    };
+  }, [currentPhotoIndex, isProgressActive]);
 
   // Fungsi toggle dark/light mode
   const toggleColorMode = () => {
@@ -1078,7 +1112,7 @@ export default function HomePage(): React.JSX.Element {
                 </div>
               </div>
 
-              {/* Progress Bar dengan 3 Foto */}
+              {/* Progress Bar dengan 3 Foto - DIPERBAIKI */}
               <div style={{
                 width: '100%',
                 padding: isMobile ? '1rem' : '2rem',
@@ -1089,299 +1123,253 @@ export default function HomePage(): React.JSX.Element {
                 <div style={{
                   display: 'flex',
                   flexDirection: 'column',
-                  gap: isMobile ? '1rem' : '1.5rem',
-                  alignItems: 'center'
+                  gap: isMobile ? '1.5rem' : '2rem',
+                  alignItems: 'center',
+                  maxWidth: '1200px',
+                  margin: '0 auto'
                 }}>
-                  {/* Container Progress Bar */}
+                  {/* Container Progress Bar - LEBAR dan TIDAK PANJANG */}
                   <div style={{
                     width: '100%',
-                    maxWidth: '800px',
                     display: 'flex',
                     alignItems: 'center',
-                    gap: isMobile ? '0.5rem' : '1rem',
-                    marginBottom: isMobile ? '0.5rem' : '1rem'
+                    gap: isMobile ? '1rem' : '1.5rem',
+                    marginBottom: '1rem'
                   }}>
-                    {/* Progress Bar 1 */}
-                    <div style={{
-                      flex: 1,
-                      height: '3px',
-                      backgroundColor: isDarkMode ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.2)',
-                      borderRadius: '2px',
-                      overflow: 'hidden',
-                      position: 'relative'
-                    }}>
-                      <motion.div
+                    {progressPhotos.map((_, index) => (
+                      <div 
+                        key={index}
                         style={{
-                          position: 'absolute',
-                          left: 0,
-                          top: 0,
-                          bottom: 0,
-                          backgroundColor: '#00FF00',
-                          borderRadius: '2px'
+                          flex: 1,
+                          height: '8px', // LEBIH TEBAL
+                          backgroundColor: isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
+                          borderRadius: '4px',
+                          overflow: 'hidden',
+                          position: 'relative'
                         }}
-                        initial={{ width: "0%" }}
-                        animate={{ width: "100%" }}
-                        transition={{ 
-                          duration: 3,
-                          ease: "linear",
-                          repeat: Infinity,
-                          repeatDelay: 6
+                      >
+                        {/* Progress Fill - hanya untuk bar aktif */}
+                        {index === currentPhotoIndex && (
+                          <motion.div
+                            style={{
+                              position: 'absolute',
+                              left: 0,
+                              top: 0,
+                              bottom: 0,
+                              backgroundColor: '#00FF00',
+                              borderRadius: '4px'
+                            }}
+                            initial={{ width: "0%" }}
+                            animate={{ width: "100%" }}
+                            transition={{ 
+                              duration: 5, // LEBIH LAMBAT
+                              ease: "linear"
+                            }}
+                            onAnimationComplete={() => {
+                              // Setelah animasi selesai, pindah ke foto berikutnya
+                              if (index === currentPhotoIndex) {
+                                nextPhoto();
+                              }
+                            }}
+                          />
+                        )}
+                        {/* Bar yang sudah terisi penuh */}
+                        {index < currentPhotoIndex && (
+                          <div style={{
+                            position: 'absolute',
+                            left: 0,
+                            top: 0,
+                            bottom: 0,
+                            width: '100%',
+                            backgroundColor: '#00FF00',
+                            borderRadius: '4px'
+                          }} />
+                        )}
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Foto Besar - PANJANG KE BAWAH dan LEBAR */}
+                  <div style={{
+                    position: 'relative',
+                    width: '100%',
+                    height: isMobile ? '400px' : '600px', // TINGGI
+                    borderRadius: '20px',
+                    overflow: 'hidden',
+                    boxShadow: '0 15px 40px rgba(0,0,0,0.4)',
+                    border: `3px solid ${isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}`
+                  }}>
+                    {/* Foto Aktif */}
+                    <AnimatePresence mode="wait">
+                      <motion.div
+                        key={currentPhotoIndex}
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 1.05 }}
+                        transition={{ duration: 0.5 }}
+                        style={{
+                          width: '100%',
+                          height: '100%'
                         }}
-                      />
+                      >
+                        <img 
+                          src={progressPhotos[currentPhotoIndex].src}
+                          alt={progressPhotos[currentPhotoIndex].alt}
+                          style={{
+                            width: '100%',
+                            height: '100%',
+                            objectFit: 'cover',
+                            display: 'block'
+                          }}
+                          onError={(e) => {
+                            e.currentTarget.style.backgroundColor = isDarkMode ? '#333' : '#eee';
+                            e.currentTarget.style.display = 'flex';
+                            e.currentTarget.style.alignItems = 'center';
+                            e.currentTarget.style.justifyContent = 'center';
+                            e.currentTarget.style.color = isDarkMode ? '#fff' : '#000';
+                            e.currentTarget.innerHTML = `<div style="padding: 2rem; text-align: center;">Photo ${currentPhotoIndex + 1}</div>`;
+                          }}
+                        />
+                      </motion.div>
+                    </AnimatePresence>
+
+                    {/* Tombol Navigasi */}
+                    <div style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      padding: '0 1rem',
+                      pointerEvents: 'none'
+                    }}>
+                      {/* Tombol Previous */}
+                      <motion.button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          prevPhoto();
+                        }}
+                        onMouseEnter={() => handleLinkHover("link", "PREVIOUS", "prev")}
+                        onMouseLeave={handleLinkLeave}
+                        style={{
+                          pointerEvents: 'auto',
+                          width: '50px',
+                          height: '50px',
+                          borderRadius: '50%',
+                          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                          border: '2px solid rgba(255, 255, 255, 0.3)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          cursor: 'none',
+                          padding: 0
+                        }}
+                        whileHover={{ 
+                          backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                          scale: 1.1 
+                        }}
+                        whileTap={{ scale: 0.9 }}
+                      >
+                        <svg 
+                          width="24" 
+                          height="24" 
+                          viewBox="0 0 24 24" 
+                          fill="none" 
+                          stroke="white"
+                          strokeWidth="3"
+                        >
+                          <path d="M15 18l-6-6 6-6"/>
+                        </svg>
+                      </motion.button>
+
+                      {/* Tombol Next */}
+                      <motion.button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          nextPhoto();
+                        }}
+                        onMouseEnter={() => handleLinkHover("link", "NEXT", "next")}
+                        onMouseLeave={handleLinkLeave}
+                        style={{
+                          pointerEvents: 'auto',
+                          width: '50px',
+                          height: '50px',
+                          borderRadius: '50%',
+                          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                          border: '2px solid rgba(255, 255, 255, 0.3)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          cursor: 'none',
+                          padding: 0
+                        }}
+                        whileHover={{ 
+                          backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                          scale: 1.1 
+                        }}
+                        whileTap={{ scale: 0.9 }}
+                      >
+                        <svg 
+                          width="24" 
+                          height="24" 
+                          viewBox="0 0 24 24" 
+                          fill="none" 
+                          stroke="white"
+                          strokeWidth="3"
+                        >
+                          <path d="M9 18l6-6-6-6"/>
+                        </svg>
+                      </motion.button>
                     </div>
 
-                    {/* Progress Bar 2 */}
+                    {/* Indikator Foto */}
                     <div style={{
-                      flex: 1,
-                      height: '3px',
-                      backgroundColor: isDarkMode ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.2)',
-                      borderRadius: '2px',
-                      overflow: 'hidden',
-                      position: 'relative'
+                      position: 'absolute',
+                      bottom: '1rem',
+                      left: '50%',
+                      transform: 'translateX(-50%)',
+                      display: 'flex',
+                      gap: '0.5rem',
+                      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                      padding: '0.5rem 1rem',
+                      borderRadius: '20px',
+                      border: '1px solid rgba(255, 255, 255, 0.2)'
                     }}>
-                      <motion.div
-                        style={{
-                          position: 'absolute',
-                          left: 0,
-                          top: 0,
-                          bottom: 0,
-                          backgroundColor: '#00FF00',
-                          borderRadius: '2px'
-                        }}
-                        initial={{ width: "0%" }}
-                        animate={{ width: "100%" }}
-                        transition={{ 
-                          duration: 3,
-                          ease: "linear",
-                          repeat: Infinity,
-                          repeatDelay: 6,
-                          delay: 3
-                        }}
-                      />
-                    </div>
-
-                    {/* Progress Bar 3 */}
-                    <div style={{
-                      flex: 1,
-                      height: '3px',
-                      backgroundColor: isDarkMode ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.2)',
-                      borderRadius: '2px',
-                      overflow: 'hidden',
-                      position: 'relative'
-                    }}>
-                      <motion.div
-                        style={{
-                          position: 'absolute',
-                          left: 0,
-                          top: 0,
-                          bottom: 0,
-                          backgroundColor: '#00FF00',
-                          borderRadius: '2px'
-                        }}
-                        initial={{ width: "0%" }}
-                        animate={{ width: "100%" }}
-                        transition={{ 
-                          duration: 3,
-                          ease: "linear",
-                          repeat: Infinity,
-                          repeatDelay: 6,
-                          delay: 6
-                        }}
-                      />
+                      {progressPhotos.map((_, index) => (
+                        <div
+                          key={index}
+                          style={{
+                            width: '10px',
+                            height: '10px',
+                            borderRadius: '50%',
+                            backgroundColor: index === currentPhotoIndex ? '#00FF00' : 'rgba(255, 255, 255, 0.3)',
+                            transition: 'background-color 0.3s ease',
+                            cursor: 'pointer',
+                            pointerEvents: 'auto'
+                          }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setCurrentPhotoIndex(index);
+                            setIsProgressActive(true);
+                          }}
+                          onMouseEnter={() => handleLinkHover("link", `PHOTO ${index + 1}`, `photo-${index}`)}
+                          onMouseLeave={handleLinkLeave}
+                        />
+                      ))}
                     </div>
                   </div>
 
-                  {/* Container untuk 3 Foto - Grid 1x3 */}
+                  {/* Indikator teks sederhana */}
                   <div style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(3, 1fr)',
-                    gap: isMobile ? '0.5rem' : '1rem',
-                    width: '100%',
-                    maxWidth: '800px'
+                    color: isDarkMode ? 'white' : 'black',
+                    fontSize: isMobile ? '0.9rem' : '1rem',
+                    fontWeight: '400',
+                    opacity: 0.7
                   }}>
-                    {/* Foto 1 */}
-                    <div style={{
-                      position: 'relative',
-                      width: '100%',
-                      aspectRatio: '4/3',
-                      borderRadius: '15px',
-                      overflow: 'hidden',
-                      boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
-                      border: `2px solid ${isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}`
-                    }}>
-                      <img 
-                        src="images/5.jpg" 
-                        alt="Progress Image 1"
-                        style={{
-                          width: '100%',
-                          height: '100%',
-                          objectFit: 'cover',
-                          display: 'block'
-                        }}
-                        onError={(e) => {
-                          e.currentTarget.style.backgroundColor = isDarkMode ? '#333' : '#eee';
-                          e.currentTarget.style.display = 'flex';
-                          e.currentTarget.style.alignItems = 'center';
-                          e.currentTarget.style.justifyContent = 'center';
-                          e.currentTarget.style.color = isDarkMode ? '#fff' : '#000';
-                          e.currentTarget.innerHTML = '<div style="padding: 1rem; text-align: center;">Image 1</div>';
-                        }}
-                      />
-                      {/* Overlay saat aktif */}
-                      <motion.div
-                        style={{
-                          position: 'absolute',
-                          top: 0,
-                          left: 0,
-                          right: 0,
-                          bottom: 0,
-                          backgroundColor: 'rgba(0, 255, 0, 0.1)',
-                          border: '2px solid #00FF00',
-                          borderRadius: '15px',
-                          pointerEvents: 'none'
-                        }}
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: [0, 1, 0] }}
-                        transition={{ 
-                          duration: 3,
-                          repeat: Infinity,
-                          repeatDelay: 6,
-                          times: [0, 0.1, 1]
-                        }}
-                      />
-                    </div>
-
-                    {/* Foto 2 */}
-                    <div style={{
-                      position: 'relative',
-                      width: '100%',
-                      aspectRatio: '4/3',
-                      borderRadius: '15px',
-                      overflow: 'hidden',
-                      boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
-                      border: `2px solid ${isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}`
-                    }}>
-                      <img 
-                        src="images/6.jpg" 
-                        alt="Progress Image 2"
-                        style={{
-                          width: '100%',
-                          height: '100%',
-                          objectFit: 'cover',
-                          display: 'block'
-                        }}
-                        onError={(e) => {
-                          e.currentTarget.style.backgroundColor = isDarkMode ? '#333' : '#eee';
-                          e.currentTarget.style.display = 'flex';
-                          e.currentTarget.style.alignItems = 'center';
-                          e.currentTarget.style.justifyContent = 'center';
-                          e.currentTarget.style.color = isDarkMode ? '#fff' : '#000';
-                          e.currentTarget.innerHTML = '<div style="padding: 1rem; text-align: center;">Image 2</div>';
-                        }}
-                      />
-                      {/* Overlay saat aktif */}
-                      <motion.div
-                        style={{
-                          position: 'absolute',
-                          top: 0,
-                          left: 0,
-                          right: 0,
-                          bottom: 0,
-                          backgroundColor: 'rgba(0, 255, 0, 0.1)',
-                          border: '2px solid #00FF00',
-                          borderRadius: '15px',
-                          pointerEvents: 'none'
-                        }}
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: [0, 1, 0] }}
-                        transition={{ 
-                          duration: 3,
-                          repeat: Infinity,
-                          repeatDelay: 6,
-                          delay: 3,
-                          times: [0, 0.1, 1]
-                        }}
-                      />
-                    </div>
-
-                    {/* Foto 3 */}
-                    <div style={{
-                      position: 'relative',
-                      width: '100%',
-                      aspectRatio: '4/3',
-                      borderRadius: '15px',
-                      overflow: 'hidden',
-                      boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
-                      border: `2px solid ${isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}`
-                    }}>
-                      <img 
-                        src="images/5.jpg" 
-                        alt="Progress Image 3"
-                        style={{
-                          width: '100%',
-                          height: '100%',
-                          objectFit: 'cover',
-                          display: 'block'
-                        }}
-                        onError={(e) => {
-                          e.currentTarget.style.backgroundColor = isDarkMode ? '#333' : '#eee';
-                          e.currentTarget.style.display = 'flex';
-                          e.currentTarget.style.alignItems = 'center';
-                          e.currentTarget.style.justifyContent = 'center';
-                          e.currentTarget.style.color = isDarkMode ? '#fff' : '#000';
-                          e.currentTarget.innerHTML = '<div style="padding: 1rem; text-align: center;">Image 3</div>';
-                        }}
-                      />
-                      {/* Overlay saat aktif */}
-                      <motion.div
-                        style={{
-                          position: 'absolute',
-                          top: 0,
-                          left: 0,
-                          right: 0,
-                          bottom: 0,
-                          backgroundColor: 'rgba(0, 255, 0, 0.1)',
-                          border: '2px solid #00FF00',
-                          borderRadius: '15px',
-                          pointerEvents: 'none'
-                        }}
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: [0, 1, 0] }}
-                        transition={{ 
-                          duration: 3,
-                          repeat: Infinity,
-                          repeatDelay: 6,
-                          delay: 6,
-                          times: [0, 0.1, 1]
-                        }}
-                      />
-                    </div>
-                  </div>
-
-                  {/* Indikator teks */}
-                  <div style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    width: '100%',
-                    maxWidth: '800px',
-                    marginTop: '0.5rem'
-                  }}>
-                    <span style={{
-                      color: isDarkMode ? 'white' : 'black',
-                      fontSize: isMobile ? '0.8rem' : '0.9rem',
-                      fontWeight: '500',
-                      opacity: 0.7
-                    }}>
-                      Auto Rotate
-                    </span>
-                    <span style={{
-                      color: isDarkMode ? 'white' : 'black',
-                      fontSize: isMobile ? '0.8rem' : '0.9rem',
-                      fontWeight: '500',
-                      opacity: 0.7
-                    }}>
-                      3 Photos
-                    </span>
+                    {currentPhotoIndex + 1} / {progressPhotos.length}
                   </div>
                 </div>
               </div>
