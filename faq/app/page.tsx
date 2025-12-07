@@ -16,10 +16,12 @@ export default function HomePage(): React.JSX.Element {
   const [hoveredLink, setHoveredLink] = useState("");
   const [currentView, setCurrentView] = useState<"main" | "index" | "grid">("main");
   const [sliderPosition, setSliderPosition] = useState<"index" | "grid">("grid");
+  const [hoveredTopic, setHoveredTopic] = useState<number | null>(null);
   const headerRef = useRef<HTMLDivElement>(null);
   const cursorRef = useRef<HTMLDivElement>(null);
   const topNavRef = useRef<HTMLDivElement>(null);
   const scrollTextRef = useRef<HTMLDivElement>(null);
+  const topicRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   // Animasi loading text
   const loadingTexts = [
@@ -116,6 +118,11 @@ export default function HomePage(): React.JSX.Element {
     setCursorType("default");
     setCursorText("");
     setHoveredLink("");
+  };
+
+  // Handler untuk topic hover
+  const handleTopicHover = (topicId: number | null) => {
+    setHoveredTopic(topicId);
   };
 
   // Fungsi untuk toggle slider
@@ -1015,8 +1022,8 @@ export default function HomePage(): React.JSX.Element {
                     }}>
                       <span style={{
                         color: 'white',
-                        fontSize: '1rem', // Lebih besar
-                        fontWeight: '700', // Lebih bold
+                        fontSize: '1rem',
+                        fontWeight: '700',
                         fontFamily: 'Helvetica, Arial, sans-serif',
                         opacity: sliderPosition === "index" ? 1 : 0.5
                       }}>
@@ -1024,8 +1031,8 @@ export default function HomePage(): React.JSX.Element {
                       </span>
                       <span style={{
                         color: 'white',
-                        fontSize: '1rem', // Lebih besar
-                        fontWeight: '700', // Lebih bold
+                        fontSize: '1rem',
+                        fontWeight: '700',
                         fontFamily: 'Helvetica, Arial, sans-serif',
                         opacity: sliderPosition === "grid" ? 1 : 0.5
                       }}>
@@ -1052,7 +1059,7 @@ export default function HomePage(): React.JSX.Element {
                   {/* Label status - lebih besar */}
                   <div style={{
                     color: isDarkMode ? 'white' : 'black',
-                    fontSize: '1.1rem', // Lebih besar
+                    fontSize: '1.1rem',
                     fontWeight: '600',
                     fontFamily: 'Helvetica, Arial, sans-serif'
                   }}>
@@ -1103,7 +1110,8 @@ export default function HomePage(): React.JSX.Element {
                 width: '100%',
                 minHeight: '100vh',
                 padding: isMobile ? '1rem' : '2rem',
-                boxSizing: 'border-box'
+                boxSizing: 'border-box',
+                position: 'relative'
               }}
             >
               {/* Garis bawah di atas MENURU - putih pudar */}
@@ -1114,13 +1122,76 @@ export default function HomePage(): React.JSX.Element {
                 marginBottom: '3rem'
               }}></div>
 
-              {/* Container utama untuk halaman Index - Layout 3 kolom dengan jarak spasi SANGAT DEKAT */}
+              {/* Gambar hover - muncul saat topic dihover */}
+              <AnimatePresence>
+                {hoveredTopic !== null && (
+                  <motion.div
+                    key="hovered-image"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.3 }}
+                    style={{
+                      position: 'fixed',
+                      top: 0,
+                      left: 0,
+                      width: '100vw',
+                      height: '100vh',
+                      zIndex: 5,
+                      pointerEvents: 'none',
+                      display: 'flex',
+                      justifyContent: 'center',
+                      alignItems: 'center'
+                    }}
+                  >
+                    {/* Gambar */}
+                    <motion.div
+                      initial={{ scale: 0.9, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      exit={{ scale: 0.9, opacity: 0 }}
+                      transition={{ duration: 0.4 }}
+                      style={{
+                        width: isMobile ? '90vw' : '70vw',
+                        height: isMobile ? '60vh' : '80vh',
+                        overflow: 'hidden',
+                        borderRadius: '20px',
+                        boxShadow: '0 20px 60px rgba(0,0,0,0.8)',
+                        border: '2px solid rgba(255,255,255,0.2)'
+                      }}
+                    >
+                      <img 
+                        src="images/5.jpg" 
+                        alt={`Topic ${hoveredTopic}`}
+                        style={{
+                          width: '100%',
+                          height: '100%',
+                          display: 'block',
+                          objectFit: 'cover'
+                        }}
+                        onError={(e) => {
+                          console.error("Gambar topic tidak ditemukan:", e);
+                          e.currentTarget.style.backgroundColor = isDarkMode ? '#333' : '#eee';
+                          e.currentTarget.style.display = 'flex';
+                          e.currentTarget.style.alignItems = 'center';
+                          e.currentTarget.style.justifyContent = 'center';
+                          e.currentTarget.style.color = isDarkMode ? '#fff' : '#000';
+                          e.currentTarget.innerHTML = '<div style="padding: 2rem; text-align: center;">Topic Image</div>';
+                        }}
+                      />
+                    </motion.div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {/* Container utama untuk halaman Index */}
               <div style={{
                 display: 'flex',
                 flexDirection: isMobile ? 'column' : 'row',
                 gap: isMobile ? '1.5rem' : '3rem',
                 width: '100%',
-                fontFamily: 'Helvetica, Arial, sans-serif'
+                fontFamily: 'Helvetica, Arial, sans-serif',
+                position: 'relative',
+                zIndex: 10
               }}>
                 {/* Kolom kiri - MENURU */}
                 <div style={{
@@ -1139,69 +1210,118 @@ export default function HomePage(): React.JSX.Element {
                   </div>
                 </div>
 
-                {/* Kolom tengah - Topics dengan jarak spasi SANGAT DEKAT */}
+                {/* Kolom tengah - Topics dengan garis hover */}
                 <div style={{
-                  flex: 1
+                  flex: 1,
+                  position: 'relative'
                 }}>
                   <div style={{
                     display: 'flex',
                     flexDirection: 'column',
-                    gap: '0.3rem', // JARAK SANGAT DEKAT
+                    gap: '0.3rem',
                     fontFamily: 'Helvetica, Arial, sans-serif'
                   }}>
-                    {indexTopics.map((topic) => (
-                      <div key={topic.id} style={{
-                        display: 'flex',
-                        flexDirection: 'column'
-                      }}>
-                        <div style={{
-                          color: isDarkMode ? 'white' : 'black',
-                          fontSize: isMobile ? '1.2rem' : '1.5rem',
-                          fontWeight: '400',
-                          fontFamily: 'Helvetica, Arial, sans-serif',
-                          lineHeight: 1.1
-                        }}>
+                    {indexTopics.map((topic, index) => (
+                      <div 
+                        key={topic.id}
+                        ref={(el) => { topicRefs.current[index] = el; }}
+                        onMouseEnter={() => handleTopicHover(topic.id)}
+                        onMouseLeave={() => handleTopicHover(null)}
+                        style={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          position: 'relative',
+                          padding: '0.5rem 0',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        {/* Garis putih pudar saat hover */}
+                        <AnimatePresence>
+                          {hoveredTopic === topic.id && (
+                            <motion.div
+                              initial={{ width: 0, opacity: 0 }}
+                              animate={{ width: '100vw', opacity: 1 }}
+                              exit={{ width: 0, opacity: 0 }}
+                              transition={{ duration: 0.3 }}
+                              style={{
+                                position: 'absolute',
+                                left: 0,
+                                top: '50%',
+                                height: '1px',
+                                backgroundColor: 'rgba(255,255,255,0.3)',
+                                transform: 'translateY(-50%)',
+                                zIndex: 1
+                              }}
+                            />
+                          )}
+                        </AnimatePresence>
+
+                        {/* Teks topic */}
+                        <motion.div
+                          style={{
+                            color: isDarkMode ? 'white' : 'black',
+                            fontSize: isMobile ? '1.2rem' : '1.5rem',
+                            fontWeight: hoveredTopic === topic.id ? '600' : '400',
+                            fontFamily: 'Helvetica, Arial, sans-serif',
+                            lineHeight: 1.1,
+                            position: 'relative',
+                            zIndex: 2,
+                            transition: 'font-weight 0.2s ease'
+                          }}
+                          whileHover={{ x: 5 }}
+                        >
                           {topic.title}
-                        </div>
+                        </motion.div>
                       </div>
                     ))}
                   </div>
                 </div>
 
-                {/* Kolom kanan - Deskripsi dan Tanggal SEJAJAR dengan jarak spasi SANGAT DEKAT */}
+                {/* Kolom kanan - Deskripsi dan Tanggal SEJAJAR */}
                 <div style={{
                   flex: 1
                 }}>
                   <div style={{
                     display: 'flex',
                     flexDirection: 'column',
-                    gap: '0.3rem', // JARAK SANGAT DEKAT
+                    gap: '0.3rem',
                     fontFamily: 'Helvetica, Arial, sans-serif'
                   }}>
                     {indexTopics.map((topic) => (
-                      <div key={topic.id} style={{
-                        display: 'flex',
-                        flexDirection: 'column'
-                      }}>
+                      <div 
+                        key={topic.id}
+                        onMouseEnter={() => handleTopicHover(topic.id)}
+                        onMouseLeave={() => handleTopicHover(null)}
+                        style={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          padding: '0.5rem 0',
+                          cursor: 'pointer'
+                        }}
+                      >
                         {/* Container untuk deskripsi dan tanggal SEJAJAR */}
                         <div style={{
                           display: 'flex',
                           alignItems: 'baseline',
                           gap: '0.5rem'
                         }}>
-                          <div style={{
-                            color: isDarkMode ? 'white' : 'black',
-                            fontSize: isMobile ? '1.2rem' : '1.5rem',
-                            fontWeight: '400',
-                            fontFamily: 'Helvetica, Arial, sans-serif',
-                            lineHeight: 1.1
-                          }}>
+                          <motion.div
+                            style={{
+                              color: isDarkMode ? 'white' : 'black',
+                              fontSize: isMobile ? '1.2rem' : '1.5rem',
+                              fontWeight: hoveredTopic === topic.id ? '600' : '400',
+                              fontFamily: 'Helvetica, Arial, sans-serif',
+                              lineHeight: 1.1,
+                              transition: 'font-weight 0.2s ease'
+                            }}
+                            whileHover={{ x: 5 }}
+                          >
                             {topic.description}
-                          </div>
-                          {/* Tanggal SEJAJAR dengan deskripsi - font SAMA BESAR */}
+                          </motion.div>
+                          {/* Tanggal SEJAJAR dengan deskripsi */}
                           <div style={{
                             color: isDarkMode ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.6)',
-                            fontSize: isMobile ? '1.2rem' : '1.5rem', // SAMA BESAR
+                            fontSize: isMobile ? '1.2rem' : '1.5rem',
                             fontWeight: '400',
                             fontFamily: 'Helvetica, Arial, sans-serif',
                             lineHeight: 1.1
@@ -1221,7 +1341,8 @@ export default function HomePage(): React.JSX.Element {
                 marginTop: '4rem',
                 marginBottom: '4rem',
                 paddingLeft: isMobile ? '1rem' : '2rem',
-                paddingRight: isMobile ? '1rem' : '2rem'
+                paddingRight: isMobile ? '1rem' : '2rem',
+                zIndex: 10
               }}>
                 <div style={{
                   display: 'flex',
@@ -1262,17 +1383,17 @@ export default function HomePage(): React.JSX.Element {
                     }}>
                       <span style={{
                         color: 'white',
-                        fontSize: '1rem', // Lebih besar
-                        fontWeight: '700', // Lebih bold
+                        fontSize: '1rem',
+                        fontWeight: '700',
                         fontFamily: 'Helvetica, Arial, sans-serif',
-                        opacity: 1 // Selalu terang di Index view
+                        opacity: 1
                       }}>
                         INDEX
                       </span>
                       <span style={{
                         color: 'white',
-                        fontSize: '1rem', // Lebih besar
-                        fontWeight: '700', // Lebih bold
+                        fontSize: '1rem',
+                        fontWeight: '700',
                         fontFamily: 'Helvetica, Arial, sans-serif',
                         opacity: 0.5
                       }}>
@@ -1282,7 +1403,7 @@ export default function HomePage(): React.JSX.Element {
                     
                     {/* Slider Dot - Hijau cerah lebih besar */}
                     <motion.div
-                      animate={{ x: 15 }} // Selalu di kiri untuk Index
+                      animate={{ x: 15 }}
                       transition={{ type: "spring", stiffness: 300, damping: 20 }}
                       style={{
                         width: '35px',
@@ -1299,7 +1420,7 @@ export default function HomePage(): React.JSX.Element {
                   {/* Label status - lebih besar */}
                   <div style={{
                     color: isDarkMode ? 'white' : 'black',
-                    fontSize: '1.1rem', // Lebih besar
+                    fontSize: '1.1rem',
                     fontWeight: '600',
                     fontFamily: 'Helvetica, Arial, sans-serif'
                   }}>
@@ -1381,8 +1502,8 @@ export default function HomePage(): React.JSX.Element {
                     }}>
                       <span style={{
                         color: 'white',
-                        fontSize: '1rem', // Lebih besar
-                        fontWeight: '700', // Lebih bold
+                        fontSize: '1rem',
+                        fontWeight: '700',
                         fontFamily: 'Helvetica, Arial, sans-serif',
                         opacity: 0.5
                       }}>
@@ -1390,10 +1511,10 @@ export default function HomePage(): React.JSX.Element {
                       </span>
                       <span style={{
                         color: 'white',
-                        fontSize: '1rem', // Lebih besar
-                        fontWeight: '700', // Lebih bold
+                        fontSize: '1rem',
+                        fontWeight: '700',
                         fontFamily: 'Helvetica, Arial, sans-serif',
-                        opacity: 1 // Selalu terang di Grid view
+                        opacity: 1
                       }}>
                         GRID
                       </span>
@@ -1401,7 +1522,7 @@ export default function HomePage(): React.JSX.Element {
                     
                     {/* Slider Dot - Hijau cerah lebih besar */}
                     <motion.div
-                      animate={{ x: 65 }} // Selalu di kanan untuk Grid
+                      animate={{ x: 65 }}
                       transition={{ type: "spring", stiffness: 300, damping: 20 }}
                       style={{
                         width: '35px',
@@ -1418,7 +1539,7 @@ export default function HomePage(): React.JSX.Element {
                   {/* Label status - lebih besar */}
                   <div style={{
                     color: isDarkMode ? 'white' : 'black',
-                    fontSize: '1.1rem', // Lebih besar
+                    fontSize: '1.1rem',
                     fontWeight: '600',
                     fontFamily: 'Helvetica, Arial, sans-serif'
                   }}>
