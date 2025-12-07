@@ -17,6 +17,7 @@ export default function HomePage(): React.JSX.Element {
   const [currentView, setCurrentView] = useState<"main" | "index" | "grid">("main");
   const [sliderPosition, setSliderPosition] = useState<"index" | "grid">("grid");
   const [hoveredTopic, setHoveredTopic] = useState<number | null>(null);
+  const [activePhotoIndex, setActivePhotoIndex] = useState(0);
   const headerRef = useRef<HTMLDivElement>(null);
   const cursorRef = useRef<HTMLDivElement>(null);
   const topNavRef = useRef<HTMLDivElement>(null);
@@ -101,6 +102,15 @@ export default function HomePage(): React.JSX.Element {
       }
     };
   }, [isMobile]);
+
+  // Progress bar auto rotation
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setActivePhotoIndex((prevIndex) => (prevIndex + 1) % 3);
+    }, 3000); // Setiap 3 detik pindah foto
+
+    return () => clearInterval(interval);
+  }, []);
 
   // Fungsi toggle dark/light mode
   const toggleColorMode = () => {
@@ -1064,6 +1074,314 @@ export default function HomePage(): React.JSX.Element {
                     fontFamily: 'Helvetica, Arial, sans-serif'
                   }}>
                     {sliderPosition === "index" ? "Index View" : "Grid View"}
+                  </div>
+                </div>
+              </div>
+
+              {/* Progress Bar dengan 3 Foto */}
+              <div style={{
+                width: '100%',
+                padding: isMobile ? '1rem' : '2rem',
+                marginTop: isMobile ? '2rem' : '3rem',
+                marginBottom: isMobile ? '2rem' : '3rem',
+                boxSizing: 'border-box'
+              }}>
+                <div style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: isMobile ? '1rem' : '1.5rem',
+                  alignItems: 'center'
+                }}>
+                  {/* Container Progress Bar */}
+                  <div style={{
+                    width: '100%',
+                    maxWidth: '800px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: isMobile ? '0.5rem' : '1rem',
+                    marginBottom: isMobile ? '0.5rem' : '1rem'
+                  }}>
+                    {/* Progress Bar 1 */}
+                    <div style={{
+                      flex: 1,
+                      height: '3px',
+                      backgroundColor: isDarkMode ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.2)',
+                      borderRadius: '2px',
+                      overflow: 'hidden',
+                      position: 'relative'
+                    }}>
+                      <motion.div
+                        style={{
+                          position: 'absolute',
+                          left: 0,
+                          top: 0,
+                          bottom: 0,
+                          backgroundColor: '#00FF00',
+                          borderRadius: '2px'
+                        }}
+                        initial={{ width: "0%" }}
+                        animate={{ width: "100%" }}
+                        transition={{ 
+                          duration: 3,
+                          ease: "linear",
+                          repeat: Infinity,
+                          repeatDelay: 6
+                        }}
+                      />
+                    </div>
+
+                    {/* Progress Bar 2 */}
+                    <div style={{
+                      flex: 1,
+                      height: '3px',
+                      backgroundColor: isDarkMode ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.2)',
+                      borderRadius: '2px',
+                      overflow: 'hidden',
+                      position: 'relative'
+                    }}>
+                      <motion.div
+                        style={{
+                          position: 'absolute',
+                          left: 0,
+                          top: 0,
+                          bottom: 0,
+                          backgroundColor: '#00FF00',
+                          borderRadius: '2px'
+                        }}
+                        initial={{ width: "0%" }}
+                        animate={{ width: "100%" }}
+                        transition={{ 
+                          duration: 3,
+                          ease: "linear",
+                          repeat: Infinity,
+                          repeatDelay: 6,
+                          delay: 3
+                        }}
+                      />
+                    </div>
+
+                    {/* Progress Bar 3 */}
+                    <div style={{
+                      flex: 1,
+                      height: '3px',
+                      backgroundColor: isDarkMode ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.2)',
+                      borderRadius: '2px',
+                      overflow: 'hidden',
+                      position: 'relative'
+                    }}>
+                      <motion.div
+                        style={{
+                          position: 'absolute',
+                          left: 0,
+                          top: 0,
+                          bottom: 0,
+                          backgroundColor: '#00FF00',
+                          borderRadius: '2px'
+                        }}
+                        initial={{ width: "0%" }}
+                        animate={{ width: "100%" }}
+                        transition={{ 
+                          duration: 3,
+                          ease: "linear",
+                          repeat: Infinity,
+                          repeatDelay: 6,
+                          delay: 6
+                        }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Container untuk 3 Foto - Grid 1x3 */}
+                  <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(3, 1fr)',
+                    gap: isMobile ? '0.5rem' : '1rem',
+                    width: '100%',
+                    maxWidth: '800px'
+                  }}>
+                    {/* Foto 1 */}
+                    <div style={{
+                      position: 'relative',
+                      width: '100%',
+                      aspectRatio: '4/3',
+                      borderRadius: '15px',
+                      overflow: 'hidden',
+                      boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
+                      border: `2px solid ${isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}`
+                    }}>
+                      <img 
+                        src="images/5.jpg" 
+                        alt="Progress Image 1"
+                        style={{
+                          width: '100%',
+                          height: '100%',
+                          objectFit: 'cover',
+                          display: 'block'
+                        }}
+                        onError={(e) => {
+                          e.currentTarget.style.backgroundColor = isDarkMode ? '#333' : '#eee';
+                          e.currentTarget.style.display = 'flex';
+                          e.currentTarget.style.alignItems = 'center';
+                          e.currentTarget.style.justifyContent = 'center';
+                          e.currentTarget.style.color = isDarkMode ? '#fff' : '#000';
+                          e.currentTarget.innerHTML = '<div style="padding: 1rem; text-align: center;">Image 1</div>';
+                        }}
+                      />
+                      {/* Overlay saat aktif */}
+                      <motion.div
+                        style={{
+                          position: 'absolute',
+                          top: 0,
+                          left: 0,
+                          right: 0,
+                          bottom: 0,
+                          backgroundColor: 'rgba(0, 255, 0, 0.1)',
+                          border: '2px solid #00FF00',
+                          borderRadius: '15px',
+                          pointerEvents: 'none'
+                        }}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: [0, 1, 0] }}
+                        transition={{ 
+                          duration: 3,
+                          repeat: Infinity,
+                          repeatDelay: 6,
+                          times: [0, 0.1, 1]
+                        }}
+                      />
+                    </div>
+
+                    {/* Foto 2 */}
+                    <div style={{
+                      position: 'relative',
+                      width: '100%',
+                      aspectRatio: '4/3',
+                      borderRadius: '15px',
+                      overflow: 'hidden',
+                      boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
+                      border: `2px solid ${isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}`
+                    }}>
+                      <img 
+                        src="images/6.jpg" 
+                        alt="Progress Image 2"
+                        style={{
+                          width: '100%',
+                          height: '100%',
+                          objectFit: 'cover',
+                          display: 'block'
+                        }}
+                        onError={(e) => {
+                          e.currentTarget.style.backgroundColor = isDarkMode ? '#333' : '#eee';
+                          e.currentTarget.style.display = 'flex';
+                          e.currentTarget.style.alignItems = 'center';
+                          e.currentTarget.style.justifyContent = 'center';
+                          e.currentTarget.style.color = isDarkMode ? '#fff' : '#000';
+                          e.currentTarget.innerHTML = '<div style="padding: 1rem; text-align: center;">Image 2</div>';
+                        }}
+                      />
+                      {/* Overlay saat aktif */}
+                      <motion.div
+                        style={{
+                          position: 'absolute',
+                          top: 0,
+                          left: 0,
+                          right: 0,
+                          bottom: 0,
+                          backgroundColor: 'rgba(0, 255, 0, 0.1)',
+                          border: '2px solid #00FF00',
+                          borderRadius: '15px',
+                          pointerEvents: 'none'
+                        }}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: [0, 1, 0] }}
+                        transition={{ 
+                          duration: 3,
+                          repeat: Infinity,
+                          repeatDelay: 6,
+                          delay: 3,
+                          times: [0, 0.1, 1]
+                        }}
+                      />
+                    </div>
+
+                    {/* Foto 3 */}
+                    <div style={{
+                      position: 'relative',
+                      width: '100%',
+                      aspectRatio: '4/3',
+                      borderRadius: '15px',
+                      overflow: 'hidden',
+                      boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
+                      border: `2px solid ${isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}`
+                    }}>
+                      <img 
+                        src="images/5.jpg" 
+                        alt="Progress Image 3"
+                        style={{
+                          width: '100%',
+                          height: '100%',
+                          objectFit: 'cover',
+                          display: 'block'
+                        }}
+                        onError={(e) => {
+                          e.currentTarget.style.backgroundColor = isDarkMode ? '#333' : '#eee';
+                          e.currentTarget.style.display = 'flex';
+                          e.currentTarget.style.alignItems = 'center';
+                          e.currentTarget.style.justifyContent = 'center';
+                          e.currentTarget.style.color = isDarkMode ? '#fff' : '#000';
+                          e.currentTarget.innerHTML = '<div style="padding: 1rem; text-align: center;">Image 3</div>';
+                        }}
+                      />
+                      {/* Overlay saat aktif */}
+                      <motion.div
+                        style={{
+                          position: 'absolute',
+                          top: 0,
+                          left: 0,
+                          right: 0,
+                          bottom: 0,
+                          backgroundColor: 'rgba(0, 255, 0, 0.1)',
+                          border: '2px solid #00FF00',
+                          borderRadius: '15px',
+                          pointerEvents: 'none'
+                        }}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: [0, 1, 0] }}
+                        transition={{ 
+                          duration: 3,
+                          repeat: Infinity,
+                          repeatDelay: 6,
+                          delay: 6,
+                          times: [0, 0.1, 1]
+                        }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Indikator teks */}
+                  <div style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    width: '100%',
+                    maxWidth: '800px',
+                    marginTop: '0.5rem'
+                  }}>
+                    <span style={{
+                      color: isDarkMode ? 'white' : 'black',
+                      fontSize: isMobile ? '0.8rem' : '0.9rem',
+                      fontWeight: '500',
+                      opacity: 0.7
+                    }}>
+                      Auto Rotate
+                    </span>
+                    <span style={{
+                      color: isDarkMode ? 'white' : 'black',
+                      fontSize: isMobile ? '0.8rem' : '0.9rem',
+                      fontWeight: '500',
+                      opacity: 0.7
+                    }}>
+                      3 Photos
+                    </span>
                   </div>
                 </div>
               </div>
