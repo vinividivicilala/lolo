@@ -21,7 +21,7 @@ export default function HomePage(): React.JSX.Element {
   const [isProgressActive, setIsProgressActive] = useState(true);
   const [showCookieNotification, setShowCookieNotification] = useState(false);
   const [showMenuruPage, setShowMenuruPage] = useState(false);
-  const [menuruArrowIcon, setMenuruArrowIcon] = useState("-");
+  const [menuruIcon, setMenuruIcon] = useState("-");
   const headerRef = useRef<HTMLDivElement>(null);
   const cursorRef = useRef<HTMLDivElement>(null);
   const topNavRef = useRef<HTMLDivElement>(null);
@@ -146,19 +146,19 @@ export default function HomePage(): React.JSX.Element {
     if (!showMenuruPage) {
       // Buka halaman menuru
       setShowMenuruPage(true);
-      setMenuruArrowIcon("↓");
+      setMenuruIcon("+");
       
       // Animasi GSAP untuk membuka halaman
       if (menuruPageRef.current) {
         gsap.fromTo(menuruPageRef.current,
           { 
             opacity: 0,
-            y: 100
+            y: "100%"
           },
           { 
             opacity: 1,
-            y: 0,
-            duration: 0.8,
+            y: "50%", // Setengah layar dari bawah
+            duration: 0.6,
             ease: "power3.out"
           }
         );
@@ -169,18 +169,18 @@ export default function HomePage(): React.JSX.Element {
         gsap.to(menuruPageRef.current,
           {
             opacity: 0,
-            y: 100,
-            duration: 0.6,
+            y: "100%",
+            duration: 0.4,
             ease: "power3.in",
             onComplete: () => {
               setShowMenuruPage(false);
-              setMenuruArrowIcon("-");
+              setMenuruIcon("-");
             }
           }
         );
       } else {
         setShowMenuruPage(false);
-        setMenuruArrowIcon("-");
+        setMenuruIcon("-");
       }
     }
   };
@@ -237,7 +237,7 @@ export default function HomePage(): React.JSX.Element {
     if (currentFill) {
       progressAnimationRef.current = gsap.to(currentFill, {
         width: '100%',
-        duration: 15, // SANGAT LAMBAT: 15 detik
+        duration: 15,
         ease: "linear",
         onComplete: () => {
           // Setelah bar penuh, pindah ke foto berikutnya
@@ -1151,6 +1151,63 @@ export default function HomePage(): React.JSX.Element {
                       />
                     </div>
                   </div>
+
+                  {/* TEKS "menuru -" DIBAWAH CARD - di dalam card */}
+                  <div style={{
+                    marginTop: 'auto',
+                    paddingTop: isMobile ? '1.5rem' : '2rem',
+                    width: '100%',
+                    display: 'flex',
+                    justifyContent: 'center'
+                  }}>
+                    <motion.div
+                      onClick={toggleMenuruPage}
+                      onMouseEnter={() => handleLinkHover("link", "VIEW", "menuru")}
+                      onMouseLeave={handleLinkLeave}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.8rem',
+                        cursor: 'none',
+                        padding: '0.6rem 1.2rem',
+                        backgroundColor: 'rgba(255,255,255,0.1)',
+                        borderRadius: '20px',
+                        border: '1px solid rgba(255,255,255,0.2)',
+                        transition: 'all 0.3s ease'
+                      }}
+                      whileHover={{ 
+                        backgroundColor: 'rgba(255,255,255,0.15)',
+                        scale: 1.05,
+                        border: '1px solid rgba(255,255,255,0.3)'
+                      }}
+                      whileTap={{ scale: 0.95 }}
+                    >
+                      {/* Teks "menuru" */}
+                      <span style={{
+                        color: 'white',
+                        fontSize: isMobile ? '1rem' : '1.2rem',
+                        fontWeight: '300',
+                        fontFamily: 'Helvetica, Arial, sans-serif',
+                        letterSpacing: '1px'
+                      }}>
+                        menuru
+                      </span>
+                      
+                      {/* Tanda "-" */}
+                      <span style={{
+                        color: 'white',
+                        fontSize: isMobile ? '1.2rem' : '1.5rem',
+                        fontWeight: '300',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        width: '24px',
+                        height: '24px'
+                      }}>
+                        {menuruIcon}
+                      </span>
+                    </motion.div>
+                  </div>
                 </div>
               </div>
 
@@ -1400,76 +1457,6 @@ export default function HomePage(): React.JSX.Element {
                     </div>
                   </motion.div>
                 </div>
-              </div>
-
-              {/* TEKS MENURU dengan tanda panah di bawah card - SEBELAH KANAN */}
-              <div style={{
-                position: 'relative',
-                width: '100%',
-                padding: isMobile ? '1rem' : '2rem',
-                marginTop: isMobile ? '1rem' : '2rem',
-                marginBottom: isMobile ? '4rem' : '6rem',
-                display: 'flex',
-                justifyContent: 'flex-end',
-                zIndex: 20
-              }}>
-                <motion.div
-                  onClick={toggleMenuruPage}
-                  onMouseEnter={() => handleLinkHover("link", "VIEW", "menuru")}
-                  onMouseLeave={handleLinkLeave}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '1rem',
-                    cursor: 'none',
-                    position: 'relative',
-                    padding: '0.8rem 1.5rem',
-                    borderRadius: '25px',
-                    backgroundColor: isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
-                    border: `1px solid ${isDarkMode ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)'}`,
-                    backdropFilter: 'blur(10px)',
-                    transition: 'all 0.3s ease'
-                  }}
-                  whileHover={{ 
-                    backgroundColor: isDarkMode ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.15)',
-                    scale: 1.05,
-                    border: `1px solid ${isDarkMode ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.3)'}`
-                  }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  {/* Teks MENURU */}
-                  <span style={{
-                    color: isDarkMode ? 'white' : 'black',
-                    fontSize: isMobile ? '1.2rem' : '1.8rem',
-                    fontWeight: '300',
-                    fontFamily: 'Helvetica, Arial, sans-serif',
-                    letterSpacing: '1px',
-                    textTransform: 'uppercase'
-                  }}>
-                    menuru
-                  </span>
-                  
-                  {/* Tanda panah animasi */}
-                  <motion.div
-                    animate={{ rotate: showMenuruPage ? 180 : 0 }}
-                    transition={{ duration: 0.3 }}
-                    style={{
-                      color: isDarkMode ? 'white' : 'black',
-                      fontSize: isMobile ? '1.5rem' : '2rem',
-                      fontWeight: '300',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      width: isMobile ? '30px' : '40px',
-                      height: isMobile ? '30px' : '40px',
-                      borderRadius: '50%',
-                      backgroundColor: isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
-                      border: `1px solid ${isDarkMode ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)'}`
-                    }}
-                  >
-                    {menuruArrowIcon}
-                  </motion.div>
-                </motion.div>
               </div>
 
               {/* Content tambahan untuk membuat halaman lebih panjang */}
@@ -1961,261 +1948,84 @@ export default function HomePage(): React.JSX.Element {
             ref={menuruPageRef}
             key="menuru-page"
             initial={{ opacity: 0, y: "100%" }}
-            animate={{ opacity: 1, y: 0 }}
+            animate={{ opacity: 1, y: "50%" }}
             exit={{ opacity: 0, y: "100%" }}
             transition={{ duration: 0.6, ease: "power3.out" }}
             style={{
               position: 'fixed',
-              top: 0,
+              bottom: 0,
               left: 0,
               width: '100%',
-              height: '100%',
+              height: '50%',
               backgroundColor: 'black',
               zIndex: 1000,
               display: 'flex',
               flexDirection: 'column',
-              overflow: 'hidden'
+              overflow: 'hidden',
+              borderTop: '1px solid rgba(255,255,255,0.1)',
+              boxShadow: '0 -10px 30px rgba(0,0,0,0.5)'
             }}
           >
-            {/* Header Halaman MENURU */}
+            {/* Header Halaman MENURU - hanya teks "menuru -" */}
             <div style={{
               width: '100%',
-              padding: isMobile ? '1.5rem 1rem' : '2rem 2rem',
+              padding: isMobile ? '1.2rem' : '1.5rem',
               display: 'flex',
-              justifyContent: 'space-between',
+              justifyContent: 'center',
               alignItems: 'center',
               borderBottom: '1px solid rgba(255,255,255,0.1)',
-              backgroundColor: 'rgba(0,0,0,0.8)',
-              backdropFilter: 'blur(10px)'
+              backgroundColor: 'rgba(0,0,0,0.9)'
             }}>
-              {/* Teks MENURU di kanan atas */}
               <div style={{
-                marginLeft: 'auto',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '1rem'
-              }}>
+                gap: '0.8rem',
+                cursor: 'pointer'
+              }}
+              onClick={toggleMenuruPage}
+              onMouseEnter={() => handleLinkHover("link", "CLOSE", "close-menuru")}
+              onMouseLeave={handleLinkLeave}
+              >
+                {/* Teks "menuru" */}
                 <span style={{
                   color: 'white',
-                  fontSize: isMobile ? '1.5rem' : '2rem',
+                  fontSize: isMobile ? '1.2rem' : '1.5rem',
                   fontWeight: '300',
                   fontFamily: 'Helvetica, Arial, sans-serif',
-                  letterSpacing: '2px',
-                  textTransform: 'uppercase'
+                  letterSpacing: '1px'
                 }}>
                   menuru
                 </span>
                 
-                {/* Tanda panah di sebelah teks (sama seperti di bawah card) */}
-                <motion.div
-                  animate={{ rotate: 180 }}
+                {/* Tanda "+" (berubah jadi + saat halaman terbuka) */}
+                <motion.span
+                  animate={{ rotate: 45 }}
                   transition={{ duration: 0.3 }}
                   style={{
                     color: 'white',
-                    fontSize: isMobile ? '1.5rem' : '2rem',
+                    fontSize: isMobile ? '1.5rem' : '1.8rem',
                     fontWeight: '300',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    width: isMobile ? '30px' : '40px',
-                    height: isMobile ? '30px' : '40px',
-                    borderRadius: '50%',
-                    backgroundColor: 'rgba(255,255,255,0.1)',
-                    border: '1px solid rgba(255,255,255,0.2)',
-                    cursor: 'pointer'
+                    width: '24px',
+                    height: '24px'
                   }}
-                  onClick={toggleMenuruPage}
-                  onMouseEnter={() => handleLinkHover("link", "CLOSE", "close-menuru")}
-                  onMouseLeave={handleLinkLeave}
                 >
-                  ↓
-                </motion.div>
+                  +
+                </motion.span>
               </div>
             </div>
 
-            {/* Konten Halaman MENURU */}
+            {/* Konten Halaman MENURU - KOSONG/HITAM POLOS */}
             <div style={{
               flex: 1,
-              padding: isMobile ? '2rem 1rem' : '4rem 2rem',
-              overflowY: 'auto',
+              backgroundColor: 'black',
               display: 'flex',
-              flexDirection: 'column',
-              gap: '2rem'
+              alignItems: 'center',
+              justifyContent: 'center'
             }}>
-              {/* Bagian 1: Deskripsi */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.1 }}
-              >
-                <h2 style={{
-                  color: 'white',
-                  fontSize: isMobile ? '1.8rem' : '2.5rem',
-                  fontWeight: '300',
-                  marginBottom: '1rem',
-                  fontFamily: 'Helvetica, Arial, sans-serif'
-                }}>
-                  About Menuru
-                </h2>
-                <p style={{
-                  color: 'rgba(255,255,255,0.8)',
-                  fontSize: isMobile ? '1rem' : '1.2rem',
-                  lineHeight: 1.6,
-                  fontFamily: 'Helvetica, Arial, sans-serif',
-                  maxWidth: '800px'
-                }}>
-                  Menuru is a personal branding journal that captures the essence of life experiences - happiness, sadness, anger, and every emotion in between. It's a creative exploration of personal growth and emotional journey, documenting moments of transformation and self-discovery through visual storytelling.
-                </p>
-              </motion.div>
-
-              {/* Bagian 2: Features */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.2 }}
-              >
-                <h3 style={{
-                  color: 'white',
-                  fontSize: isMobile ? '1.5rem' : '2rem',
-                  fontWeight: '300',
-                  marginBottom: '1.5rem',
-                  fontFamily: 'Helvetica, Arial, sans-serif'
-                }}>
-                  Features
-                </h3>
-                <div style={{
-                  display: 'grid',
-                  gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, 1fr)',
-                  gap: '1.5rem'
-                }}>
-                  {[
-                    { title: 'Personal Journal', desc: 'Document your daily thoughts and experiences' },
-                    { title: 'Visual Storytelling', desc: 'Capture moments through photography' },
-                    { title: 'Emotional Archive', desc: 'Track and reflect on your emotional journey' },
-                    { title: 'Creative Exploration', desc: 'Explore different forms of self-expression' }
-                  ].map((feature, index) => (
-                    <div
-                      key={index}
-                      style={{
-                        backgroundColor: 'rgba(255,255,255,0.05)',
-                        borderRadius: '15px',
-                        padding: '1.5rem',
-                        border: '1px solid rgba(255,255,255,0.1)',
-                        transition: 'all 0.3s ease'
-                      }}
-                      onMouseEnter={() => handleLinkHover("link", "VIEW", `feature-${index}`)}
-                      onMouseLeave={handleLinkLeave}
-                    >
-                      <h4 style={{
-                        color: 'white',
-                        fontSize: '1.2rem',
-                        fontWeight: '400',
-                        marginBottom: '0.5rem',
-                        fontFamily: 'Helvetica, Arial, sans-serif'
-                      }}>
-                        {feature.title}
-                      </h4>
-                      <p style={{
-                        color: 'rgba(255,255,255,0.6)',
-                        fontSize: '0.95rem',
-                        lineHeight: 1.5,
-                        fontFamily: 'Helvetica, Arial, sans-serif'
-                      }}>
-                        {feature.desc}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              </motion.div>
-
-              {/* Bagian 3: Recent Updates */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.3 }}
-              >
-                <h3 style={{
-                  color: 'white',
-                  fontSize: isMobile ? '1.5rem' : '2rem',
-                  fontWeight: '300',
-                  marginBottom: '1.5rem',
-                  fontFamily: 'Helvetica, Arial, sans-serif'
-                }}>
-                  Recent Updates
-                </h3>
-                <div style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '1rem'
-                }}>
-                  {[
-                    { date: '2024-03-15', update: 'Added new photo gallery feature' },
-                    { date: '2024-03-10', update: 'Improved mobile responsiveness' },
-                    { date: '2024-03-05', update: 'Enhanced dark/light mode transitions' },
-                    { date: '2024-02-28', update: 'Added timeline visualization' }
-                  ].map((item, index) => (
-                    <div
-                      key={index}
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '1rem',
-                        padding: '1rem',
-                        borderBottom: '1px solid rgba(255,255,255,0.1)'
-                      }}
-                    >
-                      <span style={{
-                        color: 'rgba(255,255,255,0.6)',
-                        fontSize: '0.9rem',
-                        minWidth: '80px',
-                        fontFamily: 'Helvetica, Arial, sans-serif'
-                      }}>
-                        {item.date}
-                      </span>
-                      <span style={{
-                        color: 'white',
-                        fontSize: '1rem',
-                        fontFamily: 'Helvetica, Arial, sans-serif'
-                      }}>
-                        {item.update}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </motion.div>
-
-              {/* Bagian 4: Call to Action */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.4 }}
-                style={{
-                  textAlign: 'center',
-                  padding: '3rem 1rem'
-                }}
-              >
-                <button
-                  onClick={toggleMenuruPage}
-                  onMouseEnter={() => handleLinkHover("link", "EXPLORE", "explore-menuru")}
-                  onMouseLeave={handleLinkLeave}
-                  style={{
-                    padding: '1rem 2rem',
-                    fontSize: '1.2rem',
-                    fontWeight: '600',
-                    color: 'black',
-                    backgroundColor: 'white',
-                    border: 'none',
-                    borderRadius: '25px',
-                    cursor: 'none',
-                    fontFamily: 'Helvetica, Arial, sans-serif',
-                    transition: 'all 0.3s ease'
-                  }}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  Start Your Menuru Journey
-                </button>
-              </motion.div>
+              {/* Tidak ada konten lain, hanya halaman hitam */}
             </div>
           </motion.div>
         )}
@@ -2238,7 +2048,7 @@ export default function HomePage(): React.JSX.Element {
               backgroundColor: 'white',
               borderRadius: '15px',
               boxShadow: '0 10px 40px rgba(0,0,0,0.3)',
-              zIndex: 1000,
+              zIndex: 1001,
               overflow: 'hidden',
               display: 'flex',
               border: '2px solid rgba(0,0,0,0.1)'
