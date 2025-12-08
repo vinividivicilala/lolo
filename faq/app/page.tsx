@@ -28,6 +28,8 @@ export default function HomePage(): React.JSX.Element {
   const scrollTextRef = useRef<HTMLDivElement>(null);
   const topicContainerRef = useRef<HTMLDivElement>(null);
   const progressAnimationRef = useRef<gsap.core.Tween | null>(null);
+  const menuruButtonRef = useRef<HTMLDivElement>(null);
+  const menuruMinusRef = useRef<HTMLDivElement>(null);
 
   // Animasi loading text
   const loadingTexts = [
@@ -139,8 +141,43 @@ export default function HomePage(): React.JSX.Element {
       if (progressAnimationRef.current) {
         progressAnimationRef.current.kill();
       }
+      // Cleanup GSAP animations
+      if (menuruButtonRef.current) {
+        gsap.killTweensOf(menuruButtonRef.current);
+      }
+      if (menuruMinusRef.current) {
+        gsap.killTweensOf(menuruMinusRef.current);
+      }
     };
   }, [isMobile, showMenuruFullPage]);
+
+  // Animasi GSAP untuk tombol Menuru
+  useEffect(() => {
+    if (menuruButtonRef.current) {
+      // Animasi pulsing untuk tanda +
+      gsap.to(menuruButtonRef.current.querySelector('.plus-sign'), {
+        scale: 1.1,
+        duration: 1,
+        repeat: -1,
+        yoyo: true,
+        ease: "power1.inOut"
+      });
+    }
+  }, []);
+
+  // Animasi GSAP untuk tanda - di halaman full page
+  useEffect(() => {
+    if (menuruMinusRef.current && showMenuruFullPage) {
+      // Animasi subtle pulse untuk tanda -
+      gsap.to(menuruMinusRef.current, {
+        scale: 1.05,
+        duration: 1.5,
+        repeat: -1,
+        yoyo: true,
+        ease: "power1.inOut"
+      });
+    }
+  }, [showMenuruFullPage]);
 
   // Fungsi untuk handle cookie acceptance
   const handleAcceptCookies = () => {
@@ -428,7 +465,7 @@ export default function HomePage(): React.JSX.Element {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
+            transition={{ duration: 0.5 }}
             style={{
               position: 'fixed',
               top: 0,
@@ -444,68 +481,84 @@ export default function HomePage(): React.JSX.Element {
               cursor: 'none'
             }}
           >
-            {/* Tombol Close dengan animasi - */}
-            <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              exit={{ scale: 0 }}
-              transition={{ delay: 0.2, type: "spring", stiffness: 200, damping: 15 }}
-              onClick={handleCloseMenuruFullPage}
-              onMouseEnter={() => handleLinkHover("link", "CLOSE", "menuru-close")}
-              onMouseLeave={handleLinkLeave}
-              style={{
-                position: 'absolute',
-                top: isMobile ? '1.5rem' : '2rem',
-                right: isMobile ? '1.5rem' : '2rem',
-                width: isMobile ? '60px' : '80px',
-                height: isMobile ? '60px' : '80px',
-                borderRadius: '50%',
-                backgroundColor: 'white',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                cursor: 'none',
-                zIndex: 9999,
-                border: '2px solid rgba(0,0,0,0.1)',
-                boxShadow: '0 5px 20px rgba(0,0,0,0.3)'
-              }}
-              whileHover={{ 
-                scale: 1.1,
-                backgroundColor: '#f0f0f0'
-              }}
-              whileTap={{ scale: 0.95 }}
-            >
+            {/* Header dengan teks MENURU dan tanda - di sebelah kanan (sejajar) */}
+            <div style={{
+              position: 'absolute',
+              top: isMobile ? '1.5rem' : '2rem',
+              left: 0,
+              width: '100%',
+              padding: isMobile ? '0 1rem' : '0 2rem',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              boxSizing: 'border-box'
+            }}>
+              {/* Teks MENURU di kiri */}
               <motion.div
-                initial={{ rotate: 0 }}
-                animate={{ rotate: menuruExpanded ? 45 : 0 }}
-                transition={{ duration: 0.3 }}
+                initial={{ x: -50, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                transition={{ duration: 0.6, delay: 0.1 }}
                 style={{
-                  fontSize: isMobile ? '2.5rem' : '3.5rem',
-                  color: 'black',
+                  color: 'white',
+                  fontSize: isMobile ? '2rem' : '2.5rem',
                   fontWeight: '300',
-                  lineHeight: 1
+                  fontFamily: 'Helvetica, Arial, sans-serif',
+                  textTransform: 'uppercase',
+                  letterSpacing: '2px'
                 }}
               >
-                -
+                MENURU
               </motion.div>
-            </motion.div>
 
-            {/* Teks MENURU di tengah */}
+              {/* Tanda - di kanan dengan animasi GSAP */}
+              <motion.div
+                ref={menuruMinusRef}
+                initial={{ x: 50, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                transition={{ duration: 0.6, delay: 0.2 }}
+                onClick={handleCloseMenuruFullPage}
+                onMouseEnter={() => handleLinkHover("link", "CLOSE", "menuru-close")}
+                onMouseLeave={handleLinkLeave}
+                style={{
+                  width: isMobile ? '50px' : '60px',
+                  height: isMobile ? '50px' : '60px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'none',
+                  position: 'relative'
+                }}
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                {/* Garis horizontal (tanda -) dengan efek glow */}
+                <div style={{
+                  width: isMobile ? '30px' : '40px',
+                  height: '3px',
+                  backgroundColor: 'white',
+                  borderRadius: '2px',
+                  boxShadow: '0 0 10px rgba(255, 255, 255, 0.7), 0 0 20px rgba(255, 255, 255, 0.5)'
+                }} />
+              </motion.div>
+            </div>
+
+            {/* Teks MENURU besar di tengah */}
             <motion.div
-              initial={{ scale: 0.5, opacity: 0 }}
+              initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.5, opacity: 0 }}
-              transition={{ delay: 0.1, duration: 0.5, type: "spring", stiffness: 100, damping: 15 }}
+              exit={{ scale: 0.8, opacity: 0 }}
+              transition={{ duration: 0.7, delay: 0.3, type: "spring", stiffness: 100, damping: 15 }}
               style={{
                 color: 'white',
-                fontSize: isMobile ? '4rem' : '8rem',
+                fontSize: isMobile ? '5rem' : '10rem',
                 fontWeight: '700',
                 fontFamily: 'Helvetica, Arial, sans-serif',
                 textAlign: 'center',
-                letterSpacing: '5px',
+                letterSpacing: '10px',
                 textTransform: 'uppercase',
                 lineHeight: 1,
-                padding: '0 2rem'
+                padding: '0 2rem',
+                textShadow: '0 0 30px rgba(255, 255, 255, 0.3)'
               }}
             >
               MENURU
@@ -1224,14 +1277,20 @@ export default function HomePage(): React.JSX.Element {
                   </div>
                 </div>
 
-                {/* Tombol Slider Index/Grid - Di bawah card */}
+                {/* Container untuk Tombol Slider dan Teks MENURU + di sebelah kanan */}
                 <div style={{
                   position: 'relative',
                   marginTop: isMobile ? '3rem' : '4rem',
                   marginBottom: isMobile ? '4rem' : '6rem',
                   paddingLeft: isMobile ? '1rem' : '2rem',
-                  paddingRight: isMobile ? '1rem' : '2rem'
+                  paddingRight: isMobile ? '1rem' : '2rem',
+                  display: 'flex',
+                  flexDirection: isMobile ? 'column' : 'row',
+                  justifyContent: 'space-between',
+                  alignItems: isMobile ? 'flex-start' : 'center',
+                  gap: isMobile ? '2rem' : '0'
                 }}>
+                  {/* Tombol Slider Index/Grid di kiri */}
                   <div style={{
                     display: 'flex',
                     alignItems: 'center',
@@ -1315,34 +1374,26 @@ export default function HomePage(): React.JSX.Element {
                       {sliderPosition === "index" ? "Index View" : "Grid View"}
                     </div>
                   </div>
-                </div>
 
-                {/* Teks MENURU dengan animasi Plus (+) di sebelah kanan card */}
-                <motion.div
-                  onClick={toggleMenuruFullPage}
-                  onMouseEnter={() => handleLinkHover("link", showMenuruFullPage ? "CLOSE" : "OPEN", "menuru-toggle")}
-                  onMouseLeave={handleLinkLeave}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'flex-end',
-                    paddingRight: isMobile ? '1rem' : '2rem',
-                    marginTop: isMobile ? '2rem' : '3rem',
-                    marginBottom: isMobile ? '2rem' : '3rem',
-                    cursor: 'none'
-                  }}
-                  whileHover={{ x: 10 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '1rem'
-                  }}>
-                    {/* Teks MENURU */}
+                  {/* Teks MENURU dengan animasi Plus (+) di sebelah kanan - TAMPIL DI SEMUA DEVICE */}
+                  <motion.div
+                    ref={menuruButtonRef}
+                    onClick={toggleMenuruFullPage}
+                    onMouseEnter={() => handleLinkHover("link", showMenuruFullPage ? "CLOSE" : "OPEN", "menuru-toggle")}
+                    onMouseLeave={handleLinkLeave}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '1rem',
+                      cursor: 'none',
+                      marginTop: isMobile ? '1rem' : '0'
+                    }}
+                    whileHover={{ x: 10 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
                     <div style={{
                       color: isDarkMode ? 'white' : 'black',
-                      fontSize: isMobile ? '2rem' : '3rem',
+                      fontSize: isMobile ? '1.8rem' : '2rem',
                       fontWeight: '300',
                       fontFamily: 'Helvetica, Arial, sans-serif',
                       textTransform: 'uppercase',
@@ -1351,33 +1402,36 @@ export default function HomePage(): React.JSX.Element {
                       MENURU
                     </div>
                     
-                    {/* Simbol Plus (+) dengan animasi */}
-                    <motion.div
-                      initial={{ rotate: 0 }}
-                      animate={{ rotate: showMenuruFullPage ? 45 : 0 }}
-                      transition={{ duration: 0.3 }}
-                      style={{
-                        width: isMobile ? '40px' : '50px',
-                        height: isMobile ? '40px' : '50px',
-                        borderRadius: '50%',
-                        backgroundColor: isDarkMode ? 'white' : 'black',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        border: `2px solid ${isDarkMode ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.3)'}`
-                      }}
-                    >
+                    {/* Simbol Plus (+) dengan animasi GSAP */}
+                    <div className="plus-sign" style={{
+                      width: isMobile ? '40px' : '45px',
+                      height: isMobile ? '40px' : '45px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      position: 'relative'
+                    }}>
+                      {/* Garis vertikal */}
                       <div style={{
-                        color: isDarkMode ? 'black' : 'white',
-                        fontSize: isMobile ? '2rem' : '2.5rem',
-                        fontWeight: '300',
-                        lineHeight: 1
-                      }}>
-                        +
-                      </div>
-                    </motion.div>
-                  </div>
-                </motion.div>
+                        position: 'absolute',
+                        width: '3px',
+                        height: isMobile ? '20px' : '22px',
+                        backgroundColor: isDarkMode ? 'white' : 'black',
+                        borderRadius: '2px',
+                        boxShadow: '0 0 5px rgba(255, 255, 255, 0.5)'
+                      }} />
+                      {/* Garis horizontal */}
+                      <div style={{
+                        position: 'absolute',
+                        width: isMobile ? '20px' : '22px',
+                        height: '3px',
+                        backgroundColor: isDarkMode ? 'white' : 'black',
+                        borderRadius: '2px',
+                        boxShadow: '0 0 5px rgba(255, 255, 255, 0.5)'
+                      }} />
+                    </div>
+                  </motion.div>
+                </div>
 
                 {/* Progress Bar dengan 3 Foto - DIPERBAIKI */}
                 <div style={{
@@ -1801,13 +1855,15 @@ export default function HomePage(): React.JSX.Element {
                 </div>
               </div>
 
-              {/* Tombol Slider Index/Grid - Di bawah content */}
+              {/* Container untuk Tombol Slider */}
               <div style={{
                 position: 'relative',
                 marginTop: '4rem',
                 marginBottom: '4rem',
                 paddingLeft: isMobile ? '1rem' : '2rem',
-                paddingRight: isMobile ? '1rem' : '2rem'
+                paddingRight: isMobile ? '1rem' : '2rem',
+                display: 'flex',
+                justifyContent: 'flex-start'
               }}>
                 <div style={{
                   display: 'flex',
@@ -1926,7 +1982,9 @@ export default function HomePage(): React.JSX.Element {
               
               {/* Tombol Slider di bawah content */}
               <div style={{
-                marginTop: '3rem'
+                marginTop: '3rem',
+                display: 'flex',
+                justifyContent: 'center'
               }}>
                 <div style={{
                   display: 'flex',
