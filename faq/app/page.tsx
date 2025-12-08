@@ -20,6 +20,7 @@ export default function HomePage(): React.JSX.Element {
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
   const [isProgressActive, setIsProgressActive] = useState(true);
   const [showCookieNotification, setShowCookieNotification] = useState(false);
+  const [showMenuruPage, setShowMenuruPage] = useState(false);
   const headerRef = useRef<HTMLDivElement>(null);
   const cursorRef = useRef<HTMLDivElement>(null);
   const topNavRef = useRef<HTMLDivElement>(null);
@@ -285,6 +286,20 @@ export default function HomePage(): React.JSX.Element {
       setSliderPosition("index");
       setCurrentView("index");
     }
+  };
+
+  // Fungsi untuk membuka halaman Menuru
+  const openMenuruPage = () => {
+    setShowMenuruPage(true);
+    // Ubah URL menjadi /menuru
+    window.history.pushState(null, '', '/menuru');
+  };
+
+  // Fungsi untuk menutup halaman Menuru
+  const closeMenuruPage = () => {
+    setShowMenuruPage(false);
+    // Kembalikan URL ke /
+    window.history.pushState(null, '', '/');
   };
 
   // Warna cursor
@@ -867,9 +882,94 @@ export default function HomePage(): React.JSX.Element {
         zIndex: 10,
         position: 'relative'
       }}>
+        {/* Halaman Menuru (Fullscreen Black) */}
+        <AnimatePresence>
+          {showMenuruPage && (
+            <motion.div
+              key="menuru-page"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.5 }}
+              style={{
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                width: '100%',
+                height: '100%',
+                backgroundColor: 'black',
+                zIndex: 1000,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+            >
+              {/* Tombol Close */}
+              <motion.button
+                onClick={closeMenuruPage}
+                onMouseEnter={() => handleLinkHover("link", "CLOSE", "close-menuru")}
+                onMouseLeave={handleLinkLeave}
+                style={{
+                  position: 'absolute',
+                  top: isMobile ? '1rem' : '2rem',
+                  right: isMobile ? '1rem' : '2rem',
+                  padding: '1rem',
+                  backgroundColor: 'rgba(255,255,255,0.1)',
+                  border: '1px solid rgba(255,255,255,0.2)',
+                  borderRadius: '50%',
+                  cursor: 'none',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  zIndex: 1001
+                }}
+                whileHover={{ 
+                  backgroundColor: 'rgba(255,255,255,0.2)',
+                  scale: 1.1
+                }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <svg 
+                  width="24" 
+                  height="24" 
+                  viewBox="0 0 24 24" 
+                  fill="none" 
+                  stroke="white"
+                  strokeWidth="2"
+                >
+                  <line x1="18" y1="6" x2="6" y2="18"/>
+                  <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+              </motion.button>
+
+              {/* Konten Kosong - Hanya Hitam */}
+              <div style={{
+                textAlign: 'center',
+                color: 'white',
+                opacity: 0.5
+              }}>
+                <div style={{
+                  fontSize: isMobile ? '3rem' : '5rem',
+                  fontWeight: '300',
+                  marginBottom: '1rem'
+                }}>
+                  MENURU
+                </div>
+                <div style={{
+                  fontSize: isMobile ? '1rem' : '1.2rem',
+                  fontWeight: '300'
+                }}>
+                  Page content coming soon...
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         {/* AnimatePresence untuk transisi antara view */}
         <AnimatePresence mode="wait">
-          {currentView === "main" && (
+          {currentView === "main" && !showMenuruPage && (
             <motion.div
               key="main-view"
               initial={{ opacity: 0 }}
@@ -1146,72 +1246,60 @@ export default function HomePage(): React.JSX.Element {
                   </div>
                 </div>
 
-                {/* Simple Text Section dengan menuru di kiri dan more info di kanan */}
+                {/* Link Menuru dengan panah - Design minimalis */}
                 <div style={{
                   width: 'calc(100% - 4rem)',
                   marginLeft: isMobile ? '1rem' : '2rem',
                   marginRight: isMobile ? '1rem' : '2rem',
-                  marginTop: isMobile ? '3rem' : '4rem',
-                  marginBottom: isMobile ? '3rem' : '4rem',
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  padding: isMobile ? '1.5rem' : '2rem',
-                  backgroundColor: isDarkMode ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
-                  borderRadius: '15px',
-                  border: `1px solid ${isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}`
+                  marginTop: isMobile ? '2rem' : '3rem',
+                  marginBottom: isMobile ? '2rem' : '3rem'
                 }}>
-                  {/* Teks menuru di kiri */}
-                  <div style={{
-                    fontSize: isMobile ? '2rem' : '3rem',
-                    fontWeight: '700',
-                    fontFamily: 'Helvetica, Arial, sans-serif',
-                    color: isDarkMode ? 'white' : 'black',
-                    textTransform: 'uppercase',
-                    letterSpacing: '1px'
-                  }}>
-                    menuru
-                  </div>
-
-                  {/* More info di kanan */}
                   <motion.div
-                    onClick={() => window.open('https://noted-farid.netlify.app/menuru', '_blank')}
-                    onMouseEnter={() => handleLinkHover("link", "VISIT", "more-info")}
+                    onClick={openMenuruPage}
+                    onMouseEnter={() => handleLinkHover("link", "VIEW", "menuru-link")}
                     onMouseLeave={handleLinkLeave}
                     style={{
-                      fontSize: isMobile ? '1rem' : '1.2rem',
-                      fontWeight: '600',
-                      fontFamily: 'Helvetica, Arial, sans-serif',
-                      color: isDarkMode ? '#EC4899' : '#0050B7',
-                      cursor: 'none',
-                      display: 'flex',
+                      display: 'inline-flex',
                       alignItems: 'center',
-                      gap: '0.5rem',
-                      padding: isMobile ? '0.6rem 1.2rem' : '0.8rem 1.5rem',
-                      backgroundColor: isDarkMode ? 'rgba(236, 72, 153, 0.1)' : 'rgba(0, 80, 183, 0.1)',
-                      borderRadius: '25px',
-                      border: `1px solid ${isDarkMode ? 'rgba(236, 72, 153, 0.3)' : 'rgba(0, 80, 183, 0.3)'}`,
+                      gap: isMobile ? '0.8rem' : '1.2rem',
+                      cursor: 'none',
+                      padding: isMobile ? '0.8rem 0' : '1rem 0',
+                      borderBottom: `2px solid ${isDarkMode ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.3)'}`,
                       transition: 'all 0.3s ease'
                     }}
                     whileHover={{ 
-                      backgroundColor: isDarkMode ? 'rgba(236, 72, 153, 0.2)' : 'rgba(0, 80, 183, 0.2)',
-                      scale: 1.05,
-                      border: `1px solid ${isDarkMode ? 'rgba(236, 72, 153, 0.5)' : 'rgba(0, 80, 183, 0.5)'}`
+                      gap: isMobile ? '1.2rem' : '1.8rem',
+                      borderBottom: `2px solid ${isDarkMode ? '#EC4899' : '#0050B7'}`
                     }}
-                    whileTap={{ scale: 0.95 }}
                   >
-                    more info
+                    {/* Teks Menuru */}
+                    <span style={{
+                      fontSize: isMobile ? '1.8rem' : '2.5rem',
+                      fontWeight: '600',
+                      fontFamily: 'Helvetica, Arial, sans-serif',
+                      color: isDarkMode ? 'white' : 'black',
+                      textTransform: 'uppercase',
+                      letterSpacing: '1px'
+                    }}>
+                      Menuru
+                    </span>
+
+                    {/* Panah SVG lurus serong kanan */}
                     <svg 
-                      width="16" 
-                      height="16" 
+                      width={isMobile ? "24" : "32"} 
+                      height={isMobile ? "24" : "32"} 
                       viewBox="0 0 24 24" 
                       fill="none" 
-                      stroke={isDarkMode ? '#EC4899' : '#0050B7'}
-                      strokeWidth="2.5"
+                      stroke={isDarkMode ? 'white' : 'black'}
+                      strokeWidth="2"
                       strokeLinecap="round"
                       strokeLinejoin="round"
+                      style={{
+                        transition: 'all 0.3s ease'
+                      }}
                     >
-                      <path d="M5 12h14M12 5l7 7-7 7"/>
+                      <line x1="5" y1="12" x2="19" y2="12"/>
+                      <polyline points="12 5 19 12 12 19"/>
                     </svg>
                   </motion.div>
                 </div>
@@ -1496,7 +1584,7 @@ export default function HomePage(): React.JSX.Element {
           )}
 
           {/* Halaman Index */}
-          {currentView === "index" && (
+          {currentView === "index" && !showMenuruPage && (
             <motion.div
               key="index-view"
               initial={{ opacity: 0 }}
@@ -1827,7 +1915,7 @@ export default function HomePage(): React.JSX.Element {
           )}
 
           {/* Halaman Grid (placeholder) */}
-          {currentView === "grid" && (
+          {currentView === "grid" && !showMenuruPage && (
             <motion.div
               key="grid-view"
               initial={{ opacity: 0 }}
