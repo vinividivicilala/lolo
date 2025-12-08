@@ -30,6 +30,9 @@ export default function HomePage(): React.JSX.Element {
   const progressAnimationRef = useRef<gsap.core.Tween | null>(null);
   const menuruButtonRef = useRef<HTMLDivElement>(null);
   const menuruMinusRef = useRef<HTMLDivElement>(null);
+  const plusSignRef = useRef<HTMLDivElement>(null);
+  const minusSignRef = useRef<HTMLDivElement>(null);
+  const menuruTextRef = useRef<HTMLDivElement>(null);
 
   // Animasi loading text
   const loadingTexts = [
@@ -142,39 +145,50 @@ export default function HomePage(): React.JSX.Element {
         progressAnimationRef.current.kill();
       }
       // Cleanup GSAP animations
-      if (menuruButtonRef.current) {
-        gsap.killTweensOf(menuruButtonRef.current);
+      if (plusSignRef.current) {
+        gsap.killTweensOf(plusSignRef.current);
       }
-      if (menuruMinusRef.current) {
-        gsap.killTweensOf(menuruMinusRef.current);
+      if (minusSignRef.current) {
+        gsap.killTweensOf(minusSignRef.current);
+      }
+      if (menuruTextRef.current) {
+        gsap.killTweensOf(menuruTextRef.current);
       }
     };
   }, [isMobile, showMenuruFullPage]);
 
   // Animasi GSAP untuk tombol Menuru
   useEffect(() => {
-    if (menuruButtonRef.current) {
+    if (plusSignRef.current && !showMenuruFullPage) {
       // Animasi pulsing untuk tanda +
-      gsap.to(menuruButtonRef.current.querySelector('.plus-sign'), {
+      gsap.to(plusSignRef.current, {
         scale: 1.1,
-        duration: 1,
+        duration: 1.5,
         repeat: -1,
         yoyo: true,
         ease: "power1.inOut"
       });
     }
-  }, []);
 
-  // Animasi GSAP untuk tanda - di halaman full page
-  useEffect(() => {
-    if (menuruMinusRef.current && showMenuruFullPage) {
+    if (minusSignRef.current && showMenuruFullPage) {
       // Animasi subtle pulse untuk tanda -
-      gsap.to(menuruMinusRef.current, {
+      gsap.to(minusSignRef.current, {
         scale: 1.05,
         duration: 1.5,
         repeat: -1,
         yoyo: true,
         ease: "power1.inOut"
+      });
+    }
+
+    // Animasi teks MENURU di halaman full page
+    if (menuruTextRef.current && showMenuruFullPage) {
+      gsap.to(menuruTextRef.current, {
+        scale: 1.02,
+        duration: 2,
+        repeat: -1,
+        yoyo: true,
+        ease: "sine.inOut"
       });
     }
   }, [showMenuruFullPage]);
@@ -292,24 +306,72 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // Fungsi untuk toggle halaman full page MENURU
+  // Fungsi untuk toggle halaman full page MENURU dengan animasi
   const toggleMenuruFullPage = () => {
-    if (showMenuruFullPage) {
-      // Jika sedang terbuka, tutup
-      handleCloseMenuruFullPage();
-    } else {
-      // Jika sedang tertutup, buka
+    if (!showMenuruFullPage) {
+      // Buka halaman full page dengan animasi
       setShowMenuruFullPage(true);
-      setMenuruExpanded(true);
+      
+      // Animasi untuk tanda +
+      if (plusSignRef.current) {
+        gsap.to(plusSignRef.current, {
+          rotation: 45,
+          duration: 0.5,
+          ease: "back.out(1.7)",
+          onComplete: () => {
+            setMenuruExpanded(true);
+          }
+        });
+      }
     }
   };
 
-  // Fungsi untuk menutup halaman full page MENURU
+  // Fungsi untuk menutup halaman full page MENURU dengan animasi
   const handleCloseMenuruFullPage = () => {
-    setMenuruExpanded(false);
-    setTimeout(() => {
-      setShowMenuruFullPage(false);
-    }, 300);
+    // Animasi untuk tanda - sebelum menutup
+    if (minusSignRef.current) {
+      gsap.to(minusSignRef.current, {
+        rotation: 0,
+        scale: 1,
+        duration: 0.4,
+        ease: "power2.out",
+        onComplete: () => {
+          setMenuruExpanded(false);
+          setTimeout(() => {
+            setShowMenuruFullPage(false);
+            // Reset animasi tanda + setelah menutup
+            if (plusSignRef.current) {
+              gsap.to(plusSignRef.current, {
+                rotation: 0,
+                duration: 0.3,
+                ease: "power2.out"
+              });
+            }
+          }, 200);
+        }
+      });
+    } else {
+      setMenuruExpanded(false);
+      setTimeout(() => {
+        setShowMenuruFullPage(false);
+      }, 300);
+    }
+  };
+
+  // Animasi klik pada tombol MENURU +
+  const handleMenuruClick = () => {
+    toggleMenuruFullPage();
+    
+    // Animasi bounce pada teks MENURU
+    if (menuruButtonRef.current) {
+      gsap.to(menuruButtonRef.current, {
+        scale: 0.95,
+        duration: 0.1,
+        yoyo: true,
+        repeat: 1,
+        ease: "power2.out"
+      });
+    }
   };
 
   // Warna cursor
@@ -481,7 +543,7 @@ export default function HomePage(): React.JSX.Element {
               cursor: 'none'
             }}
           >
-            {/* Header dengan teks MENURU dan tanda - di sebelah kanan (sejajar) */}
+            {/* Header dengan teks MENURU dan tanda \ di sebelah kanan (sejajar) */}
             <div style={{
               position: 'absolute',
               top: isMobile ? '1.5rem' : '2rem',
@@ -495,6 +557,7 @@ export default function HomePage(): React.JSX.Element {
             }}>
               {/* Teks MENURU di kiri */}
               <motion.div
+                ref={menuruTextRef}
                 initial={{ x: -50, opacity: 0 }}
                 animate={{ x: 0, opacity: 1 }}
                 transition={{ duration: 0.6, delay: 0.1 }}
@@ -510,11 +573,11 @@ export default function HomePage(): React.JSX.Element {
                 MENURU
               </motion.div>
 
-              {/* Tanda - di kanan dengan animasi GSAP */}
+              {/* Tanda \ (backslash) di kanan dengan animasi GSAP */}
               <motion.div
-                ref={menuruMinusRef}
-                initial={{ x: 50, opacity: 0 }}
-                animate={{ x: 0, opacity: 1 }}
+                ref={minusSignRef}
+                initial={{ x: 50, opacity: 0, rotation: -45 }}
+                animate={{ x: 0, opacity: 1, rotation: 0 }}
                 transition={{ duration: 0.6, delay: 0.2 }}
                 onClick={handleCloseMenuruFullPage}
                 onMouseEnter={() => handleLinkHover("link", "CLOSE", "menuru-close")}
@@ -531,12 +594,14 @@ export default function HomePage(): React.JSX.Element {
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.95 }}
               >
-                {/* Garis horizontal (tanda -) dengan efek glow */}
+                {/* Garis diagonal (tanda \) dengan efek glow */}
                 <div style={{
+                  position: 'absolute',
                   width: isMobile ? '30px' : '40px',
                   height: '3px',
                   backgroundColor: 'white',
                   borderRadius: '2px',
+                  transform: 'rotate(45deg)',
                   boxShadow: '0 0 10px rgba(255, 255, 255, 0.7), 0 0 20px rgba(255, 255, 255, 0.5)'
                 }} />
               </motion.div>
@@ -1378,7 +1443,7 @@ export default function HomePage(): React.JSX.Element {
                   {/* Teks MENURU dengan animasi Plus (+) di sebelah kanan - TAMPIL DI SEMUA DEVICE */}
                   <motion.div
                     ref={menuruButtonRef}
-                    onClick={toggleMenuruFullPage}
+                    onClick={handleMenuruClick}
                     onMouseEnter={() => handleLinkHover("link", showMenuruFullPage ? "CLOSE" : "OPEN", "menuru-toggle")}
                     onMouseLeave={handleLinkLeave}
                     style={{
@@ -1403,14 +1468,18 @@ export default function HomePage(): React.JSX.Element {
                     </div>
                     
                     {/* Simbol Plus (+) dengan animasi GSAP */}
-                    <div className="plus-sign" style={{
-                      width: isMobile ? '40px' : '45px',
-                      height: isMobile ? '40px' : '45px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      position: 'relative'
-                    }}>
+                    <div 
+                      ref={plusSignRef}
+                      className="plus-sign" 
+                      style={{
+                        width: isMobile ? '40px' : '45px',
+                        height: isMobile ? '40px' : '45px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        position: 'relative'
+                      }}
+                    >
                       {/* Garis vertikal */}
                       <div style={{
                         position: 'absolute',
@@ -1418,7 +1487,7 @@ export default function HomePage(): React.JSX.Element {
                         height: isMobile ? '20px' : '22px',
                         backgroundColor: isDarkMode ? 'white' : 'black',
                         borderRadius: '2px',
-                        boxShadow: '0 0 5px rgba(255, 255, 255, 0.5)'
+                        boxShadow: '0 0 8px rgba(255, 255, 255, 0.6)'
                       }} />
                       {/* Garis horizontal */}
                       <div style={{
@@ -1427,7 +1496,7 @@ export default function HomePage(): React.JSX.Element {
                         height: '3px',
                         backgroundColor: isDarkMode ? 'white' : 'black',
                         borderRadius: '2px',
-                        boxShadow: '0 0 5px rgba(255, 255, 255, 0.5)'
+                        boxShadow: '0 0 8px rgba(255, 255, 255, 0.6)'
                       }} />
                     </div>
                   </motion.div>
