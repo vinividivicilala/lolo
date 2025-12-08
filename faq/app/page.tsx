@@ -1105,6 +1105,157 @@ export default function HomePage(): React.JSX.Element {
                 </div>
               </div>
 
+
+{/* Link website /menuru */}
+<motion.div
+  initial={{ opacity: 0, y: 20 }}
+  whileInView={{ opacity: 1, y: 0 }}
+  transition={{ duration: 0.8 }}
+  viewport={{ once: true }}
+  style={{
+    width: 'calc(100% - 4rem)',
+    marginLeft: isMobile ? '1rem' : '2rem',
+    marginRight: isMobile ? '1rem' : '2rem',
+    marginTop: isMobile ? '2rem' : '3rem',
+    textAlign: 'center'
+  }}
+>
+  <motion.div
+    onClick={() => router.push('/menuru')}
+    onMouseEnter={() => handleLinkHover("link", "VISIT", "menuru-link")}
+    onMouseLeave={handleLinkLeave}
+    style={{
+      fontSize: isMobile ? '2rem' : '3.5rem',
+      fontWeight: '700',
+      fontFamily: 'Helvetica, Arial, sans-serif',
+      color: isDarkMode ? 'white' : '#0050B7',
+      cursor: 'none',
+      textDecoration: 'none',
+      display: 'inline-block',
+      position: 'relative',
+      padding: '0.5rem 0',
+      transition: 'all 0.3s ease'
+    }}
+    whileHover={{ 
+      color: isDarkMode ? '#EC4899' : '#ff0028',
+      scale: 1.05
+    }}
+  >
+    /menuru
+    {/* Garis bawah animasi */}
+    <motion.div
+      initial={{ width: 0 }}
+      whileHover={{ width: '100%' }}
+      transition={{ duration: 0.3 }}
+      style={{
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        height: '3px',
+        backgroundColor: isDarkMode ? '#EC4899' : '#ff0028',
+        borderRadius: '2px'
+      }}
+    />
+  </motion.div>
+</motion.div>
+
+{/* Blok warna di bawah link */}
+<motion.div
+  initial={{ opacity: 0, y: 30 }}
+  whileInView={{ opacity: 1, y: 0 }}
+  transition={{ duration: 0.8, delay: 0.2 }}
+  viewport={{ once: true }}
+  style={{
+    width: 'calc(100% - 4rem)',
+    marginLeft: isMobile ? '1rem' : '2rem',
+    marginRight: isMobile ? '1rem' : '2rem',
+    marginTop: isMobile ? '2rem' : '3rem',
+    marginBottom: isMobile ? '2rem' : '3rem',
+    backgroundColor: isDarkMode ? '#0050B7' : '#EC4899',
+    borderRadius: '25px',
+    padding: isMobile ? '3rem 2rem' : '5rem 4rem',
+    boxShadow: '0 20px 50px rgba(0,0,0,0.3)',
+    border: `3px solid ${isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.2)'}`,
+    textAlign: 'center'
+  }}
+>
+  {/* Teks "menuru" */}
+  <div style={{
+    fontSize: isMobile ? '3rem' : '5rem',
+    fontWeight: '800',
+    fontFamily: 'Helvetica, Arial, sans-serif',
+    color: 'white',
+    textTransform: 'uppercase',
+    letterSpacing: isMobile ? '3px' : '5px',
+    marginBottom: isMobile ? '1rem' : '2rem',
+    textShadow: '0 5px 15px rgba(0,0,0,0.3)'
+  }}>
+    menuru
+  </div>
+  
+  {/* Garis pemisah */}
+  <div style={{
+    width: isMobile ? '60%' : '40%',
+    height: '2px',
+    backgroundColor: 'rgba(255,255,255,0.3)',
+    margin: '0 auto',
+    marginBottom: isMobile ? '1.5rem' : '2rem'
+  }}></div>
+  
+  {/* Teks "more info" */}
+  <motion.div
+    onClick={() => router.push('/more-info')}
+    onMouseEnter={() => handleLinkHover("link", "EXPLORE", "more-info")}
+    onMouseLeave={handleLinkLeave}
+    style={{
+      fontSize: isMobile ? '1.2rem' : '1.8rem',
+      fontWeight: '600',
+      fontFamily: 'Helvetica, Arial, sans-serif',
+      color: 'white',
+      cursor: 'none',
+      display: 'inline-block',
+      position: 'relative',
+      padding: '0.5rem 1.5rem',
+      backgroundColor: 'rgba(255,255,255,0.15)',
+      borderRadius: '50px',
+      border: '2px solid rgba(255,255,255,0.3)',
+      backdropFilter: 'blur(10px)',
+      transition: 'all 0.3s ease'
+    }}
+    whileHover={{ 
+      backgroundColor: 'rgba(255,255,255,0.25)',
+      scale: 1.05,
+      border: '2px solid rgba(255,255,255,0.5)'
+    }}
+    whileTap={{ scale: 0.95 }}
+  >
+    more info
+    {/* Icon panah */}
+    <svg 
+      width="20" 
+      height="20" 
+      viewBox="0 0 24 24" 
+      fill="none" 
+      stroke="white"
+      strokeWidth="2.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      style={{
+        marginLeft: '10px',
+        verticalAlign: 'middle',
+        display: 'inline-block'
+      }}
+    >
+      <path d="M5 12h14M12 5l7 7-7 7"/>
+    </svg>
+  </motion.div>
+</motion.div>
+
+
+
+
+              
+
               {/* Tombol Slider Index/Grid - Di bawah card */}
               <div style={{
                 position: 'relative',
@@ -1941,3 +2092,4 @@ export default function HomePage(): React.JSX.Element {
     </div>
   );
 }
+
