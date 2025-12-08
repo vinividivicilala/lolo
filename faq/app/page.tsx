@@ -1476,214 +1476,167 @@ export default function HomePage(): React.JSX.Element {
                   </motion.p>
                 </div>
               </motion.div>
-          )}
+            )}
+          </AnimatePresence>
 
-          {/* Halaman Index */}
-          {currentView === "index" && (
-            <motion.div
-              key="index-view"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.5 }}
-              style={{
-                width: '100%',
-                minHeight: '100vh',
-                padding: isMobile ? '1rem' : '2rem',
-                boxSizing: 'border-box',
-                position: 'relative'
-              }}
-            >
-              {/* Garis bawah di atas MENURU - putih pudar */}
-              <div style={{
-                width: '100%',
-                height: '1px',
-                backgroundColor: isDarkMode ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)',
-                marginBottom: '3rem'
-              }}></div>
-
-              {/* Container utama untuk halaman Index - 4 kolom (MENURU + Gambar + Topics + Deskripsi) */}
-              <div ref={topicContainerRef} style={{
-                display: 'flex',
-                flexDirection: isMobile ? 'column' : 'row',
-                gap: isMobile ? '1.5rem' : '4rem',
-                width: '100%',
-                fontFamily: 'Helvetica, Arial, sans-serif',
-                position: 'relative'
-              }}>
-                {/* Kolom 1 - MENURU */}
+          <AnimatePresence mode="wait">
+            {currentView === "index" && (
+              <motion.div
+                key="index-view"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.5 }}
+                style={{
+                  width: '100%',
+                  minHeight: '100vh',
+                  padding: isMobile ? '1rem' : '2rem',
+                  boxSizing: 'border-box',
+                  position: 'relative'
+                }}
+              >
+                {/* Garis bawah di atas MENURU - putih pudar */}
                 <div style={{
-                  flex: 1
+                  width: '100%',
+                  height: '1px',
+                  backgroundColor: isDarkMode ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)',
+                  marginBottom: '3rem'
+                }}></div>
+
+                {/* Container utama untuk halaman Index - 4 kolom (MENURU + Gambar + Topics + Deskripsi) */}
+                <div ref={topicContainerRef} style={{
+                  display: 'flex',
+                  flexDirection: isMobile ? 'column' : 'row',
+                  gap: isMobile ? '1.5rem' : '4rem',
+                  width: '100%',
+                  fontFamily: 'Helvetica, Arial, sans-serif',
+                  position: 'relative'
                 }}>
+                  {/* Kolom 1 - MENURU */}
                   <div style={{
-                    color: isDarkMode ? 'white' : 'black',
-                    fontSize: isMobile ? '1.8rem' : '2.5rem',
-                    fontWeight: '300',
-                    textTransform: 'uppercase',
-                    letterSpacing: '2px',
-                    fontFamily: 'Helvetica, Arial, sans-serif',
-                    lineHeight: 1
+                    flex: 1
                   }}>
-                    MENURU
+                    <div style={{
+                      color: isDarkMode ? 'white' : 'black',
+                      fontSize: isMobile ? '1.8rem' : '2.5rem',
+                      fontWeight: '300',
+                      textTransform: 'uppercase',
+                      letterSpacing: '2px',
+                      fontFamily: 'Helvetica, Arial, sans-serif',
+                      lineHeight: 1
+                    }}>
+                      MENURU
+                    </div>
                   </div>
-                </div>
 
-                {/* Kolom 2 - Gambar Hover */}
-                <div style={{
-                  flex: 1,
-                  position: 'relative',
-                  minHeight: isMobile ? '400px' : '600px'
-                }}>
-                  <AnimatePresence>
-                    {hoveredTopic !== null && (
-                      <motion.div
-                        key="hovered-image"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        transition={{ duration: 0.3 }}
-                        style={{
-                          position: 'absolute',
-                          top: 0,
-                          left: 0,
-                          width: '100%',
-                          height: '100%'
-                        }}
-                      >
-                        {/* Gambar normal */}
+                  {/* Kolom 2 - Gambar Hover */}
+                  <div style={{
+                    flex: 1,
+                    position: 'relative',
+                    minHeight: isMobile ? '400px' : '600px'
+                  }}>
+                    <AnimatePresence>
+                      {hoveredTopic !== null && (
                         <motion.div
-                          initial={{ scale: 0.95 }}
-                          animate={{ scale: 1 }}
-                          exit={{ scale: 0.95 }}
-                          transition={{ duration: 0.4 }}
+                          key="hovered-image"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                          transition={{ duration: 0.3 }}
                           style={{
+                            position: 'absolute',
+                            top: 0,
+                            left: 0,
                             width: '100%',
-                            height: '100%',
-                            overflow: 'hidden',
-                            borderRadius: '15px',
-                            boxShadow: '0 10px 30px rgba(0,0,0,0.5)',
-                            border: '1px solid rgba(255,255,255,0.1)'
+                            height: '100%'
                           }}
                         >
-                          <img 
-                            src="images/5.jpg" 
-                            alt={`Topic ${hoveredTopic}`}
+                          {/* Gambar normal */}
+                          <motion.div
+                            initial={{ scale: 0.95 }}
+                            animate={{ scale: 1 }}
+                            exit={{ scale: 0.95 }}
+                            transition={{ duration: 0.4 }}
                             style={{
                               width: '100%',
                               height: '100%',
-                              display: 'block',
-                              objectFit: 'cover'
+                              overflow: 'hidden',
+                              borderRadius: '15px',
+                              boxShadow: '0 10px 30px rgba(0,0,0,0.5)',
+                              border: '1px solid rgba(255,255,255,0.1)'
                             }}
-                            onError={(e) => {
-                              console.error("Gambar topic tidak ditemukan:", e);
-                              e.currentTarget.style.backgroundColor = isDarkMode ? '#333' : '#eee';
-                              e.currentTarget.style.display = 'flex';
-                              e.currentTarget.style.alignItems = 'center';
-                              e.currentTarget.style.justifyContent = 'center';
-                              e.currentTarget.style.color = isDarkMode ? '#fff' : '#000';
-                              e.currentTarget.innerHTML = '<div style="padding: 2rem; text-align: center;">Topic Image</div>';
-                            }}
-                          />
-                        </motion.div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-
-                {/* Kolom 3 - Topics */}
-                <div style={{
-                  flex: 1,
-                  position: 'relative'
-                }}>
-                  <div style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '0.3rem',
-                    fontFamily: 'Helvetica, Arial, sans-serif'
-                  }}>
-                    {indexTopics.map((topic, index) => (
-                      <div 
-                        key={topic.id}
-                        onMouseEnter={() => handleTopicHover(topic.id)}
-                        onMouseLeave={() => handleTopicHover(null)}
-                        style={{
-                          display: 'flex',
-                          flexDirection: 'column',
-                          position: 'relative',
-                          padding: isMobile ? '0.8rem 0' : '1rem 0',
-                          cursor: 'pointer'
-                        }}
-                      >
-                        {/* Garis putih pudar saat hover - mentok ke kanan */}
-                        <AnimatePresence>
-                          {hoveredTopic === topic.id && (
-                            <motion.div
-                              initial={{ width: 0, opacity: 0 }}
-                              animate={{ width: '100%', opacity: 1 }}
-                              exit={{ width: 0, opacity: 0 }}
-                              transition={{ duration: 0.3 }}
+                          >
+                            <img 
+                              src="images/5.jpg" 
+                              alt={`Topic ${hoveredTopic}`}
                               style={{
-                                position: 'absolute',
-                                left: 0,
-                                top: '50%',
-                                height: '1px',
-                                backgroundColor: 'rgba(255,255,255,0.3)',
-                                transform: 'translateY(-50%)',
-                                zIndex: 1
+                                width: '100%',
+                                height: '100%',
+                                display: 'block',
+                                objectFit: 'cover'
+                              }}
+                              onError={(e) => {
+                                console.error("Gambar topic tidak ditemukan:", e);
+                                e.currentTarget.style.backgroundColor = isDarkMode ? '#333' : '#eee';
+                                e.currentTarget.style.display = 'flex';
+                                e.currentTarget.style.alignItems = 'center';
+                                e.currentTarget.style.justifyContent = 'center';
+                                e.currentTarget.style.color = isDarkMode ? '#fff' : '#000';
+                                e.currentTarget.innerHTML = '<div style="padding: 2rem; text-align: center;">Topic Image</div>';
                               }}
                             />
-                          )}
-                        </AnimatePresence>
-
-                        {/* Teks topic */}
-                        <motion.div
-                          style={{
-                            color: isDarkMode ? 'white' : 'black',
-                            fontSize: isMobile ? '1.2rem' : '1.5rem',
-                            fontWeight: hoveredTopic === topic.id ? '600' : '400',
-                            fontFamily: 'Helvetica, Arial, sans-serif',
-                            lineHeight: 1.1,
-                            position: 'relative',
-                            zIndex: 2,
-                            transition: 'font-weight 0.2s ease'
-                          }}
-                          whileHover={{ x: 5 }}
-                        >
-                          {topic.title}
+                          </motion.div>
                         </motion.div>
-                      </div>
-                    ))}
+                      )}
+                    </AnimatePresence>
                   </div>
-                </div>
 
-                {/* Kolom 4 - Deskripsi dan Tanggal SEJAJAR */}
-                <div style={{
-                  flex: 1
-                }}>
+                  {/* Kolom 3 - Topics */}
                   <div style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '0.3rem',
-                    fontFamily: 'Helvetica, Arial, sans-serif'
+                    flex: 1,
+                    position: 'relative'
                   }}>
-                    {indexTopics.map((topic, index) => (
-                      <div 
-                        key={topic.id}
-                        onMouseEnter={() => handleTopicHover(topic.id)}
-                        onMouseLeave={() => handleTopicHover(null)}
-                        style={{
-                          display: 'flex',
-                          flexDirection: 'column',
-                          padding: isMobile ? '0.8rem 0' : '1rem 0',
-                          cursor: 'pointer'
-                        }}
-                      >
-                        {/* Container untuk deskripsi dan tanggal SEJAJAR */}
-                        <div style={{
-                          display: 'flex',
-                          alignItems: 'baseline',
-                          gap: '0.5rem'
-                        }}>
+                    <div style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '0.3rem',
+                      fontFamily: 'Helvetica, Arial, sans-serif'
+                    }}>
+                      {indexTopics.map((topic, index) => (
+                        <div 
+                          key={topic.id}
+                          onMouseEnter={() => handleTopicHover(topic.id)}
+                          onMouseLeave={() => handleTopicHover(null)}
+                          style={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            position: 'relative',
+                            padding: isMobile ? '0.8rem 0' : '1rem 0',
+                            cursor: 'pointer'
+                          }}
+                        >
+                          {/* Garis putih pudar saat hover - mentok ke kanan */}
+                          <AnimatePresence>
+                            {hoveredTopic === topic.id && (
+                              <motion.div
+                                initial={{ width: 0, opacity: 0 }}
+                                animate={{ width: '100%', opacity: 1 }}
+                                exit={{ width: 0, opacity: 0 }}
+                                transition={{ duration: 0.3 }}
+                                style={{
+                                  position: 'absolute',
+                                  left: 0,
+                                  top: '50%',
+                                  height: '1px',
+                                  backgroundColor: 'rgba(255,255,255,0.3)',
+                                  transform: 'translateY(-50%)',
+                                  zIndex: 1
+                                }}
+                              />
+                            )}
+                          </AnimatePresence>
+
+                          {/* Teks topic */}
                           <motion.div
                             style={{
                               color: isDarkMode ? 'white' : 'black',
@@ -1691,244 +1644,293 @@ export default function HomePage(): React.JSX.Element {
                               fontWeight: hoveredTopic === topic.id ? '600' : '400',
                               fontFamily: 'Helvetica, Arial, sans-serif',
                               lineHeight: 1.1,
+                              position: 'relative',
+                              zIndex: 2,
                               transition: 'font-weight 0.2s ease'
                             }}
                             whileHover={{ x: 5 }}
                           >
-                            {topic.description}
+                            {topic.title}
                           </motion.div>
-                          {/* Tanggal SEJAJAR dengan deskripsi */}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Kolom 4 - Deskripsi dan Tanggal SEJAJAR */}
+                  <div style={{
+                    flex: 1
+                  }}>
+                    <div style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '0.3rem',
+                      fontFamily: 'Helvetica, Arial, sans-serif'
+                    }}>
+                      {indexTopics.map((topic, index) => (
+                        <div 
+                          key={topic.id}
+                          onMouseEnter={() => handleTopicHover(topic.id)}
+                          onMouseLeave={() => handleTopicHover(null)}
+                          style={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            padding: isMobile ? '0.8rem 0' : '1rem 0',
+                            cursor: 'pointer'
+                          }}
+                        >
+                          {/* Container untuk deskripsi dan tanggal SEJAJAR */}
                           <div style={{
-                            color: isDarkMode ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.6)',
-                            fontSize: isMobile ? '1.2rem' : '1.5rem',
-                            fontWeight: '400',
-                            fontFamily: 'Helvetica, Arial, sans-serif',
-                            lineHeight: 1.1
+                            display: 'flex',
+                            alignItems: 'baseline',
+                            gap: '0.5rem'
                           }}>
-                            {topic.date}
+                            <motion.div
+                              style={{
+                                color: isDarkMode ? 'white' : 'black',
+                                fontSize: isMobile ? '1.2rem' : '1.5rem',
+                                fontWeight: hoveredTopic === topic.id ? '600' : '400',
+                                fontFamily: 'Helvetica, Arial, sans-serif',
+                                lineHeight: 1.1,
+                                transition: 'font-weight 0.2s ease'
+                              }}
+                              whileHover={{ x: 5 }}
+                            >
+                              {topic.description}
+                            </motion.div>
+                            {/* Tanggal SEJAJAR dengan deskripsi */}
+                            <div style={{
+                              color: isDarkMode ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.6)',
+                              fontSize: isMobile ? '1.2rem' : '1.5rem',
+                              fontWeight: '400',
+                              fontFamily: 'Helvetica, Arial, sans-serif',
+                              lineHeight: 1.1
+                            }}>
+                              {topic.date}
+                            </div>
                           </div>
                         </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Tombol Slider Index/Grid - Di bawah content */}
+                <div style={{
+                  position: 'relative',
+                  marginTop: '4rem',
+                  marginBottom: '4rem',
+                  paddingLeft: isMobile ? '1rem' : '2rem',
+                  paddingRight: isMobile ? '1rem' : '2rem'
+                }}>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '1.5rem'
+                  }}>
+                    {/* Tombol Slider - lebih besar */}
+                    <motion.button
+                      onClick={toggleSlider}
+                      onMouseEnter={() => handleLinkHover("link", sliderPosition === "index" ? "TO GRID" : "TO INDEX", "slider")}
+                      onMouseLeave={handleLinkLeave}
+                      style={{
+                        width: '120px',
+                        height: '50px',
+                        backgroundColor: '#0050B7',
+                        border: 'none',
+                        borderRadius: '25px',
+                        cursor: 'none',
+                        padding: 0,
+                        position: 'relative',
+                        display: 'flex',
+                        alignItems: 'center',
+                        overflow: 'hidden'
+                      }}
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                    >
+                      {/* Track */}
+                      <div style={{
+                        position: 'absolute',
+                        width: '100%',
+                        height: '100%',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        padding: '0 15px',
+                        boxSizing: 'border-box'
+                      }}>
+                        <span style={{
+                          color: 'white',
+                          fontSize: '1rem',
+                          fontWeight: '700',
+                          fontFamily: 'Helvetica, Arial, sans-serif',
+                          opacity: 1
+                        }}>
+                          INDEX
+                        </span>
+                        <span style={{
+                          color: 'white',
+                          fontSize: '1rem',
+                          fontWeight: '700',
+                          fontFamily: 'Helvetica, Arial, sans-serif',
+                          opacity: 0.5
+                        }}>
+                          GRID
+                        </span>
                       </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
+                      
+                      {/* Slider Dot - Hijau cerah lebih besar */}
+                      <motion.div
+                        animate={{ x: 15 }}
+                        transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                        style={{
+                          width: '35px',
+                          height: '35px',
+                          backgroundColor: '#00FF00',
+                          borderRadius: '50%',
+                          position: 'absolute',
+                          left: '7px',
+                          boxShadow: '0 0 15px rgba(0, 255, 0, 0.7)'
+                        }}
+                      />
+                    </motion.button>
 
-              {/* Tombol Slider Index/Grid - Di bawah content */}
-              <div style={{
-                position: 'relative',
-                marginTop: '4rem',
-                marginBottom: '4rem',
-                paddingLeft: isMobile ? '1rem' : '2rem',
-                paddingRight: isMobile ? '1rem' : '2rem'
-              }}>
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '1.5rem'
-                }}>
-                  {/* Tombol Slider - lebih besar */}
-                  <motion.button
-                    onClick={toggleSlider}
-                    onMouseEnter={() => handleLinkHover("link", sliderPosition === "index" ? "TO GRID" : "TO INDEX", "slider")}
-                    onMouseLeave={handleLinkLeave}
-                    style={{
-                      width: '120px',
-                      height: '50px',
-                      backgroundColor: '#0050B7',
-                      border: 'none',
-                      borderRadius: '25px',
-                      cursor: 'none',
-                      padding: 0,
-                      position: 'relative',
-                      display: 'flex',
-                      alignItems: 'center',
-                      overflow: 'hidden'
-                    }}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    {/* Track */}
+                    {/* Label status - lebih besar */}
                     <div style={{
-                      position: 'absolute',
-                      width: '100%',
-                      height: '100%',
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      padding: '0 15px',
-                      boxSizing: 'border-box'
+                      color: isDarkMode ? 'white' : 'black',
+                      fontSize: '1.1rem',
+                      fontWeight: '600',
+                      fontFamily: 'Helvetica, Arial, sans-serif'
                     }}>
-                      <span style={{
-                        color: 'white',
-                        fontSize: '1rem',
-                        fontWeight: '700',
-                        fontFamily: 'Helvetica, Arial, sans-serif',
-                        opacity: 1
-                      }}>
-                        INDEX
-                      </span>
-                      <span style={{
-                        color: 'white',
-                        fontSize: '1rem',
-                        fontWeight: '700',
-                        fontFamily: 'Helvetica, Arial, sans-serif',
-                        opacity: 0.5
-                      }}>
-                        GRID
-                      </span>
+                      Index View
                     </div>
-                    
-                    {/* Slider Dot - Hijau cerah lebih besar */}
-                    <motion.div
-                      animate={{ x: 15 }}
-                      transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                      style={{
-                        width: '35px',
-                        height: '35px',
-                        backgroundColor: '#00FF00',
-                        borderRadius: '50%',
-                        position: 'absolute',
-                        left: '7px',
-                        boxShadow: '0 0 15px rgba(0, 255, 0, 0.7)'
-                      }}
-                    />
-                  </motion.button>
-
-                  {/* Label status - lebih besar */}
-                  <div style={{
-                    color: isDarkMode ? 'white' : 'black',
-                    fontSize: '1.1rem',
-                    fontWeight: '600',
-                    fontFamily: 'Helvetica, Arial, sans-serif'
-                  }}>
-                    Index View
                   </div>
                 </div>
-              </div>
-            </motion.div>
-          )}
+              </motion.div>
+            )}
+          </AnimatePresence>
 
-          {/* Halaman Grid (placeholder) */}
-          {currentView === "grid" && (
-            <motion.div
-              key="grid-view"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.5 }}
-              style={{
-                width: '100%',
-                minHeight: '100vh',
-                padding: isMobile ? '1rem' : '2rem',
-                boxSizing: 'border-box',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}
-            >
-              <h2 style={{
-                color: isDarkMode ? 'white' : 'black',
-                fontSize: isMobile ? '2rem' : '3rem',
-                fontWeight: '300',
-                marginBottom: '2rem'
-              }}>
-                Grid View - Coming Soon
-              </h2>
-              
-              {/* Tombol Slider di bawah content */}
-              <div style={{
-                marginTop: '3rem'
-              }}>
-                <div style={{
+          <AnimatePresence mode="wait">
+            {currentView === "grid" && (
+              <motion.div
+                key="grid-view"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.5 }}
+                style={{
+                  width: '100%',
+                  minHeight: '100vh',
+                  padding: isMobile ? '1rem' : '2rem',
+                  boxSizing: 'border-box',
                   display: 'flex',
+                  flexDirection: 'column',
                   alignItems: 'center',
-                  gap: '1.5rem'
+                  justifyContent: 'center'
+                }}
+              >
+                <h2 style={{
+                  color: isDarkMode ? 'white' : 'black',
+                  fontSize: isMobile ? '2rem' : '3rem',
+                  fontWeight: '300',
+                  marginBottom: '2rem'
                 }}>
-                  {/* Tombol Slider - lebih besar */}
-                  <motion.button
-                    onClick={toggleSlider}
-                    onMouseEnter={() => handleLinkHover("link", sliderPosition === "index" ? "TO GRID" : "TO INDEX", "slider")}
-                    onMouseLeave={handleLinkLeave}
-                    style={{
-                      width: '120px',
-                      height: '50px',
-                      backgroundColor: '#0050B7',
-                      border: 'none',
-                      borderRadius: '25px',
-                      cursor: 'none',
-                      padding: 0,
-                      position: 'relative',
-                      display: 'flex',
-                      alignItems: 'center',
-                      overflow: 'hidden'
-                    }}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    {/* Track */}
-                    <div style={{
-                      position: 'absolute',
-                      width: '100%',
-                      height: '100%',
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      padding: '0 15px',
-                      boxSizing: 'border-box'
-                    }}>
-                      <span style={{
-                        color: 'white',
-                        fontSize: '1rem',
-                        fontWeight: '700',
-                        fontFamily: 'Helvetica, Arial, sans-serif',
-                        opacity: 0.5
-                      }}>
-                        INDEX
-                      </span>
-                      <span style={{
-                        color: 'white',
-                        fontSize: '1rem',
-                        fontWeight: '700',
-                        fontFamily: 'Helvetica, Arial, sans-serif',
-                        opacity: 1
-                      }}>
-                        GRID
-                      </span>
-                    </div>
-                    
-                    {/* Slider Dot - Hijau cerah lebih besar */}
-                    <motion.div
-                      animate={{ x: 65 }}
-                      transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                      style={{
-                        width: '35px',
-                        height: '35px',
-                        backgroundColor: '#00FF00',
-                        borderRadius: '50%',
-                        position: 'absolute',
-                        left: '7px',
-                        boxShadow: '0 0 15px rgba(0, 255, 0, 0.7)'
-                      }}
-                    />
-                  </motion.button>
-
-                  {/* Label status - lebih besar */}
+                  Grid View - Coming Soon
+                </h2>
+                
+                {/* Tombol Slider di bawah content */}
+                <div style={{
+                  marginTop: '3rem'
+                }}>
                   <div style={{
-                    color: isDarkMode ? 'white' : 'black',
-                    fontSize: '1.1rem',
-                    fontWeight: '600',
-                    fontFamily: 'Helvetica, Arial, sans-serif'
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '1.5rem'
                   }}>
-                    Grid View
+                    {/* Tombol Slider - lebih besar */}
+                    <motion.button
+                      onClick={toggleSlider}
+                      onMouseEnter={() => handleLinkHover("link", sliderPosition === "index" ? "TO GRID" : "TO INDEX", "slider")}
+                      onMouseLeave={handleLinkLeave}
+                      style={{
+                        width: '120px',
+                        height: '50px',
+                        backgroundColor: '#0050B7',
+                        border: 'none',
+                        borderRadius: '25px',
+                        cursor: 'none',
+                        padding: 0,
+                        position: 'relative',
+                        display: 'flex',
+                        alignItems: 'center',
+                        overflow: 'hidden'
+                      }}
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                    >
+                      {/* Track */}
+                      <div style={{
+                        position: 'absolute',
+                        width: '100%',
+                        height: '100%',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        padding: '0 15px',
+                        boxSizing: 'border-box'
+                      }}>
+                        <span style={{
+                          color: 'white',
+                          fontSize: '1rem',
+                          fontWeight: '700',
+                          fontFamily: 'Helvetica, Arial, sans-serif',
+                          opacity: 0.5
+                        }}>
+                          INDEX
+                        </span>
+                        <span style={{
+                          color: 'white',
+                          fontSize: '1rem',
+                          fontWeight: '700',
+                          fontFamily: 'Helvetica, Arial, sans-serif',
+                          opacity: 1
+                        }}>
+                          GRID
+                        </span>
+                      </div>
+                      
+                      {/* Slider Dot - Hijau cerah lebih besar */}
+                      <motion.div
+                        animate={{ x: 65 }}
+                        transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                        style={{
+                          width: '35px',
+                          height: '35px',
+                          backgroundColor: '#00FF00',
+                          borderRadius: '50%',
+                          position: 'absolute',
+                          left: '7px',
+                          boxShadow: '0 0 15px rgba(0, 255, 0, 0.7)'
+                        }}
+                      />
+                    </motion.button>
+
+                    {/* Label status - lebih besar */}
+                    <div style={{
+                      color: isDarkMode ? 'white' : 'black',
+                      fontSize: '1.1rem',
+                      fontWeight: '600',
+                      fontFamily: 'Helvetica, Arial, sans-serif'
+                    }}>
+                      Grid View
+                    </div>
                   </div>
                 </div>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
 
       {/* Halaman Full MENURU - Overlay Hitam */}
       <AnimatePresence>
