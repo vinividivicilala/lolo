@@ -41,6 +41,34 @@ export default function HomePage(): React.JSX.Element {
     { id: 3, src: "images/5.jpg", alt: "Photo 3" }
   ];
 
+  // Data untuk card di area progress bar
+  const progressCards = [
+    {
+      id: 1,
+      title: "Visual Archive",
+      description: "Koleksi visual perjalanan personal",
+      icon: "🖼️"
+    },
+    {
+      id: 2,
+      title: "Growth Tracker",
+      description: "Pantau perkembangan dari waktu ke waktu",
+      icon: "📈"
+    },
+    {
+      id: 3,
+      title: "Memory Lane",
+      description: "Kenangan yang membentuk identitas",
+      icon: "🧠"
+    },
+    {
+      id: 4,
+      title: "Emotion Map",
+      description: "Peta perasaan dan refleksi",
+      icon: "🗺️"
+    }
+  ];
+
   useEffect(() => {
     // Cek apakah user sudah menyetujui cookies
     const cookieAccepted = localStorage.getItem('cookiesAccepted');
@@ -1194,6 +1222,140 @@ export default function HomePage(): React.JSX.Element {
                     fontFamily: 'Helvetica, Arial, sans-serif'
                   }}>
                     {sliderPosition === "index" ? "Index View" : "Grid View"}
+                  </div>
+                </div>
+              </div>
+
+              {/* CARD BARU DI AREA PROGRESS BAR - Dari ujung kiri ke kanan layar */}
+              <div style={{
+                width: '100%',
+                padding: isMobile ? '0' : '0',
+                marginTop: isMobile ? '3rem' : '4rem',
+                marginBottom: isMobile ? '3rem' : '4rem',
+                boxSizing: 'border-box'
+              }}>
+                {/* Card Container - MENTOK KE UJUNG LAYAR */}
+                <div
+                  style={{
+                    width: '100%',
+                    backgroundColor: '#0050B7',
+                    borderRadius: isMobile ? '0' : '0', // Tidak ada border radius biar mentok
+                    boxShadow: '0 20px 50px rgba(0,0,0,0.3)',
+                    position: 'relative',
+                    overflow: 'hidden',
+                    border: 'none',
+                    padding: isMobile ? '2rem 1rem' : '4rem 2rem',
+                    boxSizing: 'border-box',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}
+                >
+                  {/* Judul Card */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6 }}
+                    style={{
+                      textAlign: 'center',
+                      marginBottom: isMobile ? '2rem' : '3rem'
+                    }}
+                  >
+                    <h2 style={{
+                      color: 'white',
+                      fontSize: isMobile ? '2rem' : '3.5rem',
+                      fontWeight: '700',
+                      fontFamily: 'Helvetica, Arial, sans-serif',
+                      margin: 0,
+                      marginBottom: '1rem',
+                      letterSpacing: '1px'
+                    }}>
+                      Progress Insights
+                    </h2>
+                    <p style={{
+                      color: 'rgba(255,255,255,0.9)',
+                      fontSize: isMobile ? '1rem' : '1.5rem',
+                      fontWeight: '300',
+                      fontFamily: 'Helvetica, Arial, sans-serif',
+                      margin: 0,
+                      maxWidth: '800px',
+                      lineHeight: 1.5
+                    }}>
+                      Track your personal journey through visual metrics and emotional mapping
+                    </p>
+                  </motion.div>
+
+                  {/* Container untuk 4 Card - GRID 4 KOLOM */}
+                  <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: isMobile ? '1fr' : 'repeat(4, 1fr)',
+                    gap: isMobile ? '1.5rem' : '2rem',
+                    width: '100%',
+                    maxWidth: '1400px',
+                    margin: '0 auto'
+                  }}>
+                    {progressCards.map((card, index) => (
+                      <motion.div
+                        key={card.id}
+                        initial={{ opacity: 0, y: 30 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.5, delay: index * 0.1 }}
+                        onMouseEnter={() => handleLinkHover("link", "VIEW", `card-${card.id}`)}
+                        onMouseLeave={handleLinkLeave}
+                        style={{
+                          backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                          backdropFilter: 'blur(10px)',
+                          borderRadius: '20px',
+                          padding: isMobile ? '1.5rem' : '2rem',
+                          border: '1px solid rgba(255, 255, 255, 0.2)',
+                          cursor: 'none',
+                          transition: 'all 0.3s ease',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'flex-start',
+                          gap: '1rem'
+                        }}
+                        whileHover={{ 
+                          backgroundColor: 'rgba(255, 255, 255, 0.15)',
+                          transform: 'translateY(-5px)',
+                          border: '1px solid rgba(255, 255, 255, 0.3)',
+                          boxShadow: '0 10px 30px rgba(0,0,0,0.2)'
+                        }}
+                      >
+                        {/* Icon */}
+                        <div style={{
+                          fontSize: isMobile ? '2.5rem' : '3rem',
+                          marginBottom: '0.5rem'
+                        }}>
+                          {card.icon}
+                        </div>
+                        
+                        {/* Title */}
+                        <h3 style={{
+                          color: 'white',
+                          fontSize: isMobile ? '1.3rem' : '1.6rem',
+                          fontWeight: '600',
+                          fontFamily: 'Helvetica, Arial, sans-serif',
+                          margin: 0,
+                          lineHeight: 1.2
+                        }}>
+                          {card.title}
+                        </h3>
+                        
+                        {/* Description */}
+                        <p style={{
+                          color: 'rgba(255,255,255,0.8)',
+                          fontSize: isMobile ? '0.9rem' : '1rem',
+                          fontWeight: '300',
+                          fontFamily: 'Helvetica, Arial, sans-serif',
+                          margin: 0,
+                          lineHeight: 1.5
+                        }}>
+                          {card.description}
+                        </p>
+                      </motion.div>
+                    ))}
                   </div>
                 </div>
               </div>
