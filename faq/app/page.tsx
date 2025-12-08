@@ -20,15 +20,12 @@ export default function HomePage(): React.JSX.Element {
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
   const [isProgressActive, setIsProgressActive] = useState(true);
   const [showCookieNotification, setShowCookieNotification] = useState(false);
-  const [showMenuruPage, setShowMenuruPage] = useState(false);
   const headerRef = useRef<HTMLDivElement>(null);
   const cursorRef = useRef<HTMLDivElement>(null);
   const topNavRef = useRef<HTMLDivElement>(null);
   const scrollTextRef = useRef<HTMLDivElement>(null);
   const topicContainerRef = useRef<HTMLDivElement>(null);
   const progressAnimationRef = useRef<gsap.core.Tween | null>(null);
-  const twoPhotosRef = useRef<HTMLDivElement>(null);
-  const fourPhotosRef = useRef<HTMLDivElement>(null);
 
   // Animasi loading text
   const loadingTexts = [
@@ -138,42 +135,6 @@ export default function HomePage(): React.JSX.Element {
       }
     };
   }, [isMobile]);
-
-  // Detect scroll position to change URL in address bar
-  useEffect(() => {
-    const handleScroll = () => {
-      if (twoPhotosRef.current && fourPhotosRef.current) {
-        const twoPhotosRect = twoPhotosRef.current.getBoundingClientRect();
-        const fourPhotosRect = fourPhotosRef.current.getBoundingClientRect();
-        
-        // Cek jika posisi 2 foto dan 4 foto ada di viewport
-        const isTwoPhotosInView = 
-          twoPhotosRect.top < window.innerHeight * 0.8 && 
-          twoPhotosRect.bottom > 0;
-        
-        const isFourPhotosInView = 
-          fourPhotosRect.top < window.innerHeight * 0.8 && 
-          fourPhotosRect.bottom > 0;
-        
-        // Jika 2 foto dan 4 foto sedang terlihat di viewport
-        if (isTwoPhotosInView && isFourPhotosInView) {
-          // Ubah URL di address bar menjadi /menuru tanpa reload
-          window.history.replaceState(null, '', '/menuru');
-        } else {
-          // Kembalikan ke URL utama
-          window.history.replaceState(null, '', '/');
-        }
-      }
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    // Check initial position
-    setTimeout(handleScroll, 100);
-    
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-    };
-  }, []);
 
   // Fungsi untuk handle cookie acceptance
   const handleAcceptCookies = () => {
@@ -286,20 +247,6 @@ export default function HomePage(): React.JSX.Element {
       setSliderPosition("index");
       setCurrentView("index");
     }
-  };
-
-  // Fungsi untuk membuka halaman Menuru
-  const openMenuruPage = () => {
-    setShowMenuruPage(true);
-    // Ubah URL menjadi /menuru
-    window.history.pushState(null, '', '/menuru');
-  };
-
-  // Fungsi untuk menutup halaman Menuru
-  const closeMenuruPage = () => {
-    setShowMenuruPage(false);
-    // Kembalikan URL ke /
-    window.history.pushState(null, '', '/');
   };
 
   // Warna cursor
@@ -882,94 +829,9 @@ export default function HomePage(): React.JSX.Element {
         zIndex: 10,
         position: 'relative'
       }}>
-        {/* Halaman Menuru (Fullscreen Black) */}
-        <AnimatePresence>
-          {showMenuruPage && (
-            <motion.div
-              key="menuru-page"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.5 }}
-              style={{
-                position: 'fixed',
-                top: 0,
-                left: 0,
-                width: '100%',
-                height: '100%',
-                backgroundColor: 'black',
-                zIndex: 1000,
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}
-            >
-              {/* Tombol Close */}
-              <motion.button
-                onClick={closeMenuruPage}
-                onMouseEnter={() => handleLinkHover("link", "CLOSE", "close-menuru")}
-                onMouseLeave={handleLinkLeave}
-                style={{
-                  position: 'absolute',
-                  top: isMobile ? '1rem' : '2rem',
-                  right: isMobile ? '1rem' : '2rem',
-                  padding: '1rem',
-                  backgroundColor: 'rgba(255,255,255,0.1)',
-                  border: '1px solid rgba(255,255,255,0.2)',
-                  borderRadius: '50%',
-                  cursor: 'none',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  zIndex: 1001
-                }}
-                whileHover={{ 
-                  backgroundColor: 'rgba(255,255,255,0.2)',
-                  scale: 1.1
-                }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <svg 
-                  width="24" 
-                  height="24" 
-                  viewBox="0 0 24 24" 
-                  fill="none" 
-                  stroke="white"
-                  strokeWidth="2"
-                >
-                  <line x1="18" y1="6" x2="6" y2="18"/>
-                  <line x1="6" y1="6" x2="18" y2="18"/>
-                </svg>
-              </motion.button>
-
-              {/* Konten Kosong - Hanya Hitam */}
-              <div style={{
-                textAlign: 'center',
-                color: 'white',
-                opacity: 0.5
-              }}>
-                <div style={{
-                  fontSize: isMobile ? '3rem' : '5rem',
-                  fontWeight: '300',
-                  marginBottom: '1rem'
-                }}>
-                  MENURU
-                </div>
-                <div style={{
-                  fontSize: isMobile ? '1rem' : '1.2rem',
-                  fontWeight: '300'
-                }}>
-                  Page content coming soon...
-                </div>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
         {/* AnimatePresence untuk transisi antara view */}
         <AnimatePresence mode="wait">
-          {currentView === "main" && !showMenuruPage && (
+          {currentView === "main" && (
             <motion.div
               key="main-view"
               initial={{ opacity: 0 }}
@@ -999,18 +861,15 @@ export default function HomePage(): React.JSX.Element {
                 </p>
 
                 {/* Container untuk 2 foto - LEBIH MENTOK KE LAYAR */}
-                <div 
-                  ref={twoPhotosRef}
-                  style={{
-                    display: 'flex',
-                    flexDirection: isMobile ? 'column' : 'row',
-                    gap: isMobile ? '1rem' : '0.3rem',
-                    width: 'calc(100% - 2rem)',
-                    marginLeft: isMobile ? '0.5rem' : '1rem',
-                    marginRight: isMobile ? '0.5rem' : '1rem',
-                    marginTop: '1rem'
-                  }}
-                >
+                <div style={{
+                  display: 'flex',
+                  flexDirection: isMobile ? 'column' : 'row',
+                  gap: isMobile ? '1rem' : '0.3rem',
+                  width: 'calc(100% - 2rem)',
+                  marginLeft: isMobile ? '0.5rem' : '1rem',
+                  marginRight: isMobile ? '0.5rem' : '1rem',
+                  marginTop: '1rem'
+                }}>
                   {/* Foto 1 - Sisi kiri, SANGAT PANJANG */}
                   <div style={{
                     flex: 1,
@@ -1084,7 +943,6 @@ export default function HomePage(): React.JSX.Element {
 
                 {/* Card #0050B7 dengan 4 foto images/5.jpg - FOTO LEBIH LEBAR KE SAMPING */}
                 <div
-                  ref={fourPhotosRef}
                   style={{
                     width: 'calc(100% - 4rem)',
                     marginLeft: isMobile ? '1rem' : '2rem',
@@ -1244,64 +1102,6 @@ export default function HomePage(): React.JSX.Element {
                       />
                     </div>
                   </div>
-                </div>
-
-                {/* Link Menuru dengan panah - Design minimalis */}
-                <div style={{
-                  width: 'calc(100% - 4rem)',
-                  marginLeft: isMobile ? '1rem' : '2rem',
-                  marginRight: isMobile ? '1rem' : '2rem',
-                  marginTop: isMobile ? '2rem' : '3rem',
-                  marginBottom: isMobile ? '2rem' : '3rem'
-                }}>
-                  <motion.div
-                    onClick={openMenuruPage}
-                    onMouseEnter={() => handleLinkHover("link", "VIEW", "menuru-link")}
-                    onMouseLeave={handleLinkLeave}
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: isMobile ? '0.8rem' : '1.2rem',
-                      cursor: 'none',
-                      padding: isMobile ? '0.8rem 0' : '1rem 0',
-                      borderBottom: `2px solid ${isDarkMode ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.3)'}`,
-                      transition: 'all 0.3s ease'
-                    }}
-                    whileHover={{ 
-                      gap: isMobile ? '1.2rem' : '1.8rem',
-                      borderBottom: `2px solid ${isDarkMode ? '#EC4899' : '#0050B7'}`
-                    }}
-                  >
-                    {/* Teks Menuru */}
-                    <span style={{
-                      fontSize: isMobile ? '1.8rem' : '2.5rem',
-                      fontWeight: '600',
-                      fontFamily: 'Helvetica, Arial, sans-serif',
-                      color: isDarkMode ? 'white' : 'black',
-                      textTransform: 'uppercase',
-                      letterSpacing: '1px'
-                    }}>
-                      Menuru
-                    </span>
-
-                    {/* Panah SVG lurus serong kanan */}
-                    <svg 
-                      width={isMobile ? "24" : "32"} 
-                      height={isMobile ? "24" : "32"} 
-                      viewBox="0 0 24 24" 
-                      fill="none" 
-                      stroke={isDarkMode ? 'white' : 'black'}
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      style={{
-                        transition: 'all 0.3s ease'
-                      }}
-                    >
-                      <line x1="5" y1="12" x2="19" y2="12"/>
-                      <polyline points="12 5 19 12 12 19"/>
-                    </svg>
-                  </motion.div>
                 </div>
               </div>
 
@@ -1584,7 +1384,7 @@ export default function HomePage(): React.JSX.Element {
           )}
 
           {/* Halaman Index */}
-          {currentView === "index" && !showMenuruPage && (
+          {currentView === "index" && (
             <motion.div
               key="index-view"
               initial={{ opacity: 0 }}
@@ -1915,7 +1715,7 @@ export default function HomePage(): React.JSX.Element {
           )}
 
           {/* Halaman Grid (placeholder) */}
-          {currentView === "grid" && !showMenuruPage && (
+          {currentView === "grid" && (
             <motion.div
               key="grid-view"
               initial={{ opacity: 0 }}
