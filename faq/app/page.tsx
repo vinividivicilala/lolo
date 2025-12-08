@@ -1139,7 +1139,8 @@ export default function HomePage(): React.JSX.Element {
                   marginTop: isMobile ? '2rem' : '3rem',
                   paddingRight: isMobile ? '1rem' : '2rem',
                   position: 'relative',
-                  zIndex: 20
+                  zIndex: 100,
+                  marginBottom: isMobile ? '2rem' : '3rem'
                 }}>
                   <motion.div
                     onClick={handleMenuruClick}
@@ -1150,27 +1151,28 @@ export default function HomePage(): React.JSX.Element {
                       alignItems: 'center',
                       gap: '1rem',
                       cursor: 'none',
-                      padding: '1rem 2rem',
-                      backgroundColor: isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
+                      padding: isMobile ? '0.8rem 1.5rem' : '1.2rem 2.5rem',
+                      backgroundColor: isDarkMode ? 'rgba(255,255,255,0.25)' : 'rgba(0,0,0,0.25)',
                       borderRadius: '50px',
-                      border: `1px solid ${isDarkMode ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)'}`,
+                      border: `1px solid ${isDarkMode ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.3)'}`,
                       backdropFilter: 'blur(10px)',
-                      transition: 'all 0.3s ease'
+                      transition: 'all 0.3s ease',
+                      boxShadow: '0 4px 20px rgba(0,0,0,0.2)'
                     }}
                     whileHover={{ 
-                      backgroundColor: isDarkMode ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)',
+                      backgroundColor: isDarkMode ? 'rgba(255,255,255,0.35)' : 'rgba(0,0,0,0.35)',
                       scale: 1.05,
-                      borderColor: isDarkMode ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.3)'
+                      borderColor: isDarkMode ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.5)'
                     }}
                     whileTap={{ scale: 0.95 }}
                   >
                     <span style={{
                       color: isDarkMode ? 'white' : 'black',
-                      fontSize: isMobile ? '1.5rem' : '2rem',
+                      fontSize: isMobile ? '1.3rem' : '2.2rem',
                       fontWeight: '300',
                       fontFamily: 'Helvetica, Arial, sans-serif',
                       textTransform: 'uppercase',
-                      letterSpacing: '1px'
+                      letterSpacing: '2px'
                     }}>
                       menuru
                     </span>
@@ -1182,14 +1184,15 @@ export default function HomePage(): React.JSX.Element {
                       transition={{ duration: 0.3 }}
                       style={{
                         color: isDarkMode ? 'white' : 'black',
-                        fontSize: isMobile ? '2rem' : '2.5rem',
+                        fontSize: isMobile ? '1.8rem' : '3rem',
                         fontWeight: '300',
                         lineHeight: 1,
-                        width: isMobile ? '30px' : '40px',
-                        height: isMobile ? '30px' : '40px',
+                        width: isMobile ? '25px' : '40px',
+                        height: isMobile ? '25px' : '40px',
                         display: 'flex',
                         alignItems: 'center',
-                        justifyContent: 'center'
+                        justifyContent: 'center',
+                        marginLeft: '0.5rem'
                       }}
                     >
                       {showMenuruFull ? '−' : '+'}
