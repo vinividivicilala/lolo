@@ -11,9 +11,6 @@ export default function HomePage(): React.JSX.Element {
   const [loadingText, setLoadingText] = useState("NURU");
   const [isLoading, setIsLoading] = useState(true);
   const [isDarkMode, setIsDarkMode] = useState(true);
-  const [cursorType, setCursorType] = useState("default");
-  const [cursorText, setCursorText] = useState("");
-  const [hoveredLink, setHoveredLink] = useState("");
   const [currentView, setCurrentView] = useState<"main" | "index" | "grid">("main");
   const [sliderPosition, setSliderPosition] = useState<"index" | "grid">("grid");
   const [hoveredTopic, setHoveredTopic] = useState<number | null>(null);
@@ -23,7 +20,6 @@ export default function HomePage(): React.JSX.Element {
   const [showMenuruFullPage, setShowMenuruFullPage] = useState(false); // State untuk halaman full page
   const [menuruExpanded, setMenuruExpanded] = useState(false); // State untuk animasi plus/minus
   const headerRef = useRef<HTMLDivElement>(null);
-  const cursorRef = useRef<HTMLDivElement>(null);
   const topNavRef = useRef<HTMLDivElement>(null);
   const scrollTextRef = useRef<HTMLDivElement>(null);
   const topicContainerRef = useRef<HTMLDivElement>(null);
@@ -32,7 +28,6 @@ export default function HomePage(): React.JSX.Element {
   const menuruMinusRef = useRef<HTMLDivElement>(null);
   const plusSignRef = useRef<HTMLDivElement>(null);
   const minusSignRef = useRef<HTMLDivElement>(null);
-  const menuruTextRef = useRef<HTMLDivElement>(null);
 
   // Animasi loading text
   const loadingTexts = [
@@ -102,20 +97,6 @@ export default function HomePage(): React.JSX.Element {
     setTimeout(setupAutoScroll, 100);
     window.addEventListener('resize', setupAutoScroll);
 
-    // Custom cursor animation
-    const moveCursor = (e: MouseEvent) => {
-      if (cursorRef.current) {
-        gsap.to(cursorRef.current, {
-          x: e.clientX,
-          y: e.clientY,
-          duration: 0.1,
-          ease: "power2.out"
-        });
-      }
-    };
-
-    document.addEventListener('mousemove', moveCursor);
-
     // Keyboard navigation
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'ArrowLeft') {
@@ -136,7 +117,6 @@ export default function HomePage(): React.JSX.Element {
       window.removeEventListener('resize', setupAutoScroll);
       clearInterval(textInterval);
       clearTimeout(loadingTimeout);
-      document.removeEventListener('mousemove', moveCursor);
       document.removeEventListener('keydown', handleKeyDown);
       if (scrollTextRef.current) {
         gsap.killTweensOf(scrollTextRef.current);
@@ -150,9 +130,6 @@ export default function HomePage(): React.JSX.Element {
       }
       if (minusSignRef.current) {
         gsap.killTweensOf(minusSignRef.current);
-      }
-      if (menuruTextRef.current) {
-        gsap.killTweensOf(menuruTextRef.current);
       }
     };
   }, [isMobile, showMenuruFullPage]);
@@ -171,24 +148,13 @@ export default function HomePage(): React.JSX.Element {
     }
 
     if (minusSignRef.current && showMenuruFullPage) {
-      // Animasi subtle pulse untuk tanda -
+      // Animasi subtle pulse untuk tanda \
       gsap.to(minusSignRef.current, {
         scale: 1.05,
         duration: 1.5,
         repeat: -1,
         yoyo: true,
         ease: "power1.inOut"
-      });
-    }
-
-    // Animasi teks MENURU di halaman full page
-    if (menuruTextRef.current && showMenuruFullPage) {
-      gsap.to(menuruTextRef.current, {
-        scale: 1.02,
-        duration: 2,
-        repeat: -1,
-        yoyo: true,
-        ease: "sine.inOut"
       });
     }
   }, [showMenuruFullPage]);
@@ -277,19 +243,6 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // Handler untuk cursor hover
-  const handleLinkHover = (type: string, text: string = "", linkName: string = "") => {
-    setCursorType(type);
-    setCursorText(text);
-    setHoveredLink(linkName);
-  };
-
-  const handleLinkLeave = () => {
-    setCursorType("default");
-    setCursorText("");
-    setHoveredLink("");
-  };
-
   // Handler untuk topic hover
   const handleTopicHover = (topicId: number | null) => {
     setHoveredTopic(topicId);
@@ -328,7 +281,7 @@ export default function HomePage(): React.JSX.Element {
 
   // Fungsi untuk menutup halaman full page MENURU dengan animasi
   const handleCloseMenuruFullPage = () => {
-    // Animasi untuk tanda - sebelum menutup
+    // Animasi untuk tanda \ sebelum menutup
     if (minusSignRef.current) {
       gsap.to(minusSignRef.current, {
         rotation: 0,
@@ -373,23 +326,6 @@ export default function HomePage(): React.JSX.Element {
       });
     }
   };
-
-  // Warna cursor
-  const getCursorColors = () => {
-    if (cursorType === "link") {
-      return {
-        dotColor: '#6366F1',
-        textColor: 'white'
-      };
-    }
-    
-    return {
-      dotColor: '#EC4899',
-      textColor: 'white'
-    };
-  };
-
-  const cursorColors = getCursorColors();
 
   // Data untuk halaman Index
   const indexTopics = [
@@ -458,66 +394,8 @@ export default function HomePage(): React.JSX.Element {
       fontFamily: 'Helvetica, Arial, sans-serif',
       WebkitFontSmoothing: 'antialiased',
       MozOsxFontSmoothing: 'grayscale',
-      transition: 'background-color 0.5s ease',
-      cursor: 'none'
+      transition: 'background-color 0.5s ease'
     }}>
-
-      {/* Custom Cursor */}
-      <div
-        ref={cursorRef}
-        style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          width: cursorType === "link" ? '140px' : '20px',
-          height: cursorType === "link" ? '60px' : '20px',
-          backgroundColor: cursorColors.dotColor,
-          borderRadius: cursorType === "link" ? '30px' : '50%',
-          pointerEvents: 'none',
-          zIndex: 9999,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          fontSize: '14px',
-          fontWeight: '700',
-          color: cursorColors.textColor,
-          textAlign: 'center',
-          transition: 'all 0.2s ease',
-          transform: 'translate(-50%, -50%)',
-          padding: cursorType === "link" ? '0 20px' : '0',
-          boxShadow: '0 2px 10px rgba(0,0,0,0.3)',
-          border: 'none'
-        }}
-      >
-        {cursorType === "link" && (
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px'
-          }}>
-            <span style={{ 
-              fontSize: '14px', 
-              fontWeight: '700',
-              letterSpacing: '0.5px',
-              whiteSpace: 'nowrap'
-            }}>
-              {cursorText}
-            </span>
-            <svg 
-              width="20" 
-              height="20" 
-              viewBox="0 0 24 24" 
-              fill="none" 
-              stroke={cursorColors.textColor}
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M7 17L17 7M17 7H7M17 7V17"/>
-            </svg>
-          </div>
-        )}
-      </div>
 
       {/* Halaman Full Page MENURU */}
       <AnimatePresence>
@@ -539,11 +417,10 @@ export default function HomePage(): React.JSX.Element {
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              justifyContent: 'center',
-              cursor: 'none'
+              justifyContent: 'center'
             }}
           >
-            {/* Header dengan teks MENURU dan tanda \ di sebelah kanan (sejajar) */}
+            {/* Header dengan teks MENURU dan tanda \ di sebelah kanan */}
             <div style={{
               position: 'absolute',
               top: isMobile ? '1.5rem' : '2rem',
@@ -557,7 +434,6 @@ export default function HomePage(): React.JSX.Element {
             }}>
               {/* Teks MENURU di kiri */}
               <motion.div
-                ref={menuruTextRef}
                 initial={{ x: -50, opacity: 0 }}
                 animate={{ x: 0, opacity: 1 }}
                 transition={{ duration: 0.6, delay: 0.1 }}
@@ -567,7 +443,8 @@ export default function HomePage(): React.JSX.Element {
                   fontWeight: '300',
                   fontFamily: 'Helvetica, Arial, sans-serif',
                   textTransform: 'uppercase',
-                  letterSpacing: '2px'
+                  letterSpacing: '2px',
+                  marginRight: '2rem' // Memberi jarak dari tanda \
                 }}
               >
                 MENURU
@@ -576,58 +453,36 @@ export default function HomePage(): React.JSX.Element {
               {/* Tanda \ (backslash) di kanan dengan animasi GSAP */}
               <motion.div
                 ref={minusSignRef}
-                initial={{ x: 50, opacity: 0, rotation: -45 }}
-                animate={{ x: 0, opacity: 1, rotation: 0 }}
+                initial={{ x: 50, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
                 transition={{ duration: 0.6, delay: 0.2 }}
                 onClick={handleCloseMenuruFullPage}
-                onMouseEnter={() => handleLinkHover("link", "CLOSE", "menuru-close")}
-                onMouseLeave={handleLinkLeave}
                 style={{
-                  width: isMobile ? '50px' : '60px',
-                  height: isMobile ? '50px' : '60px',
+                  width: isMobile ? '40px' : '50px',
+                  height: isMobile ? '40px' : '50px',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  cursor: 'none',
-                  position: 'relative'
+                  cursor: 'pointer',
+                  position: 'relative',
+                  marginLeft: 'auto' // Posisikan ke kanan
                 }}
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.95 }}
               >
-                {/* Garis diagonal (tanda \) dengan efek glow */}
+                {/* Garis diagonal (tanda \) */}
                 <div style={{
                   position: 'absolute',
-                  width: isMobile ? '30px' : '40px',
+                  width: isMobile ? '25px' : '30px',
                   height: '3px',
                   backgroundColor: 'white',
                   borderRadius: '2px',
-                  transform: 'rotate(45deg)',
-                  boxShadow: '0 0 10px rgba(255, 255, 255, 0.7), 0 0 20px rgba(255, 255, 255, 0.5)'
+                  transform: 'rotate(45deg)'
                 }} />
               </motion.div>
             </div>
 
-            {/* Teks MENURU besar di tengah */}
-            <motion.div
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.8, opacity: 0 }}
-              transition={{ duration: 0.7, delay: 0.3, type: "spring", stiffness: 100, damping: 15 }}
-              style={{
-                color: 'white',
-                fontSize: isMobile ? '5rem' : '10rem',
-                fontWeight: '700',
-                fontFamily: 'Helvetica, Arial, sans-serif',
-                textAlign: 'center',
-                letterSpacing: '10px',
-                textTransform: 'uppercase',
-                lineHeight: 1,
-                padding: '0 2rem',
-                textShadow: '0 0 30px rgba(255, 255, 255, 0.3)'
-              }}
-            >
-              MENURU
-            </motion.div>
+            {/* Hapus teks MENURU besar di tengah */}
           </motion.div>
         )}
       </AnimatePresence>
@@ -663,13 +518,11 @@ export default function HomePage(): React.JSX.Element {
           {/* Docs */}
           <motion.div
             onClick={() => router.push('/docs')}
-            onMouseEnter={() => handleLinkHover("link", "VIEW", "docs")}
-            onMouseLeave={handleLinkLeave}
             style={{
               display: 'flex',
               alignItems: 'center',
               gap: '0.5rem',
-              cursor: 'none',
+              cursor: 'pointer',
               padding: '0.4rem 0.8rem',
               borderRadius: '25px',
               backgroundColor: isDarkMode ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.95)',
@@ -721,13 +574,11 @@ export default function HomePage(): React.JSX.Element {
           {/* Chatbot */}
           <motion.div
             onClick={() => router.push('/chatbot')}
-            onMouseEnter={() => handleLinkHover("link", "VIEW", "chatbot")}
-            onMouseLeave={handleLinkLeave}
             style={{
               display: 'flex',
               alignItems: 'center',
               gap: '0.5rem',
-              cursor: 'none',
+              cursor: 'pointer',
               padding: '0.4rem 0.8rem',
               borderRadius: '25px',
               backgroundColor: isDarkMode ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.95)',
@@ -777,13 +628,11 @@ export default function HomePage(): React.JSX.Element {
           {/* Update */}
           <motion.div
             onClick={() => router.push('/update')}
-            onMouseEnter={() => handleLinkHover("link", "VIEW", "update")}
-            onMouseLeave={handleLinkLeave}
             style={{
               display: 'flex',
               alignItems: 'center',
               gap: '0.5rem',
-              cursor: 'none',
+              cursor: 'pointer',
               padding: '0.4rem 0.8rem',
               borderRadius: '25px',
               backgroundColor: isDarkMode ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.95)',
@@ -835,13 +684,11 @@ export default function HomePage(): React.JSX.Element {
           {/* Timeline */}
           <motion.div
             onClick={() => router.push('/timeline')}
-            onMouseEnter={() => handleLinkHover("link", "VIEW", "timeline")}
-            onMouseLeave={handleLinkLeave}
             style={{
               display: 'flex',
               alignItems: 'center',
               gap: '0.5rem',
-              cursor: 'none',
+              cursor: 'pointer',
               padding: '0.4rem 0.8rem',
               borderRadius: '25px',
               backgroundColor: isDarkMode ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.95)',
@@ -966,8 +813,6 @@ export default function HomePage(): React.JSX.Element {
           {/* Color Mode Toggle Button */}
           <motion.button
             onClick={toggleColorMode}
-            onMouseEnter={() => handleLinkHover("link", "VIEW", "theme")}
-            onMouseLeave={handleLinkLeave}
             style={{
               padding: isMobile ? '0.4rem 0.8rem' : '0.6rem 1rem',
               fontSize: isMobile ? '0.8rem' : '1rem',
@@ -976,7 +821,7 @@ export default function HomePage(): React.JSX.Element {
               backgroundColor: 'transparent',
               border: `1px solid ${isDarkMode ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.3)'}`,
               borderRadius: '50px',
-              cursor: 'none',
+              cursor: 'pointer',
               fontFamily: 'Helvetica, Arial, sans-serif',
               backdropFilter: 'blur(10px)',
               whiteSpace: 'nowrap',
@@ -1010,8 +855,6 @@ export default function HomePage(): React.JSX.Element {
           {/* Sign In Button */}
           <motion.button
             onClick={() => router.push('/signin')}
-            onMouseEnter={() => handleLinkHover("link", "VIEW", "signin")}
-            onMouseLeave={handleLinkLeave}
             style={{
               padding: isMobile ? '0.4rem 1rem' : '0.6rem 1.5rem',
               fontSize: isMobile ? '0.9rem' : '1.5rem',
@@ -1020,7 +863,7 @@ export default function HomePage(): React.JSX.Element {
               backgroundColor: 'transparent',
               border: `1px solid ${isDarkMode ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.3)'}`,
               borderRadius: '50px',
-              cursor: 'none',
+              cursor: 'pointer',
               fontFamily: 'Helvetica, Arial, sans-serif',
               backdropFilter: 'blur(10px)',
               whiteSpace: 'nowrap',
@@ -1364,15 +1207,13 @@ export default function HomePage(): React.JSX.Element {
                     {/* Tombol Slider - lebih besar */}
                     <motion.button
                       onClick={toggleSlider}
-                      onMouseEnter={() => handleLinkHover("link", sliderPosition === "index" ? "TO GRID" : "TO INDEX", "slider")}
-                      onMouseLeave={handleLinkLeave}
                       style={{
                         width: '120px',
                         height: '50px',
                         backgroundColor: '#0050B7',
                         border: 'none',
                         borderRadius: '25px',
-                        cursor: 'none',
+                        cursor: 'pointer',
                         padding: 0,
                         position: 'relative',
                         display: 'flex',
@@ -1444,16 +1285,14 @@ export default function HomePage(): React.JSX.Element {
                   <motion.div
                     ref={menuruButtonRef}
                     onClick={handleMenuruClick}
-                    onMouseEnter={() => handleLinkHover("link", showMenuruFullPage ? "CLOSE" : "OPEN", "menuru-toggle")}
-                    onMouseLeave={handleLinkLeave}
                     style={{
                       display: 'flex',
                       alignItems: 'center',
-                      gap: '1rem',
-                      cursor: 'none',
+                      gap: '0.5rem', // Jarak lebih dekat antara teks dan tanda +
+                      cursor: 'pointer',
                       marginTop: isMobile ? '1rem' : '0'
                     }}
-                    whileHover={{ x: 10 }}
+                    whileHover={{ x: 5 }}
                     whileTap={{ scale: 0.95 }}
                   >
                     <div style={{
@@ -1472,8 +1311,8 @@ export default function HomePage(): React.JSX.Element {
                       ref={plusSignRef}
                       className="plus-sign" 
                       style={{
-                        width: isMobile ? '40px' : '45px',
-                        height: isMobile ? '40px' : '45px',
+                        width: isMobile ? '35px' : '40px',
+                        height: isMobile ? '35px' : '40px',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
@@ -1483,20 +1322,18 @@ export default function HomePage(): React.JSX.Element {
                       {/* Garis vertikal */}
                       <div style={{
                         position: 'absolute',
-                        width: '3px',
-                        height: isMobile ? '20px' : '22px',
+                        width: '2px',
+                        height: isMobile ? '18px' : '20px',
                         backgroundColor: isDarkMode ? 'white' : 'black',
-                        borderRadius: '2px',
-                        boxShadow: '0 0 8px rgba(255, 255, 255, 0.6)'
+                        borderRadius: '1px'
                       }} />
                       {/* Garis horizontal */}
                       <div style={{
                         position: 'absolute',
-                        width: isMobile ? '20px' : '22px',
-                        height: '3px',
+                        width: isMobile ? '18px' : '20px',
+                        height: '2px',
                         backgroundColor: isDarkMode ? 'white' : 'black',
-                        borderRadius: '2px',
-                        boxShadow: '0 0 8px rgba(255, 255, 255, 0.6)'
+                        borderRadius: '1px'
                       }} />
                     </div>
                   </motion.div>
@@ -1568,11 +1405,9 @@ export default function HomePage(): React.JSX.Element {
                         overflow: 'hidden',
                         boxShadow: '0 8px 25px rgba(0,0,0,0.4)',
                         border: `2px solid ${isDarkMode ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.15)'}`,
-                        cursor: 'none',
+                        cursor: 'pointer',
                         margin: '0 auto'
                       }}
-                      onMouseEnter={() => handleLinkHover("link", "CLICK LEFT/RIGHT", "photo-nav")}
-                      onMouseLeave={handleLinkLeave}
                       whileHover={{ scale: 1.01 }}
                     >
                       {/* Foto Aktif */}
@@ -1625,7 +1460,7 @@ export default function HomePage(): React.JSX.Element {
                             flex: 4,
                             backgroundColor: 'transparent',
                             pointerEvents: 'auto',
-                            cursor: 'none'
+                            cursor: 'pointer'
                           }}
                           onClick={(e) => {
                             e.stopPropagation();
@@ -1645,7 +1480,7 @@ export default function HomePage(): React.JSX.Element {
                             flex: 4,
                             backgroundColor: 'transparent',
                             pointerEvents: 'auto',
-                            cursor: 'none'
+                            cursor: 'pointer'
                           }}
                           onClick={(e) => {
                             e.stopPropagation();
@@ -1942,15 +1777,13 @@ export default function HomePage(): React.JSX.Element {
                   {/* Tombol Slider - lebih besar */}
                   <motion.button
                     onClick={toggleSlider}
-                    onMouseEnter={() => handleLinkHover("link", sliderPosition === "index" ? "TO GRID" : "TO INDEX", "slider")}
-                    onMouseLeave={handleLinkLeave}
                     style={{
                       width: '120px',
                       height: '50px',
                       backgroundColor: '#0050B7',
                       border: 'none',
                       borderRadius: '25px',
-                      cursor: 'none',
+                      cursor: 'pointer',
                       padding: 0,
                       position: 'relative',
                       display: 'flex',
@@ -2063,15 +1896,13 @@ export default function HomePage(): React.JSX.Element {
                   {/* Tombol Slider - lebih besar */}
                   <motion.button
                     onClick={toggleSlider}
-                    onMouseEnter={() => handleLinkHover("link", sliderPosition === "index" ? "TO GRID" : "TO INDEX", "slider")}
-                    onMouseLeave={handleLinkLeave}
                     style={{
                       width: '120px',
                       height: '50px',
                       backgroundColor: '#0050B7',
                       border: 'none',
                       borderRadius: '25px',
-                      cursor: 'none',
+                      cursor: 'pointer',
                       padding: 0,
                       position: 'relative',
                       display: 'flex',
@@ -2224,8 +2055,6 @@ export default function HomePage(): React.JSX.Element {
             {/* Tombol OK - Hitam */}
             <button
               onClick={handleAcceptCookies}
-              onMouseEnter={() => handleLinkHover("link", "OK", "cookies")}
-              onMouseLeave={handleLinkLeave}
               style={{
                 width: isMobile ? '80px' : '100px',
                 backgroundColor: 'black',
@@ -2234,7 +2063,7 @@ export default function HomePage(): React.JSX.Element {
                 fontSize: isMobile ? '0.9rem' : '1rem',
                 fontWeight: '600',
                 fontFamily: 'Helvetica, Arial, sans-serif',
-                cursor: 'none',
+                cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
