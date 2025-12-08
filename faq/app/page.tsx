@@ -100,12 +100,24 @@ export default function HomePage(): React.JSX.Element {
 
     document.addEventListener('mousemove', moveCursor);
 
+    // Keyboard navigation
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowLeft') {
+        prevPhoto();
+      } else if (e.key === 'ArrowRight') {
+        nextPhoto();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+
     return () => {
       window.removeEventListener('resize', checkMobile);
       window.removeEventListener('resize', setupAutoScroll);
       clearInterval(textInterval);
       clearTimeout(loadingTimeout);
       document.removeEventListener('mousemove', moveCursor);
+      document.removeEventListener('keydown', handleKeyDown);
       if (scrollTextRef.current) {
         gsap.killTweensOf(scrollTextRef.current);
       }
@@ -1152,7 +1164,7 @@ export default function HomePage(): React.JSX.Element {
                 </div>
               </div>
 
-              {/* Progress Bar dengan 3 Foto - VERSI BENAR */}
+              {/* Progress Bar dengan 3 Foto - DIPERBAIKI */}
               <div style={{
                 width: '100%',
                 padding: isMobile ? '1rem' : '2rem',
@@ -1163,27 +1175,27 @@ export default function HomePage(): React.JSX.Element {
                 <div style={{
                   display: 'flex',
                   flexDirection: 'column',
-                  gap: isMobile ? '1rem' : '1.5rem',
+                  gap: isMobile ? '1.5rem' : '2rem',
                   alignItems: 'center',
                   maxWidth: '800px',
                   margin: '0 auto'
                 }}>
-                  {/* Container Progress Bar - GEMUK dan LEBAR */}
+                  {/* Container Progress Bar - PANJANG dan GEMUK */}
                   <div style={{
                     width: '100%',
                     display: 'flex',
                     alignItems: 'center',
                     gap: isMobile ? '0.5rem' : '0.8rem',
-                    marginBottom: '0.8rem'
+                    marginBottom: '1rem'
                   }}>
                     {progressPhotos.map((_, index) => (
                       <div 
                         key={index}
                         style={{
                           flex: 1,
-                          height: '8px', // GEMUK
-                          backgroundColor: isDarkMode ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.2)', // BACKGROUND KOSONG TERLIHAT
-                          borderRadius: '4px', // BORDER RADIUS UNTUK GEMUK
+                          height: '12px', // GEMUK
+                          backgroundColor: isDarkMode ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.2)',
+                          borderRadius: '6px',
                           overflow: 'hidden',
                           position: 'relative'
                         }}
@@ -1197,27 +1209,27 @@ export default function HomePage(): React.JSX.Element {
                             left: 0,
                             top: 0,
                             bottom: 0,
-                            backgroundColor: 'white', // WARNA PUTIH
-                            borderRadius: '4px',
-                            width: '0%' // AWAL KOSONG
+                            backgroundColor: 'white',
+                            borderRadius: '6px',
+                            width: index === currentPhotoIndex ? '100%' : (index < currentPhotoIndex ? '100%' : '0%')
                           }}
                         />
                       </div>
                     ))}
                   </div>
 
-                  {/* Foto Portrait - TIDAK TERLALU LEBAR, PANJANG KE BAWAH */}
+                  {/* Foto Portrait - PANJANG KE BAWAH */}
                   <motion.div
                     onClick={handlePhotoClick}
                     style={{
                       position: 'relative',
                       width: '100%',
-                      maxWidth: '600px', // TIDAK TERLALU LEBAR
-                      height: isMobile ? '500px' : '700px', // PANJANG KE BAWAH
-                      borderRadius: '10px',
+                      maxWidth: '600px',
+                      height: isMobile ? '600px' : '900px', // LEBIH PANJANG KE BAWAH
+                      borderRadius: '15px',
                       overflow: 'hidden',
                       boxShadow: '0 8px 25px rgba(0,0,0,0.4)',
-                      border: `1px solid ${isDarkMode ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.15)'}`,
+                      border: `2px solid ${isDarkMode ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.15)'}`,
                       cursor: 'none',
                       margin: '0 auto'
                     }}
@@ -1302,24 +1314,6 @@ export default function HomePage(): React.JSX.Element {
                           nextPhoto();
                         }}
                       />
-                    </div>
-
-                    {/* Indikator posisi sederhana - TANPA ANGKA */}
-                    <div style={{
-                      position: 'absolute',
-                      top: '1rem',
-                      right: '1rem',
-                      backgroundColor: 'rgba(0, 0, 0, 0.6)',
-                      padding: '0.3rem 0.8rem',
-                      borderRadius: '12px',
-                      border: '1px solid rgba(255, 255, 255, 0.2)',
-                      fontSize: '0.8rem',
-                      color: 'white',
-                      fontWeight: '500',
-                      pointerEvents: 'none',
-                      opacity: 0.7
-                    }}>
-                      Click left/right
                     </div>
                   </motion.div>
                 </div>
