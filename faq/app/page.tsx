@@ -20,15 +20,12 @@ export default function HomePage(): React.JSX.Element {
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
   const [isProgressActive, setIsProgressActive] = useState(true);
   const [showCookieNotification, setShowCookieNotification] = useState(false);
-  const [showMenuruPage, setShowMenuruPage] = useState(false);
-  const [menuruIcon, setMenuruIcon] = useState("-");
   const headerRef = useRef<HTMLDivElement>(null);
   const cursorRef = useRef<HTMLDivElement>(null);
   const topNavRef = useRef<HTMLDivElement>(null);
   const scrollTextRef = useRef<HTMLDivElement>(null);
   const topicContainerRef = useRef<HTMLDivElement>(null);
   const progressAnimationRef = useRef<gsap.core.Tween | null>(null);
-  const menuruPageRef = useRef<HTMLDivElement>(null);
 
   // Animasi loading text
   const loadingTexts = [
@@ -118,8 +115,6 @@ export default function HomePage(): React.JSX.Element {
         prevPhoto();
       } else if (e.key === 'ArrowRight') {
         nextPhoto();
-      } else if (e.key === 'Escape' && showMenuruPage) {
-        toggleMenuruPage();
       }
     };
 
@@ -140,50 +135,6 @@ export default function HomePage(): React.JSX.Element {
       }
     };
   }, [isMobile]);
-
-  // Fungsi untuk toggle halaman menuru
-  const toggleMenuruPage = () => {
-    if (!showMenuruPage) {
-      // Buka halaman menuru
-      setShowMenuruPage(true);
-      setMenuruIcon("+");
-      
-      // Animasi GSAP untuk membuka halaman
-      if (menuruPageRef.current) {
-        gsap.fromTo(menuruPageRef.current,
-          { 
-            opacity: 0,
-            y: "100%"
-          },
-          { 
-            opacity: 1,
-            y: "50%", // Setengah layar dari bawah
-            duration: 0.6,
-            ease: "power3.out"
-          }
-        );
-      }
-    } else {
-      // Tutup halaman menuru dengan animasi
-      if (menuruPageRef.current) {
-        gsap.to(menuruPageRef.current,
-          {
-            opacity: 0,
-            y: "100%",
-            duration: 0.4,
-            ease: "power3.in",
-            onComplete: () => {
-              setShowMenuruPage(false);
-              setMenuruIcon("-");
-            }
-          }
-        );
-      } else {
-        setShowMenuruPage(false);
-        setMenuruIcon("-");
-      }
-    }
-  };
 
   // Fungsi untuk handle cookie acceptance
   const handleAcceptCookies = () => {
@@ -237,7 +188,7 @@ export default function HomePage(): React.JSX.Element {
     if (currentFill) {
       progressAnimationRef.current = gsap.to(currentFill, {
         width: '100%',
-        duration: 15,
+        duration: 15, // SANGAT LAMBAT: 15 detik
         ease: "linear",
         onComplete: () => {
           // Setelah bar penuh, pindah ke foto berikutnya
@@ -1151,63 +1102,6 @@ export default function HomePage(): React.JSX.Element {
                       />
                     </div>
                   </div>
-
-                  {/* TEKS "menuru -" DIBAWAH CARD - di dalam card */}
-                  <div style={{
-                    marginTop: 'auto',
-                    paddingTop: isMobile ? '1.5rem' : '2rem',
-                    width: '100%',
-                    display: 'flex',
-                    justifyContent: 'center'
-                  }}>
-                    <motion.div
-                      onClick={toggleMenuruPage}
-                      onMouseEnter={() => handleLinkHover("link", "VIEW", "menuru")}
-                      onMouseLeave={handleLinkLeave}
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.8rem',
-                        cursor: 'none',
-                        padding: '0.6rem 1.2rem',
-                        backgroundColor: 'rgba(255,255,255,0.1)',
-                        borderRadius: '20px',
-                        border: '1px solid rgba(255,255,255,0.2)',
-                        transition: 'all 0.3s ease'
-                      }}
-                      whileHover={{ 
-                        backgroundColor: 'rgba(255,255,255,0.15)',
-                        scale: 1.05,
-                        border: '1px solid rgba(255,255,255,0.3)'
-                      }}
-                      whileTap={{ scale: 0.95 }}
-                    >
-                      {/* Teks "menuru" */}
-                      <span style={{
-                        color: 'white',
-                        fontSize: isMobile ? '1rem' : '1.2rem',
-                        fontWeight: '300',
-                        fontFamily: 'Helvetica, Arial, sans-serif',
-                        letterSpacing: '1px'
-                      }}>
-                        menuru
-                      </span>
-                      
-                      {/* Tanda "-" */}
-                      <span style={{
-                        color: 'white',
-                        fontSize: isMobile ? '1.2rem' : '1.5rem',
-                        fontWeight: '300',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        width: '24px',
-                        height: '24px'
-                      }}>
-                        {menuruIcon}
-                      </span>
-                    </motion.div>
-                  </div>
                 </div>
               </div>
 
@@ -1941,96 +1835,6 @@ export default function HomePage(): React.JSX.Element {
         </AnimatePresence>
       </div>
 
-      {/* Halaman MENURU (setengah layar dari bawah) */}
-      <AnimatePresence>
-        {showMenuruPage && (
-          <motion.div
-            ref={menuruPageRef}
-            key="menuru-page"
-            initial={{ opacity: 0, y: "100%" }}
-            animate={{ opacity: 1, y: "50%" }}
-            exit={{ opacity: 0, y: "100%" }}
-            transition={{ duration: 0.6, ease: "power3.out" }}
-            style={{
-              position: 'fixed',
-              bottom: 0,
-              left: 0,
-              width: '100%',
-              height: '50%',
-              backgroundColor: 'black',
-              zIndex: 1000,
-              display: 'flex',
-              flexDirection: 'column',
-              overflow: 'hidden',
-              borderTop: '1px solid rgba(255,255,255,0.1)',
-              boxShadow: '0 -10px 30px rgba(0,0,0,0.5)'
-            }}
-          >
-            {/* Header Halaman MENURU - hanya teks "menuru -" */}
-            <div style={{
-              width: '100%',
-              padding: isMobile ? '1.2rem' : '1.5rem',
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              borderBottom: '1px solid rgba(255,255,255,0.1)',
-              backgroundColor: 'rgba(0,0,0,0.9)'
-            }}>
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.8rem',
-                cursor: 'pointer'
-              }}
-              onClick={toggleMenuruPage}
-              onMouseEnter={() => handleLinkHover("link", "CLOSE", "close-menuru")}
-              onMouseLeave={handleLinkLeave}
-              >
-                {/* Teks "menuru" */}
-                <span style={{
-                  color: 'white',
-                  fontSize: isMobile ? '1.2rem' : '1.5rem',
-                  fontWeight: '300',
-                  fontFamily: 'Helvetica, Arial, sans-serif',
-                  letterSpacing: '1px'
-                }}>
-                  menuru
-                </span>
-                
-                {/* Tanda "+" (berubah jadi + saat halaman terbuka) */}
-                <motion.span
-                  animate={{ rotate: 45 }}
-                  transition={{ duration: 0.3 }}
-                  style={{
-                    color: 'white',
-                    fontSize: isMobile ? '1.5rem' : '1.8rem',
-                    fontWeight: '300',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    width: '24px',
-                    height: '24px'
-                  }}
-                >
-                  +
-                </motion.span>
-              </div>
-            </div>
-
-            {/* Konten Halaman MENURU - KOSONG/HITAM POLOS */}
-            <div style={{
-              flex: 1,
-              backgroundColor: 'black',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}>
-              {/* Tidak ada konten lain, hanya halaman hitam */}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
       {/* Cookie Notification */}
       <AnimatePresence>
         {showCookieNotification && (
@@ -2048,7 +1852,7 @@ export default function HomePage(): React.JSX.Element {
               backgroundColor: 'white',
               borderRadius: '15px',
               boxShadow: '0 10px 40px rgba(0,0,0,0.3)',
-              zIndex: 1001,
+              zIndex: 1000,
               overflow: 'hidden',
               display: 'flex',
               border: '2px solid rgba(0,0,0,0.1)'
