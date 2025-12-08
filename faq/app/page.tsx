@@ -19,6 +19,7 @@ export default function HomePage(): React.JSX.Element {
   const [hoveredTopic, setHoveredTopic] = useState<number | null>(null);
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
   const [isProgressActive, setIsProgressActive] = useState(true);
+  const [showCookieNotification, setShowCookieNotification] = useState(false);
   const headerRef = useRef<HTMLDivElement>(null);
   const cursorRef = useRef<HTMLDivElement>(null);
   const topNavRef = useRef<HTMLDivElement>(null);
@@ -41,6 +42,14 @@ export default function HomePage(): React.JSX.Element {
   ];
 
   useEffect(() => {
+    // Cek apakah user sudah menyetujui cookies
+    const cookieAccepted = localStorage.getItem('cookiesAccepted');
+    if (!cookieAccepted) {
+      setTimeout(() => {
+        setShowCookieNotification(true);
+      }, 2000);
+    }
+
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 768);
     };
@@ -127,6 +136,23 @@ export default function HomePage(): React.JSX.Element {
     };
   }, [isMobile]);
 
+  // Fungsi untuk handle cookie acceptance
+  const handleAcceptCookies = () => {
+    localStorage.setItem('cookiesAccepted', 'true');
+    setShowCookieNotification(false);
+    
+    // Set cookie untuk 30 hari
+    const date = new Date();
+    date.setTime(date.getTime() + (30 * 24 * 60 * 60 * 1000));
+    document.cookie = `cookiesAccepted=true; expires=${date.toUTCString()}; path=/`;
+    
+    // Simpan preferensi tema jika ada
+    if (localStorage.getItem('themePreference')) {
+      const themePref = localStorage.getItem('themePreference');
+      document.cookie = `themePreference=${themePref}; expires=${date.toUTCString()}; path=/`;
+    }
+  };
+
   // Fungsi untuk maju ke foto berikutnya
   const nextPhoto = () => {
     setCurrentPhotoIndex((prev) => {
@@ -184,6 +210,14 @@ export default function HomePage(): React.JSX.Element {
   // Fungsi toggle dark/light mode
   const toggleColorMode = () => {
     setIsDarkMode(!isDarkMode);
+    // Simpan preferensi tema ke cookies jika sudah diterima
+    const cookieAccepted = localStorage.getItem('cookiesAccepted');
+    if (cookieAccepted) {
+      localStorage.setItem('themePreference', !isDarkMode ? 'light' : 'dark');
+      const date = new Date();
+      date.setTime(date.getTime() + (30 * 24 * 60 * 60 * 1000));
+      document.cookie = `themePreference=${!isDarkMode ? 'light' : 'dark'}; expires=${date.toUTCString()}; path=/`;
+    }
   };
 
   // Handler untuk cursor hover
@@ -1800,6 +1834,110 @@ export default function HomePage(): React.JSX.Element {
           )}
         </AnimatePresence>
       </div>
+
+      {/* Cookie Notification */}
+      <AnimatePresence>
+        {showCookieNotification && (
+          <motion.div
+            initial={{ y: 100, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: 100, opacity: 0 }}
+            transition={{ duration: 0.5 }}
+            style={{
+              position: 'fixed',
+              bottom: '1rem',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              width: isMobile ? '90%' : '700px',
+              backgroundColor: 'white',
+              borderRadius: '15px',
+              boxShadow: '0 10px 40px rgba(0,0,0,0.3)',
+              zIndex: 1000,
+              overflow: 'hidden',
+              display: 'flex',
+              border: '2px solid rgba(0,0,0,0.1)'
+            }}
+          >
+            {/* Bagian putih untuk teks dan icon */}
+            <div style={{
+              flex: 1,
+              padding: isMobile ? '1.2rem' : '1.8rem',
+              backgroundColor: 'white',
+              display: 'flex',
+              alignItems: 'center',
+              gap: isMobile ? '0.8rem' : '1.2rem'
+            }}>
+              {/* Icon Cookies */}
+              <div style={{
+                width: isMobile ? '40px' : '50px',
+                height: isMobile ? '40px' : '50px',
+                backgroundColor: '#FBBF24',
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0
+              }}>
+                <svg 
+                  width={isMobile ? "20" : "25"} 
+                  height={isMobile ? "20" : "25"} 
+                  viewBox="0 0 24 24" 
+                  fill="none" 
+                  stroke="#92400E"
+                  strokeWidth="2"
+                >
+                  <path d="M12 2a10 10 0 1 0 10 10 4 4 0 0 1-5-5 4 4 0 0 1-5-5"/>
+                  <path d="M8.5 8.5v.01"/>
+                  <path d="M16 15.5v.01"/>
+                  <path d="M12 12v.01"/>
+                  <path d="M11 17v.01"/>
+                  <path d="M7 14v.01"/>
+                </svg>
+              </div>
+              
+              {/* Teks Cookies */}
+              <div style={{
+                flex: 1
+              }}>
+                <p style={{
+                  margin: 0,
+                  fontSize: isMobile ? '0.85rem' : '0.95rem',
+                  color: 'black',
+                  fontFamily: 'Helvetica, Arial, sans-serif',
+                  lineHeight: 1.5
+                }}>
+                  Kami menggunakan cookie untuk meningkatkan pengalaman Anda di website ini. 
+                  Cookie membantu kami mengingat preferensi Anda dan membuat website berfungsi lebih baik.
+                </p>
+              </div>
+            </div>
+
+            {/* Tombol OK - Hitam */}
+            <button
+              onClick={handleAcceptCookies}
+              onMouseEnter={() => handleLinkHover("link", "OK", "cookies")}
+              onMouseLeave={handleLinkLeave}
+              style={{
+                width: isMobile ? '80px' : '100px',
+                backgroundColor: 'black',
+                color: 'white',
+                border: 'none',
+                fontSize: isMobile ? '0.9rem' : '1rem',
+                fontWeight: '600',
+                fontFamily: 'Helvetica, Arial, sans-serif',
+                cursor: 'none',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                transition: 'all 0.3s ease',
+                padding: 0
+              }}
+            >
+              OK
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
