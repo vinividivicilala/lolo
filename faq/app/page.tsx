@@ -20,8 +20,6 @@ export default function HomePage(): React.JSX.Element {
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
   const [isProgressActive, setIsProgressActive] = useState(true);
   const [showCookieNotification, setShowCookieNotification] = useState(false);
-  const [showMenuruLink, setShowMenuruLink] = useState(false);
-  const [currentLink, setCurrentLink] = useState("https://noted-farid.netlify.app");
   const headerRef = useRef<HTMLDivElement>(null);
   const cursorRef = useRef<HTMLDivElement>(null);
   const topNavRef = useRef<HTMLDivElement>(null);
@@ -140,28 +138,36 @@ export default function HomePage(): React.JSX.Element {
     };
   }, [isMobile]);
 
-  // Detect scroll position to change website link
+  // Detect scroll position to change URL in address bar
   useEffect(() => {
     const handleScroll = () => {
       if (twoPhotosRef.current && fourPhotosRef.current) {
         const twoPhotosRect = twoPhotosRef.current.getBoundingClientRect();
         const fourPhotosRect = fourPhotosRef.current.getBoundingClientRect();
         
-        // Jika pengguna sudah melewati kedua bagian foto
-        const viewportHeight = window.innerHeight;
-        if (twoPhotosRect.bottom < viewportHeight * 0.3 && fourPhotosRect.bottom < viewportHeight * 0.3) {
-          setShowMenuruLink(true);
-          setCurrentLink("https://noted-farid.netlify.app/menuru");
+        // Cek jika posisi 2 foto dan 4 foto ada di viewport
+        const isTwoPhotosInView = 
+          twoPhotosRect.top < window.innerHeight * 0.8 && 
+          twoPhotosRect.bottom > 0;
+        
+        const isFourPhotosInView = 
+          fourPhotosRect.top < window.innerHeight * 0.8 && 
+          fourPhotosRect.bottom > 0;
+        
+        // Jika 2 foto dan 4 foto sedang terlihat di viewport
+        if (isTwoPhotosInView && isFourPhotosInView) {
+          // Ubah URL di address bar menjadi /menuru tanpa reload
+          window.history.replaceState(null, '', '/menuru');
         } else {
-          setShowMenuruLink(false);
-          setCurrentLink("https://noted-farid.netlify.app");
+          // Kembalikan ke URL utama
+          window.history.replaceState(null, '', '/');
         }
       }
     };
 
     window.addEventListener('scroll', handleScroll);
     // Check initial position
-    setTimeout(handleScroll, 500);
+    setTimeout(handleScroll, 100);
     
     return () => {
       window.removeEventListener('scroll', handleScroll);
@@ -349,11 +355,6 @@ export default function HomePage(): React.JSX.Element {
     // Klik di tengah -> tidak melakukan apa-apa
   };
 
-  // Fungsi untuk membuka website
-  const openWebsite = () => {
-    window.open(currentLink, '_blank');
-  };
-
   return (
     <div style={{
       minHeight: '100vh',
@@ -441,90 +442,23 @@ export default function HomePage(): React.JSX.Element {
           width: '100%',
           padding: isMobile ? '0.8rem 1rem' : '1rem 2rem',
           display: 'flex',
-          justifyContent: 'space-between',
+          justifyContent: 'center',
           alignItems: 'center',
           zIndex: 101,
           boxSizing: 'border-box',
-          opacity: 1,
-          background: isDarkMode ? 'rgba(0,0,0,0.7)' : 'rgba(255,0,40,0.7)',
-          backdropFilter: 'blur(10px)',
-          borderBottom: `1px solid ${isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.2)'}`
+          opacity: 1
         }}
       >
-        {/* Website Link - Kiri */}
-        <motion.div
-          onClick={openWebsite}
-          onMouseEnter={() => handleLinkHover("link", "VISIT", "website")}
-          onMouseLeave={handleLinkLeave}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.5rem',
-            cursor: 'none',
-            padding: '0.5rem 1rem',
-            borderRadius: '25px',
-            backgroundColor: 'rgba(255,255,255,0.1)',
-            border: `1px solid ${isDarkMode ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.3)'}`,
-            transition: 'all 0.3s ease',
-            backdropFilter: 'blur(10px)'
-          }}
-          whileHover={{ 
-            backgroundColor: 'rgba(255,255,255,0.2)',
-            scale: 1.05,
-            border: `1px solid ${isDarkMode ? 'rgba(255,255,255,0.4)' : 'rgba(255,255,255,0.5)'}`
-          }}
-          whileTap={{ scale: 0.95 }}
-        >
-          <svg 
-            width="18" 
-            height="18" 
-            viewBox="0 0 24 24" 
-            fill="none" 
-            stroke="white"
-            strokeWidth="2"
-          >
-            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
-            <polyline points="15 3 21 3 21 9"/>
-            <line x1="10" y1="14" x2="21" y2="3"/>
-          </svg>
-          <span style={{
-            color: 'white',
-            fontSize: '0.9rem',
-            fontWeight: '600',
-            fontFamily: 'Helvetica, Arial, sans-serif'
-          }}>
-            {showMenuruLink ? (
-              <motion.span
-                key="menuru-link"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.3 }}
-              >
-                noted-farid.netlify.app/menuru
-              </motion.span>
-            ) : (
-              <motion.span
-                key="main-link"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.3 }}
-              >
-                noted-farid.netlify.app
-              </motion.span>
-            )}
-          </span>
-        </motion.div>
-
-        {/* Navigation Items - Tengah */}
         <div style={{
           display: 'flex',
           alignItems: 'center',
-          gap: isMobile ? '0.5rem' : '1rem',
-          backgroundColor: 'rgba(0,0,0,0.3)',
+          gap: isMobile ? '1rem' : '2rem',
+          backgroundColor: 'transparent',
           backdropFilter: 'blur(10px)',
           borderRadius: '50px',
-          padding: '0.5rem 1rem',
-          border: `1px solid ${isDarkMode ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.2)'}`
+          padding: isMobile ? '0.6rem 1rem' : '0.8rem 1.5rem',
+          border: `1px solid ${isDarkMode ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.3)'}`,
+          boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
         }}>
           {/* Docs */}
           <motion.div
@@ -639,43 +573,122 @@ export default function HomePage(): React.JSX.Element {
               NEW
             </div>
           </motion.div>
-        </div>
 
-        {/* Right Side - Theme Toggle */}
-        <motion.button
-          onClick={toggleColorMode}
-          onMouseEnter={() => handleLinkHover("link", "VIEW", "theme")}
-          onMouseLeave={handleLinkLeave}
-          style={{
-            padding: '0.5rem 1rem',
-            fontSize: '0.9rem',
-            fontWeight: '600',
-            color: 'white',
-            backgroundColor: 'rgba(255,255,255,0.1)',
-            border: `1px solid ${isDarkMode ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.3)'}`,
-            borderRadius: '25px',
-            cursor: 'none',
-            fontFamily: 'Helvetica, Arial, sans-serif',
-            backdropFilter: 'blur(10px)',
-            whiteSpace: 'nowrap',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.5rem'
-          }}
-          whileHover={{ 
-            backgroundColor: 'rgba(255,255,255,0.2)',
-            scale: 1.05
-          }}
-          whileTap={{ scale: 0.95 }}
-        >
+          {/* Update */}
           <motion.div
-            animate={{ rotate: isDarkMode ? 0 : 180 }}
-            transition={{ duration: 0.5 }}
+            onClick={() => router.push('/update')}
+            onMouseEnter={() => handleLinkHover("link", "VIEW", "update")}
+            onMouseLeave={handleLinkLeave}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              cursor: 'none',
+              padding: '0.4rem 0.8rem',
+              borderRadius: '25px',
+              backgroundColor: isDarkMode ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.95)',
+              border: isDarkMode ? '1px solid rgba(255,255,255,0.2)' : '1px solid rgba(255,255,255,0.3)',
+              transition: 'all 0.3s ease'
+            }}
+            whileHover={{ 
+              backgroundColor: 'white',
+              scale: 1.05,
+              border: '1px solid white'
+            }}
           >
-            {isDarkMode ? '☀️' : '🌙'}
+            <svg 
+              width={isMobile ? "18" : "20"} 
+              height={isMobile ? "18" : "20"} 
+              viewBox="0 0 24 24" 
+              fill="none" 
+              stroke="#6366F1"
+              strokeWidth="2"
+            >
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14,2 14,8 20,8"/>
+              <line x1="16" y1="13" x2="8" y2="13"/>
+              <line x1="16" y1="17" x2="8" y2="17"/>
+              <polyline points="10,9 9,9 8,9"/>
+            </svg>
+            <span style={{
+              color: '#6366F1',
+              fontSize: isMobile ? '0.8rem' : '0.9rem',
+              fontWeight: '600',
+              fontFamily: 'Helvetica, Arial, sans-serif'
+            }}>
+              Update
+            </span>
+            <div style={{
+              backgroundColor: '#EC4899',
+              color: 'white',
+              fontSize: '0.7rem',
+              fontWeight: '700',
+              padding: '0.1rem 0.4rem',
+              borderRadius: '10px',
+              marginLeft: '0.3rem',
+              border: 'none'
+            }}>
+              NEW
+            </div>
           </motion.div>
-          {isMobile ? '' : (isDarkMode ? 'LIGHT' : 'DARK')}
-        </motion.button>
+
+          {/* Timeline */}
+          <motion.div
+            onClick={() => router.push('/timeline')}
+            onMouseEnter={() => handleLinkHover("link", "VIEW", "timeline")}
+            onMouseLeave={handleLinkLeave}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              cursor: 'none',
+              padding: '0.4rem 0.8rem',
+              borderRadius: '25px',
+              backgroundColor: isDarkMode ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.95)',
+              border: isDarkMode ? '1px solid rgba(255,255,255,0.2)' : '1px solid rgba(255,255,255,0.3)',
+              transition: 'all 0.3s ease'
+            }}
+            whileHover={{ 
+              backgroundColor: 'white',
+              scale: 1.05,
+              border: '1px solid white'
+            }}
+          >
+            <svg 
+              width={isMobile ? "18" : "20"} 
+              height={isMobile ? "18" : "20"} 
+              viewBox="0 0 24 24" 
+              fill="none" 
+              stroke="#6366F1"
+              strokeWidth="2"
+            >
+              <polyline points="1 4 1 10 7 10"/>
+              <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>
+              <line x1="12" y1="7" x2="12" y2="13"/>
+              <line x1="16" y1="11" x2="12" y2="7"/>
+            </svg>
+            <span style={{
+              color: '#6366F1',
+              fontSize: isMobile ? '0.8rem' : '0.9rem',
+              fontWeight: '600',
+              fontFamily: 'Helvetica, Arial, sans-serif'
+            }}>
+              Timeline
+            </span>
+            <div style={{
+              backgroundColor: '#EC4899',
+              color: 'white',
+              fontSize: '0.7rem',
+              fontWeight: '700',
+              padding: '0.1rem 0.4rem',
+              borderRadius: '10px',
+              marginLeft: '0.3rem',
+              border: 'none'
+            }}>
+              NEW
+            </div>
+          </motion.div>
+        </div>
       </div>
 
       {/* Header Section */}
@@ -750,6 +763,50 @@ export default function HomePage(): React.JSX.Element {
           alignItems: 'center',
           gap: isMobile ? '0.8rem' : '1rem'
         }}>
+          {/* Color Mode Toggle Button */}
+          <motion.button
+            onClick={toggleColorMode}
+            onMouseEnter={() => handleLinkHover("link", "VIEW", "theme")}
+            onMouseLeave={handleLinkLeave}
+            style={{
+              padding: isMobile ? '0.4rem 0.8rem' : '0.6rem 1rem',
+              fontSize: isMobile ? '0.8rem' : '1rem',
+              fontWeight: '600',
+              color: 'white',
+              backgroundColor: 'transparent',
+              border: `1px solid ${isDarkMode ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.3)'}`,
+              borderRadius: '50px',
+              cursor: 'none',
+              fontFamily: 'Helvetica, Arial, sans-serif',
+              backdropFilter: 'blur(10px)',
+              whiteSpace: 'nowrap',
+              display: 'flex',
+              alignItems: 'center',
+              gap: isMobile ? '0.3rem' : '0.5rem',
+              margin: 0,
+              transition: 'all 0.3s ease',
+              boxShadow: '0 4px 15px rgba(0,0,0,0.1)'
+            }}
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1, duration: 0.6 }}
+            whileHover={{ 
+              backgroundColor: isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.2)',
+              scale: 1.05,
+              border: `1px solid ${isDarkMode ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.5)'}`,
+              transition: { duration: 0.2 }
+            }}
+            whileTap={{ scale: 0.95 }}
+          >
+            <motion.div
+              animate={{ rotate: isDarkMode ? 0 : 180 }}
+              transition={{ duration: 0.5 }}
+            >
+              {isDarkMode ? '☀️' : '🌙'}
+            </motion.div>
+            {isMobile ? '' : (isDarkMode ? 'LIGHT' : 'DARK')}
+          </motion.button>
+
           {/* Sign In Button */}
           <motion.button
             onClick={() => router.push('/signin')}
@@ -757,7 +814,7 @@ export default function HomePage(): React.JSX.Element {
             onMouseLeave={handleLinkLeave}
             style={{
               padding: isMobile ? '0.4rem 1rem' : '0.6rem 1.5rem',
-              fontSize: isMobile ? '0.9rem' : '1rem',
+              fontSize: isMobile ? '0.9rem' : '1.5rem',
               fontWeight: '600',
               color: 'white',
               backgroundColor: 'transparent',
@@ -787,8 +844,8 @@ export default function HomePage(): React.JSX.Element {
             whileTap={{ scale: 0.95 }}
           >
             <svg 
-              width={isMobile ? "18" : "20"} 
-              height={isMobile ? "18" : "20"} 
+              width={isMobile ? "18" : "30"} 
+              height={isMobile ? "18" : "30"} 
               viewBox="0 0 24 24" 
               fill="none" 
               stroke="currentColor" 
@@ -1087,6 +1144,76 @@ export default function HomePage(): React.JSX.Element {
                       />
                     </div>
                   </div>
+                </div>
+
+                {/* Simple Text Section dengan menuru di kiri dan more info di kanan */}
+                <div style={{
+                  width: 'calc(100% - 4rem)',
+                  marginLeft: isMobile ? '1rem' : '2rem',
+                  marginRight: isMobile ? '1rem' : '2rem',
+                  marginTop: isMobile ? '3rem' : '4rem',
+                  marginBottom: isMobile ? '3rem' : '4rem',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  padding: isMobile ? '1.5rem' : '2rem',
+                  backgroundColor: isDarkMode ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
+                  borderRadius: '15px',
+                  border: `1px solid ${isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}`
+                }}>
+                  {/* Teks menuru di kiri */}
+                  <div style={{
+                    fontSize: isMobile ? '2rem' : '3rem',
+                    fontWeight: '700',
+                    fontFamily: 'Helvetica, Arial, sans-serif',
+                    color: isDarkMode ? 'white' : 'black',
+                    textTransform: 'uppercase',
+                    letterSpacing: '1px'
+                  }}>
+                    menuru
+                  </div>
+
+                  {/* More info di kanan */}
+                  <motion.div
+                    onClick={() => window.open('https://noted-farid.netlify.app/menuru', '_blank')}
+                    onMouseEnter={() => handleLinkHover("link", "VISIT", "more-info")}
+                    onMouseLeave={handleLinkLeave}
+                    style={{
+                      fontSize: isMobile ? '1rem' : '1.2rem',
+                      fontWeight: '600',
+                      fontFamily: 'Helvetica, Arial, sans-serif',
+                      color: isDarkMode ? '#EC4899' : '#0050B7',
+                      cursor: 'none',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.5rem',
+                      padding: isMobile ? '0.6rem 1.2rem' : '0.8rem 1.5rem',
+                      backgroundColor: isDarkMode ? 'rgba(236, 72, 153, 0.1)' : 'rgba(0, 80, 183, 0.1)',
+                      borderRadius: '25px',
+                      border: `1px solid ${isDarkMode ? 'rgba(236, 72, 153, 0.3)' : 'rgba(0, 80, 183, 0.3)'}`,
+                      transition: 'all 0.3s ease'
+                    }}
+                    whileHover={{ 
+                      backgroundColor: isDarkMode ? 'rgba(236, 72, 153, 0.2)' : 'rgba(0, 80, 183, 0.2)',
+                      scale: 1.05,
+                      border: `1px solid ${isDarkMode ? 'rgba(236, 72, 153, 0.5)' : 'rgba(0, 80, 183, 0.5)'}`
+                    }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    more info
+                    <svg 
+                      width="16" 
+                      height="16" 
+                      viewBox="0 0 24 24" 
+                      fill="none" 
+                      stroke={isDarkMode ? '#EC4899' : '#0050B7'}
+                      strokeWidth="2.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M5 12h14M12 5l7 7-7 7"/>
+                    </svg>
+                  </motion.div>
                 </div>
               </div>
 
@@ -1818,95 +1945,6 @@ export default function HomePage(): React.JSX.Element {
             </motion.div>
           )}
         </AnimatePresence>
-      </div>
-
-      {/* Card Menuru di bagian bawah */}
-      <div style={{
-        width: '100%',
-        padding: isMobile ? '3rem 1rem' : '5rem 2rem',
-        marginTop: isMobile ? '3rem' : '5rem',
-        marginBottom: isMobile ? '3rem' : '5rem',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        boxSizing: 'border-box'
-      }}>
-        <motion.div
-          initial={{ opacity: 0, y: 50 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          viewport={{ once: true }}
-          style={{
-            width: '100%',
-            maxWidth: '800px',
-            backgroundColor: isDarkMode ? '#0050B7' : '#EC4899',
-            borderRadius: '25px',
-            padding: isMobile ? '3rem 2rem' : '4rem 3rem',
-            textAlign: 'center',
-            boxShadow: '0 25px 60px rgba(0, 0, 0, 0.3)',
-            border: `3px solid ${isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.2)'}`,
-            position: 'relative',
-            overflow: 'hidden'
-          }}
-        >
-          {/* Teks "menuru" */}
-          <div style={{
-            fontSize: isMobile ? '4rem' : '6rem',
-            fontWeight: '800',
-            fontFamily: 'Helvetica, Arial, sans-serif',
-            color: 'white',
-            textTransform: 'uppercase',
-            letterSpacing: isMobile ? '3px' : '5px',
-            marginBottom: isMobile ? '1rem' : '2rem',
-            textShadow: '0 5px 15px rgba(0,0,0,0.3)'
-          }}>
-            menuru
-          </div>
-          
-          {/* Tombol "more info" */}
-          <motion.div
-            onClick={() => window.open('https://noted-farid.netlify.app/menuru', '_blank')}
-            onMouseEnter={() => handleLinkHover("link", "VIEW", "menuru-more-info")}
-            onMouseLeave={handleLinkLeave}
-            style={{
-              fontSize: isMobile ? '1.2rem' : '1.5rem',
-              fontWeight: '600',
-              fontFamily: 'Helvetica, Arial, sans-serif',
-              color: 'white',
-              cursor: 'none',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              padding: isMobile ? '0.8rem 1.5rem' : '1rem 2rem',
-              backgroundColor: 'rgba(255,255,255,0.15)',
-              borderRadius: '50px',
-              border: '2px solid rgba(255,255,255,0.3)',
-              backdropFilter: 'blur(10px)',
-              transition: 'all 0.3s ease',
-              marginTop: '1rem'
-            }}
-            whileHover={{ 
-              backgroundColor: 'rgba(255,255,255,0.25)',
-              scale: 1.05,
-              border: '2px solid rgba(255,255,255,0.5)'
-            }}
-            whileTap={{ scale: 0.95 }}
-          >
-            more info
-            <svg 
-              width="20" 
-              height="20" 
-              viewBox="0 0 24 24" 
-              fill="none" 
-              stroke="white"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M5 12h14M12 5l7 7-7 7"/>
-            </svg>
-          </motion.div>
-        </motion.div>
       </div>
 
       {/* Cookie Notification */}
