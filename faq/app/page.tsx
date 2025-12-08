@@ -20,6 +20,8 @@ export default function HomePage(): React.JSX.Element {
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
   const [isProgressActive, setIsProgressActive] = useState(true);
   const [showCookieNotification, setShowCookieNotification] = useState(false);
+  const [showMenuruFull, setShowMenuruFull] = useState(false);
+  const [isMenuruHover, setIsMenuruHover] = useState(false);
   const headerRef = useRef<HTMLDivElement>(null);
   const cursorRef = useRef<HTMLDivElement>(null);
   const topNavRef = useRef<HTMLDivElement>(null);
@@ -40,6 +42,32 @@ export default function HomePage(): React.JSX.Element {
     { id: 2, src: "images/6.jpg", alt: "Photo 2" },
     { id: 3, src: "images/5.jpg", alt: "Photo 3" }
   ];
+
+  // Fungsi untuk menangani klik menuru
+  const handleMenuruClick = () => {
+    if (!showMenuruFull) {
+      // Masuk ke mode full
+      setShowMenuruFull(true);
+    } else {
+      // Kembali dari mode full
+      setShowMenuruFull(false);
+    }
+  };
+
+  // Handler hover untuk teks menuru
+  const handleMenuruHover = () => {
+    if (!showMenuruFull) {
+      setIsMenuruHover(true);
+      handleLinkHover("link", showMenuruFull ? "MINUS" : "PLUS", "menuru");
+    }
+  };
+
+  const handleMenuruLeave = () => {
+    if (!showMenuruFull) {
+      setIsMenuruHover(false);
+      handleLinkLeave();
+    }
+  };
 
   useEffect(() => {
     // Cek apakah user sudah menyetujui cookies
@@ -1103,284 +1131,348 @@ export default function HomePage(): React.JSX.Element {
                     </div>
                   </div>
                 </div>
-              </div>
 
-              {/* Tombol Slider Index/Grid - Di bawah card */}
-              <div style={{
-                position: 'relative',
-                marginTop: isMobile ? '3rem' : '4rem',
-                marginBottom: isMobile ? '4rem' : '6rem',
-                paddingLeft: isMobile ? '1rem' : '2rem',
-                paddingRight: isMobile ? '1rem' : '2rem'
-              }}>
+                {/* Teks MENURU + di bawah card - sebelah kanan */}
                 <div style={{
                   display: 'flex',
-                  alignItems: 'center',
-                  gap: '1.5rem'
+                  justifyContent: 'flex-end',
+                  marginTop: isMobile ? '2rem' : '3rem',
+                  paddingRight: isMobile ? '1rem' : '2rem',
+                  position: 'relative',
+                  zIndex: 20
                 }}>
-                  {/* Tombol Slider - lebih besar */}
-                  <motion.button
-                    onClick={toggleSlider}
-                    onMouseEnter={() => handleLinkHover("link", sliderPosition === "index" ? "TO GRID" : "TO INDEX", "slider")}
-                    onMouseLeave={handleLinkLeave}
+                  <motion.div
+                    onClick={handleMenuruClick}
+                    onMouseEnter={handleMenuruHover}
+                    onMouseLeave={handleMenuruLeave}
                     style={{
-                      width: '120px',
-                      height: '50px',
-                      backgroundColor: '#0050B7',
-                      border: 'none',
-                      borderRadius: '25px',
-                      cursor: 'none',
-                      padding: 0,
-                      position: 'relative',
                       display: 'flex',
                       alignItems: 'center',
-                      overflow: 'hidden'
+                      gap: '1rem',
+                      cursor: 'none',
+                      padding: '1rem 2rem',
+                      backgroundColor: isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
+                      borderRadius: '50px',
+                      border: `1px solid ${isDarkMode ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)'}`,
+                      backdropFilter: 'blur(10px)',
+                      transition: 'all 0.3s ease'
                     }}
-                    whileHover={{ scale: 1.05 }}
+                    whileHover={{ 
+                      backgroundColor: isDarkMode ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)',
+                      scale: 1.05,
+                      borderColor: isDarkMode ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.3)'
+                    }}
                     whileTap={{ scale: 0.95 }}
                   >
-                    {/* Track */}
-                    <div style={{
-                      position: 'absolute',
-                      width: '100%',
-                      height: '100%',
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      padding: '0 15px',
-                      boxSizing: 'border-box'
+                    <span style={{
+                      color: isDarkMode ? 'white' : 'black',
+                      fontSize: isMobile ? '1.5rem' : '2rem',
+                      fontWeight: '300',
+                      fontFamily: 'Helvetica, Arial, sans-serif',
+                      textTransform: 'uppercase',
+                      letterSpacing: '1px'
                     }}>
-                      <span style={{
-                        color: 'white',
-                        fontSize: '1rem',
-                        fontWeight: '700',
-                        fontFamily: 'Helvetica, Arial, sans-serif',
-                        opacity: sliderPosition === "index" ? 1 : 0.5
-                      }}>
-                        INDEX
-                      </span>
-                      <span style={{
-                        color: 'white',
-                        fontSize: '1rem',
-                        fontWeight: '700',
-                        fontFamily: 'Helvetica, Arial, sans-serif',
-                        opacity: sliderPosition === "grid" ? 1 : 0.5
-                      }}>
-                        GRID
-                      </span>
-                    </div>
-                    
-                    {/* Slider Dot - Hijau cerah lebih besar */}
+                      menuru
+                    </span>
                     <motion.div
-                      animate={{ x: sliderPosition === "index" ? 15 : 65 }}
-                      transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                      style={{
-                        width: '35px',
-                        height: '35px',
-                        backgroundColor: '#00FF00',
-                        borderRadius: '50%',
-                        position: 'absolute',
-                        left: '7px',
-                        boxShadow: '0 0 15px rgba(0, 255, 0, 0.7)'
+                      animate={{ 
+                        rotate: showMenuruFull ? 45 : 0,
+                        scale: isMenuruHover ? 1.2 : 1 
                       }}
-                    />
-                  </motion.button>
-
-                  {/* Label status - lebih besar */}
-                  <div style={{
-                    color: isDarkMode ? 'white' : 'black',
-                    fontSize: '1.1rem',
-                    fontWeight: '600',
-                    fontFamily: 'Helvetica, Arial, sans-serif'
-                  }}>
-                    {sliderPosition === "index" ? "Index View" : "Grid View"}
-                  </div>
+                      transition={{ duration: 0.3 }}
+                      style={{
+                        color: isDarkMode ? 'white' : 'black',
+                        fontSize: isMobile ? '2rem' : '2.5rem',
+                        fontWeight: '300',
+                        lineHeight: 1,
+                        width: isMobile ? '30px' : '40px',
+                        height: isMobile ? '30px' : '40px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                      }}
+                    >
+                      {showMenuruFull ? '−' : '+'}
+                    </motion.div>
+                  </motion.div>
                 </div>
-              </div>
 
-              {/* Progress Bar dengan 3 Foto - DIPERBAIKI */}
-              <div style={{
-                width: '100%',
-                padding: isMobile ? '1rem' : '2rem',
-                marginTop: isMobile ? '2rem' : '3rem',
-                marginBottom: isMobile ? '2rem' : '3rem',
-                boxSizing: 'border-box'
-              }}>
+                {/* Tombol Slider Index/Grid - Di bawah card */}
                 <div style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: isMobile ? '1.5rem' : '2rem',
-                  alignItems: 'center',
-                  maxWidth: '800px',
-                  margin: '0 auto'
+                  position: 'relative',
+                  marginTop: isMobile ? '3rem' : '4rem',
+                  marginBottom: isMobile ? '4rem' : '6rem',
+                  paddingLeft: isMobile ? '1rem' : '2rem',
+                  paddingRight: isMobile ? '1rem' : '2rem'
                 }}>
-                  {/* Container Progress Bar - PANJANG dan GEMUK */}
                   <div style={{
-                    width: '100%',
                     display: 'flex',
                     alignItems: 'center',
-                    gap: isMobile ? '0.5rem' : '0.8rem',
-                    marginBottom: '1rem'
+                    gap: '1.5rem'
                   }}>
-                    {progressPhotos.map((_, index) => (
-                      <div 
-                        key={index}
+                    {/* Tombol Slider - lebih besar */}
+                    <motion.button
+                      onClick={toggleSlider}
+                      onMouseEnter={() => handleLinkHover("link", sliderPosition === "index" ? "TO GRID" : "TO INDEX", "slider")}
+                      onMouseLeave={handleLinkLeave}
+                      style={{
+                        width: '120px',
+                        height: '50px',
+                        backgroundColor: '#0050B7',
+                        border: 'none',
+                        borderRadius: '25px',
+                        cursor: 'none',
+                        padding: 0,
+                        position: 'relative',
+                        display: 'flex',
+                        alignItems: 'center',
+                        overflow: 'hidden'
+                      }}
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                    >
+                      {/* Track */}
+                      <div style={{
+                        position: 'absolute',
+                        width: '100%',
+                        height: '100%',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        padding: '0 15px',
+                        boxSizing: 'border-box'
+                      }}>
+                        <span style={{
+                          color: 'white',
+                          fontSize: '1rem',
+                          fontWeight: '700',
+                          fontFamily: 'Helvetica, Arial, sans-serif',
+                          opacity: sliderPosition === "index" ? 1 : 0.5
+                        }}>
+                          INDEX
+                        </span>
+                        <span style={{
+                          color: 'white',
+                          fontSize: '1rem',
+                          fontWeight: '700',
+                          fontFamily: 'Helvetica, Arial, sans-serif',
+                          opacity: sliderPosition === "grid" ? 1 : 0.5
+                        }}>
+                          GRID
+                        </span>
+                      </div>
+                      
+                      {/* Slider Dot - Hijau cerah lebih besar */}
+                      <motion.div
+                        animate={{ x: sliderPosition === "index" ? 15 : 65 }}
+                        transition={{ type: "spring", stiffness: 300, damping: 20 }}
                         style={{
-                          flex: 1,
-                          height: '12px', // GEMUK
-                          backgroundColor: isDarkMode ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.2)',
-                          borderRadius: '6px',
-                          overflow: 'hidden',
-                          position: 'relative'
+                          width: '35px',
+                          height: '35px',
+                          backgroundColor: '#00FF00',
+                          borderRadius: '50%',
+                          position: 'absolute',
+                          left: '7px',
+                          boxShadow: '0 0 15px rgba(0, 255, 0, 0.7)'
                         }}
-                      >
-                        {/* Progress Fill - PUTIH GEMUK */}
-                        <div
-                          className="progress-fill"
-                          data-index={index}
+                      />
+                    </motion.button>
+
+                    {/* Label status - lebih besar */}
+                    <div style={{
+                      color: isDarkMode ? 'white' : 'black',
+                      fontSize: '1.1rem',
+                      fontWeight: '600',
+                      fontFamily: 'Helvetica, Arial, sans-serif'
+                    }}>
+                      {sliderPosition === "index" ? "Index View" : "Grid View"}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Progress Bar dengan 3 Foto - DIPERBAIKI */}
+                <div style={{
+                  width: '100%',
+                  padding: isMobile ? '1rem' : '2rem',
+                  marginTop: isMobile ? '2rem' : '3rem',
+                  marginBottom: isMobile ? '2rem' : '3rem',
+                  boxSizing: 'border-box'
+                }}>
+                  <div style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: isMobile ? '1.5rem' : '2rem',
+                    alignItems: 'center',
+                    maxWidth: '800px',
+                    margin: '0 auto'
+                  }}>
+                    {/* Container Progress Bar - PANJANG dan GEMUK */}
+                    <div style={{
+                      width: '100%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: isMobile ? '0.5rem' : '0.8rem',
+                      marginBottom: '1rem'
+                    }}>
+                      {progressPhotos.map((_, index) => (
+                        <div 
+                          key={index}
                           style={{
-                            position: 'absolute',
-                            left: 0,
-                            top: 0,
-                            bottom: 0,
-                            backgroundColor: 'white',
+                            flex: 1,
+                            height: '12px', // GEMUK
+                            backgroundColor: isDarkMode ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.2)',
                             borderRadius: '6px',
-                            width: index === currentPhotoIndex ? '100%' : (index < currentPhotoIndex ? '100%' : '0%')
+                            overflow: 'hidden',
+                            position: 'relative'
+                          }}
+                        >
+                          {/* Progress Fill - PUTIH GEMUK */}
+                          <div
+                            className="progress-fill"
+                            data-index={index}
+                            style={{
+                              position: 'absolute',
+                              left: 0,
+                              top: 0,
+                              bottom: 0,
+                              backgroundColor: 'white',
+                              borderRadius: '6px',
+                              width: index === currentPhotoIndex ? '100%' : (index < currentPhotoIndex ? '100%' : '0%')
+                            }}
+                          />
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Foto Portrait - PANJANG KE BAWAH */}
+                    <motion.div
+                      onClick={handlePhotoClick}
+                      style={{
+                        position: 'relative',
+                        width: '100%',
+                        maxWidth: '600px',
+                        height: isMobile ? '600px' : '900px', // LEBIH PANJANG KE BAWAH
+                        borderRadius: '15px',
+                        overflow: 'hidden',
+                        boxShadow: '0 8px 25px rgba(0,0,0,0.4)',
+                        border: `2px solid ${isDarkMode ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.15)'}`,
+                        cursor: 'none',
+                        margin: '0 auto'
+                      }}
+                      onMouseEnter={() => handleLinkHover("link", "CLICK LEFT/RIGHT", "photo-nav")}
+                      onMouseLeave={handleLinkLeave}
+                      whileHover={{ scale: 1.01 }}
+                    >
+                      {/* Foto Aktif */}
+                      <AnimatePresence mode="wait">
+                        <motion.div
+                          key={currentPhotoIndex}
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                          transition={{ duration: 0.3 }}
+                          style={{
+                            width: '100%',
+                            height: '100%'
+                          }}
+                        >
+                          <img 
+                            src={progressPhotos[currentPhotoIndex].src}
+                            alt={progressPhotos[currentPhotoIndex].alt}
+                            style={{
+                              width: '100%',
+                              height: '100%',
+                              objectFit: 'cover',
+                              display: 'block'
+                            }}
+                            onError={(e) => {
+                              e.currentTarget.style.backgroundColor = isDarkMode ? '#222' : '#ddd';
+                              e.currentTarget.style.display = 'flex';
+                              e.currentTarget.style.alignItems = 'center';
+                              e.currentTarget.style.justifyContent = 'center';
+                              e.currentTarget.style.color = isDarkMode ? '#fff' : '#000';
+                              e.currentTarget.innerHTML = `<div style="padding: 2rem; text-align: center;">Photo ${currentPhotoIndex + 1}</div>`;
+                            }}
+                          />
+                        </motion.div>
+                      </AnimatePresence>
+
+                      {/* Overlay untuk navigasi klik */}
+                      <div style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        display: 'flex',
+                        pointerEvents: 'none'
+                      }}>
+                        {/* Area klik kiri (40% pertama) */}
+                        <div 
+                          style={{
+                            flex: 4,
+                            backgroundColor: 'transparent',
+                            pointerEvents: 'auto',
+                            cursor: 'none'
+                          }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            prevPhoto();
+                          }}
+                        />
+                        
+                        {/* Area tengah (20%) - tidak melakukan apa-apa */}
+                        <div style={{
+                          flex: 2,
+                          backgroundColor: 'transparent'
+                        }} />
+                        
+                        {/* Area klik kanan (40% terakhir) */}
+                        <div 
+                          style={{
+                            flex: 4,
+                            backgroundColor: 'transparent',
+                            pointerEvents: 'auto',
+                            cursor: 'none'
+                          }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            nextPhoto();
                           }}
                         />
                       </div>
-                    ))}
+                    </motion.div>
                   </div>
-
-                  {/* Foto Portrait - PANJANG KE BAWAH */}
-                  <motion.div
-                    onClick={handlePhotoClick}
-                    style={{
-                      position: 'relative',
-                      width: '100%',
-                      maxWidth: '600px',
-                      height: isMobile ? '600px' : '900px', // LEBIH PANJANG KE BAWAH
-                      borderRadius: '15px',
-                      overflow: 'hidden',
-                      boxShadow: '0 8px 25px rgba(0,0,0,0.4)',
-                      border: `2px solid ${isDarkMode ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.15)'}`,
-                      cursor: 'none',
-                      margin: '0 auto'
-                    }}
-                    onMouseEnter={() => handleLinkHover("link", "CLICK LEFT/RIGHT", "photo-nav")}
-                    onMouseLeave={handleLinkLeave}
-                    whileHover={{ scale: 1.01 }}
-                  >
-                    {/* Foto Aktif */}
-                    <AnimatePresence mode="wait">
-                      <motion.div
-                        key={currentPhotoIndex}
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        transition={{ duration: 0.3 }}
-                        style={{
-                          width: '100%',
-                          height: '100%'
-                        }}
-                      >
-                        <img 
-                          src={progressPhotos[currentPhotoIndex].src}
-                          alt={progressPhotos[currentPhotoIndex].alt}
-                          style={{
-                            width: '100%',
-                            height: '100%',
-                            objectFit: 'cover',
-                            display: 'block'
-                          }}
-                          onError={(e) => {
-                            e.currentTarget.style.backgroundColor = isDarkMode ? '#222' : '#ddd';
-                            e.currentTarget.style.display = 'flex';
-                            e.currentTarget.style.alignItems = 'center';
-                            e.currentTarget.style.justifyContent = 'center';
-                            e.currentTarget.style.color = isDarkMode ? '#fff' : '#000';
-                            e.currentTarget.innerHTML = `<div style="padding: 2rem; text-align: center;">Photo ${currentPhotoIndex + 1}</div>`;
-                          }}
-                        />
-                      </motion.div>
-                    </AnimatePresence>
-
-                    {/* Overlay untuk navigasi klik */}
-                    <div style={{
-                      position: 'absolute',
-                      top: 0,
-                      left: 0,
-                      right: 0,
-                      bottom: 0,
-                      display: 'flex',
-                      pointerEvents: 'none'
-                    }}>
-                      {/* Area klik kiri (40% pertama) */}
-                      <div 
-                        style={{
-                          flex: 4,
-                          backgroundColor: 'transparent',
-                          pointerEvents: 'auto',
-                          cursor: 'none'
-                        }}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          prevPhoto();
-                        }}
-                      />
-                      
-                      {/* Area tengah (20%) - tidak melakukan apa-apa */}
-                      <div style={{
-                        flex: 2,
-                        backgroundColor: 'transparent'
-                      }} />
-                      
-                      {/* Area klik kanan (40% terakhir) */}
-                      <div 
-                        style={{
-                          flex: 4,
-                          backgroundColor: 'transparent',
-                          pointerEvents: 'auto',
-                          cursor: 'none'
-                        }}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          nextPhoto();
-                        }}
-                      />
-                    </div>
-                  </motion.div>
                 </div>
-              </div>
 
-              {/* Content tambahan untuk membuat halaman lebih panjang */}
-              <div style={{
-                height: '100vh',
-                width: '100%',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                marginTop: isMobile ? '3rem' : '5rem',
-                zIndex: 10,
-                position: 'relative'
-              }}>
-                <motion.p
-                  initial={{ opacity: 0 }}
-                  whileInView={{ opacity: 1 }}
-                  transition={{ duration: 0.8 }}
-                  style={{
-                    color: isDarkMode ? 'white' : 'black',
-                    fontSize: isMobile ? '1.5rem' : '2rem',
-                    fontWeight: '300',
-                    textAlign: 'center',
-                    maxWidth: '600px',
-                    padding: '0 2rem'
-                  }}
-                >
-                  More content coming soon...
-                </motion.p>
-              </div>
-            </motion.div>
+                {/* Content tambahan untuk membuat halaman lebih panjang */}
+                <div style={{
+                  height: '100vh',
+                  width: '100%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  marginTop: isMobile ? '3rem' : '5rem',
+                  zIndex: 10,
+                  position: 'relative'
+                }}>
+                  <motion.p
+                    initial={{ opacity: 0 }}
+                    whileInView={{ opacity: 1 }}
+                    transition={{ duration: 0.8 }}
+                    style={{
+                      color: isDarkMode ? 'white' : 'black',
+                      fontSize: isMobile ? '1.5rem' : '2rem',
+                      fontWeight: '300',
+                      textAlign: 'center',
+                      maxWidth: '600px',
+                      padding: '0 2rem'
+                    }}
+                  >
+                    More content coming soon...
+                  </motion.p>
+                </div>
+              </motion.div>
           )}
 
           {/* Halaman Index */}
@@ -1834,6 +1926,88 @@ export default function HomePage(): React.JSX.Element {
           )}
         </AnimatePresence>
       </div>
+
+      {/* Halaman Full MENURU - Overlay Hitam */}
+      <AnimatePresence>
+        {showMenuruFull && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.5 }}
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: 'black',
+              zIndex: 99999,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'none'
+            }}
+            onClick={handleMenuruClick}
+          >
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '2rem',
+              cursor: 'none'
+            }}>
+              <motion.span
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.5, delay: 0.2 }}
+                style={{
+                  color: 'white',
+                  fontSize: isMobile ? '3rem' : '6rem',
+                  fontWeight: '300',
+                  fontFamily: 'Helvetica, Arial, sans-serif',
+                  textTransform: 'uppercase',
+                  letterSpacing: '2px'
+                }}
+              >
+                menuru
+              </motion.span>
+              
+              <motion.div
+                initial={{ opacity: 0, scale: 0.5 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.5 }}
+                transition={{ duration: 0.5, delay: 0.3 }}
+                onMouseEnter={() => handleLinkHover("link", "MINUS", "menuru-close")}
+                onMouseLeave={handleLinkLeave}
+                style={{
+                  color: 'white',
+                  fontSize: isMobile ? '3rem' : '5rem',
+                  fontWeight: '300',
+                  lineHeight: 1,
+                  width: isMobile ? '50px' : '80px',
+                  height: isMobile ? '50px' : '80px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'none',
+                  backgroundColor: 'rgba(255,255,255,0.1)',
+                  borderRadius: '50%',
+                  border: '1px solid rgba(255,255,255,0.2)'
+                }}
+                whileHover={{ 
+                  backgroundColor: 'rgba(255,255,255,0.2)',
+                  scale: 1.1,
+                  rotate: 90 
+                }}
+                whileTap={{ scale: 0.9 }}
+              >
+                −
+              </motion.div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Cookie Notification */}
       <AnimatePresence>
