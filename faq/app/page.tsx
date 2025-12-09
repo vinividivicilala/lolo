@@ -393,11 +393,11 @@ export default function HomePage(): React.JSX.Element {
               alignItems: 'flex-start',
               boxSizing: 'border-box'
             }}>
-              {/* Container untuk MENURU, angka, dan roles */}
+              {/* Container untuk MENURU, angka, dan roles - di kiri */}
               <div style={{
                 display: 'flex',
                 flexDirection: 'column',
-                width: '100%'
+                width: isMobile ? '45%' : '40%'
               }}>
                 {/* Teks MENURU \ di kiri */}
                 <motion.div
@@ -429,7 +429,7 @@ export default function HomePage(): React.JSX.Element {
                     fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
                     letterSpacing: '2px',
                     marginTop: isMobile ? '1.5rem' : '2rem',
-                    marginBottom: isMobile ? '2rem' : '3rem' // JARAK KE MY ROLES
+                    marginBottom: isMobile ? '2rem' : '3rem'
                   }}
                 >
                   99887
@@ -443,7 +443,7 @@ export default function HomePage(): React.JSX.Element {
                   style={{
                     display: 'flex',
                     flexDirection: 'column',
-                    gap: isMobile ? '1.5rem' : '2rem' // JARAK ANTARA SETIAP ITEM
+                    gap: isMobile ? '1.5rem' : '2rem'
                   }}
                 >
                   {rolesData.map((role, index) => (
@@ -484,65 +484,67 @@ export default function HomePage(): React.JSX.Element {
                 </motion.div>
               </div>
 
-              {/* Bagian kanan dengan judul di tengah, deskripsi di bawah, foto di kanan */}
+              {/* Container untuk bagian tengah - JUDUL, DESKRIPSI, FOTO */}
               <div style={{
                 flex: 1,
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
-                marginLeft: isMobile ? '1rem' : '3rem'
+                justifyContent: 'center',
+                marginLeft: isMobile ? '1rem' : '3rem',
+                marginRight: isMobile ? '1rem' : '3rem'
               }}>
-                {/* Judul MENURU di tengah */}
+                {/* Judul MENURU di tengah - BESAR */}
                 <motion.div
                   initial={{ y: -30, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
                   transition={{ duration: 0.6, delay: 0.2 }}
                   style={{
                     color: 'white',
-                    fontSize: isMobile ? '1.8rem' : '2.5rem',
+                    fontSize: isMobile ? '3.5rem' : '5rem',
                     fontWeight: '300',
                     fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
                     textTransform: 'uppercase',
-                    letterSpacing: '2px',
+                    letterSpacing: '4px',
                     textAlign: 'center',
-                    marginBottom: isMobile ? '1rem' : '1.5rem'
+                    marginBottom: isMobile ? '2rem' : '3rem' // JARAK ANTAR JUDUL DAN DESKRIPSI
                   }}
                 >
                   MENURU
                 </motion.div>
 
-                {/* Deskripsi di bawah judul - rata kanan */}
+                {/* Deskripsi di bawah judul - BESAR */}
                 <motion.div
                   initial={{ y: -20, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
                   transition={{ duration: 0.6, delay: 0.3 }}
                   style={{
                     color: 'white',
-                    fontSize: isMobile ? '0.9rem' : '1.1rem',
+                    fontSize: isMobile ? '1.2rem' : '1.8rem',
                     fontWeight: '400',
                     fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
-                    lineHeight: 1.5,
-                    textAlign: 'right',
-                    maxWidth: isMobile ? '200px' : '300px',
-                    marginBottom: isMobile ? '1rem' : '1.5rem'
+                    lineHeight: 1.6,
+                    textAlign: 'center',
+                    maxWidth: isMobile ? '90%' : '70%',
+                    marginBottom: isMobile ? '2rem' : '3rem' // JARAK ANTAR DESKRIPSI DAN FOTO
                   }}
                 >
                   A personal branding journal documenting emotional journeys and creative exploration through visual storytelling and self-discovery narratives.
                 </motion.div>
 
-                {/* Foto di bawah deskripsi - rata kanan */}
+                {/* Foto di bawah deskripsi - BESAR */}
                 <motion.div
                   initial={{ y: 30, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
                   transition={{ duration: 0.6, delay: 0.4 }}
                   style={{
-                    width: isMobile ? '150px' : '250px',
-                    height: isMobile ? '200px' : '350px',
+                    width: isMobile ? '90%' : '70%',
+                    height: isMobile ? '300px' : '500px',
                     overflow: 'hidden',
-                    borderRadius: '10px',
-                    boxShadow: '0 10px 30px rgba(0,0,0,0.5)',
-                    border: '1px solid rgba(255,255,255,0.1)',
-                    alignSelf: 'flex-end'
+                    borderRadius: '15px',
+                    boxShadow: '0 15px 40px rgba(0,0,0,0.7)',
+                    border: '2px solid rgba(255,255,255,0.15)',
+                    marginTop: isMobile ? '1rem' : '1.5rem'
                   }}
                 >
                   <img 
