@@ -17,15 +17,15 @@ export default function HomePage(): React.JSX.Element {
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
   const [isProgressActive, setIsProgressActive] = useState(true);
   const [showCookieNotification, setShowCookieNotification] = useState(false);
-  const [showMenuruFullPage, setShowMenuruFullPage] = useState(false); // State untuk halaman full page
-  const [menuruExpanded, setMenuruExpanded] = useState(false); // State untuk animasi plus/minus
+  const [showMenuruFullPage, setShowMenuruFullPage] = useState(false);
+  const [menuruExpanded, setMenuruExpanded] = useState(false);
   const headerRef = useRef<HTMLDivElement>(null);
   const topNavRef = useRef<HTMLDivElement>(null);
   const scrollTextRef = useRef<HTMLDivElement>(null);
   const topicContainerRef = useRef<HTMLDivElement>(null);
   const progressAnimationRef = useRef<gsap.core.Tween | null>(null);
   const menuruButtonRef = useRef<HTMLDivElement>(null);
-  const menuruMinusRef = useRef<HTMLDivElement>(null);
+  const menuruTextRef = useRef<HTMLDivElement>(null);
   const plusSignRef = useRef<HTMLDivElement>(null);
   const minusSignRef = useRef<HTMLDivElement>(null);
 
@@ -259,50 +259,64 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // Fungsi untuk toggle halaman full page MENURU dengan animasi
+  // Fungsi untuk toggle halaman full page MENURU dengan animasi GSAP modern
   const toggleMenuruFullPage = () => {
     if (!showMenuruFullPage) {
-      // Buka halaman full page dengan animasi
+      // Buka halaman full page dengan animasi GSAP modern
       setShowMenuruFullPage(true);
       
-      // Animasi untuk tanda +
+      // Animasi untuk tanda + berubah menjadi \
       if (plusSignRef.current) {
-        gsap.to(plusSignRef.current, {
-          rotation: 45,
-          duration: 0.5,
-          ease: "back.out(1.7)",
-          onComplete: () => {
+        gsap.timeline()
+          .to(plusSignRef.current, {
+            rotation: 45,
+            duration: 0.3,
+            ease: "power2.out"
+          })
+          .to(plusSignRef.current.children[0], { // Garis vertikal
+            rotation: 45,
+            duration: 0.2,
+            ease: "power2.out"
+          }, "-=0.2")
+          .to(plusSignRef.current.children[1], { // Garis horizontal
+            scaleX: 0,
+            duration: 0.2,
+            ease: "power2.in"
+          }, "-=0.2")
+          .call(() => {
+            // Setelah animasi selesai, tampilkan tanda \
             setMenuruExpanded(true);
-          }
-        });
+          });
       }
     }
   };
 
-  // Fungsi untuk menutup halaman full page MENURU dengan animasi
+  // Fungsi untuk menutup halaman full page MENURU dengan animasi GSAP modern
   const handleCloseMenuruFullPage = () => {
-    // Animasi untuk tanda \ sebelum menutup
-    if (minusSignRef.current) {
-      gsap.to(minusSignRef.current, {
-        rotation: 0,
-        scale: 1,
-        duration: 0.4,
-        ease: "power2.out",
-        onComplete: () => {
+    // Animasi untuk tanda \ kembali menjadi +
+    if (plusSignRef.current) {
+      gsap.timeline()
+        .to(plusSignRef.current, {
+          rotation: 0,
+          duration: 0.3,
+          ease: "power2.out"
+        })
+        .to(plusSignRef.current.children[0], { // Garis vertikal
+          rotation: 0,
+          duration: 0.2,
+          ease: "power2.out"
+        }, "-=0.2")
+        .to(plusSignRef.current.children[1], { // Garis horizontal
+          scaleX: 1,
+          duration: 0.2,
+          ease: "power2.out"
+        }, "-=0.2")
+        .call(() => {
           setMenuruExpanded(false);
           setTimeout(() => {
             setShowMenuruFullPage(false);
-            // Reset animasi tanda + setelah menutup
-            if (plusSignRef.current) {
-              gsap.to(plusSignRef.current, {
-                rotation: 0,
-                duration: 0.3,
-                ease: "power2.out"
-              });
-            }
           }, 200);
-        }
-      });
+        });
     } else {
       setMenuruExpanded(false);
       setTimeout(() => {
@@ -313,11 +327,15 @@ export default function HomePage(): React.JSX.Element {
 
   // Animasi klik pada tombol MENURU +
   const handleMenuruClick = () => {
-    toggleMenuruFullPage();
+    if (!showMenuruFullPage) {
+      toggleMenuruFullPage();
+    } else {
+      handleCloseMenuruFullPage();
+    }
     
     // Animasi bounce pada teks MENURU
-    if (menuruButtonRef.current) {
-      gsap.to(menuruButtonRef.current, {
+    if (menuruTextRef.current) {
+      gsap.to(menuruTextRef.current, {
         scale: 0.95,
         duration: 0.1,
         yoyo: true,
@@ -420,22 +438,21 @@ export default function HomePage(): React.JSX.Element {
               justifyContent: 'center'
             }}
           >
-            {/* Header dengan teks MENURU dan tanda \ di sebelah kanan */}
+            {/* Header dengan teks MENURU di tengah atas */}
             <div style={{
               position: 'absolute',
               top: isMobile ? '1.5rem' : '2rem',
               left: 0,
               width: '100%',
-              padding: isMobile ? '0 1rem' : '0 2rem',
               display: 'flex',
-              justifyContent: 'space-between',
+              justifyContent: 'center',
               alignItems: 'center',
               boxSizing: 'border-box'
             }}>
-              {/* Teks MENURU di kiri */}
+              {/* Teks MENURU di tengah */}
               <motion.div
-                initial={{ x: -50, opacity: 0 }}
-                animate={{ x: 0, opacity: 1 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
                 transition={{ duration: 0.6, delay: 0.1 }}
                 style={{
                   color: 'white',
@@ -443,46 +460,12 @@ export default function HomePage(): React.JSX.Element {
                   fontWeight: '300',
                   fontFamily: 'Helvetica, Arial, sans-serif',
                   textTransform: 'uppercase',
-                  letterSpacing: '2px',
-                  marginRight: '2rem' // Memberi jarak dari tanda \
+                  letterSpacing: '2px'
                 }}
               >
                 MENURU
               </motion.div>
-
-              {/* Tanda \ (backslash) di kanan dengan animasi GSAP */}
-              <motion.div
-                ref={minusSignRef}
-                initial={{ x: 50, opacity: 0 }}
-                animate={{ x: 0, opacity: 1 }}
-                transition={{ duration: 0.6, delay: 0.2 }}
-                onClick={handleCloseMenuruFullPage}
-                style={{
-                  width: isMobile ? '40px' : '50px',
-                  height: isMobile ? '40px' : '50px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  cursor: 'pointer',
-                  position: 'relative',
-                  marginLeft: 'auto' // Posisikan ke kanan
-                }}
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                {/* Garis diagonal (tanda \) */}
-                <div style={{
-                  position: 'absolute',
-                  width: isMobile ? '25px' : '30px',
-                  height: '3px',
-                  backgroundColor: 'white',
-                  borderRadius: '2px',
-                  transform: 'rotate(45deg)'
-                }} />
-              </motion.div>
             </div>
-
-            {/* Hapus teks MENURU besar di tengah */}
           </motion.div>
         )}
       </AnimatePresence>
@@ -1288,25 +1271,31 @@ export default function HomePage(): React.JSX.Element {
                     style={{
                       display: 'flex',
                       alignItems: 'center',
-                      gap: '0.5rem', // Jarak lebih dekat antara teks dan tanda +
+                      justifyContent: 'flex-end',
+                      gap: '0.5rem',
                       cursor: 'pointer',
-                      marginTop: isMobile ? '1rem' : '0'
+                      marginTop: isMobile ? '1rem' : '0',
+                      width: isMobile ? '100%' : 'auto'
                     }}
                     whileHover={{ x: 5 }}
                     whileTap={{ scale: 0.95 }}
                   >
-                    <div style={{
-                      color: isDarkMode ? 'white' : 'black',
-                      fontSize: isMobile ? '1.8rem' : '2rem',
-                      fontWeight: '300',
-                      fontFamily: 'Helvetica, Arial, sans-serif',
-                      textTransform: 'uppercase',
-                      letterSpacing: '2px'
-                    }}>
+                    <div 
+                      ref={menuruTextRef}
+                      style={{
+                        color: isDarkMode ? 'white' : 'black',
+                        fontSize: isMobile ? '1.8rem' : '2rem',
+                        fontWeight: '300',
+                        fontFamily: 'Helvetica, Arial, sans-serif',
+                        textTransform: 'uppercase',
+                        letterSpacing: '2px',
+                        position: 'relative'
+                      }}
+                    >
                       MENURU
                     </div>
                     
-                    {/* Simbol Plus (+) dengan animasi GSAP */}
+                    {/* Simbol Plus (+) yang berubah menjadi \ dengan animasi GSAP */}
                     <div 
                       ref={plusSignRef}
                       className="plus-sign" 
@@ -1316,24 +1305,27 @@ export default function HomePage(): React.JSX.Element {
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        position: 'relative'
+                        position: 'relative',
+                        marginLeft: '0.5rem'
                       }}
                     >
-                      {/* Garis vertikal */}
+                      {/* Garis vertikal (akan berotasi menjadi \) */}
                       <div style={{
                         position: 'absolute',
                         width: '2px',
                         height: isMobile ? '18px' : '20px',
                         backgroundColor: isDarkMode ? 'white' : 'black',
-                        borderRadius: '1px'
+                        borderRadius: '1px',
+                        transformOrigin: 'center center'
                       }} />
-                      {/* Garis horizontal */}
+                      {/* Garis horizontal (akan menghilang) */}
                       <div style={{
                         position: 'absolute',
                         width: isMobile ? '18px' : '20px',
                         height: '2px',
                         backgroundColor: isDarkMode ? 'white' : 'black',
-                        borderRadius: '1px'
+                        borderRadius: '1px',
+                        transformOrigin: 'center center'
                       }} />
                     </div>
                   </motion.div>
@@ -1368,7 +1360,7 @@ export default function HomePage(): React.JSX.Element {
                           key={index}
                           style={{
                             flex: 1,
-                            height: '12px', // GEMUK
+                            height: '12px',
                             backgroundColor: isDarkMode ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.2)',
                             borderRadius: '6px',
                             overflow: 'hidden',
@@ -1400,7 +1392,7 @@ export default function HomePage(): React.JSX.Element {
                         position: 'relative',
                         width: '100%',
                         maxWidth: '600px',
-                        height: isMobile ? '600px' : '900px', // LEBIH PANJANG KE BAWAH
+                        height: isMobile ? '600px' : '900px',
                         borderRadius: '15px',
                         overflow: 'hidden',
                         boxShadow: '0 8px 25px rgba(0,0,0,0.4)',
