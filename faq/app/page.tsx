@@ -27,7 +27,6 @@ export default function HomePage(): React.JSX.Element {
   const menuruButtonRef = useRef<HTMLDivElement>(null);
   const menuruTextRef = useRef<HTMLDivElement>(null);
   const plusSignRef = useRef<HTMLDivElement>(null);
-  const minusSignRef = useRef<HTMLDivElement>(null);
 
   // Animasi loading text
   const loadingTexts = [
@@ -128,9 +127,6 @@ export default function HomePage(): React.JSX.Element {
       if (plusSignRef.current) {
         gsap.killTweensOf(plusSignRef.current);
       }
-      if (minusSignRef.current) {
-        gsap.killTweensOf(minusSignRef.current);
-      }
     };
   }, [isMobile, showMenuruFullPage]);
 
@@ -140,17 +136,6 @@ export default function HomePage(): React.JSX.Element {
       // Animasi pulsing untuk tanda +
       gsap.to(plusSignRef.current, {
         scale: 1.1,
-        duration: 1.5,
-        repeat: -1,
-        yoyo: true,
-        ease: "power1.inOut"
-      });
-    }
-
-    if (minusSignRef.current && showMenuruFullPage) {
-      // Animasi subtle pulse untuk tanda \
-      gsap.to(minusSignRef.current, {
-        scale: 1.05,
         duration: 1.5,
         repeat: -1,
         yoyo: true,
@@ -267,26 +252,34 @@ export default function HomePage(): React.JSX.Element {
       
       // Animasi untuk tanda + berubah menjadi \
       if (plusSignRef.current) {
-        gsap.timeline()
-          .to(plusSignRef.current, {
-            rotation: 45,
-            duration: 0.3,
-            ease: "power2.out"
-          })
-          .to(plusSignRef.current.children[0], { // Garis vertikal
-            rotation: 45,
-            duration: 0.2,
-            ease: "power2.out"
-          }, "-=0.2")
-          .to(plusSignRef.current.children[1], { // Garis horizontal
-            scaleX: 0,
-            duration: 0.2,
-            ease: "power2.in"
-          }, "-=0.2")
-          .call(() => {
-            // Setelah animasi selesai, tampilkan tanda \
-            setMenuruExpanded(true);
-          });
+        const timeline = gsap.timeline();
+        
+        // Rotasi container untuk efek smooth
+        timeline.to(plusSignRef.current, {
+          rotation: 45,
+          duration: 0.3,
+          ease: "power2.out"
+        });
+        
+        // Animasikan garis individual
+        const verticalLine = plusSignRef.current.children[0] as HTMLElement;
+        const horizontalLine = plusSignRef.current.children[1] as HTMLElement;
+        
+        timeline.to(verticalLine, {
+          rotation: 45,
+          duration: 0.2,
+          ease: "power2.out"
+        }, "-=0.2");
+        
+        timeline.to(horizontalLine, {
+          scaleX: 0,
+          duration: 0.2,
+          ease: "power2.in"
+        }, "-=0.2");
+        
+        timeline.call(() => {
+          setMenuruExpanded(true);
+        });
       }
     }
   };
@@ -295,28 +288,38 @@ export default function HomePage(): React.JSX.Element {
   const handleCloseMenuruFullPage = () => {
     // Animasi untuk tanda \ kembali menjadi +
     if (plusSignRef.current) {
-      gsap.timeline()
-        .to(plusSignRef.current, {
-          rotation: 0,
-          duration: 0.3,
-          ease: "power2.out"
-        })
-        .to(plusSignRef.current.children[0], { // Garis vertikal
-          rotation: 0,
-          duration: 0.2,
-          ease: "power2.out"
-        }, "-=0.2")
-        .to(plusSignRef.current.children[1], { // Garis horizontal
-          scaleX: 1,
-          duration: 0.2,
-          ease: "power2.out"
-        }, "-=0.2")
-        .call(() => {
-          setMenuruExpanded(false);
-          setTimeout(() => {
-            setShowMenuruFullPage(false);
-          }, 200);
-        });
+      const timeline = gsap.timeline();
+      
+      const verticalLine = plusSignRef.current.children[0] as HTMLElement;
+      const horizontalLine = plusSignRef.current.children[1] as HTMLElement;
+      
+      // Munculkan kembali garis horizontal
+      timeline.to(horizontalLine, {
+        scaleX: 1,
+        duration: 0.2,
+        ease: "power2.out"
+      });
+      
+      // Rotasi kembali garis vertikal
+      timeline.to(verticalLine, {
+        rotation: 0,
+        duration: 0.2,
+        ease: "power2.out"
+      }, "-=0.1");
+      
+      // Rotasi container kembali
+      timeline.to(plusSignRef.current, {
+        rotation: 0,
+        duration: 0.3,
+        ease: "power2.out"
+      }, "-=0.2");
+      
+      timeline.call(() => {
+        setMenuruExpanded(false);
+        setTimeout(() => {
+          setShowMenuruFullPage(false);
+        }, 200);
+      });
     } else {
       setMenuruExpanded(false);
       setTimeout(() => {
@@ -438,25 +441,26 @@ export default function HomePage(): React.JSX.Element {
               justifyContent: 'center'
             }}
           >
-            {/* Header dengan teks MENURU di tengah atas */}
+            {/* Header dengan teks MENURU di kanan atas (sejajar dengan tombol + di halaman utama) */}
             <div style={{
               position: 'absolute',
-              top: isMobile ? '1.5rem' : '2rem',
+              top: isMobile ? '3.5rem' : '4.5rem', // Sama dengan posisi header di halaman utama
               left: 0,
               width: '100%',
+              padding: isMobile ? '1rem' : '2rem', // Sama dengan padding header utama
               display: 'flex',
-              justifyContent: 'center',
+              justifyContent: 'flex-end', // Posisi ke kanan
               alignItems: 'center',
               boxSizing: 'border-box'
             }}>
-              {/* Teks MENURU di tengah */}
+              {/* Teks MENURU di kanan atas */}
               <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.6, delay: 0.1 }}
                 style={{
                   color: 'white',
-                  fontSize: isMobile ? '2rem' : '2.5rem',
+                  fontSize: isMobile ? '1.5rem' : '2.5rem', // Sama dengan ukuran di header utama
                   fontWeight: '300',
                   fontFamily: 'Helvetica, Arial, sans-serif',
                   textTransform: 'uppercase',
