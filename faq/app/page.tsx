@@ -43,6 +43,7 @@ export default function HomePage(): React.JSX.Element {
 
   // Data untuk Roles
   const rolesData = [
+    { title: "My Roles", description: "Branding & Creative Direction" },
     { title: "Design", description: "Visual identity & UI/UX" },
     { title: "Development", description: "Frontend & Backend" },
     { title: "Features", description: "Functionality & Integration" }
@@ -395,7 +396,8 @@ export default function HomePage(): React.JSX.Element {
               {/* Container untuk MENURU, angka, dan roles */}
               <div style={{
                 display: 'flex',
-                flexDirection: 'column'
+                flexDirection: 'column',
+                width: '100%'
               }}>
                 {/* Teks MENURU \ di kiri */}
                 <motion.div
@@ -415,7 +417,7 @@ export default function HomePage(): React.JSX.Element {
                   MENURU \
                 </motion.div>
 
-                {/* Angka 99887 dengan jarak lebih dari judul */}
+                {/* Angka 99887 dengan jarak dari judul */}
                 <motion.div
                   initial={{ x: -50, opacity: 0 }}
                   animate={{ x: 0, opacity: 1 }}
@@ -426,13 +428,14 @@ export default function HomePage(): React.JSX.Element {
                     fontWeight: '400',
                     fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
                     letterSpacing: '2px',
-                    marginTop: isMobile ? '1.5rem' : '2rem' // JARAK LEBIH DARI JUDUL
+                    marginTop: isMobile ? '1.5rem' : '2rem',
+                    marginBottom: isMobile ? '2rem' : '3rem' // JARAK KE MY ROLES
                   }}
                 >
                   99887
                 </motion.div>
 
-                {/* My Roles dengan Design, Development, Features - SEJAJAR DENGAN ANGKA */}
+                {/* Roles List dengan jarak yang cukup */}
                 <motion.div
                   initial={{ x: -50, opacity: 0 }}
                   animate={{ x: 0, opacity: 1 }}
@@ -440,63 +443,126 @@ export default function HomePage(): React.JSX.Element {
                   style={{
                     display: 'flex',
                     flexDirection: 'column',
-                    gap: isMobile ? '0.8rem' : '1rem',
-                    marginTop: isMobile ? '1rem' : '1.5rem' // JARAK ANTARA ANGKA DAN MY ROLES
+                    gap: isMobile ? '1.5rem' : '2rem' // JARAK ANTARA SETIAP ITEM
                   }}
                 >
-                  <div style={{
+                  {rolesData.map((role, index) => (
+                    <motion.div
+                      key={role.title}
+                      initial={{ x: -30, opacity: 0 }}
+                      animate={{ x: 0, opacity: 1 }}
+                      transition={{ duration: 0.4, delay: 0.4 + (index * 0.1) }}
+                      style={{
+                        display: 'flex',
+                        flexDirection: 'column'
+                      }}
+                    >
+                      {/* Role title */}
+                      <div style={{
+                        color: 'white',
+                        fontSize: isMobile ? '1rem' : '1.3rem',
+                        fontWeight: '500',
+                        fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
+                        letterSpacing: '0.5px',
+                        marginBottom: '0.3rem'
+                      }}>
+                        {role.title}
+                      </div>
+                      
+                      {/* Role description */}
+                      <div style={{
+                        color: 'white',
+                        fontSize: isMobile ? '0.9rem' : '1rem',
+                        fontWeight: '400',
+                        fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
+                        opacity: 0.9
+                      }}>
+                        {role.description}
+                      </div>
+                    </motion.div>
+                  ))}
+                </motion.div>
+              </div>
+
+              {/* Bagian kanan dengan judul di tengah, deskripsi di bawah, foto di kanan */}
+              <div style={{
+                flex: 1,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                marginLeft: isMobile ? '1rem' : '3rem'
+              }}>
+                {/* Judul MENURU di tengah */}
+                <motion.div
+                  initial={{ y: -30, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ duration: 0.6, delay: 0.2 }}
+                  style={{
+                    color: 'white',
+                    fontSize: isMobile ? '1.8rem' : '2.5rem',
+                    fontWeight: '300',
+                    fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
+                    textTransform: 'uppercase',
+                    letterSpacing: '2px',
+                    textAlign: 'center',
+                    marginBottom: isMobile ? '1rem' : '1.5rem'
+                  }}
+                >
+                  MENURU
+                </motion.div>
+
+                {/* Deskripsi di bawah judul - rata kanan */}
+                <motion.div
+                  initial={{ y: -20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ duration: 0.6, delay: 0.3 }}
+                  style={{
                     color: 'white',
                     fontSize: isMobile ? '0.9rem' : '1.1rem',
                     fontWeight: '400',
                     fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
-                    letterSpacing: '1px',
-                    textTransform: 'uppercase'
-                  }}>
-                    My Roles
-                  </div>
-                  
-                  {/* Roles List - TANPA GARIS VERTIKAL, BIASA SAJA */}
-                  <div style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: isMobile ? '0.8rem' : '1rem'
-                  }}>
-                    {rolesData.map((role, index) => (
-                      <motion.div
-                        key={role.title}
-                        initial={{ x: -30, opacity: 0 }}
-                        animate={{ x: 0, opacity: 1 }}
-                        transition={{ duration: 0.4, delay: 0.4 + (index * 0.1) }}
-                        style={{
-                          display: 'flex',
-                          flexDirection: 'column'
-                        }}
-                      >
-                        {/* Role title - BIASA SAJA */}
-                        <div style={{
-                          color: 'white',
-                          fontSize: isMobile ? '1rem' : '1.3rem',
-                          fontWeight: '500',
-                          fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
-                          letterSpacing: '0.5px'
-                        }}>
-                          {role.title}
-                        </div>
-                        
-                        {/* Role description - BIASA SAJA, TIDAK PUDAR */}
-                        <div style={{
-                          color: 'white', // TIDAK PUDAR, PUTIH BIASA
-                          fontSize: isMobile ? '0.9rem' : '1rem',
-                          fontWeight: '400',
-                          fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
-                          marginTop: '0.2rem',
-                          opacity: 0.9
-                        }}>
-                          {role.description}
-                        </div>
-                      </motion.div>
-                    ))}
-                  </div>
+                    lineHeight: 1.5,
+                    textAlign: 'right',
+                    maxWidth: isMobile ? '200px' : '300px',
+                    marginBottom: isMobile ? '1rem' : '1.5rem'
+                  }}
+                >
+                  A personal branding journal documenting emotional journeys and creative exploration through visual storytelling and self-discovery narratives.
+                </motion.div>
+
+                {/* Foto di bawah deskripsi - rata kanan */}
+                <motion.div
+                  initial={{ y: 30, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ duration: 0.6, delay: 0.4 }}
+                  style={{
+                    width: isMobile ? '150px' : '250px',
+                    height: isMobile ? '200px' : '350px',
+                    overflow: 'hidden',
+                    borderRadius: '10px',
+                    boxShadow: '0 10px 30px rgba(0,0,0,0.5)',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    alignSelf: 'flex-end'
+                  }}
+                >
+                  <img 
+                    src="images/5.jpg" 
+                    alt="Menuru Visual"
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      display: 'block',
+                      objectFit: 'cover'
+                    }}
+                    onError={(e) => {
+                      e.currentTarget.style.backgroundColor = '#333';
+                      e.currentTarget.style.display = 'flex';
+                      e.currentTarget.style.alignItems = 'center';
+                      e.currentTarget.style.justifyContent = 'center';
+                      e.currentTarget.style.color = 'white';
+                      e.currentTarget.innerHTML = '<div style="padding: 1rem; text-align: center;">Menuru Image</div>';
+                    }}
+                  />
                 </motion.div>
               </div>
 
@@ -513,8 +579,9 @@ export default function HomePage(): React.JSX.Element {
                   alignItems: 'center',
                   justifyContent: 'center',
                   cursor: 'pointer',
-                  position: 'relative',
-                  marginTop: isMobile ? '0' : '0.5rem'
+                  position: 'absolute',
+                  right: isMobile ? '1rem' : '2rem',
+                  top: isMobile ? '0' : '0.5rem'
                 }}
                 whileHover={{ scale: 1.2 }}
                 whileTap={{ scale: 0.95 }}
