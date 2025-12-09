@@ -376,12 +376,10 @@ export default function HomePage(): React.JSX.Element {
               backgroundColor: 'black',
               zIndex: 9998,
               display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center'
+              flexDirection: 'column'
             }}
           >
-            {/* Header dengan teks MENURU dan tanda \ di sebelah kanan */}
+            {/* Header dengan MENURU \ dan angka di kiri atas */}
             <div style={{
               position: 'absolute',
               top: isMobile ? '3.5rem' : '4.5rem',
@@ -393,11 +391,10 @@ export default function HomePage(): React.JSX.Element {
               alignItems: 'flex-start',
               boxSizing: 'border-box'
             }}>
-              {/* Container untuk MENURU, angka, dan roles - di kiri */}
+              {/* Bagian kiri - MENURU \ dan angka */}
               <div style={{
                 display: 'flex',
-                flexDirection: 'column',
-                width: isMobile ? '45%' : '40%'
+                flexDirection: 'column'
               }}>
                 {/* Teks MENURU \ di kiri */}
                 <motion.div
@@ -428,143 +425,10 @@ export default function HomePage(): React.JSX.Element {
                     fontWeight: '400',
                     fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
                     letterSpacing: '2px',
-                    marginTop: isMobile ? '1.5rem' : '2rem',
-                    marginBottom: isMobile ? '2rem' : '3rem'
+                    marginTop: isMobile ? '1.5rem' : '2rem'
                   }}
                 >
                   99887
-                </motion.div>
-
-                {/* Roles List dengan jarak yang cukup */}
-                <motion.div
-                  initial={{ x: -50, opacity: 0 }}
-                  animate={{ x: 0, opacity: 1 }}
-                  transition={{ duration: 0.6, delay: 0.3 }}
-                  style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: isMobile ? '1.5rem' : '2rem'
-                  }}
-                >
-                  {rolesData.map((role, index) => (
-                    <motion.div
-                      key={role.title}
-                      initial={{ x: -30, opacity: 0 }}
-                      animate={{ x: 0, opacity: 1 }}
-                      transition={{ duration: 0.4, delay: 0.4 + (index * 0.1) }}
-                      style={{
-                        display: 'flex',
-                        flexDirection: 'column'
-                      }}
-                    >
-                      {/* Role title */}
-                      <div style={{
-                        color: 'white',
-                        fontSize: isMobile ? '1rem' : '1.3rem',
-                        fontWeight: '500',
-                        fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
-                        letterSpacing: '0.5px',
-                        marginBottom: '0.3rem'
-                      }}>
-                        {role.title}
-                      </div>
-                      
-                      {/* Role description */}
-                      <div style={{
-                        color: 'white',
-                        fontSize: isMobile ? '0.9rem' : '1rem',
-                        fontWeight: '400',
-                        fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
-                        opacity: 0.9
-                      }}>
-                        {role.description}
-                      </div>
-                    </motion.div>
-                  ))}
-                </motion.div>
-              </div>
-
-              {/* Container untuk bagian tengah - JUDUL, DESKRIPSI, FOTO */}
-              <div style={{
-                flex: 1,
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                marginLeft: isMobile ? '1rem' : '3rem',
-                marginRight: isMobile ? '1rem' : '3rem'
-              }}>
-                {/* Judul MENURU di tengah - BESAR */}
-                <motion.div
-                  initial={{ y: -30, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ duration: 0.6, delay: 0.2 }}
-                  style={{
-                    color: 'white',
-                    fontSize: isMobile ? '3.5rem' : '5rem',
-                    fontWeight: '300',
-                    fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
-                    textTransform: 'uppercase',
-                    letterSpacing: '4px',
-                    textAlign: 'center',
-                    marginBottom: isMobile ? '2rem' : '3rem' // JARAK ANTAR JUDUL DAN DESKRIPSI
-                  }}
-                >
-                  MENURU
-                </motion.div>
-
-                {/* Deskripsi di bawah judul - BESAR */}
-                <motion.div
-                  initial={{ y: -20, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ duration: 0.6, delay: 0.3 }}
-                  style={{
-                    color: 'white',
-                    fontSize: isMobile ? '1.2rem' : '1.8rem',
-                    fontWeight: '400',
-                    fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
-                    lineHeight: 1.6,
-                    textAlign: 'center',
-                    maxWidth: isMobile ? '90%' : '70%',
-                    marginBottom: isMobile ? '2rem' : '3rem' // JARAK ANTAR DESKRIPSI DAN FOTO
-                  }}
-                >
-                  A personal branding journal documenting emotional journeys and creative exploration through visual storytelling and self-discovery narratives.
-                </motion.div>
-
-                {/* Foto di bawah deskripsi - BESAR */}
-                <motion.div
-                  initial={{ y: 30, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ duration: 0.6, delay: 0.4 }}
-                  style={{
-                    width: isMobile ? '90%' : '70%',
-                    height: isMobile ? '300px' : '500px',
-                    overflow: 'hidden',
-                    borderRadius: '15px',
-                    boxShadow: '0 15px 40px rgba(0,0,0,0.7)',
-                    border: '2px solid rgba(255,255,255,0.15)',
-                    marginTop: isMobile ? '1rem' : '1.5rem'
-                  }}
-                >
-                  <img 
-                    src="images/5.jpg" 
-                    alt="Menuru Visual"
-                    style={{
-                      width: '100%',
-                      height: '100%',
-                      display: 'block',
-                      objectFit: 'cover'
-                    }}
-                    onError={(e) => {
-                      e.currentTarget.style.backgroundColor = '#333';
-                      e.currentTarget.style.display = 'flex';
-                      e.currentTarget.style.alignItems = 'center';
-                      e.currentTarget.style.justifyContent = 'center';
-                      e.currentTarget.style.color = 'white';
-                      e.currentTarget.innerHTML = '<div style="padding: 1rem; text-align: center;">Menuru Image</div>';
-                    }}
-                  />
                 </motion.div>
               </div>
 
@@ -601,6 +465,123 @@ export default function HomePage(): React.JSX.Element {
                     transformOrigin: 'center'
                   }}
                 />
+              </motion.div>
+            </div>
+
+            {/* KONTEN UTAMA DI TENGAH - DIPISAH DARI HEADER */}
+            <div style={{
+              flex: 1,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: isMobile ? '1rem' : '2rem',
+              width: '100%',
+              marginTop: isMobile ? '6rem' : '8rem'
+            }}>
+              {/* Deskripsi di tengah - BESAR */}
+              <motion.div
+                initial={{ y: -20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ duration: 0.6, delay: 0.3 }}
+                style={{
+                  color: 'white',
+                  fontSize: isMobile ? '1.2rem' : '1.8rem',
+                  fontWeight: '400',
+                  fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
+                  lineHeight: 1.6,
+                  textAlign: 'center',
+                  maxWidth: isMobile ? '90%' : '70%',
+                  marginBottom: isMobile ? '3rem' : '4rem'
+                }}
+              >
+                A personal branding journal documenting emotional journeys and creative exploration through visual storytelling and self-discovery narratives.
+              </motion.div>
+
+              {/* Foto di bawah deskripsi - BESAR */}
+              <motion.div
+                initial={{ y: 30, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ duration: 0.6, delay: 0.4 }}
+                style={{
+                  width: isMobile ? '90%' : '70%',
+                  height: isMobile ? '300px' : '500px',
+                  overflow: 'hidden',
+                  borderRadius: '15px',
+                  boxShadow: '0 15px 40px rgba(0,0,0,0.7)',
+                  border: '2px solid rgba(255,255,255,0.15)'
+                }}
+              >
+                <img 
+                  src="images/5.jpg" 
+                  alt="Menuru Visual"
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    display: 'block',
+                    objectFit: 'cover'
+                  }}
+                  onError={(e) => {
+                    e.currentTarget.style.backgroundColor = '#333';
+                    e.currentTarget.style.display = 'flex';
+                    e.currentTarget.style.alignItems = 'center';
+                    e.currentTarget.style.justifyContent = 'center';
+                    e.currentTarget.style.color = 'white';
+                    e.currentTarget.innerHTML = '<div style="padding: 1rem; text-align: center;">Menuru Image</div>';
+                  }}
+                />
+              </motion.div>
+
+              {/* Roles List di bagian bawah */}
+              <motion.div
+                initial={{ y: 50, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ duration: 0.6, delay: 0.5 }}
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: isMobile ? '1.5rem' : '2rem',
+                  marginTop: isMobile ? '3rem' : '4rem',
+                  maxWidth: isMobile ? '90%' : '60%'
+                }}
+              >
+                {rolesData.map((role, index) => (
+                  <motion.div
+                    key={role.title}
+                    initial={{ x: -30, opacity: 0 }}
+                    animate={{ x: 0, opacity: 1 }}
+                    transition={{ duration: 0.4, delay: 0.6 + (index * 0.1) }}
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      textAlign: 'center'
+                    }}
+                  >
+                    {/* Role title */}
+                    <div style={{
+                      color: 'white',
+                      fontSize: isMobile ? '1rem' : '1.3rem',
+                      fontWeight: '500',
+                      fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
+                      letterSpacing: '0.5px',
+                      marginBottom: '0.3rem'
+                    }}>
+                      {role.title}
+                    </div>
+                    
+                    {/* Role description */}
+                    <div style={{
+                      color: 'white',
+                      fontSize: isMobile ? '0.9rem' : '1rem',
+                      fontWeight: '400',
+                      fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
+                      opacity: 0.9
+                    }}>
+                      {role.description}
+                    </div>
+                  </motion.div>
+                ))}
               </motion.div>
             </div>
           </motion.div>
