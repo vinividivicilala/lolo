@@ -18,7 +18,6 @@ export default function HomePage(): React.JSX.Element {
   const [isProgressActive, setIsProgressActive] = useState(true);
   const [showCookieNotification, setShowCookieNotification] = useState(false);
   const [showMenuruFullPage, setShowMenuruFullPage] = useState(false);
-  const [isBackslashMode, setIsBackslashMode] = useState(false);
   const headerRef = useRef<HTMLDivElement>(null);
   const topNavRef = useRef<HTMLDivElement>(null);
   const scrollTextRef = useRef<HTMLDivElement>(null);
@@ -140,10 +139,13 @@ export default function HomePage(): React.JSX.Element {
     };
   }, [isMobile, showMenuruFullPage]);
 
-  // Animasi GSAP untuk tombol Menuru
+  // Animasi GSAP untuk tanda + di tombol Menuru (hanya pulsing, tidak berputar)
   useEffect(() => {
     if (plusSignRef.current && !showMenuruFullPage) {
-      // Animasi pulsing untuk tanda +
+      // Hapus animasi sebelumnya
+      gsap.killTweensOf(plusSignRef.current);
+      
+      // Animasi pulsing untuk tanda + (hanya di tombol utama)
       gsap.to(plusSignRef.current, {
         scale: 1.1,
         duration: 1.5,
@@ -154,52 +156,21 @@ export default function HomePage(): React.JSX.Element {
     }
   }, [showMenuruFullPage]);
 
-  // Animasi GSAP untuk tanda + dan \ di halaman full page
+  // Animasi GSAP untuk tanda \ di halaman full page
   useEffect(() => {
-    if (showMenuruFullPage) {
+    if (backslashRef.current && showMenuruFullPage) {
       // Hapus animasi sebelumnya
-      if (plusSignRef.current) gsap.killTweensOf(plusSignRef.current);
-      if (backslashRef.current) gsap.killTweensOf(backslashRef.current);
+      gsap.killTweensOf(backslashRef.current);
       
-      if (isBackslashMode) {
-        // Animasi untuk tanda \ (berputar seperti +)
-        if (backslashRef.current) {
-          gsap.to(backslashRef.current, {
-            rotation: 360,
-            duration: 8,
-            repeat: -1,
-            ease: "linear"
-          });
-          
-          gsap.to(backslashRef.current, {
-            opacity: 0.7,
-            duration: 1,
-            repeat: -1,
-            yoyo: true,
-            ease: "power1.inOut"
-          });
-        }
-      } else {
-        // Animasi untuk tanda + (berputar seperti \)
-        if (plusSignRef.current) {
-          gsap.to(plusSignRef.current, {
-            rotation: 360,
-            duration: 8,
-            repeat: -1,
-            ease: "linear"
-          });
-          
-          gsap.to(plusSignRef.current, {
-            opacity: 0.7,
-            duration: 1,
-            repeat: -1,
-            yoyo: true,
-            ease: "power1.inOut"
-          });
-        }
-      }
+      // Animasi continuous rotation untuk tanda \ (360 derajat)
+      gsap.to(backslashRef.current, {
+        rotation: 360,
+        duration: 8,
+        repeat: -1,
+        ease: "linear"
+      });
     }
-  }, [showMenuruFullPage, isBackslashMode]);
+  }, [showMenuruFullPage]);
 
   // Fungsi untuk handle cookie acceptance
   const handleAcceptCookies = () => {
@@ -304,7 +275,6 @@ export default function HomePage(): React.JSX.Element {
   // Fungsi untuk toggle halaman full page MENURU
   const toggleMenuruFullPage = () => {
     setShowMenuruFullPage(!showMenuruFullPage);
-    setIsBackslashMode(false); // Reset ke mode plus saat membuka
   };
 
   // Handler untuk klik tombol MENURU
@@ -312,14 +282,9 @@ export default function HomePage(): React.JSX.Element {
     toggleMenuruFullPage();
   };
 
-  // Fungsi untuk menutup halaman full page MENURU
+  // Fungsi untuk menutup halaman full page MENURU (klik tanda \ untuk kembali)
   const handleCloseMenuruFullPage = () => {
     setShowMenuruFullPage(false);
-  };
-
-  // Fungsi untuk toggle antara tanda + dan \
-  const toggleSignMode = () => {
-    setIsBackslashMode(!isBackslashMode);
   };
 
   // Data untuk halaman Index
@@ -415,7 +380,7 @@ export default function HomePage(): React.JSX.Element {
               justifyContent: 'center'
             }}
           >
-            {/* Header dengan teks MENURU dan tanda +/\ di sebelah kanan */}
+            {/* Header dengan teks MENURU dan tanda \ di sebelah kanan */}
             <div style={{
               position: 'absolute',
               top: isMobile ? '3.5rem' : '4.5rem',
@@ -430,10 +395,9 @@ export default function HomePage(): React.JSX.Element {
               {/* Container untuk MENURU, angka, dan roles */}
               <div style={{
                 display: 'flex',
-                flexDirection: 'column',
-                gap: '1.5rem'
+                flexDirection: 'column'
               }}>
-                {/* Teks MENURU di kiri */}
+                {/* Teks MENURU \ di kiri */}
                 <motion.div
                   initial={{ x: -50, opacity: 0 }}
                   animate={{ x: 0, opacity: 1 }}
@@ -448,10 +412,10 @@ export default function HomePage(): React.JSX.Element {
                     lineHeight: 1
                   }}
                 >
-                  MENURU
+                  MENURU \
                 </motion.div>
 
-                {/* Angka 99887 */}
+                {/* Angka 99887 dengan jarak lebih dari judul */}
                 <motion.div
                   initial={{ x: -50, opacity: 0 }}
                   animate={{ x: 0, opacity: 1 }}
@@ -462,14 +426,13 @@ export default function HomePage(): React.JSX.Element {
                     fontWeight: '400',
                     fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
                     letterSpacing: '2px',
-                    opacity: 0.9,
-                    marginTop: '0.5rem'
+                    marginTop: isMobile ? '1.5rem' : '2rem' // JARAK LEBIH DARI JUDUL
                   }}
                 >
                   99887
                 </motion.div>
 
-                {/* My Roles dengan Design, Development, Features */}
+                {/* My Roles dengan Design, Development, Features - SEJAJAR DENGAN ANGKA */}
                 <motion.div
                   initial={{ x: -50, opacity: 0 }}
                   animate={{ x: 0, opacity: 1 }}
@@ -477,27 +440,26 @@ export default function HomePage(): React.JSX.Element {
                   style={{
                     display: 'flex',
                     flexDirection: 'column',
-                    gap: '0.8rem',
-                    marginTop: '1rem'
+                    gap: isMobile ? '0.8rem' : '1rem',
+                    marginTop: isMobile ? '1rem' : '1.5rem' // JARAK ANTARA ANGKA DAN MY ROLES
                   }}
                 >
                   <div style={{
                     color: 'white',
-                    fontSize: isMobile ? '1rem' : '1.2rem',
+                    fontSize: isMobile ? '0.9rem' : '1.1rem',
                     fontWeight: '400',
                     fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
                     letterSpacing: '1px',
-                    opacity: 0.8,
-                    marginBottom: '0.5rem'
+                    textTransform: 'uppercase'
                   }}>
                     My Roles
                   </div>
                   
-                  {/* Roles List */}
+                  {/* Roles List - TANPA GARIS VERTIKAL, BIASA SAJA */}
                   <div style={{
                     display: 'flex',
                     flexDirection: 'column',
-                    gap: '0.5rem'
+                    gap: isMobile ? '0.8rem' : '1rem'
                   }}>
                     {rolesData.map((role, index) => (
                       <motion.div
@@ -507,39 +469,28 @@ export default function HomePage(): React.JSX.Element {
                         transition={{ duration: 0.4, delay: 0.4 + (index * 0.1) }}
                         style={{
                           display: 'flex',
-                          flexDirection: 'column',
-                          paddingLeft: '1rem',
-                          position: 'relative'
+                          flexDirection: 'column'
                         }}
                       >
-                        {/* Vertical line */}
-                        <div style={{
-                          position: 'absolute',
-                          left: 0,
-                          top: 0,
-                          bottom: 0,
-                          width: '1px',
-                          backgroundColor: 'rgba(255, 255, 255, 0.3)'
-                        }} />
-                        
-                        {/* Role title */}
+                        {/* Role title - BIASA SAJA */}
                         <div style={{
                           color: 'white',
                           fontSize: isMobile ? '1rem' : '1.3rem',
                           fontWeight: '500',
                           fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
-                          letterSpacing: '1px'
+                          letterSpacing: '0.5px'
                         }}>
                           {role.title}
                         </div>
                         
-                        {/* Role description */}
+                        {/* Role description - BIASA SAJA, TIDAK PUDAR */}
                         <div style={{
-                          color: 'rgba(255, 255, 255, 0.6)',
+                          color: 'white', // TIDAK PUDAR, PUTIH BIASA
                           fontSize: isMobile ? '0.9rem' : '1rem',
                           fontWeight: '400',
                           fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
-                          marginTop: '0.2rem'
+                          marginTop: '0.2rem',
+                          opacity: 0.9
                         }}>
                           {role.description}
                         </div>
@@ -549,12 +500,12 @@ export default function HomePage(): React.JSX.Element {
                 </motion.div>
               </div>
 
-              {/* Tanda + atau \ di kanan dengan animasi GSAP */}
+              {/* Tanda \ di kanan dengan animasi GSAP - KLIK UNTUK KEMBALI */}
               <motion.div
                 initial={{ x: 50, opacity: 0 }}
                 animate={{ x: 0, opacity: 1 }}
                 transition={{ duration: 0.6, delay: 0.2 }}
-                onClick={toggleSignMode}
+                onClick={handleCloseMenuruFullPage}
                 style={{
                   width: isMobile ? '40px' : '50px',
                   height: isMobile ? '40px' : '50px',
@@ -568,39 +519,7 @@ export default function HomePage(): React.JSX.Element {
                 whileHover={{ scale: 1.2 }}
                 whileTap={{ scale: 0.95 }}
               >
-                {/* Tanda + (plus) */}
-                <div 
-                  ref={plusSignRef}
-                  style={{
-                    position: 'absolute',
-                    width: isMobile ? '30px' : '40px',
-                    height: isMobile ? '30px' : '40px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    opacity: isBackslashMode ? 0 : 1,
-                    transition: 'opacity 0.3s ease'
-                  }}
-                >
-                  {/* Garis vertikal */}
-                  <div style={{
-                    position: 'absolute',
-                    width: '2px',
-                    height: isMobile ? '20px' : '25px',
-                    backgroundColor: 'white',
-                    borderRadius: '1px'
-                  }} />
-                  {/* Garis horizontal */}
-                  <div style={{
-                    position: 'absolute',
-                    width: isMobile ? '20px' : '25px',
-                    height: '2px',
-                    backgroundColor: 'white',
-                    borderRadius: '1px'
-                  }} />
-                </div>
-                
-                {/* Tanda \ (backslash) */}
+                {/* Tanda \ (backslash) dengan animasi GSAP */}
                 <div 
                   ref={backslashRef}
                   style={{
@@ -610,9 +529,7 @@ export default function HomePage(): React.JSX.Element {
                     backgroundColor: 'white',
                     borderRadius: '2px',
                     transform: 'rotate(45deg)',
-                    transformOrigin: 'center',
-                    opacity: isBackslashMode ? 1 : 0,
-                    transition: 'opacity 0.3s ease'
+                    transformOrigin: 'center'
                   }}
                 />
               </motion.div>
@@ -1443,7 +1360,7 @@ export default function HomePage(): React.JSX.Element {
                       MENURU
                     </div>
                     
-                    {/* Simbol Plus (+) dengan animasi GSAP */}
+                    {/* Simbol Plus (+) dengan animasi GSAP (hanya pulsing) */}
                     <div 
                       ref={plusSignRef}
                       className="plus-sign" 
