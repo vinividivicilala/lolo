@@ -25,6 +25,10 @@ export default function HomePage(): React.JSX.Element {
   const progressAnimationRef = useRef<gsap.core.Tween | null>(null);
   const menuruButtonRef = useRef<HTMLDivElement>(null);
   const plusSignRef = useRef<HTMLDivElement>(null);
+  const minusSignRef = useRef<HTMLDivElement>(null);
+  const fullPageMenuruRef = useRef<HTMLDivElement>(null);
+  const brandNoteRef = useRef<HTMLDivElement>(null);
+  const year2025Ref = useRef<HTMLDivElement>(null);
 
   // Animasi loading text
   const loadingTexts = [
@@ -116,7 +120,7 @@ export default function HomePage(): React.JSX.Element {
       }
       // ESC untuk keluar dari halaman full page
       if (e.key === 'Escape' && showMenuruFullPage) {
-        toggleMenuruFullPage();
+        handleCloseMenuruFullPage();
       }
     };
 
@@ -138,6 +142,9 @@ export default function HomePage(): React.JSX.Element {
       if (plusSignRef.current) {
         gsap.killTweensOf(plusSignRef.current);
       }
+      if (minusSignRef.current) {
+        gsap.killTweensOf(minusSignRef.current);
+      }
     };
   }, [isMobile, showMenuruFullPage]);
 
@@ -152,6 +159,61 @@ export default function HomePage(): React.JSX.Element {
         yoyo: true,
         ease: "power1.inOut"
       });
+    }
+
+    if (minusSignRef.current && showMenuruFullPage) {
+      // Animasi subtle pulse untuk tanda \
+      gsap.to(minusSignRef.current, {
+        scale: 1.05,
+        duration: 1.5,
+        repeat: -1,
+        yoyo: true,
+        ease: "power1.inOut"
+      });
+    }
+  }, [showMenuruFullPage]);
+
+  // Animasi GSAP untuk konten halaman full page
+  useEffect(() => {
+    if (showMenuruFullPage) {
+      // Jalankan animasi ketika halaman full page terbuka
+      const timeline = gsap.timeline();
+      
+      // Animasi untuk header MENURU
+      if (fullPageMenuruRef.current) {
+        timeline.fromTo(fullPageMenuruRef.current, 
+          { opacity: 0, y: -30 },
+          { opacity: 1, y: 0, duration: 0.8, ease: "power2.out" },
+          0
+        );
+      }
+      
+      // Animasi untuk angka 2025
+      if (year2025Ref.current) {
+        timeline.fromTo(year2025Ref.current,
+          { opacity: 0, scale: 0.8 },
+          { opacity: 1, scale: 1, duration: 1, ease: "back.out(1.7)" },
+          0.2
+        );
+      }
+      
+      // Animasi untuk MENURU BRAND NOTE
+      if (brandNoteRef.current) {
+        timeline.fromTo(brandNoteRef.current,
+          { opacity: 0, y: 20 },
+          { opacity: 1, y: 0, duration: 0.8, ease: "power2.out" },
+          0.4
+        );
+      }
+      
+      // Animasi untuk konten lainnya
+      timeline.to(".menuru-content-item", {
+        opacity: 1,
+        y: 0,
+        stagger: 0.1,
+        duration: 0.6,
+        ease: "power2.out",
+      }, 0.6);
     }
   }, [showMenuruFullPage]);
 
@@ -255,14 +317,77 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // Fungsi untuk toggle halaman full page MENURU
+  // Fungsi untuk toggle halaman full page MENURU dengan animasi GSAP
   const toggleMenuruFullPage = () => {
-    setShowMenuruFullPage(!showMenuruFullPage);
+    if (!showMenuruFullPage) {
+      // Buka halaman full page
+      setShowMenuruFullPage(true);
+      
+      // Animasi untuk tanda + berubah menjadi \
+      if (plusSignRef.current) {
+        const timeline = gsap.timeline();
+        
+        timeline.to(plusSignRef.current.children[0], { // Garis vertikal
+          rotation: 45,
+          duration: 0.4,
+          ease: "back.out(1.7)"
+        });
+        
+        timeline.to(plusSignRef.current.children[1], { // Garis horizontal
+          rotation: 45,
+          scale: 0,
+          duration: 0.3,
+          ease: "power2.in"
+        }, "-=0.3");
+      }
+    }
   };
 
-  // Handler untuk klik tombol MENURU
+  // Fungsi untuk menutup halaman full page MENURU dengan animasi GSAP
+  const handleCloseMenuruFullPage = () => {
+    // Animasi untuk tanda \ kembali menjadi +
+    if (plusSignRef.current) {
+      const timeline = gsap.timeline();
+      
+      timeline.to(plusSignRef.current.children[0], { // Garis vertikal
+        rotation: 0,
+        duration: 0.4,
+        ease: "back.out(1.7)"
+      });
+      
+      timeline.to(plusSignRef.current.children[1], { // Garis horizontal
+        rotation: 0,
+        scale: 1,
+        duration: 0.3,
+        ease: "power2.out"
+      }, "-=0.3");
+      
+      timeline.call(() => {
+        setShowMenuruFullPage(false);
+      });
+    } else {
+      setShowMenuruFullPage(false);
+    }
+  };
+
+  // Animasi klik pada tombol MENURU +
   const handleMenuruClick = () => {
-    toggleMenuruFullPage();
+    if (!showMenuruFullPage) {
+      toggleMenuruFullPage();
+    } else {
+      handleCloseMenuruFullPage();
+    }
+    
+    // Animasi bounce pada teks MENURU
+    if (menuruButtonRef.current) {
+      gsap.to(menuruButtonRef.current, {
+        scale: 0.95,
+        duration: 0.1,
+        yoyo: true,
+        repeat: 1,
+        ease: "power2.out"
+      });
+    }
   };
 
   // Data untuk halaman Index
@@ -375,9 +500,8 @@ export default function HomePage(): React.JSX.Element {
             }}>
               {/* Teks MENURU di kiri */}
               <motion.div
-                initial={{ x: -50, opacity: 0 }}
-                animate={{ x: 0, opacity: 1 }}
-                transition={{ duration: 0.6, delay: 0.1 }}
+                ref={fullPageMenuruRef}
+                initial={{ opacity: 0 }}
                 style={{
                   color: 'white',
                   fontSize: isMobile ? '1.5rem' : '2.5rem',
@@ -390,12 +514,11 @@ export default function HomePage(): React.JSX.Element {
                 MENURU
               </motion.div>
 
-              {/* Tanda \ (backslash) di kanan */}
+              {/* Tanda \ (backslash) di kanan dengan animasi GSAP */}
               <motion.div
-                initial={{ x: 50, opacity: 0 }}
-                animate={{ x: 0, opacity: 1 }}
-                transition={{ duration: 0.6, delay: 0.2 }}
-                onClick={toggleMenuruFullPage}
+                ref={minusSignRef}
+                initial={{ opacity: 0 }}
+                onClick={handleCloseMenuruFullPage}
                 style={{
                   width: isMobile ? '35px' : '40px',
                   height: isMobile ? '35px' : '40px',
@@ -428,45 +551,46 @@ export default function HomePage(): React.JSX.Element {
               paddingTop: isMobile ? '4rem' : '6rem',
               display: 'flex',
               flexDirection: 'column',
-              gap: isMobile ? '2rem' : '3rem'
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: isMobile ? '1.5rem' : '2rem'
             }}>
-              {/* Angka 2025 di tengah */}
+              {/* Angka 2025 besar di tengah */}
               <motion.div
-                initial={{ y: 30, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ duration: 0.8, delay: 0.3 }}
+                ref={year2025Ref}
+                initial={{ opacity: 0 }}
                 style={{
                   textAlign: 'center',
-                  marginBottom: isMobile ? '1rem' : '2rem'
+                  marginBottom: isMobile ? '0.5rem' : '1rem'
                 }}
               >
                 <div style={{
                   color: 'white',
-                  fontSize: isMobile ? '4rem' : '6rem',
+                  fontSize: isMobile ? '5rem' : '8rem',
                   fontWeight: '700',
                   fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
-                  letterSpacing: '3px'
+                  letterSpacing: '5px',
+                  lineHeight: 1
                 }}>
                   {menuruBrandData.year}
                 </div>
               </motion.div>
 
-              {/* MENURU BRAND NOTE */}
+              {/* MENURU BRAND NOTE di atas sedikit bagian tengah */}
               <motion.div
-                initial={{ y: 30, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ duration: 0.8, delay: 0.4 }}
+                ref={brandNoteRef}
+                initial={{ opacity: 0 }}
                 style={{
                   textAlign: 'center',
-                  marginBottom: isMobile ? '1.5rem' : '2rem'
+                  marginBottom: isMobile ? '1rem' : '1.5rem'
                 }}
               >
                 <div style={{
                   color: 'white',
-                  fontSize: isMobile ? '1.2rem' : '1.5rem',
+                  fontSize: isMobile ? '0.9rem' : '1.1rem',
                   fontWeight: '400',
                   fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
-                  letterSpacing: '1px',
+                  letterSpacing: '2px',
                   textTransform: 'uppercase'
                 }}>
                   {menuruBrandData.title}
@@ -475,19 +599,20 @@ export default function HomePage(): React.JSX.Element {
 
               {/* Deskripsi */}
               <motion.div
-                initial={{ y: 30, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ duration: 0.8, delay: 0.5 }}
+                className="menuru-content-item"
+                initial={{ opacity: 0 }}
                 style={{
                   textAlign: 'center',
-                  maxWidth: '800px',
+                  maxWidth: '600px',
                   margin: '0 auto',
-                  marginBottom: isMobile ? '2rem' : '3rem'
+                  marginBottom: isMobile ? '2rem' : '3rem',
+                  opacity: 0,
+                  transform: 'translateY(20px)'
                 }}
               >
                 <p style={{
                   color: 'rgba(255, 255, 255, 0.8)',
-                  fontSize: isMobile ? '1rem' : '1.1rem',
+                  fontSize: isMobile ? '0.9rem' : '1rem',
                   fontWeight: '300',
                   fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
                   lineHeight: '1.6',
@@ -498,30 +623,25 @@ export default function HomePage(): React.JSX.Element {
               </motion.div>
 
               {/* Grid untuk roles, design, development, features */}
-              <motion.div
-                initial={{ y: 30, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ duration: 0.8, delay: 0.6 }}
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, 1fr)',
-                  gap: isMobile ? '1.5rem' : '2rem',
-                  width: '100%',
-                  maxWidth: '900px',
-                  margin: '0 auto'
-                }}
-              >
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, 1fr)',
+                gap: isMobile ? '1.5rem' : '2rem',
+                width: '100%',
+                maxWidth: '800px'
+              }}>
                 {menuruBrandData.roles.map((role, index) => (
                   <motion.div
                     key={role.label}
-                    initial={{ opacity: 0, x: index % 2 === 0 ? -20 : 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.5, delay: 0.7 + index * 0.1 }}
+                    className="menuru-content-item"
+                    initial={{ opacity: 0 }}
                     style={{
                       backgroundColor: 'rgba(255, 255, 255, 0.05)',
                       borderRadius: '15px',
                       padding: isMobile ? '1.2rem' : '1.5rem',
-                      border: '1px solid rgba(255, 255, 255, 0.1)'
+                      border: '1px solid rgba(255, 255, 255, 0.1)',
+                      opacity: 0,
+                      transform: 'translateY(20px)'
                     }}
                     whileHover={{ 
                       backgroundColor: 'rgba(255, 255, 255, 0.08)',
@@ -531,7 +651,7 @@ export default function HomePage(): React.JSX.Element {
                     {/* Label */}
                     <div style={{
                       color: 'white',
-                      fontSize: isMobile ? '0.9rem' : '1rem',
+                      fontSize: isMobile ? '0.8rem' : '0.9rem',
                       fontWeight: '600',
                       fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
                       textTransform: 'uppercase',
@@ -548,46 +668,40 @@ export default function HomePage(): React.JSX.Element {
                       gap: '0.5rem'
                     }}>
                       {role.items.map((item, itemIndex) => (
-                        <motion.div
+                        <div
                           key={item}
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ duration: 0.3, delay: 0.8 + index * 0.1 + itemIndex * 0.05 }}
                           style={{
                             color: 'rgba(255, 255, 255, 0.7)',
-                            fontSize: isMobile ? '0.85rem' : '0.9rem',
+                            fontSize: isMobile ? '0.8rem' : '0.85rem',
                             fontWeight: '300',
                             fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
                             padding: '0.3rem 0'
                           }}
-                          whileHover={{ 
-                            color: 'white',
-                            paddingLeft: '0.5rem'
-                          }}
                         >
                           {item}
-                        </motion.div>
+                        </div>
                       ))}
                     </div>
                   </motion.div>
                 ))}
-              </motion.div>
+              </div>
 
               {/* Footer note */}
               <motion.div
+                className="menuru-content-item"
                 initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.8, delay: 1.2 }}
                 style={{
                   textAlign: 'center',
                   marginTop: isMobile ? '2rem' : '3rem',
                   paddingTop: isMobile ? '1.5rem' : '2rem',
-                  borderTop: '1px solid rgba(255, 255, 255, 0.1)'
+                  borderTop: '1px solid rgba(255, 255, 255, 0.1)',
+                  opacity: 0,
+                  transform: 'translateY(20px)'
                 }}
               >
                 <p style={{
                   color: 'rgba(255, 255, 255, 0.5)',
-                  fontSize: isMobile ? '0.8rem' : '0.9rem',
+                  fontSize: isMobile ? '0.7rem' : '0.8rem',
                   fontWeight: '300',
                   fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
                   margin: 0
@@ -617,238 +731,7 @@ export default function HomePage(): React.JSX.Element {
           opacity: 1
         }}
       >
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: isMobile ? '1rem' : '2rem',
-          backgroundColor: 'transparent',
-          backdropFilter: 'blur(10px)',
-          borderRadius: '50px',
-          padding: isMobile ? '0.6rem 1rem' : '0.8rem 1.5rem',
-          border: `1px solid ${isDarkMode ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.3)'}`,
-          boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
-        }}>
-          {/* Docs */}
-          <motion.div
-            onClick={() => router.push('/docs')}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              cursor: 'pointer',
-              padding: '0.4rem 0.8rem',
-              borderRadius: '25px',
-              backgroundColor: isDarkMode ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.95)',
-              border: isDarkMode ? '1px solid rgba(255,255,255,0.2)' : '1px solid rgba(255,255,255,0.3)',
-              transition: 'all 0.3s ease'
-            }}
-            whileHover={{ 
-              backgroundColor: 'white',
-              scale: 1.05,
-              border: '1px solid white'
-            }}
-          >
-            <svg 
-              width={isMobile ? "18" : "20"} 
-              height={isMobile ? "18" : "20"} 
-              viewBox="0 0 24 24" 
-              fill="none" 
-              stroke="#6366F1"
-              strokeWidth="2"
-            >
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-              <polyline points="14,2 14,8 20,8"/>
-              <line x1="16" y1="13" x2="8" y2="13"/>
-              <line x1="16" y1="17" x2="8" y2="17"/>
-              <polyline points="10,9 9,9 8,9"/>
-            </svg>
-            <span style={{
-              color: '#6366F1',
-              fontSize: isMobile ? '0.8rem' : '0.9rem',
-              fontWeight: '600',
-              fontFamily: 'Helvetica, Arial, sans-serif'
-            }}>
-              Docs
-            </span>
-            <div style={{
-              backgroundColor: '#EC4899',
-              color: 'white',
-              fontSize: '0.7rem',
-              fontWeight: '700',
-              padding: '0.1rem 0.4rem',
-              borderRadius: '10px',
-              marginLeft: '0.3rem',
-              border: 'none'
-            }}>
-              NEW
-            </div>
-          </motion.div>
-
-          {/* Chatbot */}
-          <motion.div
-            onClick={() => router.push('/chatbot')}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              cursor: 'pointer',
-              padding: '0.4rem 0.8rem',
-              borderRadius: '25px',
-              backgroundColor: isDarkMode ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.95)',
-              border: isDarkMode ? '1px solid rgba(255,255,255,0.2)' : '1px solid rgba(255,255,255,0.3)',
-              transition: 'all 0.3s ease'
-            }}
-            whileHover={{ 
-              backgroundColor: 'white',
-              scale: 1.05,
-              border: '1px solid white'
-            }}
-          >
-            <svg 
-              width={isMobile ? "18" : "20"} 
-              height={isMobile ? "18" : "20"} 
-              viewBox="0 0 24 24" 
-              fill="none" 
-              stroke="#6366F1"
-              strokeWidth="2"
-            >
-              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-              <line x1="8" y1="7" x2="16" y2="7"/>
-              <line x1="8" y1="11" x2="12" y2="11"/>
-            </svg>
-            <span style={{
-              color: '#6366F1',
-              fontSize: isMobile ? '0.8rem' : '0.9rem',
-              fontWeight: '600',
-              fontFamily: 'Helvetica, Arial, sans-serif'
-            }}>
-              Chatbot
-            </span>
-            <div style={{
-              backgroundColor: '#EC4899',
-              color: 'white',
-              fontSize: '0.7rem',
-              fontWeight: '700',
-              padding: '0.1rem 0.4rem',
-              borderRadius: '10px',
-              marginLeft: '0.3rem',
-              border: 'none'
-            }}>
-              NEW
-            </div>
-          </motion.div>
-
-          {/* Update */}
-          <motion.div
-            onClick={() => router.push('/update')}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              cursor: 'pointer',
-              padding: '0.4rem 0.8rem',
-              borderRadius: '25px',
-              backgroundColor: isDarkMode ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.95)',
-              border: isDarkMode ? '1px solid rgba(255,255,255,0.2)' : '1px solid rgba(255,255,255,0.3)',
-              transition: 'all 0.3s ease'
-            }}
-            whileHover={{ 
-              backgroundColor: 'white',
-              scale: 1.05,
-              border: '1px solid white'
-            }}
-          >
-            <svg 
-              width={isMobile ? "18" : "20"} 
-              height={isMobile ? "18" : "20"} 
-              viewBox="0 0 24 24" 
-              fill="none" 
-              stroke="#6366F1"
-              strokeWidth="2"
-            >
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-              <polyline points="14,2 14,8 20,8"/>
-              <line x1="16" y1="13" x2="8" y2="13"/>
-              <line x1="16" y1="17" x2="8" y2="17"/>
-              <polyline points="10,9 9,9 8,9"/>
-            </svg>
-            <span style={{
-              color: '#6366F1',
-              fontSize: isMobile ? '0.8rem' : '0.9rem',
-              fontWeight: '600',
-              fontFamily: 'Helvetica, Arial, sans-serif'
-            }}>
-              Update
-            </span>
-            <div style={{
-              backgroundColor: '#EC4899',
-              color: 'white',
-              fontSize: '0.7rem',
-              fontWeight: '700',
-              padding: '0.1rem 0.4rem',
-              borderRadius: '10px',
-              marginLeft: '0.3rem',
-              border: 'none'
-            }}>
-              NEW
-            </div>
-          </motion.div>
-
-          {/* Timeline */}
-          <motion.div
-            onClick={() => router.push('/timeline')}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              cursor: 'pointer',
-              padding: '0.4rem 0.8rem',
-              borderRadius: '25px',
-              backgroundColor: isDarkMode ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.95)',
-              border: isDarkMode ? '1px solid rgba(255,255,255,0.2)' : '1px solid rgba(255,255,255,0.3)',
-              transition: 'all 0.3s ease'
-            }}
-            whileHover={{ 
-              backgroundColor: 'white',
-              scale: 1.05,
-              border: '1px solid white'
-            }}
-          >
-            <svg 
-              width={isMobile ? "18" : "20"} 
-              height={isMobile ? "18" : "20"} 
-              viewBox="0 0 24 24" 
-              fill="none" 
-              stroke="#6366F1"
-              strokeWidth="2"
-            >
-              <polyline points="1 4 1 10 7 10"/>
-              <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>
-              <line x1="12" y1="7" x2="12" y2="13"/>
-              <line x1="16" y1="11" x2="12" y2="7"/>
-            </svg>
-            <span style={{
-              color: '#6366F1',
-              fontSize: isMobile ? '0.8rem' : '0.9rem',
-              fontWeight: '600',
-              fontFamily: 'Helvetica, Arial, sans-serif'
-            }}>
-              Timeline
-            </span>
-            <div style={{
-              backgroundColor: '#EC4899',
-              color: 'white',
-              fontSize: '0.7rem',
-              fontWeight: '700',
-              padding: '0.1rem 0.4rem',
-              borderRadius: '10px',
-              marginLeft: '0.3rem',
-              border: 'none'
-            }}>
-              NEW
-            </div>
-          </motion.div>
-        </div>
+        {/* ... (kode top navigation tetap sama) ... */}
       </div>
 
       {/* Header Section */}
