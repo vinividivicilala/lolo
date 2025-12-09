@@ -40,6 +40,19 @@ export default function HomePage(): React.JSX.Element {
     { id: 3, src: "images/5.jpg", alt: "Photo 3" }
   ];
 
+  // Data untuk halaman full page MENURU
+  const menuruBrandData = {
+    year: "2025",
+    title: "MENURU BRAND NOTE",
+    description: "A personal branding journal that captures the emotional journey of self-discovery through visual storytelling and interactive experiences. It's a digital canvas where memories, feelings, and creative expressions converge.",
+    roles: [
+      { label: "my roles", items: ["Creative Director", "UI/UX Designer", "Frontend Developer"] },
+      { label: "design", items: ["Visual Identity", "User Experience", "Motion Design"] },
+      { label: "development", items: ["React/Next.js", "GSAP Animations", "Responsive Design"] },
+      { label: "features", items: ["Interactive Journal", "Emotional Tracking", "Visual Archive"] }
+    ]
+  };
+
   useEffect(() => {
     // Cek apakah user sudah menyetujui cookies
     const cookieAccepted = localStorage.getItem('cookiesAccepted');
@@ -103,7 +116,7 @@ export default function HomePage(): React.JSX.Element {
       }
       // ESC untuk keluar dari halaman full page
       if (e.key === 'Escape' && showMenuruFullPage) {
-        handleCloseMenuruFullPage();
+        toggleMenuruFullPage();
       }
     };
 
@@ -342,13 +355,16 @@ export default function HomePage(): React.JSX.Element {
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              justifyContent: 'center'
+              justifyContent: 'center',
+              overflow: 'auto',
+              padding: isMobile ? '1rem' : '2rem',
+              boxSizing: 'border-box'
             }}
           >
             {/* Header dengan teks MENURU dan tanda \ di sebelah kanan */}
             <div style={{
               position: 'absolute',
-              top: isMobile ? '3.5rem' : '4.5rem',
+              top: isMobile ? '1.5rem' : '2rem',
               left: 0,
               width: '100%',
               padding: isMobile ? '1rem' : '2rem',
@@ -366,7 +382,7 @@ export default function HomePage(): React.JSX.Element {
                   color: 'white',
                   fontSize: isMobile ? '1.5rem' : '2.5rem',
                   fontWeight: '300',
-                  fontFamily: 'Helvetica, Arial, sans-serif',
+                  fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
                   textTransform: 'uppercase',
                   letterSpacing: '2px'
                 }}
@@ -401,6 +417,183 @@ export default function HomePage(): React.JSX.Element {
                   borderRadius: '2px',
                   transform: 'rotate(45deg)'
                 }} />
+              </motion.div>
+            </div>
+
+            {/* Konten utama */}
+            <div style={{
+              width: '100%',
+              maxWidth: '1200px',
+              margin: '0 auto',
+              paddingTop: isMobile ? '4rem' : '6rem',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: isMobile ? '2rem' : '3rem'
+            }}>
+              {/* Angka 2025 di tengah */}
+              <motion.div
+                initial={{ y: 30, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ duration: 0.8, delay: 0.3 }}
+                style={{
+                  textAlign: 'center',
+                  marginBottom: isMobile ? '1rem' : '2rem'
+                }}
+              >
+                <div style={{
+                  color: 'white',
+                  fontSize: isMobile ? '4rem' : '6rem',
+                  fontWeight: '700',
+                  fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
+                  letterSpacing: '3px'
+                }}>
+                  {menuruBrandData.year}
+                </div>
+              </motion.div>
+
+              {/* MENURU BRAND NOTE */}
+              <motion.div
+                initial={{ y: 30, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ duration: 0.8, delay: 0.4 }}
+                style={{
+                  textAlign: 'center',
+                  marginBottom: isMobile ? '1.5rem' : '2rem'
+                }}
+              >
+                <div style={{
+                  color: 'white',
+                  fontSize: isMobile ? '1.2rem' : '1.5rem',
+                  fontWeight: '400',
+                  fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
+                  letterSpacing: '1px',
+                  textTransform: 'uppercase'
+                }}>
+                  {menuruBrandData.title}
+                </div>
+              </motion.div>
+
+              {/* Deskripsi */}
+              <motion.div
+                initial={{ y: 30, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ duration: 0.8, delay: 0.5 }}
+                style={{
+                  textAlign: 'center',
+                  maxWidth: '800px',
+                  margin: '0 auto',
+                  marginBottom: isMobile ? '2rem' : '3rem'
+                }}
+              >
+                <p style={{
+                  color: 'rgba(255, 255, 255, 0.8)',
+                  fontSize: isMobile ? '1rem' : '1.1rem',
+                  fontWeight: '300',
+                  fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
+                  lineHeight: '1.6',
+                  margin: 0
+                }}>
+                  {menuruBrandData.description}
+                </p>
+              </motion.div>
+
+              {/* Grid untuk roles, design, development, features */}
+              <motion.div
+                initial={{ y: 30, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ duration: 0.8, delay: 0.6 }}
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, 1fr)',
+                  gap: isMobile ? '1.5rem' : '2rem',
+                  width: '100%',
+                  maxWidth: '900px',
+                  margin: '0 auto'
+                }}
+              >
+                {menuruBrandData.roles.map((role, index) => (
+                  <motion.div
+                    key={role.label}
+                    initial={{ opacity: 0, x: index % 2 === 0 ? -20 : 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.5, delay: 0.7 + index * 0.1 }}
+                    style={{
+                      backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                      borderRadius: '15px',
+                      padding: isMobile ? '1.2rem' : '1.5rem',
+                      border: '1px solid rgba(255, 255, 255, 0.1)'
+                    }}
+                    whileHover={{ 
+                      backgroundColor: 'rgba(255, 255, 255, 0.08)',
+                      border: '1px solid rgba(255, 255, 255, 0.2)'
+                    }}
+                  >
+                    {/* Label */}
+                    <div style={{
+                      color: 'white',
+                      fontSize: isMobile ? '0.9rem' : '1rem',
+                      fontWeight: '600',
+                      fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
+                      textTransform: 'uppercase',
+                      letterSpacing: '1px',
+                      marginBottom: isMobile ? '0.8rem' : '1rem'
+                    }}>
+                      {role.label}
+                    </div>
+
+                    {/* Items */}
+                    <div style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '0.5rem'
+                    }}>
+                      {role.items.map((item, itemIndex) => (
+                        <motion.div
+                          key={item}
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.3, delay: 0.8 + index * 0.1 + itemIndex * 0.05 }}
+                          style={{
+                            color: 'rgba(255, 255, 255, 0.7)',
+                            fontSize: isMobile ? '0.85rem' : '0.9rem',
+                            fontWeight: '300',
+                            fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
+                            padding: '0.3rem 0'
+                          }}
+                          whileHover={{ 
+                            color: 'white',
+                            paddingLeft: '0.5rem'
+                          }}
+                        >
+                          {item}
+                        </motion.div>
+                      ))}
+                    </div>
+                  </motion.div>
+                ))}
+              </motion.div>
+
+              {/* Footer note */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.8, delay: 1.2 }}
+                style={{
+                  textAlign: 'center',
+                  marginTop: isMobile ? '2rem' : '3rem',
+                  paddingTop: isMobile ? '1.5rem' : '2rem',
+                  borderTop: '1px solid rgba(255, 255, 255, 0.1)'
+                }}
+              >
+                <p style={{
+                  color: 'rgba(255, 255, 255, 0.5)',
+                  fontSize: isMobile ? '0.8rem' : '0.9rem',
+                  fontWeight: '300',
+                  fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
+                  margin: 0
+                }}>
+                  An interactive personal branding experience • Documenting the journey since 2024
+                </p>
               </motion.div>
             </div>
           </motion.div>
