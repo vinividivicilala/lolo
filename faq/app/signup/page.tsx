@@ -3,6 +3,28 @@ import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { initializeApp } from "firebase/app";
+import { 
+  getAuth, 
+  createUserWithEmailAndPassword,
+  updateProfile 
+} from "firebase/auth";
+
+// Konfigurasi Firebase (sama dengan sign in)
+const firebaseConfig = {
+  apiKey: "AIzaSyD_htQZ1TClnXKZGRJ4izbMQ02y6V3aNAQ",
+  authDomain: "wawa44-58d1e.firebaseapp.com",
+  databaseURL: "https://wawa44-58d1e-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "wawa44-58d1e",
+  storageBucket: "wawa44-58d1e.firebasestorage.app",
+  messagingSenderId: "836899520599",
+  appId: "1:836899520599:web:b346e4370ecfa9bb89e312",
+  measurementId: "G-8LMP7F4BE9"
+};
+
+// Inisialisasi Firebase
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
 
 export default function SignUpPage() {
   const [formData, setFormData] = useState({
@@ -12,6 +34,7 @@ export default function SignUpPage() {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [error, setError] = useState("");
   const router = useRouter();
 
   useEffect(() => {
@@ -28,12 +51,49 @@ export default function SignUpPage() {
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setError("");
 
-    // Simulasi proses pendaftaran
-    setTimeout(() => {
-      setIsLoading(false);
+    try {
+      // Create user with Firebase
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        formData.email,
+        formData.password
+      );
+
+      // Update user profile with name
+      await updateProfile(userCredential.user, {
+        displayName: formData.name
+      });
+
+      console.log("User created successfully:", userCredential.user);
+      
+      // Redirect to dashboard
       router.push('/dashboard');
-    }, 1500);
+      
+    } catch (error: any) {
+      console.error("Sign up error:", error);
+      
+      // Handle error messages
+      switch (error.code) {
+        case 'auth/email-already-in-use':
+          setError("Email sudah digunakan. Coba email lain atau login.");
+          break;
+        case 'auth/invalid-email':
+          setError("Email tidak valid.");
+          break;
+        case 'auth/weak-password':
+          setError("Password terlalu lemah. Minimal 6 karakter.");
+          break;
+        case 'auth/operation-not-allowed':
+          setError("Registrasi email/password tidak diaktifkan.");
+          break;
+        default:
+          setError("Terjadi kesalahan. Silakan coba lagi.");
+      }
+      
+      setIsLoading(false);
+    }
   };
 
   // Klik "Sign in" langsung pindah halaman
@@ -161,6 +221,25 @@ export default function SignUpPage() {
               >
                 Sign up to join our community
               </motion.p>
+              
+              {/* Error Message */}
+              {error && (
+                <motion.div
+                  style={{
+                    backgroundColor: 'rgba(255, 0, 0, 0.1)',
+                    border: '1px solid rgba(255, 0, 0, 0.3)',
+                    borderRadius: '8px',
+                    padding: '12px',
+                    marginTop: '15px',
+                    color: '#ff6b6b',
+                    fontSize: '14px',
+                  }}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                >
+                  {error}
+                </motion.div>
+              )}
             </div>
 
             {/* Form */}
@@ -179,7 +258,7 @@ export default function SignUpPage() {
                 required
                 style={{
                   ...inputStyle,
-                  fontSize: isMobile ? '16px' : '1rem', // Prevent zoom on iOS
+                  fontSize: isMobile ? '16px' : '1rem',
                   padding: isMobile ? '1.2rem 1.5rem' : '1rem 1.5rem'
                 }}
               />
@@ -197,10 +276,11 @@ export default function SignUpPage() {
               />
               <input
                 type="password"
-                placeholder="Password"
+                placeholder="Password (min. 6 characters)"
                 value={formData.password}
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                 required
+                minLength={6}
                 style={{
                   ...inputStyle,
                   fontSize: isMobile ? '16px' : '1rem',
@@ -216,7 +296,8 @@ export default function SignUpPage() {
                   padding: isMobile ? '1.4rem 2rem' : '1.2rem 2rem',
                   fontSize: isMobile ? '1.2rem' : '1.1rem',
                   cursor: isLoading ? 'not-allowed' : 'pointer',
-                  opacity: isLoading ? 0.7 : 1
+                  opacity: isLoading ? 0.7 : 1,
+                  backgroundColor: isLoading ? '#555' : '#000'
                 }}
                 whileHover={!isLoading ? { scale: 1.02, background: '#333' } : {}}
                 whileTap={!isLoading ? { scale: 0.98 } : {}}
