@@ -33,9 +33,6 @@ const auth = getAuth(app);
 const googleProvider = new GoogleAuthProvider();
 const githubProvider = new GithubAuthProvider();
 
-// Discord OAuth Configuration (Firebase tidak mendukung Discord secara native)
-// Anda perlu menggunakan OAuth2 manual atau layanan pihak ketiga untuk Discord
-
 export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgotPassword }: any) {
   const router = useRouter();
   const [isMobile, setIsMobile] = useState(false);
@@ -137,89 +134,6 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
       }
     } finally {
       setLoading(false);
-    }
-  };
-
-  // Login dengan Discord (menggunakan OAuth2 manual karena Firebase tidak mendukung native)
-  const handleDiscordLogin = async () => {
-    setLoading(true);
-    setError("");
-    try {
-      // Konfigurasi OAuth2 Discord
-      const clientId = "YOUR_DISCORD_CLIENT_ID"; // Ganti dengan Client ID Discord Anda
-      const redirectUri = window.location.origin + "/auth/discord-callback"; // URL callback
-      const discordAuthUrl = `https://discord.com/api/oauth2/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=token&scope=identify%20email`;
-      
-      // Buka popup untuk Discord OAuth
-      const width = 500;
-      const height = 700;
-      const left = window.screenX + (window.outerWidth - width) / 2;
-      const top = window.screenY + (window.outerHeight - height) / 2;
-      
-      const popup = window.open(
-        discordAuthUrl,
-        "Discord Login",
-        `width=${width},height=${height},left=${left},top=${top}`
-      );
-      
-      // Listen for message from popup
-      const receiveMessage = (event: MessageEvent) => {
-        if (event.origin !== window.location.origin) return;
-        
-        if (event.data.type === 'DISCORD_OAUTH_SUCCESS') {
-          const { access_token, userData } = event.data;
-          
-          // Login ke Firebase dengan custom token (Anda perlu backend untuk ini)
-          // Atau simpan data user di localStorage/database
-          console.log("Discord login successful:", userData);
-          
-          // Untuk Firebase, Anda perlu membuat backend endpoint
-          // yang menghasilkan custom token untuk Discord user
-          handleDiscordFirebaseLogin(access_token, userData);
-          
-          // Hapus listener
-          window.removeEventListener('message', receiveMessage);
-          
-          if (popup) popup.close();
-        }
-      };
-      
-      window.addEventListener('message', receiveMessage);
-      
-    } catch (error: any) {
-      console.error("Discord login error:", error);
-      setError("Login dengan Discord gagal. Pastikan Client ID Discord sudah dikonfigurasi.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Fungsi untuk login Discord ke Firebase (membutuhkan backend)
-  const handleDiscordFirebaseLogin = async (accessToken: string, userData: any) => {
-    try {
-      // Kirim token Discord ke backend Anda untuk mendapatkan Firebase custom token
-      const response = await fetch('/api/discord-auth', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          accessToken,
-          userData
-        }),
-      });
-      
-      if (response.ok) {
-        const { customToken } = await response.json();
-        // Sign in dengan custom token
-        await auth.signInWithCustomToken(customToken);
-        router.push('/dashboard');
-      } else {
-        setError("Gagal autentikasi dengan Discord");
-      }
-    } catch (error) {
-      console.error("Firebase Discord login error:", error);
-      setError("Terjadi kesalahan saat login dengan Discord");
     }
   };
 
@@ -447,48 +361,6 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
                     fontWeight: '500',
                   }}>
                     {loading ? 'Loading...' : 'Continue with Google'}
-                  </span>
-                </div>
-
-                {/* Discord Login */}
-                <div
-                  onClick={handleDiscordLogin}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    padding: '15px 20px',
-                    border: '2px solid rgba(255, 255, 255, 0.3)',
-                    borderRadius: '12px',
-                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                    backdropFilter: 'blur(10px)',
-                    cursor: loading ? 'not-allowed' : 'pointer',
-                    transition: 'all 0.3s ease',
-                    opacity: loading ? 0.7 : 1,
-                  }}
-                  onMouseEnter={(e) => {
-                    if (!loading) {
-                      e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.2)';
-                      e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.5)';
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (!loading) {
-                      e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
-                      e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.3)';
-                    }
-                  }}
-                >
-                  <svg width="24" height="24" viewBox="0 0 24 24" style={{ marginRight: '12px' }}>
-                    <path fill="#5865F2" d="M19.73 4.87a18.2 18.2 0 0 0-4.6-1.44c-.21.4-.4.8-.58 1.21a16.6 16.6 0 0 0-4.33 0c-.18-.41-.38-.81-.59-1.21-1.62.27-3.14.77-4.6 1.44A19 19 0 0 0 .96 17.07a18.4 18.4 0 0 0 5.63 2.87c.45-.6.85-1.24 1.2-1.92a12 12 0 0 1-1.89-.92c.16-.12.31-.24.46-.37 3.58 1.68 7.46 1.68 11 0 .15.13.3.25.46.37-.61.37-1.25.69-1.89.92.35.68.75 1.32 1.2 1.92a18.4 18.4 0 0 0 5.63-2.87c-.42-4.4-2.1-8.3-4.73-12.2zM8.3 15.12c-1.1 0-2-1.02-2-2.27 0-1.25.89-2.27 2-2.27 1.1 0 2 1.02 2 2.27 0 1.25-.9 2.27-2 2.27zm7.4 0c-1.1 0-2-1.02-2-2.27 0-1.25.9-2.27 2-2.27 1.1 0 2 1.02 2 2.27 0 1.25-.89 2.27-2 2.27z"/>
-                  </svg>
-                  <span style={{ 
-                    fontFamily: "'Roboto', sans-serif",
-                    fontSize: isMobile ? '14px' : '16px', 
-                    color: '#ffffff',
-                    fontWeight: '500',
-                  }}>
-                    {loading ? 'Loading...' : 'Continue with Discord'}
                   </span>
                 </div>
 
