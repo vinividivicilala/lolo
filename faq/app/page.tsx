@@ -4,13 +4,30 @@ import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import gsap from "gsap";
+import { initializeApp } from "firebase/app";
+import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
+
+// Konfigurasi Firebase
+const firebaseConfig = {
+  apiKey: "AIzaSyD_htQZ1TClnXKZGRJ4izbMQ02y6V3aNAQ",
+  authDomain: "wawa44-58d1e.firebaseapp.com",
+  databaseURL: "https://wawa44-58d1e-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "wawa44-58d1e",
+  storageBucket: "wawa44-58d1e.firebasestorage.app",
+  messagingSenderId: "836899520599",
+  appId: "1:836899520599:web:b346e4370ecfa9bb89e312",
+  measurementId: "G-8LMP7F4BE9"
+};
+
+// Inisialisasi Firebase
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
 
 export default function HomePage(): React.JSX.Element {
   const router = useRouter();
   const [isMobile, setIsMobile] = useState(false);
   const [loadingText, setLoadingText] = useState("NURU");
   const [isLoading, setIsLoading] = useState(true);
-  const [isDarkMode, setIsDarkMode] = useState(true);
   const [currentView, setCurrentView] = useState<"main" | "index" | "grid">("main");
   const [sliderPosition, setSliderPosition] = useState<"index" | "grid">("grid");
   const [hoveredTopic, setHoveredTopic] = useState<number | null>(null);
@@ -18,6 +35,13 @@ export default function HomePage(): React.JSX.Element {
   const [isProgressActive, setIsProgressActive] = useState(true);
   const [showCookieNotification, setShowCookieNotification] = useState(false);
   const [showMenuruFullPage, setShowMenuruFullPage] = useState(false);
+  const [user, setUser] = useState<any>(null);
+  const [userDisplayName, setUserDisplayName] = useState("");
+  const [isNameScrolling, setIsNameScrolling] = useState(false);
+  const [scrollDirection, setScrollDirection] = useState<"left" | "right">("right");
+  const [scrollPosition, setScrollPosition] = useState(0);
+  const [isHoveringSignIn, setIsHoveringSignIn] = useState(false);
+  
   const headerRef = useRef<HTMLDivElement>(null);
   const topNavRef = useRef<HTMLDivElement>(null);
   const scrollTextRef = useRef<HTMLDivElement>(null);
@@ -26,6 +50,8 @@ export default function HomePage(): React.JSX.Element {
   const menuruButtonRef = useRef<HTMLDivElement>(null);
   const plusSignRef = useRef<HTMLDivElement>(null);
   const backslashRef = useRef<HTMLDivElement>(null);
+  const userButtonRef = useRef<HTMLDivElement>(null);
+  const userTextRef = useRef<HTMLSpanElement>(null);
 
   // Animasi loading text
   const loadingTexts = [
@@ -48,6 +74,57 @@ export default function HomePage(): React.JSX.Element {
     { title: "Development", description: "Frontend & Backend" },
     { title: "Features", description: "Functionality & Integration" }
   ];
+
+  // Listen to auth state changes
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      if (currentUser) {
+        setUser(currentUser);
+        // Get display name (prioritize displayName, then email, then 'User')
+        const name = currentUser.displayName || 
+                     currentUser.email?.split('@')[0] || 
+                     'User';
+        setUserDisplayName(name);
+      } else {
+        setUser(null);
+        setUserDisplayName("");
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  // Animasi teks nama user berjalan
+  useEffect(() => {
+    if (user && userTextRef.current && userButtonRef.current) {
+      const textWidth = userTextRef.current.scrollWidth;
+      const buttonWidth = userButtonRef.current.clientWidth;
+      
+      if (textWidth > buttonWidth) {
+        setIsNameScrolling(true);
+        
+        const animation = gsap.to(userTextRef.current, {
+          x: -(textWidth - buttonWidth + 20),
+          duration: 5,
+          repeat: -1,
+          yoyo: true,
+          ease: "power1.inOut",
+          onReverseComplete: () => {
+            setScrollDirection("right");
+          },
+          onComplete: () => {
+            setScrollDirection("left");
+          }
+        });
+
+        return () => {
+          animation.kill();
+        };
+      } else {
+        setIsNameScrolling(false);
+      }
+    }
+  }, [user, userDisplayName, isMobile]);
 
   useEffect(() => {
     // Cek apakah user sudah menyetujui cookies
@@ -244,19 +321,6 @@ export default function HomePage(): React.JSX.Element {
     }
   }, [currentPhotoIndex, isProgressActive]);
 
-  // Fungsi toggle dark/light mode
-  const toggleColorMode = () => {
-    setIsDarkMode(!isDarkMode);
-    // Simpan preferensi tema ke cookies jika sudah diterima
-    const cookieAccepted = localStorage.getItem('cookiesAccepted');
-    if (cookieAccepted) {
-      localStorage.setItem('themePreference', !isDarkMode ? 'light' : 'dark');
-      const date = new Date();
-      date.setTime(date.getTime() + (30 * 24 * 60 * 60 * 1000));
-      document.cookie = `themePreference=${!isDarkMode ? 'light' : 'dark'}; expires=${date.toUTCString()}; path=/`;
-    }
-  };
-
   // Handler untuk topic hover
   const handleTopicHover = (topicId: number | null) => {
     setHoveredTopic(topicId);
@@ -286,6 +350,26 @@ export default function HomePage(): React.JSX.Element {
   // Fungsi untuk menutup halaman full page MENURU (klik tanda \ untuk kembali)
   const handleCloseMenuruFullPage = () => {
     setShowMenuruFullPage(false);
+  };
+
+  // Handler untuk Sign In / User Button
+  const handleSignInClick = () => {
+    if (user) {
+      // Jika sudah login, tampilkan dropdown atau langsung logout
+      const confirmLogout = window.confirm(`Logout from ${userDisplayName}?`);
+      if (confirmLogout) {
+        signOut(auth).then(() => {
+          setUser(null);
+          setUserDisplayName("");
+          router.push('/');
+        }).catch((error) => {
+          console.error("Logout error:", error);
+        });
+      }
+    } else {
+      // Jika belum login, redirect ke signin page
+      router.push('/signin');
+    }
   };
 
   // Data untuk halaman Index
@@ -342,7 +426,7 @@ export default function HomePage(): React.JSX.Element {
   return (
     <div style={{
       minHeight: '100vh',
-      backgroundColor: isDarkMode ? 'black' : '#ff0028',
+      backgroundColor: 'black',
       margin: 0,
       padding: 0,
       width: '100%',
@@ -354,264 +438,250 @@ export default function HomePage(): React.JSX.Element {
       overflow: 'auto',
       fontFamily: 'Helvetica, Arial, sans-serif',
       WebkitFontSmoothing: 'antialiased',
-      MozOsxFontSmoothing: 'grayscale',
-      transition: 'background-color 0.5s ease'
+      MozOsxFontSmoothing: 'grayscale'
     }}>
 
       {/* Halaman Full Page MENURU */}
-<AnimatePresence>
-  {showMenuruFullPage && (
-    <motion.div
-      key="menuru-fullpage"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.5 }}
-      style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        width: '100%',
-        height: '100%',
-        backgroundColor: 'black',
-        zIndex: 9998,
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'flex-start',
-        overflowY: 'auto' // Biar bisa scroll
-      }}
-    >
-      {/* Header dengan teks MENURU dan tanda \ di sebelah kanan */}
-      <div style={{
-        position: 'sticky', // Tetap di atas saat scroll
-        top: 0,
-        left: 0,
-        width: '100%',
-        padding: isMobile ? '1rem' : '2rem',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'flex-start',
-        boxSizing: 'border-box',
-        backgroundColor: 'black', // Background solid untuk header
-        zIndex: 10
-      }}>
-        {/* Container untuk MENURU, angka, dan roles - di kiri */}
-        <div style={{
-          display: 'flex',
-          flexDirection: 'column',
-          width: isMobile ? '45%' : '40%'
-        }}>
-          {/* Teks MENURU \ di kiri */}
+      <AnimatePresence>
+        {showMenuruFullPage && (
           <motion.div
-            initial={{ x: -50, opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
-            transition={{ duration: 0.6, delay: 0.1 }}
+            key="menuru-fullpage"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.5 }}
             style={{
-              color: 'white',
-              fontSize: isMobile ? '2rem' : '3rem',
-              fontWeight: '300',
-              fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
-              textTransform: 'uppercase',
-              letterSpacing: '3px',
-              lineHeight: 1
-            }}
-          >
-            MENURU \
-          </motion.div>
-
-          {/* Angka 99887 dengan jarak dari judul */}
-          <motion.div
-            initial={{ x: -50, opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            style={{
-              color: 'white',
-              fontSize: isMobile ? '1.5rem' : '2rem',
-              fontWeight: '400',
-              fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
-              letterSpacing: '2px',
-              marginTop: isMobile ? '1.5rem' : '2rem',
-              marginBottom: isMobile ? '2rem' : '3rem'
-            }}
-          >
-            99887
-          </motion.div>
-
-          {/* Roles List dengan jarak yang cukup */}
-          <motion.div
-            initial={{ x: -50, opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
-            transition={{ duration: 0.6, delay: 0.3 }}
-            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              backgroundColor: 'black',
+              zIndex: 9998,
               display: 'flex',
               flexDirection: 'column',
-              gap: isMobile ? '1.5rem' : '2rem'
+              alignItems: 'center',
+              justifyContent: 'flex-start',
+              overflowY: 'auto'
             }}
           >
-            {rolesData.map((role, index) => (
+            {/* Header dengan teks MENURU dan tanda \ di sebelah kanan */}
+            <div style={{
+              position: 'sticky',
+              top: 0,
+              left: 0,
+              width: '100%',
+              padding: isMobile ? '1rem' : '2rem',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'flex-start',
+              boxSizing: 'border-box',
+              backgroundColor: 'black',
+              zIndex: 10
+            }}>
+              {/* Container untuk MENURU, angka, dan roles - di kiri */}
+              <div style={{
+                display: 'flex',
+                flexDirection: 'column',
+                width: isMobile ? '45%' : '40%'
+              }}>
+                {/* Teks MENURU \ di kiri */}
+                <motion.div
+                  initial={{ x: -50, opacity: 0 }}
+                  animate={{ x: 0, opacity: 1 }}
+                  transition={{ duration: 0.6, delay: 0.1 }}
+                  style={{
+                    color: 'white',
+                    fontSize: isMobile ? '2rem' : '3rem',
+                    fontWeight: '300',
+                    fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
+                    textTransform: 'uppercase',
+                    letterSpacing: '3px',
+                    lineHeight: 1
+                  }}
+                >
+                  MENURU \
+                </motion.div>
+
+                {/* Angka 99887 dengan jarak dari judul */}
+                <motion.div
+                  initial={{ x: -50, opacity: 0 }}
+                  animate={{ x: 0, opacity: 1 }}
+                  transition={{ duration: 0.6, delay: 0.2 }}
+                  style={{
+                    color: 'white',
+                    fontSize: isMobile ? '1.5rem' : '2rem',
+                    fontWeight: '400',
+                    fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
+                    letterSpacing: '2px',
+                    marginTop: isMobile ? '1.5rem' : '2rem',
+                    marginBottom: isMobile ? '2rem' : '3rem'
+                  }}
+                >
+                  99887
+                </motion.div>
+
+                {/* Roles List dengan jarak yang cukup */}
+                <motion.div
+                  initial={{ x: -50, opacity: 0 }}
+                  animate={{ x: 0, opacity: 1 }}
+                  transition={{ duration: 0.6, delay: 0.3 }}
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: isMobile ? '1.5rem' : '2rem'
+                  }}
+                >
+                  {rolesData.map((role, index) => (
+                    <motion.div
+                      key={role.title}
+                      initial={{ x: -30, opacity: 0 }}
+                      animate={{ x: 0, opacity: 1 }}
+                      transition={{ duration: 0.4, delay: 0.4 + (index * 0.1) }}
+                      style={{
+                        display: 'flex',
+                        flexDirection: 'column'
+                      }}
+                    >
+                      {/* Role title */}
+                      <div style={{
+                        color: 'white',
+                        fontSize: isMobile ? '1rem' : '1.3rem',
+                        fontWeight: '500',
+                        fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
+                        letterSpacing: '0.5px',
+                        marginBottom: '0.3rem'
+                      }}>
+                        {role.title}
+                      </div>
+                      
+                      {/* Role description */}
+                      <div style={{
+                        color: 'white',
+                        fontSize: isMobile ? '0.9rem' : '1rem',
+                        fontWeight: '400',
+                        fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
+                        opacity: 0.9
+                      }}>
+                        {role.description}
+                      </div>
+                    </motion.div>
+                  ))}
+                </motion.div>
+              </div>
+
+              {/* Container untuk bagian tengah - DESKRIPSI dan FOTO */}
+              <div style={{
+                flex: 1,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'flex-start',
+                marginLeft: isMobile ? '1rem' : '3rem',
+                marginRight: isMobile ? '1rem' : '3rem',
+                paddingTop: isMobile ? '0' : '2rem'
+              }}>
+                {/* Deskripsi di tengah - BESAR */}
+                <motion.div
+                  initial={{ y: -20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ duration: 0.6, delay: 0.3 }}
+                  style={{
+                    color: 'white',
+                    fontSize: isMobile ? '1.2rem' : '1.8rem',
+                    fontWeight: '400',
+                    fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
+                    lineHeight: 1.6,
+                    textAlign: 'left',
+                    maxWidth: isMobile ? '90%' : '70%',
+                    marginBottom: isMobile ? '3rem' : '4rem',
+                    alignSelf: 'flex-start'
+                  }}
+                >
+                  A personal branding journal documenting emotional journeys and creative exploration through visual storytelling and self-discovery narratives.
+                </motion.div>
+
+                {/* Foto di bawah deskripsi - BESAR */}
+                <motion.div
+                  initial={{ y: 30, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ duration: 0.6, delay: 0.4 }}
+                  style={{
+                    width: isMobile ? '90%' : '70%',
+                    height: isMobile ? '300px' : '500px',
+                    overflow: 'hidden',
+                    borderRadius: '15px',
+                    boxShadow: '0 15px 40px rgba(0,0,0,0.7)',
+                    border: '2px solid rgba(255,255,255,0.15)',
+                    marginTop: isMobile ? '1rem' : '1.5rem',
+                    alignSelf: 'flex-start'
+                  }}
+                >
+                  <img 
+                    src="images/5.jpg" 
+                    alt="Menuru Visual"
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      display: 'block',
+                      objectFit: 'cover'
+                    }}
+                    onError={(e) => {
+                      e.currentTarget.style.backgroundColor = '#333';
+                      e.currentTarget.style.display = 'flex';
+                      e.currentTarget.style.alignItems = 'center';
+                      e.currentTarget.style.justifyContent = 'center';
+                      e.currentTarget.style.color = 'white';
+                      e.currentTarget.innerHTML = '<div style="padding: 1rem; text-align: center;">Menuru Image</div>';
+                    }}
+                  />
+                </motion.div>
+              </div>
+
+              {/* Tanda \ di kanan dengan animasi GSAP - KLIK UNTUK KEMBALI */}
               <motion.div
-                key={role.title}
-                initial={{ x: -30, opacity: 0 }}
+                initial={{ x: 50, opacity: 0 }}
                 animate={{ x: 0, opacity: 1 }}
-                transition={{ duration: 0.4, delay: 0.4 + (index * 0.1) }}
+                transition={{ duration: 0.6, delay: 0.2 }}
+                onClick={handleCloseMenuruFullPage}
                 style={{
+                  width: isMobile ? '40px' : '50px',
+                  height: isMobile ? '40px' : '50px',
                   display: 'flex',
-                  flexDirection: 'column'
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  position: 'absolute',
+                  right: isMobile ? '1rem' : '2rem',
+                  top: isMobile ? '1rem' : '2rem'
                 }}
+                whileHover={{ scale: 1.2 }}
+                whileTap={{ scale: 0.95 }}
               >
-                {/* Role title */}
-                <div style={{
-                  color: 'white',
-                  fontSize: isMobile ? '1rem' : '1.3rem',
-                  fontWeight: '500',
-                  fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
-                  letterSpacing: '0.5px',
-                  marginBottom: '0.3rem'
-                }}>
-                  {role.title}
-                </div>
-                
-                {/* Role description */}
-                <div style={{
-                  color: 'white',
-                  fontSize: isMobile ? '0.9rem' : '1rem',
-                  fontWeight: '400',
-                  fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
-                  opacity: 0.9
-                }}>
-                  {role.description}
-                </div>
+                {/* Tanda \ (backslash) dengan animasi GSAP */}
+                <div 
+                  ref={backslashRef}
+                  style={{
+                    position: 'absolute',
+                    width: isMobile ? '25px' : '30px',
+                    height: '3px',
+                    backgroundColor: 'white',
+                    borderRadius: '2px',
+                    transform: 'rotate(45deg)',
+                    transformOrigin: 'center'
+                  }}
+                />
               </motion.div>
-            ))}
+            </div>
+
+            {/* Space untuk scroll ke bawah */}
+            <div style={{
+              height: '50vh',
+              width: '100%'
+            }}></div>
           </motion.div>
-        </div>
-
-        {/* Container untuk bagian tengah - DESKRIPSI dan FOTO */}
-        <div style={{
-          flex: 1,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'flex-start',
-          marginLeft: isMobile ? '1rem' : '3rem',
-          marginRight: isMobile ? '1rem' : '3rem',
-          paddingTop: isMobile ? '0' : '2rem'
-        }}>
-          {/* Deskripsi di tengah - BESAR */}
-          <motion.div
-            initial={{ y: -20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ duration: 0.6, delay: 0.3 }}
-            style={{
-              color: 'white',
-              fontSize: isMobile ? '1.2rem' : '1.8rem',
-              fontWeight: '400',
-              fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
-              lineHeight: 1.6,
-              textAlign: 'left',
-              maxWidth: isMobile ? '90%' : '70%',
-              marginBottom: isMobile ? '3rem' : '4rem', // JARAK ANTAR DESKRIPSI DAN FOTO
-              alignSelf: 'flex-start' // Rata kiri
-            }}
-          >
-            A personal branding journal documenting emotional journeys and creative exploration through visual storytelling and self-discovery narratives.
-          </motion.div>
-
-          {/* Foto di bawah deskripsi - BESAR */}
-          <motion.div
-            initial={{ y: 30, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ duration: 0.6, delay: 0.4 }}
-            style={{
-              width: isMobile ? '90%' : '70%',
-              height: isMobile ? '300px' : '500px',
-              overflow: 'hidden',
-              borderRadius: '15px',
-              boxShadow: '0 15px 40px rgba(0,0,0,0.7)',
-              border: '2px solid rgba(255,255,255,0.15)',
-              marginTop: isMobile ? '1rem' : '1.5rem',
-              alignSelf: 'flex-start' // Rata kiri
-            }}
-          >
-            <img 
-              src="images/5.jpg" 
-              alt="Menuru Visual"
-              style={{
-                width: '100%',
-                height: '100%',
-                display: 'block',
-                objectFit: 'cover'
-              }}
-              onError={(e) => {
-                e.currentTarget.style.backgroundColor = '#333';
-                e.currentTarget.style.display = 'flex';
-                e.currentTarget.style.alignItems = 'center';
-                e.currentTarget.style.justifyContent = 'center';
-                e.currentTarget.style.color = 'white';
-                e.currentTarget.innerHTML = '<div style="padding: 1rem; text-align: center;">Menuru Image</div>';
-              }}
-            />
-          </motion.div>
-        </div>
-
-        {/* Tanda \ di kanan dengan animasi GSAP - KLIK UNTUK KEMBALI */}
-        <motion.div
-          initial={{ x: 50, opacity: 0 }}
-          animate={{ x: 0, opacity: 1 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-          onClick={handleCloseMenuruFullPage}
-          style={{
-            width: isMobile ? '40px' : '50px',
-            height: isMobile ? '40px' : '50px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            cursor: 'pointer',
-            position: 'absolute',
-            right: isMobile ? '1rem' : '2rem',
-            top: isMobile ? '1rem' : '2rem'
-          }}
-          whileHover={{ scale: 1.2 }}
-          whileTap={{ scale: 0.95 }}
-        >
-          {/* Tanda \ (backslash) dengan animasi GSAP */}
-          <div 
-            ref={backslashRef}
-            style={{
-              position: 'absolute',
-              width: isMobile ? '25px' : '30px',
-              height: '3px',
-              backgroundColor: 'white',
-              borderRadius: '2px',
-              transform: 'rotate(45deg)',
-              transformOrigin: 'center'
-            }}
-          />
-        </motion.div>
-      </div>
-
-      {/* Space untuk scroll ke bawah */}
-      <div style={{
-        height: '50vh',
-        width: '100%'
-      }}></div>
-    </motion.div>
-  )}
-</AnimatePresence>
-
-
-
-
-
-
-
-
-
-
-
-      
-      
+        )}
+      </AnimatePresence>
 
       {/* Top Navigation Bar */}
       <div 
@@ -638,7 +708,7 @@ export default function HomePage(): React.JSX.Element {
           backdropFilter: 'blur(10px)',
           borderRadius: '50px',
           padding: isMobile ? '0.6rem 1rem' : '0.8rem 1.5rem',
-          border: `1px solid ${isDarkMode ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.3)'}`,
+          border: '1px solid rgba(255,255,255,0.15)',
           boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
         }}>
           {/* Docs */}
@@ -651,8 +721,8 @@ export default function HomePage(): React.JSX.Element {
               cursor: 'pointer',
               padding: '0.4rem 0.8rem',
               borderRadius: '25px',
-              backgroundColor: isDarkMode ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.95)',
-              border: isDarkMode ? '1px solid rgba(255,255,255,0.2)' : '1px solid rgba(255,255,255,0.3)',
+              backgroundColor: 'rgba(255,255,255,0.9)',
+              border: '1px solid rgba(255,255,255,0.2)',
               transition: 'all 0.3s ease'
             }}
             whileHover={{ 
@@ -707,8 +777,8 @@ export default function HomePage(): React.JSX.Element {
               cursor: 'pointer',
               padding: '0.4rem 0.8rem',
               borderRadius: '25px',
-              backgroundColor: isDarkMode ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.95)',
-              border: isDarkMode ? '1px solid rgba(255,255,255,0.2)' : '1px solid rgba(255,255,255,0.3)',
+              backgroundColor: 'rgba(255,255,255,0.9)',
+              border: '1px solid rgba(255,255,255,0.2)',
               transition: 'all 0.3s ease'
             }}
             whileHover={{ 
@@ -761,8 +831,8 @@ export default function HomePage(): React.JSX.Element {
               cursor: 'pointer',
               padding: '0.4rem 0.8rem',
               borderRadius: '25px',
-              backgroundColor: isDarkMode ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.95)',
-              border: isDarkMode ? '1px solid rgba(255,255,255,0.2)' : '1px solid rgba(255,255,255,0.3)',
+              backgroundColor: 'rgba(255,255,255,0.9)',
+              border: '1px solid rgba(255,255,255,0.2)',
               transition: 'all 0.3s ease'
             }}
             whileHover={{ 
@@ -817,8 +887,8 @@ export default function HomePage(): React.JSX.Element {
               cursor: 'pointer',
               padding: '0.4rem 0.8rem',
               borderRadius: '25px',
-              backgroundColor: isDarkMode ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.95)',
-              border: isDarkMode ? '1px solid rgba(255,255,255,0.2)' : '1px solid rgba(255,255,255,0.3)',
+              backgroundColor: 'rgba(255,255,255,0.9)',
+              border: '1px solid rgba(255,255,255,0.2)',
               transition: 'all 0.3s ease'
             }}
             whileHover={{ 
@@ -895,11 +965,10 @@ export default function HomePage(): React.JSX.Element {
             letterSpacing: '2px',
             lineHeight: 1,
             textTransform: 'uppercase',
-            color: isDarkMode ? 'white' : 'black',
+            color: 'white',
             minHeight: isMobile ? '1.8rem' : '2.8rem',
             display: 'flex',
-            alignItems: 'center',
-            transition: 'color 0.5s ease'
+            alignItems: 'center'
           }}>
             ME
             <AnimatePresence mode="wait">
@@ -936,58 +1005,19 @@ export default function HomePage(): React.JSX.Element {
           alignItems: 'center',
           gap: isMobile ? '0.8rem' : '1rem'
         }}>
-          {/* Color Mode Toggle Button */}
+          {/* Sign In / User Button */}
           <motion.button
-            onClick={toggleColorMode}
-            style={{
-              padding: isMobile ? '0.4rem 0.8rem' : '0.6rem 1rem',
-              fontSize: isMobile ? '0.8rem' : '1rem',
-              fontWeight: '600',
-              color: 'white',
-              backgroundColor: 'transparent',
-              border: `1px solid ${isDarkMode ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.3)'}`,
-              borderRadius: '50px',
-              cursor: 'pointer',
-              fontFamily: 'Helvetica, Arial, sans-serif',
-              backdropFilter: 'blur(10px)',
-              whiteSpace: 'nowrap',
-              display: 'flex',
-              alignItems: 'center',
-              gap: isMobile ? '0.3rem' : '0.5rem',
-              margin: 0,
-              transition: 'all 0.3s ease',
-              boxShadow: '0 4px 15px rgba(0,0,0,0.1)'
-            }}
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1, duration: 0.6 }}
-            whileHover={{ 
-              backgroundColor: isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.2)',
-              scale: 1.05,
-              border: `1px solid ${isDarkMode ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.5)'}`,
-              transition: { duration: 0.2 }
-            }}
-            whileTap={{ scale: 0.95 }}
-          >
-            <motion.div
-              animate={{ rotate: isDarkMode ? 0 : 180 }}
-              transition={{ duration: 0.5 }}
-            >
-              {isDarkMode ? '☀️' : '🌙'}
-            </motion.div>
-            {isMobile ? '' : (isDarkMode ? 'LIGHT' : 'DARK')}
-          </motion.button>
-
-          {/* Sign In Button */}
-          <motion.button
-            onClick={() => router.push('/signin')}
+            ref={userButtonRef}
+            onClick={handleSignInClick}
+            onMouseEnter={() => setIsHoveringSignIn(true)}
+            onMouseLeave={() => setIsHoveringSignIn(false)}
             style={{
               padding: isMobile ? '0.4rem 1rem' : '0.6rem 1.5rem',
               fontSize: isMobile ? '0.9rem' : '1.5rem',
               fontWeight: '600',
               color: 'white',
               backgroundColor: 'transparent',
-              border: `1px solid ${isDarkMode ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.3)'}`,
+              border: '1px solid rgba(255,255,255,0.15)',
               borderRadius: '50px',
               cursor: 'pointer',
               fontFamily: 'Helvetica, Arial, sans-serif',
@@ -997,7 +1027,11 @@ export default function HomePage(): React.JSX.Element {
               alignItems: 'center',
               gap: isMobile ? '0.3rem' : '0.5rem',
               margin: 0,
-              maxWidth: isMobile ? '120px' : 'none',
+              maxWidth: isMobile ? '180px' : '250px',
+              minWidth: isMobile ? '120px' : '180px',
+              height: isMobile ? '40px' : '50px',
+              overflow: 'hidden',
+              position: 'relative',
               transition: 'all 0.3s ease',
               boxShadow: '0 4px 15px rgba(0,0,0,0.1)'
             }}
@@ -1005,25 +1039,95 @@ export default function HomePage(): React.JSX.Element {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 1.2, duration: 0.6 }}
             whileHover={{ 
-              backgroundColor: isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.2)',
+              backgroundColor: 'rgba(255,255,255,0.1)',
               scale: 1.05,
-              border: `1px solid ${isDarkMode ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.5)'}`,
+              border: '1px solid rgba(255,255,255,0.3)',
               transition: { duration: 0.2 }
             }}
             whileTap={{ scale: 0.95 }}
           >
-            <svg 
-              width={isMobile ? "18" : "30"} 
-              height={isMobile ? "18" : "30"} 
-              viewBox="0 0 24 24" 
-              fill="none" 
-              stroke="currentColor" 
-              strokeWidth="2"
-            >
-              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-              <circle cx="12" cy="7" r="4"/>
-            </svg>
-            {isMobile ? 'SIGN IN' : 'SIGN IN'}
+            {user ? (
+              <>
+                {/* Icon user */}
+                <svg 
+                  width={isMobile ? "18" : "30"} 
+                  height={isMobile ? "18" : "30"} 
+                  viewBox="0 0 24 24" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  strokeWidth="2"
+                  style={{
+                    flexShrink: 0,
+                    marginRight: '0.5rem'
+                  }}
+                >
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                  <circle cx="12" cy="7" r="4"/>
+                </svg>
+                
+                {/* Nama user dengan animasi scroll */}
+                <div style={{
+                  overflow: 'hidden',
+                  width: '100%',
+                  position: 'relative',
+                  display: 'flex',
+                  alignItems: 'center'
+                }}>
+                  <motion.span
+                    ref={userTextRef}
+                    style={{
+                      display: 'inline-block',
+                      whiteSpace: 'nowrap',
+                      paddingRight: '20px',
+                      transform: isNameScrolling ? `translateX(${scrollPosition}px)` : 'translateX(0)',
+                      willChange: 'transform'
+                    }}
+                  >
+                    {isHoveringSignIn ? `Logout (${userDisplayName})` : userDisplayName}
+                  </motion.span>
+                  
+                  {/* Tanda panah untuk logout saat hover */}
+                  {isHoveringSignIn && (
+                    <motion.span
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      style={{
+                        marginLeft: '0.5rem',
+                        fontSize: '0.8em'
+                      }}
+                    >
+                      →
+                    </motion.span>
+                  )}
+                </div>
+              </>
+            ) : (
+              <>
+                {/* Icon untuk sign in */}
+                <svg 
+                  width={isMobile ? "18" : "30"} 
+                  height={isMobile ? "18" : "30"} 
+                  viewBox="0 0 24 24" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  strokeWidth="2"
+                  style={{
+                    flexShrink: 0,
+                    marginRight: '0.5rem'
+                  }}
+                >
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                  <circle cx="12" cy="7" r="4"/>
+                </svg>
+                <span style={{
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis'
+                }}>
+                  SIGN IN
+                </span>
+              </>
+            )}
           </motion.button>
         </div>
       </div>
@@ -1053,14 +1157,13 @@ export default function HomePage(): React.JSX.Element {
                 paddingRight: isMobile ? '0.5rem' : '1rem'
               }}>
                 <p style={{
-                  color: isDarkMode ? 'white' : 'black',
+                  color: 'white',
                   fontSize: isMobile ? '1.8rem' : '3.5rem',
                   fontWeight: '400',
                   fontFamily: 'HelveticaNowDisplay, Arial, sans-serif',
                   lineHeight: 1.3,
                   margin: 0,
                   marginBottom: isMobile ? '1.5rem' : '2rem',
-                  transition: 'color 0.5s ease',
                   wordWrap: 'break-word',
                   overflowWrap: 'break-word'
                 }}>
@@ -1083,7 +1186,7 @@ export default function HomePage(): React.JSX.Element {
                     overflow: 'hidden',
                     borderRadius: '25px',
                     boxShadow: '0 20px 50px rgba(0,0,0,0.5)',
-                    border: `3px solid ${isDarkMode ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)'}`,
+                    border: '3px solid rgba(255,255,255,0.2)',
                     width: '100%',
                     position: 'relative',
                     zIndex: 1,
@@ -1101,11 +1204,11 @@ export default function HomePage(): React.JSX.Element {
                       }}
                       onError={(e) => {
                         console.error("Gambar kiri tidak ditemukan:", e);
-                        e.currentTarget.style.backgroundColor = isDarkMode ? '#333' : '#eee';
+                        e.currentTarget.style.backgroundColor = '#333';
                         e.currentTarget.style.display = 'flex';
                         e.currentTarget.style.alignItems = 'center';
                         e.currentTarget.style.justifyContent = 'center';
-                        e.currentTarget.style.color = isDarkMode ? '#fff' : '#000';
+                        e.currentTarget.style.color = '#fff';
                         e.currentTarget.style.height = '100%';
                         e.currentTarget.innerHTML = '<div style="padding: 2rem; text-align: center;">Left Image</div>';
                       }}
@@ -1118,7 +1221,7 @@ export default function HomePage(): React.JSX.Element {
                     overflow: 'hidden',
                     borderRadius: '25px',
                     boxShadow: '0 20px 50px rgba(0,0,0,0.5)',
-                    border: `3px solid ${isDarkMode ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)'}`,
+                    border: '3px solid rgba(255,255,255,0.2)',
                     width: '100%',
                     position: 'relative',
                     zIndex: 1,
@@ -1136,11 +1239,11 @@ export default function HomePage(): React.JSX.Element {
                       }}
                       onError={(e) => {
                         console.error("Gambar kanan tidak ditemukan:", e);
-                        e.currentTarget.style.backgroundColor = isDarkMode ? '#333' : '#eee';
+                        e.currentTarget.style.backgroundColor = '#333';
                         e.currentTarget.style.display = 'flex';
                         e.currentTarget.style.alignItems = 'center';
                         e.currentTarget.style.justifyContent = 'center';
-                        e.currentTarget.style.color = isDarkMode ? '#fff' : '#000';
+                        e.currentTarget.style.color = '#fff';
                         e.currentTarget.style.height = '100%';
                         e.currentTarget.innerHTML = '<div style="padding: 2rem; text-align: center;">Right Image</div>';
                       }}
@@ -1398,7 +1501,7 @@ export default function HomePage(): React.JSX.Element {
 
                     {/* Label status - lebih besar */}
                     <div style={{
-                      color: isDarkMode ? 'white' : 'black',
+                      color: 'white',
                       fontSize: '1.1rem',
                       fontWeight: '600',
                       fontFamily: 'Helvetica, Arial, sans-serif'
@@ -1424,7 +1527,7 @@ export default function HomePage(): React.JSX.Element {
                     whileTap={{ scale: 0.95 }}
                   >
                     <div style={{
-                      color: isDarkMode ? 'white' : 'black',
+                      color: 'white',
                       fontSize: isMobile ? '1.8rem' : '2rem',
                       fontWeight: '300',
                       fontFamily: 'Helvetica, Arial, sans-serif',
@@ -1454,7 +1557,7 @@ export default function HomePage(): React.JSX.Element {
                         position: 'absolute',
                         width: '2px',
                         height: isMobile ? '18px' : '20px',
-                        backgroundColor: isDarkMode ? 'white' : 'black',
+                        backgroundColor: 'white',
                         borderRadius: '1px'
                       }} />
                       {/* Garis horizontal */}
@@ -1462,7 +1565,7 @@ export default function HomePage(): React.JSX.Element {
                         position: 'absolute',
                         width: isMobile ? '18px' : '20px',
                         height: '2px',
-                        backgroundColor: isDarkMode ? 'white' : 'black',
+                        backgroundColor: 'white',
                         borderRadius: '1px'
                       }} />
                     </div>
@@ -1499,7 +1602,7 @@ export default function HomePage(): React.JSX.Element {
                           style={{
                             flex: 1,
                             height: '12px',
-                            backgroundColor: isDarkMode ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.2)',
+                            backgroundColor: 'rgba(255, 255, 255, 0.2)',
                             borderRadius: '6px',
                             overflow: 'hidden',
                             position: 'relative'
@@ -1534,7 +1637,7 @@ export default function HomePage(): React.JSX.Element {
                         borderRadius: '15px',
                         overflow: 'hidden',
                         boxShadow: '0 8px 25px rgba(0,0,0,0.4)',
-                        border: `2px solid ${isDarkMode ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.15)'}`,
+                        border: '2px solid rgba(255,255,255,0.15)',
                         cursor: 'pointer',
                         margin: '0 auto'
                       }}
@@ -1563,11 +1666,11 @@ export default function HomePage(): React.JSX.Element {
                               display: 'block'
                             }}
                             onError={(e) => {
-                              e.currentTarget.style.backgroundColor = isDarkMode ? '#222' : '#ddd';
+                              e.currentTarget.style.backgroundColor = '#222';
                               e.currentTarget.style.display = 'flex';
                               e.currentTarget.style.alignItems = 'center';
                               e.currentTarget.style.justifyContent = 'center';
-                              e.currentTarget.style.color = isDarkMode ? '#fff' : '#000';
+                              e.currentTarget.style.color = '#fff';
                               e.currentTarget.innerHTML = `<div style="padding: 2rem; text-align: center;">Photo ${currentPhotoIndex + 1}</div>`;
                             }}
                           />
@@ -1638,7 +1741,7 @@ export default function HomePage(): React.JSX.Element {
                     whileInView={{ opacity: 1 }}
                     transition={{ duration: 0.8 }}
                     style={{
-                      color: isDarkMode ? 'white' : 'black',
+                      color: 'white',
                       fontSize: isMobile ? '1.5rem' : '2rem',
                       fontWeight: '300',
                       textAlign: 'center',
@@ -1673,7 +1776,7 @@ export default function HomePage(): React.JSX.Element {
               <div style={{
                 width: '100%',
                 height: '1px',
-                backgroundColor: isDarkMode ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)',
+                backgroundColor: 'rgba(255,255,255,0.2)',
                 marginBottom: '3rem'
               }}></div>
 
@@ -1691,7 +1794,7 @@ export default function HomePage(): React.JSX.Element {
                   flex: 1
                 }}>
                   <div style={{
-                    color: isDarkMode ? 'white' : 'black',
+                    color: 'white',
                     fontSize: isMobile ? '1.8rem' : '2.5rem',
                     fontWeight: '300',
                     textTransform: 'uppercase',
@@ -1751,11 +1854,11 @@ export default function HomePage(): React.JSX.Element {
                             }}
                             onError={(e) => {
                               console.error("Gambar topic tidak ditemukan:", e);
-                              e.currentTarget.style.backgroundColor = isDarkMode ? '#333' : '#eee';
+                              e.currentTarget.style.backgroundColor = '#333';
                               e.currentTarget.style.display = 'flex';
                               e.currentTarget.style.alignItems = 'center';
                               e.currentTarget.style.justifyContent = 'center';
-                              e.currentTarget.style.color = isDarkMode ? '#fff' : '#000';
+                              e.currentTarget.style.color = '#fff';
                               e.currentTarget.innerHTML = '<div style="padding: 2rem; text-align: center;">Topic Image</div>';
                             }}
                           />
@@ -1813,7 +1916,7 @@ export default function HomePage(): React.JSX.Element {
                         {/* Teks topic */}
                         <motion.div
                           style={{
-                            color: isDarkMode ? 'white' : 'black',
+                            color: 'white',
                             fontSize: isMobile ? '1.2rem' : '1.5rem',
                             fontWeight: hoveredTopic === topic.id ? '600' : '400',
                             fontFamily: 'Helvetica, Arial, sans-serif',
@@ -1861,7 +1964,7 @@ export default function HomePage(): React.JSX.Element {
                         }}>
                           <motion.div
                             style={{
-                              color: isDarkMode ? 'white' : 'black',
+                              color: 'white',
                               fontSize: isMobile ? '1.2rem' : '1.5rem',
                               fontWeight: hoveredTopic === topic.id ? '600' : '400',
                               fontFamily: 'Helvetica, Arial, sans-serif',
@@ -1874,7 +1977,7 @@ export default function HomePage(): React.JSX.Element {
                           </motion.div>
                           {/* Tanggal SEJAJAR dengan deskripsi */}
                           <div style={{
-                            color: isDarkMode ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.6)',
+                            color: 'rgba(255,255,255,0.6)',
                             fontSize: isMobile ? '1.2rem' : '1.5rem',
                             fontWeight: '400',
                             fontFamily: 'Helvetica, Arial, sans-serif',
@@ -1972,7 +2075,7 @@ export default function HomePage(): React.JSX.Element {
 
                   {/* Label status - lebih besar */}
                   <div style={{
-                    color: isDarkMode ? 'white' : 'black',
+                    color: 'white',
                     fontSize: '1.1rem',
                     fontWeight: '600',
                     fontFamily: 'Helvetica, Arial, sans-serif'
@@ -2004,7 +2107,7 @@ export default function HomePage(): React.JSX.Element {
               }}
             >
               <h2 style={{
-                color: isDarkMode ? 'white' : 'black',
+                color: 'white',
                 fontSize: isMobile ? '2rem' : '3rem',
                 fontWeight: '300',
                 marginBottom: '2rem'
@@ -2091,7 +2194,7 @@ export default function HomePage(): React.JSX.Element {
 
                   {/* Label status - lebih besar */}
                   <div style={{
-                    color: isDarkMode ? 'white' : 'black',
+                    color: 'white',
                     fontSize: '1.1rem',
                     fontWeight: '600',
                     fontFamily: 'Helvetica, Arial, sans-serif'
@@ -2209,4 +2312,3 @@ export default function HomePage(): React.JSX.Element {
     </div>
   );
 }
-
