@@ -496,247 +496,383 @@ export default function HomePage(): React.JSX.Element {
       MozOsxFontSmoothing: 'grayscale'
     }}>
 
-      {/* Halaman Full Page MENURU */}
-      <AnimatePresence>
-        {showMenuruFullPage && (
+ {/* Halaman Full Page MENURU */}
+<AnimatePresence>
+  {showMenuruFullPage && (
+    <motion.div
+      key="menuru-fullpage"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.5 }}
+      style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100%',
+        backgroundColor: 'black',
+        zIndex: 9998,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'flex-start',
+        overflowY: 'auto',
+        paddingBottom: '4rem' // Tambah padding bawah untuk scroll
+      }}
+    >
+      {/* Header dengan teks MENURU dan tanda \ di sebelah kanan */}
+      <div style={{
+        position: 'sticky',
+        top: 0,
+        left: 0,
+        width: '100%',
+        padding: isMobile ? '1.5rem' : '3rem',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'flex-start',
+        boxSizing: 'border-box',
+        backgroundColor: 'black',
+        zIndex: 10
+      }}>
+        {/* Container untuk MENURU, angka, dan roles - di kiri */}
+        <div style={{
+          display: 'flex',
+          flexDirection: 'column',
+          width: isMobile ? '45%' : '40%',
+          marginTop: isMobile ? '1rem' : '2rem' // Tambah jarak dari atas
+        }}>
+          {/* Teks MENURU \ di kiri */}
           <motion.div
-            key="menuru-fullpage"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.5 }}
+            initial={{ x: -50, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            transition={{ duration: 0.6, delay: 0.1 }}
             style={{
-              position: 'fixed',
-              top: 0,
-              left: 0,
-              width: '100%',
-              height: '100%',
-              backgroundColor: 'black',
-              zIndex: 9998,
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'flex-start',
-              overflowY: 'auto'
+              color: 'white',
+              fontSize: isMobile ? '2.5rem' : '4rem',
+              fontWeight: '300',
+              fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
+              textTransform: 'uppercase',
+              letterSpacing: '4px',
+              lineHeight: 1,
+              marginBottom: isMobile ? '2rem' : '3rem' // Tambah jarak bawah
             }}
           >
-            {/* Header dengan teks MENURU dan tanda \ di sebelah kanan */}
-            <div style={{
-              position: 'sticky',
-              top: 0,
-              left: 0,
-              width: '100%',
-              padding: isMobile ? '1rem' : '2rem',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'flex-start',
-              boxSizing: 'border-box',
-              backgroundColor: 'black',
-              zIndex: 10
-            }}>
-              {/* Container untuk MENURU, angka, dan roles - di kiri */}
-              <div style={{
-                display: 'flex',
-                flexDirection: 'column',
-                width: isMobile ? '45%' : '40%'
-              }}>
-                {/* Teks MENURU \ di kiri */}
-                <motion.div
-                  initial={{ x: -50, opacity: 0 }}
-                  animate={{ x: 0, opacity: 1 }}
-                  transition={{ duration: 0.6, delay: 0.1 }}
-                  style={{
-                    color: 'white',
-                    fontSize: isMobile ? '2rem' : '3rem',
-                    fontWeight: '300',
-                    fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
-                    textTransform: 'uppercase',
-                    letterSpacing: '3px',
-                    lineHeight: 1
-                  }}
-                >
-                  MENURU \
-                </motion.div>
-
-                {/* Angka 99887 dengan jarak dari judul */}
-                <motion.div
-                  initial={{ x: -50, opacity: 0 }}
-                  animate={{ x: 0, opacity: 1 }}
-                  transition={{ duration: 0.6, delay: 0.2 }}
-                  style={{
-                    color: 'white',
-                    fontSize: isMobile ? '1.5rem' : '2rem',
-                    fontWeight: '400',
-                    fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
-                    letterSpacing: '2px',
-                    marginTop: isMobile ? '1.5rem' : '2rem',
-                    marginBottom: isMobile ? '2rem' : '3rem'
-                  }}
-                >
-                  99887
-                </motion.div>
-
-                {/* Roles List dengan jarak yang cukup */}
-                <motion.div
-                  initial={{ x: -50, opacity: 0 }}
-                  animate={{ x: 0, opacity: 1 }}
-                  transition={{ duration: 0.6, delay: 0.3 }}
-                  style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: isMobile ? '1.5rem' : '2rem'
-                  }}
-                >
-                  {rolesData.map((role, index) => (
-                    <motion.div
-                      key={role.title}
-                      initial={{ x: -30, opacity: 0 }}
-                      animate={{ x: 0, opacity: 1 }}
-                      transition={{ duration: 0.4, delay: 0.4 + (index * 0.1) }}
-                      style={{
-                        display: 'flex',
-                        flexDirection: 'column'
-                      }}
-                    >
-                      {/* Role title */}
-                      <div style={{
-                        color: 'white',
-                        fontSize: isMobile ? '1rem' : '1.3rem',
-                        fontWeight: '500',
-                        fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
-                        letterSpacing: '0.5px',
-                        marginBottom: '0.3rem'
-                      }}>
-                        {role.title}
-                      </div>
-                      
-                      {/* Role description */}
-                      <div style={{
-                        color: 'white',
-                        fontSize: isMobile ? '0.9rem' : '1rem',
-                        fontWeight: '400',
-                        fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
-                        opacity: 0.9
-                      }}>
-                        {role.description}
-                      </div>
-                    </motion.div>
-                  ))}
-                </motion.div>
-              </div>
-
-              {/* Container untuk bagian tengah - DESKRIPSI dan FOTO */}
-              <div style={{
-                flex: 1,
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'flex-start',
-                marginLeft: isMobile ? '1rem' : '3rem',
-                marginRight: isMobile ? '1rem' : '3rem',
-                paddingTop: isMobile ? '0' : '2rem'
-              }}>
-                {/* Deskripsi di tengah - BESAR */}
-                <motion.div
-                  initial={{ y: -20, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ duration: 0.6, delay: 0.3 }}
-                  style={{
-                    color: 'white',
-                    fontSize: isMobile ? '1.2rem' : '1.8rem',
-                    fontWeight: '400',
-                    fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
-                    lineHeight: 1.6,
-                    textAlign: 'left',
-                    maxWidth: isMobile ? '90%' : '70%',
-                    marginBottom: isMobile ? '3rem' : '4rem',
-                    alignSelf: 'flex-start'
-                  }}
-                >
-                  A personal branding journal documenting emotional journeys and creative exploration through visual storytelling and self-discovery narratives.
-                </motion.div>
-
-                {/* Foto di bawah deskripsi - BESAR */}
-                <motion.div
-                  initial={{ y: 30, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ duration: 0.6, delay: 0.4 }}
-                  style={{
-                    width: isMobile ? '90%' : '70%',
-                    height: isMobile ? '300px' : '500px',
-                    overflow: 'hidden',
-                    borderRadius: '15px',
-                    boxShadow: '0 15px 40px rgba(0,0,0,0.7)',
-                    border: '2px solid rgba(255,255,255,0.15)',
-                    marginTop: isMobile ? '1rem' : '1.5rem',
-                    alignSelf: 'flex-start'
-                  }}
-                >
-                  <img 
-                    src="images/5.jpg" 
-                    alt="Menuru Visual"
-                    style={{
-                      width: '100%',
-                      height: '100%',
-                      display: 'block',
-                      objectFit: 'cover'
-                    }}
-                    onError={(e) => {
-                      e.currentTarget.style.backgroundColor = '#333';
-                      e.currentTarget.style.display = 'flex';
-                      e.currentTarget.style.alignItems = 'center';
-                      e.currentTarget.style.justifyContent = 'center';
-                      e.currentTarget.style.color = 'white';
-                      e.currentTarget.innerHTML = '<div style="padding: 1rem; text-align: center;">Menuru Image</div>';
-                    }}
-                  />
-                </motion.div>
-              </div>
-
-              {/* Tanda \ di kanan dengan animasi GSAP - KLIK UNTUK KEMBALI */}
-              <motion.div
-                initial={{ x: 50, opacity: 0 }}
-                animate={{ x: 0, opacity: 1 }}
-                transition={{ duration: 0.6, delay: 0.2 }}
-                onClick={handleCloseMenuruFullPage}
-                style={{
-                  width: isMobile ? '40px' : '50px',
-                  height: isMobile ? '40px' : '50px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  cursor: 'pointer',
-                  position: 'absolute',
-                  right: isMobile ? '1rem' : '2rem',
-                  top: isMobile ? '1rem' : '2rem'
-                }}
-                whileHover={{ scale: 1.2 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                {/* Tanda \ (backslash) dengan animasi GSAP */}
-                <div 
-                  ref={backslashRef}
-                  style={{
-                    position: 'absolute',
-                    width: isMobile ? '25px' : '30px',
-                    height: '3px',
-                    backgroundColor: 'white',
-                    borderRadius: '2px',
-                    transform: 'rotate(45deg)',
-                    transformOrigin: 'center'
-                  }}
-                />
-              </motion.div>
-            </div>
-
-            {/* Space untuk scroll ke bawah */}
-            <div style={{
-              height: '50vh',
-              width: '100%'
-            }}></div>
+            MENURU \
           </motion.div>
-        )}
-      </AnimatePresence>
+
+          {/* Angka 99887 dengan jarak dari judul */}
+          <motion.div
+            initial={{ x: -50, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            style={{
+              color: 'white',
+              fontSize: isMobile ? '2rem' : '3rem',
+              fontWeight: '400',
+              fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
+              letterSpacing: '3px',
+              marginBottom: isMobile ? '3rem' : '4rem' // Tambah jarak bawah
+            }}
+          >
+            99887
+          </motion.div>
+
+          {/* Roles List dengan jarak yang cukup */}
+          <motion.div
+            initial={{ x: -50, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            transition={{ duration: 0.6, delay: 0.3 }}
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: isMobile ? '2rem' : '3rem' // Tambah gap lebih besar
+            }}
+          >
+            {rolesData.map((role, index) => (
+              <motion.div
+                key={role.title}
+                initial={{ x: -30, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                transition={{ duration: 0.4, delay: 0.4 + (index * 0.1) }}
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column'
+                }}
+              >
+                {/* Role title */}
+                <div style={{
+                  color: 'white',
+                  fontSize: isMobile ? '1.2rem' : '1.8rem',
+                  fontWeight: '500',
+                  fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
+                  letterSpacing: '1px',
+                  marginBottom: '0.8rem' // Tambah jarak bawah
+                }}>
+                  {role.title}
+                </div>
+                
+                {/* Role description */}
+                <div style={{
+                  color: 'white',
+                  fontSize: isMobile ? '1rem' : '1.3rem',
+                  fontWeight: '400',
+                  fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
+                  opacity: 0.9,
+                  lineHeight: 1.5
+                }}>
+                  {role.description}
+                </div>
+              </motion.div>
+            ))}
+          </motion.div>
+        </div>
+
+        {/* Container untuk bagian tengah - DESKRIPSI dan FOTO */}
+        <div style={{
+          flex: 1,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'flex-start',
+          marginLeft: isMobile ? '1.5rem' : '4rem',
+          marginRight: isMobile ? '1.5rem' : '4rem',
+          marginTop: isMobile ? '1rem' : '2rem'
+        }}>
+          {/* Deskripsi di tengah - BESAR */}
+          <motion.div
+            initial={{ y: -20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.6, delay: 0.3 }}
+            style={{
+              color: 'white',
+              fontSize: isMobile ? '1.5rem' : '2.2rem',
+              fontWeight: '400',
+              fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
+              lineHeight: 1.7,
+              textAlign: 'left',
+              maxWidth: isMobile ? '90%' : '75%',
+              marginBottom: isMobile ? '4rem' : '5rem', // Tambah jarak bawah
+              alignSelf: 'flex-start'
+            }}
+          >
+            A personal branding journal documenting emotional journeys and creative exploration through visual storytelling and self-discovery narratives.
+          </motion.div>
+
+          {/* Foto di bawah deskripsi - BESAR */}
+          <motion.div
+            initial={{ y: 30, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+            style={{
+              width: isMobile ? '95%' : '80%',
+              height: isMobile ? '350px' : '600px',
+              overflow: 'hidden',
+              borderRadius: '20px',
+              boxShadow: '0 20px 50px rgba(0,0,0,0.8)',
+              border: '3px solid rgba(255,255,255,0.2)',
+              marginBottom: isMobile ? '3rem' : '4rem', // Tambah jarak bawah
+              alignSelf: 'flex-start'
+            }}
+          >
+            <img 
+              src="images/5.jpg" 
+              alt="Menuru Visual"
+              style={{
+                width: '100%',
+                height: '100%',
+                display: 'block',
+                objectFit: 'cover'
+              }}
+              onError={(e) => {
+                e.currentTarget.style.backgroundColor = '#333';
+                e.currentTarget.style.display = 'flex';
+                e.currentTarget.style.alignItems = 'center';
+                e.currentTarget.style.justifyContent = 'center';
+                e.currentTarget.style.color = 'white';
+                e.currentTarget.innerHTML = '<div style="padding: 2rem; text-align: center;">Menuru Image</div>';
+              }}
+            />
+          </motion.div>
+
+          {/* Judul kecil di bawah foto */}
+          <motion.div
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.6, delay: 0.5 }}
+            style={{
+              color: 'white',
+              fontSize: isMobile ? '1rem' : '1.2rem',
+              fontWeight: '500',
+              fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
+              letterSpacing: '1px',
+              textTransform: 'uppercase',
+              opacity: 0.8,
+              marginBottom: isMobile ? '2rem' : '2.5rem',
+              alignSelf: 'flex-start',
+              marginLeft: isMobile ? '0.5rem' : '1rem'
+            }}
+          >
+            Visual Journey • 2024 Collection
+          </motion.div>
+
+          {/* Teks link tautan besar di bawah judul */}
+          <motion.div
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.6, delay: 0.6 }}
+            style={{
+              alignSelf: 'flex-start',
+              marginBottom: isMobile ? '5rem' : '6rem' // Tambah jarak bawah besar
+            }}
+          >
+            <motion.a
+              href="/explore"
+              style={{
+                color: '#00FF00',
+                fontSize: isMobile ? '1.8rem' : '2.5rem',
+                fontWeight: '600',
+                fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
+                textDecoration: 'none',
+                letterSpacing: '1px',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '1rem',
+                position: 'relative',
+                padding: '1rem 0'
+              }}
+              whileHover={{ 
+                x: 10,
+                color: '#FFFFFF'
+              }}
+              transition={{ duration: 0.3 }}
+            >
+              EXPLORE FULL COLLECTION
+              <motion.svg
+                width={isMobile ? "24" : "32"}
+                height={isMobile ? "24" : "32"}
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                initial={{ x: 0 }}
+                animate={{ x: 0 }}
+                whileHover={{ x: 5 }}
+                transition={{ duration: 0.3 }}
+              >
+                <path d="M5 12h14" />
+                <path d="m12 5 7 7-7 7" />
+              </motion.svg>
+              {/* Garis bawah animasi */}
+              <motion.div
+                style={{
+                  position: 'absolute',
+                  bottom: '0.5rem',
+                  left: 0,
+                  width: '100%',
+                  height: '2px',
+                  backgroundColor: '#00FF00'
+                }}
+                initial={{ scaleX: 0 }}
+                whileHover={{ scaleX: 1 }}
+                transition={{ duration: 0.3 }}
+              />
+            </motion.a>
+          </motion.div>
+
+          {/* Container tambahan untuk konten di bawah tautan */}
+          <motion.div
+            initial={{ y: 30, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.6, delay: 0.7 }}
+            style={{
+              width: isMobile ? '95%' : '80%',
+              alignSelf: 'flex-start',
+              marginBottom: isMobile ? '3rem' : '4rem'
+            }}
+          >
+            <div style={{
+              color: 'white',
+              fontSize: isMobile ? '1.1rem' : '1.4rem',
+              fontWeight: '300',
+              fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
+              lineHeight: 1.8,
+              opacity: 0.9
+            }}>
+              This collection represents a year of personal growth and creative experimentation. Each image tells a story of transformation and discovery, captured through the lens of self-reflection.
+            </div>
+          </motion.div>
+        </div>
+
+        {/* Tanda \ di kanan dengan animasi GSAP - KLIK UNTUK KEMBALI */}
+        <motion.div
+          initial={{ x: 50, opacity: 0 }}
+          animate={{ x: 0, opacity: 1 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+          onClick={handleCloseMenuruFullPage}
+          style={{
+            width: isMobile ? '50px' : '60px',
+            height: isMobile ? '50px' : '60px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer',
+            position: 'fixed', // Ubah ke fixed agar tetap di posisi
+            right: isMobile ? '1.5rem' : '3rem',
+            top: isMobile ? '1.5rem' : '3rem',
+            backgroundColor: 'rgba(0,0,0,0.5)',
+            borderRadius: '50%',
+            zIndex: 9999
+          }}
+          whileHover={{ 
+            scale: 1.2,
+            backgroundColor: 'rgba(0,0,0,0.8)'
+          }}
+          whileTap={{ scale: 0.95 }}
+        >
+          {/* Tanda \ (backslash) dengan animasi GSAP */}
+          <div 
+            ref={backslashRef}
+            style={{
+              position: 'absolute',
+              width: isMobile ? '30px' : '35px',
+              height: '4px',
+              backgroundColor: 'white',
+              borderRadius: '2px',
+              transform: 'rotate(45deg)',
+              transformOrigin: 'center'
+            }}
+          />
+        </motion.div>
+      </div>
+
+      {/* Space untuk scroll ke bawah - ditambah lebih banyak */}
+      <div style={{
+        height: '100vh',
+        width: '100%',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }}>
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 0.5 }}
+          transition={{ delay: 1, duration: 1 }}
+          style={{
+            color: 'white',
+            fontSize: isMobile ? '1rem' : '1.2rem',
+            fontWeight: '300',
+            fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
+            textTransform: 'uppercase',
+            letterSpacing: '2px'
+          }}
+        >
+          Scroll for more
+        </motion.div>
+      </div>
+    </motion.div>
+  )}
+</AnimatePresence>
 
       {/* Top Navigation Bar */}
       <div 
@@ -2373,3 +2509,4 @@ export default function HomePage(): React.JSX.Element {
     </div>
   );
 }
+
