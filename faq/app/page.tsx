@@ -42,8 +42,9 @@ export default function HomePage(): React.JSX.Element {
   const [scrollPosition, setScrollPosition] = useState(0);
   const [isHoveringSignIn, setIsHoveringSignIn] = useState(false);
   
-  // State untuk counter foto
-  const [photoCounter, setPhotoCounter] = useState("01 / 03");
+  // State untuk counter foto - angka kiri saja yang berubah
+  const [leftCounter, setLeftCounter] = useState("01");
+  const totalPhotos = "03"; // Tetap konstan
   
   const headerRef = useRef<HTMLDivElement>(null);
   const topNavRef = useRef<HTMLDivElement>(null);
@@ -56,7 +57,7 @@ export default function HomePage(): React.JSX.Element {
   const userButtonRef = useRef<HTMLDivElement>(null);
   const userTextRef = useRef<HTMLSpanElement>(null);
   const splitTextRef = useRef<HTMLDivElement>(null);
-  const counterRef = useRef<HTMLDivElement>(null);
+  const leftCounterRef = useRef<HTMLSpanElement>(null);
 
   // Animasi loading text
   const loadingTexts = [
@@ -165,22 +166,22 @@ export default function HomePage(): React.JSX.Element {
     }
   }, [isLoading, currentView]);
 
-  // Fungsi untuk mengupdate counter foto dengan animasi GSAP
-  const updatePhotoCounter = (newIndex: number) => {
-    const newCounter = `${String(newIndex + 1).padStart(2, '0')} / ${String(progressPhotos.length).padStart(2, '0')}`;
+  // Fungsi untuk mengupdate counter angka kiri dengan animasi GSAP
+  const updateLeftCounter = (newIndex: number) => {
+    const newLeftCounter = String(newIndex + 1).padStart(2, '0');
     
-    if (counterRef.current) {
+    if (leftCounterRef.current) {
       // Animasi fade out current counter
-      gsap.to(counterRef.current, {
+      gsap.to(leftCounterRef.current, {
         opacity: 0,
         y: -10,
         duration: 0.2,
         onComplete: () => {
           // Update text
-          setPhotoCounter(newCounter);
+          setLeftCounter(newLeftCounter);
           
           // Animasi fade in new counter
-          gsap.fromTo(counterRef.current, 
+          gsap.fromTo(leftCounterRef.current, 
             { opacity: 0, y: 10 },
             { 
               opacity: 1, 
@@ -192,13 +193,13 @@ export default function HomePage(): React.JSX.Element {
         }
       });
     } else {
-      setPhotoCounter(newCounter);
+      setLeftCounter(newLeftCounter);
     }
   };
 
   // Update counter ketika currentPhotoIndex berubah
   useEffect(() => {
-    updatePhotoCounter(currentPhotoIndex);
+    updateLeftCounter(currentPhotoIndex);
   }, [currentPhotoIndex]);
 
   useEffect(() => {
@@ -293,8 +294,8 @@ export default function HomePage(): React.JSX.Element {
         const chars = splitTextRef.current.querySelectorAll('.char');
         gsap.killTweensOf(chars);
       }
-      if (counterRef.current) {
-        gsap.killTweensOf(counterRef.current);
+      if (leftCounterRef.current) {
+        gsap.killTweensOf(leftCounterRef.current);
       }
     };
   }, [isMobile, showMenuruFullPage]);
@@ -958,7 +959,8 @@ export default function HomePage(): React.JSX.Element {
               backgroundColor: 'rgba(255,255,255,0.9)',
               border: '1px solid rgba(255,255,255,0.2)',
               transition: 'all 0.3s ease',
-              position: 'relative'
+              position: 'relative',
+              paddingRight: isMobile ? '2.2rem' : '2.5rem' // Tambah padding untuk panah
             }}
             whileHover={{ 
               backgroundColor: 'white',
@@ -1001,30 +1003,28 @@ export default function HomePage(): React.JSX.Element {
               NEW
             </div>
             
-            {/* Tanda panah serong kanan bawah */}
-            <motion.div
+            {/* Tanda panah serong kanan bawah - TETAP TAMPIL */}
+            <div
               style={{
                 position: 'absolute',
-                bottom: '-5px',
-                right: '-5px',
-                width: '12px',
-                height: '12px',
-                opacity: 0
+                bottom: isMobile ? '-2px' : '-3px',
+                right: isMobile ? '-2px' : '-3px',
+                width: isMobile ? '14px' : '16px',
+                height: isMobile ? '14px' : '16px',
+                opacity: 1
               }}
-              whileHover={{ opacity: 1 }}
-              transition={{ duration: 0.2 }}
             >
               <svg 
-                width="12" 
-                height="12" 
+                width="100%" 
+                height="100%" 
                 viewBox="0 0 12 12" 
                 fill="none" 
                 stroke="#6366F1"
-                strokeWidth="2"
+                strokeWidth="1.5"
               >
                 <path d="M1 11L11 1M11 1H3M11 1V9"/>
               </svg>
-            </motion.div>
+            </div>
           </motion.div>
 
           {/* Chatbot */}
@@ -1040,7 +1040,8 @@ export default function HomePage(): React.JSX.Element {
               backgroundColor: 'rgba(255,255,255,0.9)',
               border: '1px solid rgba(255,255,255,0.2)',
               transition: 'all 0.3s ease',
-              position: 'relative'
+              position: 'relative',
+              paddingRight: isMobile ? '2.2rem' : '2.5rem'
             }}
             whileHover={{ 
               backgroundColor: 'white',
@@ -1081,30 +1082,28 @@ export default function HomePage(): React.JSX.Element {
               NEW
             </div>
             
-            {/* Tanda panah serong kanan bawah */}
-            <motion.div
+            {/* Tanda panah serong kanan bawah - TETAP TAMPIL */}
+            <div
               style={{
                 position: 'absolute',
-                bottom: '-5px',
-                right: '-5px',
-                width: '12px',
-                height: '12px',
-                opacity: 0
+                bottom: isMobile ? '-2px' : '-3px',
+                right: isMobile ? '-2px' : '-3px',
+                width: isMobile ? '14px' : '16px',
+                height: isMobile ? '14px' : '16px',
+                opacity: 1
               }}
-              whileHover={{ opacity: 1 }}
-              transition={{ duration: 0.2 }}
             >
               <svg 
-                width="12" 
-                height="12" 
+                width="100%" 
+                height="100%" 
                 viewBox="0 0 12 12" 
                 fill="none" 
                 stroke="#6366F1"
-                strokeWidth="2"
+                strokeWidth="1.5"
               >
                 <path d="M1 11L11 1M11 1H3M11 1V9"/>
               </svg>
-            </motion.div>
+            </div>
           </motion.div>
 
           {/* Update */}
@@ -1120,7 +1119,8 @@ export default function HomePage(): React.JSX.Element {
               backgroundColor: 'rgba(255,255,255,0.9)',
               border: '1px solid rgba(255,255,255,0.2)',
               transition: 'all 0.3s ease',
-              position: 'relative'
+              position: 'relative',
+              paddingRight: isMobile ? '2.2rem' : '2.5rem'
             }}
             whileHover={{ 
               backgroundColor: 'white',
@@ -1163,30 +1163,28 @@ export default function HomePage(): React.JSX.Element {
               NEW
             </div>
             
-            {/* Tanda panah serong kanan bawah */}
-            <motion.div
+            {/* Tanda panah serong kanan bawah - TETAP TAMPIL */}
+            <div
               style={{
                 position: 'absolute',
-                bottom: '-5px',
-                right: '-5px',
-                width: '12px',
-                height: '12px',
-                opacity: 0
+                bottom: isMobile ? '-2px' : '-3px',
+                right: isMobile ? '-2px' : '-3px',
+                width: isMobile ? '14px' : '16px',
+                height: isMobile ? '14px' : '16px',
+                opacity: 1
               }}
-              whileHover={{ opacity: 1 }}
-              transition={{ duration: 0.2 }}
             >
               <svg 
-                width="12" 
-                height="12" 
+                width="100%" 
+                height="100%" 
                 viewBox="0 0 12 12" 
                 fill="none" 
                 stroke="#6366F1"
-                strokeWidth="2"
+                strokeWidth="1.5"
               >
                 <path d="M1 11L11 1M11 1H3M11 1V9"/>
               </svg>
-            </motion.div>
+            </div>
           </motion.div>
 
           {/* Timeline */}
@@ -1202,7 +1200,8 @@ export default function HomePage(): React.JSX.Element {
               backgroundColor: 'rgba(255,255,255,0.9)',
               border: '1px solid rgba(255,255,255,0.2)',
               transition: 'all 0.3s ease',
-              position: 'relative'
+              position: 'relative',
+              paddingRight: isMobile ? '2.2rem' : '2.5rem'
             }}
             whileHover={{ 
               backgroundColor: 'white',
@@ -1244,30 +1243,28 @@ export default function HomePage(): React.JSX.Element {
               NEW
             </div>
             
-            {/* Tanda panah serong kanan bawah */}
-            <motion.div
+            {/* Tanda panah serong kanan bawah - TETAP TAMPIL */}
+            <div
               style={{
                 position: 'absolute',
-                bottom: '-5px',
-                right: '-5px',
-                width: '12px',
-                height: '12px',
-                opacity: 0
+                bottom: isMobile ? '-2px' : '-3px',
+                right: isMobile ? '-2px' : '-3px',
+                width: isMobile ? '14px' : '16px',
+                height: isMobile ? '14px' : '16px',
+                opacity: 1
               }}
-              whileHover={{ opacity: 1 }}
-              transition={{ duration: 0.2 }}
             >
               <svg 
-                width="12" 
-                height="12" 
+                width="100%" 
+                height="100%" 
                 viewBox="0 0 12 12" 
                 fill="none" 
                 stroke="#6366F1"
-                strokeWidth="2"
+                strokeWidth="1.5"
               >
                 <path d="M1 11L11 1M11 1H3M11 1V9"/>
               </svg>
-            </motion.div>
+            </div>
           </motion.div>
         </div>
       </div>
@@ -1926,27 +1923,52 @@ export default function HomePage(): React.JSX.Element {
                 boxSizing: 'border-box',
                 position: 'relative'
               }}>
-                {/* Counter Foto di samping kiri - angka otomatis berubah */}
+                {/* Counter Foto di samping kiri - HANYA ANGKA KIRI YANG BERUBAH */}
                 <div 
-                  ref={counterRef}
                   style={{
                     position: 'absolute',
                     left: isMobile ? '2rem' : '3rem',
                     top: isMobile ? '2rem' : '3rem',
                     zIndex: 20,
                     color: 'white',
-                    fontSize: isMobile ? '2rem' : '3rem',
+                    fontSize: isMobile ? '2.5rem' : '3.5rem',
                     fontWeight: '600',
                     fontFamily: 'Helvetica, Arial, sans-serif',
-                    opacity: 1,
                     textShadow: '0 2px 10px rgba(0,0,0,0.5)',
                     backgroundColor: 'rgba(0,0,0,0.3)',
                     padding: '0.5rem 1rem',
                     borderRadius: '10px',
-                    backdropFilter: 'blur(5px)'
+                    backdropFilter: 'blur(5px)',
+                    display: 'flex',
+                    alignItems: 'baseline',
+                    gap: '0.3rem'
                   }}
                 >
-                  {photoCounter}
+                  {/* Angka kiri yang berubah dengan animasi */}
+                  <span 
+                    ref={leftCounterRef}
+                    style={{
+                      display: 'inline-block',
+                      opacity: 1
+                    }}
+                  >
+                    {leftCounter}
+                  </span>
+                  <span style={{
+                    fontSize: isMobile ? '1.5rem' : '2rem',
+                    fontWeight: '400',
+                    opacity: 0.8,
+                    margin: '0 0.2rem'
+                  }}>
+                    /
+                  </span>
+                  <span style={{
+                    fontSize: isMobile ? '1.5rem' : '2rem',
+                    fontWeight: '400',
+                    opacity: 0.8
+                  }}>
+                    {totalPhotos}
+                  </span>
                 </div>
 
                 <div style={{
