@@ -49,14 +49,6 @@ export default function HomePage(): React.JSX.Element {
   // State untuk posisi gambar di halaman Index (semakin turun)
   const [imagePosition, setImagePosition] = useState(0);
   
-  // State untuk horizontal photos
-  const [horizontalPhotos, setHorizontalPhotos] = useState([
-    { id: 1, src: "images/5.jpg", alt: "Horizontal Photo 1", number: "001" },
-    { id: 2, src: "images/6.jpg", alt: "Horizontal Photo 2", number: "002" },
-    { id: 3, src: "images/5.jpg", alt: "Horizontal Photo 3", number: "003" },
-    { id: 4, src: "images/6.jpg", alt: "Horizontal Photo 4", number: "004" }
-  ]);
-  
   const headerRef = useRef<HTMLDivElement>(null);
   const topNavRef = useRef<HTMLDivElement>(null);
   const scrollTextRef = useRef<HTMLDivElement>(null);
@@ -92,8 +84,12 @@ export default function HomePage(): React.JSX.Element {
     { title: "Features", description: "Functionality & Integration" }
   ];
 
-  // Teks untuk split animation
-  const splitText = "stay thinking keep talk mind";
+  // Data untuk foto dengan teks
+  const textWithPhotos = [
+    { text: "stay thinking", photoSrc: "images/5.jpg", number: "001" },
+    { text: "keep talk", photoSrc: "images/6.jpg", number: "02" },
+    { text: "mind", photoSrc: "images/5.jpg", number: "03" }
+  ];
 
   // Listen to auth state changes
   useEffect(() => {
@@ -145,37 +141,6 @@ export default function HomePage(): React.JSX.Element {
       }
     }
   }, [user, userDisplayName, isMobile]);
-
-  // Animasi split text dengan GSAP
-  useEffect(() => {
-    if (!isLoading && splitTextRef.current) {
-      const chars = splitTextRef.current.querySelectorAll('.char');
-      
-      // Reset animasi sebelumnya
-      gsap.killTweensOf(chars);
-      
-      // Set initial state
-      gsap.set(chars, {
-        opacity: 0,
-        y: 20,
-        rotationX: -90
-      });
-      
-      // Animate each character with staggered delay
-      gsap.to(chars, {
-        opacity: 1,
-        y: 0,
-        rotationX: 0,
-        duration: 1,
-        ease: "power3.out",
-        stagger: {
-          amount: 1.5,
-          from: "random"
-        },
-        delay: 0.5
-      });
-    }
-  }, [isLoading, currentView]);
 
   // Fungsi untuk mengupdate counter angka kiri dengan animasi GSAP
   const updateLeftCounter = (newIndex: number) => {
@@ -528,22 +493,6 @@ export default function HomePage(): React.JSX.Element {
       nextPhoto();
     }
     // Klik di tengah -> tidak melakukan apa-apa
-  };
-
-  // Fungsi untuk memisahkan teks menjadi karakter-karakter
-  const renderSplitText = () => {
-    return splitText.split('').map((char, index) => (
-      <span 
-        key={index} 
-        className="char"
-        style={{
-          display: 'inline-block',
-          willChange: 'transform, opacity'
-        }}
-      >
-        {char === ' ' ? '\u00A0' : char}
-      </span>
-    ));
   };
 
   return (
@@ -1015,16 +964,17 @@ export default function HomePage(): React.JSX.Element {
               gap: '0.3rem'
             }}>
               Docs
-              {/* TANDA PANAH LURUS SERONG KE BAWAH KANAN - SVG YANG DIUBAH */}
+              {/* PANAH LURUS SERONG KANAN BAWAH - SVG BARU */}
               <svg 
-                width={isMobile ? "10" : "12"} 
-                height={isMobile ? "10" : "12"} 
-                viewBox="0 0 12 12" 
+                width={isMobile ? "12" : "14"} 
+                height={isMobile ? "12" : "14"} 
+                viewBox="0 0 24 24" 
                 fill="none" 
                 stroke="#6366F1"
-                strokeWidth="1.5"
+                strokeWidth="2"
               >
-                <path d="M3 4.5L6 7.5L9 4.5"/>
+                <path d="M7 7l10 10" />
+                <path d="M17 7v10H7" />
               </svg>
             </span>
             <div style={{
@@ -1084,16 +1034,17 @@ export default function HomePage(): React.JSX.Element {
               gap: '0.3rem'
             }}>
               Chatbot
-              {/* TANDA PANAH LURUS SERONG KE BAWAH KANAN - SVG YANG DIUBAH */}
+              {/* PANAH LURUS SERONG KANAN BAWAH - SVG BARU */}
               <svg 
-                width={isMobile ? "10" : "12"} 
-                height={isMobile ? "10" : "12"} 
-                viewBox="0 0 12 12" 
+                width={isMobile ? "12" : "14"} 
+                height={isMobile ? "12" : "14"} 
+                viewBox="0 0 24 24" 
                 fill="none" 
                 stroke="#6366F1"
-                strokeWidth="1.5"
+                strokeWidth="2"
               >
-                <path d="M3 4.5L6 7.5L9 4.5"/>
+                <path d="M7 7l10 10" />
+                <path d="M17 7v10H7" />
               </svg>
             </span>
             <div style={{
@@ -1155,16 +1106,17 @@ export default function HomePage(): React.JSX.Element {
               gap: '0.3rem'
             }}>
               Update
-              {/* TANDA PANAH LURUS SERONG KE BAWAH KANAN - SVG YANG DIUBAH */}
+              {/* PANAH LURUS SERONG KANAN BAWAH - SVG BARU */}
               <svg 
-                width={isMobile ? "10" : "12"} 
-                height={isMobile ? "10" : "12"} 
-                viewBox="0 0 12 12" 
+                width={isMobile ? "12" : "14"} 
+                height={isMobile ? "12" : "14"} 
+                viewBox="0 0 24 24" 
                 fill="none" 
                 stroke="#6366F1"
-                strokeWidth="1.5"
+                strokeWidth="2"
               >
-                <path d="M3 4.5L6 7.5L9 4.5"/>
+                <path d="M7 7l10 10" />
+                <path d="M17 7v10H7" />
               </svg>
             </span>
             <div style={{
@@ -1225,16 +1177,17 @@ export default function HomePage(): React.JSX.Element {
               gap: '0.3rem'
             }}>
               Timeline
-              {/* TANDA PANAH LURUS SERONG KE BAWAH KANAN - SVG YANG DIUBAH */}
+              {/* PANAH LURUS SERONG KANAN BAWAH - SVG BARU */}
               <svg 
-                width={isMobile ? "10" : "12"} 
-                height={isMobile ? "10" : "12"} 
-                viewBox="0 0 12 12" 
+                width={isMobile ? "12" : "14"} 
+                height={isMobile ? "12" : "14"} 
+                viewBox="0 0 24 24" 
                 fill="none" 
                 stroke="#6366F1"
-                strokeWidth="1.5"
+                strokeWidth="2"
               >
-                <path d="M3 4.5L6 7.5L9 4.5"/>
+                <path d="M7 7l10 10" />
+                <path d="M17 7v10H7" />
               </svg>
             </span>
             <div style={{
@@ -1469,133 +1422,109 @@ export default function HomePage(): React.JSX.Element {
               exit={{ opacity: 0 }}
               transition={{ duration: 0.5 }}
             >
-              {/* Split Text Animation - "stay thinking keep talk mind" */}
-              <div style={{
-                marginBottom: isMobile ? '2rem' : '3rem',
-                paddingLeft: isMobile ? '0.5rem' : '1rem',
-                paddingRight: isMobile ? '0.5rem' : '1rem',
-                textAlign: 'center'
-              }}>
-                <div 
-                  ref={splitTextRef}
-                  style={{
-                    color: 'white',
-                    fontSize: isMobile ? '3rem' : '5rem',
-                    fontWeight: '400',
-                    fontFamily: 'HelveticaNowDisplay, Arial, sans-serif',
-                    lineHeight: 1.1,
-                    margin: 0,
-                    marginBottom: isMobile ? '1.5rem' : '2rem',
-                    wordWrap: 'break-word',
-                    overflowWrap: 'break-word',
-                    textTransform: 'uppercase',
-                    letterSpacing: isMobile ? '2px' : '4px'
-                  }}
-                >
-                  {renderSplitText()}
-                </div>
-              </div>
-
-              {/* KONTEN BARU: Teks deskripsi dengan font Formula Condensed, setiap 2 kalimat spasi */}
+              {/* Container untuk teks dengan foto - DESAIN BARU */}
               <div style={{
                 width: '100%',
                 padding: isMobile ? '1rem' : '2rem',
-                marginBottom: isMobile ? '2rem' : '3rem',
+                marginBottom: isMobile ? '3rem' : '4rem',
                 boxSizing: 'border-box'
               }}>
-                {/* Deskripsi dengan font Formula Condensed dan font-weight 700 */}
-                <div style={{
-                  color: 'white',
-                  fontSize: isMobile ? '1.2rem' : '1.8rem',
-                  fontWeight: '700',
-                  fontFamily: '"Formula Condensed", sans-serif',
-                  lineHeight: 1.6,
-                  textAlign: 'center',
-                  maxWidth: '800px',
-                  margin: '0 auto',
-                  letterSpacing: '0.5px'
-                }}>
-                  A personal branding journal documenting emotional journeys and creative exploration.
-                  <br/><br/>
-                  Visual storytelling and self-discovery narratives through photography and design.
-                  <br/><br/>
-                  Capturing moments of transformation, growth, and creative expression.
-                  <br/><br/>
-                  Exploring the intersection of art, emotion, and personal development.
-                </div>
-              </div>
+                {textWithPhotos.map((item, index) => (
+                  <div key={index} style={{
+                    display: 'flex',
+                    flexDirection: isMobile ? 'column' : 'row',
+                    alignItems: isMobile ? 'flex-start' : 'center',
+                    marginBottom: isMobile ? '3rem' : '4rem',
+                    gap: isMobile ? '1.5rem' : '2rem'
+                  }}>
+                    {/* Teks di kiri */}
+                    <div style={{
+                      flex: isMobile ? '1' : '1',
+                      minWidth: isMobile ? '100%' : 'auto'
+                    }}>
+                      <motion.div
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ duration: 0.5, delay: index * 0.2 }}
+                        style={{
+                          color: 'white',
+                          fontSize: isMobile ? '2.5rem' : '3.5rem',
+                          fontWeight: '700',
+                          fontFamily: '"Formula Condensed", sans-serif',
+                          textTransform: 'uppercase',
+                          letterSpacing: '1px',
+                          lineHeight: 1.1
+                        }}
+                      >
+                        {item.text}
+                      </motion.div>
+                    </div>
 
-              {/* Container untuk foto horizontal dengan angka */}
-              <div style={{
-                width: '100%',
-                padding: isMobile ? '1rem' : '2rem',
-                marginTop: isMobile ? '1rem' : '2rem',
-                marginBottom: isMobile ? '2rem' : '3rem',
-                boxSizing: 'border-box'
-              }}>
-                <div style={{
-                  display: 'grid',
-                  gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, 1fr)',
-                  gap: isMobile ? '1.5rem' : '2rem',
-                  maxWidth: '1200px',
-                  margin: '0 auto'
-                }}>
-                  {horizontalPhotos.map((photo) => (
-                    <motion.div
-                      key={photo.id}
-                      style={{
-                        position: 'relative',
-                        overflow: 'hidden',
-                        borderRadius: '20px',
-                        boxShadow: '0 15px 35px rgba(0,0,0,0.4)',
-                        border: '2px solid rgba(255,255,255,0.15)',
-                        height: isMobile ? '250px' : '300px',
-                        cursor: 'pointer'
-                      }}
-                      whileHover={{ scale: 1.02 }}
-                      transition={{ duration: 0.3 }}
-                    >
-                      {/* Angka di pojok kiri atas */}
-                      <div style={{
-                        position: 'absolute',
-                        top: isMobile ? '1rem' : '1.5rem',
-                        left: isMobile ? '1rem' : '1.5rem',
-                        color: 'white',
-                        fontSize: isMobile ? '1.5rem' : '2rem',
-                        fontWeight: '700',
-                        fontFamily: 'Helvetica, Arial, sans-serif',
-                        textShadow: '0 2px 10px rgba(0,0,0,0.5)',
-                        backgroundColor: 'rgba(0,0,0,0.4)',
-                        padding: '0.5rem 1rem',
-                        borderRadius: '8px',
-                        backdropFilter: 'blur(5px)',
-                        zIndex: 2
-                      }}>
-                        {photo.number}
-                      </div>
-                      
-                      {/* Foto horizontal */}
-                      <img 
-                        src={photo.src} 
-                        alt={photo.alt}
+                    {/* Foto di tengah */}
+                    <div style={{
+                      flex: isMobile ? '1' : '2',
+                      width: '100%',
+                      position: 'relative'
+                    }}>
+                      <motion.div
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ duration: 0.5, delay: index * 0.2 + 0.1 }}
                         style={{
                           width: '100%',
-                          height: '100%',
-                          display: 'block',
-                          objectFit: 'cover'
+                          height: isMobile ? '250px' : '350px',
+                          borderRadius: '15px',
+                          overflow: 'hidden',
+                          boxShadow: '0 15px 35px rgba(0,0,0,0.5)',
+                          border: '2px solid rgba(255,255,255,0.1)',
+                          position: 'relative'
                         }}
-                        onError={(e) => {
-                          e.currentTarget.style.backgroundColor = '#333';
-                          e.currentTarget.style.display = 'flex';
-                          e.currentTarget.style.alignItems = 'center';
-                          e.currentTarget.style.justifyContent = 'center';
-                          e.currentTarget.style.color = '#fff';
-                          e.currentTarget.innerHTML = `<div style="padding: 2rem; text-align: center;">Photo ${photo.number}</div>`;
+                      >
+                        <img 
+                          src={item.photoSrc} 
+                          alt={item.text}
+                          style={{
+                            width: '100%',
+                            height: '100%',
+                            objectFit: 'cover',
+                            display: 'block'
+                          }}
+                          onError={(e) => {
+                            e.currentTarget.style.backgroundColor = '#333';
+                            e.currentTarget.style.display = 'flex';
+                            e.currentTarget.style.alignItems = 'center';
+                            e.currentTarget.style.justifyContent = 'center';
+                            e.currentTarget.style.color = '#fff';
+                            e.currentTarget.innerHTML = `<div style="padding: 2rem; text-align: center;">${item.text}</div>`;
+                          }}
+                        />
+                      </motion.div>
+                    </div>
+
+                    {/* Angka di kanan */}
+                    <div style={{
+                      flex: isMobile ? '1' : '1',
+                      display: 'flex',
+                      justifyContent: isMobile ? 'flex-start' : 'flex-end',
+                      minWidth: isMobile ? '100%' : 'auto'
+                    }}>
+                      <motion.div
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ duration: 0.5, delay: index * 0.2 + 0.2 }}
+                        style={{
+                          color: 'white',
+                          fontSize: isMobile ? '3rem' : '4rem',
+                          fontWeight: '700',
+                          fontFamily: 'Helvetica, Arial, sans-serif',
+                          opacity: 0.8
                         }}
-                      />
-                    </motion.div>
-                  ))}
-                </div>
+                      >
+                        ({item.number})
+                      </motion.div>
+                    </div>
+                  </div>
+                ))}
               </div>
 
               {/* Card #0050B7 dengan 4 foto images/5.jpg - FOTO LEBIH LEBAR KE SAMPING */}
