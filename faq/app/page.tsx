@@ -49,6 +49,14 @@ export default function HomePage(): React.JSX.Element {
   // State untuk posisi gambar di halaman Index (semakin turun)
   const [imagePosition, setImagePosition] = useState(0);
   
+  // State untuk horizontal photos
+  const [horizontalPhotos, setHorizontalPhotos] = useState([
+    { id: 1, src: "images/5.jpg", alt: "Horizontal Photo 1", number: "001" },
+    { id: 2, src: "images/6.jpg", alt: "Horizontal Photo 2", number: "002" },
+    { id: 3, src: "images/5.jpg", alt: "Horizontal Photo 3", number: "003" },
+    { id: 4, src: "images/6.jpg", alt: "Horizontal Photo 4", number: "004" }
+  ]);
+  
   const headerRef = useRef<HTMLDivElement>(null);
   const topNavRef = useRef<HTMLDivElement>(null);
   const scrollTextRef = useRef<HTMLDivElement>(null);
@@ -699,7 +707,7 @@ export default function HomePage(): React.JSX.Element {
                 marginRight: isMobile ? '1.5rem' : '4rem',
                 marginTop: isMobile ? '1rem' : '2rem'
               }}>
-                {/* Deskripsi di tengah - BESAR */}
+                {/* Deskripsi di tengah - BESAR dengan font Formula Condensed */}
                 <motion.div
                   initial={{ y: -20, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
@@ -707,8 +715,8 @@ export default function HomePage(): React.JSX.Element {
                   style={{
                     color: 'white',
                     fontSize: isMobile ? '1.5rem' : '2.2rem',
-                    fontWeight: '400',
-                    fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
+                    fontWeight: '700',
+                    fontFamily: '"Formula Condensed", sans-serif',
                     lineHeight: 1.7,
                     textAlign: 'left',
                     maxWidth: isMobile ? '90%' : '75%',
@@ -970,7 +978,7 @@ export default function HomePage(): React.JSX.Element {
               alignItems: 'center',
               gap: '0.5rem',
               cursor: 'pointer',
-              padding: '0.4rem 1rem 0.4rem 0.8rem', // Tambah padding kanan untuk panah
+              padding: '0.4rem 1rem 0.4rem 0.8rem',
               borderRadius: '25px',
               backgroundColor: 'rgba(255,255,255,0.9)',
               border: '1px solid rgba(255,255,255,0.2)',
@@ -1007,7 +1015,7 @@ export default function HomePage(): React.JSX.Element {
               gap: '0.3rem'
             }}>
               Docs
-              {/* Tanda panah lurus serong bawah kanan - DI SAMPING TEKS */}
+              {/* TANDA PANAH LURUS SERONG KE BAWAH KANAN - SVG YANG DIUBAH */}
               <svg 
                 width={isMobile ? "10" : "12"} 
                 height={isMobile ? "10" : "12"} 
@@ -1076,7 +1084,7 @@ export default function HomePage(): React.JSX.Element {
               gap: '0.3rem'
             }}>
               Chatbot
-              {/* Tanda panah lurus serong bawah kanan - DI SAMPING TEKS */}
+              {/* TANDA PANAH LURUS SERONG KE BAWAH KANAN - SVG YANG DIUBAH */}
               <svg 
                 width={isMobile ? "10" : "12"} 
                 height={isMobile ? "10" : "12"} 
@@ -1147,7 +1155,7 @@ export default function HomePage(): React.JSX.Element {
               gap: '0.3rem'
             }}>
               Update
-              {/* Tanda panah lurus serong bawah kanan - DI SAMPING TEKS */}
+              {/* TANDA PANAH LURUS SERONG KE BAWAH KANAN - SVG YANG DIUBAH */}
               <svg 
                 width={isMobile ? "10" : "12"} 
                 height={isMobile ? "10" : "12"} 
@@ -1217,7 +1225,7 @@ export default function HomePage(): React.JSX.Element {
               gap: '0.3rem'
             }}>
               Timeline
-              {/* Tanda panah lurus serong bawah kanan - DI SAMPING TEKS */}
+              {/* TANDA PANAH LURUS SERONG KE BAWAH KANAN - SVG YANG DIUBAH */}
               <svg 
                 width={isMobile ? "10" : "12"} 
                 height={isMobile ? "10" : "12"} 
@@ -1488,84 +1496,105 @@ export default function HomePage(): React.JSX.Element {
                 </div>
               </div>
 
-              {/* Container untuk 2 foto - LEBIH MENTOK KE LAYAR */}
+              {/* KONTEN BARU: Teks deskripsi dengan font Formula Condensed, setiap 2 kalimat spasi */}
               <div style={{
-                display: 'flex',
-                flexDirection: isMobile ? 'column' : 'row',
-                gap: isMobile ? '1rem' : '0.3rem',
-                width: 'calc(100% - 2rem)',
-                marginLeft: isMobile ? '0.5rem' : '1rem',
-                marginRight: isMobile ? '0.5rem' : '1rem',
-                marginTop: '1rem'
+                width: '100%',
+                padding: isMobile ? '1rem' : '2rem',
+                marginBottom: isMobile ? '2rem' : '3rem',
+                boxSizing: 'border-box'
               }}>
-                {/* Foto 1 - Sisi kiri, SANGAT PANJANG */}
+                {/* Deskripsi dengan font Formula Condensed dan font-weight 700 */}
                 <div style={{
-                  flex: 1,
-                  overflow: 'hidden',
-                  borderRadius: '25px',
-                  boxShadow: '0 20px 50px rgba(0,0,0,0.5)',
-                  border: '3px solid rgba(255,255,255,0.2)',
-                  width: '100%',
-                  position: 'relative',
-                  zIndex: 1,
-                  height: isMobile ? '500px' : '1200px'
+                  color: 'white',
+                  fontSize: isMobile ? '1.2rem' : '1.8rem',
+                  fontWeight: '700',
+                  fontFamily: '"Formula Condensed", sans-serif',
+                  lineHeight: 1.6,
+                  textAlign: 'center',
+                  maxWidth: '800px',
+                  margin: '0 auto',
+                  letterSpacing: '0.5px'
                 }}>
-                  <img 
-                    src="images/5.jpg" 
-                    alt="Menuru Visual Left"
-                    style={{
-                      width: '100%',
-                      height: '100%',
-                      display: 'block',
-                      objectFit: 'cover',
-                      borderRadius: '22px'
-                    }}
-                    onError={(e) => {
-                      console.error("Gambar kiri tidak ditemukan:", e);
-                      e.currentTarget.style.backgroundColor = '#333';
-                      e.currentTarget.style.display = 'flex';
-                      e.currentTarget.style.alignItems = 'center';
-                      e.currentTarget.style.justifyContent = 'center';
-                      e.currentTarget.style.color = '#fff';
-                      e.currentTarget.style.height = '100%';
-                      e.currentTarget.innerHTML = '<div style="padding: 2rem; text-align: center;">Left Image</div>';
-                    }}
-                  />
+                  A personal branding journal documenting emotional journeys and creative exploration.
+                  <br/><br/>
+                  Visual storytelling and self-discovery narratives through photography and design.
+                  <br/><br/>
+                  Capturing moments of transformation, growth, and creative expression.
+                  <br/><br/>
+                  Exploring the intersection of art, emotion, and personal development.
                 </div>
+              </div>
 
-                {/* Foto 2 - Sisi kanan, SANGAT PANJANG */}
+              {/* Container untuk foto horizontal dengan angka */}
+              <div style={{
+                width: '100%',
+                padding: isMobile ? '1rem' : '2rem',
+                marginTop: isMobile ? '1rem' : '2rem',
+                marginBottom: isMobile ? '2rem' : '3rem',
+                boxSizing: 'border-box'
+              }}>
                 <div style={{
-                  flex: 1,
-                  overflow: 'hidden',
-                  borderRadius: '25px',
-                  boxShadow: '0 20px 50px rgba(0,0,0,0.5)',
-                  border: '3px solid rgba(255,255,255,0.2)',
-                  width: '100%',
-                  position: 'relative',
-                  zIndex: 1,
-                  height: isMobile ? '500px' : '1200px'
+                  display: 'grid',
+                  gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, 1fr)',
+                  gap: isMobile ? '1.5rem' : '2rem',
+                  maxWidth: '1200px',
+                  margin: '0 auto'
                 }}>
-                  <img 
-                    src="images/6.jpg" 
-                    alt="Menuru Visual Right"
-                    style={{
-                      width: '100%',
-                      height: '100%',
-                      display: 'block',
-                      objectFit: 'cover',
-                      borderRadius: '22px'
-                    }}
-                    onError={(e) => {
-                      console.error("Gambar kanan tidak ditemukan:", e);
-                      e.currentTarget.style.backgroundColor = '#333';
-                      e.currentTarget.style.display = 'flex';
-                      e.currentTarget.style.alignItems = 'center';
-                      e.currentTarget.style.justifyContent = 'center';
-                      e.currentTarget.style.color = '#fff';
-                      e.currentTarget.style.height = '100%';
-                      e.currentTarget.innerHTML = '<div style="padding: 2rem; text-align: center;">Right Image</div>';
-                    }}
-                  />
+                  {horizontalPhotos.map((photo) => (
+                    <motion.div
+                      key={photo.id}
+                      style={{
+                        position: 'relative',
+                        overflow: 'hidden',
+                        borderRadius: '20px',
+                        boxShadow: '0 15px 35px rgba(0,0,0,0.4)',
+                        border: '2px solid rgba(255,255,255,0.15)',
+                        height: isMobile ? '250px' : '300px',
+                        cursor: 'pointer'
+                      }}
+                      whileHover={{ scale: 1.02 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      {/* Angka di pojok kiri atas */}
+                      <div style={{
+                        position: 'absolute',
+                        top: isMobile ? '1rem' : '1.5rem',
+                        left: isMobile ? '1rem' : '1.5rem',
+                        color: 'white',
+                        fontSize: isMobile ? '1.5rem' : '2rem',
+                        fontWeight: '700',
+                        fontFamily: 'Helvetica, Arial, sans-serif',
+                        textShadow: '0 2px 10px rgba(0,0,0,0.5)',
+                        backgroundColor: 'rgba(0,0,0,0.4)',
+                        padding: '0.5rem 1rem',
+                        borderRadius: '8px',
+                        backdropFilter: 'blur(5px)',
+                        zIndex: 2
+                      }}>
+                        {photo.number}
+                      </div>
+                      
+                      {/* Foto horizontal */}
+                      <img 
+                        src={photo.src} 
+                        alt={photo.alt}
+                        style={{
+                          width: '100%',
+                          height: '100%',
+                          display: 'block',
+                          objectFit: 'cover'
+                        }}
+                        onError={(e) => {
+                          e.currentTarget.style.backgroundColor = '#333';
+                          e.currentTarget.style.display = 'flex';
+                          e.currentTarget.style.alignItems = 'center';
+                          e.currentTarget.style.justifyContent = 'center';
+                          e.currentTarget.style.color = '#fff';
+                          e.currentTarget.innerHTML = `<div style="padding: 2rem; text-align: center;">Photo ${photo.number}</div>`;
+                        }}
+                      />
+                    </motion.div>
+                  ))}
                 </div>
               </div>
 
