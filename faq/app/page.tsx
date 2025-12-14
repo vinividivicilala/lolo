@@ -46,6 +46,9 @@ export default function HomePage(): React.JSX.Element {
   const [leftCounter, setLeftCounter] = useState("01");
   const totalPhotos = "03"; // Tetap konstan
   
+  // State untuk posisi gambar di halaman Index (semakin turun)
+  const [imagePosition, setImagePosition] = useState(0);
+  
   const headerRef = useRef<HTMLDivElement>(null);
   const topNavRef = useRef<HTMLDivElement>(null);
   const scrollTextRef = useRef<HTMLDivElement>(null);
@@ -201,6 +204,19 @@ export default function HomePage(): React.JSX.Element {
   useEffect(() => {
     updateLeftCounter(currentPhotoIndex);
   }, [currentPhotoIndex]);
+
+  // Update posisi gambar ketika hoveredTopic berubah (semakin turun)
+  useEffect(() => {
+    if (hoveredTopic !== null) {
+      // Hitung posisi berdasarkan index topic
+      const topicIndex = indexTopics.findIndex(topic => topic.id === hoveredTopic);
+      // Semakin besar index, semakin turun posisinya
+      const newPosition = topicIndex * 40; // 40px per item
+      setImagePosition(newPosition);
+    } else {
+      setImagePosition(0);
+    }
+  }, [hoveredTopic]);
 
   useEffect(() => {
     // Cek apakah user sudah menyetujui cookies
@@ -455,37 +471,37 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // Data untuk halaman Index
+  // Data untuk halaman Index - HANYA TAHUN
   const indexTopics = [
     {
       id: 1,
       title: "Personal Journey",
       description: "Exploring self-discovery.",
-      date: "2024-03-15"
+      year: "2024"
     },
     {
       id: 2,
       title: "Creative Process",
       description: "Ideas evolution documentation.",
-      date: "2024-03-10"
+      year: "2024"
     },
     {
       id: 3,
       title: "Visual Storytelling",
       description: "Photography for personal growth.",
-      date: "2024-03-05"
+      year: "2024"
     },
     {
       id: 4,
       title: "Emotional Archive",
       description: "Collection of feelings.",
-      date: "2024-02-28"
+      year: "2024"
     },
     {
       id: 5,
       title: "Growth Metrics",
       description: "Tracking development goals.",
-      date: "2024-02-20"
+      year: "2024"
     }
   ];
 
@@ -960,7 +976,7 @@ export default function HomePage(): React.JSX.Element {
               border: '1px solid rgba(255,255,255,0.2)',
               transition: 'all 0.3s ease',
               position: 'relative',
-              paddingRight: isMobile ? '2.2rem' : '2.5rem' // Tambah padding untuk panah
+              paddingRight: isMobile ? '2.2rem' : '2.5rem'
             }}
             whileHover={{ 
               backgroundColor: 'white',
@@ -998,32 +1014,33 @@ export default function HomePage(): React.JSX.Element {
               padding: '0.1rem 0.4rem',
               borderRadius: '10px',
               marginLeft: '0.3rem',
-              border: 'none'
+              border: 'none',
+              position: 'relative',
+              paddingRight: isMobile ? '1.2rem' : '1.4rem'
             }}>
               NEW
-            </div>
-            
-            {/* Tanda panah serong kanan bawah - TETAP TAMPIL */}
-            <div
-              style={{
-                position: 'absolute',
-                bottom: isMobile ? '-2px' : '-3px',
-                right: isMobile ? '-2px' : '-3px',
-                width: isMobile ? '14px' : '16px',
-                height: isMobile ? '14px' : '16px',
-                opacity: 1
-              }}
-            >
-              <svg 
-                width="100%" 
-                height="100%" 
-                viewBox="0 0 12 12" 
-                fill="none" 
-                stroke="#6366F1"
-                strokeWidth="1.5"
+              {/* Tanda panah lurus hadap ke bawah kanan - WARNA HITAM */}
+              <div
+                style={{
+                  position: 'absolute',
+                  right: '2px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  width: isMobile ? '8px' : '10px',
+                  height: isMobile ? '8px' : '10px'
+                }}
               >
-                <path d="M1 11L11 1M11 1H3M11 1V9"/>
-              </svg>
+                <svg 
+                  width="100%" 
+                  height="100%" 
+                  viewBox="0 0 12 12" 
+                  fill="none" 
+                  stroke="black"
+                  strokeWidth="1.5"
+                >
+                  <path d="M3 4.5L6 7.5L9 4.5"/>
+                </svg>
+              </div>
             </div>
           </motion.div>
 
@@ -1077,32 +1094,33 @@ export default function HomePage(): React.JSX.Element {
               padding: '0.1rem 0.4rem',
               borderRadius: '10px',
               marginLeft: '0.3rem',
-              border: 'none'
+              border: 'none',
+              position: 'relative',
+              paddingRight: isMobile ? '1.2rem' : '1.4rem'
             }}>
               NEW
-            </div>
-            
-            {/* Tanda panah serong kanan bawah - TETAP TAMPIL */}
-            <div
-              style={{
-                position: 'absolute',
-                bottom: isMobile ? '-2px' : '-3px',
-                right: isMobile ? '-2px' : '-3px',
-                width: isMobile ? '14px' : '16px',
-                height: isMobile ? '14px' : '16px',
-                opacity: 1
-              }}
-            >
-              <svg 
-                width="100%" 
-                height="100%" 
-                viewBox="0 0 12 12" 
-                fill="none" 
-                stroke="#6366F1"
-                strokeWidth="1.5"
+              {/* Tanda panah lurus hadap ke bawah kanan - WARNA HITAM */}
+              <div
+                style={{
+                  position: 'absolute',
+                  right: '2px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  width: isMobile ? '8px' : '10px',
+                  height: isMobile ? '8px' : '10px'
+                }}
               >
-                <path d="M1 11L11 1M11 1H3M11 1V9"/>
-              </svg>
+                <svg 
+                  width="100%" 
+                  height="100%" 
+                  viewBox="0 0 12 12" 
+                  fill="none" 
+                  stroke="black"
+                  strokeWidth="1.5"
+                >
+                  <path d="M3 4.5L6 7.5L9 4.5"/>
+                </svg>
+              </div>
             </div>
           </motion.div>
 
@@ -1158,32 +1176,33 @@ export default function HomePage(): React.JSX.Element {
               padding: '0.1rem 0.4rem',
               borderRadius: '10px',
               marginLeft: '0.3rem',
-              border: 'none'
+              border: 'none',
+              position: 'relative',
+              paddingRight: isMobile ? '1.2rem' : '1.4rem'
             }}>
               NEW
-            </div>
-            
-            {/* Tanda panah serong kanan bawah - TETAP TAMPIL */}
-            <div
-              style={{
-                position: 'absolute',
-                bottom: isMobile ? '-2px' : '-3px',
-                right: isMobile ? '-2px' : '-3px',
-                width: isMobile ? '14px' : '16px',
-                height: isMobile ? '14px' : '16px',
-                opacity: 1
-              }}
-            >
-              <svg 
-                width="100%" 
-                height="100%" 
-                viewBox="0 0 12 12" 
-                fill="none" 
-                stroke="#6366F1"
-                strokeWidth="1.5"
+              {/* Tanda panah lurus hadap ke bawah kanan - WARNA HITAM */}
+              <div
+                style={{
+                  position: 'absolute',
+                  right: '2px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  width: isMobile ? '8px' : '10px',
+                  height: isMobile ? '8px' : '10px'
+                }}
               >
-                <path d="M1 11L11 1M11 1H3M11 1V9"/>
-              </svg>
+                <svg 
+                  width="100%" 
+                  height="100%" 
+                  viewBox="0 0 12 12" 
+                  fill="none" 
+                  stroke="black"
+                  strokeWidth="1.5"
+                >
+                  <path d="M3 4.5L6 7.5L9 4.5"/>
+                </svg>
+              </div>
             </div>
           </motion.div>
 
@@ -1238,32 +1257,33 @@ export default function HomePage(): React.JSX.Element {
               padding: '0.1rem 0.4rem',
               borderRadius: '10px',
               marginLeft: '0.3rem',
-              border: 'none'
+              border: 'none',
+              position: 'relative',
+              paddingRight: isMobile ? '1.2rem' : '1.4rem'
             }}>
               NEW
-            </div>
-            
-            {/* Tanda panah serong kanan bawah - TETAP TAMPIL */}
-            <div
-              style={{
-                position: 'absolute',
-                bottom: isMobile ? '-2px' : '-3px',
-                right: isMobile ? '-2px' : '-3px',
-                width: isMobile ? '14px' : '16px',
-                height: isMobile ? '14px' : '16px',
-                opacity: 1
-              }}
-            >
-              <svg 
-                width="100%" 
-                height="100%" 
-                viewBox="0 0 12 12" 
-                fill="none" 
-                stroke="#6366F1"
-                strokeWidth="1.5"
+              {/* Tanda panah lurus hadap ke bawah kanan - WARNA HITAM */}
+              <div
+                style={{
+                  position: 'absolute',
+                  right: '2px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  width: isMobile ? '8px' : '10px',
+                  height: isMobile ? '8px' : '10px'
+                }}
               >
-                <path d="M1 11L11 1M11 1H3M11 1V9"/>
-              </svg>
+                <svg 
+                  width="100%" 
+                  height="100%" 
+                  viewBox="0 0 12 12" 
+                  fill="none" 
+                  stroke="black"
+                  strokeWidth="1.5"
+                >
+                  <path d="M3 4.5L6 7.5L9 4.5"/>
+                </svg>
+              </div>
             </div>
           </motion.div>
         </div>
@@ -2174,14 +2194,15 @@ export default function HomePage(): React.JSX.Element {
               <div ref={topicContainerRef} style={{
                 display: 'flex',
                 flexDirection: isMobile ? 'column' : 'row',
-                gap: isMobile ? '1.5rem' : '4rem',
+                gap: isMobile ? '2rem' : '3rem', // GAP LEBIH KECIL UNTUK DIGESER KE KIRI
                 width: '100%',
                 fontFamily: 'Helvetica, Arial, sans-serif',
                 position: 'relative'
               }}>
                 {/* Kolom 1 - MENURU */}
                 <div style={{
-                  flex: 1
+                  flex: 0.8, // LEBIH KECIL UNTUK DIGESER KE KIRI
+                  marginLeft: isMobile ? '0.5rem' : '1rem'
                 }}>
                   <div style={{
                     color: 'white',
@@ -2196,18 +2217,22 @@ export default function HomePage(): React.JSX.Element {
                   </div>
                 </div>
 
-                {/* Kolom 2 - Gambar Hover */}
+                {/* Kolom 2 - Gambar Hover - SEMAKIN TURUN */}
                 <div style={{
-                  flex: 1,
+                  flex: 1.2, // LEBIH BESAR UNTUK GAMBAR
                   position: 'relative',
-                  minHeight: isMobile ? '400px' : '600px'
+                  minHeight: isMobile ? '400px' : '600px',
+                  marginLeft: isMobile ? '-1rem' : '-2rem' // DIGESER KE KIRI
                 }}>
                   <AnimatePresence>
                     {hoveredTopic !== null && (
                       <motion.div
                         key="hovered-image"
                         initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
+                        animate={{ 
+                          opacity: 1,
+                          y: imagePosition // SEMAKIN TURUN BERDASARKAN POSISI
+                        }}
                         exit={{ opacity: 0 }}
                         transition={{ duration: 0.3 }}
                         style={{
@@ -2258,10 +2283,11 @@ export default function HomePage(): React.JSX.Element {
                   </AnimatePresence>
                 </div>
 
-                {/* Kolom 3 - Topics */}
+                {/* Kolom 3 - Topics - DIGESER KE KIRI */}
                 <div style={{
                   flex: 1,
-                  position: 'relative'
+                  position: 'relative',
+                  marginLeft: isMobile ? '-2rem' : '-3rem' // DIGESER KE KIRI
                 }}>
                   <div style={{
                     display: 'flex',
@@ -2324,9 +2350,10 @@ export default function HomePage(): React.JSX.Element {
                   </div>
                 </div>
 
-                {/* Kolom 4 - Deskripsi dan Tanggal SEJAJAR */}
+                {/* Kolom 4 - Deskripsi dan Tahun SAJA - DIGESER KE KIRI */}
                 <div style={{
-                  flex: 1
+                  flex: 1,
+                  marginLeft: isMobile ? '-2rem' : '-3rem' // DIGESER KE KIRI
                 }}>
                   <div style={{
                     display: 'flex',
@@ -2346,7 +2373,7 @@ export default function HomePage(): React.JSX.Element {
                           cursor: 'pointer'
                         }}
                       >
-                        {/* Container untuk deskripsi dan tanggal SEJAJAR */}
+                        {/* Container untuk deskripsi dan tahun SAJA */}
                         <div style={{
                           display: 'flex',
                           alignItems: 'baseline',
@@ -2365,15 +2392,16 @@ export default function HomePage(): React.JSX.Element {
                           >
                             {topic.description}
                           </motion.div>
-                          {/* Tanggal SEJAJAR dengan deskripsi */}
+                          {/* Tahun SAJA - di kanan deskripsi */}
                           <div style={{
                             color: 'rgba(255,255,255,0.6)',
                             fontSize: isMobile ? '1.2rem' : '1.5rem',
                             fontWeight: '400',
                             fontFamily: 'Helvetica, Arial, sans-serif',
-                            lineHeight: 1.1
+                            lineHeight: 1.1,
+                            whiteSpace: 'nowrap'
                           }}>
-                            {topic.date}
+                            {topic.year}
                           </div>
                         </div>
                       </div>
