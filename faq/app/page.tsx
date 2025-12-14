@@ -970,13 +970,12 @@ export default function HomePage(): React.JSX.Element {
               alignItems: 'center',
               gap: '0.5rem',
               cursor: 'pointer',
-              padding: '0.4rem 0.8rem',
+              padding: '0.4rem 1rem 0.4rem 0.8rem', // Tambah padding kanan untuk panah
               borderRadius: '25px',
               backgroundColor: 'rgba(255,255,255,0.9)',
               border: '1px solid rgba(255,255,255,0.2)',
               transition: 'all 0.3s ease',
-              position: 'relative',
-              paddingRight: isMobile ? '2.2rem' : '2.5rem'
+              position: 'relative'
             }}
             whileHover={{ 
               backgroundColor: 'white',
@@ -1002,9 +1001,23 @@ export default function HomePage(): React.JSX.Element {
               color: '#6366F1',
               fontSize: isMobile ? '0.8rem' : '0.9rem',
               fontWeight: '600',
-              fontFamily: 'Helvetica, Arial, sans-serif'
+              fontFamily: 'Helvetica, Arial, sans-serif',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.3rem'
             }}>
               Docs
+              {/* Tanda panah lurus serong bawah kanan - DI SAMPING TEKS */}
+              <svg 
+                width={isMobile ? "10" : "12"} 
+                height={isMobile ? "10" : "12"} 
+                viewBox="0 0 12 12" 
+                fill="none" 
+                stroke="#6366F1"
+                strokeWidth="1.5"
+              >
+                <path d="M3 4.5L6 7.5L9 4.5"/>
+              </svg>
             </span>
             <div style={{
               backgroundColor: '#EC4899',
@@ -1014,33 +1027,9 @@ export default function HomePage(): React.JSX.Element {
               padding: '0.1rem 0.4rem',
               borderRadius: '10px',
               marginLeft: '0.3rem',
-              border: 'none',
-              position: 'relative',
-              paddingRight: isMobile ? '1.2rem' : '1.4rem'
+              border: 'none'
             }}>
               NEW
-              {/* Tanda panah lurus hadap ke bawah kanan - WARNA HITAM */}
-              <div
-                style={{
-                  position: 'absolute',
-                  right: '2px',
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  width: isMobile ? '8px' : '10px',
-                  height: isMobile ? '8px' : '10px'
-                }}
-              >
-                <svg 
-                  width="100%" 
-                  height="100%" 
-                  viewBox="0 0 12 12" 
-                  fill="none" 
-                  stroke="black"
-                  strokeWidth="1.5"
-                >
-                  <path d="M3 4.5L6 7.5L9 4.5"/>
-                </svg>
-              </div>
             </div>
           </motion.div>
 
@@ -1052,13 +1041,12 @@ export default function HomePage(): React.JSX.Element {
               alignItems: 'center',
               gap: '0.5rem',
               cursor: 'pointer',
-              padding: '0.4rem 0.8rem',
+              padding: '0.4rem 1rem 0.4rem 0.8rem',
               borderRadius: '25px',
               backgroundColor: 'rgba(255,255,255,0.9)',
               border: '1px solid rgba(255,255,255,0.2)',
               transition: 'all 0.3s ease',
-              position: 'relative',
-              paddingRight: isMobile ? '2.2rem' : '2.5rem'
+              position: 'relative'
             }}
             whileHover={{ 
               backgroundColor: 'white',
@@ -1082,9 +1070,23 @@ export default function HomePage(): React.JSX.Element {
               color: '#6366F1',
               fontSize: isMobile ? '0.8rem' : '0.9rem',
               fontWeight: '600',
-              fontFamily: 'Helvetica, Arial, sans-serif'
+              fontFamily: 'Helvetica, Arial, sans-serif',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.3rem'
             }}>
               Chatbot
+              {/* Tanda panah lurus serong bawah kanan - DI SAMPING TEKS */}
+              <svg 
+                width={isMobile ? "10" : "12"} 
+                height={isMobile ? "10" : "12"} 
+                viewBox="0 0 12 12" 
+                fill="none" 
+                stroke="#6366F1"
+                strokeWidth="1.5"
+              >
+                <path d="M3 4.5L6 7.5L9 4.5"/>
+              </svg>
             </span>
             <div style={{
               backgroundColor: '#EC4899',
@@ -1094,33 +1096,9 @@ export default function HomePage(): React.JSX.Element {
               padding: '0.1rem 0.4rem',
               borderRadius: '10px',
               marginLeft: '0.3rem',
-              border: 'none',
-              position: 'relative',
-              paddingRight: isMobile ? '1.2rem' : '1.4rem'
+              border: 'none'
             }}>
               NEW
-              {/* Tanda panah lurus hadap ke bawah kanan - WARNA HITAM */}
-              <div
-                style={{
-                  position: 'absolute',
-                  right: '2px',
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  width: isMobile ? '8px' : '10px',
-                  height: isMobile ? '8px' : '10px'
-                }}
-              >
-                <svg 
-                  width="100%" 
-                  height="100%" 
-                  viewBox="0 0 12 12" 
-                  fill="none" 
-                  stroke="black"
-                  strokeWidth="1.5"
-                >
-                  <path d="M3 4.5L6 7.5L9 4.5"/>
-                </svg>
-              </div>
             </div>
           </motion.div>
 
@@ -1132,13 +1110,12 @@ export default function HomePage(): React.JSX.Element {
               alignItems: 'center',
               gap: '0.5rem',
               cursor: 'pointer',
-              padding: '0.4rem 0.8rem',
+              padding: '0.4rem 1rem 0.4rem 0.8rem',
               borderRadius: '25px',
               backgroundColor: 'rgba(255,255,255,0.9)',
               border: '1px solid rgba(255,255,255,0.2)',
               transition: 'all 0.3s ease',
-              position: 'relative',
-              paddingRight: isMobile ? '2.2rem' : '2.5rem'
+              position: 'relative'
             }}
             whileHover={{ 
               backgroundColor: 'white',
@@ -1164,9 +1141,23 @@ export default function HomePage(): React.JSX.Element {
               color: '#6366F1',
               fontSize: isMobile ? '0.8rem' : '0.9rem',
               fontWeight: '600',
-              fontFamily: 'Helvetica, Arial, sans-serif'
+              fontFamily: 'Helvetica, Arial, sans-serif',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.3rem'
             }}>
               Update
+              {/* Tanda panah lurus serong bawah kanan - DI SAMPING TEKS */}
+              <svg 
+                width={isMobile ? "10" : "12"} 
+                height={isMobile ? "10" : "12"} 
+                viewBox="0 0 12 12" 
+                fill="none" 
+                stroke="#6366F1"
+                strokeWidth="1.5"
+              >
+                <path d="M3 4.5L6 7.5L9 4.5"/>
+              </svg>
             </span>
             <div style={{
               backgroundColor: '#EC4899',
@@ -1176,33 +1167,9 @@ export default function HomePage(): React.JSX.Element {
               padding: '0.1rem 0.4rem',
               borderRadius: '10px',
               marginLeft: '0.3rem',
-              border: 'none',
-              position: 'relative',
-              paddingRight: isMobile ? '1.2rem' : '1.4rem'
+              border: 'none'
             }}>
               NEW
-              {/* Tanda panah lurus hadap ke bawah kanan - WARNA HITAM */}
-              <div
-                style={{
-                  position: 'absolute',
-                  right: '2px',
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  width: isMobile ? '8px' : '10px',
-                  height: isMobile ? '8px' : '10px'
-                }}
-              >
-                <svg 
-                  width="100%" 
-                  height="100%" 
-                  viewBox="0 0 12 12" 
-                  fill="none" 
-                  stroke="black"
-                  strokeWidth="1.5"
-                >
-                  <path d="M3 4.5L6 7.5L9 4.5"/>
-                </svg>
-              </div>
             </div>
           </motion.div>
 
@@ -1214,13 +1181,12 @@ export default function HomePage(): React.JSX.Element {
               alignItems: 'center',
               gap: '0.5rem',
               cursor: 'pointer',
-              padding: '0.4rem 0.8rem',
+              padding: '0.4rem 1rem 0.4rem 0.8rem',
               borderRadius: '25px',
               backgroundColor: 'rgba(255,255,255,0.9)',
               border: '1px solid rgba(255,255,255,0.2)',
               transition: 'all 0.3s ease',
-              position: 'relative',
-              paddingRight: isMobile ? '2.2rem' : '2.5rem'
+              position: 'relative'
             }}
             whileHover={{ 
               backgroundColor: 'white',
@@ -1245,9 +1211,23 @@ export default function HomePage(): React.JSX.Element {
               color: '#6366F1',
               fontSize: isMobile ? '0.8rem' : '0.9rem',
               fontWeight: '600',
-              fontFamily: 'Helvetica, Arial, sans-serif'
+              fontFamily: 'Helvetica, Arial, sans-serif',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.3rem'
             }}>
               Timeline
+              {/* Tanda panah lurus serong bawah kanan - DI SAMPING TEKS */}
+              <svg 
+                width={isMobile ? "10" : "12"} 
+                height={isMobile ? "10" : "12"} 
+                viewBox="0 0 12 12" 
+                fill="none" 
+                stroke="#6366F1"
+                strokeWidth="1.5"
+              >
+                <path d="M3 4.5L6 7.5L9 4.5"/>
+              </svg>
             </span>
             <div style={{
               backgroundColor: '#EC4899',
@@ -1257,33 +1237,9 @@ export default function HomePage(): React.JSX.Element {
               padding: '0.1rem 0.4rem',
               borderRadius: '10px',
               marginLeft: '0.3rem',
-              border: 'none',
-              position: 'relative',
-              paddingRight: isMobile ? '1.2rem' : '1.4rem'
+              border: 'none'
             }}>
               NEW
-              {/* Tanda panah lurus hadap ke bawah kanan - WARNA HITAM */}
-              <div
-                style={{
-                  position: 'absolute',
-                  right: '2px',
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  width: isMobile ? '8px' : '10px',
-                  height: isMobile ? '8px' : '10px'
-                }}
-              >
-                <svg 
-                  width="100%" 
-                  height="100%" 
-                  viewBox="0 0 12 12" 
-                  fill="none" 
-                  stroke="black"
-                  strokeWidth="1.5"
-                >
-                  <path d="M3 4.5L6 7.5L9 4.5"/>
-                </svg>
-              </div>
             </div>
           </motion.div>
         </div>
@@ -2194,14 +2150,14 @@ export default function HomePage(): React.JSX.Element {
               <div ref={topicContainerRef} style={{
                 display: 'flex',
                 flexDirection: isMobile ? 'column' : 'row',
-                gap: isMobile ? '2rem' : '3rem', // GAP LEBIH KECIL UNTUK DIGESER KE KIRI
+                gap: isMobile ? '2rem' : '3rem',
                 width: '100%',
                 fontFamily: 'Helvetica, Arial, sans-serif',
                 position: 'relative'
               }}>
                 {/* Kolom 1 - MENURU */}
                 <div style={{
-                  flex: 0.8, // LEBIH KECIL UNTUK DIGESER KE KIRI
+                  flex: 0.8,
                   marginLeft: isMobile ? '0.5rem' : '1rem'
                 }}>
                   <div style={{
@@ -2217,12 +2173,12 @@ export default function HomePage(): React.JSX.Element {
                   </div>
                 </div>
 
-                {/* Kolom 2 - Gambar Hover - SEMAKIN TURUN */}
+                {/* Kolom 2 - Gambar Hover - SEMAKIN TURUN - DIPISAH DARI TEKS */}
                 <div style={{
-                  flex: 1.2, // LEBIH BESAR UNTUK GAMBAR
+                  flex: 1.2,
                   position: 'relative',
                   minHeight: isMobile ? '400px' : '600px',
-                  marginLeft: isMobile ? '-1rem' : '-2rem' // DIGESER KE KIRI
+                  marginLeft: isMobile ? '-3rem' : '-4rem' // DIGESER LEBIH KE KIRI AGAR TIDAK KENA TEKS
                 }}>
                   <AnimatePresence>
                     {hoveredTopic !== null && (
@@ -2231,7 +2187,7 @@ export default function HomePage(): React.JSX.Element {
                         initial={{ opacity: 0 }}
                         animate={{ 
                           opacity: 1,
-                          y: imagePosition // SEMAKIN TURUN BERDASARKAN POSISI
+                          y: imagePosition
                         }}
                         exit={{ opacity: 0 }}
                         transition={{ duration: 0.3 }}
@@ -2239,8 +2195,9 @@ export default function HomePage(): React.JSX.Element {
                           position: 'absolute',
                           top: 0,
                           left: 0,
-                          width: '100%',
-                          height: '100%'
+                          width: '85%', // LEBAR DIKURANGI AGAR TIDAK KENA TEKS
+                          height: '85%', // TINGGI DIKURANGI
+                          zIndex: 5
                         }}
                       >
                         {/* Gambar normal */}
@@ -2283,11 +2240,11 @@ export default function HomePage(): React.JSX.Element {
                   </AnimatePresence>
                 </div>
 
-                {/* Kolom 3 - Topics - DIGESER KE KIRI */}
+                {/* Kolom 3 - Topics - DIGESER KE KIRI TAPI MASIH JAUH DARI GAMBAR */}
                 <div style={{
                   flex: 1,
                   position: 'relative',
-                  marginLeft: isMobile ? '-2rem' : '-3rem' // DIGESER KE KIRI
+                  marginLeft: isMobile ? '-4rem' : '-5rem' // DIGESER LEBIH KE KIRI
                 }}>
                   <div style={{
                     display: 'flex',
@@ -2353,7 +2310,7 @@ export default function HomePage(): React.JSX.Element {
                 {/* Kolom 4 - Deskripsi dan Tahun SAJA - DIGESER KE KIRI */}
                 <div style={{
                   flex: 1,
-                  marginLeft: isMobile ? '-2rem' : '-3rem' // DIGESER KE KIRI
+                  marginLeft: isMobile ? '-5rem' : '-6rem' // DIGESER LEBIH KE KIRI
                 }}>
                   <div style={{
                     display: 'flex',
@@ -2370,7 +2327,9 @@ export default function HomePage(): React.JSX.Element {
                           display: 'flex',
                           flexDirection: 'column',
                           padding: isMobile ? '0.8rem 0' : '1rem 0',
-                          cursor: 'pointer'
+                          cursor: 'pointer',
+                          position: 'relative',
+                          zIndex: 10 // TEKS DI ATAS GAMBAR
                         }}
                       >
                         {/* Container untuk deskripsi dan tahun SAJA */}
@@ -2386,7 +2345,9 @@ export default function HomePage(): React.JSX.Element {
                               fontWeight: hoveredTopic === topic.id ? '600' : '400',
                               fontFamily: 'Helvetica, Arial, sans-serif',
                               lineHeight: 1.1,
-                              transition: 'font-weight 0.2s ease'
+                              transition: 'font-weight 0.2s ease',
+                              position: 'relative',
+                              zIndex: 11
                             }}
                             whileHover={{ x: 5 }}
                           >
@@ -2399,7 +2360,9 @@ export default function HomePage(): React.JSX.Element {
                             fontWeight: '400',
                             fontFamily: 'Helvetica, Arial, sans-serif',
                             lineHeight: 1.1,
-                            whiteSpace: 'nowrap'
+                            whiteSpace: 'nowrap',
+                            position: 'relative',
+                            zIndex: 11
                           }}>
                             {topic.year}
                           </div>
