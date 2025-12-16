@@ -88,19 +88,23 @@ export default function HomePage(): React.JSX.Element {
   const textWithPhotos = [
     { 
       text: "stay", 
-      subtext: "thinking", 
       photoSrc: "images/5.jpg", 
-      number: "01",
-      textColor: "white",
-      subtextColor: "white"
+      number: "01"
+    },
+    { 
+      text: "thinking", 
+      photoSrc: "images/6.jpg", 
+      number: "02"
     },
     { 
       text: "keep", 
-      subtext: "talk", 
+      photoSrc: "images/5.jpg", 
+      number: "03"
+    },
+    { 
+      text: "talk", 
       photoSrc: "images/6.jpg", 
-      number: "02",
-      textColor: "#0050B7",
-      subtextColor: "#0050B7"
+      number: "04"
     }
   ];
 
@@ -1435,95 +1439,59 @@ export default function HomePage(): React.JSX.Element {
               exit={{ opacity: 0 }}
               transition={{ duration: 0.5 }}
             >
-              {/* Container untuk teks dengan foto - DESAIN BARU SEPERTI PERMINTAAN */}
+              {/* Container untuk Grid "stay thinking keep talk" - SEJAJAR KE SAMPING */}
               <div style={{
                 width: '100%',
                 padding: isMobile ? '1rem' : '2rem',
                 marginBottom: isMobile ? '3rem' : '4rem',
                 boxSizing: 'border-box'
               }}>
-                {/* Item 1: stay (font tebal, jarak spasi jauh) */}
-                <motion.div 
-                  style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'flex-start',
-                    marginBottom: isMobile ? '8rem' : '12rem',
-                    position: 'relative'
-                  }}
-                  initial={{ opacity: 0, y: 30 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, delay: 0 }}
-                >
-                  {/* Teks "stay" - font tebal dengan jarak spasi jauh */}
-                  <div style={{
-                    color: 'white',
-                    fontSize: isMobile ? '8rem' : '12rem',
-                    fontWeight: '900',
-                    fontFamily: 'Helvetica, Arial, sans-serif',
-                    textTransform: 'uppercase',
-                    letterSpacing: '15px',
-                    lineHeight: 0.9,
-                    marginLeft: isMobile ? '0.5rem' : '1rem',
-                    marginBottom: '3rem'
-                  }}>
-                    stay
-                  </div>
-                </motion.div>
-
-                {/* Item 2: thinking (font tebal) + foto card di samping + (01) di samping foto dengan jarak spasi jauh */}
-                <motion.div 
-                  style={{
-                    display: 'flex',
-                    flexDirection: isMobile ? 'column' : 'row',
-                    alignItems: isMobile ? 'flex-start' : 'center',
-                    marginBottom: isMobile ? '8rem' : '12rem',
-                    gap: isMobile ? '3rem' : '8rem',
-                    position: 'relative',
-                    justifyContent: 'space-between'
-                  }}
-                  initial={{ opacity: 0, y: 30 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, delay: 0.2 }}
-                >
-                  {/* Teks "thinking" - di kiri */}
-                  <div style={{
-                    flex: 1,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'flex-start',
-                    textAlign: 'left'
-                  }}>
+                {/* Grid Container - 2 baris x 2 kolom */}
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, 1fr)',
+                  gridTemplateRows: isMobile ? 'repeat(4, auto)' : 'repeat(2, auto)',
+                  gap: isMobile ? '3rem' : '5rem',
+                  width: '100%'
+                }}>
+                  
+                  {/* Baris 1 Kolom 1: stay + foto horizontal */}
+                  <motion.div 
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '2rem'
+                    }}
+                    initial={{ opacity: 0, x: -30 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.6, delay: 0 }}
+                  >
+                    {/* Teks "stay" - font sedang, tebal, putih */}
                     <div style={{
                       color: 'white',
-                      fontSize: isMobile ? '8rem' : '12rem',
-                      fontWeight: '900',
+                      fontSize: isMobile ? '3.5rem' : '4.5rem',
+                      fontWeight: '700',
                       fontFamily: 'Helvetica, Arial, sans-serif',
                       textTransform: 'uppercase',
-                      letterSpacing: '8px',
-                      lineHeight: 0.9
+                      letterSpacing: '2px',
+                      lineHeight: 1,
+                      marginLeft: isMobile ? '0' : '1rem'
                     }}>
-                      thinking
+                      stay
                     </div>
-                  </div>
-
-                  {/* Foto card di tengah */}
-                  <div style={{
-                    flex: 1.5,
-                    width: '100%',
-                    position: 'relative'
-                  }}>
+                    
+                    {/* Foto horizontal - bentuk card */}
                     <motion.div
-                      initial={{ opacity: 0, scale: 0.9 }}
+                      initial={{ opacity: 0, scale: 0.95 }}
                       animate={{ opacity: 1, scale: 1 }}
-                      transition={{ duration: 0.6, delay: 0.4 }}
+                      transition={{ duration: 0.6, delay: 0.2 }}
                       style={{
                         width: '100%',
-                        height: isMobile ? '400px' : '600px',
-                        borderRadius: '25px',
+                        height: isMobile ? '250px' : '300px',
+                        borderRadius: '15px',
                         overflow: 'hidden',
-                        boxShadow: '0 25px 60px rgba(0,0,0,0.8)',
-                        border: '4px solid rgba(255,255,255,0.2)',
+                        boxShadow: '0 10px 30px rgba(0,0,0,0.6)',
+                        border: '2px solid rgba(255,255,255,0.1)',
                         position: 'relative'
                       }}
                       whileHover={{ scale: 1.02 }}
@@ -1531,6 +1499,89 @@ export default function HomePage(): React.JSX.Element {
                     >
                       <img 
                         src={textWithPhotos[0].photoSrc} 
+                        alt="stay"
+                        style={{
+                          width: '100%',
+                          height: '100%',
+                          objectFit: 'cover',
+                          display: 'block'
+                        }}
+                        onError={(e) => {
+                          e.currentTarget.style.backgroundColor = '#333';
+                          e.currentTarget.style.display = 'flex';
+                          e.currentTarget.style.alignItems = 'center';
+                          e.currentTarget.style.justifyContent = 'center';
+                          e.currentTarget.style.color = '#fff';
+                          e.currentTarget.innerHTML = '<div style="padding: 2rem; text-align: center;">Stay Image</div>';
+                        }}
+                      />
+                    </motion.div>
+                    
+                    {/* Angka (01) di bawah foto dengan jarak */}
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.5, delay: 0.3 }}
+                      style={{
+                        color: 'white',
+                        fontSize: isMobile ? '2.5rem' : '3rem',
+                        fontWeight: '700',
+                        fontFamily: 'Helvetica, Arial, sans-serif',
+                        letterSpacing: '1px',
+                        marginLeft: isMobile ? '0' : '1rem',
+                        marginTop: '1rem'
+                      }}
+                    >
+                      (01)
+                    </motion.div>
+                  </motion.div>
+
+                  {/* Baris 1 Kolom 2: thinking + foto horizontal */}
+                  <motion.div 
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '2rem',
+                      alignItems: 'flex-end'
+                    }}
+                    initial={{ opacity: 0, x: 30 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.6, delay: 0.2 }}
+                  >
+                    {/* Teks "thinking" - font sedang, tebal, putih */}
+                    <div style={{
+                      color: 'white',
+                      fontSize: isMobile ? '3.5rem' : '4.5rem',
+                      fontWeight: '700',
+                      fontFamily: 'Helvetica, Arial, sans-serif',
+                      textTransform: 'uppercase',
+                      letterSpacing: '2px',
+                      lineHeight: 1,
+                      marginRight: isMobile ? '0' : '1rem',
+                      textAlign: 'right'
+                    }}>
+                      thinking
+                    </div>
+                    
+                    {/* Foto horizontal - bentuk card */}
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ duration: 0.6, delay: 0.4 }}
+                      style={{
+                        width: '100%',
+                        height: isMobile ? '250px' : '300px',
+                        borderRadius: '15px',
+                        overflow: 'hidden',
+                        boxShadow: '0 10px 30px rgba(0,0,0,0.6)',
+                        border: '2px solid rgba(255,255,255,0.1)',
+                        position: 'relative'
+                      }}
+                      whileHover={{ scale: 1.02 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      <img 
+                        src={textWithPhotos[1].photoSrc} 
                         alt="thinking"
                         style={{
                           width: '100%',
@@ -1549,99 +1600,72 @@ export default function HomePage(): React.JSX.Element {
                       />
                     </motion.div>
                     
-                    {/* Angka (01) di samping foto dengan jarak spasi jauh */}
+                    {/* Angka (02) di bawah foto dengan jarak */}
                     <motion.div
-                      initial={{ opacity: 0, x: 30 }}
-                      animate={{ opacity: 1, x: 0 }}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.5, delay: 0.5 }}
                       style={{
-                        position: 'absolute',
-                        top: '50%',
-                        right: isMobile ? '-3rem' : '-5rem',
-                        transform: 'translateY(-50%)',
                         color: 'white',
-                        fontSize: isMobile ? '5rem' : '8rem',
-                        fontWeight: '900',
+                        fontSize: isMobile ? '2.5rem' : '3rem',
+                        fontWeight: '700',
                         fontFamily: 'Helvetica, Arial, sans-serif',
-                        letterSpacing: '5px'
+                        letterSpacing: '1px',
+                        marginRight: isMobile ? '0' : '1rem',
+                        marginTop: '1rem',
+                        textAlign: 'right'
                       }}
                     >
-                      (01)
+                      (02)
                     </motion.div>
-                  </div>
-                </motion.div>
+                  </motion.div>
 
-                {/* Item 3: keep (font tebal, jarak spasi jauh) */}
-                <motion.div 
-                  style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'flex-end',
-                    marginBottom: isMobile ? '8rem' : '12rem',
-                    position: 'relative'
-                  }}
-                  initial={{ opacity: 0, y: 30 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, delay: 0.4 }}
-                >
-                  {/* Teks "keep" - font tebal dengan jarak spasi jauh, di kanan */}
-                  <div style={{
-                    color: '#0050B7',
-                    fontSize: isMobile ? '8rem' : '12rem',
-                    fontWeight: '900',
-                    fontFamily: 'Helvetica, Arial, sans-serif',
-                    textTransform: 'uppercase',
-                    letterSpacing: '15px',
-                    lineHeight: 0.9,
-                    marginRight: isMobile ? '0.5rem' : '1rem',
-                    marginBottom: '3rem',
-                    textAlign: 'right',
-                    width: '100%'
-                  }}>
-                    keep
-                  </div>
-                </motion.div>
-
-                {/* Item 4: keep talk (font tebal) + foto card di samping + (02) di samping foto dengan jarak spasi jauh */}
-                <motion.div 
-                  style={{
-                    display: 'flex',
-                    flexDirection: isMobile ? 'column' : 'row',
-                    alignItems: isMobile ? 'flex-start' : 'center',
-                    marginBottom: isMobile ? '8rem' : '12rem',
-                    gap: isMobile ? '3rem' : '8rem',
-                    position: 'relative',
-                    justifyContent: 'space-between'
-                  }}
-                  initial={{ opacity: 0, y: 30 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, delay: 0.6 }}
-                >
-                  {/* Foto card di kiri */}
-                  <div style={{
-                    flex: 1.5,
-                    width: '100%',
-                    position: 'relative'
-                  }}>
+                  {/* Baris 2 Kolom 1: keep + foto horizontal */}
+                  <motion.div 
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '2rem',
+                      marginTop: isMobile ? '2rem' : '0'
+                    }}
+                    initial={{ opacity: 0, x: -30 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.6, delay: 0.4 }}
+                  >
+                    {/* Teks "keep" - font sedang, tebal, putih */}
+                    <div style={{
+                      color: 'white',
+                      fontSize: isMobile ? '3.5rem' : '4.5rem',
+                      fontWeight: '700',
+                      fontFamily: 'Helvetica, Arial, sans-serif',
+                      textTransform: 'uppercase',
+                      letterSpacing: '2px',
+                      lineHeight: 1,
+                      marginLeft: isMobile ? '0' : '1rem'
+                    }}>
+                      keep
+                    </div>
+                    
+                    {/* Foto horizontal - bentuk card */}
                     <motion.div
-                      initial={{ opacity: 0, scale: 0.9 }}
+                      initial={{ opacity: 0, scale: 0.95 }}
                       animate={{ opacity: 1, scale: 1 }}
-                      transition={{ duration: 0.6, delay: 0.8 }}
+                      transition={{ duration: 0.6, delay: 0.6 }}
                       style={{
                         width: '100%',
-                        height: isMobile ? '400px' : '600px',
-                        borderRadius: '25px',
+                        height: isMobile ? '250px' : '300px',
+                        borderRadius: '15px',
                         overflow: 'hidden',
-                        boxShadow: '0 25px 60px rgba(0,0,0,0.8)',
-                        border: '4px solid rgba(255,255,255,0.2)',
+                        boxShadow: '0 10px 30px rgba(0,0,0,0.6)',
+                        border: '2px solid rgba(255,255,255,0.1)',
                         position: 'relative'
                       }}
                       whileHover={{ scale: 1.02 }}
                       transition={{ duration: 0.3 }}
                     >
                       <img 
-                        src={textWithPhotos[1].photoSrc} 
-                        alt="keep talk"
+                        src={textWithPhotos[2].photoSrc} 
+                        alt="keep"
                         style={{
                           width: '100%',
                           height: '100%',
@@ -1654,53 +1678,115 @@ export default function HomePage(): React.JSX.Element {
                           e.currentTarget.style.alignItems = 'center';
                           e.currentTarget.style.justifyContent = 'center';
                           e.currentTarget.style.color = '#fff';
-                          e.currentTarget.innerHTML = '<div style="padding: 2rem; text-align: center;">Keep Talk Image</div>';
+                          e.currentTarget.innerHTML = '<div style="padding: 2rem; text-align: center;">Keep Image</div>';
                         }}
                       />
                     </motion.div>
                     
-                    {/* Angka (02) di samping foto dengan jarak spasi jauh - di kiri */}
+                    {/* Angka (03) di bawah foto dengan jarak */}
                     <motion.div
-                      initial={{ opacity: 0, x: -30 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ duration: 0.5, delay: 0.9 }}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.5, delay: 0.7 }}
                       style={{
-                        position: 'absolute',
-                        top: '50%',
-                        left: isMobile ? '-3rem' : '-5rem',
-                        transform: 'translateY(-50%)',
-                        color: '#0050B7',
-                        fontSize: isMobile ? '5rem' : '8rem',
-                        fontWeight: '900',
+                        color: 'white',
+                        fontSize: isMobile ? '2.5rem' : '3rem',
+                        fontWeight: '700',
                         fontFamily: 'Helvetica, Arial, sans-serif',
-                        letterSpacing: '5px'
+                        letterSpacing: '1px',
+                        marginLeft: isMobile ? '0' : '1rem',
+                        marginTop: '1rem'
                       }}
                     >
-                      (02)
+                      (03)
                     </motion.div>
-                  </div>
+                  </motion.div>
 
-                  {/* Teks "talk" - di kanan */}
-                  <div style={{
-                    flex: 1,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'flex-end',
-                    textAlign: 'right'
-                  }}>
+                  {/* Baris 2 Kolom 2: talk + foto horizontal */}
+                  <motion.div 
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '2rem',
+                      alignItems: 'flex-end',
+                      marginTop: isMobile ? '2rem' : '0'
+                    }}
+                    initial={{ opacity: 0, x: 30 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.6, delay: 0.6 }}
+                  >
+                    {/* Teks "talk" - font sedang, tebal, putih */}
                     <div style={{
-                      color: '#0050B7',
-                      fontSize: isMobile ? '8rem' : '12rem',
-                      fontWeight: '900',
+                      color: 'white',
+                      fontSize: isMobile ? '3.5rem' : '4.5rem',
+                      fontWeight: '700',
                       fontFamily: 'Helvetica, Arial, sans-serif',
                       textTransform: 'uppercase',
-                      letterSpacing: '8px',
-                      lineHeight: 0.9
+                      letterSpacing: '2px',
+                      lineHeight: 1,
+                      marginRight: isMobile ? '0' : '1rem',
+                      textAlign: 'right'
                     }}>
                       talk
                     </div>
-                  </div>
-                </motion.div>
+                    
+                    {/* Foto horizontal - bentuk card */}
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ duration: 0.6, delay: 0.8 }}
+                      style={{
+                        width: '100%',
+                        height: isMobile ? '250px' : '300px',
+                        borderRadius: '15px',
+                        overflow: 'hidden',
+                        boxShadow: '0 10px 30px rgba(0,0,0,0.6)',
+                        border: '2px solid rgba(255,255,255,0.1)',
+                        position: 'relative'
+                      }}
+                      whileHover={{ scale: 1.02 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      <img 
+                        src={textWithPhotos[3].photoSrc} 
+                        alt="talk"
+                        style={{
+                          width: '100%',
+                          height: '100%',
+                          objectFit: 'cover',
+                          display: 'block'
+                        }}
+                        onError={(e) => {
+                          e.currentTarget.style.backgroundColor = '#333';
+                          e.currentTarget.style.display = 'flex';
+                          e.currentTarget.style.alignItems = 'center';
+                          e.currentTarget.style.justifyContent = 'center';
+                          e.currentTarget.style.color = '#fff';
+                          e.currentTarget.innerHTML = '<div style="padding: 2rem; text-align: center;">Talk Image</div>';
+                        }}
+                      />
+                    </motion.div>
+                    
+                    {/* Angka (04) di bawah foto dengan jarak */}
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.5, delay: 0.9 }}
+                      style={{
+                        color: 'white',
+                        fontSize: isMobile ? '2.5rem' : '3rem',
+                        fontWeight: '700',
+                        fontFamily: 'Helvetica, Arial, sans-serif',
+                        letterSpacing: '1px',
+                        marginRight: isMobile ? '0' : '1rem',
+                        marginTop: '1rem',
+                        textAlign: 'right'
+                      }}
+                    >
+                      (04)
+                    </motion.div>
+                  </motion.div>
+                </div>
               </div>
 
               {/* Card #0050B7 dengan 4 foto images/5.jpg - FOTO LEBIH LEBAR KE SAMPING */}
