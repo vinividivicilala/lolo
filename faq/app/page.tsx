@@ -84,31 +84,15 @@ export default function HomePage(): React.JSX.Element {
     { title: "Features", description: "Functionality & Integration" }
   ];
 
-  // Data untuk foto dengan teks - DIUBAH SESUAI DESAIN BARU
-  const textWithPhotos = [
-    { 
-      text: "stay", 
-      subtext: "thinking", 
-      photoSrc: "images/5.jpg", 
-      number: "001",
-      textColor: "white",
-      subtextColor: "white"
+  // Data untuk teks "stay thinking keep talk mind" dalam 2 kolom
+  const textColumns = [
+    {
+      id: 1,
+      texts: ["stay", "thinking"]
     },
-    { 
-      text: "keep", 
-      subtext: "talk", 
-      photoSrc: "images/6.jpg", 
-      number: "02",
-      textColor: "#0050B7",
-      subtextColor: "#0050B7"
-    },
-    { 
-      text: "mind", 
-      subtext: "", 
-      photoSrc: "images/5.jpg", 
-      number: "03",
-      textColor: "white",
-      subtextColor: "white"
+    {
+      id: 2,
+      texts: ["keep", "talk"]
     }
   ];
 
@@ -1443,154 +1427,130 @@ export default function HomePage(): React.JSX.Element {
               exit={{ opacity: 0 }}
               transition={{ duration: 0.5 }}
             >
-              {/* Container untuk teks dengan foto - DESAIN BARU SEPERTI GAMBAR */}
+              {/* Container untuk teks "stay thinking keep talk mind" - RATA KANAN 2 KOLOM */}
               <div style={{
                 width: '100%',
-                padding: isMobile ? '1rem' : '2rem',
-                marginBottom: isMobile ? '3rem' : '4rem',
-                boxSizing: 'border-box'
+                padding: isMobile ? '2rem 1rem' : '4rem 2rem',
+                display: 'flex',
+                justifyContent: 'flex-end',
+                alignItems: 'center',
+                marginBottom: isMobile ? '3rem' : '4rem'
               }}>
-                {textWithPhotos.map((item, index) => (
-                  <motion.div 
-                    key={index} 
-                    style={{
-                      display: 'flex',
-                      flexDirection: isMobile ? 'column' : 'row',
-                      alignItems: isMobile ? 'flex-start' : 'center',
-                      marginBottom: isMobile ? '4rem' : '6rem',
-                      gap: isMobile ? '1.5rem' : '3rem',
-                      position: 'relative',
-                      paddingLeft: isMobile ? '0' : index % 2 === 0 ? '0' : '4rem'
-                    }}
-                    initial={{ opacity: 0, y: 30 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.6, delay: index * 0.2 }}
-                  >
-                    {/* Container untuk teks (kiri untuk item ganjil, kanan untuk item genap) */}
-                    <div style={{
-                      flex: 1,
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: isMobile ? 'flex-start' : (index % 2 === 0 ? 'flex-start' : 'flex-end'),
-                      textAlign: isMobile ? 'left' : (index % 2 === 0 ? 'left' : 'right'),
-                      order: isMobile ? 1 : (index % 2 === 0 ? 1 : 3)
-                    }}>
-                      {/* Teks utama (seperti "stay", "keep", "mind") */}
+                <div style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'flex-end',
+                  width: isMobile ? '100%' : '80%',
+                  maxWidth: '800px'
+                }}>
+                  {/* Container 2 kolom untuk teks */}
+                  <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, 1fr)',
+                    gap: isMobile ? '1rem' : '3rem',
+                    width: '100%',
+                    alignItems: 'flex-start'
+                  }}>
+                    {/* Kolom 1: stay thinking */}
+                    <motion.div
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ duration: 0.6, delay: 0.2 }}
+                      style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'flex-end',
+                        textAlign: 'right'
+                      }}
+                    >
                       <div style={{
-                        color: item.textColor,
-                        fontSize: isMobile ? '4.5rem' : '7rem',
-                        fontWeight: '800',
-                        fontFamily: '"Formula Condensed", sans-serif',
-                        textTransform: 'uppercase',
-                        letterSpacing: '-2px',
-                        lineHeight: 0.85,
-                        marginBottom: '0.5rem'
+                        color: 'white',
+                        fontSize: isMobile ? '2.5rem' : '3.5rem',
+                        fontWeight: '600',
+                        fontFamily: 'Helvetica, Arial, sans-serif',
+                        letterSpacing: '1px',
+                        lineHeight: 1.1,
+                        marginBottom: '0.5rem',
+                        textTransform: 'uppercase'
                       }}>
-                        {item.text}
+                        stay
                       </div>
-                      
-                      {/* Subtext (seperti "thinking", "talk") - Hanya ditampilkan jika ada */}
-                      {item.subtext && (
-                        <div style={{
-                          color: item.subtextColor,
-                          fontSize: isMobile ? '2.5rem' : '3.5rem',
-                          fontWeight: '700',
-                          fontFamily: '"Formula Condensed", sans-serif',
-                          textTransform: 'uppercase',
-                          letterSpacing: '-1px',
-                          lineHeight: 1
-                        }}>
-                          {item.subtext}
-                        </div>
-                      )}
-                      
-                      {/* Garis dekoratif horizontal */}
                       <div style={{
-                        width: isMobile ? '80px' : '120px',
-                        height: '3px',
-                        backgroundColor: item.textColor,
-                        marginTop: '1.5rem',
-                        marginLeft: index % 2 === 0 ? '0' : 'auto',
-                        marginRight: index % 2 === 0 ? 'auto' : '0'
-                      }} />
-                    </div>
+                        color: 'white',
+                        fontSize: isMobile ? '2.5rem' : '3.5rem',
+                        fontWeight: '600',
+                        fontFamily: 'Helvetica, Arial, sans-serif',
+                        letterSpacing: '1px',
+                        lineHeight: 1.1,
+                        textTransform: 'uppercase'
+                      }}>
+                        thinking
+                      </div>
+                    </motion.div>
 
-                    {/* Foto di tengah */}
-                    <div style={{
-                      flex: 1.5,
-                      width: '100%',
-                      position: 'relative',
-                      order: isMobile ? 2 : 2
-                    }}>
-                      <motion.div
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ duration: 0.6, delay: index * 0.2 + 0.2 }}
-                        style={{
-                          width: '100%',
-                          height: isMobile ? '300px' : '500px',
-                          borderRadius: '20px',
-                          overflow: 'hidden',
-                          boxShadow: '0 20px 50px rgba(0,0,0,0.7)',
-                          border: '3px solid rgba(255,255,255,0.15)',
-                          position: 'relative'
-                        }}
-                        whileHover={{ scale: 1.02 }}
-                        transition={{ duration: 0.3 }}
-                      >
-                        <img 
-                          src={item.photoSrc} 
-                          alt={item.text}
-                          style={{
-                            width: '100%',
-                            height: '100%',
-                            objectFit: 'cover',
-                            display: 'block'
-                          }}
-                          onError={(e) => {
-                            e.currentTarget.style.backgroundColor = '#333';
-                            e.currentTarget.style.display = 'flex';
-                            e.currentTarget.style.alignItems = 'center';
-                            e.currentTarget.style.justifyContent = 'center';
-                            e.currentTarget.style.color = '#fff';
-                            e.currentTarget.innerHTML = `<div style="padding: 2rem; text-align: center;">${item.text}</div>`;
-                          }}
-                        />
-                      </motion.div>
-                      
-                      {/* Overlay angka di pojok kanan bawah foto */}
-                      <motion.div
-                        initial={{ opacity: 0, x: 20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ duration: 0.5, delay: index * 0.2 + 0.3 }}
-                        style={{
-                          position: 'absolute',
-                          bottom: isMobile ? '-1.5rem' : '-2rem',
-                          right: isMobile ? '-1rem' : '-1.5rem',
-                          color: 'white',
-                          fontSize: isMobile ? '3.5rem' : '5rem',
-                          fontWeight: '800',
-                          fontFamily: 'Helvetica, Arial, sans-serif',
-                          backgroundColor: '#0050B7',
-                          padding: isMobile ? '0.5rem 1.5rem' : '0.8rem 2rem',
-                          borderRadius: '15px',
-                          boxShadow: '0 10px 30px rgba(0,0,0,0.5)',
-                          zIndex: 2
-                        }}
-                      >
-                        {item.number}
-                      </motion.div>
-                    </div>
-
-                    {/* Spacer untuk alignment (hanya di desktop) */}
-                    {!isMobile && index % 2 === 0 && (
+                    {/* Kolom 2: keep talk mind */}
+                    <motion.div
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ duration: 0.6, delay: 0.3 }}
+                      style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'flex-end',
+                        textAlign: 'right'
+                      }}
+                    >
                       <div style={{
-                        flex: 1,
-                        order: 3
-                      }} />
-                    )}
-                  </motion.div>
-                ))}
+                        color: 'white',
+                        fontSize: isMobile ? '2.5rem' : '3.5rem',
+                        fontWeight: '600',
+                        fontFamily: 'Helvetica, Arial, sans-serif',
+                        letterSpacing: '1px',
+                        lineHeight: 1.1,
+                        marginBottom: '0.5rem',
+                        textTransform: 'uppercase'
+                      }}>
+                        keep
+                      </div>
+                      <div style={{
+                        color: 'white',
+                        fontSize: isMobile ? '2.5rem' : '3.5rem',
+                        fontWeight: '600',
+                        fontFamily: 'Helvetica, Arial, sans-serif',
+                        letterSpacing: '1px',
+                        lineHeight: 1.1,
+                        marginBottom: '0.5rem',
+                        textTransform: 'uppercase'
+                      }}>
+                        talk
+                      </div>
+                      <div style={{
+                        color: 'white',
+                        fontSize: isMobile ? '2.5rem' : '3.5rem',
+                        fontWeight: '600',
+                        fontFamily: 'Helvetica, Arial, sans-serif',
+                        letterSpacing: '1px',
+                        lineHeight: 1.1,
+                        textTransform: 'uppercase'
+                      }}>
+                        mind
+                      </div>
+                    </motion.div>
+                  </div>
+
+                  {/* Garis horizontal di bawah teks */}
+                  <motion.div
+                    initial={{ width: 0 }}
+                    animate={{ width: '100%' }}
+                    transition={{ duration: 0.8, delay: 0.5 }}
+                    style={{
+                      height: '1px',
+                      backgroundColor: 'rgba(255,255,255,0.3)',
+                      marginTop: isMobile ? '1.5rem' : '2rem',
+                      width: '100%'
+                    }}
+                  />
+                </div>
               </div>
 
               {/* Card #0050B7 dengan 4 foto images/5.jpg - FOTO LEBIH LEBAR KE SAMPING */}
@@ -1753,202 +1713,6 @@ export default function HomePage(): React.JSX.Element {
                       }}
                     />
                   </div>
-                </div>
-              </div>
-
-              {/* Komponen DESIGNER PROFESSIONAL (Seperti di Gambar) */}
-              <div style={{
-                width: '100%',
-                padding: isMobile ? '2rem 1rem' : '4rem 2rem',
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                marginTop: isMobile ? '3rem' : '4rem',
-                marginBottom: isMobile ? '3rem' : '4rem'
-              }}>
-                <div style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  width: '100%',
-                  maxWidth: '800px'
-                }}>
-                  {/* Garis horizontal di atas teks */}
-                  <div style={{
-                    width: '100%',
-                    height: '1px',
-                    backgroundColor: 'rgba(255,255,255,0.2)',
-                    marginBottom: '1.5rem'
-                  }}></div>
-                  
-                  {/* Container untuk teks vertikal */}
-                  <div style={{
-                    display: 'flex',
-                    flexDirection: 'row',
-                    justifyContent: 'space-between',
-                    width: '100%',
-                    gap: '2rem'
-                  }}>
-                    {/* Kolom kiri - Teks "PRODUCT" dan "AND" */}
-                    <div style={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'flex-start',
-                      justifyContent: 'flex-start',
-                      flex: 1
-                    }}>
-                      <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.6, delay: 0.1 }}
-                        style={{
-                          color: 'white',
-                          fontSize: isMobile ? '2.5rem' : '3.5rem',
-                          fontWeight: '700',
-                          fontFamily: '"Formula Condensed", sans-serif',
-                          textTransform: 'uppercase',
-                          letterSpacing: '2px',
-                          lineHeight: 0.9,
-                          marginBottom: '0.5rem'
-                        }}
-                      >
-                        PRODUCT
-                      </motion.div>
-                      
-                      <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.6, delay: 0.2 }}
-                        style={{
-                          color: 'rgba(255,255,255,0.7)',
-                          fontSize: isMobile ? '1.8rem' : '2.5rem',
-                          fontWeight: '400',
-                          fontFamily: '"Formula Condensed", sans-serif',
-                          textTransform: 'uppercase',
-                          letterSpacing: '1px',
-                          lineHeight: 0.9
-                        }}
-                      >
-                        AND
-                      </motion.div>
-                    </div>
-                    
-                    {/* Kolom tengah - Teks "VISUAL DESIGNER" */}
-                    <div style={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'center',
-                      justifyContent: 'flex-start',
-                      flex: 2
-                    }}>
-                      <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.6, delay: 0.3 }}
-                        style={{
-                          color: 'white',
-                          fontSize: isMobile ? '3.5rem' : '5rem',
-                          fontWeight: '800',
-                          fontFamily: '"Formula Condensed", sans-serif',
-                          textTransform: 'uppercase',
-                          letterSpacing: '3px',
-                          lineHeight: 0.85,
-                          textAlign: 'center'
-                        }}
-                      >
-                        VISUAL
-                      </motion.div>
-                      
-                      <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.6, delay: 0.4 }}
-                        style={{
-                          color: 'white',
-                          fontSize: isMobile ? '3.5rem' : '5rem',
-                          fontWeight: '800',
-                          fontFamily: '"Formula Condensed", sans-serif',
-                          textTransform: 'uppercase',
-                          letterSpacing: '3px',
-                          lineHeight: 0.85,
-                          textAlign: 'center',
-                          marginTop: '-0.5rem'
-                        }}
-                      >
-                        DESIGNER
-                      </motion.div>
-                    </div>
-                    
-                    {/* Kolom kanan - Teks "BASED" dan "NEW YORK" */}
-                    <div style={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'flex-end',
-                      justifyContent: 'flex-start',
-                      flex: 1
-                    }}>
-                      <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.6, delay: 0.5 }}
-                        style={{
-                          color: 'rgba(255,255,255,0.7)',
-                          fontSize: isMobile ? '1.8rem' : '2.5rem',
-                          fontWeight: '400',
-                          fontFamily: '"Formula Condensed", sans-serif',
-                          textTransform: 'uppercase',
-                          letterSpacing: '1px',
-                          lineHeight: 0.9,
-                          marginBottom: '0.5rem'
-                        }}
-                      >
-                        BASED
-                      </motion.div>
-                      
-                      <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.6, delay: 0.6 }}
-                        style={{
-                          color: 'white',
-                          fontSize: isMobile ? '2.5rem' : '3.5rem',
-                          fontWeight: '700',
-                          fontFamily: '"Formula Condensed", sans-serif',
-                          textTransform: 'uppercase',
-                          letterSpacing: '2px',
-                          lineHeight: 0.9
-                        }}
-                      >
-                        NEW
-                      </motion.div>
-                      
-                      <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.6, delay: 0.7 }}
-                        style={{
-                          color: 'white',
-                          fontSize: isMobile ? '2.5rem' : '3.5rem',
-                          fontWeight: '700',
-                          fontFamily: '"Formula Condensed", sans-serif',
-                          textTransform: 'uppercase',
-                          letterSpacing: '2px',
-                          lineHeight: 0.9
-                        }}
-                      >
-                        YORK
-                      </motion.div>
-                    </div>
-                  </div>
-                  
-                  {/* Garis horizontal di bawah teks */}
-                  <div style={{
-                    width: '100%',
-                    height: '1px',
-                    backgroundColor: 'rgba(255,255,255,0.2)',
-                    marginTop: '1.5rem'
-                  }}></div>
                 </div>
               </div>
 
