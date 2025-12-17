@@ -1462,7 +1462,7 @@ export default function HomePage(): React.JSX.Element {
       {/* Main Content Container */}
       <div style={{
         width: '100%',
-        paddingTop: isMobile ? '8rem' : '12rem',
+        paddingTop: isMobile ? '11rem' : '14rem', // Jarak dari atas diperbesar
         boxSizing: 'border-box',
         zIndex: 10,
         position: 'relative'
@@ -1476,17 +1476,21 @@ export default function HomePage(): React.JSX.Element {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.5 }}
+              style={{
+                width: '100%',
+                maxWidth: '1200px',
+                margin: '0 auto',
+                padding: isMobile ? '0 1rem' : '0 2rem'
+              }}
             >
-              {/* Card #0050B7 dengan 4 foto images/5.jpg - FOTO LEBIH LEBAR KE SAMPING */}
+              {/* Card #0050B7 dengan 4 foto images/5.jpg - POSISI DI BAWAH TITLE */}
               <div
                 style={{
-                  width: 'calc(100% - 4rem)',
-                  marginLeft: isMobile ? '1rem' : '2rem',
-                  marginRight: isMobile ? '1rem' : '2rem',
+                  width: '100%',
                   backgroundColor: '#0050B7',
                   borderRadius: '25px',
-                  height: isMobile ? '500px' : '800px',
-                  marginTop: isMobile ? '1rem' : '1.5rem',
+                  height: isMobile ? '500px' : '650px',
+                  marginTop: isMobile ? '2rem' : '3rem',
                   boxShadow: '0 20px 50px rgba(0,0,0,0.3)',
                   position: 'relative',
                   overflow: 'hidden',
@@ -1496,11 +1500,10 @@ export default function HomePage(): React.JSX.Element {
                   display: 'flex',
                   flexDirection: 'column',
                   alignItems: 'center',
-                  justifyContent: 'flex-start',
-                  marginLeft: isMobile ? '5rem' : '8rem' // Memberikan jarak dari teks di kiri
+                  justifyContent: 'center'
                 }}
               >
-                {/* Container untuk 4 foto images/5.jpg - GRID TETAP SAMA */}
+                {/* Container untuk 4 foto images/5.jpg */}
                 <div style={{
                   display: 'grid',
                   gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)',
@@ -1508,17 +1511,17 @@ export default function HomePage(): React.JSX.Element {
                   gap: isMobile ? '1rem' : '1.5rem',
                   width: '100%',
                   height: '100%',
-                  alignItems: 'flex-start',
+                  alignItems: 'center',
                   justifyContent: 'center'
                 }}>
-                  {/* Foto 1 - images/5.jpg - LEBIH LEBAR KE SAMPING */}
+                  {/* Foto 1 - images/5.jpg */}
                   <div style={{
                     overflow: 'hidden',
-                    borderRadius: '20px',
+                    borderRadius: '15px',
                     boxShadow: '0 10px 30px rgba(0,0,0,0.4)',
                     border: '2px solid rgba(255,255,255,0.2)',
                     width: '100%',
-                    height: isMobile ? '600px' : '600px',
+                    height: '100%',
                     position: 'relative'
                   }}>
                     <img 
@@ -1529,10 +1532,9 @@ export default function HomePage(): React.JSX.Element {
                         height: '100%',
                         display: 'block',
                         objectFit: 'cover',
-                        borderRadius: '18px'
+                        borderRadius: '13px'
                       }}
                       onError={(e) => {
-                        console.error("Gambar portrait 1 tidak ditemukan:", e);
                         e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.1)';
                         e.currentTarget.style.display = 'flex';
                         e.currentTarget.style.alignItems = 'center';
@@ -1543,14 +1545,14 @@ export default function HomePage(): React.JSX.Element {
                     />
                   </div>
 
-                  {/* Foto 2 - images/5.jpg - LEBIH LEBAR KE SAMPING */}
+                  {/* Foto 2 - images/5.jpg */}
                   <div style={{
                     overflow: 'hidden',
-                    borderRadius: '20px',
+                    borderRadius: '15px',
                     boxShadow: '0 10px 30px rgba(0,0,0,0.4)',
                     border: '2px solid rgba(255,255,255,0.2)',
                     width: '100%',
-                    height: isMobile ? '600px' : '600px',
+                    height: '100%',
                     position: 'relative'
                   }}>
                     <img 
@@ -1561,10 +1563,9 @@ export default function HomePage(): React.JSX.Element {
                         height: '100%',
                         display: 'block',
                         objectFit: 'cover',
-                        borderRadius: '18px'
+                        borderRadius: '13px'
                       }}
                       onError={(e) => {
-                        console.error("Gambar portrait 2 tidak ditemukan:", e);
                         e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.1)';
                         e.currentTarget.style.display = 'flex';
                         e.currentTarget.style.alignItems = 'center';
@@ -1575,14 +1576,14 @@ export default function HomePage(): React.JSX.Element {
                     />
                   </div>
 
-                  {/* Foto 3 - images/5.jpg - LEBIH LEBAR KE SAMPING */}
+                  {/* Foto 3 - images/5.jpg */}
                   <div style={{
                     overflow: 'hidden',
-                    borderRadius: '20px',
+                    borderRadius: '15px',
                     boxShadow: '0 10px 30px rgba(0,0,0,0.4)',
                     border: '2px solid rgba(255,255,255,0.2)',
                     width: '100%',
-                    height: isMobile ? '600px' : '600px',
+                    height: '100%',
                     position: 'relative'
                   }}>
                     <img 
@@ -1593,10 +1594,9 @@ export default function HomePage(): React.JSX.Element {
                         height: '100%',
                         display: 'block',
                         objectFit: 'cover',
-                        borderRadius: '18px'
+                        borderRadius: '13px'
                       }}
                       onError={(e) => {
-                        console.error("Gambar portrait 3 tidak ditemukan:", e);
                         e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.1)';
                         e.currentTarget.style.display = 'flex';
                         e.currentTarget.style.alignItems = 'center';
@@ -1607,14 +1607,14 @@ export default function HomePage(): React.JSX.Element {
                     />
                   </div>
 
-                  {/* Foto 4 - images/5.jpg - LEBIH LEBAR KE SAMPING */}
+                  {/* Foto 4 - images/5.jpg */}
                   <div style={{
                     overflow: 'hidden',
-                    borderRadius: '20px',
+                    borderRadius: '15px',
                     boxShadow: '0 10px 30px rgba(0,0,0,0.4)',
                     border: '2px solid rgba(255,255,255,0.2)',
                     width: '100%',
-                    height: isMobile ? '600px' : '600px',
+                    height: '100%',
                     position: 'relative'
                   }}>
                     <img 
@@ -1625,10 +1625,9 @@ export default function HomePage(): React.JSX.Element {
                         height: '100%',
                         display: 'block',
                         objectFit: 'cover',
-                        borderRadius: '18px'
+                        borderRadius: '13px'
                       }}
                       onError={(e) => {
-                        console.error("Gambar portrait 4 tidak ditemukan:", e);
                         e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.1)';
                         e.currentTarget.style.display = 'flex';
                         e.currentTarget.style.alignItems = 'center';
@@ -1644,10 +1643,9 @@ export default function HomePage(): React.JSX.Element {
               {/* Container untuk Tombol Slider dan Teks MENURU + di sebelah kanan */}
               <div style={{
                 position: 'relative',
-                marginTop: isMobile ? '3rem' : '4rem',
+                marginTop: isMobile ? '4rem' : '5rem',
                 marginBottom: isMobile ? '4rem' : '6rem',
-                paddingLeft: isMobile ? '1rem' : '2rem',
-                paddingRight: isMobile ? '1rem' : '2rem',
+                padding: isMobile ? '0 1rem' : '0 2rem',
                 display: 'flex',
                 flexDirection: isMobile ? 'column' : 'row',
                 justifyContent: 'space-between',
@@ -1799,12 +1797,12 @@ export default function HomePage(): React.JSX.Element {
                 </motion.div>
               </div>
 
-              {/* Progress Bar dengan 3 Foto - DIPERBAIKI */}
+              {/* Progress Bar dengan 3 Foto */}
               <div style={{
                 width: '100%',
                 padding: isMobile ? '1rem' : '2rem',
-                marginTop: isMobile ? '2rem' : '3rem',
-                marginBottom: isMobile ? '2rem' : '3rem',
+                marginTop: isMobile ? '3rem' : '4rem',
+                marginBottom: isMobile ? '3rem' : '4rem',
                 boxSizing: 'border-box',
                 position: 'relative'
               }}>
@@ -1909,7 +1907,7 @@ export default function HomePage(): React.JSX.Element {
                       position: 'relative',
                       width: '100%',
                       maxWidth: '600px',
-                      height: isMobile ? '600px' : '900px',
+                      height: isMobile ? '600px' : '800px',
                       borderRadius: '15px',
                       overflow: 'hidden',
                       boxShadow: '0 8px 25px rgba(0,0,0,0.4)',
@@ -2003,7 +2001,7 @@ export default function HomePage(): React.JSX.Element {
 
               {/* Content tambahan untuk membuat halaman lebih panjang */}
               <div style={{
-                height: '100vh',
+                height: '50vh',
                 width: '100%',
                 display: 'flex',
                 alignItems: 'center',
@@ -2041,10 +2039,10 @@ export default function HomePage(): React.JSX.Element {
               transition={{ duration: 0.5 }}
               style={{
                 width: '100%',
-                minHeight: '100vh',
-                padding: isMobile ? '1rem' : '2rem',
-                boxSizing: 'border-box',
-                position: 'relative'
+                maxWidth: '1200px',
+                margin: '0 auto',
+                padding: isMobile ? '0 1rem' : '0 2rem',
+                minHeight: '100vh'
               }}
             >
               {/* Garis bawah di atas MENURU - putih pudar */}
@@ -2134,7 +2132,6 @@ export default function HomePage(): React.JSX.Element {
                               objectFit: 'cover'
                             }}
                             onError={(e) => {
-                              console.error("Gambar topic tidak ditemukan:", e);
                               e.currentTarget.style.backgroundColor = '#333';
                               e.currentTarget.style.display = 'flex';
                               e.currentTarget.style.alignItems = 'center';
@@ -2287,8 +2284,7 @@ export default function HomePage(): React.JSX.Element {
                 position: 'relative',
                 marginTop: '4rem',
                 marginBottom: '4rem',
-                paddingLeft: isMobile ? '1rem' : '2rem',
-                paddingRight: isMobile ? '1rem' : '2rem',
+                padding: isMobile ? '0 1rem' : '0 2rem',
                 display: 'flex',
                 justifyContent: 'flex-start'
               }}>
@@ -2387,9 +2383,10 @@ export default function HomePage(): React.JSX.Element {
               transition={{ duration: 0.5 }}
               style={{
                 width: '100%',
+                maxWidth: '1200px',
+                margin: '0 auto',
+                padding: isMobile ? '0 1rem' : '0 2rem',
                 minHeight: '100vh',
-                padding: isMobile ? '1rem' : '2rem',
-                boxSizing: 'border-box',
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
