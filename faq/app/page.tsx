@@ -56,7 +56,7 @@ export default function HomePage(): React.JSX.Element {
   const [imagePosition, setImagePosition] = useState(0);
   
   // State untuk teks yang sedang aktif saat scroll
-  const [activeTextIndex, setActiveTextIndex] = useState(0);
+  const [activeTextIndex, setActiveTextIndex] = useState(-1);
   
   const headerRef = useRef<HTMLDivElement>(null);
   const topNavRef = useRef<HTMLDivElement>(null);
@@ -68,12 +68,8 @@ export default function HomePage(): React.JSX.Element {
   const backslashRef = useRef<HTMLDivElement>(null);
   const userButtonRef = useRef<HTMLDivElement>(null);
   const userTextRef = useRef<HTMLSpanElement>(null);
-  const splitTextRef = useRef<HTMLDivElement>(null);
   const leftCounterRef = useRef<HTMLSpanElement>(null);
   const scrollSectionRef = useRef<HTMLDivElement>(null);
-  const textContainerRef = useRef<HTMLDivElement>(null);
-  const textRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const rightTextContainerRef = useRef<HTMLDivElement>(null);
 
   // Animasi loading text
   const loadingTexts = [
@@ -97,7 +93,7 @@ export default function HomePage(): React.JSX.Element {
     { title: "Features", description: "Functionality & Integration" }
   ];
 
-  // Data untuk teks yang akan muncul di pojok kanan atas - URUTAN TETAP
+  // Data untuk teks yang akan muncul di pojok kiri - URUTAN TETAP
   const scrollTexts = [
     "stay",
     "thinking",
@@ -206,90 +202,47 @@ export default function HomePage(): React.JSX.Element {
     }
   }, [hoveredTopic]);
 
-  // Animasi teks di pojok kanan atas dengan efek blur/white sesuai scroll
+  // Animasi teks di pojok kiri dengan efek opacity sesuai scroll
   useEffect(() => {
-    if (textContainerRef.current && textRefs.current.length === scrollTexts.length) {
-      // Atur semua teks menjadi blur (opacity rendah) di awal
-      gsap.set(textRefs.current, {
-        opacity: 0.2,
-        filter: "blur(3px)",
-        color: "rgba(255, 255, 255, 0.3)"
-      });
+    // Hapus semua ScrollTrigger sebelumnya
+    ScrollTrigger.getAll().forEach(trigger => trigger.kill());
 
-      // Buat ScrollTrigger untuk setiap teks
-      scrollTexts.forEach((_, index) => {
-        if (textRefs.current[index]) {
-          // Trigger untuk scroll ke bawah (muncul putih)
-          ScrollTrigger.create({
-            trigger: document.documentElement,
-            start: `${index * 20}%`, // Setiap 20% scroll
-            end: `${index * 20 + 20}%`,
-            scrub: true,
-            onEnter: () => {
+    // Buat ScrollTrigger untuk setiap teks
+    scrollTexts.forEach((_, index) => {
+      // Hitung threshold untuk setiap teks (setiap 20% scroll)
+      const startThreshold = index * 20; // 0%, 20%, 40%, 60%, 80%
+      const endThreshold = startThreshold + 20; // 20%, 40%, 60%, 80%, 100%
+
+      ScrollTrigger.create({
+        trigger: document.documentElement,
+        start: `top top`,
+        end: "bottom bottom",
+        onUpdate: (self) => {
+          // Hitung progress scroll (0-1)
+          const scrollProgress = self.progress * 100;
+          
+          // Untuk scroll ke bawah
+          if (self.direction === 1) {
+            // Jika scrollProgress melewati threshold teks ini
+            if (scrollProgress >= startThreshold && scrollProgress < endThreshold) {
               setActiveTextIndex(index);
-              // Animate current text to white and clear
-              gsap.to(textRefs.current[index], {
-                opacity: 1,
-                color: "white",
-                filter: "blur(0px)",
-                duration: 0.5
-              });
-              
-              // Keep previous texts white (when scrolling down)
-              for (let i = 0; i < index; i++) {
-                if (textRefs.current[i]) {
-                  gsap.to(textRefs.current[i], {
-                    opacity: 1,
-                    color: "white",
-                    filter: "blur(0px)",
-                    duration: 0.5
-                  });
-                }
-              }
-              
-              // Set future texts to blur
-              for (let i = index + 1; i < scrollTexts.length; i++) {
-                if (textRefs.current[i]) {
-                  gsap.to(textRefs.current[i], {
-                    opacity: 0.2,
-                    color: "rgba(255, 255, 255, 0.3)",
-                    filter: "blur(3px)",
-                    duration: 0.5
-                  });
-                }
-              }
-            },
-            onEnterBack: () => {
-              setActiveTextIndex(index);
-              // When scrolling up, keep all previous texts white
-              gsap.to(textRefs.current[index], {
-                opacity: 1,
-                color: "white",
-                filter: "blur(0px)",
-                duration: 0.5
-              });
-              
-              // Keep texts after current index blurry when scrolling up
-              for (let i = index + 1; i < scrollTexts.length; i++) {
-                if (textRefs.current[i]) {
-                  gsap.to(textRefs.current[i], {
-                    opacity: 0.2,
-                    color: "rgba(255, 255, 255, 0.3)",
-                    filter: "blur(3px)",
-                    duration: 0.5
-                  });
-                }
-              }
             }
-          });
+          } 
+          // Untuk scroll ke atas
+          else {
+            // Jika scrollProgress masih di atas threshold teks ini
+            if (scrollProgress >= startThreshold) {
+              setActiveTextIndex(index);
+            }
+          }
         }
       });
+    });
 
-      return () => {
-        ScrollTrigger.getAll().forEach(trigger => trigger.kill());
-      };
-    }
-  }, [isMobile]);
+    return () => {
+      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
+    };
+  }, []);
 
   useEffect(() => {
     // Cek apakah user sudah menyetujui cookies
@@ -320,31 +273,6 @@ export default function HomePage(): React.JSX.Element {
       clearInterval(textInterval);
     }, 3000);
 
-    // Animasi teks berjalan dari atas ke bawah
-    const setupAutoScroll = () => {
-      if (scrollTextRef.current) {
-        const itemHeight = isMobile ? 80 : 100;
-        const totalItems = 15;
-        const totalScrollDistance = totalItems * itemHeight - window.innerHeight;
-        
-        // Hapus animasi sebelumnya jika ada
-        gsap.killTweensOf(scrollTextRef.current);
-        
-        // Animasi infinite loop dari atas ke bawah
-        gsap.to(scrollTextRef.current, {
-          y: -totalScrollDistance,
-          duration: 20,
-          ease: "none",
-          repeat: -1,
-          yoyo: false
-        });
-      }
-    };
-
-    // Setup auto scroll setelah component mount
-    setTimeout(setupAutoScroll, 100);
-    window.addEventListener('resize', setupAutoScroll);
-
     // Keyboard navigation
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'ArrowLeft') {
@@ -362,13 +290,9 @@ export default function HomePage(): React.JSX.Element {
 
     return () => {
       window.removeEventListener('resize', checkMobile);
-      window.removeEventListener('resize', setupAutoScroll);
       clearInterval(textInterval);
       clearTimeout(loadingTimeout);
       document.removeEventListener('keydown', handleKeyDown);
-      if (scrollTextRef.current) {
-        gsap.killTweensOf(scrollTextRef.current);
-      }
       if (progressAnimationRef.current) {
         progressAnimationRef.current.kill();
       }
@@ -378,10 +302,6 @@ export default function HomePage(): React.JSX.Element {
       }
       if (backslashRef.current) {
         gsap.killTweensOf(backslashRef.current);
-      }
-      if (splitTextRef.current) {
-        const chars = splitTextRef.current.querySelectorAll('.char');
-        gsap.killTweensOf(chars);
       }
       if (leftCounterRef.current) {
         gsap.killTweensOf(leftCounterRef.current);
@@ -1506,38 +1426,32 @@ export default function HomePage(): React.JSX.Element {
         </div>
       </div>
 
-      {/* Container untuk teks "stay thinking keep talk mind" di pojok kanan atas */}
+      {/* Container untuk teks "stay thinking keep talk mind" di pojok kiri */}
       <div 
-        ref={textContainerRef}
         style={{
           position: 'fixed',
-          top: isMobile ? '6rem' : '8rem', // Di bawah header
-          right: isMobile ? '1rem' : '2rem',
+          top: isMobile ? '7rem' : '9rem', // Di bawah header dengan jarak
+          left: isMobile ? '1.5rem' : '2.5rem',
           display: 'flex',
           flexDirection: 'column',
-          alignItems: 'flex-end',
+          alignItems: 'flex-start',
           zIndex: 99,
-          gap: isMobile ? '0.5rem' : '1rem',
-          maxWidth: isMobile ? '120px' : '200px'
+          gap: isMobile ? '0.3rem' : '0.5rem'
         }}
       >
         {scrollTexts.map((text, index) => (
           <div
             key={index}
-            ref={(el) => {
-              textRefs.current[index] = el;
-            }}
             style={{
-              color: 'rgba(255, 255, 255, 0.3)',
-              fontSize: isMobile ? '0.9rem' : '1.1rem',
+              color: activeTextIndex >= index ? 'white' : 'rgba(255, 255, 255, 0.3)',
+              fontSize: isMobile ? '1rem' : '1.2rem',
               fontWeight: '400',
               fontFamily: 'Helvetica, Arial, sans-serif',
-              letterSpacing: '1px',
-              textAlign: 'right',
-              opacity: 0.2,
-              filter: 'blur(3px)',
-              transition: 'all 0.5s ease',
-              lineHeight: 1.1
+              textAlign: 'left',
+              opacity: activeTextIndex >= index ? 1 : 0.5,
+              transition: 'all 0.3s ease',
+              lineHeight: 1.2,
+              whiteSpace: 'nowrap'
             }}
           >
             {text}
@@ -1582,7 +1496,8 @@ export default function HomePage(): React.JSX.Element {
                   display: 'flex',
                   flexDirection: 'column',
                   alignItems: 'center',
-                  justifyContent: 'flex-start'
+                  justifyContent: 'flex-start',
+                  marginLeft: isMobile ? '5rem' : '8rem' // Memberikan jarak dari teks di kiri
                 }}
               >
                 {/* Container untuk 4 foto images/5.jpg - GRID TETAP SAMA */}
