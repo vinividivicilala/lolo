@@ -96,7 +96,7 @@ export default function HomePage(): React.JSX.Element {
     { title: "Features", description: "Functionality & Integration" }
   ];
 
-  // Data untuk teks yang akan muncul saat scroll
+  // Data untuk teks yang akan muncul saat scroll - URUTAN TETAP
   const scrollTexts = [
     "stay",
     "thinking",
@@ -205,7 +205,7 @@ export default function HomePage(): React.JSX.Element {
     }
   }, [hoveredTopic]);
 
-  // Animasi teks saat scroll
+  // Animasi teks split GSAP saat scroll
   useEffect(() => {
     if (textContainerRef.current && textRefs.current.length === scrollTexts.length) {
       // Reset semua teks menjadi transparan
@@ -214,31 +214,98 @@ export default function HomePage(): React.JSX.Element {
         y: 30
       });
 
-      // Buat ScrollTrigger untuk setiap teks
-      scrollTexts.forEach((_, index) => {
+      // Buat ScrollTrigger untuk setiap teks dengan split text animation
+      scrollTexts.forEach((text, index) => {
         if (textRefs.current[index]) {
-          gsap.to(textRefs.current[index], {
-            opacity: 1,
-            y: 0,
-            duration: 0.8,
-            ease: "power2.out",
-            scrollTrigger: {
-              trigger: textContainerRef.current,
-              start: `top+=${index * 100} center`,
-              end: `top+=${index * 100 + 100} center`,
-              scrub: 1,
-              markers: false,
-              onEnter: () => setActiveTextIndex(index),
-              onEnterBack: () => setActiveTextIndex(index),
-              onLeave: () => {
-                if (index < scrollTexts.length - 1) {
-                  setActiveTextIndex(index + 1);
-                }
-              },
-              onLeaveBack: () => {
-                if (index > 0) {
-                  setActiveTextIndex(index - 1);
-                }
+          // Split teks menjadi huruf-huruf
+          const element = textRefs.current[index];
+          const textContent = element?.textContent || "";
+          
+          // Clear existing content
+          if (element) {
+            element.innerHTML = '';
+            
+            // Create character spans
+            textContent.split('').forEach((char, charIndex) => {
+              const charSpan = document.createElement('span');
+              charSpan.textContent = char;
+              charSpan.style.display = 'inline-block';
+              charSpan.style.opacity = '0';
+              charSpan.style.transform = 'translateY(20px)';
+              charSpan.style.transition = 'all 0.3s ease';
+              element.appendChild(charSpan);
+            });
+          }
+
+          // Buat ScrollTrigger untuk teks ini
+          ScrollTrigger.create({
+            trigger: textContainerRef.current,
+            start: `top+=${index * 100} center`,
+            end: `top+=${index * 100 + 100} center`,
+            scrub: 1,
+            markers: false,
+            onEnter: () => {
+              setActiveTextIndex(index);
+              
+              // Animate characters with GSAP
+              if (element) {
+                const chars = element.querySelectorAll('span');
+                gsap.to(chars, {
+                  opacity: 1,
+                  y: 0,
+                  stagger: 0.05,
+                  duration: 0.8,
+                  ease: "power2.out"
+                });
+              }
+            },
+            onEnterBack: () => {
+              setActiveTextIndex(index);
+              
+              // Animate characters with GSAP
+              if (element) {
+                const chars = element.querySelectorAll('span');
+                gsap.to(chars, {
+                  opacity: 1,
+                  y: 0,
+                  stagger: 0.05,
+                  duration: 0.8,
+                  ease: "power2.out"
+                });
+              }
+            },
+            onLeave: () => {
+              if (index < scrollTexts.length - 1) {
+                setActiveTextIndex(index + 1);
+              }
+              
+              // Fade out characters
+              if (element) {
+                const chars = element.querySelectorAll('span');
+                gsap.to(chars, {
+                  opacity: 0,
+                  y: 20,
+                  stagger: 0.03,
+                  duration: 0.5,
+                  ease: "power2.in"
+                });
+              }
+            },
+            onLeaveBack: () => {
+              if (index > 0) {
+                setActiveTextIndex(index - 1);
+              }
+              
+              // Fade out characters
+              if (element) {
+                const chars = element.querySelectorAll('span');
+                gsap.to(chars, {
+                  opacity: 0,
+                  y: 20,
+                  stagger: 0.03,
+                  duration: 0.5,
+                  ease: "power2.in"
+                });
               }
             }
           });
@@ -1532,7 +1599,8 @@ export default function HomePage(): React.JSX.Element {
                         position: 'absolute',
                         top: '50%',
                         left: '50%',
-                        transform: 'translate(-50%, -50%)'
+                        transform: 'translate(-50%, -50%)',
+                        whiteSpace: 'nowrap'
                       }}
                     >
                       {text}
