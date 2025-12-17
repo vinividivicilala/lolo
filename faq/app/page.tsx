@@ -73,6 +73,7 @@ export default function HomePage(): React.JSX.Element {
   const scrollSectionRef = useRef<HTMLDivElement>(null);
   const textContainerRef = useRef<HTMLDivElement>(null);
   const textRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const rightTextContainerRef = useRef<HTMLDivElement>(null);
 
   // Animasi loading text
   const loadingTexts = [
@@ -96,7 +97,7 @@ export default function HomePage(): React.JSX.Element {
     { title: "Features", description: "Functionality & Integration" }
   ];
 
-  // Data untuk teks yang akan muncul saat scroll - URUTAN TETAP
+  // Data untuk teks yang akan muncul di pojok kanan atas - URUTAN TETAP
   const scrollTexts = [
     "stay",
     "thinking",
@@ -205,107 +206,79 @@ export default function HomePage(): React.JSX.Element {
     }
   }, [hoveredTopic]);
 
-  // Animasi teks split GSAP saat scroll
+  // Animasi teks di pojok kanan atas dengan efek blur/white sesuai scroll
   useEffect(() => {
     if (textContainerRef.current && textRefs.current.length === scrollTexts.length) {
-      // Reset semua teks menjadi transparan
+      // Atur semua teks menjadi blur (opacity rendah) di awal
       gsap.set(textRefs.current, {
-        opacity: 0,
-        y: 30
+        opacity: 0.2,
+        filter: "blur(3px)",
+        color: "rgba(255, 255, 255, 0.3)"
       });
 
-      // Buat ScrollTrigger untuk setiap teks dengan split text animation
-      scrollTexts.forEach((text, index) => {
+      // Buat ScrollTrigger untuk setiap teks
+      scrollTexts.forEach((_, index) => {
         if (textRefs.current[index]) {
-          // Split teks menjadi huruf-huruf
-          const element = textRefs.current[index];
-          const textContent = element?.textContent || "";
-          
-          // Clear existing content
-          if (element) {
-            element.innerHTML = '';
-            
-            // Create character spans
-            textContent.split('').forEach((char, charIndex) => {
-              const charSpan = document.createElement('span');
-              charSpan.textContent = char;
-              charSpan.style.display = 'inline-block';
-              charSpan.style.opacity = '0';
-              charSpan.style.transform = 'translateY(20px)';
-              charSpan.style.transition = 'all 0.3s ease';
-              element.appendChild(charSpan);
-            });
-          }
-
-          // Buat ScrollTrigger untuk teks ini
+          // Trigger untuk scroll ke bawah (muncul putih)
           ScrollTrigger.create({
-            trigger: textContainerRef.current,
-            start: `top+=${index * 100} center`,
-            end: `top+=${index * 100 + 100} center`,
-            scrub: 1,
-            markers: false,
+            trigger: document.documentElement,
+            start: `${index * 20}%`, // Setiap 20% scroll
+            end: `${index * 20 + 20}%`,
+            scrub: true,
             onEnter: () => {
               setActiveTextIndex(index);
+              // Animate current text to white and clear
+              gsap.to(textRefs.current[index], {
+                opacity: 1,
+                color: "white",
+                filter: "blur(0px)",
+                duration: 0.5
+              });
               
-              // Animate characters with GSAP
-              if (element) {
-                const chars = element.querySelectorAll('span');
-                gsap.to(chars, {
-                  opacity: 1,
-                  y: 0,
-                  stagger: 0.05,
-                  duration: 0.8,
-                  ease: "power2.out"
-                });
+              // Keep previous texts white (when scrolling down)
+              for (let i = 0; i < index; i++) {
+                if (textRefs.current[i]) {
+                  gsap.to(textRefs.current[i], {
+                    opacity: 1,
+                    color: "white",
+                    filter: "blur(0px)",
+                    duration: 0.5
+                  });
+                }
+              }
+              
+              // Set future texts to blur
+              for (let i = index + 1; i < scrollTexts.length; i++) {
+                if (textRefs.current[i]) {
+                  gsap.to(textRefs.current[i], {
+                    opacity: 0.2,
+                    color: "rgba(255, 255, 255, 0.3)",
+                    filter: "blur(3px)",
+                    duration: 0.5
+                  });
+                }
               }
             },
             onEnterBack: () => {
               setActiveTextIndex(index);
+              // When scrolling up, keep all previous texts white
+              gsap.to(textRefs.current[index], {
+                opacity: 1,
+                color: "white",
+                filter: "blur(0px)",
+                duration: 0.5
+              });
               
-              // Animate characters with GSAP
-              if (element) {
-                const chars = element.querySelectorAll('span');
-                gsap.to(chars, {
-                  opacity: 1,
-                  y: 0,
-                  stagger: 0.05,
-                  duration: 0.8,
-                  ease: "power2.out"
-                });
-              }
-            },
-            onLeave: () => {
-              if (index < scrollTexts.length - 1) {
-                setActiveTextIndex(index + 1);
-              }
-              
-              // Fade out characters
-              if (element) {
-                const chars = element.querySelectorAll('span');
-                gsap.to(chars, {
-                  opacity: 0,
-                  y: 20,
-                  stagger: 0.03,
-                  duration: 0.5,
-                  ease: "power2.in"
-                });
-              }
-            },
-            onLeaveBack: () => {
-              if (index > 0) {
-                setActiveTextIndex(index - 1);
-              }
-              
-              // Fade out characters
-              if (element) {
-                const chars = element.querySelectorAll('span');
-                gsap.to(chars, {
-                  opacity: 0,
-                  y: 20,
-                  stagger: 0.03,
-                  duration: 0.5,
-                  ease: "power2.in"
-                });
+              // Keep texts after current index blurry when scrolling up
+              for (let i = index + 1; i < scrollTexts.length; i++) {
+                if (textRefs.current[i]) {
+                  gsap.to(textRefs.current[i], {
+                    opacity: 0.2,
+                    color: "rgba(255, 255, 255, 0.3)",
+                    filter: "blur(3px)",
+                    duration: 0.5
+                  });
+                }
               }
             }
           });
@@ -1533,6 +1506,45 @@ export default function HomePage(): React.JSX.Element {
         </div>
       </div>
 
+      {/* Container untuk teks "stay thinking keep talk mind" di pojok kanan atas */}
+      <div 
+        ref={textContainerRef}
+        style={{
+          position: 'fixed',
+          top: isMobile ? '6rem' : '8rem', // Di bawah header
+          right: isMobile ? '1rem' : '2rem',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'flex-end',
+          zIndex: 99,
+          gap: isMobile ? '0.5rem' : '1rem',
+          maxWidth: isMobile ? '120px' : '200px'
+        }}
+      >
+        {scrollTexts.map((text, index) => (
+          <div
+            key={index}
+            ref={(el) => {
+              textRefs.current[index] = el;
+            }}
+            style={{
+              color: 'rgba(255, 255, 255, 0.3)',
+              fontSize: isMobile ? '0.9rem' : '1.1rem',
+              fontWeight: '400',
+              fontFamily: 'Helvetica, Arial, sans-serif',
+              letterSpacing: '1px',
+              textAlign: 'right',
+              opacity: 0.2,
+              filter: 'blur(3px)',
+              transition: 'all 0.5s ease',
+              lineHeight: 1.1
+            }}
+          >
+            {text}
+          </div>
+        ))}
+      </div>
+
       {/* Main Content Container */}
       <div style={{
         width: '100%',
@@ -1551,107 +1563,6 @@ export default function HomePage(): React.JSX.Element {
               exit={{ opacity: 0 }}
               transition={{ duration: 0.5 }}
             >
-              {/* Container untuk teks yang muncul saat scroll */}
-              <div 
-                ref={scrollSectionRef}
-                style={{
-                  width: '100%',
-                  minHeight: '100vh',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  padding: isMobile ? '2rem 1rem' : '4rem 2rem',
-                  marginBottom: isMobile ? '3rem' : '4rem',
-                  position: 'relative'
-                }}
-              >
-                <div 
-                  ref={textContainerRef}
-                  style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    width: '100%',
-                    height: '100vh',
-                    position: 'sticky',
-                    top: 0
-                  }}
-                >
-                  {scrollTexts.map((text, index) => (
-                    <div
-                      key={index}
-                      ref={(el) => {
-                        textRefs.current[index] = el;
-                      }}
-                      style={{
-                        color: 'white',
-                        fontSize: isMobile ? '2.5rem' : '4rem',
-                        fontWeight: '400',
-                        fontFamily: 'Helvetica, Arial, sans-serif',
-                        letterSpacing: '1px',
-                        lineHeight: 1.2,
-                        textAlign: 'center',
-                        marginBottom: isMobile ? '2rem' : '3rem',
-                        opacity: index === activeTextIndex ? 1 : 0.2,
-                        transition: 'opacity 0.3s ease',
-                        position: 'absolute',
-                        top: '50%',
-                        left: '50%',
-                        transform: 'translate(-50%, -50%)',
-                        whiteSpace: 'nowrap'
-                      }}
-                    >
-                      {text}
-                    </div>
-                  ))}
-                  
-                  {/* Indikator scroll */}
-                  <div style={{
-                    position: 'absolute',
-                    bottom: '2rem',
-                    left: '50%',
-                    transform: 'translateX(-50%)',
-                    color: 'rgba(255,255,255,0.5)',
-                    fontSize: isMobile ? '0.9rem' : '1.1rem',
-                    fontWeight: '300',
-                    fontFamily: 'Helvetica, Arial, sans-serif',
-                    letterSpacing: '1px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    flexDirection: 'column',
-                    gap: '0.5rem'
-                  }}>
-                    <div style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '0.3rem'
-                    }}>
-                      <span>Scroll down</span>
-                      <motion.div
-                        animate={{ y: [0, 5, 0] }}
-                        transition={{ duration: 1.5, repeat: Infinity }}
-                      >
-                        ↓
-                      </motion.div>
-                    </div>
-                    <div style={{
-                      fontSize: isMobile ? '0.8rem' : '0.9rem',
-                      opacity: 0.7
-                    }}>
-                      {activeTextIndex + 1} / {scrollTexts.length}
-                    </div>
-                  </div>
-                </div>
-                
-                {/* Spacer untuk scroll */}
-                <div style={{
-                  height: 'calc(100vh * 5)',
-                  width: '100%'
-                }} />
-              </div>
-
               {/* Card #0050B7 dengan 4 foto images/5.jpg - FOTO LEBIH LEBAR KE SAMPING */}
               <div
                 style={{
