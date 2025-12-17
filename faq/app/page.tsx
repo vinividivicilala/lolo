@@ -1426,32 +1426,37 @@ export default function HomePage(): React.JSX.Element {
         </div>
       </div>
 
-      {/* Container untuk teks "stay thinking keep talk mind" di pojok kiri */}
+      {/* Container untuk teks "stay thinking keep talk mind" di pojok kanan bawah */}
       <div 
         style={{
           position: 'fixed',
-          top: isMobile ? '7rem' : '9rem', // Di bawah header dengan jarak
-          left: isMobile ? '1.5rem' : '2.5rem',
+          bottom: isMobile ? '2rem' : '3rem',
+          right: isMobile ? '1.5rem' : '2.5rem',
           display: 'flex',
           flexDirection: 'column',
-          alignItems: 'flex-start',
+          alignItems: 'flex-end',
           zIndex: 99,
-          gap: isMobile ? '0.3rem' : '0.5rem'
+          gap: '0.5rem'
         }}
       >
         {scrollTexts.map((text, index) => (
           <div
             key={index}
             style={{
-              color: activeTextIndex >= index ? 'white' : 'rgba(255, 255, 255, 0.3)',
-              fontSize: isMobile ? '1rem' : '1.2rem',
+              color: '#000000', // WARNA HITAM
+              fontSize: isMobile ? '1.1rem' : '1.4rem',
               fontWeight: '400',
-              fontFamily: 'Helvetica, Arial, sans-serif',
-              textAlign: 'left',
-              opacity: activeTextIndex >= index ? 1 : 0.5,
+              fontFamily: 'Helvetica, Arial, sans-serif', // FONT SAMA
+              textAlign: 'right',
+              opacity: 1,
               transition: 'all 0.3s ease',
               lineHeight: 1.2,
-              whiteSpace: 'nowrap'
+              whiteSpace: 'nowrap',
+              backgroundColor: 'rgba(255,255,255,0.9)',
+              padding: isMobile ? '0.3rem 0.8rem' : '0.4rem 1rem',
+              borderRadius: '4px',
+              backdropFilter: 'blur(5px)',
+              border: '1px solid rgba(0,0,0,0.1)'
             }}
           >
             {text}
@@ -1462,7 +1467,7 @@ export default function HomePage(): React.JSX.Element {
       {/* Main Content Container */}
       <div style={{
         width: '100%',
-        paddingTop: isMobile ? '11rem' : '14rem', // Jarak dari atas diperbesar
+        paddingTop: isMobile ? '8rem' : '12rem',
         boxSizing: 'border-box',
         zIndex: 10,
         position: 'relative'
@@ -1476,20 +1481,16 @@ export default function HomePage(): React.JSX.Element {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.5 }}
-              style={{
-                width: '100%',
-                maxWidth: '1200px',
-                margin: '0 auto',
-                padding: isMobile ? '0 1rem' : '0 2rem'
-              }}
             >
-              {/* Card #0050B7 dengan 4 foto images/5.jpg - POSISI DI BAWAH TITLE */}
+              {/* Card #0050B7 dengan 4 foto images/5.jpg - FOTO LEBIH LEBAR KE SAMPING */}
               <div
                 style={{
-                  width: '100%',
+                  width: 'calc(100% - 4rem)',
+                  marginLeft: isMobile ? '2rem' : '4rem',
+                  marginRight: isMobile ? '2rem' : '4rem',
                   backgroundColor: '#0050B7',
                   borderRadius: '25px',
-                  height: isMobile ? '500px' : '650px',
+                  height: isMobile ? '500px' : '700px',
                   marginTop: isMobile ? '2rem' : '3rem',
                   boxShadow: '0 20px 50px rgba(0,0,0,0.3)',
                   position: 'relative',
@@ -1500,10 +1501,10 @@ export default function HomePage(): React.JSX.Element {
                   display: 'flex',
                   flexDirection: 'column',
                   alignItems: 'center',
-                  justifyContent: 'center'
+                  justifyContent: 'flex-start'
                 }}
               >
-                {/* Container untuk 4 foto images/5.jpg */}
+                {/* Container untuk 4 foto images/5.jpg - GRID TETAP SAMA */}
                 <div style={{
                   display: 'grid',
                   gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)',
@@ -1514,7 +1515,7 @@ export default function HomePage(): React.JSX.Element {
                   alignItems: 'center',
                   justifyContent: 'center'
                 }}>
-                  {/* Foto 1 - images/5.jpg */}
+                  {/* Foto 1 - images/5.jpg - LEBIH LEBAR KE SAMPING */}
                   <div style={{
                     overflow: 'hidden',
                     borderRadius: '15px',
@@ -1545,7 +1546,7 @@ export default function HomePage(): React.JSX.Element {
                     />
                   </div>
 
-                  {/* Foto 2 - images/5.jpg */}
+                  {/* Foto 2 - images/5.jpg - LEBIH LEBAR KE SAMPING */}
                   <div style={{
                     overflow: 'hidden',
                     borderRadius: '15px',
@@ -1576,7 +1577,7 @@ export default function HomePage(): React.JSX.Element {
                     />
                   </div>
 
-                  {/* Foto 3 - images/5.jpg */}
+                  {/* Foto 3 - images/5.jpg - LEBIH LEBAR KE SAMPING */}
                   <div style={{
                     overflow: 'hidden',
                     borderRadius: '15px',
@@ -1607,7 +1608,7 @@ export default function HomePage(): React.JSX.Element {
                     />
                   </div>
 
-                  {/* Foto 4 - images/5.jpg */}
+                  {/* Foto 4 - images/5.jpg - LEBIH LEBAR KE SAMPING */}
                   <div style={{
                     overflow: 'hidden',
                     borderRadius: '15px',
@@ -1645,7 +1646,8 @@ export default function HomePage(): React.JSX.Element {
                 position: 'relative',
                 marginTop: isMobile ? '4rem' : '5rem',
                 marginBottom: isMobile ? '4rem' : '6rem',
-                padding: isMobile ? '0 1rem' : '0 2rem',
+                paddingLeft: isMobile ? '2rem' : '4rem',
+                paddingRight: isMobile ? '2rem' : '4rem',
                 display: 'flex',
                 flexDirection: isMobile ? 'column' : 'row',
                 justifyContent: 'space-between',
@@ -2039,10 +2041,10 @@ export default function HomePage(): React.JSX.Element {
               transition={{ duration: 0.5 }}
               style={{
                 width: '100%',
-                maxWidth: '1200px',
-                margin: '0 auto',
-                padding: isMobile ? '0 1rem' : '0 2rem',
-                minHeight: '100vh'
+                minHeight: '100vh',
+                padding: isMobile ? '1rem' : '2rem',
+                boxSizing: 'border-box',
+                position: 'relative'
               }}
             >
               {/* Garis bawah di atas MENURU - putih pudar */}
@@ -2284,7 +2286,8 @@ export default function HomePage(): React.JSX.Element {
                 position: 'relative',
                 marginTop: '4rem',
                 marginBottom: '4rem',
-                padding: isMobile ? '0 1rem' : '0 2rem',
+                paddingLeft: isMobile ? '1rem' : '2rem',
+                paddingRight: isMobile ? '1rem' : '2rem',
                 display: 'flex',
                 justifyContent: 'flex-start'
               }}>
@@ -2383,10 +2386,9 @@ export default function HomePage(): React.JSX.Element {
               transition={{ duration: 0.5 }}
               style={{
                 width: '100%',
-                maxWidth: '1200px',
-                margin: '0 auto',
-                padding: isMobile ? '0 1rem' : '0 2rem',
                 minHeight: '100vh',
+                padding: isMobile ? '1rem' : '2rem',
+                boxSizing: 'border-box',
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
