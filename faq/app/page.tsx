@@ -55,6 +55,9 @@ export default function HomePage(): React.JSX.Element {
   // State untuk posisi gambar di halaman Index (semakin turun)
   const [imagePosition, setImagePosition] = useState(0);
   
+  // State untuk teks yang sedang aktif saat scroll
+  const [activeTextIndex, setActiveTextIndex] = useState(0);
+  
   const headerRef = useRef<HTMLDivElement>(null);
   const topNavRef = useRef<HTMLDivElement>(null);
   const scrollTextRef = useRef<HTMLDivElement>(null);
@@ -68,8 +71,8 @@ export default function HomePage(): React.JSX.Element {
   const splitTextRef = useRef<HTMLDivElement>(null);
   const leftCounterRef = useRef<HTMLSpanElement>(null);
   const scrollSectionRef = useRef<HTMLDivElement>(null);
-  const textLine1Ref = useRef<HTMLDivElement>(null);
-  const textLine2Ref = useRef<HTMLDivElement>(null);
+  const textContainerRef = useRef<HTMLDivElement>(null);
+  const textRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   // Animasi loading text
   const loadingTexts = [
@@ -91,6 +94,15 @@ export default function HomePage(): React.JSX.Element {
     { title: "Design", description: "Visual identity & UI/UX" },
     { title: "Development", description: "Frontend & Backend" },
     { title: "Features", description: "Functionality & Integration" }
+  ];
+
+  // Data untuk teks yang akan muncul saat scroll
+  const scrollTexts = [
+    "stay",
+    "thinking",
+    "keep",
+    "talk",
+    "mind"
   ];
 
   // Listen to auth state changes
@@ -193,54 +205,48 @@ export default function HomePage(): React.JSX.Element {
     }
   }, [hoveredTopic]);
 
-  // Animasi split text saat scroll
+  // Animasi teks saat scroll
   useEffect(() => {
-    if (!isMobile && textLine1Ref.current && textLine2Ref.current) {
-      // Animasi untuk line pertama
-      const chars1 = textLine1Ref.current.querySelectorAll('.char');
-      const chars2 = textLine2Ref.current.querySelectorAll('.char');
-      
-      // Reset posisi
-      gsap.set([...chars1, ...chars2], {
-        y: 50,
+    if (textContainerRef.current && textRefs.current.length === scrollTexts.length) {
+      // Reset semua teks menjadi transparan
+      gsap.set(textRefs.current, {
         opacity: 0,
-        rotationX: 90,
-        transformOrigin: "0% 50% -50"
+        y: 30
       });
 
-      // Animasi saat scroll
-      const tl = gsap.timeline({
-        scrollTrigger: {
-          trigger: scrollSectionRef.current,
-          start: "top 80%",
-          end: "bottom 20%",
-          scrub: 1,
-          markers: false
+      // Buat ScrollTrigger untuk setiap teks
+      scrollTexts.forEach((_, index) => {
+        if (textRefs.current[index]) {
+          gsap.to(textRefs.current[index], {
+            opacity: 1,
+            y: 0,
+            duration: 0.8,
+            ease: "power2.out",
+            scrollTrigger: {
+              trigger: textContainerRef.current,
+              start: `top+=${index * 100} center`,
+              end: `top+=${index * 100 + 100} center`,
+              scrub: 1,
+              markers: false,
+              onEnter: () => setActiveTextIndex(index),
+              onEnterBack: () => setActiveTextIndex(index),
+              onLeave: () => {
+                if (index < scrollTexts.length - 1) {
+                  setActiveTextIndex(index + 1);
+                }
+              },
+              onLeaveBack: () => {
+                if (index > 0) {
+                  setActiveTextIndex(index - 1);
+                }
+              }
+            }
+          });
         }
       });
 
-      // Animasi untuk baris pertama
-      tl.to(chars1, {
-        y: 0,
-        opacity: 1,
-        rotationX: 0,
-        duration: 1,
-        stagger: 0.03,
-        ease: "power3.out"
-      }, 0);
-
-      // Animasi untuk baris kedua
-      tl.to(chars2, {
-        y: 0,
-        opacity: 1,
-        rotationX: 0,
-        duration: 1,
-        stagger: 0.03,
-        ease: "power3.out"
-      }, 0.3);
-
       return () => {
-        tl.kill();
+        ScrollTrigger.getAll().forEach(trigger => trigger.kill());
       };
     }
   }, [isMobile]);
@@ -549,15 +555,6 @@ export default function HomePage(): React.JSX.Element {
       nextPhoto();
     }
     // Klik di tengah -> tidak melakukan apa-apa
-  };
-
-  // Fungsi untuk split teks menjadi karakter
-  const splitTextIntoChars = (text: string) => {
-    return text.split('').map((char, index) => (
-      <span key={index} className="char" style={{ display: 'inline-block' }}>
-        {char === ' ' ? '\u00A0' : char}
-      </span>
-    ));
   };
 
   return (
@@ -1487,124 +1484,104 @@ export default function HomePage(): React.JSX.Element {
               exit={{ opacity: 0 }}
               transition={{ duration: 0.5 }}
             >
-              {/* Container untuk split text dengan animasi scroll */}
+              {/* Container untuk teks yang muncul saat scroll */}
               <div 
                 ref={scrollSectionRef}
                 style={{
                   width: '100%',
-                  height: '100vh',
+                  minHeight: '100vh',
                   display: 'flex',
                   flexDirection: 'column',
                   justifyContent: 'center',
                   alignItems: 'center',
                   padding: isMobile ? '2rem 1rem' : '4rem 2rem',
                   marginBottom: isMobile ? '3rem' : '4rem',
-                  position: 'relative',
-                  overflow: 'hidden'
+                  position: 'relative'
                 }}
               >
-                <div style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  width: '100%',
-                  maxWidth: '1200px'
-                }}>
-                  {/* Teks baris pertama - stay thinking */}
-                  <div 
-                    ref={textLine1Ref}
-                    style={{
-                      color: 'white',
-                      fontSize: isMobile ? '2.5rem' : '5rem',
-                      fontWeight: '600',
-                      fontFamily: 'Helvetica, Arial, sans-serif',
-                      letterSpacing: '2px',
-                      lineHeight: 1.2,
-                      textTransform: 'uppercase',
-                      textAlign: 'center',
-                      marginBottom: isMobile ? '1rem' : '1.5rem',
-                      overflow: 'hidden',
-                      padding: '0.5rem 0'
-                    }}
-                  >
-                    {splitTextIntoChars("stay thinking")}
-                  </div>
-
-                  {/* Teks baris kedua - keep talk mind */}
-                  <div 
-                    ref={textLine2Ref}
-                    style={{
-                      color: 'white',
-                      fontSize: isMobile ? '2.5rem' : '5rem',
-                      fontWeight: '600',
-                      fontFamily: 'Helvetica, Arial, sans-serif',
-                      letterSpacing: '2px',
-                      lineHeight: 1.2,
-                      textTransform: 'uppercase',
-                      textAlign: 'center',
-                      overflow: 'hidden',
-                      padding: '0.5rem 0'
-                    }}
-                  >
-                    {splitTextIntoChars("keep talk mind")}
-                  </div>
-
-                  {/* Garis horizontal di bawah teks */}
-                  <motion.div
-                    initial={{ width: 0 }}
-                    animate={{ width: '100%' }}
-                    transition={{ duration: 1.5, delay: 0.8 }}
-                    style={{
-                      height: '1px',
-                      backgroundColor: 'rgba(255,255,255,0.3)',
-                      marginTop: isMobile ? '2rem' : '3rem',
-                      width: '100%'
-                    }}
-                  />
-
-                  {/* Instruksi scroll */}
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 0.7 }}
-                    transition={{ duration: 1, delay: 1.5 }}
-                    style={{
-                      position: 'absolute',
-                      bottom: '2rem',
-                      left: '50%',
-                      transform: 'translateX(-50%)',
-                      color: 'white',
-                      fontSize: isMobile ? '0.9rem' : '1.1rem',
-                      fontWeight: '300',
-                      fontFamily: 'Helvetica, Arial, sans-serif',
-                      letterSpacing: '1px',
-                      textTransform: 'uppercase',
+                <div 
+                  ref={textContainerRef}
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    width: '100%',
+                    height: '100vh',
+                    position: 'sticky',
+                    top: 0
+                  }}
+                >
+                  {scrollTexts.map((text, index) => (
+                    <div
+                      key={index}
+                      ref={(el) => {
+                        textRefs.current[index] = el;
+                      }}
+                      style={{
+                        color: 'white',
+                        fontSize: isMobile ? '2.5rem' : '4rem',
+                        fontWeight: '400',
+                        fontFamily: 'Helvetica, Arial, sans-serif',
+                        letterSpacing: '1px',
+                        lineHeight: 1.2,
+                        textAlign: 'center',
+                        marginBottom: isMobile ? '2rem' : '3rem',
+                        opacity: index === activeTextIndex ? 1 : 0.2,
+                        transition: 'opacity 0.3s ease',
+                        position: 'absolute',
+                        top: '50%',
+                        left: '50%',
+                        transform: 'translate(-50%, -50%)'
+                      }}
+                    >
+                      {text}
+                    </div>
+                  ))}
+                  
+                  {/* Indikator scroll */}
+                  <div style={{
+                    position: 'absolute',
+                    bottom: '2rem',
+                    left: '50%',
+                    transform: 'translateX(-50%)',
+                    color: 'rgba(255,255,255,0.5)',
+                    fontSize: isMobile ? '0.9rem' : '1.1rem',
+                    fontWeight: '300',
+                    fontFamily: 'Helvetica, Arial, sans-serif',
+                    letterSpacing: '1px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    flexDirection: 'column',
+                    gap: '0.5rem'
+                  }}>
+                    <div style={{
                       display: 'flex',
                       alignItems: 'center',
-                      gap: '0.5rem'
-                    }}
-                  >
-                    <motion.div
-                      animate={{ y: [0, 5, 0] }}
-                      transition={{ duration: 1.5, repeat: Infinity }}
-                      style={{
-                        fontSize: '1.2rem'
-                      }}
-                    >
-                      ↓
-                    </motion.div>
-                    Scroll to continue
-                    <motion.div
-                      animate={{ y: [0, 5, 0] }}
-                      transition={{ duration: 1.5, repeat: Infinity, delay: 0.2 }}
-                      style={{
-                        fontSize: '1.2rem'
-                      }}
-                    >
-                      ↓
-                    </motion.div>
-                  </motion.div>
+                      gap: '0.3rem'
+                    }}>
+                      <span>Scroll down</span>
+                      <motion.div
+                        animate={{ y: [0, 5, 0] }}
+                        transition={{ duration: 1.5, repeat: Infinity }}
+                      >
+                        ↓
+                      </motion.div>
+                    </div>
+                    <div style={{
+                      fontSize: isMobile ? '0.8rem' : '0.9rem',
+                      opacity: 0.7
+                    }}>
+                      {activeTextIndex + 1} / {scrollTexts.length}
+                    </div>
+                  </div>
                 </div>
+                
+                {/* Spacer untuk scroll */}
+                <div style={{
+                  height: 'calc(100vh * 5)',
+                  width: '100%'
+                }} />
               </div>
 
               {/* Card #0050B7 dengan 4 foto images/5.jpg - FOTO LEBIH LEBAR KE SAMPING */}
