@@ -55,12 +55,8 @@ export default function HomePage(): React.JSX.Element {
   // State untuk posisi gambar di halaman Index (semakin turun)
   const [imagePosition, setImagePosition] = useState(0);
   
-  // State untuk teks yang sedang aktif saat scroll
-  const [activeTextIndex, setActiveTextIndex] = useState(-1);
-  
   const headerRef = useRef<HTMLDivElement>(null);
   const topNavRef = useRef<HTMLDivElement>(null);
-  const scrollTextRef = useRef<HTMLDivElement>(null);
   const topicContainerRef = useRef<HTMLDivElement>(null);
   const progressAnimationRef = useRef<gsap.core.Tween | null>(null);
   const menuruButtonRef = useRef<HTMLDivElement>(null);
@@ -69,7 +65,6 @@ export default function HomePage(): React.JSX.Element {
   const userButtonRef = useRef<HTMLDivElement>(null);
   const userTextRef = useRef<HTMLSpanElement>(null);
   const leftCounterRef = useRef<HTMLSpanElement>(null);
-  const scrollSectionRef = useRef<HTMLDivElement>(null);
 
   // Animasi loading text
   const loadingTexts = [
@@ -91,15 +86,6 @@ export default function HomePage(): React.JSX.Element {
     { title: "Design", description: "Visual identity & UI/UX" },
     { title: "Development", description: "Frontend & Backend" },
     { title: "Features", description: "Functionality & Integration" }
-  ];
-
-  // Data untuk teks yang akan muncul di pojok kiri - URUTAN TETAP
-  const scrollTexts = [
-    "stay",
-    "thinking",
-    "keep",
-    "talk",
-    "mind"
   ];
 
   // Listen to auth state changes
@@ -201,48 +187,6 @@ export default function HomePage(): React.JSX.Element {
       setImagePosition(0);
     }
   }, [hoveredTopic]);
-
-  // Animasi teks di pojok kiri dengan efek opacity sesuai scroll
-  useEffect(() => {
-    // Hapus semua ScrollTrigger sebelumnya
-    ScrollTrigger.getAll().forEach(trigger => trigger.kill());
-
-    // Buat ScrollTrigger untuk setiap teks
-    scrollTexts.forEach((_, index) => {
-      // Hitung threshold untuk setiap teks (setiap 20% scroll)
-      const startThreshold = index * 20; // 0%, 20%, 40%, 60%, 80%
-      const endThreshold = startThreshold + 20; // 20%, 40%, 60%, 80%, 100%
-
-      ScrollTrigger.create({
-        trigger: document.documentElement,
-        start: `top top`,
-        end: "bottom bottom",
-        onUpdate: (self) => {
-          // Hitung progress scroll (0-1)
-          const scrollProgress = self.progress * 100;
-          
-          // Untuk scroll ke bawah
-          if (self.direction === 1) {
-            // Jika scrollProgress melewati threshold teks ini
-            if (scrollProgress >= startThreshold && scrollProgress < endThreshold) {
-              setActiveTextIndex(index);
-            }
-          } 
-          // Untuk scroll ke atas
-          else {
-            // Jika scrollProgress masih di atas threshold teks ini
-            if (scrollProgress >= startThreshold) {
-              setActiveTextIndex(index);
-            }
-          }
-        }
-      });
-    });
-
-    return () => {
-      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
-    };
-  }, []);
 
   useEffect(() => {
     // Cek apakah user sudah menyetujui cookies
@@ -986,7 +930,6 @@ export default function HomePage(): React.JSX.Element {
               gap: '0.3rem'
             }}>
               Docs
-              {/* PANAH LURUS SERONG KANAN BAWAH - SVG BARU */}
               <svg 
                 width={isMobile ? "12" : "14"} 
                 height={isMobile ? "12" : "14"} 
@@ -1056,7 +999,6 @@ export default function HomePage(): React.JSX.Element {
               gap: '0.3rem'
             }}>
               Chatbot
-              {/* PANAH LURUS SERONG KANAN BAWAH - SVG BARU */}
               <svg 
                 width={isMobile ? "12" : "14"} 
                 height={isMobile ? "12" : "14"} 
@@ -1128,7 +1070,6 @@ export default function HomePage(): React.JSX.Element {
               gap: '0.3rem'
             }}>
               Update
-              {/* PANAH LURUS SERONG KANAN BAWAH - SVG BARU */}
               <svg 
                 width={isMobile ? "12" : "14"} 
                 height={isMobile ? "12" : "14"} 
@@ -1199,7 +1140,6 @@ export default function HomePage(): React.JSX.Element {
               gap: '0.3rem'
             }}>
               Timeline
-              {/* PANAH LURUS SERONG KANAN BAWAH - SVG BARU */}
               <svg 
                 width={isMobile ? "12" : "14"} 
                 height={isMobile ? "12" : "14"} 
@@ -1228,7 +1168,7 @@ export default function HomePage(): React.JSX.Element {
         </div>
       </div>
 
-      {/* Header Section */}
+      {/* Header Section - DIPISAH DARI TEKS SIDE */}
       <div 
         ref={headerRef}
         style={{
@@ -1245,53 +1185,125 @@ export default function HomePage(): React.JSX.Element {
           opacity: 1
         }}
       >
-        {/* Teks "MENURU" dengan animasi loading hanya di bagian NURU */}
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.8, delay: 0.5 }}
-        >
+        {/* Left: "MENURU" dan "stay thinking keep talk mind" */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: isMobile ? '2rem' : '3rem'
+        }}>
+          {/* Teks "MENURU" */}
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.8, delay: 0.5 }}
+          >
+            <div style={{
+              fontSize: isMobile ? '1.5rem' : '2.5rem',
+              fontWeight: '300',
+              fontFamily: 'Helvetica, Arial, sans-serif',
+              margin: 0,
+              letterSpacing: '2px',
+              lineHeight: 1,
+              textTransform: 'uppercase',
+              color: 'white',
+              minHeight: isMobile ? '1.8rem' : '2.8rem',
+              display: 'flex',
+              alignItems: 'center'
+            }}>
+              ME
+              <AnimatePresence mode="wait">
+                {isLoading ? (
+                  <motion.span
+                    key={loadingText}
+                    initial={{ opacity: 0, y: 5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -5 }}
+                    transition={{ duration: 0.3 }}
+                    style={{
+                      display: 'inline-block'
+                    }}
+                  >
+                    {loadingText}
+                  </motion.span>
+                ) : (
+                  <motion.span
+                    key="nuru-final"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.5 }}
+                  >
+                    NURU
+                  </motion.span>
+                )}
+              </AnimatePresence>
+            </div>
+          </motion.div>
+
+          {/* Garis pemisah vertikal */}
           <div style={{
-            fontSize: isMobile ? '1.5rem' : '2.5rem',
-            fontWeight: '300',
-            fontFamily: 'Helvetica, Arial, sans-serif',
-            margin: 0,
-            letterSpacing: '2px',
-            lineHeight: 1,
-            textTransform: 'uppercase',
-            color: 'white',
-            minHeight: isMobile ? '1.8rem' : '2.8rem',
+            height: isMobile ? '20px' : '30px',
+            width: '1px',
+            backgroundColor: 'rgba(255,255,255,0.3)'
+          }} />
+
+          {/* Teks "stay thinking keep talk mind" - SEJAJAR DENGAN MENURU */}
+          <div style={{
             display: 'flex',
-            alignItems: 'center'
+            flexDirection: 'column',
+            gap: '2px'
           }}>
-            ME
-            <AnimatePresence mode="wait">
-              {isLoading ? (
-                <motion.span
-                  key={loadingText}
-                  initial={{ opacity: 0, y: 5 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -5 }}
-                  transition={{ duration: 0.3 }}
-                  style={{
-                    display: 'inline-block'
-                  }}
-                >
-                  {loadingText}
-                </motion.span>
-              ) : (
-                <motion.span
-                  key="nuru-final"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ duration: 0.5 }}
-                >
-                  NURU
-                </motion.span>
-              )}
-            </AnimatePresence>
+            <div style={{
+              color: 'white',
+              fontSize: isMobile ? '0.9rem' : '1.1rem',
+              fontWeight: '300',
+              fontFamily: 'Helvetica, Arial, sans-serif',
+              letterSpacing: '0.5px',
+              opacity: 0.9
+            }}>
+              stay
+            </div>
+            <div style={{
+              color: 'white',
+              fontSize: isMobile ? '0.9rem' : '1.1rem',
+              fontWeight: '300',
+              fontFamily: 'Helvetica, Arial, sans-serif',
+              letterSpacing: '0.5px',
+              opacity: 0.9
+            }}>
+              thinking
+            </div>
+            <div style={{
+              color: 'white',
+              fontSize: isMobile ? '0.9rem' : '1.1rem',
+              fontWeight: '300',
+              fontFamily: 'Helvetica, Arial, sans-serif',
+              letterSpacing: '0.5px',
+              opacity: 0.9
+            }}>
+              keep
+            </div>
+            <div style={{
+              color: 'white',
+              fontSize: isMobile ? '0.9rem' : '1.1rem',
+              fontWeight: '300',
+              fontFamily: 'Helvetica, Arial, sans-serif',
+              letterSpacing: '0.5px',
+              opacity: 0.9
+            }}>
+              talk
+            </div>
+            <div style={{
+              color: 'white',
+              fontSize: isMobile ? '0.9rem' : '1.1rem',
+              fontWeight: '300',
+              fontFamily: 'Helvetica, Arial, sans-serif',
+              letterSpacing: '0.5px',
+              opacity: 0.9
+            }}>
+              mind
+            </div>
           </div>
-        </motion.div>
+        </div>
 
         {/* Right Side Buttons */}
         <div style={{
@@ -1426,48 +1438,10 @@ export default function HomePage(): React.JSX.Element {
         </div>
       </div>
 
-      {/* Container untuk teks "stay thinking keep talk mind" di pojok kanan bawah */}
-      <div 
-        style={{
-          position: 'fixed',
-          bottom: isMobile ? '2rem' : '3rem',
-          right: isMobile ? '1.5rem' : '2.5rem',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'flex-end',
-          zIndex: 99,
-          gap: '0.5rem'
-        }}
-      >
-        {scrollTexts.map((text, index) => (
-          <div
-            key={index}
-            style={{
-              color: '#000000', // WARNA HITAM
-              fontSize: isMobile ? '1.1rem' : '1.4rem',
-              fontWeight: '400',
-              fontFamily: 'Helvetica, Arial, sans-serif', // FONT SAMA
-              textAlign: 'right',
-              opacity: 1,
-              transition: 'all 0.3s ease',
-              lineHeight: 1.2,
-              whiteSpace: 'nowrap',
-              backgroundColor: 'rgba(255,255,255,0.9)',
-              padding: isMobile ? '0.3rem 0.8rem' : '0.4rem 1rem',
-              borderRadius: '4px',
-              backdropFilter: 'blur(5px)',
-              border: '1px solid rgba(0,0,0,0.1)'
-            }}
-          >
-            {text}
-          </div>
-        ))}
-      </div>
-
-      {/* Main Content Container */}
+      {/* Main Content Container - JARAK DARI HEADER DIPERBESAR */}
       <div style={{
         width: '100%',
-        paddingTop: isMobile ? '8rem' : '12rem',
+        paddingTop: isMobile ? '12rem' : '15rem', // JARAK DARI HEADER DIPERBESAR
         boxSizing: 'border-box',
         zIndex: 10,
         position: 'relative'
@@ -1482,7 +1456,7 @@ export default function HomePage(): React.JSX.Element {
               exit={{ opacity: 0 }}
               transition={{ duration: 0.5 }}
             >
-              {/* Card #0050B7 dengan 4 foto images/5.jpg - FOTO LEBIH LEBAR KE SAMPING */}
+              {/* Card #0050B7 dengan 4 foto images/5.jpg - JARAK DARI JUDUL DIPERBESAR */}
               <div
                 style={{
                   width: 'calc(100% - 4rem)',
@@ -1491,7 +1465,7 @@ export default function HomePage(): React.JSX.Element {
                   backgroundColor: '#0050B7',
                   borderRadius: '25px',
                   height: isMobile ? '500px' : '700px',
-                  marginTop: isMobile ? '2rem' : '3rem',
+                  marginTop: isMobile ? '3rem' : '4rem', // JARAK DARI HEADER DIPERBESAR
                   boxShadow: '0 20px 50px rgba(0,0,0,0.3)',
                   position: 'relative',
                   overflow: 'hidden',
