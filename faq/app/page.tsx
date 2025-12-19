@@ -1030,12 +1030,13 @@ export default function HomePage(): React.JSX.Element {
               backgroundColor: 'black',
               zIndex: 9997,
               display: 'flex',
-              flexDirection: 'column'
+              flexDirection: 'column',
+              overflowY: 'auto'
             }}
           >
             {/* Header sederhana dengan tombol close */}
             <div style={{
-              position: 'fixed',
+              position: 'sticky',
               top: 0,
               left: 0,
               width: '100%',
@@ -1062,26 +1063,24 @@ export default function HomePage(): React.JSX.Element {
                 <span style={{ opacity: 0.6 }}>{totalPhotos}</span>
               </div>
 
-              {/* Tombol close di kanan */}
+              {/* Tombol close (×) biasa */}
               <motion.button
                 onClick={handleClosePhotoFullPage}
                 style={{
-                  width: isMobile ? '40px' : '50px',
-                  height: isMobile ? '40px' : '50px',
-                  backgroundColor: 'rgba(255,255,255,0.1)',
-                  border: '1px solid rgba(255,255,255,0.2)',
-                  borderRadius: '50%',
+                  backgroundColor: 'transparent',
+                  border: 'none',
                   color: 'white',
-                  fontSize: isMobile ? '1.5rem' : '2rem',
+                  fontSize: isMobile ? '1.8rem' : '2.2rem',
                   cursor: 'pointer',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  fontFamily: 'Arial, sans-serif'
+                  fontFamily: 'Arial, sans-serif',
+                  padding: '0.5rem 1rem',
+                  borderRadius: '4px'
                 }}
                 whileHover={{ 
-                  backgroundColor: 'rgba(255,255,255,0.2)',
-                  scale: 1.1
+                  backgroundColor: 'rgba(255,255,255,0.1)'
                 }}
                 whileTap={{ scale: 0.95 }}
               >
@@ -1089,31 +1088,28 @@ export default function HomePage(): React.JSX.Element {
               </motion.button>
             </div>
 
-            {/* Container utama: foto di atas, komentar di bawah (scrollable) */}
+            {/* Container utama: foto di atas, komentar di bawah */}
             <div style={{
               display: 'flex',
               flexDirection: 'column',
               width: '100%',
-              height: '100%',
-              paddingTop: isMobile ? '4rem' : '5rem'
+              flex: 1
             }}>
-              {/* Foto slider (sama seperti di halaman utama) */}
+              {/* Foto slider (SAMA PERSIS dengan halaman utama) */}
               <div style={{
-                flex: isMobile ? '0 0 60vh' : '0 0 70vh',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 padding: isMobile ? '1rem' : '2rem',
-                position: 'relative'
+                paddingTop: '2rem',
+                paddingBottom: '2rem'
               }}>
                 <div style={{
                   width: '100%',
                   maxWidth: '800px',
-                  height: '100%',
                   display: 'flex',
                   alignItems: 'center',
-                  justifyContent: 'center',
-                  position: 'relative'
+                  justifyContent: 'center'
                 }}>
                   <AnimatePresence mode="wait">
                     <motion.div
@@ -1124,12 +1120,27 @@ export default function HomePage(): React.JSX.Element {
                       transition={{ duration: 0.3 }}
                       style={{
                         width: '100%',
-                        height: '100%',
+                        maxWidth: '600px',
+                        height: isMobile ? '400px' : '600px',
                         position: 'relative',
                         borderRadius: '15px',
                         overflow: 'hidden',
                         boxShadow: '0 8px 25px rgba(0,0,0,0.4)',
-                        border: '2px solid rgba(255,255,255,0.15)'
+                        border: '2px solid rgba(255,255,255,0.15)',
+                        cursor: 'pointer'
+                      }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        // Klik kiri untuk prev, klik kanan untuk next
+                        const rect = e.currentTarget.getBoundingClientRect();
+                        const clickX = e.clientX - rect.left;
+                        const width = rect.width;
+                        
+                        if (clickX < width / 2) {
+                          prevPhoto();
+                        } else {
+                          nextPhoto();
+                        }
                       }}
                     >
                       <img 
@@ -1152,72 +1163,6 @@ export default function HomePage(): React.JSX.Element {
                       />
                     </motion.div>
                   </AnimatePresence>
-
-                  {/* Tombol navigasi kiri */}
-                  <motion.button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      prevPhoto();
-                    }}
-                    style={{
-                      position: 'absolute',
-                      left: isMobile ? '10px' : '20px',
-                      top: '50%',
-                      transform: 'translateY(-50%)',
-                      width: isMobile ? '44px' : '50px',
-                      height: isMobile ? '44px' : '50px',
-                      backgroundColor: 'rgba(0,0,0,0.7)',
-                      borderRadius: '50%',
-                      border: '1px solid rgba(255,255,255,0.3)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      cursor: 'pointer',
-                      zIndex: 10
-                    }}
-                    whileHover={{ 
-                      backgroundColor: 'rgba(0,0,0,0.9)',
-                      scale: 1.1
-                    }}
-                    whileTap={{ scale: 0.9 }}
-                  >
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
-                      <path d="M15 18l-6-6 6-6" />
-                    </svg>
-                  </motion.button>
-
-                  {/* Tombol navigasi kanan */}
-                  <motion.button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      nextPhoto();
-                    }}
-                    style={{
-                      position: 'absolute',
-                      right: isMobile ? '10px' : '20px',
-                      top: '50%',
-                      transform: 'translateY(-50%)',
-                      width: isMobile ? '44px' : '50px',
-                      height: isMobile ? '44px' : '50px',
-                      backgroundColor: 'rgba(0,0,0,0.7)',
-                      borderRadius: '50%',
-                      border: '1px solid rgba(255,255,255,0.3)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      cursor: 'pointer',
-                      zIndex: 10
-                    }}
-                    whileHover={{ 
-                      backgroundColor: 'rgba(0,0,0,0.9)',
-                      scale: 1.1
-                    }}
-                    whileTap={{ scale: 0.9 }}
-                  >
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
-                      <path d="M9 18l6-6-6-6" />
-                    </svg>
-                  </motion.button>
                 </div>
               </div>
 
@@ -1225,7 +1170,7 @@ export default function HomePage(): React.JSX.Element {
               <div style={{
                 width: '100%',
                 maxWidth: '600px',
-                margin: '1rem auto',
+                margin: '0 auto 2rem auto',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '0.5rem',
@@ -1245,262 +1190,261 @@ export default function HomePage(): React.JSX.Element {
                 ))}
               </div>
 
-              {/* Area komentar di bawah foto (scrollable) */}
+              {/* Waktu update */}
+              <div style={{
+                width: '100%',
+                maxWidth: '600px',
+                margin: '0 auto 1.5rem auto',
+                padding: '0 1rem',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                color: 'rgba(255,255,255,0.7)',
+                fontSize: '0.9rem'
+              }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <circle cx="12" cy="12" r="10"/>
+                  <polyline points="12 6 12 12 16 14"/>
+                </svg>
+                {photoTimeAgo[currentPhotoIndex]}
+              </div>
+
+              {/* Area komentar di bawah foto (bisa di-scroll) */}
               <div style={{
                 flex: 1,
-                overflowY: 'auto',
-                backgroundColor: 'black',
-                borderTop: '1px solid rgba(255,255,255,0.1)',
                 padding: isMobile ? '1rem' : '2rem',
-                paddingBottom: isMobile ? '4rem' : '5rem'
+                paddingTop: '0',
+                maxWidth: '800px',
+                margin: '0 auto',
+                width: '100%'
               }}>
+                {/* Input komentar */}
                 <div style={{
-                  maxWidth: '800px',
-                  margin: '0 auto'
+                  backgroundColor: 'rgba(255,255,255,0.05)',
+                  borderRadius: '12px',
+                  padding: '1.5rem',
+                  marginBottom: '2rem',
+                  border: '1px solid rgba(255,255,255,0.1)'
                 }}>
-                  {/* Waktu update */}
                   <div style={{
-                    marginBottom: '1.5rem',
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '0.5rem',
-                    color: 'rgba(255,255,255,0.7)',
-                    fontSize: '0.9rem'
-                  }}>
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <circle cx="12" cy="12" r="10"/>
-                      <polyline points="12 6 12 12 16 14"/>
-                    </svg>
-                    {photoTimeAgo[currentPhotoIndex]}
-                  </div>
-
-                  {/* Input komentar */}
-                  <div style={{
-                    backgroundColor: 'rgba(255,255,255,0.05)',
-                    borderRadius: '12px',
-                    padding: '1.5rem',
-                    marginBottom: '2rem',
-                    border: '1px solid rgba(255,255,255,0.1)'
+                    gap: '0.8rem',
+                    marginBottom: '1rem'
                   }}>
                     <div style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '0.8rem',
-                      marginBottom: '1rem'
+                      flex: 1,
+                      position: 'relative'
                     }}>
-                      <div style={{
-                        flex: 1,
-                        position: 'relative'
-                      }}>
-                        <input
-                          ref={messageInputRef}
-                          type="text"
-                          value={message}
-                          onChange={(e) => setMessage(e.target.value)}
-                          onKeyPress={handleKeyPress}
-                          placeholder="Tulis komentar..."
-                          style={{
-                            width: '100%',
-                            padding: '0.8rem 1rem',
-                            paddingRight: '3rem',
-                            backgroundColor: 'rgba(255,255,255,0.05)',
-                            border: '1px solid rgba(255,255,255,0.1)',
-                            borderRadius: '20px',
-                            color: 'white',
-                            fontSize: '0.9rem',
-                            fontFamily: 'Helvetica, Arial, sans-serif',
-                            outline: 'none',
-                            transition: 'all 0.3s ease'
-                          }}
-                        />
-                        <span style={{
-                          position: 'absolute',
-                          right: '1rem',
-                          top: '50%',
-                          transform: 'translateY(-50%)',
-                          color: 'rgba(255,255,255,0.3)',
-                          fontSize: '0.75rem'
-                        }}>
-                          Enter
-                        </span>
-                      </div>
-                      
-                      <motion.button
-                        onClick={handleSendMessage}
-                        disabled={message.trim() === ""}
+                      <input
+                        ref={messageInputRef}
+                        type="text"
+                        value={message}
+                        onChange={(e) => setMessage(e.target.value)}
+                        onKeyPress={handleKeyPress}
+                        placeholder="Tulis komentar..."
                         style={{
-                          width: '40px',
-                          height: '40px',
-                          backgroundColor: message.trim() === "" ? 'rgba(0, 80, 183, 0.5)' : '#0050B7',
-                          border: 'none',
-                          borderRadius: '50%',
-                          cursor: message.trim() === "" ? 'not-allowed' : 'pointer',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          transition: 'all 0.3s ease',
-                          flexShrink: 0
+                          width: '100%',
+                          padding: '0.8rem 1rem',
+                          paddingRight: '3rem',
+                          backgroundColor: 'rgba(255,255,255,0.05)',
+                          border: '1px solid rgba(255,255,255,0.1)',
+                          borderRadius: '20px',
+                          color: 'white',
+                          fontSize: '0.9rem',
+                          fontFamily: 'Helvetica, Arial, sans-serif',
+                          outline: 'none',
+                          transition: 'all 0.3s ease'
                         }}
-                        whileHover={message.trim() !== "" ? { 
-                          scale: 1.1,
-                          backgroundColor: '#0066CC'
-                        } : {}}
-                        whileTap={message.trim() !== "" ? { scale: 0.95 } : {}}
-                      >
-                        <svg 
-                          width="18" 
-                          height="18" 
-                          viewBox="0 0 24 24" 
-                          fill="none" 
-                          stroke="white" 
-                          strokeWidth="2"
-                        >
-                          <line x1="22" y1="2" x2="11" y2="13"/>
-                          <polygon points="22 2 15 22 11 13 2 9 22 2"/>
-                        </svg>
-                      </motion.button>
-                    </div>
-                    
-                    <div style={{
-                      textAlign: 'center'
-                    }}>
+                      />
                       <span style={{
-                        color: 'rgba(255,255,255,0.5)',
+                        position: 'absolute',
+                        right: '1rem',
+                        top: '50%',
+                        transform: 'translateY(-50%)',
+                        color: 'rgba(255,255,255,0.3)',
                         fontSize: '0.75rem'
                       }}>
-                        {user ? `Login sebagai: ${userDisplayName}` : 'Komentar sebagai: Anonymous'}
+                        Enter
                       </span>
                     </div>
+                    
+                    <motion.button
+                      onClick={handleSendMessage}
+                      disabled={message.trim() === ""}
+                      style={{
+                        width: '40px',
+                        height: '40px',
+                        backgroundColor: message.trim() === "" ? 'rgba(0, 80, 183, 0.5)' : '#0050B7',
+                        border: 'none',
+                        borderRadius: '50%',
+                        cursor: message.trim() === "" ? 'not-allowed' : 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        transition: 'all 0.3s ease',
+                        flexShrink: 0
+                      }}
+                      whileHover={message.trim() !== "" ? { 
+                        scale: 1.1,
+                        backgroundColor: '#0066CC'
+                      } : {}}
+                      whileTap={message.trim() !== "" ? { scale: 0.95 } : {}}
+                    >
+                      <svg 
+                        width="18" 
+                        height="18" 
+                        viewBox="0 0 24 24" 
+                        fill="none" 
+                        stroke="white" 
+                        strokeWidth="2"
+                      >
+                        <line x1="22" y1="2" x2="11" y2="13"/>
+                        <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                      </svg>
+                    </motion.button>
                   </div>
-
-                  {/* Header komentar */}
+                  
                   <div style={{
-                    marginBottom: '1.5rem',
-                    color: 'white',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between'
+                    textAlign: 'center'
                   }}>
-                    <h3 style={{
-                      fontSize: isMobile ? '1.2rem' : '1.4rem',
-                      fontWeight: '600',
-                      margin: 0,
-                      fontFamily: 'Helvetica, Arial, sans-serif'
+                    <span style={{
+                      color: 'rgba(255,255,255,0.5)',
+                      fontSize: '0.75rem'
                     }}>
-                      Komentar ({currentPhotoComments.length})
-                    </h3>
+                      {user ? `Login sebagai: ${userDisplayName}` : 'Komentar sebagai: Anonymous'}
+                    </span>
                   </div>
+                </div>
 
-                  {/* Daftar komentar */}
-                  <div style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '1rem'
+                {/* Header komentar */}
+                <div style={{
+                  marginBottom: '1.5rem',
+                  color: 'white',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between'
+                }}>
+                  <h3 style={{
+                    fontSize: isMobile ? '1.2rem' : '1.4rem',
+                    fontWeight: '600',
+                    margin: 0,
+                    fontFamily: 'Helvetica, Arial, sans-serif'
                   }}>
-                    {isLoadingComments ? (
-                      <div style={{
-                        color: 'rgba(255,255,255,0.5)',
-                        textAlign: 'center',
-                        padding: '2rem',
-                        fontSize: '0.9rem'
-                      }}>
-                        Memuat komentar...
+                    Komentar ({currentPhotoComments.length})
+                  </h3>
+                </div>
+
+                {/* Daftar komentar */}
+                <div style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '1rem',
+                  paddingBottom: '3rem'
+                }}>
+                  {isLoadingComments ? (
+                    <div style={{
+                      color: 'rgba(255,255,255,0.5)',
+                      textAlign: 'center',
+                      padding: '2rem',
+                      fontSize: '0.9rem'
+                    }}>
+                      Memuat komentar...
+                    </div>
+                  ) : currentPhotoComments.length === 0 ? (
+                    <div style={{
+                      color: 'rgba(255,255,255,0.5)',
+                      textAlign: 'center',
+                      padding: '2rem',
+                      fontSize: '0.9rem'
+                    }}>
+                      Belum ada komentar untuk foto ini.
+                      <div style={{ marginTop: '0.5rem', fontSize: '0.8rem' }}>
+                        Jadilah yang pertama berkomentar!
                       </div>
-                    ) : currentPhotoComments.length === 0 ? (
-                      <div style={{
-                        color: 'rgba(255,255,255,0.5)',
-                        textAlign: 'center',
-                        padding: '2rem',
-                        fontSize: '0.9rem'
-                      }}>
-                        Belum ada komentar untuk foto ini.
-                        <div style={{ marginTop: '0.5rem', fontSize: '0.8rem' }}>
-                          Jadilah yang pertama berkomentar!
-                        </div>
-                      </div>
-                    ) : (
-                      currentPhotoComments.map((comment, index) => (
-                        <motion.div
-                          key={comment.id || index}
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: index * 0.05 }}
-                          style={{
-                            backgroundColor: 'rgba(255,255,255,0.05)',
-                            padding: '1rem',
-                            borderRadius: '8px',
-                            borderLeft: '3px solid #0050B7'
-                          }}
-                        >
+                    </div>
+                  ) : (
+                    currentPhotoComments.map((comment, index) => (
+                      <motion.div
+                        key={comment.id || index}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: index * 0.05 }}
+                        style={{
+                          backgroundColor: 'rgba(255,255,255,0.05)',
+                          padding: '1rem',
+                          borderRadius: '8px',
+                          borderLeft: '3px solid #0050B7'
+                        }}
+                      >
+                        <div style={{
+                          display: 'flex',
+                          alignItems: 'flex-start',
+                          gap: '0.8rem',
+                          marginBottom: '0.5rem'
+                        }}>
                           <div style={{
+                            width: '32px',
+                            height: '32px',
+                            minWidth: '32px',
+                            borderRadius: '50%',
+                            backgroundColor: user && comment.user === userDisplayName ? '#0050B7' : '#333',
                             display: 'flex',
-                            alignItems: 'flex-start',
-                            gap: '0.8rem',
-                            marginBottom: '0.5rem'
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontSize: '0.9rem',
+                            fontWeight: '600',
+                            color: 'white'
                           }}>
+                            {comment.userAvatar || comment.user.charAt(0).toUpperCase()}
+                          </div>
+                          <div style={{ flex: 1 }}>
                             <div style={{
-                              width: '32px',
-                              height: '32px',
-                              minWidth: '32px',
-                              borderRadius: '50%',
-                              backgroundColor: user && comment.user === userDisplayName ? '#0050B7' : '#333',
                               display: 'flex',
                               alignItems: 'center',
-                              justifyContent: 'center',
-                              fontSize: '0.9rem',
-                              fontWeight: '600',
-                              color: 'white'
+                              justifyContent: 'space-between',
+                              marginBottom: '0.3rem'
                             }}>
-                              {comment.userAvatar || comment.user.charAt(0).toUpperCase()}
-                            </div>
-                            <div style={{ flex: 1 }}>
-                              <div style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'space-between',
-                                marginBottom: '0.3rem'
-                              }}>
-                                <span style={{
-                                  color: 'rgba(255,255,255,0.9)',
-                                  fontSize: '0.9rem',
-                                  fontWeight: '600'
-                                }}>
-                                  {comment.user}
-                                  {user && comment.user === userDisplayName && (
-                                    <span style={{
-                                      marginLeft: '0.5rem',
-                                      fontSize: '0.7rem',
-                                      backgroundColor: '#0050B7',
-                                      color: 'white',
-                                      padding: '0.1rem 0.4rem',
-                                      borderRadius: '4px'
-                                    }}>
-                                      Anda
-                                    </span>
-                                  )}
-                                </span>
-                                <span style={{
-                                  color: 'rgba(255,255,255,0.5)',
-                                  fontSize: '0.75rem',
-                                  whiteSpace: 'nowrap'
-                                }}>
-                                  {calculateTimeAgo(comment.timestamp)}
-                                </span>
-                              </div>
-                              <p style={{
-                                color: 'white',
-                                margin: 0,
+                              <span style={{
+                                color: 'rgba(255,255,255,0.9)',
                                 fontSize: '0.9rem',
-                                lineHeight: 1.4
+                                fontWeight: '600'
                               }}>
-                                {comment.text}
-                              </p>
+                                {comment.user}
+                                {user && comment.user === userDisplayName && (
+                                  <span style={{
+                                    marginLeft: '0.5rem',
+                                    fontSize: '0.7rem',
+                                    backgroundColor: '#0050B7',
+                                    color: 'white',
+                                    padding: '0.1rem 0.4rem',
+                                    borderRadius: '4px'
+                                  }}>
+                                    Anda
+                                  </span>
+                                )}
+                              </span>
+                              <span style={{
+                                color: 'rgba(255,255,255,0.5)',
+                                fontSize: '0.75rem',
+                                whiteSpace: 'nowrap'
+                              }}>
+                                {calculateTimeAgo(comment.timestamp)}
+                              </span>
                             </div>
+                            <p style={{
+                              color: 'white',
+                              margin: 0,
+                              fontSize: '0.9rem',
+                              lineHeight: 1.4
+                            }}>
+                              {comment.text}
+                            </p>
                           </div>
-                        </motion.div>
-                      ))
-                    )}
-                  </div>
+                        </div>
+                      </motion.div>
+                    ))
+                  )}
                 </div>
               </div>
             </div>
