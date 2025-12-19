@@ -191,14 +191,17 @@ export default function HomePage(): React.JSX.Element {
 
   // Load comments from Firebase
   useEffect(() => {
+    console.log("Memulai loading komentar...");
     setIsLoadingComments(true);
     
     const commentsRef = collection(db, 'photoComments');
     const q = query(commentsRef, orderBy('timestamp', 'desc'));
     
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      console.log("Snapshot diterima, jumlah dokumen:", querySnapshot.size);
       const commentsData: Comment[] = [];
       querySnapshot.forEach((doc) => {
+        console.log("Komentar:", doc.id, doc.data());
         commentsData.push({
           id: doc.id,
           ...doc.data()
@@ -208,6 +211,7 @@ export default function HomePage(): React.JSX.Element {
       setIsLoadingComments(false);
     }, (error) => {
       console.error("Error loading comments:", error);
+      console.error("Error code:", error.code);
       setIsLoadingComments(false);
     });
 
@@ -540,13 +544,17 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // Handler untuk mengirim komentar ke Firebase
+  // Handler untuk mengirim komentar ke Firebase - DIPERBAIKI
   const handleSendMessage = async () => {
-    if (message.trim() === "") return;
+    if (message.trim() === "") {
+      alert("Komentar tidak boleh kosong");
+      return;
+    }
     
     try {
       const userName = user ? userDisplayName : "Anonymous";
       const userId = user ? user.uid : null;
+      const userAvatar = userName.charAt(0).toUpperCase();
       
       const newComment = {
         photoIndex: currentPhotoIndex,
@@ -554,20 +562,42 @@ export default function HomePage(): React.JSX.Element {
         user: userName,
         userId: userId,
         timestamp: serverTimestamp(),
-        userAvatar: userName.charAt(0).toUpperCase()
+        userAvatar: userAvatar
       };
       
-      await addDoc(collection(db, 'photoComments'), newComment);
+      console.log("Mengirim komentar:", newComment);
       
+      // Pastikan db sudah terinisialisasi
+      if (!db) {
+        throw new Error("Database tidak terinisialisasi");
+      }
+      
+      // Simpan ke Firestore
+      const docRef = await addDoc(collection(db, 'photoComments'), newComment);
+      console.log("Komentar berhasil dikirim dengan ID:", docRef.id);
+      
+      // Reset form
       setMessage("");
+      
       // Auto-focus kembali ke input
       if (messageInputRef.current) {
         messageInputRef.current.focus();
       }
       
-    } catch (error) {
-      console.error("Error adding comment:", error);
-      alert("Gagal mengirim komentar. Silakan coba lagi.");
+    } catch (error: any) {
+      console.error("Error detail:", error);
+      console.error("Error code:", error.code);
+      console.error("Error message:", error.message);
+      
+      let errorMessage = "Gagal mengirim komentar. Silakan coba lagi.";
+      
+      if (error.code === 'permission-denied') {
+        errorMessage = "Anda tidak memiliki izin untuk mengirim komentar. Periksa Firebase Rules.";
+      } else if (error.code === 'unauthenticated') {
+        errorMessage = "Silakan login terlebih dahulu untuk mengirim komentar.";
+      }
+      
+      alert(errorMessage);
     }
   };
 
@@ -1034,7 +1064,7 @@ export default function HomePage(): React.JSX.Element {
               overflowY: 'auto'
             }}
           >
-            {/* Header sederhana dengan tombol close */}
+            {/* Header sederhana dengan tombol close di KIRI */}
             <div style={{
               position: 'sticky',
               top: 0,
@@ -1042,28 +1072,13 @@ export default function HomePage(): React.JSX.Element {
               width: '100%',
               padding: isMobile ? '1rem' : '1.5rem',
               display: 'flex',
-              justifyContent: 'space-between',
+              justifyContent: 'space-between', // Tetap space-between
               alignItems: 'center',
               zIndex: 100,
               backgroundColor: 'black',
               borderBottom: '1px solid rgba(255,255,255,0.1)'
             }}>
-              {/* Counter di kiri */}
-              <div style={{
-                color: 'white',
-                fontSize: isMobile ? '1.5rem' : '2rem',
-                fontWeight: '600',
-                display: 'flex',
-                alignItems: 'baseline',
-                gap: '0.3rem',
-                fontFamily: 'Helvetica, Arial, sans-serif'
-              }}>
-                <span>{String(currentPhotoIndex + 1).padStart(2, '0')}</span>
-                <span style={{ opacity: 0.6, fontSize: '0.9em' }}>/</span>
-                <span style={{ opacity: 0.6 }}>{totalPhotos}</span>
-              </div>
-
-              {/* Tombol close (×) biasa */}
+              {/* Tombol close (×) di kiri */}
               <motion.button
                 onClick={handleClosePhotoFullPage}
                 style={{
@@ -1077,7 +1092,8 @@ export default function HomePage(): React.JSX.Element {
                   justifyContent: 'center',
                   fontFamily: 'Arial, sans-serif',
                   padding: '0.5rem 1rem',
-                  borderRadius: '4px'
+                  borderRadius: '4px',
+                  order: 1 // Di kiri
                 }}
                 whileHover={{ 
                   backgroundColor: 'rgba(255,255,255,0.1)'
@@ -1086,6 +1102,22 @@ export default function HomePage(): React.JSX.Element {
               >
                 ×
               </motion.button>
+
+              {/* Counter di kanan */}
+              <div style={{
+                color: 'white',
+                fontSize: isMobile ? '1.5rem' : '2rem',
+                fontWeight: '600',
+                display: 'flex',
+                alignItems: 'baseline',
+                gap: '0.3rem',
+                fontFamily: 'Helvetica, Arial, sans-serif',
+                order: 2 // Di kanan
+              }}>
+                <span>{String(currentPhotoIndex + 1).padStart(2, '0')}</span>
+                <span style={{ opacity: 0.6, fontSize: '0.9em' }}>/</span>
+                <span style={{ opacity: 0.6 }}>{totalPhotos}</span>
+              </div>
             </div>
 
             {/* Container utama: foto di atas, komentar di bawah */}
@@ -1095,14 +1127,14 @@ export default function HomePage(): React.JSX.Element {
               width: '100%',
               flex: 1
             }}>
-              {/* Foto slider (SAMA PERSIS dengan halaman utama) */}
+              {/* Foto slider - LEBIH PANJANG KE BAWAH */}
               <div style={{
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 padding: isMobile ? '1rem' : '2rem',
-                paddingTop: '2rem',
-                paddingBottom: '2rem'
+                paddingTop: '0',
+                paddingBottom: '1rem'
               }}>
                 <div style={{
                   width: '100%',
@@ -1121,7 +1153,7 @@ export default function HomePage(): React.JSX.Element {
                       style={{
                         width: '100%',
                         maxWidth: '600px',
-                        height: isMobile ? '400px' : '600px',
+                        height: isMobile ? '70vh' : '80vh', // LEBIH PANJANG
                         position: 'relative',
                         borderRadius: '15px',
                         overflow: 'hidden',
