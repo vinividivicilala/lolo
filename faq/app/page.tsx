@@ -664,43 +664,6 @@ export default function HomePage(): React.JSX.Element {
       MozOsxFontSmoothing: 'grayscale'
     }}>
 
-      {/* Banner Sederhana di Atas Judul Website */}
-      <div style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        width: '100%',
-        backgroundColor: 'rgba(0, 80, 183, 0.9)',
-        color: 'white',
-        zIndex: 1000,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '0.5rem 1rem',
-        fontSize: '0.9rem',
-        fontWeight: '500',
-        fontFamily: 'Helvetica, Arial, sans-serif',
-        borderBottom: '1px solid rgba(255,255,255,0.1)'
-      }}>
-        <svg 
-          width="16" 
-          height="16" 
-          viewBox="0 0 24 24" 
-          fill="none" 
-          stroke="currentColor" 
-          strokeWidth="2"
-          style={{ marginRight: '0.5rem' }}
-        >
-          <path d="M18 8a3 3 0 0 1 0 6" />
-          <path d="M10 8v11a1 1 0 0 0 1 1h1a1 1 0 0 0 1-1v-5" />
-          <path d="M12 8h0" />
-          <path d="M7 15a6.47 6.47 0 0 1 0-12" />
-          <path d="M12 8h4l-4-8-4 8h4z" />
-          <path d="M7 15a6.472 6.472 0 0 0 5 0 6.47 6.47 0 0 0 5 0" />
-        </svg>
-        Selamat Tahun Baru 2026
-      </div>
-
       {/* Halaman Full Page MENURU */}
       <AnimatePresence>
         {showMenuruFullPage && (
@@ -1520,6 +1483,37 @@ export default function HomePage(): React.JSX.Element {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Pengumuman Tahun Baru - SIMPLE */}
+      <div style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        width: '100%',
+        backgroundColor: 'transparent',
+        color: 'white',
+        zIndex: 999,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '0.5rem 1rem',
+        fontSize: '0.85rem',
+        fontWeight: '400',
+        fontFamily: 'Helvetica, Arial, sans-serif'
+      }}>
+        <svg 
+          width="16" 
+          height="16" 
+          viewBox="0 0 24 24" 
+          fill="none" 
+          stroke="currentColor" 
+          strokeWidth="2"
+          style={{ marginRight: '0.5rem' }}
+        >
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+        </svg>
+        Selamat Tahun Baru 2026
+      </div>
 
       {/* Top Navigation Bar */}
       <div 
