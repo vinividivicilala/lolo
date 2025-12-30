@@ -72,6 +72,7 @@ interface UserStats {
   totalLogins: number;
   lastLogin: Timestamp | Date;
   loginCount: number;
+  userName: string;
 }
 
 export default function HomePage(): React.JSX.Element {
@@ -97,6 +98,7 @@ export default function HomePage(): React.JSX.Element {
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [userStats, setUserStats] = useState<UserStats | null>(null);
   const [totalUsers, setTotalUsers] = useState(0);
+  const [totalLoggedInUsers, setTotalLoggedInUsers] = useState(0);
   
   // State untuk counter foto - angka kiri saja yang berubah
   const [leftCounter, setLeftCounter] = useState("01");
@@ -212,6 +214,22 @@ export default function HomePage(): React.JSX.Element {
           userName: userName,
           updatedAt: serverTimestamp()
         });
+        
+        // Update total logins count
+        const totalLoginsRef = doc(db, 'appStats', 'totalLogins');
+        const totalLoginsDoc = await getDoc(totalLoginsRef);
+        
+        if (totalLoginsDoc.exists()) {
+          await updateDoc(totalLoginsRef, {
+            count: increment(1),
+            updatedAt: serverTimestamp()
+          });
+        } else {
+          await setDoc(totalLoginsRef, {
+            count: 1,
+            updatedAt: serverTimestamp()
+          });
+        }
       } else {
         // Create new user stats
         await setDoc(userStatsRef, {
@@ -223,18 +241,34 @@ export default function HomePage(): React.JSX.Element {
           createdAt: serverTimestamp(),
           updatedAt: serverTimestamp()
         });
+
+        // Update total users count
+        const totalUsersRef = doc(db, 'appStats', 'totalUsers');
+        const totalUsersDoc = await getDoc(totalUsersRef);
+        
+        if (totalUsersDoc.exists()) {
+          await updateDoc(totalUsersRef, {
+            count: increment(1),
+            updatedAt: serverTimestamp()
+          });
+        } else {
+          await setDoc(totalUsersRef, {
+            count: 1,
+            updatedAt: serverTimestamp()
+          });
+        }
+        
+        // Initialize total logins
+        const totalLoginsRef = doc(db, 'appStats', 'totalLogins');
+        const totalLoginsDoc = await getDoc(totalLoginsRef);
+        if (!totalLoginsDoc.exists()) {
+          await setDoc(totalLoginsRef, {
+            count: 1,
+            updatedAt: serverTimestamp()
+          });
+        }
       }
 
-      // Update total users count
-      const totalUsersRef = doc(db, 'appStats', 'totalUsers');
-      const totalUsersDoc = await getDoc(totalUsersRef);
-      
-      if (!totalUsersDoc.exists()) {
-        await setDoc(totalUsersRef, {
-          count: 1,
-          updatedAt: serverTimestamp()
-        });
-      }
     } catch (error) {
       console.error("Error updating user stats:", error);
     }
@@ -256,6 +290,24 @@ export default function HomePage(): React.JSX.Element {
     };
 
     loadTotalUsers();
+  }, []);
+
+  // Load total logged in users
+  useEffect(() => {
+    const loadTotalLoggedInUsers = async () => {
+      try {
+        const totalLoginsRef = doc(db, 'appStats', 'totalLogins');
+        const totalLoginsDoc = await getDoc(totalLoginsRef);
+        
+        if (totalLoginsDoc.exists()) {
+          setTotalLoggedInUsers(totalLoginsDoc.data().count || 0);
+        }
+      } catch (error) {
+        console.error("Error loading total logged in users:", error);
+      }
+    };
+
+    loadTotalLoggedInUsers();
   }, []);
 
   // Listen to auth state changes
@@ -1953,20 +2005,21 @@ export default function HomePage(): React.JSX.Element {
                     color: 'rgba(255, 255, 255, 0.7)',
                     fontSize: '0.75rem'
                   }}>
-                    Total Login:
+                    Login Anda:
                   </span>
                   <span style={{
                     color: '#00FF00',
                     fontSize: '0.9rem',
                     fontWeight: '600'
                   }}>
-                    {userStats.loginCount || 0}
+                    {userStats.loginCount || 0} kali
                   </span>
                 </div>
                 <div style={{
                   display: 'flex',
                   justifyContent: 'space-between',
-                  alignItems: 'center'
+                  alignItems: 'center',
+                  marginBottom: '0.3rem'
                 }}>
                   <span style={{
                     color: 'rgba(255, 255, 255, 0.7)',
@@ -1980,6 +2033,25 @@ export default function HomePage(): React.JSX.Element {
                     fontWeight: '600'
                   }}>
                     {totalUsers}
+                  </span>
+                </div>
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center'
+                }}>
+                  <span style={{
+                    color: 'rgba(255, 255, 255, 0.7)',
+                    fontSize: '0.75rem'
+                  }}>
+                    Total Login:
+                  </span>
+                  <span style={{
+                    color: '#F59E0B',
+                    fontSize: '0.9rem',
+                    fontWeight: '600'
+                  }}>
+                    {totalLoggedInUsers}
                   </span>
                 </div>
               </div>
@@ -2378,7 +2450,7 @@ export default function HomePage(): React.JSX.Element {
           gap: isMobile ? '0.8rem' : '1rem',
           position: 'relative'
         }}>
-          {/* User Stats Badge */}
+          {/* User Stats Badge - DIPERBAIKI */}
           {user && userStats && (
             <motion.div
               initial={{ opacity: 0, scale: 0.8 }}
