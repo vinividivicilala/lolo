@@ -504,6 +504,16 @@ export default function HomePage(): React.JSX.Element {
   }, [hoveredTopic]);
 
   useEffect(() => {
+    // Cek apakah user sudah menutup banner tahun baru
+    const bannerDismissed = localStorage.getItem('newYearBanner2026');
+    if (bannerDismissed === 'dismissed') {
+      // Jika sudah ditutup, sembunyikan banner
+      const banner = document.querySelector('.new-year-banner');
+      if (banner) {
+        (banner as HTMLElement).style.display = 'none';
+      }
+    }
+
     // Cek apakah user sudah menyetujui cookies
     const cookieAccepted = localStorage.getItem('cookiesAccepted');
     if (!cookieAccepted) {
@@ -912,6 +922,225 @@ export default function HomePage(): React.JSX.Element {
       WebkitFontSmoothing: 'antialiased',
       MozOsxFontSmoothing: 'grayscale'
     }}>
+
+      {/* Banner Notifikasi Tahun Baru 2026 - Ditambahkan di atas header */}
+      <div className="new-year-banner" style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        width: '100%',
+        backgroundColor: '#FF6B6B', // Warna merah cerah untuk perayaan
+        color: 'white',
+        zIndex: 1000,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: isMobile ? '0.8rem 1rem' : '1rem 2rem',
+        boxShadow: '0 4px 20px rgba(0,0,0,0.2)',
+        borderBottom: '3px solid #FFD93D'
+      }}>
+        {/* Icon Megaphone */}
+        <motion.div
+          initial={{ scale: 0, rotate: -30 }}
+          animate={{ scale: 1, rotate: 0 }}
+          transition={{ type: "spring", stiffness: 200, damping: 15 }}
+          style={{
+            marginRight: isMobile ? '0.8rem' : '1.2rem',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}
+        >
+          <svg 
+            width={isMobile ? "24" : "32"} 
+            height={isMobile ? "24" : "32"} 
+            viewBox="0 0 24 24" 
+            fill="none" 
+            stroke="currentColor" 
+            strokeWidth="2"
+            style={{
+              filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))'
+            }}
+          >
+            <path d="M18 8a3 3 0 0 1 0 6" />
+            <path d="M10 8v11a1 1 0 0 0 1 1h1a1 1 0 0 0 1-1v-5" />
+            <path d="M12 8h0" />
+            <path d="M7 15a6.47 6.47 0 0 1 0-12" />
+            <path d="M12 8h4l-4-8-4 8h4z" />
+            <path d="M7 15a6.472 6.472 0 0 0 5 0 6.47 6.47 0 0 0 5 0" />
+          </svg>
+        </motion.div>
+
+        {/* Teks Selamat Tahun Baru 2026 */}
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2, duration: 0.5 }}
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            textAlign: 'center'
+          }}
+        >
+          <div style={{
+            fontSize: isMobile ? '1rem' : '1.3rem',
+            fontWeight: '700',
+            fontFamily: 'Helvetica, Arial, sans-serif',
+            letterSpacing: '0.5px',
+            textShadow: '0 2px 4px rgba(0,0,0,0.2)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem'
+          }}>
+            <motion.span
+              animate={{ 
+                scale: [1, 1.1, 1],
+                color: ['#FFFFFF', '#FFD93D', '#FFFFFF']
+              }}
+              transition={{ 
+                duration: 2,
+                repeat: Infinity,
+                repeatType: "reverse"
+              }}
+              style={{
+                display: 'inline-block'
+              }}
+            >
+              SELAMAT TAHUN BARU
+            </motion.span>
+            
+            <motion.span
+              animate={{ 
+                scale: [1, 1.15, 1],
+                backgroundColor: ['#4ECDC4', '#FFD93D', '#4ECDC4']
+              }}
+              transition={{ 
+                duration: 1.5,
+                repeat: Infinity,
+                repeatType: "reverse"
+              }}
+              style={{
+                backgroundColor: '#4ECDC4',
+                color: '#2C3E50',
+                padding: isMobile ? '0.2rem 0.8rem' : '0.3rem 1rem',
+                borderRadius: '20px',
+                fontWeight: '800',
+                fontSize: isMobile ? '1.1rem' : '1.4rem',
+                boxShadow: '0 3px 10px rgba(0,0,0,0.2)',
+                border: '2px solid #FFD93D'
+              }}
+            >
+              2026
+            </motion.span>
+          </div>
+          
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.4, duration: 0.5 }}
+            style={{
+              fontSize: isMobile ? '0.75rem' : '0.9rem',
+              fontWeight: '500',
+              opacity: 0.9,
+              marginTop: '0.3rem',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem'
+            }}
+          >
+            <span>✨ Tahun baru, semangat baru! ✨</span>
+          </motion.div>
+        </motion.div>
+
+        {/* Tombol Close */}
+        <motion.button
+          onClick={() => {
+            // Simpan preferensi user agar banner tidak muncul lagi
+            localStorage.setItem('newYearBanner2026', 'dismissed');
+            // Sembunyikan banner
+            const banner = document.querySelector('.new-year-banner');
+            if (banner) {
+              (banner as HTMLElement).style.display = 'none';
+            }
+          }}
+          style={{
+            position: 'absolute',
+            right: isMobile ? '0.8rem' : '1.5rem',
+            backgroundColor: 'transparent',
+            border: 'none',
+            color: 'white',
+            cursor: 'pointer',
+            padding: '0.5rem',
+            borderRadius: '50%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            opacity: 0.8
+          }}
+          whileHover={{ 
+            backgroundColor: 'rgba(255,255,255,0.2)',
+            scale: 1.1,
+            opacity: 1
+          }}
+          whileTap={{ scale: 0.9 }}
+        >
+          <svg 
+            width="20" 
+            height="20" 
+            viewBox="0 0 24 24" 
+            fill="none" 
+            stroke="currentColor" 
+            strokeWidth="2"
+          >
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+        </motion.button>
+
+        {/* Efek Konfeti */}
+        <div style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          pointerEvents: 'none',
+          overflow: 'hidden',
+          zIndex: -1
+        }}>
+          {[...Array(15)].map((_, i) => (
+            <motion.div
+              key={i}
+              initial={{ 
+                y: -20,
+                x: Math.random() * 100 + '%',
+                opacity: 0,
+                rotate: 0
+              }}
+              animate={{ 
+                y: '100%',
+                opacity: [0, 1, 0],
+                rotate: 360
+              }}
+              transition={{ 
+                duration: Math.random() * 3 + 2,
+                repeat: Infinity,
+                delay: Math.random() * 2
+              }}
+              style={{
+                position: 'absolute',
+                width: '10px',
+                height: '10px',
+                backgroundColor: i % 3 === 0 ? '#FFD93D' : i % 3 === 1 ? '#4ECDC4' : '#FFFFFF',
+                borderRadius: i % 2 === 0 ? '50%' : '0%',
+                transform: `rotate(${i * 45}deg)`
+              }}
+            />
+          ))}
+        </div>
+      </div>
 
       {/* Halaman Full Page MENURU */}
       <AnimatePresence>
