@@ -6,7 +6,14 @@ import { useRouter } from "next/navigation";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { initializeApp } from "firebase/app";
-import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
+import { 
+  getAuth, 
+  onAuthStateChanged, 
+  signOut,
+  GithubAuthProvider,
+  GoogleAuthProvider,
+  signInWithPopup 
+} from "firebase/auth";
 import { 
   getFirestore, 
   collection, 
@@ -15,7 +22,12 @@ import {
   orderBy, 
   onSnapshot,
   serverTimestamp,
-  Timestamp 
+  Timestamp,
+  doc,
+  setDoc,
+  getDoc,
+  updateDoc,
+  increment
 } from "firebase/firestore";
 
 // Register GSAP plugins
@@ -40,6 +52,10 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
+// Providers untuk login
+const githubProvider = new GithubAuthProvider();
+const googleProvider = new GoogleAuthProvider();
+
 // Type untuk komentar
 interface Comment {
   id?: string;
@@ -49,6 +65,13 @@ interface Comment {
   userId?: string;
   timestamp: Timestamp | Date;
   userAvatar?: string;
+}
+
+// Type untuk user stats
+interface UserStats {
+  totalLogins: number;
+  lastLogin: Timestamp | Date;
+  loginCount: number;
 }
 
 export default function HomePage(): React.JSX.Element {
@@ -70,6 +93,10 @@ export default function HomePage(): React.JSX.Element {
   const [scrollDirection, setScrollDirection] = useState<"left" | "right">("right");
   const [scrollPosition, setScrollPosition] = useState(0);
   const [isHoveringSignIn, setIsHoveringSignIn] = useState(false);
+  const [showUserDropdown, setShowUserDropdown] = useState(false);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [userStats, setUserStats] = useState<UserStats | null>(null);
+  const [totalUsers, setTotalUsers] = useState(0);
   
   // State untuk counter foto - angka kiri saja yang berubah
   const [leftCounter, setLeftCounter] = useState("01");
@@ -97,6 +124,7 @@ export default function HomePage(): React.JSX.Element {
   const userTextRef = useRef<HTMLSpanElement>(null);
   const leftCounterRef = useRef<HTMLSpanElement>(null);
   const messageInputRef = useRef<HTMLInputElement>(null);
+  const userDropdownRef = useRef<HTMLDivElement>(null);
 
   // Animasi loading text
   const loadingTexts = [
@@ -170,9 +198,69 @@ export default function HomePage(): React.JSX.Element {
     return () => clearInterval(interval);
   }, []);
 
+  // Fungsi untuk update user stats di Firestore
+  const updateUserStats = async (userId: string, userName: string) => {
+    try {
+      const userStatsRef = doc(db, 'userStats', userId);
+      const userStatsDoc = await getDoc(userStatsRef);
+      
+      if (userStatsDoc.exists()) {
+        // Update existing user stats
+        await updateDoc(userStatsRef, {
+          loginCount: increment(1),
+          lastLogin: serverTimestamp(),
+          userName: userName,
+          updatedAt: serverTimestamp()
+        });
+      } else {
+        // Create new user stats
+        await setDoc(userStatsRef, {
+          userId: userId,
+          userName: userName,
+          loginCount: 1,
+          totalLogins: 1,
+          lastLogin: serverTimestamp(),
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp()
+        });
+      }
+
+      // Update total users count
+      const totalUsersRef = doc(db, 'appStats', 'totalUsers');
+      const totalUsersDoc = await getDoc(totalUsersRef);
+      
+      if (!totalUsersDoc.exists()) {
+        await setDoc(totalUsersRef, {
+          count: 1,
+          updatedAt: serverTimestamp()
+        });
+      }
+    } catch (error) {
+      console.error("Error updating user stats:", error);
+    }
+  };
+
+  // Load total users count
+  useEffect(() => {
+    const loadTotalUsers = async () => {
+      try {
+        const totalUsersRef = doc(db, 'appStats', 'totalUsers');
+        const totalUsersDoc = await getDoc(totalUsersRef);
+        
+        if (totalUsersDoc.exists()) {
+          setTotalUsers(totalUsersDoc.data().count || 0);
+        }
+      } catch (error) {
+        console.error("Error loading total users:", error);
+      }
+    };
+
+    loadTotalUsers();
+  }, []);
+
   // Listen to auth state changes
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (currentUser) {
         setUser(currentUser);
         // Get display name (prioritize displayName, then email, then 'User')
@@ -180,9 +268,26 @@ export default function HomePage(): React.JSX.Element {
                      currentUser.email?.split('@')[0] || 
                      'User';
         setUserDisplayName(name);
+        
+        // Update user stats
+        await updateUserStats(currentUser.uid, name);
+        
+        // Load user stats
+        try {
+          const userStatsRef = doc(db, 'userStats', currentUser.uid);
+          const userStatsDoc = await getDoc(userStatsRef);
+          
+          if (userStatsDoc.exists()) {
+            setUserStats(userStatsDoc.data() as UserStats);
+          }
+        } catch (error) {
+          console.error("Error loading user stats:", error);
+        }
       } else {
         setUser(null);
         setUserDisplayName("");
+        setUserStats(null);
+        setShowUserDropdown(false);
       }
     });
 
@@ -249,6 +354,20 @@ export default function HomePage(): React.JSX.Element {
       }
     }
   }, [user, userDisplayName, isMobile]);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (userDropdownRef.current && !userDropdownRef.current.contains(event.target as Node)) {
+        setShowUserDropdown(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   // Fungsi untuk mengupdate counter angka kiri dengan animasi GSAP
   const updateLeftCounter = (newIndex: number) => {
@@ -345,6 +464,12 @@ export default function HomePage(): React.JSX.Element {
         if (showPhotoFullPage) {
           handleClosePhotoFullPage();
         }
+        if (showUserDropdown) {
+          setShowUserDropdown(false);
+        }
+        if (showLogoutModal) {
+          setShowLogoutModal(false);
+        }
       }
     };
 
@@ -371,7 +496,7 @@ export default function HomePage(): React.JSX.Element {
       // Kill ScrollTrigger instances
       ScrollTrigger.getAll().forEach(trigger => trigger.kill());
     };
-  }, [isMobile, showMenuruFullPage, showPhotoFullPage]);
+  }, [isMobile, showMenuruFullPage, showPhotoFullPage, showUserDropdown, showLogoutModal]);
 
   // Animasi GSAP untuk tanda + di tombol Menuru (hanya pulsing, tidak berputar)
   useEffect(() => {
@@ -527,21 +652,68 @@ export default function HomePage(): React.JSX.Element {
   // Handler untuk Sign In / User Button
   const handleSignInClick = () => {
     if (user) {
-      // Jika sudah login, tampilkan dropdown atau langsung logout
-      const confirmLogout = window.confirm(`Logout from ${userDisplayName}?`);
-      if (confirmLogout) {
-        signOut(auth).then(() => {
-          setUser(null);
-          setUserDisplayName("");
-          router.push('/');
-        }).catch((error) => {
-          console.error("Logout error:", error);
-        });
-      }
+      // Toggle dropdown
+      setShowUserDropdown(!showUserDropdown);
     } else {
       // Jika belum login, redirect ke signin page
       router.push('/signin');
     }
+  };
+
+  // Handler untuk login dengan GitHub
+  const handleGitHubLogin = async () => {
+    try {
+      const result = await signInWithPopup(auth, githubProvider);
+      console.log("GitHub login successful:", result.user);
+      setShowUserDropdown(false);
+    } catch (error) {
+      console.error("GitHub login error:", error);
+      alert("Login dengan GitHub gagal. Silakan coba lagi.");
+    }
+  };
+
+  // Handler untuk login dengan Google
+  const handleGoogleLogin = async () => {
+    try {
+      const result = await signInWithPopup(auth, googleProvider);
+      console.log("Google login successful:", result.user);
+      setShowUserDropdown(false);
+    } catch (error) {
+      console.error("Google login error:", error);
+      alert("Login dengan Google gagal. Silakan coba lagi.");
+    }
+  };
+
+  // Handler untuk menuju halaman catatan
+  const handleNotesClick = () => {
+    setShowUserDropdown(false);
+    router.push('/notes');
+  };
+
+  // Handler untuk logout
+  const handleLogoutClick = () => {
+    setShowUserDropdown(false);
+    setShowLogoutModal(true);
+  };
+
+  // Handler untuk konfirmasi logout
+  const handleConfirmLogout = async () => {
+    try {
+      await signOut(auth);
+      setShowLogoutModal(false);
+      setUser(null);
+      setUserDisplayName("");
+      setUserStats(null);
+      router.push('/');
+    } catch (error) {
+      console.error("Logout error:", error);
+      alert("Logout gagal. Silakan coba lagi.");
+    }
+  };
+
+  // Handler untuk batal logout
+  const handleCancelLogout = () => {
+    setShowLogoutModal(false);
   };
 
   // Handler untuk mengirim komentar ke Firebase - DIPERBAIKI
@@ -1484,6 +1656,123 @@ export default function HomePage(): React.JSX.Element {
         )}
       </AnimatePresence>
 
+      {/* Modal Logout Confirmation */}
+      <AnimatePresence>
+        {showLogoutModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              backgroundColor: 'rgba(0, 0, 0, 0.7)',
+              zIndex: 9999,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              backdropFilter: 'blur(5px)'
+            }}
+            onClick={handleCancelLogout}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              style={{
+                backgroundColor: 'rgba(30, 30, 30, 0.95)',
+                borderRadius: '15px',
+                padding: isMobile ? '1.5rem' : '2rem',
+                width: isMobile ? '90%' : '400px',
+                maxWidth: '500px',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                boxShadow: '0 20px 60px rgba(0, 0, 0, 0.5)',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '1.5rem'
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div style={{ textAlign: 'center' }}>
+                <h3 style={{
+                  color: 'white',
+                  fontSize: isMobile ? '1.3rem' : '1.5rem',
+                  fontWeight: '600',
+                  margin: '0 0 0.5rem 0',
+                  fontFamily: 'Helvetica, Arial, sans-serif'
+                }}>
+                  Logout
+                </h3>
+                <p style={{
+                  color: 'rgba(255, 255, 255, 0.7)',
+                  fontSize: '0.9rem',
+                  margin: 0,
+                  lineHeight: 1.5
+                }}>
+                  Apakah Anda yakin ingin keluar dari akun {userDisplayName}?
+                </p>
+              </div>
+
+              <div style={{
+                display: 'flex',
+                gap: '1rem',
+                justifyContent: 'center'
+              }}>
+                <motion.button
+                  onClick={handleCancelLogout}
+                  style={{
+                    flex: 1,
+                    padding: '0.8rem 1.5rem',
+                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                    borderRadius: '8px',
+                    color: 'white',
+                    fontSize: '0.9rem',
+                    fontWeight: '500',
+                    cursor: 'pointer',
+                    transition: 'all 0.3s ease',
+                    fontFamily: 'Helvetica, Arial, sans-serif'
+                  }}
+                  whileHover={{ 
+                    backgroundColor: 'rgba(255, 255, 255, 0.2)'
+                  }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  Tidak
+                </motion.button>
+                <motion.button
+                  onClick={handleConfirmLogout}
+                  style={{
+                    flex: 1,
+                    padding: '0.8rem 1.5rem',
+                    backgroundColor: '#0050B7',
+                    border: 'none',
+                    borderRadius: '8px',
+                    color: 'white',
+                    fontSize: '0.9rem',
+                    fontWeight: '500',
+                    cursor: 'pointer',
+                    transition: 'all 0.3s ease',
+                    fontFamily: 'Helvetica, Arial, sans-serif'
+                  }}
+                  whileHover={{ 
+                    backgroundColor: '#0066CC'
+                  }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  Ya, Logout
+                </motion.button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Teks "Selamat Tahun Baru 2026" di pojok kiri atas, di atas navbar */}
       <motion.div
         initial={{ opacity: 0, x: -20 }}
@@ -1508,6 +1797,196 @@ export default function HomePage(): React.JSX.Element {
       >
         Selamat Tahun Baru 2026
       </motion.div>
+
+      {/* User Dropdown Menu */}
+      <AnimatePresence>
+        {showUserDropdown && user && (
+          <motion.div
+            ref={userDropdownRef}
+            initial={{ opacity: 0, y: -10, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -10, scale: 0.95 }}
+            transition={{ duration: 0.2 }}
+            style={{
+              position: 'fixed',
+              top: isMobile ? '6rem' : '7.5rem',
+              right: isMobile ? '1rem' : '2rem',
+              backgroundColor: 'rgba(30, 30, 30, 0.95)',
+              backdropFilter: 'blur(10px)',
+              borderRadius: '12px',
+              padding: '0.8rem 0',
+              minWidth: '200px',
+              zIndex: 1001,
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+              boxShadow: '0 10px 30px rgba(0, 0, 0, 0.3)',
+              display: 'flex',
+              flexDirection: 'column'
+            }}
+          >
+            {/* User Info */}
+            <div style={{
+              padding: '0.8rem 1rem',
+              borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.8rem'
+            }}>
+              <div style={{
+                width: '40px',
+                height: '40px',
+                borderRadius: '50%',
+                backgroundColor: '#0050B7',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '1rem',
+                fontWeight: '600',
+                color: 'white',
+                flexShrink: 0
+              }}>
+                {userDisplayName.charAt(0).toUpperCase()}
+              </div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{
+                  color: 'white',
+                  fontSize: '0.9rem',
+                  fontWeight: '600',
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis'
+                }}>
+                  {userDisplayName}
+                </div>
+                <div style={{
+                  color: 'rgba(255, 255, 255, 0.6)',
+                  fontSize: '0.75rem',
+                  marginTop: '0.2rem'
+                }}>
+                  {user.email}
+                </div>
+              </div>
+            </div>
+
+            {/* Menu Items */}
+            <div style={{
+              display: 'flex',
+              flexDirection: 'column',
+              padding: '0.5rem 0'
+            }}>
+              <motion.button
+                onClick={handleNotesClick}
+                style={{
+                  padding: '0.8rem 1rem',
+                  backgroundColor: 'transparent',
+                  border: 'none',
+                  color: 'rgba(255, 255, 255, 0.9)',
+                  fontSize: '0.9rem',
+                  fontWeight: '500',
+                  textAlign: 'left',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.8rem',
+                  transition: 'all 0.2s ease',
+                  fontFamily: 'Helvetica, Arial, sans-serif'
+                }}
+                whileHover={{ 
+                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                  paddingLeft: '1.2rem'
+                }}
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                  <polyline points="14 2 14 8 20 8"/>
+                  <line x1="16" y1="13" x2="8" y2="13"/>
+                  <line x1="16" y1="17" x2="8" y2="17"/>
+                  <polyline points="10 9 9 9 8 9"/>
+                </svg>
+                Catatan Saya
+              </motion.button>
+
+              <motion.button
+                onClick={handleLogoutClick}
+                style={{
+                  padding: '0.8rem 1rem',
+                  backgroundColor: 'transparent',
+                  border: 'none',
+                  color: '#ff6b6b',
+                  fontSize: '0.9rem',
+                  fontWeight: '500',
+                  textAlign: 'left',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.8rem',
+                  transition: 'all 0.2s ease',
+                  fontFamily: 'Helvetica, Arial, sans-serif'
+                }}
+                whileHover={{ 
+                  backgroundColor: 'rgba(255, 107, 107, 0.1)',
+                  paddingLeft: '1.2rem'
+                }}
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                  <polyline points="16 17 21 12 16 7"/>
+                  <line x1="21" y1="12" x2="9" y2="12"/>
+                </svg>
+                Logout
+              </motion.button>
+            </div>
+
+            {/* Stats Section */}
+            {userStats && (
+              <div style={{
+                padding: '0.8rem 1rem',
+                borderTop: '1px solid rgba(255, 255, 255, 0.1)',
+                backgroundColor: 'rgba(0, 0, 0, 0.2)'
+              }}>
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  marginBottom: '0.3rem'
+                }}>
+                  <span style={{
+                    color: 'rgba(255, 255, 255, 0.7)',
+                    fontSize: '0.75rem'
+                  }}>
+                    Total Login:
+                  </span>
+                  <span style={{
+                    color: '#00FF00',
+                    fontSize: '0.9rem',
+                    fontWeight: '600'
+                  }}>
+                    {userStats.loginCount || 0}
+                  </span>
+                </div>
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center'
+                }}>
+                  <span style={{
+                    color: 'rgba(255, 255, 255, 0.7)',
+                    fontSize: '0.75rem'
+                  }}>
+                    Total Users:
+                  </span>
+                  <span style={{
+                    color: '#0050B7',
+                    fontSize: '0.9rem',
+                    fontWeight: '600'
+                  }}>
+                    {totalUsers}
+                  </span>
+                </div>
+              </div>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Top Navigation Bar */}
       <div 
@@ -1896,8 +2375,42 @@ export default function HomePage(): React.JSX.Element {
         <div style={{
           display: 'flex',
           alignItems: 'center',
-          gap: isMobile ? '0.8rem' : '1rem'
+          gap: isMobile ? '0.8rem' : '1rem',
+          position: 'relative'
         }}>
+          {/* User Stats Badge */}
+          {user && userStats && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.5, duration: 0.3 }}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                backgroundColor: 'rgba(0, 80, 183, 0.3)',
+                padding: '0.3rem 0.8rem',
+                borderRadius: '20px',
+                border: '1px solid rgba(0, 80, 183, 0.5)',
+                backdropFilter: 'blur(5px)',
+                marginRight: '0.5rem'
+              }}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#00FF00" strokeWidth="2">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                <circle cx="12" cy="7" r="4"/>
+              </svg>
+              <span style={{
+                color: '#00FF00',
+                fontSize: '0.8rem',
+                fontWeight: '600',
+                fontFamily: 'Helvetica, Arial, sans-serif'
+              }}>
+                {userStats.loginCount || 0}
+              </span>
+            </motion.div>
+          )}
+
           {/* Sign In / User Button */}
           <motion.button
             ref={userButtonRef}
@@ -1976,7 +2489,7 @@ export default function HomePage(): React.JSX.Element {
                       willChange: 'transform'
                     }}
                   >
-                    {isHoveringSignIn ? `Logout (${userDisplayName})` : userDisplayName}
+                    {isHoveringSignIn ? `Hi, ${userDisplayName}` : userDisplayName}
                   </motion.span>
                   
                   {isHoveringSignIn && (
@@ -1988,7 +2501,7 @@ export default function HomePage(): React.JSX.Element {
                         fontSize: '0.8em'
                       }}
                     >
-                      →
+                      ↓
                     </motion.span>
                   )}
                 </div>
