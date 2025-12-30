@@ -1,49 +1,196 @@
 'use client';
 
 import React, { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
+import { 
+  getAuth, 
+  onAuthStateChanged,
+  signOut 
+} from "firebase/auth";
+import { 
+  getFirestore,
+  collection,
+  addDoc,
+  query,
+  orderBy,
+  onSnapshot,
+  serverTimestamp,
+  doc,
+  getDoc,
+  updateDoc,
+  deleteDoc
+} from "firebase/firestore";
+
+// Konfigurasi Firebase
+const firebaseConfig = {
+  apiKey: "AIzaSyD_htQZ1TClnXKZGRJ4izbMQ02y6V3aNAQ",
+  authDomain: "wawa44-58d1e.firebaseapp.com",
+  databaseURL: "https://wawa44-58d1e-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "wawa44-58d1e",
+  storageBucket: "wawa44-58d1e.firebasestorage.app",
+  messagingSenderId: "836899520599",
+  appId: "1:836899520599:web:b346e4370ecfa9bb89e312",
+  measurementId: "G-8LMP7F4BE9"
+};
+
+import { initializeApp } from "firebase/app";
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+interface Note {
+  id?: string;
+  title: string;
+  content: string;
+  userId: string;
+  createdAt: any;
+  updatedAt: any;
+  color?: string;
+}
 
 export default function NotesPage(): React.JSX.Element {
-  const [showLoading, setShowLoading] = useState(true);
-  const [notes, setNotes] = useState<string[]>([]);
-  const [newNote, setNewNote] = useState("");
   const router = useRouter();
+  const [isMobile, setIsMobile] = useState(false);
+  const [user, setUser] = useState<any>(null);
+  const [userDisplayName, setUserDisplayName] = useState("");
+  const [notes, setNotes] = useState<Note[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [showNewNoteForm, setShowNewNoteForm] = useState(false);
+  const [newNote, setNewNote] = useState({ title: "", content: "", color: "#3B82F6" });
 
+  // Warna yang tersedia untuk catatan
+  const noteColors = [
+    "#3B82F6", "#10B981", "#F59E0B", "#EF4444", "#8B5CF6",
+    "#EC4899", "#14B8A6", "#F97316", "#84CC16", "#6366F1"
+  ];
+
+  // Cek auth state
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setShowLoading(false);
-    }, 2500);
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      if (currentUser) {
+        setUser(currentUser);
+        const name = currentUser.displayName || 
+                    currentUser.email?.split('@')[0] || 
+                    'User';
+        setUserDisplayName(name);
+        loadUserNotes(currentUser.uid);
+      } else {
+        // Redirect ke home jika belum login
+        router.push('/');
+      }
+    });
 
-    // Load notes from localStorage
-    const savedNotes = localStorage.getItem('notes');
-    if (savedNotes) {
-      setNotes(JSON.parse(savedNotes));
-    }
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
 
-    return () => clearTimeout(timer);
-  }, []);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
 
-  const addNote = () => {
-    if (newNote.trim()) {
-      const updatedNotes = [...notes, newNote];
-      setNotes(updatedNotes);
-      localStorage.setItem('notes', JSON.stringify(updatedNotes));
-      setNewNote("");
+    return () => {
+      unsubscribe();
+      window.removeEventListener('resize', checkMobile);
+    };
+  }, [router]);
+
+  // Load catatan user
+  const loadUserNotes = (userId: string) => {
+    setIsLoading(true);
+    try {
+      const notesRef = collection(db, 'userNotes');
+      const q = query(notesRef, orderBy('updatedAt', 'desc'));
+      
+      const unsubscribe = onSnapshot(q, (querySnapshot) => {
+        const notesData: Note[] = [];
+        querySnapshot.forEach((doc) => {
+          const noteData = doc.data() as Note;
+          // Hanya tampilkan catatan milik user ini
+          if (noteData.userId === userId) {
+            notesData.push({
+              id: doc.id,
+              ...noteData
+            });
+          }
+        });
+        setNotes(notesData);
+        setIsLoading(false);
+      });
+
+      return unsubscribe;
+    } catch (error) {
+      console.error("Error loading notes:", error);
+      setIsLoading(false);
+      return () => {};
     }
   };
 
-  const deleteNote = (index: number) => {
-    const updatedNotes = notes.filter((_, i) => i !== index);
-    setNotes(updatedNotes);
-    localStorage.setItem('notes', JSON.stringify(updatedNotes));
+  // Buat catatan baru
+  const handleCreateNote = async () => {
+    if (!user || !newNote.title.trim() || !newNote.content.trim()) {
+      alert("Judul dan konten catatan harus diisi");
+      return;
+    }
+
+    try {
+      const noteData = {
+        title: newNote.title.trim(),
+        content: newNote.content.trim(),
+        userId: user.uid,
+        color: newNote.color,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      };
+
+      await addDoc(collection(db, 'userNotes'), noteData);
+      
+      // Reset form
+      setNewNote({ title: "", content: "", color: "#3B82F6" });
+      setShowNewNoteForm(false);
+      
+      alert("Catatan berhasil dibuat!");
+    } catch (error) {
+      console.error("Error creating note:", error);
+      alert("Gagal membuat catatan. Silakan coba lagi.");
+    }
   };
 
-  const navigateToHome = () => {
-    setShowLoading(true);
-    setTimeout(() => {
+  // Hapus catatan
+  const handleDeleteNote = async (noteId: string) => {
+    if (confirm("Apakah Anda yakin ingin menghapus catatan ini?")) {
+      try {
+        await deleteDoc(doc(db, 'userNotes', noteId));
+        alert("Catatan berhasil dihapus!");
+      } catch (error) {
+        console.error("Error deleting note:", error);
+        alert("Gagal menghapus catatan.");
+      }
+    }
+  };
+
+  // Handle logout
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
       router.push('/');
-    }, 1000);
+    } catch (error) {
+      console.error("Logout error:", error);
+    }
+  };
+
+  // Format tanggal
+  const formatDate = (timestamp: any) => {
+    if (!timestamp) return "Baru saja";
+    
+    const date = timestamp.toDate();
+    return date.toLocaleDateString('id-ID', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
   };
 
   return (
@@ -53,327 +200,473 @@ export default function NotesPage(): React.JSX.Element {
       margin: 0,
       padding: 0,
       width: '100%',
+      display: 'flex',
+      flexDirection: 'column',
+      justifyContent: 'flex-start',
+      alignItems: 'center',
       position: 'relative',
-      overflow: 'hidden'
+      overflow: 'auto',
+      fontFamily: 'Helvetica, Arial, sans-serif',
     }}>
-      <AnimatePresence>
-        {showLoading && (
-          <LoadingAnimation />
-        )}
-      </AnimatePresence>
-
-      {/* Main Content After Loading */}
-      <AnimatePresence>
-        {!showLoading && (
-          <motion.div
-            style={{
-              padding: '2rem',
-              maxWidth: '800px',
-              margin: '0 auto',
-              minHeight: '100vh'
-            }}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, ease: "easeOut" }}
-          >
-            {/* Header */}
-            <motion.div
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                marginBottom: '2rem',
-                flexWrap: 'wrap',
-                gap: '1rem'
-              }}
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3, duration: 0.6 }}
-            >
-              <h1 style={{
-                fontSize: '2.5rem',
-                fontWeight: '900',
-                color: 'white',
-                fontFamily: "'Noto Sans JP', sans-serif",
-                margin: 0
-              }}>
-                私のノート
-              </h1>
-              
-              <motion.button
-                onClick={navigateToHome}
-                style={{
-                  padding: '0.75rem 1.5rem',
-                  fontSize: '1rem',
-                  fontWeight: '700',
-                  color: 'black',
-                  backgroundColor: 'white',
-                  border: 'none',
-                  borderRadius: '8px',
-                  cursor: 'pointer',
-                  fontFamily: "'Noto Sans JP', sans-serif",
-                  whiteSpace: 'nowrap'
-                }}
-                whileHover={{ scale: 1.05, backgroundColor: '#f0f0f0' }}
-                whileTap={{ scale: 0.95 }}
-              >
-                ホームへ戻る
-              </motion.button>
-            </motion.div>
-
-            {/* Add Note Form */}
-            <motion.div
-              style={{
-                marginBottom: '2rem',
-                padding: '1.5rem',
-                backgroundColor: 'rgba(255,255,255,0.05)',
-                borderRadius: '12px',
-                backdropFilter: 'blur(10px)',
-                border: '1px solid rgba(255,255,255,0.1)'
-              }}
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.5, duration: 0.6 }}
-            >
-              <textarea
-                value={newNote}
-                onChange={(e) => setNewNote(e.target.value)}
-                placeholder="新しいノートを入力..."
-                style={{
-                  width: '100%',
-                  minHeight: '100px',
-                  padding: '1rem',
-                  backgroundColor: 'rgba(255,255,255,0.1)',
-                  border: '1px solid rgba(255,255,255,0.3)',
-                  borderRadius: '8px',
-                  color: 'white',
-                  fontSize: '1rem',
-                  fontFamily: "'Noto Sans JP', sans-serif",
-                  resize: 'vertical',
-                  marginBottom: '1rem'
-                }}
-                onKeyPress={(e) => {
-                  if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault();
-                    addNote();
-                  }
-                }}
-              />
-              <motion.button
-                onClick={addNote}
-                disabled={!newNote.trim()}
-                style={{
-                  padding: '0.75rem 1.5rem',
-                  fontSize: '1rem',
-                  fontWeight: '700',
-                  color: newNote.trim() ? 'black' : 'rgba(0,0,0,0.5)',
-                  backgroundColor: newNote.trim() ? 'white' : 'rgba(255,255,255,0.5)',
-                  border: 'none',
-                  borderRadius: '8px',
-                  cursor: newNote.trim() ? 'pointer' : 'not-allowed',
-                  fontFamily: "'Noto Sans JP', sans-serif"
-                }}
-                whileHover={newNote.trim() ? { scale: 1.05, backgroundColor: '#f0f0f0' } : {}}
-                whileTap={newNote.trim() ? { scale: 0.95 } : {}}
-              >
-                ノートを追加
-              </motion.button>
-            </motion.div>
-
-            {/* Notes List */}
-            <motion.div
-              style={{
-                display: 'grid',
-                gap: '1rem'
-              }}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.7, duration: 0.6 }}
-            >
-              {notes.map((note, index) => (
-                <motion.div
-                  key={index}
-                  style={{
-                    padding: '1.5rem',
-                    backgroundColor: 'rgba(255,255,255,0.05)',
-                    borderRadius: '12px',
-                    border: '1px solid rgba(255,255,255,0.1)',
-                    backdropFilter: 'blur(10px)',
-                    position: 'relative'
-                  }}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.8 + index * 0.1, duration: 0.5 }}
-                  whileHover={{ 
-                    backgroundColor: 'rgba(255,255,255,0.08)',
-                    scale: 1.02 
-                  }}
-                >
-                  <p style={{
-                    color: 'white',
-                    fontSize: '1rem',
-                    lineHeight: '1.6',
-                    fontFamily: "'Noto Sans JP', sans-serif",
-                    margin: 0,
-                    marginRight: '60px',
-                    whiteSpace: 'pre-wrap',
-                    wordBreak: 'break-word'
-                  }}>
-                    {note}
-                  </p>
-                  <motion.button
-                    onClick={() => deleteNote(index)}
-                    style={{
-                      position: 'absolute',
-                      top: '1rem',
-                      right: '1rem',
-                      padding: '0.5rem 1rem',
-                      backgroundColor: 'rgba(255,0,0,0.2)',
-                      color: '#ff6b6b',
-                      border: '1px solid rgba(255,0,0,0.3)',
-                      borderRadius: '6px',
-                      cursor: 'pointer',
-                      fontSize: '0.8rem',
-                      fontFamily: "'Noto Sans JP', sans-serif"
-                    }}
-                    whileHover={{ 
-                      backgroundColor: 'rgba(255,0,0,0.3)',
-                      scale: 1.1 
-                    }}
-                    whileTap={{ scale: 0.9 }}
-                  >
-                    削除
-                  </motion.button>
-                </motion.div>
-              ))}
-              
-              {notes.length === 0 && (
-                <motion.div
-                  style={{
-                    textAlign: 'center',
-                    padding: '3rem',
-                    color: 'rgba(255,255,255,0.5)',
-                    fontFamily: "'Noto Sans JP', sans-serif"
-                  }}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.8, duration: 0.6 }}
-                >
-                  ノートがありません。新しいノートを追加してください。
-                </motion.div>
-              )}
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Font import */}
-      <style jsx>{`
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap');
-      `}</style>
-    </div>
-  );
-}
-
-// Komponen Loading untuk halaman notes
-function LoadingAnimation() {
-  return (
-    <motion.div
-      style={{
-        position: 'absolute',
+      {/* Header */}
+      <div style={{
+        position: 'fixed',
         top: 0,
         left: 0,
         width: '100%',
-        height: '100%',
+        padding: isMobile ? '1rem' : '1.5rem 2rem',
         display: 'flex',
-        justifyContent: 'center',
+        justifyContent: 'space-between',
         alignItems: 'center',
-        backgroundColor: 'black',
-        zIndex: 10
-      }}
-      initial={{ opacity: 1 }}
-      exit={{ 
-        opacity: 0,
-        transition: { duration: 0.6, ease: "easeInOut" }
-      }}
-    >
-      <motion.div
-        style={{
-          fontSize: '4rem',
-          fontWeight: '900',
-          color: 'white',
-          fontFamily: "'Noto Sans JP', sans-serif",
-          textAlign: 'center',
-          letterSpacing: '8px',
-          position: 'relative'
-        }}
-        initial={{ 
-          scale: 0.5, 
-          opacity: 0, 
-          rotateY: 180,
-          filter: 'blur(20px)'
-        }}
-        animate={{ 
-          scale: [0.8, 1.1, 1],
-          opacity: [0, 1, 1],
-          rotateY: [180, 0, 0],
-          filter: ['blur(20px)', 'blur(5px)', 'blur(0px)'],
-          textShadow: [
-            '0 0 0px rgba(255,255,255,0)',
-            '0 0 30px rgba(255,255,255,0.8)',
-            '0 0 20px rgba(255,255,255,0.4)'
-          ]
-        }}
-        transition={{ 
-          duration: 2,
-          ease: [0.25, 0.46, 0.45, 0.94]
-        }}
-      >
-        私のノート
-        
-        <motion.div
+        zIndex: 100,
+        backgroundColor: 'rgba(0,0,0,0.9)',
+        backdropFilter: 'blur(10px)',
+        borderBottom: '1px solid rgba(255,255,255,0.1)'
+      }}>
+        {/* Tombol kembali */}
+        <motion.button
+          onClick={() => router.push('/')}
           style={{
-            position: 'absolute',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            width: '400px',
-            height: '150px',
-            background: 'radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 70%)',
-            filter: 'blur(30px)',
-            zIndex: -1
+            backgroundColor: 'transparent',
+            border: '1px solid rgba(255,255,255,0.2)',
+            color: 'white',
+            padding: '0.6rem 1.2rem',
+            borderRadius: '8px',
+            cursor: 'pointer',
+            fontSize: '0.9rem',
+            fontWeight: '500',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem'
           }}
-          animate={{
-            scale: [0.8, 1.2, 0.9],
-            opacity: [0, 0.6, 0],
-          }}
-          transition={{
-            duration: 2,
-            ease: "easeOut"
-          }}
-        />
-      </motion.div>
+          whileHover={{ backgroundColor: 'rgba(255,255,255,0.1)' }}
+          whileTap={{ scale: 0.95 }}
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M19 12H5"/>
+            <path d="M12 19l-7-7 7-7"/>
+          </svg>
+          Kembali
+        </motion.button>
 
-      <motion.div
-        style={{
-          position: 'absolute',
-          fontSize: '1.2rem',
-          fontWeight: '700',
-          color: 'rgba(255,255,255,0.1)',
-          fontFamily: "'Noto Sans JP', sans-serif",
-        }}
-        animate={{
-          y: [0, -20, 0],
-          opacity: [0.1, 0.3, 0.1],
-        }}
-        transition={{
-          duration: 3,
-          repeat: Infinity,
-          ease: "easeInOut"
-        }}
-      >
-        メモ
-      </motion.div>
-    </motion.div>
+        {/* Judul halaman */}
+        <div style={{
+          color: 'white',
+          fontSize: isMobile ? '1.3rem' : '1.8rem',
+          fontWeight: '600',
+          textTransform: 'uppercase',
+          letterSpacing: '1px'
+        }}>
+          CATATAN SAYA
+        </div>
+
+        {/* Info user */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '1rem'
+        }}>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            backgroundColor: 'rgba(255,255,255,0.1)',
+            padding: '0.4rem 0.8rem',
+            borderRadius: '20px'
+          }}>
+            <div style={{
+              width: '32px',
+              height: '32px',
+              borderRadius: '50%',
+              backgroundColor: '#0050B7',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontWeight: '600',
+              color: 'white'
+            }}>
+              {userDisplayName.charAt(0).toUpperCase()}
+            </div>
+            <span style={{
+              color: 'white',
+              fontSize: '0.9rem',
+              fontWeight: '500'
+            }}>
+              {userDisplayName}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div style={{
+        width: '100%',
+        maxWidth: '1200px',
+        margin: '0 auto',
+        padding: isMobile ? '6rem 1rem 2rem' : '7rem 2rem 3rem',
+        boxSizing: 'border-box'
+      }}>
+        {/* Header catatan */}
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: '2rem'
+        }}>
+          <div>
+            <h1 style={{
+              color: 'white',
+              fontSize: isMobile ? '1.8rem' : '2.5rem',
+              fontWeight: '600',
+              margin: '0 0 0.5rem 0'
+            }}>
+              Catatan Pribadi
+            </h1>
+            <p style={{
+              color: 'rgba(255,255,255,0.7)',
+              margin: 0,
+              fontSize: '0.95rem'
+            }}>
+              {notes.length} catatan tersimpan
+            </p>
+          </div>
+
+          {/* Tombol buat catatan baru */}
+          <motion.button
+            onClick={() => setShowNewNoteForm(true)}
+            style={{
+              backgroundColor: '#0050B7',
+              color: 'white',
+              border: 'none',
+              padding: isMobile ? '0.8rem 1.2rem' : '1rem 1.8rem',
+              borderRadius: '8px',
+              fontSize: '1rem',
+              fontWeight: '600',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem'
+            }}
+            whileHover={{ backgroundColor: '#0066CC', scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M12 5v14"/>
+              <path d="M5 12h14"/>
+            </svg>
+            Catatan Baru
+          </motion.button>
+        </div>
+
+        {/* Form buat catatan baru */}
+        {showNewNoteForm && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            style={{
+              backgroundColor: 'rgba(30, 30, 30, 0.95)',
+              borderRadius: '12px',
+              padding: '2rem',
+              marginBottom: '2rem',
+              border: '1px solid rgba(255,255,255,0.1)',
+              backdropFilter: 'blur(10px)'
+            }}
+          >
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginBottom: '1.5rem'
+            }}>
+              <h3 style={{
+                color: 'white',
+                fontSize: '1.3rem',
+                fontWeight: '600',
+                margin: 0
+              }}>
+                Buat Catatan Baru
+              </h3>
+              <button
+                onClick={() => setShowNewNoteForm(false)}
+                style={{
+                  backgroundColor: 'transparent',
+                  border: 'none',
+                  color: 'rgba(255,255,255,0.7)',
+                  fontSize: '1.5rem',
+                  cursor: 'pointer',
+                  padding: '0.2rem 0.6rem',
+                  borderRadius: '4px'
+                }}
+              >
+                ×
+              </button>
+            </div>
+
+            <div style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '1rem'
+            }}>
+              {/* Pilih warna */}
+              <div>
+                <label style={{
+                  color: 'rgba(255,255,255,0.9)',
+                  fontSize: '0.9rem',
+                  fontWeight: '500',
+                  marginBottom: '0.5rem',
+                  display: 'block'
+                }}>
+                  Pilih Warna
+                </label>
+                <div style={{
+                  display: 'flex',
+                  gap: '0.5rem',
+                  flexWrap: 'wrap'
+                }}>
+                  {noteColors.map(color => (
+                    <button
+                      key={color}
+                      onClick={() => setNewNote({...newNote, color})}
+                      style={{
+                        width: '32px',
+                        height: '32px',
+                        borderRadius: '50%',
+                        backgroundColor: color,
+                        border: newNote.color === color ? '3px solid white' : 'none',
+                        cursor: 'pointer'
+                      }}
+                    />
+                  ))}
+                </div>
+              </div>
+
+              {/* Input judul */}
+              <div>
+                <input
+                  type="text"
+                  value={newNote.title}
+                  onChange={(e) => setNewNote({...newNote, title: e.target.value})}
+                  placeholder="Judul catatan..."
+                  style={{
+                    width: '100%',
+                    padding: '1rem',
+                    backgroundColor: 'rgba(255,255,255,0.05)',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    borderRadius: '8px',
+                    color: 'white',
+                    fontSize: '1.1rem',
+                    outline: 'none',
+                    fontFamily: 'Helvetica, Arial, sans-serif'
+                  }}
+                />
+              </div>
+
+              {/* Input konten */}
+              <div>
+                <textarea
+                  value={newNote.content}
+                  onChange={(e) => setNewNote({...newNote, content: e.target.value})}
+                  placeholder="Tulis catatan Anda di sini..."
+                  rows={6}
+                  style={{
+                    width: '100%',
+                    padding: '1rem',
+                    backgroundColor: 'rgba(255,255,255,0.05)',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    borderRadius: '8px',
+                    color: 'white',
+                    fontSize: '1rem',
+                    outline: 'none',
+                    fontFamily: 'Helvetica, Arial, sans-serif',
+                    resize: 'vertical'
+                  }}
+                />
+              </div>
+
+              {/* Tombol aksi */}
+              <div style={{
+                display: 'flex',
+                justifyContent: 'flex-end',
+                gap: '1rem',
+                marginTop: '1rem'
+              }}>
+                <button
+                  onClick={() => setShowNewNoteForm(false)}
+                  style={{
+                    padding: '0.8rem 1.5rem',
+                    backgroundColor: 'rgba(255,255,255,0.1)',
+                    border: '1px solid rgba(255,255,255,0.2)',
+                    borderRadius: '8px',
+                    color: 'white',
+                    fontSize: '0.9rem',
+                    fontWeight: '500',
+                    cursor: 'pointer'
+                  }}
+                >
+                  Batal
+                </button>
+                <button
+                  onClick={handleCreateNote}
+                  style={{
+                    padding: '0.8rem 1.5rem',
+                    backgroundColor: '#0050B7',
+                    border: 'none',
+                    borderRadius: '8px',
+                    color: 'white',
+                    fontSize: '0.9rem',
+                    fontWeight: '500',
+                    cursor: 'pointer'
+                  }}
+                >
+                  Simpan Catatan
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        )}
+
+        {/* Daftar catatan */}
+        {isLoading ? (
+          <div style={{
+            display: 'flex',
+            justifyContent: 'center',
+            padding: '3rem'
+          }}>
+            <div style={{
+              color: 'rgba(255,255,255,0.5)',
+              fontSize: '1rem'
+            }}>
+              Memuat catatan...
+            </div>
+          </div>
+        ) : notes.length === 0 ? (
+          <div style={{
+            textAlign: 'center',
+            padding: '4rem 1rem',
+            color: 'rgba(255,255,255,0.5)'
+          }}>
+            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" style={{ opacity: 0.5, marginBottom: '1rem' }}>
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+              <line x1="16" y1="13" x2="8" y2="13"/>
+              <line x1="16" y1="17" x2="8" y2="17"/>
+              <polyline points="10 9 9 9 8 9"/>
+            </svg>
+            <h3 style={{
+              color: 'rgba(255,255,255,0.7)',
+              fontSize: '1.5rem',
+              fontWeight: '400',
+              margin: '0 0 0.5rem 0'
+            }}>
+              Belum ada catatan
+            </h3>
+            <p style={{ margin: 0 }}>
+              Buat catatan pertama Anda untuk mulai menyimpan ide dan pemikiran.
+            </p>
+          </div>
+        ) : (
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fill, minmax(300px, 1fr))',
+            gap: '1.5rem'
+          }}>
+            {notes.map((note, index) => (
+              <motion.div
+                key={note.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.05 }}
+                style={{
+                  backgroundColor: `${note.color}20`, // 20 = 12% opacity
+                  border: `2px solid ${note.color}`,
+                  borderRadius: '12px',
+                  padding: '1.5rem',
+                  position: 'relative',
+                  minHeight: '200px',
+                  display: 'flex',
+                  flexDirection: 'column'
+                }}
+              >
+                {/* Header catatan */}
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'flex-start',
+                  marginBottom: '1rem'
+                }}>
+                  <h3 style={{
+                    color: 'white',
+                    fontSize: '1.2rem',
+                    fontWeight: '600',
+                    margin: 0,
+                    flex: 1
+                  }}>
+                    {note.title}
+                  </h3>
+                  <button
+                    onClick={() => handleDeleteNote(note.id!)}
+                    style={{
+                      backgroundColor: 'rgba(255,255,255,0.1)',
+                      border: 'none',
+                      color: 'rgba(255,255,255,0.7)',
+                      width: '32px',
+                      height: '32px',
+                      borderRadius: '6px',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexShrink: 0
+                    }}
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M3 6h18"/>
+                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/>
+                      <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                    </svg>
+                  </button>
+                </div>
+
+                {/* Konten catatan */}
+                <div style={{
+                  color: 'rgba(255,255,255,0.9)',
+                  fontSize: '0.95rem',
+                  lineHeight: 1.6,
+                  flex: 1,
+                  marginBottom: '1rem',
+                  whiteSpace: 'pre-wrap',
+                  wordBreak: 'break-word'
+                }}>
+                  {note.content}
+                </div>
+
+                {/* Footer catatan */}
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  marginTop: 'auto',
+                  paddingTop: '1rem',
+                  borderTop: '1px solid rgba(255,255,255,0.1)'
+                }}>
+                  <span style={{
+                    color: 'rgba(255,255,255,0.6)',
+                    fontSize: '0.8rem'
+                  }}>
+                    {formatDate(note.updatedAt)}
+                  </span>
+                  <div style={{
+                    width: '12px',
+                    height: '12px',
+                    borderRadius: '50%',
+                    backgroundColor: note.color
+                  }} />
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
   );
 }
