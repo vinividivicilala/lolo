@@ -1484,36 +1484,30 @@ export default function HomePage(): React.JSX.Element {
         )}
       </AnimatePresence>
 
-      {/* Pengumuman Tahun Baru - SIMPLE */}
-      <div style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        width: '100%',
-        backgroundColor: 'transparent',
-        color: 'white',
-        zIndex: 999,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '0.5rem 1rem',
-        fontSize: '0.85rem',
-        fontWeight: '400',
-        fontFamily: 'Helvetica, Arial, sans-serif'
-      }}>
-        <svg 
-          width="16" 
-          height="16" 
-          viewBox="0 0 24 24" 
-          fill="none" 
-          stroke="currentColor" 
-          strokeWidth="2"
-          style={{ marginRight: '0.5rem' }}
-        >
-          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-        </svg>
+      {/* Teks "Selamat Tahun Baru 2026" di pojok kiri atas, di atas navbar */}
+      <motion.div
+        initial={{ opacity: 0, x: -20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.8, delay: 0.3 }}
+        style={{
+          position: 'fixed',
+          top: isMobile ? '0.8rem' : '1rem',
+          left: isMobile ? '1rem' : '2rem',
+          color: 'white',
+          fontSize: isMobile ? '1rem' : '1.2rem',
+          fontWeight: '300',
+          fontFamily: 'Helvetica, Arial, sans-serif',
+          textTransform: 'uppercase',
+          letterSpacing: '1px',
+          zIndex: 1000,
+          backgroundColor: 'rgba(0,0,0,0.3)',
+          padding: '0.5rem 1rem',
+          borderRadius: '4px',
+          backdropFilter: 'blur(5px)'
+        }}
+      >
         Selamat Tahun Baru 2026
-      </div>
+      </motion.div>
 
       {/* Top Navigation Bar */}
       <div 
@@ -1529,7 +1523,8 @@ export default function HomePage(): React.JSX.Element {
           alignItems: 'center',
           zIndex: 101,
           boxSizing: 'border-box',
-          opacity: 1
+          opacity: 1,
+          marginTop: isMobile ? '2.5rem' : '3rem' // Memberi ruang untuk teks tahun baru
         }}
       >
         <div style={{
@@ -1831,7 +1826,7 @@ export default function HomePage(): React.JSX.Element {
         ref={headerRef}
         style={{
           position: 'fixed',
-          top: isMobile ? '3.5rem' : '4.5rem',
+          top: isMobile ? '5rem' : '6rem', // Diperbarui untuk memberi ruang untuk navbar dan teks tahun baru
           left: 0,
           width: '100%',
           padding: isMobile ? '1rem' : '2rem',
