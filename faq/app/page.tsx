@@ -70,7 +70,6 @@ export default function HomePage(): React.JSX.Element {
   const [scrollDirection, setScrollDirection] = useState<"left" | "right">("right");
   const [scrollPosition, setScrollPosition] = useState(0);
   const [isHoveringSignIn, setIsHoveringSignIn] = useState(false);
-  const [isVideoPlaying, setIsVideoPlaying] = useState(false);
   
   // State untuk counter foto - angka kiri saja yang berubah
   const [leftCounter, setLeftCounter] = useState("01");
@@ -98,9 +97,6 @@ export default function HomePage(): React.JSX.Element {
   const userTextRef = useRef<HTMLSpanElement>(null);
   const leftCounterRef = useRef<HTMLSpanElement>(null);
   const messageInputRef = useRef<HTMLInputElement>(null);
-  const videoCardRef = useRef<HTMLDivElement>(null);
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const videoContainerRef = useRef<HTMLDivElement>(null);
 
   // Animasi loading text
   const loadingTexts = [
@@ -139,15 +135,6 @@ export default function HomePage(): React.JSX.Element {
     { title: "Features", description: "Functionality & Integration" }
   ];
 
-  // Video data
-  const videoData = {
-    src: "/videos/demo-video.mp4", // Ganti dengan path video Anda
-    poster: "/images/video-poster.jpg", // Ganti dengan poster image
-    title: "Creative Process",
-    description: "A glimpse into the creative journey behind MENURU",
-    duration: "2:45"
-  };
-
   // Fungsi untuk menghitung waktu yang lalu
   const calculateTimeAgo = (date: Date | Timestamp): string => {
     const now = new Date();
@@ -182,197 +169,6 @@ export default function HomePage(): React.JSX.Element {
 
     return () => clearInterval(interval);
   }, []);
-
-  // Setup GSAP ScrollTrigger untuk video card
-  useEffect(() => {
-    if (videoCardRef.current && videoContainerRef.current && typeof window !== 'undefined') {
-      // Hapus ScrollTrigger sebelumnya
-      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
-      
-      const videoCard = videoCardRef.current;
-      const videoContainer = videoContainerRef.current;
-      
-      // Set initial state
-      gsap.set(videoCard, {
-        scale: 0.8,
-        borderRadius: "40px",
-        boxShadow: "0 20px 60px rgba(0, 255, 255, 0.3)",
-        filter: "brightness(0.8)"
-      });
-      
-      // Setup ScrollTrigger dengan animasi modern
-      const scrollTrigger = ScrollTrigger.create({
-        trigger: videoContainer,
-        start: "top center", // Mulai animasi ketika bagian atas container mencapai tengah viewport
-        end: "bottom center", // Selesai animasi ketika bagian bawah container mencapai tengah viewport
-        scrub: 1, // Smooth scrubbing
-        markers: false, // Set true untuk debugging
-        onUpdate: (self) => {
-          const progress = self.progress;
-          const direction = self.direction;
-          
-          // Animasi berdasarkan scroll direction
-          if (direction === 1) { // Scrolling down
-            // Saat scroll ke bawah, card membesar dengan efek melambung
-            gsap.to(videoCard, {
-              scale: 0.8 + (progress * 0.4), // Dari 0.8 ke 1.2
-              borderRadius: `${40 - (progress * 20)}px`, // Border radius mengecil
-              boxShadow: `0 ${20 + (progress * 40)}px ${60 + (progress * 60)}px rgba(0, 255, 255, ${0.3 + (progress * 0.4)})`,
-              filter: `brightness(${0.8 + (progress * 0.4)}) hue-rotate(${progress * 30}deg)`,
-              y: progress * -50, // Bergerak sedikit ke atas
-              rotation: progress * 5, // Rotasi halus
-              duration: 0.1
-            });
-            
-            // Animasi elemen dalam card
-            const overlay = videoCard.querySelector('.video-overlay');
-            const title = videoCard.querySelector('.video-title');
-            const description = videoCard.querySelector('.video-description');
-            const playButton = videoCard.querySelector('.play-button');
-            
-            if (overlay) {
-              gsap.to(overlay, {
-                backgroundColor: `rgba(0, 0, 0, ${0.7 - (progress * 0.3)})`,
-                backdropFilter: `blur(${10 - (progress * 8)}px)`,
-                duration: 0.1
-              });
-            }
-            
-            if (title) {
-              gsap.to(title, {
-                scale: 1 + (progress * 0.2),
-                y: progress * -20,
-                opacity: 1 - (progress * 0.5),
-                duration: 0.1
-              });
-            }
-            
-            if (description) {
-              gsap.to(description, {
-                y: progress * -15,
-                opacity: 1 - (progress * 0.7),
-                duration: 0.1
-              });
-            }
-            
-            if (playButton) {
-              gsap.to(playButton, {
-                scale: 1 + (progress * 0.3),
-                boxShadow: `0 0 ${20 + (progress * 30)}px rgba(0, 255, 255, ${0.8 + (progress * 0.2)})`,
-                duration: 0.1
-              });
-            }
-            
-          } else { // Scrolling up
-            // Saat scroll ke atas, card mengecil dengan efek melayang
-            const reverseProgress = 1 - progress;
-            
-            gsap.to(videoCard, {
-              scale: 0.8 + (reverseProgress * 0.4),
-              borderRadius: `${40 - (reverseProgress * 20)}px`,
-              boxShadow: `0 ${20 + (reverseProgress * 40)}px ${60 + (reverseProgress * 60)}px rgba(255, 0, 255, ${0.3 + (reverseProgress * 0.4)})`,
-              filter: `brightness(${0.8 + (reverseProgress * 0.4)}) hue-rotate(${reverseProgress * -30}deg)`,
-              y: reverseProgress * 30,
-              rotation: reverseProgress * -3,
-              duration: 0.1
-            });
-            
-            // Animasi elemen dalam card saat scroll up
-            const overlay = videoCard.querySelector('.video-overlay');
-            const title = videoCard.querySelector('.video-title');
-            const description = videoCard.querySelector('.video-description');
-            const playButton = videoCard.querySelector('.play-button');
-            
-            if (overlay) {
-              gsap.to(overlay, {
-                backgroundColor: `rgba(0, 0, 0, ${0.7 - (reverseProgress * 0.3)})`,
-                backdropFilter: `blur(${10 - (reverseProgress * 8)}px)`,
-                duration: 0.1
-              });
-            }
-            
-            if (title) {
-              gsap.to(title, {
-                scale: 1 + (reverseProgress * 0.2),
-                y: reverseProgress * -20,
-                opacity: 1 - (reverseProgress * 0.5),
-                duration: 0.1
-              });
-            }
-            
-            if (description) {
-              gsap.to(description, {
-                y: reverseProgress * -15,
-                opacity: 1 - (reverseProgress * 0.7),
-                duration: 0.1
-              });
-            }
-            
-            if (playButton) {
-              gsap.to(playButton, {
-                scale: 1 + (reverseProgress * 0.3),
-                boxShadow: `0 0 ${20 + (reverseProgress * 30)}px rgba(255, 0, 255, ${0.8 + (reverseProgress * 0.2)})`,
-                duration: 0.1
-              });
-            }
-          }
-        },
-        onEnter: () => {
-          // Efek saat memasuki viewport
-          gsap.fromTo(videoCard, 
-            { 
-              scale: 0.6,
-              opacity: 0,
-              y: 100
-            },
-            { 
-              scale: 0.8,
-              opacity: 1,
-              y: 0,
-              duration: 1.5,
-              ease: "back.out(1.7)",
-              boxShadow: "0 20px 60px rgba(0, 255, 255, 0.3)"
-            }
-          );
-        },
-        onLeave: () => {
-          // Efek saat meninggalkan viewport
-          gsap.to(videoCard, {
-            scale: 0.6,
-            opacity: 0.5,
-            duration: 0.5,
-            ease: "power2.in"
-          });
-        },
-        onEnterBack: () => {
-          // Efek saat kembali ke viewport
-          gsap.to(videoCard, {
-            scale: 0.8,
-            opacity: 1,
-            duration: 1,
-            ease: "power2.out"
-          });
-        }
-      });
-      
-      // Parallax effect untuk background video container
-      gsap.to(videoContainer, {
-        backgroundPosition: "50% 100%",
-        ease: "none",
-        scrollTrigger: {
-          trigger: videoContainer,
-          start: "top bottom",
-          end: "bottom top",
-          scrub: true
-        }
-      });
-      
-      return () => {
-        scrollTrigger.kill();
-        ScrollTrigger.getAll().forEach(trigger => trigger.kill());
-      };
-    }
-  }, [isMobile]);
 
   // Listen to auth state changes
   useEffect(() => {
@@ -504,16 +300,6 @@ export default function HomePage(): React.JSX.Element {
   }, [hoveredTopic]);
 
   useEffect(() => {
-    // Cek apakah user sudah menutup banner tahun baru
-    const bannerDismissed = localStorage.getItem('newYearBanner2026');
-    if (bannerDismissed === 'dismissed') {
-      // Jika sudah ditutup, sembunyikan banner
-      const banner = document.querySelector('.new-year-banner');
-      if (banner) {
-        (banner as HTMLElement).style.display = 'none';
-      }
-    }
-
     // Cek apakah user sudah menyetujui cookies
     const cookieAccepted = localStorage.getItem('cookiesAccepted');
     if (!cookieAccepted) {
@@ -581,9 +367,6 @@ export default function HomePage(): React.JSX.Element {
       }
       if (leftCounterRef.current) {
         gsap.killTweensOf(leftCounterRef.current);
-      }
-      if (videoCardRef.current) {
-        gsap.killTweensOf(videoCardRef.current);
       }
       // Kill ScrollTrigger instances
       ScrollTrigger.getAll().forEach(trigger => trigger.kill());
@@ -654,48 +437,6 @@ export default function HomePage(): React.JSX.Element {
       const prevIndex = (prev - 1 + progressPhotos.length) % progressPhotos.length;
       return prevIndex;
     });
-  };
-
-  // Fungsi untuk mengontrol video
-  const handleVideoPlay = () => {
-    if (videoRef.current) {
-      if (isVideoPlaying) {
-        videoRef.current.pause();
-        setIsVideoPlaying(false);
-      } else {
-        videoRef.current.play();
-        setIsVideoPlaying(true);
-        
-        // Animasi play button
-        const playButton = document.querySelector('.play-button');
-        if (playButton) {
-          gsap.to(playButton, {
-            scale: 0,
-            opacity: 0,
-            duration: 0.3,
-            ease: "power2.in"
-          });
-        }
-      }
-    }
-  };
-
-  const handleVideoEnded = () => {
-    setIsVideoPlaying(false);
-    
-    // Reset play button animation
-    const playButton = document.querySelector('.play-button');
-    if (playButton) {
-      gsap.fromTo(playButton,
-        { scale: 0, opacity: 0 },
-        { 
-          scale: 1, 
-          opacity: 1, 
-          duration: 0.5,
-          ease: "back.out(1.7)"
-        }
-      );
-    }
   };
 
   // Start progress animation
@@ -923,223 +664,41 @@ export default function HomePage(): React.JSX.Element {
       MozOsxFontSmoothing: 'grayscale'
     }}>
 
-      {/* Banner Notifikasi Tahun Baru 2026 - Ditambahkan di atas header */}
-      <div className="new-year-banner" style={{
+      {/* Banner Sederhana di Atas Judul Website */}
+      <div style={{
         position: 'fixed',
         top: 0,
         left: 0,
         width: '100%',
-        backgroundColor: '#FF6B6B', // Warna merah cerah untuk perayaan
+        backgroundColor: 'rgba(0, 80, 183, 0.9)',
         color: 'white',
         zIndex: 1000,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: isMobile ? '0.8rem 1rem' : '1rem 2rem',
-        boxShadow: '0 4px 20px rgba(0,0,0,0.2)',
-        borderBottom: '3px solid #FFD93D'
+        padding: '0.5rem 1rem',
+        fontSize: '0.9rem',
+        fontWeight: '500',
+        fontFamily: 'Helvetica, Arial, sans-serif',
+        borderBottom: '1px solid rgba(255,255,255,0.1)'
       }}>
-        {/* Icon Megaphone */}
-        <motion.div
-          initial={{ scale: 0, rotate: -30 }}
-          animate={{ scale: 1, rotate: 0 }}
-          transition={{ type: "spring", stiffness: 200, damping: 15 }}
-          style={{
-            marginRight: isMobile ? '0.8rem' : '1.2rem',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center'
-          }}
+        <svg 
+          width="16" 
+          height="16" 
+          viewBox="0 0 24 24" 
+          fill="none" 
+          stroke="currentColor" 
+          strokeWidth="2"
+          style={{ marginRight: '0.5rem' }}
         >
-          <svg 
-            width={isMobile ? "24" : "32"} 
-            height={isMobile ? "24" : "32"} 
-            viewBox="0 0 24 24" 
-            fill="none" 
-            stroke="currentColor" 
-            strokeWidth="2"
-            style={{
-              filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))'
-            }}
-          >
-            <path d="M18 8a3 3 0 0 1 0 6" />
-            <path d="M10 8v11a1 1 0 0 0 1 1h1a1 1 0 0 0 1-1v-5" />
-            <path d="M12 8h0" />
-            <path d="M7 15a6.47 6.47 0 0 1 0-12" />
-            <path d="M12 8h4l-4-8-4 8h4z" />
-            <path d="M7 15a6.472 6.472 0 0 0 5 0 6.47 6.47 0 0 0 5 0" />
-          </svg>
-        </motion.div>
-
-        {/* Teks Selamat Tahun Baru 2026 */}
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2, duration: 0.5 }}
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            textAlign: 'center'
-          }}
-        >
-          <div style={{
-            fontSize: isMobile ? '1rem' : '1.3rem',
-            fontWeight: '700',
-            fontFamily: 'Helvetica, Arial, sans-serif',
-            letterSpacing: '0.5px',
-            textShadow: '0 2px 4px rgba(0,0,0,0.2)',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.5rem'
-          }}>
-            <motion.span
-              animate={{ 
-                scale: [1, 1.1, 1],
-                color: ['#FFFFFF', '#FFD93D', '#FFFFFF']
-              }}
-              transition={{ 
-                duration: 2,
-                repeat: Infinity,
-                repeatType: "reverse"
-              }}
-              style={{
-                display: 'inline-block'
-              }}
-            >
-              SELAMAT TAHUN BARU
-            </motion.span>
-            
-            <motion.span
-              animate={{ 
-                scale: [1, 1.15, 1],
-                backgroundColor: ['#4ECDC4', '#FFD93D', '#4ECDC4']
-              }}
-              transition={{ 
-                duration: 1.5,
-                repeat: Infinity,
-                repeatType: "reverse"
-              }}
-              style={{
-                backgroundColor: '#4ECDC4',
-                color: '#2C3E50',
-                padding: isMobile ? '0.2rem 0.8rem' : '0.3rem 1rem',
-                borderRadius: '20px',
-                fontWeight: '800',
-                fontSize: isMobile ? '1.1rem' : '1.4rem',
-                boxShadow: '0 3px 10px rgba(0,0,0,0.2)',
-                border: '2px solid #FFD93D'
-              }}
-            >
-              2026
-            </motion.span>
-          </div>
-          
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.4, duration: 0.5 }}
-            style={{
-              fontSize: isMobile ? '0.75rem' : '0.9rem',
-              fontWeight: '500',
-              opacity: 0.9,
-              marginTop: '0.3rem',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem'
-            }}
-          >
-            <span>✨ Tahun baru, semangat baru! ✨</span>
-          </motion.div>
-        </motion.div>
-
-        {/* Tombol Close */}
-        <motion.button
-          onClick={() => {
-            // Simpan preferensi user agar banner tidak muncul lagi
-            localStorage.setItem('newYearBanner2026', 'dismissed');
-            // Sembunyikan banner
-            const banner = document.querySelector('.new-year-banner');
-            if (banner) {
-              (banner as HTMLElement).style.display = 'none';
-            }
-          }}
-          style={{
-            position: 'absolute',
-            right: isMobile ? '0.8rem' : '1.5rem',
-            backgroundColor: 'transparent',
-            border: 'none',
-            color: 'white',
-            cursor: 'pointer',
-            padding: '0.5rem',
-            borderRadius: '50%',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            opacity: 0.8
-          }}
-          whileHover={{ 
-            backgroundColor: 'rgba(255,255,255,0.2)',
-            scale: 1.1,
-            opacity: 1
-          }}
-          whileTap={{ scale: 0.9 }}
-        >
-          <svg 
-            width="20" 
-            height="20" 
-            viewBox="0 0 24 24" 
-            fill="none" 
-            stroke="currentColor" 
-            strokeWidth="2"
-          >
-            <line x1="18" y1="6" x2="6" y2="18" />
-            <line x1="6" y1="6" x2="18" y2="18" />
-          </svg>
-        </motion.button>
-
-        {/* Efek Konfeti */}
-        <div style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          width: '100%',
-          height: '100%',
-          pointerEvents: 'none',
-          overflow: 'hidden',
-          zIndex: -1
-        }}>
-          {[...Array(15)].map((_, i) => (
-            <motion.div
-              key={i}
-              initial={{ 
-                y: -20,
-                x: Math.random() * 100 + '%',
-                opacity: 0,
-                rotate: 0
-              }}
-              animate={{ 
-                y: '100%',
-                opacity: [0, 1, 0],
-                rotate: 360
-              }}
-              transition={{ 
-                duration: Math.random() * 3 + 2,
-                repeat: Infinity,
-                delay: Math.random() * 2
-              }}
-              style={{
-                position: 'absolute',
-                width: '10px',
-                height: '10px',
-                backgroundColor: i % 3 === 0 ? '#FFD93D' : i % 3 === 1 ? '#4ECDC4' : '#FFFFFF',
-                borderRadius: i % 2 === 0 ? '50%' : '0%',
-                transform: `rotate(${i * 45}deg)`
-              }}
-            />
-          ))}
-        </div>
+          <path d="M18 8a3 3 0 0 1 0 6" />
+          <path d="M10 8v11a1 1 0 0 0 1 1h1a1 1 0 0 0 1-1v-5" />
+          <path d="M12 8h0" />
+          <path d="M7 15a6.47 6.47 0 0 1 0-12" />
+          <path d="M12 8h4l-4-8-4 8h4z" />
+          <path d="M7 15a6.472 6.472 0 0 0 5 0 6.47 6.47 0 0 0 5 0" />
+        </svg>
+        Selamat Tahun Baru 2026
       </div>
 
       {/* Halaman Full Page MENURU */}
@@ -2842,250 +2401,6 @@ export default function HomePage(): React.JSX.Element {
                 </div>
               </div>
 
-              {/* VIDEO CARD SECTION - TAMBAHAN */}
-              <div 
-                ref={videoContainerRef}
-                style={{
-                  width: '100%',
-                  minHeight: '100vh',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  padding: isMobile ? '2rem 1rem' : '4rem 2rem',
-                  background: 'radial-gradient(circle at center, rgba(0, 80, 183, 0.1) 0%, transparent 70%)',
-                  position: 'relative',
-                  overflow: 'hidden',
-                  marginTop: isMobile ? '3rem' : '5rem',
-                  marginBottom: isMobile ? '3rem' : '5rem'
-                }}
-              >
-                {/* Background decorative elements */}
-                <div style={{
-                  position: 'absolute',
-                  top: '10%',
-                  left: '10%',
-                  width: '200px',
-                  height: '200px',
-                  background: 'radial-gradient(circle, rgba(0, 255, 255, 0.1) 0%, transparent 70%)',
-                  borderRadius: '50%',
-                  filter: 'blur(40px)',
-                  zIndex: 1
-                }}></div>
-                
-                <div style={{
-                  position: 'absolute',
-                  bottom: '10%',
-                  right: '10%',
-                  width: '300px',
-                  height: '300px',
-                  background: 'radial-gradient(circle, rgba(255, 0, 255, 0.1) 0%, transparent 70%)',
-                  borderRadius: '50%',
-                  filter: 'blur(60px)',
-                  zIndex: 1
-                }}></div>
-
-                {/* Video Card Container */}
-                <div 
-                  ref={videoCardRef}
-                  style={{
-                    width: isMobile ? '95%' : '70%',
-                    maxWidth: '900px',
-                    aspectRatio: '16/9',
-                    position: 'relative',
-                    zIndex: 2,
-                    cursor: 'pointer',
-                    transformStyle: 'preserve-3d',
-                    perspective: '1000px'
-                  }}
-                  onClick={handleVideoPlay}
-                >
-                  {/* Video Element */}
-                  <video
-                    ref={videoRef}
-                    src={videoData.src}
-                    poster={videoData.poster}
-                    style={{
-                      width: '100%',
-                      height: '100%',
-                      objectFit: 'cover',
-                      borderRadius: 'inherit',
-                      display: 'block'
-                    }}
-                    loop
-                    muted={false}
-                    preload="metadata"
-                    onEnded={handleVideoEnded}
-                    onError={(e) => {
-                      console.error("Video error:", e);
-                      // Fallback jika video tidak tersedia
-                      const videoElement = e.currentTarget;
-                      videoElement.style.backgroundColor = '#111';
-                      videoElement.style.display = 'flex';
-                      videoElement.style.alignItems = 'center';
-                      videoElement.style.justifyContent = 'center';
-                      videoElement.style.color = 'white';
-                      videoElement.innerHTML = `
-                        <div style="text-align: center; padding: 2rem;">
-                          <div style="font-size: 3rem; margin-bottom: 1rem;">🎬</div>
-                          <div>Creative Process Video</div>
-                          <div style="font-size: 0.9rem; opacity: 0.7; margin-top: 0.5rem;">Click to play placeholder</div>
-                        </div>
-                      `;
-                    }}
-                  />
-                  
-                  {/* Overlay dengan gradient */}
-                  <div 
-                    className="video-overlay"
-                    style={{
-                      position: 'absolute',
-                      top: 0,
-                      left: 0,
-                      width: '100%',
-                      height: '100%',
-                      background: 'linear-gradient(135deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.7) 100%)',
-                      borderRadius: 'inherit',
-                      backdropFilter: 'blur(10px)',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      justifyContent: 'center',
-                      alignItems: 'center',
-                      padding: '2rem',
-                      boxSizing: 'border-box',
-                      transition: 'all 0.3s ease'
-                    }}
-                  >
-                    {/* Play Button */}
-                    <motion.div 
-                      className="play-button"
-                      style={{
-                        width: isMobile ? '70px' : '100px',
-                        height: isMobile ? '70px' : '100px',
-                        backgroundColor: 'rgba(255, 255, 255, 0.9)',
-                        borderRadius: '50%',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        cursor: 'pointer',
-                        boxShadow: '0 0 20px rgba(0, 255, 255, 0.8)',
-                        marginBottom: '2rem',
-                        position: 'relative',
-                        overflow: 'hidden'
-                      }}
-                      whileHover={{ 
-                        scale: 1.1,
-                        backgroundColor: 'rgba(255, 255, 255, 1)',
-                        boxShadow: '0 0 40px rgba(0, 255, 255, 1)'
-                      }}
-                      whileTap={{ scale: 0.95 }}
-                    >
-                      <div style={{
-                        position: 'absolute',
-                        width: '100%',
-                        height: '100%',
-                        background: 'conic-gradient(from 0deg, transparent, rgba(0, 255, 255, 0.5), transparent)',
-                        animation: 'rotate 3s linear infinite'
-                      }}></div>
-                      
-                      <svg 
-                        width={isMobile ? "30" : "40"} 
-                        height={isMobile ? "30" : "40"} 
-                        viewBox="0 0 24 24" 
-                        fill="black" 
-                        style={{
-                          position: 'relative',
-                          zIndex: 2,
-                          marginLeft: '5px'
-                        }}
-                      >
-                        <path d="M8 5v14l11-7z"/>
-                      </svg>
-                    </motion.div>
-
-                    {/* Video Title */}
-                    <h3 
-                      className="video-title"
-                      style={{
-                        color: 'white',
-                        fontSize: isMobile ? '1.8rem' : '2.5rem',
-                        fontWeight: '700',
-                        fontFamily: '"Formula Condensed", sans-serif',
-                        textAlign: 'center',
-                        margin: '0.5rem 0',
-                        textTransform: 'uppercase',
-                        letterSpacing: '2px',
-                        textShadow: '0 2px 10px rgba(0,0,0,0.5)'
-                      }}
-                    >
-                      {videoData.title}
-                    </h3>
-
-                    {/* Video Description */}
-                    <p 
-                      className="video-description"
-                      style={{
-                        color: 'rgba(255, 255, 255, 0.9)',
-                        fontSize: isMobile ? '1rem' : '1.2rem',
-                        fontWeight: '300',
-                        fontFamily: 'Helvetica, Arial, sans-serif',
-                        textAlign: 'center',
-                        maxWidth: '600px',
-                        margin: '1rem 0',
-                        lineHeight: 1.6
-                      }}
-                    >
-                      {videoData.description}
-                    </p>
-
-                    {/* Video Duration */}
-                    <div style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '0.5rem',
-                      marginTop: '1rem',
-                      color: 'rgba(255, 255, 255, 0.7)',
-                      fontSize: '0.9rem',
-                      fontFamily: 'Helvetica, Arial, sans-serif'
-                    }}>
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <circle cx="12" cy="12" r="10"/>
-                        <polyline points="12 6 12 12 16 14"/>
-                      </svg>
-                      <span>{videoData.duration}</span>
-                    </div>
-
-                    {/* Scroll Hint */}
-                    <motion.div 
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 0.7, y: 0 }}
-                      transition={{ delay: 1, duration: 1 }}
-                      style={{
-                        position: 'absolute',
-                        bottom: '1.5rem',
-                        left: '50%',
-                        transform: 'translateX(-50%)',
-                        color: 'rgba(255, 255, 255, 0.5)',
-                        fontSize: '0.8rem',
-                        fontFamily: 'Helvetica, Arial, sans-serif',
-                        textTransform: 'uppercase',
-                        letterSpacing: '1px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.5rem'
-                      }}
-                    >
-                      <span>Scroll to transform</span>
-                      <motion.div
-                        animate={{ y: [0, 5, 0] }}
-                        transition={{ duration: 1.5, repeat: Infinity }}
-                      >
-                        ↓
-                      </motion.div>
-                    </motion.div>
-                  </div>
-                </div>
-              </div>
-
               {/* Content tambahan */}
               <div style={{
                 height: '50vh',
@@ -3671,18 +2986,6 @@ export default function HomePage(): React.JSX.Element {
           to {
             transform: rotate(360deg);
           }
-        }
-        
-        video::-webkit-media-controls {
-          display: none !important;
-        }
-        
-        video::-webkit-media-controls-enclosure {
-          display: none !important;
-        }
-        
-        video::-webkit-media-controls-panel {
-          display: none !important;
         }
       `}</style>
     </div>
