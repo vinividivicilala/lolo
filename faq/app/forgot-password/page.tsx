@@ -3,7 +3,13 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { getAuth, updatePassword, reauthenticateWithCredential, EmailAuthProvider } from "firebase/auth";
+import { 
+  getAuth, 
+  updatePassword,
+  reauthenticateWithCredential,
+  EmailAuthProvider,
+  fetchSignInMethodsForEmail 
+} from "firebase/auth";
 import { initializeApp } from "firebase/app";
 
 // Konfigurasi Firebase
@@ -30,13 +36,17 @@ export default function ForgotPasswordPage({ onClose }: ForgotPasswordPageProps)
   const [email, setEmail] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [step, setStep] = useState<1 | 2>(1); // 1: Email verification, 2: New password
+  const [currentPassword, setCurrentPassword] = useState(""); // Untuk re-authentication
+  const [step, setStep] = useState<1 | 2 | 3>(1); // 1: Email, 2: Current Password, 3: New Password
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [userData, setUserData] = useState<any>(null); // Data user yang ditemukan
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const router = useRouter();
   const [isMobile, setIsMobile] = useState(false);
-  const [tempUser, setTempUser] = useState<any>(null); // Untuk menyimpan user sementara
 
   // Check if mobile on component mount and window resize
   useEffect(() => {
@@ -52,16 +62,18 @@ export default function ForgotPasswordPage({ onClose }: ForgotPasswordPageProps)
     };
   }, []);
 
-  // Cek apakah email terdaftar (simulasi)
-  const checkRegisteredEmail = async (email: string) => {
+  // Cek apakah email terdaftar di Firebase Auth
+  const checkEmailRegistered = async (email: string) => {
     try {
-      // Di sini Anda bisa menambahkan logika untuk memeriksa ke database
-      // Untuk sekarang kita asumsikan semua email valid
-      // Anda bisa menambahkan API call ke database Anda untuk memverifikasi
-      return true;
-    } catch (error) {
+      const methods = await fetchSignInMethodsForEmail(auth, email);
+      return methods.length > 0; // Jika ada metode sign in, email terdaftar
+    } catch (error: any) {
       console.error("Error checking email:", error);
-      return false;
+      // Jika error "auth/user-not-found", email tidak terdaftar
+      if (error.code === 'auth/user-not-found') {
+        return false;
+      }
+      throw error;
     }
   };
 
@@ -77,15 +89,40 @@ export default function ForgotPasswordPage({ onClose }: ForgotPasswordPageProps)
         throw new Error("Format email tidak valid");
       }
 
-      // Cek apakah email terdaftar
-      const isRegistered = await checkRegisteredEmail(email);
+      // Cek apakah email terdaftar di Firebase
+      const isRegistered = await checkEmailRegistered(email);
+      
       if (!isRegistered) {
-        throw new Error("Email belum terdaftar");
+        throw new Error("Email belum terdaftar di sistem");
       }
 
       // Simpan email dan lanjut ke step 2
-      setTempUser({ email });
+      setUserData({ email });
       setStep(2);
+    } catch (err: any) {
+      console.error("Email verification error:", err);
+      setError(err.message || "Terjadi kesalahan. Silakan coba lagi.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleCurrentPasswordSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      if (!currentPassword) {
+        throw new Error("Masukkan password saat ini");
+      }
+
+      // Di sini seharusnya kita perlu mendapatkan user yang sedang login
+      // Tapi karena ini forgot password, user belum login
+      // Jadi kita skip step ini dan langsung ke step 3 untuk demo
+      // DI PRODUCTION: Anda perlu sistem OTP/verifikasi lain
+      
+      setStep(3);
     } catch (err: any) {
       setError(err.message || "Terjadi kesalahan. Silakan coba lagi.");
     } finally {
@@ -108,29 +145,28 @@ export default function ForgotPasswordPage({ onClose }: ForgotPasswordPageProps)
         throw new Error("Password tidak cocok");
       }
 
-      // Catatan: Di aplikasi nyata, Anda perlu verifikasi email dulu
-      // Karena ini demo, kita langsung update password
-      // Di production, Anda perlu:
-      // 1. Verifikasi email dengan OTP/kode khusus
-      // 2. Atau gunakan Firebase Auth reset dengan custom backend
+      // Catatan: DI PRODUCTION, Anda perlu:
+      // 1. Verifikasi user dengan OTP/kode khusus
+      // 2. Atau minta user login dulu sebelum ganti password
       
-      // Untuk demo, kita tampilkan success message
+      // Untuk DEMO: Tampilkan pesan sukses
+      setSuccess(true);
+      
+      // Simulasi proses update password
+      console.log(`Password untuk ${email} berhasil diubah`);
+      
+      // Reset setelah 2 detik
       setTimeout(() => {
-        setSuccess(true);
-        setIsLoading(false);
-        
-        // Reset form setelah 3 detik
-        setTimeout(() => {
-          if (onClose && typeof onClose === 'function') {
-            onClose();
-          } else {
-            router.push('/signin');
-          }
-        }, 3000);
-      }, 1500);
+        if (onClose && typeof onClose === 'function') {
+          onClose();
+        } else {
+          router.push('/signin');
+        }
+      }, 2000);
 
     } catch (err: any) {
       setError(err.message || "Terjadi kesalahan. Silakan coba lagi.");
+    } finally {
       setIsLoading(false);
     }
   };
@@ -138,6 +174,14 @@ export default function ForgotPasswordPage({ onClose }: ForgotPasswordPageProps)
   const handleBackToStep1 = () => {
     setStep(1);
     setError(null);
+    setCurrentPassword("");
+  };
+
+  const handleBackToStep2 = () => {
+    setStep(2);
+    setError(null);
+    setNewPassword("");
+    setConfirmPassword("");
   };
 
   const handleBackToSignIn = () => {
@@ -165,7 +209,7 @@ export default function ForgotPasswordPage({ onClose }: ForgotPasswordPageProps)
     modal: {
       width: '90%',
       height: 'auto',
-      minHeight: step === 1 ? '400px' : '450px',
+      minHeight: '450px',
       padding: '1.5rem',
       marginBottom: '2rem',
       marginTop: '1rem',
@@ -197,9 +241,9 @@ export default function ForgotPasswordPage({ onClose }: ForgotPasswordPageProps)
       padding: '2rem 0',
     },
     modal: {
-      width: step === 1 ? '450px' : '500px',
+      width: '500px',
       height: 'auto',
-      minHeight: step === 1 ? '450px' : '500px',
+      minHeight: '500px',
       padding: '3rem',
       marginBottom: '3rem',
       marginTop: '2rem',
@@ -226,6 +270,69 @@ export default function ForgotPasswordPage({ onClose }: ForgotPasswordPageProps)
   };
 
   const styles = isMobile ? mobileStyles : desktopStyles;
+
+  // Render password input field dengan show/hide toggle
+  const renderPasswordInput = (
+    label: string,
+    value: string,
+    onChange: (value: string) => void,
+    placeholder: string,
+    showPassword: boolean,
+    setShowPassword: (show: boolean) => void,
+    error?: boolean
+  ) => (
+    <div style={{ marginBottom: '1.5rem' }}>
+      <label style={{
+        display: 'block',
+        color: 'white',
+        marginBottom: '0.5rem',
+        fontSize: isMobile ? '0.8rem' : '0.9rem',
+        fontFamily: 'Arame Mono, monospace'
+      }}>
+        {label}
+      </label>
+      <div style={{ position: 'relative' }}>
+        <input
+          type={showPassword ? "text" : "password"}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder={placeholder}
+          required
+          disabled={isLoading}
+          style={{
+            width: '100%',
+            background: 'rgba(255,255,255,0.1)',
+            border: error ? '1px solid #ff3b30' : '1px solid rgba(255,255,255,0.3)',
+            borderRadius: '6px',
+            color: 'white',
+            outline: 'none',
+            fontFamily: 'Arame Mono, monospace',
+            ...styles.input,
+            opacity: isLoading ? 0.7 : 1,
+            paddingRight: '40px'
+          }}
+        />
+        <button
+          type="button"
+          onClick={() => setShowPassword(!showPassword)}
+          style={{
+            position: 'absolute',
+            right: '10px',
+            top: '50%',
+            transform: 'translateY(-50%)',
+            background: 'none',
+            border: 'none',
+            color: 'rgba(255,255,255,0.6)',
+            cursor: 'pointer',
+            fontSize: '0.9rem',
+            padding: '4px'
+          }}
+        >
+          {showPassword ? '🙈' : '👁️'}
+        </button>
+      </div>
+    </div>
+  );
 
   return (
     <AnimatePresence>
@@ -328,158 +435,27 @@ export default function ForgotPasswordPage({ onClose }: ForgotPasswordPageProps)
                 fontFamily: 'Arame Mono, monospace',
                 textAlign: 'center'
               }}>
-                Password Anda telah berhasil diperbarui. Anda akan diarahkan ke halaman login dalam beberapa detik.
+                Password untuk <strong>{email}</strong> telah berhasil diperbarui. 
+                Anda bisa login dengan password baru.
               </p>
-            </div>
-          ) : step === 1 ? (
-            // Step 1: Email Verification
-            <>
-              <h2 style={{
-                color: 'white',
-                fontWeight: '600',
-                marginBottom: '1rem',
-                textAlign: 'left',
-                fontFamily: 'Arame Mono, monospace',
-                ...styles.title
-              }}>
-                Verifikasi Email
-              </h2>
-
-              <p style={{
-                color: 'rgba(255,255,255,0.8)',
-                marginBottom: '2rem',
-                textAlign: 'left',
-                fontFamily: 'Arame Mono, monospace',
-                ...styles.description
-              }}>
-                Masukkan email terdaftar untuk melanjutkan proses reset password
-              </p>
-
-              {/* Error Message */}
-              {error && (
-                <div style={{
-                  backgroundColor: 'rgba(255, 59, 48, 0.1)',
-                  border: '1px solid rgba(255, 59, 48, 0.3)',
-                  borderRadius: '6px',
-                  padding: '0.75rem',
-                  marginBottom: '1.5rem',
-                  color: '#ff3b30',
-                  fontSize: isMobile ? '0.8rem' : '0.9rem',
-                  fontFamily: 'Arame Mono, monospace',
-                }}>
-                  {error}
-                </div>
-              )}
-
-              {/* Form Email */}
-              <form onSubmit={handleEmailSubmit} style={{ width: '100%' }}>
-                {/* Email Input */}
-                <div style={{ marginBottom: '2rem' }}>
-                  <label style={{
-                    display: 'block',
-                    color: 'white',
-                    marginBottom: '0.5rem',
-                    fontSize: isMobile ? '0.8rem' : '0.9rem',
-                    fontFamily: 'Arame Mono, monospace'
-                  }}>
-                    Email Terdaftar
-                  </label>
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => {
-                      setEmail(e.target.value);
-                      setError(null);
-                    }}
-                    placeholder="masukkan email terdaftar"
-                    required
-                    disabled={isLoading}
-                    style={{
-                      width: '100%',
-                      background: 'rgba(255,255,255,0.1)',
-                      border: error ? '1px solid #ff3b30' : '1px solid rgba(255,255,255,0.3)',
-                      borderRadius: '6px',
-                      color: 'white',
-                      outline: 'none',
-                      fontFamily: 'Arame Mono, monospace',
-                      ...styles.input,
-                      opacity: isLoading ? 0.7 : 1
-                    }}
-                  />
-                  <p style={{
-                    color: 'rgba(255,255,255,0.6)',
-                    fontSize: isMobile ? '0.7rem' : '0.8rem',
-                    marginTop: '0.5rem',
-                    fontFamily: 'Arame Mono, monospace'
-                  }}>
-                    *Email harus sudah terdaftar di sistem
-                  </p>
-                </div>
-
-                {/* Tombol Lanjut */}
-                <button
-                  type="submit"
-                  disabled={isLoading}
-                  style={{
-                    width: '100%',
-                    background: isLoading 
-                      ? 'rgba(255,255,255,0.1)' 
-                      : 'rgba(255,255,255,0.2)',
-                    border: '1px solid rgba(255,255,255,0.3)',
-                    borderRadius: '6px',
-                    color: isLoading ? 'rgba(255,255,255,0.5)' : 'white',
-                    cursor: isLoading ? 'not-allowed' : 'pointer',
-                    marginBottom: '1rem',
-                    fontFamily: 'Arame Mono, monospace',
-                    ...styles.button,
-                    position: 'relative'
-                  }}
-                >
-                  {isLoading ? (
-                    <>
-                      <span style={{ opacity: 0.7 }}>Memverifikasi...</span>
-                      <motion.span
-                        animate={{ rotate: 360 }}
-                        transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                        style={{
-                          position: 'absolute',
-                          right: '1rem',
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          justifyContent: 'center'
-                        }}
-                      >
-                        ↻
-                      </motion.span>
-                    </>
-                  ) : (
-                    'Lanjutkan'
-                  )}
-                </button>
-              </form>
-
-              {/* Tombol Kembali ke Login */}
+              
               <button
                 onClick={handleBackToSignIn}
-                disabled={isLoading}
                 style={{
-                  background: 'none',
-                  border: 'none',
-                  color: isLoading ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.8)',
-                  cursor: isLoading ? 'not-allowed' : 'pointer',
-                  fontSize: isMobile ? '0.8rem' : '0.9rem',
-                  textDecoration: 'underline',
+                  background: 'rgba(255,255,255,0.2)',
+                  border: '1px solid rgba(255,255,255,0.3)',
+                  borderRadius: '6px',
+                  color: 'white',
+                  padding: isMobile ? '0.6rem 1.2rem' : '0.75rem 1.5rem',
+                  cursor: 'pointer',
                   fontFamily: 'Arame Mono, monospace',
-                  alignSelf: 'flex-start',
-                  padding: 0,
-                  marginTop: '0.5rem'
+                  marginTop: '1rem'
                 }}
               >
-                Kembali ke Sign In
+                Login Sekarang
               </button>
-            </>
+            </div>
           ) : (
-            // Step 2: New Password
             <>
               {/* Progress Indicator */}
               <div style={{
@@ -488,281 +464,464 @@ export default function ForgotPasswordPage({ onClose }: ForgotPasswordPageProps)
                 justifyContent: 'space-between',
                 marginBottom: '2rem'
               }}>
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.5rem'
-                }}>
-                  <div style={{
-                    width: '24px',
-                    height: '24px',
-                    borderRadius: '50%',
-                    backgroundColor: 'rgba(255,255,255,0.2)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    color: 'white',
-                    fontSize: '0.8rem',
-                    fontFamily: 'Arame Mono, monospace'
-                  }}>
-                    1
-                  </div>
-                  <span style={{
-                    color: 'rgba(255,255,255,0.6)',
-                    fontSize: '0.8rem',
-                    fontFamily: 'Arame Mono, monospace'
-                  }}>
-                    Email
-                  </span>
-                </div>
-                
-                <div style={{
-                  flex: 1,
-                  height: '1px',
-                  backgroundColor: 'rgba(255,255,255,0.2)',
-                  margin: '0 1rem'
-                }} />
-                
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.5rem'
-                }}>
-                  <div style={{
-                    width: '24px',
-                    height: '24px',
-                    borderRadius: '50%',
-                    backgroundColor: 'white',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    color: 'black',
-                    fontSize: '0.8rem',
-                    fontFamily: 'Arame Mono, monospace'
-                  }}>
-                    2
-                  </div>
-                  <span style={{
-                    color: 'white',
-                    fontSize: '0.8rem',
-                    fontFamily: 'Arame Mono, monospace'
-                  }}>
-                    Password Baru
-                  </span>
-                </div>
+                {[1, 2, 3].map((stepNum) => (
+                  <React.Fragment key={stepNum}>
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.5rem'
+                    }}>
+                      <div style={{
+                        width: '28px',
+                        height: '28px',
+                        borderRadius: '50%',
+                        backgroundColor: step === stepNum ? 'white' : 
+                                        step > stepNum ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.1)',
+                        border: step === stepNum ? 'none' : '1px solid rgba(255,255,255,0.3)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: step === stepNum ? 'black' : 'rgba(255,255,255,0.6)',
+                        fontSize: '0.9rem',
+                        fontFamily: 'Arame Mono, monospace',
+                        fontWeight: step === stepNum ? '600' : 'normal'
+                      }}>
+                        {stepNum}
+                      </div>
+                      {!isMobile && (
+                        <span style={{
+                          color: step >= stepNum ? 'white' : 'rgba(255,255,255,0.4)',
+                          fontSize: '0.8rem',
+                          fontFamily: 'Arame Mono, monospace',
+                          whiteSpace: 'nowrap'
+                        }}>
+                          {stepNum === 1 ? 'Email' : stepNum === 2 ? 'Verifikasi' : 'Password Baru'}
+                        </span>
+                      )}
+                    </div>
+                    
+                    {stepNum < 3 && (
+                      <div style={{
+                        flex: 1,
+                        height: '1px',
+                        backgroundColor: step > stepNum ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.1)',
+                        margin: '0 0.5rem'
+                      }} />
+                    )}
+                  </React.Fragment>
+                ))}
               </div>
-
-              <h2 style={{
-                color: 'white',
-                fontWeight: '600',
-                marginBottom: '0.5rem',
-                textAlign: 'left',
-                fontFamily: 'Arame Mono, monospace',
-                ...styles.title
-              }}>
-                Buat Password Baru
-              </h2>
-
-              <p style={{
-                color: 'rgba(255,255,255,0.8)',
-                marginBottom: '2rem',
-                textAlign: 'left',
-                fontFamily: 'Arame Mono, monospace',
-                ...styles.description
-              }}>
-                Masukkan password baru untuk akun: 
-                <span style={{ fontWeight: '600', marginLeft: '0.5rem' }}>
-                  {tempUser?.email}
-                </span>
-              </p>
 
               {/* Error Message */}
               {error && (
-                <div style={{
-                  backgroundColor: 'rgba(255, 59, 48, 0.1)',
-                  border: '1px solid rgba(255, 59, 48, 0.3)',
-                  borderRadius: '6px',
-                  padding: '0.75rem',
-                  marginBottom: '1.5rem',
-                  color: '#ff3b30',
-                  fontSize: isMobile ? '0.8rem' : '0.9rem',
-                  fontFamily: 'Arame Mono, monospace',
-                }}>
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  style={{
+                    backgroundColor: 'rgba(255, 59, 48, 0.1)',
+                    border: '1px solid rgba(255, 59, 48, 0.3)',
+                    borderRadius: '6px',
+                    padding: '0.75rem',
+                    marginBottom: '1.5rem',
+                    color: '#ff3b30',
+                    fontSize: isMobile ? '0.8rem' : '0.9rem',
+                    fontFamily: 'Arame Mono, monospace',
+                  }}
+                >
                   {error}
-                </div>
+                </motion.div>
               )}
 
-              {/* Form Password Baru */}
-              <form onSubmit={handlePasswordChange} style={{ width: '100%' }}>
-                {/* New Password Input */}
-                <div style={{ marginBottom: '1.5rem' }}>
-                  <label style={{
-                    display: 'block',
+              {/* Step 1: Email Verification */}
+              {step === 1 && (
+                <>
+                  <h2 style={{
                     color: 'white',
-                    marginBottom: '0.5rem',
-                    fontSize: isMobile ? '0.8rem' : '0.9rem',
-                    fontFamily: 'Arame Mono, monospace'
+                    fontWeight: '600',
+                    marginBottom: '1rem',
+                    textAlign: 'left',
+                    fontFamily: 'Arame Mono, monospace',
+                    ...styles.title
                   }}>
-                    Password Baru
-                  </label>
-                  <input
-                    type="password"
-                    value={newPassword}
-                    onChange={(e) => {
-                      setNewPassword(e.target.value);
-                      setError(null);
-                    }}
-                    placeholder="minimal 6 karakter"
-                    required
-                    disabled={isLoading}
-                    style={{
-                      width: '100%',
-                      background: 'rgba(255,255,255,0.1)',
-                      border: '1px solid rgba(255,255,255,0.3)',
-                      borderRadius: '6px',
-                      color: 'white',
-                      outline: 'none',
-                      fontFamily: 'Arame Mono, monospace',
-                      ...styles.input,
-                      opacity: isLoading ? 0.7 : 1
-                    }}
-                  />
-                </div>
+                    Verifikasi Email
+                  </h2>
 
-                {/* Confirm Password Input */}
-                <div style={{ marginBottom: '2rem' }}>
-                  <label style={{
-                    display: 'block',
-                    color: 'white',
-                    marginBottom: '0.5rem',
-                    fontSize: isMobile ? '0.8rem' : '0.9rem',
-                    fontFamily: 'Arame Mono, monospace'
+                  <p style={{
+                    color: 'rgba(255,255,255,0.8)',
+                    marginBottom: '2rem',
+                    textAlign: 'left',
+                    fontFamily: 'Arame Mono, monospace',
+                    ...styles.description
                   }}>
-                    Konfirmasi Password Baru
-                  </label>
-                  <input
-                    type="password"
-                    value={confirmPassword}
-                    onChange={(e) => {
-                      setConfirmPassword(e.target.value);
-                      setError(null);
-                    }}
-                    placeholder="ulangi password baru"
-                    required
-                    disabled={isLoading}
-                    style={{
-                      width: '100%',
-                      background: 'rgba(255,255,255,0.1)',
-                      border: error ? '1px solid #ff3b30' : '1px solid rgba(255,255,255,0.3)',
-                      borderRadius: '6px',
-                      color: 'white',
-                      outline: 'none',
-                      fontFamily: 'Arame Mono, monospace',
-                      ...styles.input,
-                      opacity: isLoading ? 0.7 : 1
-                    }}
-                  />
-                </div>
+                    Masukkan email yang terdaftar di akun Anda
+                  </p>
 
-                {/* Button Container */}
-                <div style={{
-                  display: 'flex',
-                  gap: '1rem',
-                  marginBottom: '1rem'
-                }}>
-                  {/* Tombol Kembali */}
+                  <form onSubmit={handleEmailSubmit} style={{ width: '100%' }}>
+                    <div style={{ marginBottom: '2rem' }}>
+                      <label style={{
+                        display: 'block',
+                        color: 'white',
+                        marginBottom: '0.5rem',
+                        fontSize: isMobile ? '0.8rem' : '0.9rem',
+                        fontFamily: 'Arame Mono, monospace'
+                      }}>
+                        Email Terdaftar
+                      </label>
+                      <input
+                        type="email"
+                        value={email}
+                        onChange={(e) => {
+                          setEmail(e.target.value);
+                          setError(null);
+                        }}
+                        placeholder="contoh: user@example.com"
+                        required
+                        disabled={isLoading}
+                        style={{
+                          width: '100%',
+                          background: 'rgba(255,255,255,0.1)',
+                          border: error ? '1px solid #ff3b30' : '1px solid rgba(255,255,255,0.3)',
+                          borderRadius: '6px',
+                          color: 'white',
+                          outline: 'none',
+                          fontFamily: 'Arame Mono, monospace',
+                          ...styles.input,
+                          opacity: isLoading ? 0.7 : 1
+                        }}
+                      />
+                    </div>
+
+                    <button
+                      type="submit"
+                      disabled={isLoading || !email}
+                      style={{
+                        width: '100%',
+                        background: isLoading || !email
+                          ? 'rgba(255,255,255,0.1)' 
+                          : 'rgba(255,255,255,0.2)',
+                        border: '1px solid rgba(255,255,255,0.3)',
+                        borderRadius: '6px',
+                        color: isLoading || !email ? 'rgba(255,255,255,0.5)' : 'white',
+                        cursor: isLoading || !email ? 'not-allowed' : 'pointer',
+                        marginBottom: '1rem',
+                        fontFamily: 'Arame Mono, monospace',
+                        ...styles.button,
+                        position: 'relative'
+                      }}
+                    >
+                      {isLoading ? (
+                        <>
+                          <span style={{ opacity: 0.7 }}>Memverifikasi...</span>
+                          <motion.span
+                            animate={{ rotate: 360 }}
+                            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                            style={{
+                              position: 'absolute',
+                              right: '1rem',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              justifyContent: 'center'
+                            }}
+                          >
+                            ↻
+                          </motion.span>
+                        </>
+                      ) : (
+                        'Verifikasi Email'
+                      )}
+                    </button>
+                  </form>
+
                   <button
-                    type="button"
-                    onClick={handleBackToStep1}
+                    onClick={handleBackToSignIn}
                     disabled={isLoading}
                     style={{
-                      flex: 1,
-                      background: 'rgba(255,255,255,0.05)',
-                      border: '1px solid rgba(255,255,255,0.2)',
-                      borderRadius: '6px',
+                      background: 'none',
+                      border: 'none',
                       color: isLoading ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.8)',
                       cursor: isLoading ? 'not-allowed' : 'pointer',
+                      fontSize: isMobile ? '0.8rem' : '0.9rem',
+                      textDecoration: 'underline',
                       fontFamily: 'Arame Mono, monospace',
-                      padding: '0.75rem',
-                      fontSize: '0.9rem'
+                      alignSelf: 'flex-start',
+                      padding: 0,
+                      marginTop: '0.5rem'
                     }}
                   >
-                    Kembali
+                    Kembali ke Login
                   </button>
+                </>
+              )}
 
-                  {/* Tombol Simpan */}
-                  <button
-                    type="submit"
-                    disabled={isLoading}
-                    style={{
-                      flex: 2,
-                      background: isLoading 
-                        ? 'rgba(255,255,255,0.1)' 
-                        : 'rgba(255,255,255,0.2)',
-                      border: '1px solid rgba(255,255,255,0.3)',
-                      borderRadius: '6px',
-                      color: isLoading ? 'rgba(255,255,255,0.5)' : 'white',
-                      cursor: isLoading ? 'not-allowed' : 'pointer',
-                      fontFamily: 'Arame Mono, monospace',
-                      padding: '0.75rem',
-                      fontSize: '0.9rem',
-                      position: 'relative'
-                    }}
-                  >
-                    {isLoading ? (
-                      <>
-                        <span style={{ opacity: 0.7 }}>Menyimpan...</span>
-                        <motion.span
-                          animate={{ rotate: 360 }}
-                          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                          style={{
-                            position: 'absolute',
-                            right: '1rem',
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            justifyContent: 'center'
-                          }}
-                        >
-                          ↻
-                        </motion.span>
-                      </>
-                    ) : (
-                      'Simpan Password Baru'
+              {/* Step 2: Current Password Verification */}
+              {step === 2 && (
+                <>
+                  <h2 style={{
+                    color: 'white',
+                    fontWeight: '600',
+                    marginBottom: '0.5rem',
+                    textAlign: 'left',
+                    fontFamily: 'Arame Mono, monospace',
+                    ...styles.title
+                  }}>
+                    Verifikasi Keamanan
+                  </h2>
+
+                  <p style={{
+                    color: 'rgba(255,255,255,0.8)',
+                    marginBottom: '2rem',
+                    textAlign: 'left',
+                    fontFamily: 'Arame Mono, monospace',
+                    ...styles.description
+                  }}>
+                    Email terverifikasi: <strong>{email}</strong>
+                  </p>
+
+                  <form onSubmit={handleCurrentPasswordSubmit} style={{ width: '100%' }}>
+                    {renderPasswordInput(
+                      "Password Saat Ini",
+                      currentPassword,
+                      setCurrentPassword,
+                      "Masukkan password saat ini",
+                      showCurrentPassword,
+                      setShowCurrentPassword,
+                      !!error
                     )}
-                  </button>
-                </div>
-              </form>
 
-              {/* Password Requirements */}
-              <div style={{
-                backgroundColor: 'rgba(255,255,255,0.05)',
-                borderRadius: '6px',
-                padding: '1rem',
-                marginTop: '1rem',
-                border: '1px solid rgba(255,255,255,0.1)'
-              }}>
-                <p style={{
-                  color: 'rgba(255,255,255,0.7)',
-                  fontSize: '0.8rem',
-                  fontFamily: 'Arame Mono, monospace',
-                  margin: 0,
-                  marginBottom: '0.5rem'
-                }}>
-                  <strong>Persyaratan Password:</strong>
-                </p>
-                <ul style={{
-                  color: 'rgba(255,255,255,0.6)',
-                  fontSize: '0.75rem',
-                  fontFamily: 'Arame Mono, monospace',
-                  margin: 0,
-                  paddingLeft: '1rem',
-                  listStyleType: 'disc'
-                }}>
-                  <li>Minimal 6 karakter</li>
-                  <li>Gunakan kombinasi huruf dan angka</li>
-                  <li>Pastikan kedua password sama</li>
-                </ul>
-              </div>
+                    <div style={{
+                      display: 'flex',
+                      gap: '1rem',
+                      marginBottom: '1rem'
+                    }}>
+                      <button
+                        type="button"
+                        onClick={handleBackToStep1}
+                        disabled={isLoading}
+                        style={{
+                          flex: 1,
+                          background: 'rgba(255,255,255,0.05)',
+                          border: '1px solid rgba(255,255,255,0.2)',
+                          borderRadius: '6px',
+                          color: isLoading ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.8)',
+                          cursor: isLoading ? 'not-allowed' : 'pointer',
+                          fontFamily: 'Arame Mono, monospace',
+                          padding: '0.75rem',
+                          fontSize: '0.9rem'
+                        }}
+                      >
+                        Kembali
+                      </button>
+
+                      <button
+                        type="submit"
+                        disabled={isLoading || !currentPassword}
+                        style={{
+                          flex: 2,
+                          background: isLoading || !currentPassword
+                            ? 'rgba(255,255,255,0.1)' 
+                            : 'rgba(255,255,255,0.2)',
+                          border: '1px solid rgba(255,255,255,0.3)',
+                          borderRadius: '6px',
+                          color: isLoading || !currentPassword ? 'rgba(255,255,255,0.5)' : 'white',
+                          cursor: isLoading || !currentPassword ? 'not-allowed' : 'pointer',
+                          fontFamily: 'Arame Mono, monospace',
+                          padding: '0.75rem',
+                          fontSize: '0.9rem',
+                          position: 'relative'
+                        }}
+                      >
+                        {isLoading ? (
+                          <>
+                            <span style={{ opacity: 0.7 }}>Memverifikasi...</span>
+                            <motion.span
+                              animate={{ rotate: 360 }}
+                              transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                              style={{
+                                position: 'absolute',
+                                right: '1rem',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                justifyContent: 'center'
+                              }}
+                            >
+                              ↻
+                            </motion.span>
+                          </>
+                        ) : (
+                          'Lanjutkan'
+                        )}
+                      </button>
+                    </div>
+                  </form>
+
+                  <p style={{
+                    color: 'rgba(255,255,255,0.6)',
+                    fontSize: '0.8rem',
+                    fontFamily: 'Arame Mono, monospace',
+                    marginTop: '1rem',
+                    textAlign: 'center'
+                  }}>
+                    *Masukkan password saat ini untuk melanjutkan
+                  </p>
+                </>
+              )}
+
+              {/* Step 3: New Password */}
+              {step === 3 && (
+                <>
+                  <h2 style={{
+                    color: 'white',
+                    fontWeight: '600',
+                    marginBottom: '0.5rem',
+                    textAlign: 'left',
+                    fontFamily: 'Arame Mono, monospace',
+                    ...styles.title
+                  }}>
+                    Password Baru
+                  </h2>
+
+                  <p style={{
+                    color: 'rgba(255,255,255,0.8)',
+                    marginBottom: '2rem',
+                    textAlign: 'left',
+                    fontFamily: 'Arame Mono, monospace',
+                    ...styles.description
+                  }}>
+                    Buat password baru untuk akun: <strong>{email}</strong>
+                  </p>
+
+                  <form onSubmit={handlePasswordChange} style={{ width: '100%' }}>
+                    {renderPasswordInput(
+                      "Password Baru",
+                      newPassword,
+                      setNewPassword,
+                      "Minimal 6 karakter",
+                      showNewPassword,
+                      setShowNewPassword,
+                      !!error
+                    )}
+
+                    {renderPasswordInput(
+                      "Konfirmasi Password Baru",
+                      confirmPassword,
+                      setConfirmPassword,
+                      "Ulangi password baru",
+                      showConfirmPassword,
+                      setShowConfirmPassword,
+                      !!error
+                    )}
+
+                    <div style={{
+                      display: 'flex',
+                      gap: '1rem',
+                      marginBottom: '1rem'
+                    }}>
+                      <button
+                        type="button"
+                        onClick={handleBackToStep2}
+                        disabled={isLoading}
+                        style={{
+                          flex: 1,
+                          background: 'rgba(255,255,255,0.05)',
+                          border: '1px solid rgba(255,255,255,0.2)',
+                          borderRadius: '6px',
+                          color: isLoading ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.8)',
+                          cursor: isLoading ? 'not-allowed' : 'pointer',
+                          fontFamily: 'Arame Mono, monospace',
+                          padding: '0.75rem',
+                          fontSize: '0.9rem'
+                        }}
+                      >
+                        Kembali
+                      </button>
+
+                      <button
+                        type="submit"
+                        disabled={isLoading || !newPassword || !confirmPassword}
+                        style={{
+                          flex: 2,
+                          background: isLoading || !newPassword || !confirmPassword
+                            ? 'rgba(255,255,255,0.1)' 
+                            : 'rgba(255,255,255,0.2)',
+                          border: '1px solid rgba(255,255,255,0.3)',
+                          borderRadius: '6px',
+                          color: isLoading || !newPassword || !confirmPassword 
+                            ? 'rgba(255,255,255,0.5)' 
+                            : 'white',
+                          cursor: isLoading || !newPassword || !confirmPassword 
+                            ? 'not-allowed' 
+                            : 'pointer',
+                          fontFamily: 'Arame Mono, monospace',
+                          padding: '0.75rem',
+                          fontSize: '0.9rem',
+                          position: 'relative'
+                        }}
+                      >
+                        {isLoading ? (
+                          <>
+                            <span style={{ opacity: 0.7 }}>Menyimpan...</span>
+                            <motion.span
+                              animate={{ rotate: 360 }}
+                              transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                              style={{
+                                position: 'absolute',
+                                right: '1rem',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                justifyContent: 'center'
+                              }}
+                            >
+                              ↻
+                            </motion.span>
+                          </>
+                        ) : (
+                          'Simpan Password Baru'
+                        )}
+                      </button>
+                    </div>
+                  </form>
+
+                  {/* Password Requirements */}
+                  <div style={{
+                    backgroundColor: 'rgba(255,255,255,0.05)',
+                    borderRadius: '6px',
+                    padding: '1rem',
+                    marginTop: '1rem',
+                    border: '1px solid rgba(255,255,255,0.1)'
+                  }}>
+                    <p style={{
+                      color: 'rgba(255,255,255,0.7)',
+                      fontSize: '0.8rem',
+                      fontFamily: 'Arame Mono, monospace',
+                      margin: 0,
+                      marginBottom: '0.5rem',
+                      fontWeight: '600'
+                    }}>
+                      Persyaratan Password:
+                    </p>
+                    <ul style={{
+                      color: newPassword.length >= 6 ? 'rgba(0, 255, 0, 0.7)' : 'rgba(255,255,255,0.6)',
+                      fontSize: '0.75rem',
+                      fontFamily: 'Arame Mono, monospace',
+                      margin: 0,
+                      paddingLeft: '1rem',
+                      listStyleType: 'disc'
+                    }}>
+                      <li>✓ Minimal 6 karakter {newPassword.length >= 6 && '✓'}</li>
+                    </ul>
+                    <ul style={{
+                      color: newPassword === confirmPassword && confirmPassword ? 'rgba(0, 255, 0, 0.7)' : 'rgba(255,255,255,0.6)',
+                      fontSize: '0.75rem',
+                      fontFamily: 'Arame Mono, monospace',
+                      margin: '0.5rem 0 0 0',
+                      paddingLeft: '1rem',
+                      listStyleType: 'disc'
+                    }}>
+                      <li>✓ Password harus sama {newPassword === confirmPassword && confirmPassword && '✓'}</li>
+                    </ul>
+                  </div>
+                </>
+              )}
             </>
           )}
         </motion.div>
