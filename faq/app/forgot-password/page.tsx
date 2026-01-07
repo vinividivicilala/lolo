@@ -36,13 +36,11 @@ export default function ForgotPasswordPage({ onClose }: ForgotPasswordPageProps)
   const [email, setEmail] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [currentPassword, setCurrentPassword] = useState(""); // Untuk re-authentication
-  const [step, setStep] = useState<1 | 2 | 3>(1); // 1: Email, 2: Current Password, 3: New Password
+  const [step, setStep] = useState<1 | 2>(1); // 1: Email, 2: New Password
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
-  const [userData, setUserData] = useState<any>(null); // Data user yang ditemukan
-  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [userData, setUserData] = useState<any>(null);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const router = useRouter();
@@ -62,18 +60,28 @@ export default function ForgotPasswordPage({ onClose }: ForgotPasswordPageProps)
     };
   }, []);
 
-  // Cek apakah email terdaftar di Firebase Auth
-  const checkEmailRegistered = async (email: string) => {
+  // Fungsi untuk check email di Firebase Authentication
+  const checkEmailInFirebase = async (email: string): Promise<boolean> => {
     try {
-      const methods = await fetchSignInMethodsForEmail(auth, email);
-      return methods.length > 0; // Jika ada metode sign in, email terdaftar
+      console.log("Checking email in Firebase:", email);
+      
+      // Menggunakan fetchSignInMethodsForEmail untuk check jika email terdaftar
+      const signInMethods = await fetchSignInMethodsForEmail(auth, email);
+      console.log("Sign in methods found:", signInMethods);
+      
+      // Jika ada sign in methods, email terdaftar
+      return signInMethods.length > 0;
     } catch (error: any) {
-      console.error("Error checking email:", error);
-      // Jika error "auth/user-not-found", email tidak terdaftar
+      console.error("Error checking email in Firebase:", error);
+      
+      // Handle specific Firebase errors
       if (error.code === 'auth/user-not-found') {
+        // Email tidak ditemukan di Firebase
         return false;
       }
-      throw error;
+      
+      // Untuk error lain, kita anggap email tidak valid
+      throw new Error("Gagal memverifikasi email. Silakan coba lagi.");
     }
   };
 
@@ -86,47 +94,61 @@ export default function ForgotPasswordPage({ onClose }: ForgotPasswordPageProps)
       // Validasi email format
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(email)) {
-        throw new Error("Format email tidak valid");
+        throw new Error("Format email tidak valid. Contoh: user@example.com");
       }
+
+      console.log("Starting email verification for:", email);
 
       // Cek apakah email terdaftar di Firebase
-      const isRegistered = await checkEmailRegistered(email);
+      const isRegistered = await checkEmailInFirebase(email);
+      console.log("Email registered:", isRegistered);
       
       if (!isRegistered) {
-        throw new Error("Email belum terdaftar di sistem");
+        throw new Error("Email belum terdaftar di sistem. Silakan daftar terlebih dahulu.");
       }
 
-      // Simpan email dan lanjut ke step 2
+      // Jika email terdaftar, lanjut ke step 2
       setUserData({ email });
       setStep(2);
+      console.log("Moving to step 2 - New Password");
+      
     } catch (err: any) {
-      console.error("Email verification error:", err);
+      console.error("Email verification failed:", err);
       setError(err.message || "Terjadi kesalahan. Silakan coba lagi.");
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleCurrentPasswordSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setError(null);
-
+  // Fungsi untuk mengubah password di Firebase
+  const updatePasswordInFirebase = async (email: string, newPassword: string): Promise<boolean> => {
     try {
-      if (!currentPassword) {
-        throw new Error("Masukkan password saat ini");
-      }
-
-      // Di sini seharusnya kita perlu mendapatkan user yang sedang login
-      // Tapi karena ini forgot password, user belum login
-      // Jadi kita skip step ini dan langsung ke step 3 untuk demo
-      // DI PRODUCTION: Anda perlu sistem OTP/verifikasi lain
+      // CATATAN PENTING: 
+      // Di Firebase, untuk mengubah password kita perlu:
+      // 1. User harus login terlebih dahulu, ATAU
+      // 2. Menggunakan reset password via email, ATAU
+      // 3. Menggunakan Firebase Admin SDK di backend
       
-      setStep(3);
-    } catch (err: any) {
-      setError(err.message || "Terjadi kesalahan. Silakan coba lagi.");
-    } finally {
-      setIsLoading(false);
+      // Karena ini frontend dan user belum login, kita tidak bisa langsung updatePassword
+      // Alternatif: Kirim email reset password
+      
+      console.log("Simulasi: Password untuk", email, "akan diubah ke:", newPassword);
+      
+      // Untuk DEMO: Simulasi sukses
+      return true;
+      
+      // Untuk PRODUCTION: Anda perlu backend API yang menggunakan Firebase Admin SDK
+      // Contoh endpoint backend:
+      // POST /api/update-password
+      // {
+      //   email: "user@example.com",
+      //   newPassword: "password123",
+      //   verificationToken: "token-otp-yang-valid"
+      // }
+      
+    } catch (error: any) {
+      console.error("Error updating password:", error);
+      throw new Error("Gagal mengubah password. Silakan coba lagi.");
     }
   };
 
@@ -142,29 +164,39 @@ export default function ForgotPasswordPage({ onClose }: ForgotPasswordPageProps)
       }
 
       if (newPassword !== confirmPassword) {
-        throw new Error("Password tidak cocok");
+        throw new Error("Password tidak cocok. Pastikan kedua password sama.");
       }
 
-      // Catatan: DI PRODUCTION, Anda perlu:
-      // 1. Verifikasi user dengan OTP/kode khusus
-      // 2. Atau minta user login dulu sebelum ganti password
+      // Validasi password strength (opsional)
+      const passwordStrengthRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*#?&]{6,}$/;
+      if (!passwordStrengthRegex.test(newPassword)) {
+        throw new Error("Password harus mengandung huruf dan angka");
+      }
+
+      console.log("Attempting to update password for:", userData?.email);
+
+      // Update password di Firebase (simulasi untuk demo)
+      const updateSuccess = await updatePasswordInFirebase(userData.email, newPassword);
       
-      // Untuk DEMO: Tampilkan pesan sukses
+      if (!updateSuccess) {
+        throw new Error("Gagal mengubah password. Silakan coba lagi.");
+      }
+
+      // Tampilkan pesan sukses
       setSuccess(true);
+      console.log("Password update successful");
       
-      // Simulasi proses update password
-      console.log(`Password untuk ${email} berhasil diubah`);
-      
-      // Reset setelah 2 detik
+      // Reset form setelah 3 detik dan redirect ke login
       setTimeout(() => {
         if (onClose && typeof onClose === 'function') {
           onClose();
         } else {
           router.push('/signin');
         }
-      }, 2000);
+      }, 3000);
 
     } catch (err: any) {
+      console.error("Password change failed:", err);
       setError(err.message || "Terjadi kesalahan. Silakan coba lagi.");
     } finally {
       setIsLoading(false);
@@ -173,12 +205,6 @@ export default function ForgotPasswordPage({ onClose }: ForgotPasswordPageProps)
 
   const handleBackToStep1 = () => {
     setStep(1);
-    setError(null);
-    setCurrentPassword("");
-  };
-
-  const handleBackToStep2 = () => {
-    setStep(2);
     setError(null);
     setNewPassword("");
     setConfirmPassword("");
@@ -464,7 +490,7 @@ export default function ForgotPasswordPage({ onClose }: ForgotPasswordPageProps)
                 justifyContent: 'space-between',
                 marginBottom: '2rem'
               }}>
-                {[1, 2, 3].map((stepNum) => (
+                {[1, 2].map((stepNum) => (
                   <React.Fragment key={stepNum}>
                     <div style={{
                       display: 'flex',
@@ -495,12 +521,12 @@ export default function ForgotPasswordPage({ onClose }: ForgotPasswordPageProps)
                           fontFamily: 'Arame Mono, monospace',
                           whiteSpace: 'nowrap'
                         }}>
-                          {stepNum === 1 ? 'Email' : stepNum === 2 ? 'Verifikasi' : 'Password Baru'}
+                          {stepNum === 1 ? 'Email' : 'Password Baru'}
                         </span>
                       )}
                     </div>
                     
-                    {stepNum < 3 && (
+                    {stepNum < 2 && (
                       <div style={{
                         flex: 1,
                         height: '1px',
@@ -543,7 +569,7 @@ export default function ForgotPasswordPage({ onClose }: ForgotPasswordPageProps)
                     fontFamily: 'Arame Mono, monospace',
                     ...styles.title
                   }}>
-                    Verifikasi Email
+                    Lupa Password
                   </h2>
 
                   <p style={{
@@ -589,6 +615,14 @@ export default function ForgotPasswordPage({ onClose }: ForgotPasswordPageProps)
                           opacity: isLoading ? 0.7 : 1
                         }}
                       />
+                      <p style={{
+                        color: 'rgba(255,255,255,0.6)',
+                        fontSize: isMobile ? '0.7rem' : '0.8rem',
+                        marginTop: '0.5rem',
+                        fontFamily: 'Arame Mono, monospace'
+                      }}>
+                        *Masukkan email yang digunakan saat mendaftar
+                      </p>
                     </div>
 
                     <button
@@ -627,7 +661,7 @@ export default function ForgotPasswordPage({ onClose }: ForgotPasswordPageProps)
                           </motion.span>
                         </>
                       ) : (
-                        'Verifikasi Email'
+                        'Lanjutkan'
                       )}
                     </button>
                   </form>
@@ -653,121 +687,8 @@ export default function ForgotPasswordPage({ onClose }: ForgotPasswordPageProps)
                 </>
               )}
 
-              {/* Step 2: Current Password Verification */}
+              {/* Step 2: New Password */}
               {step === 2 && (
-                <>
-                  <h2 style={{
-                    color: 'white',
-                    fontWeight: '600',
-                    marginBottom: '0.5rem',
-                    textAlign: 'left',
-                    fontFamily: 'Arame Mono, monospace',
-                    ...styles.title
-                  }}>
-                    Verifikasi Keamanan
-                  </h2>
-
-                  <p style={{
-                    color: 'rgba(255,255,255,0.8)',
-                    marginBottom: '2rem',
-                    textAlign: 'left',
-                    fontFamily: 'Arame Mono, monospace',
-                    ...styles.description
-                  }}>
-                    Email terverifikasi: <strong>{email}</strong>
-                  </p>
-
-                  <form onSubmit={handleCurrentPasswordSubmit} style={{ width: '100%' }}>
-                    {renderPasswordInput(
-                      "Password Saat Ini",
-                      currentPassword,
-                      setCurrentPassword,
-                      "Masukkan password saat ini",
-                      showCurrentPassword,
-                      setShowCurrentPassword,
-                      !!error
-                    )}
-
-                    <div style={{
-                      display: 'flex',
-                      gap: '1rem',
-                      marginBottom: '1rem'
-                    }}>
-                      <button
-                        type="button"
-                        onClick={handleBackToStep1}
-                        disabled={isLoading}
-                        style={{
-                          flex: 1,
-                          background: 'rgba(255,255,255,0.05)',
-                          border: '1px solid rgba(255,255,255,0.2)',
-                          borderRadius: '6px',
-                          color: isLoading ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.8)',
-                          cursor: isLoading ? 'not-allowed' : 'pointer',
-                          fontFamily: 'Arame Mono, monospace',
-                          padding: '0.75rem',
-                          fontSize: '0.9rem'
-                        }}
-                      >
-                        Kembali
-                      </button>
-
-                      <button
-                        type="submit"
-                        disabled={isLoading || !currentPassword}
-                        style={{
-                          flex: 2,
-                          background: isLoading || !currentPassword
-                            ? 'rgba(255,255,255,0.1)' 
-                            : 'rgba(255,255,255,0.2)',
-                          border: '1px solid rgba(255,255,255,0.3)',
-                          borderRadius: '6px',
-                          color: isLoading || !currentPassword ? 'rgba(255,255,255,0.5)' : 'white',
-                          cursor: isLoading || !currentPassword ? 'not-allowed' : 'pointer',
-                          fontFamily: 'Arame Mono, monospace',
-                          padding: '0.75rem',
-                          fontSize: '0.9rem',
-                          position: 'relative'
-                        }}
-                      >
-                        {isLoading ? (
-                          <>
-                            <span style={{ opacity: 0.7 }}>Memverifikasi...</span>
-                            <motion.span
-                              animate={{ rotate: 360 }}
-                              transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                              style={{
-                                position: 'absolute',
-                                right: '1rem',
-                                display: 'inline-flex',
-                                alignItems: 'center',
-                                justifyContent: 'center'
-                              }}
-                            >
-                              ↻
-                            </motion.span>
-                          </>
-                        ) : (
-                          'Lanjutkan'
-                        )}
-                      </button>
-                    </div>
-                  </form>
-
-                  <p style={{
-                    color: 'rgba(255,255,255,0.6)',
-                    fontSize: '0.8rem',
-                    fontFamily: 'Arame Mono, monospace',
-                    marginTop: '1rem',
-                    textAlign: 'center'
-                  }}>
-                    *Masukkan password saat ini untuk melanjutkan
-                  </p>
-                </>
-              )}
-
-              {/* Step 3: New Password */}
-              {step === 3 && (
                 <>
                   <h2 style={{
                     color: 'white',
@@ -795,7 +716,7 @@ export default function ForgotPasswordPage({ onClose }: ForgotPasswordPageProps)
                       "Password Baru",
                       newPassword,
                       setNewPassword,
-                      "Minimal 6 karakter",
+                      "Minimal 6 karakter (huruf & angka)",
                       showNewPassword,
                       setShowNewPassword,
                       !!error
@@ -818,7 +739,7 @@ export default function ForgotPasswordPage({ onClose }: ForgotPasswordPageProps)
                     }}>
                       <button
                         type="button"
-                        onClick={handleBackToStep2}
+                        onClick={handleBackToStep1}
                         disabled={isLoading}
                         style={{
                           flex: 1,
@@ -907,7 +828,8 @@ export default function ForgotPasswordPage({ onClose }: ForgotPasswordPageProps)
                       paddingLeft: '1rem',
                       listStyleType: 'disc'
                     }}>
-                      <li>✓ Minimal 6 karakter {newPassword.length >= 6 && '✓'}</li>
+                      <li>Minimal 6 karakter {newPassword.length >= 6 && '✓'}</li>
+                      <li>Mengandung huruf dan angka</li>
                     </ul>
                     <ul style={{
                       color: newPassword === confirmPassword && confirmPassword ? 'rgba(0, 255, 0, 0.7)' : 'rgba(255,255,255,0.6)',
@@ -917,7 +839,7 @@ export default function ForgotPasswordPage({ onClose }: ForgotPasswordPageProps)
                       paddingLeft: '1rem',
                       listStyleType: 'disc'
                     }}>
-                      <li>✓ Password harus sama {newPassword === confirmPassword && confirmPassword && '✓'}</li>
+                      <li>Password harus sama {newPassword === confirmPassword && confirmPassword && '✓'}</li>
                     </ul>
                   </div>
                 </>
