@@ -6,10 +6,7 @@ import { useRouter } from "next/navigation";
 import { 
   getAuth, 
   signInWithEmailAndPassword,
-  sendPasswordResetEmail,
-  updatePassword,
-  EmailAuthProvider,
-  reauthenticateWithCredential
+  updatePassword
 } from "firebase/auth";
 import { initializeApp } from "firebase/app";
 
@@ -72,27 +69,12 @@ export default function ForgotPasswordPage({ onClose }: ForgotPasswordPageProps)
     setIsLoading(true);
 
     try {
-      // Coba login dengan email untuk verifikasi bahwa email terdaftar
-      // Kita akan login dengan password dummy untuk cek apakah email ada
-      // Ini hanya untuk verifikasi, tidak benar-benar login
-      const testCredential = EmailAuthProvider.credential(email, "dummyPassword123!");
-      
       // Cek apakah email terdaftar dengan mencoba sign in
-      // Jika email tidak terdaftar, akan throw error auth/user-not-found
       await signInWithEmailAndPassword(auth, email, "dummyPassword123!");
       
-      // Jika sampai sini tanpa error (tapi tidak mungkin karena password salah)
-      // Sebenarnya kita ingin menangkap error "wrong-password" yang berarti email ada
-      
     } catch (err: any) {
-      console.error("Auth check error:", err.code);
-      
       // Jika error adalah "wrong-password", berarti email terdaftar
-      // Jika error adalah "user-not-found", berarti email tidak terdaftar
-      // Jika error lain, tampilkan pesan umum
-      
       if (err.code === 'auth/wrong-password') {
-        // Email terdaftar, password salah (yang kita harapkan)
         setShowResetForm(true);
         setSuccess("Email verified. Please enter your current password to continue.");
       } else if (err.code === 'auth/user-not-found') {
@@ -102,9 +84,7 @@ export default function ForgotPasswordPage({ onClose }: ForgotPasswordPageProps)
       } else if (err.code === 'auth/too-many-requests') {
         setError("Too many attempts. Please try again later.");
       } else {
-        // Untuk error lain, kita asumsikan email ada
         setShowResetForm(true);
-        setSuccess("Please enter your current password to reset.");
       }
     } finally {
       setIsLoading(false);
@@ -135,7 +115,7 @@ export default function ForgotPasswordPage({ onClose }: ForgotPasswordPageProps)
     setIsLoading(true);
 
     try {
-      // 1. Login dengan password lama untuk verifikasi
+      // 1. Login dengan password lama
       const userCredential = await signInWithEmailAndPassword(auth, email, currentPassword);
       const user = userCredential.user;
       
@@ -143,17 +123,15 @@ export default function ForgotPasswordPage({ onClose }: ForgotPasswordPageProps)
       await updatePassword(user, newPassword);
       
       // 3. Tampilkan pesan sukses
-      setSuccess("Password updated successfully! You can now login with your new password.");
+      setSuccess("Password updated successfully!");
       setIsSubmitted(true);
       
-      // 4. Auto redirect ke signin setelah 3 detik
+      // 4. Auto redirect setelah 3 detik
       setTimeout(() => {
         router.push('/signin');
       }, 3000);
       
     } catch (err: any) {
-      console.error("Error resetting password:", err);
-      
       switch (err.code) {
         case 'auth/wrong-password':
           setError("Current password is incorrect.");
@@ -162,7 +140,6 @@ export default function ForgotPasswordPage({ onClose }: ForgotPasswordPageProps)
           setError("New password is too weak. Please use a stronger password.");
           break;
         case 'auth/requires-recent-login':
-          // Jika perlu re-authenticate
           setError("For security, please login again and try resetting password.");
           break;
         case 'auth/user-not-found':
@@ -928,367 +905,6 @@ export default function ForgotPasswordPage({ onClose }: ForgotPasswordPageProps)
                 </h4>
               </div>
             ))}
-          </div>
-        </motion.div>
-
-        {/* Large Horizontal Card - Responsive */}
-        <motion.div
-          style={{
-            width: isMobile ? '95%' : '90%',
-            maxWidth: '1900px',
-            height: 'auto',
-            backgroundColor: '#CCFF00',
-            borderRadius: isMobile ? '20px' : '40px',
-            padding: isMobile ? '1.5rem' : '3rem',
-            display: 'flex',
-            alignItems: 'left',
-            gap: isMobile ? '1.5rem' : '3rem',
-            cursor: 'pointer',
-            margin: isMobile ? '1rem auto' : '2rem auto',
-            boxShadow: '0 10px 40px rgba(204, 255, 0, 0.3)',
-            flexDirection: isMobile ? 'column' : 'row'
-          }}
-          whileHover={{
-            scale: isMobile ? 1 : 1.02,
-            backgroundColor: '#D4FF33',
-            transition: { duration: 0.3 }
-          }}
-          whileTap={{ scale: 0.98 }}
-        >
-          {/* Content Section */}
-          <div style={{
-            display: 'flex',
-            width: '100%',
-            gap: isMobile ? '1.5rem' : '3rem',
-            flexDirection: isMobile ? 'column' : 'row'
-          }}>
-            {/* Left Section - MENURU */}
-            <div style={{
-              flex: 1,
-              display: 'flex',
-              flexDirection: 'column',
-              gap: isMobile ? '1rem' : '1.5rem'
-            }}>
-              <h3 style={{
-                color: 'black',
-                fontSize: isMobile ? '3rem' : '10rem',
-                fontWeight: '2800',
-                fontFamily: 'Verdana, Geneva, sans-serif',
-                margin: 0,
-                lineHeight: 1.1,
-                letterSpacing: '-1px'
-              }}>
-                MENURU<br/>
-              </h3>
-
-              {/* Daftar Website Pribadi Section */}
-              <motion.div
-                style={{
-                  width: '100%',
-                  marginTop: isMobile ? '0.5rem' : '1rem',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: isMobile ? '0.3rem' : '0.5rem'
-                }}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4 }}
-              >
-                <div style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: isMobile ? '0.2rem' : '0.3rem'
-                }}>
-                  {/* Portfolio */}
-                  <motion.div
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: isMobile ? '1rem' : '1.5rem',
-                      padding: isMobile ? '0.6rem 0' : '0.8rem 0',
-                      borderBottom: '1px solid rgba(0,0,0,0.1)',
-                      cursor: 'pointer'
-                    }}
-                    whileHover={{ 
-                      x: isMobile ? 5 : 10,
-                      transition: { duration: 0.2 }
-                    }}
-                  >
-                    <span style={{
-                      color: 'black',
-                      fontSize: isMobile ? '1.2rem' : '3rem',
-                      fontFamily: 'Verdana, Geneva, sans-serif',
-                      minWidth: isMobile ? '20px' : '30px'
-                    }}>
-                      01
-                    </span>
-                    
-                    <span style={{
-                      color: 'black',
-                      fontSize: isMobile ? '1.2rem' : '3rem',
-                      fontWeight: '500',
-                      fontFamily: 'Verdana, Geneva, sans-serif',
-                      flex: 1
-                    }}>
-                      Portfolio
-                    </span>
-
-                    <div style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: isMobile ? '0.5rem' : '0.8rem',
-                      color: 'black',
-                      fontSize: isMobile ? '1rem' : '3rem',
-                      fontFamily: 'Verdana, Geneva, sans-serif'
-                    }}>
-                      <svg width={isMobile ? "20" : "40"} height={isMobile ? "20" : "40"} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-                        <line x1="16" y1="2" x2="16" y2="6"/>
-                        <line x1="8" y1="2" x2="8" y2="6"/>
-                        <line x1="3" y1="10" x2="21" y2="10"/>
-                      </svg>
-                      <span>Dec 2024</span>
-                    </div>
-
-                    <motion.svg
-                      width={isMobile ? "20" : "40"}
-                      height={isMobile ? "20" : "40"}
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="black"
-                      strokeWidth="2"
-                      whileHover={{ x: 3 }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      <path d="M5 12h14M12 5l7 7-7 7"/>
-                    </motion.svg>
-                  </motion.div>
-
-                  {/* Photography */}
-                  <motion.div
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: isMobile ? '1rem' : '1.5rem',
-                      padding: isMobile ? '0.6rem 0' : '0.8rem 0',
-                      borderBottom: '1px solid rgba(0,0,0,0.1)',
-                      cursor: 'pointer'
-                    }}
-                    whileHover={{ 
-                      x: isMobile ? 5 : 10,
-                      transition: { duration: 0.2 }
-                    }}
-                  >
-                    <span style={{
-                      color: 'black',
-                      fontSize: isMobile ? '1.2rem' : '3rem',
-                      fontFamily: 'Verdana, Geneva, sans-serif',
-                      minWidth: isMobile ? '20px' : '30px'
-                    }}>
-                      02
-                    </span>
-                    
-                    <span style={{
-                      color: 'black',
-                      fontSize: isMobile ? '1.2rem' : '3rem',
-                      fontWeight: '500',
-                      fontFamily: 'Verdana, Geneva, sans-serif',
-                      flex: 1
-                    }}>
-                      Photography
-                    </span>
-
-                    <div style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: isMobile ? '0.5rem' : '0.8rem',
-                      color: 'black',
-                      fontSize: isMobile ? '1rem' : '3rem',
-                      fontFamily: 'Verdana, Geneva, sans-serif'
-                    }}>
-                      <svg width={isMobile ? "20" : "40"} height={isMobile ? "20" : "40"} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-                        <line x1="16" y1="2" x2="16" y2="6"/>
-                        <line x1="8" y1="2" x2="8" y2="6"/>
-                        <line x1="3" y1="10" x2="21" y2="10"/>
-                      </svg>
-                      <span>Jan 2025</span>
-                    </div>
-
-                    <motion.svg
-                      width={isMobile ? "20" : "40"}
-                      height={isMobile ? "20" : "40"}
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="black"
-                      strokeWidth="2"
-                      whileHover={{ x: 3 }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      <path d="M5 12h14M12 5l7 7-7 7"/>
-                    </motion.svg>
-                  </motion.div>
-
-                  {/* Forum */}
-                  <motion.div
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: isMobile ? '1rem' : '1.5rem',
-                      padding: isMobile ? '0.6rem 0' : '0.8rem 0',
-                      borderBottom: '1px solid rgba(0,0,0,0.1)',
-                      cursor: 'pointer'
-                    }}
-                    whileHover={{ 
-                      x: isMobile ? 5 : 10,
-                      transition: { duration: 0.2 }
-                    }}
-                  >
-                    <span style={{
-                      color: 'black',
-                      fontSize: isMobile ? '1.2rem' : '3rem',
-                      fontFamily: 'Verdana, Geneva, sans-serif',
-                      minWidth: isMobile ? '20px' : '30px'
-                    }}>
-                      03
-                    </span>
-                    
-                    <span style={{
-                      color: 'black',
-                      fontSize: isMobile ? '1.2rem' : '3rem',
-                      fontWeight: '500',
-                      fontFamily: 'Verdana, Geneva, sans-serif',
-                      flex: 1
-                    }}>
-                      Forum
-                    </span>
-
-                    <div style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: isMobile ? '0.5rem' : '0.8rem',
-                      color: 'black',
-                      fontSize: isMobile ? '1rem' : '3rem',
-                      fontFamily: 'Verdana, Geneva, sans-serif'
-                    }}>
-                      <svg width={isMobile ? "20" : "40"} height={isMobile ? "20" : "40"} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-                        <line x1="16" y1="2" x2="16" y2="6"/>
-                        <line x1="8" y1="2" x2="8" y2="6"/>
-                        <line x1="3" y1="10" x2="21" y2="10"/>
-                      </svg>
-                      <span>Feb 2025</span>
-                    </div>
-
-                    <motion.svg
-                      width={isMobile ? "20" : "40"}
-                      height={isMobile ? "20" : "40"}
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="black"
-                      strokeWidth="2"
-                      whileHover={{ x: 3 }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      <path d="M5 12h14M12 5l7 7-7 7"/>
-                    </motion.svg>
-                  </motion.div>
-                </div>
-              </motion.div>
-            </div>
-
-            {/* Right Section - LETS COLLABORATE */}
-            <div style={{
-              flex: isMobile ? 'none' : 0.6,
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: isMobile ? 'flex-start' : 'flex-start',
-              justifyContent: 'center',
-              gap: isMobile ? '1rem' : '2rem'
-            }}>
-              <h3 style={{
-                color: 'black',
-                fontSize: isMobile ? '2rem' : '5rem',
-                fontWeight: '800',
-                fontFamily: 'Verdana, Geneva, sans-serif',
-                margin: 0,
-                lineHeight: 1.1,
-                letterSpacing: '-1px'
-              }}>
-                LETS
-                <br />
-                COLLABORATE
-              </h3>
-              
-              <a href="/book-call" style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: isMobile ? '0.8rem' : '1.5rem',
-                cursor: 'pointer',
-                textDecoration: 'none',
-                color: 'black',
-                padding: '0.5rem 0'
-              }}>
-                <span style={{
-                  fontSize: isMobile ? '1rem' : '1.5rem',
-                  fontWeight: '600',
-                  fontFamily: 'Verdana, Geneva, sans-serif'
-                }}>
-                  BOOK A CALL
-                </span>
-                
-                <svg width={isMobile ? "20" : "24"} height={isMobile ? "20" : "24"} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-                  <line x1="16" y1="2" x2="16" y2="6"/>
-                  <line x1="8" y1="2" x2="8" y2="6"/>
-                  <line x1="3" y1="10" x2="21" y2="10"/>
-                </svg>
-              </a>
-
-              <div style={{
-                display: 'flex',
-                flexDirection: isMobile ? 'column' : 'row',
-                alignItems: isMobile ? 'flex-start' : 'center',
-                gap: isMobile ? '0.8rem' : '2rem',
-                marginTop: isMobile ? '0.5rem' : '1rem'
-              }}>
-                <a href="/terms" style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: isMobile ? '0.3rem' : '0.5rem',
-                  textDecoration: 'none',
-                  color: 'rgba(0,0,0,0.7)',
-                  fontSize: isMobile ? '0.9rem' : '3rem',
-                  fontFamily: 'Verdana, Geneva, sans-serif',
-                  transition: 'color 0.3s ease'
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.color = 'black'}
-                onMouseLeave={(e) => e.currentTarget.style.color = 'rgba(0,0,0,0.7)'}>
-                  Ketentuan Kami
-                  <svg width={isMobile ? "16" : "100"} height={isMobile ? "16" : "100"} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M7 17L17 7M17 7H7M17 7V17"/>
-                  </svg>
-                </a>
-                
-                <a href="/privacy" style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: isMobile ? '0.3rem' : '0.5rem',
-                  textDecoration: 'none',
-                  color: 'rgba(0,0,0,0.7)',
-                  fontSize: isMobile ? '0.9rem' : '3rem',
-                  fontFamily: 'Verdana, Geneva, sans-serif',
-                  transition: 'color 0.3s ease'
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.color = 'black'}
-                onMouseLeave={(e) => e.currentTarget.style.color = 'rgba(0,0,0,0.7)'}>
-                  Kebijakan Privasi
-                  <svg width={isMobile ? "16" : "100"} height={isMobile ? "16" : "100"} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M7 17L17 7M17 7H7M17 7V17"/>
-                  </svg>
-                </a>
-              </div>
-            </div>
           </div>
         </motion.div>
       </motion.div>
