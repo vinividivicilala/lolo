@@ -1,11 +1,12 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { motion } from 'framer-motion';
 
 export default function ChatbotPage() {
   const router = useRouter();
+  const [isHover, setIsHover] = useState(false);
+  const [isTap, setIsTap] = useState(false);
 
   return (
     <div style={{
@@ -15,17 +16,39 @@ export default function ChatbotPage() {
       padding: '2rem',
       fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
     }}>
-      <motion.div
+      <button
+        onClick={() => router.back()}
+        onMouseEnter={() => setIsHover(true)}
+        onMouseLeave={() => setIsHover(false)}
+        onMouseDown={() => setIsTap(true)}
+        onMouseUp={() => setIsTap(false)}
         style={{
-          height: '100vh',
+          padding: '0.5rem 1rem',
+          backgroundColor: isHover ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.1)',
+          border: '1px solid rgba(255,255,255,0.2)',
+          borderRadius: '8px',
+          color: 'white',
+          cursor: 'pointer',
+          marginBottom: '2rem',
+          backdropFilter: 'blur(10px)',
+          transform: isTap ? 'scale(0.95)' : 'scale(1)',
+          transition: 'all 0.2s ease',
+          outline: 'none'
+        }}
+      >
+        ← Back
+      </button>
+
+      <div
+        style={{
+          opacity: 0,
+          animation: 'fadeInUp 0.5s ease forwards',
+          height: 'calc(100vh - 6rem)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           textAlign: 'center'
         }}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.8 }}
       >
         <h1 style={{
           fontSize: '6rem',
@@ -35,7 +58,20 @@ export default function ChatbotPage() {
         }}>
           chatbot
         </h1>
-      </motion.div>
+      </div>
+
+      <style jsx global>{`
+        @keyframes fadeInUp {
+          from {
+            opacity: 0;
+            transform: translateY(20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+      `}</style>
     </div>
   );
 }
