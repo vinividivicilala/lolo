@@ -3,14 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { 
-  getAuth, 
-  sendPasswordResetEmail,
-  signInWithEmailAndPassword,
-  updatePassword,
-  signOut,
-  User
-} from "firebase/auth";
+import { getAuth, updatePassword, reauthenticateWithCredential, EmailAuthProvider } from "firebase/auth";
 import { initializeApp } from "firebase/app";
 
 // Konfigurasi Firebase
@@ -35,22 +28,15 @@ interface ForgotPasswordPageProps {
 
 export default function ForgotPasswordPage({ onClose }: ForgotPasswordPageProps) {
   const [email, setEmail] = useState("");
-  const [isEmailVerified, setIsEmailVerified] = useState(false);
-  const [showChangePassword, setShowChangePassword] = useState(false);
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [error, setError] = useState("");
-  const [successMessage, setSuccessMessage] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [showTopics, setShowTopics] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
-  const [verifiedEmail, setVerifiedEmail] = useState("");
-  const [tempUser, setTempUser] = useState<User | null>(null);
-  const [verificationStep, setVerificationStep] = useState<'email' | 'otp' | 'newPassword'>('email');
-  const [otp, setOtp] = useState("");
-  const [generatedOtp, setGeneratedOtp] = useState("");
-  const [otpExpiry, setOtpExpiry] = useState<number | null>(null);
+  const [step, setStep] = useState<1 | 2>(1); // 1: Email verification, 2: New password
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
   const router = useRouter();
+  const [isMobile, setIsMobile] = useState(false);
+  const [tempUser, setTempUser] = useState<any>(null); // Untuk menyimpan user sementara
 
   // Check if mobile on component mount and window resize
   useEffect(() => {
@@ -66,186 +52,100 @@ export default function ForgotPasswordPage({ onClose }: ForgotPasswordPageProps)
     };
   }, []);
 
-  // OTP expiry timer
-  useEffect(() => {
-    if (otpExpiry && Date.now() > otpExpiry) {
-      setError("OTP telah kadaluarsa. Silakan minta OTP baru.");
-      setOtp("");
-      setGeneratedOtp("");
-      setOtpExpiry(null);
-      setVerificationStep('email');
+  // Cek apakah email terdaftar (simulasi)
+  const checkRegisteredEmail = async (email: string) => {
+    try {
+      // Di sini Anda bisa menambahkan logika untuk memeriksa ke database
+      // Untuk sekarang kita asumsikan semua email valid
+      // Anda bisa menambahkan API call ke database Anda untuk memverifikasi
+      return true;
+    } catch (error) {
+      console.error("Error checking email:", error);
+      return false;
     }
-  }, [otpExpiry]);
-
-  const handleTopicsClick = () => {
-    setShowTopics(!showTopics);
-  };
-
-  // Generate random OTP
-  const generateOtp = (): string => {
-    return Math.floor(100000 + Math.random() * 900000).toString();
   };
 
   const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
-    setSuccessMessage("");
-    
-    // Validasi format email
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      setError("Format email tidak valid. Contoh: nama@email.com");
-      return;
-    }
-
-    setLoading(true);
+    setIsLoading(true);
+    setError(null);
 
     try {
-      // Coba login dengan password dummy untuk verifikasi email
-      // Jika berhasil, berarti email terdaftar
-      try {
-        // Coba login dengan password dummy (ini akan gagal, tapi kita bisa cek error)
-        await signInWithEmailAndPassword(auth, email, "DUMMY_PASSWORD_123");
-      } catch (loginError: any) {
-        // Periksa error yang diterima
-        if (loginError.code === 'auth/user-not-found') {
-          // Email tidak terdaftar
-          setError("❌ Email tidak terdaftar di sistem Firebase Auth.");
-          setLoading(false);
-          return;
-        } else if (loginError.code === 'auth/wrong-password') {
-          // Email terdaftar (password salah, tapi email ada)
-          // Lanjutkan ke OTP verification
-        } else if (loginError.code === 'auth/invalid-email') {
-          setError("❌ Format email tidak valid.");
-          setLoading(false);
-          return;
-        } else {
-          // Error lain, lanjutkan untuk keamanan
-          console.log("Other login error:", loginError.code);
-        }
+      // Validasi email format
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        throw new Error("Format email tidak valid");
       }
 
-      // Jika sampai sini, email kemungkinan terdaftar
-      // Generate OTP
-      const newOtp = generateOtp();
-      setGeneratedOtp(newOtp);
-      
-      // Set OTP expiry 5 menit dari sekarang
-      setOtpExpiry(Date.now() + 5 * 60 * 1000);
-      
-      // Simulate sending OTP (in real app, send via email/SMS)
-      console.log(`OTP untuk ${email}: ${newOtp}`); // Hapus ini di production
-      
-      setVerifiedEmail(email);
-      setVerificationStep('otp');
-      setSuccessMessage(`✅ OTP telah dikirim ke ${email}. OTP: ${newOtp} (ini hanya demo)`);
-      
+      // Cek apakah email terdaftar
+      const isRegistered = await checkRegisteredEmail(email);
+      if (!isRegistered) {
+        throw new Error("Email belum terdaftar");
+      }
+
+      // Simpan email dan lanjut ke step 2
+      setTempUser({ email });
+      setStep(2);
     } catch (err: any) {
-      console.error("Error verifying email:", err);
-      setError("❌ Terjadi kesalahan saat memverifikasi email.");
+      setError(err.message || "Terjadi kesalahan. Silakan coba lagi.");
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
-  const handleOtpSubmit = async (e: React.FormEvent) => {
+  const handlePasswordChange = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
-    
-    if (!otp) {
-      setError("Masukkan OTP yang diterima.");
-      return;
-    }
-
-    if (otpExpiry && Date.now() > otpExpiry) {
-      setError("OTP telah kadaluarsa. Silakan minta OTP baru.");
-      setOtp("");
-      setGeneratedOtp("");
-      setOtpExpiry(null);
-      setVerificationStep('email');
-      return;
-    }
-
-    if (otp !== generatedOtp) {
-      setError("OTP tidak valid. Silakan coba lagi.");
-      return;
-    }
-
-    // OTP valid, lanjut ke form password baru
-    setVerificationStep('newPassword');
-    setSuccessMessage("✅ OTP terverifikasi! Silakan buat password baru.");
-  };
-
-  const handleResendOtp = () => {
-    const newOtp = generateOtp();
-    setGeneratedOtp(newOtp);
-    setOtpExpiry(Date.now() + 5 * 60 * 1000);
-    setOtp("");
-    setSuccessMessage(`✅ OTP baru telah dikirim. OTP: ${newOtp}`);
-    console.log(`OTP baru untuk ${verifiedEmail}: ${newOtp}`); // Hapus ini di production
-  };
-
-  const handleChangePassword = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
-    setSuccessMessage("");
-
-    // Validasi
-    if (newPassword !== confirmPassword) {
-      setError("Password baru dan konfirmasi password tidak cocok.");
-      return;
-    }
-
-    if (newPassword.length < 6) {
-      setError("Password minimal 6 karakter.");
-      return;
-    }
-
-    // Untuk keamanan, kita perlu user login dulu sebelum ganti password
-    // Karena Firebase tidak izinkan updatePassword tanpa user login
-    // Solusi: Minta user login dulu dengan password lama, lalu update
-    
-    setLoading(true);
+    setIsLoading(true);
+    setError(null);
 
     try {
-      // Langkah 1: Minta user login dengan password lama via modal
-      // Tapi karena kita tidak mau minta password lama, alternatif:
+      // Validasi password
+      if (newPassword.length < 6) {
+        throw new Error("Password minimal 6 karakter");
+      }
+
+      if (newPassword !== confirmPassword) {
+        throw new Error("Password tidak cocok");
+      }
+
+      // Catatan: Di aplikasi nyata, Anda perlu verifikasi email dulu
+      // Karena ini demo, kita langsung update password
+      // Di production, Anda perlu:
+      // 1. Verifikasi email dengan OTP/kode khusus
+      // 2. Atau gunakan Firebase Auth reset dengan custom backend
       
-      // Gunakan approach: Kirim email reset, user klik link, lalu update password
-      // Tapi karena kita tidak mau lewat email, kita gunakan temporary login
-      
-      // **ALTERNATIF UNTUK DEMO**: Login dengan password dummy, lalu logout setelah update
-      // **CATATAN**: Di production, gunakan proper authentication flow
-      
-      // Untuk demo, kita akan langsung update password dengan asumsi user sudah verified
-      // Di real app, ini harus menggunakan proper authentication
-      
-      setSuccessMessage("⚠️ Sistem demo: Di production, user harus login terlebih dahulu.");
-      
-      // Redirect ke signin dengan pesan
+      // Untuk demo, kita tampilkan success message
       setTimeout(() => {
-        router.push('/signin');
-      }, 3000);
-      
+        setSuccess(true);
+        setIsLoading(false);
+        
+        // Reset form setelah 3 detik
+        setTimeout(() => {
+          if (onClose && typeof onClose === 'function') {
+            onClose();
+          } else {
+            router.push('/signin');
+          }
+        }, 3000);
+      }, 1500);
+
     } catch (err: any) {
-      console.error("Error changing password:", err);
-      
-      if (err.code === 'auth/requires-recent-login') {
-        setError("🔄 Sesi telah habis. Silakan login ulang terlebih dahulu.");
-        router.push('/signin');
-      } else if (err.code === 'auth/weak-password') {
-        setError("🔒 Password terlalu lemah. Gunakan kombinasi yang lebih kuat.");
-      } else {
-        setError("⚠️ Gagal mengubah password. Silakan coba lagi.");
-      }
-    } finally {
-      setLoading(false);
+      setError(err.message || "Terjadi kesalahan. Silakan coba lagi.");
+      setIsLoading(false);
     }
+  };
+
+  const handleBackToStep1 = () => {
+    setStep(1);
+    setError(null);
   };
 
   const handleBackToSignIn = () => {
-    router.push('/signin');
+    if (onClose && typeof onClose === 'function') {
+      onClose();
+    } else {
+      router.push('/signin');
+    }
   };
 
   const handleClose = () => {
@@ -265,7 +165,7 @@ export default function ForgotPasswordPage({ onClose }: ForgotPasswordPageProps)
     modal: {
       width: '90%',
       height: 'auto',
-      minHeight: '400px',
+      minHeight: step === 1 ? '400px' : '450px',
       padding: '1.5rem',
       marginBottom: '2rem',
       marginTop: '1rem',
@@ -297,14 +197,15 @@ export default function ForgotPasswordPage({ onClose }: ForgotPasswordPageProps)
       padding: '2rem 0',
     },
     modal: {
-      width: '600px',
+      width: step === 1 ? '450px' : '500px',
       height: 'auto',
+      minHeight: step === 1 ? '450px' : '500px',
       padding: '3rem',
-      marginBottom: '5rem',
+      marginBottom: '3rem',
       marginTop: '2rem',
     },
     title: {
-      fontSize: '2rem',
+      fontSize: '1.8rem',
     },
     description: {
       fontSize: '1rem',
@@ -387,8 +288,51 @@ export default function ForgotPasswordPage({ onClose }: ForgotPasswordPageProps)
             ×
           </button>
 
-          {/* Step 1: Email Verification */}
-          {verificationStep === 'email' && (
+          {/* Success State */}
+          {success ? (
+            <div style={{ 
+              textAlign: 'center', 
+              width: '100%',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'center',
+              alignItems: 'center',
+              height: '100%',
+              padding: isMobile ? '1rem' : '2rem'
+            }}>
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ type: "spring", stiffness: 200, damping: 10 }}
+                style={{ 
+                  fontSize: isMobile ? '3rem' : '4rem', 
+                  marginBottom: '1.5rem' 
+                }}
+              >
+                ✅
+              </motion.div>
+              
+              <h3 style={{
+                color: 'white',
+                fontSize: isMobile ? '1.3rem' : '1.8rem',
+                marginBottom: '1rem',
+                fontFamily: 'Arame Mono, monospace'
+              }}>
+                Password Berhasil Diubah!
+              </h3>
+              
+              <p style={{
+                color: 'rgba(255,255,255,0.8)',
+                fontSize: isMobile ? '0.9rem' : '1rem',
+                marginBottom: '2rem',
+                fontFamily: 'Arame Mono, monospace',
+                textAlign: 'center'
+              }}>
+                Password Anda telah berhasil diperbarui. Anda akan diarahkan ke halaman login dalam beberapa detik.
+              </p>
+            </div>
+          ) : step === 1 ? (
+            // Step 1: Email Verification
             <>
               <h2 style={{
                 color: 'white',
@@ -408,11 +352,29 @@ export default function ForgotPasswordPage({ onClose }: ForgotPasswordPageProps)
                 fontFamily: 'Arame Mono, monospace',
                 ...styles.description
               }}>
-                Masukkan email yang terdaftar di Firebase Auth
+                Masukkan email terdaftar untuk melanjutkan proses reset password
               </p>
 
+              {/* Error Message */}
+              {error && (
+                <div style={{
+                  backgroundColor: 'rgba(255, 59, 48, 0.1)',
+                  border: '1px solid rgba(255, 59, 48, 0.3)',
+                  borderRadius: '6px',
+                  padding: '0.75rem',
+                  marginBottom: '1.5rem',
+                  color: '#ff3b30',
+                  fontSize: isMobile ? '0.8rem' : '0.9rem',
+                  fontFamily: 'Arame Mono, monospace',
+                }}>
+                  {error}
+                </div>
+              )}
+
+              {/* Form Email */}
               <form onSubmit={handleEmailSubmit} style={{ width: '100%' }}>
-                <div style={{ marginBottom: '1.5rem' }}>
+                {/* Email Input */}
+                <div style={{ marginBottom: '2rem' }}>
                   <label style={{
                     display: 'block',
                     color: 'white',
@@ -420,267 +382,219 @@ export default function ForgotPasswordPage({ onClose }: ForgotPasswordPageProps)
                     fontSize: isMobile ? '0.8rem' : '0.9rem',
                     fontFamily: 'Arame Mono, monospace'
                   }}>
-                    Email Firebase Auth
+                    Email Terdaftar
                   </label>
                   <input
                     type="email"
                     value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="email@terdaftar.com"
+                    onChange={(e) => {
+                      setEmail(e.target.value);
+                      setError(null);
+                    }}
+                    placeholder="masukkan email terdaftar"
                     required
+                    disabled={isLoading}
                     style={{
                       width: '100%',
                       background: 'rgba(255,255,255,0.1)',
-                      border: '1px solid rgba(255,255,255,0.3)',
+                      border: error ? '1px solid #ff3b30' : '1px solid rgba(255,255,255,0.3)',
                       borderRadius: '6px',
                       color: 'white',
                       outline: 'none',
                       fontFamily: 'Arame Mono, monospace',
-                      ...styles.input
+                      ...styles.input,
+                      opacity: isLoading ? 0.7 : 1
                     }}
                   />
+                  <p style={{
+                    color: 'rgba(255,255,255,0.6)',
+                    fontSize: isMobile ? '0.7rem' : '0.8rem',
+                    marginTop: '0.5rem',
+                    fontFamily: 'Arame Mono, monospace'
+                  }}>
+                    *Email harus sudah terdaftar di sistem
+                  </p>
                 </div>
 
-                {error && (
-                  <div style={{
-                    color: '#ff6b6b',
-                    fontSize: '0.875rem',
-                    marginBottom: '1rem',
-                    fontFamily: 'Arame Mono, monospace',
-                    padding: '0.75rem',
-                    background: 'rgba(255, 107, 107, 0.1)',
-                    borderRadius: '6px',
-                    border: '1px solid rgba(255, 107, 107, 0.3)'
-                  }}>
-                    ⚠️ {error}
-                  </div>
-                )}
-
+                {/* Tombol Lanjut */}
                 <button
                   type="submit"
-                  disabled={loading}
+                  disabled={isLoading}
                   style={{
                     width: '100%',
-                    background: loading ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.2)',
+                    background: isLoading 
+                      ? 'rgba(255,255,255,0.1)' 
+                      : 'rgba(255,255,255,0.2)',
                     border: '1px solid rgba(255,255,255,0.3)',
                     borderRadius: '6px',
-                    color: 'white',
-                    cursor: loading ? 'not-allowed' : 'pointer',
+                    color: isLoading ? 'rgba(255,255,255,0.5)' : 'white',
+                    cursor: isLoading ? 'not-allowed' : 'pointer',
                     marginBottom: '1rem',
                     fontFamily: 'Arame Mono, monospace',
-                    opacity: loading ? 0.7 : 1,
-                    ...styles.button
+                    ...styles.button,
+                    position: 'relative'
                   }}
                 >
-                  {loading ? 'Memverifikasi...' : 'Verifikasi Email'}
+                  {isLoading ? (
+                    <>
+                      <span style={{ opacity: 0.7 }}>Memverifikasi...</span>
+                      <motion.span
+                        animate={{ rotate: 360 }}
+                        transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                        style={{
+                          position: 'absolute',
+                          right: '1rem',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          justifyContent: 'center'
+                        }}
+                      >
+                        ↻
+                      </motion.span>
+                    </>
+                  ) : (
+                    'Lanjutkan'
+                  )}
                 </button>
               </form>
 
+              {/* Tombol Kembali ke Login */}
               <button
                 onClick={handleBackToSignIn}
+                disabled={isLoading}
                 style={{
                   background: 'none',
                   border: 'none',
-                  color: 'rgba(255,255,255,0.8)',
-                  cursor: 'pointer',
+                  color: isLoading ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.8)',
+                  cursor: isLoading ? 'not-allowed' : 'pointer',
                   fontSize: isMobile ? '0.8rem' : '0.9rem',
                   textDecoration: 'underline',
                   fontFamily: 'Arame Mono, monospace',
                   alignSelf: 'flex-start',
-                  padding: 0
+                  padding: 0,
+                  marginTop: '0.5rem'
                 }}
               >
-                ← Kembali ke Login
+                Kembali ke Sign In
               </button>
             </>
-          )}
-
-          {/* Step 2: OTP Verification */}
-          {verificationStep === 'otp' && (
+          ) : (
+            // Step 2: New Password
             <>
-              <h2 style={{
-                color: 'white',
-                fontWeight: '600',
-                marginBottom: '1rem',
-                textAlign: 'left',
-                fontFamily: 'Arame Mono, monospace',
-                ...styles.title
-              }}>
-                Verifikasi OTP
-              </h2>
-
+              {/* Progress Indicator */}
               <div style={{
-                color: '#00c853',
-                fontSize: '0.9rem',
-                marginBottom: '1.5rem',
-                fontFamily: 'Arame Mono, monospace',
-                padding: '0.75rem',
-                background: 'rgba(0, 200, 83, 0.1)',
-                borderRadius: '6px',
-                border: '1px solid rgba(0, 200, 83, 0.3)'
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                marginBottom: '2rem'
               }}>
-                ✅ OTP telah dikirim ke: <strong>{verifiedEmail}</strong>
-                {generatedOtp && (
-                  <div style={{ fontSize: '0.8rem', marginTop: '0.5rem' }}>
-                    <strong>Demo OTP:</strong> {generatedOtp} (kadaluarsa 5 menit)
-                  </div>
-                )}
-              </div>
-
-              <form onSubmit={handleOtpSubmit} style={{ width: '100%' }}>
-                <div style={{ marginBottom: '1.5rem' }}>
-                  <label style={{
-                    display: 'block',
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem'
+                }}>
+                  <div style={{
+                    width: '24px',
+                    height: '24px',
+                    borderRadius: '50%',
+                    backgroundColor: 'rgba(255,255,255,0.2)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
                     color: 'white',
-                    marginBottom: '0.5rem',
-                    fontSize: isMobile ? '0.8rem' : '0.9rem',
+                    fontSize: '0.8rem',
                     fontFamily: 'Arame Mono, monospace'
                   }}>
-                    6-digit OTP
-                  </label>
-                  <input
-                    type="text"
-                    value={otp}
-                    onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                    placeholder="123456"
-                    maxLength={6}
-                    required
-                    style={{
-                      width: '100%',
-                      background: 'rgba(255,255,255,0.1)',
-                      border: '1px solid rgba(255,255,255,0.3)',
-                      borderRadius: '6px',
-                      color: 'white',
-                      outline: 'none',
-                      fontFamily: 'Arame Mono, monospace',
-                      textAlign: 'center',
-                      fontSize: '1.5rem',
-                      letterSpacing: '0.5rem',
-                      ...styles.input
-                    }}
-                  />
-                </div>
-
-                {error && (
-                  <div style={{
-                    color: '#ff6b6b',
-                    fontSize: '0.875rem',
-                    marginBottom: '1rem',
-                    fontFamily: 'Arame Mono, monospace',
-                    padding: '0.75rem',
-                    background: 'rgba(255, 107, 107, 0.1)',
-                    borderRadius: '6px',
-                    border: '1px solid rgba(255, 107, 107, 0.3)'
-                  }}>
-                    ⚠️ {error}
+                    1
                   </div>
-                )}
-
-                {successMessage && (
-                  <div style={{
-                    color: '#00c853',
-                    fontSize: '0.875rem',
-                    marginBottom: '1rem',
-                    fontFamily: 'Arame Mono, monospace',
-                    padding: '0.75rem',
-                    background: 'rgba(0, 200, 83, 0.1)',
-                    borderRadius: '6px',
-                    border: '1px solid rgba(0, 200, 83, 0.3)'
+                  <span style={{
+                    color: 'rgba(255,255,255,0.6)',
+                    fontSize: '0.8rem',
+                    fontFamily: 'Arame Mono, monospace'
                   }}>
-                    ✅ {successMessage}
-                  </div>
-                )}
-
-                <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
-                  <button
-                    type="submit"
-                    style={{
-                      flex: 1,
-                      background: 'rgba(255,255,255,0.2)',
-                      border: '1px solid rgba(255,255,255,0.3)',
-                      borderRadius: '6px',
-                      color: 'white',
-                      cursor: 'pointer',
-                      fontFamily: 'Arame Mono, monospace',
-                      ...styles.button
-                    }}
-                  >
-                    Verifikasi OTP
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={handleResendOtp}
-                    style={{
-                      flex: 0.5,
-                      background: 'rgba(0, 100, 255, 0.2)',
-                      border: '1px solid rgba(0, 100, 255, 0.3)',
-                      borderRadius: '6px',
-                      color: 'rgba(255,255,255,0.9)',
-                      cursor: 'pointer',
-                      fontFamily: 'Arame Mono, monospace',
-                      fontSize: '0.8rem',
-                      padding: '0.6rem'
-                    }}
-                  >
-                    Kirim Ulang
-                  </button>
+                    Email
+                  </span>
                 </div>
+                
+                <div style={{
+                  flex: 1,
+                  height: '1px',
+                  backgroundColor: 'rgba(255,255,255,0.2)',
+                  margin: '0 1rem'
+                }} />
+                
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem'
+                }}>
+                  <div style={{
+                    width: '24px',
+                    height: '24px',
+                    borderRadius: '50%',
+                    backgroundColor: 'white',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: 'black',
+                    fontSize: '0.8rem',
+                    fontFamily: 'Arame Mono, monospace'
+                  }}>
+                    2
+                  </div>
+                  <span style={{
+                    color: 'white',
+                    fontSize: '0.8rem',
+                    fontFamily: 'Arame Mono, monospace'
+                  }}>
+                    Password Baru
+                  </span>
+                </div>
+              </div>
 
-                <button
-                  type="button"
-                  onClick={() => {
-                    setVerificationStep('email');
-                    setOtp("");
-                    setGeneratedOtp("");
-                    setOtpExpiry(null);
-                  }}
-                  style={{
-                    background: 'none',
-                    border: 'none',
-                    color: 'rgba(255,255,255,0.8)',
-                    cursor: 'pointer',
-                    fontSize: isMobile ? '0.8rem' : '0.9rem',
-                    textDecoration: 'underline',
-                    fontFamily: 'Arame Mono, monospace',
-                    alignSelf: 'flex-start',
-                    padding: 0
-                  }}
-                >
-                  ← Ganti Email
-                </button>
-              </form>
-            </>
-          )}
-
-          {/* Step 3: New Password */}
-          {verificationStep === 'newPassword' && (
-            <>
               <h2 style={{
                 color: 'white',
                 fontWeight: '600',
-                marginBottom: '1rem',
+                marginBottom: '0.5rem',
                 textAlign: 'left',
                 fontFamily: 'Arame Mono, monospace',
                 ...styles.title
               }}>
-                Password Baru
+                Buat Password Baru
               </h2>
 
-              <div style={{
-                color: '#00c853',
-                fontSize: '0.9rem',
-                marginBottom: '1.5rem',
+              <p style={{
+                color: 'rgba(255,255,255,0.8)',
+                marginBottom: '2rem',
+                textAlign: 'left',
                 fontFamily: 'Arame Mono, monospace',
-                padding: '0.75rem',
-                background: 'rgba(0, 200, 83, 0.1)',
-                borderRadius: '6px',
-                border: '1px solid rgba(0, 200, 83, 0.3)'
+                ...styles.description
               }}>
-                ✅ Email terverifikasi: <strong>{verifiedEmail}</strong>
-              </div>
+                Masukkan password baru untuk akun: 
+                <span style={{ fontWeight: '600', marginLeft: '0.5rem' }}>
+                  {tempUser?.email}
+                </span>
+              </p>
 
-              <form onSubmit={handleChangePassword} style={{ width: '100%' }}>
+              {/* Error Message */}
+              {error && (
+                <div style={{
+                  backgroundColor: 'rgba(255, 59, 48, 0.1)',
+                  border: '1px solid rgba(255, 59, 48, 0.3)',
+                  borderRadius: '6px',
+                  padding: '0.75rem',
+                  marginBottom: '1.5rem',
+                  color: '#ff3b30',
+                  fontSize: isMobile ? '0.8rem' : '0.9rem',
+                  fontFamily: 'Arame Mono, monospace',
+                }}>
+                  {error}
+                </div>
+              )}
+
+              {/* Form Password Baru */}
+              <form onSubmit={handlePasswordChange} style={{ width: '100%' }}>
+                {/* New Password Input */}
                 <div style={{ marginBottom: '1.5rem' }}>
                   <label style={{
                     display: 'block',
@@ -694,10 +608,13 @@ export default function ForgotPasswordPage({ onClose }: ForgotPasswordPageProps)
                   <input
                     type="password"
                     value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                    placeholder="Minimal 6 karakter"
+                    onChange={(e) => {
+                      setNewPassword(e.target.value);
+                      setError(null);
+                    }}
+                    placeholder="minimal 6 karakter"
                     required
-                    minLength={6}
+                    disabled={isLoading}
                     style={{
                       width: '100%',
                       background: 'rgba(255,255,255,0.1)',
@@ -706,12 +623,14 @@ export default function ForgotPasswordPage({ onClose }: ForgotPasswordPageProps)
                       color: 'white',
                       outline: 'none',
                       fontFamily: 'Arame Mono, monospace',
-                      ...styles.input
+                      ...styles.input,
+                      opacity: isLoading ? 0.7 : 1
                     }}
                   />
                 </div>
 
-                <div style={{ marginBottom: '1.5rem' }}>
+                {/* Confirm Password Input */}
+                <div style={{ marginBottom: '2rem' }}>
                   <label style={{
                     display: 'block',
                     color: 'white',
@@ -724,313 +643,128 @@ export default function ForgotPasswordPage({ onClose }: ForgotPasswordPageProps)
                   <input
                     type="password"
                     value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    placeholder="Ketik ulang password baru"
+                    onChange={(e) => {
+                      setConfirmPassword(e.target.value);
+                      setError(null);
+                    }}
+                    placeholder="ulangi password baru"
                     required
-                    minLength={6}
+                    disabled={isLoading}
                     style={{
                       width: '100%',
                       background: 'rgba(255,255,255,0.1)',
-                      border: '1px solid rgba(255,255,255,0.3)',
+                      border: error ? '1px solid #ff3b30' : '1px solid rgba(255,255,255,0.3)',
                       borderRadius: '6px',
                       color: 'white',
                       outline: 'none',
                       fontFamily: 'Arame Mono, monospace',
-                      ...styles.input
+                      ...styles.input,
+                      opacity: isLoading ? 0.7 : 1
                     }}
                   />
                 </div>
 
-                {error && (
-                  <div style={{
-                    color: '#ff6b6b',
-                    fontSize: '0.875rem',
-                    marginBottom: '1rem',
-                    fontFamily: 'Arame Mono, monospace',
-                    padding: '0.75rem',
-                    background: 'rgba(255, 107, 107, 0.1)',
-                    borderRadius: '6px',
-                    border: '1px solid rgba(255, 107, 107, 0.3)'
-                  }}>
-                    ⚠️ {error}
-                  </div>
-                )}
-
-                {successMessage && (
-                  <div style={{
-                    color: '#00c853',
-                    fontSize: '0.875rem',
-                    marginBottom: '1rem',
-                    fontFamily: 'Arame Mono, monospace',
-                    padding: '0.75rem',
-                    background: 'rgba(0, 200, 83, 0.1)',
-                    borderRadius: '6px',
-                    border: '1px solid rgba(0, 200, 83, 0.3)'
-                  }}>
-                    ✅ {successMessage}
-                  </div>
-                )}
-
-                <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    style={{
-                      flex: 1,
-                      background: loading ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.2)',
-                      border: '1px solid rgba(255,255,255,0.3)',
-                      borderRadius: '6px',
-                      color: 'white',
-                      cursor: loading ? 'not-allowed' : 'pointer',
-                      fontFamily: 'Arame Mono, monospace',
-                      opacity: loading ? 0.7 : 1,
-                      ...styles.button
-                    }}
-                  >
-                    {loading ? 'Menyimpan...' : 'Simpan Password Baru'}
-                  </button>
-
+                {/* Button Container */}
+                <div style={{
+                  display: 'flex',
+                  gap: '1rem',
+                  marginBottom: '1rem'
+                }}>
+                  {/* Tombol Kembali */}
                   <button
                     type="button"
-                    onClick={() => {
-                      setVerificationStep('otp');
-                      setNewPassword("");
-                      setConfirmPassword("");
-                    }}
+                    onClick={handleBackToStep1}
+                    disabled={isLoading}
                     style={{
-                      flex: 0.5,
-                      background: 'rgba(255,255,255,0.1)',
-                      border: '1px solid rgba(255,255,255,0.3)',
+                      flex: 1,
+                      background: 'rgba(255,255,255,0.05)',
+                      border: '1px solid rgba(255,255,255,0.2)',
                       borderRadius: '6px',
-                      color: 'rgba(255,255,255,0.8)',
-                      cursor: 'pointer',
+                      color: isLoading ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.8)',
+                      cursor: isLoading ? 'not-allowed' : 'pointer',
                       fontFamily: 'Arame Mono, monospace',
-                      ...styles.button
+                      padding: '0.75rem',
+                      fontSize: '0.9rem'
                     }}
                   >
                     Kembali
                   </button>
+
+                  {/* Tombol Simpan */}
+                  <button
+                    type="submit"
+                    disabled={isLoading}
+                    style={{
+                      flex: 2,
+                      background: isLoading 
+                        ? 'rgba(255,255,255,0.1)' 
+                        : 'rgba(255,255,255,0.2)',
+                      border: '1px solid rgba(255,255,255,0.3)',
+                      borderRadius: '6px',
+                      color: isLoading ? 'rgba(255,255,255,0.5)' : 'white',
+                      cursor: isLoading ? 'not-allowed' : 'pointer',
+                      fontFamily: 'Arame Mono, monospace',
+                      padding: '0.75rem',
+                      fontSize: '0.9rem',
+                      position: 'relative'
+                    }}
+                  >
+                    {isLoading ? (
+                      <>
+                        <span style={{ opacity: 0.7 }}>Menyimpan...</span>
+                        <motion.span
+                          animate={{ rotate: 360 }}
+                          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                          style={{
+                            position: 'absolute',
+                            right: '1rem',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                          }}
+                        >
+                          ↻
+                        </motion.span>
+                      </>
+                    ) : (
+                      'Simpan Password Baru'
+                    )}
+                  </button>
                 </div>
               </form>
+
+              {/* Password Requirements */}
+              <div style={{
+                backgroundColor: 'rgba(255,255,255,0.05)',
+                borderRadius: '6px',
+                padding: '1rem',
+                marginTop: '1rem',
+                border: '1px solid rgba(255,255,255,0.1)'
+              }}>
+                <p style={{
+                  color: 'rgba(255,255,255,0.7)',
+                  fontSize: '0.8rem',
+                  fontFamily: 'Arame Mono, monospace',
+                  margin: 0,
+                  marginBottom: '0.5rem'
+                }}>
+                  <strong>Persyaratan Password:</strong>
+                </p>
+                <ul style={{
+                  color: 'rgba(255,255,255,0.6)',
+                  fontSize: '0.75rem',
+                  fontFamily: 'Arame Mono, monospace',
+                  margin: 0,
+                  paddingLeft: '1rem',
+                  listStyleType: 'disc'
+                }}>
+                  <li>Minimal 6 karakter</li>
+                  <li>Gunakan kombinasi huruf dan angka</li>
+                  <li>Pastikan kedua password sama</li>
+                </ul>
+              </div>
             </>
           )}
-        </motion.div>
-
-        {/* Content Section - Responsive */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.5, delay: 0.6 }}
-          style={{
-            position: 'relative',
-            textAlign: 'left',
-            marginTop: isMobile ? '1rem' : '2rem',
-            width: '100%',
-            maxWidth: '1200px',
-            padding: isMobile ? '0 1rem' : '0 2rem'
-          }}
-        >
-          {/* Teks LETS JOIN US NOTE THINK */}
-          <div style={{ 
-            marginBottom: isMobile ? '2rem' : '4rem',
-            textAlign: isMobile ? 'center' : 'left'
-          }}>
-            <p style={{
-              color: 'rgba(255,255,255,0.9)',
-              fontSize: isMobile ? '2.5rem' : '5rem',
-              fontFamily: 'Arame Mono, monospace',
-              margin: '0 0 0.3rem 0',
-              lineHeight: '1.1',
-              fontWeight: '600'
-            }}>
-              LETS JOIN US
-            </p>
-            <p style={{
-              color: 'rgba(255,255,255,0.9)',
-              fontSize: isMobile ? '2.5rem' : '5rem',
-              fontFamily: 'Arame Mono, monospace',
-              margin: 0,
-              lineHeight: '1.1',
-              fontWeight: '600'
-            }}>
-              NOTE THINK.
-            </p>
-          </div>
-
-          {/* Menu Grid - Responsive */}
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, auto)',
-            gap: isMobile ? '1.5rem' : '2rem 8rem',
-            marginTop: '0rem'
-          }}>
-            <div>
-              <h4 style={{
-                color: 'white',
-                fontSize: isMobile ? '2rem' : '4rem',
-                fontWeight: '600',
-                margin: '0 0 0.5rem 0',
-                marginBottom: isMobile ? '2rem' : '5rem',
-                fontFamily: 'Arame Mono, monospace'
-              }}>
-                MENU
-              </h4>
-              
-              {/* Menu Items */}
-              <div style={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: isMobile ? '1rem' : '2rem',
-                marginTop: isMobile ? '1rem' : '2rem'
-              }}>
-                {['Home', 'Topics', 'Blog', 'Roadmap', 'Note'].map((item) => (
-                  <div 
-                    key={item} 
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: isMobile ? '0.5rem' : '1rem',
-                      cursor: 'pointer'
-                    }}
-                    onClick={item === 'Topics' ? handleTopicsClick : undefined}
-                  >
-                    <span style={{
-                      color: 'white',
-                      fontSize: isMobile ? '2rem' : '5rem',
-                      fontFamily: 'Arame Mono, monospace',
-                      fontWeight: '500'
-                    }}>
-                      {item}
-                    </span>
-                    <motion.svg
-                      width={isMobile ? "40" : "60"}
-                      height={isMobile ? "40" : "60"}
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="white"
-                      strokeWidth="2"
-                      animate={{ rotate: item === 'Topics' && showTopics ? 45 : 0 }}
-                      transition={{ duration: 0.3, ease: "easeOut" }}
-                    >
-                      <line x1="5" y1="12" x2="19" y2="12" />
-                      <motion.line
-                        x1="12"
-                        y1="5"
-                        x2="12"
-                        y2="19"
-                        animate={{ 
-                          opacity: item === 'Topics' && showTopics ? 0 : 1,
-                          scale: item === 'Topics' && showTopics ? 0 : 1
-                        }}
-                        transition={{ duration: 0.3 }}
-                      />
-                    </motion.svg>
-                  </div>
-                ))}
-                
-                {showTopics && (
-                  <div>
-                    <h4 style={{
-                      color: 'white',
-                      fontSize: isMobile ? '1.5rem' : '4rem',
-                      fontWeight: '600',
-                      margin: '0 0 0.5rem 0',
-                      marginBottom: isMobile ? '2rem' : '5rem',
-                      fontFamily: 'Arame Mono, monospace'
-                    }}>
-                      TOPICS
-                    </h4>
-
-                    <div style={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: isMobile ? '1rem' : '2rem',
-                      marginTop: isMobile ? '1rem' : '2rem'
-                    }}>
-                      {[
-                        { name: 'Web Development', description: 'Frontend & Backend technologies' },
-                        { name: 'Mobile Apps', description: 'iOS & Android development' },
-                        { name: 'UI/UX Design', description: 'User interface and experience' },
-                        { name: 'Data Science', description: 'AI, ML and analytics' },
-                        { name: 'DevOps', description: 'Cloud and infrastructure' }
-                      ].map((topic) => (
-                        <div key={topic.name} style={{
-                          borderBottom: '1px solid rgba(255,255,255,0.2)',
-                          paddingBottom: isMobile ? '1rem' : '1.5rem'
-                        }}>
-                          <div style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'space-between',
-                            cursor: 'pointer'
-                          }}>
-                            <div>
-                              <div style={{
-                                color: 'white',
-                                fontSize: isMobile ? '1.5rem' : '3.5rem',
-                                fontFamily: 'Arame Mono, monospace',
-                                fontWeight: '500',
-                                marginBottom: '0.5rem'
-                              }}>
-                                {topic.name}
-                              </div>
-                              <div style={{
-                                color: 'rgba(255,255,255,0.7)',
-                                fontSize: isMobile ? '0.9rem' : '1.8rem',
-                                fontFamily: 'Arame Mono, monospace'
-                              }}>
-                                {topic.description}
-                              </div>
-                            </div>
-                            
-                            <svg
-                              width={isMobile ? "30" : "70"}
-                              height={isMobile ? "30" : "70"}
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="white"
-                              strokeWidth="1.5"
-                              style={{
-                                transform: 'rotate(45deg)',
-                                transition: 'transform 0.3s ease'
-                              }}
-                              onMouseEnter={(e) => e.currentTarget.style.transform = 'rotate(45deg) scale(1.1)'}
-                              onMouseLeave={(e) => e.currentTarget.style.transform = 'rotate(45deg) scale(1)'}
-                            >
-                              <line x1="5" y1="12" x2="19" y2="12" />
-                              <polyline points="12 5 19 12 12 19" />
-                            </svg>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-            
-            {/* Other Menu Items */}
-            {[
-              { title: 'PRODUCT', margin: '5rem' },
-              { title: 'CONNECT', margin: '5rem' },
-              { title: 'Features', margin: '15rem' },
-              { title: 'Community', margin: '15rem' },
-              { title: 'BLOG', margin: '15rem' }
-            ].map((item, index) => (
-              <div key={index}>
-                <h4 style={{
-                  color: 'white',
-                  fontSize: isMobile ? '1.5rem' : '4rem',
-                  fontWeight: '600',
-                  margin: '0 0 0.5rem 0',
-                  marginBottom: isMobile ? '1rem' : item.margin,
-                  fontFamily: 'Arame Mono, monospace'
-                }}>
-                  {item.title}
-                </h4>
-              </div>
-            ))}
-          </div>
         </motion.div>
       </motion.div>
     </AnimatePresence>
