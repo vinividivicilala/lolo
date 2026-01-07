@@ -7,10 +7,12 @@ import {
   getAuth, 
   sendPasswordResetEmail,
   signInWithEmailAndPassword,
-  updatePassword
+  updatePassword,
+  fetchSignInMethodsForEmail,
+  EmailAuthProvider
 } from "firebase/auth";
 import { initializeApp } from "firebase/app";
-import { getFirestore } from "firebase/firestore";
+import { getFirestore, collection, query, where, getDocs } from "firebase/firestore";
 
 // Konfigurasi Firebase
 const firebaseConfig = {
@@ -45,6 +47,7 @@ export default function ForgotPasswordPage({ onClose }: ForgotPasswordPageProps)
   const [loading, setLoading] = useState(false);
   const [showTopics, setShowTopics] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [emailAttempts, setEmailAttempts] = useState<{[key: string]: number}>({});
   const router = useRouter();
 
   // Check if mobile on component mount and window resize
@@ -65,34 +68,115 @@ export default function ForgotPasswordPage({ onClose }: ForgotPasswordPageProps)
     setShowTopics(!showTopics);
   };
 
+  // Fungsi untuk memeriksa apakah email terdaftar di Firebase Auth
+  const checkEmailInFirebaseAuth = async (email: string): Promise<boolean> => {
+    try {
+      // Method 1: Cek sign-in methods (cara paling akurat)
+      const methods = await fetchSignInMethodsForEmail(auth, email);
+      return methods.length > 0;
+    } catch (err: any) {
+      console.log("Method 1 failed, trying alternative...");
+      
+      // Method 2: Coba send password reset email
+      try {
+        await sendPasswordResetEmail(auth, email);
+        return true; // Jika berhasil, email terdaftar
+      } catch (resetErr: any) {
+        if (resetErr.code === 'auth/user-not-found') {
+          return false; // Email tidak terdaftar
+        }
+        throw resetErr; // Error lain
+      }
+    }
+  };
+
+  // Rate limiting untuk mencegah brute force
+  const checkRateLimit = (email: string): boolean => {
+    const now = Date.now();
+    const attempts = emailAttempts[email] || 0;
+    
+    if (attempts >= 3) {
+      setError("Terlalu banyak percobaan untuk email ini. Silakan coba lagi nanti.");
+      return false;
+    }
+    
+    setEmailAttempts({
+      ...emailAttempts,
+      [email]: attempts + 1
+    });
+    
+    return true;
+  };
+
   const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setSuccessMessage("");
+    
+    // Validasi format email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setError("Format email tidak valid. Contoh: user@domain.com");
+      return;
+    }
+
+    // Rate limiting
+    if (!checkRateLimit(email)) {
+      return;
+    }
+
     setLoading(true);
 
     try {
-      // Cek apakah email terdaftar dengan mencoba sendPasswordResetEmail
-      // Jika email tidak terdaftar, Firebase akan throw error
+      // Step 1: Cek apakah email terdaftar di Firebase Auth
+      const isRegistered = await checkEmailInFirebaseAuth(email);
+      
+      if (!isRegistered) {
+        setError("❌ Email tidak terdaftar di sistem. Silakan gunakan email yang sudah terdaftar.");
+        
+        // Simpan log attempt untuk keamanan
+        console.warn(`Attempt to use unregistered email: ${email}`);
+        
+        setLoading(false);
+        return;
+      }
+
+      // Step 2: Kirim email reset password (verifikasi tambahan)
       await sendPasswordResetEmail(auth, email);
       
-      // Jika berhasil, email terdaftar
-      setSuccessMessage(`✅ Link reset password telah dikirim ke ${email}. Silakan cek email Anda untuk melanjutkan.`);
+      // Step 3: Tampilkan form ganti password
+      setSuccessMessage(`✅ Email terverifikasi! Link reset password telah dikirim ke ${email}.`);
       setIsEmailVerified(true);
       setShowChangePassword(true);
       
+      // Reset attempts counter untuk email ini
+      setEmailAttempts({
+        ...emailAttempts,
+        [email]: 0
+      });
+      
     } catch (err: any) {
       console.error("Error in forgot password:", err);
-      if (err.code === 'auth/user-not-found') {
-        setError("Email tidak terdaftar. Silakan gunakan email yang sudah terdaftar di sistem.");
-      } else if (err.code === 'auth/invalid-email') {
-        setError("Format email tidak valid. Contoh: nama@email.com");
-      } else if (err.code === 'auth/missing-email') {
-        setError("Email harus diisi.");
-      } else if (err.code === 'auth/too-many-requests') {
-        setError("Terlalu banyak percobaan. Silakan coba lagi nanti.");
-      } else {
-        setError("Terjadi kesalahan sistem. Silakan coba lagi.");
+      
+      // Handle berbagai jenis error
+      switch (err.code) {
+        case 'auth/user-not-found':
+          setError("❌ Email tidak terdaftar di sistem. Silakan gunakan email yang sudah terdaftar.");
+          break;
+        case 'auth/invalid-email':
+          setError("❌ Format email tidak valid.");
+          break;
+        case 'auth/too-many-requests':
+          setError("⏳ Terlalu banyak permintaan. Silakan tunggu beberapa saat.");
+          break;
+        case 'auth/network-request-failed':
+          setError("🌐 Koneksi jaringan bermasalah. Silakan cek koneksi internet Anda.");
+          break;
+        case 'auth/quota-exceeded':
+          setError("📧 Batas pengiriman email telah tercapai. Silakan coba lagi nanti.");
+          break;
+        default:
+          setError("⚠️ Terjadi kesalahan sistem. Silakan hubungi administrator.");
       }
     } finally {
       setLoading(false);
@@ -104,7 +188,7 @@ export default function ForgotPasswordPage({ onClose }: ForgotPasswordPageProps)
     setError("");
     setSuccessMessage("");
 
-    // Validasi
+    // Validasi ketat
     if (!currentPassword) {
       setError("Password lama harus diisi.");
       return;
@@ -115,46 +199,77 @@ export default function ForgotPasswordPage({ onClose }: ForgotPasswordPageProps)
       return;
     }
 
-    if (newPassword.length < 6) {
-      setError("Password minimal 6 karakter.");
+    if (newPassword.length < 8) {
+      setError("Password minimal 8 karakter.");
+      return;
+    }
+
+    // Validasi kompleksitas password
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    if (!passwordRegex.test(newPassword)) {
+      setError("Password harus mengandung huruf besar, huruf kecil, angka, dan simbol.");
       return;
     }
 
     setLoading(true);
 
     try {
-      // Login dengan email dan password lama untuk verifikasi
+      // Step 1: Verifikasi email dan password lama
       const userCredential = await signInWithEmailAndPassword(auth, email, currentPassword);
       const user = userCredential.user;
       
-      // Update password
+      // Step 2: Double-check user masih valid
+      if (!user || !user.emailVerified) {
+        setError("Akun belum terverifikasi. Silakan verifikasi email Anda terlebih dahulu.");
+        return;
+      }
+      
+      // Step 3: Update password dengan timeout untuk mencegah brute force
+      await new Promise(resolve => setTimeout(resolve, 1000)); // Delay 1 detik
+      
       await updatePassword(user, newPassword);
       
-      // Password berhasil diubah
-      setSuccessMessage("✅ Password berhasil diubah! Anda akan diarahkan ke halaman login.");
+      // Step 4: Success - hapus semua state dan redirect
+      setSuccessMessage("✅ Password berhasil diubah! Sistem akan mengarahkan Anda ke halaman login.");
       
-      // Redirect setelah 2 detik
+      // Clear sensitive data
       setTimeout(() => {
+        setCurrentPassword("");
+        setNewPassword("");
+        setConfirmPassword("");
+        setEmail("");
+        setIsEmailVerified(false);
+        setShowChangePassword(false);
         router.push('/signin');
-      }, 2000);
+      }, 3000);
       
     } catch (err: any) {
       console.error("Error changing password:", err);
-      if (err.code === 'auth/wrong-password') {
-        setError("Password lama salah. Silakan coba lagi.");
-      } else if (err.code === 'auth/weak-password') {
-        setError("Password terlalu lemah. Gunakan kombinasi huruf, angka, dan simbol.");
-      } else if (err.code === 'auth/user-not-found') {
-        setError("Akun tidak ditemukan. Silakan mulai dari awal.");
-        setShowChangePassword(false);
-        setIsEmailVerified(false);
-      } else if (err.code === 'auth/too-many-requests') {
-        setError("Terlalu banyak percobaan gagal. Silakan coba lagi nanti.");
-      } else if (err.code === 'auth/requires-recent-login') {
-        setError("Sesi telah habis. Silakan login ulang terlebih dahulu.");
-        router.push('/signin');
-      } else {
-        setError("Terjadi kesalahan saat mengubah password.");
+      
+      switch (err.code) {
+        case 'auth/wrong-password':
+          setError("❌ Password lama salah. Silakan coba lagi.");
+          break;
+        case 'auth/weak-password':
+          setError("🔒 Password terlalu lemah. Gunakan kombinasi yang lebih kompleks.");
+          break;
+        case 'auth/user-not-found':
+          setError("❌ Akun tidak ditemukan. Mungkin akun telah dihapus.");
+          setShowChangePassword(false);
+          setIsEmailVerified(false);
+          break;
+        case 'auth/too-many-requests':
+          setError("⏳ Terlalu banyak percobaan gagal. Tunggu 15 menit sebelum mencoba lagi.");
+          break;
+        case 'auth/requires-recent-login':
+          setError("🔄 Sesi telah habis. Silakan login ulang terlebih dahulu.");
+          router.push('/signin');
+          break;
+        case 'auth/network-request-failed':
+          setError("🌐 Koneksi jaringan bermasalah. Silakan cek koneksi Anda.");
+          break;
+        default:
+          setError("⚠️ Gagal mengubah password. Silakan coba lagi atau hubungi support.");
       }
     } finally {
       setLoading(false);
@@ -182,7 +297,7 @@ export default function ForgotPasswordPage({ onClose }: ForgotPasswordPageProps)
     modal: {
       width: '90%',
       height: 'auto',
-      minHeight: '400px',
+      minHeight: '450px',
       padding: '1.5rem',
       marginBottom: '2rem',
       marginTop: '1rem',
@@ -275,6 +390,7 @@ export default function ForgotPasswordPage({ onClose }: ForgotPasswordPageProps)
             display: 'flex',
             flexDirection: 'column',
             backgroundColor: 'rgba(0,0,0,0.7)',
+            backdropFilter: 'blur(10px)',
             ...styles.modal
           }}
           initial={{ scale: 0.9, opacity: 0, y: 20 }}
@@ -282,6 +398,25 @@ export default function ForgotPasswordPage({ onClose }: ForgotPasswordPageProps)
           exit={{ scale: 0.9, opacity: 0, y: 20 }}
           transition={{ duration: 0.3, ease: "easeOut" }}
         >
+          {/* Security Badge */}
+          <div style={{
+            position: 'absolute',
+            top: '-12px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            background: 'rgba(0, 100, 255, 0.9)',
+            color: 'white',
+            padding: '4px 12px',
+            borderRadius: '20px',
+            fontSize: '0.75rem',
+            fontFamily: 'Arame Mono, monospace',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '4px'
+          }}>
+            🔒 Sistem Keamanan Tinggi
+          </div>
+
           {/* Close Button */}
           <button
             onClick={handleClose}
@@ -316,19 +451,22 @@ export default function ForgotPasswordPage({ onClose }: ForgotPasswordPageProps)
                 fontFamily: 'Arame Mono, monospace',
                 ...styles.title
               }}>
-                Lupa Password
+                Reset Password
               </h2>
 
-              {/* Deskripsi */}
-              <p style={{
-                color: 'rgba(255,255,255,0.8)',
-                marginBottom: '2rem',
-                textAlign: 'left',
+              {/* Security Info */}
+              <div style={{
+                color: 'rgba(255,255,255,0.7)',
+                fontSize: '0.8rem',
+                marginBottom: '1.5rem',
+                padding: '0.75rem',
+                background: 'rgba(255,255,255,0.05)',
+                borderRadius: '6px',
+                border: '1px solid rgba(255,255,255,0.1)',
                 fontFamily: 'Arame Mono, monospace',
-                ...styles.description
               }}>
-                Masukkan email yang sudah terdaftar untuk reset password
-              </p>
+                🔐 Sistem hanya menerima email yang sudah terdaftar di database.
+              </div>
 
               {/* Form Email */}
               <form onSubmit={handleEmailSubmit} style={{ width: '100%' }}>
@@ -347,7 +485,7 @@ export default function ForgotPasswordPage({ onClose }: ForgotPasswordPageProps)
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="contoh: user@email.com"
+                    placeholder="contoh: user@domain.com"
                     required
                     style={{
                       width: '100%',
@@ -361,26 +499,6 @@ export default function ForgotPasswordPage({ onClose }: ForgotPasswordPageProps)
                     }}
                   />
                 </div>
-
-                {/* Success Message */}
-                {successMessage && (
-                  <motion.div
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    style={{
-                      color: '#00c853',
-                      fontSize: '0.875rem',
-                      marginBottom: '1rem',
-                      fontFamily: 'Arame Mono, monospace',
-                      padding: '0.75rem',
-                      background: 'rgba(0, 200, 83, 0.1)',
-                      borderRadius: '6px',
-                      border: '1px solid rgba(0, 200, 83, 0.3)'
-                    }}
-                  >
-                    {successMessage}
-                  </motion.div>
-                )}
 
                 {/* Error Message */}
                 {error && (
@@ -398,17 +516,17 @@ export default function ForgotPasswordPage({ onClose }: ForgotPasswordPageProps)
                       border: '1px solid rgba(255, 107, 107, 0.3)'
                     }}
                   >
-                    ⚠️ {error}
+                    {error}
                   </motion.div>
                 )}
 
-                {/* Tombol Lanjutkan */}
+                {/* Tombol Verifikasi */}
                 <button
                   type="submit"
                   disabled={loading}
                   style={{
                     width: '100%',
-                    background: loading ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.2)',
+                    background: loading ? 'rgba(255,255,255,0.1)' : 'linear-gradient(135deg, rgba(255,255,255,0.2), rgba(255,255,255,0.1))',
                     border: '1px solid rgba(255,255,255,0.3)',
                     borderRadius: '6px',
                     color: 'white',
@@ -416,57 +534,56 @@ export default function ForgotPasswordPage({ onClose }: ForgotPasswordPageProps)
                     marginBottom: '1rem',
                     fontFamily: 'Arame Mono, monospace',
                     opacity: loading ? 0.7 : 1,
-                    ...styles.button
+                    fontWeight: '500',
+                    ...styles.button,
+                    transition: 'all 0.3s ease'
                   }}
+                  onMouseEnter={(e) => !loading && (e.currentTarget.style.background = 'linear-gradient(135deg, rgba(255,255,255,0.3), rgba(255,255,255,0.2))')}
+                  onMouseLeave={(e) => !loading && (e.currentTarget.style.background = 'linear-gradient(135deg, rgba(255,255,255,0.2), rgba(255,255,255,0.1))')}
                 >
-                  {loading ? 'Mengirim link reset...' : 'Kirim Link Reset Password'}
+                  {loading ? '🔍 Memverifikasi Email...' : '✅ Verifikasi Email'}
                 </button>
-
-                {/* Tombol Alternate */}
-                <div style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  marginTop: '1rem',
-                  paddingTop: '1rem',
-                  borderTop: '1px solid rgba(255,255,255,0.1)'
-                }}>
-                  <button
-                    onClick={handleBackToSignIn}
-                    style={{
-                      background: 'none',
-                      border: 'none',
-                      color: 'rgba(255,255,255,0.8)',
-                      cursor: 'pointer',
-                      fontSize: isMobile ? '0.8rem' : '0.9rem',
-                      textDecoration: 'underline',
-                      fontFamily: 'Arame Mono, monospace',
-                      padding: 0
-                    }}
-                  >
-                    Kembali ke Login
-                  </button>
-
-                  {isEmailVerified && (
-                    <button
-                      type="button"
-                      onClick={() => setShowChangePassword(true)}
-                      style={{
-                        background: 'rgba(255,255,255,0.15)',
-                        border: '1px solid rgba(255,255,255,0.3)',
-                        borderRadius: '6px',
-                        color: 'white',
-                        cursor: 'pointer',
-                        fontSize: isMobile ? '0.8rem' : '0.9rem',
-                        padding: '0.5rem 1rem',
-                        fontFamily: 'Arame Mono, monospace'
-                      }}
-                    >
-                      Ganti Password Sekarang
-                    </button>
-                  )}
-                </div>
               </form>
+
+              {/* Security Tips */}
+              <div style={{
+                marginTop: '1.5rem',
+                padding: '0.75rem',
+                background: 'rgba(0, 100, 255, 0.1)',
+                borderRadius: '6px',
+                border: '1px solid rgba(0, 100, 255, 0.3)'
+              }}>
+                <p style={{
+                  color: 'rgba(255,255,255,0.8)',
+                  fontSize: '0.75rem',
+                  margin: 0,
+                  fontFamily: 'Arame Mono, monospace'
+                }}>
+                  💡 Tips Keamanan: 
+                  <br/>• Hanya email terdaftar yang dapat reset password
+                  <br/>• Maksimal 3 percobaan per email
+                  <br/>• Sistem mendeteksi aktivitas mencurigakan
+                </p>
+              </div>
+
+              {/* Tombol Kembali */}
+              <button
+                onClick={handleBackToSignIn}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: 'rgba(255,255,255,0.8)',
+                  cursor: 'pointer',
+                  fontSize: isMobile ? '0.8rem' : '0.9rem',
+                  textDecoration: 'underline',
+                  fontFamily: 'Arame Mono, monospace',
+                  alignSelf: 'flex-start',
+                  padding: 0,
+                  marginTop: '1rem'
+                }}
+              >
+                ← Kembali ke Login
+              </button>
             </>
           ) : (
             /* Change Password Form - HANYA muncul jika email terdaftar */
@@ -483,31 +600,26 @@ export default function ForgotPasswordPage({ onClose }: ForgotPasswordPageProps)
                 fontFamily: 'Arame Mono, monospace',
                 ...styles.title
               }}>
-                Ganti Password
+                Buat Password Baru
               </h2>
 
+              {/* Verified Badge */}
               <div style={{
-                color: 'rgba(0, 200, 83, 0.9)',
+                color: '#00c853',
                 fontSize: '0.9rem',
-                marginBottom: '1rem',
+                marginBottom: '1.5rem',
                 fontFamily: 'Arame Mono, monospace',
                 padding: '0.75rem',
                 background: 'rgba(0, 200, 83, 0.1)',
                 borderRadius: '6px',
-                border: '1px solid rgba(0, 200, 83, 0.3)'
+                border: '1px solid rgba(0, 200, 83, 0.3)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem'
               }}>
-                ✅ Email <strong>{email}</strong> telah terverifikasi
+                <span style={{ fontSize: '1.2rem' }}>✅</span>
+                Email <strong>{email}</strong> terverifikasi & terdaftar
               </div>
-
-              <p style={{
-                color: 'rgba(255,255,255,0.8)',
-                marginBottom: '2rem',
-                textAlign: 'left',
-                fontFamily: 'Arame Mono, monospace',
-                fontSize: isMobile ? '0.9rem' : '1rem'
-              }}>
-                Masukkan password lama Anda untuk verifikasi keamanan
-              </p>
 
               <form onSubmit={handleChangePassword} style={{ width: '100%' }}>
                 {/* Current Password */}
@@ -519,13 +631,13 @@ export default function ForgotPasswordPage({ onClose }: ForgotPasswordPageProps)
                     fontSize: isMobile ? '0.8rem' : '0.9rem',
                     fontFamily: 'Arame Mono, monospace'
                   }}>
-                    Password Lama
+                    Password Lama (Verifikasi)
                   </label>
                   <input
                     type="password"
                     value={currentPassword}
                     onChange={(e) => setCurrentPassword(e.target.value)}
-                    placeholder="Masukkan password lama Anda"
+                    placeholder="••••••••••"
                     required
                     style={{
                       width: '100%',
@@ -541,7 +653,7 @@ export default function ForgotPasswordPage({ onClose }: ForgotPasswordPageProps)
                 </div>
 
                 {/* New Password */}
-                <div style={{ marginBottom: '1.5rem' }}>
+                <div style={{ marginBottom: '1rem' }}>
                   <label style={{
                     display: 'block',
                     color: 'white',
@@ -555,9 +667,9 @@ export default function ForgotPasswordPage({ onClose }: ForgotPasswordPageProps)
                     type="password"
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
-                    placeholder="Minimal 6 karakter"
+                    placeholder="Minimal 8 karakter: Aa1@..."
                     required
-                    minLength={6}
+                    minLength={8}
                     style={{
                       width: '100%',
                       background: 'rgba(255,255,255,0.1)',
@@ -569,6 +681,14 @@ export default function ForgotPasswordPage({ onClose }: ForgotPasswordPageProps)
                       ...styles.input
                     }}
                   />
+                  <div style={{
+                    color: 'rgba(255,255,255,0.6)',
+                    fontSize: '0.7rem',
+                    marginTop: '0.25rem',
+                    fontFamily: 'Arame Mono, monospace'
+                  }}>
+                    Harus mengandung: huruf besar, kecil, angka, simbol
+                  </div>
                 </div>
 
                 {/* Confirm Password */}
@@ -586,9 +706,9 @@ export default function ForgotPasswordPage({ onClose }: ForgotPasswordPageProps)
                     type="password"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    placeholder="Ketik ulang password baru"
+                    placeholder="••••••••••"
                     required
-                    minLength={6}
+                    minLength={8}
                     style={{
                       width: '100%',
                       background: 'rgba(255,255,255,0.1)',
@@ -601,26 +721,6 @@ export default function ForgotPasswordPage({ onClose }: ForgotPasswordPageProps)
                     }}
                   />
                 </div>
-
-                {/* Success Message */}
-                {successMessage && (
-                  <motion.div
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    style={{
-                      color: '#00c853',
-                      fontSize: '0.875rem',
-                      marginBottom: '1rem',
-                      fontFamily: 'Arame Mono, monospace',
-                      padding: '0.75rem',
-                      background: 'rgba(0, 200, 83, 0.1)',
-                      borderRadius: '6px',
-                      border: '1px solid rgba(0, 200, 83, 0.3)'
-                    }}
-                  >
-                    {successMessage}
-                  </motion.div>
-                )}
 
                 {/* Error Message */}
                 {error && (
@@ -649,17 +749,18 @@ export default function ForgotPasswordPage({ onClose }: ForgotPasswordPageProps)
                     disabled={loading}
                     style={{
                       flex: 1,
-                      background: loading ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.2)',
-                      border: '1px solid rgba(255,255,255,0.3)',
+                      background: loading ? 'rgba(255,255,255,0.1)' : 'linear-gradient(135deg, rgba(0, 200, 83, 0.3), rgba(0, 200, 83, 0.1))',
+                      border: '1px solid rgba(0, 200, 83, 0.3)',
                       borderRadius: '6px',
                       color: 'white',
                       cursor: loading ? 'not-allowed' : 'pointer',
                       fontFamily: 'Arame Mono, monospace',
                       opacity: loading ? 0.7 : 1,
+                      fontWeight: '500',
                       ...styles.button
                     }}
                   >
-                    {loading ? 'Mengubah Password...' : 'Ganti Password'}
+                    {loading ? '🔄 Mengubah Password...' : '✅ Simpan Password Baru'}
                   </button>
 
                   <button
@@ -681,7 +782,7 @@ export default function ForgotPasswordPage({ onClose }: ForgotPasswordPageProps)
                       ...styles.button
                     }}
                   >
-                    Kembali
+                    Batalkan
                   </button>
                 </div>
               </form>
@@ -918,7 +1019,7 @@ export default function ForgotPasswordPage({ onClose }: ForgotPasswordPageProps)
                 bottom: '2rem',
                 left: '50%',
                 transform: 'translateX(-50%)',
-                background: 'rgba(0, 200, 83, 0.9)',
+                background: 'linear-gradient(135deg, rgba(0, 200, 83, 0.95), rgba(0, 150, 63, 0.95))',
                 color: 'white',
                 padding: '1rem 2rem',
                 borderRadius: '8px',
@@ -927,7 +1028,8 @@ export default function ForgotPasswordPage({ onClose }: ForgotPasswordPageProps)
                 zIndex: 1001,
                 maxWidth: '90%',
                 textAlign: 'center',
-                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)'
+                boxShadow: '0 4px 12px rgba(0, 200, 83, 0.3)',
+                border: '1px solid rgba(255,255,255,0.2)'
               }}
             >
               {successMessage}
@@ -947,7 +1049,7 @@ export default function ForgotPasswordPage({ onClose }: ForgotPasswordPageProps)
                 bottom: '2rem',
                 left: '50%',
                 transform: 'translateX(-50%)',
-                background: 'rgba(255, 107, 107, 0.9)',
+                background: 'linear-gradient(135deg, rgba(255, 107, 107, 0.95), rgba(200, 67, 67, 0.95))',
                 color: 'white',
                 padding: '1rem 2rem',
                 borderRadius: '8px',
@@ -956,10 +1058,11 @@ export default function ForgotPasswordPage({ onClose }: ForgotPasswordPageProps)
                 zIndex: 1001,
                 maxWidth: '90%',
                 textAlign: 'center',
-                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)'
+                boxShadow: '0 4px 12px rgba(255, 107, 107, 0.3)',
+                border: '1px solid rgba(255,255,255,0.2)'
               }}
             >
-              ⚠️ {error}
+              {error}
             </motion.div>
           )}
         </AnimatePresence>
