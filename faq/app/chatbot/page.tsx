@@ -1,12 +1,10 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import { useRouter } from 'next/navigation';
 
 export default function ChatbotPage() {
   const router = useRouter();
-  const [isHover, setIsHover] = useState(false);
-  const [isTap, setIsTap] = useState(false);
 
   return (
     <div style={{
@@ -18,23 +16,21 @@ export default function ChatbotPage() {
     }}>
       <button
         onClick={() => router.back()}
-        onMouseEnter={() => setIsHover(true)}
-        onMouseLeave={() => setIsHover(false)}
-        onMouseDown={() => setIsTap(true)}
-        onMouseUp={() => setIsTap(false)}
         style={{
           padding: '0.5rem 1rem',
-          backgroundColor: isHover ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.1)',
+          backgroundColor: 'rgba(255,255,255,0.1)',
           border: '1px solid rgba(255,255,255,0.2)',
           borderRadius: '8px',
           color: 'white',
           cursor: 'pointer',
           marginBottom: '2rem',
           backdropFilter: 'blur(10px)',
-          transform: isTap ? 'scale(0.95)' : 'scale(1)',
-          transition: 'all 0.2s ease',
-          outline: 'none'
+          transition: 'background-color 0.2s, transform 0.1s'
         }}
+        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.2)'}
+        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.1)'}
+        onMouseDown={(e) => e.currentTarget.style.transform = 'scale(0.95)'}
+        onMouseUp={(e) => e.currentTarget.style.transform = 'scale(1)'}
       >
         ← Back
       </button>
@@ -42,6 +38,7 @@ export default function ChatbotPage() {
       <div
         style={{
           opacity: 0,
+          transform: 'translateY(20px)',
           animation: 'fadeInUp 0.5s ease forwards',
           height: 'calc(100vh - 6rem)',
           display: 'flex',
@@ -62,10 +59,6 @@ export default function ChatbotPage() {
 
       <style jsx global>{`
         @keyframes fadeInUp {
-          from {
-            opacity: 0;
-            transform: translateY(20px);
-          }
           to {
             opacity: 1;
             transform: translateY(0);
