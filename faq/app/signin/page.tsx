@@ -58,7 +58,7 @@ interface LoginHistory {
 }
 
 interface LocalUser extends LoginHistory {
-  passwordHash?: string;
+  password?: string; // Simpan password dalam bentuk plain (untuk demo, dalam produksi harus dienkripsi)
   autoLoginEnabled?: boolean;
 }
 
@@ -73,6 +73,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
   const [loginHistory, setLoginHistory] = useState<LoginHistory[]>([]);
   const [showAutoLoginModal, setShowAutoLoginModal] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
+  const [autoLoginInProgress, setAutoLoginInProgress] = useState(false);
 
   // Fungsi untuk menyimpan login history ke Firestore
   const saveLoginHistory = async (userData: any, provider: string, userPassword?: string) => {
@@ -91,8 +92,10 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
       await setDoc(historyRef, historyData, { merge: true });
       console.log("Login history saved for:", userData.email);
       
-      // Simpan ke localStorage juga
-      saveUserToLocalStorage(historyData, userPassword);
+      // Simpan ke localStorage juga jika rememberMe aktif
+      if (rememberMe && userPassword) {
+        saveUserToLocalStorage(historyData, userPassword);
+      }
     } catch (error) {
       console.error("Error saving login history:", error);
     }
@@ -167,6 +170,9 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
         console.log("User logged in:", currentUser.email);
         // Tutup modal jika sedang terbuka
         setShowAutoLoginModal(false);
+        // Reset form
+        setEmail("");
+        setPassword("");
         // Redirect langsung ke /notes
         router.push('/notes');
       }
@@ -202,8 +208,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
         photoURL: userData.photoURL || `https://ui-avatars.com/api/?name=${userData.email}&background=random`,
         provider: userData.provider || 'email',
         lastLogin: userData.lastLogin || new Date().toISOString(),
-        passwordHash: plainPassword ? btoa(plainPassword) : 
-                     (existingIndex >= 0 ? users[existingIndex].passwordHash : undefined),
+        password: plainPassword, // Simpan password plain untuk auto-fill
         autoLoginEnabled: rememberMe
       };
       
@@ -329,7 +334,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
       
       console.log("Email login successful");
       
-      // Simpan history dengan password hash dan auto-login enabled
+      // Simpan history dengan password dan auto-login enabled
       await saveLoginHistory(user, 'email', password);
       
     } catch (error: any) {
@@ -359,29 +364,53 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
     }
   };
 
-  // Login dengan user yang sudah tersimpan
+  // Login dengan user yang sudah tersimpan - MODIFIKASI BESAR DI SINI
   const handleQuickLogin = async (savedUser: LocalUser) => {
-    setLoading(true);
+    setAutoLoginInProgress(true);
+    setShowAutoLoginModal(false);
     
     try {
-      // Untuk email login, otomatis isi form
+      // Untuk email login, otomatis isi form dan submit
       if (savedUser.provider === 'email') {
-        // Set email untuk form
+        // Set email dan password untuk form
         setEmail(savedUser.email);
         
-        // Jika ada password tersimpan, isi juga
-        if (savedUser.passwordHash) {
-          const savedPassword = atob(savedUser.passwordHash);
-          setPassword(savedPassword);
+        if (savedUser.password) {
+          setPassword(savedUser.password);
           
-          // Auto submit setelah 100ms
-          setTimeout(() => {
-            const form = document.querySelector('form');
-            if (form) {
-              handleEmailLogin();
+          // Tunggu sebentar untuk state update, lalu auto submit
+          setTimeout(async () => {
+            try {
+              setLoading(true);
+              const result = await signInWithEmailAndPassword(auth, savedUser.email, savedUser.password!);
+              const user = result.user;
+              
+              console.log("Auto login successful for:", savedUser.email);
+              
+              // Simpan history lagi dengan timestamp terbaru
+              await saveLoginHistory(user, 'email', savedUser.password);
+              
+            } catch (error: any) {
+              console.error("Auto login error:", error);
+              
+              // Jika password salah atau ada masalah, hapus dari saved users
+              if (error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found') {
+                removeUserFromLocalStorage(savedUser.uid);
+                setError("Password telah berubah. Silakan login manual.");
+              } else {
+                setError("Login otomatis gagal. Silakan login manual.");
+              }
+            } finally {
+              setLoading(false);
+              setAutoLoginInProgress(false);
             }
           }, 100);
         } else {
+          // Jika tidak ada password tersimpan, isi hanya email
+          setEmail(savedUser.email);
+          setError("Silakan masukkan password untuk melanjutkan");
+          setAutoLoginInProgress(false);
+          
           // Fokus ke password field
           setTimeout(() => {
             const passwordInput = document.querySelector('input[type="password"]') as HTMLInputElement;
@@ -390,27 +419,19 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
             }
           }, 50);
         }
-        
-        setShowAutoLoginModal(false);
       } 
       // Untuk Google/GitHub, langsung login dengan popup
       else if (savedUser.provider === 'google') {
-        setShowAutoLoginModal(false);
         await handleGoogleLogin();
-        return;
       } 
       else if (savedUser.provider === 'github') {
-        setShowAutoLoginModal(false);
         await handleGitHubLogin();
-        return;
       }
       
     } catch (error) {
       console.error("Quick login error:", error);
       setError("Gagal login dengan akun yang disimpan");
-      setShowAutoLoginModal(true);
-    } finally {
-      setLoading(false);
+      setAutoLoginInProgress(false);
     }
   };
 
@@ -419,6 +440,9 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
     try {
       await signOut(auth);
       console.log("User logged out");
+      // Reset form
+      setEmail("");
+      setPassword("");
       // Tampilkan modal lagi setelah logout
       setTimeout(() => {
         const localHistory = getLocalLoginHistory();
@@ -480,7 +504,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
           marginBottom: '25px',
           textAlign: 'center',
         }}>
-          Pilih akun untuk login cepat atau gunakan metode lain
+          Klik akun untuk login otomatis
         </p>
         
         {/* Daftar User yang Tersimpan */}
@@ -554,7 +578,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
                     marginTop: '5px',
                     textTransform: 'capitalize',
                   }}>
-                    {user.provider} • Login terakhir
+                    {user.provider} • {(user as LocalUser).password ? "Password tersimpan" : "Login terakhir"}
                   </div>
                 </div>
                 <button
@@ -755,6 +779,32 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
                   fontSize: '14px',
                 }}>
                   {error}
+                </div>
+              )}
+              
+              {/* Auto Login Progress Indicator */}
+              {autoLoginInProgress && (
+                <div style={{
+                  backgroundColor: 'rgba(0, 255, 0, 0.1)',
+                  border: '1px solid rgba(0, 255, 0, 0.3)',
+                  borderRadius: '8px',
+                  padding: '12px',
+                  marginTop: '15px',
+                  color: '#00ff00',
+                  fontSize: '14px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '10px',
+                }}>
+                  <div style={{
+                    width: '20px',
+                    height: '20px',
+                    border: '2px solid #00ff00',
+                    borderTop: '2px solid transparent',
+                    borderRadius: '50%',
+                    animation: 'spin 1s linear infinite'
+                  }} />
+                  <span>Melakukan login otomatis...</span>
                 </div>
               )}
               
@@ -1010,35 +1060,35 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
                     {/* Submit Button */}
                     <button
                       type="submit"
-                      disabled={loading}
+                      disabled={loading || autoLoginInProgress}
                       style={{
                         width: '100%',
                         padding: '14px',
                         border: 'none',
                         borderRadius: '8px',
-                        backgroundColor: loading ? 'rgba(255, 255, 255, 0.5)' : '#ffffff',
+                        backgroundColor: (loading || autoLoginInProgress) ? 'rgba(255, 255, 255, 0.5)' : '#ffffff',
                         color: '#000000',
                         fontFamily: "'Roboto', sans-serif",
                         fontSize: isMobile ? '14px' : '16px',
                         fontWeight: '600',
-                        cursor: loading ? 'not-allowed' : 'pointer',
+                        cursor: (loading || autoLoginInProgress) ? 'not-allowed' : 'pointer',
                         transition: 'all 0.3s ease',
                         marginTop: '10px',
                       }}
                       onMouseEnter={(e) => {
-                        if (!loading) {
+                        if (!loading && !autoLoginInProgress) {
                           e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.9)';
                           e.currentTarget.style.transform = 'translateY(-2px)';
                         }
                       }}
                       onMouseLeave={(e) => {
-                        if (!loading) {
+                        if (!loading && !autoLoginInProgress) {
                           e.currentTarget.style.backgroundColor = '#ffffff';
                           e.currentTarget.style.transform = 'translateY(0)';
                         }
                       }}
                     >
-                      {loading ? 'Signing In...' : 'Sign In'}
+                      {loading ? 'Signing In...' : autoLoginInProgress ? 'Auto Login...' : 'Sign In'}
                     </button>
                   </div>
                 </form>
@@ -1073,7 +1123,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
                     }}
                   >
                     <span>👤</span>
-                    Lihat Akun Tersimpan ({getLocalLoginHistory().length})
+                    Lihat {getLocalLoginHistory().length} Akun Tersimpan
                   </button>
                 )}
 
@@ -1271,6 +1321,13 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
           </div>
         </div>
       </div>
+      
+      <style jsx>{`
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+      `}</style>
     </>
   );
 }
