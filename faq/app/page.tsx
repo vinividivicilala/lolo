@@ -5,7 +5,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { initializeApp } from "firebase/app";
 import { 
   getAuth, 
   onAuthStateChanged, 
@@ -3565,3 +3564,4 @@ export default function HomePage(): React.JSX.Element {
     </div>
   );
 }
+
