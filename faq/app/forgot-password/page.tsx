@@ -8,8 +8,9 @@ import {
   signInWithEmailAndPassword,
   updatePassword
 } from "firebase/auth";
+import { initializeApp, getApps } from "firebase/app";
 
-// Konfigurasi Firebase
+// Konfigurasi Firebase (hanya objek, tidak diinisialisasi)
 const firebaseConfig = {
   apiKey: "AIzaSyD_htQZ1TClnXKZGRJ4izbMQ02y6V3aNAQ",
   authDomain: "wawa44-58d1e.firebaseapp.com",
@@ -20,10 +21,6 @@ const firebaseConfig = {
   appId: "1:836899520599:web:b346e4370ecfa9bb89e312",
   measurementId: "G-8LMP7F4BE9"
 };
-
-// Inisialisasi Firebase
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
 
 interface ForgotPasswordPageProps {
   onClose?: () => void;
@@ -39,12 +36,33 @@ export default function ForgotPasswordPage({ onClose }: ForgotPasswordPageProps)
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [isClient, setIsClient] = useState(false); // State untuk cek client/server
   const router = useRouter();
   const [isMobile, setIsMobile] = useState(false);
   const [showTopics, setShowTopics] = useState(false);
 
+  // Deteksi client side
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  // Inisialisasi Firebase HANYA di client side
+  useEffect(() => {
+    if (!isClient) return;
+
+    try {
+      if (getApps().length === 0) {
+        initializeApp(firebaseConfig);
+      }
+    } catch (error) {
+      console.error('Firebase initialization error:', error);
+    }
+  }, [isClient]);
+
   // Check if mobile on component mount and window resize
   useEffect(() => {
+    if (!isClient) return;
+
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 768);
     };
@@ -55,7 +73,13 @@ export default function ForgotPasswordPage({ onClose }: ForgotPasswordPageProps)
     return () => {
       window.removeEventListener('resize', checkMobile);
     };
-  }, []);
+  }, [isClient]);
+
+  // Fungsi untuk mendapatkan auth instance
+  const getAuthInstance = () => {
+    if (!isClient) return null;
+    return getAuth();
+  };
 
   const handleTopicsClick = () => {
     setShowTopics(!showTopics);
@@ -67,9 +91,14 @@ export default function ForgotPasswordPage({ onClose }: ForgotPasswordPageProps)
     setSuccess("");
     setIsLoading(true);
 
+    if (!isClient) return;
+
     try {
+      const authInstance = getAuthInstance();
+      if (!authInstance) return;
+
       // Cek apakah email terdaftar dengan mencoba sign in
-      await signInWithEmailAndPassword(auth, email, "dummyPassword123!");
+      await signInWithEmailAndPassword(authInstance, email, "dummyPassword123!");
       
     } catch (err: any) {
       // Jika error adalah "wrong-password", berarti email terdaftar
@@ -111,11 +140,16 @@ export default function ForgotPasswordPage({ onClose }: ForgotPasswordPageProps)
       return;
     }
 
+    if (!isClient) return;
+
     setIsLoading(true);
 
     try {
+      const authInstance = getAuthInstance();
+      if (!authInstance) return;
+
       // 1. Login dengan password lama
-      const userCredential = await signInWithEmailAndPassword(auth, email, currentPassword);
+      const userCredential = await signInWithEmailAndPassword(authInstance, email, currentPassword);
       const user = userCredential.user;
       
       // 2. Update password ke password baru
@@ -237,6 +271,26 @@ export default function ForgotPasswordPage({ onClose }: ForgotPasswordPageProps)
   };
 
   const styles = isMobile ? mobileStyles : desktopStyles;
+
+  // Loading state untuk server rendering
+  if (!isClient) {
+    return (
+      <div style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100%',
+        backgroundColor: 'rgba(0,0,0,0.5)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 1000
+      }}>
+        <div style={{ color: 'white', fontSize: '1rem' }}>Loading...</div>
+      </div>
+    );
+  }
 
   return (
     <AnimatePresence>
@@ -910,4 +964,3 @@ export default function ForgotPasswordPage({ onClose }: ForgotPasswordPageProps)
     </AnimatePresence>
   );
 }
-
