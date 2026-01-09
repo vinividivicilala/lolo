@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { initializeApp } from "firebase/app";
 import { 
   getAuth, 
   signInWithPopup, 
@@ -1331,3 +1330,4 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
     </>
   );
 }
+
