@@ -971,7 +971,7 @@ export default function ChatbotPage() {
           padding: '1rem 2rem',
           backgroundColor: '#111',
           borderRadius: '15px',
-          border: '1px solid '#333',
+          border: '1px solid #333', // FIXED: was '1px solid '#333'
           fontSize: '0.9rem',
           color: '#666',
           textAlign: 'center'
@@ -1038,8 +1038,12 @@ export default function ChatbotPage() {
         }
         
         textarea::-webkit-scrollbar-thumb {
-          background: #555;
+          background: '#555',
           border-radius: 3px;
+        }
+        
+        textarea::-webkit-scrollbar-thumb:hover {
+          background: '#666',
         }
       `}</style>
     </div>
