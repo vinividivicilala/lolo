@@ -17,10 +17,9 @@ import {
   onSnapshot,
   serverTimestamp,
   doc,
-  getDoc,
-  updateDoc,
   deleteDoc
 } from "firebase/firestore";
+import { initializeApp, getApps } from "firebase/app"; // ✅ IMPORT INI
 
 // Konfigurasi Firebase
 const firebaseConfig = {
@@ -33,11 +32,6 @@ const firebaseConfig = {
   appId: "1:836899520599:web:b346e4370ecfa9bb89e312",
   measurementId: "G-8LMP7F4BE9"
 };
-
-
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
 
 interface Note {
   id?: string;
@@ -58,6 +52,8 @@ export default function NotesPage(): React.JSX.Element {
   const [isLoading, setIsLoading] = useState(true);
   const [showNewNoteForm, setShowNewNoteForm] = useState(false);
   const [newNote, setNewNote] = useState({ title: "", content: "", color: "#3B82F6" });
+  const [auth, setAuth] = useState<any>(null); // ✅ State untuk auth
+  const [db, setDb] = useState<any>(null); // ✅ State untuk db
 
   // Warna yang tersedia untuk catatan
   const noteColors = [
@@ -65,8 +61,38 @@ export default function NotesPage(): React.JSX.Element {
     "#EC4899", "#14B8A6", "#F97316", "#84CC16", "#6366F1"
   ];
 
-  // Cek auth state
+  // 1. Inisialisasi Firebase di client side
   useEffect(() => {
+    // Pastikan hanya berjalan di browser
+    if (typeof window === 'undefined') return;
+
+    try {
+      // Inisialisasi Firebase
+      let app;
+      if (getApps().length === 0) {
+        app = initializeApp(firebaseConfig);
+        console.log('Firebase app initialized');
+      } else {
+        app = getApps()[0];
+        console.log('Using existing Firebase app');
+      }
+      
+      // Setup auth dan db
+      const authInstance = getAuth(app);
+      const dbInstance = getFirestore(app);
+      
+      setAuth(authInstance);
+      setDb(dbInstance);
+      
+    } catch (error) {
+      console.error('Firebase initialization error:', error);
+    }
+  }, []);
+
+  // 2. Cek auth state setelah Firebase siap
+  useEffect(() => {
+    if (!auth) return;
+
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       if (currentUser) {
         setUser(currentUser);
@@ -81,6 +107,15 @@ export default function NotesPage(): React.JSX.Element {
       }
     });
 
+    return () => {
+      if (unsubscribe) unsubscribe();
+    };
+  }, [auth, router]);
+
+  // 3. Cek ukuran layar
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 768);
     };
@@ -89,13 +124,17 @@ export default function NotesPage(): React.JSX.Element {
     window.addEventListener('resize', checkMobile);
 
     return () => {
-      unsubscribe();
       window.removeEventListener('resize', checkMobile);
     };
-  }, [router]);
+  }, []);
 
   // Load catatan user
   const loadUserNotes = (userId: string) => {
+    if (!db) {
+      console.log('Database not ready yet');
+      return;
+    }
+    
     setIsLoading(true);
     try {
       const notesRef = collection(db, 'userNotes');
@@ -127,7 +166,7 @@ export default function NotesPage(): React.JSX.Element {
 
   // Buat catatan baru
   const handleCreateNote = async () => {
-    if (!user || !newNote.title.trim() || !newNote.content.trim()) {
+    if (!user || !db || !newNote.title.trim() || !newNote.content.trim()) {
       alert("Judul dan konten catatan harus diisi");
       return;
     }
@@ -157,6 +196,8 @@ export default function NotesPage(): React.JSX.Element {
 
   // Hapus catatan
   const handleDeleteNote = async (noteId: string) => {
+    if (!db) return;
+    
     if (confirm("Apakah Anda yakin ingin menghapus catatan ini?")) {
       try {
         await deleteDoc(doc(db, 'userNotes', noteId));
@@ -170,6 +211,8 @@ export default function NotesPage(): React.JSX.Element {
 
   // Handle logout
   const handleLogout = async () => {
+    if (!auth) return;
+    
     try {
       await signOut(auth);
       router.push('/');
@@ -192,6 +235,39 @@ export default function NotesPage(): React.JSX.Element {
     });
   };
 
+  // Loading state sebelum Firebase siap
+  if (!auth || !db) {
+    return (
+      <div style={{
+        minHeight: '100vh',
+        backgroundColor: 'black',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        color: 'white',
+        flexDirection: 'column',
+        gap: '1rem'
+      }}>
+        <div style={{
+          width: '40px',
+          height: '40px',
+          border: '3px solid rgba(255,255,255,0.3)',
+          borderTopColor: '#3B82F6',
+          borderRadius: '50%',
+          animation: 'spin 1s linear infinite'
+        }} />
+        <div>Loading Notes...</div>
+        <style jsx>{`
+          @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+          }
+        `}</style>
+      </div>
+    );
+  }
+
+  // Render UI
   return (
     <div style={{
       minHeight: '100vh',
@@ -576,7 +652,7 @@ export default function NotesPage(): React.JSX.Element {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.05 }}
                 style={{
-                  backgroundColor: `${note.color}20`, // 20 = 12% opacity
+                  backgroundColor: `${note.color}20`,
                   border: `2px solid ${note.color}`,
                   borderRadius: '12px',
                   padding: '1.5rem',
@@ -669,4 +745,3 @@ export default function NotesPage(): React.JSX.Element {
     </div>
   );
 }
-
