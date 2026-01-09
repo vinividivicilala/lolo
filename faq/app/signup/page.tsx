@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { initializeApp, getApps } from "firebase/app";
 import { 
   getAuth, 
   createUserWithEmailAndPassword,
@@ -21,9 +22,17 @@ const firebaseConfig = {
   measurementId: "G-8LMP7F4BE9"
 };
 
-// Inisialisasi Firebase
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
+let app = null;
+let auth = null;
+
+if (typeof window !== "undefined") {
+  app = getApps().length === 0
+    ? initializeApp(firebaseConfig)
+    : getApps()[0];
+
+  auth = getAuth(app);
+}
+
 
 export default function SignUpPage() {
   const [formData, setFormData] = useState({
@@ -489,4 +498,5 @@ const buttonStyle: React.CSSProperties = {
   marginBottom: '2rem',
   transition: 'all 0.3s ease'
 };
+
 
