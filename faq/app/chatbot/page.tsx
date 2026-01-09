@@ -13,84 +13,8 @@ export default function ChatbotPage() {
       backgroundColor: 'black',
       color: 'white',
       padding: '2rem',
-      fontFamily: "'Inter', 'Helvetica Neue', Arial, sans-serif",
-      display: 'flex',
-      flexDirection: 'column'
+      fontFamily: "'Inter', 'Helvetica Neue', Arial, sans-serif"
     }}>
-      {/* Profile Section - Top Left */}
-      <motion.div
-        initial={{ opacity: 0, x: -30 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.6, delay: 0.2 }}
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '1rem',
-          marginBottom: '2rem',
-          position: 'absolute',
-          top: '2rem',
-          left: '2rem'
-        }}
-      >
-        {/* Profile Picture */}
-        <div style={{
-          width: '50px',
-          height: '50px',
-          borderRadius: '50%',
-          backgroundColor: '#3a3a3a',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          fontSize: '1.5rem',
-          fontWeight: 'bold',
-          color: '#fff'
-        }}>
-          FP
-        </div>
-        
-        {/* Name and Status */}
-        <div style={{
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '0.25rem'
-        }}>
-          <span style={{
-            fontSize: '1.25rem',
-            fontWeight: '500'
-          }}>
-            Menuru
-          </span>
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.5rem'
-          }}>
-            <div style={{
-              width: '8px',
-              height: '8px',
-              borderRadius: '50%',
-              backgroundColor: '#4CAF50',
-              animation: 'pulse 2s infinite'
-            }}></div>
-            <span style={{
-              fontSize: '0.875rem',
-              color: '#a0a0a0'
-            }}>
-              Online
-            </span>
-          </div>
-        </div>
-      </motion.div>
-
-      {/* Add CSS for pulse animation */}
-      <style jsx>{`
-        @keyframes pulse {
-          0% { opacity: 1; }
-          50% { opacity: 0.5; }
-          100% { opacity: 1; }
-        }
-      `}</style>
-
       <div style={{
         display: 'flex',
         justifyContent: 'center',
@@ -113,6 +37,82 @@ export default function ChatbotPage() {
           chatbot
         </motion.h1>
       </div>
+
+      {/* Profile Section - Below chatbot text, aligned to left */}
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 0.3 }}
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '1rem',
+          marginTop: '3rem',
+          marginLeft: '2rem',
+          position: 'relative'
+        }}
+      >
+        {/* Profile Picture */}
+        <div style={{
+          width: '60px',
+          height: '60px',
+          borderRadius: '50%',
+          backgroundColor: '#2a2a2a',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontSize: '1.5rem',
+          fontWeight: 'bold',
+          color: '#fff',
+          border: '2px solid #3a3a3a'
+        }}>
+          FP
+        </div>
+        
+        {/* Name and Status */}
+        <div style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '0.25rem'
+        }}>
+          <span style={{
+            fontSize: '1.5rem',
+            fontWeight: '400',
+            color: '#fff'
+          }}>
+            Menuru
+          </span>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem'
+          }}>
+            <div style={{
+              width: '10px',
+              height: '10px',
+              borderRadius: '50%',
+              backgroundColor: '#4CAF50',
+              animation: 'pulse 2s infinite'
+            }}></div>
+            <span style={{
+              fontSize: '0.9rem',
+              color: '#b0b0b0',
+              fontWeight: '300'
+            }}>
+              Online
+            </span>
+          </div>
+        </div>
+      </motion.div>
+
+      {/* Add CSS for pulse animation */}
+      <style jsx>{`
+        @keyframes pulse {
+          0% { opacity: 1; transform: scale(1); }
+          50% { opacity: 0.7; transform: scale(0.95); }
+          100% { opacity: 1; transform: scale(1); }
+        }
+      `}</style>
     </div>
   );
 }
