@@ -1,11 +1,14 @@
 'use client';
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
+import gsap from "gsap";
 
 export default function DocsPage() {
   const [activeSection, setActiveSection] = useState("pembuka");
   const [isMobile, setIsMobile] = useState(false);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const navRef = useRef<HTMLDivElement>(null);
   
   useEffect(() => {
     const checkMobile = () => {
@@ -20,61 +23,104 @@ export default function DocsPage() {
     };
   }, []);
 
-  // Data navigasi - JUDUL BESAR, JARAK DEKAT
+  useEffect(() => {
+    // GSAP animation for content entrance
+    if (contentRef.current) {
+      gsap.fromTo(
+        contentRef.current,
+        { opacity: 0, y: 30 },
+        { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }
+      );
+    }
+
+    // GSAP animation for plus sign
+    const plusSigns = document.querySelectorAll('.plus-sign');
+    plusSigns.forEach((sign) => {
+      gsap.to(sign, {
+        rotation: 360,
+        duration: 2,
+        repeat: -1,
+        ease: "none"
+      });
+    });
+
+  }, [activeSection]);
+
+  // Data navigasi - TANPA ANGKA, JARAK SANGAT DEKAT
   const navItems = [
-    { id: "pembuka", title: "PEMBUKA", number: "01" },
-    { id: "salam", title: "SALAM", number: "02" },
-    { id: "tujuan", title: "TUJUAN", number: "03" },
-    { id: "penggunaan", title: "PENGGUNAAN", number: "04" },
-    { id: "batasan", title: "BATASAN", number: "05" },
-    { id: "keamanan", title: "KEAMANAN", number: "06" },
-    { id: "arsitektur", title: "ARSITEKTUR", number: "07" },
-    { id: "prinsip", title: "PRINSIP", number: "08" },
-    { id: "komponen", title: "KOMPONEN", number: "09" },
-    { id: "instalasi", title: "INSTALASI", number: "10" }
+    { id: "pembuka", title: "PEMBUKA" },
+    { id: "salam", title: "SALAM" },
+    { id: "tujuan", title: "TUJUAN" },
+    { id: "penggunaan", title: "PENGGUNAAN" },
+    { id: "batasan", title: "BATASAN" },
+    { id: "keamanan", title: "KEAMANAN" },
+    { id: "arsitektur", title: "ARSITEKTUR" },
+    { id: "prinsip", title: "PRINSIP" },
+    { id: "komponen", title: "KOMPONEN" },
+    { id: "instalasi", title: "INSTALASI" }
   ];
 
-  // Data konten
+  // Data konten dengan 2 sub isi
   const contentData = {
     pembuka: {
       title: "PEMBUKA",
-      content: "Dokumentasi MENURU menyediakan panduan lengkap untuk memahami dan menggunakan platform. Platform ini dirancang untuk memberikan pengalaman optimal dalam membaca, menulis, dan mengeksplorasi konten digital."
+      content: "Selamat datang di dokumentasi platform MENURU. Platform ini dirancang untuk memberikan pengalaman optimal dalam membaca, menulis, dan mengeksplorasi berbagai jenis konten digital.",
+      sub1: "Dokumentasi ini mencakup semua aspek penggunaan platform dari tingkat dasar hingga lanjutan.",
+      sub2: "Setiap section menyediakan informasi spesifik yang diperlukan untuk memahami dan memaksimalkan penggunaan fitur yang tersedia."
     },
     salam: {
       title: "SALAM",
-      content: "Selamat datang di dokumentasi MENURU. Kami berkomitmen untuk memberikan pengalaman terbaik dan mendukung kebutuhan digital Anda dengan solusi yang efektif dan efisien."
+      content: "Kami mengucapkan terima kasih telah memilih MENURU sebagai platform digital Anda. Komitmen kami adalah memberikan pengalaman terbaik dengan antarmuka yang intuitif dan fitur yang powerful.",
+      sub1: "Platform terus dikembangkan dengan memperhatikan feedback dari pengguna.",
+      sub2: "Update rutin dilakukan untuk meningkatkan performa dan menambahkan fitur baru."
     },
     tujuan: {
       title: "TUJUAN",
-      content: "Tujuan utama platform adalah menyediakan lingkungan yang aman, efisien, dan menyenangkan untuk berinteraksi dengan berbagai jenis konten digital."
+      content: "Platform memiliki tujuan utama untuk menciptakan lingkungan digital yang aman, efisien, dan menyenangkan bagi semua pengguna dari berbagai latar belakang.",
+      sub1: "Menyediakan akses yang mudah ke berbagai jenis konten digital.",
+      sub2: "Memberikan alat yang powerful untuk membuat dan mengelola konten."
     },
     penggunaan: {
       title: "PENGGUNAAN",
-      content: "Platform dapat digunakan untuk berbagai keperluan mulai dari membaca konten, menulis dokumen, hingga mengeksplorasi informasi dengan antarmuka yang intuitif."
+      content: "Platform dapat digunakan untuk berbagai keperluan mulai dari konsumsi konten hingga produksi konten dengan alat-alat yang tersedia.",
+      sub1: "Antarmuka yang sederhana memudahkan navigasi dan penggunaan.",
+      sub2: "Dokumentasi lengkap tersedia untuk setiap fitur yang ada."
     },
     batasan: {
       title: "BATASAN",
-      content: "Setiap platform memiliki batasan teknis tertentu. Batasan ini mencakup kapasitas penyimpanan, jumlah pengguna, dan fitur tertentu yang mungkin tersedia berdasarkan paket yang dipilih."
+      content: "Seperti platform lainnya, terdapat batasan teknis tertentu yang perlu dipahami untuk penggunaan yang optimal.",
+      sub1: "Batasan kapasitas penyimpanan berdasarkan paket yang dipilih.",
+      sub2: "Batasan jumlah pengguna dan fitur yang tersedia."
     },
     keamanan: {
       title: "KEAMANAN",
-      content: "Keamanan data pengguna adalah prioritas utama. Semua data dienkripsi dan dilindungi dengan protokol keamanan terbaru untuk memastikan privasi dan keamanan informasi."
+      content: "Keamanan data dan privasi pengguna adalah prioritas utama dalam pengembangan platform ini.",
+      sub1: "Semua data dienkripsi menggunakan protokol keamanan terbaru.",
+      sub2: "Sistem monitoring aktif untuk mendeteksi dan mencegah ancaman keamanan."
     },
     arsitektur: {
       title: "ARSITEKTUR",
-      content: "Arsitektur platform dibangun dengan teknologi modern yang scalable dan reliable. Sistem dirancang untuk menangani berbagai jenis beban kerja dengan performa optimal."
+      content: "Platform dibangun dengan arsitektur modern yang scalable dan reliable untuk menangani berbagai beban kerja.",
+      sub1: "Menggunakan teknologi terbaru untuk performa optimal.",
+      sub2: "Struktur yang modular memudahkan pengembangan dan pemeliharaan."
     },
     prinsip: {
       title: "PRINSIP",
-      content: "Platform mengikuti prinsip-prinsip desain yang berfokus pada pengalaman pengguna, aksesibilitas, dan kemudahan penggunaan untuk semua kalangan."
+      content: "Platform mengikuti prinsip-prinsip desain yang berfokus pada pengalaman pengguna dan aksesibilitas.",
+      sub1: "Desain minimalis untuk mengurangi kebingungan pengguna.",
+      sub2: "Aksesibilitas untuk semua kalangan dengan berbagai kemampuan."
     },
     komponen: {
       title: "KOMPONEN",
-      content: "Terdapat beberapa komponen utama dalam platform termasuk sistem autentikasi, manajemen konten, alat kolaborasi, dan sistem analitik untuk tracking penggunaan."
+      content: "Terdapat beberapa komponen utama yang bekerja sama untuk memberikan pengalaman yang seamless.",
+      sub1: "Sistem autentikasi dan manajemen pengguna.",
+      sub2: "Sistem manajemen konten dan alat kolaborasi."
     },
     instalasi: {
       title: "INSTALASI",
-      content: "Proses instalasi sederhana dan dapat dilakukan dalam beberapa langkah mudah. Platform mendukung berbagai lingkungan deployment sesuai dengan kebutuhan pengguna."
+      content: "Proses instalasi didesain untuk sederhana dan cepat tanpa memerlukan keahlian teknis khusus.",
+      sub1: "Dukungan untuk berbagai lingkungan dan sistem operasi.",
+      sub2: "Dokumentasi instalasi lengkap dengan troubleshooting."
     }
   };
 
@@ -90,24 +136,24 @@ export default function DocsPage() {
       color: 'white'
     }}>
       
-      {/* Left Navigation - GESER KANAN LAGI, FONT BESAR */}
-      <div style={{
-        width: isMobile ? '150px' : '350px',
-        padding: isMobile ? '1.5rem 1rem' : '3rem 2rem',
+      {/* Left Navigation - JARAK SANGAT DEKAT, TANPA ANGKA */}
+      <div ref={navRef} style={{
+        width: isMobile ? '120px' : '300px',
+        padding: isMobile ? '1rem' : '2rem',
         position: 'fixed',
         left: 0,
         top: 0,
         height: '100vh',
         overflowY: 'auto',
-        backgroundColor: 'rgba(0,0,0,0.95)',
-        borderRight: '1px solid rgba(255,255,255,0.1)',
+        backgroundColor: 'black',
         zIndex: 10
       }}>
         <div style={{
-          fontSize: isMobile ? '2rem' : '3rem',
+          fontSize: isMobile ? '1.5rem' : '2rem',
           fontWeight: '800',
-          marginBottom: isMobile ? '1.5rem' : '2rem',
-          lineHeight: 1
+          marginBottom: isMobile ? '1rem' : '1.5rem',
+          lineHeight: 1,
+          opacity: 0.9
         }}>
           DOCS
         </div>
@@ -115,86 +161,135 @@ export default function DocsPage() {
         <div style={{
           display: 'flex',
           flexDirection: 'column',
-          gap: isMobile ? '0.3rem' : '0.5rem' // JARAK DEKAT ANTAR ITEM
+          gap: isMobile ? '0.1rem' : '0.15rem' // JARAK SANGAT DEKAT
         }}>
           {navItems.map((item) => (
             <div
               key={item.id}
               onClick={() => setActiveSection(item.id)}
               style={{
-                fontSize: isMobile ? '0.9rem' : '1.2rem',
+                fontSize: isMobile ? '0.8rem' : '1.1rem',
                 fontWeight: activeSection === item.id ? '700' : '400',
                 cursor: 'pointer',
-                padding: isMobile ? '0.3rem 0' : '0.4rem 0',
+                padding: isMobile ? '0.15rem 0' : '0.2rem 0',
                 opacity: activeSection === item.id ? 1 : 0.6,
-                transition: 'all 0.3s ease',
-                letterSpacing: '0.5px'
+                transition: 'all 0.2s ease',
+                letterSpacing: '0.5px',
+                lineHeight: '1.2'
               }}
               onMouseEnter={(e) => {
                 if (activeSection !== item.id) {
-                  e.currentTarget.style.opacity = '0.8';
-                  e.currentTarget.style.transform = 'translateX(5px)';
+                  e.currentTarget.style.opacity = '0.9';
                 }
               }}
               onMouseLeave={(e) => {
                 if (activeSection !== item.id) {
                   e.currentTarget.style.opacity = '0.6';
-                  e.currentTarget.style.transform = 'translateX(0)';
                 }
               }}
             >
-              {item.number} {item.title}
+              {item.title}
             </div>
           ))}
         </div>
       </div>
 
-      {/* Main Content - GESER KE TENGAH KANAN */}
+      {/* Main Content */}
       <div style={{
-        marginLeft: isMobile ? '150px' : '350px',
+        marginLeft: isMobile ? '120px' : '300px',
         flex: 1,
-        padding: isMobile ? '2rem 1.5rem' : '4rem 3rem',
+        padding: isMobile ? '1.5rem' : '3rem',
         minHeight: '100vh'
       }}>
-        <motion.div
-          key={activeSection}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3 }}
-        >
+        <div ref={contentRef}>
           {/* Judul Besar */}
           <div style={{
-            fontSize: isMobile ? '5rem' : '8rem',
+            fontSize: isMobile ? '4rem' : '6rem',
             fontWeight: '900',
             lineHeight: 0.9,
-            marginBottom: isMobile ? '2rem' : '3rem',
-            letterSpacing: '-2px'
+            marginBottom: isMobile ? '1.5rem' : '2rem',
+            letterSpacing: '-1px'
           }}>
             {contentData[activeSection as keyof typeof contentData]?.title}
           </div>
 
-          {/* Konten - TANPA LINEBOX, TANPA JUDUL TAMBAHAN */}
+          {/* Plus Sign Animation */}
           <div style={{
-            fontSize: isMobile ? '1.1rem' : '1.4rem',
-            lineHeight: 1.6,
-            maxWidth: '800px',
-            opacity: 0.9,
-            marginBottom: '3rem'
+            marginBottom: '2rem',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '1rem'
+          }}>
+            <div 
+              className="plus-sign"
+              style={{
+                fontSize: '2rem',
+                opacity: 0.8,
+                display: 'inline-block'
+              }}
+            >
+              +
+            </div>
+            <div style={{
+              fontSize: '0.9rem',
+              opacity: 0.6,
+              letterSpacing: '1px'
+            }}>
+              MENURU DOCUMENTATION
+            </div>
+          </div>
+
+          {/* Konten Utama */}
+          <div style={{
+            fontSize: isMobile ? '1rem' : '1.2rem',
+            lineHeight: 1.7,
+            maxWidth: '900px',
+            marginBottom: '3rem',
+            opacity: 0.9
           }}>
             {contentData[activeSection as keyof typeof contentData]?.content}
           </div>
 
-          {/* Additional Info - SANGAT SIMPLE */}
+          {/* 2 Sub Isi */}
           <div style={{
-            fontSize: isMobile ? '0.9rem' : '1rem',
-            opacity: 0.5,
-            borderTop: '1px solid rgba(255,255,255,0.1)',
-            paddingTop: '1rem',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '1.5rem',
+            maxWidth: '900px',
             marginTop: '2rem'
           }}>
-            Dokumentasi MENURU • Versi 1.0.0
+            <div style={{
+              fontSize: isMobile ? '0.95rem' : '1.1rem',
+              lineHeight: 1.6,
+              opacity: 0.8,
+              paddingLeft: '1rem',
+              borderLeft: '2px solid rgba(255,255,255,0.3)'
+            }}>
+              {contentData[activeSection as keyof typeof contentData]?.sub1}
+            </div>
+            
+            <div style={{
+              fontSize: isMobile ? '0.95rem' : '1.1rem',
+              lineHeight: 1.6,
+              opacity: 0.8,
+              paddingLeft: '1rem',
+              borderLeft: '2px solid rgba(255,255,255,0.3)'
+            }}>
+              {contentData[activeSection as keyof typeof contentData]?.sub2}
+            </div>
           </div>
-        </motion.div>
+
+          {/* Footer Minimal */}
+          <div style={{
+            fontSize: isMobile ? '0.8rem' : '0.9rem',
+            opacity: 0.4,
+            marginTop: '4rem',
+            paddingTop: '1rem',
+            borderTop: '1px solid rgba(255,255,255,0.1)'
+          }}>
+            MENURU • 2024
+          </div>
+        </div>
       </div>
     </div>
   );
