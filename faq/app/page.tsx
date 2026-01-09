@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { initializeApp, getApps } from "firebase/app";
 import { 
   getAuth, 
   onAuthStateChanged, 
@@ -46,10 +47,18 @@ const firebaseConfig = {
   measurementId: "G-8LMP7F4BE9"
 };
 
-// Inisialisasi Firebase
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
+let app = null;
+let auth = null;
+let db = null;
+
+if (typeof window !== "undefined") {
+  app = getApps().length === 0
+    ? initializeApp(firebaseConfig)
+    : getApps()[0];
+
+  auth = getAuth(app);
+  db = getFirestore(app);
+}
 
 // Providers untuk login
 const githubProvider = new GithubAuthProvider();
@@ -3564,4 +3573,5 @@ export default function HomePage(): React.JSX.Element {
     </div>
   );
 }
+
 
