@@ -3,12 +3,13 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
+import { initializeApp, getApps } from "firebase/app";
 import { 
   getAuth, 
   signInWithEmailAndPassword,
   updatePassword
 } from "firebase/auth";
-import { initializeApp, getApps } from "firebase/app";
+
 
 // Konfigurasi Firebase (hanya objek, tidak diinisialisasi)
 const firebaseConfig = {
@@ -21,6 +22,19 @@ const firebaseConfig = {
   appId: "1:836899520599:web:b346e4370ecfa9bb89e312",
   measurementId: "G-8LMP7F4BE9"
 };
+
+let app = null;
+let auth = null;
+
+if (typeof window !== "undefined") {
+  app = getApps().length === 0
+    ? initializeApp(firebaseConfig)
+    : getApps()[0];
+
+  auth = getAuth(app);
+}
+
+
 
 interface ForgotPasswordPageProps {
   onClose?: () => void;
@@ -964,3 +978,4 @@ export default function ForgotPasswordPage({ onClose }: ForgotPasswordPageProps)
     </AnimatePresence>
   );
 }
+
