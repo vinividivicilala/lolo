@@ -34,7 +34,6 @@ const firebaseConfig = {
   measurementId: "G-8LMP7F4BE9"
 };
 
-import { initializeApp } from "firebase/app";
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
@@ -670,3 +669,4 @@ export default function NotesPage(): React.JSX.Element {
     </div>
   );
 }
+
