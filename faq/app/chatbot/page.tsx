@@ -3,7 +3,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-
 // Firebase imports - TIDAK diinisialisasi di tingkat modul
 import { initializeApp, getApps } from 'firebase/app';
 import { 
@@ -28,6 +27,22 @@ const firebaseConfig = {
   appId: "1:836899520599:web:b346e4370ecfa9bb89e312",
   measurementId: "G-8LMP7F4BE9"
 };
+
+let app = null;
+let auth = null;
+let db = null;
+
+if (typeof window !== "undefined") {
+  app = getApps().length === 0
+    ? initializeApp(firebaseConfig)
+    : getApps()[0];
+
+  auth = getAuth(app);
+  db = getFirestore(app);
+}
+
+
+
 
 const CHATBOT_EMAIL = 'faridardiansyah061@gmail.com';
 const CHATBOT_NAME = 'Menuru (Chatbot)';
@@ -955,3 +970,4 @@ const styles = {
     height: '60px'
   }
 };
+
