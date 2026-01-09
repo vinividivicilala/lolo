@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { initializeApp } from 'firebase/app';
+import { initializeApp, getApps } from 'firebase/app';
 import { 
   getFirestore, 
   collection, 
@@ -13,9 +13,7 @@ import {
   onSnapshot,
   addDoc,
   serverTimestamp,
-  getDocs,
-  doc,
-  getDoc
+  getDocs
 } from 'firebase/firestore';
 import { getAuth, onAuthStateChanged, signOut } from 'firebase/auth';
 
@@ -28,22 +26,15 @@ const firebaseConfig = {
   appId: "1:836899520599:web:b346e4370ecfa9bb89e312"
 };
 
-
-let app = null;
-let auth = null;
-let db = null;
-
-if (typeof window !== "undefined") {
-  app = getApps().length === 0
-    ? initializeApp(firebaseConfig)
-    : getApps()[0];
-
-  auth = getAuth(app);
-  db = getFirestore(app);
-}
-
-
-
+// Inisialisasi Firebase dengan pengecekan client-side
+const getFirebaseApp = () => {
+  if (typeof window === 'undefined') return null;
+  
+  if (getApps().length === 0) {
+    return initializeApp(firebaseConfig);
+  }
+  return getApps()[0];
+};
 
 const CHATBOT_EMAIL = 'faridardiansyah061@gmail.com';
 const CHATBOT_NAME = 'Menuru (Chatbot)';
@@ -57,11 +48,28 @@ export default function AdminChatDashboard() {
   const [messages, setMessages] = useState([]);
   const [replyText, setReplyText] = useState('');
   const [isLoading, setIsLoading] = useState(true);
+  const [isClient, setIsClient] = useState(false);
   const [stats, setStats] = useState({ total: 0, unreplied: 0, replied: 0 });
-  const [allUsers, setAllUsers] = useState({});
+  const [firebaseError, setFirebaseError] = useState(null);
+
+  // Deteksi client side
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   // Cek admin dan load data
   useEffect(() => {
+    if (!isClient) return;
+
+    const app = getFirebaseApp();
+    if (!app) {
+      setIsLoading(false);
+      return;
+    }
+
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser && firebaseUser.email === CHATBOT_EMAIL) {
         console.log('✅ Admin logged in:', firebaseUser.email);
@@ -72,46 +80,35 @@ export default function AdminChatDashboard() {
           name: CHATBOT_NAME
         });
         
-        // Load semua user terlebih dahulu
-        await loadAllUsers();
+        setFirebaseError(null);
         
         // Load semua percakapan
-        loadAllConversations();
+        await loadAllConversations(db);
         
         // Setup real-time listener
-        setupRealtimeListener();
+        setupRealtimeListener(db);
         
         setIsLoading(false);
       } else {
-        console.log('❌ Not admin, redirecting...');
-        router.push('/sign-in?redirect=/admin/chat');
+        console.log('❌ Not admin or not logged in');
+        // Tidak langsung redirect, tunggu user interaction
+        if (firebaseUser && firebaseUser.email !== CHATBOT_EMAIL) {
+          // User logged in tapi bukan admin
+          setFirebaseError('Access denied. Admin only.');
+        }
+        setIsLoading(false);
       }
+    }, (error) => {
+      console.error('Auth error:', error);
+      setFirebaseError(error.message);
+      setIsLoading(false);
     });
 
     return () => unsubscribe();
-  }, [router]);
-
-  // Load semua user dari collection 'users'
-  const loadAllUsers = async () => {
-    try {
-      const usersRef = collection(db, 'users');
-      const snapshot = await getDocs(usersRef);
-      const usersMap = {};
-      
-      snapshot.forEach(doc => {
-        usersMap[doc.id] = { id: doc.id, ...doc.data() };
-      });
-      
-      console.log('📋 Users loaded:', Object.keys(usersMap).length);
-      setAllUsers(usersMap);
-      
-    } catch (error) {
-      console.error('Error loading users:', error);
-    }
-  };
+  }, [isClient, router]);
 
   // Load SEMUA percakapan dengan query yang benar
-  const loadAllConversations = async () => {
+  const loadAllConversations = async (db) => {
     try {
       console.log('🔄 Loading all conversations...');
       
@@ -163,7 +160,8 @@ export default function AdminChatDashboard() {
       });
       
       // Check for replies from chatbot
-      for (const userId in conversationsByUser) {
+      const userIds = Object.keys(conversationsByUser);
+      for (const userId of userIds) {
         const replyQuery = query(
           messagesRef,
           where('senderId', '==', CHATBOT_ID),
@@ -171,13 +169,18 @@ export default function AdminChatDashboard() {
           orderBy('timestamp', 'desc')
         );
         
-        const replySnapshot = await getDocs(replyQuery);
-        conversationsByUser[userId].hasReply = !replySnapshot.empty;
-        
-        if (!replySnapshot.empty) {
-          const lastReply = replySnapshot.docs[0].data();
-          conversationsByUser[userId].lastReplyTime = lastReply.timestamp?.toDate?.() || new Date();
-          conversationsByUser[userId].unread = false;
+        try {
+          const replySnapshot = await getDocs(replyQuery);
+          conversationsByUser[userId].hasReply = !replySnapshot.empty;
+          
+          if (!replySnapshot.empty) {
+            const lastReply = replySnapshot.docs[0].data();
+            conversationsByUser[userId].lastReplyTime = lastReply.timestamp?.toDate?.() || new Date();
+            conversationsByUser[userId].unread = false;
+          }
+        } catch (error) {
+          console.error(`Error checking replies for user ${userId}:`, error);
+          conversationsByUser[userId].hasReply = false;
         }
       }
       
@@ -191,22 +194,29 @@ export default function AdminChatDashboard() {
       
     } catch (error) {
       console.error('❌ Error loading conversations:', error);
+      setFirebaseError(error.message);
     }
   };
 
   // Setup real-time listener untuk pesan baru
-  const setupRealtimeListener = () => {
-    const messagesRef = collection(db, 'chats');
-    const q = query(
-      messagesRef,
-      where('receiverId', '==', CHATBOT_ID),
-      orderBy('timestamp', 'desc')
-    );
-    
-    return onSnapshot(q, (snapshot) => {
-      console.log('🔄 Real-time update:', snapshot.size, 'messages');
-      loadAllConversations();
-    });
+  const setupRealtimeListener = (db) => {
+    try {
+      const messagesRef = collection(db, 'chats');
+      const q = query(
+        messagesRef,
+        where('receiverId', '==', CHATBOT_ID),
+        orderBy('timestamp', 'desc')
+      );
+      
+      return onSnapshot(q, (snapshot) => {
+        console.log('🔄 Real-time update:', snapshot.size, 'messages');
+        loadAllConversations(db);
+      }, (error) => {
+        console.error('Real-time listener error:', error);
+      });
+    } catch (error) {
+      console.error('Error setting up real-time listener:', error);
+    }
   };
 
   // Update statistics
@@ -221,26 +231,35 @@ export default function AdminChatDashboard() {
   // Load messages untuk user tertentu
   const loadUserMessages = async (userId) => {
     try {
+      const app = getFirebaseApp();
+      if (!app) return;
+      
+      const db = getFirestore(app);
       const messagesRef = collection(db, 'chats');
       const q = query(
         messagesRef,
-        where('senderId', 'in', [userId, CHATBOT_ID]),
-        where('receiverId', 'in', [userId, CHATBOT_ID]),
         orderBy('timestamp', 'asc')
       );
       
       const snapshot = await getDocs(q);
-      const messagesData = snapshot.docs.map(doc => ({
+      const allMessages = snapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data(),
         timestamp: doc.data().timestamp?.toDate?.() || new Date()
       }));
+      
+      // Filter messages between this user and chatbot
+      const messagesData = allMessages.filter(msg => 
+        (msg.senderId === userId && msg.receiverId === CHATBOT_ID) ||
+        (msg.senderId === CHATBOT_ID && msg.receiverId === userId)
+      );
       
       console.log(`📩 Messages for user ${userId}:`, messagesData.length);
       setMessages(messagesData);
       
     } catch (error) {
       console.error('Error loading messages:', error);
+      setFirebaseError(error.message);
     }
   };
 
@@ -257,6 +276,13 @@ export default function AdminChatDashboard() {
     if (!replyText.trim() || !selectedConversation) return;
     
     try {
+      const app = getFirebaseApp();
+      if (!app) {
+        alert('Firebase not initialized');
+        return;
+      }
+      
+      const db = getFirestore(app);
       const replyMessage = {
         text: replyText,
         senderId: CHATBOT_ID,
@@ -293,6 +319,7 @@ export default function AdminChatDashboard() {
       
     } catch (error) {
       console.error('Error sending reply:', error);
+      setFirebaseError(error.message);
       alert('❌ Gagal mengirim balasan: ' + error.message);
     }
   };
@@ -300,32 +327,59 @@ export default function AdminChatDashboard() {
   // Format time
   const formatTime = (date) => {
     if (!date) return '';
-    const now = new Date();
-    const messageDate = new Date(date);
-    
-    if (messageDate.toDateString() === now.toDateString()) {
-      return messageDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    try {
+      const now = new Date();
+      const messageDate = new Date(date);
+      
+      if (messageDate.toDateString() === now.toDateString()) {
+        return messageDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      }
+      
+      const yesterday = new Date(now);
+      yesterday.setDate(yesterday.getDate() - 1);
+      if (messageDate.toDateString() === yesterday.toDateString()) {
+        return 'Kemarin ' + messageDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      }
+      
+      return messageDate.toLocaleDateString('id-ID', {
+        day: 'numeric',
+        month: 'short',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    } catch (error) {
+      return '';
     }
-    
-    const yesterday = new Date(now);
-    yesterday.setDate(yesterday.getDate() - 1);
-    if (messageDate.toDateString() === yesterday.toDateString()) {
-      return 'Kemarin ' + messageDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    }
-    
-    return messageDate.toLocaleDateString('id-ID', {
-      day: 'numeric',
-      month: 'short',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
+  };
+
+  // Handle login redirect
+  const handleLogin = () => {
+    router.push('/sign-in?redirect=/admin/chat');
   };
 
   // Handle logout
   const handleLogout = async () => {
-    await signOut(auth);
-    router.push('/sign-in');
+    try {
+      const app = getFirebaseApp();
+      if (!app) return;
+      
+      const auth = getAuth(app);
+      await signOut(auth);
+      router.push('/sign-in');
+    } catch (error) {
+      console.error('Logout error:', error);
+      setFirebaseError(error.message);
+    }
   };
+
+  // Loading state untuk server side rendering
+  if (!isClient) {
+    return (
+      <div style={styles.loadingContainer}>
+        <div style={styles.loadingText}>Loading...</div>
+      </div>
+    );
+  }
 
   if (isLoading) {
     return (
@@ -336,6 +390,30 @@ export default function AdminChatDashboard() {
           style={styles.spinner}
         />
         <div style={styles.loadingText}>Loading Admin Dashboard...</div>
+      </div>
+    );
+  }
+
+  // Check if user is admin
+  if (!adminUser || adminUser.email !== CHATBOT_EMAIL) {
+    return (
+      <div style={styles.accessDeniedContainer}>
+        <div style={styles.accessDeniedIcon}>🔒</div>
+        <h1 style={styles.accessDeniedTitle}>Access Denied</h1>
+        <p style={styles.accessDeniedText}>
+          This page is only accessible to administrators.
+          {firebaseError && (
+            <div style={styles.errorText}>Error: {firebaseError}</div>
+          )}
+        </p>
+        <div style={styles.accessDeniedButtons}>
+          <button onClick={handleLogin} style={styles.loginButton}>
+            Sign In as Admin
+          </button>
+          <button onClick={() => router.push('/')} style={styles.homeButton}>
+            Go to Home
+          </button>
+        </div>
       </div>
     );
   }
@@ -374,6 +452,13 @@ export default function AdminChatDashboard() {
         </div>
       </div>
 
+      {/* Error display */}
+      {firebaseError && (
+        <div style={styles.errorAlert}>
+          ⚠️ Firebase Error: {firebaseError}
+        </div>
+      )}
+
       {/* Main Content */}
       <div style={styles.mainContent}>
         {/* Left Panel - Conversations */}
@@ -381,14 +466,6 @@ export default function AdminChatDashboard() {
           <div style={styles.panelHeader}>
             <h2 style={styles.panelTitle}>All Conversations</h2>
             <div style={styles.countBadge}>{conversations.length}</div>
-          </div>
-          
-          <div style={styles.searchBox}>
-            <input 
-              type="text" 
-              placeholder="Search users..."
-              style={styles.searchInput}
-            />
           </div>
           
           <div style={styles.conversationsList}>
@@ -411,11 +488,11 @@ export default function AdminChatDashboard() {
                 >
                   <div style={styles.convHeader}>
                     <div style={styles.convAvatar}>
-                      {conv.userName.charAt(0).toUpperCase()}
+                      {conv.userName?.charAt(0)?.toUpperCase() || 'U'}
                     </div>
                     <div style={styles.convInfo}>
-                      <div style={styles.convName}>{conv.userName}</div>
-                      <div style={styles.convEmail}>{conv.userEmail}</div>
+                      <div style={styles.convName}>{conv.userName || 'Unknown User'}</div>
+                      <div style={styles.convEmail}>{conv.userEmail || 'No email'}</div>
                     </div>
                     <div style={styles.convTime}>
                       {formatTime(conv.lastMessageTime)}
@@ -423,14 +500,14 @@ export default function AdminChatDashboard() {
                   </div>
                   
                   <div style={styles.convMessage}>
-                    {conv.lastMessage.length > 50 
+                    {conv.lastMessage && conv.lastMessage.length > 50 
                       ? conv.lastMessage.substring(0, 50) + '...' 
-                      : conv.lastMessage}
+                      : conv.lastMessage || 'No message'}
                   </div>
                   
                   <div style={styles.convFooter}>
                     <div style={styles.messageCount}>
-                      {conv.messageCount} message{conv.messageCount > 1 ? 's' : ''}
+                      {conv.messageCount || 0} message{(conv.messageCount || 0) > 1 ? 's' : ''}
                     </div>
                     <div style={{
                       ...styles.statusBadge,
@@ -456,16 +533,16 @@ export default function AdminChatDashboard() {
                     ...styles.chatAvatar,
                     backgroundColor: selectedConversation.hasReply ? '#10b981' : '#ef4444'
                   }}>
-                    {selectedConversation.userName.charAt(0).toUpperCase()}
+                    {selectedConversation.userName?.charAt(0)?.toUpperCase() || 'U'}
                   </div>
                   <div>
-                    <div style={styles.chatUserName}>{selectedConversation.userName}</div>
-                    <div style={styles.chatUserEmail}>{selectedConversation.userEmail}</div>
+                    <div style={styles.chatUserName}>{selectedConversation.userName || 'Unknown User'}</div>
+                    <div style={styles.chatUserEmail}>{selectedConversation.userEmail || 'No email'}</div>
                   </div>
                 </div>
                 <div style={styles.chatStats}>
                   <div style={styles.chatStat}>
-                    <strong>{selectedConversation.messageCount}</strong> messages
+                    <strong>{selectedConversation.messageCount || 0}</strong> messages
                   </div>
                   <div style={{
                     ...styles.chatStatus,
@@ -482,17 +559,17 @@ export default function AdminChatDashboard() {
                 ) : (
                   messages.map((msg) => (
                     <div
-                      key={msg.id}
+                      key={msg.id || `msg-${Date.now()}-${Math.random()}`}
                       style={{
                         ...styles.messageBubble,
                         alignSelf: msg.senderId === CHATBOT_ID ? 'flex-end' : 'flex-start',
                         backgroundColor: msg.senderId === CHATBOT_ID ? '#2563eb' : '#222'
                       }}
                     >
-                      <div style={styles.messageText}>{msg.text}</div>
+                      <div style={styles.messageText}>{msg.text || 'No message content'}</div>
                       <div style={styles.messageMeta}>
                         <span style={styles.messageSender}>
-                          {msg.senderId === CHATBOT_ID ? 'You (Admin)' : selectedConversation.userName}
+                          {msg.senderId === CHATBOT_ID ? 'You (Admin)' : selectedConversation.userName || 'User'}
                         </span>
                         <span style={styles.messageTime}>
                           {formatTime(msg.timestamp)}
@@ -511,7 +588,7 @@ export default function AdminChatDashboard() {
                   <textarea
                     value={replyText}
                     onChange={(e) => setReplyText(e.target.value)}
-                    placeholder={`Type your reply to ${selectedConversation.userName}...`}
+                    placeholder={`Type your reply to ${selectedConversation.userName || 'user'}...`}
                     style={styles.replyTextarea}
                     rows="3"
                   />
@@ -570,7 +647,8 @@ const styles = {
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
-    height: '100vh'
+    height: '100vh',
+    backgroundColor: '#0a0a0a'
   },
   spinner: {
     width: '60px',
@@ -583,6 +661,73 @@ const styles = {
   loadingText: {
     fontSize: '1.2rem',
     color: '#666'
+  },
+  accessDeniedContainer: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: '100vh',
+    backgroundColor: '#0a0a0a',
+    color: 'white',
+    textAlign: 'center',
+    padding: '20px'
+  },
+  accessDeniedIcon: {
+    fontSize: '4rem',
+    marginBottom: '20px'
+  },
+  accessDeniedTitle: {
+    fontSize: '2rem',
+    marginBottom: '15px',
+    color: '#ef4444'
+  },
+  accessDeniedText: {
+    fontSize: '1.1rem',
+    color: '#888',
+    maxWidth: '500px',
+    marginBottom: '30px',
+    lineHeight: '1.5'
+  },
+  errorText: {
+    color: '#ef4444',
+    marginTop: '10px',
+    fontSize: '0.9rem'
+  },
+  accessDeniedButtons: {
+    display: 'flex',
+    gap: '15px',
+    marginTop: '20px'
+  },
+  loginButton: {
+    backgroundColor: '#2563eb',
+    color: 'white',
+    border: 'none',
+    padding: '12px 25px',
+    borderRadius: '25px',
+    fontSize: '1rem',
+    fontWeight: '500',
+    cursor: 'pointer'
+  },
+  homeButton: {
+    backgroundColor: '#333',
+    color: 'white',
+    border: '1px solid #555',
+    padding: '12px 25px',
+    borderRadius: '25px',
+    fontSize: '1rem',
+    fontWeight: '500',
+    cursor: 'pointer'
+  },
+  errorAlert: {
+    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+    color: '#ef4444',
+    padding: '12px 20px',
+    margin: '0 30px',
+    borderRadius: '8px',
+    border: '1px solid rgba(239, 68, 68, 0.3)',
+    fontSize: '0.9rem',
+    textAlign: 'center'
   },
   header: {
     backgroundColor: '#111',
@@ -685,30 +830,16 @@ const styles = {
     fontSize: '0.9rem',
     fontWeight: '500'
   },
-  searchBox: {
-    padding: '15px 20px',
-    borderBottom: '1px solid #333'
-  },
-  searchInput: {
-    width: '100%',
-    backgroundColor: '#222',
-    border: '1px solid #444',
-    color: 'white',
-    padding: '10px 15px',
-    borderRadius: '25px',
-    fontSize: '0.9rem',
-    outline: 'none'
-  },
   conversationsList: {
     flex: 1,
     overflowY: 'auto',
-    padding: '10px'
+    padding: '20px'
   },
   conversationItem: {
     backgroundColor: '#1a1a1a',
     borderRadius: '12px',
     padding: '15px',
-    marginBottom: '10px',
+    marginBottom: '15px',
     cursor: 'pointer',
     transition: 'all 0.2s',
     border: '1px solid transparent'
@@ -963,4 +1094,3 @@ const styles = {
     color: '#888'
   }
 };
-
