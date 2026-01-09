@@ -28,9 +28,22 @@ const firebaseConfig = {
   appId: "1:836899520599:web:b346e4370ecfa9bb89e312"
 };
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-const auth = getAuth(app);
+
+let app = null;
+let auth = null;
+let db = null;
+
+if (typeof window !== "undefined") {
+  app = getApps().length === 0
+    ? initializeApp(firebaseConfig)
+    : getApps()[0];
+
+  auth = getAuth(app);
+  db = getFirestore(app);
+}
+
+
+
 
 const CHATBOT_EMAIL = 'faridardiansyah061@gmail.com';
 const CHATBOT_NAME = 'Menuru (Chatbot)';
@@ -950,3 +963,4 @@ const styles = {
     color: '#888'
   }
 };
+
