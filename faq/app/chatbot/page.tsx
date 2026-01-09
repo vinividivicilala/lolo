@@ -3,7 +3,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-// Firebase imports - TIDAK diinisialisasi di tingkat modul
+// Firebase imports
 import { initializeApp, getApps } from 'firebase/app';
 import { 
   getFirestore, 
@@ -16,7 +16,7 @@ import {
 } from 'firebase/firestore';
 import { getAuth, onAuthStateChanged, signOut } from 'firebase/auth';
 
-// Konfigurasi Firebase (hanya objek, tidak diinisialisasi)
+// Konfigurasi Firebase
 const firebaseConfig = {
   apiKey: "AIzaSyD_htQZ1TClnXKZGRJ4izbMQ02y6V3aNAQ",
   authDomain: "wawa44-58d1e.firebaseapp.com",
@@ -28,21 +28,15 @@ const firebaseConfig = {
   measurementId: "G-8LMP7F4BE9"
 };
 
-let app = null;
-let auth = null;
-let db = null;
-
-if (typeof window !== "undefined") {
-  app = getApps().length === 0
-    ? initializeApp(firebaseConfig)
-    : getApps()[0];
-
-  auth = getAuth(app);
-  db = getFirestore(app);
-}
-
-
-
+// Inisialisasi Firebase dengan pengecekan client-side
+const getFirebaseApp = () => {
+  if (typeof window === 'undefined') return null;
+  
+  if (getApps().length === 0) {
+    return initializeApp(firebaseConfig);
+  }
+  return getApps()[0];
+};
 
 const CHATBOT_EMAIL = 'faridardiansyah061@gmail.com';
 const CHATBOT_NAME = 'Menuru (Chatbot)';
@@ -55,7 +49,8 @@ export default function ChatbotPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [user, setUser] = useState(null);
   const [isInitializing, setIsInitializing] = useState(true);
-  const [isClient, setIsClient] = useState(false); // State untuk cek client/server
+  const [isClient, setIsClient] = useState(false);
+  const [firebaseError, setFirebaseError] = useState(null);
   const messagesEndRef = useRef(null);
 
   // Deteksi client side
@@ -63,21 +58,21 @@ export default function ChatbotPage() {
     setIsClient(true);
   }, []);
 
-  // Inisialisasi Firebase HANYA di client side
+  // Inisialisasi Firebase dan auth listener
   useEffect(() => {
-    if (!isClient) return; // Jangan jalankan di server
+    if (!isClient) return;
 
     try {
-      // Inisialisasi Firebase
-      let app;
-      if (getApps().length === 0) {
-        app = initializeApp(firebaseConfig);
-      } else {
-        app = getApps()[0];
+      const app = getFirebaseApp();
+      if (!app) {
+        console.log('Firebase app not initialized (server-side)');
+        setIsInitializing(false);
+        return;
       }
 
-      // Setup auth listener
       const auth = getAuth(app);
+      const db = getFirestore(app);
+
       const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
         if (firebaseUser) {
           const userData = {
@@ -88,19 +83,24 @@ export default function ChatbotPage() {
           };
           
           setUser(userData);
-          loadChatHistory(firebaseUser.uid);
+          setFirebaseError(null);
+          
+          // Load chat history
+          loadChatHistory(firebaseUser.uid, db);
           
           // Kirim welcome message dari chatbot
           setTimeout(() => {
             sendChatbotMessage(
               `Halo ${userData.name}! 👋 Saya ${CHATBOT_NAME}, asisten chatbot dari Note. Ada yang bisa saya bantu?`, 
-              firebaseUser.uid
+              firebaseUser.uid,
+              db
             );
           }, 1500);
           
         } else {
-          // Jika belum login, redirect ke sign-in
-          router.push('/sign-in');
+          // Jika belum login, tetap tampilkan halaman tanpa redirect
+          setUser(null);
+          setMessages([]);
         }
         
         setIsInitializing(false);
@@ -109,15 +109,15 @@ export default function ChatbotPage() {
       return () => unsubscribe();
     } catch (error) {
       console.error('Firebase initialization error:', error);
+      setFirebaseError(error.message);
       setIsInitializing(false);
     }
-  }, [isClient, router]);
+  }, [isClient]);
 
-  const loadChatHistory = (userId) => {
-    if (!isClient) return;
+  const loadChatHistory = (userId, db) => {
+    if (!isClient || !db || !userId) return;
 
     try {
-      const db = getFirestore();
       const messagesRef = collection(db, 'chats');
       const q = query(
         messagesRef,
@@ -137,16 +137,20 @@ export default function ChatbotPage() {
           );
         
         setMessages(userMessages);
+      }, (error) => {
+        console.error('Error loading chat history:', error);
       });
 
       return unsubscribe;
     } catch (error) {
-      console.error('Error loading chat history:', error);
+      console.error('Error setting up chat listener:', error);
     }
   };
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+    }
   };
 
   useEffect(() => {
@@ -156,10 +160,13 @@ export default function ChatbotPage() {
   }, [messages, isClient]);
 
   const saveMessageToFirestore = async (messageData) => {
-    if (!isClient) return null;
+    if (!isClient || !user) return null;
 
     try {
-      const db = getFirestore();
+      const app = getFirebaseApp();
+      if (!app) return null;
+      
+      const db = getFirestore(app);
       const docRef = await addDoc(collection(db, 'chats'), {
         ...messageData,
         timestamp: serverTimestamp(),
@@ -172,7 +179,7 @@ export default function ChatbotPage() {
     }
   };
 
-  const sendChatbotMessage = async (text, receiverId) => {
+  const sendChatbotMessage = async (text, receiverId, db) => {
     if (!isClient || !user) return;
 
     const chatbotMessage = {
@@ -218,7 +225,12 @@ export default function ChatbotPage() {
       ];
       
       const response = responses[Math.floor(Math.random() * responses.length)];
-      await sendChatbotMessage(response, user.uid);
+      
+      const app = getFirebaseApp();
+      if (app) {
+        const db = getFirestore(app);
+        await sendChatbotMessage(response, user.uid, db);
+      }
       
       setIsLoading(false);
     }, 2000);
@@ -229,13 +241,21 @@ export default function ChatbotPage() {
     router.push('/admin/chat');
   };
 
+  const handleLogin = () => {
+    router.push('/sign-in');
+  };
+
   const handleLogout = async () => {
     if (!isClient) return;
 
     try {
-      const auth = getAuth();
+      const app = getFirebaseApp();
+      if (!app) return;
+      
+      const auth = getAuth(app);
       await signOut(auth);
-      router.push('/sign-in');
+      setUser(null);
+      setMessages([]);
     } catch (error) {
       console.error('Logout error:', error);
     }
@@ -250,12 +270,24 @@ export default function ChatbotPage() {
 
   const formatTime = (date) => {
     if (!date) return '';
-    if (date.toDate) date = date.toDate();
-    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    try {
+      if (date.toDate) date = date.toDate();
+      return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    } catch (error) {
+      return '';
+    }
   };
 
   // Loading state untuk server side rendering
-  if (!isClient || isInitializing) {
+  if (!isClient) {
+    return (
+      <div style={styles.loadingContainer}>
+        <div style={styles.loadingText}>Loading...</div>
+      </div>
+    );
+  }
+
+  if (isInitializing) {
     return (
       <div style={styles.loadingContainer}>
         <motion.div
@@ -263,14 +295,14 @@ export default function ChatbotPage() {
           transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
           style={styles.spinner}
         />
-        <div style={styles.loadingText}>Loading Chatbot...</div>
+        <div style={styles.loadingText}>Initializing Chatbot...</div>
       </div>
     );
   }
 
   return (
     <div style={styles.container}>
-      {/* Header dengan TOMBOL ADMIN khusus untuk faridardiansyah061@gmail.com */}
+      {/* Header */}
       <div style={styles.header}>
         <motion.h1
           initial={{ opacity: 0, x: -30 }}
@@ -281,63 +313,81 @@ export default function ChatbotPage() {
           chatbot
         </motion.h1>
 
-        {/* User Info dengan TOMBOL ADMIN */}
+        {/* User Info */}
         <motion.div
           initial={{ opacity: 0, x: 30 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.6 }}
           style={styles.userContainer}
         >
-          <div style={styles.userInfo}>
-            <div style={{
-              ...styles.userAvatar,
-              backgroundColor: user?.isAnonymous ? '#666' : '#2563eb'
-            }}>
-              {user?.name?.charAt(0).toUpperCase() || 'G'}
-            </div>
-            <div>
-              <div style={styles.userName}>{user?.name || 'Guest'}</div>
-              <div style={styles.userStatus}>
+          {user ? (
+            <>
+              <div style={styles.userInfo}>
                 <div style={{
-                  ...styles.statusDot,
-                  backgroundColor: user?.isAnonymous ? '#888' : '#4CAF50'
-                }}></div>
-                {user?.isAnonymous ? 'Guest Mode' : 'Signed In'}
-                {user && !user.isAnonymous && (
-                  <span style={styles.userEmail}> {user.email}</span>
-                )}
+                  ...styles.userAvatar,
+                  backgroundColor: user?.isAnonymous ? '#666' : '#2563eb'
+                }}>
+                  {user?.name?.charAt(0).toUpperCase() || 'G'}
+                </div>
+                <div>
+                  <div style={styles.userName}>{user?.name || 'Guest'}</div>
+                  <div style={styles.userStatus}>
+                    <div style={{
+                      ...styles.statusDot,
+                      backgroundColor: user?.isAnonymous ? '#888' : '#4CAF50'
+                    }}></div>
+                    {user?.isAnonymous ? 'Guest Mode' : 'Signed In'}
+                    {user && !user.isAnonymous && (
+                      <span style={styles.userEmail}> {user.email}</span>
+                    )}
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
 
-          {/* TOMBOL ADMIN - Hanya tampil untuk faridardiansyah061@gmail.com */}
-          {user?.email === CHATBOT_EMAIL && (
+              {/* TOMBOL ADMIN - Hanya tampil untuk faridardiansyah061@gmail.com */}
+              {user?.email === CHATBOT_EMAIL && (
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={handleGoToAdmin}
+                  style={styles.adminButton}
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M18 3a3 3 0 0 0-3 3v12a3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3H6a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3V6a3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3h12a3 3 0 0 0 3-3 3 3 0 0 0-3-3z"></path>
+                  </svg>
+                  Admin Dashboard
+                </motion.button>
+              )}
+
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={handleLogout}
+                style={styles.logoutButton}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                  <polyline points="16 17 21 12 16 7"></polyline>
+                  <line x1="21" y1="12" x2="9" y2="12"></line>
+                </svg>
+                Logout
+              </motion.button>
+            </>
+          ) : (
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              onClick={handleGoToAdmin}
-              style={styles.adminButton}
+              onClick={handleLogin}
+              style={styles.loginButton}
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                <path d="M18 3a3 3 0 0 0-3 3v12a3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3H6a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3V6a3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3h12a3 3 0 0 0 3-3 3 3 0 0 0-3-3z"></path>
+                <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
+                <polyline points="10 17 15 12 10 7"></polyline>
+                <line x1="15" y1="12" x2="3" y2="12"></line>
               </svg>
-              Admin Dashboard
+              Sign In
             </motion.button>
           )}
-
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={handleLogout}
-            style={styles.logoutButton}
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-              <polyline points="16 17 21 12 16 7"></polyline>
-              <line x1="21" y1="12" x2="9" y2="12"></line>
-            </svg>
-            Logout
-          </motion.button>
         </motion.div>
       </div>
 
@@ -381,6 +431,11 @@ export default function ChatbotPage() {
             </div>
             <div style={styles.aboutText}>
               Two-way communication system. Responses come from chatbot account.
+              {!user && (
+                <div style={{ marginTop: '10px', color: '#fbbf24' }}>
+                  ⚠️ Please sign in to start chatting
+                </div>
+              )}
             </div>
           </div>
           
@@ -395,13 +450,18 @@ export default function ChatbotPage() {
               </svg>
               SYSTEM STATUS
             </div>
-            <div style={statusConnected}>
+            <div style={styles.statusConnected}>
               <div style={styles.connectedDot}></div>
-              Connected to Firebase
+              {user ? 'Connected to Firebase' : 'Authentication Required'}
             </div>
             <div style={styles.statusDetails}>
-              Messages: {messages.length} • User: {user?.uid?.substring(0, 8) || 'unknown'}...
+              Messages: {messages.length} • Status: {user ? 'Signed In' : 'Not Signed In'}
             </div>
+            {firebaseError && (
+              <div style={styles.errorText}>
+                ⚠️ Error: {firebaseError}
+              </div>
+            )}
           </div>
         </motion.div>
 
@@ -419,12 +479,32 @@ export default function ChatbotPage() {
             </div>
             <div style={styles.chatBadge}>
               <div style={styles.badgeDot}></div>
-              Real-time Chat
+              {user ? 'Real-time Chat' : 'Sign in to Chat'}
             </div>
           </div>
 
           <div style={styles.messagesArea}>
-            {messages.length === 0 ? (
+            {!user ? (
+              <div style={styles.emptyChat}>
+                <motion.div
+                  animate={{ scale: [1, 1.1, 1] }}
+                  transition={{ repeat: Infinity, duration: 2 }}
+                  style={{ fontSize: '4rem', marginBottom: '1rem' }}
+                >
+                  🔒
+                </motion.div>
+                <div style={styles.emptyTitle}>Please Sign In to Chat</div>
+                <div style={styles.emptySubtitle}>You need to be signed in to send and receive messages</div>
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={handleLogin}
+                  style={styles.signInButton}
+                >
+                  Sign In to Continue
+                </motion.button>
+              </div>
+            ) : messages.length === 0 ? (
               <div style={styles.emptyChat}>
                 <motion.div
                   animate={{ scale: [1, 1.1, 1] }}
@@ -439,7 +519,7 @@ export default function ChatbotPage() {
             ) : (
               messages.map((message, index) => (
                 <motion.div
-                  key={message.id}
+                  key={message.id || index}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.1 }}
@@ -481,7 +561,7 @@ export default function ChatbotPage() {
               ))
             )}
             
-            {isLoading && (
+            {isLoading && user && (
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={styles.typingIndicator}>
                 <div style={styles.typingAvatar}>C</div>
                 <div style={styles.typingBubble}>
@@ -498,26 +578,34 @@ export default function ChatbotPage() {
           </div>
 
           <div style={styles.inputArea}>
-            <div style={styles.inputContainer}>
+            <div style={{
+              ...styles.inputContainer,
+              opacity: user ? 1 : 0.5,
+              cursor: user ? 'text' : 'not-allowed'
+            }}>
               <textarea
                 value={inputText}
-                onChange={(e) => setInputText(e.target.value)}
+                onChange={(e) => user && setInputText(e.target.value)}
                 onKeyPress={handleKeyPress}
-                placeholder={`Type your message to ${CHATBOT_NAME}... (Press Enter to send)`}
+                placeholder={user 
+                  ? `Type your message to ${CHATBOT_NAME}... (Press Enter to send)`
+                  : 'Please sign in to send messages...'
+                }
                 style={styles.textarea}
                 rows="2"
+                disabled={!user}
               />
             </div>
             <motion.button
-              whileHover={{ scale: 1.1, backgroundColor: '#1d4ed8' }}
-              whileTap={{ scale: 0.9 }}
+              whileHover={user && inputText.trim() ? { scale: 1.1, backgroundColor: '#1d4ed8' } : {}}
+              whileTap={user && inputText.trim() ? { scale: 0.9 } : {}}
               onClick={handleSendMessage}
-              disabled={isLoading || inputText.trim() === ''}
+              disabled={isLoading || inputText.trim() === '' || !user}
               style={{
                 ...styles.sendButton,
-                backgroundColor: inputText.trim() ? '#2563eb' : '#333',
-                opacity: inputText.trim() ? 1 : 0.6,
-                cursor: inputText.trim() ? 'pointer' : 'not-allowed'
+                backgroundColor: user && inputText.trim() ? '#2563eb' : '#333',
+                opacity: user && inputText.trim() ? 1 : 0.5,
+                cursor: user && inputText.trim() ? 'pointer' : 'not-allowed'
               }}
             >
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -548,7 +636,7 @@ export default function ChatbotPage() {
   );
 }
 
-// Styles object (sama seperti sebelumnya)
+// Styles object
 const styles = {
   container: {
     minHeight: '100vh',
@@ -637,6 +725,18 @@ const styles = {
     color: '#666',
     marginLeft: '0.5rem'
   },
+  loginButton: {
+    backgroundColor: '#2563eb',
+    color: 'white',
+    border: 'none',
+    padding: '0.75rem 1.5rem',
+    borderRadius: '25px',
+    fontSize: '0.9rem',
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem'
+  },
   adminButton: {
     backgroundColor: '#10b981',
     color: 'white',
@@ -660,6 +760,16 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     gap: '0.5rem'
+  },
+  signInButton: {
+    backgroundColor: '#2563eb',
+    color: 'white',
+    border: 'none',
+    padding: '0.75rem 1.5rem',
+    borderRadius: '25px',
+    fontSize: '0.9rem',
+    cursor: 'pointer',
+    marginTop: '1rem'
   },
   mainContent: {
     display: 'flex',
@@ -776,6 +886,15 @@ const styles = {
     fontSize: '0.8rem',
     color: '#888',
     marginTop: '0.5rem'
+  },
+  errorText: {
+    fontSize: '0.8rem',
+    color: '#ef4444',
+    marginTop: '0.5rem',
+    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+    padding: '0.5rem',
+    borderRadius: '5px',
+    border: '1px solid rgba(239, 68, 68, 0.3)'
   },
   chatPanel: {
     flex: 1,
@@ -970,4 +1089,3 @@ const styles = {
     height: '60px'
   }
 };
-
