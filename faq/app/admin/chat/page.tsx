@@ -1,753 +1,1016 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { useRouter } from "next/navigation";
-import gsap from "gsap";
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { motion } from 'framer-motion';
+import { initializeApp } from 'firebase/app';
+import { 
+  getFirestore, 
+  collection, 
+  query, 
+  orderBy, 
+  onSnapshot, 
+  where, 
+  getDocs,
+  addDoc,
+  serverTimestamp,
+  doc,
+  getDoc,
+  updateDoc
+} from 'firebase/firestore';
+import { getAuth, onAuthStateChanged, signOut } from 'firebase/auth';
 
-export default function HomePage(): React.JSX.Element {
+// Konfigurasi Firebase
+const firebaseConfig = {
+  apiKey: "AIzaSyD_htQZ1TClnXKZGRJ4izbMQ02y6V3aNAQ",
+  authDomain: "wawa44-58d1e.firebaseapp.com",
+  databaseURL: "https://wawa44-58d1e-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "wawa44-58d1e",
+  storageBucket: "wawa44-58d1e.firebasestorage.app",
+  messagingSenderId: "836899520599",
+  appId: "1:836899520599:web:b346e4370ecfa9bb89e312",
+  measurementId: "G-8LMP7F4BE9"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+
+const CHATBOT_EMAIL = 'faridardiansyah061@gmail.com';
+const CHATBOT_NAME = 'Menuru (Chatbot)';
+const CHATBOT_ID = 'chatbot_account_001';
+
+export default function AdminChatDashboard() {
   const router = useRouter();
-  const [isMobile, setIsMobile] = useState(false);
-  const [loadingText, setLoadingText] = useState("NURU");
+  const [adminUser, setAdminUser] = useState(null);
+  const [conversations, setConversations] = useState([]);
+  const [selectedConversation, setSelectedConversation] = useState(null);
+  const [messages, setMessages] = useState([]);
+  const [replyText, setReplyText] = useState('');
   const [isLoading, setIsLoading] = useState(true);
-  const [isDarkMode, setIsDarkMode] = useState(true);
-  const [cursorType, setCursorType] = useState("default");
-  const [cursorText, setCursorText] = useState("");
-  const [hoveredLink, setHoveredLink] = useState("");
-  const [showDescription, setShowDescription] = useState(true);
-  const headerRef = useRef<HTMLDivElement>(null);
-  const cursorRef = useRef<HTMLDivElement>(null);
-  const topNavRef = useRef<HTMLDivElement>(null);
-  const scrollTextRef = useRef<HTMLDivElement>(null);
-  const descriptionRef = useRef<HTMLDivElement>(null);
+  const [activeTab, setActiveTab] = useState('unreplied'); // 'all', 'unreplied', 'replied'
+  const [stats, setStats] = useState({
+    total: 0,
+    unreplied: 0,
+    replied: 0
+  });
 
-  // Animasi loading text
-  const loadingTexts = [
-    "NURU", "MBACA", "NULIS", "NGEXPLORASI", 
-    "NEMUKAN", "NCIPTA", "NGGALI", "NARIK",
-    "NGAMATI", "NANCANG", "NGEMBANGKAN", "NYUSUN"
-  ];
-
+  // Cek apakah user adalah admin
   useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-
-    // Animasi loading text
-    let currentIndex = 0;
-    const textInterval = setInterval(() => {
-      currentIndex = (currentIndex + 1) % loadingTexts.length;
-      setLoadingText(loadingTexts[currentIndex]);
-    }, 500);
-
-    // Hentikan loading setelah selesai
-    const loadingTimeout = setTimeout(() => {
-      setIsLoading(false);
-      clearInterval(textInterval);
-    }, 3000);
-
-    // Animasi teks berjalan dari atas ke bawah
-    const setupAutoScroll = () => {
-      if (scrollTextRef.current) {
-        const itemHeight = isMobile ? 80 : 100;
-        const totalItems = 15;
-        const totalScrollDistance = totalItems * itemHeight - window.innerHeight;
-        
-        // Hapus animasi sebelumnya jika ada
-        gsap.killTweensOf(scrollTextRef.current);
-        
-        // Animasi infinite loop dari atas ke bawah
-        gsap.to(scrollTextRef.current, {
-          y: -totalScrollDistance,
-          duration: 20,
-          ease: "none",
-          repeat: -1,
-          yoyo: false
-        });
-      }
-    };
-
-    // Handle scroll untuk hide/show description
-    const handleScroll = () => {
-      if (descriptionRef.current) {
-        const descriptionRect = descriptionRef.current.getBoundingClientRect();
-        // Jika deskripsi sudah hampir keluar dari viewport (atas), sembunyikan
-        if (descriptionRect.top < -50) {
-          setShowDescription(false);
+    const checkAdmin = async () => {
+      const unsubscribe = onAuthStateChanged(auth, async (user) => {
+        if (user && user.email === CHATBOT_EMAIL) {
+          // User adalah admin (faridardiansyah061@gmail.com)
+          setAdminUser({
+            uid: user.uid,
+            email: user.email,
+            name: CHATBOT_NAME
+          });
+          
+          // Load semua percakapan
+          loadConversations();
+          
+          // Setup real-time listener untuk percakapan baru
+          setupRealtimeListeners();
+          
+          setIsLoading(false);
         } else {
-          setShowDescription(true);
+          // Bukan admin, redirect ke login
+          router.push('/sign-in?redirect=/admin/chat');
+        }
+      });
+      
+      return () => unsubscribe();
+    };
+    
+    checkAdmin();
+  }, [router]);
+
+  // Load semua percakapan dari berbagai user
+  const loadConversations = async () => {
+    try {
+      // Ambil semua user yang pernah chat
+      const usersRef = collection(db, 'users');
+      const usersSnapshot = await getDocs(usersRef);
+      const users = usersSnapshot.docs
+        .filter(doc => doc.data().email !== CHATBOT_EMAIL)
+        .map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+      
+      // Untuk setiap user, ambil percakapan terakhir
+      const conversationsData = [];
+      
+      for (const user of users) {
+        // Ambil pesan terakhir dari user ini
+        const messagesRef = collection(db, 'chats');
+        const q = query(
+          messagesRef,
+          where('senderId', '==', user.id),
+          orderBy('timestamp', 'desc'),
+          where('receiverId', '==', CHATBOT_ID)
+        );
+        
+        const messagesSnapshot = await getDocs(q);
+        
+        if (!messagesSnapshot.empty) {
+          const lastMessage = messagesSnapshot.docs[0].data();
+          const totalMessages = messagesSnapshot.size;
+          
+          // Cek apakah ada balasan dari chatbot
+          const replyQuery = query(
+            messagesRef,
+            where('senderId', '==', CHATBOT_ID),
+            where('receiverId', '==', user.id),
+            orderBy('timestamp', 'desc')
+          );
+          
+          const replySnapshot = await getDocs(replyQuery);
+          const hasReply = !replySnapshot.empty;
+          const lastReply = hasReply ? replySnapshot.docs[0].data() : null;
+          
+          conversationsData.push({
+            userId: user.id,
+            userEmail: user.email || 'unknown@user.com',
+            userName: user.name || 'Anonymous User',
+            lastMessage: lastMessage.text,
+            lastMessageTime: lastMessage.timestamp,
+            messageCount: totalMessages,
+            hasReply: hasReply,
+            lastReplyTime: hasReply ? lastReply.timestamp : null,
+            unread: !hasReply // Tandai sebagai belum dibaca jika belum ada balasan
+          });
         }
       }
-    };
+      
+      // Urutkan berdasarkan waktu pesan terakhir (terbaru di atas)
+      conversationsData.sort((a, b) => 
+        new Date(b.lastMessageTime?.toDate?.() || b.lastMessageTime) - 
+        new Date(a.lastMessageTime?.toDate?.() || a.lastMessageTime)
+      );
+      
+      setConversations(conversationsData);
+      calculateStats(conversationsData);
+      
+    } catch (error) {
+      console.error('Error loading conversations:', error);
+    }
+  };
 
-    // Setup auto scroll setelah component mount
-    setTimeout(setupAutoScroll, 100);
-    window.addEventListener('resize', setupAutoScroll);
-    window.addEventListener('scroll', handleScroll);
-
-    // Custom cursor animation
-    const moveCursor = (e: MouseEvent) => {
-      if (cursorRef.current) {
-        gsap.to(cursorRef.current, {
-          x: e.clientX,
-          y: e.clientY,
-          duration: 0.1,
-          ease: "power2.out"
-        });
+  // Setup real-time listeners
+  const setupRealtimeListeners = () => {
+    // Listen untuk pesan baru dari user ke chatbot
+    const messagesRef = collection(db, 'chats');
+    const q = query(
+      messagesRef,
+      where('receiverId', '==', CHATBOT_ID),
+      orderBy('timestamp', 'desc')
+    );
+    
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      // Update conversations ketika ada pesan baru
+      loadConversations();
+      
+      // Jika ada conversation yang sedang dilihat, update messages juga
+      if (selectedConversation) {
+        loadMessages(selectedConversation.userId);
       }
-    };
+    });
+    
+    return unsubscribe;
+  };
 
-    document.addEventListener('mousemove', moveCursor);
+  // Hitung statistik
+  const calculateStats = (convs) => {
+    const total = convs.length;
+    const unreplied = convs.filter(c => !c.hasReply).length;
+    const replied = convs.filter(c => c.hasReply).length;
+    
+    setStats({ total, unreplied, replied });
+  };
 
-    return () => {
-      window.removeEventListener('resize', checkMobile);
-      window.removeEventListener('resize', setupAutoScroll);
-      window.removeEventListener('scroll', handleScroll);
-      clearInterval(textInterval);
-      clearTimeout(loadingTimeout);
-      document.removeEventListener('mousemove', moveCursor);
-      if (scrollTextRef.current) {
-        gsap.killTweensOf(scrollTextRef.current);
+  // Filter conversations berdasarkan tab aktif
+  const getFilteredConversations = () => {
+    switch (activeTab) {
+      case 'unreplied':
+        return conversations.filter(c => !c.hasReply);
+      case 'replied':
+        return conversations.filter(c => c.hasReply);
+      default:
+        return conversations;
+    }
+  };
+
+  // Load messages untuk conversation tertentu
+  const loadMessages = async (userId) => {
+    try {
+      const messagesRef = collection(db, 'chats');
+      const q = query(
+        messagesRef,
+        where('senderId', 'in', [userId, CHATBOT_ID]),
+        where('receiverId', 'in', [userId, CHATBOT_ID]),
+        orderBy('timestamp', 'asc')
+      );
+      
+      const snapshot = await getDocs(q);
+      const messagesData = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      
+      setMessages(messagesData);
+      
+      // Tandai sebagai sudah dibaca
+      const conversation = conversations.find(c => c.userId === userId);
+      if (conversation && conversation.unread) {
+        updateConversationReadStatus(userId);
       }
-    };
-  }, [isMobile]);
-
-  // Fungsi toggle dark/light mode
-  const toggleColorMode = () => {
-    setIsDarkMode(!isDarkMode);
+      
+    } catch (error) {
+      console.error('Error loading messages:', error);
+    }
   };
 
-  // Handler untuk cursor hover
-  const handleLinkHover = (type: string, text: string = "", linkName: string = "") => {
-    setCursorType(type);
-    setCursorText(text);
-    setHoveredLink(linkName);
+  // Update status baca conversation
+  const updateConversationReadStatus = async (userId) => {
+    // Di implementasi nyata, Anda bisa menambahkan field 'read' di conversation
+    // Untuk sekarang, kita update state lokal saja
+    setConversations(prev => prev.map(conv => 
+      conv.userId === userId ? { ...conv, unread: false } : conv
+    ));
   };
 
-  const handleLinkLeave = () => {
-    setCursorType("default");
-    setCursorText("");
-    setHoveredLink("");
+  // Handle pilih conversation
+  const handleSelectConversation = (conversation) => {
+    setSelectedConversation(conversation);
+    loadMessages(conversation.userId);
+    setReplyText('');
   };
 
-  // Warna cursor
-  const getCursorColors = () => {
-    if (cursorType === "link") {
-      return {
-        dotColor: '#6366F1',
-        textColor: 'white'
+  // Kirim balasan sebagai chatbot
+  const handleSendReply = async () => {
+    if (!replyText.trim() || !selectedConversation) return;
+    
+    try {
+      // Simpan pesan balasan
+      const replyMessage = {
+        text: replyText,
+        senderId: CHATBOT_ID,
+        senderEmail: CHATBOT_EMAIL,
+        senderName: CHATBOT_NAME,
+        receiverId: selectedConversation.userId,
+        receiverEmail: selectedConversation.userEmail,
+        timestamp: new Date(),
+        type: 'admin_reply',
+        isFromAdmin: true
       };
+      
+      await addDoc(collection(db, 'chats'), {
+        ...replyMessage,
+        timestamp: serverTimestamp()
+      });
+      
+      // Tambahkan ke messages state
+      setMessages(prev => [...prev, {
+        ...replyMessage,
+        id: `temp-${Date.now()}`
+      }]);
+      
+      // Update conversation status
+      setConversations(prev => prev.map(conv => 
+        conv.userId === selectedConversation.userId 
+          ? { ...conv, hasReply: true, lastReplyTime: new Date(), unread: false }
+          : conv
+      ));
+      
+      // Update stats
+      setStats(prev => ({
+        ...prev,
+        unreplied: Math.max(0, prev.unreplied - 1),
+        replied: prev.replied + 1
+      }));
+      
+      // Reset input
+      setReplyText('');
+      
+      // Tampilkan notifikasi sukses
+      alert('✅ Balasan berhasil dikirim ke user!');
+      
+    } catch (error) {
+      console.error('Error sending reply:', error);
+      alert('❌ Gagal mengirim balasan: ' + error.message);
+    }
+  };
+
+  // Format waktu
+  const formatTime = (date) => {
+    if (!date) return '';
+    if (date.toDate) {
+      date = date.toDate();
+    }
+    const now = new Date();
+    const messageDate = new Date(date);
+    
+    // Jika hari ini
+    if (messageDate.toDateString() === now.toDateString()) {
+      return messageDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     }
     
-    return {
-      dotColor: '#EC4899',
-      textColor: 'white'
-    };
+    // Jika kemarin
+    const yesterday = new Date(now);
+    yesterday.setDate(yesterday.getDate() - 1);
+    if (messageDate.toDateString() === yesterday.toDateString()) {
+      return 'Kemarin';
+    }
+    
+    // Format tanggal biasa
+    return messageDate.toLocaleDateString('id-ID', {
+      day: 'numeric',
+      month: 'short'
+    });
   };
 
-  const cursorColors = getCursorColors();
+  // Handle logout
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      router.push('/sign-in');
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
+  };
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <div style={{
+        minHeight: '100vh',
+        backgroundColor: 'black',
+        color: 'white',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontFamily: "'Inter', 'Helvetica Neue', Arial, sans-serif"
+      }}>
+        <motion.div
+          animate={{ rotate: 360 }}
+          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+          style={{
+            width: '60px',
+            height: '60px',
+            border: '4px solid #333',
+            borderTopColor: '#2563eb',
+            borderRadius: '50%',
+            marginBottom: '1.5rem'
+          }}
+        />
+        <div style={{ fontSize: '1.2rem', color: '#666' }}>
+          Verifying Admin Access...
+        </div>
+        <div style={{ fontSize: '0.9rem', color: '#444', marginTop: '0.5rem' }}>
+          Checking: {CHATBOT_EMAIL}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div style={{
       minHeight: '100vh',
-      backgroundColor: isDarkMode ? 'black' : '#ff0028',
-      margin: 0,
-      padding: 0,
-      width: '100%',
-      display: 'flex',
-      flexDirection: 'column',
-      justifyContent: 'flex-start',
-      alignItems: 'center',
-      position: 'relative',
-      overflow: 'hidden',
-      fontFamily: 'Helvetica, Arial, sans-serif',
-      WebkitFontSmoothing: 'antialiased',
-      MozOsxFontSmoothing: 'grayscale',
-      transition: 'background-color 0.5s ease',
-      cursor: 'none'
+      backgroundColor: '#0a0a0a',
+      color: 'white',
+      fontFamily: "'Inter', 'Helvetica Neue', Arial, sans-serif"
     }}>
-
-      {/* Custom Cursor */}
-      <div
-        ref={cursorRef}
-        style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          width: cursorType === "link" ? '140px' : '20px',
-          height: cursorType === "link" ? '60px' : '20px',
-          backgroundColor: cursorColors.dotColor,
-          borderRadius: cursorType === "link" ? '30px' : '50%',
-          pointerEvents: 'none',
-          zIndex: 9999,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          fontSize: '14px',
-          fontWeight: '700',
-          color: cursorColors.textColor,
-          textAlign: 'center',
-          transition: 'all 0.2s ease',
-          transform: 'translate(-50%, -50%)',
-          padding: cursorType === "link" ? '0 20px' : '0',
-          boxShadow: '0 2px 10px rgba(0,0,0,0.3)',
-          border: 'none'
-        }}
-      >
-        {cursorType === "link" && (
+      {/* Header */}
+      <div style={{
+        backgroundColor: '#111',
+        borderBottom: '1px solid #333',
+        padding: '1.5rem 2rem',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
           <div style={{
+            width: '40px',
+            height: '40px',
+            borderRadius: '50%',
+            backgroundColor: '#2563eb',
             display: 'flex',
             alignItems: 'center',
-            gap: '8px'
+            justifyContent: 'center',
+            fontSize: '1.2rem',
+            fontWeight: 'bold'
           }}>
-            <span style={{ 
-              fontSize: '14px', 
-              fontWeight: '700',
-              letterSpacing: '0.5px',
-              whiteSpace: 'nowrap'
-            }}>
-              {cursorText}
-            </span>
-            <svg 
-              width="20" 
-              height="20" 
-              viewBox="0 0 24 24" 
-              fill="none" 
-              stroke={cursorColors.textColor}
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M7 17L17 7M17 7H7M17 7V17"/>
-            </svg>
+            A
           </div>
-        )}
-      </div>
-
-      {/* Top Navigation Bar */}
-      <div 
-        ref={topNavRef}
-        style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          width: '100%',
-          padding: isMobile ? '0.8rem 1rem' : '1rem 2rem',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          zIndex: 101,
-          boxSizing: 'border-box',
-          opacity: 1
-        }}
-      >
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: isMobile ? '1rem' : '2rem',
-          backgroundColor: 'transparent',
-          backdropFilter: 'blur(10px)',
-          borderRadius: '50px',
-          padding: isMobile ? '0.6rem 1rem' : '0.8rem 1.5rem',
-          border: `1px solid ${isDarkMode ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.3)'}`,
-          boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
-        }}>
-          {/* Docs */}
-          <motion.div
-            onClick={() => router.push('/docs')}
-            onMouseEnter={() => handleLinkHover("link", "VIEW", "docs")}
-            onMouseLeave={handleLinkLeave}
+          <div>
+            <h1 style={{ fontSize: '1.5rem', fontWeight: '600', margin: 0 }}>
+              Chatbot Admin Dashboard
+            </h1>
+            <div style={{ fontSize: '0.9rem', color: '#888', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <div style={{
+                width: '8px',
+                height: '8px',
+                borderRadius: '50%',
+                backgroundColor: '#4CAF50'
+              }}></div>
+              Logged in as: {adminUser?.email}
+            </div>
+          </div>
+        </div>
+        
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <div style={{
+            backgroundColor: '#222',
+            padding: '0.5rem 1rem',
+            borderRadius: '20px',
+            fontSize: '0.9rem'
+          }}>
+            <div style={{ display: 'flex', gap: '1rem' }}>
+              <div>
+                <div style={{ fontSize: '0.8rem', color: '#888' }}>Total</div>
+                <div style={{ fontSize: '1.1rem', fontWeight: '600' }}>{stats.total}</div>
+              </div>
+              <div style={{ borderLeft: '1px solid #333', paddingLeft: '1rem' }}>
+                <div style={{ fontSize: '0.8rem', color: '#888' }}>Unreplied</div>
+                <div style={{ fontSize: '1.1rem', fontWeight: '600', color: '#ef4444' }}>{stats.unreplied}</div>
+              </div>
+              <div style={{ borderLeft: '1px solid #333', paddingLeft: '1rem' }}>
+                <div style={{ fontSize: '0.8rem', color: '#888' }}>Replied</div>
+                <div style={{ fontSize: '1.1rem', fontWeight: '600', color: '#4CAF50' }}>{stats.replied}</div>
+              </div>
+            </div>
+          </div>
+          
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={handleLogout}
             style={{
+              backgroundColor: '#222',
+              color: 'white',
+              border: '1px solid #444',
+              padding: '0.6rem 1.2rem',
+              borderRadius: '20px',
+              fontSize: '0.9rem',
+              cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
-              gap: '0.5rem',
-              cursor: 'none',
-              padding: '0.4rem 0.8rem',
-              borderRadius: '25px',
-              backgroundColor: isDarkMode ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.95)',
-              border: isDarkMode ? '1px solid rgba(255,255,255,0.2)' : '1px solid rgba(255,255,255,0.3)',
-              transition: 'all 0.3s ease'
-            }}
-            whileHover={{ 
-              backgroundColor: 'white',
-              scale: 1.05,
-              border: '1px solid white'
+              gap: '0.5rem'
             }}
           >
-            <svg 
-              width={isMobile ? "18" : "20"} 
-              height={isMobile ? "18" : "20"} 
-              viewBox="0 0 24 24" 
-              fill="none" 
-              stroke="#6366F1"
-              strokeWidth="2"
-            >
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-              <polyline points="14,2 14,8 20,8"/>
-              <line x1="16" y1="13" x2="8" y2="13"/>
-              <line x1="16" y1="17" x2="8" y2="17"/>
-              <polyline points="10,9 9,9 8,9"/>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+              <polyline points="16 17 21 12 16 7"></polyline>
+              <line x1="21" y1="12" x2="9" y2="12"></line>
             </svg>
-            <span style={{
-              color: '#6366F1',
-              fontSize: isMobile ? '0.8rem' : '0.9rem',
-              fontWeight: '600',
-              fontFamily: 'Helvetica, Arial, sans-serif'
-            }}>
-              Docs
-            </span>
-            <div style={{
-              backgroundColor: '#EC4899',
-              color: 'white',
-              fontSize: '0.7rem',
-              fontWeight: '700',
-              padding: '0.1rem 0.4rem',
-              borderRadius: '10px',
-              marginLeft: '0.3rem',
-              border: 'none'
-            }}>
-              NEW
-            </div>
-          </motion.div>
-
-          {/* Chatbot */}
-          <motion.div
-            onClick={() => router.push('/chatbot')}
-            onMouseEnter={() => handleLinkHover("link", "VIEW", "chatbot")}
-            onMouseLeave={handleLinkLeave}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              cursor: 'none',
-              padding: '0.4rem 0.8rem',
-              borderRadius: '25px',
-              backgroundColor: isDarkMode ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.95)',
-              border: isDarkMode ? '1px solid rgba(255,255,255,0.2)' : '1px solid rgba(255,255,255,0.3)',
-              transition: 'all 0.3s ease'
-            }}
-            whileHover={{ 
-              backgroundColor: 'white',
-              scale: 1.05,
-              border: '1px solid white'
-            }}
-          >
-            <svg 
-              width={isMobile ? "18" : "20"} 
-              height={isMobile ? "18" : "20"} 
-              viewBox="0 0 24 24" 
-              fill="none" 
-              stroke="#6366F1"
-              strokeWidth="2"
-            >
-              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-              <line x1="8" y1="7" x2="16" y2="7"/>
-              <line x1="8" y1="11" x2="12" y2="11"/>
-            </svg>
-            <span style={{
-              color: '#6366F1',
-              fontSize: isMobile ? '0.8rem' : '0.9rem',
-              fontWeight: '600',
-              fontFamily: 'Helvetica, Arial, sans-serif'
-            }}>
-              Chatbot
-            </span>
-            <div style={{
-              backgroundColor: '#EC4899',
-              color: 'white',
-              fontSize: '0.7rem',
-              fontWeight: '700',
-              padding: '0.1rem 0.4rem',
-              borderRadius: '10px',
-              marginLeft: '0.3rem',
-              border: 'none'
-            }}>
-              NEW
-            </div>
-          </motion.div>
-
-          {/* Update */}
-          <motion.div
-            onClick={() => router.push('/update')}
-            onMouseEnter={() => handleLinkHover("link", "VIEW", "update")}
-            onMouseLeave={handleLinkLeave}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              cursor: 'none',
-              padding: '0.4rem 0.8rem',
-              borderRadius: '25px',
-              backgroundColor: isDarkMode ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.95)',
-              border: isDarkMode ? '1px solid rgba(255,255,255,0.2)' : '1px solid rgba(255,255,255,0.3)',
-              transition: 'all 0.3s ease'
-            }}
-            whileHover={{ 
-              backgroundColor: 'white',
-              scale: 1.05,
-              border: '1px solid white'
-            }}
-          >
-            <svg 
-              width={isMobile ? "18" : "20"} 
-              height={isMobile ? "18" : "20"} 
-              viewBox="0 0 24 24" 
-              fill="none" 
-              stroke="#6366F1"
-              strokeWidth="2"
-            >
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-              <polyline points="14,2 14,8 20,8"/>
-              <line x1="16" y1="13" x2="8" y2="13"/>
-              <line x1="16" y1="17" x2="8" y2="17"/>
-              <polyline points="10,9 9,9 8,9"/>
-            </svg>
-            <span style={{
-              color: '#6366F1',
-              fontSize: isMobile ? '0.8rem' : '0.9rem',
-              fontWeight: '600',
-              fontFamily: 'Helvetica, Arial, sans-serif'
-            }}>
-              Update
-            </span>
-            <div style={{
-              backgroundColor: '#EC4899',
-              color: 'white',
-              fontSize: '0.7rem',
-              fontWeight: '700',
-              padding: '0.1rem 0.4rem',
-              borderRadius: '10px',
-              marginLeft: '0.3rem',
-              border: 'none'
-            }}>
-              NEW
-            </div>
-          </motion.div>
-
-          {/* Timeline */}
-          <motion.div
-            onClick={() => router.push('/timeline')}
-            onMouseEnter={() => handleLinkHover("link", "VIEW", "timeline")}
-            onMouseLeave={handleLinkLeave}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              cursor: 'none',
-              padding: '0.4rem 0.8rem',
-              borderRadius: '25px',
-              backgroundColor: isDarkMode ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.95)',
-              border: isDarkMode ? '1px solid rgba(255,255,255,0.2)' : '1px solid rgba(255,255,255,0.3)',
-              transition: 'all 0.3s ease'
-            }}
-            whileHover={{ 
-              backgroundColor: 'white',
-              scale: 1.05,
-              border: '1px solid white'
-            }}
-          >
-            <svg 
-              width={isMobile ? "18" : "20"} 
-              height={isMobile ? "18" : "20"} 
-              viewBox="0 0 24 24" 
-              fill="none" 
-              stroke="#6366F1"
-              strokeWidth="2"
-            >
-              <polyline points="1 4 1 10 7 10"/>
-              <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>
-              <line x1="12" y1="7" x2="12" y2="13"/>
-              <line x1="16" y1="11" x2="12" y2="7"/>
-            </svg>
-            <span style={{
-              color: '#6366F1',
-              fontSize: isMobile ? '0.8rem' : '0.9rem',
-              fontWeight: '600',
-              fontFamily: 'Helvetica, Arial, sans-serif'
-            }}>
-              Timeline
-            </span>
-            <div style={{
-              backgroundColor: '#EC4899',
-              color: 'white',
-              fontSize: '0.7rem',
-              fontWeight: '700',
-              padding: '0.1rem 0.4rem',
-              borderRadius: '10px',
-              marginLeft: '0.3rem',
-              border: 'none'
-            }}>
-              NEW
-            </div>
-          </motion.div>
+            Logout
+          </motion.button>
         </div>
       </div>
 
-      {/* Header Section */}
-      <div 
-        ref={headerRef}
-        style={{
-          position: 'fixed',
-          top: isMobile ? '3.5rem' : '4.5rem',
-          left: 0,
-          width: '100%',
-          padding: isMobile ? '1rem' : '2rem',
+      {/* Main Content */}
+      <div style={{
+        display: 'flex',
+        height: 'calc(100vh - 80px)'
+      }}>
+        {/* Left Panel - Conversations List */}
+        <div style={{
+          width: '400px',
+          backgroundColor: '#111',
+          borderRight: '1px solid #333',
           display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          zIndex: 100,
-          boxSizing: 'border-box',
-          opacity: 1
-        }}
-      >
-        {/* Teks "MENURU" dengan animasi loading hanya di bagian NURU */}
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.8, delay: 0.5 }}
-        >
+          flexDirection: 'column'
+        }}>
+          {/* Tabs */}
           <div style={{
-            fontSize: isMobile ? '1.5rem' : '2.5rem',
-            fontWeight: '300',
-            fontFamily: 'Helvetica, Arial, sans-serif',
-            margin: 0,
-            letterSpacing: '2px',
-            lineHeight: 1,
-            textTransform: 'uppercase',
-            color: isDarkMode ? 'white' : 'black',
-            minHeight: isMobile ? '1.8rem' : '2.8rem',
             display: 'flex',
-            alignItems: 'center',
-            transition: 'color 0.5s ease'
+            borderBottom: '1px solid #333',
+            backgroundColor: '#151515'
           }}>
-            ME
-            <AnimatePresence mode="wait">
-              {isLoading ? (
-                <motion.span
-                  key={loadingText}
-                  initial={{ opacity: 0, y: 5 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -5 }}
-                  transition={{ duration: 0.3 }}
+            {[
+              { id: 'all', label: 'All', count: stats.total },
+              { id: 'unreplied', label: 'Unreplied', count: stats.unreplied },
+              { id: 'replied', label: 'Replied', count: stats.replied }
+            ].map(tab => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                style={{
+                  flex: 1,
+                  padding: '1rem',
+                  backgroundColor: activeTab === tab.id ? '#222' : 'transparent',
+                  color: activeTab === tab.id ? 'white' : '#888',
+                  border: 'none',
+                  fontSize: '0.9rem',
+                  fontWeight: '500',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.5rem',
+                  borderBottom: activeTab === tab.id ? '2px solid #2563eb' : 'none'
+                }}
+              >
+                {tab.label}
+                <span style={{
+                  backgroundColor: activeTab === tab.id ? '#2563eb' : '#444',
+                  color: 'white',
+                  padding: '0.1rem 0.5rem',
+                  borderRadius: '10px',
+                  fontSize: '0.8rem'
+                }}>
+                  {tab.count}
+                </span>
+              </button>
+            ))}
+          </div>
+          
+          {/* Search/Filter */}
+          <div style={{ padding: '1rem', borderBottom: '1px solid #333' }}>
+            <div style={{
+              backgroundColor: '#222',
+              borderRadius: '20px',
+              padding: '0.7rem 1rem',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem'
+            }}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+              <input
+                type="text"
+                placeholder="Search conversations..."
+                style={{
+                  backgroundColor: 'transparent',
+                  border: 'none',
+                  color: 'white',
+                  fontSize: '0.9rem',
+                  width: '100%',
+                  outline: 'none'
+                }}
+              />
+            </div>
+          </div>
+          
+          {/* Conversations List */}
+          <div style={{
+            flex: 1,
+            overflowY: 'auto',
+            padding: '0.5rem'
+          }}>
+            {getFilteredConversations().length === 0 ? (
+              <div style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                height: '100%',
+                color: '#444',
+                textAlign: 'center',
+                padding: '2rem'
+              }}>
+                <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>💬</div>
+                <div style={{ fontSize: '1.1rem', marginBottom: '0.5rem' }}>
+                  {activeTab === 'unreplied' ? 'No unreplied conversations' : 
+                   activeTab === 'replied' ? 'No replied conversations' : 
+                   'No conversations yet'}
+                </div>
+                <div style={{ fontSize: '0.9rem', color: '#555' }}>
+                  User messages will appear here
+                </div>
+              </div>
+            ) : (
+              getFilteredConversations().map((conv) => (
+                <motion.div
+                  key={conv.userId}
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  whileHover={{ backgroundColor: '#1a1a1a' }}
+                  onClick={() => handleSelectConversation(conv)}
                   style={{
-                    display: 'inline-block'
+                    backgroundColor: selectedConversation?.userId === conv.userId ? '#1a1a1a' : 'transparent',
+                    border: selectedConversation?.userId === conv.userId ? '1px solid #333' : '1px solid transparent',
+                    borderRadius: '15px',
+                    padding: '1rem',
+                    marginBottom: '0.5rem',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s'
                   }}
                 >
-                  {loadingText}
-                </motion.span>
-              ) : (
-                <motion.span
-                  key="nuru-final"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ duration: 0.5 }}
-                >
-                  NURU
-                </motion.span>
-              )}
-            </AnimatePresence>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flex: 1 }}>
+                      <div style={{
+                        width: '40px',
+                        height: '40px',
+                        borderRadius: '50%',
+                        backgroundColor: conv.hasReply ? '#4CAF50' : '#ef4444',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '0.9rem',
+                        fontWeight: 'bold',
+                        flexShrink: 0
+                      }}>
+                        {conv.userName.charAt(0).toUpperCase()}
+                      </div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ 
+                          display: 'flex', 
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          marginBottom: '0.25rem'
+                        }}>
+                          <div style={{ 
+                            fontSize: '0.95rem', 
+                            fontWeight: '600',
+                            whiteSpace: 'nowrap',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis'
+                          }}>
+                            {conv.userName}
+                          </div>
+                          {conv.unread && (
+                            <div style={{
+                              width: '10px',
+                              height: '10px',
+                              borderRadius: '50%',
+                              backgroundColor: '#2563eb'
+                            }}></div>
+                          )}
+                        </div>
+                        <div style={{ 
+                          fontSize: '0.85rem', 
+                          color: '#aaa',
+                          whiteSpace: 'nowrap',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          marginBottom: '0.25rem'
+                        }}>
+                          {conv.userEmail}
+                        </div>
+                        <div style={{ 
+                          fontSize: '0.85rem', 
+                          color: conv.hasReply ? '#888' : '#ddd',
+                          whiteSpace: 'nowrap',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis'
+                        }}>
+                          {conv.lastMessage.length > 40 ? conv.lastMessage.substring(0, 40) + '...' : conv.lastMessage}
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div style={{ 
+                      fontSize: '0.75rem', 
+                      color: '#666',
+                      textAlign: 'right',
+                      flexShrink: 0,
+                      marginLeft: '0.5rem'
+                    }}>
+                      {formatTime(conv.lastMessageTime)}
+                      <div style={{ 
+                        fontSize: '0.7rem', 
+                        color: conv.hasReply ? '#4CAF50' : '#ef4444',
+                        marginTop: '0.25rem'
+                      }}>
+                        {conv.hasReply ? 'Replied' : 'Waiting'}
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div style={{ 
+                    display: 'flex', 
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    marginTop: '0.75rem',
+                    fontSize: '0.75rem',
+                    color: '#666'
+                  }}>
+                    <div>
+                      Messages: <span style={{ color: '#888', fontWeight: '500' }}>{conv.messageCount}</span>
+                    </div>
+                    <div>
+                      {conv.hasReply ? (
+                        <span style={{ color: '#4CAF50', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                          </svg>
+                          Replied
+                        </span>
+                      ) : (
+                        <span style={{ color: '#ef4444', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="8" x2="12" y2="12"></line>
+                            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                          </svg>
+                          Needs reply
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </motion.div>
+              ))
+            )}
           </div>
-        </motion.div>
+        </div>
 
-        {/* Right Side Buttons */}
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: isMobile ? '0.8rem' : '1rem'
-        }}>
-          {/* Color Mode Toggle Button */}
-          <motion.button
-            onClick={toggleColorMode}
-            onMouseEnter={() => handleLinkHover("link", "VIEW", "theme")}
-            onMouseLeave={handleLinkLeave}
-            style={{
-              padding: isMobile ? '0.4rem 0.8rem' : '0.6rem 1rem',
-              fontSize: isMobile ? '0.8rem' : '1rem',
-              fontWeight: '600',
-              color: 'white',
-              backgroundColor: 'transparent',
-              border: `1px solid ${isDarkMode ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.3)'}`,
-              borderRadius: '50px',
-              cursor: 'none',
-              fontFamily: 'Helvetica, Arial, sans-serif',
-              backdropFilter: 'blur(10px)',
-              whiteSpace: 'nowrap',
+        {/* Right Panel - Chat Area */}
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+          {selectedConversation ? (
+            <>
+              {/* Chat Header */}
+              <div style={{
+                backgroundColor: '#111',
+                borderBottom: '1px solid #333',
+                padding: '1.5rem',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                  <div style={{
+                    width: '50px',
+                    height: '50px',
+                    borderRadius: '50%',
+                    backgroundColor: selectedConversation.hasReply ? '#4CAF50' : '#ef4444',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '1.2rem',
+                    fontWeight: 'bold'
+                  }}>
+                    {selectedConversation.userName.charAt(0).toUpperCase()}
+                  </div>
+                  <div>
+                    <div style={{ fontSize: '1.2rem', fontWeight: '600' }}>
+                      {selectedConversation.userName}
+                    </div>
+                    <div style={{ fontSize: '0.9rem', color: '#888' }}>
+                      {selectedConversation.userEmail}
+                    </div>
+                  </div>
+                </div>
+                
+                <div style={{ 
+                  fontSize: '0.9rem', 
+                  color: selectedConversation.hasReply ? '#4CAF50' : '#ef4444',
+                  backgroundColor: '#222',
+                  padding: '0.5rem 1rem',
+                  borderRadius: '20px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem'
+                }}>
+                  {selectedConversation.hasReply ? (
+                    <>
+                      <div style={{
+                        width: '8px',
+                        height: '8px',
+                        borderRadius: '50%',
+                        backgroundColor: '#4CAF50'
+                      }}></div>
+                      Replied • {selectedConversation.messageCount} messages
+                    </>
+                  ) : (
+                    <>
+                      <div style={{
+                        width: '8px',
+                        height: '8px',
+                        borderRadius: '50%',
+                        backgroundColor: '#ef4444'
+                      }}></div>
+                      Waiting for reply • {selectedConversation.messageCount} messages
+                    </>
+                  )}
+                </div>
+              </div>
+              
+              {/* Messages Area */}
+              <div style={{
+                flex: 1,
+                overflowY: 'auto',
+                padding: '1.5rem',
+                backgroundColor: '#0a0a0a'
+              }}>
+                {messages.length === 0 ? (
+                  <div style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    height: '100%',
+                    color: '#444',
+                    textAlign: 'center'
+                  }}>
+                    <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>📨</div>
+                    <div style={{ fontSize: '1.1rem', marginBottom: '0.5rem' }}>
+                      Loading conversation...
+                    </div>
+                  </div>
+                ) : (
+                  messages.map((msg) => (
+                    <motion.div
+                      key={msg.id}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      style={{
+                        marginBottom: '1rem',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: msg.senderId === CHATBOT_ID ? 'flex-end' : 'flex-start'
+                      }}
+                    >
+                      <div style={{
+                        maxWidth: '70%',
+                        backgroundColor: msg.senderId === CHATBOT_ID ? '#2563eb' : '#222',
+                        padding: '0.8rem 1.2rem',
+                        borderRadius: '18px',
+                        borderTopLeftRadius: msg.senderId === CHATBOT_ID ? '18px' : '5px',
+                        borderTopRightRadius: msg.senderId === CHATBOT_ID ? '5px' : '18px'
+                      }}>
+                        <div style={{ fontSize: '0.95rem', marginBottom: '0.5rem' }}>
+                          {msg.text}
+                        </div>
+                        <div style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          fontSize: '0.75rem',
+                          color: msg.senderId === CHATBOT_ID ? 'rgba(255,255,255,0.8)' : '#888'
+                        }}>
+                          <div>
+                            <strong>{msg.senderId === CHATBOT_ID ? 'You (Admin)' : selectedConversation.userName}</strong>
+                          </div>
+                          <div>
+                            {formatTime(msg.timestamp)}
+                          </div>
+                        </div>
+                      </div>
+                    </motion.div>
+                  ))
+                )}
+              </div>
+              
+              {/* Reply Input */}
+              <div style={{
+                backgroundColor: '#111',
+                borderTop: '1px solid #333',
+                padding: '1.5rem'
+              }}>
+                <div style={{ 
+                  fontSize: '0.9rem', 
+                  color: '#888',
+                  marginBottom: '0.5rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem'
+                }}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                  </svg>
+                  Reply as {CHATBOT_NAME}
+                </div>
+                <div style={{
+                  display: 'flex',
+                  gap: '1rem',
+                  alignItems: 'flex-end'
+                }}>
+                  <div style={{
+                    flex: 1,
+                    backgroundColor: '#222',
+                    borderRadius: '20px',
+                    padding: '1rem 1.5rem',
+                    border: '2px solid #444',
+                    minHeight: '60px',
+                    display: 'flex',
+                    alignItems: 'center'
+                  }}>
+                    <textarea
+                      value={replyText}
+                      onChange={(e) => setReplyText(e.target.value)}
+                      placeholder={`Type your reply to ${selectedConversation.userName}...`}
+                      style={{
+                        width: '100%',
+                        backgroundColor: 'transparent',
+                        border: 'none',
+                        color: 'white',
+                        fontSize: '1rem',
+                        fontFamily: 'inherit',
+                        resize: 'none',
+                        outline: 'none',
+                        maxHeight: '150px',
+                        lineHeight: '1.5'
+                      }}
+                      rows="2"
+                    />
+                  </div>
+                  <motion.button
+                    whileHover={{ scale: 1.05, backgroundColor: '#1d4ed8' }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={handleSendReply}
+                    disabled={!replyText.trim()}
+                    style={{
+                      backgroundColor: replyText.trim() ? '#2563eb' : '#333',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '20px',
+                      padding: '1rem 2rem',
+                      fontSize: '1rem',
+                      fontWeight: '500',
+                      cursor: replyText.trim() ? 'pointer' : 'not-allowed',
+                      opacity: replyText.trim() ? 1 : 0.6,
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.5rem'
+                    }}
+                  >
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <line x1="22" y1="2" x2="11" y2="13"></line>
+                      <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                    </svg>
+                    Send Reply
+                  </motion.button>
+                </div>
+              </div>
+            </>
+          ) : (
+            /* Empty State - No conversation selected */
+            <div style={{
               display: 'flex',
+              flexDirection: 'column',
               alignItems: 'center',
-              gap: isMobile ? '0.3rem' : '0.5rem',
-              margin: 0,
-              transition: 'all 0.3s ease',
-              boxShadow: '0 4px 15px rgba(0,0,0,0.1)'
-            }}
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1, duration: 0.6 }}
-            whileHover={{ 
-              backgroundColor: isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.2)',
-              scale: 1.05,
-              border: `1px solid ${isDarkMode ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.5)'}`,
-              transition: { duration: 0.2 }
-            }}
-            whileTap={{ scale: 0.95 }}
-          >
-            <motion.div
-              animate={{ rotate: isDarkMode ? 0 : 180 }}
-              transition={{ duration: 0.5 }}
-            >
-              {isDarkMode ? '☀️' : '🌙'}
-            </motion.div>
-            {isMobile ? '' : (isDarkMode ? 'LIGHT' : 'DARK')}
-          </motion.button>
-
-          {/* Sign In Button */}
-          <motion.button
-            onClick={() => router.push('/signin')}
-            onMouseEnter={() => handleLinkHover("link", "VIEW", "signin")}
-            onMouseLeave={handleLinkLeave}
-            style={{
-              padding: isMobile ? '0.4rem 1rem' : '0.6rem 1.5rem',
-              fontSize: isMobile ? '0.9rem' : '1.5rem',
-              fontWeight: '600',
-              color: 'white',
-              backgroundColor: 'transparent',
-              border: `1px solid ${isDarkMode ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.3)'}`,
-              borderRadius: '50px',
-              cursor: 'none',
-              fontFamily: 'Helvetica, Arial, sans-serif',
-              backdropFilter: 'blur(10px)',
-              whiteSpace: 'nowrap',
-              display: 'flex',
-              alignItems: 'center',
-              gap: isMobile ? '0.3rem' : '0.5rem',
-              margin: 0,
-              maxWidth: isMobile ? '120px' : 'none',
-              transition: 'all 0.3s ease',
-              boxShadow: '0 4px 15px rgba(0,0,0,0.1)'
-            }}
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1.2, duration: 0.6 }}
-            whileHover={{ 
-              backgroundColor: isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.2)',
-              scale: 1.05,
-              border: `1px solid ${isDarkMode ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.5)'}`,
-              transition: { duration: 0.2 }
-            }}
-            whileTap={{ scale: 0.95 }}
-          >
-            <svg 
-              width={isMobile ? "18" : "30"} 
-              height={isMobile ? "18" : "30"} 
-              viewBox="0 0 24 24" 
-              fill="none" 
-              stroke="currentColor" 
-              strokeWidth="2"
-            >
-              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-              <circle cx="12" cy="7" r="4"/>
-            </svg>
-            {isMobile ? 'SIGN IN' : 'SIGN IN'}
-          </motion.button>
+              justifyContent: 'center',
+              height: '100%',
+              color: '#444',
+              textAlign: 'center',
+              padding: '2rem'
+            }}>
+              <div style={{ fontSize: '5rem', marginBottom: '1.5rem' }}>👑</div>
+              <div style={{ fontSize: '1.5rem', marginBottom: '0.5rem', color: '#666' }}>
+                Admin Dashboard
+              </div>
+              <div style={{ fontSize: '1rem', color: '#555', maxWidth: '500px', lineHeight: '1.6' }}>
+                Select a conversation from the left panel to view messages and reply to users.
+                <br />
+                You can see all user conversations and respond as <strong>{CHATBOT_NAME}</strong>.
+              </div>
+              <div style={{
+                backgroundColor: '#111',
+                padding: '1.5rem',
+                borderRadius: '15px',
+                marginTop: '2rem',
+                textAlign: 'left',
+                maxWidth: '500px',
+                border: '1px solid #333'
+              }}>
+                <div style={{ fontSize: '0.9rem', color: '#888', marginBottom: '0.5rem' }}>Quick Stats:</div>
+                <div style={{ display: 'flex', gap: '2rem' }}>
+                  <div>
+                    <div style={{ fontSize: '2rem', fontWeight: '600' }}>{stats.total}</div>
+                    <div style={{ fontSize: '0.9rem', color: '#666' }}>Total Conversations</div>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: '2rem', fontWeight: '600', color: '#ef4444' }}>{stats.unreplied}</div>
+                    <div style={{ fontSize: '0.9rem', color: '#666' }}>Needs Reply</div>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: '2rem', fontWeight: '600', color: '#4CAF50' }}>{stats.replied}</div>
+                    <div style={{ fontSize: '0.9rem', color: '#666' }}>Replied</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Deskripsi MENURU di Body Halaman Utama - DIBUAT HILANG SAAT SCROLL */}
-      <motion.div
-        ref={descriptionRef}
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: showDescription ? 1 : 0, y: showDescription ? 0 : -20 }}
-        transition={{ duration: 0.5 }}
-        style={{
-          position: 'absolute',
-          top: isMobile ? '8rem' : '12rem',
-          left: isMobile ? '1rem' : '2rem',
-          width: isMobile ? 'calc(100% - 2rem)' : '800px',
-          maxWidth: '800px',
-          textAlign: 'left',
-          marginBottom: '2rem',
-          zIndex: 20,
-          pointerEvents: showDescription ? 'auto' : 'none'
-        }}
-      >
-        <p style={{
-          color: isDarkMode ? 'white' : 'black',
-          fontSize: isMobile ? '1.8rem' : '3.5rem',
-          fontWeight: '400',
-          fontFamily: 'HelveticaNowDisplay, Arial, sans-serif',
-          lineHeight: 1.1,
-          margin: 0,
-          marginBottom: isMobile ? '1.5rem' : '2rem',
-          transition: 'color 0.5s ease',
-          wordWrap: 'break-word',
-          overflowWrap: 'break-word'
-        }}>
-          Menuru is a branding personal journal life with a experiences of self about happy, sad, angry, etc.
-        </p>
-
-        {/* Foto di bawah teks deskripsi */}
-        <div style={{
-          width: isMobile ? 'calc(100% - 1rem)' : '650px', // Lebar sedikit lebih kecil
-          marginLeft: isMobile ? '0.5rem' : '1.5rem', // Geser ke kiri sedikit
-          overflow: 'hidden',
-          borderRadius: '15px',
-          boxShadow: '0 15px 40px rgba(0,0,0,0.4)',
-          border: `2px solid ${isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}`,
-          marginTop: '1rem' // Jarak dari teks
-        }}>
-          <img 
-            src="images/5.jpg" 
-            alt="Menuru Visual"
-            style={{
-              width: '100%',
-              height: 'auto',
-              display: 'block',
-              objectFit: 'cover',
-              borderRadius: '13px'
-            }}
-            onError={(e) => {
-              console.error("Gambar tidak ditemukan:", e);
-              e.currentTarget.style.backgroundColor = isDarkMode ? '#333' : '#eee';
-              e.currentTarget.style.display = 'flex';
-              e.currentTarget.style.alignItems = 'center';
-              e.currentTarget.style.justifyContent = 'center';
-              e.currentTarget.style.color = isDarkMode ? '#fff' : '#000';
-              e.currentTarget.style.height = '400px';
-              e.currentTarget.innerHTML = '<div style="padding: 2rem; text-align: center;">Image: 5.jpg</div>';
-            }}
-          />
-        </div>
-      </motion.div>
-
-      {/* Content tambahan untuk membuat halaman lebih panjang */}
-      <div style={{
-        height: '150vh',
-        width: '100%',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginTop: isMobile ? '90vh' : '80vh', // Disesuaikan agar ada jarak dengan foto
-        zIndex: 10,
-        position: 'relative'
-      }}>
-        <motion.p
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          transition={{ duration: 0.8 }}
-          style={{
-            color: isDarkMode ? 'white' : 'black',
-            fontSize: isMobile ? '1.5rem' : '2rem',
-            fontWeight: '300',
-            textAlign: 'center',
-            maxWidth: '600px',
-            padding: '0 2rem'
-          }}
-        >
-          More content coming soon...
-        </motion.p>
-      </div>
+      {/* Add CSS for scrollbar */}
+      <style jsx>{`
+        ::-webkit-scrollbar {
+          width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+          background: #222;
+          border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+          background: #444;
+          border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+          background: #555;
+        }
+      `}</style>
     </div>
   );
 }
