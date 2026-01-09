@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { initializeApp, getApps } from "firebase/app";
 import { 
   getAuth, 
   signInWithPopup, 
@@ -36,10 +37,21 @@ const firebaseConfig = {
   measurementId: "G-8LMP7F4BE9"
 };
 
-// Inisialisasi Firebase
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
+let app = null;
+let auth = null;
+let db = null;
+
+if (typeof window !== "undefined") {
+  app = getApps().length === 0
+    ? initializeApp(firebaseConfig)
+    : getApps()[0];
+
+  auth = getAuth(app);
+  db = getFirestore(app);
+}
+
+
+
 
 // Provider untuk berbagai platform
 const googleProvider = new GoogleAuthProvider();
@@ -1330,4 +1342,5 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
     </>
   );
 }
+
 
