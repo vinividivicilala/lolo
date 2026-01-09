@@ -3,7 +3,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { initializeApp } from 'firebase/app';
+import { initializeApp, getApps, getApp } from 'firebase/app';
 import { 
   getFirestore, 
   collection, 
@@ -11,9 +11,7 @@ import {
   query, 
   orderBy, 
   onSnapshot, 
-  serverTimestamp, 
-  doc, 
-  getDoc 
+  serverTimestamp
 } from 'firebase/firestore';
 import { getAuth, onAuthStateChanged, signOut } from 'firebase/auth';
 
@@ -29,7 +27,8 @@ const firebaseConfig = {
   measurementId: "G-8LMP7F4BE9"
 };
 
-const app = initializeApp(firebaseConfig);
+// Inisialisasi Firebase dengan pengecekan duplicate
+const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 
