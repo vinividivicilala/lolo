@@ -3,6 +3,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
+
+// Firebase imports - TIDAK diinisialisasi di tingkat modul
+import { initializeApp, getApps } from 'firebase/app';
 import { 
   getFirestore, 
   collection, 
@@ -14,7 +17,7 @@ import {
 } from 'firebase/firestore';
 import { getAuth, onAuthStateChanged, signOut } from 'firebase/auth';
 
-// Konfigurasi Firebase
+// Konfigurasi Firebase (hanya objek, tidak diinisialisasi)
 const firebaseConfig = {
   apiKey: "AIzaSyD_htQZ1TClnXKZGRJ4izbMQ02y6V3aNAQ",
   authDomain: "wawa44-58d1e.firebaseapp.com",
@@ -25,11 +28,6 @@ const firebaseConfig = {
   appId: "1:836899520599:web:b346e4370ecfa9bb89e312",
   measurementId: "G-8LMP7F4BE9"
 };
-
-// Inisialisasi Firebase dengan pengecekan duplicate
-const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
-const db = getFirestore(app);
-const auth = getAuth(app);
 
 const CHATBOT_EMAIL = 'faridardiansyah061@gmail.com';
 const CHATBOT_NAME = 'Menuru (Chatbot)';
@@ -42,64 +40,94 @@ export default function ChatbotPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [user, setUser] = useState(null);
   const [isInitializing, setIsInitializing] = useState(true);
+  const [isClient, setIsClient] = useState(false); // State untuk cek client/server
   const messagesEndRef = useRef(null);
 
-  // Inisialisasi user
+  // Deteksi client side
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      if (firebaseUser) {
-        const userData = {
-          uid: firebaseUser.uid,
-          email: firebaseUser.email,
-          name: firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'Guest',
-          isAnonymous: firebaseUser.isAnonymous
-        };
-        
-        setUser(userData);
-        loadChatHistory(firebaseUser.uid);
-        
-        // Kirim welcome message dari chatbot
-        setTimeout(() => {
-          sendChatbotMessage(
-            `Halo ${userData.name}! 👋 Saya ${CHATBOT_NAME}, asisten chatbot dari Note. Ada yang bisa saya bantu?`, 
-            firebaseUser.uid
-          );
-        }, 1500);
-        
-      } else {
-        // Jika belum login, redirect ke sign-in
-        router.push('/sign-in');
-      }
-      
-      setIsInitializing(false);
-    });
+    setIsClient(true);
+  }, []);
 
-    return () => unsubscribe();
-  }, [router]);
+  // Inisialisasi Firebase HANYA di client side
+  useEffect(() => {
+    if (!isClient) return; // Jangan jalankan di server
+
+    try {
+      // Inisialisasi Firebase
+      let app;
+      if (getApps().length === 0) {
+        app = initializeApp(firebaseConfig);
+      } else {
+        app = getApps()[0];
+      }
+
+      // Setup auth listener
+      const auth = getAuth(app);
+      const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+        if (firebaseUser) {
+          const userData = {
+            uid: firebaseUser.uid,
+            email: firebaseUser.email,
+            name: firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'Guest',
+            isAnonymous: firebaseUser.isAnonymous
+          };
+          
+          setUser(userData);
+          loadChatHistory(firebaseUser.uid);
+          
+          // Kirim welcome message dari chatbot
+          setTimeout(() => {
+            sendChatbotMessage(
+              `Halo ${userData.name}! 👋 Saya ${CHATBOT_NAME}, asisten chatbot dari Note. Ada yang bisa saya bantu?`, 
+              firebaseUser.uid
+            );
+          }, 1500);
+          
+        } else {
+          // Jika belum login, redirect ke sign-in
+          router.push('/sign-in');
+        }
+        
+        setIsInitializing(false);
+      });
+
+      return () => unsubscribe();
+    } catch (error) {
+      console.error('Firebase initialization error:', error);
+      setIsInitializing(false);
+    }
+  }, [isClient, router]);
 
   const loadChatHistory = (userId) => {
-    const messagesRef = collection(db, 'chats');
-    const q = query(
-      messagesRef,
-      orderBy('timestamp', 'asc')
-    );
-    
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const userMessages = snapshot.docs
-        .map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        }))
-        .filter(msg => 
-          msg.receiverId === userId || 
-          msg.senderId === userId ||
-          (msg.receiverId === 'all' && msg.senderId === CHATBOT_ID)
-        );
-      
-      setMessages(userMessages);
-    });
+    if (!isClient) return;
 
-    return unsubscribe;
+    try {
+      const db = getFirestore();
+      const messagesRef = collection(db, 'chats');
+      const q = query(
+        messagesRef,
+        orderBy('timestamp', 'asc')
+      );
+      
+      const unsubscribe = onSnapshot(q, (snapshot) => {
+        const userMessages = snapshot.docs
+          .map(doc => ({
+            id: doc.id,
+            ...doc.data()
+          }))
+          .filter(msg => 
+            msg.receiverId === userId || 
+            msg.senderId === userId ||
+            (msg.receiverId === 'all' && msg.senderId === CHATBOT_ID)
+          );
+        
+        setMessages(userMessages);
+      });
+
+      return unsubscribe;
+    } catch (error) {
+      console.error('Error loading chat history:', error);
+    }
   };
 
   const scrollToBottom = () => {
@@ -107,11 +135,16 @@ export default function ChatbotPage() {
   };
 
   useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
+    if (isClient) {
+      scrollToBottom();
+    }
+  }, [messages, isClient]);
 
   const saveMessageToFirestore = async (messageData) => {
+    if (!isClient) return null;
+
     try {
+      const db = getFirestore();
       const docRef = await addDoc(collection(db, 'chats'), {
         ...messageData,
         timestamp: serverTimestamp(),
@@ -125,6 +158,8 @@ export default function ChatbotPage() {
   };
 
   const sendChatbotMessage = async (text, receiverId) => {
+    if (!isClient || !user) return;
+
     const chatbotMessage = {
       text: text,
       senderId: CHATBOT_ID,
@@ -140,7 +175,7 @@ export default function ChatbotPage() {
   };
 
   const handleSendMessage = async () => {
-    if (inputText.trim() === '' || !user) return;
+    if (inputText.trim() === '' || !user || !isClient) return;
 
     const userMessage = {
       text: inputText,
@@ -180,7 +215,10 @@ export default function ChatbotPage() {
   };
 
   const handleLogout = async () => {
+    if (!isClient) return;
+
     try {
+      const auth = getAuth();
       await signOut(auth);
       router.push('/sign-in');
     } catch (error) {
@@ -201,7 +239,8 @@ export default function ChatbotPage() {
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
 
-  if (isInitializing) {
+  // Loading state untuk server side rendering
+  if (!isClient || isInitializing) {
     return (
       <div style={styles.loadingContainer}>
         <motion.div
@@ -237,19 +276,19 @@ export default function ChatbotPage() {
           <div style={styles.userInfo}>
             <div style={{
               ...styles.userAvatar,
-              backgroundColor: user.isAnonymous ? '#666' : '#2563eb'
+              backgroundColor: user?.isAnonymous ? '#666' : '#2563eb'
             }}>
-              {user.name.charAt(0).toUpperCase()}
+              {user?.name?.charAt(0).toUpperCase() || 'G'}
             </div>
             <div>
-              <div style={styles.userName}>{user.name}</div>
+              <div style={styles.userName}>{user?.name || 'Guest'}</div>
               <div style={styles.userStatus}>
                 <div style={{
                   ...styles.statusDot,
-                  backgroundColor: user.isAnonymous ? '#888' : '#4CAF50'
+                  backgroundColor: user?.isAnonymous ? '#888' : '#4CAF50'
                 }}></div>
-                {user.isAnonymous ? 'Guest Mode' : 'Signed In'}
-                {!user.isAnonymous && (
+                {user?.isAnonymous ? 'Guest Mode' : 'Signed In'}
+                {user && !user.isAnonymous && (
                   <span style={styles.userEmail}> {user.email}</span>
                 )}
               </div>
@@ -257,7 +296,7 @@ export default function ChatbotPage() {
           </div>
 
           {/* TOMBOL ADMIN - Hanya tampil untuk faridardiansyah061@gmail.com */}
-          {user.email === CHATBOT_EMAIL && (
+          {user?.email === CHATBOT_EMAIL && (
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
@@ -341,12 +380,12 @@ export default function ChatbotPage() {
               </svg>
               SYSTEM STATUS
             </div>
-            <div style={styles.statusConnected}>
+            <div style={statusConnected}>
               <div style={styles.connectedDot}></div>
               Connected to Firebase
             </div>
             <div style={styles.statusDetails}>
-              Messages: {messages.length} • User: {user.uid.substring(0, 8)}...
+              Messages: {messages.length} • User: {user?.uid?.substring(0, 8) || 'unknown'}...
             </div>
           </div>
         </motion.div>
@@ -403,7 +442,7 @@ export default function ChatbotPage() {
                       backgroundColor: message.senderId === CHATBOT_ID ? '#2a2a2a' : '#2563eb',
                       borderColor: message.senderId === CHATBOT_ID ? '#3a3a3a' : '#1d4ed8'
                     }}>
-                      {message.senderId === CHATBOT_ID ? 'C' : user.name.charAt(0).toUpperCase()}
+                      {message.senderId === CHATBOT_ID ? 'C' : user?.name?.charAt(0).toUpperCase() || 'U'}
                     </div>
                     <div style={{
                       ...styles.messageContent,
@@ -414,7 +453,7 @@ export default function ChatbotPage() {
                       <div style={styles.messageText}>{message.text}</div>
                       <div style={styles.messageMeta}>
                         <div>
-                          <strong>{message.senderId === CHATBOT_ID ? CHATBOT_NAME : user.name}</strong>
+                          <strong>{message.senderId === CHATBOT_ID ? CHATBOT_NAME : user?.name || 'User'}</strong>
                           {message.senderId === CHATBOT_ID && (
                             <span style={styles.chatbotEmail}> ({CHATBOT_EMAIL})</span>
                           )}
@@ -494,7 +533,7 @@ export default function ChatbotPage() {
   );
 }
 
-// Styles object untuk menjaga kode rapi
+// Styles object (sama seperti sebelumnya)
 const styles = {
   container: {
     minHeight: '100vh',
@@ -583,7 +622,6 @@ const styles = {
     color: '#666',
     marginLeft: '0.5rem'
   },
-  // TOMBOL ADMIN STYLES
   adminButton: {
     backgroundColor: '#10b981',
     color: 'white',
@@ -917,4 +955,3 @@ const styles = {
     height: '60px'
   }
 };
-
