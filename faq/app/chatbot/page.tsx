@@ -4,8 +4,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { initializeApp } from 'firebase/app';
-import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp } from 'firebase/firestore';
-import { getAuth, signInAnonymously } from 'firebase/auth';
+import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, doc, setDoc, getDoc } from 'firebase/firestore';
+import { getAuth, signInAnonymously, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from 'firebase/auth';
 
 // Konfigurasi Firebase
 const firebaseConfig = {
@@ -24,8 +24,9 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 
-// Email target untuk notifikasi
-const TARGET_EMAIL = 'faridardiansyah061@gmail.com';
+// Email chatbot (Akun Anda)
+const CHATBOT_EMAIL = 'faridardiansyah061@gmail.com';
+const CHATBOT_NAME = 'Menuru (Chatbot)';
 
 export default function ChatbotPage() {
   const router = useRouter();
@@ -33,39 +34,67 @@ export default function ChatbotPage() {
   const [inputText, setInputText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [userId, setUserId] = useState('');
-  const [userEmail, setUserEmail] = useState('user@anonymous.com');
+  const [userEmail, setUserEmail] = useState('');
+  const [userName, setUserName] = useState('Guest');
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [loginEmail, setLoginEmail] = useState('');
+  const [loginPassword, setLoginPassword] = useState('');
+  const [showLoginForm, setShowLoginForm] = useState(false);
   const messagesEndRef = useRef(null);
 
-  // Inisialisasi user dan load chat history
+  // Initialize chatbot account on first load
   useEffect(() => {
-    const initFirebase = async () => {
+    const initializeChatbotAccount = async () => {
       try {
-        // Sign in secara anonymous
-        const userCredential = await signInAnonymously(auth);
-        const user = userCredential.user;
-        setUserId(user.uid);
+        // Create or get chatbot user document
+        const chatbotRef = doc(db, 'users', CHATBOT_EMAIL);
+        const chatbotDoc = await getDoc(chatbotRef);
         
-        // Set email anonymous untuk user
-        setUserEmail(`user_${user.uid.substring(0, 8)}@anonymous.com`);
-        
-        // Load chat history dari Firestore
-        loadChatHistory();
-        
-        // Kirim notifikasi awal bahwa user baru bergabung
-        await addDoc(collection(db, 'chat_logs'), {
-          type: 'SYSTEM',
-          message: `User baru bergabung ke chat: ${user.uid}`,
-          userEmail: TARGET_EMAIL,
-          timestamp: serverTimestamp(),
-          userId: user.uid
-        });
-        
+        if (!chatbotDoc.exists()) {
+          await setDoc(chatbotRef, {
+            email: CHATBOT_EMAIL,
+            name: CHATBOT_NAME,
+            role: 'chatbot',
+            createdAt: serverTimestamp(),
+            status: 'online'
+          });
+          console.log('Chatbot account initialized');
+        }
       } catch (error) {
-        console.error('Error initializing Firebase:', error);
+        console.error('Error initializing chatbot:', error);
       }
     };
 
-    initFirebase();
+    initializeChatbotAccount();
+  }, []);
+
+  // Initialize user session
+  useEffect(() => {
+    const initUser = async () => {
+      try {
+        // Try anonymous sign in first
+        const userCredential = await signInAnonymously(auth);
+        const user = userCredential.user;
+        
+        setUserId(user.uid);
+        setUserEmail('anonymous@guest.com');
+        setUserName('Guest');
+        setIsLoggedIn(false);
+        
+        // Load chat history
+        loadChatHistory();
+        
+        // Send welcome message from chatbot
+        setTimeout(() => {
+          sendChatbotMessage(`Halo! Saya ${CHATBOT_NAME}, asisten chatbot dari Note. Ada yang bisa saya bantu?`);
+        }, 1000);
+        
+      } catch (error) {
+        console.error('Error initializing user:', error);
+      }
+    };
+
+    initUser();
   }, []);
 
   const loadChatHistory = () => {
@@ -95,7 +124,8 @@ export default function ChatbotPage() {
     try {
       const docRef = await addDoc(collection(db, 'chats'), {
         ...messageData,
-        timestamp: serverTimestamp()
+        timestamp: serverTimestamp(),
+        read: false
       });
       return docRef.id;
     } catch (error) {
@@ -104,19 +134,27 @@ export default function ChatbotPage() {
     }
   };
 
-  const logToEmail = async (message, type = 'USER_QUERY') => {
-    try {
-      await addDoc(collection(db, 'chat_logs'), {
-        type: type,
-        message: message,
-        userEmail: TARGET_EMAIL,
-        timestamp: serverTimestamp(),
-        userId: userId,
-        userAnonymousEmail: userEmail
-      });
-    } catch (error) {
-      console.error('Error logging to email:', error);
-    }
+  const sendChatbotMessage = async (text) => {
+    const chatbotMessage = {
+      text: text,
+      sender: 'chatbot',
+      senderEmail: CHATBOT_EMAIL,
+      senderName: CHATBOT_NAME,
+      receiverId: userId,
+      receiverEmail: userEmail,
+      timestamp: new Date()
+    };
+
+    await saveMessageToFirestore(chatbotMessage);
+    
+    // Send notification to user
+    await addDoc(collection(db, 'notifications'), {
+      userId: userId,
+      message: `Pesan baru dari ${CHATBOT_NAME}: ${text.substring(0, 50)}...`,
+      type: 'message',
+      timestamp: serverTimestamp(),
+      read: false
+    });
   };
 
   const handleSendMessage = async () => {
@@ -125,56 +163,103 @@ export default function ChatbotPage() {
     const userMessage = {
       text: inputText,
       sender: 'user',
-      userId: userId,
-      userEmail: userEmail,
+      senderId: userId,
+      senderEmail: userEmail,
+      senderName: userName,
+      receiverEmail: CHATBOT_EMAIL,
       timestamp: new Date()
     };
 
-    // Simpan pesan user ke Firestore
+    // Save user message
     await saveMessageToFirestore(userMessage);
     
-    // Log ke email Anda
-    await logToEmail(inputText, 'USER_QUERY');
+    // Save to conversation log
+    await addDoc(collection(db, 'conversations'), {
+      userId: userId,
+      userEmail: userEmail,
+      userName: userName,
+      chatbotEmail: CHATBOT_EMAIL,
+      message: inputText,
+      type: 'user_to_chatbot',
+      timestamp: serverTimestamp()
+    });
     
     setInputText('');
     setIsLoading(true);
 
-    // Simpan pesan loading
-    const loadingMessage = {
-      text: 'Menuru sedang mengetik...',
-      sender: 'bot',
-      userId: userId,
-      timestamp: new Date(),
-      isTyping: true
-    };
-    
-    // Simulasi delay untuk bot response
+    // Simulate chatbot typing delay
     setTimeout(async () => {
-      const botResponses = [
-        `Terima kasih atas pertanyaannya! Sebagai asisten dari Note, saya akan membantu Anda. Pertanyaan ini telah dicatat dan dikirim ke ${TARGET_EMAIL}.`,
-        `Pertanyaan yang bagus! Saya memproses permintaan Anda dan sudah mengirimkannya ke email admin untuk tindak lanjut.`,
-        `Saya memahami pertanyaan Anda. Sebagai chatbot dengan akun user terintegrasi, sistem saya akan mencatat ini di riwayat ${TARGET_EMAIL}.`,
-        `Noted! Pertanyaan Anda sudah tercatat di sistem. Admin akan melihat riwayat ini melalui email ${TARGET_EMAIL}.`,
-        `Terima kasih sudah menghubungi. Saya telah mengirimkan pertanyaan Anda ke akun admin untuk diproses lebih lanjut.`
+      // This is where YOU would respond from faridardiansyah061@gmail.com
+      // For now, using auto-responses
+      const responses = [
+        `Terima kasih pesannya! Saya ${CHATBOT_NAME} (faridardiansyah061@gmail.com) sedang online dan membaca pesan Anda.`,
+        `Pesan diterima! Sebagai akun chatbot dari Note, saya akan membalas pesan Anda segera.`,
+        `Hai ${userName}! Saya mencatat pertanyaan Anda. Mohon tunggu balasan dari akun chatbot.`,
+        `Noted! Pesan Anda sudah sampai ke ${CHATBOT_EMAIL}. Saya sedang memproses permintaan Anda.`,
+        `Pertanyaan yang bagus! Saya akan membalas dari akun chatbot resmi untuk membantu Anda.`
       ];
       
-      const randomResponse = botResponses[Math.floor(Math.random() * botResponses.length)];
-      
-      const botMessage = {
-        text: randomResponse,
-        sender: 'bot',
-        userId: userId,
-        timestamp: new Date()
-      };
-
-      // Simpan response bot ke Firestore
-      await saveMessageToFirestore(botMessage);
-      
-      // Log response ke email
-      await logToEmail(`Bot response: ${randomResponse}`, 'BOT_RESPONSE');
+      const response = responses[Math.floor(Math.random() * responses.length)];
+      await sendChatbotMessage(response);
       
       setIsLoading(false);
     }, 2000);
+  };
+
+  const handleLogin = async () => {
+    try {
+      let userCredential;
+      
+      if (loginEmail && loginPassword) {
+        // Try to login with email/password
+        userCredential = await signInWithEmailAndPassword(auth, loginEmail, loginPassword);
+      } else {
+        // Create new account if doesn't exist
+        userCredential = await createUserWithEmailAndPassword(auth, loginEmail, loginPassword);
+        
+        // Create user document
+        await setDoc(doc(db, 'users', loginEmail), {
+          email: loginEmail,
+          name: loginEmail.split('@')[0],
+          role: 'user',
+          createdAt: serverTimestamp()
+        });
+      }
+      
+      const user = userCredential.user;
+      setUserId(user.uid);
+      setUserEmail(loginEmail);
+      setUserName(loginEmail.split('@')[0]);
+      setIsLoggedIn(true);
+      setShowLoginForm(false);
+      
+      // Send welcome message
+      await sendChatbotMessage(`Selamat datang kembali, ${loginEmail.split('@')[0]}! Senang bisa membantu Anda lagi.`);
+      
+    } catch (error) {
+      console.error('Login error:', error);
+      alert('Login gagal: ' + error.message);
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      
+      // Anonymous sign in
+      const userCredential = await signInAnonymously(auth);
+      const user = userCredential.user;
+      
+      setUserId(user.uid);
+      setUserEmail('anonymous@guest.com');
+      setUserName('Guest');
+      setIsLoggedIn(false);
+      
+      await sendChatbotMessage('Anda sekarang menggunakan akun Guest. Silakan login untuk pengalaman lebih baik.');
+      
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
   };
 
   const handleKeyPress = (e) => {
@@ -203,77 +288,300 @@ export default function ChatbotPage() {
       flexDirection: 'column',
       alignItems: 'center'
     }}>
+      {/* Header */}
       <div style={{
         display: 'flex',
-        justifyContent: 'center',
+        justifyContent: 'space-between',
         alignItems: 'center',
         width: '100%',
-        marginTop: '4rem',
-        marginBottom: '2rem'
+        maxWidth: '1400px',
+        marginBottom: '3rem'
       }}>
-        <motion.h1
-          initial={{ opacity: 0, y: -30 }}
-          animate={{ opacity: 1, y: 0 }}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '1rem'
+        }}>
+          <motion.h1
+            initial={{ opacity: 0, x: -30 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6 }}
+            style={{
+              fontSize: '3.5rem',
+              fontWeight: '300',
+              letterSpacing: '-0.02em',
+              margin: 0
+            }}
+          >
+            chatbot
+          </motion.h1>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.5 }}
+            style={{
+              fontSize: '0.9rem',
+              color: '#666',
+              backgroundColor: '#111',
+              padding: '0.5rem 1rem',
+              borderRadius: '20px',
+              border: '1px solid #333'
+            }}
+          >
+            Two-way Communication System
+          </motion.div>
+        </div>
+
+        {/* User Info Section */}
+        <motion.div
+          initial={{ opacity: 0, x: 30 }}
+          animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.6 }}
           style={{
-            fontSize: '5rem',
-            fontWeight: '300',
-            letterSpacing: '-0.02em',
-            margin: 0,
-            textAlign: 'center'
+            display: 'flex',
+            alignItems: 'center',
+            gap: '1.5rem'
           }}
         >
-          chatbot
-        </motion.h1>
-      </div>
-
-      {/* Profile Section */}
-      <motion.div
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, delay: 0.3 }}
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '1rem',
-          marginBottom: '2rem',
-          width: '100%',
-          maxWidth: '1200px',
-          paddingLeft: '2rem'
-        }}
-      >
-        <div style={{
-          width: '70px',
-          height: '70px',
-          borderRadius: '50%',
-          backgroundColor: '#2a2a2a',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          fontSize: '1.8rem',
-          fontWeight: 'bold',
-          color: '#fff',
-          border: '2px solid #3a3a3a'
-        }}>
-          FP
-        </div>
-        
-        <div style={{
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '0.25rem'
-        }}>
-          <span style={{
-            fontSize: '1.8rem',
-            fontWeight: '400',
-            color: '#fff'
-          }}>
-            Menuru
-          </span>
+          {/* User Profile */}
           <div style={{
             display: 'flex',
             alignItems: 'center',
-            gap: '0.5rem'
+            gap: '1rem',
+            backgroundColor: '#111',
+            padding: '0.75rem 1.5rem',
+            borderRadius: '25px',
+            border: '1px solid #333'
+          }}>
+            <div style={{
+              width: '45px',
+              height: '45px',
+              borderRadius: '50%',
+              backgroundColor: '#2563eb',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '1rem',
+              fontWeight: 'bold',
+              color: '#fff'
+            }}>
+              {userName.charAt(0).toUpperCase()}
+            </div>
+            <div>
+              <div style={{ fontSize: '1rem', fontWeight: '500' }}>
+                {userName}
+              </div>
+              <div style={{ 
+                fontSize: '0.8rem', 
+                color: isLoggedIn ? '#4CAF50' : '#888',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.3rem'
+              }}>
+                <div style={{
+                  width: '6px',
+                  height: '6px',
+                  borderRadius: '50%',
+                  backgroundColor: isLoggedIn ? '#4CAF50' : '#888'
+                }}></div>
+                {isLoggedIn ? 'Logged In' : 'Guest Mode'}
+              </div>
+            </div>
+          </div>
+
+          {/* Login/Logout Button */}
+          {!isLoggedIn ? (
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setShowLoginForm(!showLoginForm)}
+              style={{
+                backgroundColor: '#111',
+                color: 'white',
+                border: '1px solid #333',
+                padding: '0.75rem 1.5rem',
+                borderRadius: '25px',
+                fontSize: '0.9rem',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem'
+              }}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+              </svg>
+              Login
+            </motion.button>
+          ) : (
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={handleLogout}
+              style={{
+                backgroundColor: '#111',
+                color: 'white',
+                border: '1px solid #333',
+                padding: '0.75rem 1.5rem',
+                borderRadius: '25px',
+                fontSize: '0.9rem',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem'
+              }}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                <polyline points="16 17 21 12 16 7"></polyline>
+                <line x1="21" y1="12" x2="9" y2="12"></line>
+              </svg>
+              Logout
+            </motion.button>
+          )}
+        </motion.div>
+      </div>
+
+      {/* Login Form */}
+      {showLoginForm && (
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          style={{
+            backgroundColor: '#111',
+            padding: '2rem',
+            borderRadius: '20px',
+            border: '1px solid #333',
+            width: '100%',
+            maxWidth: '400px',
+            marginBottom: '2rem'
+          }}
+        >
+          <h3 style={{ marginBottom: '1rem', color: '#fff' }}>Login / Register</h3>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <input
+              type="email"
+              placeholder="Email"
+              value={loginEmail}
+              onChange={(e) => setLoginEmail(e.target.value)}
+              style={{
+                backgroundColor: '#222',
+                border: '1px solid #444',
+                color: 'white',
+                padding: '0.75rem 1rem',
+                borderRadius: '10px',
+                fontSize: '0.9rem'
+              }}
+            />
+            <input
+              type="password"
+              placeholder="Password"
+              value={loginPassword}
+              onChange={(e) => setLoginPassword(e.target.value)}
+              style={{
+                backgroundColor: '#222',
+                border: '1px solid #444',
+                color: 'white',
+                padding: '0.75rem 1rem',
+                borderRadius: '10px',
+                fontSize: '0.9rem'
+              }}
+            />
+            <div style={{ display: 'flex', gap: '1rem' }}>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={handleLogin}
+                style={{
+                  flex: 1,
+                  backgroundColor: '#2563eb',
+                  color: 'white',
+                  border: 'none',
+                  padding: '0.75rem',
+                  borderRadius: '10px',
+                  fontSize: '0.9rem',
+                  cursor: 'pointer'
+                }}
+              >
+                Login / Register
+              </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setShowLoginForm(false)}
+                style={{
+                  backgroundColor: '#333',
+                  color: 'white',
+                  border: 'none',
+                  padding: '0.75rem',
+                  borderRadius: '10px',
+                  fontSize: '0.9rem',
+                  cursor: 'pointer'
+                }}
+              >
+                Cancel
+              </motion.button>
+            </div>
+          </div>
+        </motion.div>
+      )}
+
+      {/* Chat Container - VERY LARGE */}
+      <div style={{
+        display: 'flex',
+        width: '100%',
+        maxWidth: '1400px',
+        gap: '2rem',
+        height: '750px' // VERY LARGE
+      }}>
+        {/* Left Panel - Chatbot Profile */}
+        <motion.div
+          initial={{ opacity: 0, x: -30 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+          style={{
+            flex: '0 0 300px',
+            backgroundColor: '#111',
+            borderRadius: '25px',
+            padding: '2rem',
+            border: '1px solid #333',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center'
+          }}
+        >
+          <div style={{
+            width: '120px',
+            height: '120px',
+            borderRadius: '50%',
+            backgroundColor: '#2a2a2a',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '2.5rem',
+            fontWeight: 'bold',
+            color: '#fff',
+            border: '3px solid #3a3a3a',
+            marginBottom: '1.5rem'
+          }}>
+            MB
+          </div>
+          
+          <h2 style={{
+            fontSize: '1.8rem',
+            fontWeight: '400',
+            color: '#fff',
+            marginBottom: '0.5rem'
+          }}>
+            {CHATBOT_NAME}
+          </h2>
+          
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            marginBottom: '1.5rem'
           }}>
             <div style={{
               width: '12px',
@@ -287,320 +595,375 @@ export default function ChatbotPage() {
               color: '#b0b0b0',
               fontWeight: '300'
             }}>
-              Online - Connected to Firebase
+              Online • Chatbot Account
             </span>
           </div>
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 1 }}
-            style={{
-              fontSize: '1rem',
-              color: '#888',
-              marginTop: '0.5rem',
-              fontStyle: 'italic',
-              maxWidth: '600px'
-            }}
-          >
-            Asisten chatbot dari Note - Semua pertanyaan user dikirim ke {TARGET_EMAIL} melalui Firebase
-          </motion.div>
+          
           <div style={{
-            fontSize: '0.8rem',
-            color: '#666',
-            marginTop: '0.25rem'
+            textAlign: 'center',
+            fontSize: '0.9rem',
+            color: '#888',
+            marginBottom: '2rem',
+            lineHeight: '1.5'
           }}>
-            User ID: {userId ? userId.substring(0, 12) + '...' : 'Connecting...'}
+            <div style={{ marginBottom: '0.5rem' }}>
+              <strong>Email:</strong><br />
+              {CHATBOT_EMAIL}
+            </div>
+            <div>
+              <strong>Role:</strong><br />
+              Primary Chatbot Responder
+            </div>
           </div>
-        </div>
-      </motion.div>
+          
+          <div style={{
+            backgroundColor: '#222',
+            padding: '1rem',
+            borderRadius: '15px',
+            width: '100%',
+            marginTop: 'auto'
+          }}>
+            <div style={{
+              fontSize: '0.8rem',
+              color: '#666',
+              marginBottom: '0.5rem'
+            }}>
+              SYSTEM STATUS
+            </div>
+            <div style={{
+              fontSize: '0.9rem',
+              color: '#4CAF50',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem'
+            }}>
+              <div style={{
+                width: '8px',
+                height: '8px',
+                borderRadius: '50%',
+                backgroundColor: '#4CAF50'
+              }}></div>
+              Connected to Firebase
+            </div>
+            <div style={{
+              fontSize: '0.8rem',
+              color: '#888',
+              marginTop: '0.5rem'
+            }}>
+              All messages will be responded from this account
+            </div>
+          </div>
+        </motion.div>
 
-      {/* Chat Container - DIPERBESAR */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.5 }}
-        style={{
-          width: '100%',
-          maxWidth: '1200px',
-          height: '650px', // DIPERBESAR
-          margin: '1rem auto',
-          backgroundColor: '#111',
-          borderRadius: '25px',
-          padding: '2.5rem',
-          border: '1px solid #333',
-          display: 'flex',
-          flexDirection: 'column',
-          boxShadow: '0 10px 30px rgba(0, 0, 0, 0.5)'
-        }}
-      >
-        {/* Messages Area - DIPERBESAR */}
-        <div style={{
-          flex: 1,
-          overflowY: 'auto',
-          marginBottom: '1.5rem',
-          paddingRight: '1rem'
-        }}>
-          {messages.length === 0 ? (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              style={{
+        {/* Right Panel - Chat Messages */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.4 }}
+          style={{
+            flex: 1,
+            backgroundColor: '#111',
+            borderRadius: '25px',
+            padding: '2rem',
+            border: '1px solid #333',
+            display: 'flex',
+            flexDirection: 'column'
+          }}
+        >
+          {/* Messages Header */}
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: '2rem',
+            paddingBottom: '1rem',
+            borderBottom: '1px solid #333'
+          }}>
+            <div style={{ fontSize: '1.2rem', fontWeight: '500' }}>
+              Conversation with {CHATBOT_NAME}
+            </div>
+            <div style={{
+              fontSize: '0.8rem',
+              color: '#888',
+              backgroundColor: '#222',
+              padding: '0.5rem 1rem',
+              borderRadius: '15px'
+            }}>
+              {messages.length} messages
+            </div>
+          </div>
+
+          {/* Messages Area - VERY LARGE */}
+          <div style={{
+            flex: 1,
+            overflowY: 'auto',
+            marginBottom: '1.5rem',
+            paddingRight: '1rem',
+            backgroundColor: '#0a0a0a',
+            borderRadius: '15px',
+            padding: '1.5rem'
+          }}>
+            {messages.length === 0 ? (
+              <div style={{
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
                 justifyContent: 'center',
                 height: '100%',
-                color: '#666',
+                color: '#444',
                 textAlign: 'center'
-              }}
-            >
-              <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>👋</div>
-              <div style={{ fontSize: '1.2rem', marginBottom: '0.5rem' }}>
-                Selamat datang di Chatbot Menuru
+              }}>
+                <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>💬</div>
+                <div style={{ fontSize: '1.2rem', marginBottom: '0.5rem' }}>
+                  Start a conversation
+                </div>
+                <div style={{ fontSize: '0.9rem' }}>
+                  Send a message to {CHATBOT_NAME}
+                </div>
               </div>
-              <div style={{ fontSize: '0.9rem' }}>
-                Mulai percakapan dengan mengetik pesan di bawah
-              </div>
-            </motion.div>
-          ) : (
-            messages.map((message) => (
+            ) : (
+              messages.map((message) => (
+                <motion.div
+                  key={message.id}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  style={{
+                    marginBottom: '1.5rem',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: message.sender === 'user' ? 'flex-end' : 'flex-start'
+                  }}
+                >
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'flex-start',
+                    gap: '1rem',
+                    maxWidth: '80%',
+                    flexDirection: message.sender === 'user' ? 'row-reverse' : 'row'
+                  }}>
+                    <div style={{
+                      width: '40px',
+                      height: '40px',
+                      borderRadius: '50%',
+                      backgroundColor: message.sender === 'user' ? '#2563eb' : '#2a2a2a',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '0.9rem',
+                      fontWeight: 'bold',
+                      flexShrink: 0
+                    }}>
+                      {message.sender === 'user' ? 'U' : 'C'}
+                    </div>
+                    <div style={{
+                      backgroundColor: message.sender === 'user' ? '#2563eb' : '#222',
+                      padding: '1rem 1.5rem',
+                      borderRadius: '20px',
+                      borderTopLeftRadius: message.sender === 'user' ? '20px' : '5px',
+                      borderTopRightRadius: message.sender === 'user' ? '5px' : '20px',
+                      boxShadow: '0 4px 15px rgba(0, 0, 0, 0.2)'
+                    }}>
+                      <div style={{ 
+                        fontSize: '1.1rem',
+                        lineHeight: '1.5',
+                        marginBottom: '0.5rem'
+                      }}>
+                        {message.text}
+                      </div>
+                      <div style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        fontSize: '0.75rem',
+                        color: message.sender === 'user' ? 'rgba(255,255,255,0.8)' : '#888'
+                      }}>
+                        <div>
+                          <strong>{message.sender === 'user' ? userName : CHATBOT_NAME}</strong>
+                          <span style={{ margin: '0 0.5rem' }}>•</span>
+                          {message.senderEmail && (
+                            <span>{message.senderEmail}</span>
+                          )}
+                        </div>
+                        <div>
+                          {formatTime(message.timestamp)}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              ))
+            )}
+            
+            {/* Loading Indicator */}
+            {isLoading && (
               <motion.div
-                key={message.id}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
                 style={{
                   display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: message.sender === 'user' ? 'flex-end' : 'flex-start',
+                  alignItems: 'flex-start',
+                  gap: '1rem',
                   marginBottom: '1.5rem'
                 }}
               >
                 <div style={{
+                  width: '40px',
+                  height: '40px',
+                  borderRadius: '50%',
+                  backgroundColor: '#2a2a2a',
                   display: 'flex',
-                  alignItems: 'flex-start',
-                  gap: '0.75rem',
-                  flexDirection: message.sender === 'user' ? 'row-reverse' : 'row'
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '0.9rem',
+                  fontWeight: 'bold',
+                  flexShrink: 0
                 }}>
-                  <div style={{
-                    width: '45px',
-                    height: '45px',
-                    borderRadius: '50%',
-                    backgroundColor: message.sender === 'user' ? '#3a3a3a' : '#2a2a2a',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: '0.9rem',
-                    fontWeight: 'bold',
-                    border: '2px solid #444'
-                  }}>
-                    {message.sender === 'user' ? 'YOU' : 'AI'}
-                  </div>
-                  <div style={{
-                    maxWidth: '75%',
-                    backgroundColor: message.sender === 'user' ? '#2563eb' : '#333',
-                    padding: '1rem 1.25rem',
-                    borderRadius: '20px',
-                    borderTopLeftRadius: message.sender === 'user' ? '20px' : '8px',
-                    borderTopRightRadius: message.sender === 'user' ? '8px' : '20px',
-                    boxShadow: '0 2px 10px rgba(0, 0, 0, 0.2)'
-                  }}>
-                    <div style={{ 
-                      fontSize: '1.05rem', // DIPERBESAR
-                      lineHeight: '1.5',
-                      wordBreak: 'break-word'
-                    }}>
-                      {message.text}
+                  C
+                </div>
+                <div style={{
+                  backgroundColor: '#222',
+                  padding: '1rem 1.5rem',
+                  borderRadius: '20px',
+                  borderTopLeftRadius: '5px'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                      <motion.div
+                        animate={{ scale: [1, 1.3, 1] }}
+                        transition={{ repeat: Infinity, duration: 0.8 }}
+                        style={{
+                          width: '10px',
+                          height: '10px',
+                          borderRadius: '50%',
+                          backgroundColor: '#4CAF50'
+                        }}
+                      />
+                      <motion.div
+                        animate={{ scale: [1, 1.3, 1] }}
+                        transition={{ repeat: Infinity, duration: 0.8, delay: 0.2 }}
+                        style={{
+                          width: '10px',
+                          height: '10px',
+                          borderRadius: '50%',
+                          backgroundColor: '#4CAF50'
+                        }}
+                      />
+                      <motion.div
+                        animate={{ scale: [1, 1.3, 1] }}
+                        transition={{ repeat: Infinity, duration: 0.8, delay: 0.4 }}
+                        style={{
+                          width: '10px',
+                          height: '10px',
+                          borderRadius: '50%',
+                          backgroundColor: '#4CAF50'
+                        }}
+                      />
                     </div>
-                    <div style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      marginTop: '0.75rem'
-                    }}>
-                      <div style={{
-                        fontSize: '0.75rem',
-                        color: '#aaa'
-                      }}>
-                        {message.userEmail ? message.userEmail.substring(0, 20) + '...' : 'Anonymous'}
-                      </div>
-                      <div style={{
-                        fontSize: '0.75rem',
-                        color: '#aaa',
-                        textAlign: 'right'
-                      }}>
-                        {formatTime(message.timestamp)}
-                      </div>
-                    </div>
+                    <span style={{ fontSize: '0.9rem', color: '#aaa' }}>
+                      {CHATBOT_NAME} is typing...
+                    </span>
                   </div>
                 </div>
               </motion.div>
-            ))
-          )}
-          
-          {/* Loading Indicator */}
-          {isLoading && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
+            )}
+            <div ref={messagesEndRef} />
+          </div>
+
+          {/* Input Area - LARGE */}
+          <div style={{
+            display: 'flex',
+            gap: '1rem',
+            alignItems: 'flex-end',
+            borderTop: '1px solid #333',
+            paddingTop: '1.5rem'
+          }}>
+            <div style={{
+              flex: 1,
+              backgroundColor: '#222',
+              borderRadius: '25px',
+              padding: '1rem 1.5rem',
+              border: '2px solid #444',
+              minHeight: '60px',
+              display: 'flex',
+              alignItems: 'center',
+              transition: 'border-color 0.3s'
+            }}>
+              <textarea
+                value={inputText}
+                onChange={(e) => setInputText(e.target.value)}
+                onKeyPress={handleKeyPress}
+                placeholder={`Ketik pesan untuk ${CHATBOT_NAME}...`}
+                style={{
+                  width: '100%',
+                  backgroundColor: 'transparent',
+                  border: 'none',
+                  color: 'white',
+                  fontSize: '1.05rem',
+                  fontFamily: 'inherit',
+                  resize: 'none',
+                  outline: 'none',
+                  maxHeight: '150px',
+                  lineHeight: '1.5'
+                }}
+                rows="2"
+              />
+            </div>
+            <motion.button
+              whileHover={{ scale: 1.1, backgroundColor: '#1d4ed8' }}
+              whileTap={{ scale: 0.9 }}
+              onClick={handleSendMessage}
+              disabled={isLoading || inputText.trim() === ''}
               style={{
-                display: 'flex',
-                alignItems: 'flex-start',
-                gap: '0.75rem',
-                marginBottom: '1.5rem'
-              }}
-            >
-              <div style={{
-                width: '45px',
-                height: '45px',
-                borderRadius: '50%',
-                backgroundColor: '#2a2a2a',
+                backgroundColor: inputText.trim() === '' ? '#333' : '#2563eb',
+                color: 'white',
+                border: 'none',
+                borderRadius: '20px',
+                padding: '1rem 2rem',
+                fontSize: '1rem',
+                fontWeight: '500',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                fontSize: '0.9rem',
-                fontWeight: 'bold',
-                border: '2px solid #444'
-              }}>
-                AI
-              </div>
-              <div style={{
-                backgroundColor: '#333',
-                padding: '1rem 1.25rem',
-                borderRadius: '20px',
-                borderTopLeftRadius: '8px'
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                  <div style={{ display: 'flex', gap: '0.5rem' }}>
-                    <motion.div
-                      animate={{ scale: [1, 1.3, 1] }}
-                      transition={{ repeat: Infinity, duration: 0.8 }}
-                      style={{
-                        width: '10px',
-                        height: '10px',
-                        borderRadius: '50%',
-                        backgroundColor: '#4CAF50'
-                      }}
-                    />
-                    <motion.div
-                      animate={{ scale: [1, 1.3, 1] }}
-                      transition={{ repeat: Infinity, duration: 0.8, delay: 0.2 }}
-                      style={{
-                        width: '10px',
-                        height: '10px',
-                        borderRadius: '50%',
-                        backgroundColor: '#4CAF50'
-                      }}
-                    />
-                    <motion.div
-                      animate={{ scale: [1, 1.3, 1] }}
-                      transition={{ repeat: Infinity, duration: 0.8, delay: 0.4 }}
-                      style={{
-                        width: '10px',
-                        height: '10px',
-                        borderRadius: '50%',
-                        backgroundColor: '#4CAF50'
-                      }}
-                    />
-                  </div>
-                  <span style={{ fontSize: '0.9rem', color: '#aaa' }}>
-                    Menuru sedang mengetik...
-                  </span>
-                </div>
-              </div>
-            </motion.div>
-          )}
-          <div ref={messagesEndRef} />
-        </div>
-
-        {/* Input Area - DIPERBESAR */}
-        <div style={{
-          display: 'flex',
-          gap: '1.5rem',
-          alignItems: 'flex-end',
-          borderTop: '1px solid #333',
-          paddingTop: '1.5rem'
-        }}>
-          <div style={{
-            flex: 1,
-            backgroundColor: '#222',
-            borderRadius: '30px',
-            padding: '1rem 2rem',
-            border: '2px solid #444',
-            minHeight: '60px',
-            display: 'flex',
-            alignItems: 'center',
-            transition: 'border-color 0.3s'
-          }}>
-            <textarea
-              value={inputText}
-              onChange={(e) => setInputText(e.target.value)}
-              onKeyPress={handleKeyPress}
-              placeholder="Ketik pesan Anda di sini... Semua pesan akan dikirim ke faridardiansyah061@gmail.com"
-              style={{
-                width: '100%',
-                backgroundColor: 'transparent',
-                border: 'none',
-                color: 'white',
-                fontSize: '1.05rem', // DIPERBESAR
-                fontFamily: 'inherit',
-                resize: 'none',
-                outline: 'none',
-                maxHeight: '150px',
-                lineHeight: '1.5'
+                gap: '0.5rem',
+                cursor: inputText.trim() === '' ? 'not-allowed' : 'pointer',
+                opacity: inputText.trim() === '' ? 0.6 : 1,
+                transition: 'all 0.3s',
+                height: '60px'
               }}
-              rows="2"
-            />
-          </div>
-          <motion.button
-            whileHover={{ scale: 1.1, backgroundColor: '#1d4ed8' }}
-            whileTap={{ scale: 0.9 }}
-            onClick={handleSendMessage}
-            disabled={isLoading || inputText.trim() === ''}
-            style={{
-              backgroundColor: inputText.trim() === '' ? '#333' : '#2563eb',
-              color: 'white',
-              border: 'none',
-              borderRadius: '50%',
-              width: '60px',
-              height: '60px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              cursor: inputText.trim() === '' ? 'not-allowed' : 'pointer',
-              opacity: inputText.trim() === '' ? 0.6 : 1,
-              transition: 'all 0.3s'
-            }}
-          >
-            <svg 
-              width="24" 
-              height="24" 
-              viewBox="0 0 24 24" 
-              fill="none" 
-              stroke="currentColor" 
-              strokeWidth="3"
             >
-              <line x1="22" y1="2" x2="11" y2="13"></line>
-              <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-            </svg>
-          </motion.button>
-        </div>
-      </motion.div>
+              <svg 
+                width="20" 
+                height="20" 
+                viewBox="0 0 24 24" 
+                fill="none" 
+                stroke="currentColor" 
+                strokeWidth="2"
+              >
+                <line x1="22" y1="2" x2="11" y2="13"></line>
+                <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+              </svg>
+              Send
+            </motion.button>
+          </div>
+        </motion.div>
+      </div>
 
-      {/* Firebase Status */}
+      {/* Footer Info */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 1 }}
         style={{
-          marginTop: '1.5rem',
+          marginTop: '2rem',
           padding: '1rem 2rem',
           backgroundColor: '#111',
           borderRadius: '15px',
           border: '1px solid #333',
           fontSize: '0.9rem',
-          color: '#888',
+          color: '#666',
           textAlign: 'center',
-          maxWidth: '1200px'
+          maxWidth: '1400px',
+          width: '100%'
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
@@ -610,8 +973,10 @@ export default function ChatbotPage() {
             borderRadius: '50%',
             backgroundColor: '#4CAF50'
           }}></div>
-          <span>Firebase Connected • Semua percakapan tersimpan di cloud • Email target: </span>
-          <span style={{ color: '#2563eb', fontWeight: '500' }}>{TARGET_EMAIL}</span>
+          <span>Two-Way Chat System • Chatbot Account: </span>
+          <span style={{ color: '#2563eb', fontWeight: '500' }}>{CHATBOT_EMAIL}</span>
+          <span style={{ margin: '0 1rem' }}>•</span>
+          <span>User: {userEmail} ({isLoggedIn ? 'Logged In' : 'Guest'})</span>
         </div>
       </motion.div>
 
