@@ -3,7 +3,6 @@ import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { initializeApp } from "firebase/app";
 import { 
   getAuth, 
   createUserWithEmailAndPassword,
@@ -490,3 +489,4 @@ const buttonStyle: React.CSSProperties = {
   marginBottom: '2rem',
   transition: 'all 0.3s ease'
 };
+
