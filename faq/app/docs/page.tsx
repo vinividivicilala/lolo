@@ -3,31 +3,15 @@
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-
-// Register GSAP plugins
-if (typeof window !== 'undefined') {
-  gsap.registerPlugin(ScrollTrigger);
-}
 
 export default function DocsPage() {
   const router = useRouter();
   const [isMobile, setIsMobile] = useState(false);
-  const [isDarkMode, setIsDarkMode] = useState(true);
+  const [activeSection, setActiveSection] = useState("pembuka");
   const [cursorType, setCursorType] = useState("default");
   const [cursorText, setCursorText] = useState("");
-  const [hoveredLink, setHoveredLink] = useState("");
-  const [activeSection, setActiveSection] = useState("pembuka");
-  const [expandedSections, setExpandedSections] = useState({
-    pendahuluan: true,
-    note: false,
-    konsep: false,
-    implementasi: false,
-    referensi: false
-  });
   const cursorRef = useRef<HTMLDivElement>(null);
-  const contentRef = useRef<HTMLDivElement>(null);
+  const isDarkMode = true; // Selalu dark mode
 
   useEffect(() => {
     const checkMobile = () => {
@@ -40,176 +24,115 @@ export default function DocsPage() {
     // Custom cursor animation
     const moveCursor = (e: MouseEvent) => {
       if (cursorRef.current) {
-        gsap.to(cursorRef.current, {
-          x: e.clientX,
-          y: e.clientY,
-          duration: 0.1,
-          ease: "power2.out"
-        });
+        cursorRef.current.style.left = `${e.clientX}px`;
+        cursorRef.current.style.top = `${e.clientY}px`;
       }
     };
 
     document.addEventListener('mousemove', moveCursor);
 
-    // GSAP animation for content
-    if (contentRef.current) {
-      gsap.from(contentRef.current, {
-        opacity: 0,
-        y: 30,
-        duration: 0.8,
-        delay: 0.3,
-        ease: "power3.out"
-      });
-    }
-
     return () => {
       window.removeEventListener('resize', checkMobile);
       document.removeEventListener('mousemove', moveCursor);
-      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
     };
   }, []);
 
   // Handler untuk cursor hover
-  const handleLinkHover = (type: string, text: string = "", linkName: string = "") => {
+  const handleLinkHover = (type: string, text: string = "") => {
     setCursorType(type);
     setCursorText(text);
-    setHoveredLink(linkName);
   };
 
   const handleLinkLeave = () => {
     setCursorType("default");
     setCursorText("");
-    setHoveredLink("");
   };
 
-  // Toggle expand section
-  const toggleSection = (section: string) => {
-    setExpandedSections(prev => ({
-      ...prev,
-      [section]: !prev[section as keyof typeof prev]
-    }));
-  };
-
-  // Navigasi item
-  const navItems = [
+  // Data navigasi
+  const navSections = [
     {
       id: "pendahuluan",
       title: "PENDAHULUAN",
-      subsections: [
-        { id: "pembuka", title: "Pembuka" },
-        { id: "salam", title: "Salam" },
-        { id: "tujuan", title: "Tujuan" }
+      items: [
+        { id: "pembuka", title: "Pembuka", number: "01" },
+        { id: "salam", title: "Salam", number: "02" },
+        { id: "tujuan", title: "Tujuan", number: "03" }
       ]
     },
     {
       id: "note",
-      title: "CATATAN PENTING",
-      subsections: [
-        { id: "penggunaan", title: "Penggunaan" },
-        { id: "batasan", title: "Batasan" },
-        { id: "keamanan", title: "Keamanan" }
+      title: "CATATAN",
+      items: [
+        { id: "penggunaan", title: "Penggunaan", number: "04" },
+        { id: "batasan", title: "Batasan", number: "05" },
+        { id: "keamanan", title: "Keamanan", number: "06" }
       ]
     },
     {
       id: "konsep",
-      title: "KONSEP DASAR",
-      subsections: [
-        { id: "arsitektur", title: "Arsitektur" },
-        { id: "prinsip", title: "Prinsip Desain" },
-        { id: "komponen", title: "Komponen Utama" }
+      title: "KONSEP",
+      items: [
+        { id: "arsitektur", title: "Arsitektur", number: "07" },
+        { id: "prinsip", title: "Prinsip", number: "08" },
+        { id: "komponen", title: "Komponen", number: "09" }
       ]
     },
     {
       id: "implementasi",
       title: "IMPLEMENTASI",
-      subsections: [
-        { id: "instalasi", title: "Instalasi" },
-        { id: "konfigurasi", title: "Konfigurasi" },
-        { id: "deploy", title: "Deployment" }
-      ]
-    },
-    {
-      id: "referensi",
-      title: "REFERENSI",
-      subsections: [
-        { id: "api", title: "API Reference" },
-        { id: "contoh", title: "Contoh Kode" },
-        { id: "troubleshoot", title: "Troubleshooting" }
+      items: [
+        { id: "instalasi", title: "Instalasi", number: "10" },
+        { id: "konfigurasi", title: "Konfigurasi", number: "11" },
+        { id: "deploy", title: "Deployment", number: "12" }
       ]
     }
   ];
 
-  // Konten untuk setiap section
+  // Data konten
   const contentData = {
     pembuka: {
       title: "Pembuka",
-      description: "Selamat datang di dokumentasi MENURU. Platform ini dirancang untuk memberikan pengalaman yang optimal dalam membaca, menulis, dan mengeksplorasi konten digital.",
-      content: "Dokumentasi ini akan memandu Anda melalui semua fitur dan kemampuan yang tersedia dalam platform MENURU. Kami berkomitmen untuk memberikan pengalaman pengguna yang seamless dan intuitif."
+      number: "01",
+      description: "Selamat datang di dokumentasi MENURU. Platform ini dirancang untuk memberikan pengalaman optimal dalam membaca, menulis, dan mengeksplorasi konten digital."
     },
     salam: {
       title: "Salam",
-      description: "Halo! Kami sangat senang Anda memilih MENURU sebagai platform untuk kebutuhan digital Anda.",
-      content: "Kami percaya bahwa setiap orang berhak mendapatkan akses ke alat yang powerful dan mudah digunakan. Dengan MENURU, kami berusaha untuk mendemokratisasi akses ke teknologi canggih."
+      number: "02",
+      description: "Halo! Kami senang Anda memilih MENURU sebagai platform digital Anda. Kami berkomitmen memberikan pengalaman terbaik."
     },
     tujuan: {
       title: "Tujuan",
-      description: "Tujuan utama dari platform MENURU adalah menyediakan lingkungan yang aman, efisien, dan menyenangkan untuk berinteraksi dengan konten digital.",
-      content: "Platform ini dibangun dengan beberapa tujuan utama: 1) Aksesibilitas, 2) Keamanan, 3) Performa tinggi, 4) User experience yang optimal."
+      number: "03",
+      description: "Menyediakan lingkungan yang aman, efisien, dan menyenangkan untuk berinteraksi dengan konten digital."
     },
     penggunaan: {
-      title: "Penggunaan Platform",
-      description: "Panduan lengkap tentang cara menggunakan platform MENURU secara efektif.",
-      content: "Platform ini dirancang untuk intuitif. Namun, untuk memaksimalkan pengalaman, pastikan untuk membaca panduan ini dengan seksama."
+      title: "Penggunaan",
+      number: "04",
+      description: "Panduan lengkap tentang cara menggunakan platform MENURU secara efektif dan maksimal."
     },
     batasan: {
-      title: "Batasan Penggunaan",
-      description: "Informasi mengenai batasan teknis dan kebijakan penggunaan platform.",
-      content: "Setiap platform memiliki batasan teknis. Kami terus bekerja untuk meningkatkan kapasitas dan kemampuan platform."
+      title: "Batasan",
+      number: "05",
+      description: "Informasi mengenai batasan teknis dan kebijakan penggunaan platform."
     },
     keamanan: {
-      title: "Keamanan Data",
-      description: "Kebijakan dan praktik keamanan yang kami terapkan untuk melindungi data Anda.",
-      content: "Keamanan adalah prioritas utama. Semua data dienkripsi end-to-end dan kami mengikuti praktik terbaik industri."
+      title: "Keamanan",
+      number: "06",
+      description: "Kebijakan dan praktik keamanan yang kami terapkan untuk melindungi data Anda."
     }
-  };
-
-  // Warna cursor
-  const getCursorColors = () => {
-    if (cursorType === "link") {
-      return {
-        dotColor: '#6366F1',
-        textColor: 'white'
-      };
-    }
-    
-    return {
-      dotColor: '#EC4899',
-      textColor: 'white'
-    };
-  };
-
-  const cursorColors = getCursorColors();
-
-  // Toggle color mode
-  const toggleColorMode = () => {
-    setIsDarkMode(!isDarkMode);
   };
 
   return (
     <div style={{
       minHeight: '100vh',
-      backgroundColor: isDarkMode ? '#0a0a0a' : '#f8f9fa',
+      backgroundColor: 'black',
       margin: 0,
       padding: 0,
       width: '100%',
       display: 'flex',
-      flexDirection: 'column',
-      position: 'relative',
-      overflow: 'hidden',
-      fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, sans-serif',
-      WebkitFontSmoothing: 'antialiased',
-      MozOsxFontSmoothing: 'grayscale',
-      cursor: 'none'
+      fontFamily: 'Helvetica, Arial, sans-serif',
+      cursor: 'none',
+      position: 'relative'
     }}>
 
       {/* Custom Cursor */}
@@ -217,12 +140,10 @@ export default function DocsPage() {
         ref={cursorRef}
         style={{
           position: 'fixed',
-          top: 0,
-          left: 0,
-          width: cursorType === "link" ? '120px' : '20px',
-          height: cursorType === "link" ? '50px' : '20px',
-          backgroundColor: cursorColors.dotColor,
-          borderRadius: cursorType === "link" ? '25px' : '50%',
+          width: cursorType === "link" ? '100px' : '20px',
+          height: cursorType === "link" ? '40px' : '20px',
+          backgroundColor: cursorType === "link" ? '#6366F1' : '#EC4899',
+          borderRadius: cursorType === "link" ? '20px' : '50%',
           pointerEvents: 'none',
           zIndex: 9999,
           display: 'flex',
@@ -230,491 +151,384 @@ export default function DocsPage() {
           justifyContent: 'center',
           fontSize: '12px',
           fontWeight: '600',
-          color: cursorColors.textColor,
-          textAlign: 'center',
-          transition: 'all 0.2s ease',
+          color: 'white',
           transform: 'translate(-50%, -50%)',
-          padding: cursorType === "link" ? '0 15px' : '0',
-          boxShadow: '0 2px 10px rgba(0,0,0,0.3)'
+          transition: 'all 0.2s ease'
         }}
       >
         {cursorType === "link" && cursorText}
       </div>
 
-      {/* Top Navigation Bar */}
+      {/* Header */}
       <div style={{
         position: 'fixed',
         top: 0,
         left: 0,
         width: '100%',
-        padding: isMobile ? '1rem' : '1.5rem 2rem',
+        padding: '1.5rem 2rem',
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
         zIndex: 100,
-        backgroundColor: isDarkMode ? 'rgba(10, 10, 10, 0.9)' : 'rgba(248, 249, 250, 0.9)',
-        backdropFilter: 'blur(20px)',
-        borderBottom: `1px solid ${isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}`
+        backgroundColor: 'rgba(0,0,0,0.9)',
+        backdropFilter: 'blur(10px)'
       }}>
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '1rem'
-        }}>
-          <motion.div
-            onClick={() => router.push('/')}
-            onMouseEnter={() => handleLinkHover("link", "HOME", "home")}
-            onMouseLeave={handleLinkLeave}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              cursor: 'none',
-              padding: '0.5rem 1rem',
-              borderRadius: '8px',
-              backgroundColor: isDarkMode ? 'rgba(99, 102, 241, 0.1)' : 'rgba(99, 102, 241, 0.1)',
-              transition: 'all 0.3s ease'
-            }}
-            whileHover={{ 
-              backgroundColor: isDarkMode ? 'rgba(99, 102, 241, 0.2)' : 'rgba(99, 102, 241, 0.2)'
-            }}
-          >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={isDarkMode ? '#6366F1' : '#6366F1'} strokeWidth="2">
-              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-              <polyline points="9 22 9 12 15 12 15 22"/>
-            </svg>
-            <span style={{
-              color: isDarkMode ? '#6366F1' : '#6366F1',
-              fontSize: '0.9rem',
-              fontWeight: '600'
-            }}>
-              Home
-            </span>
-          </motion.div>
-        </div>
+        {/* Home Button */}
+        <motion.div
+          onClick={() => router.push('/')}
+          onMouseEnter={() => handleLinkHover("link", "HOME")}
+          onMouseLeave={handleLinkLeave}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            cursor: 'none'
+          }}
+          whileHover={{ x: 5 }}
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#CCFF00" strokeWidth="2">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+            <polyline points="9 22 9 12 15 12 15 22"/>
+          </svg>
+          <span style={{
+            color: '#CCFF00',
+            fontSize: '1rem',
+            fontWeight: '600'
+          }}>
+            HOME
+          </span>
+        </motion.div>
 
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '1rem'
+        {/* Docs Title */}
+        <h1 style={{
+          color: 'white',
+          fontSize: '1.5rem',
+          fontWeight: '600',
+          margin: 0
         }}>
-          <motion.button
-            onClick={toggleColorMode}
-            onMouseEnter={() => handleLinkHover("link", "THEME", "theme")}
-            onMouseLeave={handleLinkLeave}
-            style={{
-              padding: '0.5rem 1rem',
-              fontSize: '0.9rem',
-              fontWeight: '600',
-              color: 'black',
-              backgroundColor: '#CCFF00',
-              border: 'none',
-              borderRadius: '8px',
-              cursor: 'none',
-              whiteSpace: 'nowrap',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem'
-            }}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            {isDarkMode ? '☀️ LIGHT' : '🌙 DARK'}
-          </motion.button>
-        </div>
+          DOCS
+        </h1>
+
+        {/* Sign In */}
+        <motion.div
+          onClick={() => router.push('/signin')}
+          onMouseEnter={() => handleLinkHover("link", "SIGN IN")}
+          onMouseLeave={handleLinkLeave}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            cursor: 'none',
+            padding: '0.5rem 1rem',
+            backgroundColor: '#CCFF00',
+            borderRadius: '25px'
+          }}
+          whileHover={{ scale: 1.05 }}
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="2">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+            <circle cx="12" cy="7" r="4"/>
+          </svg>
+          <span style={{
+            color: 'black',
+            fontSize: '0.9rem',
+            fontWeight: '600'
+          }}>
+            SIGN IN
+          </span>
+        </motion.div>
       </div>
 
       {/* Main Content */}
       <div style={{
         display: 'flex',
-        flex: 1,
-        paddingTop: isMobile ? '4rem' : '5rem',
-        height: 'calc(100vh - 5rem)',
-        overflow: 'hidden'
+        width: '100%',
+        height: '100vh',
+        paddingTop: '5rem'
       }}>
-        {/* Sidebar Navigation */}
+        {/* Left Space - Kosong */}
         <div style={{
-          width: isMobile ? '100%' : '300px',
-          height: '100%',
-          backgroundColor: isDarkMode ? '#111111' : '#ffffff',
-          borderRight: `1px solid ${isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}`,
-          padding: isMobile ? '1rem' : '2rem',
+          flex: 1,
+          backgroundColor: 'black'
+        }} />
+
+        {/* Middle Content - BESAR */}
+        <div style={{
+          flex: 3,
+          padding: '2rem',
           overflowY: 'auto',
-          display: isMobile ? 'none' : 'block'
+          height: 'calc(100vh - 5rem)'
         }}>
-          <h3 style={{
-            color: isDarkMode ? '#CCFF00' : '#000',
-            fontSize: '1rem',
-            fontWeight: '700',
-            marginBottom: '2rem',
-            textTransform: 'uppercase',
-            letterSpacing: '1px'
-          }}>
-            DAFTAR ISI
-          </h3>
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeSection}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.3 }}
+              style={{
+                maxWidth: '800px',
+                margin: '0 auto'
+              }}
+            >
+              {/* Content Number */}
+              <div style={{
+                color: '#CCFF00',
+                fontSize: '5rem',
+                fontWeight: '800',
+                fontFamily: 'Verdana, sans-serif',
+                lineHeight: 1,
+                marginBottom: '1rem'
+              }}>
+                {contentData[activeSection as keyof typeof contentData]?.number}
+              </div>
 
-          {/* Vertical Line */}
-          <div style={{
-            position: 'absolute',
-            left: '50px',
-            top: '120px',
-            bottom: '2rem',
-            width: '1px',
-            backgroundColor: isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
-            zIndex: 1
-          }} />
+              {/* Content Title */}
+              <h1 style={{
+                color: 'white',
+                fontSize: '3rem',
+                fontWeight: '700',
+                margin: '0 0 2rem 0',
+                lineHeight: 1.2
+              }}>
+                {contentData[activeSection as keyof typeof contentData]?.title}
+              </h1>
 
-          {navItems.map((section, index) => (
-            <div key={section.id} style={{ position: 'relative', marginBottom: '1.5rem' }}>
-              {/* Section Title with Toggle */}
-              <motion.div
-                onClick={() => toggleSection(section.id)}
-                onMouseEnter={() => handleLinkHover("link", "TOGGLE", section.id)}
-                onMouseLeave={handleLinkLeave}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.75rem',
-                  cursor: 'none',
-                  marginBottom: '1rem',
-                  position: 'relative',
-                  zIndex: 2
-                }}
-                whileHover={{ x: 5 }}
-              >
-                {/* Dot on vertical line */}
-                <div style={{
-                  width: '12px',
-                  height: '12px',
-                  borderRadius: '50%',
-                  backgroundColor: expandedSections[section.id as keyof typeof expandedSections] 
-                    ? '#CCFF00' 
-                    : (isDarkMode ? '#444' : '#ccc'),
-                  border: `2px solid ${isDarkMode ? '#222' : '#fff'}`,
-                  position: 'relative',
-                  zIndex: 2
-                }} />
-                
-                <span style={{
-                  color: expandedSections[section.id as keyof typeof expandedSections]
-                    ? '#CCFF00'
-                    : (isDarkMode ? '#888' : '#666'),
-                  fontSize: '0.85rem',
+              {/* Content Description */}
+              <p style={{
+                color: 'rgba(255,255,255,0.8)',
+                fontSize: '1.2rem',
+                lineHeight: 1.6,
+                marginBottom: '3rem'
+              }}>
+                {contentData[activeSection as keyof typeof contentData]?.description}
+              </p>
+
+              {/* Content Details */}
+              <div style={{
+                backgroundColor: 'rgba(255,255,255,0.05)',
+                borderRadius: '10px',
+                padding: '2rem',
+                border: '1px solid rgba(255,255,255,0.1)'
+              }}>
+                <h3 style={{
+                  color: '#CCFF00',
+                  fontSize: '1.5rem',
                   fontWeight: '600',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.5px',
-                  flex: 1
+                  marginBottom: '1rem'
                 }}>
-                  {section.title}
-                </span>
+                  Detail Informasi
+                </h3>
+                
+                <p style={{
+                  color: 'rgba(255,255,255,0.7)',
+                  lineHeight: 1.7,
+                  fontSize: '1.1rem'
+                }}>
+                  Dokumentasi ini menyediakan panduan lengkap untuk menggunakan platform MENURU. 
+                  Setiap section akan menjelaskan aspek tertentu dari platform dengan detail yang 
+                  diperlukan untuk pengguna pemula maupun berpengalaman.
+                </p>
 
-                <motion.div
-                  animate={{ rotate: expandedSections[section.id as keyof typeof expandedSections] ? 180 : 0 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" 
-                    stroke={expandedSections[section.id as keyof typeof expandedSections] ? '#CCFF00' : (isDarkMode ? '#888' : '#666')} 
-                    strokeWidth="2"
-                  >
-                    <polyline points="6 9 12 15 18 9"/>
-                  </svg>
-                </motion.div>
-              </motion.div>
+                <div style={{
+                  display: 'flex',
+                  gap: '1rem',
+                  marginTop: '2rem',
+                  flexWrap: 'wrap'
+                }}>
+                  <div style={{
+                    padding: '1rem',
+                    backgroundColor: 'rgba(204, 255, 0, 0.1)',
+                    borderRadius: '8px',
+                    flex: 1,
+                    minWidth: '200px'
+                  }}>
+                    <div style={{
+                      color: '#CCFF00',
+                      fontSize: '0.9rem',
+                      fontWeight: '600',
+                      marginBottom: '0.5rem'
+                    }}>
+                      VERSI
+                    </div>
+                    <div style={{
+                      color: 'white',
+                      fontSize: '1.2rem',
+                      fontWeight: '600'
+                    }}>
+                      1.0.0
+                    </div>
+                  </div>
 
-              {/* Subsections */}
-              <AnimatePresence>
-                {expandedSections[section.id as keyof typeof expandedSections] && (
-                  <motion.div
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: 'auto', opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    transition={{ duration: 0.3 }}
-                    style={{ overflow: 'hidden' }}
-                  >
-                    {section.subsections.map((subsection, subIndex) => (
-                      <motion.div
-                        key={subsection.id}
-                        onClick={() => setActiveSection(subsection.id)}
-                        onMouseEnter={() => handleLinkHover("link", "VIEW", subsection.id)}
-                        onMouseLeave={handleLinkLeave}
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '1rem',
-                          cursor: 'none',
-                          padding: '0.75rem 0 0.75rem 2rem',
-                          marginLeft: '0.5rem',
-                          borderLeft: `1px solid ${isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}`,
-                          position: 'relative',
-                          backgroundColor: activeSection === subsection.id 
-                            ? (isDarkMode ? 'rgba(204, 255, 0, 0.1)' : 'rgba(204, 255, 0, 0.1)')
-                            : 'transparent'
-                        }}
-                        whileHover={{ 
-                          backgroundColor: isDarkMode ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
-                          paddingLeft: '2.5rem'
-                        }}
-                      >
-                        {/* Sub-dot */}
-                        <div style={{
-                          width: '6px',
-                          height: '6px',
-                          borderRadius: '50%',
-                          backgroundColor: activeSection === subsection.id 
-                            ? '#CCFF00' 
-                            : (isDarkMode ? '#666' : '#999'),
-                          position: 'absolute',
-                          left: '-3px'
-                        }} />
-                        
-                        <span style={{
-                          color: activeSection === subsection.id
-                            ? '#CCFF00'
-                            : (isDarkMode ? '#aaa' : '#555'),
-                          fontSize: '0.9rem',
-                          fontWeight: activeSection === subsection.id ? '600' : '400',
-                          flex: 1
-                        }}>
-                          {subsection.title}
-                        </span>
-
-                        {activeSection === subsection.id && (
-                          <motion.div
-                            initial={{ scale: 0 }}
-                            animate={{ scale: 1 }}
-                            transition={{ duration: 0.3 }}
-                          >
-                            <div style={{
-                              width: '8px',
-                              height: '8px',
-                              borderRadius: '50%',
-                              backgroundColor: '#CCFF00'
-                            }} />
-                          </motion.div>
-                        )}
-                      </motion.div>
-                    ))}
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-          ))}
+                  <div style={{
+                    padding: '1rem',
+                    backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                    borderRadius: '8px',
+                    flex: 1,
+                    minWidth: '200px'
+                  }}>
+                    <div style={{
+                      color: '#6366F1',
+                      fontSize: '0.9rem',
+                      fontWeight: '600',
+                      marginBottom: '0.5rem'
+                    }}>
+                      UPDATE
+                    </div>
+                    <div style={{
+                      color: 'white',
+                      fontSize: '1.2rem',
+                      fontWeight: '600'
+                    }}>
+                      Dec 2024
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </AnimatePresence>
         </div>
 
-        {/* Main Content Area */}
-        <div ref={contentRef} style={{
+        {/* Right Navigation */}
+        <div style={{
           flex: 1,
-          height: '100%',
-          overflowY: 'auto',
-          padding: isMobile ? '1.5rem' : '3rem',
-          backgroundColor: isDarkMode ? '#0a0a0a' : '#f8f9fa'
+          padding: '2rem',
+          backgroundColor: 'rgba(0,0,0,0.8)',
+          borderLeft: '1px solid rgba(255,255,255,0.1)',
+          height: 'calc(100vh - 5rem)',
+          overflowY: 'auto'
         }}>
-          {/* Breadcrumb */}
           <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.5rem',
-            marginBottom: '2rem',
-            color: isDarkMode ? '#888' : '#666',
-            fontSize: '0.9rem'
+            position: 'sticky',
+            top: '2rem'
           }}>
-            <span>Home</span>
-            <span>/</span>
-            <span>Docs</span>
-            <span>/</span>
-            <span style={{ color: isDarkMode ? '#CCFF00' : '#000', fontWeight: '600' }}>
-              {contentData[activeSection as keyof typeof contentData]?.title || 'Documentation'}
-            </span>
-          </div>
-
-          {/* Content */}
-          <motion.div
-            key={activeSection}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4 }}
-          >
-            <h1 style={{
-              color: isDarkMode ? '#fff' : '#000',
-              fontSize: isMobile ? '2.5rem' : '3.5rem',
-              fontWeight: '800',
-              marginBottom: '1rem',
-              lineHeight: 1.2
-            }}>
-              {contentData[activeSection as keyof typeof contentData]?.title}
-            </h1>
-
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '1rem',
+            <h3 style={{
+              color: '#CCFF00',
+              fontSize: '1rem',
+              fontWeight: '600',
+              textTransform: 'uppercase',
+              letterSpacing: '2px',
               marginBottom: '2rem'
             }}>
-              <div style={{
-                width: '60px',
-                height: '1px',
-                backgroundColor: '#CCFF00'
-              }} />
-              <span style={{
+              NAVIGASI
+            </h3>
+
+            {navSections.map((section) => (
+              <div key={section.id} style={{ marginBottom: '2rem' }}>
+                <div style={{
+                  color: 'rgba(255,255,255,0.5)',
+                  fontSize: '0.9rem',
+                  fontWeight: '600',
+                  textTransform: 'uppercase',
+                  letterSpacing: '1px',
+                  marginBottom: '0.5rem'
+                }}>
+                  {section.title}
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+                  {section.items.map((item) => (
+                    <motion.div
+                      key={item.id}
+                      onClick={() => setActiveSection(item.id)}
+                      onMouseEnter={() => handleLinkHover("link", "VIEW")}
+                      onMouseLeave={handleLinkLeave}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '1rem',
+                        padding: '0.8rem',
+                        cursor: 'none',
+                        borderRadius: '8px',
+                        backgroundColor: activeSection === item.id 
+                          ? 'rgba(204, 255, 0, 0.2)' 
+                          : 'transparent',
+                        border: activeSection === item.id 
+                          ? '1px solid #CCFF00' 
+                          : '1px solid transparent'
+                      }}
+                      whileHover={{ 
+                        backgroundColor: 'rgba(255,255,255,0.1)',
+                        border: '1px solid rgba(255,255,255,0.2)'
+                      }}
+                    >
+                      <div style={{
+                        color: activeSection === item.id ? '#CCFF00' : 'rgba(255,255,255,0.5)',
+                        fontSize: '0.9rem',
+                        fontWeight: '600',
+                        fontFamily: 'Verdana, sans-serif',
+                        minWidth: '30px'
+                      }}>
+                        {item.number}
+                      </div>
+                      
+                      <div style={{
+                        color: activeSection === item.id ? 'white' : 'rgba(255,255,255,0.7)',
+                        fontSize: '1rem',
+                        fontWeight: activeSection === item.id ? '600' : '400',
+                        flex: 1
+                      }}>
+                        {item.title}
+                      </div>
+
+                      {activeSection === item.id && (
+                        <motion.div
+                          initial={{ scale: 0 }}
+                          animate={{ scale: 1 }}
+                          transition={{ duration: 0.3 }}
+                        >
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" 
+                            stroke="#CCFF00" strokeWidth="2"
+                          >
+                            <path d="M5 12h14M12 5l7 7-7 7"/>
+                          </svg>
+                        </motion.div>
+                      )}
+                    </motion.div>
+                  ))}
+                </div>
+              </div>
+            ))}
+
+            {/* Quick Links */}
+            <div style={{ marginTop: '3rem' }}>
+              <h3 style={{
                 color: '#CCFF00',
                 fontSize: '0.9rem',
                 fontWeight: '600',
                 textTransform: 'uppercase',
-                letterSpacing: '1px'
-              }}>
-                Section
-              </span>
-            </div>
-
-            <p style={{
-              color: isDarkMode ? '#ccc' : '#555',
-              fontSize: '1.1rem',
-              lineHeight: 1.6,
-              marginBottom: '2rem',
-              maxWidth: '800px'
-            }}>
-              {contentData[activeSection as keyof typeof contentData]?.description}
-            </p>
-
-            <div style={{
-              backgroundColor: isDarkMode ? '#111' : '#fff',
-              borderRadius: '12px',
-              padding: '2rem',
-              border: `1px solid ${isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}`,
-              marginBottom: '2rem'
-            }}>
-              <h3 style={{
-                color: isDarkMode ? '#fff' : '#000',
-                fontSize: '1.25rem',
-                fontWeight: '600',
+                letterSpacing: '2px',
                 marginBottom: '1rem'
               }}>
-                Detail
+                LINK CEPAT
               </h3>
-              
-              <p style={{
-                color: isDarkMode ? '#aaa' : '#666',
-                lineHeight: 1.7
-              }}>
-                {contentData[activeSection as keyof typeof contentData]?.content}
-              </p>
-            </div>
 
-            {/* Navigation Buttons */}
-            <div style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              marginTop: '3rem',
-              paddingTop: '2rem',
-              borderTop: `1px solid ${isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}`
-            }}>
-              <motion.button
-                onMouseEnter={() => handleLinkHover("link", "PREV", "prev")}
-                onMouseLeave={handleLinkLeave}
-                style={{
-                  padding: '0.75rem 1.5rem',
-                  backgroundColor: isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
-                  border: 'none',
-                  borderRadius: '8px',
-                  color: isDarkMode ? '#fff' : '#000',
-                  cursor: 'none',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.5rem',
-                  fontSize: '0.9rem',
-                  fontWeight: '600'
-                }}
-                whileHover={{ 
-                  backgroundColor: isDarkMode ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)'
-                }}
-              >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" 
-                  stroke={isDarkMode ? '#fff' : '#000'} strokeWidth="2"
-                >
-                  <polyline points="15 18 9 12 15 6"/>
-                </svg>
-                Previous
-              </motion.button>
-
-              <motion.button
-                onMouseEnter={() => handleLinkHover("link", "NEXT", "next")}
-                onMouseLeave={handleLinkLeave}
-                style={{
-                  padding: '0.75rem 1.5rem',
-                  backgroundColor: '#CCFF00',
-                  border: 'none',
-                  borderRadius: '8px',
-                  color: '#000',
-                  cursor: 'none',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.5rem',
-                  fontSize: '0.9rem',
-                  fontWeight: '600'
-                }}
-                whileHover={{ 
-                  backgroundColor: '#D4FF33',
-                  scale: 1.05
-                }}
-              >
-                Next
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" 
-                  stroke="#000" strokeWidth="2"
-                >
-                  <polyline points="9 18 15 12 9 6"/>
-                </svg>
-              </motion.button>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                {['Chatbot', 'Update', 'Timeline'].map((item) => (
+                  <motion.div
+                    key={item}
+                    onClick={() => router.push(`/${item.toLowerCase()}`)}
+                    onMouseEnter={() => handleLinkHover("link", "VIEW")}
+                    onMouseLeave={handleLinkLeave}
+                    style={{
+                      color: 'rgba(255,255,255,0.7)',
+                      fontSize: '0.9rem',
+                      padding: '0.5rem',
+                      cursor: 'none',
+                      borderRadius: '4px'
+                    }}
+                    whileHover={{ 
+                      color: 'white',
+                      backgroundColor: 'rgba(255,255,255,0.1)'
+                    }}
+                  >
+                    → {item}
+                  </motion.div>
+                ))}
+              </div>
             </div>
-          </motion.div>
+          </div>
         </div>
-
-        {/* Mobile Sidebar Toggle */}
-        {isMobile && (
-          <motion.button
-            onClick={() => {/* Add mobile sidebar toggle logic */}}
-            style={{
-              position: 'fixed',
-              bottom: '2rem',
-              right: '2rem',
-              width: '60px',
-              height: '60px',
-              borderRadius: '50%',
-              backgroundColor: '#CCFF00',
-              border: 'none',
-              cursor: 'none',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              zIndex: 90,
-              boxShadow: '0 4px 20px rgba(0,0,0,0.3)'
-            }}
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#000" strokeWidth="2">
-              <line x1="3" y1="12" x2="21" y2="12"/>
-              <line x1="3" y1="6" x2="21" y2="6"/>
-              <line x1="3" y1="18" x2="21" y2="18"/>
-            </svg>
-          </motion.button>
-        )}
-      </div>
-
-      {/* Footer */}
-      <div style={{
-        padding: isMobile ? '1.5rem' : '2rem',
-        backgroundColor: isDarkMode ? '#111' : '#fff',
-        borderTop: `1px solid ${isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}`,
-        textAlign: 'center'
-      }}>
-        <p style={{
-          color: isDarkMode ? '#888' : '#666',
-          fontSize: '0.9rem',
-          margin: 0
-        }}>
-          © 2024 MENURU Documentation. All rights reserved.
-        </p>
       </div>
     </div>
   );
