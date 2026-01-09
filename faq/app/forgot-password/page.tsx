@@ -8,7 +8,6 @@ import {
   signInWithEmailAndPassword,
   updatePassword
 } from "firebase/auth";
-import { initializeApp } from "firebase/app";
 
 // Konfigurasi Firebase
 const firebaseConfig = {
@@ -911,3 +910,4 @@ export default function ForgotPasswordPage({ onClose }: ForgotPasswordPageProps)
     </AnimatePresence>
   );
 }
+
