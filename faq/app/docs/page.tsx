@@ -1,13 +1,11 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { useRouter } from "next/navigation";
 
 export default function DocsPage() {
-  const router = useRouter();
-  const [isMobile, setIsMobile] = useState(false);
   const [activeSection, setActiveSection] = useState("pembuka");
+  const [isMobile, setIsMobile] = useState(false);
   
   useEffect(() => {
     const checkMobile = () => {
@@ -22,77 +20,61 @@ export default function DocsPage() {
     };
   }, []);
 
-  // Data navigasi
-  const navSections = [
-    {
-      id: "pendahuluan",
-      title: "PENDAHULUAN",
-      items: [
-        { id: "pembuka", title: "Pembuka", number: "01" },
-        { id: "salam", title: "Salam", number: "02" },
-        { id: "tujuan", title: "Tujuan", number: "03" }
-      ]
-    },
-    {
-      id: "note",
-      title: "CATATAN",
-      items: [
-        { id: "penggunaan", title: "Penggunaan", number: "04" },
-        { id: "batasan", title: "Batasan", number: "05" },
-        { id: "keamanan", title: "Keamanan", number: "06" }
-      ]
-    },
-    {
-      id: "konsep",
-      title: "KONSEP",
-      items: [
-        { id: "arsitektur", title: "Arsitektur", number: "07" },
-        { id: "prinsip", title: "Prinsip", number: "08" },
-        { id: "komponen", title: "Komponen", number: "09" }
-      ]
-    },
-    {
-      id: "implementasi",
-      title: "IMPLEMENTASI",
-      items: [
-        { id: "instalasi", title: "Instalasi", number: "10" },
-        { id: "konfigurasi", title: "Konfigurasi", number: "11" },
-        { id: "deploy", title: "Deployment", number: "12" }
-      ]
-    }
+  // Data navigasi - JUDUL BESAR, JARAK DEKAT
+  const navItems = [
+    { id: "pembuka", title: "PEMBUKA", number: "01" },
+    { id: "salam", title: "SALAM", number: "02" },
+    { id: "tujuan", title: "TUJUAN", number: "03" },
+    { id: "penggunaan", title: "PENGGUNAAN", number: "04" },
+    { id: "batasan", title: "BATASAN", number: "05" },
+    { id: "keamanan", title: "KEAMANAN", number: "06" },
+    { id: "arsitektur", title: "ARSITEKTUR", number: "07" },
+    { id: "prinsip", title: "PRINSIP", number: "08" },
+    { id: "komponen", title: "KOMPONEN", number: "09" },
+    { id: "instalasi", title: "INSTALASI", number: "10" }
   ];
 
   // Data konten
   const contentData = {
     pembuka: {
-      title: "Pembuka",
-      number: "01",
-      content: "Selamat datang di dokumentasi MENURU. Platform ini dirancang untuk memberikan pengalaman optimal dalam membaca, menulis, dan mengeksplorasi konten digital."
+      title: "PEMBUKA",
+      content: "Dokumentasi MENURU menyediakan panduan lengkap untuk memahami dan menggunakan platform. Platform ini dirancang untuk memberikan pengalaman optimal dalam membaca, menulis, dan mengeksplorasi konten digital."
     },
     salam: {
-      title: "Salam",
-      number: "02",
-      content: "Halo! Kami senang Anda memilih MENURU sebagai platform digital Anda. Kami berkomitmen memberikan pengalaman terbaik."
+      title: "SALAM",
+      content: "Selamat datang di dokumentasi MENURU. Kami berkomitmen untuk memberikan pengalaman terbaik dan mendukung kebutuhan digital Anda dengan solusi yang efektif dan efisien."
     },
     tujuan: {
-      title: "Tujuan",
-      number: "03",
-      content: "Menyediakan lingkungan yang aman, efisien, dan menyenangkan untuk berinteraksi dengan konten digital."
+      title: "TUJUAN",
+      content: "Tujuan utama platform adalah menyediakan lingkungan yang aman, efisien, dan menyenangkan untuk berinteraksi dengan berbagai jenis konten digital."
     },
     penggunaan: {
-      title: "Penggunaan",
-      number: "04",
-      content: "Panduan lengkap tentang cara menggunakan platform MENURU secara efektif dan maksimal."
+      title: "PENGGUNAAN",
+      content: "Platform dapat digunakan untuk berbagai keperluan mulai dari membaca konten, menulis dokumen, hingga mengeksplorasi informasi dengan antarmuka yang intuitif."
     },
     batasan: {
-      title: "Batasan",
-      number: "05",
-      content: "Informasi mengenai batasan teknis dan kebijakan penggunaan platform."
+      title: "BATASAN",
+      content: "Setiap platform memiliki batasan teknis tertentu. Batasan ini mencakup kapasitas penyimpanan, jumlah pengguna, dan fitur tertentu yang mungkin tersedia berdasarkan paket yang dipilih."
     },
     keamanan: {
-      title: "Keamanan",
-      number: "06",
-      content: "Kebijakan dan praktik keamanan yang kami terapkan untuk melindungi data Anda."
+      title: "KEAMANAN",
+      content: "Keamanan data pengguna adalah prioritas utama. Semua data dienkripsi dan dilindungi dengan protokol keamanan terbaru untuk memastikan privasi dan keamanan informasi."
+    },
+    arsitektur: {
+      title: "ARSITEKTUR",
+      content: "Arsitektur platform dibangun dengan teknologi modern yang scalable dan reliable. Sistem dirancang untuk menangani berbagai jenis beban kerja dengan performa optimal."
+    },
+    prinsip: {
+      title: "PRINSIP",
+      content: "Platform mengikuti prinsip-prinsip desain yang berfokus pada pengalaman pengguna, aksesibilitas, dan kemudahan penggunaan untuk semua kalangan."
+    },
+    komponen: {
+      title: "KOMPONEN",
+      content: "Terdapat beberapa komponen utama dalam platform termasuk sistem autentikasi, manajemen konten, alat kolaborasi, dan sistem analitik untuk tracking penggunaan."
+    },
+    instalasi: {
+      title: "INSTALASI",
+      content: "Proses instalasi sederhana dan dapat dilakukan dalam beberapa langkah mudah. Platform mendukung berbagai lingkungan deployment sesuai dengan kebutuhan pengguna."
     }
   };
 
@@ -105,188 +87,114 @@ export default function DocsPage() {
       width: '100%',
       display: 'flex',
       fontFamily: 'Helvetica, Arial, sans-serif',
-      color: 'white',
-      position: 'relative',
-      overflow: 'hidden'
+      color: 'white'
     }}>
       
-      {/* Header */}
+      {/* Left Navigation - GESER KANAN LAGI, FONT BESAR */}
       <div style={{
+        width: isMobile ? '150px' : '350px',
+        padding: isMobile ? '1.5rem 1rem' : '3rem 2rem',
         position: 'fixed',
-        top: 0,
         left: 0,
-        width: '100%',
-        padding: '2rem',
-        zIndex: 100,
-        backgroundColor: 'rgba(0,0,0,0.9)',
-        backdropFilter: 'blur(10px)',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center'
-      }}>
-        <div style={{
-          fontSize: '1.5rem',
-          fontWeight: '600'
-        }}>
-          MENURU
-        </div>
-        
-        <div 
-          onClick={() => router.push('/')}
-          style={{
-            fontSize: '1rem',
-            fontWeight: '400',
-            cursor: 'pointer',
-            opacity: 0.7,
-            transition: 'opacity 0.3s'
-          }}
-          onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
-          onMouseLeave={(e) => e.currentTarget.style.opacity = '0.7'}
-        >
-          HOME
-        </div>
-      </div>
-
-      {/* Main Layout */}
-      <div style={{
-        display: 'flex',
-        width: '100%',
+        top: 0,
         height: '100vh',
-        paddingTop: '6rem'
+        overflowY: 'auto',
+        backgroundColor: 'rgba(0,0,0,0.95)',
+        borderRight: '1px solid rgba(255,255,255,0.1)',
+        zIndex: 10
       }}>
-        
-        {/* Left Navigation */}
         <div style={{
-          width: isMobile ? '100px' : '250px',
-          padding: '2rem',
-          borderRight: '1px solid rgba(255,255,255,0.1)',
-          overflowY: 'auto',
-          height: 'calc(100vh - 6rem)'
+          fontSize: isMobile ? '2rem' : '3rem',
+          fontWeight: '800',
+          marginBottom: isMobile ? '1.5rem' : '2rem',
+          lineHeight: 1
         }}>
-          {navSections.map((section) => (
-            <div key={section.id} style={{ marginBottom: '2rem' }}>
-              <div style={{
-                fontSize: isMobile ? '0.8rem' : '0.9rem',
-                fontWeight: '600',
-                marginBottom: '1rem',
-                opacity: 0.5,
-                textTransform: 'uppercase',
-                letterSpacing: '1px'
-              }}>
-                {section.title}
-              </div>
-              
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                {section.items.map((item) => (
-                  <div
-                    key={item.id}
-                    onClick={() => setActiveSection(item.id)}
-                    style={{
-                      fontSize: isMobile ? '0.9rem' : '1rem',
-                      padding: '0.5rem',
-                      cursor: 'pointer',
-                      backgroundColor: activeSection === item.id ? 'rgba(255,255,255,0.1)' : 'transparent',
-                      borderRadius: '4px',
-                      transition: 'background-color 0.3s'
-                    }}
-                    onMouseEnter={(e) => {
-                      if (activeSection !== item.id) {
-                        e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.05)';
-                      }
-                    }}
-                    onMouseLeave={(e) => {
-                      if (activeSection !== item.id) {
-                        e.currentTarget.style.backgroundColor = 'transparent';
-                      }
-                    }}
-                  >
-                    {item.number} {isMobile ? '' : `- ${item.title}`}
-                  </div>
-                ))}
-              </div>
+          DOCS
+        </div>
+        
+        <div style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: isMobile ? '0.3rem' : '0.5rem' // JARAK DEKAT ANTAR ITEM
+        }}>
+          {navItems.map((item) => (
+            <div
+              key={item.id}
+              onClick={() => setActiveSection(item.id)}
+              style={{
+                fontSize: isMobile ? '0.9rem' : '1.2rem',
+                fontWeight: activeSection === item.id ? '700' : '400',
+                cursor: 'pointer',
+                padding: isMobile ? '0.3rem 0' : '0.4rem 0',
+                opacity: activeSection === item.id ? 1 : 0.6,
+                transition: 'all 0.3s ease',
+                letterSpacing: '0.5px'
+              }}
+              onMouseEnter={(e) => {
+                if (activeSection !== item.id) {
+                  e.currentTarget.style.opacity = '0.8';
+                  e.currentTarget.style.transform = 'translateX(5px)';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (activeSection !== item.id) {
+                  e.currentTarget.style.opacity = '0.6';
+                  e.currentTarget.style.transform = 'translateX(0)';
+                }
+              }}
+            >
+              {item.number} {item.title}
             </div>
           ))}
         </div>
+      </div>
 
-        {/* Middle Content */}
-        <div style={{
-          flex: 1,
-          padding: isMobile ? '1.5rem' : '3rem',
-          overflowY: 'auto',
-          height: 'calc(100vh - 6rem)'
-        }}>
-          <motion.div
-            key={activeSection}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.3 }}
-            style={{
-              maxWidth: '800px',
-              margin: '0 auto'
-            }}
-          >
-            {/* Section Number */}
-            <div style={{
-              fontSize: isMobile ? '4rem' : '6rem',
-              fontWeight: '800',
-              lineHeight: 1,
-              marginBottom: '1rem',
-              opacity: 0.2
-            }}>
-              {contentData[activeSection as keyof typeof contentData]?.number}
-            </div>
+      {/* Main Content - GESER KE TENGAH KANAN */}
+      <div style={{
+        marginLeft: isMobile ? '150px' : '350px',
+        flex: 1,
+        padding: isMobile ? '2rem 1.5rem' : '4rem 3rem',
+        minHeight: '100vh'
+      }}>
+        <motion.div
+          key={activeSection}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+        >
+          {/* Judul Besar */}
+          <div style={{
+            fontSize: isMobile ? '5rem' : '8rem',
+            fontWeight: '900',
+            lineHeight: 0.9,
+            marginBottom: isMobile ? '2rem' : '3rem',
+            letterSpacing: '-2px'
+          }}>
+            {contentData[activeSection as keyof typeof contentData]?.title}
+          </div>
 
-            {/* Section Title */}
-            <h1 style={{
-              fontSize: isMobile ? '2.5rem' : '4rem',
-              fontWeight: '600',
-              margin: '0 0 2rem 0',
-              lineHeight: 1.2
-            }}>
-              {contentData[activeSection as keyof typeof contentData]?.title}
-            </h1>
+          {/* Konten - TANPA LINEBOX, TANPA JUDUL TAMBAHAN */}
+          <div style={{
+            fontSize: isMobile ? '1.1rem' : '1.4rem',
+            lineHeight: 1.6,
+            maxWidth: '800px',
+            opacity: 0.9,
+            marginBottom: '3rem'
+          }}>
+            {contentData[activeSection as keyof typeof contentData]?.content}
+          </div>
 
-            {/* Section Content */}
-            <div style={{
-              fontSize: isMobile ? '1rem' : '1.2rem',
-              lineHeight: 1.6,
-              marginBottom: '2rem'
-            }}>
-              {contentData[activeSection as keyof typeof contentData]?.content}
-            </div>
-
-            {/* Additional Content */}
-            <div style={{
-              marginTop: '3rem',
-              padding: '2rem',
-              border: '1px solid rgba(255,255,255,0.1)',
-              borderRadius: '8px'
-            }}>
-              <div style={{
-                fontSize: '1.5rem',
-                fontWeight: '600',
-                marginBottom: '1rem'
-              }}>
-                Informasi Tambahan
-              </div>
-              
-              <div style={{
-                fontSize: '1rem',
-                lineHeight: 1.6,
-                opacity: 0.8
-              }}>
-                Dokumentasi ini akan terus diperbarui sesuai dengan perkembangan platform. 
-                Pastikan untuk selalu memeriksa pembaruan terbaru untuk informasi yang akurat.
-              </div>
-            </div>
-          </motion.div>
-        </div>
-
-        {/* Right Space - Kosong */}
-        <div style={{
-          width: isMobile ? '0' : '200px',
-          borderLeft: '1px solid rgba(255,255,255,0.1)'
-        }} />
+          {/* Additional Info - SANGAT SIMPLE */}
+          <div style={{
+            fontSize: isMobile ? '0.9rem' : '1rem',
+            opacity: 0.5,
+            borderTop: '1px solid rgba(255,255,255,0.1)',
+            paddingTop: '1rem',
+            marginTop: '2rem'
+          }}>
+            Dokumentasi MENURU • Versi 1.0.0
+          </div>
+        </motion.div>
       </div>
     </div>
   );
