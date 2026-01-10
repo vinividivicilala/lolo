@@ -132,7 +132,7 @@ export default function DocsPage() {
         <div style={{
           display: 'flex',
           flexDirection: 'column',
-          gap: '0.4rem',
+          gap: '0.1rem', // Jarak sangat dekat
         }}>
           {navItems.map((item) => (
             <div 
@@ -141,8 +141,10 @@ export default function DocsPage() {
             >
               <div
                 onClick={() => {
-                  setActiveSection(item.id);
-                  if (item.id !== "pembuka") {
+                  if (item.hasDropdown) {
+                    setShowPembukaDropdown(!showPembukaDropdown);
+                  } else {
+                    setActiveSection(item.id);
                     setShowPembukaDropdown(false);
                   }
                 }}
@@ -157,57 +159,36 @@ export default function DocsPage() {
                   lineHeight: '1.2',
                   display: 'flex',
                   alignItems: 'center',
-                  justifyContent: 'space-between'
+                  justifyContent: 'space-between',
+                  backgroundColor: activeSection === item.id ? 'rgba(255,255,255,0.05)' : 'transparent'
                 }}
                 onMouseEnter={(e) => {
                   if (activeSection !== item.id) {
                     e.currentTarget.style.opacity = '0.9';
+                    e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.02)';
                   }
                 }}
                 onMouseLeave={(e) => {
                   if (activeSection !== item.id) {
                     e.currentTarget.style.opacity = '0.6';
+                    e.currentTarget.style.backgroundColor = 'transparent';
                   }
                 }}
               >
                 <span>{item.title}</span>
-                {item.hasDropdown && (
-                  <span 
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setShowPembukaDropdown(!showPembukaDropdown);
-                    }}
-                    style={{
-                      fontSize: '1.2rem',
-                      cursor: 'pointer',
-                      opacity: 0.7,
-                      transition: 'all 0.3s ease',
-                      transform: showPembukaDropdown ? 'rotate(45deg)' : 'rotate(0deg)',
-                      marginLeft: '0.5rem'
-                    }}
-                  >
-                    +
-                  </span>
-                )}
               </div>
               
-              {/* Dropdown Minimalist untuk Pembuka */}
+              {/* Dropdown untuk Pembuka - DESIGN SAMA DENGAN NAVIGASI */}
               {item.id === "pembuka" && showPembukaDropdown && (
                 <motion.div
                   ref={dropdownRef}
-                  initial={{ opacity: 0, y: -10 }}
+                  initial={{ opacity: 0, y: -5 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.2 }}
                   style={{
-                    position: 'absolute',
-                    left: '100%',
-                    top: 0,
-                    backgroundColor: 'rgba(20, 20, 20, 0.95)',
-                    border: '1px solid rgba(255,255,255,0.1)',
-                    borderRadius: '4px',
-                    padding: '0.5rem 0',
-                    minWidth: '120px',
-                    zIndex: 100
+                    position: 'relative',
+                    paddingLeft: '1.5rem',
+                    marginTop: '0.1rem'
                   }}
                 >
                   {item.dropdownItems?.map((dropdownItem, index) => (
@@ -216,22 +197,26 @@ export default function DocsPage() {
                       onClick={() => {
                         // Handle dropdown item click
                         console.log(`${dropdownItem} clicked`);
+                        setActiveSection("pembuka");
                         setShowPembukaDropdown(false);
                       }}
                       style={{
-                        padding: '0.6rem 1rem',
-                        fontSize: '0.9rem',
+                        fontSize: '1rem',
+                        fontWeight: '400',
                         cursor: 'pointer',
-                        opacity: 0.8,
+                        padding: '0.4rem 0.5rem',
+                        opacity: 0.6,
                         transition: 'all 0.2s ease',
-                        whiteSpace: 'nowrap'
+                        letterSpacing: '0.5px',
+                        lineHeight: '1.2',
+                        backgroundColor: 'transparent'
                       }}
                       onMouseEnter={(e) => {
-                        e.currentTarget.style.opacity = '1';
-                        e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.05)';
+                        e.currentTarget.style.opacity = '0.9';
+                        e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.02)';
                       }}
                       onMouseLeave={(e) => {
-                        e.currentTarget.style.opacity = '0.8';
+                        e.currentTarget.style.opacity = '0.6';
                         e.currentTarget.style.backgroundColor = 'transparent';
                       }}
                     >
@@ -249,7 +234,7 @@ export default function DocsPage() {
       <div style={{
         marginLeft: '240px', // Jarak dari navigasi
         flex: 1,
-        padding: '4rem 3rem 4rem 6rem', // Padding kiri lebih besar untuk geser ke kanan
+        padding: '4rem 3rem 4rem 8rem', // Padding kiri lebih besar untuk geser ke kanan
         minHeight: '100vh',
         marginRight: '2rem' // Tambahan margin kanan
       }}>
@@ -262,7 +247,7 @@ export default function DocsPage() {
             lineHeight: 1,
             letterSpacing: '-1px',
             marginBottom: '2rem',
-            paddingLeft: '1rem' // Tambahan padding untuk geser lebih ke kanan
+            paddingLeft: '1.5rem' // Tambahan padding untuk geser lebih ke kanan
           }}>
             {contentData[activeSection as keyof typeof contentData]?.title}
           </div>
@@ -274,7 +259,7 @@ export default function DocsPage() {
             opacity: 0.9,
             fontWeight: '300',
             letterSpacing: '0.2px',
-            paddingLeft: '1rem', // Geser ke kanan
+            paddingLeft: '1.5rem', // Geser ke kanan
             paddingRight: '2rem'
           }}>
             {contentData[activeSection as keyof typeof contentData]?.description}
@@ -286,7 +271,7 @@ export default function DocsPage() {
             paddingTop: '2rem',
             borderTop: '1px solid rgba(255,255,255,0.1)',
             maxWidth: '800px',
-            paddingLeft: '1rem' // Geser ke kanan
+            paddingLeft: '1.5rem' // Geser ke kanan
           }}>
             <div style={{
               fontSize: '0.9rem',
