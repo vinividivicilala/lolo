@@ -7,9 +7,9 @@ import gsap from "gsap";
 export default function DocsPage() {
   const [activeSection, setActiveSection] = useState("pembuka");
   const [isMobile, setIsMobile] = useState(false);
-  const [isPlusOpen, setIsPlusOpen] = useState(false);
+  const [showPembukaDropdown, setShowPembukaDropdown] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
-  const plusRef = useRef<HTMLDivElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
   
   useEffect(() => {
     const checkMobile = () => {
@@ -35,32 +35,28 @@ export default function DocsPage() {
     }
   }, [activeSection]);
 
-  // Handle plus sign click
-  const handlePlusClick = () => {
-    setIsPlusOpen(!isPlusOpen);
-    
-    if (plusRef.current) {
-      if (!isPlusOpen) {
-        // Rotate to X
-        gsap.to(plusRef.current, {
-          rotation: 45,
-          duration: 0.3,
-          ease: "power2.out"
-        });
-      } else {
-        // Rotate back to +
-        gsap.to(plusRef.current, {
-          rotation: 0,
-          duration: 0.3,
-          ease: "power2.out"
-        });
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setShowPembukaDropdown(false);
       }
-    }
-  };
+    };
 
-  // Data navigasi
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  // Data navigasi dengan dropdown untuk pembuka
   const navItems = [
-    { id: "pembuka", title: "PEMBUKA" },
+    { 
+      id: "pembuka", 
+      title: "PEMBUKA",
+      hasDropdown: true,
+      dropdownItems: ["SALAM", "TUTUP"]
+    },
     { id: "arsitektur", title: "ARSITEKTUR" },
     { id: "instalasi", title: "INSTALASI" },
     { id: "penggunaan", title: "PENGGUNAAN" },
@@ -109,10 +105,10 @@ export default function DocsPage() {
       cursor: 'default'
     }}>
       
-      {/* Left Navigation - TANPA BG PUTIH, JARAK DEKAT */}
+      {/* Left Navigation */}
       <div style={{
-        width: '250px',
-        padding: '3rem 2rem',
+        width: '240px',
+        padding: '3rem 1.5rem',
         position: 'fixed',
         left: 0,
         top: 0,
@@ -124,7 +120,7 @@ export default function DocsPage() {
         flexDirection: 'column'
       }}>
         <div style={{
-          fontSize: '2rem',
+          fontSize: '1.8rem',
           fontWeight: '800',
           marginBottom: '2.5rem',
           lineHeight: 1,
@@ -136,175 +132,150 @@ export default function DocsPage() {
         <div style={{
           display: 'flex',
           flexDirection: 'column',
-          gap: '0.2rem', // JARAK SANGAT DEKAT
+          gap: '0.4rem',
         }}>
           {navItems.map((item) => (
-            <div
+            <div 
               key={item.id}
-              onClick={() => setActiveSection(item.id)}
-              style={{
-                fontSize: '1.1rem', // UKURAN SEDANG TIDAK TERLALU BESAR
-                fontWeight: activeSection === item.id ? '700' : '400',
-                cursor: 'pointer',
-                padding: '0.3rem 0', // PADDING KECIL
-                opacity: activeSection === item.id ? 1 : 0.6,
-                transition: 'all 0.2s ease',
-                letterSpacing: '0.5px',
-                lineHeight: '1.2',
-                // TANPA BACKGROUND COLOR PUTIH
-              }}
-              onMouseEnter={(e) => {
-                if (activeSection !== item.id) {
-                  e.currentTarget.style.opacity = '0.9';
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (activeSection !== item.id) {
-                  e.currentTarget.style.opacity = '0.6';
-                }
-              }}
+              style={{ position: 'relative' }}
             >
-              {item.title}
+              <div
+                onClick={() => {
+                  setActiveSection(item.id);
+                  if (item.id !== "pembuka") {
+                    setShowPembukaDropdown(false);
+                  }
+                }}
+                style={{
+                  fontSize: '1rem',
+                  fontWeight: activeSection === item.id ? '700' : '400',
+                  cursor: 'pointer',
+                  padding: '0.4rem 0.5rem',
+                  opacity: activeSection === item.id ? 1 : 0.6,
+                  transition: 'all 0.2s ease',
+                  letterSpacing: '0.5px',
+                  lineHeight: '1.2',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between'
+                }}
+                onMouseEnter={(e) => {
+                  if (activeSection !== item.id) {
+                    e.currentTarget.style.opacity = '0.9';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (activeSection !== item.id) {
+                    e.currentTarget.style.opacity = '0.6';
+                  }
+                }}
+              >
+                <span>{item.title}</span>
+                {item.hasDropdown && (
+                  <span 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setShowPembukaDropdown(!showPembukaDropdown);
+                    }}
+                    style={{
+                      fontSize: '1.2rem',
+                      cursor: 'pointer',
+                      opacity: 0.7,
+                      transition: 'all 0.3s ease',
+                      transform: showPembukaDropdown ? 'rotate(45deg)' : 'rotate(0deg)',
+                      marginLeft: '0.5rem'
+                    }}
+                  >
+                    +
+                  </span>
+                )}
+              </div>
+              
+              {/* Dropdown Minimalist untuk Pembuka */}
+              {item.id === "pembuka" && showPembukaDropdown && (
+                <motion.div
+                  ref={dropdownRef}
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.2 }}
+                  style={{
+                    position: 'absolute',
+                    left: '100%',
+                    top: 0,
+                    backgroundColor: 'rgba(20, 20, 20, 0.95)',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    borderRadius: '4px',
+                    padding: '0.5rem 0',
+                    minWidth: '120px',
+                    zIndex: 100
+                  }}
+                >
+                  {item.dropdownItems?.map((dropdownItem, index) => (
+                    <div
+                      key={index}
+                      onClick={() => {
+                        // Handle dropdown item click
+                        console.log(`${dropdownItem} clicked`);
+                        setShowPembukaDropdown(false);
+                      }}
+                      style={{
+                        padding: '0.6rem 1rem',
+                        fontSize: '0.9rem',
+                        cursor: 'pointer',
+                        opacity: 0.8,
+                        transition: 'all 0.2s ease',
+                        whiteSpace: 'nowrap'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.opacity = '1';
+                        e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.05)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.opacity = '0.8';
+                        e.currentTarget.style.backgroundColor = 'transparent';
+                      }}
+                    >
+                      {dropdownItem}
+                    </div>
+                  ))}
+                </motion.div>
+              )}
             </div>
           ))}
         </div>
       </div>
 
-      {/* Main Content - JAGA JARAK DARI NAVIGASI */}
+      {/* Main Content - DIGESER LEBIH KE KANAN */}
       <div style={{
-        marginLeft: '250px', // JARAK DARI NAVIGASI
+        marginLeft: '240px', // Jarak dari navigasi
         flex: 1,
-        padding: '4rem 5rem 4rem 3rem', // PADDING KIRI LEBIH KECIL
-        minHeight: '100vh'
+        padding: '4rem 3rem 4rem 6rem', // Padding kiri lebih besar untuk geser ke kanan
+        minHeight: '100vh',
+        marginRight: '2rem' // Tambahan margin kanan
       }}>
-        <div ref={contentRef}>
+        <div ref={contentRef} style={{ maxWidth: '800px' }}>
           
-          {/* Header dengan judul dan plus sign di sampingnya */}
+          {/* Judul Besar */}
           <div style={{
-            display: 'flex',
-            alignItems: 'center',
+            fontSize: '4.5rem',
+            fontWeight: '900',
+            lineHeight: 1,
+            letterSpacing: '-1px',
             marginBottom: '2rem',
-            position: 'relative'
+            paddingLeft: '1rem' // Tambahan padding untuk geser lebih ke kanan
           }}>
-            {/* Judul Besar */}
-            <div style={{
-              fontSize: '5rem',
-              fontWeight: '900',
-              lineHeight: 1,
-              letterSpacing: '-1px',
-              marginRight: '2rem' // JARAK DARI PLUS SIGN
-            }}>
-              {contentData[activeSection as keyof typeof contentData]?.title}
-            </div>
-            
-            {/* Plus Sign HANYA untuk PEMBUKA di samping judul */}
-            {activeSection === "pembuka" && (
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                position: 'relative'
-              }}>
-                <div 
-                  ref={plusRef}
-                  onClick={handlePlusClick}
-                  style={{
-                    fontSize: '3rem',
-                    cursor: 'pointer',
-                    width: '50px',
-                    height: '50px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    transition: 'all 0.3s ease',
-                    marginLeft: '1rem'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.opacity = '0.8';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.opacity = '1';
-                  }}
-                >
-                  +
-                </div>
-                
-                {/* Dropdown SALAM & TUTUP di samping plus sign */}
-                {isPlusOpen && (
-                  <motion.div
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.3 }}
-                    style={{
-                      position: 'absolute',
-                      left: '60px', // POSISI DI SAMPING PLUS SIGN
-                      top: '0',
-                      display: 'flex',
-                      flexDirection: 'column', // VERTIKAL KE BAWAH
-                      gap: '0.5rem',
-                      backgroundColor: 'rgba(0,0,0,0.9)',
-                      padding: '1rem',
-                      borderRadius: '8px',
-                      border: '1px solid rgba(255,255,255,0.2)',
-                      zIndex: 100
-                    }}
-                  >
-                    <div 
-                      style={{
-                        fontSize: '1rem',
-                        cursor: 'pointer',
-                        opacity: 0.8,
-                        transition: 'all 0.2s ease',
-                        padding: '0.5rem 1rem',
-                        whiteSpace: 'nowrap'
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.opacity = '1';
-                        e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.1)';
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.opacity = '0.8';
-                        e.currentTarget.style.backgroundColor = 'transparent';
-                      }}
-                    >
-                      SALAM
-                    </div>
-                    <div 
-                      style={{
-                        fontSize: '1rem',
-                        cursor: 'pointer',
-                        opacity: 0.8,
-                        transition: 'all 0.2s ease',
-                        padding: '0.5rem 1rem',
-                        whiteSpace: 'nowrap'
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.opacity = '1';
-                        e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.1)';
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.opacity = '0.8';
-                        e.currentTarget.style.backgroundColor = 'transparent';
-                      }}
-                    >
-                      TUTUP
-                    </div>
-                  </motion.div>
-                )}
-              </div>
-            )}
+            {contentData[activeSection as keyof typeof contentData]?.title}
           </div>
 
-          {/* Deskripsi - JELAS DAN JAGA JARAK DARI NAVIGASI */}
+          {/* Deskripsi - JELAS DAN DI GESER KE KANAN */}
           <div style={{
-            fontSize: '1.2rem',
-            lineHeight: 1.8,
-            maxWidth: '800px',
-            opacity: 0.95, // LEBIH JELAS
+            fontSize: '1.15rem',
+            lineHeight: 1.7,
+            opacity: 0.9,
             fontWeight: '300',
-            letterSpacing: '0.3px',
-            paddingRight: '2rem',
-            // JARAK DARI JUDUL
-            marginTop: '1rem'
+            letterSpacing: '0.2px',
+            paddingLeft: '1rem', // Geser ke kanan
+            paddingRight: '2rem'
           }}>
             {contentData[activeSection as keyof typeof contentData]?.description}
           </div>
@@ -314,7 +285,8 @@ export default function DocsPage() {
             marginTop: '4rem',
             paddingTop: '2rem',
             borderTop: '1px solid rgba(255,255,255,0.1)',
-            maxWidth: '800px'
+            maxWidth: '800px',
+            paddingLeft: '1rem' // Geser ke kanan
           }}>
             <div style={{
               fontSize: '0.9rem',
