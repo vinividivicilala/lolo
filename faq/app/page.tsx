@@ -3045,6 +3045,103 @@ export default function HomePage(): React.JSX.Element {
         </div>
       </div>
 
+
+{/* PRODUCT AND Image Section - DI BAWAH HEADER */}
+<div style={{
+  width: '100%',
+  padding: isMobile ? '2rem 1rem' : '4rem 2rem',
+  paddingTop: isMobile ? '1rem' : '2rem',
+  marginTop: isMobile ? '1rem' : '2rem',
+  boxSizing: 'border-box'
+}}>
+  {/* PRODUCT */}
+  <div style={{
+    marginBottom: isMobile ? '2rem' : '3rem',
+    textAlign: 'center'
+  }}>
+    <h2 style={{
+      color: 'white',
+      fontSize: isMobile ? '3.5rem' : '5rem',
+      fontWeight: '900',
+      textTransform: 'uppercase',
+      fontFamily: 'Helvetica, Arial, sans-serif',
+      letterSpacing: '4px',
+      margin: 0,
+      lineHeight: 1
+    }}>
+      PRODUCT
+    </h2>
+  </div>
+
+  {/* Spasi */}
+  <div style={{
+    height: isMobile ? '1.5rem' : '2rem'
+  }} />
+
+  {/* AND */}
+  <div style={{
+    marginBottom: isMobile ? '2rem' : '3rem',
+    textAlign: 'center'
+  }}>
+    <h2 style={{
+      color: 'white',
+      fontSize: isMobile ? '3rem' : '4rem',
+      fontWeight: '800',
+      textTransform: 'uppercase',
+      fontFamily: 'Helvetica, Arial, sans-serif',
+      letterSpacing: '3px',
+      margin: 0,
+      lineHeight: 1
+    }}>
+      AND
+    </h2>
+  </div>
+
+  {/* Gambar */}
+  <div style={{
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center'
+  }}>
+    <div style={{
+      width: '100%',
+      maxWidth: isMobile ? '250px' : '400px'
+    }}>
+      <div style={{
+        width: '100%',
+        height: isMobile ? '350px' : '500px',
+        borderRadius: '15px',
+        overflow: 'hidden',
+        border: '2px solid rgba(255, 255, 255, 0.3)'
+      }}>
+        <img 
+          src="images/5.jpg" 
+          alt="Product Image"
+          style={{
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            display: 'block'
+          }}
+          onError={(e) => {
+            e.currentTarget.style.backgroundColor = '#333';
+            e.currentTarget.style.display = 'flex';
+            e.currentTarget.style.alignItems = 'center';
+            e.currentTarget.style.justifyContent = 'center';
+            e.currentTarget.style.color = 'white';
+            e.currentTarget.innerHTML = '<div style="padding: 2rem; text-align: center;">IMAGE</div>';
+          }}
+        />
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+      
+
       {/* Main Content Container */}
       <div style={{
         width: '100%',
@@ -4002,3 +4099,4 @@ export default function HomePage(): React.JSX.Element {
     </div>
   );
 }
+
