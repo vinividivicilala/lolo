@@ -3045,84 +3045,78 @@ export default function HomePage(): React.JSX.Element {
           </motion.button>
         </div>
 
-        {/* PRODUCT AND Image Section - DI BAWAH HEADER */}
+{/* PRODUCT AND Image Section - POSISI FIXED UNTUK SCROLL */}
 <div style={{
+  position: 'fixed', // Tetap di posisi saat scroll
+  top: isMobile ? '12rem' : '15rem', // Posisi di bawah header
+  left: 0,
   width: '100%',
-  padding: isMobile ? '2rem' : '4rem',
-  paddingTop: isMobile ? '4rem' : '8rem', // Memberi jarak dari header
+  padding: isMobile ? '1rem' : '2rem',
   boxSizing: 'border-box',
   display: 'flex',
-  flexDirection: 'column',
   alignItems: 'center',
   justifyContent: 'center',
-  marginTop: isMobile ? '4rem' : '6rem' // Memberi jarak ekstra
+  zIndex: 50,
+  backgroundColor: 'transparent'
 }}>
-  {/* Container untuk teks dan gambar sejajar */}
+  {/* Container untuk teks dan gambar */}
   <div style={{
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: isMobile ? '1rem' : '2rem',
+    gap: isMobile ? '0.5rem' : '1rem', // Jarak sangat dekat
     width: '100%',
     maxWidth: '1200px'
   }}>
     {/* Teks PRODUCT */}
-    <div style={{
-      textAlign: 'right',
-      flex: 1
-    }}>
+    <div>
       <h2 style={{
         color: 'white',
-        fontSize: isMobile ? '4rem' : '6rem',
+        fontSize: isMobile ? '3.5rem' : '5rem',
         fontWeight: '900',
         textTransform: 'uppercase',
         fontFamily: 'Helvetica, Arial, sans-serif',
-        letterSpacing: '0px', // Huruf mepet
+        letterSpacing: '-1px', // Huruf sangat dekat (negatif)
         margin: 0,
-        lineHeight: 0.9
+        lineHeight: 0.8,
+        whiteSpace: 'nowrap'
       }}>
         PRODUCT
       </h2>
     </div>
 
     {/* Teks AND */}
-    <div style={{
-      textAlign: 'center',
-      flex: 0.5
-    }}>
+    <div>
       <h2 style={{
         color: 'white',
-        fontSize: isMobile ? '4rem' : '6rem',
+        fontSize: isMobile ? '3.5rem' : '5rem',
         fontWeight: '900',
         textTransform: 'uppercase',
         fontFamily: 'Helvetica, Arial, sans-serif',
-        letterSpacing: '0px', // Huruf mepet
+        letterSpacing: '-1px', // Huruf sangat dekat (negatif)
         margin: 0,
-        lineHeight: 0.9
+        lineHeight: 0.8,
+        whiteSpace: 'nowrap'
       }}>
         AND
       </h2>
     </div>
 
-    {/* Gambar - ukuran tinggi sama dengan teks */}
-    <div style={{
-      flex: 1,
-      display: 'flex',
-      justifyContent: 'flex-start'
-    }}>
+    {/* Gambar - ukuran tinggi sama dengan teks, lebar menyesuaikan */}
+    <div>
       <div style={{
         width: 'auto',
-        height: isMobile ? '4rem' : '6rem', // Tinggi sama dengan font size
-        aspectRatio: '4/3', // Rasio 4:3 untuk horizontal
-        borderRadius: '10px',
+        height: isMobile ? '4rem' : '5rem', // Tinggi sama dengan font size
+        borderRadius: '8px',
         overflow: 'hidden',
-        border: '2px solid rgba(255, 255, 255, 0.3)'
+        border: '1px solid rgba(255, 255, 255, 0.3)',
+        marginLeft: isMobile ? '0.5rem' : '1rem'
       }}>
         <img 
           src="images/5.jpg" 
           alt="Product Image"
           style={{
-            width: '100%',
+            width: 'auto', // Biarkan lebar menyesuaikan
             height: '100%',
             objectFit: 'cover',
             display: 'block'
@@ -3133,13 +3127,19 @@ export default function HomePage(): React.JSX.Element {
             e.currentTarget.style.alignItems = 'center';
             e.currentTarget.style.justifyContent = 'center';
             e.currentTarget.style.color = 'white';
-            e.currentTarget.innerHTML = '<div style="padding: 1rem; text-align: center; font-size: 1rem; font-weight: bold;">IMG</div>';
+            e.currentTarget.innerHTML = '<div style="padding: 0.5rem; font-size: 0.8rem; font-weight: bold;">IMG</div>';
           }}
         />
       </div>
     </div>
   </div>
 </div>
+
+{/* Spacer untuk mengimbangi tinggi section fixed */}
+<div style={{
+  height: isMobile ? '7rem' : '9rem', // Tinggi sama dengan section fixed
+  width: '100%'
+}} />
       </div>
 
 
@@ -4101,6 +4101,7 @@ export default function HomePage(): React.JSX.Element {
     </div>
   );
 }
+
 
 
 
