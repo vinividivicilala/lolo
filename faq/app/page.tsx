@@ -140,6 +140,46 @@ export default function HomePage(): React.JSX.Element {
   const userDropdownRef = useRef<HTMLDivElement>(null);
   const chatbotPopupRef = useRef<HTMLDivElement>(null);
 
+  // State untuk efek sandi morse
+const [loadingTextProduct, setLoadingTextProduct] = useState("PRODUCT");
+const [loadingTextAnd, setLoadingTextAnd] = useState("AND");
+
+// Karakter acak untuk efek sandi morse
+const randomChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%&*";
+
+
+  // Efek untuk animasi sandi morse
+useEffect(() => {
+  if (isLoading) {
+    const productInterval = setInterval(() => {
+      // Generate random text untuk PRODUCT
+      const randomProduct = Array(7)
+        .fill(0)
+        .map(() => randomChars[Math.floor(Math.random() * randomChars.length)])
+        .join('');
+      setLoadingTextProduct(randomProduct);
+    }, 80); // Ganti setiap 80ms
+
+    const andInterval = setInterval(() => {
+      // Generate random text untuk AND
+      const randomAnd = Array(3)
+        .fill(0)
+        .map(() => randomChars[Math.floor(Math.random() * randomChars.length)])
+        .join('');
+      setLoadingTextAnd(randomAnd);
+    }, 80);
+
+    return () => {
+      clearInterval(productInterval);
+      clearInterval(andInterval);
+    };
+  } else {
+    // Set teks final setelah loading selesai
+    setLoadingTextProduct("PRODUCT");
+    setLoadingTextAnd("AND");
+  }
+}, [isLoading]);
+
   // Animasi loading text
   const loadingTexts = [
     "NURU", "MBACA", "NULIS", "NGEXPLORASI", 
@@ -3056,7 +3096,7 @@ export default function HomePage(): React.JSX.Element {
   position: 'relative'
 }}>
   
-  {/* PRODUCT AND Image Section - DI BAWAH JUDUL WEBSITE */}
+   {/* PRODUCT AND Image Section - DI BAWAH JUDUL WEBSITE */}
   <div style={{
     width: '100%',
     padding: isMobile ? '1.5rem' : '3rem',
@@ -3069,77 +3109,95 @@ export default function HomePage(): React.JSX.Element {
     <div style={{
       display: 'flex',
       alignItems: 'center',
-      gap: isMobile ? '4rem' : '6rem',
+      gap: isMobile ? '1rem' : '2rem', // Jarak dekat antara AND dan gambar
       maxWidth: '1200px',
       width: '100%'
     }}>
-      {/* PRODUCT - Font lebih besar, huruf mepet */}
+      {/* PRODUCT - Dengan efek sandi morse */}
       <div style={{
         flex: 1,
         textAlign: 'right',
-        height: isMobile ? '5rem' : '7rem', // Tinggi tetap
+        height: isMobile ? '5rem' : '7rem',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'flex-end'
       }}>
-        <h2 style={{
-          color: 'white',
-          fontSize: isMobile ? '5rem' : '7rem', // Font lebih besar
-          fontWeight: '900',
-          textTransform: 'uppercase',
-          fontFamily: 'Helvetica, Arial, sans-serif',
-          letterSpacing: '-3px', // Huruf sangat mepet
-          margin: 0,
-          lineHeight: 0.8,
-          padding: 0
-        }}>
-          PRODUCT
-        </h2>
+        <AnimatePresence mode="wait">
+          <motion.h2
+            key={loadingTextProduct}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.1 }}
+            style={{
+              color: 'white',
+              fontSize: isMobile ? '5rem' : '7rem',
+              fontWeight: '900',
+              textTransform: 'uppercase',
+              fontFamily: 'Helvetica, Arial, sans-serif',
+              letterSpacing: '-3px',
+              margin: 0,
+              lineHeight: 0.8,
+              padding: 0
+            }}
+          >
+            {isLoading ? loadingTextProduct : "PRODUCT"}
+          </motion.h2>
+        </AnimatePresence>
       </div>
 
-      {/* AND - Font lebih besar, huruf mepet */}
+      {/* AND - Dengan efek sandi morse */}
       <div style={{
-        flex: 1,
-        textAlign: 'left',
-        height: isMobile ? '5rem' : '7rem', // Tinggi sama dengan PRODUCT
+        flex: 0.5, // Lebih kecil karena "AND" lebih pendek
+        textAlign: 'center',
+        height: isMobile ? '5rem' : '7rem',
         display: 'flex',
         alignItems: 'center',
-        justifyContent: 'flex-start'
+        justifyContent: 'center'
       }}>
-        <h2 style={{
-          color: 'white',
-          fontSize: isMobile ? '5rem' : '7rem', // Font lebih besar
-          fontWeight: '900',
-          textTransform: 'uppercase',
-          fontFamily: 'Helvetica, Arial, sans-serif',
-          letterSpacing: '-3px', // Huruf sangat mepet
-          margin: 0,
-          lineHeight: 0.8,
-          padding: 0
-        }}>
-          AND
-        </h2>
+        <AnimatePresence mode="wait">
+          <motion.h2
+            key={loadingTextAnd}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.1 }}
+            style={{
+              color: 'white',
+              fontSize: isMobile ? '5rem' : '7rem',
+              fontWeight: '900',
+              textTransform: 'uppercase',
+              fontFamily: 'Helvetica, Arial, sans-serif',
+              letterSpacing: '-3px',
+              margin: 0,
+              lineHeight: 0.8,
+              padding: 0
+            }}
+          >
+            {isLoading ? loadingTextAnd : "AND"}
+          </motion.h2>
+        </AnimatePresence>
       </div>
 
-      {/* Container Gambar + Angka */}
+      {/* Container Gambar + Angka - Jarak dekat dengan AND */}
       <div style={{
-        flex: 1.5,
+        flex: 1.2,
         display: 'flex',
-        alignItems: 'center', // Vertikal center dengan teks
-        height: isMobile ? '5rem' : '7rem', // Tinggi sama dengan teks
-        gap: '0.8rem' // Jarak antara gambar dan angka
+        alignItems: 'center',
+        height: isMobile ? '5rem' : '7rem',
+        gap: '0.8rem'
       }}>
-        {/* Gambar - Tinggi sama dengan teks */}
+        {/* Gambar */}
         <div style={{
           width: isMobile ? '140px' : '180px',
-          height: isMobile ? '5rem' : '7rem', // TINGGI SAMA DENGAN TEKS
+          height: isMobile ? '5rem' : '7rem',
           borderRadius: '10px',
           overflow: 'hidden',
           border: '1px solid rgba(255, 255, 255, 0.3)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          backgroundColor: '#222' // Fallback background
+          backgroundColor: '#222'
         }}>
           <img 
             src="images/5.jpg" 
@@ -3161,7 +3219,7 @@ export default function HomePage(): React.JSX.Element {
           />
         </div>
 
-        {/* Angka 01 kecil di samping gambar */}
+        {/* Angka 01 kecil */}
         <div style={{
           color: 'rgba(255, 255, 255, 0.7)',
           fontSize: isMobile ? '1.2rem' : '1.5rem',
@@ -3171,7 +3229,7 @@ export default function HomePage(): React.JSX.Element {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          height: '100%' // Tinggi sama dengan container
+          height: '100%'
         }}>
           01
         </div>
@@ -4143,6 +4201,7 @@ export default function HomePage(): React.JSX.Element {
     </div>
   );
 }
+
 
 
 
