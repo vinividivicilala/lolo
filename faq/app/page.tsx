@@ -3056,7 +3056,7 @@ export default function HomePage(): React.JSX.Element {
   position: 'relative'
 }}>
   
-  {/* PRODUCT AND Image Section - DI BAWAH JUDUL WEBSITE */}
+{/* PRODUCT AND Image Section - DI BAWAH JUDUL WEBSITE */}
   <div style={{
     width: '100%',
     padding: isMobile ? '1.5rem' : '3rem',
@@ -3178,8 +3178,106 @@ export default function HomePage(): React.JSX.Element {
         exit={{ opacity: 0 }}
         transition={{ duration: 0.5 }}
       >
+        {/* Container untuk Tombol Slider dan Teks MENURU */}
+        <div style={{
+          position: 'relative',
+          marginTop: isMobile ? '4rem' : '5rem',
+          marginBottom: isMobile ? '4rem' : '6rem',
+          paddingLeft: isMobile ? '2rem' : '4rem',
+          paddingRight: isMobile ? '2rem' : '4rem',
+          display: 'flex',
+          flexDirection: isMobile ? 'column' : 'row',
+          justifyContent: 'space-between',
+          alignItems: isMobile ? 'flex-start' : 'center',
+          gap: isMobile ? '2rem' : '0'
+        }}>
+          {/* Tombol Slider Index/Grid di kiri */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '1.5rem'
+          }}>
+            <motion.button
+              onClick={toggleSlider}
+              style={{
+                width: '120px',
+                height: '50px',
+                backgroundColor: '#0050B7',
+                border: 'none',
+                borderRadius: '25px',
+                cursor: 'pointer',
+                padding: 0,
+                position: 'relative',
+                display: 'flex',
+                alignItems: 'center',
+                overflow: 'hidden'
+              }}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <div style={{
+                position: 'absolute',
+                width: '100%',
+                height: '100%',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                padding: '0 15px',
+                boxSizing: 'border-box'
+              }}>
+                <span style={{
+                  color: 'white',
+                  fontSize: '1rem',
+                  fontWeight: '700',
+                  fontFamily: 'Helvetica, Arial, sans-serif',
+                  opacity: sliderPosition === "index" ? 1 : 0.5
+                }}>
+                  INDEX
+                </span>
+                <span style={{
+                  color: 'white',
+                  fontSize: '1rem',
+                  fontWeight: '700',
+                  fontFamily: 'Helvetica, Arial, sans-serif',
+                  opacity: sliderPosition === "grid" ? 1 : 0.5
+                }}>
+                  GRID
+                </span>
+              </div>
+              
+              <motion.div
+                animate={{ x: sliderPosition === "index" ? 15 : 65 }}
+                transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                style={{
+                  width: '35px',
+                  height: '35px',
+                  backgroundColor: '#00FF00',
+                  borderRadius: '50%',
+                  position: 'absolute',
+                  left: '7px',
+                  boxShadow: '0 0 15px rgba(0, 255, 0, 0.7)'
+                }}
+              />
+            </motion.button>
+
+            <div style={{
+              color: 'white',
+              fontSize: '1.1rem',
+              fontWeight: '600',
+              fontFamily: 'Helvetica, Arial, sans-serif'
+            }}>
+              {sliderPosition === "index" ? "Index View" : "Grid View"}
+            </div>
+          </div>
 
 
+
+
+
+
+
+
+      
 
                 {/* Teks MENURU dengan animasi Plus (+) */}
                 <motion.div
@@ -4028,6 +4126,7 @@ export default function HomePage(): React.JSX.Element {
     </div>
   );
 }
+
 
 
 
