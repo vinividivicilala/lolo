@@ -108,6 +108,9 @@ export default function HomePage(): React.JSX.Element {
   const [totalUsers, setTotalUsers] = useState(0);
   const [totalLoggedInUsers, setTotalLoggedInUsers] = useState(0);
   
+  // State baru untuk popup chatbot
+  const [showChatbotPopup, setShowChatbotPopup] = useState(false);
+  
   // State untuk counter foto - angka kiri saja yang berubah
   const [leftCounter, setLeftCounter] = useState("01");
   const totalPhotos = "03"; // Tetap konstan
@@ -135,6 +138,7 @@ export default function HomePage(): React.JSX.Element {
   const leftCounterRef = useRef<HTMLSpanElement>(null);
   const messageInputRef = useRef<HTMLInputElement>(null);
   const userDropdownRef = useRef<HTMLDivElement>(null);
+  const chatbotPopupRef = useRef<HTMLDivElement>(null);
 
   // Animasi loading text
   const loadingTexts = [
@@ -421,6 +425,9 @@ export default function HomePage(): React.JSX.Element {
       if (userDropdownRef.current && !userDropdownRef.current.contains(event.target as Node)) {
         setShowUserDropdown(false);
       }
+      if (chatbotPopupRef.current && !chatbotPopupRef.current.contains(event.target as Node)) {
+        setShowChatbotPopup(false);
+      }
     };
 
     document.addEventListener('mousedown', handleClickOutside);
@@ -487,6 +494,15 @@ export default function HomePage(): React.JSX.Element {
       }, 2000);
     }
 
+    // Tampilkan popup chatbot setelah loading selesai
+    const chatbotShown = localStorage.getItem('chatbotPopupShown');
+    if (!chatbotShown) {
+      setTimeout(() => {
+        setShowChatbotPopup(true);
+        localStorage.setItem('chatbotPopupShown', 'true');
+      }, 4000); // Tampilkan 4 detik setelah loading
+    }
+
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 768);
     };
@@ -530,6 +546,9 @@ export default function HomePage(): React.JSX.Element {
         if (showLogoutModal) {
           setShowLogoutModal(false);
         }
+        if (showChatbotPopup) {
+          setShowChatbotPopup(false);
+        }
       }
     };
 
@@ -556,7 +575,7 @@ export default function HomePage(): React.JSX.Element {
       // Kill ScrollTrigger instances
       ScrollTrigger.getAll().forEach(trigger => trigger.kill());
     };
-  }, [isMobile, showMenuruFullPage, showPhotoFullPage, showUserDropdown, showLogoutModal]);
+  }, [isMobile, showMenuruFullPage, showPhotoFullPage, showUserDropdown, showLogoutModal, showChatbotPopup]);
 
   // Animasi GSAP untuk tanda + di tombol Menuru (hanya pulsing, tidak berputar)
   useEffect(() => {
@@ -839,6 +858,22 @@ export default function HomePage(): React.JSX.Element {
       e.preventDefault();
       handleSendMessage();
     }
+  };
+
+  // Handler untuk membuka popup chatbot
+  const handleOpenChatbotPopup = () => {
+    setShowChatbotPopup(true);
+  };
+
+  // Handler untuk menutup popup chatbot
+  const handleCloseChatbotPopup = () => {
+    setShowChatbotPopup(false);
+  };
+
+  // Handler untuk menuju ke halaman chatbot
+  const handleGoToChatbot = () => {
+    setShowChatbotPopup(false);
+    router.push('/chatbot');
   };
 
   // Data untuk halaman Index - HANYA TAHUN
@@ -1827,6 +1862,457 @@ export default function HomePage(): React.JSX.Element {
                 >
                   Ya, Logout
                 </motion.button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* POPUP CHATBOT */}
+      <AnimatePresence>
+        {showChatbotPopup && (
+          <motion.div
+            ref={chatbotPopupRef}
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            transition={{ duration: 0.3, type: "spring", damping: 25 }}
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              backgroundColor: 'rgba(0, 0, 0, 0.8)',
+              zIndex: 10000,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: isMobile ? '1rem' : '2rem',
+              backdropFilter: 'blur(10px)'
+            }}
+            onClick={handleCloseChatbotPopup}
+          >
+            <motion.div
+              initial={{ y: 50, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: 50, opacity: 0 }}
+              transition={{ delay: 0.1, duration: 0.4 }}
+              style={{
+                backgroundColor: '#0A0A0A',
+                borderRadius: '24px',
+                width: '100%',
+                maxWidth: '900px',
+                overflow: 'hidden',
+                position: 'relative',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                boxShadow: '0 25px 50px rgba(0, 0, 0, 0.5)',
+                display: 'flex',
+                flexDirection: isMobile ? 'column' : 'row'
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Bagian Kiri: Foto dan Tombol Close */}
+              <div style={{
+                flex: isMobile ? 'none' : 1,
+                position: 'relative',
+                height: isMobile ? '300px' : 'auto',
+                backgroundColor: '#111',
+                overflow: 'hidden'
+              }}>
+                {/* Tombol Close */}
+                <motion.button
+                  onClick={handleCloseChatbotPopup}
+                  style={{
+                    position: 'absolute',
+                    top: isMobile ? '1rem' : '1.5rem',
+                    right: isMobile ? '1rem' : '1.5rem',
+                    width: isMobile ? '40px' : '50px',
+                    height: isMobile ? '40px' : '50px',
+                    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                    borderRadius: '50%',
+                    color: 'white',
+                    fontSize: isMobile ? '1.5rem' : '2rem',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    zIndex: 10,
+                    fontFamily: 'Arial, sans-serif',
+                    padding: 0,
+                    margin: 0
+                  }}
+                  whileHover={{ 
+                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                    scale: 1.1
+                  }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  ×
+                </motion.button>
+
+                {/* Foto AI Chatbot */}
+                <div style={{
+                  width: '100%',
+                  height: '100%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  overflow: 'hidden'
+                }}>
+                  <motion.div
+                    initial={{ scale: 0.8, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ delay: 0.2, duration: 0.5 }}
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      position: 'relative',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}
+                  >
+                    {/* Background Gradient */}
+                    <div style={{
+                      position: 'absolute',
+                      width: '100%',
+                      height: '100%',
+                      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                      opacity: 0.7,
+                      filter: 'blur(20px)'
+                    }} />
+                    
+                    {/* Gambar AI */}
+                    <div style={{
+                      position: 'relative',
+                      width: isMobile ? '200px' : '250px',
+                      height: isMobile ? '200px' : '250px',
+                      borderRadius: '20px',
+                      overflow: 'hidden',
+                      border: '3px solid rgba(255, 255, 255, 0.2)',
+                      boxShadow: '0 10px 30px rgba(0, 0, 0, 0.5)'
+                    }}>
+                      <div style={{
+                        width: '100%',
+                        height: '100%',
+                        backgroundColor: '#222',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: 'white',
+                        fontSize: isMobile ? '1.2rem' : '1.5rem',
+                        fontWeight: '600',
+                        flexDirection: 'column',
+                        gap: '1rem'
+                      }}>
+                        <svg 
+                          width={isMobile ? "80" : "100"} 
+                          height={isMobile ? "80" : "100"} 
+                          viewBox="0 0 24 24" 
+                          fill="none" 
+                          stroke="#00FF00" 
+                          strokeWidth="2"
+                        >
+                          <path d="M12 2a10 10 0 1 0 10 10 4 4 0 0 1-5-5 4 4 0 0 1-5-5"/>
+                          <path d="M8.5 8.5v.01"/>
+                          <path d="M16 15.5v.01"/>
+                          <path d="M12 12v.01"/>
+                          <path d="M11 17v.01"/>
+                          <path d="M7 14v.01"/>
+                        </svg>
+                        <div style={{ textAlign: 'center' }}>
+                          AI CHATBOT
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
+                </div>
+
+                {/* Animated Dots */}
+                <div style={{
+                  position: 'absolute',
+                  bottom: '2rem',
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  display: 'flex',
+                  gap: '0.5rem',
+                  zIndex: 5
+                }}>
+                  {[1, 2, 3].map((dot) => (
+                    <motion.div
+                      key={dot}
+                      animate={{ 
+                        scale: [1, 1.3, 1],
+                        opacity: [0.5, 1, 0.5]
+                      }}
+                      transition={{ 
+                        duration: 1.5,
+                        repeat: Infinity,
+                        delay: dot * 0.2
+                      }}
+                      style={{
+                        width: '8px',
+                        height: '8px',
+                        backgroundColor: '#00FF00',
+                        borderRadius: '50%'
+                      }}
+                    />
+                  ))}
+                </div>
+              </div>
+
+              {/* Bagian Kanan: Konten */}
+              <div style={{
+                flex: isMobile ? 'none' : 1.2,
+                padding: isMobile ? '2rem 1.5rem' : '3rem',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between',
+                backgroundColor: '#0A0A0A'
+              }}>
+                {/* Header */}
+                <div>
+                  <motion.div
+                    initial={{ x: -20, opacity: 0 }}
+                    animate={{ x: 0, opacity: 1 }}
+                    transition={{ delay: 0.3, duration: 0.4 }}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '1rem',
+                      marginBottom: '1.5rem'
+                    }}
+                  >
+                    <div style={{
+                      width: '50px',
+                      height: '50px',
+                      borderRadius: '12px',
+                      backgroundColor: '#00FF00',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}>
+                      <svg 
+                        width="30" 
+                        height="30" 
+                        viewBox="0 0 24 24" 
+                        fill="none" 
+                        stroke="black" 
+                        strokeWidth="2"
+                      >
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                        <line x1="8" y1="7" x2="16" y2="7"/>
+                        <line x1="8" y1="11" x2="12" y2="11"/>
+                      </svg>
+                    </div>
+                    <div>
+                      <div style={{
+                        color: '#00FF00',
+                        fontSize: '0.9rem',
+                        fontWeight: '600',
+                        textTransform: 'uppercase',
+                        letterSpacing: '1px',
+                        marginBottom: '0.2rem'
+                      }}>
+                        AI Assistant
+                      </div>
+                      <h2 style={{
+                        color: 'white',
+                        fontSize: isMobile ? '1.8rem' : '2.5rem',
+                        fontWeight: '700',
+                        margin: 0,
+                        fontFamily: 'Helvetica, Arial, sans-serif',
+                        lineHeight: 1.2
+                      }}>
+                        Smart Chatbot
+                      </h2>
+                    </div>
+                  </motion.div>
+
+                  {/* Deskripsi */}
+                  <motion.div
+                    initial={{ x: -20, opacity: 0 }}
+                    animate={{ x: 0, opacity: 1 }}
+                    transition={{ delay: 0.4, duration: 0.4 }}
+                    style={{
+                      marginBottom: '2rem'
+                    }}
+                  >
+                    <p style={{
+                      color: 'rgba(255, 255, 255, 0.9)',
+                      fontSize: isMobile ? '1rem' : '1.1rem',
+                      lineHeight: 1.6,
+                      margin: '0 0 1rem 0'
+                    }}>
+                      Temukan pengalaman chatting yang lebih cerdas dan personal dengan AI Chatbot kami. 
+                      Didesain untuk memahami kebutuhan Anda dengan teknologi kecerdasan buatan terkini.
+                    </p>
+                    
+                    <div style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '0.8rem',
+                      marginTop: '1.5rem'
+                    }}>
+                      {[
+                        "💬 Obrolan natural dengan AI canggih",
+                        "⚡ Respon cepat dan akurat",
+                        "🔒 Privasi data terjamin",
+                        "🎯 Solusi personal untuk setiap kebutuhan",
+                        "🌐 Tersedia 24/7"
+                      ].map((feature, index) => (
+                        <motion.div
+                          key={index}
+                          initial={{ x: -10, opacity: 0 }}
+                          animate={{ x: 0, opacity: 1 }}
+                          transition={{ delay: 0.5 + (index * 0.1), duration: 0.3 }}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.8rem'
+                          }}
+                        >
+                          <div style={{
+                            width: '20px',
+                            height: '20px',
+                            borderRadius: '50%',
+                            backgroundColor: '#00FF00',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            flexShrink: 0
+                          }}>
+                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="3">
+                              <polyline points="20 6 9 17 4 12"/>
+                            </svg>
+                          </div>
+                          <span style={{
+                            color: 'rgba(255, 255, 255, 0.8)',
+                            fontSize: '0.95rem'
+                          }}>
+                            {feature}
+                          </span>
+                        </motion.div>
+                      ))}
+                    </div>
+                  </motion.div>
+                </div>
+
+                {/* Tombol Action */}
+                <motion.div
+                  initial={{ y: 20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ delay: 0.6, duration: 0.4 }}
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '1rem',
+                    marginTop: '2rem'
+                  }}
+                >
+                  {/* Tombol Utama ke Chatbot */}
+                  <motion.button
+                    onClick={handleGoToChatbot}
+                    style={{
+                      backgroundColor: '#00FF00',
+                      color: 'black',
+                      border: 'none',
+                      padding: isMobile ? '1rem' : '1.2rem',
+                      borderRadius: '12px',
+                      fontSize: isMobile ? '1rem' : '1.1rem',
+                      fontWeight: '700',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '0.8rem',
+                      fontFamily: 'Helvetica, Arial, sans-serif',
+                      transition: 'all 0.3s ease',
+                      position: 'relative',
+                      overflow: 'hidden'
+                    }}
+                    whileHover={{ 
+                      scale: 1.05,
+                      backgroundColor: '#00CC00',
+                      boxShadow: '0 10px 20px rgba(0, 255, 0, 0.3)'
+                    }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <svg 
+                      width="20" 
+                      height="20" 
+                      viewBox="0 0 24 24" 
+                      fill="none" 
+                      stroke="currentColor" 
+                      strokeWidth="2"
+                    >
+                      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                    </svg>
+                    Coba Chatbot Sekarang
+                    <motion.div
+                      initial={{ x: -100 }}
+                      animate={{ x: 400 }}
+                      transition={{ duration: 1.5, repeat: Infinity, delay: 1 }}
+                      style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        width: '100px',
+                        height: '100%',
+                        background: 'linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent)',
+                        transform: 'skewX(-20deg)'
+                      }}
+                    />
+                  </motion.button>
+
+                  {/* Tombol Secondary */}
+                  <motion.button
+                    onClick={handleCloseChatbotPopup}
+                    style={{
+                      backgroundColor: 'transparent',
+                      color: 'rgba(255, 255, 255, 0.7)',
+                      border: '1px solid rgba(255, 255, 255, 0.2)',
+                      padding: isMobile ? '0.8rem' : '1rem',
+                      borderRadius: '12px',
+                      fontSize: '0.95rem',
+                      fontWeight: '500',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '0.5rem',
+                      fontFamily: 'Helvetica, Arial, sans-serif',
+                      transition: 'all 0.3s ease'
+                    }}
+                    whileHover={{ 
+                      backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                      color: 'white'
+                    }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <circle cx="12" cy="12" r="10"/>
+                      <polyline points="12 6 12 12 16 14"/>
+                    </svg>
+                    Nanti Saja
+                  </motion.button>
+
+                  {/* Info */}
+                  <div style={{
+                    textAlign: 'center',
+                    marginTop: '1rem'
+                  }}>
+                    <span style={{
+                      color: 'rgba(255, 255, 255, 0.5)',
+                      fontSize: '0.8rem',
+                      display: 'block'
+                    }}>
+                      Gratis • Tidak perlu registrasi • Coba sekarang
+                    </span>
+                  </div>
+                </motion.div>
               </div>
             </motion.div>
           </motion.div>
@@ -3573,5 +4059,3 @@ export default function HomePage(): React.JSX.Element {
     </div>
   );
 }
-
-
