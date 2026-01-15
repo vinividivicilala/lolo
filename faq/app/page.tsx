@@ -3049,47 +3049,42 @@ export default function HomePage(): React.JSX.Element {
 {/* PRODUCT AND Image Section - DI BAWAH HEADER */}
 <div style={{
   width: '100%',
-  padding: isMobile ? '2rem 1rem' : '4rem 2rem',
-  paddingTop: isMobile ? '1rem' : '2rem',
-  marginTop: isMobile ? '1rem' : '2rem',
-  boxSizing: 'border-box'
+  padding: isMobile ? '1rem' : '2rem',
+  paddingTop: isMobile ? '0.5rem' : '1rem',
+  marginTop: isMobile ? '0.5rem' : '1rem',
+  boxSizing: 'border-box',
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'center',
+  gap: isMobile ? '1.5rem' : '3rem'
 }}>
-  {/* PRODUCT */}
+  {/* Teks PRODUCT AND */}
   <div style={{
-    marginBottom: isMobile ? '2rem' : '3rem',
-    textAlign: 'center'
+    textAlign: 'right',
+    flex: 1,
+    maxWidth: isMobile ? '45%' : '50%'
   }}>
     <h2 style={{
       color: 'white',
-      fontSize: isMobile ? '3.5rem' : '5rem',
+      fontSize: isMobile ? '2rem' : '3.5rem',
       fontWeight: '900',
       textTransform: 'uppercase',
       fontFamily: 'Helvetica, Arial, sans-serif',
-      letterSpacing: '4px',
+      letterSpacing: '2px',
       margin: 0,
-      lineHeight: 1
+      lineHeight: 1,
+      marginBottom: isMobile ? '0.5rem' : '1rem'
     }}>
       PRODUCT
     </h2>
-  </div>
-
-  {/* Spasi */}
-  <div style={{
-    height: isMobile ? '1.5rem' : '2rem'
-  }} />
-
-  {/* AND */}
-  <div style={{
-    marginBottom: isMobile ? '2rem' : '3rem',
-    textAlign: 'center'
-  }}>
+    
     <h2 style={{
       color: 'white',
-      fontSize: isMobile ? '3rem' : '4rem',
+      fontSize: isMobile ? '1.8rem' : '3rem',
       fontWeight: '800',
       textTransform: 'uppercase',
       fontFamily: 'Helvetica, Arial, sans-serif',
-      letterSpacing: '3px',
+      letterSpacing: '1.5px',
       margin: 0,
       lineHeight: 1
     }}>
@@ -3097,50 +3092,42 @@ export default function HomePage(): React.JSX.Element {
     </h2>
   </div>
 
-  {/* Gambar */}
+  {/* Gambar Horizontal Kecil */}
   <div style={{
+    flex: 1,
+    maxWidth: isMobile ? '45%' : '50%',
     display: 'flex',
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
     alignItems: 'center'
   }}>
     <div style={{
-      width: '100%',
-      maxWidth: isMobile ? '250px' : '400px'
+      width: isMobile ? '120px' : '200px',
+      height: isMobile ? '80px' : '120px',
+      borderRadius: '10px',
+      overflow: 'hidden',
+      border: '1px solid rgba(255, 255, 255, 0.3)'
     }}>
-      <div style={{
-        width: '100%',
-        height: isMobile ? '350px' : '500px',
-        borderRadius: '15px',
-        overflow: 'hidden',
-        border: '2px solid rgba(255, 255, 255, 0.3)'
-      }}>
-        <img 
-          src="images/5.jpg" 
-          alt="Product Image"
-          style={{
-            width: '100%',
-            height: '100%',
-            objectFit: 'cover',
-            display: 'block'
-          }}
-          onError={(e) => {
-            e.currentTarget.style.backgroundColor = '#333';
-            e.currentTarget.style.display = 'flex';
-            e.currentTarget.style.alignItems = 'center';
-            e.currentTarget.style.justifyContent = 'center';
-            e.currentTarget.style.color = 'white';
-            e.currentTarget.innerHTML = '<div style="padding: 2rem; text-align: center;">IMAGE</div>';
-          }}
-        />
-      </div>
+      <img 
+        src="images/5.jpg" 
+        alt="Product Image"
+        style={{
+          width: '100%',
+          height: '100%',
+          objectFit: 'cover',
+          display: 'block'
+        }}
+        onError={(e) => {
+          e.currentTarget.style.backgroundColor = '#333';
+          e.currentTarget.style.display = 'flex';
+          e.currentTarget.style.alignItems = 'center';
+          e.currentTarget.style.justifyContent = 'center';
+          e.currentTarget.style.color = 'white';
+          e.currentTarget.innerHTML = '<div style="padding: 0.5rem; text-align: center; font-size: 0.8rem;">IMG</div>';
+        }}
+      />
     </div>
   </div>
 </div>
-
-
-
-
-      
 
       {/* Main Content Container */}
       <div style={{
@@ -4099,4 +4086,5 @@ export default function HomePage(): React.JSX.Element {
     </div>
   );
 }
+
 
