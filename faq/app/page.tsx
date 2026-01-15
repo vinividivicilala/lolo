@@ -2879,6 +2879,7 @@ export default function HomePage(): React.JSX.Element {
             </div>
           </motion.div>
         </div>
+        
 
         {/* Right Side Buttons */}
         <div style={{
@@ -3043,27 +3044,25 @@ export default function HomePage(): React.JSX.Element {
             )}
           </motion.button>
         </div>
-      </div>
 
-
-
-{/* PRODUCT AND Image Section - DI BAWAH HEADER */}
+        {/* PRODUCT AND Image Section - DI BAWAH HEADER */}
 <div style={{
   width: '100%',
-  padding: isMobile ? '1.5rem' : '3rem',
-  paddingTop: isMobile ? '2rem' : '4rem',
+  padding: isMobile ? '2rem' : '4rem',
+  paddingTop: isMobile ? '4rem' : '8rem', // Memberi jarak dari header
   boxSizing: 'border-box',
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',
-  justifyContent: 'center'
+  justifyContent: 'center',
+  marginTop: isMobile ? '4rem' : '6rem' // Memberi jarak ekstra
 }}>
   {/* Container untuk teks dan gambar sejajar */}
   <div style={{
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: isMobile ? '2rem' : '4rem',
+    gap: isMobile ? '1rem' : '2rem',
     width: '100%',
     maxWidth: '1200px'
   }}>
@@ -3078,25 +3077,18 @@ export default function HomePage(): React.JSX.Element {
         fontWeight: '900',
         textTransform: 'uppercase',
         fontFamily: 'Helvetica, Arial, sans-serif',
-        letterSpacing: '4px',
+        letterSpacing: '0px', // Huruf mepet
         margin: 0,
-        lineHeight: 1
+        lineHeight: 0.9
       }}>
         PRODUCT
       </h2>
     </div>
 
-    {/* Spasi besar antara PRODUCT dan AND */}
-    <div style={{
-      width: isMobile ? '3rem' : '6rem',
-      height: '1px',
-      backgroundColor: 'rgba(255, 255, 255, 0.3)'
-    }} />
-
     {/* Teks AND */}
     <div style={{
-      textAlign: 'left',
-      flex: 1
+      textAlign: 'center',
+      flex: 0.5
     }}>
       <h2 style={{
         color: 'white',
@@ -3104,31 +3096,25 @@ export default function HomePage(): React.JSX.Element {
         fontWeight: '900',
         textTransform: 'uppercase',
         fontFamily: 'Helvetica, Arial, sans-serif',
-        letterSpacing: '4px',
+        letterSpacing: '0px', // Huruf mepet
         margin: 0,
-        lineHeight: 1
+        lineHeight: 0.9
       }}>
         AND
       </h2>
     </div>
 
-    {/* Spasi antara AND dan gambar */}
-    <div style={{
-      width: isMobile ? '3rem' : '6rem',
-      height: '1px',
-      backgroundColor: 'rgba(255, 255, 255, 0.3)'
-    }} />
-
-    {/* Gambar - ukuran sesuai font */}
+    {/* Gambar - ukuran tinggi sama dengan teks */}
     <div style={{
       flex: 1,
       display: 'flex',
       justifyContent: 'flex-start'
     }}>
       <div style={{
-        width: isMobile ? '200px' : '300px',
-        height: isMobile ? '120px' : '180px',
-        borderRadius: '15px',
+        width: 'auto',
+        height: isMobile ? '4rem' : '6rem', // Tinggi sama dengan font size
+        aspectRatio: '4/3', // Rasio 4:3 untuk horizontal
+        borderRadius: '10px',
         overflow: 'hidden',
         border: '2px solid rgba(255, 255, 255, 0.3)'
       }}>
@@ -3147,23 +3133,16 @@ export default function HomePage(): React.JSX.Element {
             e.currentTarget.style.alignItems = 'center';
             e.currentTarget.style.justifyContent = 'center';
             e.currentTarget.style.color = 'white';
-            e.currentTarget.innerHTML = '<div style="padding: 1rem; text-align: center; font-size: 1.2rem; font-weight: bold;">IMAGE</div>';
+            e.currentTarget.innerHTML = '<div style="padding: 1rem; text-align: center; font-size: 1rem; font-weight: bold;">IMG</div>';
           }}
         />
       </div>
     </div>
   </div>
 </div>
+      </div>
 
 
-
-
-
-
-
-
-
-      
 
       {/* Main Content Container */}
       <div style={{
@@ -4122,6 +4101,7 @@ export default function HomePage(): React.JSX.Element {
     </div>
   );
 }
+
 
 
 
