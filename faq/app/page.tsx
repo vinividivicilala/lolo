@@ -3056,7 +3056,7 @@ export default function HomePage(): React.JSX.Element {
   position: 'relative'
 }}>
   
-{/* PRODUCT AND Image Section - DI BAWAH JUDUL WEBSITE */}
+  {/* PRODUCT AND Image Section - DI BAWAH JUDUL WEBSITE */}
   <div style={{
     width: '100%',
     padding: isMobile ? '1.5rem' : '3rem',
@@ -3064,80 +3064,82 @@ export default function HomePage(): React.JSX.Element {
     boxSizing: 'border-box',
     display: 'flex',
     justifyContent: 'center',
-    alignItems: 'center' // Vertikal center
+    alignItems: 'center'
   }}>
     <div style={{
       display: 'flex',
-      alignItems: 'center', // Semua sejajar vertikal
-      gap: isMobile ? '4rem' : '6rem', // Jarak jauh antara PRODUCT dan AND
+      alignItems: 'center',
+      gap: isMobile ? '4rem' : '6rem',
       maxWidth: '1200px',
       width: '100%'
     }}>
-      {/* PRODUCT - Font lebih besar */}
+      {/* PRODUCT - Font lebih besar, huruf mepet */}
       <div style={{
         flex: 1,
         textAlign: 'right',
-        height: isMobile ? '4.5rem' : '6.5rem', // Tinggi tetap
+        height: isMobile ? '5rem' : '7rem', // Tinggi tetap
         display: 'flex',
-        alignItems: 'center', // Vertikal center
-        justifyContent: 'flex-end' // Rata kanan
+        alignItems: 'center',
+        justifyContent: 'flex-end'
       }}>
         <h2 style={{
           color: 'white',
-          fontSize: isMobile ? '4.5rem' : '6.5rem', // Font lebih besar
+          fontSize: isMobile ? '5rem' : '7rem', // Font lebih besar
           fontWeight: '900',
           textTransform: 'uppercase',
           fontFamily: 'Helvetica, Arial, sans-serif',
-          letterSpacing: '-2px', // Huruf lebih mepet
+          letterSpacing: '-3px', // Huruf sangat mepet
           margin: 0,
-          lineHeight: 0.9,
+          lineHeight: 0.8,
           padding: 0
         }}>
           PRODUCT
         </h2>
       </div>
 
-      {/* AND - Font lebih besar */}
+      {/* AND - Font lebih besar, huruf mepet */}
       <div style={{
         flex: 1,
         textAlign: 'left',
-        height: isMobile ? '4.5rem' : '6.5rem', // Tinggi sama dengan PRODUCT
+        height: isMobile ? '5rem' : '7rem', // Tinggi sama dengan PRODUCT
         display: 'flex',
-        alignItems: 'center', // Vertikal center
-        justifyContent: 'flex-start' // Rata kiri
+        alignItems: 'center',
+        justifyContent: 'flex-start'
       }}>
         <h2 style={{
           color: 'white',
-          fontSize: isMobile ? '4.5rem' : '6.5rem', // Font lebih besar
+          fontSize: isMobile ? '5rem' : '7rem', // Font lebih besar
           fontWeight: '900',
           textTransform: 'uppercase',
           fontFamily: 'Helvetica, Arial, sans-serif',
-          letterSpacing: '-2px', // Huruf lebih mepet
+          letterSpacing: '-3px', // Huruf sangat mepet
           margin: 0,
-          lineHeight: 0.9,
+          lineHeight: 0.8,
           padding: 0
         }}>
           AND
         </h2>
       </div>
 
-      {/* Gambar Horizontal - Tinggi sama dengan teks */}
+      {/* Container Gambar + Angka */}
       <div style={{
-        flex: 1.2,
+        flex: 1.5,
         display: 'flex',
-        justifyContent: 'flex-start',
-        alignItems: 'center', // Vertikal center
-        height: isMobile ? '4.5rem' : '6.5rem' // Tinggi sama dengan teks
+        alignItems: 'center', // Vertikal center dengan teks
+        height: isMobile ? '5rem' : '7rem', // Tinggi sama dengan teks
+        gap: '0.8rem' // Jarak antara gambar dan angka
       }}>
+        {/* Gambar - Tinggi sama dengan teks */}
         <div style={{
-          width: isMobile ? '150px' : '200px', // Lebar untuk horizontal, tidak terlalu lebar
-          height: isMobile ? '90px' : '120px', // Tinggi lebih kecil dari lebar (rasio 3:2)
-          borderRadius: '12px', // Border radius
+          width: isMobile ? '140px' : '180px',
+          height: isMobile ? '5rem' : '7rem', // TINGGI SAMA DENGAN TEKS
+          borderRadius: '10px',
           overflow: 'hidden',
-          border: '2px solid rgba(255, 255, 255, 0.3)',
+          border: '1px solid rgba(255, 255, 255, 0.3)',
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'center'
+          justifyContent: 'center',
+          backgroundColor: '#222' // Fallback background
         }}>
           <img 
             src="images/5.jpg" 
@@ -3154,9 +3156,24 @@ export default function HomePage(): React.JSX.Element {
               e.currentTarget.style.alignItems = 'center';
               e.currentTarget.style.justifyContent = 'center';
               e.currentTarget.style.color = 'white';
-              e.currentTarget.innerHTML = '<div style="padding: 0.5rem; font-weight: bold; font-size: 0.9rem;">IMG</div>';
+              e.currentTarget.innerHTML = '<div style="padding: 1rem; font-weight: bold;">IMG</div>';
             }}
           />
+        </div>
+
+        {/* Angka 01 kecil di samping gambar */}
+        <div style={{
+          color: 'rgba(255, 255, 255, 0.7)',
+          fontSize: isMobile ? '1.2rem' : '1.5rem',
+          fontWeight: '400',
+          fontFamily: 'Helvetica, Arial, sans-serif',
+          letterSpacing: '1px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          height: '100%' // Tinggi sama dengan container
+        }}>
+          01
         </div>
       </div>
     </div>
@@ -4126,6 +4143,7 @@ export default function HomePage(): React.JSX.Element {
     </div>
   );
 }
+
 
 
 
