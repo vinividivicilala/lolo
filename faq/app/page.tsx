@@ -3068,21 +3068,22 @@ export default function HomePage(): React.JSX.Element {
   position: 'relative'
 }}>
   
- {/* PRODUCT AND Image Section - DI BAWAH JUDUL WEBSITE */}
+{/* PRODUCT AND Image Section - DI BAWAH JUDUL WEBSITE */}
 <div style={{
   width: '100%',
   padding: isMobile ? '1.5rem' : '3rem',
   marginTop: isMobile ? '1rem' : '2rem',
   boxSizing: 'border-box',
   display: 'flex',
-  justifyContent: 'center',
-  alignItems: 'center'
+  flexDirection: 'column',
+  gap: isMobile ? '3rem' : '4rem'
 }}>
+  
+  {/* Baris 1: PRODUCT + AND + Foto + 01 */}
   <div style={{
     display: 'flex',
     alignItems: 'center',
     gap: isMobile ? '4rem' : '6rem',
-    maxWidth: '1200px',
     width: '100%'
   }}>
     {/* PRODUCT */}
@@ -3133,22 +3134,20 @@ export default function HomePage(): React.JSX.Element {
       </h2>
     </div>
 
-    {/* Container Gambar + Angka 01 */}
+    {/* Container Foto + Angka 01 */}
     <div style={{
-      flex: 1.5,
+      position: 'relative',
       display: 'flex',
-      alignItems: 'center',
-      height: isMobile ? '5rem' : '7rem',
-      gap: '0.8rem'
+      alignItems: 'flex-end' // Agar angka di bawah sejajar
     }}>
+      {/* Foto */}
       <div style={{
         width: isMobile ? '140px' : '180px',
         height: isMobile ? '5rem' : '7rem',
         borderRadius: '10px',
         overflow: 'hidden',
         border: '1px solid rgba(255, 255, 255, 0.3)',
-        backgroundColor: '#222',
-        position: 'relative'
+        backgroundColor: '#222'
       }}>
         <img 
           src="images/5.jpg" 
@@ -3160,69 +3159,63 @@ export default function HomePage(): React.JSX.Element {
             display: 'block'
           }}
         />
-        {/* Angka 02 di bawah foto */}
-        <div style={{
-          position: 'absolute',
-          bottom: '-1.5rem',
-          right: '0.5rem',
-          color: 'rgba(255, 255, 255, 0.7)',
-          fontSize: isMobile ? '1rem' : '1.2rem',
-          fontWeight: '400',
-          fontFamily: 'Helvetica, Arial, sans-serif',
-          letterSpacing: '1px'
-        }}>
-          01
-        </div>
+      </div>
+      
+      {/* Angka 01 di samping bawah */}
+      <div style={{
+        position: 'absolute',
+        bottom: '-0.8rem',
+        right: '-1.5rem',
+        color: 'rgba(255, 255, 255, 0.7)',
+        fontSize: isMobile ? '1rem' : '1.2rem',
+        fontWeight: '400',
+        fontFamily: 'Helvetica, Arial, sans-serif',
+        letterSpacing: '1px'
+      }}>
+        01
       </div>
     </div>
   </div>
-</div>
 
-{/* Baris 2: VISUAL DESIGNER dengan foto dan angka 02 */}
-<div style={{
-  width: '100%',
-  padding: isMobile ? '1rem 1.5rem' : '2rem 3rem',
-  boxSizing: 'border-box',
-  display: 'flex',
-  justifyContent: 'flex-end', // Geser ke kanan
-  marginTop: isMobile ? '3rem' : '4rem'
-}}>
+  {/* Baris 2: VISUAL DESIGNER + Foto + 02 (geser ke kanan) */}
   <div style={{
     display: 'flex',
+    justifyContent: 'flex-end',
     alignItems: 'center',
-    gap: isMobile ? '2rem' : '3rem',
-    maxWidth: '800px',
-    width: '100%'
+    gap: isMobile ? '3rem' : '4rem',
+    width: '100%',
+    marginLeft: isMobile ? '2rem' : '4rem' // Geser ke kanan
   }}>
-    {/* Teks VISUAL DESIGNER */}
+    {/* VISUAL DESIGNER */}
     <div style={{
       flex: 1,
       textAlign: 'right'
     }}>
       <h2 style={{
         color: 'white',
-        fontSize: isMobile ? '2.5rem' : '3.5rem',
+        fontSize: isMobile ? '5rem' : '7rem',
         fontWeight: '900',
         textTransform: 'uppercase',
         fontFamily: 'Helvetica, Arial, sans-serif',
-        letterSpacing: '-1px',
+        letterSpacing: '-3px',
         margin: 0,
-        lineHeight: 1
+        lineHeight: 0.8
       }}>
         VISUAL<br/>DESIGNER
       </h2>
     </div>
 
-    {/* Foto dan Angka 02 */}
+    {/* Container Foto + Angka 02 */}
     <div style={{
       position: 'relative',
-      width: isMobile ? '100px' : '140px',
-      height: isMobile ? '70px' : '100px'
+      display: 'flex',
+      alignItems: 'flex-end'
     }}>
+      {/* Foto */}
       <div style={{
-        width: '100%',
-        height: '100%',
-        borderRadius: '8px',
+        width: isMobile ? '140px' : '180px',
+        height: isMobile ? '5rem' : '7rem',
+        borderRadius: '10px',
         overflow: 'hidden',
         border: '1px solid rgba(255, 255, 255, 0.3)',
         backgroundColor: '#222'
@@ -3238,13 +3231,14 @@ export default function HomePage(): React.JSX.Element {
           }}
         />
       </div>
-      {/* Angka 02 di bawah foto */}
+      
+      {/* Angka 02 di samping bawah */}
       <div style={{
         position: 'absolute',
-        bottom: '-1.2rem',
-        right: '0.3rem',
+        bottom: '-0.8rem',
+        right: '-1.5rem',
         color: 'rgba(255, 255, 255, 0.7)',
-        fontSize: isMobile ? '0.9rem' : '1.1rem',
+        fontSize: isMobile ? '1rem' : '1.2rem',
         fontWeight: '400',
         fontFamily: 'Helvetica, Arial, sans-serif',
         letterSpacing: '1px'
@@ -3253,114 +3247,113 @@ export default function HomePage(): React.JSX.Element {
       </div>
     </div>
   </div>
-</div>
 
-{/* Baris 3: BASED + foto + IN + INDONESIA */}
-<div style={{
-  width: '100%',
-  padding: isMobile ? '1rem 1.5rem' : '2rem 3rem',
-  boxSizing: 'border-box',
-  display: 'flex',
-  justifyContent: 'space-between',
-  alignItems: 'center',
-  marginTop: isMobile ? '4rem' : '5rem',
-  gap: isMobile ? '2rem' : '3rem'
-}}>
-  {/* BASED - di kiri */}
+  {/* Baris 3: BASED + Foto + IN + INDONESIA */}
   <div style={{
-    flex: 1,
-    textAlign: 'left'
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    gap: isMobile ? '2rem' : '3rem',
+    width: '100%'
   }}>
-    <h2 style={{
-      color: 'white',
-      fontSize: isMobile ? '2.5rem' : '3.5rem',
-      fontWeight: '900',
-      textTransform: 'uppercase',
-      fontFamily: 'Helvetica, Arial, sans-serif',
-      letterSpacing: '-1px',
-      margin: 0,
-      lineHeight: 1
-    }}>
-      BASED
-    </h2>
-  </div>
-
-  {/* Foto dengan Angka 03 di tengah */}
-  <div style={{
-    position: 'relative',
-    width: isMobile ? '100px' : '140px',
-    height: isMobile ? '70px' : '100px'
-  }}>
+    {/* BASED */}
     <div style={{
-      width: '100%',
-      height: '100%',
-      borderRadius: '8px',
-      overflow: 'hidden',
-      border: '1px solid rgba(255, 255, 255, 0.3)',
-      backgroundColor: '#222'
+      flex: 1,
+      textAlign: 'left'
     }}>
-      <img 
-        src="images/5.jpg" 
-        alt="Based"
-        style={{
-          width: '100%',
-          height: '100%',
-          objectFit: 'cover',
-          display: 'block'
-        }}
-      />
+      <h2 style={{
+        color: 'white',
+        fontSize: isMobile ? '5rem' : '7rem',
+        fontWeight: '900',
+        textTransform: 'uppercase',
+        fontFamily: 'Helvetica, Arial, sans-serif',
+        letterSpacing: '-3px',
+        margin: 0,
+        lineHeight: 0.8
+      }}>
+        BASED
+      </h2>
     </div>
-    {/* Angka 03 di bawah foto */}
+
+    {/* Container Foto + Angka 03 */}
     <div style={{
-      position: 'absolute',
-      bottom: '-1.2rem',
-      right: '0.3rem',
-      color: 'rgba(255, 255, 255, 0.7)',
-      fontSize: isMobile ? '0.9rem' : '1.1rem',
-      fontWeight: '400',
-      fontFamily: 'Helvetica, Arial, sans-serif',
-      letterSpacing: '1px'
+      position: 'relative',
+      display: 'flex',
+      alignItems: 'flex-end'
     }}>
-      03
+      {/* Foto */}
+      <div style={{
+        width: isMobile ? '140px' : '180px',
+        height: isMobile ? '5rem' : '7rem',
+        borderRadius: '10px',
+        overflow: 'hidden',
+        border: '1px solid rgba(255, 255, 255, 0.3)',
+        backgroundColor: '#222'
+      }}>
+        <img 
+          src="images/5.jpg" 
+          alt="Based"
+          style={{
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            display: 'block'
+          }}
+        />
+      </div>
+      
+      {/* Angka 03 di samping bawah */}
+      <div style={{
+        position: 'absolute',
+        bottom: '-0.8rem',
+        right: '-1.5rem',
+        color: 'rgba(255, 255, 255, 0.7)',
+        fontSize: isMobile ? '1rem' : '1.2rem',
+        fontWeight: '400',
+        fontFamily: 'Helvetica, Arial, sans-serif',
+        letterSpacing: '1px'
+      }}>
+        03
+      </div>
     </div>
-  </div>
 
-  {/* IN - di tengah */}
-  <div style={{
-    flex: 1,
-    textAlign: 'center'
-  }}>
-    <h2 style={{
-      color: 'white',
-      fontSize: isMobile ? '2.5rem' : '3.5rem',
-      fontWeight: '900',
-      textTransform: 'uppercase',
-      fontFamily: 'Helvetica, Arial, sans-serif',
-      letterSpacing: '-1px',
-      margin: 0,
-      lineHeight: 1
+    {/* IN */}
+    <div style={{
+      flex: 1,
+      textAlign: 'center'
     }}>
-      IN
-    </h2>
-  </div>
+      <h2 style={{
+        color: 'white',
+        fontSize: isMobile ? '5rem' : '7rem',
+        fontWeight: '900',
+        textTransform: 'uppercase',
+        fontFamily: 'Helvetica, Arial, sans-serif',
+        letterSpacing: '-3px',
+        margin: 0,
+        lineHeight: 0.8
+      }}>
+        IN
+      </h2>
+    </div>
 
-  {/* INDONESIA - di kanan */}
-  <div style={{
-    flex: 1,
-    textAlign: 'right'
-  }}>
-    <h2 style={{
-      color: 'white',
-      fontSize: isMobile ? '2.5rem' : '3.5rem',
-      fontWeight: '900',
-      textTransform: 'uppercase',
-      fontFamily: 'Helvetica, Arial, sans-serif',
-      letterSpacing: '-1px',
-      margin: 0,
-      lineHeight: 1
+    {/* INDONESIA */}
+    <div style={{
+      flex: 1,
+      textAlign: 'right'
     }}>
-      INDONESIA
-    </h2>
+      <h2 style={{
+        color: 'white',
+        fontSize: isMobile ? '5rem' : '7rem',
+        fontWeight: '900',
+        textTransform: 'uppercase',
+        fontFamily: 'Helvetica, Arial, sans-serif',
+        letterSpacing: '-3px',
+        margin: 0,
+        lineHeight: 0.8
+      }}>
+        INDONESIA
+      </h2>
+    </div>
   </div>
 </div>
 
@@ -4330,6 +4323,7 @@ export default function HomePage(): React.JSX.Element {
     </div>
   );
 }
+
 
 
 
