@@ -3068,128 +3068,302 @@ export default function HomePage(): React.JSX.Element {
   position: 'relative'
 }}>
   
-  {/* PRODUCT AND Image Section - DI BAWAH JUDUL WEBSITE */}
+ {/* PRODUCT AND Image Section - DI BAWAH JUDUL WEBSITE */}
+<div style={{
+  width: '100%',
+  padding: isMobile ? '1.5rem' : '3rem',
+  marginTop: isMobile ? '1rem' : '2rem',
+  boxSizing: 'border-box',
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'center'
+}}>
   <div style={{
-    width: '100%',
-    padding: isMobile ? '1.5rem' : '3rem',
-    marginTop: isMobile ? '1rem' : '2rem',
-    boxSizing: 'border-box',
     display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center'
+    alignItems: 'center',
+    gap: isMobile ? '4rem' : '6rem',
+    maxWidth: '1200px',
+    width: '100%'
   }}>
+    {/* PRODUCT */}
     <div style={{
+      flex: 1,
+      textAlign: 'right',
+      height: isMobile ? '5rem' : '7rem',
       display: 'flex',
       alignItems: 'center',
-      gap: isMobile ? '4rem' : '6rem',
-      maxWidth: '1200px',
-      width: '100%'
+      justifyContent: 'flex-end'
     }}>
-      {/* PRODUCT - Font lebih besar, huruf mepet */}
-      <div style={{
-        flex: 1,
-        textAlign: 'right',
-        height: isMobile ? '5rem' : '7rem', // Tinggi tetap
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'flex-end'
+      <h2 style={{
+        color: 'white',
+        fontSize: isMobile ? '5rem' : '7rem',
+        fontWeight: '900',
+        textTransform: 'uppercase',
+        fontFamily: 'Helvetica, Arial, sans-serif',
+        letterSpacing: '-3px',
+        margin: 0,
+        lineHeight: 0.8,
+        padding: 0
       }}>
-        <h2 style={{
-          color: 'white',
-          fontSize: isMobile ? '5rem' : '7rem', // Font lebih besar
-          fontWeight: '900',
-          textTransform: 'uppercase',
-          fontFamily: 'Formula Condensed',
-          letterSpacing: '-3px', // Huruf sangat mepet
-          margin: 0,
-          lineHeight: 0.8,
-          padding: 0
-        }}>
-          PRODUCT
-        </h2>
-      </div>
+        PRODUCT
+      </h2>
+    </div>
 
-      {/* AND - Font lebih besar, huruf mepet */}
-      <div style={{
-        flex: 1,
-        textAlign: 'left',
-        height: isMobile ? '5rem' : '7rem', // Tinggi sama dengan PRODUCT
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'flex-start'
+    {/* AND */}
+    <div style={{
+      flex: 1,
+      textAlign: 'left',
+      height: isMobile ? '5rem' : '7rem',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'flex-start'
+    }}>
+      <h2 style={{
+        color: 'white',
+        fontSize: isMobile ? '5rem' : '7rem',
+        fontWeight: '900',
+        textTransform: 'uppercase',
+        fontFamily: 'Helvetica, Arial, sans-serif',
+        letterSpacing: '-3px',
+        margin: 0,
+        lineHeight: 0.8,
+        padding: 0
       }}>
-        <h2 style={{
-          color: 'white',
-          fontSize: isMobile ? '5rem' : '7rem', // Font lebih besar
-          fontWeight: '900',
-          textTransform: 'uppercase',
-          fontFamily: 'Formula Condensed',
-          letterSpacing: '-3px', // Huruf sangat mepet
-          margin: 0,
-          lineHeight: 0.8,
-          padding: 0
-        }}>
-          AND
-        </h2>
-      </div>
+        AND
+      </h2>
+    </div>
 
-      {/* Container Gambar + Angka */}
+    {/* Container Gambar + Angka 01 */}
+    <div style={{
+      flex: 1.5,
+      display: 'flex',
+      alignItems: 'center',
+      height: isMobile ? '5rem' : '7rem',
+      gap: '0.8rem'
+    }}>
       <div style={{
-        flex: 1.5,
-        display: 'flex',
-        alignItems: 'center', // Vertikal center dengan teks
-        height: isMobile ? '5rem' : '7rem', // Tinggi sama dengan teks
-        gap: '0.8rem' // Jarak antara gambar dan angka
+        width: isMobile ? '140px' : '180px',
+        height: isMobile ? '5rem' : '7rem',
+        borderRadius: '10px',
+        overflow: 'hidden',
+        border: '1px solid rgba(255, 255, 255, 0.3)',
+        backgroundColor: '#222',
+        position: 'relative'
       }}>
-        {/* Gambar - Tinggi sama dengan teks */}
+        <img 
+          src="images/5.jpg" 
+          alt="Product Image"
+          style={{
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            display: 'block'
+          }}
+        />
+        {/* Angka 02 di bawah foto */}
         <div style={{
-          width: isMobile ? '140px' : '180px',
-          height: isMobile ? '5rem' : '7rem', // TINGGI SAMA DENGAN TEKS
-          borderRadius: '10px',
-          overflow: 'hidden',
-          border: '1px solid rgba(255, 255, 255, 0.3)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          backgroundColor: '#222' // Fallback background
-        }}>
-          <img 
-            src="images/5.jpg" 
-            alt="Product Image"
-            style={{
-              width: '100%',
-              height: '100%',
-              objectFit: 'cover',
-              display: 'block'
-            }}
-            onError={(e) => {
-              e.currentTarget.style.backgroundColor = '#333';
-              e.currentTarget.style.display = 'flex';
-              e.currentTarget.style.alignItems = 'center';
-              e.currentTarget.style.justifyContent = 'center';
-              e.currentTarget.style.color = 'white';
-              e.currentTarget.innerHTML = '<div style="padding: 1rem; font-weight: bold;">IMG</div>';
-            }}
-          />
-        </div>
-
-        {/* Angka 01 kecil di samping gambar */}
-        <div style={{
+          position: 'absolute',
+          bottom: '-1.5rem',
+          right: '0.5rem',
           color: 'rgba(255, 255, 255, 0.7)',
-          fontSize: isMobile ? '1.2rem' : '1.5rem',
+          fontSize: isMobile ? '1rem' : '1.2rem',
           fontWeight: '400',
-          fontFamily: 'Formula Condensed',
-          letterSpacing: '1px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          height: '100%' // Tinggi sama dengan container
+          fontFamily: 'Helvetica, Arial, sans-serif',
+          letterSpacing: '1px'
         }}>
           01
         </div>
       </div>
     </div>
   </div>
+</div>
+
+{/* Baris 2: VISUAL DESIGNER dengan foto dan angka 02 */}
+<div style={{
+  width: '100%',
+  padding: isMobile ? '1rem 1.5rem' : '2rem 3rem',
+  boxSizing: 'border-box',
+  display: 'flex',
+  justifyContent: 'flex-end', // Geser ke kanan
+  marginTop: isMobile ? '3rem' : '4rem'
+}}>
+  <div style={{
+    display: 'flex',
+    alignItems: 'center',
+    gap: isMobile ? '2rem' : '3rem',
+    maxWidth: '800px',
+    width: '100%'
+  }}>
+    {/* Teks VISUAL DESIGNER */}
+    <div style={{
+      flex: 1,
+      textAlign: 'right'
+    }}>
+      <h2 style={{
+        color: 'white',
+        fontSize: isMobile ? '2.5rem' : '3.5rem',
+        fontWeight: '900',
+        textTransform: 'uppercase',
+        fontFamily: 'Helvetica, Arial, sans-serif',
+        letterSpacing: '-1px',
+        margin: 0,
+        lineHeight: 1
+      }}>
+        VISUAL<br/>DESIGNER
+      </h2>
+    </div>
+
+    {/* Foto dan Angka 02 */}
+    <div style={{
+      position: 'relative',
+      width: isMobile ? '100px' : '140px',
+      height: isMobile ? '70px' : '100px'
+    }}>
+      <div style={{
+        width: '100%',
+        height: '100%',
+        borderRadius: '8px',
+        overflow: 'hidden',
+        border: '1px solid rgba(255, 255, 255, 0.3)',
+        backgroundColor: '#222'
+      }}>
+        <img 
+          src="images/5.jpg" 
+          alt="Visual Designer"
+          style={{
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            display: 'block'
+          }}
+        />
+      </div>
+      {/* Angka 02 di bawah foto */}
+      <div style={{
+        position: 'absolute',
+        bottom: '-1.2rem',
+        right: '0.3rem',
+        color: 'rgba(255, 255, 255, 0.7)',
+        fontSize: isMobile ? '0.9rem' : '1.1rem',
+        fontWeight: '400',
+        fontFamily: 'Helvetica, Arial, sans-serif',
+        letterSpacing: '1px'
+      }}>
+        02
+      </div>
+    </div>
+  </div>
+</div>
+
+{/* Baris 3: BASED + foto + IN + INDONESIA */}
+<div style={{
+  width: '100%',
+  padding: isMobile ? '1rem 1.5rem' : '2rem 3rem',
+  boxSizing: 'border-box',
+  display: 'flex',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  marginTop: isMobile ? '4rem' : '5rem',
+  gap: isMobile ? '2rem' : '3rem'
+}}>
+  {/* BASED - di kiri */}
+  <div style={{
+    flex: 1,
+    textAlign: 'left'
+  }}>
+    <h2 style={{
+      color: 'white',
+      fontSize: isMobile ? '2.5rem' : '3.5rem',
+      fontWeight: '900',
+      textTransform: 'uppercase',
+      fontFamily: 'Helvetica, Arial, sans-serif',
+      letterSpacing: '-1px',
+      margin: 0,
+      lineHeight: 1
+    }}>
+      BASED
+    </h2>
+  </div>
+
+  {/* Foto dengan Angka 03 di tengah */}
+  <div style={{
+    position: 'relative',
+    width: isMobile ? '100px' : '140px',
+    height: isMobile ? '70px' : '100px'
+  }}>
+    <div style={{
+      width: '100%',
+      height: '100%',
+      borderRadius: '8px',
+      overflow: 'hidden',
+      border: '1px solid rgba(255, 255, 255, 0.3)',
+      backgroundColor: '#222'
+    }}>
+      <img 
+        src="images/5.jpg" 
+        alt="Based"
+        style={{
+          width: '100%',
+          height: '100%',
+          objectFit: 'cover',
+          display: 'block'
+        }}
+      />
+    </div>
+    {/* Angka 03 di bawah foto */}
+    <div style={{
+      position: 'absolute',
+      bottom: '-1.2rem',
+      right: '0.3rem',
+      color: 'rgba(255, 255, 255, 0.7)',
+      fontSize: isMobile ? '0.9rem' : '1.1rem',
+      fontWeight: '400',
+      fontFamily: 'Helvetica, Arial, sans-serif',
+      letterSpacing: '1px'
+    }}>
+      03
+    </div>
+  </div>
+
+  {/* IN - di tengah */}
+  <div style={{
+    flex: 1,
+    textAlign: 'center'
+  }}>
+    <h2 style={{
+      color: 'white',
+      fontSize: isMobile ? '2.5rem' : '3.5rem',
+      fontWeight: '900',
+      textTransform: 'uppercase',
+      fontFamily: 'Helvetica, Arial, sans-serif',
+      letterSpacing: '-1px',
+      margin: 0,
+      lineHeight: 1
+    }}>
+      IN
+    </h2>
+  </div>
+
+  {/* INDONESIA - di kanan */}
+  <div style={{
+    flex: 1,
+    textAlign: 'right'
+  }}>
+    <h2 style={{
+      color: 'white',
+      fontSize: isMobile ? '2.5rem' : '3.5rem',
+      fontWeight: '900',
+      textTransform: 'uppercase',
+      fontFamily: 'Helvetica, Arial, sans-serif',
+      letterSpacing: '-1px',
+      margin: 0,
+      lineHeight: 1
+    }}>
+      INDONESIA
+    </h2>
+  </div>
+</div>
+
 
 
   {/* Spacer kecil sebelum konten berikutnya */}
@@ -4156,6 +4330,7 @@ export default function HomePage(): React.JSX.Element {
     </div>
   );
 }
+
 
 
 
