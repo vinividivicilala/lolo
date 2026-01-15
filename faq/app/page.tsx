@@ -141,45 +141,6 @@ export default function HomePage(): React.JSX.Element {
   const chatbotPopupRef = useRef<HTMLDivElement>(null);
 
 
-// State untuk efek sandi morse
-const [morseTextProduct, setMorseTextProduct] = useState("PRODUCT");
-const [morseTextAnd, setMorseTextAnd] = useState("AND");
-
-// Karakter acak untuk sandi morse
-const morseChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%&*";
-
-// Efek untuk sandi morse saat loading
-useEffect(() => {
-  let interval: NodeJS.Timeout;
-
-  if (isLoading) {
-    interval = setInterval(() => {
-      // Generate sandi morse untuk PRODUCT (7 karakter)
-      const randomProduct = Array(7)
-        .fill(0)
-        .map(() => morseChars[Math.floor(Math.random() * morseChars.length)])
-        .join('');
-      setMorseTextProduct(randomProduct);
-
-      // Generate sandi morse untuk AND (3 karakter)
-      const randomAnd = Array(3)
-        .fill(0)
-        .map(() => morseChars[Math.floor(Math.random() * morseChars.length)])
-        .join('');
-      setMorseTextAnd(randomAnd);
-    }, 150); // Ganti setiap 150ms
-  } else {
-    // Set kembali ke teks asli
-    setMorseTextProduct("PRODUCT");
-    setMorseTextAnd("AND");
-  }
-
-  return () => {
-    if (interval) clearInterval(interval);
-  };
-}, [isLoading]);
-
-
 
 
 
@@ -3120,79 +3081,77 @@ useEffect(() => {
     <div style={{
       display: 'flex',
       alignItems: 'center',
-      gap: isMobile ? '1rem' : '2rem',
+      gap: isMobile ? '4rem' : '6rem',
       maxWidth: '1200px',
       width: '100%'
     }}>
-      {/* PRODUCT - Efek sandi morse */}
+      {/* PRODUCT - Font lebih besar, huruf mepet */}
       <div style={{
         flex: 1,
         textAlign: 'right',
-        height: isMobile ? '5rem' : '7rem',
+        height: isMobile ? '5rem' : '7rem', // Tinggi tetap
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'flex-end'
       }}>
         <h2 style={{
           color: 'white',
-          fontSize: isMobile ? '5rem' : '7rem',
+          fontSize: isMobile ? '5rem' : '7rem', // Font lebih besar
           fontWeight: '900',
           textTransform: 'uppercase',
-          fontFamily: 'Helvetica, Arial, sans-serif',
-          letterSpacing: '-3px',
-          margin: 0,
-          lineHeight: 0.8,
-          padding: 0,
-          minWidth: isMobile ? '200px' : '280px'
-        }}>
-          {isLoading ? morseTextProduct : "PRODUCT"}
-        </h2>
-      </div>
-
-      {/* AND - Efek sandi morse */}
-      <div style={{
-        flex: 0.5,
-        textAlign: 'center',
-        height: isMobile ? '5rem' : '7rem',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        minWidth: isMobile ? '80px' : '120px'
-      }}>
-        <h2 style={{
-          color: 'white',
-          fontSize: isMobile ? '5rem' : '7rem',
-          fontWeight: '900',
-          textTransform: 'uppercase',
-          fontFamily: 'Helvetica, Arial, sans-serif',
-          letterSpacing: '-3px',
+          fontFamily: 'Formula Condensed',
+          letterSpacing: '-3px', // Huruf sangat mepet
           margin: 0,
           lineHeight: 0.8,
           padding: 0
         }}>
-          {isLoading ? morseTextAnd : "AND"}
+          PRODUCT
+        </h2>
+      </div>
+
+      {/* AND - Font lebih besar, huruf mepet */}
+      <div style={{
+        flex: 1,
+        textAlign: 'left',
+        height: isMobile ? '5rem' : '7rem', // Tinggi sama dengan PRODUCT
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'flex-start'
+      }}>
+        <h2 style={{
+          color: 'white',
+          fontSize: isMobile ? '5rem' : '7rem', // Font lebih besar
+          fontWeight: '900',
+          textTransform: 'uppercase',
+          fontFamily: 'Formula Condensed',
+          letterSpacing: '-3px', // Huruf sangat mepet
+          margin: 0,
+          lineHeight: 0.8,
+          padding: 0
+        }}>
+          AND
         </h2>
       </div>
 
       {/* Container Gambar + Angka */}
       <div style={{
-        flex: 1.2,
+        flex: 1.5,
         display: 'flex',
-        alignItems: 'center',
-        height: isMobile ? '5rem' : '7rem',
-        gap: '0.8rem'
+        alignItems: 'center', // Vertikal center dengan teks
+        height: isMobile ? '5rem' : '7rem', // Tinggi sama dengan teks
+        gap: '0.8rem' // Jarak antara gambar dan angka
       }}>
-        {/* Gambar */}
+        {/* Gambar - Tinggi sama dengan teks */}
         <div style={{
           width: isMobile ? '140px' : '180px',
-          height: isMobile ? '5rem' : '7rem',
+          height: isMobile ? '5rem' : '7rem', // TINGGI SAMA DENGAN TEKS
           borderRadius: '10px',
           overflow: 'hidden',
           border: '1px solid rgba(255, 255, 255, 0.3)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          backgroundColor: '#222'
+          backgroundColor: '#222' // Fallback background
         }}>
           <img 
             src="images/5.jpg" 
@@ -3214,24 +3173,23 @@ useEffect(() => {
           />
         </div>
 
-        {/* Angka 01 kecil */}
+        {/* Angka 01 kecil di samping gambar */}
         <div style={{
           color: 'rgba(255, 255, 255, 0.7)',
           fontSize: isMobile ? '1.2rem' : '1.5rem',
           fontWeight: '400',
-          fontFamily: 'Helvetica, Arial, sans-serif',
+          fontFamily: 'Formula Condensed',
           letterSpacing: '1px',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          height: '100%'
+          height: '100%' // Tinggi sama dengan container
         }}>
           01
         </div>
       </div>
     </div>
   </div>
-
 
 
   {/* Spacer kecil sebelum konten berikutnya */}
@@ -4198,6 +4156,7 @@ useEffect(() => {
     </div>
   );
 }
+
 
 
 
