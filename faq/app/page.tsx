@@ -140,56 +140,56 @@ export default function HomePage(): React.JSX.Element {
   const userDropdownRef = useRef<HTMLDivElement>(null);
   const chatbotPopupRef = useRef<HTMLDivElement>(null);
 
-// State untuk efek sandi morse slow motion
-const [morseProduct, setMorseProduct] = useState("");
-const [morseAnd, setMorseAnd] = useState("");
-const [morseIndex, setMorseIndex] = useState(0);
 
-// Efek untuk animasi sandi morse slow motion
+// State untuk efek sandi morse
+const [morseTextProduct, setMorseTextProduct] = useState("PRODUCT");
+const [morseTextAnd, setMorseTextAnd] = useState("AND");
+
+// Karakter acak untuk sandi morse
+const morseChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%&*";
+
+// Efek untuk sandi morse saat loading
 useEffect(() => {
-  if (isLoading) {
-    const targetProduct = "PRODUCT";
-    const targetAnd = "AND";
-    
-    // Slow motion: ubah satu huruf per 300ms
-    const morseInterval = setInterval(() => {
-      setMorseIndex(prev => {
-        const newIndex = prev + 1;
-        
-        // Update PRODUCT - per huruf
-        if (newIndex <= targetProduct.length) {
-          const currentProduct = targetProduct.slice(0, newIndex);
-          setMorseProduct(currentProduct);
-        }
-        
-        // Update AND - mulai setelah PRODUCT selesai
-        if (newIndex > targetProduct.length) {
-          const andIndex = newIndex - targetProduct.length;
-          if (andIndex <= targetAnd.length) {
-            const currentAnd = targetAnd.slice(0, andIndex);
-            setMorseAnd(currentAnd);
-          }
-        }
-        
-        // Stop ketika semua huruf sudah ditampilkan
-        if (newIndex > targetProduct.length + targetAnd.length) {
-          clearInterval(morseInterval);
-          return prev;
-        }
-        
-        return newIndex;
-      });
-    }, 300); // 300ms per huruf - SLOW MOTION
+  let interval: NodeJS.Timeout;
 
-    return () => {
-      clearInterval(morseInterval);
-    };
+  if (isLoading) {
+    interval = setInterval(() => {
+      // Generate sandi morse untuk PRODUCT (7 karakter)
+      const randomProduct = Array(7)
+        .fill(0)
+        .map(() => morseChars[Math.floor(Math.random() * morseChars.length)])
+        .join('');
+      setMorseTextProduct(randomProduct);
+
+      // Generate sandi morse untuk AND (3 karakter)
+      const randomAnd = Array(3)
+        .fill(0)
+        .map(() => morseChars[Math.floor(Math.random() * morseChars.length)])
+        .join('');
+      setMorseTextAnd(randomAnd);
+    }, 150); // Ganti setiap 150ms
   } else {
-    // Set teks final setelah loading selesai
-    setMorseProduct("PRODUCT");
-    setMorseAnd("AND");
+    // Set kembali ke teks asli
+    setMorseTextProduct("PRODUCT");
+    setMorseTextAnd("AND");
   }
+
+  return () => {
+    if (interval) clearInterval(interval);
+  };
 }, [isLoading]);
+
+
+
+
+
+
+
+
+
+
+
+  
 
   // Animasi loading text
   const loadingTexts = [
@@ -3107,7 +3107,6 @@ useEffect(() => {
   position: 'relative'
 }}>
   
-  
   {/* PRODUCT AND Image Section - DI BAWAH JUDUL WEBSITE */}
   <div style={{
     width: '100%',
@@ -3121,11 +3120,11 @@ useEffect(() => {
     <div style={{
       display: 'flex',
       alignItems: 'center',
-      gap: isMobile ? '1rem' : '2rem', // Jarak dekat antara AND dan gambar
+      gap: isMobile ? '1rem' : '2rem',
       maxWidth: '1200px',
       width: '100%'
     }}>
-      {/* PRODUCT - Dengan efek sandi morse slow motion */}
+      {/* PRODUCT - Efek sandi morse */}
       <div style={{
         flex: 1,
         textAlign: 'right',
@@ -3144,13 +3143,13 @@ useEffect(() => {
           margin: 0,
           lineHeight: 0.8,
           padding: 0,
-          minWidth: isMobile ? '200px' : '280px' // Lebar tetap
+          minWidth: isMobile ? '200px' : '280px'
         }}>
-          {morseProduct}
+          {isLoading ? morseTextProduct : "PRODUCT"}
         </h2>
       </div>
 
-      {/* AND - Dengan efek sandi morse slow motion */}
+      {/* AND - Efek sandi morse */}
       <div style={{
         flex: 0.5,
         textAlign: 'center',
@@ -3158,7 +3157,7 @@ useEffect(() => {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        minWidth: isMobile ? '80px' : '120px' // Lebar tetap
+        minWidth: isMobile ? '80px' : '120px'
       }}>
         <h2 style={{
           color: 'white',
@@ -3171,7 +3170,7 @@ useEffect(() => {
           lineHeight: 0.8,
           padding: 0
         }}>
-          {morseAnd}
+          {isLoading ? morseTextAnd : "AND"}
         </h2>
       </div>
 
@@ -4199,6 +4198,7 @@ useEffect(() => {
     </div>
   );
 }
+
 
 
 
