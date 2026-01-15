@@ -3044,102 +3044,6 @@ export default function HomePage(): React.JSX.Element {
             )}
           </motion.button>
         </div>
-
-{/* PRODUCT AND Image Section - POSISI FIXED UNTUK SCROLL */}
-<div style={{
-  position: 'fixed', // Tetap di posisi saat scroll
-  top: isMobile ? '12rem' : '15rem', // Posisi di bawah header
-  left: 0,
-  width: '100%',
-  padding: isMobile ? '1rem' : '2rem',
-  boxSizing: 'border-box',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  zIndex: 50,
-  backgroundColor: 'transparent'
-}}>
-  {/* Container untuk teks dan gambar */}
-  <div style={{
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: isMobile ? '0.5rem' : '1rem', // Jarak sangat dekat
-    width: '100%',
-    maxWidth: '1200px'
-  }}>
-    {/* Teks PRODUCT */}
-    <div>
-      <h2 style={{
-        color: 'white',
-        fontSize: isMobile ? '3.5rem' : '5rem',
-        fontWeight: '900',
-        textTransform: 'uppercase',
-        fontFamily: 'Helvetica, Arial, sans-serif',
-        letterSpacing: '-1px', // Huruf sangat dekat (negatif)
-        margin: 0,
-        lineHeight: 0.8,
-        whiteSpace: 'nowrap'
-      }}>
-        PRODUCT
-      </h2>
-    </div>
-
-    {/* Teks AND */}
-    <div>
-      <h2 style={{
-        color: 'white',
-        fontSize: isMobile ? '3.5rem' : '5rem',
-        fontWeight: '900',
-        textTransform: 'uppercase',
-        fontFamily: 'Helvetica, Arial, sans-serif',
-        letterSpacing: '-1px', // Huruf sangat dekat (negatif)
-        margin: 0,
-        lineHeight: 0.8,
-        whiteSpace: 'nowrap'
-      }}>
-        AND
-      </h2>
-    </div>
-
-    {/* Gambar - ukuran tinggi sama dengan teks, lebar menyesuaikan */}
-    <div>
-      <div style={{
-        width: 'auto',
-        height: isMobile ? '4rem' : '5rem', // Tinggi sama dengan font size
-        borderRadius: '8px',
-        overflow: 'hidden',
-        border: '1px solid rgba(255, 255, 255, 0.3)',
-        marginLeft: isMobile ? '0.5rem' : '1rem'
-      }}>
-        <img 
-          src="images/5.jpg" 
-          alt="Product Image"
-          style={{
-            width: 'auto', // Biarkan lebar menyesuaikan
-            height: '100%',
-            objectFit: 'cover',
-            display: 'block'
-          }}
-          onError={(e) => {
-            e.currentTarget.style.backgroundColor = '#333';
-            e.currentTarget.style.display = 'flex';
-            e.currentTarget.style.alignItems = 'center';
-            e.currentTarget.style.justifyContent = 'center';
-            e.currentTarget.style.color = 'white';
-            e.currentTarget.innerHTML = '<div style="padding: 0.5rem; font-size: 0.8rem; font-weight: bold;">IMG</div>';
-          }}
-        />
-      </div>
-    </div>
-  </div>
-</div>
-
-{/* Spacer untuk mengimbangi tinggi section fixed */}
-<div style={{
-  height: isMobile ? '7rem' : '9rem', // Tinggi sama dengan section fixed
-  width: '100%'
-}} />
       </div>
 
 
@@ -3253,6 +3157,96 @@ export default function HomePage(): React.JSX.Element {
                     {sliderPosition === "index" ? "Index View" : "Grid View"}
                   </div>
                 </div>
+
+                {/* PRODUCT AND Image Section - DI KONTEN UTAMA */}
+<div style={{
+  width: '100%',
+  padding: isMobile ? '2rem 1rem' : '4rem 2rem',
+  marginTop: isMobile ? '2rem' : '4rem',
+  boxSizing: 'border-box',
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  justifyContent: 'center'
+}}>
+  {/* Container untuk PRODUCT, AND, dan gambar dalam satu baris */}
+  <div style={{
+    display: 'flex',
+    alignItems: 'center', // Vertikal sejajar
+    justifyContent: 'center',
+    width: '100%',
+    maxWidth: '1200px',
+    gap: isMobile ? '3rem' : '6rem' // Jarak jauh antara PRODUCT dan AND
+  }}>
+    {/* PRODUCT */}
+    <div>
+      <h2 style={{
+        color: 'white',
+        fontSize: isMobile ? '3.5rem' : '5rem',
+        fontWeight: '900',
+        textTransform: 'uppercase',
+        fontFamily: 'Helvetica, Arial, sans-serif',
+        letterSpacing: '0px', // Huruf mepet
+        margin: 0,
+        lineHeight: 1,
+        textAlign: 'right'
+      }}>
+        PRODUCT
+      </h2>
+    </div>
+
+    {/* AND */}
+    <div>
+      <h2 style={{
+        color: 'white',
+        fontSize: isMobile ? '3.5rem' : '5rem',
+        fontWeight: '900',
+        textTransform: 'uppercase',
+        fontFamily: 'Helvetica, Arial, sans-serif',
+        letterSpacing: '0px', // Huruf mepet
+        margin: 0,
+        lineHeight: 1,
+        textAlign: 'left'
+      }}>
+        AND
+      </h2>
+    </div>
+
+    {/* Gambar Horizontal */}
+    <div style={{
+      display: 'flex',
+      alignItems: 'center', // Vertikal sejajar dengan teks
+      height: isMobile ? '3.5rem' : '5rem' // Tinggi sama dengan teks
+    }}>
+      <div style={{
+        width: isMobile ? '200px' : '300px', // Lebar untuk horizontal
+        height: isMobile ? '80px' : '120px', // Tinggi lebih kecil dari lebar (horizontal)
+        borderRadius: '10px',
+        overflow: 'hidden',
+        border: '2px solid rgba(255, 255, 255, 0.3)'
+      }}>
+        <img 
+          src="images/5.jpg" 
+          alt="Product Image"
+          style={{
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            display: 'block'
+          }}
+          onError={(e) => {
+            e.currentTarget.style.backgroundColor = '#333';
+            e.currentTarget.style.display = 'flex';
+            e.currentTarget.style.alignItems: 'center';
+            e.currentTarget.style.justifyContent = 'center';
+            e.currentTarget.style.color = 'white';
+            e.currentTarget.innerHTML = '<div style="padding: 1rem; font-weight: bold;">IMAGE</div>';
+          }}
+        />
+      </div>
+    </div>
+  </div>
+</div>
 
                 {/* Teks MENURU dengan animasi Plus (+) */}
                 <motion.div
@@ -4101,6 +4095,7 @@ export default function HomePage(): React.JSX.Element {
     </div>
   );
 }
+
 
 
 
