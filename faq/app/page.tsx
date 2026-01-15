@@ -3049,209 +3049,215 @@ export default function HomePage(): React.JSX.Element {
 
 
       {/* Main Content Container */}
-      <div style={{
-        width: '100%',
-        paddingTop: isMobile ? '12rem' : '15rem',
-        boxSizing: 'border-box',
-        zIndex: 10,
-        position: 'relative'
-      }}>
-
-
-                        {/* PRODUCT AND Image Section - DI KONTEN UTAMA */}
 <div style={{
   width: '100%',
-  padding: isMobile ? '2rem 1rem' : '4rem 2rem',
-  marginTop: isMobile ? '2rem' : '4rem',
+  paddingTop: isMobile ? '12rem' : '15rem',
   boxSizing: 'border-box',
-  display: 'flex',
-  flexDirection: 'column',
-  alignItems: 'center',
-  justifyContent: 'center'
+  zIndex: 10,
+  position: 'relative'
 }}>
-  {/* Container untuk PRODUCT, AND, dan gambar dalam satu baris */}
+  
+  {/* PRODUCT AND Image Section - DI BAWAH JUDUL WEBSITE */}
   <div style={{
-    display: 'flex',
-    alignItems: 'center', // Vertikal sejajar
-    justifyContent: 'center',
     width: '100%',
-    maxWidth: '1200px',
-    gap: isMobile ? '3rem' : '6rem' // Jarak jauh antara PRODUCT dan AND
+    padding: isMobile ? '1rem' : '2rem',
+    marginTop: isMobile ? '0.5rem' : '1rem',
+    boxSizing: 'border-box',
+    display: 'flex',
+    justifyContent: 'center'
   }}>
-    {/* PRODUCT */}
-    <div>
-      <h2 style={{
-        color: 'white',
-        fontSize: isMobile ? '3.5rem' : '5rem',
-        fontWeight: '900',
-        textTransform: 'uppercase',
-        fontFamily: 'Helvetica, Arial, sans-serif',
-        letterSpacing: '0px', // Huruf mepet
-        margin: 0,
-        lineHeight: 1,
-        textAlign: 'right'
-      }}>
-        PRODUCT
-      </h2>
-    </div>
-
-    {/* AND */}
-    <div>
-      <h2 style={{
-        color: 'white',
-        fontSize: isMobile ? '3.5rem' : '5rem',
-        fontWeight: '900',
-        textTransform: 'uppercase',
-        fontFamily: 'Helvetica, Arial, sans-serif',
-        letterSpacing: '0px', // Huruf mepet
-        margin: 0,
-        lineHeight: 1,
-        textAlign: 'left'
-      }}>
-        AND
-      </h2>
-    </div>
-
-    {/* Gambar Horizontal */}
     <div style={{
       display: 'flex',
-      alignItems: 'center', // Vertikal sejajar dengan teks
-      height: isMobile ? '3.5rem' : '5rem' // Tinggi sama dengan teks
+      alignItems: 'center', // Vertikal sejajar
+      gap: isMobile ? '3rem' : '5rem', // Jarak jauh antara PRODUCT dan AND
+      maxWidth: '1200px',
+      width: '100%'
     }}>
+      {/* PRODUCT */}
       <div style={{
-        width: isMobile ? '200px' : '300px', // Lebar untuk horizontal
-        height: isMobile ? '80px' : '120px', // Tinggi lebih kecil dari lebar (horizontal)
-        borderRadius: '10px',
-        overflow: 'hidden',
-        border: '2px solid rgba(255, 255, 255, 0.3)'
+        flex: 1,
+        textAlign: 'right'
       }}>
-        <img 
-          src="images/5.jpg" 
-          alt="Product Image"
-          style={{
-            width: '100%',
-            height: '100%',
-            objectFit: 'cover',
-            display: 'block'
-          }}
-          onError={(e) => {
-            e.currentTarget.style.backgroundColor = '#333';
-            e.currentTarget.style.display = 'flex';
-            e.currentTarget.style.alignItems: 'center';
-            e.currentTarget.style.justifyContent = 'center';
-            e.currentTarget.style.color = 'white';
-            e.currentTarget.innerHTML = '<div style="padding: 1rem; font-weight: bold;">IMAGE</div>';
-          }}
-        />
+        <h2 style={{
+          color: 'white',
+          fontSize: isMobile ? '3.5rem' : '5rem',
+          fontWeight: '900',
+          textTransform: 'uppercase',
+          fontFamily: 'Helvetica, Arial, sans-serif',
+          letterSpacing: '0px', // Huruf mepet
+          margin: 0,
+          lineHeight: 1
+        }}>
+          PRODUCT
+        </h2>
+      </div>
+
+      {/* AND */}
+      <div style={{
+        flex: 1,
+        textAlign: 'left'
+      }}>
+        <h2 style={{
+          color: 'white',
+          fontSize: isMobile ? '3.5rem' : '5rem',
+          fontWeight: '900',
+          textTransform: 'uppercase',
+          fontFamily: 'Helvetica, Arial, sans-serif',
+          letterSpacing: '0px', // Huruf mepet
+          margin: 0,
+          lineHeight: 1
+        }}>
+          AND
+        </h2>
+      </div>
+
+      {/* Gambar Horizontal - Tinggi sejajar dengan teks */}
+      <div style={{
+        flex: 1.5,
+        display: 'flex',
+        justifyContent: 'flex-start',
+        alignItems: 'center', // Vertikal sejajar dengan teks
+        height: isMobile ? '3.5rem' : '5rem' // Tinggi sama dengan teks
+      }}>
+        <div style={{
+          width: isMobile ? '180px' : '250px', // Lebar untuk horizontal
+          height: isMobile ? '70px' : '100px', // Tinggi lebih kecil dari lebar
+          borderRadius: '8px',
+          overflow: 'hidden',
+          border: '1px solid rgba(255, 255, 255, 0.3)'
+        }}>
+          <img 
+            src="images/5.jpg" 
+            alt="Product Image"
+            style={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+              display: 'block'
+            }}
+            onError={(e) => {
+              e.currentTarget.style.backgroundColor = '#333';
+              e.currentTarget.style.display = 'flex';
+              e.currentTarget.style.alignItems = 'center';
+              e.currentTarget.style.justifyContent = 'center';
+              e.currentTarget.style.color = 'white';
+              e.currentTarget.innerHTML = '<div style="padding: 0.5rem; font-weight: bold;">IMG</div>';
+            }}
+          />
+        </div>
       </div>
     </div>
   </div>
-</div>
 
+  {/* Spacer kecil sebelum konten berikutnya */}
+  <div style={{
+    height: isMobile ? '3rem' : '4rem',
+    width: '100%'
+  }} />
 
-
-        
-        {/* AnimatePresence untuk transisi antara view */}
-        <AnimatePresence mode="wait">
-          {currentView === "main" && (
-            <motion.div
-              key="main-view"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.5 }}
-            >
-              {/* Container untuk Tombol Slider dan Teks MENURU */}
-              <div style={{
+  {/* AnimatePresence untuk transisi antara view */}
+  <AnimatePresence mode="wait">
+    {currentView === "main" && (
+      <motion.div
+        key="main-view"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.5 }}
+      >
+        {/* Container untuk Tombol Slider dan Teks MENURU */}
+        <div style={{
+          position: 'relative',
+          marginTop: isMobile ? '4rem' : '5rem',
+          marginBottom: isMobile ? '4rem' : '6rem',
+          paddingLeft: isMobile ? '2rem' : '4rem',
+          paddingRight: isMobile ? '2rem' : '4rem',
+          display: 'flex',
+          flexDirection: isMobile ? 'column' : 'row',
+          justifyContent: 'space-between',
+          alignItems: isMobile ? 'flex-start' : 'center',
+          gap: isMobile ? '2rem' : '0'
+        }}>
+          {/* Tombol Slider Index/Grid di kiri */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '1.5rem'
+          }}>
+            <motion.button
+              onClick={toggleSlider}
+              style={{
+                width: '120px',
+                height: '50px',
+                backgroundColor: '#0050B7',
+                border: 'none',
+                borderRadius: '25px',
+                cursor: 'pointer',
+                padding: 0,
                 position: 'relative',
-                marginTop: isMobile ? '4rem' : '5rem',
-                marginBottom: isMobile ? '4rem' : '6rem',
-                paddingLeft: isMobile ? '2rem' : '4rem',
-                paddingRight: isMobile ? '2rem' : '4rem',
                 display: 'flex',
-                flexDirection: isMobile ? 'column' : 'row',
+                alignItems: 'center',
+                overflow: 'hidden'
+              }}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <div style={{
+                position: 'absolute',
+                width: '100%',
+                height: '100%',
+                display: 'flex',
                 justifyContent: 'space-between',
-                alignItems: isMobile ? 'flex-start' : 'center',
-                gap: isMobile ? '2rem' : '0'
+                alignItems: 'center',
+                padding: '0 15px',
+                boxSizing: 'border-box'
               }}>
-                {/* Tombol Slider Index/Grid di kiri */}
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '1.5rem'
+                <span style={{
+                  color: 'white',
+                  fontSize: '1rem',
+                  fontWeight: '700',
+                  fontFamily: 'Helvetica, Arial, sans-serif',
+                  opacity: sliderPosition === "index" ? 1 : 0.5
                 }}>
-                  <motion.button
-                    onClick={toggleSlider}
-                    style={{
-                      width: '120px',
-                      height: '50px',
-                      backgroundColor: '#0050B7',
-                      border: 'none',
-                      borderRadius: '25px',
-                      cursor: 'pointer',
-                      padding: 0,
-                      position: 'relative',
-                      display: 'flex',
-                      alignItems: 'center',
-                      overflow: 'hidden'
-                    }}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    <div style={{
-                      position: 'absolute',
-                      width: '100%',
-                      height: '100%',
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      padding: '0 15px',
-                      boxSizing: 'border-box'
-                    }}>
-                      <span style={{
-                        color: 'white',
-                        fontSize: '1rem',
-                        fontWeight: '700',
-                        fontFamily: 'Helvetica, Arial, sans-serif',
-                        opacity: sliderPosition === "index" ? 1 : 0.5
-                      }}>
-                        INDEX
-                      </span>
-                      <span style={{
-                        color: 'white',
-                        fontSize: '1rem',
-                        fontWeight: '700',
-                        fontFamily: 'Helvetica, Arial, sans-serif',
-                        opacity: sliderPosition === "grid" ? 1 : 0.5
-                      }}>
-                        GRID
-                      </span>
-                    </div>
-                    
-                    <motion.div
-                      animate={{ x: sliderPosition === "index" ? 15 : 65 }}
-                      transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                      style={{
-                        width: '35px',
-                        height: '35px',
-                        backgroundColor: '#00FF00',
-                        borderRadius: '50%',
-                        position: 'absolute',
-                        left: '7px',
-                        boxShadow: '0 0 15px rgba(0, 255, 0, 0.7)'
-                      }}
-                    />
-                  </motion.button>
+                  INDEX
+                </span>
+                <span style={{
+                  color: 'white',
+                  fontSize: '1rem',
+                  fontWeight: '700',
+                  fontFamily: 'Helvetica, Arial, sans-serif',
+                  opacity: sliderPosition === "grid" ? 1 : 0.5
+                }}>
+                  GRID
+                </span>
+              </div>
+              
+              <motion.div
+                animate={{ x: sliderPosition === "index" ? 15 : 65 }}
+                transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                style={{
+                  width: '35px',
+                  height: '35px',
+                  backgroundColor: '#00FF00',
+                  borderRadius: '50%',
+                  position: 'absolute',
+                  left: '7px',
+                  boxShadow: '0 0 15px rgba(0, 255, 0, 0.7)'
+                }}
+              />
+            </motion.button>
 
-                  <div style={{
-                    color: 'white',
-                    fontSize: '1.1rem',
-                    fontWeight: '600',
-                    fontFamily: 'Helvetica, Arial, sans-serif'
-                  }}>
-                    {sliderPosition === "index" ? "Index View" : "Grid View"}
-                  </div>
-                </div>
+            <div style={{
+              color: 'white',
+              fontSize: '1.1rem',
+              fontWeight: '600',
+              fontFamily: 'Helvetica, Arial, sans-serif'
+            }}>
+              {sliderPosition === "index" ? "Index View" : "Grid View"}
+            </div>
+          </div>
+
+
 
 
                 {/* Teks MENURU dengan animasi Plus (+) */}
@@ -4101,6 +4107,7 @@ export default function HomePage(): React.JSX.Element {
     </div>
   );
 }
+
 
 
 
