@@ -3079,12 +3079,13 @@ export default function HomePage(): React.JSX.Element {
   gap: isMobile ? '3rem' : '4rem'
 }}>
   
-  {/* Baris 1: PRODUCT + AND + Foto + 01 */}
+  {/* Baris 1: PRODUCT + AND + Foto + 01 - Foto lebih dekat */}
   <div style={{
     display: 'flex',
     alignItems: 'center',
-    gap: isMobile ? '4rem' : '6rem',
-    width: '100%'
+    gap: isMobile ? '2rem' : '3rem', // Jarak lebih dekat
+    width: '100%',
+    justifyContent: 'center' // Tengah supaya bisa atur jarak
   }}>
     {/* PRODUCT */}
     <div style={{
@@ -3134,11 +3135,12 @@ export default function HomePage(): React.JSX.Element {
       </h2>
     </div>
 
-    {/* Container Foto + Angka 01 */}
+    {/* Container Foto + Angka 01 - Geser ke kanan */}
     <div style={{
       position: 'relative',
       display: 'flex',
-      alignItems: 'flex-end' // Agar angka di bawah sejajar
+      alignItems: 'flex-end',
+      marginLeft: isMobile ? '1rem' : '2rem' // Geser ke kanan
     }}>
       {/* Foto */}
       <div style={{
@@ -3177,19 +3179,17 @@ export default function HomePage(): React.JSX.Element {
     </div>
   </div>
 
-  {/* Baris 2: VISUAL DESIGNER + Foto + 02 (geser ke kanan) */}
+  {/* Baris 2: VISUAL DESIGNER + Foto + 02 (VISUAL DESIGNER sejajar) */}
   <div style={{
     display: 'flex',
-    justifyContent: 'flex-end',
     alignItems: 'center',
-    gap: isMobile ? '3rem' : '4rem',
-    width: '100%',
-    marginLeft: isMobile ? '2rem' : '4rem' // Geser ke kanan
+    gap: isMobile ? '2rem' : '3rem',
+    width: '100%'
   }}>
-    {/* VISUAL DESIGNER */}
+    {/* VISUAL DESIGNER - Tetap di kiri */}
     <div style={{
       flex: 1,
-      textAlign: 'right'
+      textAlign: 'left'
     }}>
       <h2 style={{
         color: 'white',
@@ -3205,11 +3205,12 @@ export default function HomePage(): React.JSX.Element {
       </h2>
     </div>
 
-    {/* Container Foto + Angka 02 */}
+    {/* Container Foto + Angka 02 - Di kanan */}
     <div style={{
       position: 'relative',
       display: 'flex',
-      alignItems: 'flex-end'
+      alignItems: 'flex-end',
+      marginLeft: 'auto' // Geser ke kanan
     }}>
       {/* Foto */}
       <div style={{
@@ -3248,15 +3249,15 @@ export default function HomePage(): React.JSX.Element {
     </div>
   </div>
 
-  {/* Baris 3: BASED + Foto + IN + INDONESIA */}
+  {/* Baris 3: BASED + Foto + IN + INDONESIA - Jarak jauh */}
   <div style={{
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    gap: isMobile ? '2rem' : '3rem',
-    width: '100%'
+    width: '100%',
+    gap: isMobile ? '4rem' : '6rem' // Jarak lebih jauh
   }}>
-    {/* BASED */}
+    {/* BASED - Kiri */}
     <div style={{
       flex: 1,
       textAlign: 'left'
@@ -3279,7 +3280,8 @@ export default function HomePage(): React.JSX.Element {
     <div style={{
       position: 'relative',
       display: 'flex',
-      alignItems: 'flex-end'
+      alignItems: 'flex-end',
+      marginLeft: isMobile ? '2rem' : '4rem' // Jarak dari BASED lebih jauh
     }}>
       {/* Foto */}
       <div style={{
@@ -3320,7 +3322,8 @@ export default function HomePage(): React.JSX.Element {
     {/* IN */}
     <div style={{
       flex: 1,
-      textAlign: 'center'
+      textAlign: 'center',
+      marginLeft: isMobile ? '3rem' : '5rem' // Jarak dari foto
     }}>
       <h2 style={{
         color: 'white',
@@ -3339,7 +3342,8 @@ export default function HomePage(): React.JSX.Element {
     {/* INDONESIA */}
     <div style={{
       flex: 1,
-      textAlign: 'right'
+      textAlign: 'right',
+      marginLeft: isMobile ? '2rem' : '4rem' // Jarak dari IN
     }}>
       <h2 style={{
         color: 'white',
@@ -3355,6 +3359,59 @@ export default function HomePage(): React.JSX.Element {
       </h2>
     </div>
   </div>
+
+  {/* Baris 4: Foto di kanan jauh dari INDONESIA */}
+  <div style={{
+    display: 'flex',
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+    width: '100%',
+    marginTop: isMobile ? '3rem' : '4rem'
+  }}>
+    {/* Container Foto + Angka 04 - Di sisi kanan */}
+    <div style={{
+      position: 'relative',
+      display: 'flex',
+      alignItems: 'flex-end',
+      marginRight: isMobile ? '1rem' : '2rem' // Di kanan dengan jarak
+    }}>
+      {/* Foto */}
+      <div style={{
+        width: isMobile ? '140px' : '180px',
+        height: isMobile ? '5rem' : '7rem',
+        borderRadius: '10px',
+        overflow: 'hidden',
+        border: '1px solid rgba(255, 255, 255, 0.3)',
+        backgroundColor: '#222'
+      }}>
+        <img 
+          src="images/5.jpg" 
+          alt="Footer Image"
+          style={{
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            display: 'block'
+          }}
+        />
+      </div>
+      
+      {/* Angka 04 di samping bawah */}
+      <div style={{
+        position: 'absolute',
+        bottom: '-0.8rem',
+        right: '-1.5rem',
+        color: 'rgba(255, 255, 255, 0.7)',
+        fontSize: isMobile ? '1rem' : '1.2rem',
+        fontWeight: '400',
+        fontFamily: 'Helvetica, Arial, sans-serif',
+        letterSpacing: '1px'
+      }}>
+        04
+      </div>
+    </div>
+  </div>
+
 </div>
 
 
@@ -4323,6 +4380,7 @@ export default function HomePage(): React.JSX.Element {
     </div>
   );
 }
+
 
 
 
