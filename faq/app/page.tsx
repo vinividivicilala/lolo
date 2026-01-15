@@ -3067,8 +3067,8 @@ export default function HomePage(): React.JSX.Element {
   zIndex: 10,
   position: 'relative'
 }}>
-  
-{/* PRODUCT AND Image Section - DI BAWAH JUDUL WEBSITE */}
+
+  {/* PRODUCT AND Image Section - DI BAWAH JUDUL WEBSITE */}
 <div style={{
   width: '100%',
   padding: isMobile ? '1.5rem' : '3rem',
@@ -3076,10 +3076,10 @@ export default function HomePage(): React.JSX.Element {
   boxSizing: 'border-box',
   display: 'flex',
   flexDirection: 'column',
-  gap: isMobile ? '3rem' : '4rem'
+  gap: isMobile ? '0.1rem' : '0.2rem' // JARAK SANGAT DEKAT ANTAR BARIS
 }}>
   
-  {/* Baris 1: PRODUCT + AND + Foto + 01 - Foto dan AND jarak dekat */}
+  {/* Baris 1: PRODUCT + AND + Foto + 01 */}
   <div style={{
     display: 'flex',
     alignItems: 'center',
@@ -3112,7 +3112,7 @@ export default function HomePage(): React.JSX.Element {
     <div style={{
       display: 'flex',
       alignItems: 'center',
-      gap: isMobile ? '1rem' : '1.5rem' // Jarak sangat dekat antara AND dan Foto
+      gap: isMobile ? '0.5rem' : '1rem'
     }}>
       {/* AND */}
       <div style={{
@@ -3163,7 +3163,7 @@ export default function HomePage(): React.JSX.Element {
           />
         </div>
         
-        {/* Angka 01 di samping bawah */}
+        {/* Angka 01 */}
         <div style={{
           position: 'absolute',
           bottom: '-0.8rem',
@@ -3180,13 +3180,13 @@ export default function HomePage(): React.JSX.Element {
     </div>
   </div>
 
-  {/* Baris 2: VISUAL DESIGNER + Foto + 02 - Foto di kiri, VISUAL DESIGNER 1 baris */}
+  {/* Baris 2: Foto + VISUAL DESIGNER */}
   <div style={{
     display: 'flex',
     alignItems: 'center',
     width: '100%',
     justifyContent: 'flex-start',
-    gap: isMobile ? '4rem' : '8rem' // Jarak jauh antara foto dan teks
+    gap: isMobile ? '4rem' : '8rem'
   }}>
     {/* Container Foto + Angka 02 - Di kiri */}
     <div style={{
@@ -3215,7 +3215,7 @@ export default function HomePage(): React.JSX.Element {
         />
       </div>
       
-      {/* Angka 02 di samping bawah */}
+      {/* Angka 02 */}
       <div style={{
         position: 'absolute',
         bottom: '-0.8rem',
@@ -3230,7 +3230,7 @@ export default function HomePage(): React.JSX.Element {
       </div>
     </div>
 
-    {/* VISUAL DESIGNER - 1 baris, di kanan */}
+    {/* VISUAL DESIGNER - 1 baris */}
     <div style={{
       textAlign: 'left',
       height: isMobile ? '5rem' : '7rem',
@@ -3246,14 +3246,14 @@ export default function HomePage(): React.JSX.Element {
         letterSpacing: '-3px',
         margin: 0,
         lineHeight: 0.8,
-        whiteSpace: 'nowrap' // Tetap 1 baris
+        whiteSpace: 'nowrap'
       }}>
         VISUAL DESIGNER
       </h2>
     </div>
   </div>
 
-  {/* Baris 3: BASED + Foto + IN - INDONESIA dihapus */}
+  {/* Baris 3: BASED + Foto + IN */}
   <div style={{
     display: 'flex',
     alignItems: 'center',
@@ -3308,7 +3308,7 @@ export default function HomePage(): React.JSX.Element {
         />
       </div>
       
-      {/* Angka 03 di samping bawah */}
+      {/* Angka 03 */}
       <div style={{
         position: 'absolute',
         bottom: '-0.8rem',
@@ -3346,13 +3346,13 @@ export default function HomePage(): React.JSX.Element {
     </div>
   </div>
 
-  {/* Baris 4: Foto + INDONESIA - Foto di kiri, jarak dengan INDONESIA */}
+  {/* Baris 4: Foto + INDONESIA */}
   <div style={{
     display: 'flex',
     alignItems: 'center',
     width: '100%',
     justifyContent: 'flex-start',
-    gap: isMobile ? '4rem' : '8rem' // Jarak antara foto dan INDONESIA
+    gap: isMobile ? '4rem' : '8rem'
   }}>
     {/* Container Foto + Angka 04 - Di kiri */}
     <div style={{
@@ -3381,7 +3381,7 @@ export default function HomePage(): React.JSX.Element {
         />
       </div>
       
-      {/* Angka 04 di samping bawah */}
+      {/* Angka 04 */}
       <div style={{
         position: 'absolute',
         bottom: '-0.8rem',
@@ -3396,7 +3396,7 @@ export default function HomePage(): React.JSX.Element {
       </div>
     </div>
 
-    {/* INDONESIA - Di kanan */}
+    {/* INDONESIA */}
     <div style={{
       textAlign: 'left',
       height: isMobile ? '5rem' : '7rem',
@@ -3417,7 +3417,9 @@ export default function HomePage(): React.JSX.Element {
       </h2>
     </div>
   </div>
+
 </div>
+  
 
   {/* Spacer kecil sebelum konten berikutnya */}
   <div style={{
@@ -4383,6 +4385,7 @@ export default function HomePage(): React.JSX.Element {
     </div>
   );
 }
+
 
 
 
