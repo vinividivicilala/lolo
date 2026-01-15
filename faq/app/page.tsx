@@ -140,43 +140,54 @@ export default function HomePage(): React.JSX.Element {
   const userDropdownRef = useRef<HTMLDivElement>(null);
   const chatbotPopupRef = useRef<HTMLDivElement>(null);
 
-  // State untuk efek sandi morse
-const [loadingTextProduct, setLoadingTextProduct] = useState("PRODUCT");
-const [loadingTextAnd, setLoadingTextAnd] = useState("AND");
+// State untuk efek sandi morse slow motion
+const [morseProduct, setMorseProduct] = useState("");
+const [morseAnd, setMorseAnd] = useState("");
+const [morseIndex, setMorseIndex] = useState(0);
 
-// Karakter acak untuk efek sandi morse
-const randomChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%&*";
-
-
-  // Efek untuk animasi sandi morse
+// Efek untuk animasi sandi morse slow motion
 useEffect(() => {
   if (isLoading) {
-    const productInterval = setInterval(() => {
-      // Generate random text untuk PRODUCT
-      const randomProduct = Array(7)
-        .fill(0)
-        .map(() => randomChars[Math.floor(Math.random() * randomChars.length)])
-        .join('');
-      setLoadingTextProduct(randomProduct);
-    }, 80); // Ganti setiap 80ms
-
-    const andInterval = setInterval(() => {
-      // Generate random text untuk AND
-      const randomAnd = Array(3)
-        .fill(0)
-        .map(() => randomChars[Math.floor(Math.random() * randomChars.length)])
-        .join('');
-      setLoadingTextAnd(randomAnd);
-    }, 80);
+    const targetProduct = "PRODUCT";
+    const targetAnd = "AND";
+    
+    // Slow motion: ubah satu huruf per 300ms
+    const morseInterval = setInterval(() => {
+      setMorseIndex(prev => {
+        const newIndex = prev + 1;
+        
+        // Update PRODUCT - per huruf
+        if (newIndex <= targetProduct.length) {
+          const currentProduct = targetProduct.slice(0, newIndex);
+          setMorseProduct(currentProduct);
+        }
+        
+        // Update AND - mulai setelah PRODUCT selesai
+        if (newIndex > targetProduct.length) {
+          const andIndex = newIndex - targetProduct.length;
+          if (andIndex <= targetAnd.length) {
+            const currentAnd = targetAnd.slice(0, andIndex);
+            setMorseAnd(currentAnd);
+          }
+        }
+        
+        // Stop ketika semua huruf sudah ditampilkan
+        if (newIndex > targetProduct.length + targetAnd.length) {
+          clearInterval(morseInterval);
+          return prev;
+        }
+        
+        return newIndex;
+      });
+    }, 300); // 300ms per huruf - SLOW MOTION
 
     return () => {
-      clearInterval(productInterval);
-      clearInterval(andInterval);
+      clearInterval(morseInterval);
     };
   } else {
     // Set teks final setelah loading selesai
-    setLoadingTextProduct("PRODUCT");
-    setLoadingTextAnd("AND");
+    setMorseProduct("PRODUCT");
+    setMorseAnd("AND");
   }
 }, [isLoading]);
 
@@ -3096,7 +3107,8 @@ useEffect(() => {
   position: 'relative'
 }}>
   
-   {/* PRODUCT AND Image Section - DI BAWAH JUDUL WEBSITE */}
+  
+  {/* PRODUCT AND Image Section - DI BAWAH JUDUL WEBSITE */}
   <div style={{
     width: '100%',
     padding: isMobile ? '1.5rem' : '3rem',
@@ -3113,7 +3125,7 @@ useEffect(() => {
       maxWidth: '1200px',
       width: '100%'
     }}>
-      {/* PRODUCT - Dengan efek sandi morse */}
+      {/* PRODUCT - Dengan efek sandi morse slow motion */}
       <div style={{
         flex: 1,
         textAlign: 'right',
@@ -3122,64 +3134,48 @@ useEffect(() => {
         alignItems: 'center',
         justifyContent: 'flex-end'
       }}>
-        <AnimatePresence mode="wait">
-          <motion.h2
-            key={loadingTextProduct}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.1 }}
-            style={{
-              color: 'white',
-              fontSize: isMobile ? '5rem' : '7rem',
-              fontWeight: '900',
-              textTransform: 'uppercase',
-              fontFamily: 'Helvetica, Arial, sans-serif',
-              letterSpacing: '-3px',
-              margin: 0,
-              lineHeight: 0.8,
-              padding: 0
-            }}
-          >
-            {isLoading ? loadingTextProduct : "PRODUCT"}
-          </motion.h2>
-        </AnimatePresence>
+        <h2 style={{
+          color: 'white',
+          fontSize: isMobile ? '5rem' : '7rem',
+          fontWeight: '900',
+          textTransform: 'uppercase',
+          fontFamily: 'Helvetica, Arial, sans-serif',
+          letterSpacing: '-3px',
+          margin: 0,
+          lineHeight: 0.8,
+          padding: 0,
+          minWidth: isMobile ? '200px' : '280px' // Lebar tetap
+        }}>
+          {morseProduct}
+        </h2>
       </div>
 
-      {/* AND - Dengan efek sandi morse */}
+      {/* AND - Dengan efek sandi morse slow motion */}
       <div style={{
-        flex: 0.5, // Lebih kecil karena "AND" lebih pendek
+        flex: 0.5,
         textAlign: 'center',
         height: isMobile ? '5rem' : '7rem',
         display: 'flex',
         alignItems: 'center',
-        justifyContent: 'center'
+        justifyContent: 'center',
+        minWidth: isMobile ? '80px' : '120px' // Lebar tetap
       }}>
-        <AnimatePresence mode="wait">
-          <motion.h2
-            key={loadingTextAnd}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.1 }}
-            style={{
-              color: 'white',
-              fontSize: isMobile ? '5rem' : '7rem',
-              fontWeight: '900',
-              textTransform: 'uppercase',
-              fontFamily: 'Helvetica, Arial, sans-serif',
-              letterSpacing: '-3px',
-              margin: 0,
-              lineHeight: 0.8,
-              padding: 0
-            }}
-          >
-            {isLoading ? loadingTextAnd : "AND"}
-          </motion.h2>
-        </AnimatePresence>
+        <h2 style={{
+          color: 'white',
+          fontSize: isMobile ? '5rem' : '7rem',
+          fontWeight: '900',
+          textTransform: 'uppercase',
+          fontFamily: 'Helvetica, Arial, sans-serif',
+          letterSpacing: '-3px',
+          margin: 0,
+          lineHeight: 0.8,
+          padding: 0
+        }}>
+          {morseAnd}
+        </h2>
       </div>
 
-      {/* Container Gambar + Angka - Jarak dekat dengan AND */}
+      {/* Container Gambar + Angka */}
       <div style={{
         flex: 1.2,
         display: 'flex',
@@ -3236,6 +3232,8 @@ useEffect(() => {
       </div>
     </div>
   </div>
+
+
 
   {/* Spacer kecil sebelum konten berikutnya */}
   <div style={{
@@ -4201,6 +4199,7 @@ useEffect(() => {
     </div>
   );
 }
+
 
 
 
