@@ -3047,8 +3047,7 @@ export default function HomePage(): React.JSX.Element {
       </div>
 
 
-
-      {/* Main Content Container */}
+{/* Main Content Container */}
 <div style={{
   width: '100%',
   paddingTop: isMobile ? '12rem' : '15rem',
@@ -3060,71 +3059,85 @@ export default function HomePage(): React.JSX.Element {
   {/* PRODUCT AND Image Section - DI BAWAH JUDUL WEBSITE */}
   <div style={{
     width: '100%',
-    padding: isMobile ? '1rem' : '2rem',
-    marginTop: isMobile ? '0.5rem' : '1rem',
+    padding: isMobile ? '1.5rem' : '3rem',
+    marginTop: isMobile ? '1rem' : '2rem',
     boxSizing: 'border-box',
     display: 'flex',
-    justifyContent: 'center'
+    justifyContent: 'center',
+    alignItems: 'center' // Vertikal center
   }}>
     <div style={{
       display: 'flex',
-      alignItems: 'center', // Vertikal sejajar
-      gap: isMobile ? '3rem' : '5rem', // Jarak jauh antara PRODUCT dan AND
+      alignItems: 'center', // Semua sejajar vertikal
+      gap: isMobile ? '4rem' : '6rem', // Jarak jauh antara PRODUCT dan AND
       maxWidth: '1200px',
       width: '100%'
     }}>
-      {/* PRODUCT */}
+      {/* PRODUCT - Font lebih besar */}
       <div style={{
         flex: 1,
-        textAlign: 'right'
+        textAlign: 'right',
+        height: isMobile ? '4.5rem' : '6.5rem', // Tinggi tetap
+        display: 'flex',
+        alignItems: 'center', // Vertikal center
+        justifyContent: 'flex-end' // Rata kanan
       }}>
         <h2 style={{
           color: 'white',
-          fontSize: isMobile ? '3.5rem' : '5rem',
+          fontSize: isMobile ? '4.5rem' : '6.5rem', // Font lebih besar
           fontWeight: '900',
           textTransform: 'uppercase',
           fontFamily: 'Helvetica, Arial, sans-serif',
-          letterSpacing: '0px', // Huruf mepet
+          letterSpacing: '-2px', // Huruf lebih mepet
           margin: 0,
-          lineHeight: 1
+          lineHeight: 0.9,
+          padding: 0
         }}>
           PRODUCT
         </h2>
       </div>
 
-      {/* AND */}
+      {/* AND - Font lebih besar */}
       <div style={{
         flex: 1,
-        textAlign: 'left'
+        textAlign: 'left',
+        height: isMobile ? '4.5rem' : '6.5rem', // Tinggi sama dengan PRODUCT
+        display: 'flex',
+        alignItems: 'center', // Vertikal center
+        justifyContent: 'flex-start' // Rata kiri
       }}>
         <h2 style={{
           color: 'white',
-          fontSize: isMobile ? '3.5rem' : '5rem',
+          fontSize: isMobile ? '4.5rem' : '6.5rem', // Font lebih besar
           fontWeight: '900',
           textTransform: 'uppercase',
           fontFamily: 'Helvetica, Arial, sans-serif',
-          letterSpacing: '0px', // Huruf mepet
+          letterSpacing: '-2px', // Huruf lebih mepet
           margin: 0,
-          lineHeight: 1
+          lineHeight: 0.9,
+          padding: 0
         }}>
           AND
         </h2>
       </div>
 
-      {/* Gambar Horizontal - Tinggi sejajar dengan teks */}
+      {/* Gambar Horizontal - Tinggi sama dengan teks */}
       <div style={{
-        flex: 1.5,
+        flex: 1.2,
         display: 'flex',
         justifyContent: 'flex-start',
-        alignItems: 'center', // Vertikal sejajar dengan teks
-        height: isMobile ? '3.5rem' : '5rem' // Tinggi sama dengan teks
+        alignItems: 'center', // Vertikal center
+        height: isMobile ? '4.5rem' : '6.5rem' // Tinggi sama dengan teks
       }}>
         <div style={{
-          width: isMobile ? '180px' : '250px', // Lebar untuk horizontal
-          height: isMobile ? '70px' : '100px', // Tinggi lebih kecil dari lebar
-          borderRadius: '8px',
+          width: isMobile ? '150px' : '200px', // Lebar untuk horizontal, tidak terlalu lebar
+          height: isMobile ? '90px' : '120px', // Tinggi lebih kecil dari lebar (rasio 3:2)
+          borderRadius: '12px', // Border radius
           overflow: 'hidden',
-          border: '1px solid rgba(255, 255, 255, 0.3)'
+          border: '2px solid rgba(255, 255, 255, 0.3)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
         }}>
           <img 
             src="images/5.jpg" 
@@ -3141,7 +3154,7 @@ export default function HomePage(): React.JSX.Element {
               e.currentTarget.style.alignItems = 'center';
               e.currentTarget.style.justifyContent = 'center';
               e.currentTarget.style.color = 'white';
-              e.currentTarget.innerHTML = '<div style="padding: 0.5rem; font-weight: bold;">IMG</div>';
+              e.currentTarget.innerHTML = '<div style="padding: 0.5rem; font-weight: bold; font-size: 0.9rem;">IMG</div>';
             }}
           />
         </div>
@@ -3165,98 +3178,6 @@ export default function HomePage(): React.JSX.Element {
         exit={{ opacity: 0 }}
         transition={{ duration: 0.5 }}
       >
-        {/* Container untuk Tombol Slider dan Teks MENURU */}
-        <div style={{
-          position: 'relative',
-          marginTop: isMobile ? '4rem' : '5rem',
-          marginBottom: isMobile ? '4rem' : '6rem',
-          paddingLeft: isMobile ? '2rem' : '4rem',
-          paddingRight: isMobile ? '2rem' : '4rem',
-          display: 'flex',
-          flexDirection: isMobile ? 'column' : 'row',
-          justifyContent: 'space-between',
-          alignItems: isMobile ? 'flex-start' : 'center',
-          gap: isMobile ? '2rem' : '0'
-        }}>
-          {/* Tombol Slider Index/Grid di kiri */}
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '1.5rem'
-          }}>
-            <motion.button
-              onClick={toggleSlider}
-              style={{
-                width: '120px',
-                height: '50px',
-                backgroundColor: '#0050B7',
-                border: 'none',
-                borderRadius: '25px',
-                cursor: 'pointer',
-                padding: 0,
-                position: 'relative',
-                display: 'flex',
-                alignItems: 'center',
-                overflow: 'hidden'
-              }}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <div style={{
-                position: 'absolute',
-                width: '100%',
-                height: '100%',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                padding: '0 15px',
-                boxSizing: 'border-box'
-              }}>
-                <span style={{
-                  color: 'white',
-                  fontSize: '1rem',
-                  fontWeight: '700',
-                  fontFamily: 'Helvetica, Arial, sans-serif',
-                  opacity: sliderPosition === "index" ? 1 : 0.5
-                }}>
-                  INDEX
-                </span>
-                <span style={{
-                  color: 'white',
-                  fontSize: '1rem',
-                  fontWeight: '700',
-                  fontFamily: 'Helvetica, Arial, sans-serif',
-                  opacity: sliderPosition === "grid" ? 1 : 0.5
-                }}>
-                  GRID
-                </span>
-              </div>
-              
-              <motion.div
-                animate={{ x: sliderPosition === "index" ? 15 : 65 }}
-                transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                style={{
-                  width: '35px',
-                  height: '35px',
-                  backgroundColor: '#00FF00',
-                  borderRadius: '50%',
-                  position: 'absolute',
-                  left: '7px',
-                  boxShadow: '0 0 15px rgba(0, 255, 0, 0.7)'
-                }}
-              />
-            </motion.button>
-
-            <div style={{
-              color: 'white',
-              fontSize: '1.1rem',
-              fontWeight: '600',
-              fontFamily: 'Helvetica, Arial, sans-serif'
-            }}>
-              {sliderPosition === "index" ? "Index View" : "Grid View"}
-            </div>
-          </div>
-
 
 
 
@@ -4107,6 +4028,7 @@ export default function HomePage(): React.JSX.Element {
     </div>
   );
 }
+
 
 
 
