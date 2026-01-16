@@ -140,18 +140,6 @@ export default function HomePage(): React.JSX.Element {
   const userDropdownRef = useRef<HTMLDivElement>(null);
   const chatbotPopupRef = useRef<HTMLDivElement>(null);
 
-
-
-
-
-
-
-
-
-
-
-  
-
   // Animasi loading text
   const loadingTexts = [
     "NURU", "MBACA", "NULIS", "NGEXPLORASI", 
@@ -181,12 +169,46 @@ export default function HomePage(): React.JSX.Element {
     }
   ];
 
-  // Data untuk Roles
+  // Data untuk Roles - TIDAK DIPAKAI LAGI
   const rolesData = [
     { title: "My Roles", description: "Branding & Creative Direction" },
     { title: "Design", description: "Visual identity & UI/UX" },
     { title: "Development", description: "Frontend & Backend" },
     { title: "Features", description: "Functionality & Integration" }
+  ];
+
+  // Data untuk halaman Index MENURU - HANYA TAHUN (sama seperti Index View)
+  const menuruTopics = [
+    {
+      id: 1,
+      title: "Personal Journey",
+      description: "Exploring self-discovery.",
+      year: "2024"
+    },
+    {
+      id: 2,
+      title: "Creative Process",
+      description: "Ideas evolution documentation.",
+      year: "2024"
+    },
+    {
+      id: 3,
+      title: "Visual Storytelling",
+      description: "Photography for personal growth.",
+      year: "2024"
+    },
+    {
+      id: 4,
+      title: "Emotional Archive",
+      description: "Collection of feelings.",
+      year: "2024"
+    },
+    {
+      id: 5,
+      title: "Growth Metrics",
+      description: "Tracking development goals.",
+      year: "2024"
+    }
   ];
 
   // Fungsi untuk menghitung waktu yang lalu
@@ -494,7 +516,7 @@ export default function HomePage(): React.JSX.Element {
   useEffect(() => {
     if (hoveredTopic !== null) {
       // Hitung posisi berdasarkan index topic
-      const topicIndex = indexTopics.findIndex(topic => topic.id === hoveredTopic);
+      const topicIndex = menuruTopics.findIndex(topic => topic.id === hoveredTopic);
       // Semakin besar index, semakin turun posisinya
       const newPosition = topicIndex * 40; // 40px per item
       setImagePosition(newPosition);
@@ -890,40 +912,6 @@ export default function HomePage(): React.JSX.Element {
     router.push('/chatbot');
   };
 
-  // Data untuk halaman Index - HANYA TAHUN
-  const indexTopics = [
-    {
-      id: 1,
-      title: "Personal Journey",
-      description: "Exploring self-discovery.",
-      year: "2024"
-    },
-    {
-      id: 2,
-      title: "Creative Process",
-      description: "Ideas evolution documentation.",
-      year: "2024"
-    },
-    {
-      id: 3,
-      title: "Visual Storytelling",
-      description: "Photography for personal growth.",
-      year: "2024"
-    },
-    {
-      id: 4,
-      title: "Emotional Archive",
-      description: "Collection of feelings.",
-      year: "2024"
-    },
-    {
-      id: 5,
-      title: "Growth Metrics",
-      description: "Tracking development goals.",
-      year: "2024"
-    }
-  ];
-
   // Komentar untuk foto saat ini
   const currentPhotoComments = comments.filter(comment => comment.photoIndex === currentPhotoIndex);
 
@@ -945,7 +933,7 @@ export default function HomePage(): React.JSX.Element {
       MozOsxFontSmoothing: 'grayscale'
     }}>
 
-      {/* Halaman Full Page MENURU */}
+      {/* Halaman Full Page MENURU - DESAIN BARU SEPERTI INDEX VIEW */}
       <AnimatePresence>
         {showMenuruFullPage && (
           <motion.div
@@ -970,7 +958,7 @@ export default function HomePage(): React.JSX.Element {
               paddingBottom: '4rem'
             }}
           >
-            {/* Header dengan teks MENURU dan tanda \ di sebelah kanan */}
+            {/* Header dengan teks MENURU dan tanda \ di kanan atas */}
             <div style={{
               position: 'sticky',
               top: 0,
@@ -984,276 +972,26 @@ export default function HomePage(): React.JSX.Element {
               backgroundColor: 'black',
               zIndex: 10
             }}>
-              {/* Container untuk MENURU, angka, dan roles - di kiri */}
-              <div style={{
-                display: 'flex',
-                flexDirection: 'column',
-                width: isMobile ? '45%' : '40%',
-                marginTop: isMobile ? '1rem' : '2rem'
-              }}>
-                {/* Teks MENURU \ di kiri */}
-                <motion.div
-                  initial={{ x: -50, opacity: 0 }}
-                  animate={{ x: 0, opacity: 1 }}
-                  transition={{ duration: 0.6, delay: 0.1 }}
-                  style={{
-                    color: 'white',
-                    fontSize: isMobile ? '2.5rem' : '4rem',
-                    fontWeight: '300',
-                    fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
-                    textTransform: 'uppercase',
-                    letterSpacing: '4px',
-                    lineHeight: 1,
-                    marginBottom: isMobile ? '2rem' : '3rem'
-                  }}
-                >
-                  MENURU \
-                </motion.div>
+              {/* Teks MENURU di kiri atas */}
+              <motion.div
+                initial={{ x: -50, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                transition={{ duration: 0.6, delay: 0.1 }}
+                style={{
+                  color: 'white',
+                  fontSize: isMobile ? '2.5rem' : '4rem',
+                  fontWeight: '300',
+                  fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
+                  textTransform: 'uppercase',
+                  letterSpacing: '4px',
+                  lineHeight: 1,
+                  marginBottom: isMobile ? '2rem' : '3rem'
+                }}
+              >
+                MENURU
+              </motion.div>
 
-                {/* Angka 99887 dengan jarak dari judul */}
-                <motion.div
-                  initial={{ x: -50, opacity: 0 }}
-                  animate={{ x: 0, opacity: 1 }}
-                  transition={{ duration: 0.6, delay: 0.2 }}
-                  style={{
-                    color: 'white',
-                    fontSize: isMobile ? '2rem' : '3rem',
-                    fontWeight: '400',
-                    fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
-                    letterSpacing: '3px',
-                    marginBottom: isMobile ? '3rem' : '4rem'
-                  }}
-                >
-                  99887
-                </motion.div>
-
-                {/* Roles List dengan jarak yang cukup */}
-                <motion.div
-                  initial={{ x: -50, opacity: 0 }}
-                  animate={{ x: 0, opacity: 1 }}
-                  transition={{ duration: 0.6, delay: 0.3 }}
-                  style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: isMobile ? '2rem' : '3rem'
-                  }}
-                >
-                  {rolesData.map((role, index) => (
-                    <motion.div
-                      key={role.title}
-                      initial={{ x: -30, opacity: 0 }}
-                      animate={{ x: 0, opacity: 1 }}
-                      transition={{ duration: 0.4, delay: 0.4 + (index * 0.1) }}
-                      style={{
-                        display: 'flex',
-                        flexDirection: 'column'
-                      }}
-                    >
-                      {/* Role title */}
-                      <div style={{
-                        color: 'white',
-                        fontSize: isMobile ? '1.2rem' : '1.8rem',
-                        fontWeight: '500',
-                        fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
-                        letterSpacing: '1px',
-                        marginBottom: '0.8rem'
-                      }}>
-                        {role.title}
-                      </div>
-                      
-                      {/* Role description */}
-                      <div style={{
-                        color: 'white',
-                        fontSize: isMobile ? '1rem' : '1.3rem',
-                        fontWeight: '400',
-                        fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
-                        opacity: 0.9,
-                        lineHeight: 1.5
-                      }}>
-                        {role.description}
-                      </div>
-                    </motion.div>
-                  ))}
-                </motion.div>
-              </div>
-
-              {/* Container untuk bagian tengah - DESKRIPSI dan FOTO */}
-              <div style={{
-                flex: 1,
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'flex-start',
-                marginLeft: isMobile ? '1.5rem' : '4rem',
-                marginRight: isMobile ? '1.5rem' : '4rem',
-                marginTop: isMobile ? '1rem' : '2rem'
-              }}>
-                {/* Deskripsi di tengah - BESAR dengan font Formula Condensed */}
-                <motion.div
-                  initial={{ y: -20, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ duration: 0.6, delay: 0.3 }}
-                  style={{
-                    color: 'white',
-                    fontSize: isMobile ? '1.5rem' : '2.2rem',
-                    fontWeight: '700',
-                    fontFamily: '"Formula Condensed", sans-serif',
-                    lineHeight: 1.7,
-                    textAlign: 'left',
-                    maxWidth: isMobile ? '90%' : '75%',
-                    marginBottom: isMobile ? '4rem' : '5rem',
-                    alignSelf: 'flex-start'
-                  }}
-                >
-                  A personal branding journal documenting emotional journeys and creative exploration through visual storytelling and self-discovery narratives.
-                </motion.div>
-
-                {/* Foto di bawah deskripsi - BESAR */}
-                <motion.div
-                  initial={{ y: 30, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ duration: 0.6, delay: 0.4 }}
-                  style={{
-                    width: isMobile ? '95%' : '80%',
-                    height: isMobile ? '350px' : '600px',
-                    overflow: 'hidden',
-                    borderRadius: '20px',
-                    boxShadow: '0 20px 50px rgba(0,0,0,0.8)',
-                    border: '3px solid rgba(255,255,255,0.2)',
-                    marginBottom: isMobile ? '3rem' : '4rem',
-                    alignSelf: 'flex-start'
-                  }}
-                >
-                  <img 
-                    src="images/5.jpg" 
-                    alt="Menuru Visual"
-                    style={{
-                      width: '100%',
-                      height: '100%',
-                      display: 'block',
-                      objectFit: 'cover'
-                    }}
-                    onError={(e) => {
-                      e.currentTarget.style.backgroundColor = '#333';
-                      e.currentTarget.style.display = 'flex';
-                      e.currentTarget.style.alignItems = 'center';
-                      e.currentTarget.style.justifyContent = 'center';
-                      e.currentTarget.style.color = 'white';
-                      e.currentTarget.innerHTML = '<div style="padding: 2rem; text-align: center;">Menuru Image</div>';
-                    }}
-                  />
-                </motion.div>
-
-                {/* Judul kecil di bawah foto */}
-                <motion.div
-                  initial={{ y: 20, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ duration: 0.6, delay: 0.5 }}
-                  style={{
-                    color: 'white',
-                    fontSize: isMobile ? '1rem' : '1.2rem',
-                    fontWeight: '500',
-                    fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
-                    letterSpacing: '1px',
-                    textTransform: 'uppercase',
-                    opacity: 0.8,
-                    marginBottom: isMobile ? '2rem' : '2.5rem',
-                    alignSelf: 'flex-start',
-                    marginLeft: isMobile ? '0.5rem' : '1rem'
-                  }}
-                >
-                  Visual Journey • 2024 Collection
-                </motion.div>
-
-                {/* Teks link tautan besar di bawah judul */}
-                <motion.div
-                  initial={{ y: 20, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ duration: 0.6, delay: 0.6 }}
-                  style={{
-                    alignSelf: 'flex-start',
-                    marginBottom: isMobile ? '5rem' : '6rem'
-                  }}
-                >
-                  <motion.a
-                    href="/explore"
-                    style={{
-                      color: '#00FF00',
-                      fontSize: isMobile ? '1.8rem' : '2.5rem',
-                      fontWeight: '600',
-                      fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
-                      textDecoration: 'none',
-                      letterSpacing: '1px',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '1rem',
-                      position: 'relative',
-                      padding: '1rem 0'
-                    }}
-                    whileHover={{ 
-                      x: 10,
-                      color: '#FFFFFF'
-                    }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    EXPLORE FULL COLLECTION
-                    <motion.svg
-                      width={isMobile ? "24" : "32"}
-                      height={isMobile ? "24" : "32"}
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      initial={{ x: 0 }}
-                      animate={{ x: 0 }}
-                      whileHover={{ x: 5 }}
-                      transition={{ duration: 0.3 }}
-                    >
-                      <path d="M5 12h14" />
-                      <path d="m12 5 7 7-7 7" />
-                    </motion.svg>
-                    {/* Garis bawah animasi */}
-                    <motion.div
-                      style={{
-                        position: 'absolute',
-                        bottom: '0.5rem',
-                        left: 0,
-                        width: '100%',
-                        height: '2px',
-                        backgroundColor: '#00FF00'
-                      }}
-                      initial={{ scaleX: 0 }}
-                      whileHover={{ scaleX: 1 }}
-                      transition={{ duration: 0.3 }}
-                    />
-                  </motion.a>
-                </motion.div>
-
-                {/* Container tambahan untuk konten di bawah tautan */}
-                <motion.div
-                  initial={{ y: 30, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ duration: 0.6, delay: 0.7 }}
-                  style={{
-                    width: isMobile ? '95%' : '80%',
-                    alignSelf: 'flex-start',
-                    marginBottom: isMobile ? '3rem' : '4rem'
-                  }}
-                >
-                  <div style={{
-                    color: 'white',
-                    fontSize: isMobile ? '1.1rem' : '1.4rem',
-                    fontWeight: '300',
-                    fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
-                    lineHeight: 1.8,
-                    opacity: 0.9
-                  }}>
-                    This collection represents a year of personal growth and creative experimentation. Each image tells a story of transformation and discovery, captured through the lens of self-reflection.
-                  </div>
-                </motion.div>
-              </div>
-
-              {/* Tanda \ di kanan dengan animasi GSAP - KLIK UNTUK KEMBALI */}
+              {/* Tanda \ di kanan atas - KLIK UNTUK KEMBALI */}
               <motion.div
                 initial={{ x: 50, opacity: 0 }}
                 animate={{ x: 0, opacity: 1 }}
@@ -1266,9 +1004,6 @@ export default function HomePage(): React.JSX.Element {
                   alignItems: 'center',
                   justifyContent: 'center',
                   cursor: 'pointer',
-                  position: 'fixed',
-                  right: isMobile ? '1.5rem' : '3rem',
-                  top: isMobile ? '1.5rem' : '3rem',
                   backgroundColor: 'rgba(0,0,0,0.5)',
                   borderRadius: '50%',
                   zIndex: 9999
@@ -1295,9 +1030,231 @@ export default function HomePage(): React.JSX.Element {
               </motion.div>
             </div>
 
-            {/* Space untuk scroll ke bawah */}
+            {/* Container utama untuk halaman Index MENURU */}
+            <div ref={topicContainerRef} style={{
+              display: 'flex',
+              flexDirection: isMobile ? 'column' : 'row',
+              gap: isMobile ? '2rem' : '3rem',
+              width: '100%',
+              fontFamily: 'Helvetica, Arial, sans-serif',
+              position: 'relative',
+              padding: isMobile ? '0 1.5rem' : '0 3rem'
+            }}>
+              {/* Kolom kiri: Judul "MENURU" */}
+              <div style={{
+                flex: 0.8,
+                marginLeft: isMobile ? '0.5rem' : '1rem'
+              }}>
+                <div style={{
+                  color: 'white',
+                  fontSize: isMobile ? '1.8rem' : '2.5rem',
+                  fontWeight: '300',
+                  textTransform: 'uppercase',
+                  letterSpacing: '2px',
+                  fontFamily: 'Helvetica, Arial, sans-serif',
+                  lineHeight: 1
+                }}>
+                  MENURU
+                </div>
+              </div>
+
+              {/* Kolom tengah: Gambar yang berpindah berdasarkan hover */}
+              <div style={{
+                flex: 1.2,
+                position: 'relative',
+                minHeight: isMobile ? '400px' : '600px',
+                marginLeft: isMobile ? '-3rem' : '-4rem'
+              }}>
+                <AnimatePresence>
+                  {hoveredTopic !== null && (
+                    <motion.div
+                      key="hovered-image"
+                      initial={{ opacity: 0 }}
+                      animate={{ 
+                        opacity: 1,
+                        y: imagePosition
+                      }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.3 }}
+                      style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        width: '85%',
+                        height: '85%',
+                        zIndex: 5
+                      }}
+                    >
+                      <motion.div
+                        initial={{ scale: 0.95 }}
+                        animate={{ scale: 1 }}
+                        exit={{ scale: 0.95 }}
+                        transition={{ duration: 0.4 }}
+                        style={{
+                          width: '100%',
+                          height: '100%',
+                          overflow: 'hidden',
+                          borderRadius: '15px',
+                          boxShadow: '0 10px 30px rgba(0,0,0,0.5)',
+                          border: '1px solid rgba(255,255,255,0.1)'
+                        }}
+                      >
+                        <img 
+                          src="images/5.jpg" 
+                          alt={`Topic ${hoveredTopic}`}
+                          style={{
+                            width: '100%',
+                            height: '100%',
+                            display: 'block',
+                            objectFit: 'cover'
+                          }}
+                          onError={(e) => {
+                            e.currentTarget.style.backgroundColor = '#333';
+                            e.currentTarget.style.display = 'flex';
+                            e.currentTarget.style.alignItems = 'center';
+                            e.currentTarget.style.justifyContent = 'center';
+                            e.currentTarget.style.color = '#fff';
+                            e.currentTarget.innerHTML = '<div style="padding: 2rem; text-align: center;">Topic Image</div>';
+                          }}
+                        />
+                      </motion.div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+
+              {/* Kolom kanan: Daftar Topik */}
+              <div style={{
+                flex: 1,
+                position: 'relative',
+                marginLeft: isMobile ? '-4rem' : '-5rem'
+              }}>
+                <div style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '0.3rem',
+                  fontFamily: 'Helvetica, Arial, sans-serif'
+                }}>
+                  {menuruTopics.map((topic, index) => (
+                    <div 
+                      key={topic.id}
+                      onMouseEnter={() => handleTopicHover(topic.id)}
+                      onMouseLeave={() => handleTopicHover(null)}
+                      style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        position: 'relative',
+                        padding: isMobile ? '0.8rem 0' : '1rem 0',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      <AnimatePresence>
+                        {hoveredTopic === topic.id && (
+                          <motion.div
+                            initial={{ width: 0, opacity: 0 }}
+                            animate={{ width: '100%', opacity: 1 }}
+                            exit={{ width: 0, opacity: 0 }}
+                            transition={{ duration: 0.3 }}
+                            style={{
+                              position: 'absolute',
+                              left: 0,
+                              top: '50%',
+                              height: '1px',
+                              backgroundColor: 'rgba(255,255,255,0.3)',
+                              transform: 'translateY(-50%)',
+                              zIndex: 1
+                            }}
+                          />
+                        )}
+                      </AnimatePresence>
+
+                      <motion.div
+                        style={{
+                          color: 'white',
+                          fontSize: isMobile ? '1.2rem' : '1.5rem',
+                          fontWeight: hoveredTopic === topic.id ? '600' : '400',
+                          fontFamily: 'Helvetica, Arial, sans-serif',
+                          lineHeight: 1.1,
+                          position: 'relative',
+                          zIndex: 2,
+                          transition: 'font-weight 0.2s ease'
+                        }}
+                        whileHover={{ x: 5 }}
+                      >
+                        {topic.title}
+                      </motion.div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Kolom paling kanan: Deskripsi dan Tahun */}
+              <div style={{
+                flex: 1,
+                marginLeft: isMobile ? '-5rem' : '-6rem'
+              }}>
+                <div style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '0.3rem',
+                  fontFamily: 'Helvetica, Arial, sans-serif'
+                }}>
+                  {menuruTopics.map((topic, index) => (
+                    <div 
+                      key={topic.id}
+                      onMouseEnter={() => handleTopicHover(topic.id)}
+                      onMouseLeave={() => handleTopicHover(null)}
+                      style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        padding: isMobile ? '0.8rem 0' : '1rem 0',
+                        cursor: 'pointer',
+                        position: 'relative',
+                        zIndex: 10
+                      }}
+                    >
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'baseline',
+                        gap: '0.5rem'
+                      }}>
+                        <motion.div
+                          style={{
+                            color: 'white',
+                            fontSize: isMobile ? '1.2rem' : '1.5rem',
+                            fontWeight: hoveredTopic === topic.id ? '600' : '400',
+                            fontFamily: 'Helvetica, Arial, sans-serif',
+                            lineHeight: 1.1,
+                            transition: 'font-weight 0.2s ease',
+                            position: 'relative',
+                            zIndex: 11
+                          }}
+                          whileHover={{ x: 5 }}
+                        >
+                          {topic.description}
+                        </motion.div>
+                        <div style={{
+                          color: 'rgba(255,255,255,0.6)',
+                          fontSize: isMobile ? '1.2rem' : '1.5rem',
+                          fontWeight: '400',
+                          fontFamily: 'Helvetica, Arial, sans-serif',
+                          lineHeight: 1.1,
+                          whiteSpace: 'nowrap',
+                          position: 'relative',
+                          zIndex: 11
+                        }}>
+                          {topic.year}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Spacer untuk scroll */}
             <div style={{
-              height: '100vh',
+              height: '50vh',
               width: '100%',
               display: 'flex',
               alignItems: 'center',
@@ -1323,955 +1280,10 @@ export default function HomePage(): React.JSX.Element {
         )}
       </AnimatePresence>
 
-      {/* Halaman Full Page untuk Foto dengan Komentar - DESIGN SEDERHANA */}
-      <AnimatePresence>
-        {showPhotoFullPage && (
-          <motion.div
-            key="photo-fullpage"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.5 }}
-            style={{
-              position: 'fixed',
-              top: 0,
-              left: 0,
-              width: '100%',
-              height: '100%',
-              backgroundColor: 'black',
-              zIndex: 9997,
-              display: 'flex',
-              flexDirection: 'column',
-              overflowY: 'auto'
-            }}
-          >
-            {/* Header sederhana dengan tombol close di KIRI */}
-            <div style={{
-              position: 'sticky',
-              top: 0,
-              left: 0,
-              width: '100%',
-              padding: isMobile ? '1rem' : '1.5rem',
-              display: 'flex',
-              justifyContent: 'space-between', // Tetap space-between
-              alignItems: 'center',
-              zIndex: 100,
-              backgroundColor: 'black',
-              borderBottom: '1px solid rgba(255,255,255,0.1)'
-            }}>
-              {/* Tombol close (×) di kiri */}
-              <motion.button
-                onClick={handleClosePhotoFullPage}
-                style={{
-                  backgroundColor: 'transparent',
-                  border: 'none',
-                  color: 'white',
-                  fontSize: isMobile ? '1.8rem' : '2.2rem',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontFamily: 'Arial, sans-serif',
-                  padding: '0.5rem 1rem',
-                  borderRadius: '4px',
-                  order: 1 // Di kiri
-                }}
-                whileHover={{ 
-                  backgroundColor: 'rgba(255,255,255,0.1)'
-                }}
-                whileTap={{ scale: 0.95 }}
-              >
-                ×
-              </motion.button>
-
-              {/* Counter di kanan */}
-              <div style={{
-                color: 'white',
-                fontSize: isMobile ? '1.5rem' : '2rem',
-                fontWeight: '600',
-                display: 'flex',
-                alignItems: 'baseline',
-                gap: '0.3rem',
-                fontFamily: 'Helvetica, Arial, sans-serif',
-                order: 2 // Di kanan
-              }}>
-                <span>{String(currentPhotoIndex + 1).padStart(2, '0')}</span>
-                <span style={{ opacity: 0.6, fontSize: '0.9em' }}>/</span>
-                <span style={{ opacity: 0.6 }}>{totalPhotos}</span>
-              </div>
-            </div>
-
-            {/* Container utama: foto di atas, komentar di bawah */}
-            <div style={{
-              display: 'flex',
-              flexDirection: 'column',
-              width: '100%',
-              flex: 1
-            }}>
-              {/* Foto slider - LEBIH PANJANG KE BAWAH */}
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                padding: isMobile ? '1rem' : '2rem',
-                paddingTop: '0',
-                paddingBottom: '1rem'
-              }}>
-                <div style={{
-                  width: '100%',
-                  maxWidth: '800px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}>
-                  <AnimatePresence mode="wait">
-                    <motion.div
-                      key={currentPhotoIndex}
-                      initial={{ opacity: 0, scale: 0.95 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 1.05 }}
-                      transition={{ duration: 0.3 }}
-                      style={{
-                        width: '100%',
-                        maxWidth: '600px',
-                        height: isMobile ? '70vh' : '80vh', // LEBIH PANJANG
-                        position: 'relative',
-                        borderRadius: '15px',
-                        overflow: 'hidden',
-                        boxShadow: '0 8px 25px rgba(0,0,0,0.4)',
-                        border: '2px solid rgba(255,255,255,0.15)',
-                        cursor: 'pointer'
-                      }}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        // Klik kiri untuk prev, klik kanan untuk next
-                        const rect = e.currentTarget.getBoundingClientRect();
-                        const clickX = e.clientX - rect.left;
-                        const width = rect.width;
-                        
-                        if (clickX < width / 2) {
-                          prevPhoto();
-                        } else {
-                          nextPhoto();
-                        }
-                      }}
-                    >
-                      <img 
-                        src={progressPhotos[currentPhotoIndex].src}
-                        alt={progressPhotos[currentPhotoIndex].alt}
-                        style={{
-                          width: '100%',
-                          height: '100%',
-                          objectFit: 'cover',
-                          display: 'block'
-                        }}
-                        onError={(e) => {
-                          e.currentTarget.style.backgroundColor = '#222';
-                          e.currentTarget.style.display = 'flex';
-                          e.currentTarget.style.alignItems = 'center';
-                          e.currentTarget.style.justifyContent = 'center';
-                          e.currentTarget.style.color = '#fff';
-                          e.currentTarget.innerHTML = `<div style="padding: 2rem; text-align: center;">Photo ${currentPhotoIndex + 1}</div>`;
-                        }}
-                      />
-                    </motion.div>
-                  </AnimatePresence>
-                </div>
-              </div>
-
-              {/* Progress bar kecil di bawah foto */}
-              <div style={{
-                width: '100%',
-                maxWidth: '600px',
-                margin: '0 auto 2rem auto',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem',
-                padding: '0 1rem'
-              }}>
-                {progressPhotos.map((_, index) => (
-                  <div 
-                    key={index}
-                    style={{
-                      flex: 1,
-                      height: '4px',
-                      backgroundColor: index === currentPhotoIndex ? 'white' : 'rgba(255,255,255,0.2)',
-                      borderRadius: '2px',
-                      transition: 'background-color 0.3s ease'
-                    }}
-                  />
-                ))}
-              </div>
-
-              {/* Waktu update */}
-              <div style={{
-                width: '100%',
-                maxWidth: '600px',
-                margin: '0 auto 1.5rem auto',
-                padding: '0 1rem',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem',
-                color: 'rgba(255,255,255,0.7)',
-                fontSize: '0.9rem'
-              }}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <circle cx="12" cy="12" r="10"/>
-                  <polyline points="12 6 12 12 16 14"/>
-                </svg>
-                {photoTimeAgo[currentPhotoIndex]}
-              </div>
-
-              {/* Area komentar di bawah foto (bisa di-scroll) */}
-              <div style={{
-                flex: 1,
-                padding: isMobile ? '1rem' : '2rem',
-                paddingTop: '0',
-                maxWidth: '800px',
-                margin: '0 auto',
-                width: '100%'
-              }}>
-                {/* Input komentar */}
-                <div style={{
-                  backgroundColor: 'rgba(255,255,255,0.05)',
-                  borderRadius: '12px',
-                  padding: '1.5rem',
-                  marginBottom: '2rem',
-                  border: '1px solid rgba(255,255,255,0.1)'
-                }}>
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.8rem',
-                    marginBottom: '1rem'
-                  }}>
-                    <div style={{
-                      flex: 1,
-                      position: 'relative'
-                    }}>
-                      <input
-                        ref={messageInputRef}
-                        type="text"
-                        value={message}
-                        onChange={(e) => setMessage(e.target.value)}
-                        onKeyPress={handleKeyPress}
-                        placeholder="Tulis komentar..."
-                        style={{
-                          width: '100%',
-                          padding: '0.8rem 1rem',
-                          paddingRight: '3rem',
-                          backgroundColor: 'rgba(255,255,255,0.05)',
-                          border: '1px solid rgba(255,255,255,0.1)',
-                          borderRadius: '20px',
-                          color: 'white',
-                          fontSize: '0.9rem',
-                          fontFamily: 'Helvetica, Arial, sans-serif',
-                          outline: 'none',
-                          transition: 'all 0.3s ease'
-                        }}
-                      />
-                      <span style={{
-                        position: 'absolute',
-                        right: '1rem',
-                        top: '50%',
-                        transform: 'translateY(-50%)',
-                        color: 'rgba(255,255,255,0.3)',
-                        fontSize: '0.75rem'
-                      }}>
-                        Enter
-                      </span>
-                    </div>
-                    
-                    <motion.button
-                      onClick={handleSendMessage}
-                      disabled={message.trim() === ""}
-                      style={{
-                        width: '40px',
-                        height: '40px',
-                        backgroundColor: message.trim() === "" ? 'rgba(0, 80, 183, 0.5)' : '#0050B7',
-                        border: 'none',
-                        borderRadius: '50%',
-                        cursor: message.trim() === "" ? 'not-allowed' : 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        transition: 'all 0.3s ease',
-                        flexShrink: 0
-                      }}
-                      whileHover={message.trim() !== "" ? { 
-                        scale: 1.1,
-                        backgroundColor: '#0066CC'
-                      } : {}}
-                      whileTap={message.trim() !== "" ? { scale: 0.95 } : {}}
-                    >
-                      <svg 
-                        width="18" 
-                        height="18" 
-                        viewBox="0 0 24 24" 
-                        fill="none" 
-                        stroke="white" 
-                        strokeWidth="2"
-                      >
-                        <line x1="22" y1="2" x2="11" y2="13"/>
-                        <polygon points="22 2 15 22 11 13 2 9 22 2"/>
-                      </svg>
-                    </motion.button>
-                  </div>
-                  
-                  <div style={{
-                    textAlign: 'center'
-                  }}>
-                    <span style={{
-                      color: 'rgba(255,255,255,0.5)',
-                      fontSize: '0.75rem'
-                    }}>
-                      {user ? `Login sebagai: ${userDisplayName}` : 'Komentar sebagai: Anonymous'}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Header komentar */}
-                <div style={{
-                  marginBottom: '1.5rem',
-                  color: 'white',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between'
-                }}>
-                  <h3 style={{
-                    fontSize: isMobile ? '1.2rem' : '1.4rem',
-                    fontWeight: '600',
-                    margin: 0,
-                    fontFamily: 'Helvetica, Arial, sans-serif'
-                  }}>
-                    Komentar ({currentPhotoComments.length})
-                  </h3>
-                </div>
-
-                {/* Daftar komentar */}
-                <div style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '1rem',
-                  paddingBottom: '3rem'
-                }}>
-                  {isLoadingComments ? (
-                    <div style={{
-                      color: 'rgba(255,255,255,0.5)',
-                      textAlign: 'center',
-                      padding: '2rem',
-                      fontSize: '0.9rem'
-                    }}>
-                      Memuat komentar...
-                    </div>
-                  ) : currentPhotoComments.length === 0 ? (
-                    <div style={{
-                      color: 'rgba(255,255,255,0.5)',
-                      textAlign: 'center',
-                      padding: '2rem',
-                      fontSize: '0.9rem'
-                    }}>
-                      Belum ada komentar untuk foto ini.
-                      <div style={{ marginTop: '0.5rem', fontSize: '0.8rem' }}>
-                        Jadilah yang pertama berkomentar!
-                      </div>
-                    </div>
-                  ) : (
-                    currentPhotoComments.map((comment, index) => (
-                      <motion.div
-                        key={comment.id || index}
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: index * 0.05 }}
-                        style={{
-                          backgroundColor: 'rgba(255,255,255,0.05)',
-                          padding: '1rem',
-                          borderRadius: '8px',
-                          borderLeft: '3px solid #0050B7'
-                        }}
-                      >
-                        <div style={{
-                          display: 'flex',
-                          alignItems: 'flex-start',
-                          gap: '0.8rem',
-                          marginBottom: '0.5rem'
-                        }}>
-                          <div style={{
-                            width: '32px',
-                            height: '32px',
-                            minWidth: '32px',
-                            borderRadius: '50%',
-                            backgroundColor: user && comment.user === userDisplayName ? '#0050B7' : '#333',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            fontSize: '0.9rem',
-                            fontWeight: '600',
-                            color: 'white'
-                          }}>
-                            {comment.userAvatar || comment.user.charAt(0).toUpperCase()}
-                          </div>
-                          <div style={{ flex: 1 }}>
-                            <div style={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'space-between',
-                              marginBottom: '0.3rem'
-                            }}>
-                              <span style={{
-                                color: 'rgba(255,255,255,0.9)',
-                                fontSize: '0.9rem',
-                                fontWeight: '600'
-                              }}>
-                                {comment.user}
-                                {user && comment.user === userDisplayName && (
-                                  <span style={{
-                                    marginLeft: '0.5rem',
-                                    fontSize: '0.7rem',
-                                    backgroundColor: '#0050B7',
-                                    color: 'white',
-                                    padding: '0.1rem 0.4rem',
-                                    borderRadius: '4px'
-                                  }}>
-                                    Anda
-                                  </span>
-                                )}
-                              </span>
-                              <span style={{
-                                color: 'rgba(255,255,255,0.5)',
-                                fontSize: '0.75rem',
-                                whiteSpace: 'nowrap'
-                              }}>
-                                {calculateTimeAgo(comment.timestamp)}
-                              </span>
-                            </div>
-                            <p style={{
-                              color: 'white',
-                              margin: 0,
-                              fontSize: '0.9rem',
-                              lineHeight: 1.4
-                            }}>
-                              {comment.text}
-                            </p>
-                          </div>
-                        </div>
-                      </motion.div>
-                    ))
-                  )}
-                </div>
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Modal Logout Confirmation */}
-      <AnimatePresence>
-        {showLogoutModal && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
-            style={{
-              position: 'fixed',
-              top: 0,
-              left: 0,
-              width: '100%',
-              height: '100%',
-              backgroundColor: 'rgba(0, 0, 0, 0.7)',
-              zIndex: 9999,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              backdropFilter: 'blur(5px)'
-            }}
-            onClick={handleCancelLogout}
-          >
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              transition={{ duration: 0.3 }}
-              style={{
-                backgroundColor: 'rgba(30, 30, 30, 0.95)',
-                borderRadius: '15px',
-                padding: isMobile ? '1.5rem' : '2rem',
-                width: isMobile ? '90%' : '400px',
-                maxWidth: '500px',
-                border: '1px solid rgba(255, 255, 255, 0.1)',
-                boxShadow: '0 20px 60px rgba(0, 0, 0, 0.5)',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '1.5rem'
-              }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div style={{ textAlign: 'center' }}>
-                <h3 style={{
-                  color: 'white',
-                  fontSize: isMobile ? '1.3rem' : '1.5rem',
-                  fontWeight: '600',
-                  margin: '0 0 0.5rem 0',
-                  fontFamily: 'Helvetica, Arial, sans-serif'
-                }}>
-                  Logout
-                </h3>
-                <p style={{
-                  color: 'rgba(255, 255, 255, 0.7)',
-                  fontSize: '0.9rem',
-                  margin: 0,
-                  lineHeight: 1.5
-                }}>
-                  Apakah Anda yakin ingin keluar dari akun {userDisplayName}?
-                </p>
-              </div>
-
-              <div style={{
-                display: 'flex',
-                gap: '1rem',
-                justifyContent: 'center'
-              }}>
-                <motion.button
-                  onClick={handleCancelLogout}
-                  style={{
-                    flex: 1,
-                    padding: '0.8rem 1.5rem',
-                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                    border: '1px solid rgba(255, 255, 255, 0.2)',
-                    borderRadius: '8px',
-                    color: 'white',
-                    fontSize: '0.9rem',
-                    fontWeight: '500',
-                    cursor: 'pointer',
-                    transition: 'all 0.3s ease',
-                    fontFamily: 'Helvetica, Arial, sans-serif'
-                  }}
-                  whileHover={{ 
-                    backgroundColor: 'rgba(255, 255, 255, 0.2)'
-                  }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  Tidak
-                </motion.button>
-                <motion.button
-                  onClick={handleConfirmLogout}
-                  style={{
-                    flex: 1,
-                    padding: '0.8rem 1.5rem',
-                    backgroundColor: '#0050B7',
-                    border: 'none',
-                    borderRadius: '8px',
-                    color: 'white',
-                    fontSize: '0.9rem',
-                    fontWeight: '500',
-                    cursor: 'pointer',
-                    transition: 'all 0.3s ease',
-                    fontFamily: 'Helvetica, Arial, sans-serif'
-                  }}
-                  whileHover={{ 
-                    backgroundColor: '#0066CC'
-                  }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  Ya, Logout
-                </motion.button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* POPUP CHATBOT - DI KANAN BAWAH */}
-      <AnimatePresence>
-        {showChatbotPopup && (
-          <motion.div
-            ref={chatbotPopupRef}
-            initial={{ opacity: 0, x: 100, y: 100 }}
-            animate={{ opacity: 1, x: 0, y: 0 }}
-            exit={{ opacity: 0, x: 100, y: 100 }}
-            transition={{ 
-              duration: 0.5,
-              type: "spring",
-              damping: 25,
-              stiffness: 300
-            }}
-            style={{
-              position: 'fixed',
-              bottom: isMobile ? '1rem' : '2rem',
-              right: isMobile ? '1rem' : '2rem',
-              zIndex: 9996,
-              maxWidth: isMobile ? 'calc(100% - 2rem)' : '400px',
-              width: isMobile ? '90%' : '380px'
-            }}
-          >
-            <motion.div
-              initial={{ scale: 0.8 }}
-              animate={{ scale: 1 }}
-              transition={{ delay: 0.1, duration: 0.3 }}
-              style={{
-                backgroundColor: 'rgba(20, 20, 20, 0.95)',
-                backdropFilter: 'blur(10px)',
-                borderRadius: '20px',
-                border: '1px solid rgba(255, 255, 255, 0.15)',
-                boxShadow: '0 20px 60px rgba(0, 0, 0, 0.5), 0 0 30px rgba(0, 255, 0, 0.2)',
-                overflow: 'hidden',
-                position: 'relative'
-              }}
-            >
-              {/* Header dengan Tombol Close */}
-              <div style={{
-                padding: isMobile ? '1.2rem 1.2rem 0.8rem 1.2rem' : '1.5rem 1.5rem 1rem 1.5rem',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'flex-start',
-                backgroundColor: 'rgba(10, 10, 10, 0.8)',
-                borderBottom: '1px solid rgba(255, 255, 255, 0.1)'
-              }}>
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.8rem'
-                }}>
-                  <div style={{
-                    width: isMobile ? '45px' : '50px',
-                    height: isMobile ? '45px' : '50px',
-                    borderRadius: '12px',
-                    backgroundColor: '#00FF00',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    flexShrink: 0
-                  }}>
-                    <svg 
-                      width={isMobile ? "25" : "28"} 
-                      height={isMobile ? "25" : "28"} 
-                      viewBox="0 0 24 24" 
-                      fill="none" 
-                      stroke="black" 
-                      strokeWidth="2"
-                    >
-                      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-                    </svg>
-                  </div>
-                  
-                  <div>
-                    <div style={{
-                      color: '#00FF00',
-                      fontSize: isMobile ? '0.85rem' : '0.9rem',
-                      fontWeight: '600',
-                      textTransform: 'uppercase',
-                      letterSpacing: '1px',
-                      marginBottom: '0.2rem'
-                    }}>
-                      AI Assistant
-                    </div>
-                    <h3 style={{
-                      color: 'white',
-                      fontSize: isMobile ? '1.3rem' : '1.5rem',
-                      fontWeight: '700',
-                      margin: 0,
-                      fontFamily: 'Helvetica, Arial, sans-serif',
-                      lineHeight: 1.2
-                    }}>
-                      Chatbot AI
-                    </h3>
-                  </div>
-                </div>
-
-                {/* Tombol Close */}
-                <motion.button
-                  onClick={handleCloseChatbotPopup}
-                  style={{
-                    width: isMobile ? '32px' : '36px',
-                    height: isMobile ? '32px' : '36px',
-                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                    border: '1px solid rgba(255, 255, 255, 0.2)',
-                    borderRadius: '50%',
-                    color: 'white',
-                    fontSize: isMobile ? '1.2rem' : '1.5rem',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    padding: 0,
-                    margin: 0,
-                    flexShrink: 0
-                  }}
-                  whileHover={{ 
-                    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-                    scale: 1.1
-                  }}
-                  whileTap={{ scale: 0.9 }}
-                >
-                  ×
-                </motion.button>
-              </div>
-
-              {/* Konten */}
-              <div style={{
-                padding: isMobile ? '1.2rem' : '1.5rem'
-              }}>
-                {/* Deskripsi */}
-                <motion.div
-                  initial={{ y: 10, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ delay: 0.2, duration: 0.3 }}
-                  style={{
-                    marginBottom: '1.5rem'
-                  }}
-                >
-                  <p style={{
-                    color: 'rgba(255, 255, 255, 0.9)',
-                    fontSize: isMobile ? '0.95rem' : '1rem',
-                    lineHeight: 1.5,
-                    margin: '0 0 1rem 0'
-                  }}>
-                    Coba chatbot AI cerdas kami! Dapatkan bantuan instan, jawaban cepat, dan pengalaman chatting yang lebih personal.
-                  </p>
-                  
-                  {/* Fitur-fitur */}
-                  <div style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '0.6rem',
-                    marginTop: '1rem'
-                  }}>
-                    {[
-                      "🤖 AI dengan teknologi terbaru",
-                      "⚡ Respon dalam hitungan detik",
-                      "🔐 Privasi data terjamin",
-                      "🎯 Solusi personal untuk Anda"
-                    ].map((feature, index) => (
-                      <motion.div
-                        key={index}
-                        initial={{ x: -10, opacity: 0 }}
-                        animate={{ x: 0, opacity: 1 }}
-                        transition={{ delay: 0.3 + (index * 0.1), duration: 0.3 }}
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '0.6rem'
-                        }}
-                      >
-                        <div style={{
-                          width: '20px',
-                          height: '20px',
-                          borderRadius: '50%',
-                          backgroundColor: 'rgba(0, 255, 0, 0.2)',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          flexShrink: 0
-                        }}>
-                          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#00FF00" strokeWidth="3">
-                            <polyline points="20 6 9 17 4 12"/>
-                          </svg>
-                        </div>
-                        <span style={{
-                          color: 'rgba(255, 255, 255, 0.8)',
-                          fontSize: '0.9rem'
-                        }}>
-                          {feature}
-                        </span>
-                      </motion.div>
-                    ))}
-                  </div>
-                </motion.div>
-
-                {/* Foto/Ilustrasi Chatbot */}
-                <motion.div
-                  initial={{ scale: 0.9, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  transition={{ delay: 0.4, duration: 0.4 }}
-                  style={{
-                    width: '100%',
-                    height: isMobile ? '120px' : '140px',
-                    borderRadius: '12px',
-                    overflow: 'hidden',
-                    marginBottom: '1.5rem',
-                    position: 'relative',
-                    border: '2px solid rgba(0, 255, 0, 0.2)'
-                  }}
-                >
-                  <div style={{
-                    width: '100%',
-                    height: '100%',
-                    backgroundColor: 'rgba(0, 255, 0, 0.05)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    flexDirection: 'column',
-                    gap: '0.8rem'
-                  }}>
-                    <div style={{
-                      display: 'flex',
-                      gap: '0.5rem'
-                    }}>
-                      {[1, 2, 3].map((dot) => (
-                        <motion.div
-                          key={dot}
-                          animate={{ 
-                            scale: [1, 1.2, 1],
-                            opacity: [0.5, 1, 0.5]
-                          }}
-                          transition={{ 
-                            duration: 1.5,
-                            repeat: Infinity,
-                            delay: dot * 0.2
-                          }}
-                          style={{
-                            width: '12px',
-                            height: '12px',
-                            backgroundColor: '#00FF00',
-                            borderRadius: '50%'
-                          }}
-                        />
-                      ))}
-                    </div>
-                    <div style={{
-                      color: '#00FF00',
-                      fontSize: isMobile ? '1rem' : '1.1rem',
-                      fontWeight: '600',
-                      textAlign: 'center'
-                    }}>
-                      AI Chatbot Siap Membantu
-                    </div>
-                  </div>
-                </motion.div>
-
-                {/* Tombol Action */}
-                <motion.div
-                  initial={{ y: 10, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ delay: 0.5, duration: 0.3 }}
-                  style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '0.8rem'
-                  }}
-                >
-                  {/* Tombol Utama */}
-                  <motion.button
-                    onClick={handleGoToChatbot}
-                    style={{
-                      backgroundColor: '#00FF00',
-                      color: 'black',
-                      border: 'none',
-                      padding: isMobile ? '0.9rem' : '1rem',
-                      borderRadius: '12px',
-                      fontSize: isMobile ? '1rem' : '1.05rem',
-                      fontWeight: '700',
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: '0.6rem',
-                      fontFamily: 'Helvetica, Arial, sans-serif',
-                      transition: 'all 0.3s ease',
-                      position: 'relative',
-                      overflow: 'hidden'
-                    }}
-                    whileHover={{ 
-                      scale: 1.03,
-                      backgroundColor: '#00CC00',
-                      boxShadow: '0 10px 20px rgba(0, 255, 0, 0.3)'
-                    }}
-                    whileTap={{ scale: 0.97 }}
-                  >
-                    <svg 
-                      width="18" 
-                      height="18" 
-                      viewBox="0 0 24 24" 
-                      fill="none" 
-                      stroke="currentColor" 
-                      strokeWidth="2"
-                    >
-                      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-                    </svg>
-                    Coba Sekarang - Gratis
-                    <motion.div
-                      initial={{ x: -100 }}
-                      animate={{ x: 400 }}
-                      transition={{ duration: 2, repeat: Infinity, delay: 1 }}
-                      style={{
-                        position: 'absolute',
-                        top: 0,
-                        left: 0,
-                        width: '50px',
-                        height: '100%',
-                        background: 'linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent)',
-                        transform: 'skewX(-20deg)'
-                      }}
-                    />
-                  </motion.button>
-
-                  {/* Tombol Secondary */}
-                  <motion.button
-                    onClick={handleCloseChatbotPopup}
-                    style={{
-                      backgroundColor: 'transparent',
-                      color: 'rgba(255, 255, 255, 0.7)',
-                      border: '1px solid rgba(255, 255, 255, 0.2)',
-                      padding: isMobile ? '0.7rem' : '0.8rem',
-                      borderRadius: '10px',
-                      fontSize: '0.9rem',
-                      fontWeight: '500',
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: '0.5rem',
-                      fontFamily: 'Helvetica, Arial, sans-serif',
-                      transition: 'all 0.3s ease'
-                    }}
-                    whileHover={{ 
-                      backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                      color: 'white'
-                    }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    Nanti Saja
-                  </motion.button>
-                </motion.div>
-
-                {/* Info Footer */}
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.6, duration: 0.3 }}
-                  style={{
-                    textAlign: 'center',
-                    marginTop: '1rem',
-                    paddingTop: '0.8rem',
-                    borderTop: '1px solid rgba(255, 255, 255, 0.1)'
-                  }}
-                >
-                  <span style={{
-                    color: 'rgba(255, 255, 255, 0.5)',
-                    fontSize: '0.75rem',
-                    display: 'block'
-                  }}>
-                    Tidak perlu registrasi • 100% gratis • Coba sekarang juga!
-                  </span>
-                </motion.div>
-              </div>
-
-              {/* Efek Cahaya */}
-              <div style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                width: '100%',
-                height: '100%',
-                background: 'radial-gradient(circle at 80% 20%, rgba(0, 255, 0, 0.1) 0%, transparent 70%)',
-                pointerEvents: 'none',
-                zIndex: -1
-              }} />
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* Sisa kode tetap sama (Halaman Full Page untuk Foto, Modal Logout, Popup Chatbot, dll) */}
+      {/* ... (kode Halaman Full Page untuk Foto dengan Komentar tetap sama) ... */}
+      {/* ... (kode Modal Logout Confirmation tetap sama) ... */}
+      {/* ... (kode POPUP CHATBOT tetap sama) ... */}
 
       {/* Teks "Selamat Tahun Baru 2026" di pojok kiri atas, di atas navbar */}
       <motion.div
@@ -3529,749 +2541,740 @@ export default function HomePage(): React.JSX.Element {
             </div>
           </div>
 
-
-
-
-
-
-
-
-      
-
-                {/* Teks MENURU dengan animasi Plus (+) */}
-                <motion.div
-                  ref={menuruButtonRef}
-                  onClick={handleMenuruClick}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'flex-end',
-                    gap: '0.5rem',
-                    cursor: 'pointer',
-                    marginTop: isMobile ? '1rem' : '0',
-                    width: isMobile ? '100%' : 'auto'
-                  }}
-                  whileHover={{ x: 5 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <div style={{
-                    color: 'white',
-                    fontSize: isMobile ? '1.8rem' : '2rem',
-                    fontWeight: '300',
-                    fontFamily: 'Helvetica, Arial, sans-serif',
-                    textTransform: 'uppercase',
-                    letterSpacing: '2px',
-                    position: 'relative'
-                  }}>
-                    MENURU
-                  </div>
-                  
-                  <div 
-                    ref={plusSignRef}
-                    className="plus-sign" 
-                    style={{
-                      width: isMobile ? '35px' : '40px',
-                      height: isMobile ? '35px' : '40px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      position: 'relative',
-                      marginLeft: '0.5rem'
-                    }}
-                  >
-                    <div style={{
-                      position: 'absolute',
-                      width: '2px',
-                      height: isMobile ? '18px' : '20px',
-                      backgroundColor: 'white',
-                      borderRadius: '1px'
-                    }} />
-                    <div style={{
-                      position: 'absolute',
-                      width: isMobile ? '18px' : '20px',
-                      height: '2px',
-                      backgroundColor: 'white',
-                      borderRadius: '1px'
-                    }} />
-                  </div>
-                </motion.div>
-              </div>
-
-              {/* Progress Bar dengan 3 Foto dan Komentar */}
-              <div style={{
-                width: '100%',
-                padding: isMobile ? '1rem' : '2rem',
-                marginTop: isMobile ? '3rem' : '4rem',
-                marginBottom: isMobile ? '3rem' : '4rem',
-                boxSizing: 'border-box',
-                position: 'relative'
-              }}>
-                {/* Counter Foto di samping kiri */}
-                <div 
-                  style={{
-                    position: 'absolute',
-                    left: isMobile ? '2rem' : '3rem',
-                    top: isMobile ? '2rem' : '3rem',
-                    zIndex: 20,
-                    color: 'white',
-                    fontSize: isMobile ? '2.5rem' : '3.5rem',
-                    fontWeight: '600',
-                    fontFamily: 'Helvetica, Arial, sans-serif',
-                    textShadow: '0 2px 10px rgba(0,0,0,0.5)',
-                    backgroundColor: 'rgba(0,0,0,0.3)',
-                    padding: '0.5rem 1rem',
-                    borderRadius: '10px',
-                    backdropFilter: 'blur(5px)',
-                    display: 'flex',
-                    alignItems: 'baseline',
-                    gap: '0.3rem'
-                  }}
-                >
-                  <span 
-                    ref={leftCounterRef}
-                    style={{
-                      display: 'inline-block',
-                      opacity: 1
-                    }}
-                  >
-                    {leftCounter}
-                  </span>
-                  <span style={{
-                    fontSize: isMobile ? '1.5rem' : '2rem',
-                    fontWeight: '400',
-                    opacity: 0.8,
-                    margin: '0 0.2rem'
-                  }}>
-                    /
-                  </span>
-                  <span style={{
-                    fontSize: isMobile ? '1.5rem' : '2rem',
-                    fontWeight: '400',
-                    opacity: 0.8
-                  }}>
-                    {totalPhotos}
-                  </span>
-                </div>
-
-                {/* Waktu Update */}
-                <div style={{
-                  position: 'absolute',
-                  right: isMobile ? '2rem' : '3rem',
-                  top: isMobile ? '2rem' : '3rem',
-                  zIndex: 20,
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'flex-end',
-                  gap: '0.5rem'
-                }}>
-                  <div style={{
-                    backgroundColor: 'rgba(0,0,0,0.3)',
-                    padding: '0.4rem 0.8rem',
-                    borderRadius: '8px',
-                    backdropFilter: 'blur(5px)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.4rem'
-                  }}>
-                    <svg 
-                      width="14" 
-                      height="14" 
-                      viewBox="0 0 24 24" 
-                      fill="none" 
-                      stroke="currentColor" 
-                      strokeWidth="2"
-                    >
-                      <circle cx="12" cy="12" r="10"/>
-                      <polyline points="12 6 12 12 16 14"/>
-                    </svg>
-                    <span style={{
-                      color: 'rgba(255,255,255,0.9)',
-                      fontSize: isMobile ? '0.8rem' : '0.9rem',
-                      fontWeight: '500',
-                      fontFamily: 'Helvetica, Arial, sans-serif'
-                    }}>
-                      {photoTimeAgo[currentPhotoIndex]}
-                    </span>
-                  </div>
-                </div>
-
-                <div style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: isMobile ? '1.5rem' : '2rem',
-                  alignItems: 'center',
-                  maxWidth: '800px',
-                  margin: '0 auto'
-                }}>
-                  {/* Container Progress Bar */}
-                  <div style={{
-                    width: '100%',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: isMobile ? '0.5rem' : '0.8rem',
-                    marginBottom: '1rem'
-                  }}>
-                    {progressPhotos.map((_, index) => (
-                      <div 
-                        key={index}
-                        style={{
-                          flex: 1,
-                          height: '12px',
-                          backgroundColor: 'rgba(255, 255, 255, 0.2)',
-                          borderRadius: '6px',
-                          overflow: 'hidden',
-                          position: 'relative'
-                        }}
-                      >
-                        <div
-                          className="progress-fill"
-                          data-index={index}
-                          style={{
-                            position: 'absolute',
-                            left: 0,
-                            top: 0,
-                            bottom: 0,
-                            backgroundColor: 'white',
-                            borderRadius: '6px',
-                            width: index === currentPhotoIndex ? '100%' : (index < currentPhotoIndex ? '100%' : '0%')
-                          }}
-                        />
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Foto Portrait - KLIK UNTUK MEMBUKA FULL PAGE */}
-                  <motion.div
-                    onClick={handlePhotoClick}
-                    style={{
-                      position: 'relative',
-                      width: '100%',
-                      maxWidth: '600px',
-                      height: isMobile ? '600px' : '800px',
-                      borderRadius: '15px',
-                      overflow: 'hidden',
-                      boxShadow: '0 8px 25px rgba(0,0,0,0.4)',
-                      border: '2px solid rgba(255,255,255,0.15)',
-                      cursor: 'pointer',
-                      margin: '0 auto'
-                    }}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                  >
-                    {/* Foto Aktif */}
-                    <AnimatePresence mode="wait">
-                      <motion.div
-                        key={currentPhotoIndex}
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        transition={{ duration: 0.3 }}
-                        style={{
-                          width: '100%',
-                          height: '100%'
-                        }}
-                      >
-                        <img 
-                          src={progressPhotos[currentPhotoIndex].src}
-                          alt={progressPhotos[currentPhotoIndex].alt}
-                          style={{
-                            width: '100%',
-                            height: '100%',
-                            objectFit: 'cover',
-                            display: 'block'
-                          }}
-                          onError={(e) => {
-                            e.currentTarget.style.backgroundColor = '#222';
-                            e.currentTarget.style.display = 'flex';
-                            e.currentTarget.style.alignItems = 'center';
-                            e.currentTarget.style.justifyContent = 'center';
-                            e.currentTarget.style.color = '#fff';
-                            e.currentTarget.innerHTML = `<div style="padding: 2rem; text-align: center;">Photo ${currentPhotoIndex + 1}</div>`;
-                          }}
-                        />
-                      </motion.div>
-                    </AnimatePresence>
-                  </motion.div>
-                </div>
-              </div>
-
-              {/* Content tambahan */}
-              <div style={{
-                height: '50vh',
-                width: '100%',
+          {/* Teks MENURU dengan animasi Plus (+) */}
+          <motion.div
+            ref={menuruButtonRef}
+            onClick={handleMenuruClick}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'flex-end',
+              gap: '0.5rem',
+              cursor: 'pointer',
+              marginTop: isMobile ? '1rem' : '0',
+              width: isMobile ? '100%' : 'auto'
+            }}
+            whileHover={{ x: 5 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            <div style={{
+              color: 'white',
+              fontSize: isMobile ? '1.8rem' : '2rem',
+              fontWeight: '300',
+              fontFamily: 'Helvetica, Arial, sans-serif',
+              textTransform: 'uppercase',
+              letterSpacing: '2px',
+              position: 'relative'
+            }}>
+              MENURU
+            </div>
+            
+            <div 
+              ref={plusSignRef}
+              className="plus-sign" 
+              style={{
+                width: isMobile ? '35px' : '40px',
+                height: isMobile ? '35px' : '40px',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                marginTop: isMobile ? '3rem' : '5rem',
-                zIndex: 10,
-                position: 'relative'
-              }}>
-                <motion.p
-                  initial={{ opacity: 0 }}
-                  whileInView={{ opacity: 1 }}
-                  transition={{ duration: 0.8 }}
-                  style={{
-                    color: 'white',
-                    fontSize: isMobile ? '1.5rem' : '2rem',
-                    fontWeight: '300',
-                    textAlign: 'center',
-                    maxWidth: '600px',
-                    padding: '0 2rem'
-                  }}
-                >
-                  More content coming soon...
-                </motion.p>
-              </div>
-            </motion.div>
-          )}
-
-          {/* Halaman Index */}
-          {currentView === "index" && (
-            <motion.div
-              key="index-view"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.5 }}
-              style={{
-                width: '100%',
-                minHeight: '100vh',
-                padding: isMobile ? '1rem' : '2rem',
-                boxSizing: 'border-box',
-                position: 'relative'
+                position: 'relative',
+                marginLeft: '0.5rem'
               }}
             >
-              {/* Garis bawah di atas MENURU */}
               <div style={{
-                width: '100%',
-                height: '1px',
-                backgroundColor: 'rgba(255,255,255,0.2)',
-                marginBottom: '3rem'
-              }}></div>
+                position: 'absolute',
+                width: '2px',
+                height: isMobile ? '18px' : '20px',
+                backgroundColor: 'white',
+                borderRadius: '1px'
+              }} />
+              <div style={{
+                position: 'absolute',
+                width: isMobile ? '18px' : '20px',
+                height: '2px',
+                backgroundColor: 'white',
+                borderRadius: '1px'
+              }} />
+            </div>
+          </motion.div>
+        </div>
 
-              {/* Container utama untuk halaman Index */}
-              <div ref={topicContainerRef} style={{
-                display: 'flex',
-                flexDirection: isMobile ? 'column' : 'row',
-                gap: isMobile ? '2rem' : '3rem',
-                width: '100%',
-                fontFamily: 'Helvetica, Arial, sans-serif',
-                position: 'relative'
+        {/* Progress Bar dengan 3 Foto dan Komentar */}
+        <div style={{
+          width: '100%',
+          padding: isMobile ? '1rem' : '2rem',
+          marginTop: isMobile ? '3rem' : '4rem',
+          marginBottom: isMobile ? '3rem' : '4rem',
+          boxSizing: 'border-box',
+          position: 'relative'
+        }}>
+          {/* Counter Foto di samping kiri */}
+          <div 
+            style={{
+              position: 'absolute',
+              left: isMobile ? '2rem' : '3rem',
+              top: isMobile ? '2rem' : '3rem',
+              zIndex: 20,
+              color: 'white',
+              fontSize: isMobile ? '2.5rem' : '3.5rem',
+              fontWeight: '600',
+              fontFamily: 'Helvetica, Arial, sans-serif',
+              textShadow: '0 2px 10px rgba(0,0,0,0.5)',
+              backgroundColor: 'rgba(0,0,0,0.3)',
+              padding: '0.5rem 1rem',
+              borderRadius: '10px',
+              backdropFilter: 'blur(5px)',
+              display: 'flex',
+              alignItems: 'baseline',
+              gap: '0.3rem'
+            }}
+          >
+            <span 
+              ref={leftCounterRef}
+              style={{
+                display: 'inline-block',
+                opacity: 1
+              }}
+            >
+              {leftCounter}
+            </span>
+            <span style={{
+              fontSize: isMobile ? '1.5rem' : '2rem',
+              fontWeight: '400',
+              opacity: 0.8,
+              margin: '0 0.2rem'
+            }}>
+              /
+            </span>
+            <span style={{
+              fontSize: isMobile ? '1.5rem' : '2rem',
+              fontWeight: '400',
+              opacity: 0.8
+            }}>
+              {totalPhotos}
+            </span>
+          </div>
+
+          {/* Waktu Update */}
+          <div style={{
+            position: 'absolute',
+            right: isMobile ? '2rem' : '3rem',
+            top: isMobile ? '2rem' : '3rem',
+            zIndex: 20,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'flex-end',
+            gap: '0.5rem'
+          }}>
+            <div style={{
+              backgroundColor: 'rgba(0,0,0,0.3)',
+              padding: '0.4rem 0.8rem',
+              borderRadius: '8px',
+              backdropFilter: 'blur(5px)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.4rem'
+            }}>
+              <svg 
+                width="14" 
+                height="14" 
+                viewBox="0 0 24 24" 
+                fill="none" 
+                stroke="currentColor" 
+                strokeWidth="2"
+              >
+                <circle cx="12" cy="12" r="10"/>
+                <polyline points="12 6 12 12 16 14"/>
+              </svg>
+              <span style={{
+                color: 'rgba(255,255,255,0.9)',
+                fontSize: isMobile ? '0.8rem' : '0.9rem',
+                fontWeight: '500',
+                fontFamily: 'Helvetica, Arial, sans-serif'
               }}>
-                <div style={{
-                  flex: 0.8,
-                  marginLeft: isMobile ? '0.5rem' : '1rem'
-                }}>
-                  <div style={{
-                    color: 'white',
-                    fontSize: isMobile ? '1.8rem' : '2.5rem',
-                    fontWeight: '300',
-                    textTransform: 'uppercase',
-                    letterSpacing: '2px',
-                    fontFamily: 'Helvetica, Arial, sans-serif',
-                    lineHeight: 1
-                  }}>
-                    MENURU
-                  </div>
-                </div>
+                {photoTimeAgo[currentPhotoIndex]}
+              </span>
+            </div>
+          </div>
 
-                <div style={{
-                  flex: 1.2,
-                  position: 'relative',
-                  minHeight: isMobile ? '400px' : '600px',
-                  marginLeft: isMobile ? '-3rem' : '-4rem'
-                }}>
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: isMobile ? '1.5rem' : '2rem',
+            alignItems: 'center',
+            maxWidth: '800px',
+            margin: '0 auto'
+          }}>
+            {/* Container Progress Bar */}
+            <div style={{
+              width: '100%',
+              display: 'flex',
+              alignItems: 'center',
+              gap: isMobile ? '0.5rem' : '0.8rem',
+              marginBottom: '1rem'
+            }}>
+              {progressPhotos.map((_, index) => (
+                <div 
+                  key={index}
+                  style={{
+                    flex: 1,
+                    height: '12px',
+                    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                    borderRadius: '6px',
+                    overflow: 'hidden',
+                    position: 'relative'
+                  }}
+                >
+                  <div
+                    className="progress-fill"
+                    data-index={index}
+                    style={{
+                      position: 'absolute',
+                      left: 0,
+                      top: 0,
+                      bottom: 0,
+                      backgroundColor: 'white',
+                      borderRadius: '6px',
+                      width: index === currentPhotoIndex ? '100%' : (index < currentPhotoIndex ? '100%' : '0%')
+                    }}
+                  />
+                </div>
+              ))}
+            </div>
+
+            {/* Foto Portrait - KLIK UNTUK MEMBUKA FULL PAGE */}
+            <motion.div
+              onClick={handlePhotoClick}
+              style={{
+                position: 'relative',
+                width: '100%',
+                maxWidth: '600px',
+                height: isMobile ? '600px' : '800px',
+                borderRadius: '15px',
+                overflow: 'hidden',
+                boxShadow: '0 8px 25px rgba(0,0,0,0.4)',
+                border: '2px solid rgba(255,255,255,0.15)',
+                cursor: 'pointer',
+                margin: '0 auto'
+              }}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              {/* Foto Aktif */}
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={currentPhotoIndex}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.3 }}
+                  style={{
+                    width: '100%',
+                    height: '100%'
+                  }}
+                >
+                  <img 
+                    src={progressPhotos[currentPhotoIndex].src}
+                    alt={progressPhotos[currentPhotoIndex].alt}
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'cover',
+                      display: 'block'
+                    }}
+                    onError={(e) => {
+                      e.currentTarget.style.backgroundColor = '#222';
+                      e.currentTarget.style.display = 'flex';
+                      e.currentTarget.style.alignItems = 'center';
+                      e.currentTarget.style.justifyContent = 'center';
+                      e.currentTarget.style.color = '#fff';
+                      e.currentTarget.innerHTML = `<div style="padding: 2rem; text-align: center;">Photo ${currentPhotoIndex + 1}</div>`;
+                    }}
+                  />
+                </motion.div>
+              </AnimatePresence>
+            </motion.div>
+          </div>
+        </div>
+
+        {/* Content tambahan */}
+        <div style={{
+          height: '50vh',
+          width: '100%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          marginTop: isMobile ? '3rem' : '5rem',
+          zIndex: 10,
+          position: 'relative'
+        }}>
+          <motion.p
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            transition={{ duration: 0.8 }}
+            style={{
+              color: 'white',
+              fontSize: isMobile ? '1.5rem' : '2rem',
+              fontWeight: '300',
+              textAlign: 'center',
+              maxWidth: '600px',
+              padding: '0 2rem'
+            }}
+          >
+            More content coming soon...
+          </motion.p>
+        </div>
+      </motion.div>
+    )}
+
+    {/* Halaman Index - Sama seperti halaman MENURU */}
+    {currentView === "index" && (
+      <motion.div
+        key="index-view"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.5 }}
+        style={{
+          width: '100%',
+          minHeight: '100vh',
+          padding: isMobile ? '1rem' : '2rem',
+          boxSizing: 'border-box',
+          position: 'relative'
+        }}
+      >
+        {/* Garis bawah di atas MENURU */}
+        <div style={{
+          width: '100%',
+          height: '1px',
+          backgroundColor: 'rgba(255,255,255,0.2)',
+          marginBottom: '3rem'
+        }}></div>
+
+        {/* Container utama untuk halaman Index */}
+        <div ref={topicContainerRef} style={{
+          display: 'flex',
+          flexDirection: isMobile ? 'column' : 'row',
+          gap: isMobile ? '2rem' : '3rem',
+          width: '100%',
+          fontFamily: 'Helvetica, Arial, sans-serif',
+          position: 'relative'
+        }}>
+          <div style={{
+            flex: 0.8,
+            marginLeft: isMobile ? '0.5rem' : '1rem'
+          }}>
+            <div style={{
+              color: 'white',
+              fontSize: isMobile ? '1.8rem' : '2.5rem',
+              fontWeight: '300',
+              textTransform: 'uppercase',
+              letterSpacing: '2px',
+              fontFamily: 'Helvetica, Arial, sans-serif',
+              lineHeight: 1
+            }}>
+              MENURU
+            </div>
+          </div>
+
+          <div style={{
+            flex: 1.2,
+            position: 'relative',
+            minHeight: isMobile ? '400px' : '600px',
+            marginLeft: isMobile ? '-3rem' : '-4rem'
+          }}>
+            <AnimatePresence>
+              {hoveredTopic !== null && (
+                <motion.div
+                  key="hovered-image"
+                  initial={{ opacity: 0 }}
+                  animate={{ 
+                    opacity: 1,
+                    y: imagePosition
+                  }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.3 }}
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '85%',
+                    height: '85%',
+                    zIndex: 5
+                  }}
+                >
+                  <motion.div
+                    initial={{ scale: 0.95 }}
+                    animate={{ scale: 1 }}
+                    exit={{ scale: 0.95 }}
+                    transition={{ duration: 0.4 }}
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      overflow: 'hidden',
+                      borderRadius: '15px',
+                      boxShadow: '0 10px 30px rgba(0,0,0,0.5)',
+                      border: '1px solid rgba(255,255,255,0.1)'
+                    }}
+                  >
+                    <img 
+                      src="images/5.jpg" 
+                      alt={`Topic ${hoveredTopic}`}
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        display: 'block',
+                        objectFit: 'cover'
+                      }}
+                      onError={(e) => {
+                        e.currentTarget.style.backgroundColor = '#333';
+                        e.currentTarget.style.display = 'flex';
+                        e.currentTarget.style.alignItems = 'center';
+                        e.currentTarget.style.justifyContent = 'center';
+                        e.currentTarget.style.color = '#fff';
+                        e.currentTarget.innerHTML = '<div style="padding: 2rem; text-align: center;">Topic Image</div>';
+                      }}
+                    />
+                  </motion.div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
+          <div style={{
+            flex: 1,
+            position: 'relative',
+            marginLeft: isMobile ? '-4rem' : '-5rem'
+          }}>
+            <div style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '0.3rem',
+              fontFamily: 'Helvetica, Arial, sans-serif'
+            }}>
+              {menuruTopics.map((topic, index) => (
+                <div 
+                  key={topic.id}
+                  onMouseEnter={() => handleTopicHover(topic.id)}
+                  onMouseLeave={() => handleTopicHover(null)}
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    position: 'relative',
+                    padding: isMobile ? '0.8rem 0' : '1rem 0',
+                    cursor: 'pointer'
+                  }}
+                >
                   <AnimatePresence>
-                    {hoveredTopic !== null && (
+                    {hoveredTopic === topic.id && (
                       <motion.div
-                        key="hovered-image"
-                        initial={{ opacity: 0 }}
-                        animate={{ 
-                          opacity: 1,
-                          y: imagePosition
-                        }}
-                        exit={{ opacity: 0 }}
+                        initial={{ width: 0, opacity: 0 }}
+                        animate={{ width: '100%', opacity: 1 }}
+                        exit={{ width: 0, opacity: 0 }}
                         transition={{ duration: 0.3 }}
                         style={{
                           position: 'absolute',
-                          top: 0,
                           left: 0,
-                          width: '85%',
-                          height: '85%',
-                          zIndex: 5
+                          top: '50%',
+                          height: '1px',
+                          backgroundColor: 'rgba(255,255,255,0.3)',
+                          transform: 'translateY(-50%)',
+                          zIndex: 1
                         }}
-                      >
-                        <motion.div
-                          initial={{ scale: 0.95 }}
-                          animate={{ scale: 1 }}
-                          exit={{ scale: 0.95 }}
-                          transition={{ duration: 0.4 }}
-                          style={{
-                            width: '100%',
-                            height: '100%',
-                            overflow: 'hidden',
-                            borderRadius: '15px',
-                            boxShadow: '0 10px 30px rgba(0,0,0,0.5)',
-                            border: '1px solid rgba(255,255,255,0.1)'
-                          }}
-                        >
-                          <img 
-                            src="images/5.jpg" 
-                            alt={`Topic ${hoveredTopic}`}
-                            style={{
-                              width: '100%',
-                              height: '100%',
-                              display: 'block',
-                              objectFit: 'cover'
-                            }}
-                            onError={(e) => {
-                              e.currentTarget.style.backgroundColor = '#333';
-                              e.currentTarget.style.display = 'flex';
-                              e.currentTarget.style.alignItems = 'center';
-                              e.currentTarget.style.justifyContent = 'center';
-                              e.currentTarget.style.color = '#fff';
-                              e.currentTarget.innerHTML = '<div style="padding: 2rem; text-align: center;">Topic Image</div>';
-                            }}
-                          />
-                        </motion.div>
-                      </motion.div>
+                      />
                     )}
                   </AnimatePresence>
-                </div>
 
-                <div style={{
-                  flex: 1,
-                  position: 'relative',
-                  marginLeft: isMobile ? '-4rem' : '-5rem'
-                }}>
-                  <div style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '0.3rem',
-                    fontFamily: 'Helvetica, Arial, sans-serif'
-                  }}>
-                    {indexTopics.map((topic, index) => (
-                      <div 
-                        key={topic.id}
-                        onMouseEnter={() => handleTopicHover(topic.id)}
-                        onMouseLeave={() => handleTopicHover(null)}
-                        style={{
-                          display: 'flex',
-                          flexDirection: 'column',
-                          position: 'relative',
-                          padding: isMobile ? '0.8rem 0' : '1rem 0',
-                          cursor: 'pointer'
-                        }}
-                      >
-                        <AnimatePresence>
-                          {hoveredTopic === topic.id && (
-                            <motion.div
-                              initial={{ width: 0, opacity: 0 }}
-                              animate={{ width: '100%', opacity: 1 }}
-                              exit={{ width: 0, opacity: 0 }}
-                              transition={{ duration: 0.3 }}
-                              style={{
-                                position: 'absolute',
-                                left: 0,
-                                top: '50%',
-                                height: '1px',
-                                backgroundColor: 'rgba(255,255,255,0.3)',
-                                transform: 'translateY(-50%)',
-                                zIndex: 1
-                              }}
-                            />
-                          )}
-                        </AnimatePresence>
-
-                        <motion.div
-                          style={{
-                            color: 'white',
-                            fontSize: isMobile ? '1.2rem' : '1.5rem',
-                            fontWeight: hoveredTopic === topic.id ? '600' : '400',
-                            fontFamily: 'Helvetica, Arial, sans-serif',
-                            lineHeight: 1.1,
-                            position: 'relative',
-                            zIndex: 2,
-                            transition: 'font-weight 0.2s ease'
-                          }}
-                          whileHover={{ x: 5 }}
-                        >
-                          {topic.title}
-                        </motion.div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div style={{
-                  flex: 1,
-                  marginLeft: isMobile ? '-5rem' : '-6rem'
-                }}>
-                  <div style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '0.3rem',
-                    fontFamily: 'Helvetica, Arial, sans-serif'
-                  }}>
-                    {indexTopics.map((topic, index) => (
-                      <div 
-                        key={topic.id}
-                        onMouseEnter={() => handleTopicHover(topic.id)}
-                        onMouseLeave={() => handleTopicHover(null)}
-                        style={{
-                          display: 'flex',
-                          flexDirection: 'column',
-                          padding: isMobile ? '0.8rem 0' : '1rem 0',
-                          cursor: 'pointer',
-                          position: 'relative',
-                          zIndex: 10
-                        }}
-                      >
-                        <div style={{
-                          display: 'flex',
-                          alignItems: 'baseline',
-                          gap: '0.5rem'
-                        }}>
-                          <motion.div
-                            style={{
-                              color: 'white',
-                              fontSize: isMobile ? '1.2rem' : '1.5rem',
-                              fontWeight: hoveredTopic === topic.id ? '600' : '400',
-                              fontFamily: 'Helvetica, Arial, sans-serif',
-                              lineHeight: 1.1,
-                              transition: 'font-weight 0.2s ease',
-                              position: 'relative',
-                              zIndex: 11
-                            }}
-                            whileHover={{ x: 5 }}
-                          >
-                            {topic.description}
-                          </motion.div>
-                          <div style={{
-                            color: 'rgba(255,255,255,0.6)',
-                            fontSize: isMobile ? '1.2rem' : '1.5rem',
-                            fontWeight: '400',
-                            fontFamily: 'Helvetica, Arial, sans-serif',
-                            lineHeight: 1.1,
-                            whiteSpace: 'nowrap',
-                            position: 'relative',
-                            zIndex: 11
-                          }}>
-                            {topic.year}
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              {/* Container untuk Tombol Slider */}
-              <div style={{
-                position: 'relative',
-                marginTop: '4rem',
-                marginBottom: '4rem',
-                paddingLeft: isMobile ? '1rem' : '2rem',
-                paddingRight: isMobile ? '1rem' : '2rem',
-                display: 'flex',
-                justifyContent: 'flex-start'
-              }}>
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '1.5rem'
-                }}>
-                  <motion.button
-                    onClick={toggleSlider}
+                  <motion.div
                     style={{
-                      width: '120px',
-                      height: '50px',
-                      backgroundColor: '#0050B7',
-                      border: 'none',
-                      borderRadius: '25px',
-                      cursor: 'pointer',
-                      padding: 0,
+                      color: 'white',
+                      fontSize: isMobile ? '1.2rem' : '1.5rem',
+                      fontWeight: hoveredTopic === topic.id ? '600' : '400',
+                      fontFamily: 'Helvetica, Arial, sans-serif',
+                      lineHeight: 1.1,
                       position: 'relative',
-                      display: 'flex',
-                      alignItems: 'center',
-                      overflow: 'hidden'
+                      zIndex: 2,
+                      transition: 'font-weight 0.2s ease'
                     }}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
+                    whileHover={{ x: 5 }}
                   >
-                    <div style={{
-                      position: 'absolute',
-                      width: '100%',
-                      height: '100%',
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      padding: '0 15px',
-                      boxSizing: 'border-box'
-                    }}>
-                      <span style={{
-                        color: 'white',
-                        fontSize: '1rem',
-                        fontWeight: '700',
-                        fontFamily: 'Helvetica, Arial, sans-serif',
-                        opacity: 1
-                      }}>
-                        INDEX
-                      </span>
-                      <span style={{
-                        color: 'white',
-                        fontSize: '1rem',
-                        fontWeight: '700',
-                        fontFamily: 'Helvetica, Arial, sans-serif',
-                        opacity: 0.5
-                      }}>
-                        GRID
-                      </span>
-                    </div>
-                    
-                    <motion.div
-                      animate={{ x: 15 }}
-                      transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                      style={{
-                        width: '35px',
-                        height: '35px',
-                        backgroundColor: '#00FF00',
-                        borderRadius: '50%',
-                        position: 'absolute',
-                        left: '7px',
-                        boxShadow: '0 0 15px rgba(0, 255, 0, 0.7)'
-                      }}
-                    />
-                  </motion.button>
+                    {topic.title}
+                  </motion.div>
+                </div>
+              ))}
+            </div>
+          </div>
 
+          <div style={{
+            flex: 1,
+            marginLeft: isMobile ? '-5rem' : '-6rem'
+          }}>
+            <div style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '0.3rem',
+              fontFamily: 'Helvetica, Arial, sans-serif'
+            }}>
+              {menuruTopics.map((topic, index) => (
+                <div 
+                  key={topic.id}
+                  onMouseEnter={() => handleTopicHover(topic.id)}
+                  onMouseLeave={() => handleTopicHover(null)}
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    padding: isMobile ? '0.8rem 0' : '1rem 0',
+                    cursor: 'pointer',
+                    position: 'relative',
+                    zIndex: 10
+                  }}
+                >
                   <div style={{
-                    color: 'white',
-                    fontSize: '1.1rem',
-                    fontWeight: '600',
-                    fontFamily: 'Helvetica, Arial, sans-serif'
+                    display: 'flex',
+                    alignItems: 'baseline',
+                    gap: '0.5rem'
                   }}>
-                    Index View
+                    <motion.div
+                      style={{
+                        color: 'white',
+                        fontSize: isMobile ? '1.2rem' : '1.5rem',
+                        fontWeight: hoveredTopic === topic.id ? '600' : '400',
+                        fontFamily: 'Helvetica, Arial, sans-serif',
+                        lineHeight: 1.1,
+                        transition: 'font-weight 0.2s ease',
+                        position: 'relative',
+                        zIndex: 11
+                      }}
+                      whileHover={{ x: 5 }}
+                    >
+                      {topic.description}
+                    </motion.div>
+                    <div style={{
+                      color: 'rgba(255,255,255,0.6)',
+                      fontSize: isMobile ? '1.2rem' : '1.5rem',
+                      fontWeight: '400',
+                      fontFamily: 'Helvetica, Arial, sans-serif',
+                      lineHeight: 1.1,
+                      whiteSpace: 'nowrap',
+                      position: 'relative',
+                      zIndex: 11
+                    }}>
+                      {topic.year}
+                    </div>
                   </div>
                 </div>
-              </div>
-            </motion.div>
-          )}
+              ))}
+            </div>
+          </div>
+        </div>
 
-          {/* Halaman Grid (placeholder) */}
-          {currentView === "grid" && (
-            <motion.div
-              key="grid-view"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.5 }}
+        {/* Container untuk Tombol Slider */}
+        <div style={{
+          position: 'relative',
+          marginTop: '4rem',
+          marginBottom: '4rem',
+          paddingLeft: isMobile ? '1rem' : '2rem',
+          paddingRight: isMobile ? '1rem' : '2rem',
+          display: 'flex',
+          justifyContent: 'flex-start'
+        }}>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '1.5rem'
+          }}>
+            <motion.button
+              onClick={toggleSlider}
               style={{
-                width: '100%',
-                minHeight: '100vh',
-                padding: isMobile ? '1rem' : '2rem',
-                boxSizing: 'border-box',
+                width: '120px',
+                height: '50px',
+                backgroundColor: '#0050B7',
+                border: 'none',
+                borderRadius: '25px',
+                cursor: 'pointer',
+                padding: 0,
+                position: 'relative',
                 display: 'flex',
-                flexDirection: 'column',
                 alignItems: 'center',
-                justifyContent: 'center'
+                overflow: 'hidden'
               }}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
             >
-              <h2 style={{
-                color: 'white',
-                fontSize: isMobile ? '2rem' : '3rem',
-                fontWeight: '300',
-                marginBottom: '2rem'
-              }}>
-                Grid View - Coming Soon
-              </h2>
-              
               <div style={{
-                marginTop: '3rem',
+                position: 'absolute',
+                width: '100%',
+                height: '100%',
                 display: 'flex',
-                justifyContent: 'center'
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                padding: '0 15px',
+                boxSizing: 'border-box'
               }}>
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '1.5rem'
+                <span style={{
+                  color: 'white',
+                  fontSize: '1rem',
+                  fontWeight: '700',
+                  fontFamily: 'Helvetica, Arial, sans-serif',
+                  opacity: 1
                 }}>
-                  <motion.button
-                    onClick={toggleSlider}
-                    style={{
-                      width: '120px',
-                      height: '50px',
-                      backgroundColor: '#0050B7',
-                      border: 'none',
-                      borderRadius: '25px',
-                      cursor: 'pointer',
-                      padding: 0,
-                      position: 'relative',
-                      display: 'flex',
-                      alignItems: 'center',
-                      overflow: 'hidden'
-                    }}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    <div style={{
-                      position: 'absolute',
-                      width: '100%',
-                      height: '100%',
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      padding: '0 15px',
-                      boxSizing: 'border-box'
-                    }}>
-                      <span style={{
-                        color: 'white',
-                        fontSize: '1rem',
-                        fontWeight: '700',
-                        fontFamily: 'Helvetica, Arial, sans-serif',
-                        opacity: 0.5
-                      }}>
-                        INDEX
-                      </span>
-                      <span style={{
-                        color: 'white',
-                        fontSize: '1rem',
-                        fontWeight: '700',
-                        fontFamily: 'Helvetica, Arial, sans-serif',
-                        opacity: 1
-                      }}>
-                        GRID
-                      </span>
-                    </div>
-                    
-                    <motion.div
-                      animate={{ x: 65 }}
-                      transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                      style={{
-                        width: '35px',
-                        height: '35px',
-                        backgroundColor: '#00FF00',
-                        borderRadius: '50%',
-                        position: 'absolute',
-                        left: '7px',
-                        boxShadow: '0 0 15px rgba(0, 255, 0, 0.7)'
-                      }}
-                    />
-                  </motion.button>
-
-                  <div style={{
-                    color: 'white',
-                    fontSize: '1.1rem',
-                    fontWeight: '600',
-                    fontFamily: 'Helvetica, Arial, sans-serif'
-                  }}>
-                    Grid View
-                  </div>
-                </div>
+                  INDEX
+                </span>
+                <span style={{
+                  color: 'white',
+                  fontSize: '1rem',
+                  fontWeight: '700',
+                  fontFamily: 'Helvetica, Arial, sans-serif',
+                  opacity: 0.5
+                }}>
+                  GRID
+                </span>
               </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
+              
+              <motion.div
+                animate={{ x: 15 }}
+                transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                style={{
+                  width: '35px',
+                  height: '35px',
+                  backgroundColor: '#00FF00',
+                  borderRadius: '50%',
+                  position: 'absolute',
+                  left: '7px',
+                  boxShadow: '0 0 15px rgba(0, 255, 0, 0.7)'
+                }}
+              />
+            </motion.button>
+
+            <div style={{
+              color: 'white',
+              fontSize: '1.1rem',
+              fontWeight: '600',
+              fontFamily: 'Helvetica, Arial, sans-serif'
+            }}>
+              Index View
+            </div>
+          </div>
+        </div>
+      </motion.div>
+    )}
+
+    {/* Halaman Grid (placeholder) */}
+    {currentView === "grid" && (
+      <motion.div
+        key="grid-view"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.5 }}
+        style={{
+          width: '100%',
+          minHeight: '100vh',
+          padding: isMobile ? '1rem' : '2rem',
+          boxSizing: 'border-box',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}
+      >
+        <h2 style={{
+          color: 'white',
+          fontSize: isMobile ? '2rem' : '3rem',
+          fontWeight: '300',
+          marginBottom: '2rem'
+        }}>
+          Grid View - Coming Soon
+        </h2>
+        
+        <div style={{
+          marginTop: '3rem',
+          display: 'flex',
+          justifyContent: 'center'
+        }}>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '1.5rem'
+          }}>
+            <motion.button
+              onClick={toggleSlider}
+              style={{
+                width: '120px',
+                height: '50px',
+                backgroundColor: '#0050B7',
+                border: 'none',
+                borderRadius: '25px',
+                cursor: 'pointer',
+                padding: 0,
+                position: 'relative',
+                display: 'flex',
+                alignItems: 'center',
+                overflow: 'hidden'
+              }}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <div style={{
+                position: 'absolute',
+                width: '100%',
+                height: '100%',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                padding: '0 15px',
+                boxSizing: 'border-box'
+              }}>
+                <span style={{
+                  color: 'white',
+                  fontSize: '1rem',
+                  fontWeight: '700',
+                  fontFamily: 'Helvetica, Arial, sans-serif',
+                  opacity: 0.5
+                }}>
+                  INDEX
+                </span>
+                <span style={{
+                  color: 'white',
+                  fontSize: '1rem',
+                  fontWeight: '700',
+                  fontFamily: 'Helvetica, Arial, sans-serif',
+                  opacity: 1
+                }}>
+                  GRID
+                </span>
+              </div>
+              
+              <motion.div
+                animate={{ x: 65 }}
+                transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                style={{
+                  width: '35px',
+                  height: '35px',
+                  backgroundColor: '#00FF00',
+                  borderRadius: '50%',
+                  position: 'absolute',
+                  left: '7px',
+                  boxShadow: '0 0 15px rgba(0, 255, 0, 0.7)'
+                }}
+              />
+            </motion.button>
+
+            <div style={{
+              color: 'white',
+              fontSize: '1.1rem',
+              fontWeight: '600',
+              fontFamily: 'Helvetica, Arial, sans-serif'
+            }}>
+              Grid View
+            </div>
+          </div>
+        </div>
+      </motion.div>
+    )}
+  </AnimatePresence>
+</div>
 
       {/* Cookie Notification */}
       <AnimatePresence>
@@ -4385,24 +3388,3 @@ export default function HomePage(): React.JSX.Element {
     </div>
   );
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
