@@ -88,7 +88,7 @@ export default function HomePage(): React.JSX.Element {
   const [isMobile, setIsMobile] = useState(false);
   const [loadingText, setLoadingText] = useState("NURU");
   const [isLoading, setIsLoading] = useState(true);
-  const [currentView, setCurrentView] = useState<"main" | "index" | "grid">("main");
+  const [currentView, setCurrentView] = useState<"main" | "index" | "menuruPlus">("main");
   const [sliderPosition, setSliderPosition] = useState<"index" | "grid">("grid");
   const [hoveredTopic, setHoveredTopic] = useState<number | null>(null);
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
@@ -207,6 +207,40 @@ export default function HomePage(): React.JSX.Element {
       id: 5,
       title: "Growth Metrics",
       description: "Tracking development goals.",
+      year: "2024"
+    }
+  ];
+
+  // Data untuk halaman Menuru+ (Mirip Index tapi dengan konten berbeda)
+  const menuruPlusTopics = [
+    {
+      id: 1,
+      title: "Brand Strategy",
+      description: "Creating meaningful connections.",
+      year: "2024"
+    },
+    {
+      id: 2,
+      title: "Visual Identity",
+      description: "Crafting memorable aesthetics.",
+      year: "2024"
+    },
+    {
+      id: 3,
+      title: "Digital Presence",
+      description: "Building online ecosystems.",
+      year: "2024"
+    },
+    {
+      id: 4,
+      title: "User Experience",
+      description: "Designing intuitive interactions.",
+      year: "2024"
+    },
+    {
+      id: 5,
+      title: "Content Creation",
+      description: "Telling compelling stories.",
       year: "2024"
     }
   ];
@@ -736,6 +770,11 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
+  // Fungsi untuk toggle view ke Menuru+
+  const toggleMenuruPlusView = () => {
+    setCurrentView("menuruPlus");
+  };
+
   // Fungsi untuk toggle halaman full page MENURU
   const toggleMenuruFullPage = () => {
     setShowMenuruFullPage(!showMenuruFullPage);
@@ -933,7 +972,7 @@ export default function HomePage(): React.JSX.Element {
       MozOsxFontSmoothing: 'grayscale'
     }}>
 
-      {/* Halaman Full Page MENURU - YANG DITAMPILKAN SEBAGAI HALF PAGE */}
+      {/* Halaman Full Page MENURU */}
       <AnimatePresence>
         {showMenuruFullPage && (
           <motion.div
@@ -2236,7 +2275,7 @@ export default function HomePage(): React.JSX.Element {
                   }}
                 >
                   <span style={{
-                    color: 'rgba(255, 255,255, 0.5)',
+                    color: 'rgba(255, 255, 255, 0.5)',
                     fontSize: '0.75rem',
                     display: 'block'
                   }}>
@@ -3047,7 +3086,7 @@ export default function HomePage(): React.JSX.Element {
       </div>
 
 
-{/* Main Content Container - HALAMAN UTAMA */}
+{/* Main Content Container */}
 <div style={{
   width: '100%',
   paddingTop: isMobile ? '12rem' : '15rem',
@@ -3056,259 +3095,7 @@ export default function HomePage(): React.JSX.Element {
   position: 'relative'
 }}>
 
-  {/* Halaman MENURU+ yang ditampilkan langsung (setengah halaman di atas) */}
-  <motion.div
-    initial={{ opacity: 0, y: 20 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ duration: 0.8, delay: 0.3 }}
-    style={{
-      width: '100%',
-      padding: isMobile ? '1.5rem' : '3rem',
-      marginTop: isMobile ? '1rem' : '2rem',
-      boxSizing: 'border-box',
-      display: 'flex',
-      flexDirection: 'column',
-      gap: isMobile ? '2rem' : '3rem',
-      backgroundColor: 'rgba(0, 0, 0, 0.7)',
-      borderRadius: '20px',
-      border: '1px solid rgba(255, 255, 255, 0.1)',
-      backdropFilter: 'blur(10px)',
-      marginBottom: isMobile ? '2rem' : '3rem'
-    }}
-  >
-    {/* Header MENURU+ */}
-    <div style={{
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'center'
-    }}>
-      <div>
-        <h2 style={{
-          color: 'white',
-          fontSize: isMobile ? '2rem' : '3rem',
-          fontWeight: '300',
-          fontFamily: 'Helvetica, Arial, sans-serif',
-          textTransform: 'uppercase',
-          letterSpacing: '3px',
-          margin: 0
-        }}>
-          MENURU+
-        </h2>
-        <p style={{
-          color: 'rgba(255, 255, 255, 0.7)',
-          fontSize: isMobile ? '0.9rem' : '1.1rem',
-          marginTop: '0.5rem'
-        }}>
-          Enhanced Personal Branding Experience
-        </p>
-      </div>
-      
-      {/* Tombol close untuk menutup halaman MENURU+ */}
-      <motion.button
-        onClick={() => setShowMenuruFullPage(false)}
-        style={{
-          width: isMobile ? '40px' : '50px',
-          height: isMobile ? '40px' : '50px',
-          backgroundColor: 'rgba(255, 255, 255, 0.1)',
-          border: '1px solid rgba(255, 255, 255, 0.2)',
-          borderRadius: '50%',
-          color: 'white',
-          fontSize: isMobile ? '1.5rem' : '2rem',
-          cursor: 'pointer',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          padding: 0
-        }}
-        whileHover={{ 
-          backgroundColor: 'rgba(255, 255, 255, 0.2)',
-          scale: 1.1
-        }}
-        whileTap={{ scale: 0.9 }}
-      >
-        ×
-      </motion.button>
-    </div>
-
-    {/* Konten utama MENURU+ */}
-    <div style={{
-      display: 'flex',
-      flexDirection: isMobile ? 'column' : 'row',
-      gap: isMobile ? '2rem' : '3rem'
-    }}>
-      {/* Bagian kiri - Deskripsi */}
-      <div style={{
-        flex: 1,
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '1.5rem'
-      }}>
-        <div>
-          <h3 style={{
-            color: 'white',
-            fontSize: isMobile ? '1.2rem' : '1.5rem',
-            fontWeight: '600',
-            marginBottom: '1rem'
-          }}>
-            About MENURU+
-          </h3>
-          <p style={{
-            color: 'rgba(255, 255, 255, 0.8)',
-            fontSize: isMobile ? '0.9rem' : '1rem',
-            lineHeight: 1.6
-          }}>
-            A premium extension of the MENURU experience, offering deeper insights into personal branding, 
-            creative processes, and visual storytelling. This enhanced section provides exclusive content 
-            and advanced features for dedicated users.
-          </p>
-        </div>
-
-        <div>
-          <h3 style={{
-            color: 'white',
-            fontSize: isMobile ? '1.2rem' : '1.5rem',
-            fontWeight: '600',
-            marginBottom: '1rem'
-          }}>
-            Key Features
-          </h3>
-          <ul style={{
-            color: 'rgba(255, 255, 255, 0.8)',
-            fontSize: isMobile ? '0.9rem' : '1rem',
-            lineHeight: 1.6,
-            paddingLeft: '1.5rem'
-          }}>
-            <li>Advanced analytics and insights</li>
-            <li>Exclusive content and tutorials</li>
-            <li>Priority support and feedback</li>
-            <li>Early access to new features</li>
-            <li>Personalized recommendations</li>
-          </ul>
-        </div>
-      </div>
-
-      {/* Bagian kanan - Stats dan Info */}
-      <div style={{
-        flex: 1,
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '1.5rem'
-      }}>
-        <div style={{
-          backgroundColor: 'rgba(0, 255, 0, 0.1)',
-          padding: '1.5rem',
-          borderRadius: '12px',
-          border: '1px solid rgba(0, 255, 0, 0.2)'
-        }}>
-          <h4 style={{
-            color: '#00FF00',
-            fontSize: isMobile ? '1.1rem' : '1.3rem',
-            fontWeight: '600',
-            marginBottom: '1rem'
-          }}>
-            Premium Stats
-          </h4>
-          <div style={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '0.8rem'
-          }}>
-            <div style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center'
-            }}>
-              <span style={{ color: 'rgba(255, 255, 255, 0.8)' }}>Total Views</span>
-              <span style={{ color: '#00FF00', fontWeight: '600' }}>1,247</span>
-            </div>
-            <div style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center'
-            }}>
-              <span style={{ color: 'rgba(255, 255, 255, 0.8)' }}>Engagement Rate</span>
-              <span style={{ color: '#00FF00', fontWeight: '600' }}>87%</span>
-            </div>
-            <div style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center'
-            }}>
-              <span style={{ color: 'rgba(255, 255, 255, 0.8)' }}>Content Quality</span>
-              <span style={{ color: '#00FF00', fontWeight: '600' }}>4.8/5.0</span>
-            </div>
-          </div>
-        </div>
-
-        {/* CTA Button */}
-        <motion.button
-          onClick={handleMenuruClick}
-          style={{
-            backgroundColor: '#00FF00',
-            color: 'black',
-            border: 'none',
-            padding: isMobile ? '0.9rem' : '1.2rem',
-            borderRadius: '10px',
-            fontSize: isMobile ? '1rem' : '1.1rem',
-            fontWeight: '700',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '0.8rem',
-            marginTop: '1rem'
-          }}
-          whileHover={{ 
-            scale: 1.05,
-            backgroundColor: '#00CC00'
-          }}
-          whileTap={{ scale: 0.95 }}
-        >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M5 12h14"/>
-            <path d="m12 5 7 7-7 7"/>
-          </svg>
-          Explore Full MENURU Experience
-        </motion.button>
-      </div>
-    </div>
-
-    {/* Footer MENURU+ */}
-    <div style={{
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      paddingTop: '1.5rem',
-      borderTop: '1px solid rgba(255, 255, 255, 0.1)'
-    }}>
-      <div style={{
-        color: 'rgba(255, 255, 255, 0.6)',
-        fontSize: isMobile ? '0.8rem' : '0.9rem'
-      }}>
-        Last updated: December 2024
-      </div>
-      <div style={{
-        display: 'flex',
-        gap: '1rem'
-      }}>
-        <span style={{
-          color: '#00FF00',
-          fontSize: isMobile ? '0.8rem' : '0.9rem',
-          fontWeight: '600'
-        }}>
-          Premium
-        </span>
-        <span style={{
-          color: 'rgba(255, 255, 255, 0.6)',
-          fontSize: isMobile ? '0.8rem' : '0.9rem'
-        }}>
-          Version 2.0
-        </span>
-      </div>
-    </div>
-  </motion.div>
-
-  {/* PRODUCT AND Image Section - DI BAWAH MENURU+ */}
+  {/* PRODUCT AND Image Section - DI BAWAH JUDUL WEBSITE */}
 <div style={{
   width: '100%',
   padding: isMobile ? '1.5rem' : '3rem',
@@ -4389,6 +4176,313 @@ export default function HomePage(): React.JSX.Element {
             </motion.div>
           )}
 
+          {/* Halaman Menuru+ */}
+          {currentView === "menuruPlus" && (
+            <motion.div
+              key="menuru-plus-view"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.5 }}
+              style={{
+                width: '100%',
+                minHeight: '100vh',
+                padding: isMobile ? '1rem' : '2rem',
+                boxSizing: 'border-box',
+                position: 'relative',
+                marginTop: isMobile ? '2rem' : '4rem'
+              }}
+            >
+              {/* Garis bawah di atas MENURU+ */}
+              <div style={{
+                width: '100%',
+                height: '1px',
+                backgroundColor: 'rgba(255,255,255,0.2)',
+                marginBottom: '3rem'
+              }}></div>
+
+              {/* Container utama untuk halaman Menuru+ */}
+              <div ref={topicContainerRef} style={{
+                display: 'flex',
+                flexDirection: isMobile ? 'column' : 'row',
+                gap: isMobile ? '2rem' : '3rem',
+                width: '100%',
+                fontFamily: 'Helvetica, Arial, sans-serif',
+                position: 'relative'
+              }}>
+                <div style={{
+                  flex: 0.8,
+                  marginLeft: isMobile ? '0.5rem' : '1rem'
+                }}>
+                  <div style={{
+                    color: 'white',
+                    fontSize: isMobile ? '1.8rem' : '2.5rem',
+                    fontWeight: '300',
+                    textTransform: 'uppercase',
+                    letterSpacing: '2px',
+                    fontFamily: 'Helvetica, Arial, sans-serif',
+                    lineHeight: 1
+                  }}>
+                    MENURU+
+                  </div>
+                  <div style={{
+                    color: 'rgba(255,255,255,0.7)',
+                    fontSize: isMobile ? '0.9rem' : '1.1rem',
+                    fontWeight: '300',
+                    marginTop: '0.5rem'
+                  }}>
+                    Enhanced Experience
+                  </div>
+                </div>
+
+                <div style={{
+                  flex: 1.2,
+                  position: 'relative',
+                  minHeight: isMobile ? '400px' : '600px',
+                  marginLeft: isMobile ? '-3rem' : '-4rem'
+                }}>
+                  <AnimatePresence>
+                    {hoveredTopic !== null && (
+                      <motion.div
+                        key="hovered-image"
+                        initial={{ opacity: 0 }}
+                        animate={{ 
+                          opacity: 1,
+                          y: imagePosition
+                        }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.3 }}
+                        style={{
+                          position: 'absolute',
+                          top: 0,
+                          left: 0,
+                          width: '85%',
+                          height: '85%',
+                          zIndex: 5
+                        }}
+                      >
+                        <motion.div
+                          initial={{ scale: 0.95 }}
+                          animate={{ scale: 1 }}
+                          exit={{ scale: 0.95 }}
+                          transition={{ duration: 0.4 }}
+                          style={{
+                            width: '100%',
+                            height: '100%',
+                            overflow: 'hidden',
+                            borderRadius: '15px',
+                            boxShadow: '0 10px 30px rgba(0,0,0,0.5)',
+                            border: '1px solid rgba(255,255,255,0.1)'
+                          }}
+                        >
+                          <img 
+                            src="images/5.jpg" 
+                            alt={`Topic ${hoveredTopic}`}
+                            style={{
+                              width: '100%',
+                              height: '100%',
+                              display: 'block',
+                              objectFit: 'cover'
+                            }}
+                            onError={(e) => {
+                              e.currentTarget.style.backgroundColor = '#333';
+                              e.currentTarget.style.display = 'flex';
+                              e.currentTarget.style.alignItems = 'center';
+                              e.currentTarget.style.justifyContent = 'center';
+                              e.currentTarget.style.color = '#fff';
+                              e.currentTarget.innerHTML = '<div style="padding: 2rem; text-align: center;">Topic Image</div>';
+                            }}
+                          />
+                        </motion.div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+
+                <div style={{
+                  flex: 1,
+                  position: 'relative',
+                  marginLeft: isMobile ? '-4rem' : '-5rem'
+                }}>
+                  <div style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '0.3rem',
+                    fontFamily: 'Helvetica, Arial, sans-serif'
+                  }}>
+                    {menuruPlusTopics.map((topic, index) => (
+                      <div 
+                        key={topic.id}
+                        onMouseEnter={() => handleTopicHover(topic.id)}
+                        onMouseLeave={() => handleTopicHover(null)}
+                        style={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          position: 'relative',
+                          padding: isMobile ? '0.8rem 0' : '1rem 0',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        <AnimatePresence>
+                          {hoveredTopic === topic.id && (
+                            <motion.div
+                              initial={{ width: 0, opacity: 0 }}
+                              animate={{ width: '100%', opacity: 1 }}
+                              exit={{ width: 0, opacity: 0 }}
+                              transition={{ duration: 0.3 }}
+                              style={{
+                                position: 'absolute',
+                                left: 0,
+                                top: '50%',
+                                height: '1px',
+                                backgroundColor: 'rgba(255,255,255,0.3)',
+                                transform: 'translateY(-50%)',
+                                zIndex: 1
+                              }}
+                            />
+                          )}
+                        </AnimatePresence>
+
+                        <motion.div
+                          style={{
+                            color: 'white',
+                            fontSize: isMobile ? '1.2rem' : '1.5rem',
+                            fontWeight: hoveredTopic === topic.id ? '600' : '400',
+                            fontFamily: 'Helvetica, Arial, sans-serif',
+                            lineHeight: 1.1,
+                            position: 'relative',
+                            zIndex: 2,
+                            transition: 'font-weight 0.2s ease'
+                          }}
+                          whileHover={{ x: 5 }}
+                        >
+                          {topic.title}
+                        </motion.div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div style={{
+                  flex: 1,
+                  marginLeft: isMobile ? '-5rem' : '-6rem'
+                }}>
+                  <div style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '0.3rem',
+                    fontFamily: 'Helvetica, Arial, sans-serif'
+                  }}>
+                    {menuruPlusTopics.map((topic, index) => (
+                      <div 
+                        key={topic.id}
+                        onMouseEnter={() => handleTopicHover(topic.id)}
+                        onMouseLeave={() => handleTopicHover(null)}
+                        style={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          padding: isMobile ? '0.8rem 0' : '1rem 0',
+                          cursor: 'pointer',
+                          position: 'relative',
+                          zIndex: 10
+                        }}
+                      >
+                        <div style={{
+                          display: 'flex',
+                          alignItems: 'baseline',
+                          gap: '0.5rem'
+                        }}>
+                          <motion.div
+                            style={{
+                              color: 'white',
+                              fontSize: isMobile ? '1.2rem' : '1.5rem',
+                              fontWeight: hoveredTopic === topic.id ? '600' : '400',
+                              fontFamily: 'Helvetica, Arial, sans-serif',
+                              lineHeight: 1.1,
+                              transition: 'font-weight 0.2s ease',
+                              position: 'relative',
+                              zIndex: 11
+                            }}
+                            whileHover={{ x: 5 }}
+                          >
+                            {topic.description}
+                          </motion.div>
+                          <div style={{
+                            color: '#00FF00',
+                            fontSize: isMobile ? '1.2rem' : '1.5rem',
+                            fontWeight: '400',
+                            fontFamily: 'Helvetica, Arial, sans-serif',
+                            lineHeight: 1.1,
+                            whiteSpace: 'nowrap',
+                            position: 'relative',
+                            zIndex: 11
+                          }}>
+                            {topic.year}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Tombol untuk kembali ke view utama */}
+              <div style={{
+                position: 'relative',
+                marginTop: '4rem',
+                marginBottom: '4rem',
+                paddingLeft: isMobile ? '1rem' : '2rem',
+                paddingRight: isMobile ? '1rem' : '2rem',
+                display: 'flex',
+                justifyContent: 'flex-start'
+              }}>
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '1.5rem'
+                }}>
+                  <motion.button
+                    onClick={() => setCurrentView("main")}
+                    style={{
+                      width: '160px',
+                      height: '50px',
+                      backgroundColor: '#00FF00',
+                      border: 'none',
+                      borderRadius: '25px',
+                      cursor: 'pointer',
+                      padding: 0,
+                      position: 'relative',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      overflow: 'hidden'
+                    }}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <span style={{
+                      color: 'black',
+                      fontSize: '1rem',
+                      fontWeight: '700',
+                      fontFamily: 'Helvetica, Arial, sans-serif'
+                    }}>
+                      BACK TO MAIN
+                    </span>
+                  </motion.button>
+
+                  <div style={{
+                    color: '#00FF00',
+                    fontSize: '1.1rem',
+                    fontWeight: '600',
+                    fontFamily: 'Helvetica, Arial, sans-serif'
+                  }}>
+                    Menuru+ View
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          )}
+
           {/* Halaman Grid (placeholder) */}
           {currentView === "grid" && (
             <motion.div
@@ -4504,6 +4598,36 @@ export default function HomePage(): React.JSX.Element {
           )}
         </AnimatePresence>
       </div>
+
+      {/* Tombol Menuru+ di pojok kanan bawah */}
+      <motion.button
+        onClick={toggleMenuruPlusView}
+        style={{
+          position: 'fixed',
+          bottom: isMobile ? '2rem' : '3rem',
+          right: isMobile ? '2rem' : '3rem',
+          backgroundColor: '#00FF00',
+          color: 'black',
+          border: 'none',
+          borderRadius: '50%',
+          width: isMobile ? '60px' : '80px',
+          height: isMobile ? '60px' : '80px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontSize: isMobile ? '1.5rem' : '2rem',
+          fontWeight: '700',
+          cursor: 'pointer',
+          zIndex: 9995,
+          boxShadow: '0 0 20px rgba(0, 255, 0, 0.5)',
+          fontFamily: 'Helvetica, Arial, sans-serif'
+        }}
+        whileHover={{ scale: 1.1, rotate: 90 }}
+        whileTap={{ scale: 0.9 }}
+        transition={{ duration: 0.3 }}
+      >
+        +
+      </motion.button>
 
       {/* Cookie Notification */}
       <AnimatePresence>
