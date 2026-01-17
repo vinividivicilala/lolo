@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect, useRef } from "react";
@@ -164,43 +165,55 @@ export default function HomePage(): React.JSX.Element {
     }
   ];
 
-  // Data untuk 4 foto portrait sejajar
+  // Data untuk 6 foto portrait sejajar - DIUBAH
   const portraitPhotos = [
     {
       id: 1,
       src: "images/5.jpg",
-      alt: "Portrait 1",
-      title: "Creative Vision",
-      description: "Artistic exploration",
+      alt: "Project 1",
+      title: "View Project",
       linkText: "View Project",
       linkUrl: "/projects/1"
     },
     {
       id: 2,
       src: "images/6.jpg",
-      alt: "Portrait 2",
-      title: "Visual Story",
-      description: "Narrative through imagery",
+      alt: "Project 2",
+      title: "Explore Story",
       linkText: "Explore Story",
       linkUrl: "/projects/2"
     },
     {
       id: 3,
       src: "images/5.jpg",
-      alt: "Portrait 3",
-      title: "Design Process",
-      description: "From concept to creation",
+      alt: "Project 3",
+      title: "See Process",
       linkText: "See Process",
       linkUrl: "/projects/3"
     },
     {
       id: 4,
       src: "images/6.jpg",
-      alt: "Portrait 4",
-      title: "Brand Identity",
-      description: "Visual consistency",
+      alt: "Project 4",
+      title: "Discover Brand",
       linkText: "Discover Brand",
       linkUrl: "/projects/4"
+    },
+    {
+      id: 5,
+      src: "images/5.jpg",
+      alt: "Project 5",
+      title: "Explore Design",
+      linkText: "Explore Design",
+      linkUrl: "/projects/5"
+    },
+    {
+      id: 6,
+      src: "images/6.jpg",
+      alt: "Project 6",
+      title: "View Portfolio",
+      linkText: "View Portfolio",
+      linkUrl: "/projects/6"
     }
   ];
 
@@ -2632,7 +2645,7 @@ export default function HomePage(): React.JSX.Element {
               </div>
 
               {/* ======================== */}
-              {/* 4 Foto Portrait Sejajar */}
+              {/* 6 Foto Portrait Sejajar - DIUBAH */}
               {/* ======================== */}
               <div style={{
                 width: '100%',
@@ -2641,11 +2654,31 @@ export default function HomePage(): React.JSX.Element {
                 marginBottom: isMobile ? '3rem' : '4rem',
                 boxSizing: 'border-box'
               }}>
+                {/* Judul "PROJECT" di atas foto */}
+                <div style={{
+                  marginBottom: isMobile ? '2rem' : '3rem',
+                  textAlign: 'left',
+                  paddingLeft: isMobile ? '1rem' : '2rem'
+                }}>
+                  <h2 style={{
+                    color: 'white',
+                    fontSize: isMobile ? '3rem' : '4rem',
+                    fontWeight: '900',
+                    textTransform: 'uppercase',
+                    fontFamily: 'Helvetica, Arial, sans-serif',
+                    letterSpacing: '-1px',
+                    margin: 0,
+                    lineHeight: 1
+                  }}>
+                    PROJECT
+                  </h2>
+                </div>
+
                 <div style={{
                   display: 'grid',
-                  gridTemplateColumns: isMobile ? '1fr' : 'repeat(4, 1fr)',
-                  gap: isMobile ? '2rem' : '1.5rem',
-                  maxWidth: '1200px',
+                  gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)',
+                  gap: isMobile ? '2rem' : '2rem',
+                  maxWidth: '1400px',
                   margin: '0 auto'
                 }}>
                   {portraitPhotos.map((photo, index) => (
@@ -2658,27 +2691,28 @@ export default function HomePage(): React.JSX.Element {
                         display: 'flex',
                         flexDirection: 'column',
                         backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                        borderRadius: '20px',
+                        borderRadius: '15px',
                         overflow: 'hidden',
                         border: '1px solid rgba(255, 255, 255, 0.1)',
                         boxShadow: '0 8px 20px rgba(0, 0, 0, 0.3)',
                         transition: 'all 0.3s ease',
                         cursor: 'pointer',
-                        height: '100%'
+                        height: '500px', // Tinggi tetap
+                        position: 'relative'
                       }}
                       whileHover={{ 
-                        y: -5,
+                        y: -8,
                         backgroundColor: 'rgba(255, 255, 255, 0.08)',
-                        boxShadow: '0 12px 30px rgba(0, 0, 0, 0.4)',
+                        boxShadow: '0 15px 35px rgba(0, 0, 0, 0.5)',
                         border: '1px solid rgba(255, 255, 255, 0.2)'
                       }}
                       whileTap={{ scale: 0.98 }}
                       onClick={() => router.push(photo.linkUrl)}
                     >
-                      {/* Foto dengan border radius portrait */}
+                      {/* Container foto dengan tinggi penuh */}
                       <div style={{
                         width: '100%',
-                        height: isMobile ? '250px' : '300px',
+                        height: '100%',
                         overflow: 'hidden',
                         position: 'relative'
                       }}>
@@ -2693,90 +2727,74 @@ export default function HomePage(): React.JSX.Element {
                             transition: 'transform 0.5s ease'
                           }}
                         />
-                        {/* Overlay gradient */}
+                        
+                        {/* Overlay gelap transparan di atas foto */}
                         <div style={{
                           position: 'absolute',
-                          bottom: 0,
+                          top: 0,
                           left: 0,
                           right: 0,
-                          height: '40%',
-                          background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 100%)',
-                          opacity: 0.7,
-                          transition: 'opacity 0.3s ease'
+                          bottom: 0,
+                          background: 'rgba(0, 0, 0, 0.3)',
+                          transition: 'background 0.3s ease'
                         }} />
-                      </div>
-
-                      {/* Konten teks di bawah foto */}
-                      <div style={{
-                        padding: isMobile ? '1.2rem' : '1.5rem',
-                        flex: 1,
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: '0.5rem'
-                      }}>
-                        {/* Judul */}
-                        <h3 style={{
-                          color: 'white',
-                          fontSize: isMobile ? '1.2rem' : '1.4rem',
-                          fontWeight: '600',
-                          margin: 0,
-                          fontFamily: 'Helvetica, Arial, sans-serif',
-                          lineHeight: 1.2
-                        }}>
-                          {photo.title}
-                        </h3>
-
-                        {/* Deskripsi */}
-                        <p style={{
-                          color: 'rgba(255, 255, 255, 0.7)',
-                          fontSize: isMobile ? '0.9rem' : '1rem',
-                          margin: 0,
-                          fontFamily: 'Helvetica, Arial, sans-serif',
-                          lineHeight: 1.4,
-                          flex: 1
-                        }}>
-                          {photo.description}
-                        </p>
-
-                        {/* Link dengan tanda panah */}
+                        
+                        {/* Konten teks di tengah foto */}
                         <div style={{
+                          position: 'absolute',
+                          top: 0,
+                          left: 0,
+                          right: 0,
+                          bottom: 0,
                           display: 'flex',
+                          flexDirection: 'column',
                           alignItems: 'center',
-                          justifyContent: 'space-between',
-                          marginTop: isMobile ? '0.8rem' : '1rem',
-                          paddingTop: isMobile ? '0.8rem' : '1rem',
-                          borderTop: '1px solid rgba(255, 255, 255, 0.1)'
+                          justifyContent: 'center',
+                          padding: '2rem',
+                          textAlign: 'center',
+                          zIndex: 2
                         }}>
-                          <span style={{
-                            color: '#00FF00',
-                            fontSize: isMobile ? '0.9rem' : '1rem',
-                            fontWeight: '500',
-                            fontFamily: 'Helvetica, Arial, sans-serif',
-                            letterSpacing: '0.5px'
-                          }}>
-                            {photo.linkText}
-                          </span>
-                          
-                          {/* Tanda panah lurus serong kanan SVG */}
+                          {/* Tanda panah SVG di atas teks */}
                           <motion.div
-                            initial={{ x: 0 }}
-                            whileHover={{ x: 5 }}
-                            transition={{ duration: 0.2 }}
+                            initial={{ y: 10, opacity: 0 }}
+                            animate={{ y: 0, opacity: 1 }}
+                            transition={{ delay: 0.2 }}
+                            style={{
+                              marginBottom: '1.5rem'
+                            }}
                           >
                             <svg 
-                              width={isMobile ? "20" : "24"} 
-                              height={isMobile ? "20" : "24"} 
+                              width="40" 
+                              height="40" 
                               viewBox="0 0 24 24" 
                               fill="none" 
-                              stroke="#00FF00" 
+                              stroke="white" 
                               strokeWidth="2"
                               style={{
-                                transition: 'transform 0.3s ease'
+                                opacity: 0.8
                               }}
                             >
                               <path d="M7 17L17 7" />
                               <path d="M7 7h10v10" />
                             </svg>
+                          </motion.div>
+                          
+                          {/* Teks di tengah - hanya title yang muncul */}
+                          <motion.div
+                            initial={{ y: 20, opacity: 0 }}
+                            animate={{ y: 0, opacity: 1 }}
+                            transition={{ delay: 0.3 }}
+                            style={{
+                              color: 'white',
+                              fontSize: isMobile ? '1.8rem' : '2.2rem',
+                              fontWeight: '600',
+                              fontFamily: 'Helvetica, Arial, sans-serif',
+                              letterSpacing: '0.5px',
+                              textAlign: 'center',
+                              maxWidth: '90%'
+                            }}
+                          >
+                            {photo.title}
                           </motion.div>
                         </div>
                       </div>
