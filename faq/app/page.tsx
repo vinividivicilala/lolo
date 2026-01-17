@@ -3598,6 +3598,737 @@ export default function HomePage(): React.JSX.Element {
                 </motion.div>
               </div>
 
+
+{/* Foto Card Design Section - 6 Card dengan Tanda Panah */}
+
+<div style={{
+  width: '100%',
+  padding: isMobile ? '1rem' : '2rem',
+  marginTop: isMobile ? '1rem' : '2rem',
+  marginBottom: isMobile ? '3rem' : '4rem',
+  boxSizing: 'border-box'
+}}>
+  {/* Judul Grid - Di Tengah */}
+  <div style={{
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: isMobile ? '2rem' : '3rem',
+    position: 'relative'
+  }}>
+    <h2 style={{
+      color: 'white',
+      fontSize: isMobile ? '1.5rem' : '2rem',
+      fontWeight: '400',
+      fontFamily: 'Helvetica, Arial, sans-serif',
+      textTransform: 'uppercase',
+      letterSpacing: '1px',
+      margin: 0,
+      padding: '0.5rem 1.5rem',
+      backgroundColor: 'rgba(255,255,255,0.05)',
+      borderRadius: '4px',
+      border: '1px solid rgba(255,255,255,0.1)'
+    }}>
+      Grid Collection
+    </h2>
+  </div>
+
+  {/* Container 6 Foto Card */}
+  <div style={{
+    display: 'grid',
+    gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)',
+    gap: isMobile ? '1.5rem' : '2rem',
+    maxWidth: '1200px',
+    margin: '0 auto'
+  }}>
+    {/* Card 1 */}
+    <motion.div
+      style={{
+        position: 'relative',
+        width: '100%',
+        aspectRatio: '3/4',
+        borderRadius: '15px',
+        overflow: 'hidden',
+        backgroundColor: '#222',
+        border: '1px solid rgba(255,255,255,0.15)',
+        cursor: 'pointer',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: '1rem',
+        boxSizing: 'border-box'
+      }}
+      whileHover={{ 
+        scale: 1.03,
+        borderColor: 'rgba(255,255,255,0.3)',
+        boxShadow: '0 10px 25px rgba(0,0,0,0.3)'
+      }}
+      whileTap={{ scale: 0.98 }}
+      transition={{ duration: 0.3 }}
+    >
+      {/* Foto */}
+      <div style={{
+        width: '100%',
+        height: '100%',
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        zIndex: 1
+      }}>
+        <img 
+          src="images/5.jpg" 
+          alt="Design 1"
+          style={{
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            display: 'block'
+          }}
+          onError={(e) => {
+            e.currentTarget.style.backgroundColor = '#1a1a1a';
+            e.currentTarget.style.display = 'flex';
+            e.currentTarget.style.alignItems = 'center';
+            e.currentTarget.style.justifyContent = 'center';
+            e.currentTarget.style.color = '#fff';
+            e.currentTarget.innerHTML = '<div style="padding: 2rem; text-align: center;">Design 1</div>';
+          }}
+        />
+      </div>
+      
+      {/* Overlay Gradient */}
+      <div style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100%',
+        background: 'linear-gradient(to bottom, rgba(0,0,0,0.1), rgba(0,0,0,0.7))',
+        zIndex: 2
+      }} />
+      
+      {/* Konten Teks dan Panah */}
+      <div style={{
+        position: 'relative',
+        zIndex: 3,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: '100%',
+        height: '100%',
+        padding: '1rem'
+      }}>
+        {/* Teks Judul */}
+        <div style={{
+          color: 'white',
+          fontSize: isMobile ? '1rem' : '1.2rem',
+          fontWeight: '400',
+          fontFamily: 'Helvetica, Arial, sans-serif',
+          textAlign: 'center',
+          marginBottom: '1rem',
+          lineHeight: 1.4,
+          textShadow: '0 2px 4px rgba(0,0,0,0.5)'
+        }}>
+          Visual Exploration
+        </div>
+        
+        {/* Tanda Panah SVG Lurus Serong Kanan */}
+        <motion.svg
+          width={isMobile ? "40" : "50"}
+          height={isMobile ? "40" : "50"}
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="white"
+          strokeWidth="1.5"
+          style={{
+            filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.5))'
+          }}
+          whileHover={{ 
+            x: 5,
+            stroke: '#00FF00'
+          }}
+          transition={{ duration: 0.3 }}
+        >
+          <line x1="5" y1="12" x2="19" y2="12" />
+          <polyline points="12 5 19 12 12 19" />
+        </motion.svg>
+      </div>
+    </motion.div>
+
+    {/* Card 2 */}
+    <motion.div
+      style={{
+        position: 'relative',
+        width: '100%',
+        aspectRatio: '3/4',
+        borderRadius: '15px',
+        overflow: 'hidden',
+        backgroundColor: '#222',
+        border: '1px solid rgba(255,255,255,0.15)',
+        cursor: 'pointer',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: '1rem',
+        boxSizing: 'border-box'
+      }}
+      whileHover={{ 
+        scale: 1.03,
+        borderColor: 'rgba(255,255,255,0.3)',
+        boxShadow: '0 10px 25px rgba(0,0,0,0.3)'
+      }}
+      whileTap={{ scale: 0.98 }}
+      transition={{ duration: 0.3 }}
+    >
+      <div style={{
+        width: '100%',
+        height: '100%',
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        zIndex: 1
+      }}>
+        <img 
+          src="images/5.jpg" 
+          alt="Design 2"
+          style={{
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            display: 'block'
+          }}
+          onError={(e) => {
+            e.currentTarget.style.backgroundColor = '#1a1a1a';
+            e.currentTarget.style.display = 'flex';
+            e.currentTarget.style.alignItems = 'center';
+            e.currentTarget.style.justifyContent = 'center';
+            e.currentTarget.style.color = '#fff';
+            e.currentTarget.innerHTML = '<div style="padding: 2rem; text-align: center;">Design 2</div>';
+          }}
+        />
+      </div>
+      
+      <div style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100%',
+        background: 'linear-gradient(to bottom, rgba(0,0,0,0.1), rgba(0,0,0,0.7))',
+        zIndex: 2
+      }} />
+      
+      <div style={{
+        position: 'relative',
+        zIndex: 3,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: '100%',
+        height: '100%',
+        padding: '1rem'
+      }}>
+        <div style={{
+          color: 'white',
+          fontSize: isMobile ? '1rem' : '1.2rem',
+          fontWeight: '400',
+          fontFamily: 'Helvetica, Arial, sans-serif',
+          textAlign: 'center',
+          marginBottom: '1rem',
+          lineHeight: 1.4,
+          textShadow: '0 2px 4px rgba(0,0,0,0.5)'
+        }}>
+          Creative Process
+        </div>
+        
+        <motion.svg
+          width={isMobile ? "40" : "50"}
+          height={isMobile ? "40" : "50"}
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="white"
+          strokeWidth="1.5"
+          style={{
+            filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.5))'
+          }}
+          whileHover={{ 
+            x: 5,
+            stroke: '#00FF00'
+          }}
+          transition={{ duration: 0.3 }}
+        >
+          <line x1="5" y1="12" x2="19" y2="12" />
+          <polyline points="12 5 19 12 12 19" />
+        </motion.svg>
+      </div>
+    </motion.div>
+
+    {/* Card 3 */}
+    <motion.div
+      style={{
+        position: 'relative',
+        width: '100%',
+        aspectRatio: '3/4',
+        borderRadius: '15px',
+        overflow: 'hidden',
+        backgroundColor: '#222',
+        border: '1px solid rgba(255,255,255,0.15)',
+        cursor: 'pointer',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: '1rem',
+        boxSizing: 'border-box'
+      }}
+      whileHover={{ 
+        scale: 1.03,
+        borderColor: 'rgba(255,255,255,0.3)',
+        boxShadow: '0 10px 25px rgba(0,0,0,0.3)'
+      }}
+      whileTap={{ scale: 0.98 }}
+      transition={{ duration: 0.3 }}
+    >
+      <div style={{
+        width: '100%',
+        height: '100%',
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        zIndex: 1
+      }}>
+        <img 
+          src="images/5.jpg" 
+          alt="Design 3"
+          style={{
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            display: 'block'
+          }}
+          onError={(e) => {
+            e.currentTarget.style.backgroundColor = '#1a1a1a';
+            e.currentTarget.style.display = 'flex';
+            e.currentTarget.style.alignItems = 'center';
+            e.currentTarget.style.justifyContent = 'center';
+            e.currentTarget.style.color = '#fff';
+            e.currentTarget.innerHTML = '<div style="padding: 2rem; text-align: center;">Design 3</div>';
+          }}
+        />
+      </div>
+      
+      <div style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100%',
+        background: 'linear-gradient(to bottom, rgba(0,0,0,0.1), rgba(0,0,0,0.7))',
+        zIndex: 2
+      }} />
+      
+      <div style={{
+        position: 'relative',
+        zIndex: 3,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: '100%',
+        height: '100%',
+        padding: '1rem'
+      }}>
+        <div style={{
+          color: 'white',
+          fontSize: isMobile ? '1rem' : '1.2rem',
+          fontWeight: '400',
+          fontFamily: 'Helvetica, Arial, sans-serif',
+          textAlign: 'center',
+          marginBottom: '1rem',
+          lineHeight: 1.4,
+          textShadow: '0 2px 4px rgba(0,0,0,0.5)'
+        }}>
+          Design System
+        </div>
+        
+        <motion.svg
+          width={isMobile ? "40" : "50"}
+          height={isMobile ? "40" : "50"}
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="white"
+          strokeWidth="1.5"
+          style={{
+            filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.5))'
+          }}
+          whileHover={{ 
+            x: 5,
+            stroke: '#00FF00'
+          }}
+          transition={{ duration: 0.3 }}
+        >
+          <line x1="5" y1="12" x2="19" y2="12" />
+          <polyline points="12 5 19 12 12 19" />
+        </motion.svg>
+      </div>
+    </motion.div>
+
+    {/* Card 4 */}
+    <motion.div
+      style={{
+        position: 'relative',
+        width: '100%',
+        aspectRatio: '3/4',
+        borderRadius: '15px',
+        overflow: 'hidden',
+        backgroundColor: '#222',
+        border: '1px solid rgba(255,255,255,0.15)',
+        cursor: 'pointer',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: '1rem',
+        boxSizing: 'border-box'
+      }}
+      whileHover={{ 
+        scale: 1.03,
+        borderColor: 'rgba(255,255,255,0.3)',
+        boxShadow: '0 10px 25px rgba(0,0,0,0.3)'
+      }}
+      whileTap={{ scale: 0.98 }}
+      transition={{ duration: 0.3 }}
+    >
+      <div style={{
+        width: '100%',
+        height: '100%',
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        zIndex: 1
+      }}>
+        <img 
+          src="images/5.jpg" 
+          alt="Design 4"
+          style={{
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            display: 'block'
+          }}
+          onError={(e) => {
+            e.currentTarget.style.backgroundColor = '#1a1a1a';
+            e.currentTarget.style.display = 'flex';
+            e.currentTarget.style.alignItems = 'center';
+            e.currentTarget.style.justifyContent = 'center';
+            e.currentTarget.style.color = '#fff';
+            e.currentTarget.innerHTML = '<div style="padding: 2rem; text-align: center;">Design 4</div>';
+          }}
+        />
+      </div>
+      
+      <div style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100%',
+        background: 'linear-gradient(to bottom, rgba(0,0,0,0.1), rgba(0,0,0,0.7))',
+        zIndex: 2
+      }} />
+      
+      <div style={{
+        position: 'relative',
+        zIndex: 3,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: '100%',
+        height: '100%',
+        padding: '1rem'
+      }}>
+        <div style={{
+          color: 'white',
+          fontSize: isMobile ? '1rem' : '1.2rem',
+          fontWeight: '400',
+          fontFamily: 'Helvetica, Arial, sans-serif',
+          textAlign: 'center',
+          marginBottom: '1rem',
+          lineHeight: 1.4,
+          textShadow: '0 2px 4px rgba(0,0,0,0.5)'
+        }}>
+          Brand Identity
+        </div>
+        
+        <motion.svg
+          width={isMobile ? "40" : "50"}
+          height={isMobile ? "40" : "50"}
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="white"
+          strokeWidth="1.5"
+          style={{
+            filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.5))'
+          }}
+          whileHover={{ 
+            x: 5,
+            stroke: '#00FF00'
+          }}
+          transition={{ duration: 0.3 }}
+        >
+          <line x1="5" y1="12" x2="19" y2="12" />
+          <polyline points="12 5 19 12 12 19" />
+        </motion.svg>
+      </div>
+    </motion.div>
+
+    {/* Card 5 */}
+    <motion.div
+      style={{
+        position: 'relative',
+        width: '100%',
+        aspectRatio: '3/4',
+        borderRadius: '15px',
+        overflow: 'hidden',
+        backgroundColor: '#222',
+        border: '1px solid rgba(255,255,255,0.15)',
+        cursor: 'pointer',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: '1rem',
+        boxSizing: 'border-box'
+      }}
+      whileHover={{ 
+        scale: 1.03,
+        borderColor: 'rgba(255,255,255,0.3)',
+        boxShadow: '0 10px 25px rgba(0,0,0,0.3)'
+      }}
+      whileTap={{ scale: 0.98 }}
+      transition={{ duration: 0.3 }}
+    >
+      <div style={{
+        width: '100%',
+        height: '100%',
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        zIndex: 1
+      }}>
+        <img 
+          src="images/5.jpg" 
+          alt="Design 5"
+          style={{
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            display: 'block'
+          }}
+          onError={(e) => {
+            e.currentTarget.style.backgroundColor = '#1a1a1a';
+            e.currentTarget.style.display = 'flex';
+            e.currentTarget.style.alignItems = 'center';
+            e.currentTarget.style.justifyContent = 'center';
+            e.currentTarget.style.color = '#fff';
+            e.currentTarget.innerHTML = '<div style="padding: 2rem; text-align: center;">Design 5</div>';
+          }}
+        />
+      </div>
+      
+      <div style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100%',
+        background: 'linear-gradient(to bottom, rgba(0,0,0,0.1), rgba(0,0,0,0.7))',
+        zIndex: 2
+      }} />
+      
+      <div style={{
+        position: 'relative',
+        zIndex: 3,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: '100%',
+        height: '100%',
+        padding: '1rem'
+      }}>
+        <div style={{
+          color: 'white',
+          fontSize: isMobile ? '1rem' : '1.2rem',
+          fontWeight: '400',
+          fontFamily: 'Helvetica, Arial, sans-serif',
+          textAlign: 'center',
+          marginBottom: '1rem',
+          lineHeight: 1.4,
+          textShadow: '0 2px 4px rgba(0,0,0,0.5)'
+        }}>
+          UI/UX Design
+        </div>
+        
+        <motion.svg
+          width={isMobile ? "40" : "50"}
+          height={isMobile ? "40" : "50"}
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="white"
+          strokeWidth="1.5"
+          style={{
+            filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.5))'
+          }}
+          whileHover={{ 
+            x: 5,
+            stroke: '#00FF00'
+          }}
+          transition={{ duration: 0.3 }}
+        >
+          <line x1="5" y1="12" x2="19" y2="12" />
+          <polyline points="12 5 19 12 12 19" />
+        </motion.svg>
+      </div>
+    </motion.div>
+
+    {/* Card 6 */}
+    <motion.div
+      style={{
+        position: 'relative',
+        width: '100%',
+        aspectRatio: '3/4',
+        borderRadius: '15px',
+        overflow: 'hidden',
+        backgroundColor: '#222',
+        border: '1px solid rgba(255,255,255,0.15)',
+        cursor: 'pointer',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: '1rem',
+        boxSizing: 'border-box'
+      }}
+      whileHover={{ 
+        scale: 1.03,
+        borderColor: 'rgba(255,255,255,0.3)',
+        boxShadow: '0 10px 25px rgba(0,0,0,0.3)'
+      }}
+      whileTap={{ scale: 0.98 }}
+      transition={{ duration: 0.3 }}
+    >
+      <div style={{
+        width: '100%',
+        height: '100%',
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        zIndex: 1
+      }}>
+        <img 
+          src="images/5.jpg" 
+          alt="Design 6"
+          style={{
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            display: 'block'
+          }}
+          onError={(e) => {
+            e.currentTarget.style.backgroundColor = '#1a1a1a';
+            e.currentTarget.style.display = 'flex';
+            e.currentTarget.style.alignItems = 'center';
+            e.currentTarget.style.justifyContent = 'center';
+            e.currentTarget.style.color = '#fff';
+            e.currentTarget.innerHTML = '<div style="padding: 2rem; text-align: center;">Design 6</div>';
+          }}
+        />
+      </div>
+      
+      <div style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100%',
+        background: 'linear-gradient(to bottom, rgba(0,0,0,0.1), rgba(0,0,0,0.7))',
+        zIndex: 2
+      }} />
+      
+      <div style={{
+        position: 'relative',
+        zIndex: 3,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: '100%',
+        height: '100%',
+        padding: '1rem'
+      }}>
+        <div style={{
+          color: 'white',
+          fontSize: isMobile ? '1rem' : '1.2rem',
+          fontWeight: '400',
+          fontFamily: 'Helvetica, Arial, sans-serif',
+          textAlign: 'center',
+          marginBottom: '1rem',
+          lineHeight: 1.4,
+          textShadow: '0 2px 4px rgba(0,0,0,0.5)'
+        }}>
+          Motion Design
+        </div>
+        
+        <motion.svg
+          width={isMobile ? "40" : "50"}
+          height={isMobile ? "40" : "50"}
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="white"
+          strokeWidth="1.5"
+          style={{
+            filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.5))'
+          }}
+          whileHover={{ 
+            x: 5,
+            stroke: '#00FF00'
+          }}
+          transition={{ duration: 0.3 }}
+        >
+          <line x1="5" y1="12" x2="19" y2="12" />
+          <polyline points="12 5 19 12 12 19" />
+        </motion.svg>
+      </div>
+    </motion.div>
+  </div>
+
+  {/* Deskripsi tambahan di bawah grid */}
+  <div style={{
+    textAlign: 'center',
+    marginTop: isMobile ? '2rem' : '3rem',
+    padding: '0 1rem'
+  }}>
+    <p style={{
+      color: 'rgba(255,255,255,0.7)',
+      fontSize: isMobile ? '0.9rem' : '1rem',
+      fontWeight: '300',
+      fontFamily: 'Helvetica, Arial, sans-serif',
+      lineHeight: 1.5,
+      maxWidth: '600px',
+      margin: '0 auto'
+    }}>
+      Koleksi desain visual terpilih yang menampilkan berbagai aspek kreativitas dan inovasi dalam dunia desain kontemporer.
+    </p>
+  </div>
+</div>
+
+        
+
               {/* Progress Bar dengan 3 Foto dan Komentar */}
               <div style={{
                 width: '100%',
@@ -4386,6 +5117,7 @@ export default function HomePage(): React.JSX.Element {
     </div>
   );
 }
+
 
 
 
