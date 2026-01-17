@@ -3685,7 +3685,7 @@ export default function HomePage(): React.JSX.Element {
           onError={(e) => {
             e.currentTarget.style.backgroundColor = '#111';
             e.currentTarget.style.display = 'flex';
-            e.currentTarget.style.alignItems: 'center';
+            e.currentTarget.style.alignItems = 'center'; // Diperbaiki dari ':' menjadi '='
             e.currentTarget.style.justifyContent = 'center';
             e.currentTarget.style.color = '#fff';
             e.currentTarget.innerHTML = '<div style="padding: 2rem; text-align: center;">VISUAL</div>';
@@ -4324,129 +4324,7 @@ export default function HomePage(): React.JSX.Element {
       </div>
     </motion.div>
   </div>
-
-  {/* Responsive untuk mobile - 2 baris */}
-  {isMobile && (
-    <div style={{
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      gap: '0.8rem',
-      padding: '1rem',
-      flexWrap: 'wrap',
-      marginTop: '1rem'
-    }}>
-      {/* 3 card tambahan di baris kedua untuk mobile */}
-      <motion.div
-        style={{
-          position: 'relative',
-          width: '180px',
-          height: '260px',
-          borderRadius: '12px',
-          overflow: 'hidden',
-          backgroundColor: '#1a1a1a',
-          border: '1px solid rgba(255,255,255,0.15)',
-          cursor: 'pointer',
-          flexShrink: 0,
-          display: 'flex',
-          flexDirection: 'column'
-        }}
-        whileHover={{ 
-          transform: 'translateY(-8px) scale(1.02)',
-          borderColor: 'rgba(255,255,255,0.3)',
-          boxShadow: '0 15px 30px rgba(0,0,0,0.4)'
-        }}
-        whileTap={{ scale: 0.98 }}
-        transition={{ duration: 0.3 }}
-      >
-        <div style={{
-          width: '100%',
-          height: '100%',
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          zIndex: 1
-        }}>
-          <div style={{
-            width: '100%',
-            height: '100%',
-            backgroundColor: '#111',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: '#fff',
-            fontSize: '1rem'
-          }}>
-            Card 4
-          </div>
-        </div>
-        
-        <div style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          width: '100%',
-          height: '100%',
-          background: 'linear-gradient(to bottom, rgba(0,0,0,0.1), rgba(0,0,0,0.6))',
-          zIndex: 2,
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'flex-end',
-          alignItems: 'center',
-          paddingBottom: '1.5rem'
-        }}>
-          <div style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            gap: '0.8rem',
-            zIndex: 3
-          }}>
-            <div style={{
-              color: 'white',
-              fontSize: '1.2rem',
-              fontWeight: '400',
-              fontFamily: 'Helvetica, Arial, sans-serif',
-              lineHeight: 1,
-              textAlign: 'center',
-              textShadow: '0 2px 4px rgba(0,0,0,0.8)'
-            }}>
-              EXTRA
-            </div>
-            
-            <motion.div
-              whileHover={{ scale: 1.2 }}
-              transition={{ duration: 0.2 }}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}
-            >
-              <svg
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="white"
-                strokeWidth="2"
-                style={{
-                  filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.8))'
-                }}
-              >
-                <line x1="5" y1="12" x2="19" y2="12" />
-                <line x1="12" y1="5" x2="19" y2="12" />
-                <line x1="12" y1="19" x2="19" y2="12" />
-              </svg>
-            </motion.div>
-          </div>
-        </div>
-      </motion.div>
-    </div>
-  )}
 </div>
-
-
         
 
               {/* Progress Bar dengan 3 Foto dan Komentar */}
@@ -5237,6 +5115,7 @@ export default function HomePage(): React.JSX.Element {
     </div>
   );
 }
+
 
 
 
