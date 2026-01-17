@@ -3599,8 +3599,7 @@ export default function HomePage(): React.JSX.Element {
               </div>
 
 
-
-{/* Foto Card Design Section - 6 Card Horizontal */}
+        {/* Foto Card Design Section - 6 Card Horizontal */}
 
 <div style={{
   width: '100%',
@@ -3637,7 +3636,7 @@ export default function HomePage(): React.JSX.Element {
     flexWrap: 'wrap',
     maxWidth: '1400px'
   }}>
-    {/* Card 1 - VISUAL */}
+    {/* Card 1 */}
     <div
       style={{
         position: 'relative',
@@ -3651,7 +3650,7 @@ export default function HomePage(): React.JSX.Element {
       {/* Foto Murni */}
       <img 
         src="images/5.jpg" 
-        alt="V"
+        alt="Visual Design"
         style={{
           width: '100%',
           height: '100%',
@@ -3665,46 +3664,52 @@ export default function HomePage(): React.JSX.Element {
           e.currentTarget.style.alignItems = 'center';
           e.currentTarget.style.justifyContent = 'center';
           e.currentTarget.style.color = '#fff';
-          e.currentTarget.innerHTML = '<div style="padding: 1rem; text-align: center; color: #fff; font-size: 2rem;">V</div>';
+          e.currentTarget.innerHTML = '<div style="padding: 1rem; text-align: center; color: #fff;">Visual Design</div>';
         }}
       />
       
-      {/* Teks Huruf Depan - Tengah Bawah */}
-      <div style={{
-        position: 'absolute',
-        bottom: '1.5rem',
-        left: '50%',
-        transform: 'translateX(-50%)',
-        color: 'white',
-        fontSize: isMobile ? '1.8rem' : '2.2rem',
-        fontWeight: '600',
-        fontFamily: 'Helvetica, Arial, sans-serif'
-      }}>
-        V
-      </div>
-      
-      {/* Tanda Panah Lurus Serong Kanan - Kanan Bawah */}
+      {/* Container Teks dan SVG di Bawah - Sejajar */}
       <div style={{
         position: 'absolute',
         bottom: '1rem',
-        right: '1rem'
+        left: 0,
+        width: '100%',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        padding: '0 1rem',
+        boxSizing: 'border-box'
       }}>
-        <svg
-          width={isMobile ? "18" : "22"}
-          height={isMobile ? "18" : "22"}
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="white"
-          strokeWidth="2.5"
-        >
-          <line x1="3" y1="12" x2="21" y2="12" />
-          <line x1="15" y1="6" x2="21" y2="12" />
-          <line x1="15" y1="18" x2="21" y2="12" />
-        </svg>
+        {/* Teks Lengkap - Normal */}
+        <div style={{
+          color: 'white',
+          fontSize: isMobile ? '0.9rem' : '1rem',
+          fontWeight: '400',
+          fontFamily: 'Helvetica, Arial, sans-serif'
+        }}>
+          Visual Design
+        </div>
+        
+        {/* SVG Panah Serong Kanan */}
+        <div style={{
+          marginLeft: '0.5rem'
+        }}>
+          <svg
+            width={isMobile ? "16" : "18"}
+            height={isMobile ? "16" : "18"}
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="white"
+            strokeWidth="2"
+          >
+            {/* Garis serong kanan: dari kiri ke kanan, atas ke bawah */}
+            <line x1="4" y1="20" x2="20" y2="4" />
+          </svg>
+        </div>
       </div>
     </div>
 
-    {/* Card 2 - DESIGN */}
+    {/* Card 2 */}
     <div
       style={{
         position: 'relative',
@@ -3717,7 +3722,7 @@ export default function HomePage(): React.JSX.Element {
     >
       <img 
         src="images/5.jpg" 
-        alt="D"
+        alt="Brand Identity"
         style={{
           width: '100%',
           height: '100%',
@@ -3731,44 +3736,48 @@ export default function HomePage(): React.JSX.Element {
           e.currentTarget.style.alignItems = 'center';
           e.currentTarget.style.justifyContent = 'center';
           e.currentTarget.style.color = '#fff';
-          e.currentTarget.innerHTML = '<div style="padding: 1rem; text-align: center; color: #fff; font-size: 2rem;">D</div>';
+          e.currentTarget.innerHTML = '<div style="padding: 1rem; text-align: center; color: #fff;">Brand Identity</div>';
         }}
       />
       
       <div style={{
         position: 'absolute',
-        bottom: '1.5rem',
-        left: '50%',
-        transform: 'translateX(-50%)',
-        color: 'white',
-        fontSize: isMobile ? '1.8rem' : '2.2rem',
-        fontWeight: '600',
-        fontFamily: 'Helvetica, Arial, sans-serif'
-      }}>
-        D
-      </div>
-      
-      <div style={{
-        position: 'absolute',
         bottom: '1rem',
-        right: '1rem'
+        left: 0,
+        width: '100%',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        padding: '0 1rem',
+        boxSizing: 'border-box'
       }}>
-        <svg
-          width={isMobile ? "18" : "22"}
-          height={isMobile ? "18" : "22"}
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="white"
-          strokeWidth="2.5"
-        >
-          <line x1="3" y1="12" x2="21" y2="12" />
-          <line x1="15" y1="6" x2="21" y2="12" />
-          <line x1="15" y1="18" x2="21" y2="12" />
-        </svg>
+        <div style={{
+          color: 'white',
+          fontSize: isMobile ? '0.9rem' : '1rem',
+          fontWeight: '400',
+          fontFamily: 'Helvetica, Arial, sans-serif'
+        }}>
+          Brand Identity
+        </div>
+        
+        <div style={{
+          marginLeft: '0.5rem'
+        }}>
+          <svg
+            width={isMobile ? "16" : "18"}
+            height={isMobile ? "16" : "18"}
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="white"
+            strokeWidth="2"
+          >
+            <line x1="4" y1="20" x2="20" y2="4" />
+          </svg>
+        </div>
       </div>
     </div>
 
-    {/* Card 3 - BRAND */}
+    {/* Card 3 */}
     <div
       style={{
         position: 'relative',
@@ -3781,7 +3790,7 @@ export default function HomePage(): React.JSX.Element {
     >
       <img 
         src="images/5.jpg" 
-        alt="B"
+        alt="UI/UX Design"
         style={{
           width: '100%',
           height: '100%',
@@ -3795,44 +3804,48 @@ export default function HomePage(): React.JSX.Element {
           e.currentTarget.style.alignItems = 'center';
           e.currentTarget.style.justifyContent = 'center';
           e.currentTarget.style.color = '#fff';
-          e.currentTarget.innerHTML = '<div style="padding: 1rem; text-align: center; color: #fff; font-size: 2rem;">B</div>';
+          e.currentTarget.innerHTML = '<div style="padding: 1rem; text-align: center; color: #fff;">UI/UX Design</div>';
         }}
       />
       
       <div style={{
         position: 'absolute',
-        bottom: '1.5rem',
-        left: '50%',
-        transform: 'translateX(-50%)',
-        color: 'white',
-        fontSize: isMobile ? '1.8rem' : '2.2rem',
-        fontWeight: '600',
-        fontFamily: 'Helvetica, Arial, sans-serif'
-      }}>
-        B
-      </div>
-      
-      <div style={{
-        position: 'absolute',
         bottom: '1rem',
-        right: '1rem'
+        left: 0,
+        width: '100%',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        padding: '0 1rem',
+        boxSizing: 'border-box'
       }}>
-        <svg
-          width={isMobile ? "18" : "22"}
-          height={isMobile ? "18" : "22"}
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="white"
-          strokeWidth="2.5"
-        >
-          <line x1="3" y1="12" x2="21" y2="12" />
-          <line x1="15" y1="6" x2="21" y2="12" />
-          <line x1="15" y1="18" x2="21" y2="12" />
-        </svg>
+        <div style={{
+          color: 'white',
+          fontSize: isMobile ? '0.9rem' : '1rem',
+          fontWeight: '400',
+          fontFamily: 'Helvetica, Arial, sans-serif'
+        }}>
+          UI/UX Design
+        </div>
+        
+        <div style={{
+          marginLeft: '0.5rem'
+        }}>
+          <svg
+            width={isMobile ? "16" : "18"}
+            height={isMobile ? "16" : "18"}
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="white"
+            strokeWidth="2"
+          >
+            <line x1="4" y1="20" x2="20" y2="4" />
+          </svg>
+        </div>
       </div>
     </div>
 
-    {/* Card 4 - UI/UX */}
+    {/* Card 4 */}
     <div
       style={{
         position: 'relative',
@@ -3845,7 +3858,7 @@ export default function HomePage(): React.JSX.Element {
     >
       <img 
         src="images/5.jpg" 
-        alt="U"
+        alt="Motion Graphics"
         style={{
           width: '100%',
           height: '100%',
@@ -3859,44 +3872,48 @@ export default function HomePage(): React.JSX.Element {
           e.currentTarget.style.alignItems = 'center';
           e.currentTarget.style.justifyContent = 'center';
           e.currentTarget.style.color = '#fff';
-          e.currentTarget.innerHTML = '<div style="padding: 1rem; text-align: center; color: #fff; font-size: 2rem;">U</div>';
+          e.currentTarget.innerHTML = '<div style="padding: 1rem; text-align: center; color: #fff;">Motion Graphics</div>';
         }}
       />
       
       <div style={{
         position: 'absolute',
-        bottom: '1.5rem',
-        left: '50%',
-        transform: 'translateX(-50%)',
-        color: 'white',
-        fontSize: isMobile ? '1.8rem' : '2.2rem',
-        fontWeight: '600',
-        fontFamily: 'Helvetica, Arial, sans-serif'
-      }}>
-        U
-      </div>
-      
-      <div style={{
-        position: 'absolute',
         bottom: '1rem',
-        right: '1rem'
+        left: 0,
+        width: '100%',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        padding: '0 1rem',
+        boxSizing: 'border-box'
       }}>
-        <svg
-          width={isMobile ? "18" : "22"}
-          height={isMobile ? "18" : "22"}
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="white"
-          strokeWidth="2.5"
-        >
-          <line x1="3" y1="12" x2="21" y2="12" />
-          <line x1="15" y1="6" x2="21" y2="12" />
-          <line x1="15" y1="18" x2="21" y2="12" />
-        </svg>
+        <div style={{
+          color: 'white',
+          fontSize: isMobile ? '0.9rem' : '1rem',
+          fontWeight: '400',
+          fontFamily: 'Helvetica, Arial, sans-serif'
+        }}>
+          Motion Graphics
+        </div>
+        
+        <div style={{
+          marginLeft: '0.5rem'
+        }}>
+          <svg
+            width={isMobile ? "16" : "18"}
+            height={isMobile ? "16" : "18"}
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="white"
+            strokeWidth="2"
+          >
+            <line x1="4" y1="20" x2="20" y2="4" />
+          </svg>
+        </div>
       </div>
     </div>
 
-    {/* Card 5 - MOTION */}
+    {/* Card 5 */}
     <div
       style={{
         position: 'relative',
@@ -3909,7 +3926,7 @@ export default function HomePage(): React.JSX.Element {
     >
       <img 
         src="images/5.jpg" 
-        alt="M"
+        alt="Print Design"
         style={{
           width: '100%',
           height: '100%',
@@ -3923,44 +3940,48 @@ export default function HomePage(): React.JSX.Element {
           e.currentTarget.style.alignItems = 'center';
           e.currentTarget.style.justifyContent = 'center';
           e.currentTarget.style.color = '#fff';
-          e.currentTarget.innerHTML = '<div style="padding: 1rem; text-align: center; color: #fff; font-size: 2rem;">M</div>';
+          e.currentTarget.innerHTML = '<div style="padding: 1rem; text-align: center; color: #fff;">Print Design</div>';
         }}
       />
       
       <div style={{
         position: 'absolute',
-        bottom: '1.5rem',
-        left: '50%',
-        transform: 'translateX(-50%)',
-        color: 'white',
-        fontSize: isMobile ? '1.8rem' : '2.2rem',
-        fontWeight: '600',
-        fontFamily: 'Helvetica, Arial, sans-serif'
-      }}>
-        M
-      </div>
-      
-      <div style={{
-        position: 'absolute',
         bottom: '1rem',
-        right: '1rem'
+        left: 0,
+        width: '100%',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        padding: '0 1rem',
+        boxSizing: 'border-box'
       }}>
-        <svg
-          width={isMobile ? "18" : "22"}
-          height={isMobile ? "18" : "22"}
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="white"
-          strokeWidth="2.5"
-        >
-          <line x1="3" y1="12" x2="21" y2="12" />
-          <line x1="15" y1="6" x2="21" y2="12" />
-          <line x1="15" y1="18" x2="21" y2="12" />
-        </svg>
+        <div style={{
+          color: 'white',
+          fontSize: isMobile ? '0.9rem' : '1rem',
+          fontWeight: '400',
+          fontFamily: 'Helvetica, Arial, sans-serif'
+        }}>
+          Print Design
+        </div>
+        
+        <div style={{
+          marginLeft: '0.5rem'
+        }}>
+          <svg
+            width={isMobile ? "16" : "18"}
+            height={isMobile ? "16" : "18"}
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="white"
+            strokeWidth="2"
+          >
+            <line x1="4" y1="20" x2="20" y2="4" />
+          </svg>
+        </div>
       </div>
     </div>
 
-    {/* Card 6 - PRINT */}
+    {/* Card 6 */}
     <div
       style={{
         position: 'relative',
@@ -3973,7 +3994,7 @@ export default function HomePage(): React.JSX.Element {
     >
       <img 
         src="images/5.jpg" 
-        alt="P"
+        alt="Web Design"
         style={{
           width: '100%',
           height: '100%',
@@ -3987,44 +4008,53 @@ export default function HomePage(): React.JSX.Element {
           e.currentTarget.style.alignItems = 'center';
           e.currentTarget.style.justifyContent = 'center';
           e.currentTarget.style.color = '#fff';
-          e.currentTarget.innerHTML = '<div style="padding: 1rem; text-align: center; color: #fff; font-size: 2rem;">P</div>';
+          e.currentTarget.innerHTML = '<div style="padding: 1rem; text-align: center; color: #fff;">Web Design</div>';
         }}
       />
       
       <div style={{
         position: 'absolute',
-        bottom: '1.5rem',
-        left: '50%',
-        transform: 'translateX(-50%)',
-        color: 'white',
-        fontSize: isMobile ? '1.8rem' : '2.2rem',
-        fontWeight: '600',
-        fontFamily: 'Helvetica, Arial, sans-serif'
-      }}>
-        P
-      </div>
-      
-      <div style={{
-        position: 'absolute',
         bottom: '1rem',
-        right: '1rem'
+        left: 0,
+        width: '100%',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        padding: '0 1rem',
+        boxSizing: 'border-box'
       }}>
-        <svg
-          width={isMobile ? "18" : "22"}
-          height={isMobile ? "18" : "22"}
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="white"
-          strokeWidth="2.5"
-        >
-          <line x1="3" y1="12" x2="21" y2="12" />
-          <line x1="15" y1="6" x2="21" y2="12" />
-          <line x1="15" y1="18" x2="21" y2="12" />
-        </svg>
+        <div style={{
+          color: 'white',
+          fontSize: isMobile ? '0.9rem' : '1rem',
+          fontWeight: '400',
+          fontFamily: 'Helvetica, Arial, sans-serif'
+        }}>
+          Web Design
+        </div>
+        
+        <div style={{
+          marginLeft: '0.5rem'
+        }}>
+          <svg
+            width={isMobile ? "16" : "18"}
+            height={isMobile ? "16" : "18"}
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="white"
+            strokeWidth="2"
+          >
+            <line x1="4" y1="20" x2="20" y2="4" />
+          </svg>
+        </div>
       </div>
     </div>
   </div>
 </div>
+
+
+
+
+        
 
 
 
@@ -4825,6 +4855,7 @@ export default function HomePage(): React.JSX.Element {
     </div>
   );
 }
+
 
 
 
