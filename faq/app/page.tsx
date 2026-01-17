@@ -164,37 +164,43 @@ export default function HomePage(): React.JSX.Element {
     }
   ];
 
-  // Data untuk 6 foto portrait sejajar (DITAMBAHKAN MENJADI 6 FOTO)
+  // Data untuk 4 foto portrait sejajar
   const portraitPhotos = [
     {
       id: 1,
       src: "images/5.jpg",
-      alt: "Portrait 1"
+      alt: "Portrait 1",
+      title: "Creative Vision",
+      description: "Artistic exploration",
+      linkText: "View Project",
+      linkUrl: "/projects/1"
     },
     {
       id: 2,
       src: "images/6.jpg",
-      alt: "Portrait 2"
+      alt: "Portrait 2",
+      title: "Visual Story",
+      description: "Narrative through imagery",
+      linkText: "Explore Story",
+      linkUrl: "/projects/2"
     },
     {
       id: 3,
       src: "images/5.jpg",
-      alt: "Portrait 3"
+      alt: "Portrait 3",
+      title: "Design Process",
+      description: "From concept to creation",
+      linkText: "See Process",
+      linkUrl: "/projects/3"
     },
     {
       id: 4,
       src: "images/6.jpg",
-      alt: "Portrait 4"
-    },
-    {
-      id: 5,
-      src: "images/5.jpg",
-      alt: "Portrait 5"
-    },
-    {
-      id: 6,
-      src: "images/6.jpg",
-      alt: "Portrait 6"
+      alt: "Portrait 4",
+      title: "Brand Identity",
+      description: "Visual consistency",
+      linkText: "Discover Brand",
+      linkUrl: "/projects/4"
     }
   ];
 
@@ -2626,48 +2632,19 @@ export default function HomePage(): React.JSX.Element {
               </div>
 
               {/* ======================== */}
-              {/* TULISAN PROJECT DI ATAS FOTO */}
-              {/* ======================== */}
-              <div style={{
-                width: '100%',
-                padding: isMobile ? '1rem 2rem' : '2rem 4rem',
-                marginTop: isMobile ? '0rem' : '0rem',
-                marginBottom: isMobile ? '1rem' : '2rem',
-                textAlign: 'center'
-              }}>
-                <motion.h2
-                  initial={{ opacity: 0, y: -20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5 }}
-                  style={{
-                    color: 'white',
-                    fontSize: isMobile ? '2.5rem' : '3.5rem',
-                    fontWeight: '700',
-                    fontFamily: 'Helvetica, Arial, sans-serif',
-                    letterSpacing: '2px',
-                    textTransform: 'uppercase',
-                    margin: 0,
-                    textShadow: '0 2px 10px rgba(0,0,0,0.5)'
-                  }}
-                >
-                  PROJECT
-                </motion.h2>
-              </div>
-
-              {/* ======================== */}
-              {/* 6 Foto Portrait Sejajar */}
+              {/* 4 Foto Portrait Sejajar */}
               {/* ======================== */}
               <div style={{
                 width: '100%',
                 padding: isMobile ? '1rem 1.5rem' : '2rem 3rem',
-                marginTop: isMobile ? '0rem' : '0rem',
+                marginTop: isMobile ? '2rem' : '3rem',
                 marginBottom: isMobile ? '3rem' : '4rem',
                 boxSizing: 'border-box'
               }}>
                 <div style={{
                   display: 'grid',
-                  gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)', // 3 kolom untuk desktop
-                  gap: isMobile ? '2rem' : '2rem',
+                  gridTemplateColumns: isMobile ? '1fr' : 'repeat(4, 1fr)',
+                  gap: isMobile ? '2rem' : '1.5rem',
                   maxWidth: '1200px',
                   margin: '0 auto'
                 }}>
@@ -2696,12 +2673,12 @@ export default function HomePage(): React.JSX.Element {
                         border: '1px solid rgba(255, 255, 255, 0.2)'
                       }}
                       whileTap={{ scale: 0.98 }}
-                      onClick={() => router.push(`/projects/${photo.id}`)}
+                      onClick={() => router.push(photo.linkUrl)}
                     >
-                      {/* Foto tanpa border radius portrait - full image display */}
+                      {/* Foto dengan border radius portrait */}
                       <div style={{
                         width: '100%',
-                        height: isMobile ? '250px' : '350px', // Tinggi lebih besar untuk foto normal
+                        height: isMobile ? '250px' : '300px',
                         overflow: 'hidden',
                         position: 'relative'
                       }}>
@@ -2711,42 +2688,76 @@ export default function HomePage(): React.JSX.Element {
                           style={{
                             width: '100%',
                             height: '100%',
-                            objectFit: 'contain', // Diganti dari 'cover' ke 'contain' untuk menampilkan gambar utuh
+                            objectFit: 'cover',
                             display: 'block',
-                            backgroundColor: '#111', // Background untuk area kosong jika ada
                             transition: 'transform 0.5s ease'
                           }}
                         />
+                        {/* Overlay gradient */}
+                        <div style={{
+                          position: 'absolute',
+                          bottom: 0,
+                          left: 0,
+                          right: 0,
+                          height: '40%',
+                          background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 100%)',
+                          opacity: 0.7,
+                          transition: 'opacity 0.3s ease'
+                        }} />
                       </div>
 
-                      {/* Konten teks minimal di bawah foto - TEKS PUTIH DAN DI TENGAH */}
+                      {/* Konten teks di bawah foto */}
                       <div style={{
-                        padding: isMobile ? '1rem' : '1.5rem',
+                        padding: isMobile ? '1.2rem' : '1.5rem',
+                        flex: 1,
                         display: 'flex',
                         flexDirection: 'column',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: '0.5rem',
-                        textAlign: 'center'
+                        gap: '0.5rem'
                       }}>
-                        {/* Link dengan tanda panah - TEKS PUTIH */}
+                        {/* Judul */}
+                        <h3 style={{
+                          color: 'white',
+                          fontSize: isMobile ? '1.2rem' : '1.4rem',
+                          fontWeight: '600',
+                          margin: 0,
+                          fontFamily: 'Helvetica, Arial, sans-serif',
+                          lineHeight: 1.2
+                        }}>
+                          {photo.title}
+                        </h3>
+
+                        {/* Deskripsi */}
+                        <p style={{
+                          color: 'rgba(255, 255, 255, 0.7)',
+                          fontSize: isMobile ? '0.9rem' : '1rem',
+                          margin: 0,
+                          fontFamily: 'Helvetica, Arial, sans-serif',
+                          lineHeight: 1.4,
+                          flex: 1
+                        }}>
+                          {photo.description}
+                        </p>
+
+                        {/* Link dengan tanda panah */}
                         <div style={{
                           display: 'flex',
                           alignItems: 'center',
-                          justifyContent: 'center',
-                          gap: '0.5rem'
+                          justifyContent: 'space-between',
+                          marginTop: isMobile ? '0.8rem' : '1rem',
+                          paddingTop: isMobile ? '0.8rem' : '1rem',
+                          borderTop: '1px solid rgba(255, 255, 255, 0.1)'
                         }}>
                           <span style={{
-                            color: 'white', // TEKS PUTIH
+                            color: '#00FF00',
                             fontSize: isMobile ? '0.9rem' : '1rem',
                             fontWeight: '500',
                             fontFamily: 'Helvetica, Arial, sans-serif',
                             letterSpacing: '0.5px'
                           }}>
-                            VIEW PROJECT
+                            {photo.linkText}
                           </span>
                           
-                          {/* Tanda panah lurus serong kanan SVG - PUTIH */}
+                          {/* Tanda panah lurus serong kanan SVG */}
                           <motion.div
                             initial={{ x: 0 }}
                             whileHover={{ x: 5 }}
@@ -2757,7 +2768,7 @@ export default function HomePage(): React.JSX.Element {
                               height={isMobile ? "20" : "24"} 
                               viewBox="0 0 24 24" 
                               fill="none" 
-                              stroke="white" // ARROW PUTIH
+                              stroke="#00FF00" 
                               strokeWidth="2"
                               style={{
                                 transition: 'transform 0.3s ease'
