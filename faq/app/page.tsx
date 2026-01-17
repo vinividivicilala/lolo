@@ -3039,13 +3039,16 @@ export default function HomePage(): React.JSX.Element {
                               objectFit: 'cover'
                             }}
                             onError={(e) => {
-                              e.currentTarget.style.backgroundColor = '#333';
-                              e.currentTarget.style.display = 'flex';
-                              e.currentTarget.style.alignItems = 'center';
-                              e.currentTarget.style.justifyContent: 'center';
-                              e.currentTarget.style.color = '#fff';
-                              e.currentTarget.innerHTML = '<div style="padding: 2rem; text-align: center;">Topic Image</div>';
-                            }}
+  e.currentTarget.style.backgroundColor = '#333';
+  e.currentTarget.style.display = 'flex';
+  e.currentTarget.style.alignItems = 'center';
+  e.currentTarget.style.justifyContent = 'center'; // PERBAIKAN: ganti : dengan =
+  e.currentTarget.style.color = '#fff';
+  e.currentTarget.innerHTML = '<div style="padding: 2rem; text-align: center;">Topic Image</div>';
+}}
+                           
+
+                      
                           />
                         </motion.div>
                       </motion.div>
@@ -3499,3 +3502,4 @@ export default function HomePage(): React.JSX.Element {
     </div>
   );
 }
+
