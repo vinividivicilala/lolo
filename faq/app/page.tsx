@@ -3597,7 +3597,6 @@ export default function HomePage(): React.JSX.Element {
                   </div>
                 </motion.div>
               </div>
-
 {/* Foto Card Design Section - 6 Card Horizontal */}
 
 <div style={{
@@ -3635,7 +3634,7 @@ export default function HomePage(): React.JSX.Element {
     flexWrap: 'wrap',
     maxWidth: '1400px'
   }}>
-    {/* Card 1 */}
+    {/* Card 1 - VISUAL */}
     <div
       style={{
         position: 'relative',
@@ -3643,80 +3642,64 @@ export default function HomePage(): React.JSX.Element {
         height: isMobile ? '250px' : '320px',
         borderRadius: '12px',
         overflow: 'hidden',
-        flexShrink: 0,
-        backgroundColor: '#fff'
+        flexShrink: 0
       }}
     >
-      {/* Foto */}
+      {/* Foto Murni */}
+      <img 
+        src="images/5.jpg" 
+        alt="V"
+        style={{
+          width: '100%',
+          height: '100%',
+          objectFit: 'cover',
+          display: 'block',
+          borderRadius: '12px'
+        }}
+        onError={(e) => {
+          e.currentTarget.style.backgroundColor = '#111';
+          e.currentTarget.style.display = 'flex';
+          e.currentTarget.style.alignItems = 'center';
+          e.currentTarget.style.justifyContent = 'center';
+          e.currentTarget.style.color = '#fff';
+          e.currentTarget.innerHTML = '<div style="padding: 1rem; text-align: center; color: #fff; font-size: 2rem;">V</div>';
+        }}
+      />
+      
+      {/* Teks Huruf Depan di dalam foto */}
       <div style={{
-        width: '100%',
-        height: 'calc(100% - 50px)',
-        borderRadius: '12px 12px 0 0',
-        overflow: 'hidden'
+        position: 'absolute',
+        top: '1rem',
+        left: '1rem',
+        color: 'white',
+        fontSize: isMobile ? '1.8rem' : '2.2rem',
+        fontWeight: '600',
+        fontFamily: 'Helvetica, Arial, sans-serif'
       }}>
-        <img 
-          src="images/5.jpg" 
-          alt="VISUAL"
-          style={{
-            width: '100%',
-            height: '100%',
-            objectFit: 'cover',
-            display: 'block'
-          }}
-          onError={(e) => {
-            e.currentTarget.style.backgroundColor = '#f5f5f5';
-            e.currentTarget.style.display = 'flex';
-            e.currentTarget.style.alignItems = 'center';
-            e.currentTarget.style.justifyContent = 'center';
-            e.currentTarget.style.color = '#000';
-            e.currentTarget.innerHTML = '<div style="padding: 1rem; text-align: center; color: #000;">VISUAL</div>';
-          }}
-        />
+        Vaa
       </div>
       
-      {/* Container Teks dan SVG di bawah - Background putih */}
+      {/* Tanda Panah Lurus Serong Kanan di pojok kanan bawah */}
       <div style={{
-        height: '50px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        padding: '0 1rem',
-        boxSizing: 'border-box',
-        backgroundColor: '#fff',
-        borderRadius: '0 0 12px 12px'
+        position: 'absolute',
+        bottom: '1rem',
+        right: '1rem'
       }}>
-        {/* Teks di tengah bawah - Hitam */}
-        <div style={{
-          flex: 1,
-          textAlign: 'center',
-          color: '#000',
-          fontSize: isMobile ? '1rem' : '1.1rem',
-          fontWeight: '400',
-          fontFamily: 'Helvetica, Arial, sans-serif'
-        }}>
-          VISUAL
-        </div>
-        
-        {/* SVG di kanan bawah - Hitam, Serong Kanan */}
-        <div style={{
-          marginLeft: '0.5rem'
-        }}>
-          <svg
-            width={isMobile ? "16" : "18"}
-            height={isMobile ? "16" : "18"}
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="#000"
-            strokeWidth="2"
-          >
-            {/* Garis serong kanan */}
-            <line x1="5" y1="19" x2="19" y2="5" />
-          </svg>
-        </div>
+        <svg
+          width={isMobile ? "20" : "24"}
+          height={isMobile ? "20" : "24"}
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="#000"
+          strokeWidth="2.5"
+        >
+          {/* Garis serong kanan dari kiri bawah ke kanan atas */}
+          <line x1="4" y1="20" x2="20" y2="4" />
+        </svg>
       </div>
     </div>
 
-    {/* Card 2 */}
+    {/* Card 2 - DESIGN */}
     <div
       style={{
         position: 'relative',
@@ -3724,75 +3707,60 @@ export default function HomePage(): React.JSX.Element {
         height: isMobile ? '250px' : '320px',
         borderRadius: '12px',
         overflow: 'hidden',
-        flexShrink: 0,
-        backgroundColor: '#fff'
+        flexShrink: 0
       }}
     >
+      <img 
+        src="images/5.jpg" 
+        alt="D"
+        style={{
+          width: '100%',
+          height: '100%',
+          objectFit: 'cover',
+          display: 'block',
+          borderRadius: '12px'
+        }}
+        onError={(e) => {
+          e.currentTarget.style.backgroundColor = '#111';
+          e.currentTarget.style.display = 'flex';
+          e.currentTarget.style.alignItems = 'center';
+          e.currentTarget.style.justifyContent = 'center';
+          e.currentTarget.style.color = '#fff';
+          e.currentTarget.innerHTML = '<div style="padding: 1rem; text-align: center; color: #fff; font-size: 2rem;">D</div>';
+        }}
+      />
+      
       <div style={{
-        width: '100%',
-        height: 'calc(100% - 50px)',
-        borderRadius: '12px 12px 0 0',
-        overflow: 'hidden'
+        position: 'absolute',
+        top: '1rem',
+        left: '1rem',
+        color: 'white',
+        fontSize: isMobile ? '1.8rem' : '2.2rem',
+        fontWeight: '600',
+        fontFamily: 'Helvetica, Arial, sans-serif'
       }}>
-        <img 
-          src="images/5.jpg" 
-          alt="DESIGN"
-          style={{
-            width: '100%',
-            height: '100%',
-            objectFit: 'cover',
-            display: 'block'
-          }}
-          onError={(e) => {
-            e.currentTarget.style.backgroundColor = '#f5f5f5';
-            e.currentTarget.style.display = 'flex';
-            e.currentTarget.style.alignItems = 'center';
-            e.currentTarget.style.justifyContent = 'center';
-            e.currentTarget.style.color = '#000';
-            e.currentTarget.innerHTML = '<div style="padding: 1rem; text-align: center; color: #000;">DESIGN</div>';
-          }}
-        />
+        Daa
       </div>
       
       <div style={{
-        height: '50px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        padding: '0 1rem',
-        boxSizing: 'border-box',
-        backgroundColor: '#fff',
-        borderRadius: '0 0 12px 12px'
+        position: 'absolute',
+        bottom: '1rem',
+        right: '1rem'
       }}>
-        <div style={{
-          flex: 1,
-          textAlign: 'center',
-          color: '#000',
-          fontSize: isMobile ? '1rem' : '1.1rem',
-          fontWeight: '400',
-          fontFamily: 'Helvetica, Arial, sans-serif'
-        }}>
-          DESIGN
-        </div>
-        
-        <div style={{
-          marginLeft: '0.5rem'
-        }}>
-          <svg
-            width={isMobile ? "16" : "18"}
-            height={isMobile ? "16" : "18"}
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="#000"
-            strokeWidth="2"
-          >
-            <line x1="5" y1="19" x2="19" y2="5" />
-          </svg>
-        </div>
+        <svg
+          width={isMobile ? "20" : "24"}
+          height={isMobile ? "20" : "24"}
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="#000"
+          strokeWidth="2.5"
+        >
+          <line x1="4" y1="20" x2="20" y2="4" />
+        </svg>
       </div>
     </div>
 
-    {/* Card 3 */}
+    {/* Card 3 - BRAND */}
     <div
       style={{
         position: 'relative',
@@ -3800,75 +3768,60 @@ export default function HomePage(): React.JSX.Element {
         height: isMobile ? '250px' : '320px',
         borderRadius: '12px',
         overflow: 'hidden',
-        flexShrink: 0,
-        backgroundColor: '#fff'
+        flexShrink: 0
       }}
     >
+      <img 
+        src="images/5.jpg" 
+        alt="B"
+        style={{
+          width: '100%',
+          height: '100%',
+          objectFit: 'cover',
+          display: 'block',
+          borderRadius: '12px'
+        }}
+        onError={(e) => {
+          e.currentTarget.style.backgroundColor = '#111';
+          e.currentTarget.style.display = 'flex';
+          e.currentTarget.style.alignItems = 'center';
+          e.currentTarget.style.justifyContent = 'center';
+          e.currentTarget.style.color = '#fff';
+          e.currentTarget.innerHTML = '<div style="padding: 1rem; text-align: center; color: #fff; font-size: 2rem;">B</div>';
+        }}
+      />
+      
       <div style={{
-        width: '100%',
-        height: 'calc(100% - 50px)',
-        borderRadius: '12px 12px 0 0',
-        overflow: 'hidden'
+        position: 'absolute',
+        top: '1rem',
+        left: '1rem',
+        color: 'white',
+        fontSize: isMobile ? '1.8rem' : '2.2rem',
+        fontWeight: '600',
+        fontFamily: 'Helvetica, Arial, sans-serif'
       }}>
-        <img 
-          src="images/5.jpg" 
-          alt="BRAND"
-          style={{
-            width: '100%',
-            height: '100%',
-            objectFit: 'cover',
-            display: 'block'
-          }}
-          onError={(e) => {
-            e.currentTarget.style.backgroundColor = '#f5f5f5';
-            e.currentTarget.style.display = 'flex';
-            e.currentTarget.style.alignItems = 'center';
-            e.currentTarget.style.justifyContent = 'center';
-            e.currentTarget.style.color = '#000';
-            e.currentTarget.innerHTML = '<div style="padding: 1rem; text-align: center; color: #000;">BRAND</div>';
-          }}
-        />
+        Baa
       </div>
       
       <div style={{
-        height: '50px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        padding: '0 1rem',
-        boxSizing: 'border-box',
-        backgroundColor: '#fff',
-        borderRadius: '0 0 12px 12px'
+        position: 'absolute',
+        bottom: '1rem',
+        right: '1rem'
       }}>
-        <div style={{
-          flex: 1,
-          textAlign: 'center',
-          color: '#000',
-          fontSize: isMobile ? '1rem' : '1.1rem',
-          fontWeight: '400',
-          fontFamily: 'Helvetica, Arial, sans-serif'
-        }}>
-          BRAND
-        </div>
-        
-        <div style={{
-          marginLeft: '0.5rem'
-        }}>
-          <svg
-            width={isMobile ? "16" : "18"}
-            height={isMobile ? "16" : "18"}
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="#000"
-            strokeWidth="2"
-          >
-            <line x1="5" y1="19" x2="19" y2="5" />
-          </svg>
-        </div>
+        <svg
+          width={isMobile ? "20" : "24"}
+          height={isMobile ? "20" : "24"}
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="#000"
+          strokeWidth="2.5"
+        >
+          <line x1="4" y1="20" x2="20" y2="4" />
+        </svg>
       </div>
     </div>
 
-    {/* Card 4 */}
+    {/* Card 4 - UI/UX */}
     <div
       style={{
         position: 'relative',
@@ -3876,75 +3829,60 @@ export default function HomePage(): React.JSX.Element {
         height: isMobile ? '250px' : '320px',
         borderRadius: '12px',
         overflow: 'hidden',
-        flexShrink: 0,
-        backgroundColor: '#fff'
+        flexShrink: 0
       }}
     >
+      <img 
+        src="images/5.jpg" 
+        alt="U"
+        style={{
+          width: '100%',
+          height: '100%',
+          objectFit: 'cover',
+          display: 'block',
+          borderRadius: '12px'
+        }}
+        onError={(e) => {
+          e.currentTarget.style.backgroundColor = '#111';
+          e.currentTarget.style.display = 'flex';
+          e.currentTarget.style.alignItems = 'center';
+          e.currentTarget.style.justifyContent = 'center';
+          e.currentTarget.style.color = '#fff';
+          e.currentTarget.innerHTML = '<div style="padding: 1rem; text-align: center; color: #fff; font-size: 2rem;">U</div>';
+        }}
+      />
+      
       <div style={{
-        width: '100%',
-        height: 'calc(100% - 50px)',
-        borderRadius: '12px 12px 0 0',
-        overflow: 'hidden'
+        position: 'absolute',
+        top: '1rem',
+        left: '1rem',
+        color: 'white',
+        fontSize: isMobile ? '1.8rem' : '2.2rem',
+        fontWeight: '600',
+        fontFamily: 'Helvetica, Arial, sans-serif'
       }}>
-        <img 
-          src="images/5.jpg" 
-          alt="UI/UX"
-          style={{
-            width: '100%',
-            height: '100%',
-            objectFit: 'cover',
-            display: 'block'
-          }}
-          onError={(e) => {
-            e.currentTarget.style.backgroundColor = '#f5f5f5';
-            e.currentTarget.style.display = 'flex';
-            e.currentTarget.style.alignItems = 'center';
-            e.currentTarget.style.justifyContent = 'center';
-            e.currentTarget.style.color = '#000';
-            e.currentTarget.innerHTML = '<div style="padding: 1rem; text-align: center; color: #000;">UI/UX</div>';
-          }}
-        />
+        Uaa
       </div>
       
       <div style={{
-        height: '50px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        padding: '0 1rem',
-        boxSizing: 'border-box',
-        backgroundColor: '#fff',
-        borderRadius: '0 0 12px 12px'
+        position: 'absolute',
+        bottom: '1rem',
+        right: '1rem'
       }}>
-        <div style={{
-          flex: 1,
-          textAlign: 'center',
-          color: '#000',
-          fontSize: isMobile ? '1rem' : '1.1rem',
-          fontWeight: '400',
-          fontFamily: 'Helvetica, Arial, sans-serif'
-        }}>
-          UI/UX
-        </div>
-        
-        <div style={{
-          marginLeft: '0.5rem'
-        }}>
-          <svg
-            width={isMobile ? "16" : "18"}
-            height={isMobile ? "16" : "18"}
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="#000"
-            strokeWidth="2"
-          >
-            <line x1="5" y1="19" x2="19" y2="5" />
-          </svg>
-        </div>
+        <svg
+          width={isMobile ? "20" : "24"}
+          height={isMobile ? "20" : "24"}
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="#000"
+          strokeWidth="2.5"
+        >
+          <line x1="4" y1="20" x2="20" y2="4" />
+        </svg>
       </div>
     </div>
 
-    {/* Card 5 */}
+    {/* Card 5 - MOTION */}
     <div
       style={{
         position: 'relative',
@@ -3952,75 +3890,60 @@ export default function HomePage(): React.JSX.Element {
         height: isMobile ? '250px' : '320px',
         borderRadius: '12px',
         overflow: 'hidden',
-        flexShrink: 0,
-        backgroundColor: '#fff'
+        flexShrink: 0
       }}
     >
+      <img 
+        src="images/5.jpg" 
+        alt="M"
+        style={{
+          width: '100%',
+          height: '100%',
+          objectFit: 'cover',
+          display: 'block',
+          borderRadius: '12px'
+        }}
+        onError={(e) => {
+          e.currentTarget.style.backgroundColor = '#111';
+          e.currentTarget.style.display = 'flex';
+          e.currentTarget.style.alignItems = 'center';
+          e.currentTarget.style.justifyContent = 'center';
+          e.currentTarget.style.color = '#fff';
+          e.currentTarget.innerHTML = '<div style="padding: 1rem; text-align: center; color: #fff; font-size: 2rem;">M</div>';
+        }}
+      />
+      
       <div style={{
-        width: '100%',
-        height: 'calc(100% - 50px)',
-        borderRadius: '12px 12px 0 0',
-        overflow: 'hidden'
+        position: 'absolute',
+        top: '1rem',
+        left: '1rem',
+        color: 'white',
+        fontSize: isMobile ? '1.8rem' : '2.2rem',
+        fontWeight: '600',
+        fontFamily: 'Helvetica, Arial, sans-serif'
       }}>
-        <img 
-          src="images/5.jpg" 
-          alt="MOTION"
-          style={{
-            width: '100%',
-            height: '100%',
-            objectFit: 'cover',
-            display: 'block'
-          }}
-          onError={(e) => {
-            e.currentTarget.style.backgroundColor = '#f5f5f5';
-            e.currentTarget.style.display = 'flex';
-            e.currentTarget.style.alignItems = 'center';
-            e.currentTarget.style.justifyContent = 'center';
-            e.currentTarget.style.color = '#000';
-            e.currentTarget.innerHTML = '<div style="padding: 1rem; text-align: center; color: #000;">MOTION</div>';
-          }}
-        />
+        Maa
       </div>
       
       <div style={{
-        height: '50px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        padding: '0 1rem',
-        boxSizing: 'border-box',
-        backgroundColor: '#fff',
-        borderRadius: '0 0 12px 12px'
+        position: 'absolute',
+        bottom: '1rem',
+        right: '1rem'
       }}>
-        <div style={{
-          flex: 1,
-          textAlign: 'center',
-          color: '#000',
-          fontSize: isMobile ? '1rem' : '1.1rem',
-          fontWeight: '400',
-          fontFamily: 'Helvetica, Arial, sans-serif'
-        }}>
-          MOTION
-        </div>
-        
-        <div style={{
-          marginLeft: '0.5rem'
-        }}>
-          <svg
-            width={isMobile ? "16" : "18"}
-            height={isMobile ? "16" : "18"}
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="#000"
-            strokeWidth="2"
-          >
-            <line x1="5" y1="19" x2="19" y2="5" />
-          </svg>
-        </div>
+        <svg
+          width={isMobile ? "20" : "24"}
+          height={isMobile ? "20" : "24"}
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="#000"
+          strokeWidth="2.5"
+        >
+          <line x1="4" y1="20" x2="20" y2="4" />
+        </svg>
       </div>
     </div>
 
-    {/* Card 6 */}
+    {/* Card 6 - PRINT */}
     <div
       style={{
         position: 'relative',
@@ -4028,76 +3951,60 @@ export default function HomePage(): React.JSX.Element {
         height: isMobile ? '250px' : '320px',
         borderRadius: '12px',
         overflow: 'hidden',
-        flexShrink: 0,
-        backgroundColor: '#fff'
+        flexShrink: 0
       }}
     >
+      <img 
+        src="images/5.jpg" 
+        alt="P"
+        style={{
+          width: '100%',
+          height: '100%',
+          objectFit: 'cover',
+          display: 'block',
+          borderRadius: '12px'
+        }}
+        onError={(e) => {
+          e.currentTarget.style.backgroundColor = '#111';
+          e.currentTarget.style.display = 'flex';
+          e.currentTarget.style.alignItems = 'center';
+          e.currentTarget.style.justifyContent = 'center';
+          e.currentTarget.style.color = '#fff';
+          e.currentTarget.innerHTML = '<div style="padding: 1rem; text-align: center; color: #fff; font-size: 2rem;">P</div>';
+        }}
+      />
+      
       <div style={{
-        width: '100%',
-        height: 'calc(100% - 50px)',
-        borderRadius: '12px 12px 0 0',
-        overflow: 'hidden'
+        position: 'absolute',
+        top: '1rem',
+        left: '1rem',
+        color: 'white',
+        fontSize: isMobile ? '1.8rem' : '2.2rem',
+        fontWeight: '600',
+        fontFamily: 'Helvetica, Arial, sans-serif'
       }}>
-        <img 
-          src="images/5.jpg" 
-          alt="PRINT"
-          style={{
-            width: '100%',
-            height: '100%',
-            objectFit: 'cover',
-            display: 'block'
-          }}
-          onError={(e) => {
-            e.currentTarget.style.backgroundColor = '#f5f5f5';
-            e.currentTarget.style.display = 'flex';
-            e.currentTarget.style.alignItems = 'center';
-            e.currentTarget.style.justifyContent = 'center';
-            e.currentTarget.style.color = '#000';
-            e.currentTarget.innerHTML = '<div style="padding: 1rem; text-align: center; color: #000;">PRINT</div>';
-          }}
-        />
+        Paa
       </div>
       
       <div style={{
-        height: '50px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        padding: '0 1rem',
-        boxSizing: 'border-box',
-        backgroundColor: '#fff',
-        borderRadius: '0 0 12px 12px'
+        position: 'absolute',
+        bottom: '1rem',
+        right: '1rem'
       }}>
-        <div style={{
-          flex: 1,
-          textAlign: 'center',
-          color: '#000',
-          fontSize: isMobile ? '1rem' : '1.1rem',
-          fontWeight: '400',
-          fontFamily: 'Helvetica, Arial, sans-serif'
-        }}>
-          PRINT
-        </div>
-        
-        <div style={{
-          marginLeft: '0.5rem'
-        }}>
-          <svg
-            width={isMobile ? "16" : "18"}
-            height={isMobile ? "16" : "18"}
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="#000"
-            strokeWidth="2"
-          >
-            <line x1="5" y1="19" x2="19" y2="5" />
-          </svg>
-        </div>
+        <svg
+          width={isMobile ? "20" : "24"}
+          height={isMobile ? "20" : "24"}
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="#000"
+          strokeWidth="2.5"
+        >
+          <line x1="4" y1="20" x2="20" y2="4" />
+        </svg>
       </div>
     </div>
   </div>
 </div>
-
         
 
               {/* Progress Bar dengan 3 Foto dan Komentar */}
@@ -4888,6 +4795,7 @@ export default function HomePage(): React.JSX.Element {
     </div>
   );
 }
+
 
 
 
