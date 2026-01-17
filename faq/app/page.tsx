@@ -164,6 +164,46 @@ export default function HomePage(): React.JSX.Element {
     }
   ];
 
+  // Data untuk 4 foto portrait sejajar
+  const portraitPhotos = [
+    {
+      id: 1,
+      src: "images/5.jpg",
+      alt: "Portrait 1",
+      title: "Creative Vision",
+      description: "Artistic exploration",
+      linkText: "View Project",
+      linkUrl: "/projects/1"
+    },
+    {
+      id: 2,
+      src: "images/6.jpg",
+      alt: "Portrait 2",
+      title: "Visual Story",
+      description: "Narrative through imagery",
+      linkText: "Explore Story",
+      linkUrl: "/projects/2"
+    },
+    {
+      id: 3,
+      src: "images/5.jpg",
+      alt: "Portrait 3",
+      title: "Design Process",
+      description: "From concept to creation",
+      linkText: "See Process",
+      linkUrl: "/projects/3"
+    },
+    {
+      id: 4,
+      src: "images/6.jpg",
+      alt: "Portrait 4",
+      title: "Brand Identity",
+      description: "Visual consistency",
+      linkText: "Discover Brand",
+      linkUrl: "/projects/4"
+    }
+  ];
+
   // Fungsi untuk menghitung waktu yang lalu
   const calculateTimeAgo = (date: Date | Timestamp): string => {
     const now = new Date();
@@ -2588,6 +2628,160 @@ export default function HomePage(): React.JSX.Element {
                   }}>
                     {sliderPosition === "index" ? "Index View" : "Grid View"}
                   </div>
+                </div>
+              </div>
+
+              {/* ======================== */}
+              {/* 4 Foto Portrait Sejajar */}
+              {/* ======================== */}
+              <div style={{
+                width: '100%',
+                padding: isMobile ? '1rem 1.5rem' : '2rem 3rem',
+                marginTop: isMobile ? '2rem' : '3rem',
+                marginBottom: isMobile ? '3rem' : '4rem',
+                boxSizing: 'border-box'
+              }}>
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: isMobile ? '1fr' : 'repeat(4, 1fr)',
+                  gap: isMobile ? '2rem' : '1.5rem',
+                  maxWidth: '1200px',
+                  margin: '0 auto'
+                }}>
+                  {portraitPhotos.map((photo, index) => (
+                    <motion.div
+                      key={photo.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.5, delay: index * 0.1 }}
+                      style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                        borderRadius: '20px',
+                        overflow: 'hidden',
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                        boxShadow: '0 8px 20px rgba(0, 0, 0, 0.3)',
+                        transition: 'all 0.3s ease',
+                        cursor: 'pointer',
+                        height: '100%'
+                      }}
+                      whileHover={{ 
+                        y: -5,
+                        backgroundColor: 'rgba(255, 255, 255, 0.08)',
+                        boxShadow: '0 12px 30px rgba(0, 0, 0, 0.4)',
+                        border: '1px solid rgba(255, 255, 255, 0.2)'
+                      }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={() => router.push(photo.linkUrl)}
+                    >
+                      {/* Foto dengan border radius portrait */}
+                      <div style={{
+                        width: '100%',
+                        height: isMobile ? '250px' : '300px',
+                        overflow: 'hidden',
+                        position: 'relative'
+                      }}>
+                        <img 
+                          src={photo.src} 
+                          alt={photo.alt}
+                          style={{
+                            width: '100%',
+                            height: '100%',
+                            objectFit: 'cover',
+                            display: 'block',
+                            transition: 'transform 0.5s ease'
+                          }}
+                        />
+                        {/* Overlay gradient */}
+                        <div style={{
+                          position: 'absolute',
+                          bottom: 0,
+                          left: 0,
+                          right: 0,
+                          height: '40%',
+                          background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 100%)',
+                          opacity: 0.7,
+                          transition: 'opacity 0.3s ease'
+                        }} />
+                      </div>
+
+                      {/* Konten teks di bawah foto */}
+                      <div style={{
+                        padding: isMobile ? '1.2rem' : '1.5rem',
+                        flex: 1,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '0.5rem'
+                      }}>
+                        {/* Judul */}
+                        <h3 style={{
+                          color: 'white',
+                          fontSize: isMobile ? '1.2rem' : '1.4rem',
+                          fontWeight: '600',
+                          margin: 0,
+                          fontFamily: 'Helvetica, Arial, sans-serif',
+                          lineHeight: 1.2
+                        }}>
+                          {photo.title}
+                        </h3>
+
+                        {/* Deskripsi */}
+                        <p style={{
+                          color: 'rgba(255, 255, 255, 0.7)',
+                          fontSize: isMobile ? '0.9rem' : '1rem',
+                          margin: 0,
+                          fontFamily: 'Helvetica, Arial, sans-serif',
+                          lineHeight: 1.4,
+                          flex: 1
+                        }}>
+                          {photo.description}
+                        </p>
+
+                        {/* Link dengan tanda panah */}
+                        <div style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          marginTop: isMobile ? '0.8rem' : '1rem',
+                          paddingTop: isMobile ? '0.8rem' : '1rem',
+                          borderTop: '1px solid rgba(255, 255, 255, 0.1)'
+                        }}>
+                          <span style={{
+                            color: '#00FF00',
+                            fontSize: isMobile ? '0.9rem' : '1rem',
+                            fontWeight: '500',
+                            fontFamily: 'Helvetica, Arial, sans-serif',
+                            letterSpacing: '0.5px'
+                          }}>
+                            {photo.linkText}
+                          </span>
+                          
+                          {/* Tanda panah lurus serong kanan SVG */}
+                          <motion.div
+                            initial={{ x: 0 }}
+                            whileHover={{ x: 5 }}
+                            transition={{ duration: 0.2 }}
+                          >
+                            <svg 
+                              width={isMobile ? "20" : "24"} 
+                              height={isMobile ? "20" : "24"} 
+                              viewBox="0 0 24 24" 
+                              fill="none" 
+                              stroke="#00FF00" 
+                              strokeWidth="2"
+                              style={{
+                                transition: 'transform 0.3s ease'
+                              }}
+                            >
+                              <path d="M7 17L17 7" />
+                              <path d="M7 7h10v10" />
+                            </svg>
+                          </motion.div>
+                        </div>
+                      </div>
+                    </motion.div>
+                  ))}
                 </div>
               </div>
 
