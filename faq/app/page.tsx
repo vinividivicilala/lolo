@@ -1,5 +1,3 @@
-[file name]: 67x.txt
-[file content begin]
 'use client';
 
 import React, { useState, useEffect, useRef } from "react";
@@ -4930,4 +4928,5 @@ export default function HomePage(): React.JSX.Element {
     </div>
   );
 }
-[file content end]
+
+
