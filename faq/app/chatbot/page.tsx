@@ -242,7 +242,7 @@ export default function ChatbotPage() {
   };
 
   const handleLogin = () => {
-    router.push('/sign-in');
+    router.push('/signin');
   };
 
   const handleLogout = async () => {
@@ -1089,3 +1089,4 @@ const styles = {
     height: '60px'
   }
 };
+
