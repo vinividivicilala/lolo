@@ -3598,8 +3598,7 @@ export default function HomePage(): React.JSX.Element {
                 </motion.div>
               </div>
 
-
-    {/* Foto Card Design Section - 6 Card Horizontal */}
+{/* Foto Card Design Section - 6 Card Horizontal */}
 
 <div style={{
   width: '100%',
@@ -3609,14 +3608,14 @@ export default function HomePage(): React.JSX.Element {
   boxSizing: 'border-box',
   position: 'relative'
 }}>
-  {/* Judul di Atas Foto - Tengah */}
+  {/* Judul di Atas Foto - Kiri Tengah */}
   <div style={{
-    textAlign: 'center',
-    marginBottom: isMobile ? '1.5rem' : '2rem'
+    marginBottom: isMobile ? '1.5rem' : '2rem',
+    paddingLeft: isMobile ? '1rem' : '2rem'
   }}>
     <div style={{
       color: 'white',
-      fontSize: isMobile ? '1.2rem' : '1.5rem',
+      fontSize: isMobile ? '1.3rem' : '1.6rem',
       fontWeight: '400',
       fontFamily: 'Helvetica, Arial, sans-serif'
     }}>
@@ -3644,14 +3643,15 @@ export default function HomePage(): React.JSX.Element {
         height: isMobile ? '250px' : '320px',
         borderRadius: '12px',
         overflow: 'hidden',
-        flexShrink: 0
+        flexShrink: 0,
+        backgroundColor: '#fff'
       }}
     >
       {/* Foto */}
       <div style={{
         width: '100%',
-        height: '100%',
-        borderRadius: '12px',
+        height: 'calc(100% - 50px)',
+        borderRadius: '12px 12px 0 0',
         overflow: 'hidden'
       }}>
         <img 
@@ -3664,62 +3664,53 @@ export default function HomePage(): React.JSX.Element {
             display: 'block'
           }}
           onError={(e) => {
-            e.currentTarget.style.backgroundColor = '#111';
+            e.currentTarget.style.backgroundColor = '#f5f5f5';
             e.currentTarget.style.display = 'flex';
             e.currentTarget.style.alignItems = 'center';
             e.currentTarget.style.justifyContent = 'center';
-            e.currentTarget.style.color = '#fff';
-            e.currentTarget.innerHTML = '<div style="padding: 1rem; text-align: center;">VISUAL</div>';
+            e.currentTarget.style.color = '#000';
+            e.currentTarget.innerHTML = '<div style="padding: 1rem; text-align: center; color: #000;">VISUAL</div>';
           }}
         />
       </div>
       
-      {/* Container Teks dan SVG di bawah - Tidak pakai background */}
+      {/* Container Teks dan SVG di bawah - Background putih */}
       <div style={{
-        position: 'absolute',
-        bottom: 0,
-        left: 0,
-        width: '100%',
         height: '50px',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
         padding: '0 1rem',
-        boxSizing: 'border-box'
+        boxSizing: 'border-box',
+        backgroundColor: '#fff',
+        borderRadius: '0 0 12px 12px'
       }}>
-        {/* Teks di tengah bawah - Putih */}
+        {/* Teks di tengah bawah - Hitam */}
         <div style={{
           flex: 1,
           textAlign: 'center',
-          color: 'white',
+          color: '#000',
           fontSize: isMobile ? '1rem' : '1.1rem',
           fontWeight: '400',
-          fontFamily: 'Helvetica, Arial, sans-serif',
-          textShadow: '0 1px 3px rgba(0,0,0,0.8)'
+          fontFamily: 'Helvetica, Arial, sans-serif'
         }}>
           VISUAL
         </div>
         
-        {/* SVG di kanan bawah - Putih, Lurus Serong Kanan */}
+        {/* SVG di kanan bawah - Hitam, Serong Kanan */}
         <div style={{
           marginLeft: '0.5rem'
         }}>
           <svg
-            width={isMobile ? "18" : "20"}
-            height={isMobile ? "18" : "20"}
+            width={isMobile ? "16" : "18"}
+            height={isMobile ? "16" : "18"}
             viewBox="0 0 24 24"
             fill="none"
-            stroke="white"
+            stroke="#000"
             strokeWidth="2"
-            style={{
-              filter: 'drop-shadow(0 1px 3px rgba(0,0,0,0.8))'
-            }}
           >
-            {/* Garis horizontal */}
-            <line x1="3" y1="12" x2="21" y2="12" />
             {/* Garis serong kanan */}
-            <line x1="15" y1="5" x2="21" y2="12" />
-            <line x1="15" y1="19" x2="21" y2="12" />
+            <line x1="5" y1="19" x2="19" y2="5" />
           </svg>
         </div>
       </div>
@@ -3733,13 +3724,14 @@ export default function HomePage(): React.JSX.Element {
         height: isMobile ? '250px' : '320px',
         borderRadius: '12px',
         overflow: 'hidden',
-        flexShrink: 0
+        flexShrink: 0,
+        backgroundColor: '#fff'
       }}
     >
       <div style={{
         width: '100%',
-        height: '100%',
-        borderRadius: '12px',
+        height: 'calc(100% - 50px)',
+        borderRadius: '12px 12px 0 0',
         overflow: 'hidden'
       }}>
         <img 
@@ -3752,36 +3744,33 @@ export default function HomePage(): React.JSX.Element {
             display: 'block'
           }}
           onError={(e) => {
-            e.currentTarget.style.backgroundColor = '#111';
+            e.currentTarget.style.backgroundColor = '#f5f5f5';
             e.currentTarget.style.display = 'flex';
             e.currentTarget.style.alignItems = 'center';
             e.currentTarget.style.justifyContent = 'center';
-            e.currentTarget.style.color = '#fff';
-            e.currentTarget.innerHTML = '<div style="padding: 1rem; text-align: center;">DESIGN</div>';
+            e.currentTarget.style.color = '#000';
+            e.currentTarget.innerHTML = '<div style="padding: 1rem; text-align: center; color: #000;">DESIGN</div>';
           }}
         />
       </div>
       
       <div style={{
-        position: 'absolute',
-        bottom: 0,
-        left: 0,
-        width: '100%',
         height: '50px',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
         padding: '0 1rem',
-        boxSizing: 'border-box'
+        boxSizing: 'border-box',
+        backgroundColor: '#fff',
+        borderRadius: '0 0 12px 12px'
       }}>
         <div style={{
           flex: 1,
           textAlign: 'center',
-          color: 'white',
+          color: '#000',
           fontSize: isMobile ? '1rem' : '1.1rem',
           fontWeight: '400',
-          fontFamily: 'Helvetica, Arial, sans-serif',
-          textShadow: '0 1px 3px rgba(0,0,0,0.8)'
+          fontFamily: 'Helvetica, Arial, sans-serif'
         }}>
           DESIGN
         </div>
@@ -3790,19 +3779,14 @@ export default function HomePage(): React.JSX.Element {
           marginLeft: '0.5rem'
         }}>
           <svg
-            width={isMobile ? "18" : "20"}
-            height={isMobile ? "18" : "20"}
+            width={isMobile ? "16" : "18"}
+            height={isMobile ? "16" : "18"}
             viewBox="0 0 24 24"
             fill="none"
-            stroke="white"
+            stroke="#000"
             strokeWidth="2"
-            style={{
-              filter: 'drop-shadow(0 1px 3px rgba(0,0,0,0.8))'
-            }}
           >
-            <line x1="3" y1="12" x2="21" y2="12" />
-            <line x1="15" y1="5" x2="21" y2="12" />
-            <line x1="15" y1="19" x2="21" y2="12" />
+            <line x1="5" y1="19" x2="19" y2="5" />
           </svg>
         </div>
       </div>
@@ -3816,13 +3800,14 @@ export default function HomePage(): React.JSX.Element {
         height: isMobile ? '250px' : '320px',
         borderRadius: '12px',
         overflow: 'hidden',
-        flexShrink: 0
+        flexShrink: 0,
+        backgroundColor: '#fff'
       }}
     >
       <div style={{
         width: '100%',
-        height: '100%',
-        borderRadius: '12px',
+        height: 'calc(100% - 50px)',
+        borderRadius: '12px 12px 0 0',
         overflow: 'hidden'
       }}>
         <img 
@@ -3835,36 +3820,33 @@ export default function HomePage(): React.JSX.Element {
             display: 'block'
           }}
           onError={(e) => {
-            e.currentTarget.style.backgroundColor = '#111';
+            e.currentTarget.style.backgroundColor = '#f5f5f5';
             e.currentTarget.style.display = 'flex';
             e.currentTarget.style.alignItems = 'center';
             e.currentTarget.style.justifyContent = 'center';
-            e.currentTarget.style.color = '#fff';
-            e.currentTarget.innerHTML = '<div style="padding: 1rem; text-align: center;">BRAND</div>';
+            e.currentTarget.style.color = '#000';
+            e.currentTarget.innerHTML = '<div style="padding: 1rem; text-align: center; color: #000;">BRAND</div>';
           }}
         />
       </div>
       
       <div style={{
-        position: 'absolute',
-        bottom: 0,
-        left: 0,
-        width: '100%',
         height: '50px',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
         padding: '0 1rem',
-        boxSizing: 'border-box'
+        boxSizing: 'border-box',
+        backgroundColor: '#fff',
+        borderRadius: '0 0 12px 12px'
       }}>
         <div style={{
           flex: 1,
           textAlign: 'center',
-          color: 'white',
+          color: '#000',
           fontSize: isMobile ? '1rem' : '1.1rem',
           fontWeight: '400',
-          fontFamily: 'Helvetica, Arial, sans-serif',
-          textShadow: '0 1px 3px rgba(0,0,0,0.8)'
+          fontFamily: 'Helvetica, Arial, sans-serif'
         }}>
           BRAND
         </div>
@@ -3873,19 +3855,14 @@ export default function HomePage(): React.JSX.Element {
           marginLeft: '0.5rem'
         }}>
           <svg
-            width={isMobile ? "18" : "20"}
-            height={isMobile ? "18" : "20"}
+            width={isMobile ? "16" : "18"}
+            height={isMobile ? "16" : "18"}
             viewBox="0 0 24 24"
             fill="none"
-            stroke="white"
+            stroke="#000"
             strokeWidth="2"
-            style={{
-              filter: 'drop-shadow(0 1px 3px rgba(0,0,0,0.8))'
-            }}
           >
-            <line x1="3" y1="12" x2="21" y2="12" />
-            <line x1="15" y1="5" x2="21" y2="12" />
-            <line x1="15" y1="19" x2="21" y2="12" />
+            <line x1="5" y1="19" x2="19" y2="5" />
           </svg>
         </div>
       </div>
@@ -3899,13 +3876,14 @@ export default function HomePage(): React.JSX.Element {
         height: isMobile ? '250px' : '320px',
         borderRadius: '12px',
         overflow: 'hidden',
-        flexShrink: 0
+        flexShrink: 0,
+        backgroundColor: '#fff'
       }}
     >
       <div style={{
         width: '100%',
-        height: '100%',
-        borderRadius: '12px',
+        height: 'calc(100% - 50px)',
+        borderRadius: '12px 12px 0 0',
         overflow: 'hidden'
       }}>
         <img 
@@ -3918,36 +3896,33 @@ export default function HomePage(): React.JSX.Element {
             display: 'block'
           }}
           onError={(e) => {
-            e.currentTarget.style.backgroundColor = '#111';
+            e.currentTarget.style.backgroundColor = '#f5f5f5';
             e.currentTarget.style.display = 'flex';
             e.currentTarget.style.alignItems = 'center';
             e.currentTarget.style.justifyContent = 'center';
-            e.currentTarget.style.color = '#fff';
-            e.currentTarget.innerHTML = '<div style="padding: 1rem; text-align: center;">UI/UX</div>';
+            e.currentTarget.style.color = '#000';
+            e.currentTarget.innerHTML = '<div style="padding: 1rem; text-align: center; color: #000;">UI/UX</div>';
           }}
         />
       </div>
       
       <div style={{
-        position: 'absolute',
-        bottom: 0,
-        left: 0,
-        width: '100%',
         height: '50px',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
         padding: '0 1rem',
-        boxSizing: 'border-box'
+        boxSizing: 'border-box',
+        backgroundColor: '#fff',
+        borderRadius: '0 0 12px 12px'
       }}>
         <div style={{
           flex: 1,
           textAlign: 'center',
-          color: 'white',
+          color: '#000',
           fontSize: isMobile ? '1rem' : '1.1rem',
           fontWeight: '400',
-          fontFamily: 'Helvetica, Arial, sans-serif',
-          textShadow: '0 1px 3px rgba(0,0,0,0.8)'
+          fontFamily: 'Helvetica, Arial, sans-serif'
         }}>
           UI/UX
         </div>
@@ -3956,19 +3931,14 @@ export default function HomePage(): React.JSX.Element {
           marginLeft: '0.5rem'
         }}>
           <svg
-            width={isMobile ? "18" : "20"}
-            height={isMobile ? "18" : "20"}
+            width={isMobile ? "16" : "18"}
+            height={isMobile ? "16" : "18"}
             viewBox="0 0 24 24"
             fill="none"
-            stroke="white"
+            stroke="#000"
             strokeWidth="2"
-            style={{
-              filter: 'drop-shadow(0 1px 3px rgba(0,0,0,0.8))'
-            }}
           >
-            <line x1="3" y1="12" x2="21" y2="12" />
-            <line x1="15" y1="5" x2="21" y2="12" />
-            <line x1="15" y1="19" x2="21" y2="12" />
+            <line x1="5" y1="19" x2="19" y2="5" />
           </svg>
         </div>
       </div>
@@ -3982,13 +3952,14 @@ export default function HomePage(): React.JSX.Element {
         height: isMobile ? '250px' : '320px',
         borderRadius: '12px',
         overflow: 'hidden',
-        flexShrink: 0
+        flexShrink: 0,
+        backgroundColor: '#fff'
       }}
     >
       <div style={{
         width: '100%',
-        height: '100%',
-        borderRadius: '12px',
+        height: 'calc(100% - 50px)',
+        borderRadius: '12px 12px 0 0',
         overflow: 'hidden'
       }}>
         <img 
@@ -4001,36 +3972,33 @@ export default function HomePage(): React.JSX.Element {
             display: 'block'
           }}
           onError={(e) => {
-            e.currentTarget.style.backgroundColor = '#111';
+            e.currentTarget.style.backgroundColor = '#f5f5f5';
             e.currentTarget.style.display = 'flex';
             e.currentTarget.style.alignItems = 'center';
             e.currentTarget.style.justifyContent = 'center';
-            e.currentTarget.style.color = '#fff';
-            e.currentTarget.innerHTML = '<div style="padding: 1rem; text-align: center;">MOTION</div>';
+            e.currentTarget.style.color = '#000';
+            e.currentTarget.innerHTML = '<div style="padding: 1rem; text-align: center; color: #000;">MOTION</div>';
           }}
         />
       </div>
       
       <div style={{
-        position: 'absolute',
-        bottom: 0,
-        left: 0,
-        width: '100%',
         height: '50px',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
         padding: '0 1rem',
-        boxSizing: 'border-box'
+        boxSizing: 'border-box',
+        backgroundColor: '#fff',
+        borderRadius: '0 0 12px 12px'
       }}>
         <div style={{
           flex: 1,
           textAlign: 'center',
-          color: 'white',
+          color: '#000',
           fontSize: isMobile ? '1rem' : '1.1rem',
           fontWeight: '400',
-          fontFamily: 'Helvetica, Arial, sans-serif',
-          textShadow: '0 1px 3px rgba(0,0,0,0.8)'
+          fontFamily: 'Helvetica, Arial, sans-serif'
         }}>
           MOTION
         </div>
@@ -4039,19 +4007,14 @@ export default function HomePage(): React.JSX.Element {
           marginLeft: '0.5rem'
         }}>
           <svg
-            width={isMobile ? "18" : "20"}
-            height={isMobile ? "18" : "20"}
+            width={isMobile ? "16" : "18"}
+            height={isMobile ? "16" : "18"}
             viewBox="0 0 24 24"
             fill="none"
-            stroke="white"
+            stroke="#000"
             strokeWidth="2"
-            style={{
-              filter: 'drop-shadow(0 1px 3px rgba(0,0,0,0.8))'
-            }}
           >
-            <line x1="3" y1="12" x2="21" y2="12" />
-            <line x1="15" y1="5" x2="21" y2="12" />
-            <line x1="15" y1="19" x2="21" y2="12" />
+            <line x1="5" y1="19" x2="19" y2="5" />
           </svg>
         </div>
       </div>
@@ -4065,13 +4028,14 @@ export default function HomePage(): React.JSX.Element {
         height: isMobile ? '250px' : '320px',
         borderRadius: '12px',
         overflow: 'hidden',
-        flexShrink: 0
+        flexShrink: 0,
+        backgroundColor: '#fff'
       }}
     >
       <div style={{
         width: '100%',
-        height: '100%',
-        borderRadius: '12px',
+        height: 'calc(100% - 50px)',
+        borderRadius: '12px 12px 0 0',
         overflow: 'hidden'
       }}>
         <img 
@@ -4084,36 +4048,33 @@ export default function HomePage(): React.JSX.Element {
             display: 'block'
           }}
           onError={(e) => {
-            e.currentTarget.style.backgroundColor = '#111';
+            e.currentTarget.style.backgroundColor = '#f5f5f5';
             e.currentTarget.style.display = 'flex';
             e.currentTarget.style.alignItems = 'center';
             e.currentTarget.style.justifyContent = 'center';
-            e.currentTarget.style.color = '#fff';
-            e.currentTarget.innerHTML = '<div style="padding: 1rem; text-align: center;">PRINT</div>';
+            e.currentTarget.style.color = '#000';
+            e.currentTarget.innerHTML = '<div style="padding: 1rem; text-align: center; color: #000;">PRINT</div>';
           }}
         />
       </div>
       
       <div style={{
-        position: 'absolute',
-        bottom: 0,
-        left: 0,
-        width: '100%',
         height: '50px',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
         padding: '0 1rem',
-        boxSizing: 'border-box'
+        boxSizing: 'border-box',
+        backgroundColor: '#fff',
+        borderRadius: '0 0 12px 12px'
       }}>
         <div style={{
           flex: 1,
           textAlign: 'center',
-          color: 'white',
+          color: '#000',
           fontSize: isMobile ? '1rem' : '1.1rem',
           fontWeight: '400',
-          fontFamily: 'Helvetica, Arial, sans-serif',
-          textShadow: '0 1px 3px rgba(0,0,0,0.8)'
+          fontFamily: 'Helvetica, Arial, sans-serif'
         }}>
           PRINT
         </div>
@@ -4122,26 +4083,20 @@ export default function HomePage(): React.JSX.Element {
           marginLeft: '0.5rem'
         }}>
           <svg
-            width={isMobile ? "18" : "20"}
-            height={isMobile ? "18" : "20"}
+            width={isMobile ? "16" : "18"}
+            height={isMobile ? "16" : "18"}
             viewBox="0 0 24 24"
             fill="none"
-            stroke="white"
+            stroke="#000"
             strokeWidth="2"
-            style={{
-              filter: 'drop-shadow(0 1px 3px rgba(0,0,0,0.8))'
-            }}
           >
-            <line x1="3" y1="12" x2="21" y2="12" />
-            <line x1="15" y1="5" x2="21" y2="12" />
-            <line x1="15" y1="19" x2="21" y2="12" />
+            <line x1="5" y1="19" x2="19" y2="5" />
           </svg>
         </div>
       </div>
     </div>
   </div>
 </div>
-
 
         
 
@@ -4933,6 +4888,7 @@ export default function HomePage(): React.JSX.Element {
     </div>
   );
 }
+
 
 
 
