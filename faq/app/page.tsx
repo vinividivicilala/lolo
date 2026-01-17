@@ -248,12 +248,42 @@ export default function HomePage(): React.JSX.Element {
 
   // Data untuk card design - 6 card sejajar
   const cardItems = [
-    { id: 1, src: "images/5.jpg", alt: "Card 1" },
-    { id: 2, src: "images/6.jpg", alt: "Card 2" },
-    { id: 3, src: "images/5.jpg", alt: "Card 3" },
-    { id: 4, src: "images/6.jpg", alt: "Card 4" },
-    { id: 5, src: "images/5.jpg", alt: "Card 5" },
-    { id: 6, src: "images/6.jpg", alt: "Card 6" }
+    { 
+      id: 1, 
+      src: "images/5.jpg", 
+      alt: "Card 1",
+      text: "Brand Identity"
+    },
+    { 
+      id: 2, 
+      src: "images/6.jpg", 
+      alt: "Card 2",
+      text: "Visual Design"
+    },
+    { 
+      id: 3, 
+      src: "images/5.jpg", 
+      alt: "Card 3",
+      text: "UI/UX"
+    },
+    { 
+      id: 4, 
+      src: "images/6.jpg", 
+      alt: "Card 4",
+      text: "Web Development"
+    },
+    { 
+      id: 5, 
+      src: "images/5.jpg", 
+      alt: "Card 5",
+      text: "Mobile App"
+    },
+    { 
+      id: 6, 
+      src: "images/6.jpg", 
+      alt: "Card 6",
+      text: "Creative Direction"
+    }
   ];
 
   // Fungsi untuk menghitung waktu yang lalu
@@ -3120,6 +3150,28 @@ export default function HomePage(): React.JSX.Element {
   marginTop: isMobile ? '2rem' : '3rem'
 }}>
   
+  {/* Teks PROJECT kecil di atas tengah */}
+  <motion.div
+    initial={{ opacity: 0, y: -20 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.5 }}
+    style={{
+      textAlign: 'center',
+      marginBottom: isMobile ? '1.5rem' : '2rem'
+    }}
+  >
+    <div style={{
+      color: 'rgba(255,255,255,0.7)',
+      fontSize: isMobile ? '0.9rem' : '1rem',
+      fontWeight: '400',
+      fontFamily: 'Helvetica, Arial, sans-serif',
+      letterSpacing: '2px',
+      textTransform: 'uppercase'
+    }}>
+      PROJECT
+    </div>
+  </motion.div>
+
   {/* Container untuk 6 Card */}
   <div style={{
     display: 'grid',
@@ -3136,13 +3188,14 @@ export default function HomePage(): React.JSX.Element {
         onClick={() => handleCardClick(card.id)}
         style={{
           aspectRatio: '3/4',
-          borderRadius: '20px',
+          borderRadius: '12px',
           overflow: 'hidden',
           position: 'relative',
           cursor: 'pointer',
           boxShadow: '0 8px 25px rgba(0,0,0,0.3)',
-          border: '1px solid rgba(255,255,255,0.15)',
-          backgroundColor: '#111'
+          border: '1px solid rgba(255,255,255,0.1)',
+          backgroundColor: '#111',
+          height: isMobile ? '250px' : '300px' // Ukuran lebih kecil standar
         }}
         whileHover={{ 
           scale: 1.05,
@@ -3167,44 +3220,47 @@ export default function HomePage(): React.JSX.Element {
             e.currentTarget.style.alignItems = 'center';
             e.currentTarget.style.justifyContent = 'center';
             e.currentTarget.style.color = '#fff';
-            e.currentTarget.innerHTML = `<div style="padding: 1rem; text-align: center;">Card ${card.id}</div>`;
+            e.currentTarget.innerHTML = `<div style="padding: 1rem; text-align: center;">${card.text}</div>`;
           }}
         />
         
-        {/* Container untuk nomor dan panah */}
+        {/* Overlay untuk teks dan panah */}
         <div style={{
           position: 'absolute',
-          bottom: isMobile ? '0.8rem' : '1.2rem',
-          left: isMobile ? '0.8rem' : '1.2rem',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          padding: isMobile ? '0.8rem' : '1rem',
+          background: 'linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 100%)',
           display: 'flex',
           alignItems: 'center',
-          gap: '0.5rem'
+          justifyContent: 'space-between'
         }}>
-          {/* Nomor card dengan background */}
+          {/* Teks di tengah bawah */}
           <div style={{
-            backgroundColor: 'rgba(0,0,0,0.7)',
             color: 'white',
             fontSize: isMobile ? '0.9rem' : '1rem',
-            fontWeight: '600',
+            fontWeight: '500',
             fontFamily: 'Helvetica, Arial, sans-serif',
-            padding: '0.3rem 0.8rem',
-            borderRadius: '20px',
-            backdropFilter: 'blur(5px)'
+            flex: 1,
+            textAlign: 'center'
           }}>
-            {String(card.id).padStart(2, '0')}
+            {card.text}
           </div>
           
-          {/* Panah ke kanan */}
-          <div style={{
-            backgroundColor: 'rgba(0,0,0,0.7)',
-            width: isMobile ? '28px' : '32px',
-            height: isMobile ? '28px' : '32px',
-            borderRadius: '50%',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            backdropFilter: 'blur(5px)'
-          }}>
+          {/* Panah serong kanan */}
+          <motion.div
+            style={{
+              width: isMobile ? '24px' : '28px',
+              height: isMobile ? '24px' : '28px',
+              marginLeft: '0.5rem',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+            whileHover={{ x: 5 }}
+            transition={{ duration: 0.2 }}
+          >
             <svg 
               width={isMobile ? "16" : "18"} 
               height={isMobile ? "16" : "18"} 
@@ -3212,11 +3268,14 @@ export default function HomePage(): React.JSX.Element {
               fill="none" 
               stroke="white" 
               strokeWidth="2"
+              style={{
+                transform: 'rotate(-45deg)'
+              }}
             >
-              <path d="M5 12h14"/>
-              <path d="m12 5 7 7-7 7"/>
+              <line x1="5" y1="12" x2="19" y2="12"/>
+              <polyline points="12 5 19 12 12 19"/>
             </svg>
-          </div>
+          </motion.div>
         </div>
         
         {/* Overlay efek hover */}
@@ -3229,47 +3288,13 @@ export default function HomePage(): React.JSX.Element {
             left: 0,
             right: 0,
             bottom: 0,
-            background: 'linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 50%)',
+            background: 'rgba(0,0,0,0.2)',
             pointerEvents: 'none'
           }}
         />
       </motion.div>
     ))}
   </div>
-  
-  {/* Title di bawah card */}
-  <motion.div
-    initial={{ opacity: 0, y: 20 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ delay: 0.8, duration: 0.5 }}
-    style={{
-      textAlign: 'center',
-      marginTop: isMobile ? '2rem' : '3rem'
-    }}
-  >
-    <h2 style={{
-      color: 'white',
-      fontSize: isMobile ? '1.8rem' : '2.5rem',
-      fontWeight: '700',
-      fontFamily: 'Helvetica, Arial, sans-serif',
-      margin: 0,
-      letterSpacing: '1px'
-    }}>
-      COLLECTION 2024
-    </h2>
-    <p style={{
-      color: 'rgba(255,255,255,0.7)',
-      fontSize: isMobile ? '1rem' : '1.2rem',
-      fontWeight: '300',
-      marginTop: '0.5rem',
-      maxWidth: '600px',
-      marginLeft: 'auto',
-      marginRight: 'auto',
-      lineHeight: 1.5
-    }}>
-      Explore our latest visual storytelling series
-    </p>
-  </motion.div>
 </div>
 
   {/* Spacer kecil sebelum konten berikutnya */}
