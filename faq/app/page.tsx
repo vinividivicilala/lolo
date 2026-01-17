@@ -3597,6 +3597,9 @@ export default function HomePage(): React.JSX.Element {
                   </div>
                 </motion.div>
               </div>
+
+
+
 {/* Foto Card Design Section - 6 Card Horizontal */}
 
 <div style={{
@@ -3666,35 +3669,37 @@ export default function HomePage(): React.JSX.Element {
         }}
       />
       
-      {/* Teks Huruf Depan di dalam foto */}
+      {/* Teks Huruf Depan - Tengah Bawah */}
       <div style={{
         position: 'absolute',
-        top: '1rem',
-        left: '1rem',
+        bottom: '1.5rem',
+        left: '50%',
+        transform: 'translateX(-50%)',
         color: 'white',
         fontSize: isMobile ? '1.8rem' : '2.2rem',
         fontWeight: '600',
         fontFamily: 'Helvetica, Arial, sans-serif'
       }}>
-        Vaa
+        V
       </div>
       
-      {/* Tanda Panah Lurus Serong Kanan di pojok kanan bawah */}
+      {/* Tanda Panah Lurus Serong Kanan - Kanan Bawah */}
       <div style={{
         position: 'absolute',
         bottom: '1rem',
         right: '1rem'
       }}>
         <svg
-          width={isMobile ? "20" : "24"}
-          height={isMobile ? "20" : "24"}
+          width={isMobile ? "18" : "22"}
+          height={isMobile ? "18" : "22"}
           viewBox="0 0 24 24"
           fill="none"
-          stroke="#000"
+          stroke="white"
           strokeWidth="2.5"
         >
-          {/* Garis serong kanan dari kiri bawah ke kanan atas */}
-          <line x1="4" y1="20" x2="20" y2="4" />
+          <line x1="3" y1="12" x2="21" y2="12" />
+          <line x1="15" y1="6" x2="21" y2="12" />
+          <line x1="15" y1="18" x2="21" y2="12" />
         </svg>
       </div>
     </div>
@@ -3732,14 +3737,15 @@ export default function HomePage(): React.JSX.Element {
       
       <div style={{
         position: 'absolute',
-        top: '1rem',
-        left: '1rem',
+        bottom: '1.5rem',
+        left: '50%',
+        transform: 'translateX(-50%)',
         color: 'white',
         fontSize: isMobile ? '1.8rem' : '2.2rem',
         fontWeight: '600',
         fontFamily: 'Helvetica, Arial, sans-serif'
       }}>
-        Daa
+        D
       </div>
       
       <div style={{
@@ -3748,14 +3754,16 @@ export default function HomePage(): React.JSX.Element {
         right: '1rem'
       }}>
         <svg
-          width={isMobile ? "20" : "24"}
-          height={isMobile ? "20" : "24"}
+          width={isMobile ? "18" : "22"}
+          height={isMobile ? "18" : "22"}
           viewBox="0 0 24 24"
           fill="none"
-          stroke="#000"
+          stroke="white"
           strokeWidth="2.5"
         >
-          <line x1="4" y1="20" x2="20" y2="4" />
+          <line x1="3" y1="12" x2="21" y2="12" />
+          <line x1="15" y1="6" x2="21" y2="12" />
+          <line x1="15" y1="18" x2="21" y2="12" />
         </svg>
       </div>
     </div>
@@ -3793,14 +3801,15 @@ export default function HomePage(): React.JSX.Element {
       
       <div style={{
         position: 'absolute',
-        top: '1rem',
-        left: '1rem',
+        bottom: '1.5rem',
+        left: '50%',
+        transform: 'translateX(-50%)',
         color: 'white',
         fontSize: isMobile ? '1.8rem' : '2.2rem',
         fontWeight: '600',
         fontFamily: 'Helvetica, Arial, sans-serif'
       }}>
-        Baa
+        B
       </div>
       
       <div style={{
@@ -3809,14 +3818,16 @@ export default function HomePage(): React.JSX.Element {
         right: '1rem'
       }}>
         <svg
-          width={isMobile ? "20" : "24"}
-          height={isMobile ? "20" : "24"}
+          width={isMobile ? "18" : "22"}
+          height={isMobile ? "18" : "22"}
           viewBox="0 0 24 24"
           fill="none"
-          stroke="#000"
+          stroke="white"
           strokeWidth="2.5"
         >
-          <line x1="4" y1="20" x2="20" y2="4" />
+          <line x1="3" y1="12" x2="21" y2="12" />
+          <line x1="15" y1="6" x2="21" y2="12" />
+          <line x1="15" y1="18" x2="21" y2="12" />
         </svg>
       </div>
     </div>
@@ -3854,14 +3865,15 @@ export default function HomePage(): React.JSX.Element {
       
       <div style={{
         position: 'absolute',
-        top: '1rem',
-        left: '1rem',
+        bottom: '1.5rem',
+        left: '50%',
+        transform: 'translateX(-50%)',
         color: 'white',
         fontSize: isMobile ? '1.8rem' : '2.2rem',
         fontWeight: '600',
         fontFamily: 'Helvetica, Arial, sans-serif'
       }}>
-        Uaa
+        U
       </div>
       
       <div style={{
@@ -3870,14 +3882,16 @@ export default function HomePage(): React.JSX.Element {
         right: '1rem'
       }}>
         <svg
-          width={isMobile ? "20" : "24"}
-          height={isMobile ? "20" : "24"}
+          width={isMobile ? "18" : "22"}
+          height={isMobile ? "18" : "22"}
           viewBox="0 0 24 24"
           fill="none"
-          stroke="#000"
+          stroke="white"
           strokeWidth="2.5"
         >
-          <line x1="4" y1="20" x2="20" y2="4" />
+          <line x1="3" y1="12" x2="21" y2="12" />
+          <line x1="15" y1="6" x2="21" y2="12" />
+          <line x1="15" y1="18" x2="21" y2="12" />
         </svg>
       </div>
     </div>
@@ -3915,14 +3929,15 @@ export default function HomePage(): React.JSX.Element {
       
       <div style={{
         position: 'absolute',
-        top: '1rem',
-        left: '1rem',
+        bottom: '1.5rem',
+        left: '50%',
+        transform: 'translateX(-50%)',
         color: 'white',
         fontSize: isMobile ? '1.8rem' : '2.2rem',
         fontWeight: '600',
         fontFamily: 'Helvetica, Arial, sans-serif'
       }}>
-        Maa
+        M
       </div>
       
       <div style={{
@@ -3931,14 +3946,16 @@ export default function HomePage(): React.JSX.Element {
         right: '1rem'
       }}>
         <svg
-          width={isMobile ? "20" : "24"}
-          height={isMobile ? "20" : "24"}
+          width={isMobile ? "18" : "22"}
+          height={isMobile ? "18" : "22"}
           viewBox="0 0 24 24"
           fill="none"
-          stroke="#000"
+          stroke="white"
           strokeWidth="2.5"
         >
-          <line x1="4" y1="20" x2="20" y2="4" />
+          <line x1="3" y1="12" x2="21" y2="12" />
+          <line x1="15" y1="6" x2="21" y2="12" />
+          <line x1="15" y1="18" x2="21" y2="12" />
         </svg>
       </div>
     </div>
@@ -3976,14 +3993,15 @@ export default function HomePage(): React.JSX.Element {
       
       <div style={{
         position: 'absolute',
-        top: '1rem',
-        left: '1rem',
+        bottom: '1.5rem',
+        left: '50%',
+        transform: 'translateX(-50%)',
         color: 'white',
         fontSize: isMobile ? '1.8rem' : '2.2rem',
         fontWeight: '600',
         fontFamily: 'Helvetica, Arial, sans-serif'
       }}>
-        Paa
+        P
       </div>
       
       <div style={{
@@ -3992,19 +4010,31 @@ export default function HomePage(): React.JSX.Element {
         right: '1rem'
       }}>
         <svg
-          width={isMobile ? "20" : "24"}
-          height={isMobile ? "20" : "24"}
+          width={isMobile ? "18" : "22"}
+          height={isMobile ? "18" : "22"}
           viewBox="0 0 24 24"
           fill="none"
-          stroke="#000"
+          stroke="white"
           strokeWidth="2.5"
         >
-          <line x1="4" y1="20" x2="20" y2="4" />
+          <line x1="3" y1="12" x2="21" y2="12" />
+          <line x1="15" y1="6" x2="21" y2="12" />
+          <line x1="15" y1="18" x2="21" y2="12" />
         </svg>
       </div>
     </div>
   </div>
 </div>
+
+
+
+
+
+
+
+
+
+
         
 
               {/* Progress Bar dengan 3 Foto dan Komentar */}
@@ -4795,6 +4825,7 @@ export default function HomePage(): React.JSX.Element {
     </div>
   );
 }
+
 
 
 
