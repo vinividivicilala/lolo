@@ -3598,57 +3598,80 @@ export default function HomePage(): React.JSX.Element {
                 </motion.div>
               </div>
 
+
 {/* Foto Card Design Section - 6 Card Horizontal */}
 
 <div style={{
   width: '100%',
-  padding: isMobile ? '0.5rem' : '1rem',
-  marginTop: isMobile ? '1rem' : '2rem',
-  marginBottom: isMobile ? '2rem' : '3rem',
+  padding: isMobile ? '1rem' : '2rem',
+  marginTop: isMobile ? '2rem' : '3rem',
+  marginBottom: isMobile ? '3rem' : '4rem',
   boxSizing: 'border-box',
-  overflowX: 'auto',
-  overflowY: 'hidden',
   position: 'relative'
 }}>
-  {/* Container 6 Foto Card Horizontal */}
+  {/* Teks Judul di Atas Foto - Tengah, Kecil */}
+  <div style={{
+    textAlign: 'center',
+    marginBottom: isMobile ? '1.5rem' : '2rem',
+    padding: '0 1rem'
+  }}>
+    <div style={{
+      color: 'rgba(255,255,255,0.9)',
+      fontSize: isMobile ? '0.9rem' : '1.1rem',
+      fontWeight: '400',
+      fontFamily: 'Helvetica, Arial, sans-serif',
+      textTransform: 'uppercase',
+      letterSpacing: '1px',
+      display: 'inline-block',
+      padding: '0.5rem 1.5rem',
+      borderBottom: '1px solid rgba(255,255,255,0.2)'
+    }}>
+      Design Collection
+    </div>
+  </div>
+
+  {/* Container 6 Foto Card Horizontal - Posisi di Tengah */}
   <div style={{
     display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
     gap: isMobile ? '0.8rem' : '1rem',
     padding: isMobile ? '0.5rem' : '1rem',
-    minWidth: isMobile ? '800px' : '1200px',
-    alignItems: 'flex-start'
+    flexWrap: 'wrap',
+    maxWidth: '1200px',
+    margin: '0 auto'
   }}>
     {/* Card 1 */}
     <motion.div
       style={{
         position: 'relative',
-        width: isMobile ? '160px' : '200px',
-        height: isMobile ? '240px' : '280px',
-        borderRadius: '10px',
+        width: isMobile ? '180px' : '220px',
+        height: isMobile ? '260px' : '300px',
+        borderRadius: '12px',
         overflow: 'hidden',
         backgroundColor: '#1a1a1a',
-        border: '1px solid rgba(255,255,255,0.1)',
+        border: '1px solid rgba(255,255,255,0.15)',
         cursor: 'pointer',
         flexShrink: 0,
         display: 'flex',
         flexDirection: 'column'
       }}
       whileHover={{ 
+        transform: 'translateY(-8px) scale(1.02)',
         borderColor: 'rgba(255,255,255,0.3)',
-        transform: 'translateY(-5px)'
+        boxShadow: '0 15px 30px rgba(0,0,0,0.4)'
       }}
-      whileTap={{ scale: 0.95 }}
-      transition={{ duration: 0.2 }}
+      whileTap={{ scale: 0.98 }}
+      transition={{ duration: 0.3 }}
     >
-      {/* Foto - Lebih besar, lebih ke bawah */}
+      {/* Foto - Full height, tidak terpotong */}
       <div style={{
         width: '100%',
-        height: '85%',
-        position: 'relative',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        overflow: 'hidden'
+        height: '100%',
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        zIndex: 1
       }}>
         <img 
           src="images/5.jpg" 
@@ -3657,54 +3680,58 @@ export default function HomePage(): React.JSX.Element {
             width: '100%',
             height: '100%',
             objectFit: 'cover',
-            display: 'block',
-            objectPosition: 'center'
+            display: 'block'
           }}
           onError={(e) => {
             e.currentTarget.style.backgroundColor = '#111';
             e.currentTarget.style.display = 'flex';
-            e.currentTarget.style.alignItems = 'center';
+            e.currentTarget.style.alignItems: 'center';
             e.currentTarget.style.justifyContent = 'center';
             e.currentTarget.style.color = '#fff';
-            e.currentTarget.innerHTML = '<div style="padding: 1rem; font-size: 0.8rem;">VISUAL</div>';
+            e.currentTarget.innerHTML = '<div style="padding: 2rem; text-align: center;">VISUAL</div>';
           }}
         />
       </div>
       
-      {/* Container Judul dan Panah - Menyatu dengan foto */}
+      {/* Overlay untuk teks */}
       <div style={{
-        height: '15%',
-        minHeight: '40px',
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100%',
+        background: 'linear-gradient(to bottom, rgba(0,0,0,0.1), rgba(0,0,0,0.6))',
+        zIndex: 2,
         display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'flex-end',
         alignItems: 'center',
-        justifyContent: 'center',
-        padding: isMobile ? '0.3rem' : '0.5rem',
-        backgroundColor: 'rgba(0,0,0,0.9)',
-        borderTop: '1px solid rgba(255,255,255,0.1)'
+        paddingBottom: isMobile ? '1.5rem' : '2rem'
       }}>
-        {/* Container untuk teks dan panah sejajar */}
+        {/* Teks di dalam foto - Tengah bawah */}
         <div style={{
           display: 'flex',
+          flexDirection: 'column',
           alignItems: 'center',
-          justifyContent: 'center',
-          gap: '0.5rem'
+          gap: '0.8rem',
+          zIndex: 3
         }}>
           {/* Judul */}
           <div style={{
             color: 'white',
-            fontSize: isMobile ? '0.85rem' : '1rem',
-            fontWeight: '300',
+            fontSize: isMobile ? '1.2rem' : '1.4rem',
+            fontWeight: '400',
             fontFamily: 'Helvetica, Arial, sans-serif',
             lineHeight: 1,
-            textTransform: 'uppercase',
-            letterSpacing: '0.5px'
+            textAlign: 'center',
+            textShadow: '0 2px 4px rgba(0,0,0,0.8)'
           }}>
             VISUAL
           </div>
           
-          {/* Tanda Panah SVG Lurus Serong Kanan */}
+          {/* Tanda Panah SVG */}
           <motion.div
-            whileHover={{ x: 3 }}
+            whileHover={{ scale: 1.2 }}
             transition={{ duration: 0.2 }}
             style={{
               display: 'flex',
@@ -3713,14 +3740,14 @@ export default function HomePage(): React.JSX.Element {
             }}
           >
             <svg
-              width={isMobile ? "14" : "16"}
-              height={isMobile ? "14" : "16"}
+              width={isMobile ? "24" : "28"}
+              height={isMobile ? "24" : "28"}
               viewBox="0 0 24 24"
               fill="none"
-              stroke="rgba(255,255,255,0.7)"
+              stroke="white"
               strokeWidth="2"
               style={{
-                transform: 'rotate(-45deg)'
+                filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.8))'
               }}
             >
               <line x1="5" y1="12" x2="19" y2="12" />
@@ -3736,32 +3763,32 @@ export default function HomePage(): React.JSX.Element {
     <motion.div
       style={{
         position: 'relative',
-        width: isMobile ? '160px' : '200px',
-        height: isMobile ? '240px' : '280px',
-        borderRadius: '10px',
+        width: isMobile ? '180px' : '220px',
+        height: isMobile ? '260px' : '300px',
+        borderRadius: '12px',
         overflow: 'hidden',
         backgroundColor: '#1a1a1a',
-        border: '1px solid rgba(255,255,255,0.1)',
+        border: '1px solid rgba(255,255,255,0.15)',
         cursor: 'pointer',
         flexShrink: 0,
         display: 'flex',
         flexDirection: 'column'
       }}
       whileHover={{ 
+        transform: 'translateY(-8px) scale(1.02)',
         borderColor: 'rgba(255,255,255,0.3)',
-        transform: 'translateY(-5px)'
+        boxShadow: '0 15px 30px rgba(0,0,0,0.4)'
       }}
-      whileTap={{ scale: 0.95 }}
-      transition={{ duration: 0.2 }}
+      whileTap={{ scale: 0.98 }}
+      transition={{ duration: 0.3 }}
     >
       <div style={{
         width: '100%',
-        height: '85%',
-        position: 'relative',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        overflow: 'hidden'
+        height: '100%',
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        zIndex: 1
       }}>
         <img 
           src="images/5.jpg" 
@@ -3770,8 +3797,7 @@ export default function HomePage(): React.JSX.Element {
             width: '100%',
             height: '100%',
             objectFit: 'cover',
-            display: 'block',
-            objectPosition: 'center'
+            display: 'block'
           }}
           onError={(e) => {
             e.currentTarget.style.backgroundColor = '#111';
@@ -3779,41 +3805,46 @@ export default function HomePage(): React.JSX.Element {
             e.currentTarget.style.alignItems = 'center';
             e.currentTarget.style.justifyContent = 'center';
             e.currentTarget.style.color = '#fff';
-            e.currentTarget.innerHTML = '<div style="padding: 1rem; font-size: 0.8rem;">DESIGN</div>';
+            e.currentTarget.innerHTML = '<div style="padding: 2rem; text-align: center;">DESIGN</div>';
           }}
         />
       </div>
       
       <div style={{
-        height: '15%',
-        minHeight: '40px',
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100%',
+        background: 'linear-gradient(to bottom, rgba(0,0,0,0.1), rgba(0,0,0,0.6))',
+        zIndex: 2,
         display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'flex-end',
         alignItems: 'center',
-        justifyContent: 'center',
-        padding: isMobile ? '0.3rem' : '0.5rem',
-        backgroundColor: 'rgba(0,0,0,0.9)',
-        borderTop: '1px solid rgba(255,255,255,0.1)'
+        paddingBottom: isMobile ? '1.5rem' : '2rem'
       }}>
         <div style={{
           display: 'flex',
+          flexDirection: 'column',
           alignItems: 'center',
-          justifyContent: 'center',
-          gap: '0.5rem'
+          gap: '0.8rem',
+          zIndex: 3
         }}>
           <div style={{
             color: 'white',
-            fontSize: isMobile ? '0.85rem' : '1rem',
-            fontWeight: '300',
+            fontSize: isMobile ? '1.2rem' : '1.4rem',
+            fontWeight: '400',
             fontFamily: 'Helvetica, Arial, sans-serif',
             lineHeight: 1,
-            textTransform: 'uppercase',
-            letterSpacing: '0.5px'
+            textAlign: 'center',
+            textShadow: '0 2px 4px rgba(0,0,0,0.8)'
           }}>
             DESIGN
           </div>
           
           <motion.div
-            whileHover={{ x: 3 }}
+            whileHover={{ scale: 1.2 }}
             transition={{ duration: 0.2 }}
             style={{
               display: 'flex',
@@ -3822,14 +3853,14 @@ export default function HomePage(): React.JSX.Element {
             }}
           >
             <svg
-              width={isMobile ? "14" : "16"}
-              height={isMobile ? "14" : "16"}
+              width={isMobile ? "24" : "28"}
+              height={isMobile ? "24" : "28"}
               viewBox="0 0 24 24"
               fill="none"
-              stroke="rgba(255,255,255,0.7)"
+              stroke="white"
               strokeWidth="2"
               style={{
-                transform: 'rotate(-45deg)'
+                filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.8))'
               }}
             >
               <line x1="5" y1="12" x2="19" y2="12" />
@@ -3845,32 +3876,32 @@ export default function HomePage(): React.JSX.Element {
     <motion.div
       style={{
         position: 'relative',
-        width: isMobile ? '160px' : '200px',
-        height: isMobile ? '240px' : '280px',
-        borderRadius: '10px',
+        width: isMobile ? '180px' : '220px',
+        height: isMobile ? '260px' : '300px',
+        borderRadius: '12px',
         overflow: 'hidden',
         backgroundColor: '#1a1a1a',
-        border: '1px solid rgba(255,255,255,0.1)',
+        border: '1px solid rgba(255,255,255,0.15)',
         cursor: 'pointer',
         flexShrink: 0,
         display: 'flex',
         flexDirection: 'column'
       }}
       whileHover={{ 
+        transform: 'translateY(-8px) scale(1.02)',
         borderColor: 'rgba(255,255,255,0.3)',
-        transform: 'translateY(-5px)'
+        boxShadow: '0 15px 30px rgba(0,0,0,0.4)'
       }}
-      whileTap={{ scale: 0.95 }}
-      transition={{ duration: 0.2 }}
+      whileTap={{ scale: 0.98 }}
+      transition={{ duration: 0.3 }}
     >
       <div style={{
         width: '100%',
-        height: '85%',
-        position: 'relative',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        overflow: 'hidden'
+        height: '100%',
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        zIndex: 1
       }}>
         <img 
           src="images/5.jpg" 
@@ -3879,8 +3910,7 @@ export default function HomePage(): React.JSX.Element {
             width: '100%',
             height: '100%',
             objectFit: 'cover',
-            display: 'block',
-            objectPosition: 'center'
+            display: 'block'
           }}
           onError={(e) => {
             e.currentTarget.style.backgroundColor = '#111';
@@ -3888,41 +3918,46 @@ export default function HomePage(): React.JSX.Element {
             e.currentTarget.style.alignItems = 'center';
             e.currentTarget.style.justifyContent = 'center';
             e.currentTarget.style.color = '#fff';
-            e.currentTarget.innerHTML = '<div style="padding: 1rem; font-size: 0.8rem;">BRAND</div>';
+            e.currentTarget.innerHTML = '<div style="padding: 2rem; text-align: center;">BRAND</div>';
           }}
         />
       </div>
       
       <div style={{
-        height: '15%',
-        minHeight: '40px',
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100%',
+        background: 'linear-gradient(to bottom, rgba(0,0,0,0.1), rgba(0,0,0,0.6))',
+        zIndex: 2,
         display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'flex-end',
         alignItems: 'center',
-        justifyContent: 'center',
-        padding: isMobile ? '0.3rem' : '0.5rem',
-        backgroundColor: 'rgba(0,0,0,0.9)',
-        borderTop: '1px solid rgba(255,255,255,0.1)'
+        paddingBottom: isMobile ? '1.5rem' : '2rem'
       }}>
         <div style={{
           display: 'flex',
+          flexDirection: 'column',
           alignItems: 'center',
-          justifyContent: 'center',
-          gap: '0.5rem'
+          gap: '0.8rem',
+          zIndex: 3
         }}>
           <div style={{
             color: 'white',
-            fontSize: isMobile ? '0.85rem' : '1rem',
-            fontWeight: '300',
+            fontSize: isMobile ? '1.2rem' : '1.4rem',
+            fontWeight: '400',
             fontFamily: 'Helvetica, Arial, sans-serif',
             lineHeight: 1,
-            textTransform: 'uppercase',
-            letterSpacing: '0.5px'
+            textAlign: 'center',
+            textShadow: '0 2px 4px rgba(0,0,0,0.8)'
           }}>
             BRAND
           </div>
           
           <motion.div
-            whileHover={{ x: 3 }}
+            whileHover={{ scale: 1.2 }}
             transition={{ duration: 0.2 }}
             style={{
               display: 'flex',
@@ -3931,14 +3966,14 @@ export default function HomePage(): React.JSX.Element {
             }}
           >
             <svg
-              width={isMobile ? "14" : "16"}
-              height={isMobile ? "14" : "16"}
+              width={isMobile ? "24" : "28"}
+              height={isMobile ? "24" : "28"}
               viewBox="0 0 24 24"
               fill="none"
-              stroke="rgba(255,255,255,0.7)"
+              stroke="white"
               strokeWidth="2"
               style={{
-                transform: 'rotate(-45deg)'
+                filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.8))'
               }}
             >
               <line x1="5" y1="12" x2="19" y2="12" />
@@ -3954,32 +3989,32 @@ export default function HomePage(): React.JSX.Element {
     <motion.div
       style={{
         position: 'relative',
-        width: isMobile ? '160px' : '200px',
-        height: isMobile ? '240px' : '280px',
-        borderRadius: '10px',
+        width: isMobile ? '180px' : '220px',
+        height: isMobile ? '260px' : '300px',
+        borderRadius: '12px',
         overflow: 'hidden',
         backgroundColor: '#1a1a1a',
-        border: '1px solid rgba(255,255,255,0.1)',
+        border: '1px solid rgba(255,255,255,0.15)',
         cursor: 'pointer',
         flexShrink: 0,
         display: 'flex',
         flexDirection: 'column'
       }}
       whileHover={{ 
+        transform: 'translateY(-8px) scale(1.02)',
         borderColor: 'rgba(255,255,255,0.3)',
-        transform: 'translateY(-5px)'
+        boxShadow: '0 15px 30px rgba(0,0,0,0.4)'
       }}
-      whileTap={{ scale: 0.95 }}
-      transition={{ duration: 0.2 }}
+      whileTap={{ scale: 0.98 }}
+      transition={{ duration: 0.3 }}
     >
       <div style={{
         width: '100%',
-        height: '85%',
-        position: 'relative',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        overflow: 'hidden'
+        height: '100%',
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        zIndex: 1
       }}>
         <img 
           src="images/5.jpg" 
@@ -3988,8 +4023,7 @@ export default function HomePage(): React.JSX.Element {
             width: '100%',
             height: '100%',
             objectFit: 'cover',
-            display: 'block',
-            objectPosition: 'center'
+            display: 'block'
           }}
           onError={(e) => {
             e.currentTarget.style.backgroundColor = '#111';
@@ -3997,41 +4031,46 @@ export default function HomePage(): React.JSX.Element {
             e.currentTarget.style.alignItems = 'center';
             e.currentTarget.style.justifyContent = 'center';
             e.currentTarget.style.color = '#fff';
-            e.currentTarget.innerHTML = '<div style="padding: 1rem; font-size: 0.8rem;">UI/UX</div>';
+            e.currentTarget.innerHTML = '<div style="padding: 2rem; text-align: center;">UI/UX</div>';
           }}
         />
       </div>
       
       <div style={{
-        height: '15%',
-        minHeight: '40px',
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100%',
+        background: 'linear-gradient(to bottom, rgba(0,0,0,0.1), rgba(0,0,0,0.6))',
+        zIndex: 2,
         display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'flex-end',
         alignItems: 'center',
-        justifyContent: 'center',
-        padding: isMobile ? '0.3rem' : '0.5rem',
-        backgroundColor: 'rgba(0,0,0,0.9)',
-        borderTop: '1px solid rgba(255,255,255,0.1)'
+        paddingBottom: isMobile ? '1.5rem' : '2rem'
       }}>
         <div style={{
           display: 'flex',
+          flexDirection: 'column',
           alignItems: 'center',
-          justifyContent: 'center',
-          gap: '0.5rem'
+          gap: '0.8rem',
+          zIndex: 3
         }}>
           <div style={{
             color: 'white',
-            fontSize: isMobile ? '0.85rem' : '1rem',
-            fontWeight: '300',
+            fontSize: isMobile ? '1.2rem' : '1.4rem',
+            fontWeight: '400',
             fontFamily: 'Helvetica, Arial, sans-serif',
             lineHeight: 1,
-            textTransform: 'uppercase',
-            letterSpacing: '0.5px'
+            textAlign: 'center',
+            textShadow: '0 2px 4px rgba(0,0,0,0.8)'
           }}>
             UI/UX
           </div>
           
           <motion.div
-            whileHover={{ x: 3 }}
+            whileHover={{ scale: 1.2 }}
             transition={{ duration: 0.2 }}
             style={{
               display: 'flex',
@@ -4040,14 +4079,14 @@ export default function HomePage(): React.JSX.Element {
             }}
           >
             <svg
-              width={isMobile ? "14" : "16"}
-              height={isMobile ? "14" : "16"}
+              width={isMobile ? "24" : "28"}
+              height={isMobile ? "24" : "28"}
               viewBox="0 0 24 24"
               fill="none"
-              stroke="rgba(255,255,255,0.7)"
+              stroke="white"
               strokeWidth="2"
               style={{
-                transform: 'rotate(-45deg)'
+                filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.8))'
               }}
             >
               <line x1="5" y1="12" x2="19" y2="12" />
@@ -4063,32 +4102,32 @@ export default function HomePage(): React.JSX.Element {
     <motion.div
       style={{
         position: 'relative',
-        width: isMobile ? '160px' : '200px',
-        height: isMobile ? '240px' : '280px',
-        borderRadius: '10px',
+        width: isMobile ? '180px' : '220px',
+        height: isMobile ? '260px' : '300px',
+        borderRadius: '12px',
         overflow: 'hidden',
         backgroundColor: '#1a1a1a',
-        border: '1px solid rgba(255,255,255,0.1)',
+        border: '1px solid rgba(255,255,255,0.15)',
         cursor: 'pointer',
         flexShrink: 0,
         display: 'flex',
         flexDirection: 'column'
       }}
       whileHover={{ 
+        transform: 'translateY(-8px) scale(1.02)',
         borderColor: 'rgba(255,255,255,0.3)',
-        transform: 'translateY(-5px)'
+        boxShadow: '0 15px 30px rgba(0,0,0,0.4)'
       }}
-      whileTap={{ scale: 0.95 }}
-      transition={{ duration: 0.2 }}
+      whileTap={{ scale: 0.98 }}
+      transition={{ duration: 0.3 }}
     >
       <div style={{
         width: '100%',
-        height: '85%',
-        position: 'relative',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        overflow: 'hidden'
+        height: '100%',
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        zIndex: 1
       }}>
         <img 
           src="images/5.jpg" 
@@ -4097,8 +4136,7 @@ export default function HomePage(): React.JSX.Element {
             width: '100%',
             height: '100%',
             objectFit: 'cover',
-            display: 'block',
-            objectPosition: 'center'
+            display: 'block'
           }}
           onError={(e) => {
             e.currentTarget.style.backgroundColor = '#111';
@@ -4106,41 +4144,46 @@ export default function HomePage(): React.JSX.Element {
             e.currentTarget.style.alignItems = 'center';
             e.currentTarget.style.justifyContent = 'center';
             e.currentTarget.style.color = '#fff';
-            e.currentTarget.innerHTML = '<div style="padding: 1rem; font-size: 0.8rem;">MOTION</div>';
+            e.currentTarget.innerHTML = '<div style="padding: 2rem; text-align: center;">MOTION</div>';
           }}
         />
       </div>
       
       <div style={{
-        height: '15%',
-        minHeight: '40px',
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100%',
+        background: 'linear-gradient(to bottom, rgba(0,0,0,0.1), rgba(0,0,0,0.6))',
+        zIndex: 2,
         display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'flex-end',
         alignItems: 'center',
-        justifyContent: 'center',
-        padding: isMobile ? '0.3rem' : '0.5rem',
-        backgroundColor: 'rgba(0,0,0,0.9)',
-        borderTop: '1px solid rgba(255,255,255,0.1)'
+        paddingBottom: isMobile ? '1.5rem' : '2rem'
       }}>
         <div style={{
           display: 'flex',
+          flexDirection: 'column',
           alignItems: 'center',
-          justifyContent: 'center',
-          gap: '0.5rem'
+          gap: '0.8rem',
+          zIndex: 3
         }}>
           <div style={{
             color: 'white',
-            fontSize: isMobile ? '0.85rem' : '1rem',
-            fontWeight: '300',
+            fontSize: isMobile ? '1.2rem' : '1.4rem',
+            fontWeight: '400',
             fontFamily: 'Helvetica, Arial, sans-serif',
             lineHeight: 1,
-            textTransform: 'uppercase',
-            letterSpacing: '0.5px'
+            textAlign: 'center',
+            textShadow: '0 2px 4px rgba(0,0,0,0.8)'
           }}>
             MOTION
           </div>
           
           <motion.div
-            whileHover={{ x: 3 }}
+            whileHover={{ scale: 1.2 }}
             transition={{ duration: 0.2 }}
             style={{
               display: 'flex',
@@ -4149,14 +4192,14 @@ export default function HomePage(): React.JSX.Element {
             }}
           >
             <svg
-              width={isMobile ? "14" : "16"}
-              height={isMobile ? "14" : "16"}
+              width={isMobile ? "24" : "28"}
+              height={isMobile ? "24" : "28"}
               viewBox="0 0 24 24"
               fill="none"
-              stroke="rgba(255,255,255,0.7)"
+              stroke="white"
               strokeWidth="2"
               style={{
-                transform: 'rotate(-45deg)'
+                filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.8))'
               }}
             >
               <line x1="5" y1="12" x2="19" y2="12" />
@@ -4172,32 +4215,32 @@ export default function HomePage(): React.JSX.Element {
     <motion.div
       style={{
         position: 'relative',
-        width: isMobile ? '160px' : '200px',
-        height: isMobile ? '240px' : '280px',
-        borderRadius: '10px',
+        width: isMobile ? '180px' : '220px',
+        height: isMobile ? '260px' : '300px',
+        borderRadius: '12px',
         overflow: 'hidden',
         backgroundColor: '#1a1a1a',
-        border: '1px solid rgba(255,255,255,0.1)',
+        border: '1px solid rgba(255,255,255,0.15)',
         cursor: 'pointer',
         flexShrink: 0,
         display: 'flex',
         flexDirection: 'column'
       }}
       whileHover={{ 
+        transform: 'translateY(-8px) scale(1.02)',
         borderColor: 'rgba(255,255,255,0.3)',
-        transform: 'translateY(-5px)'
+        boxShadow: '0 15px 30px rgba(0,0,0,0.4)'
       }}
-      whileTap={{ scale: 0.95 }}
-      transition={{ duration: 0.2 }}
+      whileTap={{ scale: 0.98 }}
+      transition={{ duration: 0.3 }}
     >
       <div style={{
         width: '100%',
-        height: '85%',
-        position: 'relative',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        overflow: 'hidden'
+        height: '100%',
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        zIndex: 1
       }}>
         <img 
           src="images/5.jpg" 
@@ -4206,8 +4249,7 @@ export default function HomePage(): React.JSX.Element {
             width: '100%',
             height: '100%',
             objectFit: 'cover',
-            display: 'block',
-            objectPosition: 'center'
+            display: 'block'
           }}
           onError={(e) => {
             e.currentTarget.style.backgroundColor = '#111';
@@ -4215,41 +4257,46 @@ export default function HomePage(): React.JSX.Element {
             e.currentTarget.style.alignItems = 'center';
             e.currentTarget.style.justifyContent = 'center';
             e.currentTarget.style.color = '#fff';
-            e.currentTarget.innerHTML = '<div style="padding: 1rem; font-size: 0.8rem;">PRINT</div>';
+            e.currentTarget.innerHTML = '<div style="padding: 2rem; text-align: center;">PRINT</div>';
           }}
         />
       </div>
       
       <div style={{
-        height: '15%',
-        minHeight: '40px',
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100%',
+        background: 'linear-gradient(to bottom, rgba(0,0,0,0.1), rgba(0,0,0,0.6))',
+        zIndex: 2,
         display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'flex-end',
         alignItems: 'center',
-        justifyContent: 'center',
-        padding: isMobile ? '0.3rem' : '0.5rem',
-        backgroundColor: 'rgba(0,0,0,0.9)',
-        borderTop: '1px solid rgba(255,255,255,0.1)'
+        paddingBottom: isMobile ? '1.5rem' : '2rem'
       }}>
         <div style={{
           display: 'flex',
+          flexDirection: 'column',
           alignItems: 'center',
-          justifyContent: 'center',
-          gap: '0.5rem'
+          gap: '0.8rem',
+          zIndex: 3
         }}>
           <div style={{
             color: 'white',
-            fontSize: isMobile ? '0.85rem' : '1rem',
-            fontWeight: '300',
+            fontSize: isMobile ? '1.2rem' : '1.4rem',
+            fontWeight: '400',
             fontFamily: 'Helvetica, Arial, sans-serif',
             lineHeight: 1,
-            textTransform: 'uppercase',
-            letterSpacing: '0.5px'
+            textAlign: 'center',
+            textShadow: '0 2px 4px rgba(0,0,0,0.8)'
           }}>
             PRINT
           </div>
           
           <motion.div
-            whileHover={{ x: 3 }}
+            whileHover={{ scale: 1.2 }}
             transition={{ duration: 0.2 }}
             style={{
               display: 'flex',
@@ -4258,14 +4305,14 @@ export default function HomePage(): React.JSX.Element {
             }}
           >
             <svg
-              width={isMobile ? "14" : "16"}
-              height={isMobile ? "14" : "16"}
+              width={isMobile ? "24" : "28"}
+              height={isMobile ? "24" : "28"}
               viewBox="0 0 24 24"
               fill="none"
-              stroke="rgba(255,255,255,0.7)"
+              stroke="white"
               strokeWidth="2"
               style={{
-                transform: 'rotate(-45deg)'
+                filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.8))'
               }}
             >
               <line x1="5" y1="12" x2="19" y2="12" />
@@ -4278,20 +4325,126 @@ export default function HomePage(): React.JSX.Element {
     </motion.div>
   </div>
 
-  {/* Indikator scroll untuk mobile */}
+  {/* Responsive untuk mobile - 2 baris */}
   {isMobile && (
     <div style={{
-      textAlign: 'center',
-      marginTop: '0.5rem',
-      color: 'rgba(255,255,255,0.5)',
-      fontSize: '0.7rem',
-      fontFamily: 'Helvetica, Arial, sans-serif'
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      gap: '0.8rem',
+      padding: '1rem',
+      flexWrap: 'wrap',
+      marginTop: '1rem'
     }}>
-      ← scroll →
+      {/* 3 card tambahan di baris kedua untuk mobile */}
+      <motion.div
+        style={{
+          position: 'relative',
+          width: '180px',
+          height: '260px',
+          borderRadius: '12px',
+          overflow: 'hidden',
+          backgroundColor: '#1a1a1a',
+          border: '1px solid rgba(255,255,255,0.15)',
+          cursor: 'pointer',
+          flexShrink: 0,
+          display: 'flex',
+          flexDirection: 'column'
+        }}
+        whileHover={{ 
+          transform: 'translateY(-8px) scale(1.02)',
+          borderColor: 'rgba(255,255,255,0.3)',
+          boxShadow: '0 15px 30px rgba(0,0,0,0.4)'
+        }}
+        whileTap={{ scale: 0.98 }}
+        transition={{ duration: 0.3 }}
+      >
+        <div style={{
+          width: '100%',
+          height: '100%',
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          zIndex: 1
+        }}>
+          <div style={{
+            width: '100%',
+            height: '100%',
+            backgroundColor: '#111',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: '#fff',
+            fontSize: '1rem'
+          }}>
+            Card 4
+          </div>
+        </div>
+        
+        <div style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          background: 'linear-gradient(to bottom, rgba(0,0,0,0.1), rgba(0,0,0,0.6))',
+          zIndex: 2,
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'flex-end',
+          alignItems: 'center',
+          paddingBottom: '1.5rem'
+        }}>
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '0.8rem',
+            zIndex: 3
+          }}>
+            <div style={{
+              color: 'white',
+              fontSize: '1.2rem',
+              fontWeight: '400',
+              fontFamily: 'Helvetica, Arial, sans-serif',
+              lineHeight: 1,
+              textAlign: 'center',
+              textShadow: '0 2px 4px rgba(0,0,0,0.8)'
+            }}>
+              EXTRA
+            </div>
+            
+            <motion.div
+              whileHover={{ scale: 1.2 }}
+              transition={{ duration: 0.2 }}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+            >
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="white"
+                strokeWidth="2"
+                style={{
+                  filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.8))'
+                }}
+              >
+                <line x1="5" y1="12" x2="19" y2="12" />
+                <line x1="12" y1="5" x2="19" y2="12" />
+                <line x1="12" y1="19" x2="19" y2="12" />
+              </svg>
+            </motion.div>
+          </div>
+        </div>
+      </motion.div>
     </div>
   )}
 </div>
-
 
 
         
@@ -5084,6 +5237,7 @@ export default function HomePage(): React.JSX.Element {
     </div>
   );
 }
+
 
 
 
