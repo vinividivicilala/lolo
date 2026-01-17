@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect, useRef } from "react";
@@ -89,14 +88,12 @@ export default function HomePage(): React.JSX.Element {
   const [isMobile, setIsMobile] = useState(false);
   const [loadingText, setLoadingText] = useState("NURU");
   const [isLoading, setIsLoading] = useState(true);
-  const [currentView, setCurrentView] = useState<"main" | "index" | "grid" | "menuruPlus">("main");
+  const [currentView, setCurrentView] = useState<"main" | "index" | "grid">("main");
   const [sliderPosition, setSliderPosition] = useState<"index" | "grid">("grid");
   const [hoveredTopic, setHoveredTopic] = useState<number | null>(null);
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
   const [isProgressActive, setIsProgressActive] = useState(true);
   const [showCookieNotification, setShowCookieNotification] = useState(false);
-  const [showMenuruFullPage, setShowMenuruFullPage] = useState(false);
-  const [showPhotoFullPage, setShowPhotoFullPage] = useState(false);
   const [user, setUser] = useState<any>(null);
   const [userDisplayName, setUserDisplayName] = useState("");
   const [isNameScrolling, setIsNameScrolling] = useState(false);
@@ -127,16 +124,10 @@ export default function HomePage(): React.JSX.Element {
   const [comments, setComments] = useState<Comment[]>([]);
   const [isLoadingComments, setIsLoadingComments] = useState(false);
 
-  // State untuk menampilkan konten Menuru+
-  const [isMenuruPlusMode, setIsMenuruPlusMode] = useState(false);
-
   const headerRef = useRef<HTMLDivElement>(null);
   const topNavRef = useRef<HTMLDivElement>(null);
   const topicContainerRef = useRef<HTMLDivElement>(null);
   const progressAnimationRef = useRef<gsap.core.Tween | null>(null);
-  const menuruButtonRef = useRef<HTMLDivElement>(null);
-  const plusSignRef = useRef<HTMLDivElement>(null);
-  const backslashRef = useRef<HTMLDivElement>(null);
   const userButtonRef = useRef<HTMLDivElement>(null);
   const userTextRef = useRef<HTMLSpanElement>(null);
   const leftCounterRef = useRef<HTMLSpanElement>(null);
@@ -170,92 +161,6 @@ export default function HomePage(): React.JSX.Element {
       src: "images/5.jpg", 
       alt: "Photo 3",
       uploadTime: new Date(Date.now() - 30 * 1000) // 30 detik lalu
-    }
-  ];
-
-  // Data untuk Roles
-  const rolesData = [
-    { title: "My Roles", description: "Branding & Creative Direction" },
-    { title: "Design", description: "Visual identity & UI/UX" },
-    { title: "Development", description: "Frontend & Backend" },
-    { title: "Features", description: "Functionality & Integration" }
-  ];
-
-  // Data untuk halaman Index - HANYA TAHUN
-  const indexTopics = [
-    {
-      id: 1,
-      title: "Personal Journey",
-      description: "Exploring self-discovery.",
-      year: "2024"
-    },
-    {
-      id: 2,
-      title: "Creative Process",
-      description: "Ideas evolution documentation.",
-      year: "2024"
-    },
-    {
-      id: 3,
-      title: "Visual Storytelling",
-      description: "Photography for personal growth.",
-      year: "2024"
-    },
-    {
-      id: 4,
-      title: "Emotional Archive",
-      description: "Collection of feelings.",
-      year: "2024"
-    },
-    {
-      id: 5,
-      title: "Growth Metrics",
-      description: "Tracking development goals.",
-      year: "2024"
-    }
-  ];
-
-  // Data untuk konten Menuru+ - KONTEN KHUSUS
-  const menuruPlusContent = [
-    {
-      id: 1,
-      title: "PRODUCT",
-      description: "Digital innovation showcase",
-      year: "2024",
-      content: "A collection of innovative digital products and solutions that push the boundaries of technology and design.",
-      image: "images/5.jpg"
-    },
-    {
-      id: 2,
-      title: "VISUAL DESIGNER",
-      description: "Artistic visual creations",
-      year: "2024",
-      content: "Showcasing the work of visionary designers who blend aesthetics with functionality to create stunning visual experiences.",
-      image: "images/6.jpg"
-    },
-    {
-      id: 3,
-      title: "BASED IN INDONESIA",
-      description: "Local talent, global impact",
-      year: "2024",
-      content: "Highlighting creative talents and projects originating from Indonesia that make waves on the international stage.",
-      image: "images/5.jpg"
-    },
-    {
-      id: 4,
-      title: "CREATIVE EXPLORATION",
-      description: "Pushing creative boundaries",
-      year: "2025",
-      content: "Experimental projects that explore new forms of creative expression and innovative approaches to design challenges.",
-      image: "images/6.jpg"
-    },
-    {
-      id: 5,
-      title: "FUTURE VISIONS",
-      description: "Tomorrow's design today",
-      year: "2025",
-      content: "Conceptual work that imagines the future of design, technology, and human interaction in innovative ways.",
-      image: "images/5.jpg"
     }
   ];
 
@@ -564,15 +469,14 @@ export default function HomePage(): React.JSX.Element {
   useEffect(() => {
     if (hoveredTopic !== null) {
       // Hitung posisi berdasarkan index topic
-      const currentContent = isMenuruPlusMode ? menuruPlusContent : indexTopics;
-      const topicIndex = currentContent.findIndex(topic => topic.id === hoveredTopic);
+      const topicIndex = indexTopics.findIndex(topic => topic.id === hoveredTopic);
       // Semakin besar index, semakin turun posisinya
       const newPosition = topicIndex * 40; // 40px per item
       setImagePosition(newPosition);
     } else {
       setImagePosition(0);
     }
-  }, [hoveredTopic, isMenuruPlusMode]);
+  }, [hoveredTopic]);
 
   useEffect(() => {
     // Cek apakah user sudah menyetujui cookies
@@ -613,21 +517,7 @@ export default function HomePage(): React.JSX.Element {
 
     // Keyboard navigation
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (showPhotoFullPage) {
-        if (e.key === 'ArrowLeft') {
-          prevPhoto();
-        } else if (e.key === 'ArrowRight') {
-          nextPhoto();
-        }
-      }
-      
       if (e.key === 'Escape') {
-        if (showMenuruFullPage) {
-          handleCloseMenuruFullPage();
-        }
-        if (showPhotoFullPage) {
-          handleClosePhotoFullPage();
-        }
         if (showUserDropdown) {
           setShowUserDropdown(false);
         }
@@ -650,53 +540,10 @@ export default function HomePage(): React.JSX.Element {
       if (progressAnimationRef.current) {
         progressAnimationRef.current.kill();
       }
-      // Cleanup GSAP animations
-      if (plusSignRef.current) {
-        gsap.killTweensOf(plusSignRef.current);
-      }
-      if (backslashRef.current) {
-        gsap.killTweensOf(backslashRef.current);
-      }
-      if (leftCounterRef.current) {
-        gsap.killTweensOf(leftCounterRef.current);
-      }
       // Kill ScrollTrigger instances
       ScrollTrigger.getAll().forEach(trigger => trigger.kill());
     };
-  }, [isMobile, showMenuruFullPage, showPhotoFullPage, showUserDropdown, showLogoutModal, showChatbotPopup]);
-
-  // Animasi GSAP untuk tanda + di tombol Menuru (hanya pulsing, tidak berputar)
-  useEffect(() => {
-    if (plusSignRef.current && !showMenuruFullPage) {
-      // Hapus animasi sebelumnya
-      gsap.killTweensOf(plusSignRef.current);
-      
-      // Animasi pulsing untuk tanda + (hanya di tombol utama)
-      gsap.to(plusSignRef.current, {
-        scale: 1.1,
-        duration: 1.5,
-        repeat: -1,
-        yoyo: true,
-        ease: "power1.inOut"
-      });
-    }
-  }, [showMenuruFullPage]);
-
-  // Animasi GSAP untuk tanda \ di halaman full page
-  useEffect(() => {
-    if (backslashRef.current && showMenuruFullPage) {
-      // Hapus animasi sebelumnya
-      gsap.killTweensOf(backslashRef.current);
-      
-      // Animasi continuous rotation untuk tanda \ (360 derajat)
-      gsap.to(backslashRef.current, {
-        rotation: 360,
-        duration: 8,
-        repeat: -1,
-        ease: "linear"
-      });
-    }
-  }, [showMenuruFullPage]);
+  }, [isMobile, showUserDropdown, showLogoutModal, showChatbotPopup]);
 
   // Fungsi untuk handle cookie acceptance
   const handleAcceptCookies = () => {
@@ -783,37 +630,6 @@ export default function HomePage(): React.JSX.Element {
       setSliderPosition("index");
       setCurrentView("index");
     }
-  };
-
-  // Fungsi untuk toggle halaman full page MENURU
-  const toggleMenuruFullPage = () => {
-    setShowMenuruFullPage(!showMenuruFullPage);
-  };
-
-  // Handler untuk klik tombol MENURU
-  const handleMenuruClick = () => {
-    toggleMenuruFullPage();
-  };
-
-  // Fungsi untuk menutup halaman full page MENURU (klik tanda \ untuk kembali)
-  const handleCloseMenuruFullPage = () => {
-    setShowMenuruFullPage(false);
-  };
-
-  // Handler untuk membuka tampilan foto full page
-  const handleOpenPhotoFullPage = () => {
-    setShowPhotoFullPage(true);
-  };
-
-  // Handler untuk menutup tampilan foto full page
-  const handleClosePhotoFullPage = () => {
-    setShowPhotoFullPage(false);
-  };
-
-  // Handler untuk klik foto - KLIK LENGAN MEMBUKA FULL PAGE
-  const handlePhotoClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    handleOpenPhotoFullPage();
   };
 
   // Handler untuk Sign In / User Button
@@ -961,10 +777,39 @@ export default function HomePage(): React.JSX.Element {
     router.push('/chatbot');
   };
 
-  // Handler untuk toggle Menuru+ mode
-  const handleToggleMenuruPlus = () => {
-    setIsMenuruPlusMode(!isMenuruPlusMode);
-  };
+  // Data untuk halaman Index - HANYA TAHUN
+  const indexTopics = [
+    {
+      id: 1,
+      title: "Personal Journey",
+      description: "Exploring self-discovery.",
+      year: "2024"
+    },
+    {
+      id: 2,
+      title: "Creative Process",
+      description: "Ideas evolution documentation.",
+      year: "2024"
+    },
+    {
+      id: 3,
+      title: "Visual Storytelling",
+      description: "Photography for personal growth.",
+      year: "2024"
+    },
+    {
+      id: 4,
+      title: "Emotional Archive",
+      description: "Collection of feelings.",
+      year: "2024"
+    },
+    {
+      id: 5,
+      title: "Growth Metrics",
+      description: "Tracking development goals.",
+      year: "2024"
+    }
+  ];
 
   // Komentar untuk foto saat ini
   const currentPhotoComments = comments.filter(comment => comment.photoIndex === currentPhotoIndex);
@@ -986,827 +831,6 @@ export default function HomePage(): React.JSX.Element {
       WebkitFontSmoothing: 'antialiased',
       MozOsxFontSmoothing: 'grayscale'
     }}>
-
-      {/* Halaman Full Page MENURU */}
-      <AnimatePresence>
-        {showMenuruFullPage && (
-          <motion.div
-            key="menuru-fullpage"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.5 }}
-            style={{
-              position: 'fixed',
-              top: 0,
-              left: 0,
-              width: '100%',
-              height: '100%',
-              backgroundColor: 'black',
-              zIndex: 9998,
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'flex-start',
-              overflowY: 'auto',
-              paddingBottom: '4rem'
-            }}
-          >
-            {/* Header dengan teks MENURU dan tanda \ di sebelah kanan */}
-            <div style={{
-              position: 'sticky',
-              top: 0,
-              left: 0,
-              width: '100%',
-              padding: isMobile ? '1.5rem' : '3rem',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'flex-start',
-              boxSizing: 'border-box',
-              backgroundColor: 'black',
-              zIndex: 10
-            }}>
-              {/* Container untuk MENURU, angka, dan roles - di kiri */}
-              <div style={{
-                display: 'flex',
-                flexDirection: 'column',
-                width: isMobile ? '45%' : '40%',
-                marginTop: isMobile ? '1rem' : '2rem'
-              }}>
-                {/* Teks MENURU \ di kiri */}
-                <motion.div
-                  initial={{ x: -50, opacity: 0 }}
-                  animate={{ x: 0, opacity: 1 }}
-                  transition={{ duration: 0.6, delay: 0.1 }}
-                  style={{
-                    color: 'white',
-                    fontSize: isMobile ? '2.5rem' : '4rem',
-                    fontWeight: '300',
-                    fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
-                    textTransform: 'uppercase',
-                    letterSpacing: '4px',
-                    lineHeight: 1,
-                    marginBottom: isMobile ? '2rem' : '3rem'
-                  }}
-                >
-                  MENURU \
-                </motion.div>
-
-                {/* Angka 99887 dengan jarak dari judul */}
-                <motion.div
-                  initial={{ x: -50, opacity: 0 }}
-                  animate={{ x: 0, opacity: 1 }}
-                  transition={{ duration: 0.6, delay: 0.2 }}
-                  style={{
-                    color: 'white',
-                    fontSize: isMobile ? '2rem' : '3rem',
-                    fontWeight: '400',
-                    fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
-                    letterSpacing: '3px',
-                    marginBottom: isMobile ? '3rem' : '4rem'
-                  }}
-                >
-                  99887
-                </motion.div>
-
-                {/* Roles List dengan jarak yang cukup */}
-                <motion.div
-                  initial={{ x: -50, opacity: 0 }}
-                  animate={{ x: 0, opacity: 1 }}
-                  transition={{ duration: 0.6, delay: 0.3 }}
-                  style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: isMobile ? '2rem' : '3rem'
-                  }}
-                >
-                  {rolesData.map((role, index) => (
-                    <motion.div
-                      key={role.title}
-                      initial={{ x: -30, opacity: 0 }}
-                      animate={{ x: 0, opacity: 1 }}
-                      transition={{ duration: 0.4, delay: 0.4 + (index * 0.1) }}
-                      style={{
-                        display: 'flex',
-                        flexDirection: 'column'
-                      }}
-                    >
-                      {/* Role title */}
-                      <div style={{
-                        color: 'white',
-                        fontSize: isMobile ? '1.2rem' : '1.8rem',
-                        fontWeight: '500',
-                        fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
-                        letterSpacing: '1px',
-                        marginBottom: '0.8rem'
-                      }}>
-                        {role.title}
-                      </div>
-                      
-                      {/* Role description */}
-                      <div style={{
-                        color: 'white',
-                        fontSize: isMobile ? '1rem' : '1.3rem',
-                        fontWeight: '400',
-                        fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
-                        opacity: 0.9,
-                        lineHeight: 1.5
-                      }}>
-                        {role.description}
-                      </div>
-                    </motion.div>
-                  ))}
-                </motion.div>
-              </div>
-
-              {/* Container untuk bagian tengah - DESKRIPSI dan FOTO */}
-              <div style={{
-                flex: 1,
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'flex-start',
-                marginLeft: isMobile ? '1.5rem' : '4rem',
-                marginRight: isMobile ? '1.5rem' : '4rem',
-                marginTop: isMobile ? '1rem' : '2rem'
-              }}>
-                {/* Deskripsi di tengah - BESAR dengan font Formula Condensed */}
-                <motion.div
-                  initial={{ y: -20, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ duration: 0.6, delay: 0.3 }}
-                  style={{
-                    color: 'white',
-                    fontSize: isMobile ? '1.5rem' : '2.2rem',
-                    fontWeight: '700',
-                    fontFamily: '"Formula Condensed", sans-serif',
-                    lineHeight: 1.7,
-                    textAlign: 'left',
-                    maxWidth: isMobile ? '90%' : '75%',
-                    marginBottom: isMobile ? '4rem' : '5rem',
-                    alignSelf: 'flex-start'
-                  }}
-                >
-                  A personal branding journal documenting emotional journeys and creative exploration through visual storytelling and self-discovery narratives.
-                </motion.div>
-
-                {/* Foto di bawah deskripsi - BESAR */}
-                <motion.div
-                  initial={{ y: 30, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ duration: 0.6, delay: 0.4 }}
-                  style={{
-                    width: isMobile ? '95%' : '80%',
-                    height: isMobile ? '350px' : '600px',
-                    overflow: 'hidden',
-                    borderRadius: '20px',
-                    boxShadow: '0 20px 50px rgba(0,0,0,0.8)',
-                    border: '3px solid rgba(255,255,255,0.2)',
-                    marginBottom: isMobile ? '3rem' : '4rem',
-                    alignSelf: 'flex-start'
-                  }}
-                >
-                  <img 
-                    src="images/5.jpg" 
-                    alt="Menuru Visual"
-                    style={{
-                      width: '100%',
-                      height: '100%',
-                      display: 'block',
-                      objectFit: 'cover'
-                    }}
-                    onError={(e) => {
-                      e.currentTarget.style.backgroundColor = '#333';
-                      e.currentTarget.style.display = 'flex';
-                      e.currentTarget.style.alignItems = 'center';
-                      e.currentTarget.style.justifyContent = 'center';
-                      e.currentTarget.style.color = 'white';
-                      e.currentTarget.innerHTML = '<div style="padding: 2rem; text-align: center;">Menuru Image</div>';
-                    }}
-                  />
-                </motion.div>
-
-                {/* Judul kecil di bawah foto */}
-                <motion.div
-                  initial={{ y: 20, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ duration: 0.6, delay: 0.5 }}
-                  style={{
-                    color: 'white',
-                    fontSize: isMobile ? '1rem' : '1.2rem',
-                    fontWeight: '500',
-                    fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
-                    letterSpacing: '1px',
-                    textTransform: 'uppercase',
-                    opacity: 0.8,
-                    marginBottom: isMobile ? '2rem' : '2.5rem',
-                    alignSelf: 'flex-start',
-                    marginLeft: isMobile ? '0.5rem' : '1rem'
-                  }}
-                >
-                  Visual Journey • 2024 Collection
-                </motion.div>
-
-                {/* Teks link tautan besar di bawah judul */}
-                <motion.div
-                  initial={{ y: 20, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ duration: 0.6, delay: 0.6 }}
-                  style={{
-                    alignSelf: 'flex-start',
-                    marginBottom: isMobile ? '5rem' : '6rem'
-                  }}
-                >
-                  <motion.a
-                    href="/explore"
-                    style={{
-                      color: '#00FF00',
-                      fontSize: isMobile ? '1.8rem' : '2.5rem',
-                      fontWeight: '600',
-                      fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
-                      textDecoration: 'none',
-                      letterSpacing: '1px',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '1rem',
-                      position: 'relative',
-                      padding: '1rem 0'
-                    }}
-                    whileHover={{ 
-                      x: 10,
-                      color: '#FFFFFF'
-                    }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    EXPLORE FULL COLLECTION
-                    <motion.svg
-                      width={isMobile ? "24" : "32"}
-                      height={isMobile ? "24" : "32"}
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      initial={{ x: 0 }}
-                      animate={{ x: 0 }}
-                      whileHover={{ x: 5 }}
-                      transition={{ duration: 0.3 }}
-                    >
-                      <path d="M5 12h14" />
-                      <path d="m12 5 7 7-7 7" />
-                    </motion.svg>
-                    {/* Garis bawah animasi */}
-                    <motion.div
-                      style={{
-                        position: 'absolute',
-                        bottom: '0.5rem',
-                        left: 0,
-                        width: '100%',
-                        height: '2px',
-                        backgroundColor: '#00FF00'
-                      }}
-                      initial={{ scaleX: 0 }}
-                      whileHover={{ scaleX: 1 }}
-                      transition={{ duration: 0.3 }}
-                    />
-                  </motion.a>
-                </motion.div>
-
-                {/* Container tambahan untuk konten di bawah tautan */}
-                <motion.div
-                  initial={{ y: 30, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ duration: 0.6, delay: 0.7 }}
-                  style={{
-                    width: isMobile ? '95%' : '80%',
-                    alignSelf: 'flex-start',
-                    marginBottom: isMobile ? '3rem' : '4rem'
-                  }}
-                >
-                  <div style={{
-                    color: 'white',
-                    fontSize: isMobile ? '1.1rem' : '1.4rem',
-                    fontWeight: '300',
-                    fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
-                    lineHeight: 1.8,
-                    opacity: 0.9
-                  }}>
-                    This collection represents a year of personal growth and creative experimentation. Each image tells a story of transformation and discovery, captured through the lens of self-reflection.
-                  </div>
-                </motion.div>
-              </div>
-
-              {/* Tanda \ di kanan dengan animasi GSAP - KLIK UNTUK KEMBALI */}
-              <motion.div
-                initial={{ x: 50, opacity: 0 }}
-                animate={{ x: 0, opacity: 1 }}
-                transition={{ duration: 0.6, delay: 0.2 }}
-                onClick={handleCloseMenuruFullPage}
-                style={{
-                  width: isMobile ? '50px' : '60px',
-                  height: isMobile ? '50px' : '60px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  cursor: 'pointer',
-                  position: 'fixed',
-                  right: isMobile ? '1.5rem' : '3rem',
-                  top: isMobile ? '1.5rem' : '3rem',
-                  backgroundColor: 'rgba(0,0,0,0.5)',
-                  borderRadius: '50%',
-                  zIndex: 9999
-                }}
-                whileHover={{ 
-                  scale: 1.2,
-                  backgroundColor: 'rgba(0,0,0,0.8)'
-                }}
-                whileTap={{ scale: 0.95 }}
-              >
-                {/* Tanda \ (backslash) dengan animasi GSAP */}
-                <div 
-                  ref={backslashRef}
-                  style={{
-                    position: 'absolute',
-                    width: isMobile ? '30px' : '35px',
-                    height: '4px',
-                    backgroundColor: 'white',
-                    borderRadius: '2px',
-                    transform: 'rotate(45deg)',
-                    transformOrigin: 'center'
-                  }}
-                />
-              </motion.div>
-            </div>
-
-            {/* Space untuk scroll ke bawah */}
-            <div style={{
-              height: '100vh',
-              width: '100%',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}>
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 0.5 }}
-                transition={{ delay: 1, duration: 1 }}
-                style={{
-                  color: 'white',
-                  fontSize: isMobile ? '1rem' : '1.2rem',
-                  fontWeight: '300',
-                  fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
-                  textTransform: 'uppercase',
-                  letterSpacing: '2px'
-                }}
-              >
-                Scroll for more
-              </motion.div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Halaman Full Page untuk Foto dengan Komentar - DESIGN SEDERHANA */}
-      <AnimatePresence>
-        {showPhotoFullPage && (
-          <motion.div
-            key="photo-fullpage"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.5 }}
-            style={{
-              position: 'fixed',
-              top: 0,
-              left: 0,
-              width: '100%',
-              height: '100%',
-              backgroundColor: 'black',
-              zIndex: 9997,
-              display: 'flex',
-              flexDirection: 'column',
-              overflowY: 'auto'
-            }}
-          >
-            {/* Header sederhana dengan tombol close di KIRI */}
-            <div style={{
-              position: 'sticky',
-              top: 0,
-              left: 0,
-              width: '100%',
-              padding: isMobile ? '1rem' : '1.5rem',
-              display: 'flex',
-              justifyContent: 'space-between', // Tetap space-between
-              alignItems: 'center',
-              zIndex: 100,
-              backgroundColor: 'black',
-              borderBottom: '1px solid rgba(255,255,255,0.1)'
-            }}>
-              {/* Tombol close (×) di kiri */}
-              <motion.button
-                onClick={handleClosePhotoFullPage}
-                style={{
-                  backgroundColor: 'transparent',
-                  border: 'none',
-                  color: 'white',
-                  fontSize: isMobile ? '1.8rem' : '2.2rem',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontFamily: 'Arial, sans-serif',
-                  padding: '0.5rem 1rem',
-                  borderRadius: '4px',
-                  order: 1 // Di kiri
-                }}
-                whileHover={{ 
-                  backgroundColor: 'rgba(255,255,255,0.1)'
-                }}
-                whileTap={{ scale: 0.95 }}
-              >
-                ×
-              </motion.button>
-
-              {/* Counter di kanan */}
-              <div style={{
-                color: 'white',
-                fontSize: isMobile ? '1.5rem' : '2rem',
-                fontWeight: '600',
-                display: 'flex',
-                alignItems: 'baseline',
-                gap: '0.3rem',
-                fontFamily: 'Helvetica, Arial, sans-serif',
-                order: 2 // Di kanan
-              }}>
-                <span>{String(currentPhotoIndex + 1).padStart(2, '0')}</span>
-                <span style={{ opacity: 0.6, fontSize: '0.9em' }}>/</span>
-                <span style={{ opacity: 0.6 }}>{totalPhotos}</span>
-              </div>
-            </div>
-
-            {/* Container utama: foto di atas, komentar di bawah */}
-            <div style={{
-              display: 'flex',
-              flexDirection: 'column',
-              width: '100%',
-              flex: 1
-            }}>
-              {/* Foto slider - LEBIH PANJANG KE BAWAH */}
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                padding: isMobile ? '1rem' : '2rem',
-                paddingTop: '0',
-                paddingBottom: '1rem'
-              }}>
-                <div style={{
-                  width: '100%',
-                  maxWidth: '800px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}>
-                  <AnimatePresence mode="wait">
-                    <motion.div
-                      key={currentPhotoIndex}
-                      initial={{ opacity: 0, scale: 0.95 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 1.05 }}
-                      transition={{ duration: 0.3 }}
-                      style={{
-                        width: '100%',
-                        maxWidth: '600px',
-                        height: isMobile ? '70vh' : '80vh', // LEBIH PANJANG
-                        position: 'relative',
-                        borderRadius: '15px',
-                        overflow: 'hidden',
-                        boxShadow: '0 8px 25px rgba(0,0,0,0.4)',
-                        border: '2px solid rgba(255,255,255,0.15)',
-                        cursor: 'pointer'
-                      }}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        // Klik kiri untuk prev, klik kanan untuk next
-                        const rect = e.currentTarget.getBoundingClientRect();
-                        const clickX = e.clientX - rect.left;
-                        const width = rect.width;
-                        
-                        if (clickX < width / 2) {
-                          prevPhoto();
-                        } else {
-                          nextPhoto();
-                        }
-                      }}
-                    >
-                      <img 
-                        src={progressPhotos[currentPhotoIndex].src}
-                        alt={progressPhotos[currentPhotoIndex].alt}
-                        style={{
-                          width: '100%',
-                          height: '100%',
-                          objectFit: 'cover',
-                          display: 'block'
-                        }}
-                        onError={(e) => {
-                          e.currentTarget.style.backgroundColor = '#222';
-                          e.currentTarget.style.display = 'flex';
-                          e.currentTarget.style.alignItems = 'center';
-                          e.currentTarget.style.justifyContent = 'center';
-                          e.currentTarget.style.color = '#fff';
-                          e.currentTarget.innerHTML = `<div style="padding: 2rem; text-align: center;">Photo ${currentPhotoIndex + 1}</div>`;
-                        }}
-                      />
-                    </motion.div>
-                  </AnimatePresence>
-                </div>
-              </div>
-
-              {/* Progress bar kecil di bawah foto */}
-              <div style={{
-                width: '100%',
-                maxWidth: '600px',
-                margin: '0 auto 2rem auto',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem',
-                padding: '0 1rem'
-              }}>
-                {progressPhotos.map((_, index) => (
-                  <div 
-                    key={index}
-                    style={{
-                      flex: 1,
-                      height: '4px',
-                      backgroundColor: index === currentPhotoIndex ? 'white' : 'rgba(255,255,255,0.2)',
-                      borderRadius: '2px',
-                      transition: 'background-color 0.3s ease'
-                    }}
-                  />
-                ))}
-              </div>
-
-              {/* Waktu update */}
-              <div style={{
-                width: '100%',
-                maxWidth: '600px',
-                margin: '0 auto 1.5rem auto',
-                padding: '0 1rem',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem',
-                color: 'rgba(255,255,255,0.7)',
-                fontSize: '0.9rem'
-              }}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <circle cx="12" cy="12" r="10"/>
-                  <polyline points="12 6 12 12 16 14"/>
-                </svg>
-                {photoTimeAgo[currentPhotoIndex]}
-              </div>
-
-              {/* Area komentar di bawah foto (bisa di-scroll) */}
-              <div style={{
-                flex: 1,
-                padding: isMobile ? '1rem' : '2rem',
-                paddingTop: '0',
-                maxWidth: '800px',
-                margin: '0 auto',
-                width: '100%'
-              }}>
-                {/* Input komentar */}
-                <div style={{
-                  backgroundColor: 'rgba(255,255,255,0.05)',
-                  borderRadius: '12px',
-                  padding: '1.5rem',
-                  marginBottom: '2rem',
-                  border: '1px solid rgba(255,255,255,0.1)'
-                }}>
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.8rem',
-                    marginBottom: '1rem'
-                  }}>
-                    <div style={{
-                      flex: 1,
-                      position: 'relative'
-                    }}>
-                      <input
-                        ref={messageInputRef}
-                        type="text"
-                        value={message}
-                        onChange={(e) => setMessage(e.target.value)}
-                        onKeyPress={handleKeyPress}
-                        placeholder="Tulis komentar..."
-                        style={{
-                          width: '100%',
-                          padding: '0.8rem 1rem',
-                          paddingRight: '3rem',
-                          backgroundColor: 'rgba(255,255,255,0.05)',
-                          border: '1px solid rgba(255,255,255,0.1)',
-                          borderRadius: '20px',
-                          color: 'white',
-                          fontSize: '0.9rem',
-                          fontFamily: 'Helvetica, Arial, sans-serif',
-                          outline: 'none',
-                          transition: 'all 0.3s ease'
-                        }}
-                      />
-                      <span style={{
-                        position: 'absolute',
-                        right: '1rem',
-                        top: '50%',
-                        transform: 'translateY(-50%)',
-                        color: 'rgba(255,255,255,0.3)',
-                        fontSize: '0.75rem'
-                      }}>
-                        Enter
-                      </span>
-                    </div>
-                    
-                    <motion.button
-                      onClick={handleSendMessage}
-                      disabled={message.trim() === ""}
-                      style={{
-                        width: '40px',
-                        height: '40px',
-                        backgroundColor: message.trim() === "" ? 'rgba(0, 80, 183, 0.5)' : '#0050B7',
-                        border: 'none',
-                        borderRadius: '50%',
-                        cursor: message.trim() === "" ? 'not-allowed' : 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        transition: 'all 0.3s ease',
-                        flexShrink: 0
-                      }}
-                      whileHover={message.trim() !== "" ? { 
-                        scale: 1.1,
-                        backgroundColor: '#0066CC'
-                      } : {}}
-                      whileTap={message.trim() !== "" ? { scale: 0.95 } : {}}
-                    >
-                      <svg 
-                        width="18" 
-                        height="18" 
-                        viewBox="0 0 24 24" 
-                        fill="none" 
-                        stroke="white" 
-                        strokeWidth="2"
-                      >
-                        <line x1="22" y1="2" x2="11" y2="13"/>
-                        <polygon points="22 2 15 22 11 13 2 9 22 2"/>
-                      </svg>
-                    </motion.button>
-                  </div>
-                  
-                  <div style={{
-                    textAlign: 'center'
-                  }}>
-                    <span style={{
-                      color: 'rgba(255,255,255,0.5)',
-                      fontSize: '0.75rem'
-                    }}>
-                      {user ? `Login sebagai: ${userDisplayName}` : 'Komentar sebagai: Anonymous'}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Header komentar */}
-                <div style={{
-                  marginBottom: '1.5rem',
-                  color: 'white',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between'
-                }}>
-                  <h3 style={{
-                    fontSize: isMobile ? '1.2rem' : '1.4rem',
-                    fontWeight: '600',
-                    margin: 0,
-                    fontFamily: 'Helvetica, Arial, sans-serif'
-                  }}>
-                    Komentar ({currentPhotoComments.length})
-                  </h3>
-                </div>
-
-                {/* Daftar komentar */}
-                <div style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '1rem',
-                  paddingBottom: '3rem'
-                }}>
-                  {isLoadingComments ? (
-                    <div style={{
-                      color: 'rgba(255,255,255,0.5)',
-                      textAlign: 'center',
-                      padding: '2rem',
-                      fontSize: '0.9rem'
-                    }}>
-                      Memuat komentar...
-                    </div>
-                  ) : currentPhotoComments.length === 0 ? (
-                    <div style={{
-                      color: 'rgba(255,255,255,0.5)',
-                      textAlign: 'center',
-                      padding: '2rem',
-                      fontSize: '0.9rem'
-                    }}>
-                      Belum ada komentar untuk foto ini.
-                      <div style={{ marginTop: '0.5rem', fontSize: '0.8rem' }}>
-                        Jadilah yang pertama berkomentar!
-                      </div>
-                    </div>
-                  ) : (
-                    currentPhotoComments.map((comment, index) => (
-                      <motion.div
-                        key={comment.id || index}
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: index * 0.05 }}
-                        style={{
-                          backgroundColor: 'rgba(255,255,255,0.05)',
-                          padding: '1rem',
-                          borderRadius: '8px',
-                          borderLeft: '3px solid #0050B7'
-                        }}
-                      >
-                        <div style={{
-                          display: 'flex',
-                          alignItems: 'flex-start',
-                          gap: '0.8rem',
-                          marginBottom: '0.5rem'
-                        }}>
-                          <div style={{
-                            width: '32px',
-                            height: '32px',
-                            minWidth: '32px',
-                            borderRadius: '50%',
-                            backgroundColor: user && comment.user === userDisplayName ? '#0050B7' : '#333',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            fontSize: '0.9rem',
-                            fontWeight: '600',
-                            color: 'white'
-                          }}>
-                            {comment.userAvatar || comment.user.charAt(0).toUpperCase()}
-                          </div>
-                          <div style={{ flex: 1 }}>
-                            <div style={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'space-between',
-                              marginBottom: '0.3rem'
-                            }}>
-                              <span style={{
-                                color: 'rgba(255,255,255,0.9)',
-                                fontSize: '0.9rem',
-                                fontWeight: '600'
-                              }}>
-                                {comment.user}
-                                {user && comment.user === userDisplayName && (
-                                  <span style={{
-                                    marginLeft: '0.5rem',
-                                    fontSize: '0.7rem',
-                                    backgroundColor: '#0050B7',
-                                    color: 'white',
-                                    padding: '0.1rem 0.4rem',
-                                    borderRadius: '4px'
-                                  }}>
-                                    Anda
-                                  </span>
-                                )}
-                              </span>
-                              <span style={{
-                                color: 'rgba(255,255,255,0.5)',
-                                fontSize: '0.75rem',
-                                whiteSpace: 'nowrap'
-                              }}>
-                                {calculateTimeAgo(comment.timestamp)}
-                              </span>
-                            </div>
-                            <p style={{
-                              color: 'white',
-                              margin: 0,
-                              fontSize: '0.9rem',
-                              lineHeight: 1.4
-                            }}>
-                              {comment.text}
-                            </p>
-                          </div>
-                        </div>
-                      </motion.div>
-                    ))
-                  )}
-                </div>
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
       {/* Modal Logout Confirmation */}
       <AnimatePresence>
         {showLogoutModal && (
@@ -3108,7 +2132,6 @@ export default function HomePage(): React.JSX.Element {
         zIndex: 10,
         position: 'relative'
       }}>
-
         {/* PRODUCT AND Image Section - DI BAWAH JUDUL WEBSITE */}
         <div style={{
           width: '100%',
@@ -3119,7 +2142,6 @@ export default function HomePage(): React.JSX.Element {
           flexDirection: 'column',
           gap: isMobile ? '0.1rem' : '0.2rem' // JARAK SANGAT DEKAT ANTAR BARIS
         }}>
-          
           {/* Baris 1: PRODUCT + AND + Foto + 01 */}
           <div style={{
             display: 'flex',
@@ -3459,7 +2481,7 @@ export default function HomePage(): React.JSX.Element {
             </div>
           </div>
         </div>
-        
+
         {/* Spacer kecil sebelum konten berikutnya */}
         <div style={{
           height: isMobile ? '3rem' : '4rem',
@@ -3476,7 +2498,7 @@ export default function HomePage(): React.JSX.Element {
               exit={{ opacity: 0 }}
               transition={{ duration: 0.5 }}
             >
-              {/* Container untuk Tombol Slider dan Teks MENURU */}
+              {/* Container untuk Tombol Slider */}
               <div style={{
                 position: 'relative',
                 marginTop: isMobile ? '4rem' : '5rem',
@@ -3567,794 +2589,236 @@ export default function HomePage(): React.JSX.Element {
                     {sliderPosition === "index" ? "Index View" : "Grid View"}
                   </div>
                 </div>
-
-                {/* Teks MENURU dengan animasi Plus (+) */}
-                <motion.div
-                  ref={menuruButtonRef}
-                  onClick={handleMenuruClick}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'flex-end',
-                    gap: '0.5rem',
-                    cursor: 'pointer',
-                    marginTop: isMobile ? '1rem' : '0',
-                    width: isMobile ? '100%' : 'auto'
-                  }}
-                  whileHover={{ x: 5 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <div style={{
-                    color: 'white',
-                    fontSize: isMobile ? '1.8rem' : '2rem',
-                    fontWeight: '300',
-                    fontFamily: 'Helvetica, Arial, sans-serif',
-                    textTransform: 'uppercase',
-                    letterSpacing: '2px',
-                    position: 'relative'
-                  }}>
-                    MENURU
-                  </div>
-                  
-                  <div 
-                    ref={plusSignRef}
-                    className="plus-sign" 
-                    style={{
-                      width: isMobile ? '35px' : '40px',
-                      height: isMobile ? '35px' : '40px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      position: 'relative',
-                      marginLeft: '0.5rem'
-                    }}
-                  >
-                    <div style={{
-                      position: 'absolute',
-                      width: '2px',
-                      height: isMobile ? '18px' : '20px',
-                      backgroundColor: 'white',
-                      borderRadius: '1px'
-                    }} />
-                    <div style={{
-                      position: 'absolute',
-                      width: isMobile ? '18px' : '20px',
-                      height: '2px',
-                      backgroundColor: 'white',
-                      borderRadius: '1px'
-                    }} />
-                  </div>
-                </motion.div>
               </div>
 
-              {/* Tombol Menuru+ untuk toggle konten */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.6, duration: 0.5 }}
-                style={{
-                  display: 'flex',
-                  justifyContent: 'center',
-                  marginBottom: '2rem'
-                }}
-              >
-                <motion.button
-                  onClick={handleToggleMenuruPlus}
-                  style={{
-                    backgroundColor: isMenuruPlusMode ? '#00FF00' : 'rgba(0, 255, 0, 0.1)',
-                    color: isMenuruPlusMode ? 'black' : '#00FF00',
-                    border: isMenuruPlusMode ? 'none' : '1px solid rgba(0, 255, 0, 0.3)',
-                    padding: '0.8rem 2rem',
-                    borderRadius: '25px',
-                    fontSize: '1.1rem',
-                    fontWeight: '600',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.5rem',
-                    fontFamily: 'Helvetica, Arial, sans-serif',
-                    transition: 'all 0.3s ease',
-                    backdropFilter: 'blur(10px)'
-                  }}
-                  whileHover={{ 
-                    scale: 1.05,
-                    boxShadow: '0 5px 15px rgba(0, 255, 0, 0.2)'
-                  }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={isMenuruPlusMode ? "black" : "#00FF00"} strokeWidth="2">
-                    <path d="M12 5v14"/>
-                    <path d="M5 12h14"/>
-                  </svg>
-                  {isMenuruPlusMode ? "Standard View" : "Menuru+ View"}
-                </motion.button>
-              </motion.div>
-
-              {/* KONTEN UTAMA: Index View atau Menuru+ View */}
+              {/* Progress Bar dengan 3 Foto dan Komentar */}
               <div style={{
                 width: '100%',
-                minHeight: '100vh',
                 padding: isMobile ? '1rem' : '2rem',
+                marginTop: isMobile ? '3rem' : '4rem',
+                marginBottom: isMobile ? '3rem' : '4rem',
                 boxSizing: 'border-box',
                 position: 'relative'
               }}>
-                {/* Garis bawah di atas konten */}
-                <div style={{
-                  width: '100%',
-                  height: '1px',
-                  backgroundColor: 'rgba(255,255,255,0.2)',
-                  marginBottom: '3rem'
-                }}></div>
-
-                {/* Container utama untuk konten */}
-                <div ref={topicContainerRef} style={{
-                  display: 'flex',
-                  flexDirection: isMobile ? 'column' : 'row',
-                  gap: isMobile ? '2rem' : '3rem',
-                  width: '100%',
-                  fontFamily: 'Helvetica, Arial, sans-serif',
-                  position: 'relative'
-                }}>
-                  {/* Kolom 1: MENURU atau MENURU+ */}
-                  <div style={{
-                    flex: 0.8,
-                    marginLeft: isMobile ? '0.5rem' : '1rem'
+                {/* Counter Foto di samping kiri */}
+                <div 
+                  style={{
+                    position: 'absolute',
+                    left: isMobile ? '2rem' : '3rem',
+                    top: isMobile ? '2rem' : '3rem',
+                    zIndex: 20,
+                    color: 'white',
+                    fontSize: isMobile ? '2.5rem' : '3.5rem',
+                    fontWeight: '600',
+                    fontFamily: 'Helvetica, Arial, sans-serif',
+                    textShadow: '0 2px 10px rgba(0,0,0,0.5)',
+                    backgroundColor: 'rgba(0,0,0,0.3)',
+                    padding: '0.5rem 1rem',
+                    borderRadius: '10px',
+                    backdropFilter: 'blur(5px)',
+                    display: 'flex',
+                    alignItems: 'baseline',
+                    gap: '0.3rem'
+                  }}
+                >
+                  <span 
+                    ref={leftCounterRef}
+                    style={{
+                      display: 'inline-block',
+                      opacity: 1
+                    }}
+                  >
+                    {leftCounter}
+                  </span>
+                  <span style={{
+                    fontSize: isMobile ? '1.5rem' : '2rem',
+                    fontWeight: '400',
+                    opacity: 0.8,
+                    margin: '0 0.2rem'
                   }}>
-                    <div style={{
-                      color: isMenuruPlusMode ? '#00FF00' : 'white',
-                      fontSize: isMobile ? '1.8rem' : '2.5rem',
-                      fontWeight: '300',
-                      textTransform: 'uppercase',
-                      letterSpacing: '2px',
-                      fontFamily: 'Helvetica, Arial, sans-serif',
-                      lineHeight: 1
-                    }}>
-                      {isMenuruPlusMode ? 'MENURU+' : 'MENURU'}
-                    </div>
-                    {isMenuruPlusMode && (
-                      <div style={{
-                        color: 'rgba(255,255,255,0.7)',
-                        fontSize: '0.9rem',
-                        marginTop: '1rem',
-                        lineHeight: 1.5
-                      }}>
-                        Premium content and exclusive creative projects.
-                        <br />
-                        <span style={{ color: '#00FF00' }}>Advanced features and extended exploration.</span>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Kolom 2: Gambar dengan hover effect */}
-                  <div style={{
-                    flex: 1.2,
-                    position: 'relative',
-                    minHeight: isMobile ? '400px' : '600px',
-                    marginLeft: isMobile ? '-3rem' : '-4rem'
+                    /
+                  </span>
+                  <span style={{
+                    fontSize: isMobile ? '1.5rem' : '2rem',
+                    fontWeight: '400',
+                    opacity: 0.8
                   }}>
-                    <AnimatePresence>
-                      {hoveredTopic !== null && (
-                        <motion.div
-                          key="hovered-image"
-                          initial={{ opacity: 0 }}
-                          animate={{ 
-                            opacity: 1,
-                            y: imagePosition
-                          }}
-                          exit={{ opacity: 0 }}
-                          transition={{ duration: 0.3 }}
-                          style={{
-                            position: 'absolute',
-                            top: 0,
-                            left: 0,
-                            width: '85%',
-                            height: '85%',
-                            zIndex: 5
-                          }}
-                        >
-                          <motion.div
-                            initial={{ scale: 0.95 }}
-                            animate={{ scale: 1 }}
-                            exit={{ scale: 0.95 }}
-                            transition={{ duration: 0.4 }}
-                            style={{
-                              width: '100%',
-                              height: '100%',
-                              overflow: 'hidden',
-                              borderRadius: '15px',
-                              boxShadow: '0 10px 30px rgba(0,0,0,0.5)',
-                              border: isMenuruPlusMode ? '1px solid rgba(0, 255, 0, 0.3)' : '1px solid rgba(255,255,255,0.1)'
-                            }}
-                          >
-                            <img 
-                              src="images/5.jpg" 
-                              alt={`Topic ${hoveredTopic}`}
-                              style={{
-                                width: '100%',
-                                height: '100%',
-                                display: 'block',
-                                objectFit: 'cover'
-                              }}
-                              onError={(e) => {
-                                e.currentTarget.style.backgroundColor = '#333';
-                                e.currentTarget.style.display = 'flex';
-                                e.currentTarget.style.alignItems = 'center';
-                                e.currentTarget.style.justifyContent = 'center';
-                                e.currentTarget.style.color = '#fff';
-                                e.currentTarget.innerHTML = '<div style="padding: 2rem; text-align: center;">Topic Image</div>';
-                              }}
-                            />
-                          </motion.div>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </div>
-
-                  {/* Kolom 3: Daftar konten - Title */}
-                  <div style={{
-                    flex: 1,
-                    position: 'relative',
-                    marginLeft: isMobile ? '-4rem' : '-5rem'
-                  }}>
-                    <div style={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: '0.3rem',
-                      fontFamily: 'Helvetica, Arial, sans-serif'
-                    }}>
-                      {(isMenuruPlusMode ? menuruPlusContent : indexTopics).map((topic, index) => (
-                        <div 
-                          key={topic.id}
-                          onMouseEnter={() => handleTopicHover(topic.id)}
-                          onMouseLeave={() => handleTopicHover(null)}
-                          style={{
-                            display: 'flex',
-                            flexDirection: 'column',
-                            position: 'relative',
-                            padding: isMobile ? '0.8rem 0' : '1rem 0',
-                            cursor: 'pointer'
-                          }}
-                        >
-                          <AnimatePresence>
-                            {hoveredTopic === topic.id && (
-                              <motion.div
-                                initial={{ width: 0, opacity: 0 }}
-                                animate={{ width: '100%', opacity: 1 }}
-                                exit={{ width: 0, opacity: 0 }}
-                                transition={{ duration: 0.3 }}
-                                style={{
-                                  position: 'absolute',
-                                  left: 0,
-                                  top: '50%',
-                                  height: '1px',
-                                  backgroundColor: isMenuruPlusMode ? 'rgba(0, 255, 0, 0.5)' : 'rgba(255,255,255,0.3)',
-                                  transform: 'translateY(-50%)',
-                                  zIndex: 1
-                                }}
-                              />
-                            )}
-                          </AnimatePresence>
-
-                          <motion.div
-                            style={{
-                              color: hoveredTopic === topic.id 
-                                ? (isMenuruPlusMode ? '#00FF00' : 'white')
-                                : 'white',
-                              fontSize: isMobile ? '1.2rem' : '1.5rem',
-                              fontWeight: hoveredTopic === topic.id ? '600' : '400',
-                              fontFamily: 'Helvetica, Arial, sans-serif',
-                              lineHeight: 1.1,
-                              position: 'relative',
-                              zIndex: 2,
-                              transition: 'all 0.2s ease'
-                            }}
-                            whileHover={{ x: 5 }}
-                          >
-                            {topic.title}
-                          </motion.div>
-                          
-                          {/* Hanya tampilkan description untuk Menuru+ */}
-                          {isMenuruPlusMode && (
-                            <div style={{
-                              color: 'rgba(255,255,255,0.6)',
-                              fontSize: '0.9rem',
-                              marginTop: '0.3rem'
-                            }}>
-                              {topic.description}
-                            </div>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Kolom 4: Description/Content dan Tahun */}
-                  <div style={{
-                    flex: 1,
-                    marginLeft: isMobile ? '-5rem' : '-6rem'
-                  }}>
-                    <div style={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: '0.3rem',
-                      fontFamily: 'Helvetica, Arial, sans-serif'
-                    }}>
-                      {(isMenuruPlusMode ? menuruPlusContent : indexTopics).map((topic, index) => (
-                        <div 
-                          key={topic.id}
-                          onMouseEnter={() => handleTopicHover(topic.id)}
-                          onMouseLeave={() => handleTopicHover(null)}
-                          style={{
-                            display: 'flex',
-                            flexDirection: 'column',
-                            padding: isMobile ? '0.8rem 0' : '1rem 0',
-                            cursor: 'pointer',
-                            position: 'relative',
-                            zIndex: 10
-                          }}
-                        >
-                          <div style={{
-                            display: 'flex',
-                            alignItems: 'flex-start',
-                            gap: '0.5rem'
-                          }}>
-                            <motion.div
-                              style={{
-                                color: hoveredTopic === topic.id 
-                                  ? (isMenuruPlusMode ? 'rgba(255,255,255,0.9)' : 'white')
-                                  : (isMenuruPlusMode ? 'rgba(255,255,255,0.7)' : 'white'),
-                                fontSize: isMobile ? (isMenuruPlusMode ? '0.9rem' : '1.2rem') : (isMenuruPlusMode ? '1rem' : '1.5rem'),
-                                fontWeight: hoveredTopic === topic.id ? '500' : '400',
-                                fontFamily: 'Helvetica, Arial, sans-serif',
-                                lineHeight: isMenuruPlusMode ? 1.4 : 1.1,
-                                transition: 'all 0.2s ease',
-                                position: 'relative',
-                                zIndex: 11,
-                                flex: 1
-                              }}
-                              whileHover={{ x: 5 }}
-                            >
-                              {isMenuruPlusMode ? topic.content : topic.description}
-                            </motion.div>
-                            <div style={{
-                              color: hoveredTopic === topic.id 
-                                ? (isMenuruPlusMode ? '#00FF00' : 'rgba(255,255,255,0.6)')
-                                : 'rgba(255,255,255,0.6)',
-                              fontSize: isMobile ? '1rem' : '1.1rem',
-                              fontWeight: hoveredTopic === topic.id ? '600' : '400',
-                              fontFamily: 'Helvetica, Arial, sans-serif',
-                              lineHeight: 1.1,
-                              whiteSpace: 'nowrap',
-                              position: 'relative',
-                              zIndex: 11,
-                              minWidth: '50px'
-                            }}>
-                              {topic.year}
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
+                    {totalPhotos}
+                  </span>
                 </div>
 
-                {/* Container untuk Tombol Slider di bawah konten */}
+                {/* Waktu Update */}
                 <div style={{
-                  position: 'relative',
-                  marginTop: '4rem',
-                  marginBottom: '4rem',
-                  paddingLeft: isMobile ? '1rem' : '2rem',
-                  paddingRight: isMobile ? '1rem' : '2rem',
+                  position: 'absolute',
+                  right: isMobile ? '2rem' : '3rem',
+                  top: isMobile ? '2rem' : '3rem',
+                  zIndex: 20,
                   display: 'flex',
-                  justifyContent: 'flex-start'
+                  flexDirection: 'column',
+                  alignItems: 'flex-end',
+                  gap: '0.5rem'
                 }}>
                   <div style={{
+                    backgroundColor: 'rgba(0,0,0,0.3)',
+                    padding: '0.4rem 0.8rem',
+                    borderRadius: '8px',
+                    backdropFilter: 'blur(5px)',
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '1.5rem'
+                    gap: '0.4rem'
                   }}>
-                    <motion.button
-                      onClick={toggleSlider}
-                      style={{
-                        width: '120px',
-                        height: '50px',
-                        backgroundColor: '#0050B7',
-                        border: 'none',
-                        borderRadius: '25px',
-                        cursor: 'pointer',
-                        padding: 0,
-                        position: 'relative',
-                        display: 'flex',
-                        alignItems: 'center',
-                        overflow: 'hidden'
-                      }}
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
+                    <svg 
+                      width="14" 
+                      height="14" 
+                      viewBox="0 0 24 24" 
+                      fill="none" 
+                      stroke="currentColor" 
+                      strokeWidth="2"
                     >
-                      <div style={{
-                        position: 'absolute',
-                        width: '100%',
-                        height: '100%',
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        padding: '0 15px',
-                        boxSizing: 'border-box'
-                      }}>
-                        <span style={{
-                          color: 'white',
-                          fontSize: '1rem',
-                          fontWeight: '700',
-                          fontFamily: 'Helvetica, Arial, sans-serif',
-                          opacity: 0.5
-                        }}>
-                          INDEX
-                        </span>
-                        <span style={{
-                          color: 'white',
-                          fontSize: '1rem',
-                          fontWeight: '700',
-                          fontFamily: 'Helvetica, Arial, sans-serif',
-                          opacity: 0.5
-                        }}>
-                          GRID
-                        </span>
-                      </div>
-                      
-                      <motion.div
-                        animate={{ x: 65 }}
-                        transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                        style={{
-                          width: '35px',
-                          height: '35px',
-                          backgroundColor: '#00FF00',
-                          borderRadius: '50%',
-                          position: 'absolute',
-                          left: '7px',
-                          boxShadow: '0 0 15px rgba(0, 255, 0, 0.7)'
-                        }}
-                      />
-                    </motion.button>
-
-                    <div style={{
-                      color: 'white',
-                      fontSize: '1.1rem',
-                      fontWeight: '600',
+                      <circle cx="12" cy="12" r="10"/>
+                      <polyline points="12 6 12 12 16 14"/>
+                    </svg>
+                    <span style={{
+                      color: 'rgba(255,255,255,0.9)',
+                      fontSize: isMobile ? '0.8rem' : '0.9rem',
+                      fontWeight: '500',
                       fontFamily: 'Helvetica, Arial, sans-serif'
                     }}>
-                      {isMenuruPlusMode ? "Menuru+ View" : "Main View"}
-                    </div>
+                      {photoTimeAgo[currentPhotoIndex]}
+                    </span>
                   </div>
                 </div>
 
-                {/* Progress Bar dengan 3 Foto dan Komentar (hanya di Main View, bukan Menuru+ View) */}
-                {!isMenuruPlusMode && (
+                <div style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: isMobile ? '1.5rem' : '2rem',
+                  alignItems: 'center',
+                  maxWidth: '800px',
+                  margin: '0 auto'
+                }}>
+                  {/* Container Progress Bar */}
                   <div style={{
                     width: '100%',
-                    padding: isMobile ? '1rem' : '2rem',
-                    marginTop: isMobile ? '3rem' : '4rem',
-                    marginBottom: isMobile ? '3rem' : '4rem',
-                    boxSizing: 'border-box',
-                    position: 'relative'
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: isMobile ? '0.5rem' : '0.8rem',
+                    marginBottom: '1rem'
                   }}>
-                    {/* Counter Foto di samping kiri */}
-                    <div 
-                      style={{
-                        position: 'absolute',
-                        left: isMobile ? '2rem' : '3rem',
-                        top: isMobile ? '2rem' : '3rem',
-                        zIndex: 20,
-                        color: 'white',
-                        fontSize: isMobile ? '2.5rem' : '3.5rem',
-                        fontWeight: '600',
-                        fontFamily: 'Helvetica, Arial, sans-serif',
-                        textShadow: '0 2px 10px rgba(0,0,0,0.5)',
-                        backgroundColor: 'rgba(0,0,0,0.3)',
-                        padding: '0.5rem 1rem',
-                        borderRadius: '10px',
-                        backdropFilter: 'blur(5px)',
-                        display: 'flex',
-                        alignItems: 'baseline',
-                        gap: '0.3rem'
-                      }}
-                    >
-                      <span 
-                        ref={leftCounterRef}
+                    {progressPhotos.map((_, index) => (
+                      <div 
+                        key={index}
                         style={{
-                          display: 'inline-block',
-                          opacity: 1
-                        }}
-                      >
-                        {leftCounter}
-                      </span>
-                      <span style={{
-                        fontSize: isMobile ? '1.5rem' : '2rem',
-                        fontWeight: '400',
-                        opacity: 0.8,
-                        margin: '0 0.2rem'
-                      }}>
-                        /
-                      </span>
-                      <span style={{
-                        fontSize: isMobile ? '1.5rem' : '2rem',
-                        fontWeight: '400',
-                        opacity: 0.8
-                      }}>
-                        {totalPhotos}
-                      </span>
-                    </div>
-
-                    {/* Waktu Update */}
-                    <div style={{
-                      position: 'absolute',
-                      right: isMobile ? '2rem' : '3rem',
-                      top: isMobile ? '2rem' : '3rem',
-                      zIndex: 20,
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'flex-end',
-                      gap: '0.5rem'
-                    }}>
-                      <div style={{
-                        backgroundColor: 'rgba(0,0,0,0.3)',
-                        padding: '0.4rem 0.8rem',
-                        borderRadius: '8px',
-                        backdropFilter: 'blur(5px)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.4rem'
-                      }}>
-                        <svg 
-                          width="14" 
-                          height="14" 
-                          viewBox="0 0 24 24" 
-                          fill="none" 
-                          stroke="currentColor" 
-                          strokeWidth="2"
-                        >
-                          <circle cx="12" cy="12" r="10"/>
-                          <polyline points="12 6 12 12 16 14"/>
-                        </svg>
-                        <span style={{
-                          color: 'rgba(255,255,255,0.9)',
-                          fontSize: isMobile ? '0.8rem' : '0.9rem',
-                          fontWeight: '500',
-                          fontFamily: 'Helvetica, Arial, sans-serif'
-                        }}>
-                          {photoTimeAgo[currentPhotoIndex]}
-                        </span>
-                      </div>
-                    </div>
-
-                    <div style={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: isMobile ? '1.5rem' : '2rem',
-                      alignItems: 'center',
-                      maxWidth: '800px',
-                      margin: '0 auto'
-                    }}>
-                      {/* Container Progress Bar */}
-                      <div style={{
-                        width: '100%',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: isMobile ? '0.5rem' : '0.8rem',
-                        marginBottom: '1rem'
-                      }}>
-                        {progressPhotos.map((_, index) => (
-                          <div 
-                            key={index}
-                            style={{
-                              flex: 1,
-                              height: '12px',
-                              backgroundColor: 'rgba(255, 255, 255, 0.2)',
-                              borderRadius: '6px',
-                              overflow: 'hidden',
-                              position: 'relative'
-                            }}
-                          >
-                            <div
-                              className="progress-fill"
-                              data-index={index}
-                              style={{
-                                position: 'absolute',
-                                left: 0,
-                                top: 0,
-                                bottom: 0,
-                                backgroundColor: 'white',
-                                borderRadius: '6px',
-                                width: index === currentPhotoIndex ? '100%' : (index < currentPhotoIndex ? '100%' : '0%')
-                              }}
-                            />
-                          </div>
-                        ))}
-                      </div>
-
-                      {/* Foto Portrait - KLIK UNTUK MEMBUKA FULL PAGE */}
-                      <motion.div
-                        onClick={handlePhotoClick}
-                        style={{
-                          position: 'relative',
-                          width: '100%',
-                          maxWidth: '600px',
-                          height: isMobile ? '600px' : '800px',
-                          borderRadius: '15px',
+                          flex: 1,
+                          height: '12px',
+                          backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                          borderRadius: '6px',
                           overflow: 'hidden',
-                          boxShadow: '0 8px 25px rgba(0,0,0,0.4)',
-                          border: '2px solid rgba(255,255,255,0.15)',
-                          cursor: 'pointer',
-                          margin: '0 auto'
+                          position: 'relative'
                         }}
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
                       >
-                        {/* Foto Aktif */}
-                        <AnimatePresence mode="wait">
-                          <motion.div
-                            key={currentPhotoIndex}
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            transition={{ duration: 0.3 }}
-                            style={{
-                              width: '100%',
-                              height: '100%'
-                            }}
-                          >
-                            <img 
-                              src={progressPhotos[currentPhotoIndex].src}
-                              alt={progressPhotos[currentPhotoIndex].alt}
-                              style={{
-                                width: '100%',
-                                height: '100%',
-                                objectFit: 'cover',
-                                display: 'block'
-                              }}
-                              onError={(e) => {
-                                e.currentTarget.style.backgroundColor = '#222';
-                                e.currentTarget.style.display = 'flex';
-                                e.currentTarget.style.alignItems = 'center';
-                                e.currentTarget.style.justifyContent = 'center';
-                                e.currentTarget.style.color = '#fff';
-                                e.currentTarget.innerHTML = `<div style="padding: 2rem; text-align: center;">Photo ${currentPhotoIndex + 1}</div>`;
-                              }}
-                            />
-                          </motion.div>
-                        </AnimatePresence>
-                      </motion.div>
-                    </div>
-                  </div>
-                )}
-
-                {/* Content tambahan untuk Menuru+ */}
-                {isMenuruPlusMode && (
-                  <motion.div
-                    initial={{ y: 30, opacity: 0 }}
-                    animate={{ y: 0, opacity: 1 }}
-                    transition={{ delay: 0.3, duration: 0.5 }}
-                    style={{
-                      marginTop: '4rem',
-                      padding: '2rem',
-                      backgroundColor: 'rgba(0, 255, 0, 0.05)',
-                      borderRadius: '15px',
-                      border: '1px solid rgba(0, 255, 0, 0.1)'
-                    }}
-                  >
-                    <div style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '1rem',
-                      marginBottom: '1.5rem'
-                    }}>
-                      <div style={{
-                        width: '40px',
-                        height: '40px',
-                        borderRadius: '50%',
-                        backgroundColor: 'rgba(0, 255, 0, 0.2)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center'
-                      }}>
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#00FF00" strokeWidth="2">
-                          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
-                        </svg>
-                      </div>
-                      <h3 style={{
-                        color: '#00FF00',
-                        fontSize: '1.5rem',
-                        fontWeight: '600',
-                        margin: 0
-                      }}>
-                        Exclusive Menuru+ Features
-                      </h3>
-                    </div>
-                    
-                    <div style={{
-                      display: 'grid',
-                      gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)',
-                      gap: '1.5rem'
-                    }}>
-                      {[
-                        { icon: '🚀', title: 'Advanced Analytics', desc: 'Detailed insights and performance metrics' },
-                        { icon: '🎨', title: 'Premium Templates', desc: 'Exclusive design templates and assets' },
-                        { icon: '🔒', title: 'Priority Access', desc: 'Early access to new features and updates' }
-                      ].map((feature, idx) => (
-                        <motion.div
-                          key={idx}
-                          initial={{ y: 20, opacity: 0 }}
-                          animate={{ y: 0, opacity: 1 }}
-                          transition={{ delay: 0.1 * idx }}
+                        <div
+                          className="progress-fill"
+                          data-index={index}
                           style={{
-                            backgroundColor: 'rgba(255,255,255,0.05)',
-                            padding: '1.5rem',
-                            borderRadius: '10px',
-                            border: '1px solid rgba(255,255,255,0.1)'
+                            position: 'absolute',
+                            left: 0,
+                            top: 0,
+                            bottom: 0,
+                            backgroundColor: 'white',
+                            borderRadius: '6px',
+                            width: index === currentPhotoIndex ? '100%' : (index < currentPhotoIndex ? '100%' : '0%')
                           }}
-                          whileHover={{ 
-                            backgroundColor: 'rgba(255,255,255,0.1)',
-                            transform: 'translateY(-5px)'
-                          }}
-                        >
-                          <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>
-                            {feature.icon}
-                          </div>
-                          <h4 style={{
-                            color: 'white',
-                            fontSize: '1.2rem',
-                            fontWeight: '600',
-                            margin: '0 0 0.5rem 0'
-                          }}>
-                            {feature.title}
-                          </h4>
-                          <p style={{
-                            color: 'rgba(255,255,255,0.7)',
-                            fontSize: '0.9rem',
-                            margin: 0,
-                            lineHeight: 1.5
-                          }}>
-                            {feature.desc}
-                          </p>
-                        </motion.div>
-                      ))}
-                    </div>
-                  </motion.div>
-                )}
+                        />
+                      </div>
+                    ))}
+                  </div>
 
-                {/* Content tambahan untuk semua view */}
-                <div style={{
-                  height: '50vh',
-                  width: '100%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  marginTop: isMobile ? '3rem' : '5rem',
-                  zIndex: 10,
-                  position: 'relative'
-                }}>
-                  <motion.p
-                    initial={{ opacity: 0 }}
-                    whileInView={{ opacity: 1 }}
-                    transition={{ duration: 0.8 }}
+                  {/* Foto Portrait */}
+                  <motion.div
                     style={{
-                      color: 'white',
-                      fontSize: isMobile ? '1.5rem' : '2rem',
-                      fontWeight: '300',
-                      textAlign: 'center',
+                      position: 'relative',
+                      width: '100%',
                       maxWidth: '600px',
-                      padding: '0 2rem'
+                      height: isMobile ? '600px' : '800px',
+                      borderRadius: '15px',
+                      overflow: 'hidden',
+                      boxShadow: '0 8px 25px rgba(0,0,0,0.4)',
+                      border: '2px solid rgba(255,255,255,0.15)',
+                      cursor: 'pointer',
+                      margin: '0 auto'
                     }}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
                   >
-                    {isMenuruPlusMode 
-                      ? "Explore premium content and exclusive features with Menuru+"
-                      : "More content coming soon..."}
-                  </motion.p>
+                    {/* Foto Aktif */}
+                    <AnimatePresence mode="wait">
+                      <motion.div
+                        key={currentPhotoIndex}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.3 }}
+                        style={{
+                          width: '100%',
+                          height: '100%'
+                        }}
+                      >
+                        <img 
+                          src={progressPhotos[currentPhotoIndex].src}
+                          alt={progressPhotos[currentPhotoIndex].alt}
+                          style={{
+                            width: '100%',
+                            height: '100%',
+                            objectFit: 'cover',
+                            display: 'block'
+                          }}
+                          onError={(e) => {
+                            e.currentTarget.style.backgroundColor = '#222';
+                            e.currentTarget.style.display = 'flex';
+                            e.currentTarget.style.alignItems = 'center';
+                            e.currentTarget.style.justifyContent = 'center';
+                            e.currentTarget.style.color = '#fff';
+                            e.currentTarget.innerHTML = `<div style="padding: 2rem; text-align: center;">Photo ${currentPhotoIndex + 1}</div>`;
+                          }}
+                        />
+                      </motion.div>
+                    </AnimatePresence>
+                  </motion.div>
                 </div>
+              </div>
+
+              {/* Content tambahan */}
+              <div style={{
+                height: '50vh',
+                width: '100%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginTop: isMobile ? '3rem' : '5rem',
+                zIndex: 10,
+                position: 'relative'
+              }}>
+                <motion.p
+                  initial={{ opacity: 0 }}
+                  whileInView={{ opacity: 1 }}
+                  transition={{ duration: 0.8 }}
+                  style={{
+                    color: 'white',
+                    fontSize: isMobile ? '1.5rem' : '2rem',
+                    fontWeight: '300',
+                    textAlign: 'center',
+                    maxWidth: '600px',
+                    padding: '0 2rem'
+                  }}
+                >
+                  More content coming soon...
+                </motion.p>
               </div>
             </motion.div>
           )}
 
-          {/* Halaman Index (terpisah) */}
+          {/* Halaman Index */}
           {currentView === "index" && (
             <motion.div
               key="index-view"
