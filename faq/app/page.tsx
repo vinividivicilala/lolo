@@ -3600,7 +3600,6 @@ export default function HomePage(): React.JSX.Element {
 
 
         {/* Foto Card Design Section - 6 Card Horizontal */}
-
 <div style={{
   width: '100%',
   padding: isMobile ? '0.5rem' : '1rem',
@@ -3636,15 +3635,19 @@ export default function HomePage(): React.JSX.Element {
     flexWrap: 'wrap',
     maxWidth: '1400px'
   }}>
-    {/* Card 1 */}
-    <div
+    
+    {/* Card 1 dengan Link */}
+    <a 
+      href="/visual-design" 
       style={{
+        textDecoration: 'none',
         position: 'relative',
         width: isMobile ? '180px' : '220px',
         height: isMobile ? '250px' : '320px',
         borderRadius: '12px',
         overflow: 'hidden',
-        flexShrink: 0
+        flexShrink: 0,
+        display: 'block'
       }}
     >
       {/* Foto Murni */}
@@ -3682,42 +3685,59 @@ export default function HomePage(): React.JSX.Element {
       }}>
         {/* Teks Lengkap - Normal */}
         <div style={{
-          color: 'white',
+          color: 'black',
           fontSize: isMobile ? '0.9rem' : '1rem',
           fontWeight: '400',
-          fontFamily: 'Helvetica, Arial, sans-serif'
+          fontFamily: 'Helvetica, Arial, sans-serif',
+          backgroundColor: 'rgba(255, 255, 255, 0.9)',
+          padding: '0.3rem 0.6rem',
+          borderRadius: '4px'
         }}>
           Visual Design
         </div>
         
-        {/* SVG Panah Serong Kanan */}
+        {/* SVG Panah Serong Kanan Modern */}
         <div style={{
-          marginLeft: '0.5rem'
+          marginLeft: '0.5rem',
+          backgroundColor: 'rgba(255, 255, 255, 0.9)',
+          padding: '0.3rem',
+          borderRadius: '50%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
         }}>
           <svg
             width={isMobile ? "16" : "18"}
             height={isMobile ? "16" : "18"}
             viewBox="0 0 24 24"
             fill="none"
-            stroke="white"
-            strokeWidth="2"
+            xmlns="http://www.w3.org/2000/svg"
           >
-            {/* Garis serong kanan: dari kiri ke kanan, atas ke bawah */}
-            <line x1="4" y1="20" x2="20" y2="4" />
+            {/* Panah serong kanan modern */}
+            <path 
+              d="M7 17L17 7M17 7H7M17 7V17" 
+              stroke="black" 
+              strokeWidth="2" 
+              strokeLinecap="round" 
+              strokeLinejoin="round"
+            />
           </svg>
         </div>
       </div>
-    </div>
+    </a>
 
-    {/* Card 2 */}
-    <div
+    {/* Card 2 dengan Link */}
+    <a 
+      href="/brand-identity" 
       style={{
+        textDecoration: 'none',
         position: 'relative',
         width: isMobile ? '180px' : '220px',
         height: isMobile ? '250px' : '320px',
         borderRadius: '12px',
         overflow: 'hidden',
-        flexShrink: 0
+        flexShrink: 0,
+        display: 'block'
       }}
     >
       <img 
@@ -3752,40 +3772,57 @@ export default function HomePage(): React.JSX.Element {
         boxSizing: 'border-box'
       }}>
         <div style={{
-          color: 'white',
+          color: 'black',
           fontSize: isMobile ? '0.9rem' : '1rem',
           fontWeight: '400',
-          fontFamily: 'Helvetica, Arial, sans-serif'
+          fontFamily: 'Helvetica, Arial, sans-serif',
+          backgroundColor: 'rgba(255, 255, 255, 0.9)',
+          padding: '0.3rem 0.6rem',
+          borderRadius: '4px'
         }}>
           Brand Identity
         </div>
         
         <div style={{
-          marginLeft: '0.5rem'
+          marginLeft: '0.5rem',
+          backgroundColor: 'rgba(255, 255, 255, 0.9)',
+          padding: '0.3rem',
+          borderRadius: '50%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
         }}>
           <svg
             width={isMobile ? "16" : "18"}
             height={isMobile ? "16" : "18"}
             viewBox="0 0 24 24"
             fill="none"
-            stroke="white"
-            strokeWidth="2"
+            xmlns="http://www.w3.org/2000/svg"
           >
-            <line x1="4" y1="20" x2="20" y2="4" />
+            <path 
+              d="M7 17L17 7M17 7H7M17 7V17" 
+              stroke="black" 
+              strokeWidth="2" 
+              strokeLinecap="round" 
+              strokeLinejoin="round"
+            />
           </svg>
         </div>
       </div>
-    </div>
+    </a>
 
-    {/* Card 3 */}
-    <div
+    {/* Card 3 dengan Link */}
+    <a 
+      href="/ui-ux-design" 
       style={{
+        textDecoration: 'none',
         position: 'relative',
         width: isMobile ? '180px' : '220px',
         height: isMobile ? '250px' : '320px',
         borderRadius: '12px',
         overflow: 'hidden',
-        flexShrink: 0
+        flexShrink: 0,
+        display: 'block'
       }}
     >
       <img 
@@ -3820,40 +3857,57 @@ export default function HomePage(): React.JSX.Element {
         boxSizing: 'border-box'
       }}>
         <div style={{
-          color: 'white',
+          color: 'black',
           fontSize: isMobile ? '0.9rem' : '1rem',
           fontWeight: '400',
-          fontFamily: 'Helvetica, Arial, sans-serif'
+          fontFamily: 'Helvetica, Arial, sans-serif',
+          backgroundColor: 'rgba(255, 255, 255, 0.9)',
+          padding: '0.3rem 0.6rem',
+          borderRadius: '4px'
         }}>
           UI/UX Design
         </div>
         
         <div style={{
-          marginLeft: '0.5rem'
+          marginLeft: '0.5rem',
+          backgroundColor: 'rgba(255, 255, 255, 0.9)',
+          padding: '0.3rem',
+          borderRadius: '50%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
         }}>
           <svg
             width={isMobile ? "16" : "18"}
             height={isMobile ? "16" : "18"}
             viewBox="0 0 24 24"
             fill="none"
-            stroke="white"
-            strokeWidth="2"
+            xmlns="http://www.w3.org/2000/svg"
           >
-            <line x1="4" y1="20" x2="20" y2="4" />
+            <path 
+              d="M7 17L17 7M17 7H7M17 7V17" 
+              stroke="black" 
+              strokeWidth="2" 
+              strokeLinecap="round" 
+              strokeLinejoin="round"
+            />
           </svg>
         </div>
       </div>
-    </div>
+    </a>
 
-    {/* Card 4 */}
-    <div
+    {/* Card 4 dengan Link */}
+    <a 
+      href="/motion-graphics" 
       style={{
+        textDecoration: 'none',
         position: 'relative',
         width: isMobile ? '180px' : '220px',
         height: isMobile ? '250px' : '320px',
         borderRadius: '12px',
         overflow: 'hidden',
-        flexShrink: 0
+        flexShrink: 0,
+        display: 'block'
       }}
     >
       <img 
@@ -3888,40 +3942,57 @@ export default function HomePage(): React.JSX.Element {
         boxSizing: 'border-box'
       }}>
         <div style={{
-          color: 'white',
+          color: 'black',
           fontSize: isMobile ? '0.9rem' : '1rem',
           fontWeight: '400',
-          fontFamily: 'Helvetica, Arial, sans-serif'
+          fontFamily: 'Helvetica, Arial, sans-serif',
+          backgroundColor: 'rgba(255, 255, 255, 0.9)',
+          padding: '0.3rem 0.6rem',
+          borderRadius: '4px'
         }}>
           Motion Graphics
         </div>
         
         <div style={{
-          marginLeft: '0.5rem'
+          marginLeft: '0.5rem',
+          backgroundColor: 'rgba(255, 255, 255, 0.9)',
+          padding: '0.3rem',
+          borderRadius: '50%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
         }}>
           <svg
             width={isMobile ? "16" : "18"}
             height={isMobile ? "16" : "18"}
             viewBox="0 0 24 24"
             fill="none"
-            stroke="white"
-            strokeWidth="2"
+            xmlns="http://www.w3.org/2000/svg"
           >
-            <line x1="4" y1="20" x2="20" y2="4" />
+            <path 
+              d="M7 17L17 7M17 7H7M17 7V17" 
+              stroke="black" 
+              strokeWidth="2" 
+              strokeLinecap="round" 
+              strokeLinejoin="round"
+            />
           </svg>
         </div>
       </div>
-    </div>
+    </a>
 
-    {/* Card 5 */}
-    <div
+    {/* Card 5 dengan Link */}
+    <a 
+      href="/print-design" 
       style={{
+        textDecoration: 'none',
         position: 'relative',
         width: isMobile ? '180px' : '220px',
         height: isMobile ? '250px' : '320px',
         borderRadius: '12px',
         overflow: 'hidden',
-        flexShrink: 0
+        flexShrink: 0,
+        display: 'block'
       }}
     >
       <img 
@@ -3956,40 +4027,57 @@ export default function HomePage(): React.JSX.Element {
         boxSizing: 'border-box'
       }}>
         <div style={{
-          color: 'white',
+          color: 'black',
           fontSize: isMobile ? '0.9rem' : '1rem',
           fontWeight: '400',
-          fontFamily: 'Helvetica, Arial, sans-serif'
+          fontFamily: 'Helvetica, Arial, sans-serif',
+          backgroundColor: 'rgba(255, 255, 255, 0.9)',
+          padding: '0.3rem 0.6rem',
+          borderRadius: '4px'
         }}>
           Print Design
         </div>
         
         <div style={{
-          marginLeft: '0.5rem'
+          marginLeft: '0.5rem',
+          backgroundColor: 'rgba(255, 255, 255, 0.9)',
+          padding: '0.3rem',
+          borderRadius: '50%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
         }}>
           <svg
             width={isMobile ? "16" : "18"}
             height={isMobile ? "16" : "18"}
             viewBox="0 0 24 24"
             fill="none"
-            stroke="white"
-            strokeWidth="2"
+            xmlns="http://www.w3.org/2000/svg"
           >
-            <line x1="4" y1="20" x2="20" y2="4" />
+            <path 
+              d="M7 17L17 7M17 7H7M17 7V17" 
+              stroke="black" 
+              strokeWidth="2" 
+              strokeLinecap="round" 
+              strokeLinejoin="round"
+            />
           </svg>
         </div>
       </div>
-    </div>
+    </a>
 
-    {/* Card 6 */}
-    <div
+    {/* Card 6 dengan Link */}
+    <a 
+      href="/web-design" 
       style={{
+        textDecoration: 'none',
         position: 'relative',
         width: isMobile ? '180px' : '220px',
         height: isMobile ? '250px' : '320px',
         borderRadius: '12px',
         overflow: 'hidden',
-        flexShrink: 0
+        flexShrink: 0,
+        display: 'block'
       }}
     >
       <img 
@@ -4024,42 +4112,46 @@ export default function HomePage(): React.JSX.Element {
         boxSizing: 'border-box'
       }}>
         <div style={{
-          color: 'white',
+          color: 'black',
           fontSize: isMobile ? '0.9rem' : '1rem',
           fontWeight: '400',
-          fontFamily: 'Helvetica, Arial, sans-serif'
+          fontFamily: 'Helvetica, Arial, sans-serif',
+          backgroundColor: 'rgba(255, 255, 255, 0.9)',
+          padding: '0.3rem 0.6rem',
+          borderRadius: '4px'
         }}>
           Web Design
         </div>
         
         <div style={{
-          marginLeft: '0.5rem'
+          marginLeft: '0.5rem',
+          backgroundColor: 'rgba(255, 255, 255, 0.9)',
+          padding: '0.3rem',
+          borderRadius: '50%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
         }}>
           <svg
             width={isMobile ? "16" : "18"}
             height={isMobile ? "16" : "18"}
             viewBox="0 0 24 24"
             fill="none"
-            stroke="white"
-            strokeWidth="2"
+            xmlns="http://www.w3.org/2000/svg"
           >
-            <line x1="4" y1="20" x2="20" y2="4" />
+            <path 
+              d="M7 17L17 7M17 7H7M17 7V17" 
+              stroke="black" 
+              strokeWidth="2" 
+              strokeLinecap="round" 
+              strokeLinejoin="round"
+            />
           </svg>
         </div>
       </div>
-    </div>
+    </a>
   </div>
 </div>
-
-
-
-
-        
-
-
-
-
-
 
 
 
@@ -4855,6 +4947,7 @@ export default function HomePage(): React.JSX.Element {
     </div>
   );
 }
+
 
 
 
