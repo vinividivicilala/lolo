@@ -3609,7 +3609,7 @@ export default function HomePage(): React.JSX.Element {
   boxSizing: 'border-box',
   position: 'relative'
 }}>
-  {/* Teks Judul di Atas Foto - Tengah, Kecil */}
+  {/* Teks Judul di Atas Foto - Tengah, Normal */}
   <div style={{
     textAlign: 'center',
     marginBottom: isMobile ? '1.5rem' : '2rem',
@@ -3617,61 +3617,49 @@ export default function HomePage(): React.JSX.Element {
   }}>
     <div style={{
       color: 'rgba(255,255,255,0.9)',
-      fontSize: isMobile ? '0.9rem' : '1.1rem',
+      fontSize: isMobile ? '1rem' : '1.2rem',
       fontWeight: '400',
       fontFamily: 'Helvetica, Arial, sans-serif',
-      textTransform: 'uppercase',
-      letterSpacing: '1px',
-      display: 'inline-block',
-      padding: '0.5rem 1.5rem',
-      borderBottom: '1px solid rgba(255,255,255,0.2)'
+      letterSpacing: '0.5px'
     }}>
       Design Collection
     </div>
   </div>
 
-  {/* Container 6 Foto Card Horizontal - Posisi di Tengah */}
+  {/* Container 6 Foto Card Horizontal - Sejajar Bareng */}
   <div style={{
     display: 'flex',
     justifyContent: 'center',
-    alignItems: 'center',
-    gap: isMobile ? '0.8rem' : '1rem',
+    alignItems: 'flex-start',
+    gap: isMobile ? '0.8rem' : '1.2rem',
     padding: isMobile ? '0.5rem' : '1rem',
-    flexWrap: 'wrap',
-    maxWidth: '1200px',
-    margin: '0 auto'
+    maxWidth: '1400px',
+    margin: '0 auto',
+    flexWrap: 'nowrap',
+    overflowX: isMobile ? 'auto' : 'visible',
+    overflowY: 'hidden'
   }}>
     {/* Card 1 */}
-    <motion.div
+    <div
       style={{
         position: 'relative',
-        width: isMobile ? '180px' : '220px',
-        height: isMobile ? '260px' : '300px',
-        borderRadius: '12px',
+        width: isMobile ? '200px' : '240px',
+        height: isMobile ? '280px' : '340px',
+        borderRadius: '8px',
         overflow: 'hidden',
         backgroundColor: '#1a1a1a',
-        border: '1px solid rgba(255,255,255,0.15)',
+        border: '1px solid rgba(255,255,255,0.1)',
         cursor: 'pointer',
         flexShrink: 0,
         display: 'flex',
         flexDirection: 'column'
       }}
-      whileHover={{ 
-        transform: 'translateY(-8px) scale(1.02)',
-        borderColor: 'rgba(255,255,255,0.3)',
-        boxShadow: '0 15px 30px rgba(0,0,0,0.4)'
-      }}
-      whileTap={{ scale: 0.98 }}
-      transition={{ duration: 0.3 }}
     >
-      {/* Foto - Full height, tidak terpotong */}
+      {/* Foto - Lebar ke kanan */}
       <div style={{
         width: '100%',
-        height: '100%',
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        zIndex: 1
+        height: 'calc(100% - 60px)',
+        position: 'relative'
       }}>
         <img 
           src="images/5.jpg" 
@@ -3685,7 +3673,7 @@ export default function HomePage(): React.JSX.Element {
           onError={(e) => {
             e.currentTarget.style.backgroundColor = '#111';
             e.currentTarget.style.display = 'flex';
-            e.currentTarget.style.alignItems = 'center'; // Diperbaiki dari ':' menjadi '='
+            e.currentTarget.style.alignItems = 'center';
             e.currentTarget.style.justifyContent = 'center';
             e.currentTarget.style.color = '#fff';
             e.currentTarget.innerHTML = '<div style="padding: 2rem; text-align: center;">VISUAL</div>';
@@ -3693,102 +3681,73 @@ export default function HomePage(): React.JSX.Element {
         />
       </div>
       
-      {/* Overlay untuk teks */}
+      {/* Container Teks dan Panah - Normal, tidak ada overlay gelap */}
       <div style={{
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        width: '100%',
-        height: '100%',
-        background: 'linear-gradient(to bottom, rgba(0,0,0,0.1), rgba(0,0,0,0.6))',
-        zIndex: 2,
+        height: '60px',
         display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'flex-end',
         alignItems: 'center',
-        paddingBottom: isMobile ? '1.5rem' : '2rem'
+        justifyContent: 'center',
+        padding: isMobile ? '0.5rem' : '0.8rem',
+        backgroundColor: 'rgba(0,0,0,0.9)',
+        borderTop: '1px solid rgba(255,255,255,0.1)'
       }}>
-        {/* Teks di dalam foto - Tengah bawah */}
         <div style={{
           display: 'flex',
-          flexDirection: 'column',
           alignItems: 'center',
-          gap: '0.8rem',
-          zIndex: 3
+          justifyContent: 'center',
+          gap: '0.6rem'
         }}>
-          {/* Judul */}
+          {/* Teks */}
           <div style={{
             color: 'white',
-            fontSize: isMobile ? '1.2rem' : '1.4rem',
+            fontSize: isMobile ? '1rem' : '1.1rem',
             fontWeight: '400',
             fontFamily: 'Helvetica, Arial, sans-serif',
-            lineHeight: 1,
-            textAlign: 'center',
-            textShadow: '0 2px 4px rgba(0,0,0,0.8)'
+            lineHeight: 1
           }}>
             VISUAL
           </div>
           
-          {/* Tanda Panah SVG */}
-          <motion.div
-            whileHover={{ scale: 1.2 }}
-            transition={{ duration: 0.2 }}
+          {/* Tanda Panah SVG Lurus Serong Kanan */}
+          <svg
+            width={isMobile ? "16" : "18"}
+            height={isMobile ? "16" : "18"}
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="white"
+            strokeWidth="2"
             style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
+              transform: 'rotate(-45deg)'
             }}
           >
-            <svg
-              width={isMobile ? "24" : "28"}
-              height={isMobile ? "24" : "28"}
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="white"
-              strokeWidth="2"
-              style={{
-                filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.8))'
-              }}
-            >
-              <line x1="5" y1="12" x2="19" y2="12" />
-              <line x1="12" y1="5" x2="19" y2="12" />
-              <line x1="12" y1="19" x2="19" y2="12" />
-            </svg>
-          </motion.div>
+            <line x1="5" y1="12" x2="19" y2="12" />
+            <line x1="12" y1="5" x2="19" y2="12" />
+            <line x1="12" y1="19" x2="19" y2="12" />
+          </svg>
         </div>
       </div>
-    </motion.div>
+    </div>
 
     {/* Card 2 */}
-    <motion.div
+    <div
       style={{
         position: 'relative',
-        width: isMobile ? '180px' : '220px',
-        height: isMobile ? '260px' : '300px',
-        borderRadius: '12px',
+        width: isMobile ? '200px' : '240px',
+        height: isMobile ? '280px' : '340px',
+        borderRadius: '8px',
         overflow: 'hidden',
         backgroundColor: '#1a1a1a',
-        border: '1px solid rgba(255,255,255,0.15)',
+        border: '1px solid rgba(255,255,255,0.1)',
         cursor: 'pointer',
         flexShrink: 0,
         display: 'flex',
         flexDirection: 'column'
       }}
-      whileHover={{ 
-        transform: 'translateY(-8px) scale(1.02)',
-        borderColor: 'rgba(255,255,255,0.3)',
-        boxShadow: '0 15px 30px rgba(0,0,0,0.4)'
-      }}
-      whileTap={{ scale: 0.98 }}
-      transition={{ duration: 0.3 }}
     >
       <div style={{
         width: '100%',
-        height: '100%',
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        zIndex: 1
+        height: 'calc(100% - 60px)',
+        position: 'relative'
       }}>
         <img 
           src="images/5.jpg" 
@@ -3811,97 +3770,69 @@ export default function HomePage(): React.JSX.Element {
       </div>
       
       <div style={{
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        width: '100%',
-        height: '100%',
-        background: 'linear-gradient(to bottom, rgba(0,0,0,0.1), rgba(0,0,0,0.6))',
-        zIndex: 2,
+        height: '60px',
         display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'flex-end',
         alignItems: 'center',
-        paddingBottom: isMobile ? '1.5rem' : '2rem'
+        justifyContent: 'center',
+        padding: isMobile ? '0.5rem' : '0.8rem',
+        backgroundColor: 'rgba(0,0,0,0.9)',
+        borderTop: '1px solid rgba(255,255,255,0.1)'
       }}>
         <div style={{
           display: 'flex',
-          flexDirection: 'column',
           alignItems: 'center',
-          gap: '0.8rem',
-          zIndex: 3
+          justifyContent: 'center',
+          gap: '0.6rem'
         }}>
           <div style={{
             color: 'white',
-            fontSize: isMobile ? '1.2rem' : '1.4rem',
+            fontSize: isMobile ? '1rem' : '1.1rem',
             fontWeight: '400',
             fontFamily: 'Helvetica, Arial, sans-serif',
-            lineHeight: 1,
-            textAlign: 'center',
-            textShadow: '0 2px 4px rgba(0,0,0,0.8)'
+            lineHeight: 1
           }}>
             DESIGN
           </div>
           
-          <motion.div
-            whileHover={{ scale: 1.2 }}
-            transition={{ duration: 0.2 }}
+          <svg
+            width={isMobile ? "16" : "18"}
+            height={isMobile ? "16" : "18"}
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="white"
+            strokeWidth="2"
             style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
+              transform: 'rotate(-45deg)'
             }}
           >
-            <svg
-              width={isMobile ? "24" : "28"}
-              height={isMobile ? "24" : "28"}
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="white"
-              strokeWidth="2"
-              style={{
-                filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.8))'
-              }}
-            >
-              <line x1="5" y1="12" x2="19" y2="12" />
-              <line x1="12" y1="5" x2="19" y2="12" />
-              <line x1="12" y1="19" x2="19" y2="12" />
-            </svg>
-          </motion.div>
+            <line x1="5" y1="12" x2="19" y2="12" />
+            <line x1="12" y1="5" x2="19" y2="12" />
+            <line x1="12" y1="19" x2="19" y2="12" />
+          </svg>
         </div>
       </div>
-    </motion.div>
+    </div>
 
     {/* Card 3 */}
-    <motion.div
+    <div
       style={{
         position: 'relative',
-        width: isMobile ? '180px' : '220px',
-        height: isMobile ? '260px' : '300px',
-        borderRadius: '12px',
+        width: isMobile ? '200px' : '240px',
+        height: isMobile ? '280px' : '340px',
+        borderRadius: '8px',
         overflow: 'hidden',
         backgroundColor: '#1a1a1a',
-        border: '1px solid rgba(255,255,255,0.15)',
+        border: '1px solid rgba(255,255,255,0.1)',
         cursor: 'pointer',
         flexShrink: 0,
         display: 'flex',
         flexDirection: 'column'
       }}
-      whileHover={{ 
-        transform: 'translateY(-8px) scale(1.02)',
-        borderColor: 'rgba(255,255,255,0.3)',
-        boxShadow: '0 15px 30px rgba(0,0,0,0.4)'
-      }}
-      whileTap={{ scale: 0.98 }}
-      transition={{ duration: 0.3 }}
     >
       <div style={{
         width: '100%',
-        height: '100%',
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        zIndex: 1
+        height: 'calc(100% - 60px)',
+        position: 'relative'
       }}>
         <img 
           src="images/5.jpg" 
@@ -3924,97 +3855,69 @@ export default function HomePage(): React.JSX.Element {
       </div>
       
       <div style={{
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        width: '100%',
-        height: '100%',
-        background: 'linear-gradient(to bottom, rgba(0,0,0,0.1), rgba(0,0,0,0.6))',
-        zIndex: 2,
+        height: '60px',
         display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'flex-end',
         alignItems: 'center',
-        paddingBottom: isMobile ? '1.5rem' : '2rem'
+        justifyContent: 'center',
+        padding: isMobile ? '0.5rem' : '0.8rem',
+        backgroundColor: 'rgba(0,0,0,0.9)',
+        borderTop: '1px solid rgba(255,255,255,0.1)'
       }}>
         <div style={{
           display: 'flex',
-          flexDirection: 'column',
           alignItems: 'center',
-          gap: '0.8rem',
-          zIndex: 3
+          justifyContent: 'center',
+          gap: '0.6rem'
         }}>
           <div style={{
             color: 'white',
-            fontSize: isMobile ? '1.2rem' : '1.4rem',
+            fontSize: isMobile ? '1rem' : '1.1rem',
             fontWeight: '400',
             fontFamily: 'Helvetica, Arial, sans-serif',
-            lineHeight: 1,
-            textAlign: 'center',
-            textShadow: '0 2px 4px rgba(0,0,0,0.8)'
+            lineHeight: 1
           }}>
             BRAND
           </div>
           
-          <motion.div
-            whileHover={{ scale: 1.2 }}
-            transition={{ duration: 0.2 }}
+          <svg
+            width={isMobile ? "16" : "18"}
+            height={isMobile ? "16" : "18"}
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="white"
+            strokeWidth="2"
             style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
+              transform: 'rotate(-45deg)'
             }}
           >
-            <svg
-              width={isMobile ? "24" : "28"}
-              height={isMobile ? "24" : "28"}
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="white"
-              strokeWidth="2"
-              style={{
-                filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.8))'
-              }}
-            >
-              <line x1="5" y1="12" x2="19" y2="12" />
-              <line x1="12" y1="5" x2="19" y2="12" />
-              <line x1="12" y1="19" x2="19" y2="12" />
-            </svg>
-          </motion.div>
+            <line x1="5" y1="12" x2="19" y2="12" />
+            <line x1="12" y1="5" x2="19" y2="12" />
+            <line x1="12" y1="19" x2="19" y2="12" />
+          </svg>
         </div>
       </div>
-    </motion.div>
+    </div>
 
     {/* Card 4 */}
-    <motion.div
+    <div
       style={{
         position: 'relative',
-        width: isMobile ? '180px' : '220px',
-        height: isMobile ? '260px' : '300px',
-        borderRadius: '12px',
+        width: isMobile ? '200px' : '240px',
+        height: isMobile ? '280px' : '340px',
+        borderRadius: '8px',
         overflow: 'hidden',
         backgroundColor: '#1a1a1a',
-        border: '1px solid rgba(255,255,255,0.15)',
+        border: '1px solid rgba(255,255,255,0.1)',
         cursor: 'pointer',
         flexShrink: 0,
         display: 'flex',
         flexDirection: 'column'
       }}
-      whileHover={{ 
-        transform: 'translateY(-8px) scale(1.02)',
-        borderColor: 'rgba(255,255,255,0.3)',
-        boxShadow: '0 15px 30px rgba(0,0,0,0.4)'
-      }}
-      whileTap={{ scale: 0.98 }}
-      transition={{ duration: 0.3 }}
     >
       <div style={{
         width: '100%',
-        height: '100%',
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        zIndex: 1
+        height: 'calc(100% - 60px)',
+        position: 'relative'
       }}>
         <img 
           src="images/5.jpg" 
@@ -4037,97 +3940,69 @@ export default function HomePage(): React.JSX.Element {
       </div>
       
       <div style={{
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        width: '100%',
-        height: '100%',
-        background: 'linear-gradient(to bottom, rgba(0,0,0,0.1), rgba(0,0,0,0.6))',
-        zIndex: 2,
+        height: '60px',
         display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'flex-end',
         alignItems: 'center',
-        paddingBottom: isMobile ? '1.5rem' : '2rem'
+        justifyContent: 'center',
+        padding: isMobile ? '0.5rem' : '0.8rem',
+        backgroundColor: 'rgba(0,0,0,0.9)',
+        borderTop: '1px solid rgba(255,255,255,0.1)'
       }}>
         <div style={{
           display: 'flex',
-          flexDirection: 'column',
           alignItems: 'center',
-          gap: '0.8rem',
-          zIndex: 3
+          justifyContent: 'center',
+          gap: '0.6rem'
         }}>
           <div style={{
             color: 'white',
-            fontSize: isMobile ? '1.2rem' : '1.4rem',
+            fontSize: isMobile ? '1rem' : '1.1rem',
             fontWeight: '400',
             fontFamily: 'Helvetica, Arial, sans-serif',
-            lineHeight: 1,
-            textAlign: 'center',
-            textShadow: '0 2px 4px rgba(0,0,0,0.8)'
+            lineHeight: 1
           }}>
             UI/UX
           </div>
           
-          <motion.div
-            whileHover={{ scale: 1.2 }}
-            transition={{ duration: 0.2 }}
+          <svg
+            width={isMobile ? "16" : "18"}
+            height={isMobile ? "16" : "18"}
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="white"
+            strokeWidth="2"
             style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
+              transform: 'rotate(-45deg)'
             }}
           >
-            <svg
-              width={isMobile ? "24" : "28"}
-              height={isMobile ? "24" : "28"}
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="white"
-              strokeWidth="2"
-              style={{
-                filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.8))'
-              }}
-            >
-              <line x1="5" y1="12" x2="19" y2="12" />
-              <line x1="12" y1="5" x2="19" y2="12" />
-              <line x1="12" y1="19" x2="19" y2="12" />
-            </svg>
-          </motion.div>
+            <line x1="5" y1="12" x2="19" y2="12" />
+            <line x1="12" y1="5" x2="19" y2="12" />
+            <line x1="12" y1="19" x2="19" y2="12" />
+          </svg>
         </div>
       </div>
-    </motion.div>
+    </div>
 
     {/* Card 5 */}
-    <motion.div
+    <div
       style={{
         position: 'relative',
-        width: isMobile ? '180px' : '220px',
-        height: isMobile ? '260px' : '300px',
-        borderRadius: '12px',
+        width: isMobile ? '200px' : '240px',
+        height: isMobile ? '280px' : '340px',
+        borderRadius: '8px',
         overflow: 'hidden',
         backgroundColor: '#1a1a1a',
-        border: '1px solid rgba(255,255,255,0.15)',
+        border: '1px solid rgba(255,255,255,0.1)',
         cursor: 'pointer',
         flexShrink: 0,
         display: 'flex',
         flexDirection: 'column'
       }}
-      whileHover={{ 
-        transform: 'translateY(-8px) scale(1.02)',
-        borderColor: 'rgba(255,255,255,0.3)',
-        boxShadow: '0 15px 30px rgba(0,0,0,0.4)'
-      }}
-      whileTap={{ scale: 0.98 }}
-      transition={{ duration: 0.3 }}
     >
       <div style={{
         width: '100%',
-        height: '100%',
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        zIndex: 1
+        height: 'calc(100% - 60px)',
+        position: 'relative'
       }}>
         <img 
           src="images/5.jpg" 
@@ -4150,97 +4025,69 @@ export default function HomePage(): React.JSX.Element {
       </div>
       
       <div style={{
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        width: '100%',
-        height: '100%',
-        background: 'linear-gradient(to bottom, rgba(0,0,0,0.1), rgba(0,0,0,0.6))',
-        zIndex: 2,
+        height: '60px',
         display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'flex-end',
         alignItems: 'center',
-        paddingBottom: isMobile ? '1.5rem' : '2rem'
+        justifyContent: 'center',
+        padding: isMobile ? '0.5rem' : '0.8rem',
+        backgroundColor: 'rgba(0,0,0,0.9)',
+        borderTop: '1px solid rgba(255,255,255,0.1)'
       }}>
         <div style={{
           display: 'flex',
-          flexDirection: 'column',
           alignItems: 'center',
-          gap: '0.8rem',
-          zIndex: 3
+          justifyContent: 'center',
+          gap: '0.6rem'
         }}>
           <div style={{
             color: 'white',
-            fontSize: isMobile ? '1.2rem' : '1.4rem',
+            fontSize: isMobile ? '1rem' : '1.1rem',
             fontWeight: '400',
             fontFamily: 'Helvetica, Arial, sans-serif',
-            lineHeight: 1,
-            textAlign: 'center',
-            textShadow: '0 2px 4px rgba(0,0,0,0.8)'
+            lineHeight: 1
           }}>
             MOTION
           </div>
           
-          <motion.div
-            whileHover={{ scale: 1.2 }}
-            transition={{ duration: 0.2 }}
+          <svg
+            width={isMobile ? "16" : "18"}
+            height={isMobile ? "16" : "18"}
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="white"
+            strokeWidth="2"
             style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
+              transform: 'rotate(-45deg)'
             }}
           >
-            <svg
-              width={isMobile ? "24" : "28"}
-              height={isMobile ? "24" : "28"}
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="white"
-              strokeWidth="2"
-              style={{
-                filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.8))'
-              }}
-            >
-              <line x1="5" y1="12" x2="19" y2="12" />
-              <line x1="12" y1="5" x2="19" y2="12" />
-              <line x1="12" y1="19" x2="19" y2="12" />
-            </svg>
-          </motion.div>
+            <line x1="5" y1="12" x2="19" y2="12" />
+            <line x1="12" y1="5" x2="19" y2="12" />
+            <line x1="12" y1="19" x2="19" y2="12" />
+          </svg>
         </div>
       </div>
-    </motion.div>
+    </div>
 
     {/* Card 6 */}
-    <motion.div
+    <div
       style={{
         position: 'relative',
-        width: isMobile ? '180px' : '220px',
-        height: isMobile ? '260px' : '300px',
-        borderRadius: '12px',
+        width: isMobile ? '200px' : '240px',
+        height: isMobile ? '280px' : '340px',
+        borderRadius: '8px',
         overflow: 'hidden',
         backgroundColor: '#1a1a1a',
-        border: '1px solid rgba(255,255,255,0.15)',
+        border: '1px solid rgba(255,255,255,0.1)',
         cursor: 'pointer',
         flexShrink: 0,
         display: 'flex',
         flexDirection: 'column'
       }}
-      whileHover={{ 
-        transform: 'translateY(-8px) scale(1.02)',
-        borderColor: 'rgba(255,255,255,0.3)',
-        boxShadow: '0 15px 30px rgba(0,0,0,0.4)'
-      }}
-      whileTap={{ scale: 0.98 }}
-      transition={{ duration: 0.3 }}
     >
       <div style={{
         width: '100%',
-        height: '100%',
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        zIndex: 1
+        height: 'calc(100% - 60px)',
+        position: 'relative'
       }}>
         <img 
           src="images/5.jpg" 
@@ -4263,68 +4110,71 @@ export default function HomePage(): React.JSX.Element {
       </div>
       
       <div style={{
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        width: '100%',
-        height: '100%',
-        background: 'linear-gradient(to bottom, rgba(0,0,0,0.1), rgba(0,0,0,0.6))',
-        zIndex: 2,
+        height: '60px',
         display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'flex-end',
         alignItems: 'center',
-        paddingBottom: isMobile ? '1.5rem' : '2rem'
+        justifyContent: 'center',
+        padding: isMobile ? '0.5rem' : '0.8rem',
+        backgroundColor: 'rgba(0,0,0,0.9)',
+        borderTop: '1px solid rgba(255,255,255,0.1)'
       }}>
         <div style={{
           display: 'flex',
-          flexDirection: 'column',
           alignItems: 'center',
-          gap: '0.8rem',
-          zIndex: 3
+          justifyContent: 'center',
+          gap: '0.6rem'
         }}>
           <div style={{
             color: 'white',
-            fontSize: isMobile ? '1.2rem' : '1.4rem',
+            fontSize: isMobile ? '1rem' : '1.1rem',
             fontWeight: '400',
             fontFamily: 'Helvetica, Arial, sans-serif',
-            lineHeight: 1,
-            textAlign: 'center',
-            textShadow: '0 2px 4px rgba(0,0,0,0.8)'
+            lineHeight: 1
           }}>
             PRINT
           </div>
           
-          <motion.div
-            whileHover={{ scale: 1.2 }}
-            transition={{ duration: 0.2 }}
+          <svg
+            width={isMobile ? "16" : "18"}
+            height={isMobile ? "16" : "18"}
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="white"
+            strokeWidth="2"
             style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
+              transform: 'rotate(-45deg)'
             }}
           >
-            <svg
-              width={isMobile ? "24" : "28"}
-              height={isMobile ? "24" : "28"}
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="white"
-              strokeWidth="2"
-              style={{
-                filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.8))'
-              }}
-            >
-              <line x1="5" y1="12" x2="19" y2="12" />
-              <line x1="12" y1="5" x2="19" y2="12" />
-              <line x1="12" y1="19" x2="19" y2="12" />
-            </svg>
-          </motion.div>
+            <line x1="5" y1="12" x2="19" y2="12" />
+            <line x1="12" y1="5" x2="19" y2="12" />
+            <line x1="12" y1="19" x2="19" y2="12" />
+          </svg>
         </div>
       </div>
-    </motion.div>
+    </div>
   </div>
+
+  {/* Indikator scroll untuk mobile */}
+  {isMobile && (
+    <div style={{
+      textAlign: 'center',
+      marginTop: '0.8rem',
+      color: 'rgba(255,255,255,0.5)',
+      fontSize: '0.8rem',
+      fontFamily: 'Helvetica, Arial, sans-serif'
+    }}>
+      ← scroll untuk melihat semua →
+    </div>
+  )}
 </div>
+
+
+
+
+
+
+
+
         
 
               {/* Progress Bar dengan 3 Foto dan Komentar */}
@@ -5115,6 +4965,7 @@ export default function HomePage(): React.JSX.Element {
     </div>
   );
 }
+
 
 
 
