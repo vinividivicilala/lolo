@@ -164,13 +164,13 @@ export default function HomePage(): React.JSX.Element {
     }
   ];
 
-  // Data untuk 4 foto portrait sejajar - DIUBAH: tanpa teks, full
+  // Data untuk 4 foto portrait sejajar - VERSI FULL HEIGHT
   const portraitPhotos = [
     {
       id: 1,
       src: "images/5.jpg",
       alt: "Portrait 1",
-      text: "Photo 1" // Teks sederhana untuk ditampilkan di tengah bawah
+      text: "Photo 1"
     },
     {
       id: 2,
@@ -2620,20 +2620,22 @@ export default function HomePage(): React.JSX.Element {
               </div>
 
               {/* ======================== */}
-              {/* 4 Foto Portrait Sejajar - VERSI DIMODIFIKASI */}
+              {/* 4 Foto Portrait Sejajar - VERSI FULL HEIGHT */}
               {/* ======================== */}
               <div style={{
                 width: '100%',
-                padding: isMobile ? '1rem 0.5rem' : '2rem 1rem', // Padding minimal
+                padding: isMobile ? '0.5rem' : '1rem',
                 marginTop: isMobile ? '2rem' : '3rem',
                 marginBottom: isMobile ? '3rem' : '4rem',
                 boxSizing: 'border-box'
               }}>
                 <div style={{
                   display: 'grid',
-                  gridTemplateColumns: isMobile ? '1fr' : 'repeat(4, 1fr)',
-                  gap: isMobile ? '1rem' : '0.5rem', // Gap kecil
-                  maxWidth: '1400px', // Lebar maksimal lebih besar
+                  gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)',
+                  gridTemplateRows: isMobile ? 'repeat(2, 1fr)' : '1fr',
+                  gap: isMobile ? '0.5rem' : '0.5rem',
+                  height: isMobile ? '100vh' : '80vh', // FULL HEIGHT untuk mobile
+                  maxWidth: '100%',
                   margin: '0 auto'
                 }}>
                   {portraitPhotos.map((photo, index) => (
@@ -2645,14 +2647,15 @@ export default function HomePage(): React.JSX.Element {
                       style={{
                         display: 'flex',
                         flexDirection: 'column',
-                        backgroundColor: 'transparent', // No background
-                        borderRadius: '0', // No border radius
+                        backgroundColor: 'transparent',
+                        borderRadius: '0',
                         overflow: 'hidden',
-                        border: 'none', // No border
-                        boxShadow: 'none', // No shadow
+                        border: 'none',
+                        boxShadow: 'none',
                         transition: 'all 0.3s ease',
                         cursor: 'pointer',
                         height: '100%',
+                        width: '100%',
                         position: 'relative'
                       }}
                       whileHover={{ 
@@ -2661,10 +2664,10 @@ export default function HomePage(): React.JSX.Element {
                       }}
                       whileTap={{ scale: 0.98 }}
                     >
-                      {/* Foto FULL tanpa efek */}
+                      {/* Foto FULL HEIGHT */}
                       <div style={{
                         width: '100%',
-                        height: isMobile ? '300px' : '400px', // Tinggi lebih besar untuk full effect
+                        height: '100%', // FULL HEIGHT
                         overflow: 'hidden',
                         position: 'relative'
                       }}>
@@ -2680,25 +2683,26 @@ export default function HomePage(): React.JSX.Element {
                         />
                       </div>
 
-                      {/* Teks sederhana di tengah bawah */}
+                      {/* Teks sederhana di tengah bawah - DITEMUKAN */}
                       <div style={{
                         position: 'absolute',
-                        bottom: '1rem',
+                        bottom: isMobile ? '1rem' : '1.5rem',
                         left: 0,
                         right: 0,
                         textAlign: 'center',
-                        zIndex: 2
+                        zIndex: 2,
+                        pointerEvents: 'none'
                       }}>
                         <div style={{
                           display: 'inline-block',
                           backgroundColor: 'rgba(0, 0, 0, 0.5)',
                           backdropFilter: 'blur(5px)',
-                          padding: '0.5rem 1rem',
+                          padding: isMobile ? '0.4rem 0.8rem' : '0.5rem 1rem',
                           borderRadius: '4px'
                         }}>
                           <span style={{
                             color: 'white',
-                            fontSize: isMobile ? '0.9rem' : '1rem',
+                            fontSize: isMobile ? '0.8rem' : '1rem',
                             fontWeight: '500',
                             fontFamily: 'Helvetica, Arial, sans-serif',
                             letterSpacing: '0.5px'
@@ -3039,16 +3043,13 @@ export default function HomePage(): React.JSX.Element {
                               objectFit: 'cover'
                             }}
                             onError={(e) => {
-  e.currentTarget.style.backgroundColor = '#333';
-  e.currentTarget.style.display = 'flex';
-  e.currentTarget.style.alignItems = 'center';
-  e.currentTarget.style.justifyContent = 'center'; // PERBAIKAN: ganti : dengan =
-  e.currentTarget.style.color = '#fff';
-  e.currentTarget.innerHTML = '<div style="padding: 2rem; text-align: center;">Topic Image</div>';
-}}
-                           
-
-                      
+                              e.currentTarget.style.backgroundColor = '#333';
+                              e.currentTarget.style.display = 'flex';
+                              e.currentTarget.style.alignItems = 'center';
+                              e.currentTarget.style.justifyContent = 'center';
+                              e.currentTarget.style.color = '#fff';
+                              e.currentTarget.innerHTML = '<div style="padding: 2rem; text-align: center;">Topic Image</div>';
+                            }}
                           />
                         </motion.div>
                       </motion.div>
@@ -3502,4 +3503,3 @@ export default function HomePage(): React.JSX.Element {
     </div>
   );
 }
-
