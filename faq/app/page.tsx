@@ -3599,7 +3599,7 @@ export default function HomePage(): React.JSX.Element {
               </div>
 
 
-        {/* Foto Card Design Section - 6 Card Horizontal */}
+    {/* Foto Card Design Section - 6 Card Horizontal */}
 
 <div style={{
   width: '100%',
@@ -3609,6 +3609,21 @@ export default function HomePage(): React.JSX.Element {
   boxSizing: 'border-box',
   position: 'relative'
 }}>
+  {/* Judul di Atas Foto - Tengah */}
+  <div style={{
+    textAlign: 'center',
+    marginBottom: isMobile ? '1.5rem' : '2rem'
+  }}>
+    <div style={{
+      color: 'white',
+      fontSize: isMobile ? '1.2rem' : '1.5rem',
+      fontWeight: '400',
+      fontFamily: 'Helvetica, Arial, sans-serif'
+    }}>
+      Design Collection
+    </div>
+  </div>
+
   {/* Container 6 Foto Card Horizontal - Tengah */}
   <div style={{
     display: 'flex',
@@ -3659,7 +3674,7 @@ export default function HomePage(): React.JSX.Element {
         />
       </div>
       
-      {/* Container Teks dan SVG di bawah */}
+      {/* Container Teks dan SVG di bawah - Tidak pakai background */}
       <div style={{
         position: 'absolute',
         bottom: 0,
@@ -3670,22 +3685,22 @@ export default function HomePage(): React.JSX.Element {
         alignItems: 'center',
         justifyContent: 'space-between',
         padding: '0 1rem',
-        boxSizing: 'border-box',
-        backgroundColor: 'rgba(255,255,255,0.9)'
+        boxSizing: 'border-box'
       }}>
-        {/* Teks di tengah bawah */}
+        {/* Teks di tengah bawah - Putih */}
         <div style={{
           flex: 1,
           textAlign: 'center',
-          color: '#000',
+          color: 'white',
           fontSize: isMobile ? '1rem' : '1.1rem',
           fontWeight: '400',
-          fontFamily: 'Helvetica, Arial, sans-serif'
+          fontFamily: 'Helvetica, Arial, sans-serif',
+          textShadow: '0 1px 3px rgba(0,0,0,0.8)'
         }}>
           VISUAL
         </div>
         
-        {/* SVG di kanan bawah */}
+        {/* SVG di kanan bawah - Putih, Lurus Serong Kanan */}
         <div style={{
           marginLeft: '0.5rem'
         }}>
@@ -3694,12 +3709,17 @@ export default function HomePage(): React.JSX.Element {
             height={isMobile ? "18" : "20"}
             viewBox="0 0 24 24"
             fill="none"
-            stroke="#000"
+            stroke="white"
             strokeWidth="2"
+            style={{
+              filter: 'drop-shadow(0 1px 3px rgba(0,0,0,0.8))'
+            }}
           >
-            <line x1="5" y1="12" x2="19" y2="12" />
-            <line x1="12" y1="5" x2="19" y2="12" />
-            <line x1="12" y1="19" x2="19" y2="12" />
+            {/* Garis horizontal */}
+            <line x1="3" y1="12" x2="21" y2="12" />
+            {/* Garis serong kanan */}
+            <line x1="15" y1="5" x2="21" y2="12" />
+            <line x1="15" y1="19" x2="21" y2="12" />
           </svg>
         </div>
       </div>
@@ -3752,16 +3772,16 @@ export default function HomePage(): React.JSX.Element {
         alignItems: 'center',
         justifyContent: 'space-between',
         padding: '0 1rem',
-        boxSizing: 'border-box',
-        backgroundColor: 'rgba(255,255,255,0.9)'
+        boxSizing: 'border-box'
       }}>
         <div style={{
           flex: 1,
           textAlign: 'center',
-          color: '#000',
+          color: 'white',
           fontSize: isMobile ? '1rem' : '1.1rem',
           fontWeight: '400',
-          fontFamily: 'Helvetica, Arial, sans-serif'
+          fontFamily: 'Helvetica, Arial, sans-serif',
+          textShadow: '0 1px 3px rgba(0,0,0,0.8)'
         }}>
           DESIGN
         </div>
@@ -3774,12 +3794,15 @@ export default function HomePage(): React.JSX.Element {
             height={isMobile ? "18" : "20"}
             viewBox="0 0 24 24"
             fill="none"
-            stroke="#000"
+            stroke="white"
             strokeWidth="2"
+            style={{
+              filter: 'drop-shadow(0 1px 3px rgba(0,0,0,0.8))'
+            }}
           >
-            <line x1="5" y1="12" x2="19" y2="12" />
-            <line x1="12" y1="5" x2="19" y2="12" />
-            <line x1="12" y1="19" x2="19" y2="12" />
+            <line x1="3" y1="12" x2="21" y2="12" />
+            <line x1="15" y1="5" x2="21" y2="12" />
+            <line x1="15" y1="19" x2="21" y2="12" />
           </svg>
         </div>
       </div>
@@ -3832,16 +3855,16 @@ export default function HomePage(): React.JSX.Element {
         alignItems: 'center',
         justifyContent: 'space-between',
         padding: '0 1rem',
-        boxSizing: 'border-box',
-        backgroundColor: 'rgba(255,255,255,0.9)'
+        boxSizing: 'border-box'
       }}>
         <div style={{
           flex: 1,
           textAlign: 'center',
-          color: '#000',
+          color: 'white',
           fontSize: isMobile ? '1rem' : '1.1rem',
           fontWeight: '400',
-          fontFamily: 'Helvetica, Arial, sans-serif'
+          fontFamily: 'Helvetica, Arial, sans-serif',
+          textShadow: '0 1px 3px rgba(0,0,0,0.8)'
         }}>
           BRAND
         </div>
@@ -3854,12 +3877,15 @@ export default function HomePage(): React.JSX.Element {
             height={isMobile ? "18" : "20"}
             viewBox="0 0 24 24"
             fill="none"
-            stroke="#000"
+            stroke="white"
             strokeWidth="2"
+            style={{
+              filter: 'drop-shadow(0 1px 3px rgba(0,0,0,0.8))'
+            }}
           >
-            <line x1="5" y1="12" x2="19" y2="12" />
-            <line x1="12" y1="5" x2="19" y2="12" />
-            <line x1="12" y1="19" x2="19" y2="12" />
+            <line x1="3" y1="12" x2="21" y2="12" />
+            <line x1="15" y1="5" x2="21" y2="12" />
+            <line x1="15" y1="19" x2="21" y2="12" />
           </svg>
         </div>
       </div>
@@ -3912,16 +3938,16 @@ export default function HomePage(): React.JSX.Element {
         alignItems: 'center',
         justifyContent: 'space-between',
         padding: '0 1rem',
-        boxSizing: 'border-box',
-        backgroundColor: 'rgba(255,255,255,0.9)'
+        boxSizing: 'border-box'
       }}>
         <div style={{
           flex: 1,
           textAlign: 'center',
-          color: '#000',
+          color: 'white',
           fontSize: isMobile ? '1rem' : '1.1rem',
           fontWeight: '400',
-          fontFamily: 'Helvetica, Arial, sans-serif'
+          fontFamily: 'Helvetica, Arial, sans-serif',
+          textShadow: '0 1px 3px rgba(0,0,0,0.8)'
         }}>
           UI/UX
         </div>
@@ -3934,12 +3960,15 @@ export default function HomePage(): React.JSX.Element {
             height={isMobile ? "18" : "20"}
             viewBox="0 0 24 24"
             fill="none"
-            stroke="#000"
+            stroke="white"
             strokeWidth="2"
+            style={{
+              filter: 'drop-shadow(0 1px 3px rgba(0,0,0,0.8))'
+            }}
           >
-            <line x1="5" y1="12" x2="19" y2="12" />
-            <line x1="12" y1="5" x2="19" y2="12" />
-            <line x1="12" y1="19" x2="19" y2="12" />
+            <line x1="3" y1="12" x2="21" y2="12" />
+            <line x1="15" y1="5" x2="21" y2="12" />
+            <line x1="15" y1="19" x2="21" y2="12" />
           </svg>
         </div>
       </div>
@@ -3992,16 +4021,16 @@ export default function HomePage(): React.JSX.Element {
         alignItems: 'center',
         justifyContent: 'space-between',
         padding: '0 1rem',
-        boxSizing: 'border-box',
-        backgroundColor: 'rgba(255,255,255,0.9)'
+        boxSizing: 'border-box'
       }}>
         <div style={{
           flex: 1,
           textAlign: 'center',
-          color: '#000',
+          color: 'white',
           fontSize: isMobile ? '1rem' : '1.1rem',
           fontWeight: '400',
-          fontFamily: 'Helvetica, Arial, sans-serif'
+          fontFamily: 'Helvetica, Arial, sans-serif',
+          textShadow: '0 1px 3px rgba(0,0,0,0.8)'
         }}>
           MOTION
         </div>
@@ -4014,12 +4043,15 @@ export default function HomePage(): React.JSX.Element {
             height={isMobile ? "18" : "20"}
             viewBox="0 0 24 24"
             fill="none"
-            stroke="#000"
+            stroke="white"
             strokeWidth="2"
+            style={{
+              filter: 'drop-shadow(0 1px 3px rgba(0,0,0,0.8))'
+            }}
           >
-            <line x1="5" y1="12" x2="19" y2="12" />
-            <line x1="12" y1="5" x2="19" y2="12" />
-            <line x1="12" y1="19" x2="19" y2="12" />
+            <line x1="3" y1="12" x2="21" y2="12" />
+            <line x1="15" y1="5" x2="21" y2="12" />
+            <line x1="15" y1="19" x2="21" y2="12" />
           </svg>
         </div>
       </div>
@@ -4072,16 +4104,16 @@ export default function HomePage(): React.JSX.Element {
         alignItems: 'center',
         justifyContent: 'space-between',
         padding: '0 1rem',
-        boxSizing: 'border-box',
-        backgroundColor: 'rgba(255,255,255,0.9)'
+        boxSizing: 'border-box'
       }}>
         <div style={{
           flex: 1,
           textAlign: 'center',
-          color: '#000',
+          color: 'white',
           fontSize: isMobile ? '1rem' : '1.1rem',
           fontWeight: '400',
-          fontFamily: 'Helvetica, Arial, sans-serif'
+          fontFamily: 'Helvetica, Arial, sans-serif',
+          textShadow: '0 1px 3px rgba(0,0,0,0.8)'
         }}>
           PRINT
         </div>
@@ -4094,19 +4126,21 @@ export default function HomePage(): React.JSX.Element {
             height={isMobile ? "18" : "20"}
             viewBox="0 0 24 24"
             fill="none"
-            stroke="#000"
+            stroke="white"
             strokeWidth="2"
+            style={{
+              filter: 'drop-shadow(0 1px 3px rgba(0,0,0,0.8))'
+            }}
           >
-            <line x1="5" y1="12" x2="19" y2="12" />
-            <line x1="12" y1="5" x2="19" y2="12" />
-            <line x1="12" y1="19" x2="19" y2="12" />
+            <line x1="3" y1="12" x2="21" y2="12" />
+            <line x1="15" y1="5" x2="21" y2="12" />
+            <line x1="15" y1="19" x2="21" y2="12" />
           </svg>
         </div>
       </div>
     </div>
   </div>
 </div>
-
 
 
         
@@ -4899,6 +4933,7 @@ export default function HomePage(): React.JSX.Element {
     </div>
   );
 }
+
 
 
 
