@@ -89,7 +89,7 @@ export default function HomePage(): React.JSX.Element {
   const [isMobile, setIsMobile] = useState(false);
   const [loadingText, setLoadingText] = useState("NURU");
   const [isLoading, setIsLoading] = useState(true);
-  const [currentView, setCurrentView] = useState<"main" | "index" | "menuruPlus">("main");
+  const [currentView, setCurrentView] = useState<"main" | "index" | "grid">("main");
   const [sliderPosition, setSliderPosition] = useState<"index" | "grid">("grid");
   const [hoveredTopic, setHoveredTopic] = useState<number | null>(null);
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
@@ -110,7 +110,7 @@ export default function HomePage(): React.JSX.Element {
   const [totalLoggedInUsers, setTotalLoggedInUsers] = useState(0);
   
   // State baru untuk popup chatbot
-  const [showChatbotPopup, setShowChatbotPopup] = useState(false);
+  const [showChatbotPopup, setShowChatbotPopup] = useState(true); // Default true untuk testing
   
   // State untuk counter foto - angka kiri saja yang berubah
   const [leftCounter, setLeftCounter] = useState("01");
@@ -141,6 +141,18 @@ export default function HomePage(): React.JSX.Element {
   const userDropdownRef = useRef<HTMLDivElement>(null);
   const chatbotPopupRef = useRef<HTMLDivElement>(null);
 
+
+
+
+
+
+
+
+
+
+
+  
+
   // Animasi loading text
   const loadingTexts = [
     "NURU", "MBACA", "NULIS", "NGEXPLORASI", 
@@ -170,120 +182,12 @@ export default function HomePage(): React.JSX.Element {
     }
   ];
 
-  // Data untuk Roles di halaman Menuru Full Page
+  // Data untuk Roles
   const rolesData = [
     { title: "My Roles", description: "Branding & Creative Direction" },
     { title: "Design", description: "Visual identity & UI/UX" },
     { title: "Development", description: "Frontend & Backend" },
     { title: "Features", description: "Functionality & Integration" }
-  ];
-
-  // Data untuk halaman Index - HANYA TAHUN
-  const indexTopics = [
-    {
-      id: 1,
-      title: "Personal Journey",
-      description: "Exploring self-discovery.",
-      year: "2024"
-    },
-    {
-      id: 2,
-      title: "Creative Process",
-      description: "Ideas evolution documentation.",
-      year: "2024"
-    },
-    {
-      id: 3,
-      title: "Visual Storytelling",
-      description: "Photography for personal growth.",
-      year: "2024"
-    },
-    {
-      id: 4,
-      title: "Emotional Archive",
-      description: "Collection of feelings.",
-      year: "2024"
-    },
-    {
-      id: 5,
-      title: "Growth Metrics",
-      description: "Tracking development goals.",
-      year: "2024"
-    }
-  ];
-
-  // Data untuk halaman Menuru+ (Mirip Index tapi dengan konten berbeda)
-  const menuruPlusTopics = [
-    {
-      id: 1,
-      title: "Brand Strategy",
-      description: "Creating meaningful connections.",
-      year: "2024"
-    },
-    {
-      id: 2,
-      title: "Visual Identity",
-      description: "Crafting memorable aesthetics.",
-      year: "2024"
-    },
-    {
-      id: 3,
-      title: "Digital Presence",
-      description: "Building online ecosystems.",
-      year: "2024"
-    },
-    {
-      id: 4,
-      title: "User Experience",
-      description: "Designing intuitive interactions.",
-      year: "2024"
-    },
-    {
-      id: 5,
-      title: "Content Creation",
-      description: "Telling compelling stories.",
-      year: "2024"
-    }
-  ];
-
-  // Data untuk card design - 6 card sejajar
-  const cardItems = [
-    { 
-      id: 1, 
-      src: "images/5.jpg", 
-      alt: "Card 1",
-      text: "Brand Identity"
-    },
-    { 
-      id: 2, 
-      src: "images/6.jpg", 
-      alt: "Card 2",
-      text: "Visual Design"
-    },
-    { 
-      id: 3, 
-      src: "images/5.jpg", 
-      alt: "Card 3",
-      text: "UI/UX"
-    },
-    { 
-      id: 4, 
-      src: "images/6.jpg", 
-      alt: "Card 4",
-      text: "Web Development"
-    },
-    { 
-      id: 5, 
-      src: "images/5.jpg", 
-      alt: "Card 5",
-      text: "Mobile App"
-    },
-    { 
-      id: 6, 
-      src: "images/6.jpg", 
-      alt: "Card 6",
-      text: "Creative Direction"
-    }
   ];
 
   // Fungsi untuk menghitung waktu yang lalu
@@ -811,11 +715,6 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // Fungsi untuk toggle view ke Menuru+
-  const toggleMenuruPlusView = () => {
-    setCurrentView("menuruPlus");
-  };
-
   // Fungsi untuk toggle halaman full page MENURU
   const toggleMenuruFullPage = () => {
     setShowMenuruFullPage(!showMenuruFullPage);
@@ -845,12 +744,6 @@ export default function HomePage(): React.JSX.Element {
   const handlePhotoClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     handleOpenPhotoFullPage();
-  };
-
-  // Handler untuk klik card
-  const handleCardClick = (id: number) => {
-    console.log(`Card ${id} diklik`);
-    // Bisa ditambahkan aksi lain jika diperlukan
   };
 
   // Handler untuk Sign In / User Button
@@ -997,6 +890,40 @@ export default function HomePage(): React.JSX.Element {
     handleCloseChatbotPopup();
     router.push('/chatbot');
   };
+
+  // Data untuk halaman Index - HANYA TAHUN
+  const indexTopics = [
+    {
+      id: 1,
+      title: "Personal Journey",
+      description: "Exploring self-discovery.",
+      year: "2024"
+    },
+    {
+      id: 2,
+      title: "Creative Process",
+      description: "Ideas evolution documentation.",
+      year: "2024"
+    },
+    {
+      id: 3,
+      title: "Visual Storytelling",
+      description: "Photography for personal growth.",
+      year: "2024"
+    },
+    {
+      id: 4,
+      title: "Emotional Archive",
+      description: "Collection of feelings.",
+      year: "2024"
+    },
+    {
+      id: 5,
+      title: "Growth Metrics",
+      description: "Tracking development goals.",
+      year: "2024"
+    }
+  ];
 
   // Komentar untuk foto saat ini
   const currentPhotoComments = comments.filter(comment => comment.photoIndex === currentPhotoIndex);
@@ -2223,7 +2150,7 @@ export default function HomePage(): React.JSX.Element {
                     display: 'flex',
                     flexDirection: 'column',
                     gap: '0.8rem'
-                }}
+                  }}
                 >
                   {/* Tombol Utama */}
                   <motion.button
@@ -3142,160 +3069,358 @@ export default function HomePage(): React.JSX.Element {
   position: 'relative'
 }}>
 
-{/* CARD DESIGN SECTION - 6 Card Sejajar */}
+  {/* PRODUCT AND Image Section - DI BAWAH JUDUL WEBSITE */}
 <div style={{
   width: '100%',
   padding: isMobile ? '1.5rem' : '3rem',
+  marginTop: isMobile ? '1rem' : '2rem',
   boxSizing: 'border-box',
-  marginTop: isMobile ? '2rem' : '3rem'
+  display: 'flex',
+  flexDirection: 'column',
+  gap: isMobile ? '0.1rem' : '0.2rem' // JARAK SANGAT DEKAT ANTAR BARIS
 }}>
   
-  {/* Teks PROJECT kecil di atas tengah */}
-  <motion.div
-    initial={{ opacity: 0, y: -20 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ duration: 0.5 }}
-    style={{
-      textAlign: 'center',
-      marginBottom: isMobile ? '1.5rem' : '2rem'
-    }}
-  >
-    <div style={{
-      color: 'rgba(255,255,255,0.7)',
-      fontSize: isMobile ? '0.9rem' : '1rem',
-      fontWeight: '400',
-      fontFamily: 'Helvetica, Arial, sans-serif',
-      letterSpacing: '2px',
-      textTransform: 'uppercase'
-    }}>
-      PROJECT
-    </div>
-  </motion.div>
-
-  {/* Container untuk 6 Card */}
+  {/* Baris 1: PRODUCT + AND + Foto + 01 */}
   <div style={{
-    display: 'grid',
-    gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(6, 1fr)',
-    gap: isMobile ? '1rem' : '1.5rem',
-    width: '100%'
+    display: 'flex',
+    alignItems: 'center',
+    width: '100%',
+    justifyContent: 'space-between'
   }}>
-    {cardItems.map((card, index) => (
-      <motion.div
-        key={card.id}
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: index * 0.1, duration: 0.5 }}
-        onClick={() => handleCardClick(card.id)}
-        style={{
-          aspectRatio: '3/4',
-          borderRadius: '12px',
+    {/* PRODUCT - Di kiri */}
+    <div style={{
+      textAlign: 'left',
+      height: isMobile ? '5rem' : '7rem',
+      display: 'flex',
+      alignItems: 'center'
+    }}>
+      <h2 style={{
+        color: 'white',
+        fontSize: isMobile ? '5rem' : '7rem',
+        fontWeight: '900',
+        textTransform: 'uppercase',
+        fontFamily: 'Helvetica, Arial, sans-serif',
+        letterSpacing: '-3px',
+        margin: 0,
+        lineHeight: 0.8,
+        padding: 0
+      }}>
+        PRODUCT
+      </h2>
+    </div>
+
+    {/* AND + Foto Container - Di kanan, dekat satu sama lain */}
+    <div style={{
+      display: 'flex',
+      alignItems: 'center',
+      gap: isMobile ? '0.5rem' : '1rem'
+    }}>
+      {/* AND */}
+      <div style={{
+        textAlign: 'center',
+        height: isMobile ? '5rem' : '7rem',
+        display: 'flex',
+        alignItems: 'center'
+      }}>
+        <h2 style={{
+          color: 'white',
+          fontSize: isMobile ? '5rem' : '7rem',
+          fontWeight: '900',
+          textTransform: 'uppercase',
+          fontFamily: 'Helvetica, Arial, sans-serif',
+          letterSpacing: '-3px',
+          margin: 0,
+          lineHeight: 0.8,
+          padding: 0
+        }}>
+          AND
+        </h2>
+      </div>
+
+      {/* Container Foto + Angka 01 */}
+      <div style={{
+        position: 'relative',
+        display: 'flex',
+        alignItems: 'flex-end'
+      }}>
+        {/* Foto */}
+        <div style={{
+          width: isMobile ? '140px' : '180px',
+          height: isMobile ? '5rem' : '7rem',
+          borderRadius: '10px',
           overflow: 'hidden',
-          position: 'relative',
-          cursor: 'pointer',
-          boxShadow: '0 8px 25px rgba(0,0,0,0.3)',
-          border: '1px solid rgba(255,255,255,0.1)',
-          backgroundColor: '#111',
-          height: isMobile ? '250px' : '300px' // Ukuran lebih kecil standar
-        }}
-        whileHover={{ 
-          scale: 1.05,
-          boxShadow: '0 12px 35px rgba(255,255,255,0.1)',
-          transition: { duration: 0.3 }
-        }}
-        whileTap={{ scale: 0.95 }}
-      >
-        {/* Foto di dalam card */}
+          border: '1px solid rgba(255, 255, 255, 0.3)',
+          backgroundColor: '#222'
+        }}>
+          <img 
+            src="images/5.jpg" 
+            alt="Product Image"
+            style={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+              display: 'block'
+            }}
+          />
+        </div>
+        
+        {/* Angka 01 */}
+        <div style={{
+          position: 'absolute',
+          bottom: '-0.8rem',
+          right: '-1.5rem',
+          color: 'rgba(255, 255, 255, 0.7)',
+          fontSize: isMobile ? '1rem' : '1.2rem',
+          fontWeight: '400',
+          fontFamily: 'Helvetica, Arial, sans-serif',
+          letterSpacing: '1px'
+        }}>
+          01
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {/* Baris 2: Foto + VISUAL DESIGNER */}
+  <div style={{
+    display: 'flex',
+    alignItems: 'center',
+    width: '100%',
+    justifyContent: 'flex-start',
+    gap: isMobile ? '4rem' : '8rem'
+  }}>
+    {/* Container Foto + Angka 02 - Di kiri */}
+    <div style={{
+      position: 'relative',
+      display: 'flex',
+      alignItems: 'flex-end'
+    }}>
+      {/* Foto */}
+      <div style={{
+        width: isMobile ? '140px' : '180px',
+        height: isMobile ? '5rem' : '7rem',
+        borderRadius: '10px',
+        overflow: 'hidden',
+        border: '1px solid rgba(255, 255, 255, 0.3)',
+        backgroundColor: '#222'
+      }}>
         <img 
-          src={card.src}
-          alt={card.alt}
+          src="images/5.jpg" 
+          alt="Visual Designer"
           style={{
             width: '100%',
             height: '100%',
             objectFit: 'cover',
             display: 'block'
           }}
-          onError={(e) => {
-            e.currentTarget.style.backgroundColor = '#222';
-            e.currentTarget.style.display = 'flex';
-            e.currentTarget.style.alignItems = 'center';
-            e.currentTarget.style.justifyContent = 'center';
-            e.currentTarget.style.color = '#fff';
-            e.currentTarget.innerHTML = `<div style="padding: 1rem; text-align: center;">${card.text}</div>`;
-          }}
         />
-        
-        {/* Overlay untuk teks dan panah */}
-        <div style={{
-          position: 'absolute',
-          bottom: 0,
-          left: 0,
-          right: 0,
-          padding: isMobile ? '0.8rem' : '1rem',
-          background: 'linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 100%)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between'
-        }}>
-          {/* Teks di tengah bawah */}
-          <div style={{
-            color: 'white',
-            fontSize: isMobile ? '0.9rem' : '1rem',
-            fontWeight: '500',
-            fontFamily: 'Helvetica, Arial, sans-serif',
-            flex: 1,
-            textAlign: 'center'
-          }}>
-            {card.text}
-          </div>
-          
-          {/* Panah serong kanan */}
-          <motion.div
-            style={{
-              width: isMobile ? '24px' : '28px',
-              height: isMobile ? '24px' : '28px',
-              marginLeft: '0.5rem',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}
-            whileHover={{ x: 5 }}
-            transition={{ duration: 0.2 }}
-          >
-            <svg 
-              width={isMobile ? "16" : "18"} 
-              height={isMobile ? "16" : "18"} 
-              viewBox="0 0 24 24" 
-              fill="none" 
-              stroke="white" 
-              strokeWidth="2"
-              style={{
-                transform: 'rotate(-45deg)'
-              }}
-            >
-              <line x1="5" y1="12" x2="19" y2="12"/>
-              <polyline points="12 5 19 12 12 19"/>
-            </svg>
-          </motion.div>
-        </div>
-        
-        {/* Overlay efek hover */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          whileHover={{ opacity: 1 }}
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: 'rgba(0,0,0,0.2)',
-            pointerEvents: 'none'
-          }}
-        />
-      </motion.div>
-    ))}
+      </div>
+      
+      {/* Angka 02 */}
+      <div style={{
+        position: 'absolute',
+        bottom: '-0.8rem',
+        right: '-1.5rem',
+        color: 'rgba(255, 255, 255, 0.7)',
+        fontSize: isMobile ? '1rem' : '1.2rem',
+        fontWeight: '400',
+        fontFamily: 'Helvetica, Arial, sans-serif',
+        letterSpacing: '1px'
+      }}>
+        02
+      </div>
+    </div>
+
+    {/* VISUAL DESIGNER - 1 baris */}
+    <div style={{
+      textAlign: 'left',
+      height: isMobile ? '5rem' : '7rem',
+      display: 'flex',
+      alignItems: 'center'
+    }}>
+      <h2 style={{
+        color: 'white',
+        fontSize: isMobile ? '5rem' : '7rem',
+        fontWeight: '900',
+        textTransform: 'uppercase',
+        fontFamily: 'Helvetica, Arial, sans-serif',
+        letterSpacing: '-3px',
+        margin: 0,
+        lineHeight: 0.8,
+        whiteSpace: 'nowrap'
+      }}>
+        VISUAL DESIGNER
+      </h2>
+    </div>
   </div>
+
+  {/* Baris 3: BASED + Foto + IN */}
+  <div style={{
+    display: 'flex',
+    alignItems: 'center',
+    width: '100%',
+    justifyContent: 'space-between'
+  }}>
+    {/* BASED - Kiri */}
+    <div style={{
+      textAlign: 'left',
+      height: isMobile ? '5rem' : '7rem',
+      display: 'flex',
+      alignItems: 'center'
+    }}>
+      <h2 style={{
+        color: 'white',
+        fontSize: isMobile ? '5rem' : '7rem',
+        fontWeight: '900',
+        textTransform: 'uppercase',
+        fontFamily: 'Helvetica, Arial, sans-serif',
+        letterSpacing: '-3px',
+        margin: 0,
+        lineHeight: 0.8
+      }}>
+        BASED
+      </h2>
+    </div>
+
+    {/* Container Foto + Angka 03 */}
+    <div style={{
+      position: 'relative',
+      display: 'flex',
+      alignItems: 'flex-end'
+    }}>
+      {/* Foto */}
+      <div style={{
+        width: isMobile ? '140px' : '180px',
+        height: isMobile ? '5rem' : '7rem',
+        borderRadius: '10px',
+        overflow: 'hidden',
+        border: '1px solid rgba(255, 255, 255, 0.3)',
+        backgroundColor: '#222'
+      }}>
+        <img 
+          src="images/5.jpg" 
+          alt="Based"
+          style={{
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            display: 'block'
+          }}
+        />
+      </div>
+      
+      {/* Angka 03 */}
+      <div style={{
+        position: 'absolute',
+        bottom: '-0.8rem',
+        right: '-1.5rem',
+        color: 'rgba(255, 255, 255, 0.7)',
+        fontSize: isMobile ? '1rem' : '1.2rem',
+        fontWeight: '400',
+        fontFamily: 'Helvetica, Arial, sans-serif',
+        letterSpacing: '1px'
+      }}>
+        03
+      </div>
+    </div>
+
+    {/* IN - Kanan */}
+    <div style={{
+      textAlign: 'right',
+      height: isMobile ? '5rem' : '7rem',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'flex-end'
+    }}>
+      <h2 style={{
+        color: 'white',
+        fontSize: isMobile ? '5rem' : '7rem',
+        fontWeight: '900',
+        textTransform: 'uppercase',
+        fontFamily: 'Helvetica, Arial, sans-serif',
+        letterSpacing: '-3px',
+        margin: 0,
+        lineHeight: 0.8
+      }}>
+        IN
+      </h2>
+    </div>
+  </div>
+
+  {/* Baris 4: Foto + INDONESIA */}
+  <div style={{
+    display: 'flex',
+    alignItems: 'center',
+    width: '100%',
+    justifyContent: 'flex-start',
+    gap: isMobile ? '4rem' : '8rem'
+  }}>
+    {/* Container Foto + Angka 04 - Di kiri */}
+    <div style={{
+      position: 'relative',
+      display: 'flex',
+      alignItems: 'flex-end'
+    }}>
+      {/* Foto */}
+      <div style={{
+        width: isMobile ? '140px' : '180px',
+        height: isMobile ? '5rem' : '7rem',
+        borderRadius: '10px',
+        overflow: 'hidden',
+        border: '1px solid rgba(255, 255, 255, 0.3)',
+        backgroundColor: '#222'
+      }}>
+        <img 
+          src="images/5.jpg" 
+          alt="Footer Image"
+          style={{
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            display: 'block'
+          }}
+        />
+      </div>
+      
+      {/* Angka 04 */}
+      <div style={{
+        position: 'absolute',
+        bottom: '-0.8rem',
+        right: '-1.5rem',
+        color: 'rgba(255, 255, 255, 0.7)',
+        fontSize: isMobile ? '1rem' : '1.2rem',
+        fontWeight: '400',
+        fontFamily: 'Helvetica, Arial, sans-serif',
+        letterSpacing: '1px'
+      }}>
+        04
+      </div>
+    </div>
+
+    {/* INDONESIA */}
+    <div style={{
+      textAlign: 'left',
+      height: isMobile ? '5rem' : '7rem',
+      display: 'flex',
+      alignItems: 'center'
+    }}>
+      <h2 style={{
+        color: 'white',
+        fontSize: isMobile ? '5rem' : '7rem',
+        fontWeight: '900',
+        textTransform: 'uppercase',
+        fontFamily: 'Helvetica, Arial, sans-serif',
+        letterSpacing: '-3px',
+        margin: 0,
+        lineHeight: 0.8
+      }}>
+        INDONESIA
+      </h2>
+    </div>
+  </div>
+
 </div>
+  
 
   {/* Spacer kecil sebelum konten berikutnya */}
   <div style={{
@@ -3405,6 +3530,14 @@ export default function HomePage(): React.JSX.Element {
             </div>
           </div>
 
+
+
+
+
+
+
+
+      
 
                 {/* Teks MENURU dengan animasi Plus (+) */}
                 <motion.div
@@ -4025,313 +4158,6 @@ export default function HomePage(): React.JSX.Element {
             </motion.div>
           )}
 
-          {/* Halaman Menuru+ */}
-          {currentView === "menuruPlus" && (
-            <motion.div
-              key="menuru-plus-view"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.5 }}
-              style={{
-                width: '100%',
-                minHeight: '100vh',
-                padding: isMobile ? '1rem' : '2rem',
-                boxSizing: 'border-box',
-                position: 'relative',
-                marginTop: isMobile ? '2rem' : '4rem'
-              }}
-            >
-              {/* Garis bawah di atas MENURU+ */}
-              <div style={{
-                width: '100%',
-                height: '1px',
-                backgroundColor: 'rgba(255,255,255,0.2)',
-                marginBottom: '3rem'
-              }}></div>
-
-              {/* Container utama untuk halaman Menuru+ */}
-              <div ref={topicContainerRef} style={{
-                display: 'flex',
-                flexDirection: isMobile ? 'column' : 'row',
-                gap: isMobile ? '2rem' : '3rem',
-                width: '100%',
-                fontFamily: 'Helvetica, Arial, sans-serif',
-                position: 'relative'
-              }}>
-                <div style={{
-                  flex: 0.8,
-                  marginLeft: isMobile ? '0.5rem' : '1rem'
-                }}>
-                  <div style={{
-                    color: 'white',
-                    fontSize: isMobile ? '1.8rem' : '2.5rem',
-                    fontWeight: '300',
-                    textTransform: 'uppercase',
-                    letterSpacing: '2px',
-                    fontFamily: 'Helvetica, Arial, sans-serif',
-                    lineHeight: 1
-                  }}>
-                    MENURU+
-                  </div>
-                  <div style={{
-                    color: 'rgba(255,255,255,0.7)',
-                    fontSize: isMobile ? '0.9rem' : '1.1rem',
-                    fontWeight: '300',
-                    marginTop: '0.5rem'
-                  }}>
-                    Enhanced Experience
-                  </div>
-                </div>
-
-                <div style={{
-                  flex: 1.2,
-                  position: 'relative',
-                  minHeight: isMobile ? '400px' : '600px',
-                  marginLeft: isMobile ? '-3rem' : '-4rem'
-                }}>
-                  <AnimatePresence>
-                    {hoveredTopic !== null && (
-                      <motion.div
-                        key="hovered-image"
-                        initial={{ opacity: 0 }}
-                        animate={{ 
-                          opacity: 1,
-                          y: imagePosition
-                        }}
-                        exit={{ opacity: 0 }}
-                        transition={{ duration: 0.3 }}
-                        style={{
-                          position: 'absolute',
-                          top: 0,
-                          left: 0,
-                          width: '85%',
-                          height: '85%',
-                          zIndex: 5
-                        }}
-                      >
-                        <motion.div
-                          initial={{ scale: 0.95 }}
-                          animate={{ scale: 1 }}
-                          exit={{ scale: 0.95 }}
-                          transition={{ duration: 0.4 }}
-                          style={{
-                            width: '100%',
-                            height: '100%',
-                            overflow: 'hidden',
-                            borderRadius: '15px',
-                            boxShadow: '0 10px 30px rgba(0,0,0,0.5)',
-                            border: '1px solid rgba(255,255,255,0.1)'
-                          }}
-                        >
-                          <img 
-                            src="images/5.jpg" 
-                            alt={`Topic ${hoveredTopic}`}
-                            style={{
-                              width: '100%',
-                              height: '100%',
-                              display: 'block',
-                              objectFit: 'cover'
-                            }}
-                            onError={(e) => {
-                              e.currentTarget.style.backgroundColor = '#333';
-                              e.currentTarget.style.display = 'flex';
-                              e.currentTarget.style.alignItems = 'center';
-                              e.currentTarget.style.justifyContent = 'center';
-                              e.currentTarget.style.color = '#fff';
-                              e.currentTarget.innerHTML = '<div style="padding: 2rem; text-align: center;">Topic Image</div>';
-                            }}
-                          />
-                        </motion.div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-
-                <div style={{
-                  flex: 1,
-                  position: 'relative',
-                  marginLeft: isMobile ? '-4rem' : '-5rem'
-                }}>
-                  <div style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '0.3rem',
-                    fontFamily: 'Helvetica, Arial, sans-serif'
-                  }}>
-                    {menuruPlusTopics.map((topic, index) => (
-                      <div 
-                        key={topic.id}
-                        onMouseEnter={() => handleTopicHover(topic.id)}
-                        onMouseLeave={() => handleTopicHover(null)}
-                        style={{
-                          display: 'flex',
-                          flexDirection: 'column',
-                          position: 'relative',
-                          padding: isMobile ? '0.8rem 0' : '1rem 0',
-                          cursor: 'pointer'
-                        }}
-                      >
-                        <AnimatePresence>
-                          {hoveredTopic === topic.id && (
-                            <motion.div
-                              initial={{ width: 0, opacity: 0 }}
-                              animate={{ width: '100%', opacity: 1 }}
-                              exit={{ width: 0, opacity: 0 }}
-                              transition={{ duration: 0.3 }}
-                              style={{
-                                position: 'absolute',
-                                left: 0,
-                                top: '50%',
-                                height: '1px',
-                                backgroundColor: 'rgba(255,255,255,0.3)',
-                                transform: 'translateY(-50%)',
-                                zIndex: 1
-                              }}
-                            />
-                          )}
-                        </AnimatePresence>
-
-                        <motion.div
-                          style={{
-                            color: 'white',
-                            fontSize: isMobile ? '1.2rem' : '1.5rem',
-                            fontWeight: hoveredTopic === topic.id ? '600' : '400',
-                            fontFamily: 'Helvetica, Arial, sans-serif',
-                            lineHeight: 1.1,
-                            position: 'relative',
-                            zIndex: 2,
-                            transition: 'font-weight 0.2s ease'
-                          }}
-                          whileHover={{ x: 5 }}
-                        >
-                          {topic.title}
-                        </motion.div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div style={{
-                  flex: 1,
-                  marginLeft: isMobile ? '-5rem' : '-6rem'
-                }}>
-                  <div style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '0.3rem',
-                    fontFamily: 'Helvetica, Arial, sans-serif'
-                  }}>
-                    {menuruPlusTopics.map((topic, index) => (
-                      <div 
-                        key={topic.id}
-                        onMouseEnter={() => handleTopicHover(topic.id)}
-                        onMouseLeave={() => handleTopicHover(null)}
-                        style={{
-                          display: 'flex',
-                          flexDirection: 'column',
-                          padding: isMobile ? '0.8rem 0' : '1rem 0',
-                          cursor: 'pointer',
-                          position: 'relative',
-                          zIndex: 10
-                        }}
-                      >
-                        <div style={{
-                          display: 'flex',
-                          alignItems: 'baseline',
-                          gap: '0.5rem'
-                        }}>
-                          <motion.div
-                            style={{
-                              color: 'white',
-                              fontSize: isMobile ? '1.2rem' : '1.5rem',
-                              fontWeight: hoveredTopic === topic.id ? '600' : '400',
-                              fontFamily: 'Helvetica, Arial, sans-serif',
-                              lineHeight: 1.1,
-                              transition: 'font-weight 0.2s ease',
-                              position: 'relative',
-                              zIndex: 11
-                            }}
-                            whileHover={{ x: 5 }}
-                          >
-                            {topic.description}
-                          </motion.div>
-                          <div style={{
-                            color: '#00FF00',
-                            fontSize: isMobile ? '1.2rem' : '1.5rem',
-                            fontWeight: '400',
-                            fontFamily: 'Helvetica, Arial, sans-serif',
-                            lineHeight: 1.1,
-                            whiteSpace: 'nowrap',
-                            position: 'relative',
-                            zIndex: 11
-                          }}>
-                            {topic.year}
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              {/* Tombol untuk kembali ke view utama */}
-              <div style={{
-                position: 'relative',
-                marginTop: '4rem',
-                marginBottom: '4rem',
-                paddingLeft: isMobile ? '1rem' : '2rem',
-                paddingRight: isMobile ? '1rem' : '2rem',
-                display: 'flex',
-                justifyContent: 'flex-start'
-              }}>
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '1.5rem'
-                }}>
-                  <motion.button
-                    onClick={() => setCurrentView("main")}
-                    style={{
-                      width: '160px',
-                      height: '50px',
-                      backgroundColor: '#00FF00',
-                      border: 'none',
-                      borderRadius: '25px',
-                      cursor: 'pointer',
-                      padding: 0,
-                      position: 'relative',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      overflow: 'hidden'
-                    }}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    <span style={{
-                      color: 'black',
-                      fontSize: '1rem',
-                      fontWeight: '700',
-                      fontFamily: 'Helvetica, Arial, sans-serif'
-                    }}>
-                      BACK TO MAIN
-                    </span>
-                  </motion.button>
-
-                  <div style={{
-                    color: '#00FF00',
-                    fontSize: '1.1rem',
-                    fontWeight: '600',
-                    fontFamily: 'Helvetica, Arial, sans-serif'
-                  }}>
-                    Menuru+ View
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          )}
-
           {/* Halaman Grid (placeholder) */}
           {currentView === "grid" && (
             <motion.div
@@ -4448,36 +4274,6 @@ export default function HomePage(): React.JSX.Element {
         </AnimatePresence>
       </div>
 
-      {/* Tombol Menuru+ di pojok kanan bawah */}
-      <motion.button
-        onClick={toggleMenuruPlusView}
-        style={{
-          position: 'fixed',
-          bottom: isMobile ? '2rem' : '3rem',
-          right: isMobile ? '2rem' : '3rem',
-          backgroundColor: '#00FF00',
-          color: 'black',
-          border: 'none',
-          borderRadius: '50%',
-          width: isMobile ? '60px' : '80px',
-          height: isMobile ? '60px' : '80px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          fontSize: isMobile ? '1.5rem' : '2rem',
-          fontWeight: '700',
-          cursor: 'pointer',
-          zIndex: 9995,
-          boxShadow: '0 0 20px rgba(0, 255, 0, 0.5)',
-          fontFamily: 'Helvetica, Arial, sans-serif'
-        }}
-        whileHover={{ scale: 1.1, rotate: 90 }}
-        whileTap={{ scale: 0.9 }}
-        transition={{ duration: 0.3 }}
-      >
-        +
-      </motion.button>
-
       {/* Cookie Notification */}
       <AnimatePresence>
         {showCookieNotification && (
@@ -4590,3 +4386,24 @@ export default function HomePage(): React.JSX.Element {
     </div>
   );
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
