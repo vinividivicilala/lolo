@@ -3597,6 +3597,7 @@ export default function HomePage(): React.JSX.Element {
                   </div>
                 </motion.div>
               </div>
+
 {/* Foto Card Design Section - 6 Card Horizontal */}
 
 <div style={{
@@ -3612,7 +3613,7 @@ export default function HomePage(): React.JSX.Element {
   {/* Container 6 Foto Card Horizontal */}
   <div style={{
     display: 'flex',
-    gap: isMobile ? '0.8rem' : '1.2rem',
+    gap: isMobile ? '0.8rem' : '1rem',
     padding: isMobile ? '0.5rem' : '1rem',
     minWidth: isMobile ? '800px' : '1200px',
     alignItems: 'flex-start'
@@ -3621,9 +3622,9 @@ export default function HomePage(): React.JSX.Element {
     <motion.div
       style={{
         position: 'relative',
-        width: isMobile ? '150px' : '180px',
-        aspectRatio: '3/4',
-        borderRadius: '8px',
+        width: isMobile ? '160px' : '200px',
+        height: isMobile ? '240px' : '280px',
+        borderRadius: '10px',
         overflow: 'hidden',
         backgroundColor: '#1a1a1a',
         border: '1px solid rgba(255,255,255,0.1)',
@@ -3634,24 +3635,30 @@ export default function HomePage(): React.JSX.Element {
       }}
       whileHover={{ 
         borderColor: 'rgba(255,255,255,0.3)',
+        transform: 'translateY(-5px)'
       }}
       whileTap={{ scale: 0.95 }}
       transition={{ duration: 0.2 }}
     >
-      {/* Foto */}
+      {/* Foto - Lebih besar, lebih ke bawah */}
       <div style={{
         width: '100%',
-        height: '70%',
-        position: 'relative'
+        height: '85%',
+        position: 'relative',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        overflow: 'hidden'
       }}>
         <img 
           src="images/5.jpg" 
-          alt="Design 1"
+          alt="VISUAL"
           style={{
             width: '100%',
             height: '100%',
             objectFit: 'cover',
-            display: 'block'
+            display: 'block',
+            objectPosition: 'center'
           }}
           onError={(e) => {
             e.currentTarget.style.backgroundColor = '#111';
@@ -3659,71 +3666,68 @@ export default function HomePage(): React.JSX.Element {
             e.currentTarget.style.alignItems = 'center';
             e.currentTarget.style.justifyContent = 'center';
             e.currentTarget.style.color = '#fff';
-            e.currentTarget.innerHTML = '<div style="padding: 1rem; font-size: 0.8rem;">Photo 1</div>';
+            e.currentTarget.innerHTML = '<div style="padding: 1rem; font-size: 0.8rem;">VISUAL</div>';
           }}
         />
       </div>
       
-      {/* Container Judul dan Panah */}
+      {/* Container Judul dan Panah - Menyatu dengan foto */}
       <div style={{
-        flex: 1,
+        height: '15%',
+        minHeight: '40px',
         display: 'flex',
-        flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
         padding: isMobile ? '0.3rem' : '0.5rem',
-        backgroundColor: 'rgba(0,0,0,0.8)',
+        backgroundColor: 'rgba(0,0,0,0.9)',
         borderTop: '1px solid rgba(255,255,255,0.1)'
       }}>
-        {/* Judul - Font sama dengan judul website */}
-        <div style={{
-          color: 'white',
-          fontSize: isMobile ? '0.8rem' : '0.9rem',
-          fontWeight: '300',
-          fontFamily: 'Helvetica, Arial, sans-serif',
-          textAlign: 'center',
-          marginBottom: isMobile ? '0.3rem' : '0.5rem',
-          lineHeight: 1.2,
-          textTransform: 'uppercase',
-          letterSpacing: '0.5px'
-        }}>
-          VISUAL
-        </div>
-        
-        {/* Container Panah dan Teks */}
+        {/* Container untuk teks dan panah sejajar */}
         <div style={{
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          gap: '0.3rem'
+          gap: '0.5rem'
         }}>
-          {/* Tanda Panah SVG */}
-          <motion.svg
-            width={isMobile ? "16" : "18"}
-            height={isMobile ? "16" : "18"}
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="rgba(255,255,255,0.7)"
-            strokeWidth="1.5"
-            whileHover={{ 
-              stroke: '#00FF00',
-              x: 3
-            }}
-            transition={{ duration: 0.2 }}
-          >
-            <line x1="5" y1="12" x2="19" y2="12" />
-            <polyline points="12 5 19 12 12 19" />
-          </motion.svg>
-          
-          {/* Teks kecil di samping panah */}
-          <span style={{
-            color: 'rgba(255,255,255,0.7)',
-            fontSize: isMobile ? '0.7rem' : '0.8rem',
+          {/* Judul */}
+          <div style={{
+            color: 'white',
+            fontSize: isMobile ? '0.85rem' : '1rem',
             fontWeight: '300',
-            fontFamily: 'Helvetica, Arial, sans-serif'
+            fontFamily: 'Helvetica, Arial, sans-serif',
+            lineHeight: 1,
+            textTransform: 'uppercase',
+            letterSpacing: '0.5px'
           }}>
-            view
-          </span>
+            VISUAL
+          </div>
+          
+          {/* Tanda Panah SVG Lurus Serong Kanan */}
+          <motion.div
+            whileHover={{ x: 3 }}
+            transition={{ duration: 0.2 }}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+          >
+            <svg
+              width={isMobile ? "14" : "16"}
+              height={isMobile ? "14" : "16"}
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="rgba(255,255,255,0.7)"
+              strokeWidth="2"
+              style={{
+                transform: 'rotate(-45deg)'
+              }}
+            >
+              <line x1="5" y1="12" x2="19" y2="12" />
+              <line x1="12" y1="5" x2="19" y2="12" />
+              <line x1="12" y1="19" x2="19" y2="12" />
+            </svg>
+          </motion.div>
         </div>
       </div>
     </motion.div>
@@ -3732,9 +3736,9 @@ export default function HomePage(): React.JSX.Element {
     <motion.div
       style={{
         position: 'relative',
-        width: isMobile ? '150px' : '180px',
-        aspectRatio: '3/4',
-        borderRadius: '8px',
+        width: isMobile ? '160px' : '200px',
+        height: isMobile ? '240px' : '280px',
+        borderRadius: '10px',
         overflow: 'hidden',
         backgroundColor: '#1a1a1a',
         border: '1px solid rgba(255,255,255,0.1)',
@@ -3745,23 +3749,29 @@ export default function HomePage(): React.JSX.Element {
       }}
       whileHover={{ 
         borderColor: 'rgba(255,255,255,0.3)',
+        transform: 'translateY(-5px)'
       }}
       whileTap={{ scale: 0.95 }}
       transition={{ duration: 0.2 }}
     >
       <div style={{
         width: '100%',
-        height: '70%',
-        position: 'relative'
+        height: '85%',
+        position: 'relative',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        overflow: 'hidden'
       }}>
         <img 
           src="images/5.jpg" 
-          alt="Design 2"
+          alt="DESIGN"
           style={{
             width: '100%',
             height: '100%',
             objectFit: 'cover',
-            display: 'block'
+            display: 'block',
+            objectPosition: 'center'
           }}
           onError={(e) => {
             e.currentTarget.style.backgroundColor = '#111';
@@ -3769,66 +3779,64 @@ export default function HomePage(): React.JSX.Element {
             e.currentTarget.style.alignItems = 'center';
             e.currentTarget.style.justifyContent = 'center';
             e.currentTarget.style.color = '#fff';
-            e.currentTarget.innerHTML = '<div style="padding: 1rem; font-size: 0.8rem;">Photo 2</div>';
+            e.currentTarget.innerHTML = '<div style="padding: 1rem; font-size: 0.8rem;">DESIGN</div>';
           }}
         />
       </div>
       
       <div style={{
-        flex: 1,
+        height: '15%',
+        minHeight: '40px',
         display: 'flex',
-        flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
         padding: isMobile ? '0.3rem' : '0.5rem',
-        backgroundColor: 'rgba(0,0,0,0.8)',
+        backgroundColor: 'rgba(0,0,0,0.9)',
         borderTop: '1px solid rgba(255,255,255,0.1)'
       }}>
-        <div style={{
-          color: 'white',
-          fontSize: isMobile ? '0.8rem' : '0.9rem',
-          fontWeight: '300',
-          fontFamily: 'Helvetica, Arial, sans-serif',
-          textAlign: 'center',
-          marginBottom: isMobile ? '0.3rem' : '0.5rem',
-          lineHeight: 1.2,
-          textTransform: 'uppercase',
-          letterSpacing: '0.5px'
-        }}>
-          DESIGN
-        </div>
-        
         <div style={{
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          gap: '0.3rem'
+          gap: '0.5rem'
         }}>
-          <motion.svg
-            width={isMobile ? "16" : "18"}
-            height={isMobile ? "16" : "18"}
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="rgba(255,255,255,0.7)"
-            strokeWidth="1.5"
-            whileHover={{ 
-              stroke: '#00FF00',
-              x: 3
-            }}
-            transition={{ duration: 0.2 }}
-          >
-            <line x1="5" y1="12" x2="19" y2="12" />
-            <polyline points="12 5 19 12 12 19" />
-          </motion.svg>
-          
-          <span style={{
-            color: 'rgba(255,255,255,0.7)',
-            fontSize: isMobile ? '0.7rem' : '0.8rem',
+          <div style={{
+            color: 'white',
+            fontSize: isMobile ? '0.85rem' : '1rem',
             fontWeight: '300',
-            fontFamily: 'Helvetica, Arial, sans-serif'
+            fontFamily: 'Helvetica, Arial, sans-serif',
+            lineHeight: 1,
+            textTransform: 'uppercase',
+            letterSpacing: '0.5px'
           }}>
-            view
-          </span>
+            DESIGN
+          </div>
+          
+          <motion.div
+            whileHover={{ x: 3 }}
+            transition={{ duration: 0.2 }}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+          >
+            <svg
+              width={isMobile ? "14" : "16"}
+              height={isMobile ? "14" : "16"}
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="rgba(255,255,255,0.7)"
+              strokeWidth="2"
+              style={{
+                transform: 'rotate(-45deg)'
+              }}
+            >
+              <line x1="5" y1="12" x2="19" y2="12" />
+              <line x1="12" y1="5" x2="19" y2="12" />
+              <line x1="12" y1="19" x2="19" y2="12" />
+            </svg>
+          </motion.div>
         </div>
       </div>
     </motion.div>
@@ -3837,9 +3845,9 @@ export default function HomePage(): React.JSX.Element {
     <motion.div
       style={{
         position: 'relative',
-        width: isMobile ? '150px' : '180px',
-        aspectRatio: '3/4',
-        borderRadius: '8px',
+        width: isMobile ? '160px' : '200px',
+        height: isMobile ? '240px' : '280px',
+        borderRadius: '10px',
         overflow: 'hidden',
         backgroundColor: '#1a1a1a',
         border: '1px solid rgba(255,255,255,0.1)',
@@ -3850,23 +3858,29 @@ export default function HomePage(): React.JSX.Element {
       }}
       whileHover={{ 
         borderColor: 'rgba(255,255,255,0.3)',
+        transform: 'translateY(-5px)'
       }}
       whileTap={{ scale: 0.95 }}
       transition={{ duration: 0.2 }}
     >
       <div style={{
         width: '100%',
-        height: '70%',
-        position: 'relative'
+        height: '85%',
+        position: 'relative',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        overflow: 'hidden'
       }}>
         <img 
           src="images/5.jpg" 
-          alt="Design 3"
+          alt="BRAND"
           style={{
             width: '100%',
             height: '100%',
             objectFit: 'cover',
-            display: 'block'
+            display: 'block',
+            objectPosition: 'center'
           }}
           onError={(e) => {
             e.currentTarget.style.backgroundColor = '#111';
@@ -3874,66 +3888,64 @@ export default function HomePage(): React.JSX.Element {
             e.currentTarget.style.alignItems = 'center';
             e.currentTarget.style.justifyContent = 'center';
             e.currentTarget.style.color = '#fff';
-            e.currentTarget.innerHTML = '<div style="padding: 1rem; font-size: 0.8rem;">Photo 3</div>';
+            e.currentTarget.innerHTML = '<div style="padding: 1rem; font-size: 0.8rem;">BRAND</div>';
           }}
         />
       </div>
       
       <div style={{
-        flex: 1,
+        height: '15%',
+        minHeight: '40px',
         display: 'flex',
-        flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
         padding: isMobile ? '0.3rem' : '0.5rem',
-        backgroundColor: 'rgba(0,0,0,0.8)',
+        backgroundColor: 'rgba(0,0,0,0.9)',
         borderTop: '1px solid rgba(255,255,255,0.1)'
       }}>
-        <div style={{
-          color: 'white',
-          fontSize: isMobile ? '0.8rem' : '0.9rem',
-          fontWeight: '300',
-          fontFamily: 'Helvetica, Arial, sans-serif',
-          textAlign: 'center',
-          marginBottom: isMobile ? '0.3rem' : '0.5rem',
-          lineHeight: 1.2,
-          textTransform: 'uppercase',
-          letterSpacing: '0.5px'
-        }}>
-          BRAND
-        </div>
-        
         <div style={{
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          gap: '0.3rem'
+          gap: '0.5rem'
         }}>
-          <motion.svg
-            width={isMobile ? "16" : "18"}
-            height={isMobile ? "16" : "18"}
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="rgba(255,255,255,0.7)"
-            strokeWidth="1.5"
-            whileHover={{ 
-              stroke: '#00FF00',
-              x: 3
-            }}
-            transition={{ duration: 0.2 }}
-          >
-            <line x1="5" y1="12" x2="19" y2="12" />
-            <polyline points="12 5 19 12 12 19" />
-          </motion.svg>
-          
-          <span style={{
-            color: 'rgba(255,255,255,0.7)',
-            fontSize: isMobile ? '0.7rem' : '0.8rem',
+          <div style={{
+            color: 'white',
+            fontSize: isMobile ? '0.85rem' : '1rem',
             fontWeight: '300',
-            fontFamily: 'Helvetica, Arial, sans-serif'
+            fontFamily: 'Helvetica, Arial, sans-serif',
+            lineHeight: 1,
+            textTransform: 'uppercase',
+            letterSpacing: '0.5px'
           }}>
-            view
-          </span>
+            BRAND
+          </div>
+          
+          <motion.div
+            whileHover={{ x: 3 }}
+            transition={{ duration: 0.2 }}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+          >
+            <svg
+              width={isMobile ? "14" : "16"}
+              height={isMobile ? "14" : "16"}
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="rgba(255,255,255,0.7)"
+              strokeWidth="2"
+              style={{
+                transform: 'rotate(-45deg)'
+              }}
+            >
+              <line x1="5" y1="12" x2="19" y2="12" />
+              <line x1="12" y1="5" x2="19" y2="12" />
+              <line x1="12" y1="19" x2="19" y2="12" />
+            </svg>
+          </motion.div>
         </div>
       </div>
     </motion.div>
@@ -3942,9 +3954,9 @@ export default function HomePage(): React.JSX.Element {
     <motion.div
       style={{
         position: 'relative',
-        width: isMobile ? '150px' : '180px',
-        aspectRatio: '3/4',
-        borderRadius: '8px',
+        width: isMobile ? '160px' : '200px',
+        height: isMobile ? '240px' : '280px',
+        borderRadius: '10px',
         overflow: 'hidden',
         backgroundColor: '#1a1a1a',
         border: '1px solid rgba(255,255,255,0.1)',
@@ -3955,23 +3967,29 @@ export default function HomePage(): React.JSX.Element {
       }}
       whileHover={{ 
         borderColor: 'rgba(255,255,255,0.3)',
+        transform: 'translateY(-5px)'
       }}
       whileTap={{ scale: 0.95 }}
       transition={{ duration: 0.2 }}
     >
       <div style={{
         width: '100%',
-        height: '70%',
-        position: 'relative'
+        height: '85%',
+        position: 'relative',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        overflow: 'hidden'
       }}>
         <img 
           src="images/5.jpg" 
-          alt="Design 4"
+          alt="UI/UX"
           style={{
             width: '100%',
             height: '100%',
             objectFit: 'cover',
-            display: 'block'
+            display: 'block',
+            objectPosition: 'center'
           }}
           onError={(e) => {
             e.currentTarget.style.backgroundColor = '#111';
@@ -3979,66 +3997,64 @@ export default function HomePage(): React.JSX.Element {
             e.currentTarget.style.alignItems = 'center';
             e.currentTarget.style.justifyContent = 'center';
             e.currentTarget.style.color = '#fff';
-            e.currentTarget.innerHTML = '<div style="padding: 1rem; font-size: 0.8rem;">Photo 4</div>';
+            e.currentTarget.innerHTML = '<div style="padding: 1rem; font-size: 0.8rem;">UI/UX</div>';
           }}
         />
       </div>
       
       <div style={{
-        flex: 1,
+        height: '15%',
+        minHeight: '40px',
         display: 'flex',
-        flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
         padding: isMobile ? '0.3rem' : '0.5rem',
-        backgroundColor: 'rgba(0,0,0,0.8)',
+        backgroundColor: 'rgba(0,0,0,0.9)',
         borderTop: '1px solid rgba(255,255,255,0.1)'
       }}>
-        <div style={{
-          color: 'white',
-          fontSize: isMobile ? '0.8rem' : '0.9rem',
-          fontWeight: '300',
-          fontFamily: 'Helvetica, Arial, sans-serif',
-          textAlign: 'center',
-          marginBottom: isMobile ? '0.3rem' : '0.5rem',
-          lineHeight: 1.2,
-          textTransform: 'uppercase',
-          letterSpacing: '0.5px'
-        }}>
-          UI/UX
-        </div>
-        
         <div style={{
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          gap: '0.3rem'
+          gap: '0.5rem'
         }}>
-          <motion.svg
-            width={isMobile ? "16" : "18"}
-            height={isMobile ? "16" : "18"}
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="rgba(255,255,255,0.7)"
-            strokeWidth="1.5"
-            whileHover={{ 
-              stroke: '#00FF00',
-              x: 3
-            }}
-            transition={{ duration: 0.2 }}
-          >
-            <line x1="5" y1="12" x2="19" y2="12" />
-            <polyline points="12 5 19 12 12 19" />
-          </motion.svg>
-          
-          <span style={{
-            color: 'rgba(255,255,255,0.7)',
-            fontSize: isMobile ? '0.7rem' : '0.8rem',
+          <div style={{
+            color: 'white',
+            fontSize: isMobile ? '0.85rem' : '1rem',
             fontWeight: '300',
-            fontFamily: 'Helvetica, Arial, sans-serif'
+            fontFamily: 'Helvetica, Arial, sans-serif',
+            lineHeight: 1,
+            textTransform: 'uppercase',
+            letterSpacing: '0.5px'
           }}>
-            view
-          </span>
+            UI/UX
+          </div>
+          
+          <motion.div
+            whileHover={{ x: 3 }}
+            transition={{ duration: 0.2 }}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+          >
+            <svg
+              width={isMobile ? "14" : "16"}
+              height={isMobile ? "14" : "16"}
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="rgba(255,255,255,0.7)"
+              strokeWidth="2"
+              style={{
+                transform: 'rotate(-45deg)'
+              }}
+            >
+              <line x1="5" y1="12" x2="19" y2="12" />
+              <line x1="12" y1="5" x2="19" y2="12" />
+              <line x1="12" y1="19" x2="19" y2="12" />
+            </svg>
+          </motion.div>
         </div>
       </div>
     </motion.div>
@@ -4047,9 +4063,9 @@ export default function HomePage(): React.JSX.Element {
     <motion.div
       style={{
         position: 'relative',
-        width: isMobile ? '150px' : '180px',
-        aspectRatio: '3/4',
-        borderRadius: '8px',
+        width: isMobile ? '160px' : '200px',
+        height: isMobile ? '240px' : '280px',
+        borderRadius: '10px',
         overflow: 'hidden',
         backgroundColor: '#1a1a1a',
         border: '1px solid rgba(255,255,255,0.1)',
@@ -4060,23 +4076,29 @@ export default function HomePage(): React.JSX.Element {
       }}
       whileHover={{ 
         borderColor: 'rgba(255,255,255,0.3)',
+        transform: 'translateY(-5px)'
       }}
       whileTap={{ scale: 0.95 }}
       transition={{ duration: 0.2 }}
     >
       <div style={{
         width: '100%',
-        height: '70%',
-        position: 'relative'
+        height: '85%',
+        position: 'relative',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        overflow: 'hidden'
       }}>
         <img 
           src="images/5.jpg" 
-          alt="Design 5"
+          alt="MOTION"
           style={{
             width: '100%',
             height: '100%',
             objectFit: 'cover',
-            display: 'block'
+            display: 'block',
+            objectPosition: 'center'
           }}
           onError={(e) => {
             e.currentTarget.style.backgroundColor = '#111';
@@ -4084,66 +4106,64 @@ export default function HomePage(): React.JSX.Element {
             e.currentTarget.style.alignItems = 'center';
             e.currentTarget.style.justifyContent = 'center';
             e.currentTarget.style.color = '#fff';
-            e.currentTarget.innerHTML = '<div style="padding: 1rem; font-size: 0.8rem;">Photo 5</div>';
+            e.currentTarget.innerHTML = '<div style="padding: 1rem; font-size: 0.8rem;">MOTION</div>';
           }}
         />
       </div>
       
       <div style={{
-        flex: 1,
+        height: '15%',
+        minHeight: '40px',
         display: 'flex',
-        flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
         padding: isMobile ? '0.3rem' : '0.5rem',
-        backgroundColor: 'rgba(0,0,0,0.8)',
+        backgroundColor: 'rgba(0,0,0,0.9)',
         borderTop: '1px solid rgba(255,255,255,0.1)'
       }}>
-        <div style={{
-          color: 'white',
-          fontSize: isMobile ? '0.8rem' : '0.9rem',
-          fontWeight: '300',
-          fontFamily: 'Helvetica, Arial, sans-serif',
-          textAlign: 'center',
-          marginBottom: isMobile ? '0.3rem' : '0.5rem',
-          lineHeight: 1.2,
-          textTransform: 'uppercase',
-          letterSpacing: '0.5px'
-        }}>
-          MOTION
-        </div>
-        
         <div style={{
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          gap: '0.3rem'
+          gap: '0.5rem'
         }}>
-          <motion.svg
-            width={isMobile ? "16" : "18"}
-            height={isMobile ? "16" : "18"}
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="rgba(255,255,255,0.7)"
-            strokeWidth="1.5"
-            whileHover={{ 
-              stroke: '#00FF00',
-              x: 3
-            }}
-            transition={{ duration: 0.2 }}
-          >
-            <line x1="5" y1="12" x2="19" y2="12" />
-            <polyline points="12 5 19 12 12 19" />
-          </motion.svg>
-          
-          <span style={{
-            color: 'rgba(255,255,255,0.7)',
-            fontSize: isMobile ? '0.7rem' : '0.8rem',
+          <div style={{
+            color: 'white',
+            fontSize: isMobile ? '0.85rem' : '1rem',
             fontWeight: '300',
-            fontFamily: 'Helvetica, Arial, sans-serif'
+            fontFamily: 'Helvetica, Arial, sans-serif',
+            lineHeight: 1,
+            textTransform: 'uppercase',
+            letterSpacing: '0.5px'
           }}>
-            view
-          </span>
+            MOTION
+          </div>
+          
+          <motion.div
+            whileHover={{ x: 3 }}
+            transition={{ duration: 0.2 }}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+          >
+            <svg
+              width={isMobile ? "14" : "16"}
+              height={isMobile ? "14" : "16"}
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="rgba(255,255,255,0.7)"
+              strokeWidth="2"
+              style={{
+                transform: 'rotate(-45deg)'
+              }}
+            >
+              <line x1="5" y1="12" x2="19" y2="12" />
+              <line x1="12" y1="5" x2="19" y2="12" />
+              <line x1="12" y1="19" x2="19" y2="12" />
+            </svg>
+          </motion.div>
         </div>
       </div>
     </motion.div>
@@ -4152,9 +4172,9 @@ export default function HomePage(): React.JSX.Element {
     <motion.div
       style={{
         position: 'relative',
-        width: isMobile ? '150px' : '180px',
-        aspectRatio: '3/4',
-        borderRadius: '8px',
+        width: isMobile ? '160px' : '200px',
+        height: isMobile ? '240px' : '280px',
+        borderRadius: '10px',
         overflow: 'hidden',
         backgroundColor: '#1a1a1a',
         border: '1px solid rgba(255,255,255,0.1)',
@@ -4165,23 +4185,29 @@ export default function HomePage(): React.JSX.Element {
       }}
       whileHover={{ 
         borderColor: 'rgba(255,255,255,0.3)',
+        transform: 'translateY(-5px)'
       }}
       whileTap={{ scale: 0.95 }}
       transition={{ duration: 0.2 }}
     >
       <div style={{
         width: '100%',
-        height: '70%',
-        position: 'relative'
+        height: '85%',
+        position: 'relative',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        overflow: 'hidden'
       }}>
         <img 
           src="images/5.jpg" 
-          alt="Design 6"
+          alt="PRINT"
           style={{
             width: '100%',
             height: '100%',
             objectFit: 'cover',
-            display: 'block'
+            display: 'block',
+            objectPosition: 'center'
           }}
           onError={(e) => {
             e.currentTarget.style.backgroundColor = '#111';
@@ -4189,66 +4215,64 @@ export default function HomePage(): React.JSX.Element {
             e.currentTarget.style.alignItems = 'center';
             e.currentTarget.style.justifyContent = 'center';
             e.currentTarget.style.color = '#fff';
-            e.currentTarget.innerHTML = '<div style="padding: 1rem; font-size: 0.8rem;">Photo 6</div>';
+            e.currentTarget.innerHTML = '<div style="padding: 1rem; font-size: 0.8rem;">PRINT</div>';
           }}
         />
       </div>
       
       <div style={{
-        flex: 1,
+        height: '15%',
+        minHeight: '40px',
         display: 'flex',
-        flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
         padding: isMobile ? '0.3rem' : '0.5rem',
-        backgroundColor: 'rgba(0,0,0,0.8)',
+        backgroundColor: 'rgba(0,0,0,0.9)',
         borderTop: '1px solid rgba(255,255,255,0.1)'
       }}>
-        <div style={{
-          color: 'white',
-          fontSize: isMobile ? '0.8rem' : '0.9rem',
-          fontWeight: '300',
-          fontFamily: 'Helvetica, Arial, sans-serif',
-          textAlign: 'center',
-          marginBottom: isMobile ? '0.3rem' : '0.5rem',
-          lineHeight: 1.2,
-          textTransform: 'uppercase',
-          letterSpacing: '0.5px'
-        }}>
-          PRINT
-        </div>
-        
         <div style={{
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          gap: '0.3rem'
+          gap: '0.5rem'
         }}>
-          <motion.svg
-            width={isMobile ? "16" : "18"}
-            height={isMobile ? "16" : "18"}
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="rgba(255,255,255,0.7)"
-            strokeWidth="1.5"
-            whileHover={{ 
-              stroke: '#00FF00',
-              x: 3
-            }}
-            transition={{ duration: 0.2 }}
-          >
-            <line x1="5" y1="12" x2="19" y2="12" />
-            <polyline points="12 5 19 12 12 19" />
-          </motion.svg>
-          
-          <span style={{
-            color: 'rgba(255,255,255,0.7)',
-            fontSize: isMobile ? '0.7rem' : '0.8rem',
+          <div style={{
+            color: 'white',
+            fontSize: isMobile ? '0.85rem' : '1rem',
             fontWeight: '300',
-            fontFamily: 'Helvetica, Arial, sans-serif'
+            fontFamily: 'Helvetica, Arial, sans-serif',
+            lineHeight: 1,
+            textTransform: 'uppercase',
+            letterSpacing: '0.5px'
           }}>
-            view
-          </span>
+            PRINT
+          </div>
+          
+          <motion.div
+            whileHover={{ x: 3 }}
+            transition={{ duration: 0.2 }}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+          >
+            <svg
+              width={isMobile ? "14" : "16"}
+              height={isMobile ? "14" : "16"}
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="rgba(255,255,255,0.7)"
+              strokeWidth="2"
+              style={{
+                transform: 'rotate(-45deg)'
+              }}
+            >
+              <line x1="5" y1="12" x2="19" y2="12" />
+              <line x1="12" y1="5" x2="19" y2="12" />
+              <line x1="12" y1="19" x2="19" y2="12" />
+            </svg>
+          </motion.div>
         </div>
       </div>
     </motion.div>
@@ -4267,6 +4291,9 @@ export default function HomePage(): React.JSX.Element {
     </div>
   )}
 </div>
+
+
+
         
 
               {/* Progress Bar dengan 3 Foto dan Komentar */}
@@ -5057,6 +5084,7 @@ export default function HomePage(): React.JSX.Element {
     </div>
   );
 }
+
 
 
 
