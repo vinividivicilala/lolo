@@ -4362,45 +4362,45 @@ export default function HomePage(): React.JSX.Element {
 <div style={{
   width: '100%',
   padding: isMobile ? '1rem' : '2rem',
-  marginTop: isMobile ? '2rem' : '3rem',
-  marginBottom: isMobile ? '3rem' : '4rem',
+  marginTop: isMobile ? '2rem' : '4rem',
+  marginBottom: isMobile ? '3rem' : '5rem',
   boxSizing: 'border-box',
   position: 'relative'
 }}>
   {/* Judul di Atas Foto - Tanpa Background Putih */}
   <div style={{
-    marginBottom: isMobile ? '1.5rem' : '2rem',
+    marginBottom: isMobile ? '2rem' : '3rem',
     paddingLeft: isMobile ? '0' : '0'
   }}>
     <div style={{
       color: 'white',
-      fontSize: isMobile ? '1.8rem' : '2.2rem',
-      fontWeight: '600',
+      fontSize: isMobile ? '2rem' : '3rem',
+      fontWeight: '700',
       fontFamily: 'Helvetica, Arial, sans-serif',
-      letterSpacing: '0.5px',
+      letterSpacing: '1px',
       textAlign: 'left'
     }}>
       Design Collection
     </div>
   </div>
 
-  {/* 4 Card Foto Pojok Kanan - Lebar Lebar, Tinggi Dikurangi */}
+  {/* 4 Card Foto Pojok Kanan - Lebar dan Tinggi Besar */}
   <div style={{
     display: 'flex',
     justifyContent: 'flex-end',
     alignItems: 'flex-start',
-    gap: isMobile ? '0.8rem' : '1rem', // Jarak antar foto lebih dekat
+    gap: isMobile ? '1rem' : '2rem',
     flexWrap: 'wrap',
     marginLeft: 'auto',
-    width: isMobile ? '100%' : '90%'
+    width: isMobile ? '100%' : '85%'
   }}>
     
     {/* Card 1 */}
     <div style={{
       position: 'relative',
-      width: isMobile ? 'calc(50% - 0.4rem)' : '380px', // Lebar lebih besar
-      height: isMobile ? '280px' : '380px', // Tinggi lebih rendah
-      borderRadius: '8px',
+      width: isMobile ? 'calc(50% - 0.5rem)' : '350px',
+      height: isMobile ? '400px' : '550px',
+      borderRadius: '12px',
       overflow: 'hidden',
       flexShrink: 0
     }}>
@@ -4412,7 +4412,7 @@ export default function HomePage(): React.JSX.Element {
           height: '100%',
           objectFit: 'cover',
           display: 'block',
-          borderRadius: '8px'
+          borderRadius: '12px'
         }}
         onError={(e) => {
           e.currentTarget.style.backgroundColor = '#111';
@@ -4420,7 +4420,7 @@ export default function HomePage(): React.JSX.Element {
           e.currentTarget.style.alignItems = 'center';
           e.currentTarget.style.justifyContent = 'center';
           e.currentTarget.style.color = '#fff';
-          e.currentTarget.innerHTML = '<div style="padding: 1rem; text-align: center; color: #fff; font-size: 1.2rem;">Visual Design</div>';
+          e.currentTarget.innerHTML = '<div style="padding: 1rem; text-align: center; color: #fff; font-size: 1.5rem;">Visual Design</div>';
         }}
       />
       
@@ -4430,26 +4430,26 @@ export default function HomePage(): React.JSX.Element {
         bottom: 0,
         left: 0,
         right: 0,
-        background: 'linear-gradient(to top, rgba(0,0,0,0.9) 40%, transparent)',
-        padding: isMobile ? '1rem 0.8rem' : '1.2rem 1rem',
+        background: 'linear-gradient(to top, rgba(0,0,0,0.8), transparent)',
+        padding: isMobile ? '1.5rem 1rem' : '2rem 1.5rem',
         color: 'white'
       }}>
-        {/* Judul dan External Link Icon dalam satu baris */}
+        {/* Judul dan Toggle Icon dalam satu baris */}
         <div style={{
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          marginBottom: '0.3rem'
+          marginBottom: '0.5rem'
         }}>
           <div style={{
-            fontSize: isMobile ? '1.1rem' : '1.4rem',
-            fontWeight: '500',
+            fontSize: isMobile ? '1.3rem' : '1.8rem',
+            fontWeight: '600',
             fontFamily: 'Helvetica, Arial, sans-serif'
           }}>
             Visual Design
           </div>
           
-          {/* External Link Icon di pojok kanan */}
+          {/* Toggle Icon di pojok kanan */}
           <div 
             id="toggle1"
             style={{
@@ -4457,11 +4457,11 @@ export default function HomePage(): React.JSX.Element {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              width: '28px',
-              height: '28px',
+              width: '32px',
+              height: '32px',
               color: 'white',
               opacity: '0.8',
-              transition: 'all 0.2s ease'
+              transition: 'all 0.3s ease'
             }}
             onMouseEnter={(e) => {
               e.currentTarget.style.opacity = '1';
@@ -4472,32 +4472,30 @@ export default function HomePage(): React.JSX.Element {
               e.currentTarget.style.transform = 'scale(1)';
             }}
           >
-            {/* External Link Icon */}
+            {/* Toggle Icon: Hamburger atau plus */}
             <svg 
-              width="20" 
-              height="20" 
+              width="24" 
+              height="24" 
               viewBox="0 0 24 24" 
               fill="none" 
               stroke="currentColor" 
               strokeWidth="2"
-              strokeLinecap="round" 
-              strokeLinejoin="round"
             >
-              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
-              <polyline points="15 3 21 3 21 9" />
-              <line x1="10" y1="14" x2="21" y2="3" />
+              <line x1="3" y1="12" x2="21" y2="12" />
+              <line x1="3" y1="6" x2="21" y2="6" />
+              <line x1="3" y1="18" x2="21" y2="18" />
             </svg>
           </div>
         </div>
         
         {/* Deskripsi singkat */}
         <div style={{
-          fontSize: isMobile ? '0.8rem' : '0.9rem',
-          opacity: '0.8',
+          fontSize: isMobile ? '0.9rem' : '1rem',
+          opacity: '0.9',
           fontFamily: 'Helvetica, Arial, sans-serif',
-          lineHeight: '1.3'
+          lineHeight: '1.5'
         }}>
-          Creating compelling visual experiences
+          Creating compelling visual experiences.
         </div>
       </div>
     </div>
@@ -4505,9 +4503,9 @@ export default function HomePage(): React.JSX.Element {
     {/* Card 2 */}
     <div style={{
       position: 'relative',
-      width: isMobile ? 'calc(50% - 0.4rem)' : '380px',
-      height: isMobile ? '280px' : '380px',
-      borderRadius: '8px',
+      width: isMobile ? 'calc(50% - 0.5rem)' : '350px',
+      height: isMobile ? '400px' : '550px',
+      borderRadius: '12px',
       overflow: 'hidden',
       flexShrink: 0
     }}>
@@ -4519,7 +4517,7 @@ export default function HomePage(): React.JSX.Element {
           height: '100%',
           objectFit: 'cover',
           display: 'block',
-          borderRadius: '8px'
+          borderRadius: '12px'
         }}
         onError={(e) => {
           e.currentTarget.style.backgroundColor = '#111';
@@ -4527,7 +4525,7 @@ export default function HomePage(): React.JSX.Element {
           e.currentTarget.style.alignItems = 'center';
           e.currentTarget.style.justifyContent = 'center';
           e.currentTarget.style.color = '#fff';
-          e.currentTarget.innerHTML = '<div style="padding: 1rem; text-align: center; color: #fff; font-size: 1.2rem;">Brand Identity</div>';
+          e.currentTarget.innerHTML = '<div style="padding: 1rem; text-align: center; color: #fff; font-size: 1.5rem;">Brand Identity</div>';
         }}
       />
       
@@ -4537,25 +4535,25 @@ export default function HomePage(): React.JSX.Element {
         bottom: 0,
         left: 0,
         right: 0,
-        background: 'linear-gradient(to top, rgba(0,0,0,0.9) 40%, transparent)',
-        padding: isMobile ? '1rem 0.8rem' : '1.2rem 1rem',
+        background: 'linear-gradient(to top, rgba(0,0,0,0.8), transparent)',
+        padding: isMobile ? '1.5rem 1rem' : '2rem 1.5rem',
         color: 'white'
       }}>
         <div style={{
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          marginBottom: '0.3rem'
+          marginBottom: '0.5rem'
         }}>
           <div style={{
-            fontSize: isMobile ? '1.1rem' : '1.4rem',
-            fontWeight: '500',
+            fontSize: isMobile ? '1.3rem' : '1.8rem',
+            fontWeight: '600',
             fontFamily: 'Helvetica, Arial, sans-serif'
           }}>
             Brand Identity
           </div>
           
-          {/* External Link Icon di pojok kanan */}
+          {/* Toggle Icon di pojok kanan */}
           <div 
             id="toggle2"
             style={{
@@ -4563,11 +4561,11 @@ export default function HomePage(): React.JSX.Element {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              width: '28px',
-              height: '28px',
+              width: '32px',
+              height: '32px',
               color: 'white',
               opacity: '0.8',
-              transition: 'all 0.2s ease'
+              transition: 'all 0.3s ease'
             }}
             onMouseEnter={(e) => {
               e.currentTarget.style.opacity = '1';
@@ -4579,30 +4577,28 @@ export default function HomePage(): React.JSX.Element {
             }}
           >
             <svg 
-              width="20" 
-              height="20" 
+              width="24" 
+              height="24" 
               viewBox="0 0 24 24" 
               fill="none" 
               stroke="currentColor" 
               strokeWidth="2"
-              strokeLinecap="round" 
-              strokeLinejoin="round"
             >
-              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
-              <polyline points="15 3 21 3 21 9" />
-              <line x1="10" y1="14" x2="21" y2="3" />
+              <line x1="3" y1="12" x2="21" y2="12" />
+              <line x1="3" y1="6" x2="21" y2="6" />
+              <line x1="3" y1="18" x2="21" y2="18" />
             </svg>
           </div>
         </div>
         
         {/* Deskripsi singkat */}
         <div style={{
-          fontSize: isMobile ? '0.8rem' : '0.9rem',
-          opacity: '0.8',
+          fontSize: isMobile ? '0.9rem' : '1rem',
+          opacity: '0.9',
           fontFamily: 'Helvetica, Arial, sans-serif',
-          lineHeight: '1.3'
+          lineHeight: '1.5'
         }}>
-          Building memorable brand systems
+          Building memorable brand systems.
         </div>
       </div>
     </div>
@@ -4610,9 +4606,9 @@ export default function HomePage(): React.JSX.Element {
     {/* Card 3 */}
     <div style={{
       position: 'relative',
-      width: isMobile ? 'calc(50% - 0.4rem)' : '380px',
-      height: isMobile ? '280px' : '380px',
-      borderRadius: '8px',
+      width: isMobile ? 'calc(50% - 0.5rem)' : '350px',
+      height: isMobile ? '400px' : '550px',
+      borderRadius: '12px',
       overflow: 'hidden',
       flexShrink: 0
     }}>
@@ -4624,7 +4620,7 @@ export default function HomePage(): React.JSX.Element {
           height: '100%',
           objectFit: 'cover',
           display: 'block',
-          borderRadius: '8px'
+          borderRadius: '12px'
         }}
         onError={(e) => {
           e.currentTarget.style.backgroundColor = '#111';
@@ -4632,7 +4628,7 @@ export default function HomePage(): React.JSX.Element {
           e.currentTarget.style.alignItems = 'center';
           e.currentTarget.style.justifyContent = 'center';
           e.currentTarget.style.color = '#fff';
-          e.currentTarget.innerHTML = '<div style="padding: 1rem; text-align: center; color: #fff; font-size: 1.2rem;">UI/UX Design</div>';
+          e.currentTarget.innerHTML = '<div style="padding: 1rem; text-align: center; color: #fff; font-size: 1.5rem;">UI/UX Design</div>';
         }}
       />
       
@@ -4642,25 +4638,25 @@ export default function HomePage(): React.JSX.Element {
         bottom: 0,
         left: 0,
         right: 0,
-        background: 'linear-gradient(to top, rgba(0,0,0,0.9) 40%, transparent)',
-        padding: isMobile ? '1rem 0.8rem' : '1.2rem 1rem',
+        background: 'linear-gradient(to top, rgba(0,0,0,0.8), transparent)',
+        padding: isMobile ? '1.5rem 1rem' : '2rem 1.5rem',
         color: 'white'
       }}>
         <div style={{
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          marginBottom: '0.3rem'
+          marginBottom: '0.5rem'
         }}>
           <div style={{
-            fontSize: isMobile ? '1.1rem' : '1.4rem',
-            fontWeight: '500',
+            fontSize: isMobile ? '1.3rem' : '1.8rem',
+            fontWeight: '600',
             fontFamily: 'Helvetica, Arial, sans-serif'
           }}>
             UI/UX Design
           </div>
           
-          {/* External Link Icon di pojok kanan */}
+          {/* Toggle Icon di pojok kanan */}
           <div 
             id="toggle3"
             style={{
@@ -4668,11 +4664,11 @@ export default function HomePage(): React.JSX.Element {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              width: '28px',
-              height: '28px',
+              width: '32px',
+              height: '32px',
               color: 'white',
               opacity: '0.8',
-              transition: 'all 0.2s ease'
+              transition: 'all 0.3s ease'
             }}
             onMouseEnter={(e) => {
               e.currentTarget.style.opacity = '1';
@@ -4684,30 +4680,28 @@ export default function HomePage(): React.JSX.Element {
             }}
           >
             <svg 
-              width="20" 
-              height="20" 
+              width="24" 
+              height="24" 
               viewBox="0 0 24 24" 
               fill="none" 
               stroke="currentColor" 
               strokeWidth="2"
-              strokeLinecap="round" 
-              strokeLinejoin="round"
             >
-              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
-              <polyline points="15 3 21 3 21 9" />
-              <line x1="10" y1="14" x2="21" y2="3" />
+              <line x1="3" y1="12" x2="21" y2="12" />
+              <line x1="3" y1="6" x2="21" y2="6" />
+              <line x1="3" y1="18" x2="21" y2="18" />
             </svg>
           </div>
         </div>
         
         {/* Deskripsi singkat */}
         <div style={{
-          fontSize: isMobile ? '0.8rem' : '0.9rem',
-          opacity: '0.8',
+          fontSize: isMobile ? '0.9rem' : '1rem',
+          opacity: '0.9',
           fontFamily: 'Helvetica, Arial, sans-serif',
-          lineHeight: '1.3'
+          lineHeight: '1.5'
         }}>
-          Designing intuitive digital experiences
+          Designing intuitive digital experiences.
         </div>
       </div>
     </div>
@@ -4715,9 +4709,9 @@ export default function HomePage(): React.JSX.Element {
     {/* Card 4 */}
     <div style={{
       position: 'relative',
-      width: isMobile ? 'calc(50% - 0.4rem)' : '380px',
-      height: isMobile ? '280px' : '380px',
-      borderRadius: '8px',
+      width: isMobile ? 'calc(50% - 0.5rem)' : '350px',
+      height: isMobile ? '400px' : '550px',
+      borderRadius: '12px',
       overflow: 'hidden',
       flexShrink: 0
     }}>
@@ -4729,7 +4723,7 @@ export default function HomePage(): React.JSX.Element {
           height: '100%',
           objectFit: 'cover',
           display: 'block',
-          borderRadius: '8px'
+          borderRadius: '12px'
         }}
         onError={(e) => {
           e.currentTarget.style.backgroundColor = '#111';
@@ -4737,7 +4731,7 @@ export default function HomePage(): React.JSX.Element {
           e.currentTarget.style.alignItems = 'center';
           e.currentTarget.style.justifyContent = 'center';
           e.currentTarget.style.color = '#fff';
-          e.currentTarget.innerHTML = '<div style="padding: 1rem; text-align: center; color: #fff; font-size: 1.2rem;">Motion Graphics</div>';
+          e.currentTarget.innerHTML = '<div style="padding: 1rem; text-align: center; color: #fff; font-size: 1.5rem;">Motion Graphics</div>';
         }}
       />
       
@@ -4747,25 +4741,25 @@ export default function HomePage(): React.JSX.Element {
         bottom: 0,
         left: 0,
         right: 0,
-        background: 'linear-gradient(to top, rgba(0,0,0,0.9) 40%, transparent)',
-        padding: isMobile ? '1rem 0.8rem' : '1.2rem 1rem',
+        background: 'linear-gradient(to top, rgba(0,0,0,0.8), transparent)',
+        padding: isMobile ? '1.5rem 1rem' : '2rem 1.5rem',
         color: 'white'
       }}>
         <div style={{
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          marginBottom: '0.3rem'
+          marginBottom: '0.5rem'
         }}>
           <div style={{
-            fontSize: isMobile ? '1.1rem' : '1.4rem',
-            fontWeight: '500',
+            fontSize: isMobile ? '1.3rem' : '1.8rem',
+            fontWeight: '600',
             fontFamily: 'Helvetica, Arial, sans-serif'
           }}>
             Motion Graphics
           </div>
           
-          {/* External Link Icon di pojok kanan */}
+          {/* Toggle Icon di pojok kanan */}
           <div 
             id="toggle4"
             style={{
@@ -4773,11 +4767,11 @@ export default function HomePage(): React.JSX.Element {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              width: '28px',
-              height: '28px',
+              width: '32px',
+              height: '32px',
               color: 'white',
               opacity: '0.8',
-              transition: 'all 0.2s ease'
+              transition: 'all 0.3s ease'
             }}
             onMouseEnter={(e) => {
               e.currentTarget.style.opacity = '1';
@@ -4789,30 +4783,28 @@ export default function HomePage(): React.JSX.Element {
             }}
           >
             <svg 
-              width="20" 
-              height="20" 
+              width="24" 
+              height="24" 
               viewBox="0 0 24 24" 
               fill="none" 
               stroke="currentColor" 
               strokeWidth="2"
-              strokeLinecap="round" 
-              strokeLinejoin="round"
             >
-              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
-              <polyline points="15 3 21 3 21 9" />
-              <line x1="10" y1="14" x2="21" y2="3" />
+              <line x1="3" y1="12" x2="21" y2="12" />
+              <line x1="3" y1="6" x2="21" y2="6" />
+              <line x1="3" y1="18" x2="21" y2="18" />
             </svg>
           </div>
         </div>
         
         {/* Deskripsi singkat */}
         <div style={{
-          fontSize: isMobile ? '0.8rem' : '0.9rem',
-          opacity: '0.8',
+          fontSize: isMobile ? '0.9rem' : '1rem',
+          opacity: '0.9',
           fontFamily: 'Helvetica, Arial, sans-serif',
-          lineHeight: '1.3'
+          lineHeight: '1.5'
         }}>
-          Bringing designs to life with animation
+          Bringing designs to life with animation.
         </div>
       </div>
     </div>
@@ -4843,7 +4835,7 @@ export default function HomePage(): React.JSX.Element {
       backgroundColor: '#000',
       width: '90%',
       height: '90%',
-      borderRadius: '8px',
+      borderRadius: '12px',
       position: 'relative'
     }}>
       {/* Close Button */}
@@ -4853,15 +4845,15 @@ export default function HomePage(): React.JSX.Element {
         }}
         style={{
           position: 'absolute',
-          top: '15px',
-          right: '15px',
-          width: '36px',
-          height: '36px',
+          top: '20px',
+          right: '20px',
+          width: '40px',
+          height: '40px',
           borderRadius: '50%',
           backgroundColor: 'rgba(255, 255, 255, 0.1)',
           border: 'none',
           color: 'white',
-          fontSize: '1.2rem',
+          fontSize: '1.5rem',
           cursor: 'pointer',
           display: 'flex',
           alignItems: 'center',
@@ -4880,7 +4872,7 @@ export default function HomePage(): React.JSX.Element {
         width: '100%',
         height: '100%',
         color: '#666',
-        fontSize: '1rem',
+        fontSize: '1.2rem',
         fontFamily: 'Helvetica, Arial, sans-serif'
       }}>
         Halaman Detail - Klik di luar modal atau tombol X untuk menutup
@@ -4913,6 +4905,13 @@ export default function HomePage(): React.JSX.Element {
     `
   }} />
 </div>
+
+
+
+
+
+
+        
 
         
 
@@ -5506,6 +5505,7 @@ export default function HomePage(): React.JSX.Element {
     </div>
   );
 }
+
 
 
 
