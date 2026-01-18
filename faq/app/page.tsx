@@ -4357,6 +4357,660 @@ export default function HomePage(): React.JSX.Element {
                 </div>
               </div>
 
+{/* Foto Card Design Section - 4 Card Pojok Kanan */}
+<div style={{
+  width: '100%',
+  padding: isMobile ? '0.5rem' : '1rem',
+  marginTop: isMobile ? '2rem' : '3rem',
+  marginBottom: isMobile ? '3rem' : '4rem',
+  boxSizing: 'border-box',
+  position: 'relative'
+}}>
+  {/* Judul di Atas Foto - Tanpa Background Putih */}
+  <div style={{
+    marginBottom: isMobile ? '1.5rem' : '2rem',
+    paddingLeft: isMobile ? '1rem' : '2rem'
+  }}>
+    <div style={{
+      color: 'white',
+      fontSize: isMobile ? '1.5rem' : '2rem',
+      fontWeight: '600',
+      fontFamily: 'Helvetica, Arial, sans-serif',
+      letterSpacing: '0.5px'
+    }}>
+      Design Collection
+    </div>
+  </div>
+
+  {/* Container Utama untuk 4 Card Pojok Kanan dan 3 Card Bawah */}
+  <div style={{
+    display: 'flex',
+    flexDirection: 'column',
+    gap: isMobile ? '2rem' : '3rem',
+    width: '100%',
+    maxWidth: '1400px',
+    margin: '0 auto',
+    padding: isMobile ? '0 0.5rem' : '0 1rem'
+  }}>
+    
+    {/* 4 Card di Pojok Kanan */}
+    <div style={{
+      display: 'flex',
+      justifyContent: 'flex-end',
+      gap: isMobile ? '1rem' : '1.5rem',
+      flexWrap: 'wrap'
+    }}>
+      {/* Card 1 */}
+      <div style={{
+        position: 'relative',
+        width: isMobile ? 'calc(50% - 0.5rem)' : '250px',
+        height: isMobile ? '300px' : '350px',
+        borderRadius: '16px',
+        overflow: 'hidden',
+        flexShrink: 0
+      }}>
+        <img 
+          src="images/5.jpg" 
+          alt="Visual Design"
+          style={{
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            display: 'block',
+            borderRadius: '16px'
+          }}
+          onError={(e) => {
+            e.currentTarget.style.backgroundColor = '#111';
+            e.currentTarget.style.display = 'flex';
+            e.currentTarget.style.alignItems = 'center';
+            e.currentTarget.style.justifyContent = 'center';
+            e.currentTarget.style.color = '#fff';
+            e.currentTarget.innerHTML = '<div style="padding: 1rem; text-align: center; color: #fff;">Visual Design</div>';
+          }}
+        />
+        
+        {/* Overlay Konten di Dalam Foto */}
+        <div style={{
+          position: 'absolute',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          background: 'linear-gradient(to top, rgba(0,0,0,0.8), transparent)',
+          padding: isMobile ? '1rem' : '1.5rem',
+          color: 'white'
+        }}>
+          <div style={{
+            fontSize: isMobile ? '1.2rem' : '1.5rem',
+            fontWeight: '600',
+            marginBottom: '0.5rem',
+            fontFamily: 'Helvetica, Arial, sans-serif'
+          }}>
+            Visual Design
+          </div>
+          <div style={{
+            fontSize: isMobile ? '0.8rem' : '0.9rem',
+            opacity: 0.9,
+            fontFamily: 'Helvetica, Arial, sans-serif',
+            marginBottom: '1rem'
+          }}>
+            Creating compelling visual experiences through color, typography, and layout
+          </div>
+          
+          {/* Toggle Button di Pojok Kanan Bawah */}
+          <button
+            onClick={() => window.open('/visual-design', '_blank')}
+            style={{
+              position: 'absolute',
+              bottom: isMobile ? '1rem' : '1.5rem',
+              right: isMobile ? '1rem' : '1.5rem',
+              width: '40px',
+              height: '40px',
+              borderRadius: '50%',
+              backgroundColor: 'rgba(255, 255, 255, 0.9)',
+              border: 'none',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '1.2rem',
+              color: '#000',
+              fontWeight: 'bold',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
+              transition: 'transform 0.2s'
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
+            onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+          >
+            +
+          </button>
+        </div>
+      </div>
+
+      {/* Card 2 */}
+      <div style={{
+        position: 'relative',
+        width: isMobile ? 'calc(50% - 0.5rem)' : '250px',
+        height: isMobile ? '300px' : '350px',
+        borderRadius: '16px',
+        overflow: 'hidden',
+        flexShrink: 0
+      }}>
+        <img 
+          src="images/5.jpg" 
+          alt="Brand Identity"
+          style={{
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            display: 'block',
+            borderRadius: '16px'
+          }}
+          onError={(e) => {
+            e.currentTarget.style.backgroundColor = '#111';
+            e.currentTarget.style.display = 'flex';
+            e.currentTarget.style.alignItems = 'center';
+            e.currentTarget.style.justifyContent = 'center';
+            e.currentTarget.style.color = '#fff';
+            e.currentTarget.innerHTML = '<div style="padding: 1rem; text-align: center; color: #fff;">Brand Identity</div>';
+          }}
+        />
+        
+        <div style={{
+          position: 'absolute',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          background: 'linear-gradient(to top, rgba(0,0,0,0.8), transparent)',
+          padding: isMobile ? '1rem' : '1.5rem',
+          color: 'white'
+        }}>
+          <div style={{
+            fontSize: isMobile ? '1.2rem' : '1.5rem',
+            fontWeight: '600',
+            marginBottom: '0.5rem',
+            fontFamily: 'Helvetica, Arial, sans-serif'
+          }}>
+            Brand Identity
+          </div>
+          <div style={{
+            fontSize: isMobile ? '0.8rem' : '0.9rem',
+            opacity: 0.9,
+            fontFamily: 'Helvetica, Arial, sans-serif',
+            marginBottom: '1rem'
+          }}>
+            Building memorable brand experiences through logos and visual systems
+          </div>
+          
+          <button
+            onClick={() => window.open('/brand-identity', '_blank')}
+            style={{
+              position: 'absolute',
+              bottom: isMobile ? '1rem' : '1.5rem',
+              right: isMobile ? '1rem' : '1.5rem',
+              width: '40px',
+              height: '40px',
+              borderRadius: '50%',
+              backgroundColor: 'rgba(255, 255, 255, 0.9)',
+              border: 'none',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '1.2rem',
+              color: '#000',
+              fontWeight: 'bold',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
+              transition: 'transform 0.2s'
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
+            onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+          >
+            +
+          </button>
+        </div>
+      </div>
+
+      {/* Card 3 */}
+      <div style={{
+        position: 'relative',
+        width: isMobile ? 'calc(50% - 0.5rem)' : '250px',
+        height: isMobile ? '300px' : '350px',
+        borderRadius: '16px',
+        overflow: 'hidden',
+        flexShrink: 0
+      }}>
+        <img 
+          src="images/5.jpg" 
+          alt="UI/UX Design"
+          style={{
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            display: 'block',
+            borderRadius: '16px'
+          }}
+          onError={(e) => {
+            e.currentTarget.style.backgroundColor = '#111';
+            e.currentTarget.style.display = 'flex';
+            e.currentTarget.style.alignItems = 'center';
+            e.currentTarget.style.justifyContent = 'center';
+            e.currentTarget.style.color = '#fff';
+            e.currentTarget.innerHTML = '<div style="padding: 1rem; text-align: center; color: #fff;">UI/UX Design</div>';
+          }}
+        />
+        
+        <div style={{
+          position: 'absolute',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          background: 'linear-gradient(to top, rgba(0,0,0,0.8), transparent)',
+          padding: isMobile ? '1rem' : '1.5rem',
+          color: 'white'
+        }}>
+          <div style={{
+            fontSize: isMobile ? '1.2rem' : '1.5rem',
+            fontWeight: '600',
+            marginBottom: '0.5rem',
+            fontFamily: 'Helvetica, Arial, sans-serif'
+          }}>
+            UI/UX Design
+          </div>
+          <div style={{
+            fontSize: isMobile ? '0.8rem' : '0.9rem',
+            opacity: 0.9,
+            fontFamily: 'Helvetica, Arial, sans-serif',
+            marginBottom: '1rem'
+          }}>
+            Designing intuitive digital experiences for web and mobile applications
+          </div>
+          
+          <button
+            onClick={() => window.open('/ui-ux-design', '_blank')}
+            style={{
+              position: 'absolute',
+              bottom: isMobile ? '1rem' : '1.5rem',
+              right: isMobile ? '1rem' : '1.5rem',
+              width: '40px',
+              height: '40px',
+              borderRadius: '50%',
+              backgroundColor: 'rgba(255, 255, 255, 0.9)',
+              border: 'none',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '1.2rem',
+              color: '#000',
+              fontWeight: 'bold',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
+              transition: 'transform 0.2s'
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
+            onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+          >
+            +
+          </button>
+        </div>
+      </div>
+
+      {/* Card 4 */}
+      <div style={{
+        position: 'relative',
+        width: isMobile ? 'calc(50% - 0.5rem)' : '250px',
+        height: isMobile ? '300px' : '350px',
+        borderRadius: '16px',
+        overflow: 'hidden',
+        flexShrink: 0
+      }}>
+        <img 
+          src="images/5.jpg" 
+          alt="Motion Graphics"
+          style={{
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            display: 'block',
+            borderRadius: '16px'
+          }}
+          onError={(e) => {
+            e.currentTarget.style.backgroundColor = '#111';
+            e.currentTarget.style.display = 'flex';
+            e.currentTarget.style.alignItems = 'center';
+            e.currentTarget.style.justifyContent = 'center';
+            e.currentTarget.style.color = '#fff';
+            e.currentTarget.innerHTML = '<div style="padding: 1rem; text-align: center; color: #fff;">Motion Graphics</div>';
+          }}
+        />
+        
+        <div style={{
+          position: 'absolute',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          background: 'linear-gradient(to top, rgba(0,0,0,0.8), transparent)',
+          padding: isMobile ? '1rem' : '1.5rem',
+          color: 'white'
+        }}>
+          <div style={{
+            fontSize: isMobile ? '1.2rem' : '1.5rem',
+            fontWeight: '600',
+            marginBottom: '0.5rem',
+            fontFamily: 'Helvetica, Arial, sans-serif'
+          }}>
+            Motion Graphics
+          </div>
+          <div style={{
+            fontSize: isMobile ? '0.8rem' : '0.9rem',
+            opacity: 0.9,
+            fontFamily: 'Helvetica, Arial, sans-serif',
+            marginBottom: '1rem'
+          }}>
+            Bringing designs to life with animation and dynamic visual storytelling
+          </div>
+          
+          <button
+            onClick={() => window.open('/motion-graphics', '_blank')}
+            style={{
+              position: 'absolute',
+              bottom: isMobile ? '1rem' : '1.5rem',
+              right: isMobile ? '1rem' : '1.5rem',
+              width: '40px',
+              height: '40px',
+              borderRadius: '50%',
+              backgroundColor: 'rgba(255, 255, 255, 0.9)',
+              border: 'none',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '1.2rem',
+              color: '#000',
+              fontWeight: 'bold',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
+              transition: 'transform 0.2s'
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
+            onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+          >
+            +
+          </button>
+        </div>
+      </div>
+    </div>
+
+    {/* 3 Card di Bawah */}
+    <div style={{
+      display: 'flex',
+      justifyContent: 'center',
+      gap: isMobile ? '1rem' : '1.5rem',
+      flexWrap: 'wrap'
+    }}>
+      {/* Card 5 */}
+      <div style={{
+        position: 'relative',
+        width: isMobile ? 'calc(33.333% - 0.67rem)' : '280px',
+        height: isMobile ? '250px' : '300px',
+        borderRadius: '16px',
+        overflow: 'hidden',
+        flexShrink: 0
+      }}>
+        <img 
+          src="images/5.jpg" 
+          alt="Print Design"
+          style={{
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            display: 'block',
+            borderRadius: '16px'
+          }}
+          onError={(e) => {
+            e.currentTarget.style.backgroundColor = '#111';
+            e.currentTarget.style.display = 'flex';
+            e.currentTarget.style.alignItems = 'center';
+            e.currentTarget.style.justifyContent = 'center';
+            e.currentTarget.style.color = '#fff';
+            e.currentTarget.innerHTML = '<div style="padding: 1rem; text-align: center; color: #fff;">Print Design</div>';
+          }}
+        />
+        
+        <div style={{
+          position: 'absolute',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          background: 'linear-gradient(to top, rgba(0,0,0,0.8), transparent)',
+          padding: isMobile ? '1rem' : '1.5rem',
+          color: 'white'
+        }}>
+          <div style={{
+            fontSize: isMobile ? '1.1rem' : '1.3rem',
+            fontWeight: '600',
+            marginBottom: '0.5rem',
+            fontFamily: 'Helvetica, Arial, sans-serif'
+          }}>
+            Print Design
+          </div>
+          <div style={{
+            fontSize: isMobile ? '0.75rem' : '0.85rem',
+            opacity: 0.9,
+            fontFamily: 'Helvetica, Arial, sans-serif',
+            marginBottom: '1rem'
+          }}>
+            Crafting impactful designs for physical media and print materials
+          </div>
+          
+          <button
+            onClick={() => window.open('/print-design', '_blank')}
+            style={{
+              position: 'absolute',
+              bottom: isMobile ? '1rem' : '1.5rem',
+              right: isMobile ? '1rem' : '1.5rem',
+              width: '35px',
+              height: '35px',
+              borderRadius: '50%',
+              backgroundColor: 'rgba(255, 255, 255, 0.9)',
+              border: 'none',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '1.1rem',
+              color: '#000',
+              fontWeight: 'bold',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
+              transition: 'transform 0.2s'
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
+            onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+          >
+            +
+          </button>
+        </div>
+      </div>
+
+      {/* Card 6 */}
+      <div style={{
+        position: 'relative',
+        width: isMobile ? 'calc(33.333% - 0.67rem)' : '280px',
+        height: isMobile ? '250px' : '300px',
+        borderRadius: '16px',
+        overflow: 'hidden',
+        flexShrink: 0
+      }}>
+        <img 
+          src="images/5.jpg" 
+          alt="Web Design"
+          style={{
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            display: 'block',
+            borderRadius: '16px'
+          }}
+          onError={(e) => {
+            e.currentTarget.style.backgroundColor = '#111';
+            e.currentTarget.style.display = 'flex';
+            e.currentTarget.style.alignItems = 'center';
+            e.currentTarget.style.justifyContent = 'center';
+            e.currentTarget.style.color = '#fff';
+            e.currentTarget.innerHTML = '<div style="padding: 1rem; text-align: center; color: #fff;">Web Design</div>';
+          }}
+        />
+        
+        <div style={{
+          position: 'absolute',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          background: 'linear-gradient(to top, rgba(0,0,0,0.8), transparent)',
+          padding: isMobile ? '1rem' : '1.5rem',
+          color: 'white'
+        }}>
+          <div style={{
+            fontSize: isMobile ? '1.1rem' : '1.3rem',
+            fontWeight: '600',
+            marginBottom: '0.5rem',
+            fontFamily: 'Helvetica, Arial, sans-serif'
+          }}>
+            Web Design
+          </div>
+          <div style={{
+            fontSize: isMobile ? '0.75rem' : '0.85rem',
+            opacity: 0.9,
+            fontFamily: 'Helvetica, Arial, sans-serif',
+            marginBottom: '1rem'
+          }}>
+            Designing beautiful and functional websites for modern businesses
+          </div>
+          
+          <button
+            onClick={() => window.open('/web-design', '_blank')}
+            style={{
+              position: 'absolute',
+              bottom: isMobile ? '1rem' : '1.5rem',
+              right: isMobile ? '1rem' : '1.5rem',
+              width: '35px',
+              height: '35px',
+              borderRadius: '50%',
+              backgroundColor: 'rgba(255, 255, 255, 0.9)',
+              border: 'none',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '1.1rem',
+              color: '#000',
+              fontWeight: 'bold',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
+              transition: 'transform 0.2s'
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
+            onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+          >
+            +
+          </button>
+        </div>
+      </div>
+
+      {/* Card 7 */}
+      <div style={{
+        position: 'relative',
+        width: isMobile ? 'calc(33.333% - 0.67rem)' : '280px',
+        height: isMobile ? '250px' : '300px',
+        borderRadius: '16px',
+        overflow: 'hidden',
+        flexShrink: 0
+      }}>
+        <img 
+          src="images/5.jpg" 
+          alt="Packaging Design"
+          style={{
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            display: 'block',
+            borderRadius: '16px'
+          }}
+          onError={(e) => {
+            e.currentTarget.style.backgroundColor = '#111';
+            e.currentTarget.style.display = 'flex';
+            e.currentTarget.style.alignItems = 'center';
+            e.currentTarget.style.justifyContent = 'center';
+            e.currentTarget.style.color = '#fff';
+            e.currentTarget.innerHTML = '<div style="padding: 1rem; text-align: center; color: #fff;">Packaging Design</div>';
+          }}
+        />
+        
+        <div style={{
+          position: 'absolute',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          background: 'linear-gradient(to top, rgba(0,0,0,0.8), transparent)',
+          padding: isMobile ? '1rem' : '1.5rem',
+          color: 'white'
+        }}>
+          <div style={{
+            fontSize: isMobile ? '1.1rem' : '1.3rem',
+            fontWeight: '600',
+            marginBottom: '0.5rem',
+            fontFamily: 'Helvetica, Arial, sans-serif'
+          }}>
+            Packaging Design
+          </div>
+          <div style={{
+            fontSize: isMobile ? '0.75rem' : '0.85rem',
+            opacity: 0.9,
+            fontFamily: 'Helvetica, Arial, sans-serif',
+            marginBottom: '1rem'
+          }}>
+            Creating compelling product packaging that stands out on shelves
+          </div>
+          
+          <button
+            onClick={() => window.open('/packaging-design', '_blank')}
+            style={{
+              position: 'absolute',
+              bottom: isMobile ? '1rem' : '1.5rem',
+              right: isMobile ? '1rem' : '1.5rem',
+              width: '35px',
+              height: '35px',
+              borderRadius: '50%',
+              backgroundColor: 'rgba(255, 255, 255, 0.9)',
+              border: 'none',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '1.1rem',
+              color: '#000',
+              fontWeight: 'bold',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
+              transition: 'transform 0.2s'
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
+            onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+          >
+            +
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+
+
+        
+
               {/* Content tambahan */}
               <div style={{
                 height: '50vh',
@@ -4947,6 +5601,7 @@ export default function HomePage(): React.JSX.Element {
     </div>
   );
 }
+
 
 
 
