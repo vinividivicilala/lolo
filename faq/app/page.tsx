@@ -4356,12 +4356,10 @@ export default function HomePage(): React.JSX.Element {
                   </motion.div>
                 </div>
               </div>
-
-
-        {/* Foto Card Design Section - 4 Card Pojok Kanan */}
+{/* Foto Card Design Section - 4 Card Pojok Kanan */}
 <div style={{
   width: '100%',
-  padding: isMobile ? '0.5rem' : '2rem',
+  padding: isMobile ? '1rem' : '2rem',
   marginTop: isMobile ? '2rem' : '4rem',
   marginBottom: isMobile ? '3rem' : '5rem',
   boxSizing: 'border-box',
@@ -4370,15 +4368,15 @@ export default function HomePage(): React.JSX.Element {
   {/* Judul di Atas Foto - Tanpa Background Putih */}
   <div style={{
     marginBottom: isMobile ? '2rem' : '3rem',
-    paddingLeft: isMobile ? '1rem' : '2rem'
+    paddingLeft: isMobile ? '0' : '0'
   }}>
     <div style={{
       color: 'white',
-      fontSize: isMobile ? '1.8rem' : '2.5rem',
+      fontSize: isMobile ? '2rem' : '3rem',
       fontWeight: '700',
       fontFamily: 'Helvetica, Arial, sans-serif',
       letterSpacing: '1px',
-      textShadow: '0 2px 4px rgba(0,0,0,0.3)'
+      textAlign: 'left'
     }}>
       Design Collection
     </div>
@@ -4388,43 +4386,31 @@ export default function HomePage(): React.JSX.Element {
   <div style={{
     display: 'flex',
     justifyContent: 'flex-end',
-    alignItems: 'center',
-    gap: isMobile ? '1.5rem' : '2rem',
-    padding: isMobile ? '0 1rem' : '0 2rem',
+    alignItems: 'flex-start',
+    gap: isMobile ? '1rem' : '2rem',
     flexWrap: 'wrap',
-    maxWidth: '1600px',
-    marginLeft: 'auto'
+    marginLeft: 'auto',
+    width: isMobile ? '100%' : '85%'
   }}>
     
     {/* Card 1 */}
     <div style={{
       position: 'relative',
-      width: isMobile ? 'calc(50% - 0.75rem)' : '320px',
-      height: isMobile ? '380px' : '480px',
-      borderRadius: '20px',
+      width: isMobile ? 'calc(50% - 0.5rem)' : '350px',
+      height: isMobile ? '400px' : '550px',
+      borderRadius: '12px',
       overflow: 'hidden',
-      flexShrink: 0,
-      boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
-      transition: 'transform 0.3s ease, box-shadow 0.3s ease'
-    }}
-    onMouseEnter={(e) => {
-      e.currentTarget.style.transform = 'translateY(-10px)';
-      e.currentTarget.style.boxShadow = '0 20px 40px rgba(0,0,0,0.4)';
-    }}
-    onMouseLeave={(e) => {
-      e.currentTarget.style.transform = 'translateY(0)';
-      e.currentTarget.style.boxShadow = '0 10px 30px rgba(0,0,0,0.3)';
-    }}
-    >
+      flexShrink: 0
+    }}>
       <img 
         src="images/5.jpg" 
         alt="Visual Design"
         style={{
           width: '100%',
-          height: '100%',
+          height: '85%',
           objectFit: 'cover',
           display: 'block',
-          borderRadius: '20px'
+          borderRadius: '12px'
         }}
         onError={(e) => {
           e.currentTarget.style.backgroundColor = '#111';
@@ -4436,108 +4422,87 @@ export default function HomePage(): React.JSX.Element {
         }}
       />
       
-      {/* Overlay Konten di Dalam Foto */}
+      {/* Konten di Bawah Foto */}
       <div style={{
-        position: 'absolute',
-        bottom: 0,
-        left: 0,
-        right: 0,
-        background: 'linear-gradient(to top, rgba(0,0,0,0.9) 30%, transparent)',
-        padding: isMobile ? '1.5rem' : '2rem',
+        padding: isMobile ? '1rem 0.5rem' : '1.5rem 0',
         color: 'white',
-        height: '50%',
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'flex-end'
+        height: '15%'
       }}>
         <div style={{
-          fontSize: isMobile ? '1.5rem' : '2rem',
-          fontWeight: '700',
-          marginBottom: '0.8rem',
-          fontFamily: 'Helvetica, Arial, sans-serif',
-          letterSpacing: '0.5px'
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'flex-start',
+          marginBottom: '0.5rem'
         }}>
-          Visual Design
-        </div>
-        <div style={{
-          fontSize: isMobile ? '0.9rem' : '1.1rem',
-          opacity: 0.95,
-          fontFamily: 'Helvetica, Arial, sans-serif',
-          marginBottom: '1.5rem',
-          lineHeight: '1.5',
-          maxWidth: '90%'
-        }}>
-          Creating compelling visual experiences through innovative color schemes, typography, and modern layout designs that captivate audiences.
-        </div>
-        
-        {/* Toggle Button < > Miring di Pojok Kanan Bawah */}
-        <button
-          onClick={() => {/* Function untuk modal akan ditambahkan */}}
-          style={{
-            position: 'absolute',
-            bottom: isMobile ? '1.5rem' : '2rem',
-            right: isMobile ? '1.5rem' : '2rem',
-            width: '50px',
-            height: '50px',
-            borderRadius: '50%',
-            backgroundColor: 'rgba(255, 255, 255, 0.95)',
-            border: 'none',
+          <div style={{
+            fontSize: isMobile ? '1.2rem' : '1.6rem',
+            fontWeight: '600',
+            fontFamily: 'Helvetica, Arial, sans-serif'
+          }}>
+            Visual Design
+          </div>
+          
+          {/* Icon Maximize di pojok kanan - tanpa background */}
+          <div style={{
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            fontSize: '1.5rem',
-            color: '#000',
-            fontWeight: 'bold',
-            boxShadow: '0 4px 12px rgba(0,0,0,0.4)',
-            transition: 'all 0.3s ease',
-            transform: 'rotate(-45deg)'
+            width: '24px',
+            height: '24px',
+            color: 'white',
+            opacity: '0.7',
+            transition: 'opacity 0.2s',
+            marginTop: '2px'
           }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 1)';
-            e.currentTarget.style.transform = 'rotate(-45deg) scale(1.1)';
-            e.currentTarget.style.boxShadow = '0 6px 15px rgba(0,0,0,0.5)';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.95)';
-            e.currentTarget.style.transform = 'rotate(-45deg) scale(1)';
-            e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.4)';
-          }}
-        >
-          {'>'}
-        </button>
+          onClick={() => {/* Fungsi untuk expand */}}
+          onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
+          onMouseLeave={(e) => e.currentTarget.style.opacity = '0.7'}
+          >
+            {/* SVG Icon Maximize */}
+            <svg 
+              width="20" 
+              height="20" 
+              viewBox="0 0 24 24" 
+              fill="none" 
+              stroke="currentColor" 
+              strokeWidth="2"
+            >
+              <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
+            </svg>
+          </div>
+        </div>
+        
+        {/* Deskripsi singkat */}
+        <div style={{
+          fontSize: isMobile ? '0.85rem' : '1rem',
+          opacity: '0.8',
+          fontFamily: 'Helvetica, Arial, sans-serif',
+          lineHeight: '1.4'
+        }}>
+          Creating compelling visual experiences.
+        </div>
       </div>
     </div>
 
     {/* Card 2 */}
     <div style={{
       position: 'relative',
-      width: isMobile ? 'calc(50% - 0.75rem)' : '320px',
-      height: isMobile ? '380px' : '480px',
-      borderRadius: '20px',
+      width: isMobile ? 'calc(50% - 0.5rem)' : '350px',
+      height: isMobile ? '400px' : '550px',
+      borderRadius: '12px',
       overflow: 'hidden',
-      flexShrink: 0,
-      boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
-      transition: 'transform 0.3s ease, box-shadow 0.3s ease'
-    }}
-    onMouseEnter={(e) => {
-      e.currentTarget.style.transform = 'translateY(-10px)';
-      e.currentTarget.style.boxShadow = '0 20px 40px rgba(0,0,0,0.4)';
-    }}
-    onMouseLeave={(e) => {
-      e.currentTarget.style.transform = 'translateY(0)';
-      e.currentTarget.style.boxShadow = '0 10px 30px rgba(0,0,0,0.3)';
-    }}
-    >
+      flexShrink: 0
+    }}>
       <img 
         src="images/5.jpg" 
         alt="Brand Identity"
         style={{
           width: '100%',
-          height: '100%',
+          height: '85%',
           objectFit: 'cover',
           display: 'block',
-          borderRadius: '20px'
+          borderRadius: '12px'
         }}
         onError={(e) => {
           e.currentTarget.style.backgroundColor = '#111';
@@ -4549,106 +4514,86 @@ export default function HomePage(): React.JSX.Element {
         }}
       />
       
+      {/* Konten di Bawah Foto */}
       <div style={{
-        position: 'absolute',
-        bottom: 0,
-        left: 0,
-        right: 0,
-        background: 'linear-gradient(to top, rgba(0,0,0,0.9) 30%, transparent)',
-        padding: isMobile ? '1.5rem' : '2rem',
+        padding: isMobile ? '1rem 0.5rem' : '1.5rem 0',
         color: 'white',
-        height: '50%',
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'flex-end'
+        height: '15%'
       }}>
         <div style={{
-          fontSize: isMobile ? '1.5rem' : '2rem',
-          fontWeight: '700',
-          marginBottom: '0.8rem',
-          fontFamily: 'Helvetica, Arial, sans-serif',
-          letterSpacing: '0.5px'
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'flex-start',
+          marginBottom: '0.5rem'
         }}>
-          Brand Identity
-        </div>
-        <div style={{
-          fontSize: isMobile ? '0.9rem' : '1.1rem',
-          opacity: 0.95,
-          fontFamily: 'Helvetica, Arial, sans-serif',
-          marginBottom: '1.5rem',
-          lineHeight: '1.5',
-          maxWidth: '90%'
-        }}>
-          Building comprehensive brand systems with memorable logos, color palettes, and visual guidelines that define company personality.
-        </div>
-        
-        <button
-          onClick={() => {/* Function untuk modal akan ditambahkan */}}
-          style={{
-            position: 'absolute',
-            bottom: isMobile ? '1.5rem' : '2rem',
-            right: isMobile ? '1.5rem' : '2rem',
-            width: '50px',
-            height: '50px',
-            borderRadius: '50%',
-            backgroundColor: 'rgba(255, 255, 255, 0.95)',
-            border: 'none',
+          <div style={{
+            fontSize: isMobile ? '1.2rem' : '1.6rem',
+            fontWeight: '600',
+            fontFamily: 'Helvetica, Arial, sans-serif'
+          }}>
+            Brand Identity
+          </div>
+          
+          {/* Icon Maximize di pojok kanan - tanpa background */}
+          <div style={{
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            fontSize: '1.5rem',
-            color: '#000',
-            fontWeight: 'bold',
-            boxShadow: '0 4px 12px rgba(0,0,0,0.4)',
-            transition: 'all 0.3s ease',
-            transform: 'rotate(-45deg)'
+            width: '24px',
+            height: '24px',
+            color: 'white',
+            opacity: '0.7',
+            transition: 'opacity 0.2s',
+            marginTop: '2px'
           }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 1)';
-            e.currentTarget.style.transform = 'rotate(-45deg) scale(1.1)';
-            e.currentTarget.style.boxShadow = '0 6px 15px rgba(0,0,0,0.5)';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.95)';
-            e.currentTarget.style.transform = 'rotate(-45deg) scale(1)';
-            e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.4)';
-          }}
-        >
-          {'>'}
-        </button>
+          onClick={() => {/* Fungsi untuk expand */}}
+          onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
+          onMouseLeave={(e) => e.currentTarget.style.opacity = '0.7'}
+          >
+            <svg 
+              width="20" 
+              height="20" 
+              viewBox="0 0 24 24" 
+              fill="none" 
+              stroke="currentColor" 
+              strokeWidth="2"
+            >
+              <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
+            </svg>
+          </div>
+        </div>
+        
+        {/* Deskripsi singkat */}
+        <div style={{
+          fontSize: isMobile ? '0.85rem' : '1rem',
+          opacity: '0.8',
+          fontFamily: 'Helvetica, Arial, sans-serif',
+          lineHeight: '1.4'
+        }}>
+          Building memorable brand systems.
+        </div>
       </div>
     </div>
 
     {/* Card 3 */}
     <div style={{
       position: 'relative',
-      width: isMobile ? 'calc(50% - 0.75rem)' : '320px',
-      height: isMobile ? '380px' : '480px',
-      borderRadius: '20px',
+      width: isMobile ? 'calc(50% - 0.5rem)' : '350px',
+      height: isMobile ? '400px' : '550px',
+      borderRadius: '12px',
       overflow: 'hidden',
-      flexShrink: 0,
-      boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
-      transition: 'transform 0.3s ease, box-shadow 0.3s ease'
-    }}
-    onMouseEnter={(e) => {
-      e.currentTarget.style.transform = 'translateY(-10px)';
-      e.currentTarget.style.boxShadow = '0 20px 40px rgba(0,0,0,0.4)';
-    }}
-    onMouseLeave={(e) => {
-      e.currentTarget.style.transform = 'translateY(0)';
-      e.currentTarget.style.boxShadow = '0 10px 30px rgba(0,0,0,0.3)';
-    }}
-    >
+      flexShrink: 0
+    }}>
       <img 
         src="images/5.jpg" 
         alt="UI/UX Design"
         style={{
           width: '100%',
-          height: '100%',
+          height: '85%',
           objectFit: 'cover',
           display: 'block',
-          borderRadius: '20px'
+          borderRadius: '12px'
         }}
         onError={(e) => {
           e.currentTarget.style.backgroundColor = '#111';
@@ -4660,106 +4605,86 @@ export default function HomePage(): React.JSX.Element {
         }}
       />
       
+      {/* Konten di Bawah Foto */}
       <div style={{
-        position: 'absolute',
-        bottom: 0,
-        left: 0,
-        right: 0,
-        background: 'linear-gradient(to top, rgba(0,0,0,0.9) 30%, transparent)',
-        padding: isMobile ? '1.5rem' : '2rem',
+        padding: isMobile ? '1rem 0.5rem' : '1.5rem 0',
         color: 'white',
-        height: '50%',
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'flex-end'
+        height: '15%'
       }}>
         <div style={{
-          fontSize: isMobile ? '1.5rem' : '2rem',
-          fontWeight: '700',
-          marginBottom: '0.8rem',
-          fontFamily: 'Helvetica, Arial, sans-serif',
-          letterSpacing: '0.5px'
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'flex-start',
+          marginBottom: '0.5rem'
         }}>
-          UI/UX Design
-        </div>
-        <div style={{
-          fontSize: isMobile ? '0.9rem' : '1.1rem',
-          opacity: 0.95,
-          fontFamily: 'Helvetica, Arial, sans-serif',
-          marginBottom: '1.5rem',
-          lineHeight: '1.5',
-          maxWidth: '90%'
-        }}>
-          Designing intuitive user interfaces and seamless experiences for web and mobile applications with user-centered approach.
-        </div>
-        
-        <button
-          onClick={() => {/* Function untuk modal akan ditambahkan */}}
-          style={{
-            position: 'absolute',
-            bottom: isMobile ? '1.5rem' : '2rem',
-            right: isMobile ? '1.5rem' : '2rem',
-            width: '50px',
-            height: '50px',
-            borderRadius: '50%',
-            backgroundColor: 'rgba(255, 255, 255, 0.95)',
-            border: 'none',
+          <div style={{
+            fontSize: isMobile ? '1.2rem' : '1.6rem',
+            fontWeight: '600',
+            fontFamily: 'Helvetica, Arial, sans-serif'
+          }}>
+            UI/UX Design
+          </div>
+          
+          {/* Icon Maximize di pojok kanan - tanpa background */}
+          <div style={{
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            fontSize: '1.5rem',
-            color: '#000',
-            fontWeight: 'bold',
-            boxShadow: '0 4px 12px rgba(0,0,0,0.4)',
-            transition: 'all 0.3s ease',
-            transform: 'rotate(-45deg)'
+            width: '24px',
+            height: '24px',
+            color: 'white',
+            opacity: '0.7',
+            transition: 'opacity 0.2s',
+            marginTop: '2px'
           }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 1)';
-            e.currentTarget.style.transform = 'rotate(-45deg) scale(1.1)';
-            e.currentTarget.style.boxShadow = '0 6px 15px rgba(0,0,0,0.5)';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.95)';
-            e.currentTarget.style.transform = 'rotate(-45deg) scale(1)';
-            e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.4)';
-          }}
-        >
-          {'>'}
-        </button>
+          onClick={() => {/* Fungsi untuk expand */}}
+          onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
+          onMouseLeave={(e) => e.currentTarget.style.opacity = '0.7'}
+          >
+            <svg 
+              width="20" 
+              height="20" 
+              viewBox="0 0 24 24" 
+              fill="none" 
+              stroke="currentColor" 
+              strokeWidth="2"
+            >
+              <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
+            </svg>
+          </div>
+        </div>
+        
+        {/* Deskripsi singkat */}
+        <div style={{
+          fontSize: isMobile ? '0.85rem' : '1rem',
+          opacity: '0.8',
+          fontFamily: 'Helvetica, Arial, sans-serif',
+          lineHeight: '1.4'
+        }}>
+          Designing intuitive digital experiences.
+        </div>
       </div>
     </div>
 
     {/* Card 4 */}
     <div style={{
       position: 'relative',
-      width: isMobile ? 'calc(50% - 0.75rem)' : '320px',
-      height: isMobile ? '380px' : '480px',
-      borderRadius: '20px',
+      width: isMobile ? 'calc(50% - 0.5rem)' : '350px',
+      height: isMobile ? '400px' : '550px',
+      borderRadius: '12px',
       overflow: 'hidden',
-      flexShrink: 0,
-      boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
-      transition: 'transform 0.3s ease, box-shadow 0.3s ease'
-    }}
-    onMouseEnter={(e) => {
-      e.currentTarget.style.transform = 'translateY(-10px)';
-      e.currentTarget.style.boxShadow = '0 20px 40px rgba(0,0,0,0.4)';
-    }}
-    onMouseLeave={(e) => {
-      e.currentTarget.style.transform = 'translateY(0)';
-      e.currentTarget.style.boxShadow = '0 10px 30px rgba(0,0,0,0.3)';
-    }}
-    >
+      flexShrink: 0
+    }}>
       <img 
         src="images/5.jpg" 
         alt="Motion Graphics"
         style={{
           width: '100%',
-          height: '100%',
+          height: '85%',
           objectFit: 'cover',
           display: 'block',
-          borderRadius: '20px'
+          borderRadius: '12px'
         }}
         onError={(e) => {
           e.currentTarget.style.backgroundColor = '#111';
@@ -4771,155 +4696,69 @@ export default function HomePage(): React.JSX.Element {
         }}
       />
       
+      {/* Konten di Bawah Foto */}
       <div style={{
-        position: 'absolute',
-        bottom: 0,
-        left: 0,
-        right: 0,
-        background: 'linear-gradient(to top, rgba(0,0,0,0.9) 30%, transparent)',
-        padding: isMobile ? '1.5rem' : '2rem',
+        padding: isMobile ? '1rem 0.5rem' : '1.5rem 0',
         color: 'white',
-        height: '50%',
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'flex-end'
+        height: '15%'
       }}>
         <div style={{
-          fontSize: isMobile ? '1.5rem' : '2rem',
-          fontWeight: '700',
-          marginBottom: '0.8rem',
-          fontFamily: 'Helvetica, Arial, sans-serif',
-          letterSpacing: '0.5px'
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'flex-start',
+          marginBottom: '0.5rem'
         }}>
-          Motion Graphics
-        </div>
-        <div style={{
-          fontSize: isMobile ? '0.9rem' : '1.1rem',
-          opacity: 0.95,
-          fontFamily: 'Helvetica, Arial, sans-serif',
-          marginBottom: '1.5rem',
-          lineHeight: '1.5',
-          maxWidth: '90%'
-        }}>
-          Bringing static designs to life with fluid animations, dynamic transitions, and engaging visual storytelling for digital media.
-        </div>
-        
-        <button
-          onClick={() => {/* Function untuk modal akan ditambahkan */}}
-          style={{
-            position: 'absolute',
-            bottom: isMobile ? '1.5rem' : '2rem',
-            right: isMobile ? '1.5rem' : '2rem',
-            width: '50px',
-            height: '50px',
-            borderRadius: '50%',
-            backgroundColor: 'rgba(255, 255, 255, 0.95)',
-            border: 'none',
+          <div style={{
+            fontSize: isMobile ? '1.2rem' : '1.6rem',
+            fontWeight: '600',
+            fontFamily: 'Helvetica, Arial, sans-serif'
+          }}>
+            Motion Graphics
+          </div>
+          
+          {/* Icon Maximize di pojok kanan - tanpa background */}
+          <div style={{
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            fontSize: '1.5rem',
-            color: '#000',
-            fontWeight: 'bold',
-            boxShadow: '0 4px 12px rgba(0,0,0,0.4)',
-            transition: 'all 0.3s ease',
-            transform: 'rotate(-45deg)'
+            width: '24px',
+            height: '24px',
+            color: 'white',
+            opacity: '0.7',
+            transition: 'opacity 0.2s',
+            marginTop: '2px'
           }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 1)';
-            e.currentTarget.style.transform = 'rotate(-45deg) scale(1.1)';
-            e.currentTarget.style.boxShadow = '0 6px 15px rgba(0,0,0,0.5)';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.95)';
-            e.currentTarget.style.transform = 'rotate(-45deg) scale(1)';
-            e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.4)';
-          }}
-        >
-          {'>'}
-        </button>
+          onClick={() => {/* Fungsi untuk expand */}}
+          onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
+          onMouseLeave={(e) => e.currentTarget.style.opacity = '0.7'}
+          >
+            <svg 
+              width="20" 
+              height="20" 
+              viewBox="0 0 24 24" 
+              fill="none" 
+              stroke="currentColor" 
+              strokeWidth="2"
+            >
+              <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
+            </svg>
+          </div>
+        </div>
+        
+        {/* Deskripsi singkat */}
+        <div style={{
+          fontSize: isMobile ? '0.85rem' : '1rem',
+          opacity: '0.8',
+          fontFamily: 'Helvetica, Arial, sans-serif',
+          lineHeight: '1.4'
+        }}>
+          Bringing designs to life with animation.
+        </div>
       </div>
     </div>
   </div>
-
-  {/* Modal Overlay (hidden by default, akan ditampilkan saat tombol diklik) */}
-  <div id="photoModal" style={{
-    display: 'none',
-    position: 'fixed',
-    top: 0,
-    left: 0,
-    width: '100%',
-    height: '100%',
-    backgroundColor: 'rgba(0, 0, 0, 0.9)',
-    zIndex: 1000,
-    justifyContent: 'center',
-    alignItems: 'center'
-  }}>
-    <div style={{
-      position: 'relative',
-      maxWidth: '90%',
-      maxHeight: '90%',
-      backgroundColor: '#111',
-      borderRadius: '20px',
-      overflow: 'hidden',
-      boxShadow: '0 20px 50px rgba(0,0,0,0.5)'
-    }}>
-      <div style={{
-        padding: '2rem',
-        color: 'white',
-        fontSize: '1.8rem',
-        fontWeight: '600'
-      }}>
-        Modal Content - Detail dari foto yang dipilih
-      </div>
-      <button
-        onClick={() => {
-          document.getElementById('photoModal').style.display = 'none';
-        }}
-        style={{
-          position: 'absolute',
-          top: '1rem',
-          right: '1rem',
-          width: '40px',
-          height: '40px',
-          borderRadius: '50%',
-          backgroundColor: 'rgba(255, 255, 255, 0.2)',
-          border: 'none',
-          color: 'white',
-          fontSize: '1.5rem',
-          cursor: 'pointer',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center'
-        }}
-      >
-        ×
-      </button>
-    </div>
-  </div>
-
-  {/* Script untuk menangani modal */}
-  <script dangerouslySetInnerHTML={{
-    __html: `
-      function openPhotoModal(cardId) {
-        const modal = document.getElementById('photoModal');
-        modal.style.display = 'flex';
-        // Tambahkan logika untuk mengisi konten modal berdasarkan card yang diklik
-      }
-      
-      // Tambahkan event listener ke semua tombol
-      document.querySelectorAll('button[onclick*="openPhotoModal"]').forEach(button => {
-        button.addEventListener('click', function() {
-          const card = this.closest('[style*="position: relative"]');
-          // Logika untuk menentukan card mana yang diklik
-        });
-      });
-    `
-  }} />
 </div>
-
-
 
 
 
@@ -5518,6 +5357,7 @@ export default function HomePage(): React.JSX.Element {
     </div>
   );
 }
+
 
 
 
