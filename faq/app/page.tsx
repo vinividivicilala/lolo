@@ -4356,7 +4356,9 @@ export default function HomePage(): React.JSX.Element {
                   </motion.div>
                 </div>
               </div>
-{/* Foto Card Design Section - 4 Card Pojok Kanan */}
+
+
+        {/* Foto Card Design Section - 4 Card Pojok Kanan */}
 <div style={{
   width: '100%',
   padding: isMobile ? '1rem' : '2rem',
@@ -4407,7 +4409,7 @@ export default function HomePage(): React.JSX.Element {
         alt="Visual Design"
         style={{
           width: '100%',
-          height: '85%',
+          height: '100%',
           objectFit: 'cover',
           display: 'block',
           borderRadius: '12px'
@@ -4422,63 +4424,76 @@ export default function HomePage(): React.JSX.Element {
         }}
       />
       
-      {/* Konten di Bawah Foto */}
+      {/* Overlay Konten di Dalam Foto */}
       <div style={{
-        padding: isMobile ? '1rem 0.5rem' : '1.5rem 0',
-        color: 'white',
-        height: '15%'
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        background: 'linear-gradient(to top, rgba(0,0,0,0.8), transparent)',
+        padding: isMobile ? '1.5rem 1rem' : '2rem 1.5rem',
+        color: 'white'
       }}>
+        {/* Judul dan Toggle Icon dalam satu baris */}
         <div style={{
           display: 'flex',
           justifyContent: 'space-between',
-          alignItems: 'flex-start',
+          alignItems: 'center',
           marginBottom: '0.5rem'
         }}>
           <div style={{
-            fontSize: isMobile ? '1.2rem' : '1.6rem',
+            fontSize: isMobile ? '1.3rem' : '1.8rem',
             fontWeight: '600',
             fontFamily: 'Helvetica, Arial, sans-serif'
           }}>
             Visual Design
           </div>
           
-          {/* Icon Maximize di pojok kanan - tanpa background */}
-          <div style={{
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            width: '24px',
-            height: '24px',
-            color: 'white',
-            opacity: '0.7',
-            transition: 'opacity 0.2s',
-            marginTop: '2px'
-          }}
-          onClick={() => {/* Fungsi untuk expand */}}
-          onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
-          onMouseLeave={(e) => e.currentTarget.style.opacity = '0.7'}
+          {/* Toggle Icon di pojok kanan */}
+          <div 
+            id="toggle1"
+            style={{
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '32px',
+              height: '32px',
+              color: 'white',
+              opacity: '0.8',
+              transition: 'all 0.3s ease'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.opacity = '1';
+              e.currentTarget.style.transform = 'scale(1.1)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.opacity = '0.8';
+              e.currentTarget.style.transform = 'scale(1)';
+            }}
           >
-            {/* SVG Icon Maximize */}
+            {/* Toggle Icon: Hamburger atau plus */}
             <svg 
-              width="20" 
-              height="20" 
+              width="24" 
+              height="24" 
               viewBox="0 0 24 24" 
               fill="none" 
               stroke="currentColor" 
               strokeWidth="2"
             >
-              <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
+              <line x1="3" y1="12" x2="21" y2="12" />
+              <line x1="3" y1="6" x2="21" y2="6" />
+              <line x1="3" y1="18" x2="21" y2="18" />
             </svg>
           </div>
         </div>
         
         {/* Deskripsi singkat */}
         <div style={{
-          fontSize: isMobile ? '0.85rem' : '1rem',
-          opacity: '0.8',
+          fontSize: isMobile ? '0.9rem' : '1rem',
+          opacity: '0.9',
           fontFamily: 'Helvetica, Arial, sans-serif',
-          lineHeight: '1.4'
+          lineHeight: '1.5'
         }}>
           Creating compelling visual experiences.
         </div>
@@ -4499,7 +4514,7 @@ export default function HomePage(): React.JSX.Element {
         alt="Brand Identity"
         style={{
           width: '100%',
-          height: '85%',
+          height: '100%',
           objectFit: 'cover',
           display: 'block',
           borderRadius: '12px'
@@ -4514,62 +4529,74 @@ export default function HomePage(): React.JSX.Element {
         }}
       />
       
-      {/* Konten di Bawah Foto */}
+      {/* Overlay Konten di Dalam Foto */}
       <div style={{
-        padding: isMobile ? '1rem 0.5rem' : '1.5rem 0',
-        color: 'white',
-        height: '15%'
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        background: 'linear-gradient(to top, rgba(0,0,0,0.8), transparent)',
+        padding: isMobile ? '1.5rem 1rem' : '2rem 1.5rem',
+        color: 'white'
       }}>
         <div style={{
           display: 'flex',
           justifyContent: 'space-between',
-          alignItems: 'flex-start',
+          alignItems: 'center',
           marginBottom: '0.5rem'
         }}>
           <div style={{
-            fontSize: isMobile ? '1.2rem' : '1.6rem',
+            fontSize: isMobile ? '1.3rem' : '1.8rem',
             fontWeight: '600',
             fontFamily: 'Helvetica, Arial, sans-serif'
           }}>
             Brand Identity
           </div>
           
-          {/* Icon Maximize di pojok kanan - tanpa background */}
-          <div style={{
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            width: '24px',
-            height: '24px',
-            color: 'white',
-            opacity: '0.7',
-            transition: 'opacity 0.2s',
-            marginTop: '2px'
-          }}
-          onClick={() => {/* Fungsi untuk expand */}}
-          onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
-          onMouseLeave={(e) => e.currentTarget.style.opacity = '0.7'}
+          {/* Toggle Icon di pojok kanan */}
+          <div 
+            id="toggle2"
+            style={{
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '32px',
+              height: '32px',
+              color: 'white',
+              opacity: '0.8',
+              transition: 'all 0.3s ease'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.opacity = '1';
+              e.currentTarget.style.transform = 'scale(1.1)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.opacity = '0.8';
+              e.currentTarget.style.transform = 'scale(1)';
+            }}
           >
             <svg 
-              width="20" 
-              height="20" 
+              width="24" 
+              height="24" 
               viewBox="0 0 24 24" 
               fill="none" 
               stroke="currentColor" 
               strokeWidth="2"
             >
-              <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
+              <line x1="3" y1="12" x2="21" y2="12" />
+              <line x1="3" y1="6" x2="21" y2="6" />
+              <line x1="3" y1="18" x2="21" y2="18" />
             </svg>
           </div>
         </div>
         
         {/* Deskripsi singkat */}
         <div style={{
-          fontSize: isMobile ? '0.85rem' : '1rem',
-          opacity: '0.8',
+          fontSize: isMobile ? '0.9rem' : '1rem',
+          opacity: '0.9',
           fontFamily: 'Helvetica, Arial, sans-serif',
-          lineHeight: '1.4'
+          lineHeight: '1.5'
         }}>
           Building memorable brand systems.
         </div>
@@ -4590,7 +4617,7 @@ export default function HomePage(): React.JSX.Element {
         alt="UI/UX Design"
         style={{
           width: '100%',
-          height: '85%',
+          height: '100%',
           objectFit: 'cover',
           display: 'block',
           borderRadius: '12px'
@@ -4605,62 +4632,74 @@ export default function HomePage(): React.JSX.Element {
         }}
       />
       
-      {/* Konten di Bawah Foto */}
+      {/* Overlay Konten di Dalam Foto */}
       <div style={{
-        padding: isMobile ? '1rem 0.5rem' : '1.5rem 0',
-        color: 'white',
-        height: '15%'
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        background: 'linear-gradient(to top, rgba(0,0,0,0.8), transparent)',
+        padding: isMobile ? '1.5rem 1rem' : '2rem 1.5rem',
+        color: 'white'
       }}>
         <div style={{
           display: 'flex',
           justifyContent: 'space-between',
-          alignItems: 'flex-start',
+          alignItems: 'center',
           marginBottom: '0.5rem'
         }}>
           <div style={{
-            fontSize: isMobile ? '1.2rem' : '1.6rem',
+            fontSize: isMobile ? '1.3rem' : '1.8rem',
             fontWeight: '600',
             fontFamily: 'Helvetica, Arial, sans-serif'
           }}>
             UI/UX Design
           </div>
           
-          {/* Icon Maximize di pojok kanan - tanpa background */}
-          <div style={{
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            width: '24px',
-            height: '24px',
-            color: 'white',
-            opacity: '0.7',
-            transition: 'opacity 0.2s',
-            marginTop: '2px'
-          }}
-          onClick={() => {/* Fungsi untuk expand */}}
-          onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
-          onMouseLeave={(e) => e.currentTarget.style.opacity = '0.7'}
+          {/* Toggle Icon di pojok kanan */}
+          <div 
+            id="toggle3"
+            style={{
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '32px',
+              height: '32px',
+              color: 'white',
+              opacity: '0.8',
+              transition: 'all 0.3s ease'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.opacity = '1';
+              e.currentTarget.style.transform = 'scale(1.1)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.opacity = '0.8';
+              e.currentTarget.style.transform = 'scale(1)';
+            }}
           >
             <svg 
-              width="20" 
-              height="20" 
+              width="24" 
+              height="24" 
               viewBox="0 0 24 24" 
               fill="none" 
               stroke="currentColor" 
               strokeWidth="2"
             >
-              <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
+              <line x1="3" y1="12" x2="21" y2="12" />
+              <line x1="3" y1="6" x2="21" y2="6" />
+              <line x1="3" y1="18" x2="21" y2="18" />
             </svg>
           </div>
         </div>
         
         {/* Deskripsi singkat */}
         <div style={{
-          fontSize: isMobile ? '0.85rem' : '1rem',
-          opacity: '0.8',
+          fontSize: isMobile ? '0.9rem' : '1rem',
+          opacity: '0.9',
           fontFamily: 'Helvetica, Arial, sans-serif',
-          lineHeight: '1.4'
+          lineHeight: '1.5'
         }}>
           Designing intuitive digital experiences.
         </div>
@@ -4681,7 +4720,7 @@ export default function HomePage(): React.JSX.Element {
         alt="Motion Graphics"
         style={{
           width: '100%',
-          height: '85%',
+          height: '100%',
           objectFit: 'cover',
           display: 'block',
           borderRadius: '12px'
@@ -4696,73 +4735,176 @@ export default function HomePage(): React.JSX.Element {
         }}
       />
       
-      {/* Konten di Bawah Foto */}
+      {/* Overlay Konten di Dalam Foto */}
       <div style={{
-        padding: isMobile ? '1rem 0.5rem' : '1.5rem 0',
-        color: 'white',
-        height: '15%'
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        background: 'linear-gradient(to top, rgba(0,0,0,0.8), transparent)',
+        padding: isMobile ? '1.5rem 1rem' : '2rem 1.5rem',
+        color: 'white'
       }}>
         <div style={{
           display: 'flex',
           justifyContent: 'space-between',
-          alignItems: 'flex-start',
+          alignItems: 'center',
           marginBottom: '0.5rem'
         }}>
           <div style={{
-            fontSize: isMobile ? '1.2rem' : '1.6rem',
+            fontSize: isMobile ? '1.3rem' : '1.8rem',
             fontWeight: '600',
             fontFamily: 'Helvetica, Arial, sans-serif'
           }}>
             Motion Graphics
           </div>
           
-          {/* Icon Maximize di pojok kanan - tanpa background */}
-          <div style={{
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            width: '24px',
-            height: '24px',
-            color: 'white',
-            opacity: '0.7',
-            transition: 'opacity 0.2s',
-            marginTop: '2px'
-          }}
-          onClick={() => {/* Fungsi untuk expand */}}
-          onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
-          onMouseLeave={(e) => e.currentTarget.style.opacity = '0.7'}
+          {/* Toggle Icon di pojok kanan */}
+          <div 
+            id="toggle4"
+            style={{
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '32px',
+              height: '32px',
+              color: 'white',
+              opacity: '0.8',
+              transition: 'all 0.3s ease'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.opacity = '1';
+              e.currentTarget.style.transform = 'scale(1.1)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.opacity = '0.8';
+              e.currentTarget.style.transform = 'scale(1)';
+            }}
           >
             <svg 
-              width="20" 
-              height="20" 
+              width="24" 
+              height="24" 
               viewBox="0 0 24 24" 
               fill="none" 
               stroke="currentColor" 
               strokeWidth="2"
             >
-              <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
+              <line x1="3" y1="12" x2="21" y2="12" />
+              <line x1="3" y1="6" x2="21" y2="6" />
+              <line x1="3" y1="18" x2="21" y2="18" />
             </svg>
           </div>
         </div>
         
         {/* Deskripsi singkat */}
         <div style={{
-          fontSize: isMobile ? '0.85rem' : '1rem',
-          opacity: '0.8',
+          fontSize: isMobile ? '0.9rem' : '1rem',
+          opacity: '0.9',
           fontFamily: 'Helvetica, Arial, sans-serif',
-          lineHeight: '1.4'
+          lineHeight: '1.5'
         }}>
           Bringing designs to life with animation.
         </div>
       </div>
     </div>
   </div>
+
+  {/* Modal Halaman Kosong Warna Hitam */}
+  <div 
+    id="modalOverlay"
+    style={{
+      display: 'none',
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      width: '100%',
+      height: '100%',
+      backgroundColor: 'rgba(0, 0, 0, 0.95)',
+      zIndex: 1000,
+      justifyContent: 'center',
+      alignItems: 'center'
+    }}
+    onClick={(e) => {
+      if (e.target.id === 'modalOverlay') {
+        e.currentTarget.style.display = 'none';
+      }
+    }}
+  >
+    <div style={{
+      backgroundColor: '#000',
+      width: '90%',
+      height: '90%',
+      borderRadius: '12px',
+      position: 'relative'
+    }}>
+      {/* Close Button */}
+      <button
+        onClick={() => {
+          document.getElementById('modalOverlay').style.display = 'none';
+        }}
+        style={{
+          position: 'absolute',
+          top: '20px',
+          right: '20px',
+          width: '40px',
+          height: '40px',
+          borderRadius: '50%',
+          backgroundColor: 'rgba(255, 255, 255, 0.1)',
+          border: 'none',
+          color: 'white',
+          fontSize: '1.5rem',
+          cursor: 'pointer',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1001
+        }}
+      >
+        ×
+      </button>
+      
+      {/* Konten Modal Kosong */}
+      <div style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        width: '100%',
+        height: '100%',
+        color: '#666',
+        fontSize: '1.2rem',
+        fontFamily: 'Helvetica, Arial, sans-serif'
+      }}>
+        Halaman Detail - Klik di luar modal atau tombol X untuk menutup
+      </div>
+    </div>
+  </div>
+
+  {/* JavaScript untuk menangani toggle */}
+  <script dangerouslySetInnerHTML={{
+    __html: `
+      function setupModalToggle() {
+        // Tambahkan event listener ke semua toggle
+        for (let i = 1; i <= 4; i++) {
+          const toggle = document.getElementById('toggle' + i);
+          if (toggle) {
+            toggle.addEventListener('click', function(e) {
+              e.stopPropagation();
+              document.getElementById('modalOverlay').style.display = 'flex';
+            });
+          }
+        }
+      }
+      
+      // Jalankan setelah halaman dimuat
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', setupModalToggle);
+      } else {
+        setupModalToggle();
+      }
+    `
+  }} />
 </div>
-
-
-
-
 
 
         
@@ -5357,6 +5499,7 @@ export default function HomePage(): React.JSX.Element {
     </div>
   );
 }
+
 
 
 
