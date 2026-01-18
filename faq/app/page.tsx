@@ -4357,7 +4357,6 @@ export default function HomePage(): React.JSX.Element {
                 </div>
               </div>
 
-
 {/* Foto Card Design Section - 4 Card Pojok Kanan */}
 <div style={{
   width: '100%',
@@ -4449,42 +4448,39 @@ export default function HomePage(): React.JSX.Element {
             Visual Design
           </div>
           
-          {/* Toggle Icon di pojok kanan */}
+          {/* Toggle Icon 2 garis - Container untuk animasi */}
           <div 
             id="toggle1"
             style={{
               cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
               width: '32px',
               height: '32px',
-              color: 'white',
-              opacity: '0.8',
-              transition: 'all 0.3s ease'
+              position: 'relative',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
             }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.opacity = '1';
-              e.currentTarget.style.transform = 'scale(1.1)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.opacity = '0.8';
-              e.currentTarget.style.transform = 'scale(1)';
-            }}
+            onClick={() => openModalWithAnimation(1)}
           >
-            {/* Toggle Icon: Hamburger atau plus */}
-            <svg 
-              width="24" 
-              height="24" 
-              viewBox="0 0 24 24" 
-              fill="none" 
-              stroke="currentColor" 
-              strokeWidth="2"
-            >
-              <line x1="3" y1="12" x2="21" y2="12" />
-              <line x1="3" y1="6" x2="21" y2="6" />
-              <line x1="3" y1="18" x2="21" y2="18" />
-            </svg>
+            {/* Garis 1 */}
+            <div id="line1-1" style={{
+              position: 'absolute',
+              width: '20px',
+              height: '2px',
+              backgroundColor: 'white',
+              borderRadius: '1px',
+              transform: 'translateY(-4px)'
+            }}></div>
+            
+            {/* Garis 2 */}
+            <div id="line1-2" style={{
+              position: 'absolute',
+              width: '20px',
+              height: '2px',
+              backgroundColor: 'white',
+              borderRadius: '1px',
+              transform: 'translateY(4px)'
+            }}></div>
           </div>
         </div>
         
@@ -4553,41 +4549,37 @@ export default function HomePage(): React.JSX.Element {
             Brand Identity
           </div>
           
-          {/* Toggle Icon di pojok kanan */}
+          {/* Toggle Icon 2 garis */}
           <div 
             id="toggle2"
             style={{
               cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
               width: '32px',
               height: '32px',
-              color: 'white',
-              opacity: '0.8',
-              transition: 'all 0.3s ease'
+              position: 'relative',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
             }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.opacity = '1';
-              e.currentTarget.style.transform = 'scale(1.1)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.opacity = '0.8';
-              e.currentTarget.style.transform = 'scale(1)';
-            }}
+            onClick={() => openModalWithAnimation(2)}
           >
-            <svg 
-              width="24" 
-              height="24" 
-              viewBox="0 0 24 24" 
-              fill="none" 
-              stroke="currentColor" 
-              strokeWidth="2"
-            >
-              <line x1="3" y1="12" x2="21" y2="12" />
-              <line x1="3" y1="6" x2="21" y2="6" />
-              <line x1="3" y1="18" x2="21" y2="18" />
-            </svg>
+            <div id="line2-1" style={{
+              position: 'absolute',
+              width: '20px',
+              height: '2px',
+              backgroundColor: 'white',
+              borderRadius: '1px',
+              transform: 'translateY(-4px)'
+            }}></div>
+            
+            <div id="line2-2" style={{
+              position: 'absolute',
+              width: '20px',
+              height: '2px',
+              backgroundColor: 'white',
+              borderRadius: '1px',
+              transform: 'translateY(4px)'
+            }}></div>
           </div>
         </div>
         
@@ -4656,41 +4648,37 @@ export default function HomePage(): React.JSX.Element {
             UI/UX Design
           </div>
           
-          {/* Toggle Icon di pojok kanan */}
+          {/* Toggle Icon 2 garis */}
           <div 
             id="toggle3"
             style={{
               cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
               width: '32px',
               height: '32px',
-              color: 'white',
-              opacity: '0.8',
-              transition: 'all 0.3s ease'
+              position: 'relative',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
             }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.opacity = '1';
-              e.currentTarget.style.transform = 'scale(1.1)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.opacity = '0.8';
-              e.currentTarget.style.transform = 'scale(1)';
-            }}
+            onClick={() => openModalWithAnimation(3)}
           >
-            <svg 
-              width="24" 
-              height="24" 
-              viewBox="0 0 24 24" 
-              fill="none" 
-              stroke="currentColor" 
-              strokeWidth="2"
-            >
-              <line x1="3" y1="12" x2="21" y2="12" />
-              <line x1="3" y1="6" x2="21" y2="6" />
-              <line x1="3" y1="18" x2="21" y2="18" />
-            </svg>
+            <div id="line3-1" style={{
+              position: 'absolute',
+              width: '20px',
+              height: '2px',
+              backgroundColor: 'white',
+              borderRadius: '1px',
+              transform: 'translateY(-4px)'
+            }}></div>
+            
+            <div id="line3-2" style={{
+              position: 'absolute',
+              width: '20px',
+              height: '2px',
+              backgroundColor: 'white',
+              borderRadius: '1px',
+              transform: 'translateY(4px)'
+            }}></div>
           </div>
         </div>
         
@@ -4759,41 +4747,37 @@ export default function HomePage(): React.JSX.Element {
             Motion Graphics
           </div>
           
-          {/* Toggle Icon di pojok kanan */}
+          {/* Toggle Icon 2 garis */}
           <div 
             id="toggle4"
             style={{
               cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
               width: '32px',
               height: '32px',
-              color: 'white',
-              opacity: '0.8',
-              transition: 'all 0.3s ease'
+              position: 'relative',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
             }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.opacity = '1';
-              e.currentTarget.style.transform = 'scale(1.1)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.opacity = '0.8';
-              e.currentTarget.style.transform = 'scale(1)';
-            }}
+            onClick={() => openModalWithAnimation(4)}
           >
-            <svg 
-              width="24" 
-              height="24" 
-              viewBox="0 0 24 24" 
-              fill="none" 
-              stroke="currentColor" 
-              strokeWidth="2"
-            >
-              <line x1="3" y1="12" x2="21" y2="12" />
-              <line x1="3" y1="6" x2="21" y2="6" />
-              <line x1="3" y1="18" x2="21" y2="18" />
-            </svg>
+            <div id="line4-1" style={{
+              position: 'absolute',
+              width: '20px',
+              height: '2px',
+              backgroundColor: 'white',
+              borderRadius: '1px',
+              transform: 'translateY(-4px)'
+            }}></div>
+            
+            <div id="line4-2" style={{
+              position: 'absolute',
+              width: '20px',
+              height: '2px',
+              backgroundColor: 'white',
+              borderRadius: '1px',
+              transform: 'translateY(4px)'
+            }}></div>
           </div>
         </div>
         
@@ -4823,46 +4807,63 @@ export default function HomePage(): React.JSX.Element {
       backgroundColor: 'rgba(0, 0, 0, 0.95)',
       zIndex: 1000,
       justifyContent: 'center',
-      alignItems: 'center'
+      alignItems: 'center',
+      opacity: 0
     }}
     onClick={(e) => {
       if (e.target.id === 'modalOverlay') {
-        e.currentTarget.style.display = 'none';
+        closeModalWithAnimation();
       }
     }}
   >
-    <div style={{
+    <div id="modalContent" style={{
       backgroundColor: '#000',
       width: '90%',
       height: '90%',
       borderRadius: '12px',
-      position: 'relative'
+      position: 'relative',
+      opacity: 0,
+      transform: 'scale(0.8)'
     }}>
-      {/* Close Button */}
-      <button
-        onClick={() => {
-          document.getElementById('modalOverlay').style.display = 'none';
-        }}
+      {/* Close Button X dengan animasi */}
+      <div 
+        id="modalCloseBtn"
         style={{
           position: 'absolute',
           top: '20px',
           right: '20px',
           width: '40px',
           height: '40px',
-          borderRadius: '50%',
-          backgroundColor: 'rgba(255, 255, 255, 0.1)',
-          border: 'none',
-          color: 'white',
-          fontSize: '1.5rem',
           cursor: 'pointer',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           zIndex: 1001
         }}
+        onClick={(e) => {
+          e.stopPropagation();
+          closeModalWithAnimation();
+        }}
       >
-        ×
-      </button>
+        {/* Garis X animasi */}
+        <div id="xLine1" style={{
+          position: 'absolute',
+          width: '24px',
+          height: '2px',
+          backgroundColor: 'white',
+          borderRadius: '1px',
+          transform: 'rotate(45deg)'
+        }}></div>
+        
+        <div id="xLine2" style={{
+          position: 'absolute',
+          width: '24px',
+          height: '2px',
+          backgroundColor: 'white',
+          borderRadius: '1px',
+          transform: 'rotate(-45deg)'
+        }}></div>
+      </div>
       
       {/* Konten Modal Kosong */}
       <div style={{
@@ -4880,33 +4881,222 @@ export default function HomePage(): React.JSX.Element {
     </div>
   </div>
 
-  {/* JavaScript untuk menangani toggle */}
+  {/* Include GSAP Library */}
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  
+  {/* JavaScript untuk animasi GSAP */}
   <script dangerouslySetInnerHTML={{
     __html: `
-      function setupModalToggle() {
-        // Tambahkan event listener ke semua toggle
-        for (let i = 1; i <= 4; i++) {
-          const toggle = document.getElementById('toggle' + i);
-          if (toggle) {
-            toggle.addEventListener('click', function(e) {
-              e.stopPropagation();
-              document.getElementById('modalOverlay').style.display = 'flex';
+      let activeToggleId = null;
+      
+      function openModalWithAnimation(toggleNumber) {
+        activeToggleId = toggleNumber;
+        const overlay = document.getElementById('modalOverlay');
+        const modalContent = document.getElementById('modalContent');
+        const toggleBtn = document.getElementById('toggle' + toggleNumber);
+        
+        // Animasikan garis toggle menjadi X
+        const line1 = document.getElementById('line' + toggleNumber + '-1');
+        const line2 = document.getElementById('line' + toggleNumber + '-2');
+        
+        // Simpan posisi toggle
+        const toggleRect = toggleBtn.getBoundingClientRect();
+        const toggleCenterX = toggleRect.left + toggleRect.width / 2;
+        const toggleCenterY = toggleRect.top + toggleRect.height / 2;
+        
+        // Sembunyikan garis asli
+        gsap.to(line1, { duration: 0.2, opacity: 0 });
+        gsap.to(line2, { duration: 0.2, opacity: 0 });
+        
+        // Buat duplikat garis untuk animasi
+        const line1Clone = line1.cloneNode(true);
+        const line2Clone = line2.cloneNode(true);
+        line1Clone.id = 'line1Clone';
+        line2Clone.id = 'line2Clone';
+        
+        // Posisikan di tempat yang sama dengan aslinya
+        line1Clone.style.position = 'fixed';
+        line1Clone.style.top = (toggleRect.top + toggleRect.height / 2 - 4) + 'px';
+        line1Clone.style.left = (toggleRect.left + toggleRect.width / 2 - 10) + 'px';
+        line1Clone.style.zIndex = '2000';
+        
+        line2Clone.style.position = 'fixed';
+        line2Clone.style.top = (toggleRect.top + toggleRect.height / 2 + 4) + 'px';
+        line2Clone.style.left = (toggleRect.left + toggleRect.width / 2 - 10) + 'px';
+        line2Clone.style.zIndex = '2000';
+        
+        document.body.appendChild(line1Clone);
+        document.body.appendChild(line2Clone);
+        
+        // Animasi garis berpindah ke posisi close button
+        const modalRect = document.getElementById('modalCloseBtn').getBoundingClientRect();
+        const closeCenterX = modalRect.left + modalRect.width / 2;
+        const closeCenterY = modalRect.top + modalRect.height / 2;
+        
+        gsap.to(line1Clone, {
+          duration: 0.6,
+          x: closeCenterX - (toggleRect.left + toggleRect.width / 2 - 10),
+          y: closeCenterY - (toggleRect.top + toggleRect.height / 2 - 4),
+          rotation: 45,
+          ease: "power2.out"
+        });
+        
+        gsap.to(line2Clone, {
+          duration: 0.6,
+          x: closeCenterX - (toggleRect.left + toggleRect.width / 2 - 10),
+          y: closeCenterY - (toggleRect.top + toggleRect.height / 2 + 4),
+          rotation: -45,
+          ease: "power2.out",
+          onComplete: () => {
+            // Hapus clone dan tampilkan modal
+            document.body.removeChild(line1Clone);
+            document.body.removeChild(line2Clone);
+            
+            // Tampilkan modal dengan animasi
+            overlay.style.display = 'flex';
+            gsap.to(overlay, { 
+              duration: 0.3, 
+              opacity: 1 
+            });
+            gsap.to(modalContent, { 
+              duration: 0.4, 
+              opacity: 1, 
+              scale: 1,
+              ease: "back.out(1.7)" 
             });
           }
+        });
+      }
+      
+      function closeModalWithAnimation() {
+        const overlay = document.getElementById('modalOverlay');
+        const modalContent = document.getElementById('modalContent');
+        
+        // Ambil garis X dari modal
+        const xLine1 = document.getElementById('xLine1');
+        const xLine2 = document.getElementById('xLine2');
+        
+        // Dapatkan posisi close button
+        const closeBtn = document.getElementById('modalCloseBtn');
+        const closeRect = closeBtn.getBoundingClientRect();
+        const closeCenterX = closeRect.left + closeRect.width / 2;
+        const closeCenterY = closeRect.top + closeRect.height / 2;
+        
+        // Buat duplikat garis X untuk animasi
+        const xLine1Clone = xLine1.cloneNode(true);
+        const xLine2Clone = xLine2.cloneNode(true);
+        
+        xLine1Clone.style.position = 'fixed';
+        xLine1Clone.style.top = (closeRect.top + closeRect.height / 2) + 'px';
+        xLine1Clone.style.left = (closeRect.left + closeRect.width / 2 - 12) + 'px';
+        xLine1Clone.style.zIndex = '2000';
+        xLine1Clone.style.transform = 'rotate(45deg)';
+        
+        xLine2Clone.style.position = 'fixed';
+        xLine2Clone.style.top = (closeRect.top + closeRect.height / 2) + 'px';
+        xLine2Clone.style.left = (closeRect.left + closeRect.width / 2 - 12) + 'px';
+        xLine2Clone.style.zIndex = '2000';
+        xLine2Clone.style.transform = 'rotate(-45deg)';
+        
+        document.body.appendChild(xLine1Clone);
+        document.body.appendChild(xLine2Clone);
+        
+        // Sembunyikan garis X asli
+        gsap.to(xLine1, { duration: 0.1, opacity: 0 });
+        gsap.to(xLine2, { duration: 0.1, opacity: 0 });
+        
+        // Sembunyikan modal
+        gsap.to(modalContent, { 
+          duration: 0.3, 
+          opacity: 0, 
+          scale: 0.8 
+        });
+        
+        gsap.to(overlay, { 
+          duration: 0.3, 
+          opacity: 0,
+          onComplete: () => {
+            overlay.style.display = 'none';
+          }
+        });
+        
+        // Animasi garis X kembali ke toggle
+        if (activeToggleId) {
+          const toggleBtn = document.getElementById('toggle' + activeToggleId);
+          const toggleRect = toggleBtn.getBoundingClientRect();
+          const toggleCenterX = toggleRect.left + toggleRect.width / 2;
+          const toggleCenterY = toggleRect.top + toggleRect.height / 2;
+          
+          gsap.to(xLine1Clone, {
+            duration: 0.6,
+            x: toggleCenterX - (closeRect.left + closeRect.width / 2 - 12),
+            y: (toggleCenterY - 4) - closeRect.top,
+            rotation: 0,
+            ease: "power2.out",
+            onComplete: () => {
+              document.body.removeChild(xLine1Clone);
+              
+              // Tampilkan kembali garis asli
+              const line1 = document.getElementById('line' + activeToggleId + '-1');
+              gsap.to(line1, { 
+                duration: 0.3, 
+                opacity: 1,
+                delay: 0.1
+              });
+            }
+          });
+          
+          gsap.to(xLine2Clone, {
+            duration: 0.6,
+            x: toggleCenterX - (closeRect.left + closeRect.width / 2 - 12),
+            y: (toggleCenterY + 4) - closeRect.top,
+            rotation: 0,
+            ease: "power2.out",
+            onComplete: () => {
+              document.body.removeChild(xLine2Clone);
+              
+              // Tampilkan kembali garis asli
+              const line2 = document.getElementById('line' + activeToggleId + '-2');
+              gsap.to(line2, { 
+                duration: 0.3, 
+                opacity: 1,
+                delay: 0.1
+              });
+              
+              activeToggleId = null;
+            }
+          });
+        }
+      }
+      
+      // Setup hover effect untuk semua toggle
+      function setupToggleHover() {
+        for (let i = 1; i <= 4; i++) {
+          const toggle = document.getElementById('toggle' + i);
+          const line1 = document.getElementById('line' + i + '-1');
+          const line2 = document.getElementById('line' + i + '-2');
+          
+          toggle.addEventListener('mouseenter', () => {
+            gsap.to(line1, { duration: 0.2, scaleX: 1.2 });
+            gsap.to(line2, { duration: 0.2, scaleX: 1.2 });
+          });
+          
+          toggle.addEventListener('mouseleave', () => {
+            gsap.to(line1, { duration: 0.2, scaleX: 1 });
+            gsap.to(line2, { duration: 0.2, scaleX: 1 });
+          });
         }
       }
       
       // Jalankan setelah halaman dimuat
       if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', setupModalToggle);
+        document.addEventListener('DOMContentLoaded', setupToggleHover);
       } else {
-        setupModalToggle();
+        setupToggleHover();
       }
     `
   }} />
 </div>
-
-
 
 
 
@@ -5505,6 +5695,7 @@ export default function HomePage(): React.JSX.Element {
     </div>
   );
 }
+
 
 
 
