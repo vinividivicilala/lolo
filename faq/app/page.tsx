@@ -898,11 +898,43 @@ export default function HomePage(): React.JSX.Element {
   // Handler untuk membuka modal navigasi +
   const handleOpenPlusModal = () => {
     setShowPlusModal(true);
+    
+    // Animasi GSAP untuk modal
+    if (plusModalContentRef.current) {
+      gsap.fromTo(plusModalContentRef.current,
+        { 
+          scale: 0.8,
+          opacity: 0,
+          y: -50
+        },
+        {
+          scale: 1,
+          opacity: 1,
+          y: 0,
+          duration: 0.6,
+          ease: "back.out(1.7)"
+        }
+      );
+    }
   };
 
   // Handler untuk menutup modal navigasi +
   const handleClosePlusModal = () => {
-    setShowPlusModal(false);
+    // Animasi GSAP untuk menutup modal
+    if (plusModalContentRef.current) {
+      gsap.to(plusModalContentRef.current, {
+        scale: 0.8,
+        opacity: 0,
+        y: -50,
+        duration: 0.4,
+        ease: "power2.in",
+        onComplete: () => {
+          setShowPlusModal(false);
+        }
+      });
+    } else {
+      setShowPlusModal(false);
+    }
   };
 
   // Data untuk halaman Index - HANYA TAHUN
@@ -945,7 +977,7 @@ export default function HomePage(): React.JSX.Element {
   return (
     <div style={{
       minHeight: '100vh',
-      backgroundColor: 'black',
+      backgroundColor: 'white', // DIUBAH: dari black menjadi white
       margin: 0,
       padding: 0,
       width: '100%',
@@ -960,7 +992,7 @@ export default function HomePage(): React.JSX.Element {
       MozOsxFontSmoothing: 'grayscale'
     }}>
 
-      {/* Modal Navigasi Plus - Full Screen Hitam */}
+      {/* Modal Navigasi Plus - Full Screen Putih Modern dengan GSAP */}
       <AnimatePresence>
         {showPlusModal && (
           <motion.div
@@ -969,14 +1001,14 @@ export default function HomePage(): React.JSX.Element {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.5, ease: "easeInOut" }}
+            transition={{ duration: 0.4, ease: "easeInOut" }}
             style={{
               position: 'fixed',
               top: 0,
               left: 0,
               width: '100%',
               height: '100%',
-              backgroundColor: '#000000',
+              backgroundColor: '#FFFFFF',
               zIndex: 9998,
               display: 'flex',
               alignItems: 'center',
@@ -987,75 +1019,248 @@ export default function HomePage(): React.JSX.Element {
           >
             <motion.div
               ref={plusModalContentRef}
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.8, opacity: 0 }}
-              transition={{ duration: 0.5, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
               style={{
                 width: '100%',
                 height: '100%',
                 position: 'relative',
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'center'
+                justifyContent: 'center',
+                background: 'linear-gradient(135deg, #FFFFFF 0%, #F8F9FA 100%)'
               }}
               onClick={(e) => e.stopPropagation()}
             >
-              {/* Tombol Close (X) - Styling Modern */}
+              {/* Tombol Close Modern - Tanda + besar berputar menjadi X */}
               <motion.button
                 onClick={handleClosePlusModal}
+                initial={{ rotate: 0, scale: 0.9 }}
+                animate={{ rotate: 45, scale: 1 }}
+                transition={{ 
+                  rotate: { duration: 0.5, ease: "back.out(1.2)" },
+                  scale: { duration: 0.3 }
+                }}
+                whileHover={{ 
+                  scale: 1.1,
+                  rotate: 90,
+                  backgroundColor: 'rgba(0, 255, 0, 0.1)'
+                }}
+                whileTap={{ scale: 0.95 }}
                 style={{
                   position: 'absolute',
                   top: isMobile ? '1.5rem' : '2rem',
                   right: isMobile ? '1.5rem' : '2rem',
-                  width: isMobile ? '45px' : '60px',
-                  height: isMobile ? '45px' : '60px',
-                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                  border: '1px solid rgba(255, 255, 255, 0.2)',
-                  borderRadius: '50%',
-                  color: 'white',
-                  fontSize: isMobile ? '1.8rem' : '2.5rem',
+                  width: isMobile ? '60px' : '80px',
+                  height: isMobile ? '60px' : '80px',
+                  backgroundColor: 'transparent',
+                  border: 'none',
+                  borderRadius: '12px',
                   cursor: 'pointer',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   zIndex: 100,
-                  backdropFilter: 'blur(10px)',
-                  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
-                  transition: 'all 0.3s ease',
-                  fontFamily: 'Arial, sans-serif',
-                  fontWeight: '300'
+                  overflow: 'hidden',
+                  boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)'
                 }}
-                whileHover={{ 
-                  scale: 1.1,
-                  backgroundColor: 'rgba(255, 255, 255, 0.2)',
-                  border: '1px solid rgba(255, 255, 255, 0.4)',
-                  boxShadow: '0 12px 40px rgba(0, 0, 0, 0.5)'
-                }}
-                whileTap={{ scale: 0.95 }}
               >
-                ×
+                {/* Container untuk animasi plus/x */}
+                <motion.div
+                  style={{
+                    position: 'relative',
+                    width: '70%',
+                    height: '70%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}
+                >
+                  {/* Garis vertikal - berubah menjadi diagonal */}
+                  <motion.div
+                    style={{
+                      position: 'absolute',
+                      width: '6px',
+                      height: '60%',
+                      backgroundColor: '#00FF00',
+                      borderRadius: '3px'
+                    }}
+                    animate={{ 
+                      rotate: 45,
+                      scaleY: 1.2
+                    }}
+                    transition={{ duration: 0.5, ease: "back.out(1.2)" }}
+                  />
+                  
+                  {/* Garis horizontal - berubah menjadi diagonal */}
+                  <motion.div
+                    style={{
+                      position: 'absolute',
+                      width: '60%',
+                      height: '6px',
+                      backgroundColor: '#00FF00',
+                      borderRadius: '3px'
+                    }}
+                    animate={{ 
+                      rotate: 45,
+                      scaleX: 1.2
+                    }}
+                    transition={{ duration: 0.5, ease: "back.out(1.2)" }}
+                  />
+                  
+                  {/* Efek glow */}
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 0.3 }}
+                    transition={{ delay: 0.2 }}
+                    style={{
+                      position: 'absolute',
+                      width: '100%',
+                      height: '100%',
+                      borderRadius: '50%',
+                      backgroundColor: '#00FF00',
+                      filter: 'blur(15px)'
+                    }}
+                  />
+                </motion.div>
+                
+                {/* Border animasi */}
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ delay: 0.1 }}
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    border: '3px solid #00FF00',
+                    borderRadius: '12px',
+                    opacity: 0.3
+                  }}
+                />
               </motion.button>
 
-              {/* Konten Kosong - Hanya Latar Hitam */}
+              {/* Konten Utama Modal - Muncul dari tengah atas */}
               <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3, duration: 0.5 }}
+                initial={{ y: -100, opacity: 0, scale: 0.8 }}
+                animate={{ y: 0, opacity: 1, scale: 1 }}
+                transition={{ 
+                  duration: 0.6,
+                  delay: 0.1,
+                  ease: [0.22, 1, 0.36, 1]
+                }}
                 style={{
                   textAlign: 'center',
-                  color: 'rgba(255, 255, 255, 0.3)',
-                  fontSize: isMobile ? '1rem' : '1.2rem',
-                  fontFamily: 'Helvetica, Arial, sans-serif',
-                  letterSpacing: '2px',
-                  textTransform: 'uppercase',
-                  maxWidth: '600px',
-                  padding: '2rem'
+                  color: '#1A1A1A',
+                  maxWidth: '800px',
+                  padding: '3rem'
                 }}
               >
-                {/* Anda bisa menambahkan teks atau elemen lain di sini jika diperlukan */}
-                {/* Saat ini hanya halaman kosong hitam dengan tombol X */}
+                <motion.h1
+                  initial={{ y: 20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ delay: 0.2, duration: 0.5 }}
+                  style={{
+                    fontSize: isMobile ? '2.5rem' : '4rem',
+                    fontWeight: '800',
+                    fontFamily: 'Helvetica, Arial, sans-serif',
+                    marginBottom: '1.5rem',
+                    background: 'linear-gradient(135deg, #1A1A1A 0%, #333 100%)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    letterSpacing: '-0.02em'
+                  }}
+                >
+                  Navigation Plus
+                </motion.h1>
+                
+                <motion.p
+                  initial={{ y: 20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ delay: 0.3, duration: 0.5 }}
+                  style={{
+                    fontSize: isMobile ? '1rem' : '1.2rem',
+                    fontWeight: '400',
+                    color: '#666',
+                    lineHeight: 1.6,
+                    marginBottom: '3rem',
+                    maxWidth: '600px',
+                    margin: '0 auto 3rem'
+                  }}
+                >
+                  Premium navigation experience with modern animations and intuitive design.
+                  Explore enhanced features and seamless transitions.
+                </motion.p>
+                
+                <motion.div
+                  initial={{ y: 20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ delay: 0.4, duration: 0.5 }}
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '1.5rem',
+                    alignItems: 'center'
+                  }}
+                >
+                  <div style={{
+                    display: 'flex',
+                    gap: '1rem',
+                    flexWrap: 'wrap',
+                    justifyContent: 'center'
+                  }}>
+                    {['Dashboard', 'Analytics', 'Settings', 'Profile', 'Documents', 'Help'].map((item, index) => (
+                      <motion.div
+                        key={item}
+                        initial={{ scale: 0, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        transition={{ delay: 0.5 + (index * 0.1), duration: 0.4 }}
+                        whileHover={{ 
+                          scale: 1.05,
+                          y: -5,
+                          boxShadow: '0 10px 25px rgba(0, 255, 0, 0.2)'
+                        }}
+                        whileTap={{ scale: 0.95 }}
+                        style={{
+                          backgroundColor: '#00FF00',
+                          color: 'white',
+                          padding: '0.8rem 1.5rem',
+                          borderRadius: '50px',
+                          fontSize: '0.9rem',
+                          fontWeight: '600',
+                          cursor: 'pointer',
+                          border: '2px solid transparent',
+                          transition: 'all 0.3s ease',
+                          boxShadow: '0 4px 12px rgba(0, 255, 0, 0.1)'
+                        }}
+                      >
+                        {item}
+                      </motion.div>
+                    ))}
+                  </div>
+                </motion.div>
               </motion.div>
+
+              {/* Background Pattern */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.8 }}
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  background: `
+                    linear-gradient(45deg, transparent 49%, rgba(0, 255, 0, 0.03) 50%, transparent 51%),
+                    linear-gradient(-45deg, transparent 49%, rgba(0, 255, 0, 0.03) 50%, transparent 51%)
+                  `,
+                  backgroundSize: '60px 60px',
+                  zIndex: -1,
+                  pointerEvents: 'none'
+                }}
+              />
             </motion.div>
           </motion.div>
         )}
@@ -2265,8 +2470,7 @@ export default function HomePage(): React.JSX.Element {
                     display: 'flex',
                     flexDirection: 'column',
                     gap: '0.8rem'
-                  }}
-                >
+                }}>
                   {/* Tombol Utama */}
                   <motion.button
                     onClick={handleGoToChatbot}
@@ -2398,17 +2602,18 @@ export default function HomePage(): React.JSX.Element {
           position: 'fixed',
           top: isMobile ? '0.8rem' : '1rem',
           left: isMobile ? '1rem' : '2rem',
-          color: 'white',
+          color: '#1A1A1A', // DIUBAH: dari white menjadi #1A1A1A
           fontSize: isMobile ? '1rem' : '1.2rem',
           fontWeight: '300',
           fontFamily: 'Helvetica, Arial, sans-serif',
           textTransform: 'uppercase',
           letterSpacing: '1px',
           zIndex: 1000,
-          backgroundColor: 'rgba(0,0,0,0.3)',
+          backgroundColor: 'rgba(255,255,255,0.8)', // DIUBAH: dari rgba(0,0,0,0.3)
           padding: '0.5rem 1rem',
           borderRadius: '4px',
-          backdropFilter: 'blur(5px)'
+          backdropFilter: 'blur(5px)',
+          border: '1px solid rgba(0,0,0,0.1)'
         }}
       >
         Selamat Tahun Baru 2026
@@ -2650,8 +2855,8 @@ export default function HomePage(): React.JSX.Element {
           backdropFilter: 'blur(10px)',
           borderRadius: '50px',
           padding: isMobile ? '0.6rem 1rem' : '0.8rem 1.5rem',
-          border: '1px solid rgba(255,255,255,0.15)',
-          boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
+          border: '1px solid rgba(0,0,0,0.15)', // DIUBAH: dari rgba(255,255,255,0.15)
+          boxShadow: '0 4px 20px rgba(0,0,0,0.05)' // DIUBAH: shadow lebih soft
         }}>
           {/* Docs */}
           <motion.div
@@ -2663,15 +2868,15 @@ export default function HomePage(): React.JSX.Element {
               cursor: 'pointer',
               padding: '0.4rem 1rem 0.4rem 0.8rem',
               borderRadius: '25px',
-              backgroundColor: 'rgba(255,255,255,0.9)',
-              border: '1px solid rgba(255,255,255,0.2)',
+              backgroundColor: 'rgba(0,0,0,0.9)', // DIUBAH: dari rgba(255,255,255,0.9)
+              border: '1px solid rgba(0,0,0,0.2)',
               transition: 'all 0.3s ease',
               position: 'relative'
             }}
             whileHover={{ 
-              backgroundColor: 'white',
+              backgroundColor: '#000000',
               scale: 1.05,
-              border: '1px solid white'
+              border: '1px solid #000000'
             }}
           >
             <svg 
@@ -2679,7 +2884,7 @@ export default function HomePage(): React.JSX.Element {
               height={isMobile ? "18" : "20"} 
               viewBox="0 0 24 24" 
               fill="none" 
-              stroke="#6366F1"
+              stroke="white"
               strokeWidth="2"
             >
               <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
@@ -2689,7 +2894,7 @@ export default function HomePage(): React.JSX.Element {
               <polyline points="10,9 9,9 8,9"/>
             </svg>
             <span style={{
-              color: '#6366F1',
+              color: 'white',
               fontSize: isMobile ? '0.8rem' : '0.9rem',
               fontWeight: '600',
               fontFamily: 'Helvetica, Arial, sans-serif',
@@ -2703,7 +2908,7 @@ export default function HomePage(): React.JSX.Element {
                 height={isMobile ? "12" : "14"} 
                 viewBox="0 0 24 24" 
                 fill="none" 
-                stroke="#6366F1"
+                stroke="white"
                 strokeWidth="2"
               >
                 <path d="M7 7l10 10" />
@@ -2735,15 +2940,15 @@ export default function HomePage(): React.JSX.Element {
               cursor: 'pointer',
               padding: '0.4rem 1rem 0.4rem 0.8rem',
               borderRadius: '25px',
-              backgroundColor: 'rgba(255,255,255,0.9)',
-              border: '1px solid rgba(255,255,255,0.2)',
+              backgroundColor: 'rgba(0,0,0,0.9)', // DIUBAH
+              border: '1px solid rgba(0,0,0,0.2)',
               transition: 'all 0.3s ease',
               position: 'relative'
             }}
             whileHover={{ 
-              backgroundColor: 'white',
+              backgroundColor: '#000000',
               scale: 1.05,
-              border: '1px solid white'
+              border: '1px solid #000000'
             }}
           >
             <svg 
@@ -2751,7 +2956,7 @@ export default function HomePage(): React.JSX.Element {
               height={isMobile ? "18" : "20"} 
               viewBox="0 0 24 24" 
               fill="none" 
-              stroke="#6366F1"
+              stroke="white"
               strokeWidth="2"
             >
               <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
@@ -2759,7 +2964,7 @@ export default function HomePage(): React.JSX.Element {
               <line x1="8" y1="11" x2="12" y2="11"/>
             </svg>
             <span style={{
-              color: '#6366F1',
+              color: 'white',
               fontSize: isMobile ? '0.8rem' : '0.9rem',
               fontWeight: '600',
               fontFamily: 'Helvetica, Arial, sans-serif',
@@ -2773,7 +2978,7 @@ export default function HomePage(): React.JSX.Element {
                 height={isMobile ? "12" : "14"} 
                 viewBox="0 0 24 24" 
                 fill="none" 
-                stroke="#6366F1"
+                stroke="white"
                 strokeWidth="2"
               >
                 <path d="M7 7l10 10" />
@@ -2804,15 +3009,15 @@ export default function HomePage(): React.JSX.Element {
               cursor: 'pointer',
               padding: '0.4rem 1rem 0.4rem 0.8rem',
               borderRadius: '25px',
-              backgroundColor: 'rgba(255,255,255,0.9)',
-              border: '1px solid rgba(255,255,255,0.2)',
+              backgroundColor: 'rgba(0,0,0,0.9)', // DIUBAH
+              border: '1px solid rgba(0,0,0,0.2)',
               transition: 'all 0.3s ease',
               position: 'relative'
             }}
             whileHover={{ 
-              backgroundColor: 'white',
+              backgroundColor: '#000000',
               scale: 1.05,
-              border: '1px solid white'
+              border: '1px solid #000000'
             }}
           >
             <svg 
@@ -2820,7 +3025,7 @@ export default function HomePage(): React.JSX.Element {
               height={isMobile ? "18" : "20"} 
               viewBox="0 0 24 24" 
               fill="none" 
-              stroke="#6366F1"
+              stroke="white"
               strokeWidth="2"
             >
               <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
@@ -2830,7 +3035,7 @@ export default function HomePage(): React.JSX.Element {
               <polyline points="10,9 9,9 8,9"/>
             </svg>
             <span style={{
-              color: '#6366F1',
+              color: 'white',
               fontSize: isMobile ? '0.8rem' : '0.9rem',
               fontWeight: '600',
               fontFamily: 'Helvetica, Arial, sans-serif',
@@ -2844,7 +3049,7 @@ export default function HomePage(): React.JSX.Element {
                 height={isMobile ? "12" : "14"} 
                 viewBox="0 0 24 24" 
                 fill="none" 
-                stroke="#6366F1"
+                stroke="white"
                 strokeWidth="2"
               >
                 <path d="M7 7l10 10" />
@@ -2875,15 +3080,15 @@ export default function HomePage(): React.JSX.Element {
               cursor: 'pointer',
               padding: '0.4rem 1rem 0.4rem 0.8rem',
               borderRadius: '25px',
-              backgroundColor: 'rgba(255,255,255,0.9)',
-              border: '1px solid rgba(255,255,255,0.2)',
+              backgroundColor: 'rgba(0,0,0,0.9)', // DIUBAH
+              border: '1px solid rgba(0,0,0,0.2)',
               transition: 'all 0.3s ease',
               position: 'relative'
             }}
             whileHover={{ 
-              backgroundColor: 'white',
+              backgroundColor: '#000000',
               scale: 1.05,
-              border: '1px solid white'
+              border: '1px solid #000000'
             }}
           >
             <svg 
@@ -2891,7 +3096,7 @@ export default function HomePage(): React.JSX.Element {
               height={isMobile ? "18" : "20"} 
               viewBox="0 0 24 24" 
               fill="none" 
-              stroke="#6366F1"
+              stroke="white"
               strokeWidth="2"
             >
               <polyline points="1 4 1 10 7 10"/>
@@ -2900,7 +3105,7 @@ export default function HomePage(): React.JSX.Element {
               <line x1="16" y1="11" x2="12" y2="7"/>
             </svg>
             <span style={{
-              color: '#6366F1',
+              color: 'white',
               fontSize: isMobile ? '0.8rem' : '0.9rem',
               fontWeight: '600',
               fontFamily: 'Helvetica, Arial, sans-serif',
@@ -2914,7 +3119,7 @@ export default function HomePage(): React.JSX.Element {
                 height={isMobile ? "12" : "14"} 
                 viewBox="0 0 24 24" 
                 fill="none" 
-                stroke="#6366F1"
+                stroke="white"
                 strokeWidth="2"
               >
                 <path d="M7 7l10 10" />
@@ -2973,7 +3178,7 @@ export default function HomePage(): React.JSX.Element {
               letterSpacing: '2px',
               lineHeight: 1,
               textTransform: 'uppercase',
-              color: 'white',
+              color: '#1A1A1A', // DIUBAH: dari white menjadi #1A1A1A
               minHeight: isMobile ? '1.8rem' : '2.8rem',
               display: 'flex',
               alignItems: 'center'
@@ -3016,24 +3221,24 @@ export default function HomePage(): React.JSX.Element {
           gap: isMobile ? '0.8rem' : '1rem',
           position: 'relative'
         }}>
-          {/* Tombol + Modern */}
+          {/* Tombol + Modern dengan animasi GSAP */}
           <motion.button
             data-plus-button
             onClick={handleOpenPlusModal}
             style={{
-              width: isMobile ? '40px' : '50px',
-              height: isMobile ? '40px' : '50px',
+              width: isMobile ? '60px' : '80px', // DIUBAH: lebih besar
+              height: isMobile ? '60px' : '80px',
               backgroundColor: 'transparent',
-              border: '1px solid rgba(255, 255, 255, 0.15)',
-              borderRadius: '50%',
+              border: '2px solid #00FF00', // DIUBAH: border hijau stabilo
+              borderRadius: '12px', // DIUBAH: tidak bulat, square dengan rounded corners
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               padding: 0,
               margin: 0,
-              backdropFilter: 'blur(10px)',
-              boxShadow: '0 4px 15px rgba(0,0,0,0.1)',
+              backdropFilter: 'none',
+              boxShadow: '0 4px 20px rgba(0, 255, 0, 0.2)',
               position: 'relative',
               overflow: 'hidden'
             }}
@@ -3042,54 +3247,103 @@ export default function HomePage(): React.JSX.Element {
             transition={{ delay: 1.1, duration: 0.6 }}
             whileHover={{ 
               scale: 1.1,
-              border: '1px solid rgba(255, 255, 255, 0.3)',
-              backgroundColor: 'rgba(255, 255, 255, 0.05)'
+              border: '2px solid #00FF00',
+              backgroundColor: 'rgba(0, 255, 0, 0.05)',
+              boxShadow: '0 8px 30px rgba(0, 255, 0, 0.3)'
             }}
             whileTap={{ scale: 0.95 }}
           >
-            {/* Tanda + dengan animasi GSAP */}
+            {/* Container untuk animasi plus */}
             <div style={{
               position: 'relative',
-              width: '20px',
-              height: '20px'
+              width: '70%',
+              height: '70%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
             }}>
               {/* Garis vertikal */}
-              <div style={{
-                position: 'absolute',
-                top: '50%',
-                left: '50%',
-                transform: 'translate(-50%, -50%)',
-                width: '2px',
-                height: '12px',
-                backgroundColor: 'white',
-                borderRadius: '1px'
-              }} />
+              <motion.div
+                style={{
+                  position: 'absolute',
+                  width: '6px', // DIUBAH: lebih tebal
+                  height: '60%',
+                  backgroundColor: '#00FF00', // DIUBAH: hijau stabilo
+                  borderRadius: '3px'
+                }}
+                animate={{ 
+                  scaleY: [1, 1.2, 1],
+                  opacity: [1, 0.8, 1]
+                }}
+                transition={{ 
+                  duration: 2,
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }}
+              />
+              
               {/* Garis horizontal */}
-              <div style={{
-                position: 'absolute',
-                top: '50%',
-                left: '50%',
-                transform: 'translate(-50%, -50%)',
-                width: '12px',
-                height: '2px',
-                backgroundColor: 'white',
-                borderRadius: '1px'
-              }} />
+              <motion.div
+                style={{
+                  position: 'absolute',
+                  width: '60%',
+                  height: '6px', // DIUBAH: lebih tebal
+                  backgroundColor: '#00FF00', // DIUBAH: hijau stabilo
+                  borderRadius: '3px'
+                }}
+                animate={{ 
+                  scaleX: [1, 1.2, 1],
+                  opacity: [1, 0.8, 1]
+                }}
+                transition={{ 
+                  duration: 2,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                  delay: 0.5
+                }}
+              />
+              
+              {/* Efek glow */}
+              <motion.div
+                animate={{ 
+                  scale: [1, 1.1, 1],
+                  opacity: [0.3, 0.5, 0.3]
+                }}
+                transition={{ 
+                  duration: 2,
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }}
+                style={{
+                  position: 'absolute',
+                  width: '100%',
+                  height: '100%',
+                  borderRadius: '50%',
+                  backgroundColor: '#00FF00',
+                  filter: 'blur(15px)',
+                  opacity: 0.3
+                }}
+              />
             </div>
             
-            {/* Efek cahaya saat hover */}
+            {/* Border animasi */}
             <motion.div
-              initial={{ scale: 0 }}
-              whileHover={{ scale: 1 }}
-              transition={{ duration: 0.3 }}
+              initial={{ scale: 1 }}
+              animate={{ scale: [1, 1.05, 1] }}
+              transition={{ 
+                duration: 3,
+                repeat: Infinity,
+                ease: "easeInOut"
+              }}
               style={{
                 position: 'absolute',
                 top: 0,
                 left: 0,
-                width: '100%',
-                height: '100%',
-                background: 'radial-gradient(circle at center, rgba(255,255,255,0.1) 0%, transparent 70%)',
-                borderRadius: '50%'
+                right: 0,
+                bottom: 0,
+                border: '2px solid #00FF00',
+                borderRadius: '12px',
+                opacity: 0.5
               }}
             />
           </motion.button>
@@ -3137,9 +3391,9 @@ export default function HomePage(): React.JSX.Element {
               padding: isMobile ? '0.4rem 1rem' : '0.6rem 1.5rem',
               fontSize: isMobile ? '0.9rem' : '1.5rem',
               fontWeight: '600',
-              color: 'white',
+              color: '#1A1A1A', // DIUBAH: dari white menjadi #1A1A1A
               backgroundColor: 'transparent',
-              border: '1px solid rgba(255,255,255,0.15)',
+              border: '1px solid rgba(0,0,0,0.15)', // DIUBAH: dari rgba(255,255,255,0.15)
               borderRadius: '50px',
               cursor: 'pointer',
               fontFamily: 'Helvetica, Arial, sans-serif',
@@ -3155,15 +3409,15 @@ export default function HomePage(): React.JSX.Element {
               overflow: 'hidden',
               position: 'relative',
               transition: 'all 0.3s ease',
-              boxShadow: '0 4px 15px rgba(0,0,0,0.1)'
+              boxShadow: '0 4px 15px rgba(0,0,0,0.05)'
             }}
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 1.2, duration: 0.6 }}
             whileHover={{ 
-              backgroundColor: 'rgba(255,255,255,0.1)',
+              backgroundColor: 'rgba(0,0,0,0.05)',
               scale: 1.05,
-              border: '1px solid rgba(255,255,255,0.3)',
+              border: '1px solid rgba(0,0,0,0.3)',
               transition: { duration: 0.2 }
             }}
             whileTap={{ scale: 0.95 }}
@@ -3287,7 +3541,7 @@ export default function HomePage(): React.JSX.Element {
               alignItems: 'center'
             }}>
               <h2 style={{
-                color: 'white',
+                color: '#1A1A1A', // DIUBAH: dari white menjadi #1A1A1A
                 fontSize: isMobile ? '5rem' : '7rem',
                 fontWeight: '900',
                 textTransform: 'uppercase',
@@ -3315,7 +3569,7 @@ export default function HomePage(): React.JSX.Element {
                 alignItems: 'center'
               }}>
                 <h2 style={{
-                  color: 'white',
+                  color: '#1A1A1A', // DIUBAH
                   fontSize: isMobile ? '5rem' : '7rem',
                   fontWeight: '900',
                   textTransform: 'uppercase',
@@ -3341,8 +3595,8 @@ export default function HomePage(): React.JSX.Element {
                   height: isMobile ? '5rem' : '7rem',
                   borderRadius: '10px',
                   overflow: 'hidden',
-                  border: '1px solid rgba(255, 255, 255, 0.3)',
-                  backgroundColor: '#222'
+                  border: '1px solid rgba(0,0,0,0.3)', // DIUBAH
+                  backgroundColor: '#f0f0f0' // DIUBAH: dari #222
                 }}>
                   <img 
                     src="images/5.jpg" 
@@ -3361,7 +3615,7 @@ export default function HomePage(): React.JSX.Element {
                   position: 'absolute',
                   bottom: '-0.8rem',
                   right: '-1.5rem',
-                  color: 'rgba(255, 255, 255, 0.7)',
+                  color: 'rgba(0,0,0,0.7)', // DIUBAH
                   fontSize: isMobile ? '1rem' : '1.2rem',
                   fontWeight: '400',
                   fontFamily: 'Helvetica, Arial, sans-serif',
@@ -3393,8 +3647,8 @@ export default function HomePage(): React.JSX.Element {
                 height: isMobile ? '5rem' : '7rem',
                 borderRadius: '10px',
                 overflow: 'hidden',
-                border: '1px solid rgba(255, 255, 255, 0.3)',
-                backgroundColor: '#222'
+                border: '1px solid rgba(0,0,0,0.3)', // DIUBAH
+                backgroundColor: '#f0f0f0' // DIUBAH
               }}>
                 <img 
                   src="images/5.jpg" 
@@ -3413,7 +3667,7 @@ export default function HomePage(): React.JSX.Element {
                 position: 'absolute',
                 bottom: '-0.8rem',
                 right: '-1.5rem',
-                color: 'rgba(255, 255, 255, 0.7)',
+                color: 'rgba(0,0,0,0.7)', // DIUBAH
                 fontSize: isMobile ? '1rem' : '1.2rem',
                 fontWeight: '400',
                 fontFamily: 'Helvetica, Arial, sans-serif',
@@ -3431,7 +3685,7 @@ export default function HomePage(): React.JSX.Element {
               alignItems: 'center'
             }}>
               <h2 style={{
-                color: 'white',
+                color: '#1A1A1A', // DIUBAH
                 fontSize: isMobile ? '5rem' : '7rem',
                 fontWeight: '900',
                 textTransform: 'uppercase',
@@ -3461,7 +3715,7 @@ export default function HomePage(): React.JSX.Element {
               alignItems: 'center'
             }}>
               <h2 style={{
-                color: 'white',
+                color: '#1A1A1A', // DIUBAH
                 fontSize: isMobile ? '5rem' : '7rem',
                 fontWeight: '900',
                 textTransform: 'uppercase',
@@ -3486,8 +3740,8 @@ export default function HomePage(): React.JSX.Element {
                 height: isMobile ? '5rem' : '7rem',
                 borderRadius: '10px',
                 overflow: 'hidden',
-                border: '1px solid rgba(255, 255, 255, 0.3)',
-                backgroundColor: '#222'
+                border: '1px solid rgba(0,0,0,0.3)', // DIUBAH
+                backgroundColor: '#f0f0f0' // DIUBAH
               }}>
                 <img 
                   src="images/5.jpg" 
@@ -3506,7 +3760,7 @@ export default function HomePage(): React.JSX.Element {
                 position: 'absolute',
                 bottom: '-0.8rem',
                 right: '-1.5rem',
-                color: 'rgba(255, 255, 255, 0.7)',
+                color: 'rgba(0,0,0,0.7)', // DIUBAH
                 fontSize: isMobile ? '1rem' : '1.2rem',
                 fontWeight: '400',
                 fontFamily: 'Helvetica, Arial, sans-serif',
@@ -3525,7 +3779,7 @@ export default function HomePage(): React.JSX.Element {
               justifyContent: 'flex-end'
             }}>
               <h2 style={{
-                color: 'white',
+                color: '#1A1A1A', // DIUBAH
                 fontSize: isMobile ? '5rem' : '7rem',
                 fontWeight: '900',
                 textTransform: 'uppercase',
@@ -3559,8 +3813,8 @@ export default function HomePage(): React.JSX.Element {
                 height: isMobile ? '5rem' : '7rem',
                 borderRadius: '10px',
                 overflow: 'hidden',
-                border: '1px solid rgba(255, 255, 255, 0.3)',
-                backgroundColor: '#222'
+                border: '1px solid rgba(0,0,0,0.3)', // DIUBAH
+                backgroundColor: '#f0f0f0' // DIUBAH
               }}>
                 <img 
                   src="images/5.jpg" 
@@ -3579,7 +3833,7 @@ export default function HomePage(): React.JSX.Element {
                 position: 'absolute',
                 bottom: '-0.8rem',
                 right: '-1.5rem',
-                color: 'rgba(255, 255, 255, 0.7)',
+                color: 'rgba(0,0,0,0.7)', // DIUBAH
                 fontSize: isMobile ? '1rem' : '1.2rem',
                 fontWeight: '400',
                 fontFamily: 'Helvetica, Arial, sans-serif',
@@ -3597,7 +3851,7 @@ export default function HomePage(): React.JSX.Element {
               alignItems: 'center'
             }}>
               <h2 style={{
-                color: 'white',
+                color: '#1A1A1A', // DIUBAH
                 fontSize: isMobile ? '5rem' : '7rem',
                 fontWeight: '900',
                 textTransform: 'uppercase',
@@ -3711,7 +3965,7 @@ export default function HomePage(): React.JSX.Element {
                   </motion.button>
 
                   <div style={{
-                    color: 'white',
+                    color: '#1A1A1A', // DIUBAH
                     fontSize: '1.1rem',
                     fontWeight: '600',
                     fontFamily: 'Helvetica, Arial, sans-serif'
@@ -3737,7 +3991,7 @@ export default function HomePage(): React.JSX.Element {
                   whileTap={{ scale: 0.95 }}
                 >
                   <div style={{
-                    color: 'white',
+                    color: '#1A1A1A', // DIUBAH
                     fontSize: isMobile ? '1.8rem' : '2rem',
                     fontWeight: '300',
                     fontFamily: 'Helvetica, Arial, sans-serif',
@@ -3765,14 +4019,14 @@ export default function HomePage(): React.JSX.Element {
                       position: 'absolute',
                       width: '2px',
                       height: isMobile ? '18px' : '20px',
-                      backgroundColor: 'white',
+                      backgroundColor: '#1A1A1A', // DIUBAH
                       borderRadius: '1px'
                     }} />
                     <div style={{
                       position: 'absolute',
                       width: isMobile ? '18px' : '20px',
                       height: '2px',
-                      backgroundColor: 'white',
+                      backgroundColor: '#1A1A1A', // DIUBAH
                       borderRadius: '1px'
                     }} />
                   </div>
@@ -3794,7 +4048,7 @@ export default function HomePage(): React.JSX.Element {
                   paddingLeft: isMobile ? '1rem' : '2rem'
                 }}>
                   <div style={{
-                    color: 'white',
+                    color: '#1A1A1A', // DIUBAH
                     fontSize: isMobile ? '1.3rem' : '1.6rem',
                     fontWeight: '400',
                     fontFamily: 'Helvetica, Arial, sans-serif'
@@ -3842,12 +4096,12 @@ export default function HomePage(): React.JSX.Element {
                         borderRadius: '12px'
                       }}
                       onError={(e) => {
-                        e.currentTarget.style.backgroundColor = '#111';
+                        e.currentTarget.style.backgroundColor = '#f5f5f5'; // DIUBAH
                         e.currentTarget.style.display = 'flex';
                         e.currentTarget.style.alignItems = 'center';
                         e.currentTarget.style.justifyContent = 'center';
-                        e.currentTarget.style.color = '#fff';
-                        e.currentTarget.innerHTML = '<div style="padding: 1rem; text-align: center; color: #fff;">Visual Design</div>';
+                        e.currentTarget.style.color = '#1A1A1A'; // DIUBAH
+                        e.currentTarget.innerHTML = '<div style="padding: 1rem; text-align: center; color: #1A1A1A;">Visual Design</div>';
                       }}
                     />
                     
@@ -3865,11 +4119,11 @@ export default function HomePage(): React.JSX.Element {
                     }}>
                       {/* Teks Lengkap - Normal */}
                       <div style={{
-                        color: 'black',
+                        color: 'white',
                         fontSize: isMobile ? '0.9rem' : '1rem',
                         fontWeight: '400',
                         fontFamily: 'Helvetica, Arial, sans-serif',
-                        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                        backgroundColor: 'rgba(0,0,0,0.8)', // DIUBAH
                         padding: '0.3rem 0.6rem',
                         borderRadius: '4px'
                       }}>
@@ -3879,7 +4133,7 @@ export default function HomePage(): React.JSX.Element {
                       {/* SVG Panah Serong Kanan Modern */}
                       <div style={{
                         marginLeft: '0.5rem',
-                        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                        backgroundColor: 'rgba(0,0,0,0.8)', // DIUBAH
                         padding: '0.3rem',
                         borderRadius: '50%',
                         display: 'flex',
@@ -3896,7 +4150,7 @@ export default function HomePage(): React.JSX.Element {
                           {/* Panah serong kanan modern */}
                           <path 
                             d="M7 17L17 7M17 7H7M17 7V17" 
-                            stroke="black" 
+                            stroke="white" 
                             strokeWidth="2" 
                             strokeLinecap="round" 
                             strokeLinejoin="round"
@@ -3931,12 +4185,12 @@ export default function HomePage(): React.JSX.Element {
                         borderRadius: '12px'
                       }}
                       onError={(e) => {
-                        e.currentTarget.style.backgroundColor = '#111';
+                        e.currentTarget.style.backgroundColor = '#f5f5f5'; // DIUBAH
                         e.currentTarget.style.display = 'flex';
                         e.currentTarget.style.alignItems = 'center';
                         e.currentTarget.style.justifyContent = 'center';
-                        e.currentTarget.style.color = '#fff';
-                        e.currentTarget.innerHTML = '<div style="padding: 1rem; text-align: center; color: #fff;">Brand Identity</div>';
+                        e.currentTarget.style.color = '#1A1A1A'; // DIUBAH
+                        e.currentTarget.innerHTML = '<div style="padding: 1rem; text-align: center; color: #1A1A1A;">Brand Identity</div>';
                       }}
                     />
                     
@@ -3952,11 +4206,11 @@ export default function HomePage(): React.JSX.Element {
                       boxSizing: 'border-box'
                     }}>
                       <div style={{
-                        color: 'black',
+                        color: 'white',
                         fontSize: isMobile ? '0.9rem' : '1rem',
                         fontWeight: '400',
                         fontFamily: 'Helvetica, Arial, sans-serif',
-                        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                        backgroundColor: 'rgba(0,0,0,0.8)', // DIUBAH
                         padding: '0.3rem 0.6rem',
                         borderRadius: '4px'
                       }}>
@@ -3965,7 +4219,7 @@ export default function HomePage(): React.JSX.Element {
                       
                       <div style={{
                         marginLeft: '0.5rem',
-                        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                        backgroundColor: 'rgba(0,0,0,0.8)', // DIUBAH
                         padding: '0.3rem',
                         borderRadius: '50%',
                         display: 'flex',
@@ -3981,7 +4235,7 @@ export default function HomePage(): React.JSX.Element {
                         >
                           <path 
                             d="M7 17L17 7M17 7H7M17 7V17" 
-                            stroke="black" 
+                            stroke="white" 
                             strokeWidth="2" 
                             strokeLinecap="round" 
                             strokeLinejoin="round"
@@ -4016,12 +4270,12 @@ export default function HomePage(): React.JSX.Element {
                         borderRadius: '12px'
                       }}
                       onError={(e) => {
-                        e.currentTarget.style.backgroundColor = '#111';
+                        e.currentTarget.style.backgroundColor = '#f5f5f5'; // DIUBAH
                         e.currentTarget.style.display = 'flex';
                         e.currentTarget.style.alignItems = 'center';
                         e.currentTarget.style.justifyContent = 'center';
-                        e.currentTarget.style.color = '#fff';
-                        e.currentTarget.innerHTML = '<div style="padding: 1rem; text-align: center; color: #fff;">UI/UX Design</div>';
+                        e.currentTarget.style.color = '#1A1A1A'; // DIUBAH
+                        e.currentTarget.innerHTML = '<div style="padding: 1rem; text-align: center; color: #1A1A1A;">UI/UX Design</div>';
                       }}
                     />
                     
@@ -4037,11 +4291,11 @@ export default function HomePage(): React.JSX.Element {
                       boxSizing: 'border-box'
                     }}>
                       <div style={{
-                        color: 'black',
+                        color: 'white',
                         fontSize: isMobile ? '0.9rem' : '1rem',
                         fontWeight: '400',
                         fontFamily: 'Helvetica, Arial, sans-serif',
-                        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                        backgroundColor: 'rgba(0,0,0,0.8)', // DIUBAH
                         padding: '0.3rem 0.6rem',
                         borderRadius: '4px'
                       }}>
@@ -4050,7 +4304,7 @@ export default function HomePage(): React.JSX.Element {
                       
                       <div style={{
                         marginLeft: '0.5rem',
-                        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                        backgroundColor: 'rgba(0,0,0,0.8)', // DIUBAH
                         padding: '0.3rem',
                         borderRadius: '50%',
                         display: 'flex',
@@ -4066,7 +4320,7 @@ export default function HomePage(): React.JSX.Element {
                         >
                           <path 
                             d="M7 17L17 7M17 7H7M17 7V17" 
-                            stroke="black" 
+                            stroke="white" 
                             strokeWidth="2" 
                             strokeLinecap="round" 
                             strokeLinejoin="round"
@@ -4101,12 +4355,12 @@ export default function HomePage(): React.JSX.Element {
                         borderRadius: '12px'
                       }}
                       onError={(e) => {
-                        e.currentTarget.style.backgroundColor = '#111';
+                        e.currentTarget.style.backgroundColor = '#f5f5f5'; // DIUBAH
                         e.currentTarget.style.display = 'flex';
                         e.currentTarget.style.alignItems = 'center';
                         e.currentTarget.style.justifyContent = 'center';
-                        e.currentTarget.style.color = '#fff';
-                        e.currentTarget.innerHTML = '<div style="padding: 1rem; text-align: center; color: #fff;">Motion Graphics</div>';
+                        e.currentTarget.style.color = '#1A1A1A'; // DIUBAH
+                        e.currentTarget.innerHTML = '<div style="padding: 1rem; text-align: center; color: #1A1A1A;">Motion Graphics</div>';
                       }}
                     />
                     
@@ -4122,11 +4376,11 @@ export default function HomePage(): React.JSX.Element {
                       boxSizing: 'border-box'
                     }}>
                       <div style={{
-                        color: 'black',
+                        color: 'white',
                         fontSize: isMobile ? '0.9rem' : '1rem',
                         fontWeight: '400',
                         fontFamily: 'Helvetica, Arial, sans-serif',
-                        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                        backgroundColor: 'rgba(0,0,0,0.8)', // DIUBAH
                         padding: '0.3rem 0.6rem',
                         borderRadius: '4px'
                       }}>
@@ -4135,7 +4389,7 @@ export default function HomePage(): React.JSX.Element {
                       
                       <div style={{
                         marginLeft: '0.5rem',
-                        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                        backgroundColor: 'rgba(0,0,0,0.8)', // DIUBAH
                         padding: '0.3rem',
                         borderRadius: '50%',
                         display: 'flex',
@@ -4151,7 +4405,7 @@ export default function HomePage(): React.JSX.Element {
                         >
                           <path 
                             d="M7 17L17 7M17 7H7M17 7V17" 
-                            stroke="black" 
+                            stroke="white" 
                             strokeWidth="2" 
                             strokeLinecap="round" 
                             strokeLinejoin="round"
@@ -4186,12 +4440,12 @@ export default function HomePage(): React.JSX.Element {
                         borderRadius: '12px'
                       }}
                       onError={(e) => {
-                        e.currentTarget.style.backgroundColor = '#111';
+                        e.currentTarget.style.backgroundColor = '#f5f5f5'; // DIUBAH
                         e.currentTarget.style.display = 'flex';
                         e.currentTarget.style.alignItems = 'center';
                         e.currentTarget.style.justifyContent = 'center';
-                        e.currentTarget.style.color = '#fff';
-                        e.currentTarget.innerHTML = '<div style="padding: 1rem; text-align: center; color: #fff;">Print Design</div>';
+                        e.currentTarget.style.color = '#1A1A1A'; // DIUBAH
+                        e.currentTarget.innerHTML = '<div style="padding: 1rem; text-align: center; color: #1A1A1A;">Print Design</div>';
                       }}
                     />
                     
@@ -4207,11 +4461,11 @@ export default function HomePage(): React.JSX.Element {
                       boxSizing: 'border-box'
                     }}>
                       <div style={{
-                        color: 'black',
+                        color: 'white',
                         fontSize: isMobile ? '0.9rem' : '1rem',
                         fontWeight: '400',
                         fontFamily: 'Helvetica, Arial, sans-serif',
-                        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                        backgroundColor: 'rgba(0,0,0,0.8)', // DIUBAH
                         padding: '0.3rem 0.6rem',
                         borderRadius: '4px'
                       }}>
@@ -4220,7 +4474,7 @@ export default function HomePage(): React.JSX.Element {
                       
                       <div style={{
                         marginLeft: '0.5rem',
-                        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                        backgroundColor: 'rgba(0,0,0,0.8)', // DIUBAH
                         padding: '0.3rem',
                         borderRadius: '50%',
                         display: 'flex',
@@ -4236,7 +4490,7 @@ export default function HomePage(): React.JSX.Element {
                         >
                           <path 
                             d="M7 17L17 7M17 7H7M17 7V17" 
-                            stroke="black" 
+                            stroke="white" 
                             strokeWidth="2" 
                             strokeLinecap="round" 
                             strokeLinejoin="round"
@@ -4271,12 +4525,12 @@ export default function HomePage(): React.JSX.Element {
                         borderRadius: '12px'
                       }}
                       onError={(e) => {
-                        e.currentTarget.style.backgroundColor = '#111';
+                        e.currentTarget.style.backgroundColor = '#f5f5f5'; // DIUBAH
                         e.currentTarget.style.display = 'flex';
                         e.currentTarget.style.alignItems = 'center';
                         e.currentTarget.style.justifyContent = 'center';
-                        e.currentTarget.style.color = '#fff';
-                        e.currentTarget.innerHTML = '<div style="padding: 1rem; text-align: center; color: #fff;">Web Design</div>';
+                        e.currentTarget.style.color = '#1A1A1A'; // DIUBAH
+                        e.currentTarget.innerHTML = '<div style="padding: 1rem; text-align: center; color: #1A1A1A;">Web Design</div>';
                       }}
                     />
                     
@@ -4292,11 +4546,11 @@ export default function HomePage(): React.JSX.Element {
                       boxSizing: 'border-box'
                     }}>
                       <div style={{
-                        color: 'black',
+                        color: 'white',
                         fontSize: isMobile ? '0.9rem' : '1rem',
                         fontWeight: '400',
                         fontFamily: 'Helvetica, Arial, sans-serif',
-                        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                        backgroundColor: 'rgba(0,0,0,0.8)', // DIUBAH
                         padding: '0.3rem 0.6rem',
                         borderRadius: '4px'
                       }}>
@@ -4305,7 +4559,7 @@ export default function HomePage(): React.JSX.Element {
                       
                       <div style={{
                         marginLeft: '0.5rem',
-                        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                        backgroundColor: 'rgba(0,0,0,0.8)', // DIUBAH
                         padding: '0.3rem',
                         borderRadius: '50%',
                         display: 'flex',
@@ -4321,7 +4575,7 @@ export default function HomePage(): React.JSX.Element {
                         >
                           <path 
                             d="M7 17L17 7M17 7H7M17 7V17" 
-                            stroke="black" 
+                            stroke="white" 
                             strokeWidth="2" 
                             strokeLinecap="round" 
                             strokeLinejoin="round"
@@ -4349,18 +4603,19 @@ export default function HomePage(): React.JSX.Element {
                     left: isMobile ? '2rem' : '3rem',
                     top: isMobile ? '2rem' : '3rem',
                     zIndex: 20,
-                    color: 'white',
+                    color: '#1A1A1A', // DIUBAH
                     fontSize: isMobile ? '2.5rem' : '3.5rem',
                     fontWeight: '600',
                     fontFamily: 'Helvetica, Arial, sans-serif',
-                    textShadow: '0 2px 10px rgba(0,0,0,0.5)',
-                    backgroundColor: 'rgba(0,0,0,0.3)',
+                    textShadow: '0 2px 10px rgba(0,0,0,0.1)',
+                    backgroundColor: 'rgba(255,255,255,0.8)', // DIUBAH
                     padding: '0.5rem 1rem',
                     borderRadius: '10px',
                     backdropFilter: 'blur(5px)',
                     display: 'flex',
                     alignItems: 'baseline',
-                    gap: '0.3rem'
+                    gap: '0.3rem',
+                    border: '1px solid rgba(0,0,0,0.1)'
                   }}
                 >
                   <span 
@@ -4401,13 +4656,14 @@ export default function HomePage(): React.JSX.Element {
                   gap: '0.5rem'
                 }}>
                   <div style={{
-                    backgroundColor: 'rgba(0,0,0,0.3)',
+                    backgroundColor: 'rgba(255,255,255,0.8)', // DIUBAH
                     padding: '0.4rem 0.8rem',
                     borderRadius: '8px',
                     backdropFilter: 'blur(5px)',
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '0.4rem'
+                    gap: '0.4rem',
+                    border: '1px solid rgba(0,0,0,0.1)'
                   }}>
                     <svg 
                       width="14" 
@@ -4421,7 +4677,7 @@ export default function HomePage(): React.JSX.Element {
                       <polyline points="12 6 12 12 16 14"/>
                     </svg>
                     <span style={{
-                      color: 'rgba(255,255,255,0.9)',
+                      color: '#1A1A1A', // DIUBAH
                       fontSize: isMobile ? '0.8rem' : '0.9rem',
                       fontWeight: '500',
                       fontFamily: 'Helvetica, Arial, sans-serif'
@@ -4453,7 +4709,7 @@ export default function HomePage(): React.JSX.Element {
                         style={{
                           flex: 1,
                           height: '12px',
-                          backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                          backgroundColor: 'rgba(0, 0, 0, 0.2)', // DIUBAH
                           borderRadius: '6px',
                           overflow: 'hidden',
                           position: 'relative'
@@ -4467,7 +4723,7 @@ export default function HomePage(): React.JSX.Element {
                             left: 0,
                             top: 0,
                             bottom: 0,
-                            backgroundColor: 'white',
+                            backgroundColor: '#1A1A1A', // DIUBAH
                             borderRadius: '6px',
                             width: index === currentPhotoIndex ? '100%' : (index < currentPhotoIndex ? '100%' : '0%')
                           }}
@@ -4486,8 +4742,8 @@ export default function HomePage(): React.JSX.Element {
                       height: isMobile ? '600px' : '800px',
                       borderRadius: '15px',
                       overflow: 'hidden',
-                      boxShadow: '0 8px 25px rgba(0,0,0,0.4)',
-                      border: '2px solid rgba(255,255,255,0.15)',
+                      boxShadow: '0 8px 25px rgba(0,0,0,0.1)', // DIUBAH
+                      border: '2px solid rgba(0,0,0,0.15)', // DIUBAH
                       cursor: 'pointer',
                       margin: '0 auto'
                     }}
@@ -4517,12 +4773,12 @@ export default function HomePage(): React.JSX.Element {
                             display: 'block'
                           }}
                           onError={(e) => {
-                            e.currentTarget.style.backgroundColor = '#222';
+                            e.currentTarget.style.backgroundColor = '#f0f0f0'; // DIUBAH
                             e.currentTarget.style.display = 'flex';
                             e.currentTarget.style.alignItems = 'center';
                             e.currentTarget.style.justifyContent = 'center';
-                            e.currentTarget.style.color = '#fff';
-                            e.currentTarget.innerHTML = `<div style="padding: 2rem; text-align: center;">Photo ${currentPhotoIndex + 1}</div>`;
+                            e.currentTarget.style.color = '#1A1A1A'; // DIUBAH
+                            e.currentTarget.innerHTML = `<div style="padding: 2rem; text-align: center; color: #1A1A1A;">Photo ${currentPhotoIndex + 1}</div>`;
                           }}
                         />
                       </motion.div>
@@ -4546,7 +4802,7 @@ export default function HomePage(): React.JSX.Element {
                   paddingLeft: isMobile ? '0' : '0'
                 }}>
                   <div style={{
-                    color: 'white',
+                    color: '#1A1A1A', // DIUBAH
                     fontSize: isMobile ? '2rem' : '3rem',
                     fontWeight: '700',
                     fontFamily: 'Helvetica, Arial, sans-serif',
@@ -4588,12 +4844,12 @@ export default function HomePage(): React.JSX.Element {
                         borderRadius: '12px'
                       }}
                       onError={(e) => {
-                        e.currentTarget.style.backgroundColor = '#111';
+                        e.currentTarget.style.backgroundColor = '#f5f5f5'; // DIUBAH
                         e.currentTarget.style.display = 'flex';
                         e.currentTarget.style.alignItems = 'center';
                         e.currentTarget.style.justifyContent = 'center';
-                        e.currentTarget.style.color = '#fff';
-                        e.currentTarget.innerHTML = '<div style="padding: 1rem; text-align: center; color: #fff; font-size: 1.5rem;">Visual Design</div>';
+                        e.currentTarget.style.color = '#1A1A1A'; // DIUBAH
+                        e.currentTarget.innerHTML = '<div style="padding: 1rem; text-align: center; color: #1A1A1A; font-size: 1.5rem;">Visual Design</div>';
                       }}
                     />
                     
@@ -4693,12 +4949,12 @@ export default function HomePage(): React.JSX.Element {
                         borderRadius: '12px'
                       }}
                       onError={(e) => {
-                        e.currentTarget.style.backgroundColor = '#111';
+                        e.currentTarget.style.backgroundColor = '#f5f5f5'; // DIUBAH
                         e.currentTarget.style.display = 'flex';
                         e.currentTarget.style.alignItems = 'center';
                         e.currentTarget.style.justifyContent = 'center';
-                        e.currentTarget.style.color = '#fff';
-                        e.currentTarget.innerHTML = '<div style="padding: 1rem; text-align: center; color: #fff; font-size: 1.5rem;">Brand Identity</div>';
+                        e.currentTarget.style.color = '#1A1A1A'; // DIUBAH
+                        e.currentTarget.innerHTML = '<div style="padding: 1rem; text-align: center; color: #1A1A1A; font-size: 1.5rem;">Brand Identity</div>';
                       }}
                     />
                     
@@ -4796,12 +5052,12 @@ export default function HomePage(): React.JSX.Element {
                         borderRadius: '12px'
                       }}
                       onError={(e) => {
-                        e.currentTarget.style.backgroundColor = '#111';
+                        e.currentTarget.style.backgroundColor = '#f5f5f5'; // DIUBAH
                         e.currentTarget.style.display = 'flex';
                         e.currentTarget.style.alignItems = 'center';
                         e.currentTarget.style.justifyContent = 'center';
-                        e.currentTarget.style.color = '#fff';
-                        e.currentTarget.innerHTML = '<div style="padding: 1rem; text-align: center; color: #fff; font-size: 1.5rem;">UI/UX Design</div>';
+                        e.currentTarget.style.color = '#1A1A1A'; // DIUBAH
+                        e.currentTarget.innerHTML = '<div style="padding: 1rem; text-align: center; color: #1A1A1A; font-size: 1.5rem;">UI/UX Design</div>';
                       }}
                     />
                     
@@ -4899,12 +5155,12 @@ export default function HomePage(): React.JSX.Element {
                         borderRadius: '12px'
                       }}
                       onError={(e) => {
-                        e.currentTarget.style.backgroundColor = '#111';
+                        e.currentTarget.style.backgroundColor = '#f5f5f5'; // DIUBAH
                         e.currentTarget.style.display = 'flex';
                         e.currentTarget.style.alignItems = 'center';
                         e.currentTarget.style.justifyContent = 'center';
-                        e.currentTarget.style.color = '#fff';
-                        e.currentTarget.innerHTML = '<div style="padding: 1rem; text-align: center; color: #fff; font-size: 1.5rem;">Motion Graphics</div>';
+                        e.currentTarget.style.color = '#1A1A1A'; // DIUBAH
+                        e.currentTarget.innerHTML = '<div style="padding: 1rem; text-align: center; color: #1A1A1A; font-size: 1.5rem;">Motion Graphics</div>';
                       }}
                     />
                     
@@ -5095,7 +5351,7 @@ export default function HomePage(): React.JSX.Element {
                   whileInView={{ opacity: 1 }}
                   transition={{ duration: 0.8 }}
                   style={{
-                    color: 'white',
+                    color: '#1A1A1A', // DIUBAH
                     fontSize: isMobile ? '1.5rem' : '2rem',
                     fontWeight: '300',
                     textAlign: 'center',
@@ -5129,7 +5385,7 @@ export default function HomePage(): React.JSX.Element {
               <div style={{
                 width: '100%',
                 height: '1px',
-                backgroundColor: 'rgba(255,255,255,0.2)',
+                backgroundColor: 'rgba(0,0,0,0.2)', // DIUBAH
                 marginBottom: '3rem'
               }}></div>
 
@@ -5147,7 +5403,7 @@ export default function HomePage(): React.JSX.Element {
                   marginLeft: isMobile ? '0.5rem' : '1rem'
                 }}>
                   <div style={{
-                    color: 'white',
+                    color: '#1A1A1A', // DIUBAH
                     fontSize: isMobile ? '1.8rem' : '2.5rem',
                     fontWeight: '300',
                     textTransform: 'uppercase',
@@ -5195,8 +5451,8 @@ export default function HomePage(): React.JSX.Element {
                             height: '100%',
                             overflow: 'hidden',
                             borderRadius: '15px',
-                            boxShadow: '0 10px 30px rgba(0,0,0,0.5)',
-                            border: '1px solid rgba(255,255,255,0.1)'
+                            boxShadow: '0 10px 30px rgba(0,0,0,0.1)', // DIUBAH
+                            border: '1px solid rgba(0,0,0,0.1)' // DIUBAH
                           }}
                         >
                           <img 
@@ -5209,11 +5465,11 @@ export default function HomePage(): React.JSX.Element {
                               objectFit: 'cover'
                             }}
                             onError={(e) => {
-                              e.currentTarget.style.backgroundColor = '#333';
+                              e.currentTarget.style.backgroundColor = '#f0f0f0'; // DIUBAH
                               e.currentTarget.style.display = 'flex';
                               e.currentTarget.style.alignItems = 'center';
                               e.currentTarget.style.justifyContent = 'center';
-                              e.currentTarget.style.color = '#fff';
+                              e.currentTarget.style.color = '#1A1A1A'; // DIUBAH
                               e.currentTarget.innerHTML = '<div style="padding: 2rem; text-align: center;">Topic Image</div>';
                             }}
                           />
@@ -5259,7 +5515,7 @@ export default function HomePage(): React.JSX.Element {
                                 left: 0,
                                 top: '50%',
                                 height: '1px',
-                                backgroundColor: 'rgba(255,255,255,0.3)',
+                                backgroundColor: 'rgba(0,0,0,0.3)', // DIUBAH
                                 transform: 'translateY(-50%)',
                                 zIndex: 1
                               }}
@@ -5269,7 +5525,7 @@ export default function HomePage(): React.JSX.Element {
 
                         <motion.div
                           style={{
-                            color: 'white',
+                            color: '#1A1A1A', // DIUBAH
                             fontSize: isMobile ? '1.2rem' : '1.5rem',
                             fontWeight: hoveredTopic === topic.id ? '600' : '400',
                             fontFamily: 'Helvetica, Arial, sans-serif',
@@ -5318,7 +5574,7 @@ export default function HomePage(): React.JSX.Element {
                         }}>
                           <motion.div
                             style={{
-                              color: 'white',
+                              color: '#1A1A1A', // DIUBAH
                               fontSize: isMobile ? '1.2rem' : '1.5rem',
                               fontWeight: hoveredTopic === topic.id ? '600' : '400',
                               fontFamily: 'Helvetica, Arial, sans-serif',
@@ -5332,7 +5588,7 @@ export default function HomePage(): React.JSX.Element {
                             {topic.description}
                           </motion.div>
                           <div style={{
-                            color: 'rgba(255,255,255,0.6)',
+                            color: 'rgba(0,0,0,0.6)', // DIUBAH
                             fontSize: isMobile ? '1.2rem' : '1.5rem',
                             fontWeight: '400',
                             fontFamily: 'Helvetica, Arial, sans-serif',
@@ -5429,7 +5685,7 @@ export default function HomePage(): React.JSX.Element {
                   </motion.button>
 
                   <div style={{
-                    color: 'white',
+                    color: '#1A1A1A', // DIUBAH
                     fontSize: '1.1rem',
                     fontWeight: '600',
                     fontFamily: 'Helvetica, Arial, sans-serif'
@@ -5461,7 +5717,7 @@ export default function HomePage(): React.JSX.Element {
               }}
             >
               <h2 style={{
-                color: 'white',
+                color: '#1A1A1A', // DIUBAH
                 fontSize: isMobile ? '2rem' : '3rem',
                 fontWeight: '300',
                 marginBottom: '2rem'
@@ -5543,7 +5799,7 @@ export default function HomePage(): React.JSX.Element {
                   </motion.button>
 
                   <div style={{
-                    color: 'white',
+                    color: '#1A1A1A', // DIUBAH
                     fontSize: '1.1rem',
                     fontWeight: '600',
                     fontFamily: 'Helvetica, Arial, sans-serif'
