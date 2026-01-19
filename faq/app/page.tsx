@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect, useRef } from "react";
@@ -127,6 +126,9 @@ export default function HomePage(): React.JSX.Element {
   const [comments, setComments] = useState<Comment[]>([]);
   const [isLoadingComments, setIsLoadingComments] = useState(false);
 
+  // State baru untuk modal navigasi
+  const [showNavModal, setShowNavModal] = useState(false);
+
   const headerRef = useRef<HTMLDivElement>(null);
   const topNavRef = useRef<HTMLDivElement>(null);
   const topicContainerRef = useRef<HTMLDivElement>(null);
@@ -140,18 +142,7 @@ export default function HomePage(): React.JSX.Element {
   const messageInputRef = useRef<HTMLInputElement>(null);
   const userDropdownRef = useRef<HTMLDivElement>(null);
   const chatbotPopupRef = useRef<HTMLDivElement>(null);
-
-
-
-
-
-
-
-
-
-
-
-  
+  const navModalRef = useRef<HTMLDivElement>(null);
 
   // Animasi loading text
   const loadingTexts = [
@@ -447,6 +438,13 @@ export default function HomePage(): React.JSX.Element {
           setShowChatbotPopup(false);
         }
       }
+      if (navModalRef.current && !navModalRef.current.contains(event.target as Node)) {
+        const target = event.target as HTMLElement;
+        const isPlusButton = target.closest('[data-nav-plus]');
+        if (!isPlusButton) {
+          handleCloseNavModal();
+        }
+      }
     };
 
     document.addEventListener('mousedown', handleClickOutside);
@@ -567,6 +565,9 @@ export default function HomePage(): React.JSX.Element {
         if (showChatbotPopup) {
           setShowChatbotPopup(false);
         }
+        if (showNavModal) {
+          handleCloseNavModal();
+        }
       }
     };
 
@@ -593,7 +594,7 @@ export default function HomePage(): React.JSX.Element {
       // Kill ScrollTrigger instances
       ScrollTrigger.getAll().forEach(trigger => trigger.kill());
     };
-  }, [isMobile, showMenuruFullPage, showPhotoFullPage, showUserDropdown, showLogoutModal, showChatbotPopup]);
+  }, [isMobile, showMenuruFullPage, showPhotoFullPage, showUserDropdown, showLogoutModal, showChatbotPopup, showNavModal]);
 
   // Animasi GSAP untuk tanda + di tombol Menuru (hanya pulsing, tidak berputar)
   useEffect(() => {
@@ -891,6 +892,33 @@ export default function HomePage(): React.JSX.Element {
     router.push('/chatbot');
   };
 
+  // Handler untuk membuka modal navigasi
+  const handleOpenNavModal = () => {
+    setShowNavModal(true);
+    // Animate modal masuk
+    if (navModalRef.current) {
+      gsap.fromTo(navModalRef.current,
+        { scale: 0.8, opacity: 0 },
+        { scale: 1, opacity: 1, duration: 0.5, ease: "power3.out" }
+      );
+    }
+  };
+
+  // Handler untuk menutup modal navigasi
+  const handleCloseNavModal = () => {
+    if (navModalRef.current) {
+      gsap.to(navModalRef.current, {
+        scale: 0.8,
+        opacity: 0,
+        duration: 0.3,
+        ease: "power3.in",
+        onComplete: () => setShowNavModal(false)
+      });
+    } else {
+      setShowNavModal(false);
+    }
+  };
+
   // Data untuk halaman Index - HANYA TAHUN
   const indexTopics = [
     {
@@ -945,6 +973,525 @@ export default function HomePage(): React.JSX.Element {
       WebkitFontSmoothing: 'antialiased',
       MozOsxFontSmoothing: 'grayscale'
     }}>
+
+      {/* Modern Navigation Modal */}
+      <AnimatePresence>
+        {showNavModal && (
+          <>
+            {/* Backdrop with blur effect */}
+            <motion.div
+              initial={{ backdropFilter: 'blur(0px)', opacity: 0 }}
+              animate={{ backdropFilter: 'blur(10px)', opacity: 1 }}
+              exit={{ backdropFilter: 'blur(0px)', opacity: 0 }}
+              transition={{ duration: 0.5 }}
+              style={{
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                width: '100%',
+                height: '100%',
+                backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                zIndex: 9995,
+                cursor: 'pointer'
+              }}
+              onClick={handleCloseNavModal}
+            />
+            
+            {/* Modal Content */}
+            <motion.div
+              ref={navModalRef}
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.8, opacity: 0 }}
+              transition={{ duration: 0.5, type: "spring", damping: 25 }}
+              style={{
+                position: 'fixed',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                width: isMobile ? '95%' : '90%',
+                height: isMobile ? '90%' : '85%',
+                backgroundColor: 'black',
+                borderRadius: '20px',
+                zIndex: 9996,
+                overflow: 'hidden',
+                boxShadow: '0 25px 50px rgba(0, 0, 0, 0.5)',
+                border: '1px solid rgba(255, 255, 255, 0.1)'
+              }}
+            >
+              {/* Close Button - Top Right Corner */}
+              <motion.button
+                onClick={handleCloseNavModal}
+                style={{
+                  position: 'absolute',
+                  top: isMobile ? '1.5rem' : '2rem',
+                  right: isMobile ? '1.5rem' : '2rem',
+                  width: isMobile ? '40px' : '50px',
+                  height: isMobile ? '40px' : '50px',
+                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                  border: '1px solid rgba(255, 255, 255, 0.2)',
+                  borderRadius: '50%',
+                  color: 'white',
+                  fontSize: isMobile ? '1.5rem' : '2rem',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  zIndex: 100,
+                  backdropFilter: 'blur(10px)'
+                }}
+                whileHover={{ 
+                  backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                  scale: 1.1
+                }}
+                whileTap={{ scale: 0.9 }}
+              >
+                ×
+              </motion.button>
+
+              {/* Modal Content */}
+              <div style={{
+                width: '100%',
+                height: '100%',
+                display: 'flex',
+                flexDirection: 'column',
+                padding: isMobile ? '2rem 1.5rem' : '4rem 3rem',
+                boxSizing: 'border-box',
+                overflowY: 'auto'
+              }}>
+                {/* Title */}
+                <motion.div
+                  initial={{ y: -20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ delay: 0.1, duration: 0.5 }}
+                  style={{
+                    marginBottom: isMobile ? '2rem' : '3rem',
+                    textAlign: 'center'
+                  }}
+                >
+                  <h1 style={{
+                    color: 'white',
+                    fontSize: isMobile ? '2.5rem' : '4rem',
+                    fontWeight: '700',
+                    fontFamily: 'Helvetica, Arial, sans-serif',
+                    margin: 0,
+                    letterSpacing: '2px'
+                  }}>
+                    NAVIGATION
+                  </h1>
+                  <p style={{
+                    color: 'rgba(255, 255, 255, 0.7)',
+                    fontSize: isMobile ? '1rem' : '1.2rem',
+                    marginTop: '0.5rem'
+                  }}>
+                    Explore all sections of the website
+                  </p>
+                </motion.div>
+
+                {/* Grid Menu */}
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)',
+                  gap: isMobile ? '1.5rem' : '2rem',
+                  flex: 1
+                }}>
+                  {/* Home Card */}
+                  <motion.div
+                    initial={{ scale: 0.9, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ delay: 0.2, duration: 0.5 }}
+                    whileHover={{ scale: 1.05 }}
+                    onClick={() => {
+                      handleCloseNavModal();
+                      router.push('/');
+                    }}
+                    style={{
+                      backgroundColor: 'rgba(30, 30, 30, 0.8)',
+                      borderRadius: '15px',
+                      padding: isMobile ? '1.5rem' : '2rem',
+                      cursor: 'pointer',
+                      border: '1px solid rgba(255, 255, 255, 0.1)',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      textAlign: 'center',
+                      transition: 'all 0.3s ease'
+                    }}
+                  >
+                    <div style={{
+                      width: '60px',
+                      height: '60px',
+                      backgroundColor: '#0050B7',
+                      borderRadius: '50%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      marginBottom: '1rem'
+                    }}>
+                      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                        <polyline points="9 22 9 12 15 12 15 22"/>
+                      </svg>
+                    </div>
+                    <h3 style={{
+                      color: 'white',
+                      fontSize: isMobile ? '1.3rem' : '1.5rem',
+                      margin: '0.5rem 0',
+                      fontWeight: '600'
+                    }}>
+                      Home
+                    </h3>
+                    <p style={{
+                      color: 'rgba(255, 255, 255, 0.6)',
+                      fontSize: '0.9rem',
+                      margin: 0
+                    }}>
+                      Return to main page
+                    </p>
+                  </motion.div>
+
+                  {/* Docs Card */}
+                  <motion.div
+                    initial={{ scale: 0.9, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ delay: 0.3, duration: 0.5 }}
+                    whileHover={{ scale: 1.05 }}
+                    onClick={() => {
+                      handleCloseNavModal();
+                      router.push('/docs');
+                    }}
+                    style={{
+                      backgroundColor: 'rgba(30, 30, 30, 0.8)',
+                      borderRadius: '15px',
+                      padding: isMobile ? '1.5rem' : '2rem',
+                      cursor: 'pointer',
+                      border: '1px solid rgba(255, 255, 255, 0.1)',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      textAlign: 'center',
+                      transition: 'all 0.3s ease'
+                    }}
+                  >
+                    <div style={{
+                      width: '60px',
+                      height: '60px',
+                      backgroundColor: '#6366F1',
+                      borderRadius: '50%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      marginBottom: '1rem'
+                    }}>
+                      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                        <polyline points="14 2 14 8 20 8"/>
+                        <line x1="16" y1="13" x2="8" y2="13"/>
+                        <line x1="16" y1="17" x2="8" y2="17"/>
+                        <polyline points="10 9 9 9 8 9"/>
+                      </svg>
+                    </div>
+                    <h3 style={{
+                      color: 'white',
+                      fontSize: isMobile ? '1.3rem' : '1.5rem',
+                      margin: '0.5rem 0',
+                      fontWeight: '600'
+                    }}>
+                      Documentation
+                    </h3>
+                    <p style={{
+                      color: 'rgba(255, 255, 255, 0.6)',
+                      fontSize: '0.9rem',
+                      margin: 0
+                    }}>
+                      Technical documentation
+                    </p>
+                  </motion.div>
+
+                  {/* Chatbot Card */}
+                  <motion.div
+                    initial={{ scale: 0.9, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ delay: 0.4, duration: 0.5 }}
+                    whileHover={{ scale: 1.05 }}
+                    onClick={() => {
+                      handleCloseNavModal();
+                      router.push('/chatbot');
+                    }}
+                    style={{
+                      backgroundColor: 'rgba(30, 30, 30, 0.8)',
+                      borderRadius: '15px',
+                      padding: isMobile ? '1.5rem' : '2rem',
+                      cursor: 'pointer',
+                      border: '1px solid rgba(255, 255, 255, 0.1)',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      textAlign: 'center',
+                      transition: 'all 0.3s ease'
+                    }}
+                  >
+                    <div style={{
+                      width: '60px',
+                      height: '60px',
+                      backgroundColor: '#00FF00',
+                      borderRadius: '50%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      marginBottom: '1rem'
+                    }}>
+                      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="2">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                      </svg>
+                    </div>
+                    <h3 style={{
+                      color: 'white',
+                      fontSize: isMobile ? '1.3rem' : '1.5rem',
+                      margin: '0.5rem 0',
+                      fontWeight: '600'
+                    }}>
+                      AI Chatbot
+                    </h3>
+                    <p style={{
+                      color: 'rgba(255, 255, 255, 0.6)',
+                      fontSize: '0.9rem',
+                      margin: 0
+                    }}>
+                      Intelligent assistant
+                    </p>
+                  </motion.div>
+
+                  {/* Update Card */}
+                  <motion.div
+                    initial={{ scale: 0.9, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ delay: 0.5, duration: 0.5 }}
+                    whileHover={{ scale: 1.05 }}
+                    onClick={() => {
+                      handleCloseNavModal();
+                      router.push('/update');
+                    }}
+                    style={{
+                      backgroundColor: 'rgba(30, 30, 30, 0.8)',
+                      borderRadius: '15px',
+                      padding: isMobile ? '1.5rem' : '2rem',
+                      cursor: 'pointer',
+                      border: '1px solid rgba(255, 255, 255, 0.1)',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      textAlign: 'center'
+                    }}
+                  >
+                    <div style={{
+                      width: '60px',
+                      height: '60px',
+                      backgroundColor: '#EC4899',
+                      borderRadius: '50%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      marginBottom: '1rem'
+                    }}>
+                      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                        <polyline points="14 2 14 8 20 8"/>
+                        <circle cx="8" cy="15" r="1"/>
+                        <circle cx="12" cy="15" r="1"/>
+                        <circle cx="16" cy="15" r="1"/>
+                      </svg>
+                    </div>
+                    <h3 style={{
+                      color: 'white',
+                      fontSize: isMobile ? '1.3rem' : '1.5rem',
+                      margin: '0.5rem 0',
+                      fontWeight: '600'
+                    }}>
+                      Updates
+                    </h3>
+                    <p style={{
+                      color: 'rgba(255, 255, 255, 0.6)',
+                      fontSize: '0.9rem',
+                      margin: 0
+                    }}>
+                      Latest changes
+                    </p>
+                  </motion.div>
+
+                  {/* Timeline Card */}
+                  <motion.div
+                    initial={{ scale: 0.9, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ delay: 0.6, duration: 0.5 }}
+                    whileHover={{ scale: 1.05 }}
+                    onClick={() => {
+                      handleCloseNavModal();
+                      router.push('/timeline');
+                    }}
+                    style={{
+                      backgroundColor: 'rgba(30, 30, 30, 0.8)',
+                      borderRadius: '15px',
+                      padding: isMobile ? '1.5rem' : '2rem',
+                      cursor: 'pointer',
+                      border: '1px solid rgba(255, 255, 255, 0.1)',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      textAlign: 'center'
+                    }}
+                  >
+                    <div style={{
+                      width: '60px',
+                      height: '60px',
+                      backgroundColor: '#F59E0B',
+                      borderRadius: '50%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      marginBottom: '1rem'
+                    }}>
+                      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
+                        <polyline points="1 4 1 10 7 10"/>
+                        <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>
+                      </svg>
+                    </div>
+                    <h3 style={{
+                      color: 'white',
+                      fontSize: isMobile ? '1.3rem' : '1.5rem',
+                      margin: '0.5rem 0',
+                      fontWeight: '600'
+                    }}>
+                      Timeline
+                    </h3>
+                    <p style={{
+                      color: 'rgba(255, 255, 255, 0.6)',
+                      fontSize: '0.9rem',
+                      margin: 0
+                    }}>
+                      Development history
+                    </p>
+                  </motion.div>
+
+                  {/* Notes Card */}
+                  <motion.div
+                    initial={{ scale: 0.9, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ delay: 0.7, duration: 0.5 }}
+                    whileHover={{ scale: 1.05 }}
+                    onClick={() => {
+                      handleCloseNavModal();
+                      router.push('/notes');
+                    }}
+                    style={{
+                      backgroundColor: 'rgba(30, 30, 30, 0.8)',
+                      borderRadius: '15px',
+                      padding: isMobile ? '1.5rem' : '2rem',
+                      cursor: 'pointer',
+                      border: '1px solid rgba(255, 255, 255, 0.1)',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      textAlign: 'center'
+                    }}
+                  >
+                    <div style={{
+                      width: '60px',
+                      height: '60px',
+                      backgroundColor: '#10B981',
+                      borderRadius: '50%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      marginBottom: '1rem'
+                    }}>
+                      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                        <polyline points="14 2 14 8 20 8"/>
+                        <line x1="16" y1="13" x2="8" y2="13"/>
+                        <line x1="16" y1="17" x2="8" y2="17"/>
+                      </svg>
+                    </div>
+                    <h3 style={{
+                      color: 'white',
+                      fontSize: isMobile ? '1.3rem' : '1.5rem',
+                      margin: '0.5rem 0',
+                      fontWeight: '600'
+                    }}>
+                      Notes
+                    </h3>
+                    <p style={{
+                      color: 'rgba(255, 255, 255, 0.6)',
+                      fontSize: '0.9rem',
+                      margin: 0
+                    }}>
+                      Personal notes
+                    </p>
+                  </motion.div>
+                </div>
+
+                {/* Footer Section */}
+                <motion.div
+                  initial={{ y: 20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ delay: 0.8, duration: 0.5 }}
+                  style={{
+                    marginTop: isMobile ? '2rem' : '3rem',
+                    paddingTop: isMobile ? '1.5rem' : '2rem',
+                    borderTop: '1px solid rgba(255, 255, 255, 0.1)',
+                    textAlign: 'center'
+                  }}
+                >
+                  <p style={{
+                    color: 'rgba(255, 255, 255, 0.5)',
+                    fontSize: isMobile ? '0.9rem' : '1rem',
+                    margin: 0
+                  }}>
+                    MENURU • 2024 • All sections
+                  </p>
+                </motion.div>
+              </div>
+
+              {/* Animated Background Elements */}
+              <div style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: '100%',
+                height: '100%',
+                pointerEvents: 'none',
+                zIndex: -1
+              }}>
+                {/* Animated circles */}
+                {[...Array(3)].map((_, i) => (
+                  <motion.div
+                    key={i}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 0.1 }}
+                    transition={{ delay: 0.5 + i * 0.1 }}
+                    style={{
+                      position: 'absolute',
+                      width: `${100 + i * 50}px`,
+                      height: `${100 + i * 50}px`,
+                      borderRadius: '50%',
+                      backgroundColor: '#0050B7',
+                      top: `${20 + i * 20}%`,
+                      left: `${10 + i * 30}%`,
+                      filter: 'blur(40px)'
+                    }}
+                  />
+                ))}
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
 
       {/* Halaman Full Page MENURU */}
       <AnimatePresence>
@@ -2819,6 +3366,84 @@ export default function HomePage(): React.JSX.Element {
               NEW
             </div>
           </motion.div>
+
+          {/* Modern Plus Button */}
+          <motion.div
+            data-nav-plus
+            onClick={handleOpenNavModal}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              cursor: 'pointer',
+              padding: '0.4rem 1rem 0.4rem 0.8rem',
+              borderRadius: '25px',
+              backgroundColor: 'rgba(255,255,255,0.9)',
+              border: '1px solid rgba(255,255,255,0.2)',
+              transition: 'all 0.3s ease',
+              position: 'relative'
+            }}
+            whileHover={{ 
+              backgroundColor: 'white',
+              scale: 1.05,
+              border: '1px solid white'
+            }}
+            whileTap={{ scale: 0.95 }}
+          >
+            {/* Animated Plus Icon */}
+            <div style={{
+              position: 'relative',
+              width: isMobile ? '18px' : '20px',
+              height: isMobile ? '18px' : '20px'
+            }}>
+              {/* Vertical line with animation */}
+              <motion.div
+                animate={{ 
+                  rotate: showNavModal ? 45 : 0,
+                  scaleY: showNavModal ? 1.2 : 1
+                }}
+                transition={{ duration: 0.3 }}
+                style={{
+                  position: 'absolute',
+                  width: '2px',
+                  height: '100%',
+                  backgroundColor: '#6366F1',
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  borderRadius: '1px'
+                }}
+              />
+              {/* Horizontal line with animation */}
+              <motion.div
+                animate={{ 
+                  rotate: showNavModal ? 45 : 0,
+                  scaleX: showNavModal ? 1.2 : 1
+                }}
+                transition={{ duration: 0.3 }}
+                style={{
+                  position: 'absolute',
+                  width: '100%',
+                  height: '2px',
+                  backgroundColor: '#6366F1',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  borderRadius: '1px'
+                }}
+              />
+            </div>
+            
+            <span style={{
+              color: '#6366F1',
+              fontSize: isMobile ? '0.8rem' : '0.9rem',
+              fontWeight: '600',
+              fontFamily: 'Helvetica, Arial, sans-serif',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.3rem'
+            }}>
+              Menu
+            </span>
+          </motion.div>
         </div>
       </div>
 
@@ -3533,10 +4158,6 @@ export default function HomePage(): React.JSX.Element {
 
 
 
-
-
-
-
       
 
                 {/* Teks MENURU dengan animasi Plus (+) */}
@@ -4156,7 +4777,6 @@ export default function HomePage(): React.JSX.Element {
 
 
 
-
         
 
               {/* Progress Bar dengan 3 Foto dan Komentar */}
@@ -4357,6 +4977,7 @@ export default function HomePage(): React.JSX.Element {
                 </div>
               </div>
 
+
 {/* Foto Card Design Section - 4 Card Pojok Kanan */}
 <div style={{
   width: '100%',
@@ -4448,39 +5069,42 @@ export default function HomePage(): React.JSX.Element {
             Visual Design
           </div>
           
-          {/* Toggle Icon 2 garis - Container untuk animasi */}
+          {/* Toggle Icon di pojok kanan */}
           <div 
             id="toggle1"
             style={{
               cursor: 'pointer',
-              width: '32px',
-              height: '32px',
-              position: 'relative',
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'center'
+              justifyContent: 'center',
+              width: '32px',
+              height: '32px',
+              color: 'white',
+              opacity: '0.8',
+              transition: 'all 0.3s ease'
             }}
-            onClick={() => openModalWithAnimation(1)}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.opacity = '1';
+              e.currentTarget.style.transform = 'scale(1.1)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.opacity = '0.8';
+              e.currentTarget.style.transform = 'scale(1)';
+            }}
           >
-            {/* Garis 1 */}
-            <div id="line1-1" style={{
-              position: 'absolute',
-              width: '20px',
-              height: '2px',
-              backgroundColor: 'white',
-              borderRadius: '1px',
-              transform: 'translateY(-4px)'
-            }}></div>
-            
-            {/* Garis 2 */}
-            <div id="line1-2" style={{
-              position: 'absolute',
-              width: '20px',
-              height: '2px',
-              backgroundColor: 'white',
-              borderRadius: '1px',
-              transform: 'translateY(4px)'
-            }}></div>
+            {/* Toggle Icon: Hamburger atau plus */}
+            <svg 
+              width="24" 
+              height="24" 
+              viewBox="0 0 24 24" 
+              fill="none" 
+              stroke="currentColor" 
+              strokeWidth="2"
+            >
+              <line x1="3" y1="12" x2="21" y2="12" />
+              <line x1="3" y1="6" x2="21" y2="6" />
+              <line x1="3" y1="18" x2="21" y2="18" />
+            </svg>
           </div>
         </div>
         
@@ -4549,37 +5173,41 @@ export default function HomePage(): React.JSX.Element {
             Brand Identity
           </div>
           
-          {/* Toggle Icon 2 garis */}
+          {/* Toggle Icon di pojok kanan */}
           <div 
             id="toggle2"
             style={{
               cursor: 'pointer',
-              width: '32px',
-              height: '32px',
-              position: 'relative',
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'center'
+              justifyContent: 'center',
+              width: '32px',
+              height: '32px',
+              color: 'white',
+              opacity: '0.8',
+              transition: 'all 0.3s ease'
             }}
-            onClick={() => openModalWithAnimation(2)}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.opacity = '1';
+              e.currentTarget.style.transform = 'scale(1.1)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.opacity = '0.8';
+              e.currentTarget.style.transform = 'scale(1)';
+            }}
           >
-            <div id="line2-1" style={{
-              position: 'absolute',
-              width: '20px',
-              height: '2px',
-              backgroundColor: 'white',
-              borderRadius: '1px',
-              transform: 'translateY(-4px)'
-            }}></div>
-            
-            <div id="line2-2" style={{
-              position: 'absolute',
-              width: '20px',
-              height: '2px',
-              backgroundColor: 'white',
-              borderRadius: '1px',
-              transform: 'translateY(4px)'
-            }}></div>
+            <svg 
+              width="24" 
+              height="24" 
+              viewBox="0 0 24 24" 
+              fill="none" 
+              stroke="currentColor" 
+              strokeWidth="2"
+            >
+              <line x1="3" y1="12" x2="21" y2="12" />
+              <line x1="3" y1="6" x2="21" y2="6" />
+              <line x1="3" y1="18" x2="21" y2="18" />
+            </svg>
           </div>
         </div>
         
@@ -4648,37 +5276,41 @@ export default function HomePage(): React.JSX.Element {
             UI/UX Design
           </div>
           
-          {/* Toggle Icon 2 garis */}
+          {/* Toggle Icon di pojok kanan */}
           <div 
             id="toggle3"
             style={{
               cursor: 'pointer',
-              width: '32px',
-              height: '32px',
-              position: 'relative',
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'center'
+              justifyContent: 'center',
+              width: '32px',
+              height: '32px',
+              color: 'white',
+              opacity: '0.8',
+              transition: 'all 0.3s ease'
             }}
-            onClick={() => openModalWithAnimation(3)}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.opacity = '1';
+              e.currentTarget.style.transform = 'scale(1.1)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.opacity = '0.8';
+              e.currentTarget.style.transform = 'scale(1)';
+            }}
           >
-            <div id="line3-1" style={{
-              position: 'absolute',
-              width: '20px',
-              height: '2px',
-              backgroundColor: 'white',
-              borderRadius: '1px',
-              transform: 'translateY(-4px)'
-            }}></div>
-            
-            <div id="line3-2" style={{
-              position: 'absolute',
-              width: '20px',
-              height: '2px',
-              backgroundColor: 'white',
-              borderRadius: '1px',
-              transform: 'translateY(4px)'
-            }}></div>
+            <svg 
+              width="24" 
+              height="24" 
+              viewBox="0 0 24 24" 
+              fill="none" 
+              stroke="currentColor" 
+              strokeWidth="2"
+            >
+              <line x1="3" y1="12" x2="21" y2="12" />
+              <line x1="3" y1="6" x2="21" y2="6" />
+              <line x1="3" y1="18" x2="21" y2="18" />
+            </svg>
           </div>
         </div>
         
@@ -4747,37 +5379,41 @@ export default function HomePage(): React.JSX.Element {
             Motion Graphics
           </div>
           
-          {/* Toggle Icon 2 garis */}
+          {/* Toggle Icon di pojok kanan */}
           <div 
             id="toggle4"
             style={{
               cursor: 'pointer',
-              width: '32px',
-              height: '32px',
-              position: 'relative',
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'center'
+              justifyContent: 'center',
+              width: '32px',
+              height: '32px',
+              color: 'white',
+              opacity: '0.8',
+              transition: 'all 0.3s ease'
             }}
-            onClick={() => openModalWithAnimation(4)}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.opacity = '1';
+              e.currentTarget.style.transform = 'scale(1.1)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.opacity = '0.8';
+              e.currentTarget.style.transform = 'scale(1)';
+            }}
           >
-            <div id="line4-1" style={{
-              position: 'absolute',
-              width: '20px',
-              height: '2px',
-              backgroundColor: 'white',
-              borderRadius: '1px',
-              transform: 'translateY(-4px)'
-            }}></div>
-            
-            <div id="line4-2" style={{
-              position: 'absolute',
-              width: '20px',
-              height: '2px',
-              backgroundColor: 'white',
-              borderRadius: '1px',
-              transform: 'translateY(4px)'
-            }}></div>
+            <svg 
+              width="24" 
+              height="24" 
+              viewBox="0 0 24 24" 
+              fill="none" 
+              stroke="currentColor" 
+              strokeWidth="2"
+            >
+              <line x1="3" y1="12" x2="21" y2="12" />
+              <line x1="3" y1="6" x2="21" y2="6" />
+              <line x1="3" y1="18" x2="21" y2="18" />
+            </svg>
           </div>
         </div>
         
@@ -4807,63 +5443,46 @@ export default function HomePage(): React.JSX.Element {
       backgroundColor: 'rgba(0, 0, 0, 0.95)',
       zIndex: 1000,
       justifyContent: 'center',
-      alignItems: 'center',
-      opacity: 0
+      alignItems: 'center'
     }}
     onClick={(e) => {
       if (e.target.id === 'modalOverlay') {
-        closeModalWithAnimation();
+        e.currentTarget.style.display = 'none';
       }
     }}
   >
-    <div id="modalContent" style={{
+    <div style={{
       backgroundColor: '#000',
       width: '90%',
       height: '90%',
       borderRadius: '12px',
-      position: 'relative',
-      opacity: 0,
-      transform: 'scale(0.8)'
+      position: 'relative'
     }}>
-      {/* Close Button X dengan animasi */}
-      <div 
-        id="modalCloseBtn"
+      {/* Close Button */}
+      <button
+        onClick={() => {
+          document.getElementById('modalOverlay').style.display = 'none';
+        }}
         style={{
           position: 'absolute',
           top: '20px',
           right: '20px',
           width: '40px',
           height: '40px',
+          borderRadius: '50%',
+          backgroundColor: 'rgba(255, 255, 255, 0.1)',
+          border: 'none',
+          color: 'white',
+          fontSize: '1.5rem',
           cursor: 'pointer',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           zIndex: 1001
         }}
-        onClick={(e) => {
-          e.stopPropagation();
-          closeModalWithAnimation();
-        }}
       >
-        {/* Garis X animasi */}
-        <div id="xLine1" style={{
-          position: 'absolute',
-          width: '24px',
-          height: '2px',
-          backgroundColor: 'white',
-          borderRadius: '1px',
-          transform: 'rotate(45deg)'
-        }}></div>
-        
-        <div id="xLine2" style={{
-          position: 'absolute',
-          width: '24px',
-          height: '2px',
-          backgroundColor: 'white',
-          borderRadius: '1px',
-          transform: 'rotate(-45deg)'
-        }}></div>
-      </div>
+        ×
+      </button>
       
       {/* Konten Modal Kosong */}
       <div style={{
@@ -4881,218 +5500,27 @@ export default function HomePage(): React.JSX.Element {
     </div>
   </div>
 
-  {/* Include GSAP Library */}
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-  
-  {/* JavaScript untuk animasi GSAP */}
+  {/* JavaScript untuk menangani toggle */}
   <script dangerouslySetInnerHTML={{
     __html: `
-      let activeToggleId = null;
-      
-      function openModalWithAnimation(toggleNumber) {
-        activeToggleId = toggleNumber;
-        const overlay = document.getElementById('modalOverlay');
-        const modalContent = document.getElementById('modalContent');
-        const toggleBtn = document.getElementById('toggle' + toggleNumber);
-        
-        // Animasikan garis toggle menjadi X
-        const line1 = document.getElementById('line' + toggleNumber + '-1');
-        const line2 = document.getElementById('line' + toggleNumber + '-2');
-        
-        // Simpan posisi toggle
-        const toggleRect = toggleBtn.getBoundingClientRect();
-        const toggleCenterX = toggleRect.left + toggleRect.width / 2;
-        const toggleCenterY = toggleRect.top + toggleRect.height / 2;
-        
-        // Sembunyikan garis asli
-        gsap.to(line1, { duration: 0.2, opacity: 0 });
-        gsap.to(line2, { duration: 0.2, opacity: 0 });
-        
-        // Buat duplikat garis untuk animasi
-        const line1Clone = line1.cloneNode(true);
-        const line2Clone = line2.cloneNode(true);
-        line1Clone.id = 'line1Clone';
-        line2Clone.id = 'line2Clone';
-        
-        // Posisikan di tempat yang sama dengan aslinya
-        line1Clone.style.position = 'fixed';
-        line1Clone.style.top = (toggleRect.top + toggleRect.height / 2 - 4) + 'px';
-        line1Clone.style.left = (toggleRect.left + toggleRect.width / 2 - 10) + 'px';
-        line1Clone.style.zIndex = '2000';
-        
-        line2Clone.style.position = 'fixed';
-        line2Clone.style.top = (toggleRect.top + toggleRect.height / 2 + 4) + 'px';
-        line2Clone.style.left = (toggleRect.left + toggleRect.width / 2 - 10) + 'px';
-        line2Clone.style.zIndex = '2000';
-        
-        document.body.appendChild(line1Clone);
-        document.body.appendChild(line2Clone);
-        
-        // Animasi garis berpindah ke posisi close button
-        const modalRect = document.getElementById('modalCloseBtn').getBoundingClientRect();
-        const closeCenterX = modalRect.left + modalRect.width / 2;
-        const closeCenterY = modalRect.top + modalRect.height / 2;
-        
-        gsap.to(line1Clone, {
-          duration: 0.6,
-          x: closeCenterX - (toggleRect.left + toggleRect.width / 2 - 10),
-          y: closeCenterY - (toggleRect.top + toggleRect.height / 2 - 4),
-          rotation: 45,
-          ease: "power2.out"
-        });
-        
-        gsap.to(line2Clone, {
-          duration: 0.6,
-          x: closeCenterX - (toggleRect.left + toggleRect.width / 2 - 10),
-          y: closeCenterY - (toggleRect.top + toggleRect.height / 2 + 4),
-          rotation: -45,
-          ease: "power2.out",
-          onComplete: () => {
-            // Hapus clone dan tampilkan modal
-            document.body.removeChild(line1Clone);
-            document.body.removeChild(line2Clone);
-            
-            // Tampilkan modal dengan animasi
-            overlay.style.display = 'flex';
-            gsap.to(overlay, { 
-              duration: 0.3, 
-              opacity: 1 
-            });
-            gsap.to(modalContent, { 
-              duration: 0.4, 
-              opacity: 1, 
-              scale: 1,
-              ease: "back.out(1.7)" 
-            });
-          }
-        });
-      }
-      
-      function closeModalWithAnimation() {
-        const overlay = document.getElementById('modalOverlay');
-        const modalContent = document.getElementById('modalContent');
-        
-        // Ambil garis X dari modal
-        const xLine1 = document.getElementById('xLine1');
-        const xLine2 = document.getElementById('xLine2');
-        
-        // Dapatkan posisi close button
-        const closeBtn = document.getElementById('modalCloseBtn');
-        const closeRect = closeBtn.getBoundingClientRect();
-        const closeCenterX = closeRect.left + closeRect.width / 2;
-        const closeCenterY = closeRect.top + closeRect.height / 2;
-        
-        // Buat duplikat garis X untuk animasi
-        const xLine1Clone = xLine1.cloneNode(true);
-        const xLine2Clone = xLine2.cloneNode(true);
-        
-        xLine1Clone.style.position = 'fixed';
-        xLine1Clone.style.top = (closeRect.top + closeRect.height / 2) + 'px';
-        xLine1Clone.style.left = (closeRect.left + closeRect.width / 2 - 12) + 'px';
-        xLine1Clone.style.zIndex = '2000';
-        xLine1Clone.style.transform = 'rotate(45deg)';
-        
-        xLine2Clone.style.position = 'fixed';
-        xLine2Clone.style.top = (closeRect.top + closeRect.height / 2) + 'px';
-        xLine2Clone.style.left = (closeRect.left + closeRect.width / 2 - 12) + 'px';
-        xLine2Clone.style.zIndex = '2000';
-        xLine2Clone.style.transform = 'rotate(-45deg)';
-        
-        document.body.appendChild(xLine1Clone);
-        document.body.appendChild(xLine2Clone);
-        
-        // Sembunyikan garis X asli
-        gsap.to(xLine1, { duration: 0.1, opacity: 0 });
-        gsap.to(xLine2, { duration: 0.1, opacity: 0 });
-        
-        // Sembunyikan modal
-        gsap.to(modalContent, { 
-          duration: 0.3, 
-          opacity: 0, 
-          scale: 0.8 
-        });
-        
-        gsap.to(overlay, { 
-          duration: 0.3, 
-          opacity: 0,
-          onComplete: () => {
-            overlay.style.display = 'none';
-          }
-        });
-        
-        // Animasi garis X kembali ke toggle
-        if (activeToggleId) {
-          const toggleBtn = document.getElementById('toggle' + activeToggleId);
-          const toggleRect = toggleBtn.getBoundingClientRect();
-          const toggleCenterX = toggleRect.left + toggleRect.width / 2;
-          const toggleCenterY = toggleRect.top + toggleRect.height / 2;
-          
-          gsap.to(xLine1Clone, {
-            duration: 0.6,
-            x: toggleCenterX - (closeRect.left + closeRect.width / 2 - 12),
-            y: (toggleCenterY - 4) - closeRect.top,
-            rotation: 0,
-            ease: "power2.out",
-            onComplete: () => {
-              document.body.removeChild(xLine1Clone);
-              
-              // Tampilkan kembali garis asli
-              const line1 = document.getElementById('line' + activeToggleId + '-1');
-              gsap.to(line1, { 
-                duration: 0.3, 
-                opacity: 1,
-                delay: 0.1
-              });
-            }
-          });
-          
-          gsap.to(xLine2Clone, {
-            duration: 0.6,
-            x: toggleCenterX - (closeRect.left + closeRect.width / 2 - 12),
-            y: (toggleCenterY + 4) - closeRect.top,
-            rotation: 0,
-            ease: "power2.out",
-            onComplete: () => {
-              document.body.removeChild(xLine2Clone);
-              
-              // Tampilkan kembali garis asli
-              const line2 = document.getElementById('line' + activeToggleId + '-2');
-              gsap.to(line2, { 
-                duration: 0.3, 
-                opacity: 1,
-                delay: 0.1
-              });
-              
-              activeToggleId = null;
-            }
-          });
-        }
-      }
-      
-      // Setup hover effect untuk semua toggle
-      function setupToggleHover() {
+      function setupModalToggle() {
+        // Tambahkan event listener ke semua toggle
         for (let i = 1; i <= 4; i++) {
           const toggle = document.getElementById('toggle' + i);
-          const line1 = document.getElementById('line' + i + '-1');
-          const line2 = document.getElementById('line' + i + '-2');
-          
-          toggle.addEventListener('mouseenter', () => {
-            gsap.to(line1, { duration: 0.2, scaleX: 1.2 });
-            gsap.to(line2, { duration: 0.2, scaleX: 1.2 });
-          });
-          
-          toggle.addEventListener('mouseleave', () => {
-            gsap.to(line1, { duration: 0.2, scaleX: 1 });
-            gsap.to(line2, { duration: 0.2, scaleX: 1 });
-          });
+          if (toggle) {
+            toggle.addEventListener('click', function(e) {
+              e.stopPropagation();
+              document.getElementById('modalOverlay').style.display = 'flex';
+            });
+          }
         }
       }
       
       // Jalankan setelah halaman dimuat
       if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', setupToggleHover);
+        document.addEventListener('DOMContentLoaded', setupModalToggle);
       } else {
-        setupToggleHover();
+        setupModalToggle();
       }
     `
   }} />
@@ -5695,47 +6123,3 @@ export default function HomePage(): React.JSX.Element {
     </div>
   );
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
