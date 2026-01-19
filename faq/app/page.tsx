@@ -127,6 +127,13 @@ export default function HomePage(): React.JSX.Element {
   const [comments, setComments] = useState<Comment[]>([]);
   const [isLoadingComments, setIsLoadingComments] = useState(false);
 
+
+  // State untuk menu overlay
+const [showMenuOverlay, setShowMenuOverlay] = useState(false);
+const menuOverlayRef = useRef<HTMLDivElement>(null);
+const menuButtonRef = useRef<HTMLButtonElement>(null);
+const menuCloseButtonRef = useRef<HTMLButtonElement>(null);
+
   const headerRef = useRef<HTMLDivElement>(null);
   const topNavRef = useRef<HTMLDivElement>(null);
   const topicContainerRef = useRef<HTMLDivElement>(null);
@@ -142,16 +149,103 @@ export default function HomePage(): React.JSX.Element {
   const chatbotPopupRef = useRef<HTMLDivElement>(null);
 
 
+// Close overlay when clicking outside
+useEffect(() => {
+  const handleClickOutside = (event: MouseEvent) => {
+    // ... kode yang sudah ada ...
+    
+    // Untuk menu overlay
+    if (menuOverlayRef.current && !menuOverlayRef.current.contains(event.target as Node)) {
+      // Periksa apakah klik bukan pada tombol menu
+      const target = event.target as HTMLElement;
+      const isMenuButton = target.closest('[ref="menuButtonRef"]') || target === menuButtonRef.current;
+      if (!isMenuButton) {
+        handleCloseMenu();
+      }
+    }
+  };
 
+  document.addEventListener('mousedown', handleClickOutside);
+  return () => {
+    document.removeEventListener('mousedown', handleClickOutside);
+  };
+}, [showMenuOverlay]);
 
+// Handler untuk membuka menu overlay
+const handleOpenMenu = () => {
+  setShowMenuOverlay(true);
+};
 
+// Handler untuk menutup menu overlay dengan animasi GSAP
+const handleCloseMenu = () => {
+  if (menuOverlayRef.current) {
+    // Animasi tutup dengan GSAP
+    const tl = gsap.timeline();
+    
+    // Animasi untuk konten
+    tl.to(menuOverlayRef.current.querySelector('.menu-content'), {
+      opacity: 0,
+      y: 50,
+      duration: 0.3,
+      ease: "power2.in"
+    })
+    .to(menuOverlayRef.current.querySelector('.menu-background'), {
+      opacity: 0,
+      duration: 0.4,
+      ease: "power2.out"
+    }, "-=0.2")
+    .to(menuOverlayRef.current, {
+      opacity: 0,
+      duration: 0.3,
+      ease: "power2.out",
+      onComplete: () => {
+        setShowMenuOverlay(false);
+      }
+    });
+  } else {
+    setShowMenuOverlay(false);
+  }
+};
 
+// Animasi GSAP saat menu dibuka
+useEffect(() => {
+  if (showMenuOverlay && menuOverlayRef.current) {
+    // Reset animasi
+    gsap.set(menuOverlayRef.current, { opacity: 0 });
+    gsap.set(menuOverlayRef.current.querySelector('.menu-content'), { 
+      opacity: 0, 
+      y: 50 
+    });
+    gsap.set(menuOverlayRef.current.querySelector('.menu-background'), { 
+      opacity: 0 
+    });
 
+    // Animasi buka dengan GSAP
+    const tl = gsap.timeline();
+    
+    tl.to(menuOverlayRef.current, {
+      opacity: 1,
+      duration: 0.4,
+      ease: "power2.out"
+    })
+    .to(menuOverlayRef.current.querySelector('.menu-background'), {
+      opacity: 1,
+      duration: 0.5,
+      ease: "power2.out"
+    }, "-=0.2")
+    .to(menuOverlayRef.current.querySelector('.menu-content'), {
+      opacity: 1,
+      y: 0,
+      duration: 0.5,
+      ease: "power3.out"
+    }, "-=0.3");
 
-
-
-
-  
+    // Focus ke tombol close untuk aksesibilitas
+    if (menuCloseButtonRef.current) {
+      menuCloseButtonRef.current.focus();
+    }
+  }
+}, [showMenuOverlay]);
 
   // Animasi loading text
   const loadingTexts = [
@@ -550,6 +644,18 @@ export default function HomePage(): React.JSX.Element {
           nextPhoto();
         }
       }
+
+        if (showMenuOverlay && e.key === 'Escape') {
+    handleCloseMenu();
+  }
+
+      // Tambahkan event listener
+useEffect(() => {
+  document.addEventListener('keydown', handleKeyDown);
+  return () => {
+    document.removeEventListener('keydown', handleKeyDown);
+  };
+}, [showMenuOverlay]);
       
       if (e.key === 'Escape') {
         if (showMenuruFullPage) {
@@ -2934,6 +3040,68 @@ export default function HomePage(): React.JSX.Element {
             </motion.div>
           )}
 
+            {/* Menu Button - TOMBOL BARU */}
+  <motion.button
+    ref={menuButtonRef}
+    onClick={handleOpenMenu}
+    style={{
+      padding: isMobile ? '0.4rem 1.2rem' : '0.6rem 1.5rem',
+      fontSize: isMobile ? '0.9rem' : '1.5rem',
+      fontWeight: '600',
+      color: 'white',
+      backgroundColor: 'rgba(255, 255, 255, 0.1)',
+      border: '1px solid rgba(255, 255, 255, 0.2)',
+      borderRadius: '50px',
+      cursor: 'pointer',
+      fontFamily: 'Helvetica, Arial, sans-serif',
+      backdropFilter: 'blur(10px)',
+      whiteSpace: 'nowrap',
+      display: 'flex',
+      alignItems: 'center',
+      gap: isMobile ? '0.3rem' : '0.5rem',
+      margin: 0,
+      minWidth: isMobile ? '80px' : '120px',
+      height: isMobile ? '40px' : '50px',
+      overflow: 'hidden',
+      position: 'relative',
+      transition: 'all 0.3s ease',
+      boxShadow: '0 4px 15px rgba(0,0,0,0.1)'
+    }}
+    initial={{ opacity: 0, x: -10 }}
+    animate={{ opacity: 1, x: 0 }}
+    transition={{ delay: 1.1, duration: 0.6 }}
+    whileHover={{ 
+      backgroundColor: 'rgba(255, 255, 255, 0.2)',
+      scale: 1.05,
+      border: '1px solid rgba(255, 255, 255, 0.4)',
+      transition: { duration: 0.2 }
+    }}
+    whileTap={{ scale: 0.95 }}
+  >
+    <svg 
+      width={isMobile ? "18" : "24"} 
+      height={isMobile ? "18" : "24"} 
+      viewBox="0 0 24 24" 
+      fill="none" 
+      stroke="currentColor" 
+      strokeWidth="2"
+      style={{
+        flexShrink: 0
+      }}
+    >
+      <line x1="3" y1="12" x2="21" y2="12"/>
+      <line x1="3" y1="6" x2="21" y2="6"/>
+      <line x1="3" y1="18" x2="21" y2="18"/>
+    </svg>
+    <span style={{
+      whiteSpace: 'nowrap',
+      overflow: 'hidden',
+      textOverflow: 'ellipsis'
+    }}>
+      MENU
+    </span>
+  </motion.button>
+
           {/* Sign In / User Button */}
           <motion.button
             ref={userButtonRef}
@@ -3058,6 +3226,11 @@ export default function HomePage(): React.JSX.Element {
           </motion.button>
         </div>
       </div>
+
+      
+
+
+      
 
 
 {/* Main Content Container */}
@@ -3531,7 +3704,177 @@ export default function HomePage(): React.JSX.Element {
           </div>
 
 
-
+{/* Menu Overlay dengan GSAP Animation */}
+<AnimatePresence>
+  {showMenuOverlay && (
+    <motion.div
+      ref={menuOverlayRef}
+      key="menu-overlay"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.3 }}
+      style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100%',
+        backgroundColor: 'black',
+        zIndex: 9995,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        overflow: 'hidden'
+      }}
+    >
+      {/* Background dengan efek blur */}
+      <div 
+        className="menu-background"
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          backgroundColor: 'rgba(0, 0, 0, 0.95)',
+          backdropFilter: 'blur(10px)',
+          opacity: 0
+        }}
+      />
+      
+      {/* Konten Menu - Halaman Kosong Hitam */}
+      <div 
+        className="menu-content"
+        style={{
+          position: 'relative',
+          width: '100%',
+          height: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          color: 'white',
+          opacity: 0,
+          transform: 'translateY(50px)'
+        }}
+      >
+        {/* Tombol Close dengan animasi GSAP */}
+        <motion.button
+          ref={menuCloseButtonRef}
+          onClick={handleCloseMenu}
+          style={{
+            position: 'absolute',
+            top: isMobile ? '1.5rem' : '2rem',
+            right: isMobile ? '1.5rem' : '2rem',
+            width: isMobile ? '50px' : '60px',
+            height: isMobile ? '50px' : '60px',
+            backgroundColor: 'rgba(255, 255, 255, 0.1)',
+            border: '2px solid rgba(255, 255, 255, 0.3)',
+            borderRadius: '50%',
+            color: 'white',
+            fontSize: isMobile ? '1.8rem' : '2.2rem',
+            fontWeight: '300',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontFamily: 'Helvetica, Arial, sans-serif',
+            zIndex: 10,
+            transition: 'all 0.3s ease'
+          }}
+          whileHover={{ 
+            backgroundColor: 'rgba(255, 255, 255, 0.2)',
+            border: '2px solid rgba(255, 255, 255, 0.6)',
+            scale: 1.1,
+            rotate: 90
+          }}
+          whileTap={{ scale: 0.9 }}
+        >
+          ×
+        </motion.button>
+        
+        {/* Pesan Minimalis */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5, duration: 0.4 }}
+          style={{
+            textAlign: 'center',
+            maxWidth: isMobile ? '80%' : '600px',
+            padding: isMobile ? '1rem' : '2rem'
+          }}
+        >
+          <h1 style={{
+            fontSize: isMobile ? '2rem' : '4rem',
+            fontWeight: '300',
+            letterSpacing: '4px',
+            marginBottom: isMobile ? '1rem' : '2rem',
+            color: 'rgba(255, 255, 255, 0.9)',
+            fontFamily: 'Helvetica, Arial, sans-serif',
+            textTransform: 'uppercase'
+          }}>
+            Menu
+          </h1>
+          
+          <p style={{
+            fontSize: isMobile ? '1rem' : '1.5rem',
+            fontWeight: '300',
+            lineHeight: 1.6,
+            color: 'rgba(255, 255, 255, 0.7)',
+            fontFamily: 'Helvetica, Arial, sans-serif',
+            marginBottom: isMobile ? '2rem' : '3rem'
+          }}>
+            Halaman menu kosong. Klik tombol X di atas untuk menutup.
+          </p>
+          
+          {/* Animasi garis dekoratif */}
+          <motion.div
+            initial={{ width: 0 }}
+            animate={{ width: '200px' }}
+            transition={{ delay: 0.8, duration: 1, ease: "power2.out" }}
+            style={{
+              height: '2px',
+              backgroundColor: 'rgba(255, 255, 255, 0.3)',
+              margin: '0 auto'
+            }}
+          />
+        </motion.div>
+        
+        {/* Efek partikel minimal */}
+        <div style={{
+          position: 'absolute',
+          bottom: '2rem',
+          display: 'flex',
+          gap: '1rem',
+          opacity: 0.5
+        }}>
+          {[...Array(3)].map((_, i) => (
+            <motion.div
+              key={i}
+              animate={{ 
+                y: [0, -10, 0],
+                opacity: [0.5, 1, 0.5]
+              }}
+              transition={{ 
+                duration: 2,
+                repeat: Infinity,
+                delay: i * 0.3
+              }}
+              style={{
+                width: '8px',
+                height: '8px',
+                borderRadius: '50%',
+                backgroundColor: 'rgba(255, 255, 255, 0.5)'
+              }}
+            />
+          ))}
+        </div>
+      </div>
+    </motion.div>
+  )}
+</AnimatePresence>
 
 
 
@@ -5505,5 +5848,6 @@ export default function HomePage(): React.JSX.Element {
     </div>
   );
 }
+
 
 
