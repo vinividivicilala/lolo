@@ -13,7 +13,10 @@ import {
   updateDoc,
   Timestamp,
   where,
-  getDocs
+  getDocs,
+  getDoc,
+  arrayUnion,
+  arrayRemove
 } from "firebase/firestore";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { initializeApp, getApps } from "firebase/app";
@@ -46,19 +49,35 @@ interface Notification {
   id: string;
   title: string;
   message: string;
-  type: 'system' | 'announcement' | 'alert' | 'update' | 'comment' | 'personal';
+  type: 'system' | 'announcement' | 'alert' | 'update' | 'comment' | 'personal' | 'all';
   priority: 'low' | 'medium' | 'high' | 'urgent';
   senderId: string;
   senderName: string;
   senderEmail?: string;
-  recipientType: 'all' | 'specific' | 'email_only' | 'app_only';
+  recipientType: 'all_users' | 'logged_in' | 'specific' | 'all_visitors';
   recipientIds?: string[];
-  recipientEmails?: string[];
-  isRead: boolean;
+  isReadBy: string[]; // Array of user IDs yang sudah baca
+  isDeleted: boolean;
   createdAt: Timestamp;
+  expiresAt?: Timestamp;
   actionUrl?: string;
   icon?: string;
   color?: string;
+  allowComments: boolean;
+  comments?: NotificationComment[];
+  likes: string[]; // Array of user IDs yang like
+  views: number; // Total views
+  clicks: number; // Total clicks
+}
+
+interface NotificationComment {
+  id: string;
+  userId: string;
+  userName: string;
+  userEmail?: string;
+  comment: string;
+  createdAt: Timestamp;
+  likes: string[];
 }
 
 export default function NotificationsPage(): React.JSX.Element {
@@ -68,8 +87,11 @@ export default function NotificationsPage(): React.JSX.Element {
   const [isLoading, setIsLoading] = useState(true);
   const [user, setUser] = useState<any>(null);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [activeTab, setActiveTab] = useState<'all' | 'unread' | 'system' | 'announcement' | 'personal'>('all');
+  const [activeTab, setActiveTab] = useState<'all' | 'unread' | 'announcement' | 'update' | 'system'>('all');
   const [selectedNotification, setSelectedNotification] = useState<Notification | null>(null);
+  const [commentText, setCommentText] = useState('');
+  const [isSubmittingComment, setIsSubmittingComment] = useState(false);
+  const [showComments, setShowComments] = useState(false);
 
   // Admin email yang diizinkan
   const ADMIN_EMAILS = [
@@ -94,68 +116,110 @@ export default function NotificationsPage(): React.JSX.Element {
     return () => unsubscribe();
   }, []);
 
-  // Load notifications
+  // Generate anonymous user ID untuk non-logged in users
+  const getOrCreateAnonymousId = () => {
+    let anonymousId = localStorage.getItem('anonymous_user_id');
+    if (!anonymousId) {
+      anonymousId = 'anonymous_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+      localStorage.setItem('anonymous_user_id', anonymousId);
+    }
+    return anonymousId;
+  };
+
+  // Get current user ID (logged in atau anonymous)
+  const getCurrentUserId = () => {
+    return user ? user.uid : getOrCreateAnonymousId();
+  };
+
+  // Get current user name
+  const getCurrentUserName = () => {
+    if (user) {
+      return user.displayName || user.email?.split('@')[0] || 'User';
+    }
+    return 'Anonymous User';
+  };
+
+  // Load notifications untuk semua user (login dan non-login)
   useEffect(() => {
-    if (!db || !user) return;
+    if (!db) return;
 
     setIsLoading(true);
     const notificationsRef = collection(db, 'notifications');
     
-    // Query berdasarkan user role
-    let q;
-    if (isAdmin) {
-      // Admin bisa lihat semua notifikasi
-      q = query(notificationsRef, orderBy('createdAt', 'desc'));
-    } else {
-      // Regular user hanya lihat notifikasi yang ditujukan kepada mereka
-      q = query(
-        notificationsRef,
-        where('recipientType', 'in', ['all', 'app_only']),
-        orderBy('createdAt', 'desc')
-      );
-    }
+    // Query untuk notifikasi yang belum expired dan tidak deleted
+    const q = query(
+      notificationsRef,
+      where('isDeleted', '==', false),
+      orderBy('createdAt', 'desc')
+    );
     
-    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+    const unsubscribe = onSnapshot(q, async (querySnapshot) => {
       const notificationsData: Notification[] = [];
       let unread = 0;
+      const currentUserId = getCurrentUserId();
       
-      querySnapshot.forEach((doc) => {
+      for (const doc of querySnapshot.docs) {
         const data = doc.data();
         
-        // Filter notifikasi untuk regular users
-        if (!isAdmin) {
-          // Cek jika notifikasi untuk user tertentu
-          if (data.recipientType === 'specific') {
-            const recipientIds = data.recipientIds || [];
-            if (!recipientIds.includes(user.uid)) {
-              return; // Skip jika user tidak termasuk
-            }
-          }
-          
-          // Cek jika notifikasi email only
-          if (data.recipientType === 'email_only') {
-            return; // Skip email only untuk regular users di app
+        // Cek apakah notifikasi sudah expired
+        if (data.expiresAt) {
+          const expiresAt = data.expiresAt.toDate();
+          const now = new Date();
+          if (expiresAt < now) {
+            continue; // Skip expired notifications
           }
         }
         
-        const notification = {
-          id: doc.id,
-          ...data
-        } as Notification;
+        // Filter berdasarkan recipientType
+        let shouldShow = false;
         
-        notificationsData.push(notification);
+        switch (data.recipientType) {
+          case 'all_visitors':
+            // Tampilkan ke semua visitor (login dan non-login)
+            shouldShow = true;
+            break;
+            
+          case 'all_users':
+            // Tampilkan ke semua registered users
+            if (user) {
+              shouldShow = true;
+            }
+            break;
+            
+          case 'logged_in':
+            // Hanya untuk logged in users
+            if (user) {
+              shouldShow = true;
+            }
+            break;
+            
+          case 'specific':
+            // Hanya untuk specific user IDs
+            const recipientIds = data.recipientIds || [];
+            if (recipientIds.includes(currentUserId)) {
+              shouldShow = true;
+            }
+            break;
+            
+          default:
+            shouldShow = false;
+        }
         
-        // Hitung unread untuk user ini
-        if (notification.recipientType === 'specific') {
-          // Untuk specific recipients, cek di userReads
-          const userReads = data.userReads || {};
-          if (!userReads[user.uid]) {
+        if (shouldShow) {
+          const notification = {
+            id: doc.id,
+            ...data
+          } as Notification;
+          
+          // Cek apakah user sudah baca notifikasi ini
+          const isReadByUser = notification.isReadBy?.includes(currentUserId) || false;
+          if (!isReadByUser) {
             unread++;
           }
-        } else if (!notification.isRead) {
-          unread++;
+          
+          notificationsData.push(notification);
         }
-      });
+      }
       
       setNotifications(notificationsData);
       setUnreadCount(unread);
@@ -166,70 +230,106 @@ export default function NotificationsPage(): React.JSX.Element {
     });
 
     return () => unsubscribe();
-  }, [db, user, isAdmin]);
-
-  // Filter notifications berdasarkan tab aktif
-  const filteredNotifications = notifications.filter(notification => {
-    if (activeTab === 'all') return true;
-    if (activeTab === 'unread') {
-      if (notification.recipientType === 'specific') {
-        const userReads = (notification as any).userReads || {};
-        return !userReads[user?.uid];
-      }
-      return !notification.isRead;
-    }
-    if (activeTab === 'system') return notification.type === 'system';
-    if (activeTab === 'announcement') return notification.type === 'announcement';
-    if (activeTab === 'personal') return notification.type === 'personal';
-    return true;
-  });
+  }, [db, user]);
 
   // Mark notification as read
   const markAsRead = async (notificationId: string) => {
-    if (!user || !db) return;
+    if (!db) return;
     
     try {
+      const currentUserId = getCurrentUserId();
       const notificationRef = doc(db, 'notifications', notificationId);
-      const notificationDoc = await getDocs(query(collection(db, 'notifications'), where('__name__', '==', notificationId)));
       
-      if (!notificationDoc.empty) {
-        const notificationData = notificationDoc.docs[0].data();
-        
-        if (notificationData.recipientType === 'specific') {
-          // Update hanya untuk specific recipients
-          const userReads = notificationData.userReads || {};
-          userReads[user.uid] = true;
-          await updateDoc(notificationRef, { userReads });
-        } else {
-          // Untuk all/app_only, mark as read secara umum
-          await updateDoc(notificationRef, { isRead: true });
-        }
-      }
+      // Tambah user ID ke array isReadBy
+      await updateDoc(notificationRef, {
+        isReadBy: arrayUnion(currentUserId),
+        views: increment(1)
+      });
+      
+      // Update views count
+      await updateDoc(notificationRef, {
+        views: increment(1)
+      });
     } catch (error) {
       console.error("Error marking notification as read:", error);
     }
   };
 
-  // Mark all as read
-  const markAllAsRead = async () => {
-    if (!user || !db) return;
+  // Mark notification as clicked (track engagement)
+  const trackClick = async (notificationId: string) => {
+    if (!db) return;
     
     try {
-      const updatePromises = filteredNotifications.map(async (notification) => {
-        const notificationRef = doc(db, 'notifications', notification.id);
+      const notificationRef = doc(db, 'notifications', notificationId);
+      await updateDoc(notificationRef, {
+        clicks: increment(1)
+      });
+    } catch (error) {
+      console.error("Error tracking click:", error);
+    }
+  };
+
+  // Toggle like notification
+  const toggleLike = async (notificationId: string) => {
+    if (!db) return;
+    
+    try {
+      const currentUserId = getCurrentUserId();
+      const notificationRef = doc(db, 'notifications', notificationId);
+      const notificationDoc = await getDoc(notificationRef);
+      
+      if (notificationDoc.exists()) {
+        const notification = notificationDoc.data() as Notification;
+        const isLiked = notification.likes?.includes(currentUserId) || false;
         
-        if (notification.recipientType === 'specific') {
-          const userReads = (notification as any).userReads || {};
-          userReads[user.uid] = true;
-          await updateDoc(notificationRef, { userReads });
-        } else if (!notification.isRead) {
-          await updateDoc(notificationRef, { isRead: true });
+        if (isLiked) {
+          // Unlike
+          await updateDoc(notificationRef, {
+            likes: arrayRemove(currentUserId)
+          });
+        } else {
+          // Like
+          await updateDoc(notificationRef, {
+            likes: arrayUnion(currentUserId)
+          });
         }
+      }
+    } catch (error) {
+      console.error("Error toggling like:", error);
+    }
+  };
+
+  // Add comment to notification
+  const addComment = async (notificationId: string) => {
+    if (!db || !commentText.trim()) return;
+    
+    setIsSubmittingComment(true);
+    
+    try {
+      const currentUserId = getCurrentUserId();
+      const currentUserName = getCurrentUserName();
+      const notificationRef = doc(db, 'notifications', notificationId);
+      
+      const newComment: NotificationComment = {
+        id: Date.now().toString(),
+        userId: currentUserId,
+        userName: currentUserName,
+        userEmail: user?.email,
+        comment: commentText.trim(),
+        createdAt: Timestamp.now(),
+        likes: []
+      };
+      
+      await updateDoc(notificationRef, {
+        comments: arrayUnion(newComment)
       });
       
-      await Promise.all(updatePromises);
+      setCommentText('');
     } catch (error) {
-      console.error("Error marking all as read:", error);
+      console.error("Error adding comment:", error);
+      alert('Failed to add comment. Please try again.');
+    } finally {
+      setIsSubmittingComment(false);
     }
   };
 
@@ -239,11 +339,27 @@ export default function NotificationsPage(): React.JSX.Element {
     
     try {
       const notificationRef = doc(db, 'notifications', notificationId);
-      await updateDoc(notificationRef, { isDeleted: true });
+      await updateDoc(notificationRef, {
+        isDeleted: true,
+        deletedAt: Timestamp.now()
+      });
     } catch (error) {
       console.error("Error deleting notification:", error);
     }
   };
+
+  // Filter notifications berdasarkan tab aktif
+  const filteredNotifications = notifications.filter(notification => {
+    if (activeTab === 'all') return true;
+    if (activeTab === 'unread') {
+      const currentUserId = getCurrentUserId();
+      return !notification.isReadBy?.includes(currentUserId);
+    }
+    if (activeTab === 'announcement') return notification.type === 'announcement';
+    if (activeTab === 'update') return notification.type === 'update';
+    if (activeTab === 'system') return notification.type === 'system';
+    return true;
+  });
 
   // Get icon based on notification type
   const getNotificationIcon = (type: string) => {
@@ -254,6 +370,7 @@ export default function NotificationsPage(): React.JSX.Element {
       case 'update': return '🆕';
       case 'comment': return '💬';
       case 'personal': return '👤';
+      case 'all': return '🌍';
       default: return '📌';
     }
   };
@@ -286,19 +403,54 @@ export default function NotificationsPage(): React.JSX.Element {
     return date.toLocaleDateString('id-ID', {
       day: 'numeric',
       month: 'short',
-      year: 'numeric'
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
     });
+  };
+
+  // Format number dengan K/M
+  const formatNumber = (num: number) => {
+    if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+    if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
+    return num.toString();
   };
 
   // Open notification detail
   const openNotificationDetail = async (notification: Notification) => {
     setSelectedNotification(notification);
     await markAsRead(notification.id);
+    await trackClick(notification.id);
   };
 
   // Close notification detail
   const closeNotificationDetail = () => {
     setSelectedNotification(null);
+    setShowComments(false);
+    setCommentText('');
+  };
+
+  // Increment helper untuk Firestore
+  const increment = (n: number) => {
+    return {
+      increment: n
+    };
+  };
+
+  // Navigate to action URL
+  const handleActionClick = async (notification: Notification, e: React.MouseEvent) => {
+    e.stopPropagation();
+    await trackClick(notification.id);
+    if (notification.actionUrl) {
+      window.open(notification.actionUrl, '_blank');
+    }
+  };
+
+  // Copy notification link
+  const copyNotificationLink = (notificationId: string) => {
+    const link = `${window.location.origin}/notifications?n=${notificationId}`;
+    navigator.clipboard.writeText(link);
+    alert('Link copied to clipboard!');
   };
 
   return (
@@ -318,7 +470,7 @@ export default function NotificationsPage(): React.JSX.Element {
         left: 0,
         width: '100%',
         padding: '1rem 2rem',
-        backgroundColor: 'rgba(0,0,0,0.9)',
+        backgroundColor: 'rgba(0,0,0,0.95)',
         backdropFilter: 'blur(10px)',
         zIndex: 100,
         borderBottom: '1px solid rgba(255,255,255,0.1)',
@@ -379,6 +531,19 @@ export default function NotificationsPage(): React.JSX.Element {
               ADMIN
             </span>
           )}
+          {!user && (
+            <span style={{
+              backgroundColor: '#6366F1',
+              color: 'white',
+              fontSize: '0.7rem',
+              fontWeight: '700',
+              padding: '0.2rem 0.6rem',
+              borderRadius: '12px',
+              marginLeft: '0.5rem'
+            }}>
+              VISITOR
+            </span>
+          )}
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
@@ -411,7 +576,16 @@ export default function NotificationsPage(): React.JSX.Element {
           
           {unreadCount > 0 && (
             <motion.button
-              onClick={markAllAsRead}
+              onClick={async () => {
+                // Mark all as read
+                const currentUserId = getCurrentUserId();
+                const updatePromises = filteredNotifications
+                  .filter(n => !n.isReadBy?.includes(currentUserId))
+                  .map(async (notification) => {
+                    await markAsRead(notification.id);
+                  });
+                await Promise.all(updatePromises);
+              }}
               style={{
                 padding: '0.6rem 1.2rem',
                 backgroundColor: 'rgba(255,255,255,0.1)',
@@ -440,45 +614,64 @@ export default function NotificationsPage(): React.JSX.Element {
         width: '100%',
         boxSizing: 'border-box'
       }}>
-        {/* Admin Info Banner */}
-        {isAdmin && (
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            style={{
-              margin: '1rem 2rem',
-              padding: '1rem',
-              backgroundColor: 'rgba(0, 255, 0, 0.1)',
-              border: '1px solid rgba(0, 255, 0, 0.3)',
-              borderRadius: '8px',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '1rem'
-            }}
-          >
-            <div style={{
-              width: '30px',
-              height: '30px',
-              borderRadius: '50%',
-              backgroundColor: '#00FF00',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: 'black',
-              fontWeight: 'bold'
-            }}>
-              A
+        {/* User Info Banner */}
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          style={{
+            margin: '1rem 2rem',
+            padding: '1rem',
+            backgroundColor: user ? 'rgba(0, 80, 183, 0.1)' : 'rgba(100, 100, 100, 0.1)',
+            border: `1px solid ${user ? 'rgba(0, 80, 183, 0.3)' : 'rgba(255,255,255,0.1)'}`,
+            borderRadius: '8px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '1rem'
+          }}
+        >
+          <div style={{
+            width: '40px',
+            height: '40px',
+            borderRadius: '50%',
+            backgroundColor: user ? '#0050B7' : '#666',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: 'white',
+            fontWeight: 'bold',
+            fontSize: '1.2rem'
+          }}>
+            {user ? (user.displayName?.[0] || user.email?.[0] || 'U') : 'V'}
+          </div>
+          <div>
+            <div style={{ fontWeight: '600', color: user ? '#0050B7' : 'rgba(255,255,255,0.8)' }}>
+              {user ? (user.displayName || user.email || 'User') : 'Anonymous Visitor'}
             </div>
-            <div>
-              <div style={{ fontWeight: '600', color: '#00FF00' }}>
-                Admin Mode Activated
-              </div>
-              <div style={{ fontSize: '0.9rem', color: 'rgba(255,255,255,0.7)' }}>
-                You can create and manage all notifications
-              </div>
+            <div style={{ fontSize: '0.9rem', color: 'rgba(255,255,255,0.6)' }}>
+              {user ? 'Logged in user' : 'Viewing as guest'} • {notifications.length} notifications available
             </div>
-          </motion.div>
-        )}
+          </div>
+          {!user && (
+            <motion.button
+              onClick={() => router.push('/signin')}
+              style={{
+                marginLeft: 'auto',
+                padding: '0.5rem 1rem',
+                backgroundColor: 'rgba(255,255,255,0.1)',
+                border: '1px solid rgba(255,255,255,0.2)',
+                borderRadius: '6px',
+                color: 'white',
+                fontSize: '0.8rem',
+                fontWeight: '600',
+                cursor: 'pointer'
+              }}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              Sign In for More Features
+            </motion.button>
+          )}
+        </motion.div>
 
         {/* Tabs */}
         <div style={{
@@ -488,7 +681,7 @@ export default function NotificationsPage(): React.JSX.Element {
           overflowX: 'auto',
           borderBottom: '1px solid rgba(255,255,255,0.1)'
         }}>
-          {['all', 'unread', 'system', 'announcement', 'personal'].map((tab) => (
+          {['all', 'unread', 'announcement', 'update', 'system'].map((tab) => (
             <motion.button
               key={tab}
               onClick={() => setActiveTab(tab as any)}
@@ -592,9 +785,13 @@ export default function NotificationsPage(): React.JSX.Element {
               gap: '1rem'
             }}>
               {filteredNotifications.map((notification, index) => {
-                const isRead = notification.recipientType === 'specific' 
-                  ? (notification as any).userReads?.[user?.uid] 
-                  : notification.isRead;
+                const currentUserId = getCurrentUserId();
+                const isRead = notification.isReadBy?.includes(currentUserId) || false;
+                const isLiked = notification.likes?.includes(currentUserId) || false;
+                const likeCount = notification.likes?.length || 0;
+                const commentCount = notification.comments?.length || 0;
+                const viewCount = notification.views || 0;
+                const clickCount = notification.clicks || 0;
                 
                 return (
                   <motion.div
@@ -634,6 +831,24 @@ export default function NotificationsPage(): React.JSX.Element {
                         borderTopLeftRadius: '12px',
                         borderBottomLeftRadius: '12px'
                       }} />
+                    )}
+
+                    {/* Priority badge */}
+                    {notification.priority === 'urgent' && (
+                      <div style={{
+                        position: 'absolute',
+                        top: '10px',
+                        right: '10px',
+                        backgroundColor: '#FF4757',
+                        color: 'white',
+                        fontSize: '0.7rem',
+                        fontWeight: '700',
+                        padding: '0.2rem 0.6rem',
+                        borderRadius: '10px',
+                        zIndex: 2
+                      }}>
+                        URGENT
+                      </div>
                     )}
 
                     <div style={{
@@ -677,14 +892,14 @@ export default function NotificationsPage(): React.JSX.Element {
                               display: 'flex',
                               gap: '1rem',
                               alignItems: 'center',
-                              marginBottom: '0.5rem'
+                              marginBottom: '0.5rem',
+                              flexWrap: 'wrap'
                             }}>
                               <span style={{
                                 fontSize: '0.8rem',
                                 color: 'rgba(255,255,255,0.6)'
                               }}>
                                 From: {notification.senderName}
-                                {isAdmin && notification.senderEmail && ` (${notification.senderEmail})`}
                               </span>
                               <span style={{
                                 fontSize: '0.8rem',
@@ -702,14 +917,15 @@ export default function NotificationsPage(): React.JSX.Element {
                               }}>
                                 {notification.type.toUpperCase()}
                               </span>
-                              {notification.recipientType !== 'all' && isAdmin && (
-                                <span style={{
-                                  fontSize: '0.8rem',
-                                  color: '#FFA502'
-                                }}>
-                                  {notification.recipientType.toUpperCase()}
-                                </span>
-                              )}
+                              <span style={{
+                                fontSize: '0.8rem',
+                                color: '#FFA502'
+                              }}>
+                                {notification.recipientType === 'all_visitors' ? 'ALL VISITORS' : 
+                                 notification.recipientType === 'all_users' ? 'ALL USERS' : 
+                                 notification.recipientType === 'logged_in' ? 'LOGGED IN' : 
+                                 'SPECIFIC'}
+                              </span>
                             </div>
                           </div>
                           
@@ -726,62 +942,17 @@ export default function NotificationsPage(): React.JSX.Element {
                               {formatDate(notification.createdAt)}
                             </span>
                             
-                            {/* Action buttons */}
+                            {/* Stats */}
                             <div style={{
                               display: 'flex',
-                              gap: '0.5rem'
+                              gap: '0.8rem',
+                              fontSize: '0.7rem',
+                              color: 'rgba(255,255,255,0.5)'
                             }}>
-                              {!isRead && (
-                                <motion.button
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    markAsRead(notification.id);
-                                  }}
-                                  style={{
-                                    width: '28px',
-                                    height: '28px',
-                                    borderRadius: '50%',
-                                    backgroundColor: 'rgba(255,255,255,0.1)',
-                                    border: 'none',
-                                    color: 'white',
-                                    fontSize: '0.8rem',
-                                    cursor: 'pointer',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center'
-                                  }}
-                                  whileHover={{ scale: 1.2 }}
-                                  whileTap={{ scale: 0.9 }}
-                                >
-                                  ✓
-                                </motion.button>
-                              )}
-                              
-                              {isAdmin && (
-                                <motion.button
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    deleteNotification(notification.id);
-                                  }}
-                                  style={{
-                                    width: '28px',
-                                    height: '28px',
-                                    borderRadius: '50%',
-                                    backgroundColor: 'rgba(255, 71, 87, 0.2)',
-                                    border: 'none',
-                                    color: '#FF4757',
-                                    fontSize: '0.8rem',
-                                    cursor: 'pointer',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center'
-                                  }}
-                                  whileHover={{ scale: 1.2 }}
-                                  whileTap={{ scale: 0.9 }}
-                                >
-                                  ×
-                                </motion.button>
-                              )}
+                              <span>👁️ {formatNumber(viewCount)}</span>
+                              <span>👆 {formatNumber(clickCount)}</span>
+                              <span>❤️ {formatNumber(likeCount)}</span>
+                              <span>💬 {formatNumber(commentCount)}</span>
                             </div>
                           </div>
                         </div>
@@ -792,35 +963,121 @@ export default function NotificationsPage(): React.JSX.Element {
                           fontSize: '0.95rem',
                           lineHeight: 1.5
                         }}>
-                          {notification.message.length > 150
-                            ? `${notification.message.substring(0, 150)}...`
+                          {notification.message.length > 200
+                            ? `${notification.message.substring(0, 200)}...`
                             : notification.message}
                         </p>
                         
-                        {notification.actionUrl && (
-                          <div style={{ marginTop: '0.8rem' }}>
-                            <motion.a
-                              href={notification.actionUrl}
-                              onClick={(e) => e.stopPropagation()}
+                        {/* Action buttons */}
+                        <div style={{ 
+                          display: 'flex', 
+                          gap: '1rem', 
+                          marginTop: '1rem',
+                          alignItems: 'center'
+                        }}>
+                          {notification.actionUrl && (
+                            <motion.button
+                              onClick={(e) => handleActionClick(notification, e)}
                               style={{
-                                display: 'inline-flex',
-                                alignItems: 'center',
-                                gap: '0.5rem',
+                                padding: '0.4rem 0.8rem',
+                                backgroundColor: 'rgba(0, 255, 0, 0.1)',
+                                border: '1px solid rgba(0, 255, 0, 0.3)',
+                                borderRadius: '6px',
                                 color: '#00FF00',
-                                fontSize: '0.9rem',
+                                fontSize: '0.8rem',
                                 fontWeight: '600',
-                                textDecoration: 'none'
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.3rem'
                               }}
-                              whileHover={{ x: 5 }}
+                              whileHover={{ scale: 1.05 }}
+                              whileTap={{ scale: 0.95 }}
                             >
-                              View Details
-                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                <path d="M5 12h14"/>
-                                <path d="m12 5 7 7-7 7"/>
+                              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+                                <polyline points="15 3 21 3 21 9"/>
+                                <line x1="10" y1="14" x2="21" y2="3"/>
                               </svg>
-                            </motion.a>
-                          </div>
-                        )}
+                              Take Action
+                            </motion.button>
+                          )}
+                          
+                          <motion.button
+                            onClick={async (e) => {
+                              e.stopPropagation();
+                              await toggleLike(notification.id);
+                            }}
+                            style={{
+                              padding: '0.4rem 0.8rem',
+                              backgroundColor: isLiked ? 'rgba(255, 71, 87, 0.2)' : 'rgba(255,255,255,0.05)',
+                              border: `1px solid ${isLiked ? '#FF4757' : 'rgba(255,255,255,0.1)'}`,
+                              borderRadius: '6px',
+                              color: isLiked ? '#FF4757' : 'rgba(255,255,255,0.7)',
+                              fontSize: '0.8rem',
+                              fontWeight: '600',
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '0.3rem'
+                            }}
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                          >
+                            {isLiked ? '❤️ Liked' : '🤍 Like'} ({likeCount})
+                          </motion.button>
+                          
+                          <motion.button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              copyNotificationLink(notification.id);
+                            }}
+                            style={{
+                              padding: '0.4rem 0.8rem',
+                              backgroundColor: 'rgba(255,255,255,0.05)',
+                              border: '1px solid rgba(255,255,255,0.1)',
+                              borderRadius: '6px',
+                              color: 'rgba(255,255,255,0.7)',
+                              fontSize: '0.8rem',
+                              fontWeight: '600',
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '0.3rem'
+                            }}
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                          >
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                            </svg>
+                            Copy Link
+                          </motion.button>
+                          
+                          {isAdmin && (
+                            <motion.button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                deleteNotification(notification.id);
+                              }}
+                              style={{
+                                padding: '0.4rem 0.8rem',
+                                backgroundColor: 'rgba(255, 71, 87, 0.2)',
+                                border: '1px solid rgba(255, 71, 87, 0.4)',
+                                borderRadius: '6px',
+                                color: '#FF4757',
+                                fontSize: '0.8rem',
+                                fontWeight: '600',
+                                cursor: 'pointer'
+                              }}
+                              whileHover={{ scale: 1.05 }}
+                              whileTap={{ scale: 0.95 }}
+                            >
+                              Delete
+                            </motion.button>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </motion.div>
@@ -839,7 +1096,7 @@ export default function NotificationsPage(): React.JSX.Element {
           left: 0,
           width: '100%',
           height: '100%',
-          backgroundColor: 'rgba(0,0,0,0.8)',
+          backgroundColor: 'rgba(0,0,0,0.9)',
           zIndex: 1000,
           display: 'flex',
           alignItems: 'center',
@@ -894,7 +1151,7 @@ export default function NotificationsPage(): React.JSX.Element {
                   }}>
                     {selectedNotification.title}
                   </h2>
-                  <div style={{ display: 'flex', gap: '0.8rem', alignItems: 'center' }}>
+                  <div style={{ display: 'flex', gap: '0.8rem', alignItems: 'center', flexWrap: 'wrap' }}>
                     <span style={{
                       fontSize: '0.9rem',
                       color: 'rgba(255,255,255,0.6)'
@@ -916,36 +1173,62 @@ export default function NotificationsPage(): React.JSX.Element {
                 </div>
               </div>
               
-              <motion.button
-                onClick={closeNotificationDetail}
-                style={{
-                  width: '40px',
-                  height: '40px',
-                  borderRadius: '50%',
-                  backgroundColor: 'rgba(255,255,255,0.1)',
-                  border: 'none',
-                  color: 'white',
-                  fontSize: '1.5rem',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}
-                whileHover={{ scale: 1.1, backgroundColor: 'rgba(255,255,255,0.2)' }}
-                whileTap={{ scale: 0.95 }}
-              >
-                ×
-              </motion.button>
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <motion.button
+                  onClick={() => setShowComments(!showComments)}
+                  style={{
+                    padding: '0.5rem 1rem',
+                    backgroundColor: showComments ? '#0050B7' : 'rgba(255,255,255,0.1)',
+                    border: 'none',
+                    borderRadius: '8px',
+                    color: 'white',
+                    fontSize: '0.9rem',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.3rem'
+                  }}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  💬 Comments ({selectedNotification.comments?.length || 0})
+                </motion.button>
+                
+                <motion.button
+                  onClick={closeNotificationDetail}
+                  style={{
+                    width: '40px',
+                    height: '40px',
+                    borderRadius: '50%',
+                    backgroundColor: 'rgba(255,255,255,0.1)',
+                    border: 'none',
+                    color: 'white',
+                    fontSize: '1.5rem',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}
+                  whileHover={{ scale: 1.1, backgroundColor: 'rgba(255,255,255,0.2)' }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  ×
+                </motion.button>
+              </div>
             </div>
 
             {/* Modal Content */}
             <div style={{
               flex: 1,
               padding: '2rem',
-              overflowY: 'auto'
+              overflowY: 'auto',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '1.5rem'
             }}>
+              {/* Message Content */}
               <div style={{
-                marginBottom: '2rem',
                 padding: '1.5rem',
                 backgroundColor: 'rgba(0,0,0,0.3)',
                 borderRadius: '12px',
@@ -962,191 +1245,348 @@ export default function NotificationsPage(): React.JSX.Element {
                 </p>
               </div>
 
-              {/* Notification Metadata */}
+              {/* Stats */}
               <div style={{
                 display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-                gap: '1rem',
-                marginBottom: '2rem'
+                gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))',
+                gap: '1rem'
               }}>
                 <div style={{
                   backgroundColor: 'rgba(255,255,255,0.05)',
                   padding: '1rem',
-                  borderRadius: '8px'
+                  borderRadius: '8px',
+                  textAlign: 'center'
                 }}>
                   <div style={{
-                    fontSize: '0.8rem',
-                    color: 'rgba(255,255,255,0.5)',
+                    fontSize: '1.5rem',
+                    fontWeight: '700',
+                    color: '#00FF00',
                     marginBottom: '0.3rem'
                   }}>
-                    Type
+                    {formatNumber(selectedNotification.views || 0)}
                   </div>
                   <div style={{
-                    fontSize: '1rem',
-                    fontWeight: '600',
-                    color: 'white'
+                    fontSize: '0.8rem',
+                    color: 'rgba(255,255,255,0.5)'
                   }}>
-                    {selectedNotification.type.toUpperCase()}
+                    Views
                   </div>
                 </div>
                 
                 <div style={{
                   backgroundColor: 'rgba(255,255,255,0.05)',
                   padding: '1rem',
-                  borderRadius: '8px'
+                  borderRadius: '8px',
+                  textAlign: 'center'
                 }}>
                   <div style={{
-                    fontSize: '0.8rem',
-                    color: 'rgba(255,255,255,0.5)',
+                    fontSize: '1.5rem',
+                    fontWeight: '700',
+                    color: '#FFA502',
                     marginBottom: '0.3rem'
                   }}>
-                    Priority
+                    {formatNumber(selectedNotification.clicks || 0)}
                   </div>
                   <div style={{
-                    fontSize: '1rem',
-                    fontWeight: '600',
-                    color: getPriorityColor(selectedNotification.priority)
+                    fontSize: '0.8rem',
+                    color: 'rgba(255,255,255,0.5)'
                   }}>
-                    {selectedNotification.priority.toUpperCase()}
+                    Clicks
                   </div>
                 </div>
                 
                 <div style={{
                   backgroundColor: 'rgba(255,255,255,0.05)',
                   padding: '1rem',
-                  borderRadius: '8px'
+                  borderRadius: '8px',
+                  textAlign: 'center'
                 }}>
                   <div style={{
-                    fontSize: '0.8rem',
-                    color: 'rgba(255,255,255,0.5)',
+                    fontSize: '1.5rem',
+                    fontWeight: '700',
+                    color: '#FF4757',
                     marginBottom: '0.3rem'
                   }}>
-                    Sent To
+                    {formatNumber(selectedNotification.likes?.length || 0)}
                   </div>
                   <div style={{
-                    fontSize: '1rem',
-                    fontWeight: '600',
-                    color: 'white'
+                    fontSize: '0.8rem',
+                    color: 'rgba(255,255,255,0.5)'
                   }}>
-                    {selectedNotification.recipientType === 'all' && 'All Users'}
-                    {selectedNotification.recipientType === 'specific' && 'Specific Users'}
-                    {selectedNotification.recipientType === 'email_only' && 'Email Subscribers'}
-                    {selectedNotification.recipientType === 'app_only' && 'App Users Only'}
+                    Likes
                   </div>
                 </div>
                 
                 <div style={{
                   backgroundColor: 'rgba(255,255,255,0.05)',
                   padding: '1rem',
-                  borderRadius: '8px'
+                  borderRadius: '8px',
+                  textAlign: 'center'
                 }}>
                   <div style={{
-                    fontSize: '0.8rem',
-                    color: 'rgba(255,255,255,0.5)',
+                    fontSize: '1.5rem',
+                    fontWeight: '700',
+                    color: '#6366F1',
                     marginBottom: '0.3rem'
                   }}>
-                    Date Sent
+                    {formatNumber(selectedNotification.comments?.length || 0)}
                   </div>
                   <div style={{
-                    fontSize: '1rem',
-                    fontWeight: '600',
-                    color: 'white'
+                    fontSize: '0.8rem',
+                    color: 'rgba(255,255,255,0.5)'
                   }}>
-                    {formatDate(selectedNotification.createdAt)}
+                    Comments
                   </div>
                 </div>
               </div>
 
-              {/* Admin Only Info */}
-              {isAdmin && (
-                <>
-                  {/* Recipient Details */}
-                  {selectedNotification.recipientIds && selectedNotification.recipientIds.length > 0 && (
-                    <div style={{ marginBottom: '2rem' }}>
-                      <h3 style={{
-                        fontSize: '1.2rem',
-                        fontWeight: '600',
-                        margin: '0 0 1rem 0',
-                        color: 'white'
-                      }}>
-                        Recipients ({selectedNotification.recipientIds.length} users)
-                      </h3>
-                      <div style={{
-                        display: 'flex',
-                        flexWrap: 'wrap',
-                        gap: '0.5rem'
-                      }}>
-                        {selectedNotification.recipientIds.slice(0, 10).map((id, index) => (
-                          <span key={index} style={{
-                            backgroundColor: 'rgba(0, 80, 183, 0.2)',
-                            color: '#0050B7',
-                            padding: '0.3rem 0.8rem',
-                            borderRadius: '15px',
-                            fontSize: '0.8rem',
-                            fontWeight: '500'
-                          }}>
-                            User {index + 1}
-                          </span>
-                        ))}
-                        {selectedNotification.recipientIds.length > 10 && (
-                          <span style={{
-                            backgroundColor: 'rgba(255,255,255,0.1)',
-                            color: 'rgba(255,255,255,0.6)',
-                            padding: '0.3rem 0.8rem',
-                            borderRadius: '15px',
-                            fontSize: '0.8rem',
-                            fontWeight: '500'
-                          }}>
-                            +{selectedNotification.recipientIds.length - 10} more
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  )}
+              {/* Action Button */}
+              {selectedNotification.actionUrl && (
+                <div style={{ textAlign: 'center' }}>
+                  <motion.a
+                    href={selectedNotification.actionUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => trackClick(selectedNotification.id)}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '0.8rem',
+                      padding: '1rem 2rem',
+                      backgroundColor: '#0050B7',
+                      borderRadius: '10px',
+                      color: 'white',
+                      fontSize: '1.1rem',
+                      fontWeight: '600',
+                      textDecoration: 'none',
+                      cursor: 'pointer'
+                    }}
+                    whileHover={{ scale: 1.05, backgroundColor: '#0066CC' }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
+                      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+                      <polyline points="15 3 21 3 21 9"/>
+                      <line x1="10" y1="14" x2="21" y2="3"/>
+                    </svg>
+                    Take Action Now
+                  </motion.a>
+                </div>
+              )}
 
-                  {selectedNotification.recipientEmails && selectedNotification.recipientEmails.length > 0 && (
-                    <div style={{ marginBottom: '2rem' }}>
-                      <h3 style={{
-                        fontSize: '1.2rem',
-                        fontWeight: '600',
-                        margin: '0 0 1rem 0',
-                        color: 'white'
-                      }}>
-                        Email Recipients ({selectedNotification.recipientEmails.length} emails)
-                      </h3>
+              {/* Comments Section */}
+              {showComments && selectedNotification.allowComments && (
+                <div style={{
+                  marginTop: '1rem',
+                  borderTop: '1px solid rgba(255,255,255,0.1)',
+                  paddingTop: '1.5rem'
+                }}>
+                  <h3 style={{
+                    fontSize: '1.2rem',
+                    fontWeight: '600',
+                    margin: '0 0 1rem 0',
+                    color: 'white'
+                  }}>
+                    Comments ({selectedNotification.comments?.length || 0})
+                  </h3>
+                  
+                  {/* Add Comment Form */}
+                  <div style={{
+                    marginBottom: '1.5rem',
+                    backgroundColor: 'rgba(255,255,255,0.05)',
+                    padding: '1rem',
+                    borderRadius: '8px'
+                  }}>
+                    <div style={{
+                      display: 'flex',
+                      gap: '0.5rem',
+                      marginBottom: '0.5rem'
+                    }}>
                       <div style={{
+                        width: '36px',
+                        height: '36px',
+                        borderRadius: '50%',
+                        backgroundColor: user ? '#0050B7' : '#666',
                         display: 'flex',
-                        flexWrap: 'wrap',
-                        gap: '0.5rem'
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: 'white',
+                        fontWeight: 'bold',
+                        fontSize: '0.9rem',
+                        flexShrink: 0
                       }}>
-                        {selectedNotification.recipientEmails.slice(0, 5).map((email, index) => (
-                          <span key={index} style={{
-                            backgroundColor: 'rgba(46, 213, 115, 0.2)',
-                            color: '#2ED573',
-                            padding: '0.3rem 0.8rem',
-                            borderRadius: '15px',
-                            fontSize: '0.8rem',
-                            fontWeight: '500'
-                          }}>
-                            {email}
-                          </span>
-                        ))}
-                        {selectedNotification.recipientEmails.length > 5 && (
-                          <span style={{
-                            backgroundColor: 'rgba(255,255,255,0.1)',
-                            color: 'rgba(255,255,255,0.6)',
-                            padding: '0.3rem 0.8rem',
-                            borderRadius: '15px',
-                            fontSize: '0.8rem',
-                            fontWeight: '500'
-                          }}>
-                            +{selectedNotification.recipientEmails.length - 5} more
-                          </span>
-                        )}
+                        {getCurrentUserName()[0]}
                       </div>
+                      <textarea
+                        value={commentText}
+                        onChange={(e) => setCommentText(e.target.value)}
+                        placeholder={user ? "Add a comment..." : "Sign in to add a comment"}
+                        disabled={!user || isSubmittingComment}
+                        rows={3}
+                        style={{
+                          flex: 1,
+                          padding: '0.8rem',
+                          backgroundColor: 'rgba(255,255,255,0.05)',
+                          border: '1px solid rgba(255,255,255,0.1)',
+                          borderRadius: '8px',
+                          color: 'white',
+                          fontSize: '0.9rem',
+                          outline: 'none',
+                          resize: 'vertical',
+                          fontFamily: 'Helvetica, Arial, sans-serif'
+                        }}
+                      />
                     </div>
-                  )}
-                </>
+                    <div style={{
+                      display: 'flex',
+                      justifyContent: 'flex-end',
+                      gap: '0.5rem'
+                    }}>
+                      {!user && (
+                        <motion.button
+                          onClick={() => router.push('/signin')}
+                          style={{
+                            padding: '0.5rem 1rem',
+                            backgroundColor: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.2)',
+                            borderRadius: '6px',
+                            color: 'white',
+                            fontSize: '0.8rem',
+                            fontWeight: '600',
+                            cursor: 'pointer'
+                          }}
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                        >
+                          Sign In to Comment
+                        </motion.button>
+                      )}
+                      {user && (
+                        <motion.button
+                          onClick={() => addComment(selectedNotification.id)}
+                          disabled={!commentText.trim() || isSubmittingComment}
+                          style={{
+                            padding: '0.5rem 1.5rem',
+                            backgroundColor: commentText.trim() && !isSubmittingComment ? '#0050B7' : '#666',
+                            border: 'none',
+                            borderRadius: '6px',
+                            color: 'white',
+                            fontSize: '0.9rem',
+                            fontWeight: '600',
+                            cursor: commentText.trim() && !isSubmittingComment ? 'pointer' : 'not-allowed'
+                          }}
+                          whileHover={commentText.trim() && !isSubmittingComment ? { scale: 1.05 } : {}}
+                          whileTap={commentText.trim() && !isSubmittingComment ? { scale: 0.95 } : {}}
+                        >
+                          {isSubmittingComment ? 'Posting...' : 'Post Comment'}
+                        </motion.button>
+                      )}
+                    </div>
+                  </div>
+                  
+                  {/* Comments List */}
+                  <div style={{
+                    maxHeight: '300px',
+                    overflowY: 'auto',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '1rem'
+                  }}>
+                    {selectedNotification.comments && selectedNotification.comments.length > 0 ? (
+                      [...selectedNotification.comments]
+                        .sort((a, b) => b.createdAt.toMillis() - a.createdAt.toMillis())
+                        .map((comment, index) => (
+                          <div key={comment.id} style={{
+                            backgroundColor: 'rgba(255,255,255,0.03)',
+                            padding: '1rem',
+                            borderRadius: '8px',
+                            borderLeft: '3px solid #0050B7'
+                          }}>
+                            <div style={{
+                              display: 'flex',
+                              justifyContent: 'space-between',
+                              alignItems: 'flex-start',
+                              marginBottom: '0.5rem'
+                            }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                <div style={{
+                                  width: '28px',
+                                  height: '28px',
+                                  borderRadius: '50%',
+                                  backgroundColor: comment.userEmail === user?.email ? '#0050B7' : '#666',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  color: 'white',
+                                  fontWeight: 'bold',
+                                  fontSize: '0.7rem',
+                                  flexShrink: 0
+                                }}>
+                                  {comment.userName[0]}
+                                </div>
+                                <div>
+                                  <div style={{
+                                    fontWeight: '600',
+                                    color: 'white',
+                                    fontSize: '0.9rem'
+                                  }}>
+                                    {comment.userName}
+                                    {comment.userEmail === user?.email && (
+                                      <span style={{
+                                        marginLeft: '0.5rem',
+                                        fontSize: '0.7rem',
+                                        backgroundColor: '#0050B7',
+                                        color: 'white',
+                                        padding: '0.1rem 0.4rem',
+                                        borderRadius: '4px'
+                                      }}>
+                                        You
+                                      </span>
+                                    )}
+                                  </div>
+                                  <div style={{
+                                    fontSize: '0.7rem',
+                                    color: 'rgba(255,255,255,0.5)'
+                                  }}>
+                                    {formatDate(comment.createdAt)}
+                                  </div>
+                                </div>
+                              </div>
+                              <div style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.5rem'
+                              }}>
+                                <span style={{
+                                  fontSize: '0.8rem',
+                                  color: 'rgba(255,255,255,0.5)'
+                                }}>
+                                  ❤️ {comment.likes?.length || 0}
+                                </span>
+                              </div>
+                            </div>
+                            <p style={{
+                              margin: 0,
+                              color: 'rgba(255,255,255,0.8)',
+                              fontSize: '0.9rem',
+                              lineHeight: 1.4
+                            }}>
+                              {comment.comment}
+                            </p>
+                          </div>
+                        ))
+                    ) : (
+                      <div style={{
+                        textAlign: 'center',
+                        padding: '2rem',
+                        color: 'rgba(255,255,255,0.5)',
+                        fontSize: '0.9rem'
+                      }}>
+                        No comments yet. Be the first to comment!
+                      </div>
+                    )}
+                  </div>
+                </div>
               )}
             </div>
 
@@ -1155,54 +1595,68 @@ export default function NotificationsPage(): React.JSX.Element {
               padding: '1.5rem 2rem',
               borderTop: '1px solid rgba(255,255,255,0.1)',
               display: 'flex',
-              justifyContent: 'flex-end',
-              gap: '1rem'
+              justifyContent: 'space-between',
+              alignItems: 'center'
             }}>
-              <motion.button
-                onClick={closeNotificationDetail}
-                style={{
-                  padding: '0.8rem 1.5rem',
-                  backgroundColor: 'rgba(255,255,255,0.1)',
-                  border: '1px solid rgba(255,255,255,0.2)',
-                  borderRadius: '8px',
-                  color: 'white',
-                  fontSize: '0.9rem',
-                  fontWeight: '600',
-                  cursor: 'pointer'
-                }}
-                whileHover={{ scale: 1.05, backgroundColor: 'rgba(255,255,255,0.2)' }}
-                whileTap={{ scale: 0.95 }}
-              >
-                Close
-              </motion.button>
+              <div style={{
+                fontSize: '0.8rem',
+                color: 'rgba(255,255,255,0.5)'
+              }}>
+                Sent: {formatDate(selectedNotification.createdAt)}
+                {selectedNotification.expiresAt && (
+                  <> • Expires: {formatDate(selectedNotification.expiresAt)}</>
+                )}
+              </div>
               
-              {selectedNotification.actionUrl && (
-                <motion.a
-                  href={selectedNotification.actionUrl}
+              <div style={{ display: 'flex', gap: '1rem' }}>
+                <motion.button
+                  onClick={async () => {
+                    await toggleLike(selectedNotification.id);
+                  }}
                   style={{
-                    padding: '0.8rem 1.5rem',
-                    backgroundColor: '#0050B7',
-                    border: 'none',
+                    padding: '0.5rem 1rem',
+                    backgroundColor: selectedNotification.likes?.includes(getCurrentUserId()) 
+                      ? 'rgba(255, 71, 87, 0.2)' 
+                      : 'rgba(255,255,255,0.1)',
+                    border: `1px solid ${selectedNotification.likes?.includes(getCurrentUserId()) 
+                      ? '#FF4757' 
+                      : 'rgba(255,255,255,0.2)'}`,
                     borderRadius: '8px',
-                    color: 'white',
+                    color: selectedNotification.likes?.includes(getCurrentUserId()) 
+                      ? '#FF4757' 
+                      : 'white',
                     fontSize: '0.9rem',
                     fontWeight: '600',
                     cursor: 'pointer',
-                    textDecoration: 'none',
                     display: 'flex',
                     alignItems: 'center',
                     gap: '0.5rem'
                   }}
-                  whileHover={{ scale: 1.05, backgroundColor: '#0066CC' }}
+                  whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
-                  Take Action
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
-                    <path d="M5 12h14"/>
-                    <path d="m12 5 7 7-7 7"/>
-                  </svg>
-                </motion.a>
-              )}
+                  {selectedNotification.likes?.includes(getCurrentUserId()) ? '❤️ Liked' : '🤍 Like'}
+                  ({selectedNotification.likes?.length || 0})
+                </motion.button>
+                
+                <motion.button
+                  onClick={closeNotificationDetail}
+                  style={{
+                    padding: '0.5rem 1.5rem',
+                    backgroundColor: 'rgba(255,255,255,0.1)',
+                    border: '1px solid rgba(255,255,255,0.2)',
+                    borderRadius: '8px',
+                    color: 'white',
+                    fontSize: '0.9rem',
+                    fontWeight: '600',
+                    cursor: 'pointer'
+                  }}
+                  whileHover={{ scale: 1.05, backgroundColor: 'rgba(255,255,255,0.2)' }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  Close
+                </motion.button>
+              </div>
             </div>
           </motion.div>
         </div>
