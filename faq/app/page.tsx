@@ -129,6 +129,13 @@ export default function HomePage(): React.JSX.Element {
   // State untuk menu overlay
   const [showMenuOverlay, setShowMenuOverlay] = useState(false);
 
+  // State baru untuk notifikasi dan search
+  const [showNotification, setShowNotification] = useState(false);
+  const [showSearch, setShowSearch] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [hasUnreadNotifications, setHasUnreadNotifications] = useState(true);
+  const [notificationCount, setNotificationCount] = useState(3);
+
   const headerRef = useRef<HTMLDivElement>(null);
   const topNavRef = useRef<HTMLDivElement>(null);
   const topicContainerRef = useRef<HTMLDivElement>(null);
@@ -143,6 +150,12 @@ export default function HomePage(): React.JSX.Element {
   const userDropdownRef = useRef<HTMLDivElement>(null);
   const chatbotPopupRef = useRef<HTMLDivElement>(null);
   const menuOverlayRef = useRef<HTMLDivElement>(null);
+  
+  // Ref baru untuk notifikasi dan search
+  const notificationRef = useRef<HTMLDivElement>(null);
+  const notificationDropdownRef = useRef<HTMLDivElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  const searchContainerRef = useRef<HTMLDivElement>(null);
 
   // Animasi loading text
   const loadingTexts = [
@@ -179,6 +192,34 @@ export default function HomePage(): React.JSX.Element {
     { title: "Design", description: "Visual identity & UI/UX" },
     { title: "Development", description: "Frontend & Backend" },
     { title: "Features", description: "Functionality & Integration" }
+  ];
+
+  // Data dummy notifikasi
+  const notifications = [
+    {
+      id: 1,
+      title: "New Comment",
+      message: "Someone commented on your photo",
+      time: "5 min ago",
+      read: false,
+      icon: "💬"
+    },
+    {
+      id: 2,
+      title: "Photo Update",
+      message: "Your photo has been featured",
+      time: "1 hour ago",
+      read: false,
+      icon: "⭐"
+    },
+    {
+      id: 3,
+      title: "System Update",
+      message: "New features available",
+      time: "2 days ago",
+      read: true,
+      icon: "🔄"
+    }
   ];
 
   // Fungsi untuk menghitung waktu yang lalu
@@ -423,6 +464,34 @@ export default function HomePage(): React.JSX.Element {
     }
   }, [user, userDisplayName, isMobile]);
 
+  // Animasi GSAP untuk search expand
+  useEffect(() => {
+    if (searchContainerRef.current) {
+      if (showSearch) {
+        gsap.to(searchContainerRef.current, {
+          width: 250,
+          duration: 0.3,
+          ease: "power2.out"
+        });
+        // Auto focus input
+        setTimeout(() => {
+          if (searchInputRef.current) {
+            searchInputRef.current.focus();
+          }
+        }, 100);
+      } else {
+        gsap.to(searchContainerRef.current, {
+          width: 40,
+          duration: 0.3,
+          ease: "power2.in",
+          onComplete: () => {
+            setSearchQuery("");
+          }
+        });
+      }
+    }
+  }, [showSearch]);
+
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -440,6 +509,12 @@ export default function HomePage(): React.JSX.Element {
       }
       if (menuOverlayRef.current && !menuOverlayRef.current.contains(event.target as Node)) {
         handleCloseMenu();
+      }
+      if (notificationDropdownRef.current && !notificationDropdownRef.current.contains(event.target as Node)) {
+        setShowNotification(false);
+      }
+      if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
+        setShowSearch(false);
       }
     };
 
@@ -604,6 +679,12 @@ export default function HomePage(): React.JSX.Element {
         if (showMenuOverlay) {
           handleCloseMenu();
         }
+        if (showNotification) {
+          setShowNotification(false);
+        }
+        if (showSearch) {
+          setShowSearch(false);
+        }
       }
     };
 
@@ -630,7 +711,7 @@ export default function HomePage(): React.JSX.Element {
       // Kill ScrollTrigger instances
       ScrollTrigger.getAll().forEach(trigger => trigger.kill());
     };
-  }, [isMobile, showMenuruFullPage, showPhotoFullPage, showUserDropdown, showLogoutModal, showChatbotPopup, showMenuOverlay]);
+  }, [isMobile, showMenuruFullPage, showPhotoFullPage, showUserDropdown, showLogoutModal, showChatbotPopup, showMenuOverlay, showNotification, showSearch]);
 
   // Animasi GSAP untuk tanda + di tombol Menuru (hanya pulsing, tidak berputar)
   useEffect(() => {
@@ -926,6 +1007,32 @@ export default function HomePage(): React.JSX.Element {
   const handleGoToChatbot = () => {
     handleCloseChatbotPopup();
     router.push('/chatbot');
+  };
+
+  // Handler untuk search
+  const handleSearch = () => {
+    if (searchQuery.trim()) {
+      console.log("Searching for:", searchQuery);
+      // Implement search logic here
+      router.push(`/search?q=${encodeURIComponent(searchQuery)}`);
+      setShowSearch(false);
+    }
+  };
+
+  // Handler untuk key press di search
+  const handleSearchKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleSearch();
+    } else if (e.key === 'Escape') {
+      setShowSearch(false);
+    }
+  };
+
+  // Handler untuk clear notification
+  const handleClearNotification = () => {
+    setHasUnreadNotifications(false);
+    setNotificationCount(0);
+    setShowNotification(false);
   };
 
   // Data untuk halaman Index - HANYA TAHUN
@@ -1978,6 +2085,250 @@ export default function HomePage(): React.JSX.Element {
         )}
       </AnimatePresence>
 
+      {/* Notification Dropdown */}
+      <AnimatePresence>
+        {showNotification && (
+          <motion.div
+            ref={notificationDropdownRef}
+            initial={{ opacity: 0, y: -10, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -10, scale: 0.95 }}
+            transition={{ duration: 0.2 }}
+            style={{
+              position: 'fixed',
+              top: isMobile ? '6rem' : '7.5rem',
+              right: isMobile ? '5.5rem' : '7rem',
+              backgroundColor: 'rgba(30, 30, 30, 0.98)',
+              backdropFilter: 'blur(20px)',
+              borderRadius: '15px',
+              padding: '1rem 0',
+              width: isMobile ? '300px' : '350px',
+              maxWidth: '90vw',
+              zIndex: 1001,
+              border: '1px solid rgba(255, 255, 255, 0.15)',
+              boxShadow: '0 20px 60px rgba(0, 0, 0, 0.5)',
+              display: 'flex',
+              flexDirection: 'column',
+              maxHeight: '500px',
+              overflow: 'hidden'
+            }}
+          >
+            {/* Header Notifikasi */}
+            <div style={{
+              padding: '0 1.2rem 1rem 1.2rem',
+              borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center'
+            }}>
+              <h3 style={{
+                color: 'white',
+                fontSize: '1.2rem',
+                fontWeight: '600',
+                margin: 0,
+                fontFamily: 'Helvetica, Arial, sans-serif',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem'
+              }}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
+                  <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                  <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                </svg>
+                Notifications
+                {notificationCount > 0 && (
+                  <span style={{
+                    backgroundColor: '#FF4757',
+                    color: 'white',
+                    fontSize: '0.8rem',
+                    fontWeight: '600',
+                    padding: '0.1rem 0.5rem',
+                    borderRadius: '10px',
+                    marginLeft: '0.5rem'
+                  }}>
+                    {notificationCount} new
+                  </span>
+                )}
+              </h3>
+              
+              {hasUnreadNotifications && (
+                <motion.button
+                  onClick={handleClearNotification}
+                  style={{
+                    backgroundColor: 'rgba(255, 71, 87, 0.2)',
+                    border: '1px solid rgba(255, 71, 87, 0.4)',
+                    color: '#FF4757',
+                    fontSize: '0.8rem',
+                    fontWeight: '600',
+                    padding: '0.3rem 0.8rem',
+                    borderRadius: '20px',
+                    cursor: 'pointer',
+                    fontFamily: 'Helvetica, Arial, sans-serif'
+                  }}
+                  whileHover={{ 
+                    backgroundColor: 'rgba(255, 71, 87, 0.3)',
+                    scale: 1.05
+                  }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  Clear All
+                </motion.button>
+              )}
+            </div>
+            
+            {/* List Notifikasi */}
+            <div style={{
+              flex: 1,
+              overflowY: 'auto',
+              padding: '0.5rem 0'
+            }}>
+              {notifications.length === 0 ? (
+                <div style={{
+                  padding: '2rem 1rem',
+                  textAlign: 'center',
+                  color: 'rgba(255, 255, 255, 0.5)',
+                  fontFamily: 'Helvetica, Arial, sans-serif'
+                }}>
+                  No notifications yet
+                </div>
+              ) : (
+                notifications.map((notification, index) => (
+                  <motion.div
+                    key={notification.id}
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: index * 0.05 }}
+                    style={{
+                      padding: '1rem 1.2rem',
+                      borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease',
+                      backgroundColor: notification.read ? 'transparent' : 'rgba(255, 71, 87, 0.05)',
+                      position: 'relative'
+                    }}
+                    whileHover={{ 
+                      backgroundColor: notification.read ? 'rgba(255, 255, 255, 0.05)' : 'rgba(255, 71, 87, 0.1)'
+                    }}
+                    onClick={() => {
+                      // Mark as read on click
+                      if (!notification.read) {
+                        const newNotifications = [...notifications];
+                        newNotifications[index].read = true;
+                        // Update state here
+                      }
+                    }}
+                  >
+                    {/* Unread Indicator */}
+                    {!notification.read && (
+                      <div style={{
+                        position: 'absolute',
+                        left: '0.5rem',
+                        top: '50%',
+                        transform: 'translateY(-50%)',
+                        width: '6px',
+                        height: '6px',
+                        backgroundColor: '#FF4757',
+                        borderRadius: '50%'
+                      }} />
+                    )}
+                    
+                    <div style={{
+                      display: 'flex',
+                      gap: '1rem',
+                      alignItems: 'flex-start'
+                    }}>
+                      {/* Notification Icon */}
+                      <div style={{
+                        width: '36px',
+                        height: '36px',
+                        borderRadius: '50%',
+                        backgroundColor: notification.read ? 'rgba(255, 255, 255, 0.1)' : 'rgba(255, 71, 87, 0.2)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '1rem',
+                        flexShrink: 0
+                      }}>
+                        {notification.icon}
+                      </div>
+                      
+                      {/* Notification Content */}
+                      <div style={{ flex: 1 }}>
+                        <div style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'flex-start',
+                          marginBottom: '0.3rem'
+                        }}>
+                          <h4 style={{
+                            color: 'white',
+                            fontSize: '0.95rem',
+                            fontWeight: '600',
+                            margin: 0,
+                            fontFamily: 'Helvetica, Arial, sans-serif'
+                          }}>
+                            {notification.title}
+                          </h4>
+                          <span style={{
+                            color: 'rgba(255, 255, 255, 0.5)',
+                            fontSize: '0.75rem',
+                            whiteSpace: 'nowrap'
+                          }}>
+                            {notification.time}
+                          </span>
+                        </div>
+                        
+                        <p style={{
+                          color: notification.read ? 'rgba(255, 255, 255, 0.7)' : 'white',
+                          fontSize: '0.85rem',
+                          margin: 0,
+                          lineHeight: 1.4,
+                          fontFamily: 'Helvetica, Arial, sans-serif'
+                        }}>
+                          {notification.message}
+                        </p>
+                      </div>
+                    </div>
+                  </motion.div>
+                ))
+              )}
+            </div>
+            
+            {/* Footer */}
+            <div style={{
+              padding: '1rem 1.2rem',
+              borderTop: '1px solid rgba(255, 255, 255, 0.1)',
+              textAlign: 'center'
+            }}>
+              <motion.a
+                href="/notifications"
+                style={{
+                  color: '#00FF00',
+                  fontSize: '0.9rem',
+                  fontWeight: '600',
+                  textDecoration: 'none',
+                  fontFamily: 'Helvetica, Arial, sans-serif',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.5rem'
+                }}
+                whileHover={{ 
+                  color: 'white',
+                  x: 5
+                }}
+              >
+                View All Notifications
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M5 12h14"/>
+                  <path d="m12 5 7 7-7 7"/>
+                </svg>
+              </motion.a>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* POPUP CHATBOT - DI KANAN BAWAH */}
       <AnimatePresence>
         {showChatbotPopup && (
@@ -2989,13 +3340,223 @@ export default function HomePage(): React.JSX.Element {
         </div>
         
 
-        {/* Right Side Buttons */}
+        {/* Right Side Buttons - DENGAN SEARCH DAN NOTIFIKASI BARU */}
         <div style={{
           display: 'flex',
           alignItems: 'center',
           gap: isMobile ? '0.8rem' : '1rem',
           position: 'relative'
         }}>
+          {/* Search Bar dengan animasi GSAP */}
+          <motion.div
+            ref={searchContainerRef}
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 1, duration: 0.5 }}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              width: '40px',
+              height: '40px',
+              borderRadius: '20px',
+              backgroundColor: 'rgba(255, 255, 255, 0.1)',
+              backdropFilter: 'blur(10px)',
+              border: '1px solid rgba(255, 255, 255, 0.15)',
+              overflow: 'hidden',
+              cursor: 'pointer',
+              transition: 'all 0.3s ease',
+              position: 'relative'
+            }}
+          >
+            {/* Search Icon */}
+            <motion.div
+              onClick={() => setShowSearch(!showSearch)}
+              style={{
+                position: 'absolute',
+                left: '10px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '20px',
+                height: '100%',
+                cursor: 'pointer',
+                zIndex: 2
+              }}
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+            >
+              <svg 
+                width="18" 
+                height="18" 
+                viewBox="0 0 24 24" 
+                fill="none" 
+                stroke={showSearch ? "#00FF00" : "white"} 
+                strokeWidth="2"
+              >
+                <circle cx="11" cy="11" r="8"/>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              </svg>
+            </motion.div>
+            
+            {/* Search Input */}
+            <input
+              ref={searchInputRef}
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={handleSearchKeyPress}
+              placeholder="Search..."
+              style={{
+                width: '100%',
+                height: '100%',
+                padding: '0 40px 0 35px',
+                backgroundColor: 'transparent',
+                border: 'none',
+                color: 'white',
+                fontSize: '0.9rem',
+                outline: 'none',
+                fontFamily: 'Helvetica, Arial, sans-serif',
+                opacity: showSearch ? 1 : 0,
+                pointerEvents: showSearch ? 'auto' : 'none',
+                transition: 'opacity 0.2s ease'
+              }}
+            />
+            
+            {/* Clear/X Button */}
+            {showSearch && searchQuery && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                onClick={() => setSearchQuery("")}
+                style={{
+                  position: 'absolute',
+                  right: '10px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: '20px',
+                  height: '20px',
+                  cursor: 'pointer',
+                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                  borderRadius: '50%'
+                }}
+                whileHover={{ scale: 1.2, backgroundColor: 'rgba(255, 255, 255, 0.2)' }}
+                whileTap={{ scale: 0.9 }}
+              >
+                <svg 
+                  width="12" 
+                  height="12" 
+                  viewBox="0 0 24 24" 
+                  fill="none" 
+                  stroke="white" 
+                  strokeWidth="2"
+                >
+                  <line x1="18" y1="6" x2="6" y2="18"/>
+                  <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+              </motion.div>
+            )}
+          </motion.div>
+
+          {/* Notification Bell dengan Badge */}
+          <motion.div
+            ref={notificationRef}
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 1.05, duration: 0.5 }}
+            style={{
+              position: 'relative',
+              width: '40px',
+              height: '40px',
+              borderRadius: '50%',
+              backgroundColor: 'rgba(255, 255, 255, 0.1)',
+              backdropFilter: 'blur(10px)',
+              border: '1px solid rgba(255, 255, 255, 0.15)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              transition: 'all 0.3s ease'
+            }}
+            onClick={() => setShowNotification(!showNotification)}
+            whileHover={{ 
+              scale: 1.1,
+              backgroundColor: 'rgba(255, 255, 255, 0.15)',
+              border: '1px solid rgba(255, 255, 255, 0.3)'
+            }}
+            whileTap={{ scale: 0.95 }}
+          >
+            {/* Bell Icon */}
+            <svg 
+              width="20" 
+              height="20" 
+              viewBox="0 0 24 24" 
+              fill="none" 
+              stroke="white" 
+              strokeWidth="2"
+            >
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+              <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+            </svg>
+            
+            {/* Notification Badge */}
+            {hasUnreadNotifications && notificationCount > 0 && (
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ type: "spring", stiffness: 500, damping: 15 }}
+                style={{
+                  position: 'absolute',
+                  top: '-2px',
+                  right: '-2px',
+                  minWidth: '18px',
+                  height: '18px',
+                  backgroundColor: '#FF4757',
+                  borderRadius: '50%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  border: '2px solid black'
+                }}
+              >
+                <span style={{
+                  color: 'white',
+                  fontSize: '0.65rem',
+                  fontWeight: '700',
+                  fontFamily: 'Helvetica, Arial, sans-serif',
+                  padding: '0 4px'
+                }}>
+                  {notificationCount > 9 ? '9+' : notificationCount}
+                </span>
+              </motion.div>
+            )}
+            
+            {/* Pulse Animation untuk unread notifications */}
+            {hasUnreadNotifications && (
+              <motion.div
+                animate={{
+                  scale: [1, 1.2, 1],
+                  opacity: [0.7, 0, 0.7]
+                }}
+                transition={{
+                  duration: 2,
+                  repeat: Infinity,
+                  repeatType: "reverse"
+                }}
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  backgroundColor: '#FF4757',
+                  borderRadius: '50%',
+                  zIndex: -1
+                }}
+              />
+            )}
+          </motion.div>
+
           {/* User Stats Badge */}
           {user && userStats && (
             <motion.div
@@ -3029,7 +3590,7 @@ export default function HomePage(): React.JSX.Element {
             </motion.div>
           )}
 
-          {/* Tombol MENU - Hanya teks */}
+          {/* Tombol MENU */}
           <motion.div
             onClick={handleOpenMenu}
             style={{
@@ -3181,481 +3742,474 @@ export default function HomePage(): React.JSX.Element {
         </div>
       </div>
 
-
-{/* Main Content Container */}
-<div style={{
-  width: '100%',
-  paddingTop: isMobile ? '12rem' : '15rem',
-  boxSizing: 'border-box',
-  zIndex: 10,
-  position: 'relative'
-}}>
-
-  {/* PRODUCT AND Image Section - DI BAWAH JUDUL WEBSITE */}
-<div style={{
-  width: '100%',
-  padding: isMobile ? '1.5rem' : '3rem',
-  marginTop: isMobile ? '1rem' : '2rem',
-  boxSizing: 'border-box',
-  display: 'flex',
-  flexDirection: 'column',
-  gap: isMobile ? '0.1rem' : '0.2rem' // JARAK SANGAT DEKAT ANTAR BARIS
-}}>
-  
-  {/* Baris 1: PRODUCT + AND + Foto + 01 */}
-  <div style={{
-    display: 'flex',
-    alignItems: 'center',
-    width: '100%',
-    justifyContent: 'space-between'
-  }}>
-    {/* PRODUCT - Di kiri */}
-    <div style={{
-      textAlign: 'left',
-      height: isMobile ? '5rem' : '7rem',
-      display: 'flex',
-      alignItems: 'center'
-    }}>
-      <h2 style={{
-        color: 'white',
-        fontSize: isMobile ? '5rem' : '7rem',
-        fontWeight: '900',
-        textTransform: 'uppercase',
-        fontFamily: 'Helvetica, Arial, sans-serif',
-        letterSpacing: '-3px',
-        margin: 0,
-        lineHeight: 0.8,
-        padding: 0
-      }}>
-        PRODUCT
-      </h2>
-    </div>
-
-    {/* AND + Foto Container - Di kanan, dekat satu sama lain */}
-    <div style={{
-      display: 'flex',
-      alignItems: 'center',
-      gap: isMobile ? '0.5rem' : '1rem'
-    }}>
-      {/* AND */}
+      {/* Main Content Container */}
       <div style={{
-        textAlign: 'center',
-        height: isMobile ? '5rem' : '7rem',
-        display: 'flex',
-        alignItems: 'center'
+        width: '100%',
+        paddingTop: isMobile ? '12rem' : '15rem',
+        boxSizing: 'border-box',
+        zIndex: 10,
+        position: 'relative'
       }}>
-        <h2 style={{
-          color: 'white',
-          fontSize: isMobile ? '5rem' : '7rem',
-          fontWeight: '900',
-          textTransform: 'uppercase',
-          fontFamily: 'Helvetica, Arial, sans-serif',
-          letterSpacing: '-3px',
-          margin: 0,
-          lineHeight: 0.8,
-          padding: 0
-        }}>
-          AND
-        </h2>
-      </div>
 
-      {/* Container Foto + Angka 01 */}
-      <div style={{
-        position: 'relative',
-        display: 'flex',
-        alignItems: 'flex-end'
-      }}>
-        {/* Foto */}
+        {/* PRODUCT AND Image Section - DI BAWAH JUDUL WEBSITE */}
         <div style={{
-          width: isMobile ? '140px' : '180px',
-          height: isMobile ? '5rem' : '7rem',
-          borderRadius: '10px',
-          overflow: 'hidden',
-          border: '1px solid rgba(255, 255, 255, 0.3)',
-          backgroundColor: '#222'
-        }}>
-          <img 
-            src="images/5.jpg" 
-            alt="Product Image"
-            style={{
-              width: '100%',
-              height: '100%',
-              objectFit: 'cover',
-              display: 'block'
-            }}
-          />
-        </div>
-        
-        {/* Angka 01 */}
-        <div style={{
-          position: 'absolute',
-          bottom: '-0.8rem',
-          right: '-1.5rem',
-          color: 'rgba(255, 255, 255, 0.7)',
-          fontSize: isMobile ? '1rem' : '1.2rem',
-          fontWeight: '400',
-          fontFamily: 'Helvetica, Arial, sans-serif',
-          letterSpacing: '1px'
-        }}>
-          01
-        </div>
-      </div>
-    </div>
-  </div>
-
-  {/* Baris 2: Foto + VISUAL DESIGNER */}
-  <div style={{
-    display: 'flex',
-    alignItems: 'center',
-    width: '100%',
-    justifyContent: 'flex-start',
-    gap: isMobile ? '4rem' : '8rem'
-  }}>
-    {/* Container Foto + Angka 02 - Di kiri */}
-    <div style={{
-      position: 'relative',
-      display: 'flex',
-      alignItems: 'flex-end'
-    }}>
-      {/* Foto */}
-      <div style={{
-        width: isMobile ? '140px' : '180px',
-        height: isMobile ? '5rem' : '7rem',
-        borderRadius: '10px',
-        overflow: 'hidden',
-        border: '1px solid rgba(255, 255, 255, 0.3)',
-        backgroundColor: '#222'
-      }}>
-        <img 
-          src="images/5.jpg" 
-          alt="Visual Designer"
-          style={{
-            width: '100%',
-            height: '100%',
-            objectFit: 'cover',
-            display: 'block'
-          }}
-        />
-      </div>
-      
-      {/* Angka 02 */}
-      <div style={{
-        position: 'absolute',
-        bottom: '-0.8rem',
-        right: '-1.5rem',
-        color: 'rgba(255, 255, 255, 0.7)',
-        fontSize: isMobile ? '1rem' : '1.2rem',
-        fontWeight: '400',
-        fontFamily: 'Helvetica, Arial, sans-serif',
-        letterSpacing: '1px'
-      }}>
-        02
-      </div>
-    </div>
-
-    {/* VISUAL DESIGNER - 1 baris */}
-    <div style={{
-      textAlign: 'left',
-      height: isMobile ? '5rem' : '7rem',
-      display: 'flex',
-      alignItems: 'center'
-    }}>
-      <h2 style={{
-        color: 'white',
-        fontSize: isMobile ? '5rem' : '7rem',
-        fontWeight: '900',
-        textTransform: 'uppercase',
-        fontFamily: 'Helvetica, Arial, sans-serif',
-        letterSpacing: '-3px',
-        margin: 0,
-        lineHeight: 0.8,
-        whiteSpace: 'nowrap'
-      }}>
-        VISUAL DESIGNER
-      </h2>
-    </div>
-  </div>
-
-  {/* Baris 3: BASED + Foto + IN */}
-  <div style={{
-    display: 'flex',
-    alignItems: 'center',
-    width: '100%',
-    justifyContent: 'space-between'
-  }}>
-    {/* BASED - Kiri */}
-    <div style={{
-      textAlign: 'left',
-      height: isMobile ? '5rem' : '7rem',
-      display: 'flex',
-      alignItems: 'center'
-    }}>
-      <h2 style={{
-        color: 'white',
-        fontSize: isMobile ? '5rem' : '7rem',
-        fontWeight: '900',
-        textTransform: 'uppercase',
-        fontFamily: 'Helvetica, Arial, sans-serif',
-        letterSpacing: '-3px',
-        margin: 0,
-        lineHeight: 0.8
-      }}>
-        BASED
-      </h2>
-    </div>
-
-    {/* Container Foto + Angka 03 */}
-    <div style={{
-      position: 'relative',
-      display: 'flex',
-      alignItems: 'flex-end'
-    }}>
-      {/* Foto */}
-      <div style={{
-        width: isMobile ? '140px' : '180px',
-        height: isMobile ? '5rem' : '7rem',
-        borderRadius: '10px',
-        overflow: 'hidden',
-        border: '1px solid rgba(255, 255, 255, 0.3)',
-        backgroundColor: '#222'
-      }}>
-        <img 
-          src="images/5.jpg" 
-          alt="Based"
-          style={{
-            width: '100%',
-            height: '100%',
-            objectFit: 'cover',
-            display: 'block'
-          }}
-        />
-      </div>
-      
-      {/* Angka 03 */}
-      <div style={{
-        position: 'absolute',
-        bottom: '-0.8rem',
-        right: '-1.5rem',
-        color: 'rgba(255, 255, 255, 0.7)',
-        fontSize: isMobile ? '1rem' : '1.2rem',
-        fontWeight: '400',
-        fontFamily: 'Helvetica, Arial, sans-serif',
-        letterSpacing: '1px'
-      }}>
-        03
-      </div>
-    </div>
-
-    {/* IN - Kanan */}
-    <div style={{
-      textAlign: 'right',
-      height: isMobile ? '5rem' : '7rem',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'flex-end'
-    }}>
-      <h2 style={{
-        color: 'white',
-        fontSize: isMobile ? '5rem' : '7rem',
-        fontWeight: '900',
-        textTransform: 'uppercase',
-        fontFamily: 'Helvetica, Arial, sans-serif',
-        letterSpacing: '-3px',
-        margin: 0,
-        lineHeight: 0.8
-      }}>
-        IN
-      </h2>
-    </div>
-  </div>
-
-  {/* Baris 4: Foto + INDONESIA */}
-  <div style={{
-    display: 'flex',
-    alignItems: 'center',
-    width: '100%',
-    justifyContent: 'flex-start',
-    gap: isMobile ? '4rem' : '8rem'
-  }}>
-    {/* Container Foto + Angka 04 - Di kiri */}
-    <div style={{
-      position: 'relative',
-      display: 'flex',
-      alignItems: 'flex-end'
-    }}>
-      {/* Foto */}
-      <div style={{
-        width: isMobile ? '140px' : '180px',
-        height: isMobile ? '5rem' : '7rem',
-        borderRadius: '10px',
-        overflow: 'hidden',
-        border: '1px solid rgba(255, 255, 255, 0.3)',
-        backgroundColor: '#222'
-      }}>
-        <img 
-          src="images/5.jpg" 
-          alt="Footer Image"
-          style={{
-            width: '100%',
-            height: '100%',
-            objectFit: 'cover',
-            display: 'block'
-          }}
-        />
-      </div>
-      
-      {/* Angka 04 */}
-      <div style={{
-        position: 'absolute',
-        bottom: '-0.8rem',
-        right: '-1.5rem',
-        color: 'rgba(255, 255, 255, 0.7)',
-        fontSize: isMobile ? '1rem' : '1.2rem',
-        fontWeight: '400',
-        fontFamily: 'Helvetica, Arial, sans-serif',
-        letterSpacing: '1px'
-      }}>
-        04
-      </div>
-    </div>
-
-    {/* INDONESIA */}
-    <div style={{
-      textAlign: 'left',
-      height: isMobile ? '5rem' : '7rem',
-      display: 'flex',
-      alignItems: 'center'
-    }}>
-      <h2 style={{
-        color: 'white',
-        fontSize: isMobile ? '5rem' : '7rem',
-        fontWeight: '900',
-        textTransform: 'uppercase',
-        fontFamily: 'Helvetica, Arial, sans-serif',
-        letterSpacing: '-3px',
-        margin: 0,
-        lineHeight: 0.8
-      }}>
-        INDONESIA
-      </h2>
-    </div>
-  </div>
-
-</div>
-  
-
-  {/* Spacer kecil sebelum konten berikutnya */}
-  <div style={{
-    height: isMobile ? '3rem' : '4rem',
-    width: '100%'
-  }} />
-
-  {/* AnimatePresence untuk transisi antara view */}
-  <AnimatePresence mode="wait">
-    {currentView === "main" && (
-      <motion.div
-        key="main-view"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 0.5 }}
-      >
-        {/* Container untuk Tombol Slider dan Teks MENURU */}
-        <div style={{
-          position: 'relative',
-          marginTop: isMobile ? '4rem' : '5rem',
-          marginBottom: isMobile ? '4rem' : '6rem',
-          paddingLeft: isMobile ? '2rem' : '4rem',
-          paddingRight: isMobile ? '2rem' : '4rem',
+          width: '100%',
+          padding: isMobile ? '1.5rem' : '3rem',
+          marginTop: isMobile ? '1rem' : '2rem',
+          boxSizing: 'border-box',
           display: 'flex',
-          flexDirection: isMobile ? 'column' : 'row',
-          justifyContent: 'space-between',
-          alignItems: isMobile ? 'flex-start' : 'center',
-          gap: isMobile ? '2rem' : '0'
+          flexDirection: 'column',
+          gap: isMobile ? '0.1rem' : '0.2rem' // JARAK SANGAT DEKAT ANTAR BARIS
         }}>
-          {/* Tombol Slider Index/Grid di kiri */}
+          
+          {/* Baris 1: PRODUCT + AND + Foto + 01 */}
           <div style={{
             display: 'flex',
             alignItems: 'center',
-            gap: '1.5rem'
+            width: '100%',
+            justifyContent: 'space-between'
           }}>
-            <motion.button
-              onClick={toggleSlider}
-              style={{
-                width: '120px',
-                height: '50px',
-                backgroundColor: '#0050B7',
-                border: 'none',
-                borderRadius: '25px',
-                cursor: 'pointer',
-                padding: 0,
+            {/* PRODUCT - Di kiri */}
+            <div style={{
+              textAlign: 'left',
+              height: isMobile ? '5rem' : '7rem',
+              display: 'flex',
+              alignItems: 'center'
+            }}>
+              <h2 style={{
+                color: 'white',
+                fontSize: isMobile ? '5rem' : '7rem',
+                fontWeight: '900',
+                textTransform: 'uppercase',
+                fontFamily: 'Helvetica, Arial, sans-serif',
+                letterSpacing: '-3px',
+                margin: 0,
+                lineHeight: 0.8,
+                padding: 0
+              }}>
+                PRODUCT
+              </h2>
+            </div>
+
+            {/* AND + Foto Container - Di kanan, dekat satu sama lain */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: isMobile ? '0.5rem' : '1rem'
+            }}>
+              {/* AND */}
+              <div style={{
+                textAlign: 'center',
+                height: isMobile ? '5rem' : '7rem',
+                display: 'flex',
+                alignItems: 'center'
+              }}>
+                <h2 style={{
+                  color: 'white',
+                  fontSize: isMobile ? '5rem' : '7rem',
+                  fontWeight: '900',
+                  textTransform: 'uppercase',
+                  fontFamily: 'Helvetica, Arial, sans-serif',
+                  letterSpacing: '-3px',
+                  margin: 0,
+                  lineHeight: 0.8,
+                  padding: 0
+                }}>
+                  AND
+                </h2>
+              </div>
+
+              {/* Container Foto + Angka 01 */}
+              <div style={{
                 position: 'relative',
                 display: 'flex',
-                alignItems: 'center',
-                overflow: 'hidden'
-              }}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <div style={{
-                position: 'absolute',
-                width: '100%',
-                height: '100%',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                padding: '0 15px',
-                boxSizing: 'border-box'
+                alignItems: 'flex-end'
               }}>
-                <span style={{
-                  color: 'white',
-                  fontSize: '1rem',
-                  fontWeight: '700',
-                  fontFamily: 'Helvetica, Arial, sans-serif',
-                  opacity: sliderPosition === "index" ? 1 : 0.5
+                {/* Foto */}
+                <div style={{
+                  width: isMobile ? '140px' : '180px',
+                  height: isMobile ? '5rem' : '7rem',
+                  borderRadius: '10px',
+                  overflow: 'hidden',
+                  border: '1px solid rgba(255, 255, 255, 0.3)',
+                  backgroundColor: '#222'
                 }}>
-                  INDEX
-                </span>
-                <span style={{
-                  color: 'white',
-                  fontSize: '1rem',
-                  fontWeight: '700',
-                  fontFamily: 'Helvetica, Arial, sans-serif',
-                  opacity: sliderPosition === "grid" ? 1 : 0.5
-                }}>
-                  GRID
-                </span>
-              </div>
-              
-              <motion.div
-                animate={{ x: sliderPosition === "index" ? 15 : 65 }}
-                transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                style={{
-                  width: '35px',
-                  height: '35px',
-                  backgroundColor: '#00FF00',
-                  borderRadius: '50%',
+                  <img 
+                    src="images/5.jpg" 
+                    alt="Product Image"
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'cover',
+                      display: 'block'
+                    }}
+                  />
+                </div>
+                
+                {/* Angka 01 */}
+                <div style={{
                   position: 'absolute',
-                  left: '7px',
-                  boxShadow: '0 0 15px rgba(0, 255, 0, 0.7)'
-                }}
-              />
-            </motion.button>
-
-            <div style={{
-              color: 'white',
-              fontSize: '1.1rem',
-              fontWeight: '600',
-              fontFamily: 'Helvetica, Arial, sans-serif'
-            }}>
-              {sliderPosition === "index" ? "Index View" : "Grid View"}
+                  bottom: '-0.8rem',
+                  right: '-1.5rem',
+                  color: 'rgba(255, 255, 255, 0.7)',
+                  fontSize: isMobile ? '1rem' : '1.2rem',
+                  fontWeight: '400',
+                  fontFamily: 'Helvetica, Arial, sans-serif',
+                  letterSpacing: '1px'
+                }}>
+                  01
+                </div>
+              </div>
             </div>
           </div>
 
+          {/* Baris 2: Foto + VISUAL DESIGNER */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            width: '100%',
+            justifyContent: 'flex-start',
+            gap: isMobile ? '4rem' : '8rem'
+          }}>
+            {/* Container Foto + Angka 02 - Di kiri */}
+            <div style={{
+              position: 'relative',
+              display: 'flex',
+              alignItems: 'flex-end'
+            }}>
+              {/* Foto */}
+              <div style={{
+                width: isMobile ? '140px' : '180px',
+                height: isMobile ? '5rem' : '7rem',
+                borderRadius: '10px',
+                overflow: 'hidden',
+                border: '1px solid rgba(255, 255, 255, 0.3)',
+                backgroundColor: '#222'
+              }}>
+                <img 
+                  src="images/5.jpg" 
+                  alt="Visual Designer"
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover',
+                    display: 'block'
+                  }}
+                />
+              </div>
+              
+              {/* Angka 02 */}
+              <div style={{
+                position: 'absolute',
+                bottom: '-0.8rem',
+                right: '-1.5rem',
+                color: 'rgba(255, 255, 255, 0.7)',
+                fontSize: isMobile ? '1rem' : '1.2rem',
+                fontWeight: '400',
+                fontFamily: 'Helvetica, Arial, sans-serif',
+                letterSpacing: '1px'
+              }}>
+                02
+              </div>
+            </div>
 
+            {/* VISUAL DESIGNER - 1 baris */}
+            <div style={{
+              textAlign: 'left',
+              height: isMobile ? '5rem' : '7rem',
+              display: 'flex',
+              alignItems: 'center'
+            }}>
+              <h2 style={{
+                color: 'white',
+                fontSize: isMobile ? '5rem' : '7rem',
+                fontWeight: '900',
+                textTransform: 'uppercase',
+                fontFamily: 'Helvetica, Arial, sans-serif',
+                letterSpacing: '-3px',
+                margin: 0,
+                lineHeight: 0.8,
+                whiteSpace: 'nowrap'
+              }}>
+                VISUAL DESIGNER
+              </h2>
+            </div>
+          </div>
 
+          {/* Baris 3: BASED + Foto + IN */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            width: '100%',
+            justifyContent: 'space-between'
+          }}>
+            {/* BASED - Kiri */}
+            <div style={{
+              textAlign: 'left',
+              height: isMobile ? '5rem' : '7rem',
+              display: 'flex',
+              alignItems: 'center'
+            }}>
+              <h2 style={{
+                color: 'white',
+                fontSize: isMobile ? '5rem' : '7rem',
+                fontWeight: '900',
+                textTransform: 'uppercase',
+                fontFamily: 'Helvetica, Arial, sans-serif',
+                letterSpacing: '-3px',
+                margin: 0,
+                lineHeight: 0.8
+              }}>
+                BASED
+              </h2>
+            </div>
 
-      
+            {/* Container Foto + Angka 03 */}
+            <div style={{
+              position: 'relative',
+              display: 'flex',
+              alignItems: 'flex-end'
+            }}>
+              {/* Foto */}
+              <div style={{
+                width: isMobile ? '140px' : '180px',
+                height: isMobile ? '5rem' : '7rem',
+                borderRadius: '10px',
+                overflow: 'hidden',
+                border: '1px solid rgba(255, 255, 255, 0.3)',
+                backgroundColor: '#222'
+              }}>
+                <img 
+                  src="images/5.jpg" 
+                  alt="Based"
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover',
+                    display: 'block'
+                  }}
+                />
+              </div>
+              
+              {/* Angka 03 */}
+              <div style={{
+                position: 'absolute',
+                bottom: '-0.8rem',
+                right: '-1.5rem',
+                color: 'rgba(255, 255, 255, 0.7)',
+                fontSize: isMobile ? '1rem' : '1.2rem',
+                fontWeight: '400',
+                fontFamily: 'Helvetica, Arial, sans-serif',
+                letterSpacing: '1px'
+              }}>
+                03
+              </div>
+            </div>
+
+            {/* IN - Kanan */}
+            <div style={{
+              textAlign: 'right',
+              height: isMobile ? '5rem' : '7rem',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'flex-end'
+            }}>
+              <h2 style={{
+                color: 'white',
+                fontSize: isMobile ? '5rem' : '7rem',
+                fontWeight: '900',
+                textTransform: 'uppercase',
+                fontFamily: 'Helvetica, Arial, sans-serif',
+                letterSpacing: '-3px',
+                margin: 0,
+                lineHeight: 0.8
+              }}>
+                IN
+              </h2>
+            </div>
+          </div>
+
+          {/* Baris 4: Foto + INDONESIA */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            width: '100%',
+            justifyContent: 'flex-start',
+            gap: isMobile ? '4rem' : '8rem'
+          }}>
+            {/* Container Foto + Angka 04 - Di kiri */}
+            <div style={{
+              position: 'relative',
+              display: 'flex',
+              alignItems: 'flex-end'
+            }}>
+              {/* Foto */}
+              <div style={{
+                width: isMobile ? '140px' : '180px',
+                height: isMobile ? '5rem' : '7rem',
+                borderRadius: '10px',
+                overflow: 'hidden',
+                border: '1px solid rgba(255, 255, 255, 0.3)',
+                backgroundColor: '#222'
+              }}>
+                <img 
+                  src="images/5.jpg" 
+                  alt="Footer Image"
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover',
+                    display: 'block'
+                  }}
+                />
+              </div>
+              
+              {/* Angka 04 */}
+              <div style={{
+                position: 'absolute',
+                bottom: '-0.8rem',
+                right: '-1.5rem',
+                color: 'rgba(255, 255, 255, 0.7)',
+                fontSize: isMobile ? '1rem' : '1.2rem',
+                fontWeight: '400',
+                fontFamily: 'Helvetica, Arial, sans-serif',
+                letterSpacing: '1px'
+              }}>
+                04
+              </div>
+            </div>
+
+            {/* INDONESIA */}
+            <div style={{
+              textAlign: 'left',
+              height: isMobile ? '5rem' : '7rem',
+              display: 'flex',
+              alignItems: 'center'
+            }}>
+              <h2 style={{
+                color: 'white',
+                fontSize: isMobile ? '5rem' : '7rem',
+                fontWeight: '900',
+                textTransform: 'uppercase',
+                fontFamily: 'Helvetica, Arial, sans-serif',
+                letterSpacing: '-3px',
+                margin: 0,
+                lineHeight: 0.8
+              }}>
+                INDONESIA
+              </h2>
+            </div>
+          </div>
+
+        </div>
+        
+        {/* Spacer kecil sebelum konten berikutnya */}
+        <div style={{
+          height: isMobile ? '3rem' : '4rem',
+          width: '100%'
+        }} />
+
+        {/* AnimatePresence untuk transisi antara view */}
+        <AnimatePresence mode="wait">
+          {currentView === "main" && (
+            <motion.div
+              key="main-view"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.5 }}
+            >
+              {/* Container untuk Tombol Slider dan Teks MENURU */}
+              <div style={{
+                position: 'relative',
+                marginTop: isMobile ? '4rem' : '5rem',
+                marginBottom: isMobile ? '4rem' : '6rem',
+                paddingLeft: isMobile ? '2rem' : '4rem',
+                paddingRight: isMobile ? '2rem' : '4rem',
+                display: 'flex',
+                flexDirection: isMobile ? 'column' : 'row',
+                justifyContent: 'space-between',
+                alignItems: isMobile ? 'flex-start' : 'center',
+                gap: isMobile ? '2rem' : '0'
+              }}>
+                {/* Tombol Slider Index/Grid di kiri */}
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '1.5rem'
+                }}>
+                  <motion.button
+                    onClick={toggleSlider}
+                    style={{
+                      width: '120px',
+                      height: '50px',
+                      backgroundColor: '#0050B7',
+                      border: 'none',
+                      borderRadius: '25px',
+                      cursor: 'pointer',
+                      padding: 0,
+                      position: 'relative',
+                      display: 'flex',
+                      alignItems: 'center',
+                      overflow: 'hidden'
+                    }}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <div style={{
+                      position: 'absolute',
+                      width: '100%',
+                      height: '100%',
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      padding: '0 15px',
+                      boxSizing: 'border-box'
+                    }}>
+                      <span style={{
+                        color: 'white',
+                        fontSize: '1rem',
+                        fontWeight: '700',
+                        fontFamily: 'Helvetica, Arial, sans-serif',
+                        opacity: sliderPosition === "index" ? 1 : 0.5
+                      }}>
+                        INDEX
+                      </span>
+                      <span style={{
+                        color: 'white',
+                        fontSize: '1rem',
+                        fontWeight: '700',
+                        fontFamily: 'Helvetica, Arial, sans-serif',
+                        opacity: sliderPosition === "grid" ? 1 : 0.5
+                      }}>
+                        GRID
+                      </span>
+                    </div>
+                    
+                    <motion.div
+                      animate={{ x: sliderPosition === "index" ? 15 : 65 }}
+                      transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                      style={{
+                        width: '35px',
+                        height: '35px',
+                        backgroundColor: '#00FF00',
+                        borderRadius: '50%',
+                        position: 'absolute',
+                        left: '7px',
+                        boxShadow: '0 0 15px rgba(0, 255, 0, 0.7)'
+                      }}
+                    />
+                  </motion.button>
+
+                  <div style={{
+                    color: 'white',
+                    fontSize: '1.1rem',
+                    fontWeight: '600',
+                    fontFamily: 'Helvetica, Arial, sans-serif'
+                  }}>
+                    {sliderPosition === "index" ? "Index View" : "Grid View"}
+                  </div>
+                </div>
 
                 {/* Teks MENURU dengan animasi Plus (+) */}
                 <motion.div
@@ -3716,565 +4270,559 @@ export default function HomePage(): React.JSX.Element {
                 </motion.div>
               </div>
 
+              {/* Foto Card Design Section - 6 Card Horizontal */}
+              <div style={{
+                width: '100%',
+                padding: isMobile ? '0.5rem' : '1rem',
+                marginTop: isMobile ? '2rem' : '3rem',
+                marginBottom: isMobile ? '3rem' : '4rem',
+                boxSizing: 'border-box',
+                position: 'relative'
+              }}>
+                {/* Judul di Atas Foto - Kiri Tengah */}
+                <div style={{
+                  marginBottom: isMobile ? '1.5rem' : '2rem',
+                  paddingLeft: isMobile ? '1rem' : '2rem'
+                }}>
+                  <div style={{
+                    color: 'white',
+                    fontSize: isMobile ? '1.3rem' : '1.6rem',
+                    fontWeight: '400',
+                    fontFamily: 'Helvetica, Arial, sans-serif'
+                  }}>
+                    Design Collection
+                  </div>
+                </div>
 
-        {/* Foto Card Design Section - 6 Card Horizontal */}
-<div style={{
-  width: '100%',
-  padding: isMobile ? '0.5rem' : '1rem',
-  marginTop: isMobile ? '2rem' : '3rem',
-  marginBottom: isMobile ? '3rem' : '4rem',
-  boxSizing: 'border-box',
-  position: 'relative'
-}}>
-  {/* Judul di Atas Foto - Kiri Tengah */}
-  <div style={{
-    marginBottom: isMobile ? '1.5rem' : '2rem',
-    paddingLeft: isMobile ? '1rem' : '2rem'
-  }}>
-    <div style={{
-      color: 'white',
-      fontSize: isMobile ? '1.3rem' : '1.6rem',
-      fontWeight: '400',
-      fontFamily: 'Helvetica, Arial, sans-serif'
-    }}>
-      Design Collection
-    </div>
-  </div>
+                {/* Container 6 Foto Card Horizontal - Tengah */}
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  gap: isMobile ? '0.8rem' : '1rem',
+                  padding: isMobile ? '0 0.5rem' : '0 1rem',
+                  margin: '0 auto',
+                  width: '100%',
+                  flexWrap: 'wrap',
+                  maxWidth: '1400px'
+                }}>
+                  
+                  {/* Card 1 dengan Link */}
+                  <a 
+                    href="/visual-design" 
+                    style={{
+                      textDecoration: 'none',
+                      position: 'relative',
+                      width: isMobile ? '180px' : '220px',
+                      height: isMobile ? '250px' : '320px',
+                      borderRadius: '12px',
+                      overflow: 'hidden',
+                      flexShrink: 0,
+                      display: 'block'
+                    }}
+                  >
+                    {/* Foto Murni */}
+                    <img 
+                      src="images/5.jpg" 
+                      alt="Visual Design"
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover',
+                        display: 'block',
+                        borderRadius: '12px'
+                      }}
+                      onError={(e) => {
+                        e.currentTarget.style.backgroundColor = '#111';
+                        e.currentTarget.style.display = 'flex';
+                        e.currentTarget.style.alignItems = 'center';
+                        e.currentTarget.style.justifyContent = 'center';
+                        e.currentTarget.style.color = '#fff';
+                        e.currentTarget.innerHTML = '<div style="padding: 1rem; text-align: center; color: #fff;">Visual Design</div>';
+                      }}
+                    />
+                    
+                    {/* Container Teks dan SVG di Bawah - Sejajar */}
+                    <div style={{
+                      position: 'absolute',
+                      bottom: '1rem',
+                      left: 0,
+                      width: '100%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      padding: '0 1rem',
+                      boxSizing: 'border-box'
+                    }}>
+                      {/* Teks Lengkap - Normal */}
+                      <div style={{
+                        color: 'black',
+                        fontSize: isMobile ? '0.9rem' : '1rem',
+                        fontWeight: '400',
+                        fontFamily: 'Helvetica, Arial, sans-serif',
+                        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                        padding: '0.3rem 0.6rem',
+                        borderRadius: '4px'
+                      }}>
+                        Visual Design
+                      </div>
+                      
+                      {/* SVG Panah Serong Kanan Modern */}
+                      <div style={{
+                        marginLeft: '0.5rem',
+                        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                        padding: '0.3rem',
+                        borderRadius: '50%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                      }}>
+                        <svg
+                          width={isMobile ? "16" : "18"}
+                          height={isMobile ? "16" : "18"}
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          {/* Panah serong kanan modern */}
+                          <path 
+                            d="M7 17L17 7M17 7H7M17 7V17" 
+                            stroke="black" 
+                            strokeWidth="2" 
+                            strokeLinecap="round" 
+                            strokeLinejoin="round"
+                          />
+                        </svg>
+                      </div>
+                    </div>
+                  </a>
 
-  {/* Container 6 Foto Card Horizontal - Tengah */}
-  <div style={{
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: isMobile ? '0.8rem' : '1rem',
-    padding: isMobile ? '0 0.5rem' : '0 1rem',
-    margin: '0 auto',
-    width: '100%',
-    flexWrap: 'wrap',
-    maxWidth: '1400px'
-  }}>
-    
-    {/* Card 1 dengan Link */}
-    <a 
-      href="/visual-design" 
-      style={{
-        textDecoration: 'none',
-        position: 'relative',
-        width: isMobile ? '180px' : '220px',
-        height: isMobile ? '250px' : '320px',
-        borderRadius: '12px',
-        overflow: 'hidden',
-        flexShrink: 0,
-        display: 'block'
-      }}
-    >
-      {/* Foto Murni */}
-      <img 
-        src="images/5.jpg" 
-        alt="Visual Design"
-        style={{
-          width: '100%',
-          height: '100%',
-          objectFit: 'cover',
-          display: 'block',
-          borderRadius: '12px'
-        }}
-        onError={(e) => {
-          e.currentTarget.style.backgroundColor = '#111';
-          e.currentTarget.style.display = 'flex';
-          e.currentTarget.style.alignItems = 'center';
-          e.currentTarget.style.justifyContent = 'center';
-          e.currentTarget.style.color = '#fff';
-          e.currentTarget.innerHTML = '<div style="padding: 1rem; text-align: center; color: #fff;">Visual Design</div>';
-        }}
-      />
-      
-      {/* Container Teks dan SVG di Bawah - Sejajar */}
-      <div style={{
-        position: 'absolute',
-        bottom: '1rem',
-        left: 0,
-        width: '100%',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        padding: '0 1rem',
-        boxSizing: 'border-box'
-      }}>
-        {/* Teks Lengkap - Normal */}
-        <div style={{
-          color: 'black',
-          fontSize: isMobile ? '0.9rem' : '1rem',
-          fontWeight: '400',
-          fontFamily: 'Helvetica, Arial, sans-serif',
-          backgroundColor: 'rgba(255, 255, 255, 0.9)',
-          padding: '0.3rem 0.6rem',
-          borderRadius: '4px'
-        }}>
-          Visual Design
-        </div>
-        
-        {/* SVG Panah Serong Kanan Modern */}
-        <div style={{
-          marginLeft: '0.5rem',
-          backgroundColor: 'rgba(255, 255, 255, 0.9)',
-          padding: '0.3rem',
-          borderRadius: '50%',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center'
-        }}>
-          <svg
-            width={isMobile ? "16" : "18"}
-            height={isMobile ? "16" : "18"}
-            viewBox="0 0 24 24"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            {/* Panah serong kanan modern */}
-            <path 
-              d="M7 17L17 7M17 7H7M17 7V17" 
-              stroke="black" 
-              strokeWidth="2" 
-              strokeLinecap="round" 
-              strokeLinejoin="round"
-            />
-          </svg>
-        </div>
-      </div>
-    </a>
+                  {/* Card 2 dengan Link */}
+                  <a 
+                    href="/brand-identity" 
+                    style={{
+                      textDecoration: 'none',
+                      position: 'relative',
+                      width: isMobile ? '180px' : '220px',
+                      height: isMobile ? '250px' : '320px',
+                      borderRadius: '12px',
+                      overflow: 'hidden',
+                      flexShrink: 0,
+                      display: 'block'
+                    }}
+                  >
+                    <img 
+                      src="images/5.jpg" 
+                      alt="Brand Identity"
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover',
+                        display: 'block',
+                        borderRadius: '12px'
+                      }}
+                      onError={(e) => {
+                        e.currentTarget.style.backgroundColor = '#111';
+                        e.currentTarget.style.display = 'flex';
+                        e.currentTarget.style.alignItems = 'center';
+                        e.currentTarget.style.justifyContent = 'center';
+                        e.currentTarget.style.color = '#fff';
+                        e.currentTarget.innerHTML = '<div style="padding: 1rem; text-align: center; color: #fff;">Brand Identity</div>';
+                      }}
+                    />
+                    
+                    <div style={{
+                      position: 'absolute',
+                      bottom: '1rem',
+                      left: 0,
+                      width: '100%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      padding: '0 1rem',
+                      boxSizing: 'border-box'
+                    }}>
+                      <div style={{
+                        color: 'black',
+                        fontSize: isMobile ? '0.9rem' : '1rem',
+                        fontWeight: '400',
+                        fontFamily: 'Helvetica, Arial, sans-serif',
+                        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                        padding: '0.3rem 0.6rem',
+                        borderRadius: '4px'
+                      }}>
+                        Brand Identity
+                      </div>
+                      
+                      <div style={{
+                        marginLeft: '0.5rem',
+                        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                        padding: '0.3rem',
+                        borderRadius: '50%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                      }}>
+                        <svg
+                          width={isMobile ? "16" : "18"}
+                          height={isMobile ? "16" : "18"}
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path 
+                            d="M7 17L17 7M17 7H7M17 7V17" 
+                            stroke="black" 
+                            strokeWidth="2" 
+                            strokeLinecap="round" 
+                            strokeLinejoin="round"
+                          />
+                        </svg>
+                      </div>
+                    </div>
+                  </a>
 
-    {/* Card 2 dengan Link */}
-    <a 
-      href="/brand-identity" 
-      style={{
-        textDecoration: 'none',
-        position: 'relative',
-        width: isMobile ? '180px' : '220px',
-        height: isMobile ? '250px' : '320px',
-        borderRadius: '12px',
-        overflow: 'hidden',
-        flexShrink: 0,
-        display: 'block'
-      }}
-    >
-      <img 
-        src="images/5.jpg" 
-        alt="Brand Identity"
-        style={{
-          width: '100%',
-          height: '100%',
-          objectFit: 'cover',
-          display: 'block',
-          borderRadius: '12px'
-        }}
-        onError={(e) => {
-          e.currentTarget.style.backgroundColor = '#111';
-          e.currentTarget.style.display = 'flex';
-          e.currentTarget.style.alignItems = 'center';
-          e.currentTarget.style.justifyContent = 'center';
-          e.currentTarget.style.color = '#fff';
-          e.currentTarget.innerHTML = '<div style="padding: 1rem; text-align: center; color: #fff;">Brand Identity</div>';
-        }}
-      />
-      
-      <div style={{
-        position: 'absolute',
-        bottom: '1rem',
-        left: 0,
-        width: '100%',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        padding: '0 1rem',
-        boxSizing: 'border-box'
-      }}>
-        <div style={{
-          color: 'black',
-          fontSize: isMobile ? '0.9rem' : '1rem',
-          fontWeight: '400',
-          fontFamily: 'Helvetica, Arial, sans-serif',
-          backgroundColor: 'rgba(255, 255, 255, 0.9)',
-          padding: '0.3rem 0.6rem',
-          borderRadius: '4px'
-        }}>
-          Brand Identity
-        </div>
-        
-        <div style={{
-          marginLeft: '0.5rem',
-          backgroundColor: 'rgba(255, 255, 255, 0.9)',
-          padding: '0.3rem',
-          borderRadius: '50%',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center'
-        }}>
-          <svg
-            width={isMobile ? "16" : "18"}
-            height={isMobile ? "16" : "18"}
-            viewBox="0 0 24 24"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path 
-              d="M7 17L17 7M17 7H7M17 7V17" 
-              stroke="black" 
-              strokeWidth="2" 
-              strokeLinecap="round" 
-              strokeLinejoin="round"
-            />
-          </svg>
-        </div>
-      </div>
-    </a>
+                  {/* Card 3 dengan Link */}
+                  <a 
+                    href="/ui-ux-design" 
+                    style={{
+                      textDecoration: 'none',
+                      position: 'relative',
+                      width: isMobile ? '180px' : '220px',
+                      height: isMobile ? '250px' : '320px',
+                      borderRadius: '12px',
+                      overflow: 'hidden',
+                      flexShrink: 0,
+                      display: 'block'
+                    }}
+                  >
+                    <img 
+                      src="images/5.jpg" 
+                      alt="UI/UX Design"
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover',
+                        display: 'block',
+                        borderRadius: '12px'
+                      }}
+                      onError={(e) => {
+                        e.currentTarget.style.backgroundColor = '#111';
+                        e.currentTarget.style.display = 'flex';
+                        e.currentTarget.style.alignItems = 'center';
+                        e.currentTarget.style.justifyContent = 'center';
+                        e.currentTarget.style.color = '#fff';
+                        e.currentTarget.innerHTML = '<div style="padding: 1rem; text-align: center; color: #fff;">UI/UX Design</div>';
+                      }}
+                    />
+                    
+                    <div style={{
+                      position: 'absolute',
+                      bottom: '1rem',
+                      left: 0,
+                      width: '100%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      padding: '0 1rem',
+                      boxSizing: 'border-box'
+                    }}>
+                      <div style={{
+                        color: 'black',
+                        fontSize: isMobile ? '0.9rem' : '1rem',
+                        fontWeight: '400',
+                        fontFamily: 'Helvetica, Arial, sans-serif',
+                        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                        padding: '0.3rem 0.6rem',
+                        borderRadius: '4px'
+                      }}>
+                        UI/UX Design
+                      </div>
+                      
+                      <div style={{
+                        marginLeft: '0.5rem',
+                        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                        padding: '0.3rem',
+                        borderRadius: '50%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                      }}>
+                        <svg
+                          width={isMobile ? "16" : "18"}
+                          height={isMobile ? "16" : "18"}
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path 
+                            d="M7 17L17 7M17 7H7M17 7V17" 
+                            stroke="black" 
+                            strokeWidth="2" 
+                            strokeLinecap="round" 
+                            strokeLinejoin="round"
+                          />
+                        </svg>
+                      </div>
+                    </div>
+                  </a>
 
-    {/* Card 3 dengan Link */}
-    <a 
-      href="/ui-ux-design" 
-      style={{
-        textDecoration: 'none',
-        position: 'relative',
-        width: isMobile ? '180px' : '220px',
-        height: isMobile ? '250px' : '320px',
-        borderRadius: '12px',
-        overflow: 'hidden',
-        flexShrink: 0,
-        display: 'block'
-      }}
-    >
-      <img 
-        src="images/5.jpg" 
-        alt="UI/UX Design"
-        style={{
-          width: '100%',
-          height: '100%',
-          objectFit: 'cover',
-          display: 'block',
-          borderRadius: '12px'
-        }}
-        onError={(e) => {
-          e.currentTarget.style.backgroundColor = '#111';
-          e.currentTarget.style.display = 'flex';
-          e.currentTarget.style.alignItems = 'center';
-          e.currentTarget.style.justifyContent = 'center';
-          e.currentTarget.style.color = '#fff';
-          e.currentTarget.innerHTML = '<div style="padding: 1rem; text-align: center; color: #fff;">UI/UX Design</div>';
-        }}
-      />
-      
-      <div style={{
-        position: 'absolute',
-        bottom: '1rem',
-        left: 0,
-        width: '100%',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        padding: '0 1rem',
-        boxSizing: 'border-box'
-      }}>
-        <div style={{
-          color: 'black',
-          fontSize: isMobile ? '0.9rem' : '1rem',
-          fontWeight: '400',
-          fontFamily: 'Helvetica, Arial, sans-serif',
-          backgroundColor: 'rgba(255, 255, 255, 0.9)',
-          padding: '0.3rem 0.6rem',
-          borderRadius: '4px'
-        }}>
-          UI/UX Design
-        </div>
-        
-        <div style={{
-          marginLeft: '0.5rem',
-          backgroundColor: 'rgba(255, 255, 255, 0.9)',
-          padding: '0.3rem',
-          borderRadius: '50%',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center'
-        }}>
-          <svg
-            width={isMobile ? "16" : "18"}
-            height={isMobile ? "16" : "18"}
-            viewBox="0 0 24 24"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path 
-              d="M7 17L17 7M17 7H7M17 7V17" 
-              stroke="black" 
-              strokeWidth="2" 
-              strokeLinecap="round" 
-              strokeLinejoin="round"
-            />
-          </svg>
-        </div>
-      </div>
-    </a>
+                  {/* Card 4 dengan Link */}
+                  <a 
+                    href="/motion-graphics" 
+                    style={{
+                      textDecoration: 'none',
+                      position: 'relative',
+                      width: isMobile ? '180px' : '220px',
+                      height: isMobile ? '250px' : '320px',
+                      borderRadius: '12px',
+                      overflow: 'hidden',
+                      flexShrink: 0,
+                      display: 'block'
+                    }}
+                  >
+                    <img 
+                      src="images/5.jpg" 
+                      alt="Motion Graphics"
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover',
+                        display: 'block',
+                        borderRadius: '12px'
+                      }}
+                      onError={(e) => {
+                        e.currentTarget.style.backgroundColor = '#111';
+                        e.currentTarget.style.display = 'flex';
+                        e.currentTarget.style.alignItems = 'center';
+                        e.currentTarget.style.justifyContent = 'center';
+                        e.currentTarget.style.color = '#fff';
+                        e.currentTarget.innerHTML = '<div style="padding: 1rem; text-align: center; color: #fff;">Motion Graphics</div>';
+                      }}
+                    />
+                    
+                    <div style={{
+                      position: 'absolute',
+                      bottom: '1rem',
+                      left: 0,
+                      width: '100%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      padding: '0 1rem',
+                      boxSizing: 'border-box'
+                    }}>
+                      <div style={{
+                        color: 'black',
+                        fontSize: isMobile ? '0.9rem' : '1rem',
+                        fontWeight: '400',
+                        fontFamily: 'Helvetica, Arial, sans-serif',
+                        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                        padding: '0.3rem 0.6rem',
+                        borderRadius: '4px'
+                      }}>
+                        Motion Graphics
+                      </div>
+                      
+                      <div style={{
+                        marginLeft: '0.5rem',
+                        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                        padding: '0.3rem',
+                        borderRadius: '50%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                      }}>
+                        <svg
+                          width={isMobile ? "16" : "18"}
+                          height={isMobile ? "16" : "18"}
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path 
+                            d="M7 17L17 7M17 7H7M17 7V17" 
+                            stroke="black" 
+                            strokeWidth="2" 
+                            strokeLinecap="round" 
+                            strokeLinejoin="round"
+                          />
+                        </svg>
+                      </div>
+                    </div>
+                  </a>
 
-    {/* Card 4 dengan Link */}
-    <a 
-      href="/motion-graphics" 
-      style={{
-        textDecoration: 'none',
-        position: 'relative',
-        width: isMobile ? '180px' : '220px',
-        height: isMobile ? '250px' : '320px',
-        borderRadius: '12px',
-        overflow: 'hidden',
-        flexShrink: 0,
-        display: 'block'
-      }}
-    >
-      <img 
-        src="images/5.jpg" 
-        alt="Motion Graphics"
-        style={{
-          width: '100%',
-          height: '100%',
-          objectFit: 'cover',
-          display: 'block',
-          borderRadius: '12px'
-        }}
-        onError={(e) => {
-          e.currentTarget.style.backgroundColor = '#111';
-          e.currentTarget.style.display = 'flex';
-          e.currentTarget.style.alignItems = 'center';
-          e.currentTarget.style.justifyContent = 'center';
-          e.currentTarget.style.color = '#fff';
-          e.currentTarget.innerHTML = '<div style="padding: 1rem; text-align: center; color: #fff;">Motion Graphics</div>';
-        }}
-      />
-      
-      <div style={{
-        position: 'absolute',
-        bottom: '1rem',
-        left: 0,
-        width: '100%',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        padding: '0 1rem',
-        boxSizing: 'border-box'
-      }}>
-        <div style={{
-          color: 'black',
-          fontSize: isMobile ? '0.9rem' : '1rem',
-          fontWeight: '400',
-          fontFamily: 'Helvetica, Arial, sans-serif',
-          backgroundColor: 'rgba(255, 255, 255, 0.9)',
-          padding: '0.3rem 0.6rem',
-          borderRadius: '4px'
-        }}>
-          Motion Graphics
-        </div>
-        
-        <div style={{
-          marginLeft: '0.5rem',
-          backgroundColor: 'rgba(255, 255, 255, 0.9)',
-          padding: '0.3rem',
-          borderRadius: '50%',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center'
-        }}>
-          <svg
-            width={isMobile ? "16" : "18"}
-            height={isMobile ? "16" : "18"}
-            viewBox="0 0 24 24"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path 
-              d="M7 17L17 7M17 7H7M17 7V17" 
-              stroke="black" 
-              strokeWidth="2" 
-              strokeLinecap="round" 
-              strokeLinejoin="round"
-            />
-          </svg>
-        </div>
-      </div>
-    </a>
+                  {/* Card 5 dengan Link */}
+                  <a 
+                    href="/print-design" 
+                    style={{
+                      textDecoration: 'none',
+                      position: 'relative',
+                      width: isMobile ? '180px' : '220px',
+                      height: isMobile ? '250px' : '320px',
+                      borderRadius: '12px',
+                      overflow: 'hidden',
+                      flexShrink: 0,
+                      display: 'block'
+                    }}
+                  >
+                    <img 
+                      src="images/5.jpg" 
+                      alt="Print Design"
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover',
+                        display: 'block',
+                        borderRadius: '12px'
+                      }}
+                      onError={(e) => {
+                        e.currentTarget.style.backgroundColor = '#111';
+                        e.currentTarget.style.display = 'flex';
+                        e.currentTarget.style.alignItems = 'center';
+                        e.currentTarget.style.justifyContent = 'center';
+                        e.currentTarget.style.color = '#fff';
+                        e.currentTarget.innerHTML = '<div style="padding: 1rem; text-align: center; color: #fff;">Print Design</div>';
+                      }}
+                    />
+                    
+                    <div style={{
+                      position: 'absolute',
+                      bottom: '1rem',
+                      left: 0,
+                      width: '100%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      padding: '0 1rem',
+                      boxSizing: 'border-box'
+                    }}>
+                      <div style={{
+                        color: 'black',
+                        fontSize: isMobile ? '0.9rem' : '1rem',
+                        fontWeight: '400',
+                        fontFamily: 'Helvetica, Arial, sans-serif',
+                        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                        padding: '0.3rem 0.6rem',
+                        borderRadius: '4px'
+                      }}>
+                        Print Design
+                      </div>
+                      
+                      <div style={{
+                        marginLeft: '0.5rem',
+                        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                        padding: '0.3rem',
+                        borderRadius: '50%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                      }}>
+                        <svg
+                          width={isMobile ? "16" : "18"}
+                          height={isMobile ? "16" : "18"}
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path 
+                            d="M7 17L17 7M17 7H7M17 7V17" 
+                            stroke="black" 
+                            strokeWidth="2" 
+                            strokeLinecap="round" 
+                            strokeLinejoin="round"
+                          />
+                        </svg>
+                      </div>
+                    </div>
+                  </a>
 
-    {/* Card 5 dengan Link */}
-    <a 
-      href="/print-design" 
-      style={{
-        textDecoration: 'none',
-        position: 'relative',
-        width: isMobile ? '180px' : '220px',
-        height: isMobile ? '250px' : '320px',
-        borderRadius: '12px',
-        overflow: 'hidden',
-        flexShrink: 0,
-        display: 'block'
-      }}
-    >
-      <img 
-        src="images/5.jpg" 
-        alt="Print Design"
-        style={{
-          width: '100%',
-          height: '100%',
-          objectFit: 'cover',
-          display: 'block',
-          borderRadius: '12px'
-        }}
-        onError={(e) => {
-          e.currentTarget.style.backgroundColor = '#111';
-          e.currentTarget.style.display = 'flex';
-          e.currentTarget.style.alignItems = 'center';
-          e.currentTarget.style.justifyContent = 'center';
-          e.currentTarget.style.color = '#fff';
-          e.currentTarget.innerHTML = '<div style="padding: 1rem; text-align: center; color: #fff;">Print Design</div>';
-        }}
-      />
-      
-      <div style={{
-        position: 'absolute',
-        bottom: '1rem',
-        left: 0,
-        width: '100%',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        padding: '0 1rem',
-        boxSizing: 'border-box'
-      }}>
-        <div style={{
-          color: 'black',
-          fontSize: isMobile ? '0.9rem' : '1rem',
-          fontWeight: '400',
-          fontFamily: 'Helvetica, Arial, sans-serif',
-          backgroundColor: 'rgba(255, 255, 255, 0.9)',
-          padding: '0.3rem 0.6rem',
-          borderRadius: '4px'
-        }}>
-          Print Design
-        </div>
-        
-        <div style={{
-          marginLeft: '0.5rem',
-          backgroundColor: 'rgba(255, 255, 255, 0.9)',
-          padding: '0.3rem',
-          borderRadius: '50%',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center'
-        }}>
-          <svg
-            width={isMobile ? "16" : "18"}
-            height={isMobile ? "16" : "18"}
-            viewBox="0 0 24 24"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path 
-              d="M7 17L17 7M17 7H7M17 7V17" 
-              stroke="black" 
-              strokeWidth="2" 
-              strokeLinecap="round" 
-              strokeLinejoin="round"
-            />
-          </svg>
-        </div>
-      </div>
-    </a>
-
-    {/* Card 6 dengan Link */}
-    <a 
-      href="/web-design" 
-      style={{
-        textDecoration: 'none',
-        position: 'relative',
-        width: isMobile ? '180px' : '220px',
-        height: isMobile ? '250px' : '320px',
-        borderRadius: '12px',
-        overflow: 'hidden',
-        flexShrink: 0,
-        display: 'block'
-      }}
-    >
-      <img 
-        src="images/5.jpg" 
-        alt="Web Design"
-        style={{
-          width: '100%',
-          height: '100%',
-          objectFit: 'cover',
-          display: 'block',
-          borderRadius: '12px'
-        }}
-        onError={(e) => {
-          e.currentTarget.style.backgroundColor = '#111';
-          e.currentTarget.style.display = 'flex';
-          e.currentTarget.style.alignItems = 'center';
-          e.currentTarget.style.justifyContent = 'center';
-          e.currentTarget.style.color = '#fff';
-          e.currentTarget.innerHTML = '<div style="padding: 1rem; text-align: center; color: #fff;">Web Design</div>';
-        }}
-      />
-      
-      <div style={{
-        position: 'absolute',
-        bottom: '1rem',
-        left: 0,
-        width: '100%',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        padding: '0 1rem',
-        boxSizing: 'border-box'
-      }}>
-        <div style={{
-          color: 'black',
-          fontSize: isMobile ? '0.9rem' : '1rem',
-          fontWeight: '400',
-          fontFamily: 'Helvetica, Arial, sans-serif',
-          backgroundColor: 'rgba(255, 255, 255, 0.9)',
-          padding: '0.3rem 0.6rem',
-          borderRadius: '4px'
-        }}>
-          Web Design
-        </div>
-        
-        <div style={{
-          marginLeft: '0.5rem',
-          backgroundColor: 'rgba(255, 255, 255, 0.9)',
-          padding: '0.3rem',
-          borderRadius: '50%',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center'
-        }}>
-          <svg
-            width={isMobile ? "16" : "18"}
-            height={isMobile ? "16" : "18"}
-            viewBox="0 0 24 24"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path 
-              d="M7 17L17 7M17 7H7M17 7V17" 
-              stroke="black" 
-              strokeWidth="2" 
-              strokeLinecap="round" 
-              strokeLinejoin="round"
-            />
-          </svg>
-        </div>
-      </div>
-    </a>
-  </div>
-</div>
-
-
-
-
-        
+                  {/* Card 6 dengan Link */}
+                  <a 
+                    href="/web-design" 
+                    style={{
+                      textDecoration: 'none',
+                      position: 'relative',
+                      width: isMobile ? '180px' : '220px',
+                      height: isMobile ? '250px' : '320px',
+                      borderRadius: '12px',
+                      overflow: 'hidden',
+                      flexShrink: 0,
+                      display: 'block'
+                    }}
+                  >
+                    <img 
+                      src="images/5.jpg" 
+                      alt="Web Design"
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover',
+                        display: 'block',
+                        borderRadius: '12px'
+                      }}
+                      onError={(e) => {
+                        e.currentTarget.style.backgroundColor = '#111';
+                        e.currentTarget.style.display = 'flex';
+                        e.currentTarget.style.alignItems = 'center';
+                        e.currentTarget.style.justifyContent = 'center';
+                        e.currentTarget.style.color = '#fff';
+                        e.currentTarget.innerHTML = '<div style="padding: 1rem; text-align: center; color: #fff;">Web Design</div>';
+                      }}
+                    />
+                    
+                    <div style={{
+                      position: 'absolute',
+                      bottom: '1rem',
+                      left: 0,
+                      width: '100%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      padding: '0 1rem',
+                      boxSizing: 'border-box'
+                    }}>
+                      <div style={{
+                        color: 'black',
+                        fontSize: isMobile ? '0.9rem' : '1rem',
+                        fontWeight: '400',
+                        fontFamily: 'Helvetica, Arial, sans-serif',
+                        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                        padding: '0.3rem 0.6rem',
+                        borderRadius: '4px'
+                      }}>
+                        Web Design
+                      </div>
+                      
+                      <div style={{
+                        marginLeft: '0.5rem',
+                        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                        padding: '0.3rem',
+                        borderRadius: '50%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                      }}>
+                        <svg
+                          width={isMobile ? "16" : "18"}
+                          height={isMobile ? "16" : "18"}
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path 
+                            d="M7 17L17 7M17 7H7M17 7V17" 
+                            stroke="black" 
+                            strokeWidth="2" 
+                            strokeLinecap="round" 
+                            strokeLinejoin="round"
+                          />
+                        </svg>
+                      </div>
+                    </div>
+                  </a>
+                </div>
+              </div>
 
               {/* Progress Bar dengan 3 Foto dan Komentar */}
               <div style={{
@@ -4474,561 +5022,553 @@ export default function HomePage(): React.JSX.Element {
                 </div>
               </div>
 
+              {/* Foto Card Design Section - 4 Card Pojok Kanan */}
+              <div style={{
+                width: '100%',
+                padding: isMobile ? '1rem' : '2rem',
+                marginTop: isMobile ? '2rem' : '4rem',
+                marginBottom: isMobile ? '3rem' : '5rem',
+                boxSizing: 'border-box',
+                position: 'relative'
+              }}>
+                {/* Judul di Atas Foto - Tanpa Background Putih */}
+                <div style={{
+                  marginBottom: isMobile ? '2rem' : '3rem',
+                  paddingLeft: isMobile ? '0' : '0'
+                }}>
+                  <div style={{
+                    color: 'white',
+                    fontSize: isMobile ? '2rem' : '3rem',
+                    fontWeight: '700',
+                    fontFamily: 'Helvetica, Arial, sans-serif',
+                    letterSpacing: '1px',
+                    textAlign: 'left'
+                  }}>
+                    Design Collection
+                  </div>
+                </div>
 
-{/* Foto Card Design Section - 4 Card Pojok Kanan */}
-<div style={{
-  width: '100%',
-  padding: isMobile ? '1rem' : '2rem',
-  marginTop: isMobile ? '2rem' : '4rem',
-  marginBottom: isMobile ? '3rem' : '5rem',
-  boxSizing: 'border-box',
-  position: 'relative'
-}}>
-  {/* Judul di Atas Foto - Tanpa Background Putih */}
-  <div style={{
-    marginBottom: isMobile ? '2rem' : '3rem',
-    paddingLeft: isMobile ? '0' : '0'
-  }}>
-    <div style={{
-      color: 'white',
-      fontSize: isMobile ? '2rem' : '3rem',
-      fontWeight: '700',
-      fontFamily: 'Helvetica, Arial, sans-serif',
-      letterSpacing: '1px',
-      textAlign: 'left'
-    }}>
-      Design Collection
-    </div>
-  </div>
+                {/* 4 Card Foto Pojok Kanan - Lebar dan Tinggi Besar */}
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'flex-end',
+                  alignItems: 'flex-start',
+                  gap: isMobile ? '1rem' : '2rem',
+                  flexWrap: 'wrap',
+                  marginLeft: 'auto',
+                  width: isMobile ? '100%' : '85%'
+                }}>
+                  
+                  {/* Card 1 */}
+                  <div style={{
+                    position: 'relative',
+                    width: isMobile ? 'calc(50% - 0.5rem)' : '350px',
+                    height: isMobile ? '400px' : '550px',
+                    borderRadius: '12px',
+                    overflow: 'hidden',
+                    flexShrink: 0
+                  }}>
+                    <img 
+                      src="images/5.jpg" 
+                      alt="Visual Design"
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover',
+                        display: 'block',
+                        borderRadius: '12px'
+                      }}
+                      onError={(e) => {
+                        e.currentTarget.style.backgroundColor = '#111';
+                        e.currentTarget.style.display = 'flex';
+                        e.currentTarget.style.alignItems = 'center';
+                        e.currentTarget.style.justifyContent = 'center';
+                        e.currentTarget.style.color = '#fff';
+                        e.currentTarget.innerHTML = '<div style="padding: 1rem; text-align: center; color: #fff; font-size: 1.5rem;">Visual Design</div>';
+                      }}
+                    />
+                    
+                    {/* Overlay Konten di Dalam Foto */}
+                    <div style={{
+                      position: 'absolute',
+                      bottom: 0,
+                      left: 0,
+                      right: 0,
+                      background: 'linear-gradient(to top, rgba(0,0,0,0.8), transparent)',
+                      padding: isMobile ? '1.5rem 1rem' : '2rem 1.5rem',
+                      color: 'white'
+                    }}>
+                      {/* Judul dan Toggle Icon dalam satu baris */}
+                      <div style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        marginBottom: '0.5rem'
+                      }}>
+                        <div style={{
+                          fontSize: isMobile ? '1.3rem' : '1.8rem',
+                          fontWeight: '600',
+                          fontFamily: 'Helvetica, Arial, sans-serif'
+                        }}>
+                          Visual Design
+                        </div>
+                        
+                        {/* Toggle Icon di pojok kanan */}
+                        <div 
+                          id="toggle1"
+                          style={{
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            width: '32px',
+                            height: '32px',
+                            color: 'white',
+                            opacity: '0.8',
+                            transition: 'all 0.3s ease'
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.opacity = '1';
+                            e.currentTarget.style.transform = 'scale(1.1)';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.opacity = '0.8';
+                            e.currentTarget.style.transform = 'scale(1)';
+                          }}
+                        >
+                          {/* Toggle Icon: Hamburger atau plus */}
+                          <svg 
+                            width="24" 
+                            height="24" 
+                            viewBox="0 0 24 24" 
+                            fill="none" 
+                            stroke="currentColor" 
+                            strokeWidth="2"
+                          >
+                            <line x1="3" y1="12" x2="21" y2="12" />
+                            <line x1="3" y1="6" x2="21" y2="6" />
+                            <line x1="3" y1="18" x2="21" y2="18" />
+                          </svg>
+                        </div>
+                      </div>
+                      
+                      {/* Deskripsi singkat */}
+                      <div style={{
+                        fontSize: isMobile ? '0.9rem' : '1rem',
+                        opacity: '0.9',
+                        fontFamily: 'Helvetica, Arial, sans-serif',
+                        lineHeight: '1.5'
+                      }}>
+                        Creating compelling visual experiences.
+                      </div>
+                    </div>
+                  </div>
 
-  {/* 4 Card Foto Pojok Kanan - Lebar dan Tinggi Besar */}
-  <div style={{
-    display: 'flex',
-    justifyContent: 'flex-end',
-    alignItems: 'flex-start',
-    gap: isMobile ? '1rem' : '2rem',
-    flexWrap: 'wrap',
-    marginLeft: 'auto',
-    width: isMobile ? '100%' : '85%'
-  }}>
-    
-    {/* Card 1 */}
-    <div style={{
-      position: 'relative',
-      width: isMobile ? 'calc(50% - 0.5rem)' : '350px',
-      height: isMobile ? '400px' : '550px',
-      borderRadius: '12px',
-      overflow: 'hidden',
-      flexShrink: 0
-    }}>
-      <img 
-        src="images/5.jpg" 
-        alt="Visual Design"
-        style={{
-          width: '100%',
-          height: '100%',
-          objectFit: 'cover',
-          display: 'block',
-          borderRadius: '12px'
-        }}
-        onError={(e) => {
-          e.currentTarget.style.backgroundColor = '#111';
-          e.currentTarget.style.display = 'flex';
-          e.currentTarget.style.alignItems = 'center';
-          e.currentTarget.style.justifyContent = 'center';
-          e.currentTarget.style.color = '#fff';
-          e.currentTarget.innerHTML = '<div style="padding: 1rem; text-align: center; color: #fff; font-size: 1.5rem;">Visual Design</div>';
-        }}
-      />
-      
-      {/* Overlay Konten di Dalam Foto */}
-      <div style={{
-        position: 'absolute',
-        bottom: 0,
-        left: 0,
-        right: 0,
-        background: 'linear-gradient(to top, rgba(0,0,0,0.8), transparent)',
-        padding: isMobile ? '1.5rem 1rem' : '2rem 1.5rem',
-        color: 'white'
-      }}>
-        {/* Judul dan Toggle Icon dalam satu baris */}
-        <div style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: '0.5rem'
-        }}>
-          <div style={{
-            fontSize: isMobile ? '1.3rem' : '1.8rem',
-            fontWeight: '600',
-            fontFamily: 'Helvetica, Arial, sans-serif'
-          }}>
-            Visual Design
-          </div>
-          
-          {/* Toggle Icon di pojok kanan */}
-          <div 
-            id="toggle1"
-            style={{
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              width: '32px',
-              height: '32px',
-              color: 'white',
-              opacity: '0.8',
-              transition: 'all 0.3s ease'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.opacity = '1';
-              e.currentTarget.style.transform = 'scale(1.1)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.opacity = '0.8';
-              e.currentTarget.style.transform = 'scale(1)';
-            }}
-          >
-            {/* Toggle Icon: Hamburger atau plus */}
-            <svg 
-              width="24" 
-              height="24" 
-              viewBox="0 0 24 24" 
-              fill="none" 
-              stroke="currentColor" 
-              strokeWidth="2"
-            >
-              <line x1="3" y1="12" x2="21" y2="12" />
-              <line x1="3" y1="6" x2="21" y2="6" />
-              <line x1="3" y1="18" x2="21" y2="18" />
-            </svg>
-          </div>
-        </div>
-        
-        {/* Deskripsi singkat */}
-        <div style={{
-          fontSize: isMobile ? '0.9rem' : '1rem',
-          opacity: '0.9',
-          fontFamily: 'Helvetica, Arial, sans-serif',
-          lineHeight: '1.5'
-        }}>
-          Creating compelling visual experiences.
-        </div>
-      </div>
-    </div>
+                  {/* Card 2 */}
+                  <div style={{
+                    position: 'relative',
+                    width: isMobile ? 'calc(50% - 0.5rem)' : '350px',
+                    height: isMobile ? '400px' : '550px',
+                    borderRadius: '12px',
+                    overflow: 'hidden',
+                    flexShrink: 0
+                  }}>
+                    <img 
+                      src="images/5.jpg" 
+                      alt="Brand Identity"
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover',
+                        display: 'block',
+                        borderRadius: '12px'
+                      }}
+                      onError={(e) => {
+                        e.currentTarget.style.backgroundColor = '#111';
+                        e.currentTarget.style.display = 'flex';
+                        e.currentTarget.style.alignItems = 'center';
+                        e.currentTarget.style.justifyContent = 'center';
+                        e.currentTarget.style.color = '#fff';
+                        e.currentTarget.innerHTML = '<div style="padding: 1rem; text-align: center; color: #fff; font-size: 1.5rem;">Brand Identity</div>';
+                      }}
+                    />
+                    
+                    {/* Overlay Konten di Dalam Foto */}
+                    <div style={{
+                      position: 'absolute',
+                      bottom: 0,
+                      left: 0,
+                      right: 0,
+                      background: 'linear-gradient(to top, rgba(0,0,0,0.8), transparent)',
+                      padding: isMobile ? '1.5rem 1rem' : '2rem 1.5rem',
+                      color: 'white'
+                    }}>
+                      <div style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        marginBottom: '0.5rem'
+                      }}>
+                        <div style={{
+                          fontSize: isMobile ? '1.3rem' : '1.8rem',
+                          fontWeight: '600',
+                          fontFamily: 'Helvetica, Arial, sans-serif'
+                        }}>
+                          Brand Identity
+                        </div>
+                        
+                        {/* Toggle Icon di pojok kanan */}
+                        <div 
+                          id="toggle2"
+                          style={{
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            width: '32px',
+                            height: '32px',
+                            color: 'white',
+                            opacity: '0.8',
+                            transition: 'all 0.3s ease'
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.opacity = '1';
+                            e.currentTarget.style.transform = 'scale(1.1)';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.opacity = '0.8';
+                            e.currentTarget.style.transform = 'scale(1)';
+                          }}
+                        >
+                          <svg 
+                            width="24" 
+                            height="24" 
+                            viewBox="0 0 24 24" 
+                            fill="none" 
+                            stroke="currentColor" 
+                            strokeWidth="2"
+                          >
+                            <line x1="3" y1="12" x2="21" y2="12" />
+                            <line x1="3" y1="6" x2="21" y2="6" />
+                            <line x1="3" y1="18" x2="21" y2="18" />
+                          </svg>
+                        </div>
+                      </div>
+                      
+                      {/* Deskripsi singkat */}
+                      <div style={{
+                        fontSize: isMobile ? '0.9rem' : '1rem',
+                        opacity: '0.9',
+                        fontFamily: 'Helvetica, Arial, sans-serif',
+                        lineHeight: '1.5'
+                      }}>
+                        Building memorable brand systems.
+                      </div>
+                    </div>
+                  </div>
 
-    {/* Card 2 */}
-    <div style={{
-      position: 'relative',
-      width: isMobile ? 'calc(50% - 0.5rem)' : '350px',
-      height: isMobile ? '400px' : '550px',
-      borderRadius: '12px',
-      overflow: 'hidden',
-      flexShrink: 0
-    }}>
-      <img 
-        src="images/5.jpg" 
-        alt="Brand Identity"
-        style={{
-          width: '100%',
-          height: '100%',
-          objectFit: 'cover',
-          display: 'block',
-          borderRadius: '12px'
-        }}
-        onError={(e) => {
-          e.currentTarget.style.backgroundColor = '#111';
-          e.currentTarget.style.display = 'flex';
-          e.currentTarget.style.alignItems = 'center';
-          e.currentTarget.style.justifyContent = 'center';
-          e.currentTarget.style.color = '#fff';
-          e.currentTarget.innerHTML = '<div style="padding: 1rem; text-align: center; color: #fff; font-size: 1.5rem;">Brand Identity</div>';
-        }}
-      />
-      
-      {/* Overlay Konten di Dalam Foto */}
-      <div style={{
-        position: 'absolute',
-        bottom: 0,
-        left: 0,
-        right: 0,
-        background: 'linear-gradient(to top, rgba(0,0,0,0.8), transparent)',
-        padding: isMobile ? '1.5rem 1rem' : '2rem 1.5rem',
-        color: 'white'
-      }}>
-        <div style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: '0.5rem'
-        }}>
-          <div style={{
-            fontSize: isMobile ? '1.3rem' : '1.8rem',
-            fontWeight: '600',
-            fontFamily: 'Helvetica, Arial, sans-serif'
-          }}>
-            Brand Identity
-          </div>
-          
-          {/* Toggle Icon di pojok kanan */}
-          <div 
-            id="toggle2"
-            style={{
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              width: '32px',
-              height: '32px',
-              color: 'white',
-              opacity: '0.8',
-              transition: 'all 0.3s ease'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.opacity = '1';
-              e.currentTarget.style.transform = 'scale(1.1)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.opacity = '0.8';
-              e.currentTarget.style.transform = 'scale(1)';
-            }}
-          >
-            <svg 
-              width="24" 
-              height="24" 
-              viewBox="0 0 24 24" 
-              fill="none" 
-              stroke="currentColor" 
-              strokeWidth="2"
-            >
-              <line x1="3" y1="12" x2="21" y2="12" />
-              <line x1="3" y1="6" x2="21" y2="6" />
-              <line x1="3" y1="18" x2="21" y2="18" />
-            </svg>
-          </div>
-        </div>
-        
-        {/* Deskripsi singkat */}
-        <div style={{
-          fontSize: isMobile ? '0.9rem' : '1rem',
-          opacity: '0.9',
-          fontFamily: 'Helvetica, Arial, sans-serif',
-          lineHeight: '1.5'
-        }}>
-          Building memorable brand systems.
-        </div>
-      </div>
-    </div>
+                  {/* Card 3 */}
+                  <div style={{
+                    position: 'relative',
+                    width: isMobile ? 'calc(50% - 0.5rem)' : '350px',
+                    height: isMobile ? '400px' : '550px',
+                    borderRadius: '12px',
+                    overflow: 'hidden',
+                    flexShrink: 0
+                  }}>
+                    <img 
+                      src="images/5.jpg" 
+                      alt="UI/UX Design"
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover',
+                        display: 'block',
+                        borderRadius: '12px'
+                      }}
+                      onError={(e) => {
+                        e.currentTarget.style.backgroundColor = '#111';
+                        e.currentTarget.style.display = 'flex';
+                        e.currentTarget.style.alignItems = 'center';
+                        e.currentTarget.style.justifyContent = 'center';
+                        e.currentTarget.style.color = '#fff';
+                        e.currentTarget.innerHTML = '<div style="padding: 1rem; text-align: center; color: #fff; font-size: 1.5rem;">UI/UX Design</div>';
+                      }}
+                    />
+                    
+                    {/* Overlay Konten di Dalam Foto */}
+                    <div style={{
+                      position: 'absolute',
+                      bottom: 0,
+                      left: 0,
+                      right: 0,
+                      background: 'linear-gradient(to top, rgba(0,0,0,0.8), transparent)',
+                      padding: isMobile ? '1.5rem 1rem' : '2rem 1.5rem',
+                      color: 'white'
+                    }}>
+                      <div style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        marginBottom: '0.5rem'
+                      }}>
+                        <div style={{
+                          fontSize: isMobile ? '1.3rem' : '1.8rem',
+                          fontWeight: '600',
+                          fontFamily: 'Helvetica, Arial, sans-serif'
+                        }}>
+                          UI/UX Design
+                        </div>
+                        
+                        {/* Toggle Icon di pojok kanan */}
+                        <div 
+                          id="toggle3"
+                          style={{
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            width: '32px',
+                            height: '32px',
+                            color: 'white',
+                            opacity: '0.8',
+                            transition: 'all 0.3s ease'
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.opacity = '1';
+                            e.currentTarget.style.transform = 'scale(1.1)';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.opacity = '0.8';
+                            e.currentTarget.style.transform = 'scale(1)';
+                          }}
+                        >
+                          <svg 
+                            width="24" 
+                            height="24" 
+                            viewBox="0 0 24 24" 
+                            fill="none" 
+                            stroke="currentColor" 
+                            strokeWidth="2"
+                          >
+                            <line x1="3" y1="12" x2="21" y2="12" />
+                            <line x1="3" y1="6" x2="21" y2="6" />
+                            <line x1="3" y1="18" x2="21" y2="18" />
+                          </svg>
+                        </div>
+                      </div>
+                      
+                      {/* Deskripsi singkat */}
+                      <div style={{
+                        fontSize: isMobile ? '0.9rem' : '1rem',
+                        opacity: '0.9',
+                        fontFamily: 'Helvetica, Arial, sans-serif',
+                        lineHeight: '1.5'
+                      }}>
+                        Designing intuitive digital experiences.
+                      </div>
+                    </div>
+                  </div>
 
-    {/* Card 3 */}
-    <div style={{
-      position: 'relative',
-      width: isMobile ? 'calc(50% - 0.5rem)' : '350px',
-      height: isMobile ? '400px' : '550px',
-      borderRadius: '12px',
-      overflow: 'hidden',
-      flexShrink: 0
-    }}>
-      <img 
-        src="images/5.jpg" 
-        alt="UI/UX Design"
-        style={{
-          width: '100%',
-          height: '100%',
-          objectFit: 'cover',
-          display: 'block',
-          borderRadius: '12px'
-        }}
-        onError={(e) => {
-          e.currentTarget.style.backgroundColor = '#111';
-          e.currentTarget.style.display = 'flex';
-          e.currentTarget.style.alignItems = 'center';
-          e.currentTarget.style.justifyContent = 'center';
-          e.currentTarget.style.color = '#fff';
-          e.currentTarget.innerHTML = '<div style="padding: 1rem; text-align: center; color: #fff; font-size: 1.5rem;">UI/UX Design</div>';
-        }}
-      />
-      
-      {/* Overlay Konten di Dalam Foto */}
-      <div style={{
-        position: 'absolute',
-        bottom: 0,
-        left: 0,
-        right: 0,
-        background: 'linear-gradient(to top, rgba(0,0,0,0.8), transparent)',
-        padding: isMobile ? '1.5rem 1rem' : '2rem 1.5rem',
-        color: 'white'
-      }}>
-        <div style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: '0.5rem'
-        }}>
-          <div style={{
-            fontSize: isMobile ? '1.3rem' : '1.8rem',
-            fontWeight: '600',
-            fontFamily: 'Helvetica, Arial, sans-serif'
-          }}>
-            UI/UX Design
-          </div>
-          
-          {/* Toggle Icon di pojok kanan */}
-          <div 
-            id="toggle3"
-            style={{
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              width: '32px',
-              height: '32px',
-              color: 'white',
-              opacity: '0.8',
-              transition: 'all 0.3s ease'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.opacity = '1';
-              e.currentTarget.style.transform = 'scale(1.1)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.opacity = '0.8';
-              e.currentTarget.style.transform = 'scale(1)';
-            }}
-          >
-            <svg 
-              width="24" 
-              height="24" 
-              viewBox="0 0 24 24" 
-              fill="none" 
-              stroke="currentColor" 
-              strokeWidth="2"
-            >
-              <line x1="3" y1="12" x2="21" y2="12" />
-              <line x1="3" y1="6" x2="21" y2="6" />
-              <line x1="3" y1="18" x2="21" y2="18" />
-            </svg>
-          </div>
-        </div>
-        
-        {/* Deskripsi singkat */}
-        <div style={{
-          fontSize: isMobile ? '0.9rem' : '1rem',
-          opacity: '0.9',
-          fontFamily: 'Helvetica, Arial, sans-serif',
-          lineHeight: '1.5'
-        }}>
-          Designing intuitive digital experiences.
-        </div>
-      </div>
-    </div>
+                  {/* Card 4 */}
+                  <div style={{
+                    position: 'relative',
+                    width: isMobile ? 'calc(50% - 0.5rem)' : '350px',
+                    height: isMobile ? '400px' : '550px',
+                    borderRadius: '12px',
+                    overflow: 'hidden',
+                    flexShrink: 0
+                  }}>
+                    <img 
+                      src="images/5.jpg" 
+                      alt="Motion Graphics"
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover',
+                        display: 'block',
+                        borderRadius: '12px'
+                      }}
+                      onError={(e) => {
+                        e.currentTarget.style.backgroundColor = '#111';
+                        e.currentTarget.style.display = 'flex';
+                        e.currentTarget.style.alignItems = 'center';
+                        e.currentTarget.style.justifyContent = 'center';
+                        e.currentTarget.style.color = '#fff';
+                        e.currentTarget.innerHTML = '<div style="padding: 1rem; text-align: center; color: #fff; font-size: 1.5rem;">Motion Graphics</div>';
+                      }}
+                    />
+                    
+                    {/* Overlay Konten di Dalam Foto */}
+                    <div style={{
+                      position: 'absolute',
+                      bottom: 0,
+                      left: 0,
+                      right: 0,
+                      background: 'linear-gradient(to top, rgba(0,0,0,0.8), transparent)',
+                      padding: isMobile ? '1.5rem 1rem' : '2rem 1.5rem',
+                      color: 'white'
+                    }}>
+                      <div style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        marginBottom: '0.5rem'
+                      }}>
+                        <div style={{
+                          fontSize: isMobile ? '1.3rem' : '1.8rem',
+                          fontWeight: '600',
+                          fontFamily: 'Helvetica, Arial, sans-serif'
+                        }}>
+                          Motion Graphics
+                        </div>
+                        
+                        {/* Toggle Icon di pojok kanan */}
+                        <div 
+                          id="toggle4"
+                          style={{
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            width: '32px',
+                            height: '32px',
+                            color: 'white',
+                            opacity: '0.8',
+                            transition: 'all 0.3s ease'
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.opacity = '1';
+                            e.currentTarget.style.transform = 'scale(1.1)';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.opacity = '0.8';
+                            e.currentTarget.style.transform = 'scale(1)';
+                          }}
+                        >
+                          <svg 
+                            width="24" 
+                            height="24" 
+                            viewBox="0 0 24 24" 
+                            fill="none" 
+                            stroke="currentColor" 
+                            strokeWidth="2"
+                          >
+                            <line x1="3" y1="12" x2="21" y2="12" />
+                            <line x1="3" y1="6" x2="21" y2="6" />
+                            <line x1="3" y1="18" x2="21" y2="18" />
+                          </svg>
+                        </div>
+                      </div>
+                      
+                      {/* Deskripsi singkat */}
+                      <div style={{
+                        fontSize: isMobile ? '0.9rem' : '1rem',
+                        opacity: '0.9',
+                        fontFamily: 'Helvetica, Arial, sans-serif',
+                        lineHeight: '1.5'
+                      }}>
+                        Bringing designs to life with animation.
+                      </div>
+                    </div>
+                  </div>
+                </div>
 
-    {/* Card 4 */}
-    <div style={{
-      position: 'relative',
-      width: isMobile ? 'calc(50% - 0.5rem)' : '350px',
-      height: isMobile ? '400px' : '550px',
-      borderRadius: '12px',
-      overflow: 'hidden',
-      flexShrink: 0
-    }}>
-      <img 
-        src="images/5.jpg" 
-        alt="Motion Graphics"
-        style={{
-          width: '100%',
-          height: '100%',
-          objectFit: 'cover',
-          display: 'block',
-          borderRadius: '12px'
-        }}
-        onError={(e) => {
-          e.currentTarget.style.backgroundColor = '#111';
-          e.currentTarget.style.display = 'flex';
-          e.currentTarget.style.alignItems = 'center';
-          e.currentTarget.style.justifyContent = 'center';
-          e.currentTarget.style.color = '#fff';
-          e.currentTarget.innerHTML = '<div style="padding: 1rem; text-align: center; color: #fff; font-size: 1.5rem;">Motion Graphics</div>';
-        }}
-      />
-      
-      {/* Overlay Konten di Dalam Foto */}
-      <div style={{
-        position: 'absolute',
-        bottom: 0,
-        left: 0,
-        right: 0,
-        background: 'linear-gradient(to top, rgba(0,0,0,0.8), transparent)',
-        padding: isMobile ? '1.5rem 1rem' : '2rem 1.5rem',
-        color: 'white'
-      }}>
-        <div style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: '0.5rem'
-        }}>
-          <div style={{
-            fontSize: isMobile ? '1.3rem' : '1.8rem',
-            fontWeight: '600',
-            fontFamily: 'Helvetica, Arial, sans-serif'
-          }}>
-            Motion Graphics
-          </div>
-          
-          {/* Toggle Icon di pojok kanan */}
-          <div 
-            id="toggle4"
-            style={{
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              width: '32px',
-              height: '32px',
-              color: 'white',
-              opacity: '0.8',
-              transition: 'all 0.3s ease'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.opacity = '1';
-              e.currentTarget.style.transform = 'scale(1.1)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.opacity = '0.8';
-              e.currentTarget.style.transform = 'scale(1)';
-            }}
-          >
-            <svg 
-              width="24" 
-              height="24" 
-              viewBox="0 0 24 24" 
-              fill="none" 
-              stroke="currentColor" 
-              strokeWidth="2"
-            >
-              <line x1="3" y1="12" x2="21" y2="12" />
-              <line x1="3" y1="6" x2="21" y2="6" />
-              <line x1="3" y1="18" x2="21" y2="18" />
-            </svg>
-          </div>
-        </div>
-        
-        {/* Deskripsi singkat */}
-        <div style={{
-          fontSize: isMobile ? '0.9rem' : '1rem',
-          opacity: '0.9',
-          fontFamily: 'Helvetica, Arial, sans-serif',
-          lineHeight: '1.5'
-        }}>
-          Bringing designs to life with animation.
-        </div>
-      </div>
-    </div>
-  </div>
+                {/* Modal Halaman Kosong Warna Hitam */}
+                <div 
+                  id="modalOverlay"
+                  style={{
+                    display: 'none',
+                    position: 'fixed',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: '100%',
+                    backgroundColor: 'rgba(0, 0, 0, 0.95)',
+                    zIndex: 1000,
+                    justifyContent: 'center',
+                    alignItems: 'center'
+                  }}
+                  onClick={(e) => {
+                    if (e.target.id === 'modalOverlay') {
+                      e.currentTarget.style.display = 'none';
+                    }
+                  }}
+                >
+                  <div style={{
+                    backgroundColor: '#000',
+                    width: '90%',
+                    height: '90%',
+                    borderRadius: '12px',
+                    position: 'relative'
+                  }}>
+                    {/* Close Button */}
+                    <button
+                      onClick={() => {
+                        document.getElementById('modalOverlay').style.display = 'none';
+                      }}
+                      style={{
+                        position: 'absolute',
+                        top: '20px',
+                        right: '20px',
+                        width: '40px',
+                        height: '40px',
+                        borderRadius: '50%',
+                        backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                        border: 'none',
+                        color: 'white',
+                        fontSize: '1.5rem',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        zIndex: 1001
+                      }}
+                    >
+                      ×
+                    </button>
+                    
+                    {/* Konten Modal Kosong */}
+                    <div style={{
+                      display: 'flex',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      width: '100%',
+                      height: '100%',
+                      color: '#666',
+                      fontSize: '1.2rem',
+                      fontFamily: 'Helvetica, Arial, sans-serif'
+                    }}>
+                      Halaman Detail - Klik di luar modal atau tombol X untuk menutup
+                    </div>
+                  </div>
+                </div>
 
-  {/* Modal Halaman Kosong Warna Hitam */}
-  <div 
-    id="modalOverlay"
-    style={{
-      display: 'none',
-      position: 'fixed',
-      top: 0,
-      left: 0,
-      width: '100%',
-      height: '100%',
-      backgroundColor: 'rgba(0, 0, 0, 0.95)',
-      zIndex: 1000,
-      justifyContent: 'center',
-      alignItems: 'center'
-    }}
-    onClick={(e) => {
-      if (e.target.id === 'modalOverlay') {
-        e.currentTarget.style.display = 'none';
-      }
-    }}
-  >
-    <div style={{
-      backgroundColor: '#000',
-      width: '90%',
-      height: '90%',
-      borderRadius: '12px',
-      position: 'relative'
-    }}>
-      {/* Close Button */}
-      <button
-        onClick={() => {
-          document.getElementById('modalOverlay').style.display = 'none';
-        }}
-        style={{
-          position: 'absolute',
-          top: '20px',
-          right: '20px',
-          width: '40px',
-          height: '40px',
-          borderRadius: '50%',
-          backgroundColor: 'rgba(255, 255, 255, 0.1)',
-          border: 'none',
-          color: 'white',
-          fontSize: '1.5rem',
-          cursor: 'pointer',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 1001
-        }}
-      >
-        ×
-      </button>
-      
-      {/* Konten Modal Kosong */}
-      <div style={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        width: '100%',
-        height: '100%',
-        color: '#666',
-        fontSize: '1.2rem',
-        fontFamily: 'Helvetica, Arial, sans-serif'
-      }}>
-        Halaman Detail - Klik di luar modal atau tombol X untuk menutup
-      </div>
-    </div>
-  </div>
-
-  {/* JavaScript untuk menangani toggle */}
-  <script dangerouslySetInnerHTML={{
-    __html: `
-      function setupModalToggle() {
-        // Tambahkan event listener ke semua toggle
-        for (let i = 1; i <= 4; i++) {
-          const toggle = document.getElementById('toggle' + i);
-          if (toggle) {
-            toggle.addEventListener('click', function(e) {
-              e.stopPropagation();
-              document.getElementById('modalOverlay').style.display = 'flex';
-            });
-          }
-        }
-      }
-      
-      // Jalankan setelah halaman dimuat
-      if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', setupModalToggle);
-      } else {
-        setupModalToggle();
-      }
-    `
-  }} />
-</div>
-
-
-
-
-        
-
-        
+                {/* JavaScript untuk menangani toggle */}
+                <script dangerouslySetInnerHTML={{
+                  __html: `
+                    function setupModalToggle() {
+                      // Tambahkan event listener ke semua toggle
+                      for (let i = 1; i <= 4; i++) {
+                        const toggle = document.getElementById('toggle' + i);
+                        if (toggle) {
+                          toggle.addEventListener('click', function(e) {
+                            e.stopPropagation();
+                            document.getElementById('modalOverlay').style.display = 'flex';
+                          });
+                        }
+                      }
+                    }
+                    
+                    // Jalankan setelah halaman dimuat
+                    if (document.readyState === 'loading') {
+                      document.addEventListener('DOMContentLoaded', setupModalToggle);
+                    } else {
+                      setupModalToggle();
+                    }
+                  `
+                }} />
+              </div>
 
               {/* Content tambahan */}
               <div style={{
@@ -5615,6 +6155,22 @@ export default function HomePage(): React.JSX.Element {
           to {
             transform: rotate(360deg);
           }
+        }
+        
+        @keyframes searchPulse {
+          0% {
+            box-shadow: 0 0 0 0 rgba(0, 255, 0, 0.4);
+          }
+          70% {
+            box-shadow: 0 0 0 10px rgba(0, 255, 0, 0);
+          }
+          100% {
+            box-shadow: 0 0 0 0 rgba(0, 255, 0, 0);
+          }
+        }
+        
+        .search-active {
+          animation: searchPulse 2s infinite;
         }
       `}</style>
     </div>
