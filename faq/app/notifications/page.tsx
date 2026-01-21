@@ -12,11 +12,10 @@ import {
   doc,
   updateDoc,
   Timestamp,
-  where,
-  getDocs,
   getDoc,
   arrayUnion,
-  arrayRemove
+  arrayRemove,
+  increment as firestoreIncrement
 } from "firebase/firestore";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { initializeApp, getApps } from "firebase/app";
@@ -49,25 +48,27 @@ interface Notification {
   id: string;
   title: string;
   message: string;
-  type: 'system' | 'announcement' | 'alert' | 'update' | 'comment' | 'personal' | 'all';
+  type: 'system' | 'announcement' | 'alert' | 'update' | 'comment' | 'personal';
   priority: 'low' | 'medium' | 'high' | 'urgent';
   senderId: string;
   senderName: string;
   senderEmail?: string;
-  recipientType: 'all_users' | 'logged_in' | 'specific' | 'all_visitors';
+  senderPhotoURL?: string;
+  recipientType: 'all' | 'specific' | 'email_only' | 'app_only';
   recipientIds?: string[];
-  isReadBy: string[]; // Array of user IDs yang sudah baca
+  recipientEmails?: string[];
+  isRead: boolean;
   isDeleted: boolean;
   createdAt: Timestamp;
-  expiresAt?: Timestamp;
   actionUrl?: string;
-  icon?: string;
-  color?: string;
-  allowComments: boolean;
-  comments?: NotificationComment[];
-  likes: string[]; // Array of user IDs yang like
-  views: number; // Total views
-  clicks: number; // Total clicks
+  icon: string;
+  color: string;
+  userReads: Record<string, boolean>;
+  views?: number;
+  clicks?: number;
+  likes?: string[];
+  comments?: any[];
+  allowComments?: boolean;
 }
 
 interface NotificationComment {
@@ -87,7 +88,7 @@ export default function NotificationsPage(): React.JSX.Element {
   const [isLoading, setIsLoading] = useState(true);
   const [user, setUser] = useState<any>(null);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [activeTab, setActiveTab] = useState<'all' | 'unread' | 'announcement' | 'update' | 'system'>('all');
+  const [activeTab, setActiveTab] = useState<'all' | 'unread' | 'announcement' | 'update' | 'system' | 'alert'>('all');
   const [selectedNotification, setSelectedNotification] = useState<Notification | null>(null);
   const [commentText, setCommentText] = useState('');
   const [isSubmittingComment, setIsSubmittingComment] = useState(false);
@@ -136,7 +137,7 @@ export default function NotificationsPage(): React.JSX.Element {
     if (user) {
       return user.displayName || user.email?.split('@')[0] || 'User';
     }
-    return 'Anonymous User';
+    return 'Anonymous Visitor';
   };
 
   // Load notifications untuk semua user (login dan non-login)
@@ -146,57 +147,51 @@ export default function NotificationsPage(): React.JSX.Element {
     setIsLoading(true);
     const notificationsRef = collection(db, 'notifications');
     
-    // Query untuk notifikasi yang belum expired dan tidak deleted
+    // Query untuk notifikasi yang tidak deleted, diurutkan berdasarkan tanggal
     const q = query(
       notificationsRef,
-      where('isDeleted', '==', false),
       orderBy('createdAt', 'desc')
     );
     
-    const unsubscribe = onSnapshot(q, async (querySnapshot) => {
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
       const notificationsData: Notification[] = [];
       let unread = 0;
       const currentUserId = getCurrentUserId();
       
-      for (const doc of querySnapshot.docs) {
+      querySnapshot.docs.forEach((doc) => {
         const data = doc.data();
         
-        // Cek apakah notifikasi sudah expired
-        if (data.expiresAt) {
-          const expiresAt = data.expiresAt.toDate();
-          const now = new Date();
-          if (expiresAt < now) {
-            continue; // Skip expired notifications
-          }
-        }
+        // Skip deleted notifications
+        if (data.isDeleted) return;
         
-        // Filter berdasarkan recipientType
+        // Determine if user should see this notification
         let shouldShow = false;
         
         switch (data.recipientType) {
-          case 'all_visitors':
-            // Tampilkan ke semua visitor (login dan non-login)
+          case 'all':
+            // Tampilkan ke semua orang (login dan non-login)
             shouldShow = true;
-            break;
-            
-          case 'all_users':
-            // Tampilkan ke semua registered users
-            if (user) {
-              shouldShow = true;
-            }
-            break;
-            
-          case 'logged_in':
-            // Hanya untuk logged in users
-            if (user) {
-              shouldShow = true;
-            }
             break;
             
           case 'specific':
             // Hanya untuk specific user IDs
             const recipientIds = data.recipientIds || [];
-            if (recipientIds.includes(currentUserId)) {
+            if (recipientIds.includes(currentUserId) || 
+                (user && recipientIds.includes(user.uid))) {
+              shouldShow = true;
+            }
+            break;
+            
+          case 'email_only':
+            // Hanya untuk email tertentu
+            if (user && data.recipientEmails?.includes(user.email)) {
+              shouldShow = true;
+            }
+            break;
+            
+          case 'app_only':
+            // Hanya untuk logged in users
+            if (user) {
               shouldShow = true;
             }
             break;
@@ -212,14 +207,16 @@ export default function NotificationsPage(): React.JSX.Element {
           } as Notification;
           
           // Cek apakah user sudah baca notifikasi ini
-          const isReadByUser = notification.isReadBy?.includes(currentUserId) || false;
+          const isReadByUser = notification.userReads?.[currentUserId] || 
+                              (user && notification.userReads?.[user.uid]) || 
+                              false;
           if (!isReadByUser) {
             unread++;
           }
           
           notificationsData.push(notification);
         }
-      }
+      });
       
       setNotifications(notificationsData);
       setUnreadCount(unread);
@@ -238,32 +235,93 @@ export default function NotificationsPage(): React.JSX.Element {
     
     try {
       const currentUserId = getCurrentUserId();
+      const userIdToUse = user ? user.uid : currentUserId;
       const notificationRef = doc(db, 'notifications', notificationId);
       
-      // Tambah user ID ke array isReadBy
+      // Tambah user ID ke userReads
       await updateDoc(notificationRef, {
-        isReadBy: arrayUnion(currentUserId),
-        views: increment(1)
+        [`userReads.${userIdToUse}`]: true,
+        views: firestoreIncrement(1)
       });
       
-      // Update views count
-      await updateDoc(notificationRef, {
-        views: increment(1)
-      });
+      // Update local state
+      setNotifications(prev => prev.map(notif => {
+        if (notif.id === notificationId) {
+          return {
+            ...notif,
+            userReads: {
+              ...notif.userReads,
+              [userIdToUse]: true
+            },
+            views: (notif.views || 0) + 1
+          };
+        }
+        return notif;
+      }));
+      
+      // Update unread count
+      setUnreadCount(prev => Math.max(0, prev - 1));
     } catch (error) {
       console.error("Error marking notification as read:", error);
     }
   };
 
-  // Mark notification as clicked (track engagement)
+  // Mark all notifications as read
+  const markAllAsRead = async () => {
+    if (!db) return;
+    
+    try {
+      const currentUserId = getCurrentUserId();
+      const userIdToUse = user ? user.uid : currentUserId;
+      
+      const updatePromises = notifications
+        .filter(notification => !notification.userReads?.[userIdToUse])
+        .map(async (notification) => {
+          const notificationRef = doc(db, 'notifications', notification.id);
+          await updateDoc(notificationRef, {
+            [`userReads.${userIdToUse}`]: true,
+            views: firestoreIncrement(1)
+          });
+        });
+      
+      await Promise.all(updatePromises);
+      
+      // Update local state
+      setNotifications(prev => prev.map(notification => ({
+        ...notification,
+        userReads: {
+          ...notification.userReads,
+          [userIdToUse]: true
+        },
+        views: (notification.views || 0) + 1
+      })));
+      
+      setUnreadCount(0);
+    } catch (error) {
+      console.error("Error marking all as read:", error);
+    }
+  };
+
+  // Track click on notification
   const trackClick = async (notificationId: string) => {
     if (!db) return;
     
     try {
       const notificationRef = doc(db, 'notifications', notificationId);
       await updateDoc(notificationRef, {
-        clicks: increment(1)
+        clicks: firestoreIncrement(1)
       });
+      
+      // Update local state
+      setNotifications(prev => prev.map(notif => {
+        if (notif.id === notificationId) {
+          return {
+            ...notif,
+            clicks: (notif.clicks || 0) + 1
+          };
+        }
+        return notif;
+      }));
     } catch (error) {
       console.error("Error tracking click:", error);
     }
@@ -287,11 +345,33 @@ export default function NotificationsPage(): React.JSX.Element {
           await updateDoc(notificationRef, {
             likes: arrayRemove(currentUserId)
           });
+          
+          // Update local state
+          setNotifications(prev => prev.map(notif => {
+            if (notif.id === notificationId) {
+              return {
+                ...notif,
+                likes: notif.likes?.filter(id => id !== currentUserId) || []
+              };
+            }
+            return notif;
+          }));
         } else {
           // Like
           await updateDoc(notificationRef, {
             likes: arrayUnion(currentUserId)
           });
+          
+          // Update local state
+          setNotifications(prev => prev.map(notif => {
+            if (notif.id === notificationId) {
+              return {
+                ...notif,
+                likes: [...(notif.likes || []), currentUserId]
+              };
+            }
+            return notif;
+          }));
         }
       }
     } catch (error) {
@@ -310,7 +390,7 @@ export default function NotificationsPage(): React.JSX.Element {
       const currentUserName = getCurrentUserName();
       const notificationRef = doc(db, 'notifications', notificationId);
       
-      const newComment: NotificationComment = {
+      const newComment = {
         id: Date.now().toString(),
         userId: currentUserId,
         userName: currentUserName,
@@ -323,6 +403,24 @@ export default function NotificationsPage(): React.JSX.Element {
       await updateDoc(notificationRef, {
         comments: arrayUnion(newComment)
       });
+      
+      // Update local state
+      setNotifications(prev => prev.map(notif => {
+        if (notif.id === notificationId) {
+          return {
+            ...notif,
+            comments: [...(notif.comments || []), newComment]
+          };
+        }
+        return notif;
+      }));
+      
+      if (selectedNotification?.id === notificationId) {
+        setSelectedNotification(prev => prev ? {
+          ...prev,
+          comments: [...(prev.comments || []), newComment]
+        } : null);
+      }
       
       setCommentText('');
     } catch (error) {
@@ -337,14 +435,22 @@ export default function NotificationsPage(): React.JSX.Element {
   const deleteNotification = async (notificationId: string) => {
     if (!db || !isAdmin) return;
     
+    if (!confirm('Are you sure you want to delete this notification?')) return;
+    
     try {
       const notificationRef = doc(db, 'notifications', notificationId);
       await updateDoc(notificationRef, {
-        isDeleted: true,
-        deletedAt: Timestamp.now()
+        isDeleted: true
       });
+      
+      // Remove from local state
+      setNotifications(prev => prev.filter(notif => notif.id !== notificationId));
+      if (selectedNotification?.id === notificationId) {
+        setSelectedNotification(null);
+      }
     } catch (error) {
       console.error("Error deleting notification:", error);
+      alert('Failed to delete notification.');
     }
   };
 
@@ -353,11 +459,13 @@ export default function NotificationsPage(): React.JSX.Element {
     if (activeTab === 'all') return true;
     if (activeTab === 'unread') {
       const currentUserId = getCurrentUserId();
-      return !notification.isReadBy?.includes(currentUserId);
+      const userIdToUse = user ? user.uid : currentUserId;
+      return !notification.userReads?.[userIdToUse];
     }
     if (activeTab === 'announcement') return notification.type === 'announcement';
     if (activeTab === 'update') return notification.type === 'update';
     if (activeTab === 'system') return notification.type === 'system';
+    if (activeTab === 'alert') return notification.type === 'alert';
     return true;
   });
 
@@ -370,7 +478,6 @@ export default function NotificationsPage(): React.JSX.Element {
       case 'update': return '🆕';
       case 'comment': return '💬';
       case 'personal': return '👤';
-      case 'all': return '🌍';
       default: return '📌';
     }
   };
@@ -403,6 +510,16 @@ export default function NotificationsPage(): React.JSX.Element {
     return date.toLocaleDateString('id-ID', {
       day: 'numeric',
       month: 'short',
+      year: 'numeric'
+    });
+  };
+
+  // Format date with time
+  const formatDateTime = (timestamp: Timestamp) => {
+    const date = timestamp.toDate();
+    return date.toLocaleDateString('id-ID', {
+      day: 'numeric',
+      month: 'short',
       year: 'numeric',
       hour: '2-digit',
       minute: '2-digit'
@@ -410,7 +527,7 @@ export default function NotificationsPage(): React.JSX.Element {
   };
 
   // Format number dengan K/M
-  const formatNumber = (num: number) => {
+  const formatNumber = (num: number = 0) => {
     if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
     if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
     return num.toString();
@@ -430,13 +547,6 @@ export default function NotificationsPage(): React.JSX.Element {
     setCommentText('');
   };
 
-  // Increment helper untuk Firestore
-  const increment = (n: number) => {
-    return {
-      increment: n
-    };
-  };
-
   // Navigate to action URL
   const handleActionClick = async (notification: Notification, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -451,6 +561,30 @@ export default function NotificationsPage(): React.JSX.Element {
     const link = `${window.location.origin}/notifications?n=${notificationId}`;
     navigator.clipboard.writeText(link);
     alert('Link copied to clipboard!');
+  };
+
+  // Check if user has read a notification
+  const hasUserReadNotification = (notification: Notification) => {
+    const currentUserId = getCurrentUserId();
+    const userIdToUse = user ? user.uid : currentUserId;
+    return notification.userReads?.[userIdToUse] || false;
+  };
+
+  // Check if user has liked a notification
+  const hasUserLikedNotification = (notification: Notification) => {
+    const currentUserId = getCurrentUserId();
+    return notification.likes?.includes(currentUserId) || false;
+  };
+
+  // Get recipient type text
+  const getRecipientTypeText = (type: string) => {
+    switch (type) {
+      case 'all': return 'All Users & Visitors';
+      case 'specific': return 'Specific Users';
+      case 'email_only': return 'Email Only';
+      case 'app_only': return 'App Only';
+      default: return type;
+    }
   };
 
   return (
@@ -576,16 +710,7 @@ export default function NotificationsPage(): React.JSX.Element {
           
           {unreadCount > 0 && (
             <motion.button
-              onClick={async () => {
-                // Mark all as read
-                const currentUserId = getCurrentUserId();
-                const updatePromises = filteredNotifications
-                  .filter(n => !n.isReadBy?.includes(currentUserId))
-                  .map(async (notification) => {
-                    await markAsRead(notification.id);
-                  });
-                await Promise.all(updatePromises);
-              }}
+              onClick={markAllAsRead}
               style={{
                 padding: '0.6rem 1.2rem',
                 backgroundColor: 'rgba(255,255,255,0.1)',
@@ -649,6 +774,7 @@ export default function NotificationsPage(): React.JSX.Element {
             </div>
             <div style={{ fontSize: '0.9rem', color: 'rgba(255,255,255,0.6)' }}>
               {user ? 'Logged in user' : 'Viewing as guest'} • {notifications.length} notifications available
+              {user && user.providerId && ` • Signed in via ${user.providerId}`}
             </div>
           </div>
           {!user && (
@@ -681,7 +807,7 @@ export default function NotificationsPage(): React.JSX.Element {
           overflowX: 'auto',
           borderBottom: '1px solid rgba(255,255,255,0.1)'
         }}>
-          {['all', 'unread', 'announcement', 'update', 'system'].map((tab) => (
+          {['all', 'unread', 'announcement', 'update', 'system', 'alert'].map((tab) => (
             <motion.button
               key={tab}
               onClick={() => setActiveTab(tab as any)}
@@ -727,11 +853,13 @@ export default function NotificationsPage(): React.JSX.Element {
               height: '300px'
             }}>
               <div style={{
-                color: 'rgba(255,255,255,0.5)',
-                fontSize: '1.2rem'
-              }}>
-                Loading notifications...
-              </div>
+                width: '40px',
+                height: '40px',
+                border: '3px solid rgba(255,255,255,0.1)',
+                borderTopColor: '#0050B7',
+                borderRadius: '50%',
+                animation: 'spin 1s linear infinite'
+              }} />
             </div>
           ) : filteredNotifications.length === 0 ? (
             <div style={{
@@ -785,9 +913,8 @@ export default function NotificationsPage(): React.JSX.Element {
               gap: '1rem'
             }}>
               {filteredNotifications.map((notification, index) => {
-                const currentUserId = getCurrentUserId();
-                const isRead = notification.isReadBy?.includes(currentUserId) || false;
-                const isLiked = notification.likes?.includes(currentUserId) || false;
+                const isRead = hasUserReadNotification(notification);
+                const isLiked = hasUserLikedNotification(notification);
                 const likeCount = notification.likes?.length || 0;
                 const commentCount = notification.comments?.length || 0;
                 const viewCount = notification.views || 0;
@@ -900,6 +1027,7 @@ export default function NotificationsPage(): React.JSX.Element {
                                 color: 'rgba(255,255,255,0.6)'
                               }}>
                                 From: {notification.senderName}
+                                {notification.senderEmail && ` (${notification.senderEmail})`}
                               </span>
                               <span style={{
                                 fontSize: '0.8rem',
@@ -919,12 +1047,12 @@ export default function NotificationsPage(): React.JSX.Element {
                               </span>
                               <span style={{
                                 fontSize: '0.8rem',
-                                color: '#FFA502'
+                                color: '#FFA502',
+                                backgroundColor: 'rgba(255, 165, 2, 0.1)',
+                                padding: '0.1rem 0.5rem',
+                                borderRadius: '10px'
                               }}>
-                                {notification.recipientType === 'all_visitors' ? 'ALL VISITORS' : 
-                                 notification.recipientType === 'all_users' ? 'ALL USERS' : 
-                                 notification.recipientType === 'logged_in' ? 'LOGGED IN' : 
-                                 'SPECIFIC'}
+                                {getRecipientTypeText(notification.recipientType)}
                               </span>
                             </div>
                           </div>
@@ -1157,7 +1285,7 @@ export default function NotificationsPage(): React.JSX.Element {
                       color: 'rgba(255,255,255,0.6)'
                     }}>
                       From: {selectedNotification.senderName}
-                      {isAdmin && selectedNotification.senderEmail && ` (${selectedNotification.senderEmail})`}
+                      {selectedNotification.senderEmail && ` (${selectedNotification.senderEmail})`}
                     </span>
                     <span style={{
                       fontSize: '0.8rem',
@@ -1168,6 +1296,16 @@ export default function NotificationsPage(): React.JSX.Element {
                       fontWeight: '600'
                     }}>
                       {selectedNotification.priority.toUpperCase()}
+                    </span>
+                    <span style={{
+                      fontSize: '0.8rem',
+                      padding: '0.2rem 0.6rem',
+                      backgroundColor: 'rgba(255, 165, 2, 0.1)',
+                      color: '#FFA502',
+                      borderRadius: '12px',
+                      fontWeight: '600'
+                    }}>
+                      {getRecipientTypeText(selectedNotification.recipientType)}
                     </span>
                   </div>
                 </div>
@@ -1375,7 +1513,7 @@ export default function NotificationsPage(): React.JSX.Element {
               )}
 
               {/* Comments Section */}
-              {showComments && selectedNotification.allowComments && (
+              {showComments && (
                 <div style={{
                   marginTop: '1rem',
                   borderTop: '1px solid rgba(255,255,255,0.1)',
@@ -1496,7 +1634,7 @@ export default function NotificationsPage(): React.JSX.Element {
                       [...selectedNotification.comments]
                         .sort((a, b) => b.createdAt.toMillis() - a.createdAt.toMillis())
                         .map((comment, index) => (
-                          <div key={comment.id} style={{
+                          <div key={comment.id || index} style={{
                             backgroundColor: 'rgba(255,255,255,0.03)',
                             padding: '1rem',
                             borderRadius: '8px',
@@ -1522,7 +1660,7 @@ export default function NotificationsPage(): React.JSX.Element {
                                   fontSize: '0.7rem',
                                   flexShrink: 0
                                 }}>
-                                  {comment.userName[0]}
+                                  {comment.userName?.[0] || 'U'}
                                 </div>
                                 <div>
                                   <div style={{
@@ -1530,7 +1668,7 @@ export default function NotificationsPage(): React.JSX.Element {
                                     color: 'white',
                                     fontSize: '0.9rem'
                                   }}>
-                                    {comment.userName}
+                                    {comment.userName || 'Anonymous'}
                                     {comment.userEmail === user?.email && (
                                       <span style={{
                                         marginLeft: '0.5rem',
@@ -1548,7 +1686,7 @@ export default function NotificationsPage(): React.JSX.Element {
                                     fontSize: '0.7rem',
                                     color: 'rgba(255,255,255,0.5)'
                                   }}>
-                                    {formatDate(comment.createdAt)}
+                                    {formatDateTime(comment.createdAt)}
                                   </div>
                                 </div>
                               </div>
@@ -1602,10 +1740,7 @@ export default function NotificationsPage(): React.JSX.Element {
                 fontSize: '0.8rem',
                 color: 'rgba(255,255,255,0.5)'
               }}>
-                Sent: {formatDate(selectedNotification.createdAt)}
-                {selectedNotification.expiresAt && (
-                  <> • Expires: {formatDate(selectedNotification.expiresAt)}</>
-                )}
+                Sent: {formatDateTime(selectedNotification.createdAt)}
               </div>
               
               <div style={{ display: 'flex', gap: '1rem' }}>
@@ -1661,6 +1796,14 @@ export default function NotificationsPage(): React.JSX.Element {
           </motion.div>
         </div>
       )}
+
+      {/* CSS for animations */}
+      <style jsx global>{`
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+      `}</style>
     </div>
   );
 }
