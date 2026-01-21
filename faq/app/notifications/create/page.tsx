@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect } from "react";
@@ -42,16 +43,14 @@ if (typeof window !== "undefined") {
 interface NotificationForm {
   title: string;
   message: string;
-  type: 'system' | 'announcement' | 'alert' | 'update' | 'comment' | 'personal' | 'all';
+  type: 'system' | 'announcement' | 'alert' | 'update' | 'comment' | 'personal';
   priority: 'low' | 'medium' | 'high' | 'urgent';
-  recipientType: 'all_visitors' | 'all_users' | 'logged_in' | 'specific';
+  recipientType: 'all' | 'specific' | 'email_only' | 'app_only';
   recipientIds: string[];
   recipientEmails: string[];
   actionUrl?: string;
   icon: string;
   color: string;
-  allowComments: boolean;
-  expiresInHours?: number;
 }
 
 interface User {
@@ -74,14 +73,12 @@ export default function CreateNotificationPage(): React.JSX.Element {
     message: '',
     type: 'announcement',
     priority: 'medium',
-    recipientType: 'all_visitors',
+    recipientType: 'all',
     recipientIds: [],
     recipientEmails: [],
     actionUrl: '',
     icon: '📢',
-    color: '#0050B7',
-    allowComments: true,
-    expiresInHours: 24
+    color: '#0050B7'
   });
 
   const [newRecipientEmail, setNewRecipientEmail] = useState('');
@@ -90,6 +87,7 @@ export default function CreateNotificationPage(): React.JSX.Element {
   // Admin email yang diizinkan
   const ADMIN_EMAILS = [
     'faridardiansyah061@gmail.com',
+    // Tambahkan email admin lainnya di sini
   ];
 
   // Check if user is admin
@@ -117,40 +115,37 @@ export default function CreateNotificationPage(): React.JSX.Element {
     return () => unsubscribe();
   }, []);
 
-  // Load all users from Firestore (admin only)
+  // Load all users (admin only)
   useEffect(() => {
     if (!db || !isAdmin) return;
 
     const loadUsers = async () => {
       setIsLoadingUsers(true);
       try {
-        // Coba load users dari collection 'users' di Firestore
-        const usersRef = collection(db, 'users');
-        const usersQuery = query(usersRef, where('isDeleted', '==', false));
-        const querySnapshot = await getDocs(usersQuery);
+        // Catatan: Di Firebase, tidak ada cara langsung untuk mendapatkan semua user
+        // Kita perlu menyimpan data user di Firestore saat registrasi/login
+        // Untuk sekarang, kita buat dummy data atau minta user untuk input manual
         
-        const usersData: User[] = [];
-        querySnapshot.forEach((doc) => {
-          const userData = doc.data();
-          usersData.push({ 
-            uid: doc.id, 
-            displayName: userData.displayName || userData.email?.split('@')[0] || 'User',
-            email: userData.email,
-            createdAt: userData.createdAt 
-          });
-        });
+        // Jika Anda menyimpan user data di Firestore, gunakan query ini:
+        // const usersRef = collection(db, 'users');
+        // const q = query(usersRef, orderBy('createdAt', 'desc'));
+        // const querySnapshot = await getDocs(q);
+        // const usersData: User[] = [];
+        // querySnapshot.forEach((doc) => {
+        //   usersData.push({ id: doc.id, ...doc.data() } as User);
+        // });
+        // setUsers(usersData);
         
-        setUsers(usersData);
+        // Untuk demo, kita gunakan dummy data
+        const dummyUsers: User[] = [
+          { uid: 'user1', displayName: 'John Doe', email: 'john@example.com' },
+          { uid: 'user2', displayName: 'Jane Smith', email: 'jane@example.com' },
+          { uid: 'user3', displayName: 'Bob Johnson', email: 'bob@example.com' },
+        ];
+        setUsers(dummyUsers);
         
       } catch (error) {
         console.error("Error loading users:", error);
-        // Jika error, tampilkan dummy data untuk demo
-        const dummyUsers: User[] = [
-          { uid: 'demo_user_1', displayName: 'Demo User 1', email: 'demo1@example.com' },
-          { uid: 'demo_user_2', displayName: 'Demo User 2', email: 'demo2@example.com' },
-          { uid: 'demo_user_3', displayName: 'Demo User 3', email: 'demo3@example.com' },
-        ];
-        setUsers(dummyUsers);
       } finally {
         setIsLoadingUsers(false);
       }
@@ -217,8 +212,7 @@ export default function CreateNotificationPage(): React.JSX.Element {
       alert: ['⚠️', '🚨', '🔴', '⛔', '🚩'],
       update: ['🆕', '✨', '🌟', '⭐', '💫'],
       comment: ['💬', '🗨️', '👥', '💭', '📝'],
-      personal: ['👤', '🎯', '💌', '📮', '✉️'],
-      all: ['🌍', '👥', '📢', '📣', '🔊']
+      personal: ['👤', '🎯', '💌', '📮', '✉️']
     };
     return icons[type] || ['📌'];
   };
@@ -254,13 +248,15 @@ export default function CreateNotificationPage(): React.JSX.Element {
       return;
     }
 
+    // Validasi untuk email recipients
+    if (formData.recipientType === 'email_only' && formData.recipientEmails.length === 0) {
+      alert('Please add at least one email address for email notification');
+      return;
+    }
+
     setIsLoading(true);
 
     try {
-      // Calculate expiration date
-      const expiresAt = new Date();
-      expiresAt.setHours(expiresAt.getHours() + (formData.expiresInHours || 24));
-      
       // 1. Save notification to Firestore
       const notificationData = {
         title: formData.title.trim(),
@@ -272,28 +268,24 @@ export default function CreateNotificationPage(): React.JSX.Element {
         senderEmail: user.email,
         recipientType: formData.recipientType,
         recipientIds: formData.recipientType === 'specific' ? formData.recipientIds : [],
-        isReadBy: [], // Array of user IDs yang sudah baca
+        recipientEmails: formData.recipientType === 'email_only' ? formData.recipientEmails : [],
+        isRead: false,
         isDeleted: false,
         createdAt: serverTimestamp(),
-        expiresAt: serverTimestamp(), // Temporarily, will update with Date object
         actionUrl: formData.actionUrl?.trim() || '',
         icon: formData.icon,
         color: formData.color,
-        allowComments: formData.allowComments,
-        likes: [], // Array of user IDs yang like
-        comments: [], // Array of comments
-        views: 0, // Total views
-        clicks: 0, // Total clicks
-        // Store expiration as Date object for easier querying
-        expiresAtDate: expiresAt,
-        expiresInHours: formData.expiresInHours
+        userReads: {} // Untuk melacak pembacaan per user
       };
 
       const docRef = await addDoc(collection(db, 'notifications'), notificationData);
       console.log('Notification saved with ID:', docRef.id);
 
+      // 2. Send email notifications (opsional - bisa ditambahkan nanti)
+      // Jika ingin kirim email, bisa integrasi dengan EmailJS atau service email lainnya
+
       // 3. Success message
-      alert('✅ Notification created successfully! All users (logged in and visitors) will see this notification.');
+      alert('Notification created successfully!');
       
       // 4. Reset form
       setFormData({
@@ -301,14 +293,12 @@ export default function CreateNotificationPage(): React.JSX.Element {
         message: '',
         type: 'announcement',
         priority: 'medium',
-        recipientType: 'all_visitors',
+        recipientType: 'all',
         recipientIds: [],
         recipientEmails: [],
         actionUrl: '',
         icon: '📢',
-        color: '#0050B7',
-        allowComments: true,
-        expiresInHours: 24
+        color: '#0050B7'
       });
 
       // 5. Redirect to notifications page
@@ -316,7 +306,7 @@ export default function CreateNotificationPage(): React.JSX.Element {
 
     } catch (error) {
       console.error('Error creating notification:', error);
-      alert('❌ Failed to create notification. Please try again.');
+      alert('Failed to create notification. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -505,7 +495,7 @@ export default function CreateNotificationPage(): React.JSX.Element {
               margin: 0,
               fontSize: '0.9rem'
             }}>
-              Send notifications to ALL users (logged in and visitors)
+              Send notifications to users via app
             </p>
           </div>
 
@@ -644,7 +634,6 @@ export default function CreateNotificationPage(): React.JSX.Element {
                   <option value="update">Update</option>
                   <option value="comment">Comment</option>
                   <option value="personal">Personal</option>
-                  <option value="all">All</option>
                 </select>
               </div>
 
@@ -678,41 +667,6 @@ export default function CreateNotificationPage(): React.JSX.Element {
                   <option value="medium">Medium</option>
                   <option value="high">High</option>
                   <option value="urgent">Urgent</option>
-                </select>
-              </div>
-
-              {/* Expiration Time */}
-              <div>
-                <label style={{
-                  display: 'block',
-                  marginBottom: '0.5rem',
-                  fontSize: '0.9rem',
-                  fontWeight: '600',
-                  color: 'rgba(255,255,255,0.8)'
-                }}>
-                  Expires In (Hours)
-                </label>
-                <select
-                  value={formData.expiresInHours}
-                  onChange={(e) => handleInputChange('expiresInHours', parseInt(e.target.value))}
-                  style={{
-                    width: '100%',
-                    padding: '0.8rem 1rem',
-                    backgroundColor: 'rgba(255,255,255,0.05)',
-                    border: '1px solid rgba(255,255,255,0.1)',
-                    borderRadius: '8px',
-                    color: 'white',
-                    fontSize: '1rem',
-                    outline: 'none',
-                    cursor: 'pointer'
-                  }}
-                >
-                  <option value={1}>1 Hour</option>
-                  <option value={6}>6 Hours</option>
-                  <option value={24}>24 Hours (1 Day)</option>
-                  <option value={168}>168 Hours (1 Week)</option>
-                  <option value={720}>720 Hours (30 Days)</option>
-                  <option value={8760}>8760 Hours (1 Year)</option>
                 </select>
               </div>
             </div>
@@ -804,33 +758,6 @@ export default function CreateNotificationPage(): React.JSX.Element {
                 </div>
               </div>
             </div>
-
-            {/* Allow Comments */}
-            <div style={{
-              marginTop: '1rem',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '1rem'
-            }}>
-              <input
-                type="checkbox"
-                id="allowComments"
-                checked={formData.allowComments}
-                onChange={(e) => handleInputChange('allowComments', e.target.checked)}
-                style={{
-                  width: '20px',
-                  height: '20px',
-                  cursor: 'pointer'
-                }}
-              />
-              <label htmlFor="allowComments" style={{
-                color: 'rgba(255,255,255,0.8)',
-                fontSize: '0.9rem',
-                cursor: 'pointer'
-              }}>
-                Allow users to comment on this notification
-              </label>
-            </div>
           </div>
 
           {/* Recipient Settings */}
@@ -865,10 +792,10 @@ export default function CreateNotificationPage(): React.JSX.Element {
                 gap: '0.5rem'
               }}>
                 {[
-                  { value: 'all_visitors', label: 'All Visitors', desc: 'All users (login & non-login)' },
-                  { value: 'all_users', label: 'All Registered Users', desc: 'Only users with accounts' },
-                  { value: 'logged_in', label: 'Currently Logged In', desc: 'Only currently active users' },
-                  { value: 'specific', label: 'Specific Users', desc: 'Select specific users only' }
+                  { value: 'all', label: 'All Users', desc: 'All registered users' },
+                  { value: 'specific', label: 'Specific Users', desc: 'Select specific users' },
+                  { value: 'email_only', label: 'Email Addresses', desc: 'Manual email list' },
+                  { value: 'app_only', label: 'App Only', desc: 'In-app notification only' }
                 ].map((option) => (
                   <motion.button
                     key={option.value}
@@ -1077,6 +1004,126 @@ export default function CreateNotificationPage(): React.JSX.Element {
                 )}
               </div>
             )}
+
+            {/* Email Recipients */}
+            {formData.recipientType === 'email_only' && (
+              <div style={{ marginBottom: '1.5rem' }}>
+                <label style={{
+                  display: 'block',
+                  marginBottom: '0.5rem',
+                  fontSize: '0.9rem',
+                  fontWeight: '600',
+                  color: 'rgba(255,255,255,0.8)'
+                }}>
+                  Email Addresses *
+                </label>
+                <div style={{
+                  display: 'flex',
+                  gap: '0.5rem',
+                  marginBottom: '0.5rem'
+                }}>
+                  <input
+                    type="email"
+                    value={newRecipientEmail}
+                    onChange={(e) => setNewRecipientEmail(e.target.value)}
+                    placeholder="Enter email address"
+                    style={{
+                      flex: 1,
+                      padding: '0.8rem 1rem',
+                      backgroundColor: 'rgba(255,255,255,0.05)',
+                      border: '1px solid rgba(255,255,255,0.1)',
+                      borderRadius: '8px',
+                      color: 'white',
+                      fontSize: '0.9rem',
+                      outline: 'none'
+                    }}
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        addRecipientEmail();
+                      }
+                    }}
+                  />
+                  <motion.button
+                    type="button"
+                    onClick={addRecipientEmail}
+                    style={{
+                      padding: '0.8rem 1.2rem',
+                      backgroundColor: formData.color,
+                      border: 'none',
+                      borderRadius: '8px',
+                      color: 'white',
+                      fontSize: '0.9rem',
+                      fontWeight: '600',
+                      cursor: 'pointer',
+                      whiteSpace: 'nowrap'
+                    }}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    Add Email
+                  </motion.button>
+                </div>
+                
+                {formData.recipientEmails.length > 0 && (
+                  <div style={{ marginTop: '1rem' }}>
+                    <div style={{
+                      fontSize: '0.9rem',
+                      fontWeight: '600',
+                      color: 'rgba(255,255,255,0.8)',
+                      marginBottom: '0.5rem'
+                    }}>
+                      Email List: {formData.recipientEmails.length} addresses
+                    </div>
+                    <div style={{
+                      display: 'flex',
+                      flexWrap: 'wrap',
+                      gap: '0.5rem'
+                    }}>
+                      {formData.recipientEmails.map((email, index) => (
+                        <div key={index} style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.5rem',
+                          backgroundColor: 'rgba(46, 213, 115, 0.2)',
+                          padding: '0.5rem 0.8rem',
+                          borderRadius: '15px'
+                        }}>
+                          <span style={{
+                            fontSize: '0.8rem',
+                            color: '#2ED573'
+                          }}>
+                            {email}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => removeRecipientEmail(email)}
+                            style={{
+                              backgroundColor: 'transparent',
+                              border: 'none',
+                              color: '#FF4757',
+                              cursor: 'pointer',
+                              fontSize: '0.8rem',
+                              fontWeight: 'bold'
+                            }}
+                          >
+                            ×
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                
+                <div style={{
+                  fontSize: '0.8rem',
+                  color: 'rgba(255,255,255,0.5)',
+                  marginTop: '0.5rem'
+                }}>
+                  Note: Email notifications will be sent via Firebase Cloud Functions (requires setup)
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Action URL */}
@@ -1172,7 +1219,7 @@ export default function CreateNotificationPage(): React.JSX.Element {
                     borderRadius: '50%',
                     animation: 'spin 1s linear infinite'
                   }} />
-                  Creating...
+                  Sending...
                 </>
               ) : (
                 <>
@@ -1180,7 +1227,7 @@ export default function CreateNotificationPage(): React.JSX.Element {
                     <line x1="22" y1="2" x2="11" y2="13"/>
                     <polygon points="22 2 15 22 11 13 2 9 22 2"/>
                   </svg>
-                  Create & Publish Notification
+                  Send Notification
                 </>
               )}
             </motion.button>
@@ -1218,9 +1265,8 @@ export default function CreateNotificationPage(): React.JSX.Element {
           }}>
             <li>Only administrators with authorized emails can create notifications</li>
             <li>Current admin email: <strong>{user?.email}</strong></li>
-            <li>Notifications are stored permanently in Firebase Firestore</li>
-            <li>All users (logged in and visitors) can view notifications</li>
-            <li>Notifications auto-expire based on expiration time setting</li>
+            <li>Notifications are stored in Firebase and visible to all users</li>
+            <li>For email notifications, you need to set up Firebase Cloud Functions</li>
             <li>All notifications are logged with admin information</li>
           </ul>
         </div>
