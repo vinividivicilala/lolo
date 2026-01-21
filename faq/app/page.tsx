@@ -84,7 +84,7 @@ interface UserStats {
   userName: string;
 }
 
-// Type untuk notifikasi
+// Type untuk notifikasi - DIPERBARUI
 interface Notification {
   id?: string;
   title: string;
@@ -93,11 +93,14 @@ interface Notification {
   userDisplayName?: string;
   userEmail?: string;
   userAvatar?: string;
-  type: 'comment' | 'system' | 'photo' | 'login';
+  type: 'announcement' | 'update' | 'alert' | 'system'; // Hanya 4 tipe yang diizinkan
   read: boolean;
   timestamp: Timestamp | Date;
   icon: string;
-  photoIndex?: number;
+  isAdminPost: boolean; // Menandai apakah notifikasi dari admin
+  adminName?: string; // Nama admin yang mengirim
+  priority?: 'low' | 'medium' | 'high'; // Prioritas notifikasi
+  category?: 'general' | 'feature' | 'maintenance' | 'security'; // Kategori notifikasi
 }
 
 export default function HomePage(): React.JSX.Element {
@@ -146,7 +149,7 @@ export default function HomePage(): React.JSX.Element {
   // State untuk menu overlay
   const [showMenuOverlay, setShowMenuOverlay] = useState(false);
 
-  // State untuk notifikasi dan search
+  // State untuk notifikasi dan search - DIPERBARUI
   const [showNotification, setShowNotification] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -162,7 +165,7 @@ export default function HomePage(): React.JSX.Element {
   const menuruButtonRef = useRef<HTMLDivElement>(null);
   const plusSignRef = useRef<HTMLDivElement>(null);
   const backslashRef = useRef<HTMLDivElement>(null);
-  const userButtonRef = useRef<HTMLDivElement>(null);
+  const userButtonRef = useRef<HTMLButtonElement>(null);
   const userTextRef = useRef<HTMLSpanElement>(null);
   const leftCounterRef = useRef<HTMLSpanElement>(null);
   const messageInputRef = useRef<HTMLInputElement>(null);
@@ -213,26 +216,51 @@ export default function HomePage(): React.JSX.Element {
     { title: "Features", description: "Functionality & Integration" }
   ];
 
-  // Helper function untuk menentukan icon berdasarkan tipe
+  // Helper function untuk menentukan icon berdasarkan tipe - DIPERBARUI
   const getIconByType = (type: string): string => {
     switch (type) {
-      case 'comment': return '💬';
-      case 'system': return '🔄';
-      case 'photo': return '⭐';
-      case 'login': return '👤';
+      case 'announcement': return '📢';
+      case 'update': return '🔄';
+      case 'alert': return '⚠️';
+      case 'system': return '⚙️';
       default: return '📢';
     }
   };
 
-  // Fungsi untuk mengirim notifikasi
+  // Helper function untuk menentukan warna berdasarkan tipe - BARU
+  const getColorByType = (type: string): string => {
+    switch (type) {
+      case 'announcement': return '#3B82F6'; // Blue
+      case 'update': return '#10B981'; // Green
+      case 'alert': return '#EF4444'; // Red
+      case 'system': return '#8B5CF6'; // Purple
+      default: return '#6B7280'; // Gray
+    }
+  };
+
+  // Helper function untuk menentukan warna background berdasarkan tipe - BARU
+  const getBgColorByType = (type: string): string => {
+    switch (type) {
+      case 'announcement': return 'rgba(59, 130, 246, 0.1)';
+      case 'update': return 'rgba(16, 185, 129, 0.1)';
+      case 'alert': return 'rgba(239, 68, 68, 0.1)';
+      case 'system': return 'rgba(139, 92, 246, 0.1)';
+      default: return 'rgba(107, 114, 128, 0.1)';
+    }
+  };
+
+  // Fungsi untuk mengirim notifikasi - DIPERBARUI
   const sendNotification = async (notificationData: {
     title: string;
     message: string;
-    type: 'comment' | 'system' | 'photo' | 'login';
+    type: 'announcement' | 'update' | 'alert' | 'system';
     userId?: string;
     userDisplayName?: string;
     userEmail?: string;
-    photoIndex?: number;
+    isAdminPost?: boolean;
+    adminName?: string;
+    priority?: 'low' | 'medium' | 'high';
+    category?: 'general' | 'feature' | 'maintenance' | 'security';
   }) => {
     try {
       const newNotification = {
@@ -240,7 +268,11 @@ export default function HomePage(): React.JSX.Element {
         read: false,
         timestamp: serverTimestamp(),
         icon: getIconByType(notificationData.type),
-        userAvatar: notificationData.userDisplayName?.charAt(0).toUpperCase() || '👤'
+        userAvatar: notificationData.userDisplayName?.charAt(0).toUpperCase() || '👤',
+        isAdminPost: notificationData.isAdminPost || false,
+        adminName: notificationData.adminName || 'Admin',
+        priority: notificationData.priority || 'medium',
+        category: notificationData.category || 'general'
       };
 
       await addDoc(collection(db, 'notifications'), newNotification);
@@ -266,18 +298,16 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // Handler untuk klik notifikasi
+  // Handler untuk klik notifikasi - DIPERBARUI
   const handleNotificationClick = async (notification: Notification) => {
     // Mark as read ketika diklik
     if (notification.id && !notification.read) {
       await markAsRead(notification.id);
     }
     
-    // Navigasi berdasarkan tipe notifikasi
-    if (notification.type === 'comment' && notification.photoIndex !== undefined) {
-      handleOpenPhotoFullPage();
-      setCurrentPhotoIndex(notification.photoIndex);
-    }
+    // Untuk notifikasi admin, tidak ada navigasi khusus
+    // Hanya menampilkan detail notifikasi
+    console.log("Notification clicked:", notification);
     
     setShowNotification(false);
   };
@@ -468,19 +498,7 @@ export default function HomePage(): React.JSX.Element {
         // Update user stats
         await updateUserStats(currentUser.uid, name);
         
-        // Send login notification
-        try {
-          await sendNotification({
-            title: "New Login",
-            message: `${name} logged in with ${currentUser.providerData[0]?.providerId?.includes('github') ? 'GitHub' : 'Google'}`,
-            type: 'login',
-            userId: currentUser.uid,
-            userDisplayName: name,
-            userEmail: currentUser.email
-          });
-        } catch (error) {
-          console.error("Error sending login notification:", error);
-        }
+        // TIDAK LAGI MENGIRIM NOTIFIKASI LOGIN
         
         // Load user stats
         try {
@@ -533,7 +551,7 @@ export default function HomePage(): React.JSX.Element {
     return () => unsubscribe();
   }, []);
 
-  // Load notifications from Firebase
+  // Load notifications from Firebase - DIPERBARUI
   useEffect(() => {
     console.log("Memulai loading notifikasi...");
     setIsLoadingNotifications(true);
@@ -553,9 +571,13 @@ export default function HomePage(): React.JSX.Element {
           ...data
         } as Notification;
         
-        notificationsData.push(notification);
-        if (!notification.read) {
-          unreadCount++;
+        // Filter hanya notifikasi dengan tipe yang diinginkan
+        const allowedTypes = ['announcement', 'update', 'alert', 'system'];
+        if (allowedTypes.includes(notification.type)) {
+          notificationsData.push(notification);
+          if (!notification.read) {
+            unreadCount++;
+          }
         }
       });
       
@@ -1071,16 +1093,7 @@ export default function HomePage(): React.JSX.Element {
       const docRef = await addDoc(collection(db, 'photoComments'), newComment);
       console.log("Komentar berhasil dikirim dengan ID:", docRef.id);
       
-      // Kirim notifikasi untuk komentar baru
-      await sendNotification({
-        title: "New Comment",
-        message: `${userName} commented on photo ${currentPhotoIndex + 1}: ${message.trim().substring(0, 50)}...`,
-        type: 'comment',
-        userId: userId,
-        userDisplayName: userName,
-        userEmail: userEmail,
-        photoIndex: currentPhotoIndex
-      });
+      // TIDAK LAGI MENGIRIM NOTIFIKASI KOMENTAR
       
       setMessage("");
       
@@ -2192,7 +2205,7 @@ export default function HomePage(): React.JSX.Element {
         )}
       </AnimatePresence>
 
-      {/* Notification Dropdown */}
+      {/* Notification Dropdown - DIPERBARUI */}
       <AnimatePresence>
         {showNotification && (
           <motion.div
@@ -2209,7 +2222,7 @@ export default function HomePage(): React.JSX.Element {
               backdropFilter: 'blur(20px)',
               borderRadius: '15px',
               padding: '1rem 0',
-              width: isMobile ? '300px' : '350px',
+              width: isMobile ? '300px' : '400px',
               maxWidth: '90vw',
               zIndex: 1001,
               border: '1px solid rgba(255, 255, 255, 0.15)',
@@ -2283,7 +2296,7 @@ export default function HomePage(): React.JSX.Element {
               )}
             </div>
             
-            {/* List Notifikasi dari Firebase */}
+            {/* List Notifikasi dari Firebase - DIPERBARUI */}
             <div style={{
               flex: 1,
               overflowY: 'auto',
@@ -2319,11 +2332,11 @@ export default function HomePage(): React.JSX.Element {
                       borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
                       cursor: 'pointer',
                       transition: 'all 0.2s ease',
-                      backgroundColor: notification.read ? 'transparent' : 'rgba(255, 71, 87, 0.05)',
+                      backgroundColor: notification.read ? 'transparent' : getBgColorByType(notification.type),
                       position: 'relative'
                     }}
                     whileHover={{ 
-                      backgroundColor: notification.read ? 'rgba(255, 255, 255, 0.05)' : 'rgba(255, 71, 87, 0.1)'
+                      backgroundColor: notification.read ? 'rgba(255, 255, 255, 0.05)' : getBgColorByType(notification.type).replace('0.1', '0.2')
                     }}
                     onClick={() => handleNotificationClick(notification)}
                   >
@@ -2336,7 +2349,7 @@ export default function HomePage(): React.JSX.Element {
                         transform: 'translateY(-50%)',
                         width: '6px',
                         height: '6px',
-                        backgroundColor: '#FF4757',
+                        backgroundColor: getColorByType(notification.type),
                         borderRadius: '50%'
                       }} />
                     )}
@@ -2346,17 +2359,18 @@ export default function HomePage(): React.JSX.Element {
                       gap: '1rem',
                       alignItems: 'flex-start'
                     }}>
-                      {/* Notification Icon */}
+                      {/* Notification Icon dengan warna sesuai tipe */}
                       <div style={{
                         width: '36px',
                         height: '36px',
                         borderRadius: '50%',
-                        backgroundColor: notification.read ? 'rgba(255, 255, 255, 0.1)' : 'rgba(255, 71, 87, 0.2)',
+                        backgroundColor: notification.read ? 'rgba(255, 255, 255, 0.1)' : `${getColorByType(notification.type)}20`,
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
                         fontSize: '1rem',
-                        flexShrink: 0
+                        flexShrink: 0,
+                        color: getColorByType(notification.type)
                       }}>
                         {notification.icon}
                       </div>
@@ -2369,15 +2383,50 @@ export default function HomePage(): React.JSX.Element {
                           alignItems: 'flex-start',
                           marginBottom: '0.3rem'
                         }}>
-                          <h4 style={{
-                            color: 'white',
-                            fontSize: '0.95rem',
-                            fontWeight: '600',
-                            margin: 0,
-                            fontFamily: 'Helvetica, Arial, sans-serif'
+                          <div style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.5rem',
+                            flexWrap: 'wrap'
                           }}>
-                            {notification.title}
-                          </h4>
+                            <h4 style={{
+                              color: 'white',
+                              fontSize: '0.95rem',
+                              fontWeight: '600',
+                              margin: 0,
+                              fontFamily: 'Helvetica, Arial, sans-serif'
+                            }}>
+                              {notification.title}
+                            </h4>
+                            
+                            {/* Badge Type */}
+                            <span style={{
+                              backgroundColor: getColorByType(notification.type),
+                              color: 'white',
+                              fontSize: '0.7rem',
+                              fontWeight: '600',
+                              padding: '0.1rem 0.4rem',
+                              borderRadius: '4px',
+                              textTransform: 'uppercase'
+                            }}>
+                              {notification.type}
+                            </span>
+                            
+                            {/* Badge Admin */}
+                            {notification.isAdminPost && (
+                              <span style={{
+                                backgroundColor: '#8B5CF6',
+                                color: 'white',
+                                fontSize: '0.7rem',
+                                fontWeight: '600',
+                                padding: '0.1rem 0.4rem',
+                                borderRadius: '4px'
+                              }}>
+                                ADMIN
+                              </span>
+                            )}
+                          </div>
+                          
                           <span style={{
                             color: 'rgba(255, 255, 255, 0.5)',
                             fontSize: '0.75rem',
@@ -2397,8 +2446,8 @@ export default function HomePage(): React.JSX.Element {
                           {notification.message}
                         </p>
                         
-                        {/* User info jika ada */}
-                        {notification.userDisplayName && (
+                        {/* Admin info jika ada */}
+                        {notification.isAdminPost && notification.adminName && (
                           <div style={{
                             display: 'flex',
                             alignItems: 'center',
@@ -2409,18 +2458,48 @@ export default function HomePage(): React.JSX.Element {
                               color: 'rgba(255, 255, 255, 0.5)',
                               fontSize: '0.75rem'
                             }}>
-                              From: 
+                              Posted by: 
                             </span>
                             <span style={{
-                              color: 'rgba(255, 255, 255, 0.8)',
+                              color: '#8B5CF6',
                               fontSize: '0.75rem',
                               fontWeight: '500'
                             }}>
-                              {notification.userDisplayName}
-                              {notification.userEmail && ` (${notification.userEmail})`}
+                              {notification.adminName}
                             </span>
                           </div>
                         )}
+                        
+                        {/* Priority dan Category */}
+                        <div style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.5rem',
+                          marginTop: '0.3rem'
+                        }}>
+                          {notification.priority && (
+                            <span style={{
+                              color: notification.priority === 'high' ? '#EF4444' : 
+                                     notification.priority === 'medium' ? '#F59E0B' : '#10B981',
+                              fontSize: '0.7rem',
+                              fontWeight: '500'
+                            }}>
+                              {notification.priority.toUpperCase()}
+                            </span>
+                          )}
+                          
+                          {notification.category && (
+                            <span style={{
+                              color: 'rgba(255, 255, 255, 0.7)',
+                              fontSize: '0.7rem',
+                              backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                              padding: '0.1rem 0.4rem',
+                              borderRadius: '4px'
+                            }}>
+                              {notification.category}
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </motion.div>
@@ -6292,18 +6371,14 @@ export default function HomePage(): React.JSX.Element {
         
         @keyframes searchPulse {
           0% {
-            box-shadow: 0 0 0 0 rgba(0, 255, 0, 0.4);
+            box-shadow: 0 0 0 0 rgba(0, 255, 0, 0.7);
           }
           70% {
             box-shadow: 0 0 0 10px rgba(0, 255, 0, 0);
           }
           100% {
-            box-shadow: 0 0 0 0 rgba(0, 255, 0, 0);
+            boxShadow: 0 0 0 0 rgba(0, 255, 0, 0);
           }
-        }
-        
-        .search-active {
-          animation: searchPulse 2s infinite;
         }
       `}</style>
     </div>
