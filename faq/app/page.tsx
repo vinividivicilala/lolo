@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect, useRef } from "react";
@@ -27,8 +28,7 @@ import {
   setDoc,
   getDoc,
   updateDoc,
-  increment,
-  where 
+  increment
 } from "firebase/firestore";
 
 // Register GSAP plugins
@@ -84,19 +84,6 @@ interface UserStats {
   userName: string;
 }
 
-// Type untuk notifikasi
-interface Notification {
-  id?: string;
-  userId: string;
-  title: string;
-  message: string;
-  type: 'comment' | 'system' | 'update' | 'mention' | 'like';
-  read: boolean;
-  data?: any;
-  createdAt: Timestamp | Date;
-  createdBy?: string;
-}
-
 export default function HomePage(): React.JSX.Element {
   const router = useRouter();
   const [isMobile, setIsMobile] = useState(false);
@@ -143,15 +130,12 @@ export default function HomePage(): React.JSX.Element {
   // State untuk menu overlay
   const [showMenuOverlay, setShowMenuOverlay] = useState(false);
 
-  // State untuk notifikasi REAL-TIME
-const [showNotification, setShowNotification] = useState(false);
-const [showSearch, setShowSearch] = useState(false);
-const [searchQuery, setSearchQuery] = useState("");
-const [notifications, setNotifications] = useState<Notification[]>([]);
-const [hasUnreadNotifications, setHasUnreadNotifications] = useState(false);
-const [notificationCount, setNotificationCount] = useState(0);
-const [isLoadingNotifications, setIsLoadingNotifications] = useState(false);
-  
+  // State baru untuk notifikasi dan search
+  const [showNotification, setShowNotification] = useState(false);
+  const [showSearch, setShowSearch] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [hasUnreadNotifications, setHasUnreadNotifications] = useState(true);
+  const [notificationCount, setNotificationCount] = useState(3);
 
   const headerRef = useRef<HTMLDivElement>(null);
   const topNavRef = useRef<HTMLDivElement>(null);
@@ -211,135 +195,33 @@ const [isLoadingNotifications, setIsLoadingNotifications] = useState(false);
     { title: "Features", description: "Functionality & Integration" }
   ];
 
-// Load notifikasi real-time dari Firebase
-useEffect(() => {
-  if (!user) {
-    setNotifications([]);
-    setHasUnreadNotifications(false);
-    setNotificationCount(0);
-    return;
-  }
-
-  console.log("Memulai loading notifikasi untuk user:", user.uid);
-  setIsLoadingNotifications(true);
-  
-  const notificationsRef = collection(db, 'notifications');
-  const q = query(
-    notificationsRef, 
-    where('userId', '==', user.uid),
-    orderBy('createdAt', 'desc')
-  );
-  
-  const unsubscribe = onSnapshot(q, (querySnapshot) => {
-    console.log("Snapshot notifikasi diterima, jumlah:", querySnapshot.size);
-    const notificationsData: Notification[] = [];
-    let unreadCount = 0;
-    
-    querySnapshot.forEach((doc) => {
-      const notification = {
-        id: doc.id,
-        ...doc.data()
-      } as Notification;
-      
-      notificationsData.push(notification);
-      
-      if (!notification.read) {
-        unreadCount++;
-      }
-    });
-    
-    setNotifications(notificationsData);
-    setHasUnreadNotifications(unreadCount > 0);
-    setNotificationCount(unreadCount);
-    setIsLoadingNotifications(false);
-    
-    console.log("Notifikasi loaded:", notificationsData.length, "unread:", unreadCount);
-  }, (error) => {
-    console.error("Error loading notifications:", error);
-    setIsLoadingNotifications(false);
-  });
-
-  return () => unsubscribe();
-}, [user]);
-
-
-// Fungsi untuk menandai notifikasi sebagai sudah dibaca
-const markNotificationAsRead = async (notificationId: string) => {
-  if (!user) return;
-  
-  try {
-    const notificationRef = doc(db, 'notifications', notificationId);
-    await updateDoc(notificationRef, {
+  // Data dummy notifikasi
+  const notifications = [
+    {
+      id: 1,
+      title: "New Comment",
+      message: "Someone commented on your photo",
+      time: "5 min ago",
+      read: false,
+      icon: "💬"
+    },
+    {
+      id: 2,
+      title: "Photo Update",
+      message: "Your photo has been featured",
+      time: "1 hour ago",
+      read: false,
+      icon: "⭐"
+    },
+    {
+      id: 3,
+      title: "System Update",
+      message: "New features available",
+      time: "2 days ago",
       read: true,
-      updatedAt: serverTimestamp()
-    });
-  } catch (error) {
-    console.error("Error marking notification as read:", error);
-  }
-};
-
-// Fungsi untuk menandai semua notifikasi sebagai sudah dibaca
-const markAllNotificationsAsRead = async () => {
-  if (!user) return;
-  
-  try {
-    // Ambil semua notifikasi yang belum dibaca
-    const unreadNotifications = notifications.filter(n => !n.read);
-    
-    // Update semua notifikasi yang belum dibaca
-    const batchPromises = unreadNotifications.map(notification => 
-      updateDoc(doc(db, 'notifications', notification.id!), {
-        read: true,
-        updatedAt: serverTimestamp()
-      })
-    );
-    
-    await Promise.all(batchPromises);
-    
-    // Update state lokal
-    setNotifications(prev => prev.map(n => ({ ...n, read: true })));
-    setHasUnreadNotifications(false);
-    setNotificationCount(0);
-  } catch (error) {
-    console.error("Error marking all notifications as read:", error);
-  }
-};
-
-  // Handler untuk clear notification
-const handleClearNotification = async () => {
-  await markAllNotificationsAsRead();
-  setShowNotification(false);
-};
-
-// Handler untuk klik notifikasi
-const handleNotificationClick = async (notification: Notification) => {
-  // Tandai sebagai sudah dibaca
-  if (notification.id && !notification.read) {
-    await markNotificationAsRead(notification.id);
-  }
-  
-  // Handle berdasarkan tipe notifikasi
-  switch (notification.type) {
-    case 'comment':
-      if (notification.data?.photoIndex !== undefined) {
-        setCurrentPhotoIndex(notification.data.photoIndex);
-        handleOpenPhotoFullPage();
-      }
-      break;
-    case 'update':
-      router.push('/update');
-      break;
-    case 'mention':
-      // Handle mention
-      break;
-    default:
-      // Default behavior
-      break;
-  }
-  
-  setShowNotification(false);
-};
-  
+      icon: "🔄"
+    }
+  ];
 
   // Fungsi untuk menghitung waktu yang lalu
   const calculateTimeAgo = (date: Date | Timestamp): string => {
@@ -1147,7 +1029,13 @@ const handleNotificationClick = async (notification: Notification) => {
     }
   };
 
- 
+  // Handler untuk clear notification
+  const handleClearNotification = () => {
+    setHasUnreadNotifications(false);
+    setNotificationCount(0);
+    setShowNotification(false);
+  };
+
   // Data untuk halaman Index - HANYA TAHUN
   const indexTopics = [
     {
@@ -2198,265 +2086,249 @@ const handleNotificationClick = async (notification: Notification) => {
         )}
       </AnimatePresence>
 
-    // Notification Dropdown REAL-TIME
-<AnimatePresence>
-  {showNotification && (
-    <motion.div
-      ref={notificationDropdownRef}
-      initial={{ opacity: 0, y: -10, scale: 0.95 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      exit={{ opacity: 0, y: -10, scale: 0.95 }}
-      transition={{ duration: 0.2 }}
-      style={{
-        position: 'fixed',
-        top: isMobile ? '6rem' : '7.5rem',
-        right: isMobile ? '5.5rem' : '7rem',
-        backgroundColor: 'rgba(30, 30, 30, 0.98)',
-        backdropFilter: 'blur(20px)',
-        borderRadius: '15px',
-        padding: '1rem 0',
-        width: isMobile ? '300px' : '350px',
-        maxWidth: '90vw',
-        zIndex: 1001,
-        border: '1px solid rgba(255, 255, 255, 0.15)',
-        boxShadow: '0 20px 60px rgba(0, 0, 0, 0.5)',
-        display: 'flex',
-        flexDirection: 'column',
-        maxHeight: '500px',
-        overflow: 'hidden'
-      }}
-    >
-      {/* Header Notifikasi */}
-      <div style={{
-        padding: '0 1.2rem 1rem 1.2rem',
-        borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center'
-      }}>
-        <h3 style={{
-          color: 'white',
-          fontSize: '1.2rem',
-          fontWeight: '600',
-          margin: 0,
-          fontFamily: 'Helvetica, Arial, sans-serif',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '0.5rem'
-        }}>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
-            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
-            <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
-          </svg>
-          Notifications
-          {notificationCount > 0 && (
-            <span style={{
-              backgroundColor: '#FF4757',
-              color: 'white',
-              fontSize: '0.8rem',
-              fontWeight: '600',
-              padding: '0.1rem 0.5rem',
-              borderRadius: '10px',
-              marginLeft: '0.5rem'
-            }}>
-              {notificationCount} new
-            </span>
-          )}
-        </h3>
-        
-        {hasUnreadNotifications && (
-          <motion.button
-            onClick={handleClearNotification}
+      {/* Notification Dropdown */}
+      <AnimatePresence>
+        {showNotification && (
+          <motion.div
+            ref={notificationDropdownRef}
+            initial={{ opacity: 0, y: -10, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -10, scale: 0.95 }}
+            transition={{ duration: 0.2 }}
             style={{
-              backgroundColor: 'rgba(255, 71, 87, 0.2)',
-              border: '1px solid rgba(255, 71, 87, 0.4)',
-              color: '#FF4757',
-              fontSize: '0.8rem',
-              fontWeight: '600',
-              padding: '0.3rem 0.8rem',
-              borderRadius: '20px',
-              cursor: 'pointer',
-              fontFamily: 'Helvetica, Arial, sans-serif'
+              position: 'fixed',
+              top: isMobile ? '6rem' : '7.5rem',
+              right: isMobile ? '5.5rem' : '7rem',
+              backgroundColor: 'rgba(30, 30, 30, 0.98)',
+              backdropFilter: 'blur(20px)',
+              borderRadius: '15px',
+              padding: '1rem 0',
+              width: isMobile ? '300px' : '350px',
+              maxWidth: '90vw',
+              zIndex: 1001,
+              border: '1px solid rgba(255, 255, 255, 0.15)',
+              boxShadow: '0 20px 60px rgba(0, 0, 0, 0.5)',
+              display: 'flex',
+              flexDirection: 'column',
+              maxHeight: '500px',
+              overflow: 'hidden'
             }}
-            whileHover={{ 
-              backgroundColor: 'rgba(255, 71, 87, 0.3)',
-              scale: 1.05
-            }}
-            whileTap={{ scale: 0.95 }}
           >
-            Mark All Read
-          </motion.button>
-        )}
-      </div>
-      
-      {/* List Notifikasi REAL-TIME */}
-      <div style={{
-        flex: 1,
-        overflowY: 'auto',
-        padding: '0.5rem 0'
-      }}>
-        {isLoadingNotifications ? (
-          <div style={{
-            padding: '2rem 1rem',
-            textAlign: 'center',
-            color: 'rgba(255, 255, 255, 0.5)',
-            fontFamily: 'Helvetica, Arial, sans-serif'
-          }}>
-            Memuat notifikasi...
-          </div>
-        ) : notifications.length === 0 ? (
-          <div style={{
-            padding: '2rem 1rem',
-            textAlign: 'center',
-            color: 'rgba(255, 255, 255, 0.5)',
-            fontFamily: 'Helvetica, Arial, sans-serif'
-          }}>
-            Tidak ada notifikasi
-            <div style={{ marginTop: '0.5rem', fontSize: '0.9rem' }}>
-              Notifikasi akan muncul di sini
-            </div>
-          </div>
-        ) : (
-          notifications.map((notification, index) => (
-            <motion.div
-              key={notification.id || index}
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: index * 0.05 }}
-              style={{
-                padding: '1rem 1.2rem',
-                borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
-                cursor: 'pointer',
-                transition: 'all 0.2s ease',
-                backgroundColor: notification.read ? 'transparent' : 'rgba(255, 71, 87, 0.05)',
-                position: 'relative'
-              }}
-              whileHover={{ 
-                backgroundColor: notification.read ? 'rgba(255, 255, 255, 0.05)' : 'rgba(255, 71, 87, 0.1)'
-              }}
-              onClick={() => handleNotificationClick(notification)}
-            >
-              {/* Unread Indicator */}
-              {!notification.read && (
-                <div style={{
-                  position: 'absolute',
-                  left: '0.5rem',
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  width: '6px',
-                  height: '6px',
-                  backgroundColor: '#FF4757',
-                  borderRadius: '50%'
-                }} />
-              )}
-              
-              <div style={{
+            {/* Header Notifikasi */}
+            <div style={{
+              padding: '0 1.2rem 1rem 1.2rem',
+              borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center'
+            }}>
+              <h3 style={{
+                color: 'white',
+                fontSize: '1.2rem',
+                fontWeight: '600',
+                margin: 0,
+                fontFamily: 'Helvetica, Arial, sans-serif',
                 display: 'flex',
-                gap: '1rem',
-                alignItems: 'flex-start'
+                alignItems: 'center',
+                gap: '0.5rem'
               }}>
-                {/* Notification Icon */}
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
+                  <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                  <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                </svg>
+                Notifications
+                {notificationCount > 0 && (
+                  <span style={{
+                    backgroundColor: '#FF4757',
+                    color: 'white',
+                    fontSize: '0.8rem',
+                    fontWeight: '600',
+                    padding: '0.1rem 0.5rem',
+                    borderRadius: '10px',
+                    marginLeft: '0.5rem'
+                  }}>
+                    {notificationCount} new
+                  </span>
+                )}
+              </h3>
+              
+              {hasUnreadNotifications && (
+                <motion.button
+                  onClick={handleClearNotification}
+                  style={{
+                    backgroundColor: 'rgba(255, 71, 87, 0.2)',
+                    border: '1px solid rgba(255, 71, 87, 0.4)',
+                    color: '#FF4757',
+                    fontSize: '0.8rem',
+                    fontWeight: '600',
+                    padding: '0.3rem 0.8rem',
+                    borderRadius: '20px',
+                    cursor: 'pointer',
+                    fontFamily: 'Helvetica, Arial, sans-serif'
+                  }}
+                  whileHover={{ 
+                    backgroundColor: 'rgba(255, 71, 87, 0.3)',
+                    scale: 1.05
+                  }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  Clear All
+                </motion.button>
+              )}
+            </div>
+            
+            {/* List Notifikasi */}
+            <div style={{
+              flex: 1,
+              overflowY: 'auto',
+              padding: '0.5rem 0'
+            }}>
+              {notifications.length === 0 ? (
                 <div style={{
-                  width: '36px',
-                  height: '36px',
-                  borderRadius: '50%',
-                  backgroundColor: notification.read ? 'rgba(255, 255, 255, 0.1)' : 'rgba(255, 71, 87, 0.2)',
+                  padding: '2rem 1rem',
+                  textAlign: 'center',
+                  color: 'rgba(255, 255, 255, 0.5)',
+                  fontFamily: 'Helvetica, Arial, sans-serif'
+                }}>
+                  No notifications yet
+                </div>
+              ) : (
+                notifications.map((notification, index) => (
+                  <motion.div
+                    key={notification.id}
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: index * 0.05 }}
+                    style={{
+                      padding: '1rem 1.2rem',
+                      borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease',
+                      backgroundColor: notification.read ? 'transparent' : 'rgba(255, 71, 87, 0.05)',
+                      position: 'relative'
+                    }}
+                    whileHover={{ 
+                      backgroundColor: notification.read ? 'rgba(255, 255, 255, 0.05)' : 'rgba(255, 71, 87, 0.1)'
+                    }}
+                    onClick={() => {
+                      // Mark as read on click
+                      if (!notification.read) {
+                        const newNotifications = [...notifications];
+                        newNotifications[index].read = true;
+                        // Update state here
+                      }
+                    }}
+                  >
+                    {/* Unread Indicator */}
+                    {!notification.read && (
+                      <div style={{
+                        position: 'absolute',
+                        left: '0.5rem',
+                        top: '50%',
+                        transform: 'translateY(-50%)',
+                        width: '6px',
+                        height: '6px',
+                        backgroundColor: '#FF4757',
+                        borderRadius: '50%'
+                      }} />
+                    )}
+                    
+                    <div style={{
+                      display: 'flex',
+                      gap: '1rem',
+                      alignItems: 'flex-start'
+                    }}>
+                      {/* Notification Icon */}
+                      <div style={{
+                        width: '36px',
+                        height: '36px',
+                        borderRadius: '50%',
+                        backgroundColor: notification.read ? 'rgba(255, 255, 255, 0.1)' : 'rgba(255, 71, 87, 0.2)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '1rem',
+                        flexShrink: 0
+                      }}>
+                        {notification.icon}
+                      </div>
+                      
+                      {/* Notification Content */}
+                      <div style={{ flex: 1 }}>
+                        <div style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'flex-start',
+                          marginBottom: '0.3rem'
+                        }}>
+                          <h4 style={{
+                            color: 'white',
+                            fontSize: '0.95rem',
+                            fontWeight: '600',
+                            margin: 0,
+                            fontFamily: 'Helvetica, Arial, sans-serif'
+                          }}>
+                            {notification.title}
+                          </h4>
+                          <span style={{
+                            color: 'rgba(255, 255, 255, 0.5)',
+                            fontSize: '0.75rem',
+                            whiteSpace: 'nowrap'
+                          }}>
+                            {notification.time}
+                          </span>
+                        </div>
+                        
+                        <p style={{
+                          color: notification.read ? 'rgba(255, 255, 255, 0.7)' : 'white',
+                          fontSize: '0.85rem',
+                          margin: 0,
+                          lineHeight: 1.4,
+                          fontFamily: 'Helvetica, Arial, sans-serif'
+                        }}>
+                          {notification.message}
+                        </p>
+                      </div>
+                    </div>
+                  </motion.div>
+                ))
+              )}
+            </div>
+            
+            {/* Footer */}
+            <div style={{
+              padding: '1rem 1.2rem',
+              borderTop: '1px solid rgba(255, 255, 255, 0.1)',
+              textAlign: 'center'
+            }}>
+              <motion.a
+                href="/notifications"
+                style={{
+                  color: '#00FF00',
+                  fontSize: '0.9rem',
+                  fontWeight: '600',
+                  textDecoration: 'none',
+                  fontFamily: 'Helvetica, Arial, sans-serif',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  fontSize: '1rem',
-                  flexShrink: 0
-                }}>
-                  {getNotificationIcon(notification.type)}
-                </div>
-                
-                {/* Notification Content */}
-                <div style={{ flex: 1 }}>
-                  <div style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'flex-start',
-                    marginBottom: '0.3rem'
-                  }}>
-                    <h4 style={{
-                      color: 'white',
-                      fontSize: '0.95rem',
-                      fontWeight: '600',
-                      margin: 0,
-                      fontFamily: 'Helvetica, Arial, sans-serif'
-                    }}>
-                      {notification.title}
-                    </h4>
-                    <span style={{
-                      color: 'rgba(255, 255, 255, 0.5)',
-                      fontSize: '0.75rem',
-                      whiteSpace: 'nowrap'
-                    }}>
-                      {notification.createdAt instanceof Timestamp 
-                        ? calculateTimeAgo(notification.createdAt)
-                        : 'Baru saja'}
-                    </span>
-                  </div>
-                  
-                  <p style={{
-                    color: notification.read ? 'rgba(255, 255, 255, 0.7)' : 'white',
-                    fontSize: '0.85rem',
-                    margin: 0,
-                    lineHeight: 1.4,
-                    fontFamily: 'Helvetica, Arial, sans-serif'
-                  }}>
-                    {notification.message}
-                  </p>
-                </div>
-              </div>
-            </motion.div>
-          ))
+                  gap: '0.5rem'
+                }}
+                whileHover={{ 
+                  color: 'white',
+                  x: 5
+                }}
+              >
+                View All Notifications
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M5 12h14"/>
+                  <path d="m12 5 7 7-7 7"/>
+                </svg>
+              </motion.a>
+            </div>
+          </motion.div>
         )}
-      </div>
-      
-      {/* Footer dengan tombol buat notifikasi */}
-      <div style={{
-        padding: '1rem 1.2rem',
-        borderTop: '1px solid rgba(255, 255, 255, 0.1)',
-        textAlign: 'center'
-      }}>
-        <motion.button
-          onClick={() => router.push('/create-notification')}
-          style={{
-            color: '#00FF00',
-            fontSize: '0.9rem',
-            fontWeight: '600',
-            textDecoration: 'none',
-            fontFamily: 'Helvetica, Arial, sans-serif',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '0.5rem',
-            backgroundColor: 'transparent',
-            border: 'none',
-            cursor: 'pointer',
-            width: '100%',
-            padding: '0.5rem'
-          }}
-          whileHover={{ 
-            color: 'white',
-            x: 5
-          }}
-        >
-          Buat Notifikasi Baru
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M12 5v14"/>
-            <path d="M5 12h14"/>
-          </svg>
-        </motion.button>
-      </div>
-    </motion.div>
-  )}
-</AnimatePresence>
-
-
-
-      
+      </AnimatePresence>
 
       {/* POPUP CHATBOT - DI KANAN BAWAH */}
       <AnimatePresence>
@@ -6305,6 +6177,3 @@ const handleNotificationClick = async (notification: Notification) => {
     </div>
   );
 }
-
-
-
