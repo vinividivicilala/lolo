@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect, useRef } from "react";
@@ -28,7 +27,8 @@ import {
   setDoc,
   getDoc,
   updateDoc,
-  increment
+  increment,
+  writeBatch
 } from "firebase/firestore";
 
 // Register GSAP plugins
@@ -84,6 +84,22 @@ interface UserStats {
   userName: string;
 }
 
+// Type untuk notifikasi
+interface Notification {
+  id?: string;
+  title: string;
+  message: string;
+  userId?: string;
+  userDisplayName?: string;
+  userEmail?: string;
+  userAvatar?: string;
+  type: 'comment' | 'system' | 'photo' | 'login';
+  read: boolean;
+  timestamp: Timestamp | Date;
+  icon: string;
+  photoIndex?: number;
+}
+
 export default function HomePage(): React.JSX.Element {
   const router = useRouter();
   const [isMobile, setIsMobile] = useState(false);
@@ -109,14 +125,14 @@ export default function HomePage(): React.JSX.Element {
   const [totalUsers, setTotalUsers] = useState(0);
   const [totalLoggedInUsers, setTotalLoggedInUsers] = useState(0);
   
-  // State baru untuk popup chatbot
+  // State untuk popup chatbot
   const [showChatbotPopup, setShowChatbotPopup] = useState(true);
   
-  // State untuk counter foto - angka kiri saja yang berubah
+  // State untuk counter foto
   const [leftCounter, setLeftCounter] = useState("01");
-  const totalPhotos = "03"; // Tetap konstan
+  const totalPhotos = "03";
   
-  // State untuk posisi gambar di halaman Index (semakin turun)
+  // State untuk posisi gambar
   const [imagePosition, setImagePosition] = useState(0);
   
   // State untuk komentar
@@ -130,12 +146,14 @@ export default function HomePage(): React.JSX.Element {
   // State untuk menu overlay
   const [showMenuOverlay, setShowMenuOverlay] = useState(false);
 
-  // State baru untuk notifikasi dan search
+  // State untuk notifikasi dan search
   const [showNotification, setShowNotification] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [hasUnreadNotifications, setHasUnreadNotifications] = useState(true);
-  const [notificationCount, setNotificationCount] = useState(3);
+  const [hasUnreadNotifications, setHasUnreadNotifications] = useState(false);
+  const [notificationCount, setNotificationCount] = useState(0);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [isLoadingNotifications, setIsLoadingNotifications] = useState(false);
 
   const headerRef = useRef<HTMLDivElement>(null);
   const topNavRef = useRef<HTMLDivElement>(null);
@@ -152,7 +170,7 @@ export default function HomePage(): React.JSX.Element {
   const chatbotPopupRef = useRef<HTMLDivElement>(null);
   const menuOverlayRef = useRef<HTMLDivElement>(null);
   
-  // Ref baru untuk notifikasi dan search
+  // Ref untuk notifikasi dan search
   const notificationRef = useRef<HTMLDivElement>(null);
   const notificationDropdownRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -171,19 +189,19 @@ export default function HomePage(): React.JSX.Element {
       id: 1, 
       src: "images/5.jpg", 
       alt: "Photo 1",
-      uploadTime: new Date(Date.now() - 5 * 60 * 1000) // 5 menit lalu
+      uploadTime: new Date(Date.now() - 5 * 60 * 1000)
     },
     { 
       id: 2, 
       src: "images/6.jpg", 
       alt: "Photo 2",
-      uploadTime: new Date(Date.now() - 2 * 60 * 1000) // 2 menit lalu
+      uploadTime: new Date(Date.now() - 2 * 60 * 1000)
     },
     { 
       id: 3, 
       src: "images/5.jpg", 
       alt: "Photo 3",
-      uploadTime: new Date(Date.now() - 30 * 1000) // 30 detik lalu
+      uploadTime: new Date(Date.now() - 30 * 1000)
     }
   ];
 
@@ -195,33 +213,101 @@ export default function HomePage(): React.JSX.Element {
     { title: "Features", description: "Functionality & Integration" }
   ];
 
-  // Data dummy notifikasi
-  const notifications = [
-    {
-      id: 1,
-      title: "New Comment",
-      message: "Someone commented on your photo",
-      time: "5 min ago",
-      read: false,
-      icon: "💬"
-    },
-    {
-      id: 2,
-      title: "Photo Update",
-      message: "Your photo has been featured",
-      time: "1 hour ago",
-      read: false,
-      icon: "⭐"
-    },
-    {
-      id: 3,
-      title: "System Update",
-      message: "New features available",
-      time: "2 days ago",
-      read: true,
-      icon: "🔄"
+  // Helper function untuk menentukan icon berdasarkan tipe
+  const getIconByType = (type: string): string => {
+    switch (type) {
+      case 'comment': return '💬';
+      case 'system': return '🔄';
+      case 'photo': return '⭐';
+      case 'login': return '👤';
+      default: return '📢';
     }
-  ];
+  };
+
+  // Fungsi untuk mengirim notifikasi
+  const sendNotification = async (notificationData: {
+    title: string;
+    message: string;
+    type: 'comment' | 'system' | 'photo' | 'login';
+    userId?: string;
+    userDisplayName?: string;
+    userEmail?: string;
+    photoIndex?: number;
+  }) => {
+    try {
+      const newNotification = {
+        ...notificationData,
+        read: false,
+        timestamp: serverTimestamp(),
+        icon: getIconByType(notificationData.type),
+        userAvatar: notificationData.userDisplayName?.charAt(0).toUpperCase() || '👤'
+      };
+
+      await addDoc(collection(db, 'notifications'), newNotification);
+      console.log("Notification sent successfully");
+      return true;
+    } catch (error) {
+      console.error("Error sending notification:", error);
+      return false;
+    }
+  };
+
+  // Fungsi untuk mark notification as read
+  const markAsRead = async (notificationId: string) => {
+    try {
+      const notificationRef = doc(db, 'notifications', notificationId);
+      await updateDoc(notificationRef, {
+        read: true,
+        readAt: serverTimestamp()
+      });
+      console.log("Notification marked as read:", notificationId);
+    } catch (error) {
+      console.error("Error marking notification as read:", error);
+    }
+  };
+
+  // Handler untuk klik notifikasi
+  const handleNotificationClick = async (notification: Notification) => {
+    // Mark as read ketika diklik
+    if (notification.id && !notification.read) {
+      await markAsRead(notification.id);
+    }
+    
+    // Navigasi berdasarkan tipe notifikasi
+    if (notification.type === 'comment' && notification.photoIndex !== undefined) {
+      handleOpenPhotoFullPage();
+      setCurrentPhotoIndex(notification.photoIndex);
+    }
+    
+    setShowNotification(false);
+  };
+
+  // Fungsi untuk clear all notifications
+  const handleClearNotification = async () => {
+    try {
+      // Update semua notifikasi yang belum dibaca
+      const batch = writeBatch(db);
+      const unreadNotifications = notifications.filter(n => !n.read);
+      
+      unreadNotifications.forEach(notification => {
+        if (notification.id) {
+          const notificationRef = doc(db, 'notifications', notification.id);
+          batch.update(notificationRef, {
+            read: true,
+            readAt: serverTimestamp()
+          });
+        }
+      });
+      
+      await batch.commit();
+      
+      setHasUnreadNotifications(false);
+      setNotificationCount(0);
+      setShowNotification(false);
+    } catch (error) {
+      console.error("Error clearing notifications:", error);
+    }
+  };
 
   // Fungsi untuk menghitung waktu yang lalu
   const calculateTimeAgo = (date: Date | Timestamp): string => {
@@ -230,16 +316,16 @@ export default function HomePage(): React.JSX.Element {
     const diffInSeconds = Math.floor((now.getTime() - commentDate.getTime()) / 1000);
     
     if (diffInSeconds < 60) {
-      return `${diffInSeconds} detik yang lalu`;
+      return `${diffInSeconds} seconds ago`;
     } else if (diffInSeconds < 3600) {
       const minutes = Math.floor(diffInSeconds / 60);
-      return `${minutes} menit yang lalu`;
+      return `${minutes} minutes ago`;
     } else if (diffInSeconds < 86400) {
       const hours = Math.floor(diffInSeconds / 3600);
-      return `${hours} jam yang lalu`;
+      return `${hours} hours ago`;
     } else {
       const days = Math.floor(diffInSeconds / 86400);
-      return `${days} hari yang lalu`;
+      return `${days} days ago`;
     }
   };
 
@@ -252,8 +338,8 @@ export default function HomePage(): React.JSX.Element {
       setPhotoTimeAgo(newTimes);
     };
 
-    updateTimes(); // Initial update
-    const interval = setInterval(updateTimes, 1000); // Update setiap detik
+    updateTimes();
+    const interval = setInterval(updateTimes, 1000);
 
     return () => clearInterval(interval);
   }, []);
@@ -373,7 +459,7 @@ export default function HomePage(): React.JSX.Element {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (currentUser) {
         setUser(currentUser);
-        // Get display name (prioritize displayName, then email, then 'User')
+        // Get display name
         const name = currentUser.displayName || 
                      currentUser.email?.split('@')[0] || 
                      'User';
@@ -381,6 +467,20 @@ export default function HomePage(): React.JSX.Element {
         
         // Update user stats
         await updateUserStats(currentUser.uid, name);
+        
+        // Send login notification
+        try {
+          await sendNotification({
+            title: "New Login",
+            message: `${name} logged in with ${currentUser.providerData[0]?.providerId?.includes('github') ? 'GitHub' : 'Google'}`,
+            type: 'login',
+            userId: currentUser.uid,
+            userDisplayName: name,
+            userEmail: currentUser.email
+          });
+        } catch (error) {
+          console.error("Error sending login notification:", error);
+        }
         
         // Load user stats
         try {
@@ -428,6 +528,44 @@ export default function HomePage(): React.JSX.Element {
       console.error("Error loading comments:", error);
       console.error("Error code:", error.code);
       setIsLoadingComments(false);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  // Load notifications from Firebase
+  useEffect(() => {
+    console.log("Memulai loading notifikasi...");
+    setIsLoadingNotifications(true);
+    
+    const notificationsRef = collection(db, 'notifications');
+    const q = query(notificationsRef, orderBy('timestamp', 'desc'));
+    
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      console.log("Snapshot notifikasi diterima:", querySnapshot.size, "notifikasi");
+      const notificationsData: Notification[] = [];
+      let unreadCount = 0;
+      
+      querySnapshot.forEach((doc) => {
+        const data = doc.data();
+        const notification = {
+          id: doc.id,
+          ...data
+        } as Notification;
+        
+        notificationsData.push(notification);
+        if (!notification.read) {
+          unreadCount++;
+        }
+      });
+      
+      setNotifications(notificationsData);
+      setHasUnreadNotifications(unreadCount > 0);
+      setNotificationCount(unreadCount);
+      setIsLoadingNotifications(false);
+    }, (error) => {
+      console.error("Error loading notifications:", error);
+      setIsLoadingNotifications(false);
     });
 
     return () => unsubscribe();
@@ -500,9 +638,7 @@ export default function HomePage(): React.JSX.Element {
         setShowUserDropdown(false);
       }
       if (chatbotPopupRef.current && !chatbotPopupRef.current.contains(event.target as Node)) {
-        // Hanya tutup jika klik di luar popup
         const target = event.target as HTMLElement;
-        // Periksa apakah klik bukan pada tombol navbar chatbot
         const isChatbotNavButton = target.closest('[data-nav-chatbot]');
         if (!isChatbotNavButton) {
           setShowChatbotPopup(false);
@@ -561,13 +697,11 @@ export default function HomePage(): React.JSX.Element {
     updateLeftCounter(currentPhotoIndex);
   }, [currentPhotoIndex]);
 
-  // Update posisi gambar ketika hoveredTopic berubah (semakin turun)
+  // Update posisi gambar ketika hoveredTopic berubah
   useEffect(() => {
     if (hoveredTopic !== null) {
-      // Hitung posisi berdasarkan index topic
       const topicIndex = indexTopics.findIndex(topic => topic.id === hoveredTopic);
-      // Semakin besar index, semakin turun posisinya
-      const newPosition = topicIndex * 40; // 40px per item
+      const newPosition = topicIndex * 40;
       setImagePosition(newPosition);
     } else {
       setImagePosition(0);
@@ -584,7 +718,6 @@ export default function HomePage(): React.JSX.Element {
     if (menuOverlayRef.current) {
       const tl = gsap.timeline();
       
-      // Animasi keluar ke atas
       tl.to(menuOverlayRef.current, {
         y: '-100%',
         duration: 0.5,
@@ -601,10 +734,8 @@ export default function HomePage(): React.JSX.Element {
   // Animasi GSAP saat menu dibuka
   useEffect(() => {
     if (showMenuOverlay && menuOverlayRef.current) {
-      // Reset posisi di atas layar
       gsap.set(menuOverlayRef.current, { y: '-100%' });
       
-      // Animasi masuk dari atas
       const tl = gsap.timeline();
       tl.to(menuOverlayRef.current, {
         y: '0%',
@@ -615,7 +746,6 @@ export default function HomePage(): React.JSX.Element {
   }, [showMenuOverlay]);
 
   useEffect(() => {
-    // Cek apakah user sudah menyetujui cookies
     const cookieAccepted = localStorage.getItem('cookiesAccepted');
     if (!cookieAccepted) {
       setTimeout(() => {
@@ -623,12 +753,11 @@ export default function HomePage(): React.JSX.Element {
       }, 2000);
     }
 
-    // Tampilkan popup chatbot setelah loading selesai (jika belum pernah ditampilkan)
     const chatbotShown = localStorage.getItem('chatbotPopupShown');
     if (!chatbotShown) {
       setTimeout(() => {
         setShowChatbotPopup(true);
-      }, 3000); // Tampilkan 3 detik setelah loading
+      }, 3000);
     }
 
     const checkMobile = () => {
@@ -638,20 +767,17 @@ export default function HomePage(): React.JSX.Element {
     checkMobile();
     window.addEventListener('resize', checkMobile);
 
-    // Animasi loading text
     let currentIndex = 0;
     const textInterval = setInterval(() => {
       currentIndex = (currentIndex + 1) % loadingTexts.length;
       setLoadingText(loadingTexts[currentIndex]);
     }, 500);
 
-    // Hentikan loading setelah selesai
     const loadingTimeout = setTimeout(() => {
       setIsLoading(false);
       clearInterval(textInterval);
     }, 3000);
 
-    // Keyboard navigation
     const handleKeyDown = (e: KeyboardEvent) => {
       if (showPhotoFullPage) {
         if (e.key === 'ArrowLeft') {
@@ -699,7 +825,6 @@ export default function HomePage(): React.JSX.Element {
       if (progressAnimationRef.current) {
         progressAnimationRef.current.kill();
       }
-      // Cleanup GSAP animations
       if (plusSignRef.current) {
         gsap.killTweensOf(plusSignRef.current);
       }
@@ -709,18 +834,15 @@ export default function HomePage(): React.JSX.Element {
       if (leftCounterRef.current) {
         gsap.killTweensOf(leftCounterRef.current);
       }
-      // Kill ScrollTrigger instances
       ScrollTrigger.getAll().forEach(trigger => trigger.kill());
     };
   }, [isMobile, showMenuruFullPage, showPhotoFullPage, showUserDropdown, showLogoutModal, showChatbotPopup, showMenuOverlay, showNotification, showSearch]);
 
-  // Animasi GSAP untuk tanda + di tombol Menuru (hanya pulsing, tidak berputar)
+  // Animasi GSAP untuk tanda + di tombol Menuru
   useEffect(() => {
     if (plusSignRef.current && !showMenuruFullPage) {
-      // Hapus animasi sebelumnya
       gsap.killTweensOf(plusSignRef.current);
       
-      // Animasi pulsing untuk tanda + (hanya di tombol utama)
       gsap.to(plusSignRef.current, {
         scale: 1.1,
         duration: 1.5,
@@ -734,10 +856,8 @@ export default function HomePage(): React.JSX.Element {
   // Animasi GSAP untuk tanda \ di halaman full page
   useEffect(() => {
     if (backslashRef.current && showMenuruFullPage) {
-      // Hapus animasi sebelumnya
       gsap.killTweensOf(backslashRef.current);
       
-      // Animasi continuous rotation untuk tanda \ (360 derajat)
       gsap.to(backslashRef.current, {
         rotation: 360,
         duration: 8,
@@ -752,12 +872,10 @@ export default function HomePage(): React.JSX.Element {
     localStorage.setItem('cookiesAccepted', 'true');
     setShowCookieNotification(false);
     
-    // Set cookie untuk 30 hari
     const date = new Date();
     date.setTime(date.getTime() + (30 * 24 * 60 * 60 * 1000));
     document.cookie = `cookiesAccepted=true; expires=${date.toUTCString()}; path=/`;
     
-    // Simpan preferensi tema jika ada
     if (localStorage.getItem('themePreference')) {
       const themePref = localStorage.getItem('themePreference');
       document.cookie = `themePreference=${themePref}; expires=${date.toUTCString()}; path=/`;
@@ -782,27 +900,23 @@ export default function HomePage(): React.JSX.Element {
 
   // Start progress animation
   const startProgressAnimation = () => {
-    // Hentikan animasi sebelumnya
     if (progressAnimationRef.current) {
       progressAnimationRef.current.kill();
     }
 
-    // Reset semua bar progress menjadi kosong
     const progressFills = document.querySelectorAll('.progress-fill');
     progressFills.forEach(fill => {
       (fill as HTMLElement).style.width = '0%';
     });
 
-    // Mulai animasi untuk bar yang aktif
     const currentFill = document.querySelector(`.progress-fill[data-index="${currentPhotoIndex}"]`) as HTMLElement;
     
     if (currentFill) {
       progressAnimationRef.current = gsap.to(currentFill, {
         width: '100%',
-        duration: 15, // SANGAT LAMBAT: 15 detik
+        duration: 15,
         ease: "linear",
         onComplete: () => {
-          // Setelah bar penuh, pindah ke foto berikutnya
           if (isProgressActive) {
             nextPhoto();
           }
@@ -844,7 +958,7 @@ export default function HomePage(): React.JSX.Element {
     toggleMenuruFullPage();
   };
 
-  // Fungsi untuk menutup halaman full page MENURU (klik tanda \ untuk kembali)
+  // Fungsi untuk menutup halaman full page MENURU
   const handleCloseMenuruFullPage = () => {
     setShowMenuruFullPage(false);
   };
@@ -859,7 +973,7 @@ export default function HomePage(): React.JSX.Element {
     setShowPhotoFullPage(false);
   };
 
-  // Handler untuk klik foto - KLIK LENGAN MEMBUKA FULL PAGE
+  // Handler untuk klik foto
   const handlePhotoClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     handleOpenPhotoFullPage();
@@ -868,10 +982,8 @@ export default function HomePage(): React.JSX.Element {
   // Handler untuk Sign In / User Button
   const handleSignInClick = () => {
     if (user) {
-      // Toggle dropdown
       setShowUserDropdown(!showUserDropdown);
     } else {
-      // Jika belum login, redirect ke signin page
       router.push('/signin');
     }
   };
@@ -932,7 +1044,7 @@ export default function HomePage(): React.JSX.Element {
     setShowLogoutModal(false);
   };
 
-  // Handler untuk mengirim komentar ke Firebase - DIPERBAIKI
+  // Handler untuk mengirim komentar ke Firebase
   const handleSendMessage = async () => {
     if (message.trim() === "") {
       alert("Komentar tidak boleh kosong");
@@ -942,6 +1054,7 @@ export default function HomePage(): React.JSX.Element {
     try {
       const userName = user ? userDisplayName : "Anonymous";
       const userId = user ? user.uid : null;
+      const userEmail = user ? user.email : null;
       const userAvatar = userName.charAt(0).toUpperCase();
       
       const newComment = {
@@ -955,19 +1068,22 @@ export default function HomePage(): React.JSX.Element {
       
       console.log("Mengirim komentar:", newComment);
       
-      // Pastikan db sudah terinisialisasi
-      if (!db) {
-        throw new Error("Database tidak terinisialisasi");
-      }
-      
-      // Simpan ke Firestore
       const docRef = await addDoc(collection(db, 'photoComments'), newComment);
       console.log("Komentar berhasil dikirim dengan ID:", docRef.id);
       
-      // Reset form
+      // Kirim notifikasi untuk komentar baru
+      await sendNotification({
+        title: "New Comment",
+        message: `${userName} commented on photo ${currentPhotoIndex + 1}: ${message.trim().substring(0, 50)}...`,
+        type: 'comment',
+        userId: userId,
+        userDisplayName: userName,
+        userEmail: userEmail,
+        photoIndex: currentPhotoIndex
+      });
+      
       setMessage("");
       
-      // Auto-focus kembali ke input
       if (messageInputRef.current) {
         messageInputRef.current.focus();
       }
@@ -1000,7 +1116,6 @@ export default function HomePage(): React.JSX.Element {
   // Handler untuk menutup popup chatbot
   const handleCloseChatbotPopup = () => {
     setShowChatbotPopup(false);
-    // Simpan ke localStorage agar tidak muncul lagi
     localStorage.setItem('chatbotPopupShown', 'true');
   };
 
@@ -1014,7 +1129,6 @@ export default function HomePage(): React.JSX.Element {
   const handleSearch = () => {
     if (searchQuery.trim()) {
       console.log("Searching for:", searchQuery);
-      // Implement search logic here
       router.push(`/search?q=${encodeURIComponent(searchQuery)}`);
       setShowSearch(false);
     }
@@ -1029,14 +1143,7 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // Handler untuk clear notification
-  const handleClearNotification = () => {
-    setHasUnreadNotifications(false);
-    setNotificationCount(0);
-    setShowNotification(false);
-  };
-
-  // Data untuk halaman Index - HANYA TAHUN
+  // Data untuk halaman Index
   const indexTopics = [
     {
       id: 1,
@@ -1557,7 +1664,7 @@ export default function HomePage(): React.JSX.Element {
               width: '100%',
               padding: isMobile ? '1rem' : '1.5rem',
               display: 'flex',
-              justifyContent: 'space-between', // Tetap space-between
+              justifyContent: 'space-between',
               alignItems: 'center',
               zIndex: 100,
               backgroundColor: 'black',
@@ -1578,7 +1685,7 @@ export default function HomePage(): React.JSX.Element {
                   fontFamily: 'Arial, sans-serif',
                   padding: '0.5rem 1rem',
                   borderRadius: '4px',
-                  order: 1 // Di kiri
+                  order: 1
                 }}
                 whileHover={{ 
                   backgroundColor: 'rgba(255,255,255,0.1)'
@@ -1597,7 +1704,7 @@ export default function HomePage(): React.JSX.Element {
                 alignItems: 'baseline',
                 gap: '0.3rem',
                 fontFamily: 'Helvetica, Arial, sans-serif',
-                order: 2 // Di kanan
+                order: 2
               }}>
                 <span>{String(currentPhotoIndex + 1).padStart(2, '0')}</span>
                 <span style={{ opacity: 0.6, fontSize: '0.9em' }}>/</span>
@@ -1638,7 +1745,7 @@ export default function HomePage(): React.JSX.Element {
                       style={{
                         width: '100%',
                         maxWidth: '600px',
-                        height: isMobile ? '70vh' : '80vh', // LEBIH PANJANG
+                        height: isMobile ? '70vh' : '80vh',
                         position: 'relative',
                         borderRadius: '15px',
                         overflow: 'hidden',
@@ -1648,7 +1755,6 @@ export default function HomePage(): React.JSX.Element {
                       }}
                       onClick={(e) => {
                         e.stopPropagation();
-                        // Klik kiri untuk prev, klik kanan untuk next
                         const rect = e.currentTarget.getBoundingClientRect();
                         const clickX = e.clientX - rect.left;
                         const width = rect.width;
@@ -2177,13 +2283,22 @@ export default function HomePage(): React.JSX.Element {
               )}
             </div>
             
-            {/* List Notifikasi */}
+            {/* List Notifikasi dari Firebase */}
             <div style={{
               flex: 1,
               overflowY: 'auto',
               padding: '0.5rem 0'
             }}>
-              {notifications.length === 0 ? (
+              {isLoadingNotifications ? (
+                <div style={{
+                  padding: '2rem 1rem',
+                  textAlign: 'center',
+                  color: 'rgba(255, 255, 255, 0.5)',
+                  fontFamily: 'Helvetica, Arial, sans-serif'
+                }}>
+                  Loading notifications...
+                </div>
+              ) : notifications.length === 0 ? (
                 <div style={{
                   padding: '2rem 1rem',
                   textAlign: 'center',
@@ -2195,7 +2310,7 @@ export default function HomePage(): React.JSX.Element {
               ) : (
                 notifications.map((notification, index) => (
                   <motion.div
-                    key={notification.id}
+                    key={notification.id || index}
                     initial={{ opacity: 0, x: -10 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: index * 0.05 }}
@@ -2210,14 +2325,7 @@ export default function HomePage(): React.JSX.Element {
                     whileHover={{ 
                       backgroundColor: notification.read ? 'rgba(255, 255, 255, 0.05)' : 'rgba(255, 71, 87, 0.1)'
                     }}
-                    onClick={() => {
-                      // Mark as read on click
-                      if (!notification.read) {
-                        const newNotifications = [...notifications];
-                        newNotifications[index].read = true;
-                        // Update state here
-                      }
-                    }}
+                    onClick={() => handleNotificationClick(notification)}
                   >
                     {/* Unread Indicator */}
                     {!notification.read && (
@@ -2275,7 +2383,7 @@ export default function HomePage(): React.JSX.Element {
                             fontSize: '0.75rem',
                             whiteSpace: 'nowrap'
                           }}>
-                            {notification.time}
+                            {calculateTimeAgo(notification.timestamp)}
                           </span>
                         </div>
                         
@@ -2288,6 +2396,31 @@ export default function HomePage(): React.JSX.Element {
                         }}>
                           {notification.message}
                         </p>
+                        
+                        {/* User info jika ada */}
+                        {notification.userDisplayName && (
+                          <div style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.3rem',
+                            marginTop: '0.3rem'
+                          }}>
+                            <span style={{
+                              color: 'rgba(255, 255, 255, 0.5)',
+                              fontSize: '0.75rem'
+                            }}>
+                              From: 
+                            </span>
+                            <span style={{
+                              color: 'rgba(255, 255, 255, 0.8)',
+                              fontSize: '0.75rem',
+                              fontWeight: '500'
+                            }}>
+                              {notification.userDisplayName}
+                              {notification.userEmail && ` (${notification.userEmail})`}
+                            </span>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </motion.div>
@@ -2721,7 +2854,7 @@ export default function HomePage(): React.JSX.Element {
         )}
       </AnimatePresence>
 
-      {/* Teks "Selamat Tahun Baru 2026" di pojok kiri atas, di atas navbar */}
+      {/* Teks "Selamat Tahun Baru 2026" di pojok kiri atas */}
       <motion.div
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
@@ -2971,7 +3104,7 @@ export default function HomePage(): React.JSX.Element {
           zIndex: 101,
           boxSizing: 'border-box',
           opacity: 1,
-          marginTop: isMobile ? '2.5rem' : '3rem' // Memberi ruang untuk teks tahun baru
+          marginTop: isMobile ? '2.5rem' : '3rem'
         }}
       >
         <div style={{
@@ -3291,7 +3424,6 @@ export default function HomePage(): React.JSX.Element {
           display: 'flex',
           alignItems: 'center'
         }}>
-          {/* Teks "MENURU" */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
@@ -3760,7 +3892,7 @@ export default function HomePage(): React.JSX.Element {
           boxSizing: 'border-box',
           display: 'flex',
           flexDirection: 'column',
-          gap: isMobile ? '0.1rem' : '0.2rem' // JARAK SANGAT DEKAT ANTAR BARIS
+          gap: isMobile ? '0.1rem' : '0.2rem'
         }}>
           
           {/* Baris 1: PRODUCT + AND + Foto + 01 */}
