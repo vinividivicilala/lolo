@@ -27,7 +27,8 @@ import {
   setDoc,
   getDoc,
   updateDoc,
-  increment
+  increment,
+  where 
 } from "firebase/firestore";
 
 // Register GSAP plugins
@@ -81,6 +82,19 @@ interface UserStats {
   lastLogin: Timestamp | Date;
   loginCount: number;
   userName: string;
+}
+
+// Type untuk notifikasi
+interface Notification {
+  id?: string;
+  userId: string;
+  title: string;
+  message: string;
+  type: 'comment' | 'system' | 'update' | 'mention' | 'like';
+  read: boolean;
+  data?: any;
+  createdAt: Timestamp | Date;
+  createdBy?: string;
 }
 
 export default function HomePage(): React.JSX.Element {
@@ -6291,5 +6305,6 @@ const handleNotificationClick = async (notification: Notification) => {
     </div>
   );
 }
+
 
 
