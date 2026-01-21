@@ -13,10 +13,10 @@ import {
   updateDoc,
   Timestamp,
   where,
-  getDocs,
   getDoc,
   arrayUnion,
-  arrayRemove
+  arrayRemove,
+  increment as firestoreIncrement
 } from "firebase/firestore";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { initializeApp, getApps } from "firebase/app";
@@ -54,12 +54,13 @@ interface Notification {
   senderId: string;
   senderName: string;
   senderEmail?: string;
-  recipientType: 'all_users' | 'logged_in' | 'specific' | 'all_visitors';
+  recipientType: 'all_visitors' | 'all_users' | 'logged_in' | 'specific';
   recipientIds?: string[];
   isReadBy: string[]; // Array of user IDs yang sudah baca
   isDeleted: boolean;
   createdAt: Timestamp;
   expiresAt?: Timestamp;
+  expiresAtDate?: any;
   actionUrl?: string;
   icon?: string;
   color?: string;
@@ -96,7 +97,6 @@ export default function NotificationsPage(): React.JSX.Element {
   // Admin email yang diizinkan
   const ADMIN_EMAILS = [
     'faridardiansyah061@gmail.com',
-    // Tambahkan email admin lainnya di sini
   ];
 
   // Check if user is admin
@@ -157,14 +157,14 @@ export default function NotificationsPage(): React.JSX.Element {
       const notificationsData: Notification[] = [];
       let unread = 0;
       const currentUserId = getCurrentUserId();
+      const now = new Date();
       
       for (const doc of querySnapshot.docs) {
         const data = doc.data();
         
         // Cek apakah notifikasi sudah expired
-        if (data.expiresAt) {
-          const expiresAt = data.expiresAt.toDate();
-          const now = new Date();
+        if (data.expiresAtDate) {
+          const expiresAt = data.expiresAtDate.toDate();
           if (expiresAt < now) {
             continue; // Skip expired notifications
           }
@@ -181,9 +181,8 @@ export default function NotificationsPage(): React.JSX.Element {
             
           case 'all_users':
             // Tampilkan ke semua registered users
-            if (user) {
-              shouldShow = true;
-            }
+            // Untuk demo, kita tampilkan ke semua (termasuk non-login)
+            shouldShow = true;
             break;
             
           case 'logged_in':
@@ -202,7 +201,7 @@ export default function NotificationsPage(): React.JSX.Element {
             break;
             
           default:
-            shouldShow = false;
+            shouldShow = true; // Default tampilkan ke semua
         }
         
         if (shouldShow) {
@@ -243,13 +242,9 @@ export default function NotificationsPage(): React.JSX.Element {
       // Tambah user ID ke array isReadBy
       await updateDoc(notificationRef, {
         isReadBy: arrayUnion(currentUserId),
-        views: increment(1)
+        views: firestoreIncrement(1)
       });
       
-      // Update views count
-      await updateDoc(notificationRef, {
-        views: increment(1)
-      });
     } catch (error) {
       console.error("Error marking notification as read:", error);
     }
@@ -262,7 +257,7 @@ export default function NotificationsPage(): React.JSX.Element {
     try {
       const notificationRef = doc(db, 'notifications', notificationId);
       await updateDoc(notificationRef, {
-        clicks: increment(1)
+        clicks: firestoreIncrement(1)
       });
     } catch (error) {
       console.error("Error tracking click:", error);
@@ -335,7 +330,14 @@ export default function NotificationsPage(): React.JSX.Element {
 
   // Delete notification (admin only)
   const deleteNotification = async (notificationId: string) => {
-    if (!db || !isAdmin) return;
+    if (!db || !isAdmin) {
+      alert('Only admins can delete notifications');
+      return;
+    }
+    
+    if (!confirm('Are you sure you want to delete this notification? This action cannot be undone.')) {
+      return;
+    }
     
     try {
       const notificationRef = doc(db, 'notifications', notificationId);
@@ -343,8 +345,10 @@ export default function NotificationsPage(): React.JSX.Element {
         isDeleted: true,
         deletedAt: Timestamp.now()
       });
+      alert('Notification deleted successfully!');
     } catch (error) {
       console.error("Error deleting notification:", error);
+      alert('Failed to delete notification.');
     }
   };
 
@@ -388,6 +392,7 @@ export default function NotificationsPage(): React.JSX.Element {
 
   // Format date
   const formatDate = (timestamp: Timestamp) => {
+    if (!timestamp) return 'Just now';
     const date = timestamp.toDate();
     const now = new Date();
     const diffMs = now.getTime() - date.getTime();
@@ -428,13 +433,6 @@ export default function NotificationsPage(): React.JSX.Element {
     setSelectedNotification(null);
     setShowComments(false);
     setCommentText('');
-  };
-
-  // Increment helper untuk Firestore
-  const increment = (n: number) => {
-    return {
-      increment: n
-    };
   };
 
   // Navigate to action URL
@@ -585,6 +583,7 @@ export default function NotificationsPage(): React.JSX.Element {
                     await markAsRead(notification.id);
                   });
                 await Promise.all(updatePromises);
+                alert('All notifications marked as read!');
               }}
               style={{
                 padding: '0.6rem 1.2rem',
@@ -727,10 +726,25 @@ export default function NotificationsPage(): React.JSX.Element {
               height: '300px'
             }}>
               <div style={{
-                color: 'rgba(255,255,255,0.5)',
-                fontSize: '1.2rem'
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: '1rem'
               }}>
-                Loading notifications...
+                <div style={{
+                  width: '40px',
+                  height: '40px',
+                  border: '3px solid rgba(255,255,255,0.1)',
+                  borderTopColor: '#0050B7',
+                  borderRadius: '50%',
+                  animation: 'spin 1s linear infinite'
+                }} />
+                <div style={{
+                  color: 'rgba(255,255,255,0.7)',
+                  fontSize: '1rem'
+                }}>
+                  Loading real-time notifications...
+                </div>
               </div>
             </div>
           ) : filteredNotifications.length === 0 ? (
@@ -1661,6 +1675,14 @@ export default function NotificationsPage(): React.JSX.Element {
           </motion.div>
         </div>
       )}
+
+      {/* CSS Animations */}
+      <style jsx global>{`
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+      `}</style>
     </div>
   );
 }
