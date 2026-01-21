@@ -1133,13 +1133,7 @@ const handleNotificationClick = async (notification: Notification) => {
     }
   };
 
-  // Handler untuk clear notification
-  const handleClearNotification = () => {
-    setHasUnreadNotifications(false);
-    setNotificationCount(0);
-    setShowNotification(false);
-  };
-
+ 
   // Data untuk halaman Index - HANYA TAHUN
   const indexTopics = [
     {
@@ -6297,4 +6291,5 @@ const handleNotificationClick = async (notification: Notification) => {
     </div>
   );
 }
+
 
