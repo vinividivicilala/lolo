@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect } from "react";
@@ -11,7 +10,8 @@ import {
   serverTimestamp,
   getDocs,
   query,
-  where
+  where,
+  orderBy
 } from "firebase/firestore";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { initializeApp, getApps } from "firebase/app";
@@ -57,6 +57,8 @@ interface User {
   uid: string;
   displayName: string | null;
   email: string | null;
+  photoURL?: string | null;
+  providerId?: string;
   createdAt?: any;
 }
 
@@ -115,37 +117,52 @@ export default function CreateNotificationPage(): React.JSX.Element {
     return () => unsubscribe();
   }, []);
 
-  // Load all users (admin only)
+  // Load all users from Firestore (termasuk anonymous)
   useEffect(() => {
     if (!db || !isAdmin) return;
 
     const loadUsers = async () => {
       setIsLoadingUsers(true);
       try {
-        // Catatan: Di Firebase, tidak ada cara langsung untuk mendapatkan semua user
-        // Kita perlu menyimpan data user di Firestore saat registrasi/login
-        // Untuk sekarang, kita buat dummy data atau minta user untuk input manual
+        // Load users from Firestore collection 'users'
+        const usersRef = collection(db, 'users');
+        const q = query(usersRef, orderBy('createdAt', 'desc'));
+        const querySnapshot = await getDocs(q);
         
-        // Jika Anda menyimpan user data di Firestore, gunakan query ini:
-        // const usersRef = collection(db, 'users');
-        // const q = query(usersRef, orderBy('createdAt', 'desc'));
-        // const querySnapshot = await getDocs(q);
-        // const usersData: User[] = [];
-        // querySnapshot.forEach((doc) => {
-        //   usersData.push({ id: doc.id, ...doc.data() } as User);
-        // });
-        // setUsers(usersData);
+        const usersData: User[] = [];
+        querySnapshot.forEach((doc) => {
+          const userData = doc.data();
+          usersData.push({
+            uid: doc.id,
+            displayName: userData.displayName || userData.email || 'Anonymous User',
+            email: userData.email || 'No Email',
+            photoURL: userData.photoURL || null,
+            providerId: userData.providerId || 'unknown',
+            createdAt: userData.createdAt
+          });
+        });
         
-        // Untuk demo, kita gunakan dummy data
-        const dummyUsers: User[] = [
-          { uid: 'user1', displayName: 'John Doe', email: 'john@example.com' },
-          { uid: 'user2', displayName: 'Jane Smith', email: 'jane@example.com' },
-          { uid: 'user3', displayName: 'Bob Johnson', email: 'bob@example.com' },
-        ];
-        setUsers(dummyUsers);
+        // If no users in Firestore, use dummy data
+        if (usersData.length === 0) {
+          const dummyUsers: User[] = [
+            { uid: 'anonymous-1', displayName: 'Anonymous User 1', email: 'anonymous@example.com', providerId: 'anonymous' },
+            { uid: 'google-1', displayName: 'Google User', email: 'google@example.com', providerId: 'google.com' },
+            { uid: 'github-1', displayName: 'GitHub User', email: 'github@example.com', providerId: 'github.com' },
+          ];
+          setUsers(dummyUsers);
+        } else {
+          setUsers(usersData);
+        }
         
       } catch (error) {
         console.error("Error loading users:", error);
+        // Fallback to dummy data if error
+        const dummyUsers: User[] = [
+          { uid: 'anonymous-1', displayName: 'Anonymous User 1', email: 'anonymous@example.com', providerId: 'anonymous' },
+          { uid: 'google-1', displayName: 'Google User', email: 'google@example.com', providerId: 'google.com' },
+          { uid: 'github-1', displayName: 'GitHub User', email: 'github@example.com', providerId: 'github.com' },
+        ];
+        setUsers(dummyUsers);
       } finally {
         setIsLoadingUsers(false);
       }
@@ -266,6 +283,7 @@ export default function CreateNotificationPage(): React.JSX.Element {
         senderId: user.uid,
         senderName: user.displayName || user.email || 'Admin',
         senderEmail: user.email,
+        senderPhotoURL: user.photoURL || null,
         recipientType: formData.recipientType,
         recipientIds: formData.recipientType === 'specific' ? formData.recipientIds : [],
         recipientEmails: formData.recipientType === 'email_only' ? formData.recipientEmails : [],
@@ -281,13 +299,10 @@ export default function CreateNotificationPage(): React.JSX.Element {
       const docRef = await addDoc(collection(db, 'notifications'), notificationData);
       console.log('Notification saved with ID:', docRef.id);
 
-      // 2. Send email notifications (opsional - bisa ditambahkan nanti)
-      // Jika ingin kirim email, bisa integrasi dengan EmailJS atau service email lainnya
-
-      // 3. Success message
+      // 2. Success message
       alert('Notification created successfully!');
       
-      // 4. Reset form
+      // 3. Reset form
       setFormData({
         title: '',
         message: '',
@@ -301,7 +316,7 @@ export default function CreateNotificationPage(): React.JSX.Element {
         color: '#0050B7'
       });
 
-      // 5. Redirect to notifications page
+      // 4. Redirect to notifications page
       router.push('/notifications');
 
     } catch (error) {
@@ -495,7 +510,7 @@ export default function CreateNotificationPage(): React.JSX.Element {
               margin: 0,
               fontSize: '0.9rem'
             }}>
-              Send notifications to users via app
+              Send notifications to all users (including anonymous)
             </p>
           </div>
 
@@ -792,7 +807,7 @@ export default function CreateNotificationPage(): React.JSX.Element {
                 gap: '0.5rem'
               }}>
                 {[
-                  { value: 'all', label: 'All Users', desc: 'All registered users' },
+                  { value: 'all', label: 'All Users', desc: 'All registered users (Gmail, GitHub, Anonymous)' },
                   { value: 'specific', label: 'Specific Users', desc: 'Select specific users' },
                   { value: 'email_only', label: 'Email Addresses', desc: 'Manual email list' },
                   { value: 'app_only', label: 'App Only', desc: 'In-app notification only' }
@@ -933,9 +948,20 @@ export default function CreateNotificationPage(): React.JSX.Element {
                             </div>
                             <div style={{
                               fontSize: '0.8rem',
-                              color: 'rgba(255,255,255,0.6)'
+                              color: 'rgba(255,255,255,0.6)',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '0.5rem'
                             }}>
-                              {user.email}
+                              <span>{user.email}</span>
+                              <span style={{
+                                fontSize: '0.7rem',
+                                backgroundColor: 'rgba(255,255,255,0.1)',
+                                padding: '0.1rem 0.3rem',
+                                borderRadius: '3px'
+                              }}>
+                                {user.providerId || 'unknown'}
+                              </span>
                             </div>
                           </div>
                           <div style={{
@@ -1265,7 +1291,7 @@ export default function CreateNotificationPage(): React.JSX.Element {
           }}>
             <li>Only administrators with authorized emails can create notifications</li>
             <li>Current admin email: <strong>{user?.email}</strong></li>
-            <li>Notifications are stored in Firebase and visible to all users</li>
+            <li>Notifications are stored permanently in Firebase and visible to all users</li>
             <li>For email notifications, you need to set up Firebase Cloud Functions</li>
             <li>All notifications are logged with admin information</li>
           </ul>
