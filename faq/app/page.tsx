@@ -354,7 +354,7 @@ const markAsRead = async (notificationId: string) => {
     // Update di Firestore
     await updateDoc(notificationRef, {
       [`userReads.${userIdToUse}`]: true,
-      views: firestoreIncrement(1)
+      views: increment(1)
     });
     
     console.log(`✅ Marked notification ${notificationId} as read for user ${userIdToUse}`);
@@ -394,7 +394,7 @@ const markAsRead = async (notificationId: string) => {
   // Handler untuk klik notifikasi - DIPERBARUI
   const handleNotificationClick = async (notification: Notification) => {
     // Mark as read ketika diklik
-    if (notification.id && !notification.read) {
+   if (notification.id && !notification.isRead) {
       await markAsRead(notification.id);
     }
     
@@ -2741,7 +2741,7 @@ useEffect(() => {
                   borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
                   cursor: 'pointer',
                   transition: 'all 0.2s ease',
-                  backgroundColor: notification.read ? 'transparent' : getBgColorByType(notification.type),
+                  backgroundColor: notification.isRead ? 'transparent' : getBgColorByType(notification.type),
                   position: 'relative'
                 }}
                 whileHover={{ 
@@ -6812,6 +6812,7 @@ useEffect(() => {
     </div>
   );
 }
+
 
 
 
