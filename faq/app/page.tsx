@@ -114,28 +114,6 @@ interface Notification {
   allowComments?: boolean;
 }
 
-// PERBAIKI: Tambahkan helper functions yang sama
-const getIconByType = (type: string): string => {
-  switch (type) {
-    case 'system': return '🔄';
-    case 'announcement': return '📢';
-    case 'alert': return '⚠️';
-    case 'update': return '🆕';
-    case 'comment': return '💬';
-    case 'personal': return '👤';
-    default: return '📌';
-  }
-};
-
-const getPriorityColor = (priority: string): string => {
-  switch (priority) {
-    case 'urgent': return '#FF4757';
-    case 'high': return '#FF6B6B';
-    case 'medium': return '#FFA502';
-    case 'low': return '#2ED573';
-    default: return '#747D8C';
-  }
-};
 
 
 
@@ -257,16 +235,45 @@ export default function HomePage(): React.JSX.Element {
   ];
 
 
-  // Helper function untuk menentukan warna background berdasarkan tipe - BARU
-  const getBgColorByType = (type: string): string => {
-    switch (type) {
-      case 'announcement': return 'rgba(59, 130, 246, 0.1)';
-      case 'update': return 'rgba(16, 185, 129, 0.1)';
-      case 'alert': return 'rgba(239, 68, 68, 0.1)';
-      case 'system': return 'rgba(139, 92, 246, 0.1)';
-      default: return 'rgba(107, 114, 128, 0.1)';
-    }
-  };
+// Helper functions yang HARUS ADA:
+const getIconByType = (type: string): string => {
+  switch (type) {
+    case 'system': return '🔄';
+    case 'announcement': return '📢';
+    case 'alert': return '⚠️';
+    case 'update': return '🆕';
+    case 'comment': return '💬';
+    case 'personal': return '👤';
+    default: return '📌';
+  }
+};
+
+const getColorByType = (type: string): string => {
+  switch (type) {
+    case 'system': return '#6366F1';
+    case 'announcement': return '#0050B7';
+    case 'alert': return '#FF4757';
+    case 'update': return '#00FF00';
+    case 'comment': return '#8B5CF6';
+    case 'personal': return '#F59E0B';
+    default: return '#6B7280';
+  }
+};
+
+const getPriorityColor = (priority: string): string => {
+  switch (priority) {
+    case 'urgent': return '#FF4757';
+    case 'high': return '#FF6B6B';
+    case 'medium': return '#FFA502';
+    case 'low': return '#2ED573';
+    default: return '#747D8C';
+  }
+};
+
+const getBgColorByType = (type: string): string => {
+  const color = getColorByType(type);
+  return color + '20'; // 20 = 12% opacity dalam hex
+};
 
 
 // Fungsi untuk mengirim notifikasi - DIPERBAIKI
@@ -6805,5 +6812,6 @@ useEffect(() => {
     </div>
   );
 }
+
 
 
