@@ -85,24 +85,63 @@ interface UserStats {
   userName: string;
 }
 
-// Type untuk notifikasi - DIPERBARUI
+
+// Type untuk notifikasi - SESUAIKAN DENGAN NOTIFICATIONS PAGE
 interface Notification {
-  id?: string;
+  id: string;
   title: string;
   message: string;
-  userId?: string;
-  userDisplayName?: string;
-  userEmail?: string;
-  userAvatar?: string;
-  type: 'announcement' | 'update' | 'alert' | 'system'; // Hanya 4 tipe yang diizinkan
-  read: boolean;
-  timestamp: Timestamp | Date;
+  type: 'system' | 'announcement' | 'alert' | 'update' | 'comment' | 'personal';
+  priority: 'low' | 'medium' | 'high' | 'urgent';
+  senderId: string;
+  senderName: string;
+  senderEmail?: string;
+  senderPhotoURL?: string;
+  recipientType: 'all' | 'specific' | 'email_only' | 'app_only';
+  recipientIds?: string[];
+  recipientEmails?: string[];
+  isRead: boolean;
+  isDeleted: boolean;
+  createdAt: Timestamp | Date;
+  actionUrl?: string;
   icon: string;
-  isAdminPost: boolean; // Menandai apakah notifikasi dari admin
-  adminName?: string; // Nama admin yang mengirim
-  priority?: 'low' | 'medium' | 'high'; // Prioritas notifikasi
-  category?: 'general' | 'feature' | 'maintenance' | 'security'; // Kategori notifikasi
+  color: string;
+  userReads: Record<string, boolean>;
+  views?: number;
+  clicks?: number;
+  likes?: string[];
+  comments?: any[];
+  allowComments?: boolean;
 }
+
+// PERBAIKI: Tambahkan helper functions yang sama
+const getIconByType = (type: string): string => {
+  switch (type) {
+    case 'system': return '🔄';
+    case 'announcement': return '📢';
+    case 'alert': return '⚠️';
+    case 'update': return '🆕';
+    case 'comment': return '💬';
+    case 'personal': return '👤';
+    default: return '📌';
+  }
+};
+
+const getPriorityColor = (priority: string): string => {
+  switch (priority) {
+    case 'urgent': return '#FF4757';
+    case 'high': return '#FF6B6B';
+    case 'medium': return '#FFA502';
+    case 'low': return '#2ED573';
+    default: return '#747D8C';
+  }
+};
+
+
+
+
+
+
 
 export default function HomePage(): React.JSX.Element {
   const router = useRouter();
@@ -217,27 +256,6 @@ export default function HomePage(): React.JSX.Element {
     { title: "Features", description: "Functionality & Integration" }
   ];
 
-  // Helper function untuk menentukan icon berdasarkan tipe - DIPERBARUI
-  const getIconByType = (type: string): string => {
-    switch (type) {
-      case 'announcement': return '📢';
-      case 'update': return '🔄';
-      case 'alert': return '⚠️';
-      case 'system': return '⚙️';
-      default: return '📢';
-    }
-  };
-
-  // Helper function untuk menentukan warna berdasarkan tipe - BARU
-  const getColorByType = (type: string): string => {
-    switch (type) {
-      case 'announcement': return '#3B82F6'; // Blue
-      case 'update': return '#10B981'; // Green
-      case 'alert': return '#EF4444'; // Red
-      case 'system': return '#8B5CF6'; // Purple
-      default: return '#6B7280'; // Gray
-    }
-  };
 
   // Helper function untuk menentukan warna background berdasarkan tipe - BARU
   const getBgColorByType = (type: string): string => {
@@ -309,24 +327,62 @@ const sendNotification = async (notificationData: {
 };
 
 
-
+// Fungsi untuk mark notification as read - PERBAIKI
+const markAsRead = async (notificationId: string) => {
+  try {
+    if (!db || !auth) return;
+    
+    const currentUser = auth.currentUser;
+    const currentUserId = currentUser ? currentUser.uid : 
+                         localStorage.getItem('anonymous_user_id');
+    
+    if (!currentUserId) {
+      console.error("❌ No user ID found for marking as read");
+      return;
+    }
+    
+    const userIdToUse = currentUser ? currentUser.uid : currentUserId;
+    const notificationRef = doc(db, 'notifications', notificationId);
+    
+    // Update di Firestore
+    await updateDoc(notificationRef, {
+      [`userReads.${userIdToUse}`]: true,
+      views: firestoreIncrement(1)
+    });
+    
+    console.log(`✅ Marked notification ${notificationId} as read for user ${userIdToUse}`);
+    
+    // Update local state
+    setNotifications(prev => prev.map(notif => {
+      if (notif.id === notificationId) {
+        return {
+          ...notif,
+          userReads: {
+            ...notif.userReads,
+            [userIdToUse]: true
+          },
+          views: (notif.views || 0) + 1
+        };
+      }
+      return notif;
+    }));
+    
+    // Update unread count
+    setNotificationCount(prev => Math.max(0, prev - 1));
+    setHasUnreadNotifications(prev => {
+      const newCount = notificationCount - 1;
+      return newCount > 0;
+    });
+    
+  } catch (error) {
+    console.error("❌ Error marking notification as read:", error);
+  }
+};
 
 
   
 
-  // Fungsi untuk mark notification as read
-  const markAsRead = async (notificationId: string) => {
-    try {
-      const notificationRef = doc(db, 'notifications', notificationId);
-      await updateDoc(notificationRef, {
-        read: true,
-        readAt: serverTimestamp()
-      });
-      console.log("Notification marked as read:", notificationId);
-    } catch (error) {
-      console.error("Error marking notification as read:", error);
-    }
-  };
+  
 
   // Handler untuk klik notifikasi - DIPERBARUI
   const handleNotificationClick = async (notification: Notification) => {
@@ -342,32 +398,69 @@ const sendNotification = async (notificationData: {
     setShowNotification(false);
   };
 
-  // Fungsi untuk clear all notifications
-  const handleClearNotification = async () => {
-    try {
-      // Update semua notifikasi yang belum dibaca
-      const batch = writeBatch(db);
-      const unreadNotifications = notifications.filter(n => !n.read);
-      
-      unreadNotifications.forEach(notification => {
-        if (notification.id) {
-          const notificationRef = doc(db, 'notifications', notification.id);
-          batch.update(notificationRef, {
-            read: true,
-            readAt: serverTimestamp()
-          });
-        }
-      });
-      
-      await batch.commit();
-      
-      setHasUnreadNotifications(false);
-      setNotificationCount(0);
-      setShowNotification(false);
-    } catch (error) {
-      console.error("Error clearing notifications:", error);
+
+
+// Fungsi untuk clear all notifications - PERBAIKI
+const handleClearNotification = async () => {
+  try {
+    if (!db || !auth) return;
+    
+    const currentUser = auth.currentUser;
+    const currentUserId = currentUser ? currentUser.uid : 
+                         localStorage.getItem('anonymous_user_id');
+    
+    if (!currentUserId) {
+      console.error("❌ No user ID found for clearing notifications");
+      return;
     }
-  };
+    
+    const userIdToUse = currentUser ? currentUser.uid : currentUserId;
+    
+    // Update semua notifikasi yang belum dibaca
+    const batch = writeBatch(db);
+    const unreadNotifications = notifications.filter(notification => {
+      return !notification.userReads?.[userIdToUse];
+    });
+    
+    console.log(`🗑️ Clearing ${unreadNotifications.length} unread notifications`);
+    
+    unreadNotifications.forEach(notification => {
+      const notificationRef = doc(db, 'notifications', notification.id);
+      batch.update(notificationRef, {
+        [`userReads.${userIdToUse}`]: true,
+        views: firestoreIncrement(1)
+      });
+    });
+    
+    await batch.commit();
+    
+    // Update semua notifikasi di local state
+    setNotifications(prev => prev.map(notification => ({
+      ...notification,
+      userReads: {
+        ...notification.userReads,
+        [userIdToUse]: true
+      },
+      views: (notification.views || 0) + 1
+    })));
+    
+    setHasUnreadNotifications(false);
+    setNotificationCount(0);
+    setShowNotification(false);
+    
+    console.log("✅ All notifications marked as read");
+    
+  } catch (error) {
+    console.error("❌ Error clearing notifications:", error);
+  }
+};
+
+
+
+
+
+
+  
 
   // Fungsi untuk menghitung waktu yang lalu
   const calculateTimeAgo = (date: Date | Timestamp): string => {
@@ -581,46 +674,108 @@ const sendNotification = async (notificationData: {
     return () => unsubscribe();
   }, []);
 
-// Load notifications from Firebase - DIPERBARUI DAN DIPERBAIKI
-useEffect(() => {
-  console.log("🚀 Memulai loading notifikasi dari Firebase...");
-  setIsLoadingNotifications(true);
+
+
   
-  // Pastikan Firebase sudah diinisialisasi
+// Load notifications from Firebase - PERBAIKI SESUAI DENGAN NOTIFICATIONS PAGE
+useEffect(() => {
+  console.log("🚀 Memulai loading notifikasi untuk halaman utama...");
+  
   if (!db) {
-    console.error("❌ Firebase belum diinisialisasi!");
+    console.log("❌ Firebase belum siap");
     setIsLoadingNotifications(false);
     return;
   }
   
+  setIsLoadingNotifications(true);
+  
   try {
     const notificationsRef = collection(db, 'notifications');
-    const q = query(notificationsRef, orderBy('timestamp', 'desc'));
+    const q = query(notificationsRef, orderBy('createdAt', 'desc'));
     
-    console.log("📡 Mendengarkan snapshot notifikasi...");
+    console.log("📡 Mendengarkan notifikasi dari Firestore...");
     
     const unsubscribe = onSnapshot(q, 
       (querySnapshot) => {
-        console.log("✅ Snapshot notifikasi diterima:", querySnapshot.size, "notifikasi");
+        console.log("✅ Notifikasi diterima:", querySnapshot.size, "dokumen");
+        
+        if (querySnapshot.empty) {
+          console.log("ℹ️ Tidak ada notifikasi di database");
+          setNotifications([]);
+          setHasUnreadNotifications(false);
+          setNotificationCount(0);
+          setIsLoadingNotifications(false);
+          return;
+        }
         
         const notificationsData: Notification[] = [];
         let unreadCount = 0;
         
-        if (querySnapshot.empty) {
-          console.log("ℹ️ Tidak ada notifikasi di database");
-        } else {
-          querySnapshot.forEach((doc) => {
-            try {
-              const data = doc.data();
-              console.log(`📝 Notifikasi ${doc.id}:`, {
-                title: data.title,
-                type: data.type,
-                read: data.read,
-                timestamp: data.timestamp?.toDate?.() || data.timestamp
-              });
-              
-              // Konversi timestamp jika perlu
-              let timestamp = data.timestamp;
+        // Get current user info
+        const currentUser = auth?.currentUser;
+        const currentUserId = currentUser ? currentUser.uid : 
+                              localStorage.getItem('anonymous_user_id') || 
+                              'anonymous_' + Date.now();
+        
+        // Generate anonymous ID jika belum ada
+        if (!currentUser && !localStorage.getItem('anonymous_user_id')) {
+          localStorage.setItem('anonymous_user_id', currentUserId);
+        }
+        
+        querySnapshot.forEach((doc) => {
+          try {
+            const data = doc.data();
+            console.log(`📝 Memproses notifikasi ${doc.id}:`, {
+              title: data.title,
+              type: data.type,
+              isDeleted: data.isDeleted
+            });
+            
+            // Skip jika deleted
+            if (data.isDeleted === true) {
+              console.log(`⏭️ Skip notifikasi ${doc.id} karena deleted`);
+              return;
+            }
+            
+            // Cek apakah user bisa melihat notifikasi ini
+            let shouldShow = false;
+            
+            switch (data.recipientType) {
+              case 'all':
+                // Semua orang bisa lihat
+                shouldShow = true;
+                break;
+                
+              case 'specific':
+                // Hanya untuk user tertentu
+                const recipientIds = data.recipientIds || [];
+                if (recipientIds.includes(currentUserId) || 
+                    (currentUser && recipientIds.includes(currentUser.uid))) {
+                  shouldShow = true;
+                }
+                break;
+                
+              case 'email_only':
+                // Hanya untuk email tertentu
+                if (currentUser && data.recipientEmails?.includes(currentUser.email)) {
+                  shouldShow = true;
+                }
+                break;
+                
+              case 'app_only':
+                // Hanya untuk logged in users
+                if (currentUser) {
+                  shouldShow = true;
+                }
+                break;
+                
+              default:
+                shouldShow = false;
+            }
+            
+            if (shouldShow) {
+              // Convert timestamp
+              let timestamp = data.createdAt;
               if (timestamp && typeof timestamp.toDate === 'function') {
                 timestamp = timestamp.toDate();
               }
@@ -630,31 +785,46 @@ useEffect(() => {
                 title: data.title || "No Title",
                 message: data.message || "",
                 type: data.type || 'announcement',
-                read: data.read || false,
-                timestamp: timestamp || new Date(),
-                icon: data.icon || getIconByType(data.type || 'announcement'),
-                isAdminPost: data.isAdminPost || false,
-                adminName: data.adminName || 'System Admin',
                 priority: data.priority || 'medium',
-                category: data.category || 'general',
-                userId: data.userId || '',
-                userDisplayName: data.userDisplayName || '',
-                userEmail: data.userEmail || '',
-                userAvatar: data.userAvatar || '👤'
+                senderId: data.senderId || 'system',
+                senderName: data.senderName || 'System',
+                senderEmail: data.senderEmail,
+                senderPhotoURL: data.senderPhotoURL,
+                recipientType: data.recipientType || 'all',
+                recipientIds: data.recipientIds || [],
+                recipientEmails: data.recipientEmails || [],
+                isRead: false, // Will be calculated based on userReads
+                isDeleted: data.isDeleted || false,
+                createdAt: timestamp || new Date(),
+                actionUrl: data.actionUrl,
+                icon: data.icon || getIconByType(data.type || 'announcement'),
+                color: data.color || '#0050B7',
+                userReads: data.userReads || {},
+                views: data.views || 0,
+                clicks: data.clicks || 0,
+                likes: data.likes || [],
+                comments: data.comments || [],
+                allowComments: data.allowComments || false
               };
               
-              notificationsData.push(notification);
+              // Cek apakah user sudah baca notifikasi ini
+              const isReadByUser = notification.userReads[currentUserId] || 
+                                  (currentUser && notification.userReads[currentUser.uid]) || 
+                                  false;
               
-              if (!notification.read) {
+              if (!isReadByUser) {
                 unreadCount++;
               }
-            } catch (error) {
-              console.error(`❌ Error parsing notification ${doc.id}:`, error);
+              
+              notificationsData.push(notification);
+              console.log(`✅ Ditambahkan: ${notification.title} (${isReadByUser ? 'read' : 'unread'})`);
             }
-          });
-        }
+          } catch (error) {
+            console.error(`❌ Error processing notification ${doc.id}:`, error);
+          }
+        });
         
-        console.log(`📊 Total notifikasi: ${notificationsData.length}, Unread: ${unreadCount}`);
+        console.log(`📊 Total notifikasi untuk user: ${notificationsData.length}, Unread: ${unreadCount}`);
         
         setNotifications(notificationsData);
         setHasUnreadNotifications(unreadCount > 0);
@@ -666,36 +836,46 @@ useEffect(() => {
         console.error("Error code:", error.code);
         console.error("Error message:", error.message);
         
-        // Tampilkan notifikasi error untuk debugging
-        if (error.code === 'permission-denied') {
-          console.error("⚠️ Permission denied! Periksa Firebase Rules.");
-          // Tambahkan notifikasi dummy untuk testing
+        // Untuk debugging, tambahkan dummy data jika error
+        if (process.env.NODE_ENV === 'development') {
           const dummyNotifications: Notification[] = [
             {
               id: 'dummy1',
-              title: "Permission Error",
-              message: "Cannot load notifications due to permission issues. Check Firebase rules.",
-              type: 'alert',
-              read: false,
-              timestamp: new Date(),
-              icon: '⚠️',
-              isAdminPost: true,
-              adminName: 'System',
-              priority: 'high',
-              category: 'security'
+              title: "Welcome to MENURU!",
+              message: "Welcome to our platform. Notifications are working correctly.",
+              type: 'announcement',
+              priority: 'medium',
+              senderId: 'system',
+              senderName: 'System',
+              isRead: false,
+              isDeleted: false,
+              createdAt: new Date(),
+              icon: '📢',
+              color: '#0050B7',
+              userReads: {},
+              recipientType: 'all',
+              views: 0,
+              clicks: 0,
+              likes: []
             },
             {
               id: 'dummy2',
-              title: "Test Notification",
-              message: "This is a test notification. Add real notifications in Firebase.",
-              type: 'announcement',
-              read: false,
-              timestamp: new Date(Date.now() - 3600000), // 1 hour ago
-              icon: '📢',
-              isAdminPost: true,
-              adminName: 'Admin',
-              priority: 'medium',
-              category: 'general'
+              title: "Firebase Connected",
+              message: "Successfully connected to Firebase database.",
+              type: 'system',
+              priority: 'low',
+              senderId: 'system',
+              senderName: 'System',
+              isRead: false,
+              isDeleted: false,
+              createdAt: new Date(Date.now() - 3600000),
+              icon: '🔄',
+              color: '#6366F1',
+              userReads: {},
+              recipientType: 'all',
+              views: 0,
+              clicks: 0,
+              likes: []
             }
           ];
           
@@ -708,21 +888,12 @@ useEffect(() => {
       }
     );
     
-    console.log("👂 Listener notifikasi aktif");
-    
-    return () => {
-      console.log("🧹 Membersihkan listener notifikasi");
-      unsubscribe();
-    };
+    return () => unsubscribe();
   } catch (error) {
-    console.error("❌ Error setting up notifications listener:", error);
+    console.error("❌ Error in notifications useEffect:", error);
     setIsLoadingNotifications(false);
   }
-}, [db]); // Tambahkan db sebagai dependency
-
-
-  
-
+}, [db, auth?.currentUser]); // Tambahkan auth sebagai dependency
 
 
 
@@ -6634,4 +6805,5 @@ useEffect(() => {
     </div>
   );
 }
+
 
