@@ -112,6 +112,9 @@ interface Notification {
   likes?: string[];
   comments?: any[];
   allowComments?: boolean;
+  isAdminPost?: boolean; // Tambahkan
+  adminName?: string; // Tambahkan
+  category?: string; // Tambahkan
 }
 
 
@@ -466,28 +469,55 @@ const handleClearNotification = async () => {
 
 
 
-
-  
-
-  // Fungsi untuk menghitung waktu yang lalu
-  const calculateTimeAgo = (date: Date | Timestamp): string => {
+const calculateTimeAgo = (date: Date | Timestamp | undefined | null): string => {
+  try {
+    // Handle undefined atau null
+    if (!date) {
+      return "Recently";
+    }
+    
     const now = new Date();
-    const commentDate = date instanceof Timestamp ? date.toDate() : date;
+    let commentDate: Date;
+    
+    if (date instanceof Timestamp) {
+      commentDate = date.toDate();
+    } else if (date instanceof Date) {
+      commentDate = date;
+    } else {
+      // Coba parse jika string atau object lain
+      commentDate = new Date(date);
+    }
+    
+    // Validasi date
+    if (!commentDate || isNaN(commentDate.getTime())) {
+      return "Recently";
+    }
+    
     const diffInSeconds = Math.floor((now.getTime() - commentDate.getTime()) / 1000);
     
     if (diffInSeconds < 60) {
-      return `${diffInSeconds} seconds ago`;
+      return "Just now";
     } else if (diffInSeconds < 3600) {
       const minutes = Math.floor(diffInSeconds / 60);
-      return `${minutes} minutes ago`;
+      return `${minutes}m ago`;
     } else if (diffInSeconds < 86400) {
       const hours = Math.floor(diffInSeconds / 3600);
-      return `${hours} hours ago`;
-    } else {
+      return `${hours}h ago`;
+    } else if (diffInSeconds < 2592000) { // 30 hari
       const days = Math.floor(diffInSeconds / 86400);
-      return `${days} days ago`;
+      return `${days}d ago`;
+    } else {
+      const months = Math.floor(diffInSeconds / 2592000);
+      return `${months}mo ago`;
     }
-  };
+  } catch (error) {
+    console.error("Error calculating time ago:", error);
+    return "Recently";
+  }
+};
+  
+
+  
 
   // Update waktu yang lalu secara real-time
   useEffect(() => {
@@ -811,7 +841,11 @@ useEffect(() => {
                 clicks: data.clicks || 0,
                 likes: data.likes || [],
                 comments: data.comments || [],
-                allowComments: data.allowComments || false
+                allowComments: data.allowComments || false,
+                 read: data.read || false, // Tambahkan properti read untuk kompatibilitas
+      isAdminPost: data.isAdminPost || false, // Tambahkan
+      adminName: data.adminName || '', // Tambahkan
+      category: data.category || 'general' // Tambahkan
               };
               
               // Cek apakah user sudah baca notifikasi ini
@@ -6812,6 +6846,7 @@ useEffect(() => {
     </div>
   );
 }
+
 
 
 
