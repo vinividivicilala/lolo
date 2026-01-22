@@ -30,7 +30,9 @@ import {
   increment,
   writeBatch,
   limit,
-  where
+  where,
+   getDocs,
+  startAfter
 } from "firebase/firestore";
 
 // Register GSAP plugins
@@ -255,41 +257,44 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // Fungsi untuk mengirim notifikasi
-  const sendNotification = async (notificationData: {
-    title: string;
-    message: string;
-    type: 'announcement' | 'update' | 'alert' | 'system';
-    userId?: string;
-    userDisplayName?: string;
-    userEmail?: string;
-    isAdminPost?: boolean;
-    adminName?: string;
-    priority?: 'low' | 'medium' | 'high';
-    category?: 'general' | 'feature' | 'maintenance' | 'security';
-  }) => {
-    try {
-      const newNotification = {
-        ...notificationData,
-        read: false,
-        timestamp: serverTimestamp(),
-        icon: getIconByType(notificationData.type),
-        userAvatar: notificationData.userDisplayName?.charAt(0).toUpperCase() || '👤',
-        isAdminPost: notificationData.isAdminPost || false,
-        adminName: notificationData.adminName || 'Admin',
-        priority: notificationData.priority || 'medium',
-        category: notificationData.category || 'general'
-      };
+// Fungsi untuk mengirim notifikasi (Admin)
+const sendNotification = async (notificationData: {
+  title: string;
+  message: string;
+  type: 'announcement' | 'update' | 'alert' | 'system';
+  userId?: string;
+  userDisplayName?: string;
+  userEmail?: string;
+  isAdminPost?: boolean;
+  adminName?: string;
+  priority?: 'low' | 'medium' | 'high';
+  category?: 'general' | 'feature' | 'maintenance' | 'security';
+}) => {
+  try {
+    const newNotification = {
+      ...notificationData,
+      read: false,
+      timestamp: serverTimestamp(),
+      icon: getIconByType(notificationData.type),
+      userAvatar: notificationData.userDisplayName?.charAt(0).toUpperCase() || '👤',
+      isAdminPost: notificationData.isAdminPost || false,
+      adminName: notificationData.adminName || 'Admin',
+      priority: notificationData.priority || 'medium',
+      category: notificationData.category || 'general',
+      // Tambahkan field tambahan untuk konsistensi
+      userId: notificationData.userId || null,
+      userDisplayName: notificationData.userDisplayName || 'Admin',
+      userEmail: notificationData.userEmail || null
+    };
 
-      await addDoc(collection(db, 'notifications'), newNotification);
-      console.log("Notification sent successfully");
-      return true;
-    } catch (error) {
-      console.error("Error sending notification:", error);
-      return false;
-    }
-  };
-
+    await addDoc(collection(db, 'notifications'), newNotification);
+    console.log("Notification sent successfully:", newNotification);
+    return true;
+  } catch (error) {
+    console.error("Error sending notification:", error);
+    return false;
+  }
+};
   // Fungsi untuk mark notification as read
   const markAsRead = async (notificationId: string) => {
     try {
@@ -542,108 +547,145 @@ export default function HomePage(): React.JSX.Element {
     return () => unsubscribe();
   }, []);
 
-  // Load notifications from Firebase - DIPERBAIKI UNTUK REAL-TIME
-  useEffect(() => {
-    console.log("Memulai loading notifikasi...");
-    setIsLoadingNotifications(true);
+
+
+// Load notifications from Firebase - DIPERBAIKI UNTUK REAL-TIME
+useEffect(() => {
+  console.log("Memulai loading notifikasi...");
+  setIsLoadingNotifications(true);
+  
+  const notificationsRef = collection(db, 'notifications');
+  const q = query(notificationsRef, orderBy('timestamp', 'desc'), limit(50));
+  
+  const unsubscribe = onSnapshot(q, (querySnapshot) => {
+    console.log("Snapshot notifikasi diterima:", querySnapshot.size, "notifikasi");
+    const notificationsData: Notification[] = [];
+    let unreadCount = 0;
     
-    const notificationsRef = collection(db, 'notifications');
-    const q = query(notificationsRef, orderBy('timestamp', 'desc'), limit(50));
-    
-    const unsubscribe = onSnapshot(q, (querySnapshot) => {
-      console.log("Snapshot notifikasi diterima:", querySnapshot.size, "notifikasi");
-      const notificationsData: Notification[] = [];
-      let unreadCount = 0;
+    querySnapshot.forEach((doc) => {
+      const data = doc.data();
       
-      querySnapshot.forEach((doc) => {
-        const data = doc.data();
-        const notification = {
-          id: doc.id,
-          ...data
-        } as Notification;
-        
-        const allowedTypes = ['announcement', 'update', 'alert', 'system'];
-        if (allowedTypes.includes(notification.type)) {
-          notificationsData.push(notification);
-          if (!notification.read) {
-            unreadCount++;
-          }
+      // Validasi data untuk memastikan semua field ada
+      const notification: Notification = {
+        id: doc.id,
+        title: data.title || 'No Title',
+        message: data.message || 'No Message',
+        type: data.type || 'announcement',
+        read: data.read || false,
+        timestamp: data.timestamp || serverTimestamp(),
+        icon: getIconByType(data.type || 'announcement'),
+        isAdminPost: data.isAdminPost || false,
+        adminName: data.adminName || 'Admin',
+        priority: data.priority || 'medium',
+        category: data.category || 'general',
+        userId: data.userId,
+        userDisplayName: data.userDisplayName,
+        userEmail: data.userEmail,
+        userAvatar: data.userAvatar || '👤',
+        readAt: data.readAt
+      };
+      
+      // Hanya tambahkan jika tipe valid
+      const allowedTypes = ['announcement', 'update', 'alert', 'system'];
+      if (allowedTypes.includes(notification.type)) {
+        notificationsData.push(notification);
+        if (!notification.read) {
+          unreadCount++;
         }
-      });
-      
-      setNotifications(notificationsData);
-      setHasUnreadNotifications(unreadCount > 0);
-      setNotificationCount(unreadCount);
-      setIsLoadingNotifications(false);
-      
-      // Simpan dokumen terakhir untuk pagination
-      if (querySnapshot.docs.length > 0) {
-        setLastNotificationDoc(querySnapshot.docs[querySnapshot.docs.length - 1]);
       }
-      
-      if (querySnapshot.size < 50) {
-        setAllNotificationsLoaded(true);
-      }
-    }, (error) => {
-      console.error("Error loading notifications:", error);
-      setIsLoadingNotifications(false);
     });
-
-    return () => unsubscribe();
-  }, []);
-
-  // Fungsi untuk load more notifications (pagination)
-  const loadMoreNotifications = async () => {
-    if (allNotificationsLoaded || !lastNotificationDoc) return;
     
-    try {
-      const notificationsRef = collection(db, 'notifications');
-      const q = query(
-        notificationsRef,
-        orderBy('timestamp', 'desc'),
-        startAfter(lastNotificationDoc),
-        limit(20)
-      );
-      
-      const querySnapshot = await getDocs(q);
-      
-      if (querySnapshot.empty) {
-        setAllNotificationsLoaded(true);
-        return;
-      }
-      
-      const newNotifications: Notification[] = [];
-      let newUnreadCount = 0;
-      
-      querySnapshot.forEach((doc) => {
-        const data = doc.data();
-        const notification = {
-          id: doc.id,
-          ...data
-        } as Notification;
-        
-        const allowedTypes = ['announcement', 'update', 'alert', 'system'];
-        if (allowedTypes.includes(notification.type)) {
-          newNotifications.push(notification);
-          if (!notification.read) {
-            newUnreadCount++;
-          }
-        }
-      });
-      
-      setNotifications(prev => [...prev, ...newNotifications]);
-      setNotificationCount(prev => prev + newUnreadCount);
-      setHasUnreadNotifications(prev => prev || newUnreadCount > 0);
-      
+    // Sort by timestamp descending
+    notificationsData.sort((a, b) => {
+      const dateA = a.timestamp instanceof Timestamp ? a.timestamp.toDate().getTime() : new Date(a.timestamp).getTime();
+      const dateB = b.timestamp instanceof Timestamp ? b.timestamp.toDate().getTime() : new Date(b.timestamp).getTime();
+      return dateB - dateA;
+    });
+    
+    setNotifications(notificationsData);
+    setHasUnreadNotifications(unreadCount > 0);
+    setNotificationCount(unreadCount);
+    setIsLoadingNotifications(false);
+    
+    // Simpan dokumen terakhir untuk pagination
+    if (querySnapshot.docs.length > 0) {
       setLastNotificationDoc(querySnapshot.docs[querySnapshot.docs.length - 1]);
-      
-      if (querySnapshot.size < 20) {
-        setAllNotificationsLoaded(true);
-      }
-    } catch (error) {
-      console.error("Error loading more notifications:", error);
     }
-  };
+    
+    if (querySnapshot.size < 50) {
+      setAllNotificationsLoaded(true);
+    }
+  }, (error) => {
+    console.error("Error loading notifications:", error);
+    console.error("Error details:", error.message);
+    setIsLoadingNotifications(false);
+  });
+
+  return () => unsubscribe();
+}, []);
+
+
+
+
+
+  
+
+// Fungsi untuk load more notifications (pagination)
+const loadMoreNotifications = async () => {
+  if (allNotificationsLoaded || !lastNotificationDoc) return;
+  
+  try {
+    const notificationsRef = collection(db, 'notifications');
+    const q = query(
+      notificationsRef,
+      orderBy('timestamp', 'desc'),
+      startAfter(lastNotificationDoc),
+      limit(20)
+    );
+    
+    const querySnapshot = await getDocs(q);
+    
+    if (querySnapshot.empty) {
+      setAllNotificationsLoaded(true);
+      return;
+    }
+    
+    const newNotifications: Notification[] = [];
+    let newUnreadCount = 0;
+    
+    querySnapshot.forEach((doc) => {
+      const data = doc.data();
+      const notification = {
+        id: doc.id,
+        ...data
+      } as Notification;
+      
+      // Filter untuk hanya menampilkan notifikasi dengan tipe yang valid
+      if (data.type && ['announcement', 'update', 'alert', 'system'].includes(data.type)) {
+        newNotifications.push(notification);
+        if (!data.read) {
+          newUnreadCount++;
+        }
+      }
+    });
+    
+    setNotifications(prev => [...prev, ...newNotifications]);
+    setNotificationCount(prev => prev + newUnreadCount);
+    setHasUnreadNotifications(prev => prev || newUnreadCount > 0);
+    
+    setLastNotificationDoc(querySnapshot.docs[querySnapshot.docs.length - 1]);
+    
+    if (querySnapshot.size < 20) {
+      setAllNotificationsLoaded(true);
+    }
+  } catch (error) {
+    console.error("Error loading more notifications:", error);
+  }
+};
+
+
+
+  
 
   // Animasi teks nama user berjalan
   useEffect(() => {
@@ -2401,25 +2443,26 @@ export default function HomePage(): React.JSX.Element {
                 </div>
               ) : (
                 <>
-                  {notifications.map((notification, index) => (
-                    <motion.div
-                      key={notification.id || index}
-                      initial={{ opacity: 0, x: -10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: index * 0.05 }}
-                      style={{
-                        padding: '1rem 1.2rem',
-                        borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
-                        cursor: 'pointer',
-                        transition: 'all 0.2s ease',
-                        backgroundColor: notification.read ? 'transparent' : getBgColorByType(notification.type),
-                        position: 'relative'
-                      }}
-                      whileHover={{ 
-                        backgroundColor: notification.read ? 'rgba(255, 255, 255, 0.05)' : getBgColorByType(notification.type).replace('0.1', '0.2')
-                      }}
-                      onClick={() => handleNotificationClick(notification)}
-                    >
+                  // Di bagian render notifikasi, pastikan data ditampilkan dengan benar
+{notifications.map((notification, index) => (
+  <motion.div
+    key={notification.id || index}
+    initial={{ opacity: 0, x: -10 }}
+    animate={{ opacity: 1, x: 0 }}
+    transition={{ delay: index * 0.05 }}
+    style={{
+      padding: '1rem 1.2rem',
+      borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
+      cursor: 'pointer',
+      transition: 'all 0.2s ease',
+      backgroundColor: notification.read ? 'transparent' : getBgColorByType(notification.type),
+      position: 'relative'
+    }}
+    whileHover={{ 
+      backgroundColor: notification.read ? 'rgba(255, 255, 255, 0.05)' : getBgColorByType(notification.type).replace('0.1', '0.2')
+    }}
+    onClick={() => handleNotificationClick(notification)}
+  >
                       {/* Unread Indicator */}
                       {!notification.read && (
                         <div style={{
@@ -2526,29 +2569,31 @@ export default function HomePage(): React.JSX.Element {
                             {notification.message}
                           </p>
                           
-                          {/* Admin info jika ada */}
-                          {notification.isAdminPost && notification.adminName && (
-                            <div style={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: '0.3rem',
-                              marginTop: '0.3rem'
-                            }}>
-                              <span style={{
-                                color: 'rgba(255, 255, 255, 0.5)',
-                                fontSize: '0.75rem'
-                              }}>
-                                Posted by: 
-                              </span>
-                              <span style={{
-                                color: '#8B5CF6',
-                                fontSize: '0.75rem',
-                                fontWeight: '500'
-                              }}>
-                                {notification.adminName}
-                              </span>
-                            </div>
-                          )}
+                           {/* Tampilkan admin name jika dari admin */}
+    {notification.isAdminPost && notification.adminName && (
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: '0.3rem',
+        marginTop: '0.3rem'
+      }}>
+        <span style={{
+          color: 'rgba(255, 255, 255, 0.5)',
+          fontSize: '0.75rem'
+        }}>
+          Posted by: 
+        </span>
+        <span style={{
+          color: '#8B5CF6',
+          fontSize: '0.75rem',
+          fontWeight: '500'
+        }}>
+          {notification.adminName}
+        </span>
+      </div>
+    )}
+  </motion.div>
+))}
                           
                           {/* Priority dan Category */}
                           <div style={{
@@ -6452,3 +6497,4 @@ export default function HomePage(): React.JSX.Element {
     </div>
   );
 }
+
