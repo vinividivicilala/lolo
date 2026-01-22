@@ -2536,280 +2536,281 @@ const loadMoreNotifications = async () => {
                 </motion.button>
               )}
             </div>
-            
-            {/* List Notifikasi dari Firebase - REAL-TIME */}
-            <div 
-              ref={notificationListRef}
-              style={{
-                flex: 1,
-                overflowY: 'auto',
-                padding: '0.5rem 0'
-              }}
-              onScroll={handleNotificationScroll}
-            >
-              {isLoadingNotifications ? (
-                <div style={{
-                  padding: '2rem 1rem',
-                  textAlign: 'center',
-                  color: 'rgba(255, 255, 255, 0.5)',
-                  fontFamily: 'Helvetica, Arial, sans-serif'
-                }}>
-                  <motion.div
-                    animate={{ rotate: 360 }}
-                    transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                    style={{
-                      width: '30px',
-                      height: '30px',
-                      border: '3px solid rgba(255, 255, 255, 0.1)',
-                      borderTop: '3px solid #00FF00',
-                      borderRadius: '50%',
-                      margin: '0 auto 1rem auto'
-                    }}
-                  />
-                  Loading notifications...
-                </div>
-              ) : notifications.length === 0 ? (
-                <div style={{
-                  padding: '3rem 1rem',
-                  textAlign: 'center',
-                  color: 'rgba(255, 255, 255, 0.5)',
-                  fontFamily: 'Helvetica, Arial, sans-serif'
-                }}>
-                  <svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="rgba(255, 255, 255, 0.3)" strokeWidth="1">
-                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
-                    <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
-                  </svg>
-                  <div style={{ marginTop: '1rem' }}>
-                    No notifications yet
-                  </div>
-                  <div style={{ fontSize: '0.8rem', marginTop: '0.5rem', opacity: 0.7 }}>
-                    You're all caught up!
-                  </div>
-                </div>
-              ) : (
-                <>
 
-                  // Di dalam mapping notifications, perbaiki bagian ini:
-{notifications.map((notification, index) => {
-  const isRead = user ? 
-    (notification.userReads && notification.userReads[user.uid]) || false : 
-    false;
-  
-  return (
-    <motion.div
-      key={notification.id || index}
-      initial={{ opacity: 0, x: -10 }}
-      animate={{ opacity: 1, x: 0 }}
-      transition={{ delay: index * 0.05 }}
-      style={{
-        padding: '1rem 1.2rem',
-        borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
-        cursor: 'pointer',
-        transition: 'all 0.2s ease',
-        backgroundColor: isRead ? 'transparent' : getBgColorByType(notification.type),
-        position: 'relative'
-      }}
-      whileHover={{ 
-        backgroundColor: isRead ? 'rgba(255, 255, 255, 0.05)' : getBgColorByType(notification.type).replace('0.1', '0.2')
-      }}
-      onClick={() => handleNotificationClick(notification)}
-    >
-      {/* Unread Indicator */}
-      {!isRead && (
-        <div style={{
-          position: 'absolute',
-          left: '0.5rem',
-          top: '50%',
-          transform: 'translateY(-50%)',
-          width: '6px',
-          height: '6px',
-          backgroundColor: getColorByType(notification.type),
-          borderRadius: '50%'
-        }} />
-      )}
-                
-                      <div style={{
-                        display: 'flex',
-                        gap: '1rem',
-                        alignItems: 'flex-start'
-                      }}>
-                        {/* Notification Icon dengan warna sesuai tipe */}
-                        <div style={{
-                          width: '36px',
-                          height: '36px',
-                          borderRadius: '50%',
-                          backgroundColor: notification.read ? 'rgba(255, 255, 255, 0.1)' : `${getColorByType(notification.type)}20`,
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          fontSize: '1rem',
-                          flexShrink: 0,
-                          color: getColorByType(notification.type)
-                        }}>
-                          {notification.icon}
-                        </div>
-                        
-                        {/* Notification Content */}
-                        <div style={{ flex: 1 }}>
-                          <div style={{
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                            alignItems: 'flex-start',
-                            marginBottom: '0.3rem'
-                          }}>
-                            <div style={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: '0.5rem',
-                              flexWrap: 'wrap'
-                            }}>
-                              <h4 style={{
-                                color: 'white',
-                                fontSize: '0.95rem',
-                                fontWeight: '600',
-                                margin: 0,
-                                fontFamily: 'Helvetica, Arial, sans-serif'
-                              }}>
-                                {notification.title}
-                              </h4>
-                              
-                              {/* Badge Type */}
-                              <span style={{
-                                backgroundColor: getColorByType(notification.type),
-                                color: 'white',
-                                fontSize: '0.7rem',
-                                fontWeight: '600',
-                                padding: '0.1rem 0.4rem',
-                                borderRadius: '4px',
-                                textTransform: 'uppercase'
-                              }}>
-                                {notification.type}
-                              </span>
-                              
-                              {/* Badge Admin */}
-                              {notification.isAdminPost && (
-                                <span style={{
-                                  backgroundColor: '#8B5CF6',
-                                  color: 'white',
-                                  fontSize: '0.7rem',
-                                  fontWeight: '600',
-                                  padding: '0.1rem 0.4rem',
-                                  borderRadius: '4px'
-                                }}>
-                                  ADMIN
-                                </span>
-                              )}
-                            </div>
-                            
-                            <span style={{
-                              color: 'rgba(255, 255, 255, 0.5)',
-                              fontSize: '0.75rem',
-                              whiteSpace: 'nowrap'
-                            }}>
-                              {calculateTimeAgo(notification.timestamp)}
-                            </span>
-                          </div>
-                          
-                          <p style={{
-                            color: notification.read ? 'rgba(255, 255, 255, 0.7)' : 'white',
-                            fontSize: '0.85rem',
-                            margin: 0,
-                            lineHeight: 1.4,
-                            fontFamily: 'Helvetica, Arial, sans-serif'
-                          }}>
-                            {notification.message}
-                          </p>
-                          
-                           {/* Tampilkan admin name jika dari admin */}
-    {notification.isAdminPost && notification.adminName && (
-      <div style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: '0.3rem',
-        marginTop: '0.3rem'
-      }}>
-        <span style={{
-          color: 'rgba(255, 255, 255, 0.5)',
-          fontSize: '0.75rem'
-        }}>
-          Posted by: 
-        </span>
-        <span style={{
-          color: '#8B5CF6',
-          fontSize: '0.75rem',
-          fontWeight: '500'
-        }}>
-          {notification.adminName}
-        </span>
+            {/* List Notifikasi dari Firebase - REAL-TIME */}
+<div 
+  ref={notificationListRef}
+  style={{
+    flex: 1,
+    overflowY: 'auto',
+    padding: '0.5rem 0'
+  }}
+  onScroll={handleNotificationScroll}
+>
+  {isLoadingNotifications ? (
+    <div style={{
+      padding: '2rem 1rem',
+      textAlign: 'center',
+      color: 'rgba(255, 255, 255, 0.5)',
+      fontFamily: 'Helvetica, Arial, sans-serif'
+    }}>
+      <motion.div
+        animate={{ rotate: 360 }}
+        transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+        style={{
+          width: '30px',
+          height: '30px',
+          border: '3px solid rgba(255, 255, 255, 0.1)',
+          borderTop: '3px solid #00FF00',
+          borderRadius: '50%',
+          margin: '0 auto 1rem auto'
+        }}
+      />
+      Loading notifications...
+    </div>
+  ) : notifications.length === 0 ? (
+    <div style={{
+      padding: '3rem 1rem',
+      textAlign: 'center',
+      color: 'rgba(255, 255, 255, 0.5)',
+      fontFamily: 'Helvetica, Arial, sans-serif'
+    }}>
+      <svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="rgba(255, 255, 255, 0.3)" strokeWidth="1">
+        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+        <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+      </svg>
+      <div style={{ marginTop: '1rem' }}>
+        No notifications yet
       </div>
-    )}
-               
-                          {/* Priority dan Category */}
-                          <div style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '0.5rem',
-                            marginTop: '0.3rem'
-                          }}>
-                            {notification.priority && (
-                              <span style={{
-                                color: notification.priority === 'high' ? '#EF4444' : 
-                                       notification.priority === 'medium' ? '#F59E0B' : '#10B981',
-                                fontSize: '0.7rem',
-                                fontWeight: '500'
-                              }}>
-                                {notification.priority.toUpperCase()}
-                              </span>
-                            )}
-                            
-                            {notification.category && (
-                              <span style={{
-                                color: 'rgba(255, 255, 255, 0.7)',
-                                fontSize: '0.7rem',
-                                backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                                padding: '0.1rem 0.4rem',
-                                borderRadius: '4px'
-                              }}>
-                                {notification.category}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    </motion.div>
-                  ))}
-                  
-                  {/* Load More Indicator */}
-                  {!allNotificationsLoaded && (
-                    <div style={{
-                      padding: '1rem',
-                      textAlign: 'center'
+      <div style={{ fontSize: '0.8rem', marginTop: '0.5rem', opacity: 0.7 }}>
+        You're all caught up!
+      </div>
+    </div>
+  ) : (
+    <>
+      {notifications.map((notification, index) => {
+        const isRead = user ? 
+          (notification.userReads && notification.userReads[user.uid]) || false : 
+          false;
+        
+        return (
+          <motion.div
+            key={notification.id || index}
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: index * 0.05 }}
+            style={{
+              padding: '1rem 1.2rem',
+              borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease',
+              backgroundColor: isRead ? 'transparent' : getBgColorByType(notification.type),
+              position: 'relative'
+            }}
+            whileHover={{ 
+              backgroundColor: isRead ? 'rgba(255, 255, 255, 0.05)' : getBgColorByType(notification.type).replace('0.1', '0.2')
+            }}
+            onClick={() => handleNotificationClick(notification)}
+          >
+            {/* Unread Indicator */}
+            {!isRead && (
+              <div style={{
+                position: 'absolute',
+                left: '0.5rem',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                width: '6px',
+                height: '6px',
+                backgroundColor: getColorByType(notification.type),
+                borderRadius: '50%'
+              }} />
+            )}
+            
+            <div style={{
+              display: 'flex',
+              gap: '1rem',
+              alignItems: 'flex-start'
+            }}>
+              {/* Notification Icon dengan warna sesuai tipe */}
+              <div style={{
+                width: '36px',
+                height: '36px',
+                borderRadius: '50%',
+                backgroundColor: isRead ? 'rgba(255, 255, 255, 0.1)' : `${getColorByType(notification.type)}20`,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '1rem',
+                flexShrink: 0,
+                color: getColorByType(notification.type)
+              }}>
+                {notification.icon}
+              </div>
+              
+              {/* Notification Content */}
+              <div style={{ flex: 1 }}>
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'flex-start',
+                  marginBottom: '0.3rem'
+                }}>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                    flexWrap: 'wrap'
+                  }}>
+                    <h4 style={{
+                      color: 'white',
+                      fontSize: '0.95rem',
+                      fontWeight: '600',
+                      margin: 0,
+                      fontFamily: 'Helvetica, Arial, sans-serif'
                     }}>
-                      <motion.button
-                        onClick={loadMoreNotifications}
-                        disabled={isLoadingNotifications}
-                        style={{
-                          backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                          border: '1px solid rgba(255, 255, 255, 0.2)',
-                          color: 'white',
-                          padding: '0.5rem 1rem',
-                          borderRadius: '20px',
-                          fontSize: '0.8rem',
-                          cursor: 'pointer',
-                          fontFamily: 'Helvetica, Arial, sans-serif'
-                        }}
-                        whileHover={{ 
-                          backgroundColor: 'rgba(255, 255, 255, 0.2)'
-                        }}
-                        whileTap={{ scale: 0.95 }}
-                      >
-                        {isLoadingNotifications ? 'Loading...' : 'Load More'}
-                      </motion.button>
-                    </div>
+                      {notification.title}
+                    </h4>
+                    
+                    {/* Badge Type */}
+                    <span style={{
+                      backgroundColor: getColorByType(notification.type),
+                      color: 'white',
+                      fontSize: '0.7rem',
+                      fontWeight: '600',
+                      padding: '0.1rem 0.4rem',
+                      borderRadius: '4px',
+                      textTransform: 'uppercase'
+                    }}>
+                      {notification.type}
+                    </span>
+                    
+                    {/* Badge Admin */}
+                    {notification.isAdminPost && (
+                      <span style={{
+                        backgroundColor: '#8B5CF6',
+                        color: 'white',
+                        fontSize: '0.7rem',
+                        fontWeight: '600',
+                        padding: '0.1rem 0.4rem',
+                        borderRadius: '4px'
+                      }}>
+                        ADMIN
+                      </span>
+                    )}
+                  </div>
+                  
+                  <span style={{
+                    color: 'rgba(255, 255, 255, 0.5)',
+                    fontSize: '0.75rem',
+                    whiteSpace: 'nowrap'
+                  }}>
+                    {calculateTimeAgo(notification.timestamp)}
+                  </span>
+                </div>
+                
+                <p style={{
+                  color: isRead ? 'rgba(255, 255, 255, 0.7)' : 'white',
+                  fontSize: '0.85rem',
+                  margin: 0,
+                  lineHeight: 1.4,
+                  fontFamily: 'Helvetica, Arial, sans-serif'
+                }}>
+                  {notification.message}
+                </p>
+                
+                {/* Tampilkan admin name jika dari admin */}
+                {notification.isAdminPost && notification.adminName && (
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.3rem',
+                    marginTop: '0.3rem'
+                  }}>
+                    <span style={{
+                      color: 'rgba(255, 255, 255, 0.5)',
+                      fontSize: '0.75rem'
+                    }}>
+                      Posted by: 
+                    </span>
+                    <span style={{
+                      color: '#8B5CF6',
+                      fontSize: '0.75rem',
+                      fontWeight: '500'
+                    }}>
+                      {notification.adminName}
+                    </span>
+                  </div>
+                )}
+                
+                {/* Priority dan Category */}
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  marginTop: '0.3rem'
+                }}>
+                  {notification.priority && (
+                    <span style={{
+                      color: notification.priority === 'high' ? '#EF4444' : 
+                             notification.priority === 'medium' ? '#F59E0B' : '#10B981',
+                      fontSize: '0.7rem',
+                      fontWeight: '500'
+                    }}>
+                      {notification.priority.toUpperCase()}
+                    </span>
                   )}
-                </>
-              )}
+                  
+                  {notification.category && (
+                    <span style={{
+                      color: 'rgba(255, 255, 255, 0.7)',
+                      fontSize: '0.7rem',
+                      backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                      padding: '0.1rem 0.4rem',
+                      borderRadius: '4px'
+                    }}>
+                      {notification.category}
+                    </span>
+                  )}
+                </div>
+              </div>
             </div>
+          </motion.div>
+        );
+      })}
+      
+      {/* Load More Indicator */}
+      {!allNotificationsLoaded && (
+        <div style={{
+          padding: '1rem',
+          textAlign: 'center'
+        }}>
+          <motion.button
+            onClick={loadMoreNotifications}
+            disabled={isLoadingNotifications}
+            style={{
+              backgroundColor: 'rgba(255, 255, 255, 0.1)',
+              border: '1px solid rgba(255, 255, 255, 0.2)',
+              color: 'white',
+              padding: '0.5rem 1rem',
+              borderRadius: '20px',
+              fontSize: '0.8rem',
+              cursor: 'pointer',
+              fontFamily: 'Helvetica, Arial, sans-serif'
+            }}
+            whileHover={{ 
+              backgroundColor: 'rgba(255, 255, 255, 0.2)'
+            }}
+            whileTap={{ scale: 0.95 }}
+          >
+            {isLoadingNotifications ? 'Loading...' : 'Load More'}
+          </motion.button>
+        </div>
+      )}
+    </>
+  )}
+</div>
+            
+           
             
             {/* Footer */}
             <div style={{
@@ -6646,6 +6647,7 @@ const loadMoreNotifications = async () => {
     </div>
   );
 }
+
 
 
 
