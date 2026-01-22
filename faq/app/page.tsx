@@ -89,11 +89,12 @@ interface UserStats {
 }
 
 
+// Update interface Notification di bagian awal file
 interface Notification {
   id?: string;
   title: string;
   message: string;
-  type: 'system' | 'announcement' | 'alert' | 'update' | 'comment' | 'personal';
+  type: 'announcement' | 'update' | 'alert' | 'system';
   priority: 'low' | 'medium' | 'high' | 'urgent';
   senderId?: string;
   senderName?: string;
@@ -102,17 +103,20 @@ interface Notification {
   recipientType: 'all' | 'specific' | 'email_only' | 'app_only';
   recipientIds?: string[];
   recipientEmails?: string[];
-  isRead?: boolean; // deprecated
+  isRead?: boolean;
   isDeleted?: boolean;
   timestamp: Timestamp | Date;
   actionUrl?: string;
   icon: string;
   color: string;
-  userReads: Record<string, boolean>;
+  userReads?: Record<string, boolean>;
   views?: number;
   clicks?: number;
   likes?: string[];
   comments?: any[];
+  isAdminPost?: boolean;
+  adminName?: string;
+  category?: string;
 }
 
 
@@ -266,6 +270,24 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
+
+  // Tambahkan fungsi helper untuk mendapatkan user ID
+const getCurrentUserId = (): string => {
+  if (user && user.uid) return user.uid;
+  
+  // Untuk anonymous users, gunakan localStorage ID
+  if (typeof window !== 'undefined') {
+    let anonymousId = localStorage.getItem('anonymous_user_id');
+    if (!anonymousId) {
+      anonymousId = 'anonymous_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+      localStorage.setItem('anonymous_user_id', anonymousId);
+    }
+    return anonymousId;
+  }
+  
+  return 'unknown';
+};
+
 // Fungsi untuk mengirim notifikasi (Admin)
 const sendNotification = async (notificationData: {
   title: string;
@@ -305,66 +327,115 @@ const sendNotification = async (notificationData: {
   }
 };
 
-
 const markAsRead = async (notificationId: string) => {
-  if (!db) return;
+  if (!db || !user) return;
+  
   try {
-    const currentUserId = getCurrentUserId();
-    const userIdToUse = user ? user.uid : currentUserId;
+    const userId = user.uid;
     const notificationRef = doc(db, 'notifications', notificationId);
+    
+    // Gunakan field userReads untuk tracking multi-user
     await updateDoc(notificationRef, {
-      [`userReads.${userIdToUse}`]: true,
+      [`userReads.${userId}`]: true,
       views: increment(1)
     });
-    setNotifications(prev =>
-      prev.map(n =>
-        n.id === notificationId
-          ? { ...n, userReads: { ...n.userReads, [userIdToUse]: true }, views: (n.views || 0) + 1 }
-          : n
+    
+    // Update state notifications
+    setNotifications(prevNotifications =>
+      prevNotifications.map(notification =>
+        notification.id === notificationId
+          ? {
+              ...notification,
+              userReads: {
+                ...notification.userReads,
+                [userId]: true
+              },
+              views: (notification.views || 0) + 1
+            }
+          : notification
       )
     );
-    setNotificationCount(prev => Math.max(0, prev - 1));
-    setHasUnreadNotifications(prev => prev && notificationCount > 1);
+    
   } catch (error) {
     console.error("Error marking as read:", error);
   }
 };
-  
- const handleNotificationClick = async (notification: Notification) => {
-  if (notification.id && !notification.userReads[getCurrentUserId()]) {
+
+
+
+  const handleNotificationClick = async (notification: Notification) => {
+  if (notification.id && user) {
+    // Tandai sebagai sudah dibaca
     await markAsRead(notification.id);
+    
+    // Update state untuk menghapus badge unread
+    setNotifications(prevNotifications =>
+      prevNotifications.map(n =>
+        n.id === notification.id
+          ? {
+              ...n,
+              userReads: {
+                ...n.userReads,
+                [user.uid]: true
+              }
+            }
+          : n
+      )
+    );
+    
+    // Update unread count
+    setNotificationCount(prev => Math.max(0, prev - 1));
+    setHasUnreadNotifications(notificationCount > 1);
   }
+  
+  // Tutup dropdown notifikasi
   setShowNotification(false);
+  
+  // Jika ada actionUrl, redirect ke URL tersebut
+  if (notification.actionUrl) {
+    router.push(notification.actionUrl);
+  }
 };
 
-
-
   
-  // Fungsi untuk clear all notifications
-  const handleClearNotification = async () => {
-    try {
-      const batch = writeBatch(db);
-      const unreadNotifications = notifications.filter(n => !n.read);
-      
-      unreadNotifications.forEach(notification => {
-        if (notification.id) {
-          const notificationRef = doc(db, 'notifications', notification.id);
-          batch.update(notificationRef, {
-            read: true,
-            readAt: serverTimestamp()
-          });
+const handleClearNotification = async () => {
+  if (!db || !user) return;
+  
+  try {
+    const batch = writeBatch(db);
+    const userId = user.uid;
+    
+    // Tandai semua notifikasi yang belum dibaca oleh user ini
+    notifications.forEach(notification => {
+      if (notification.id && notification.userReads && !notification.userReads[userId]) {
+        const notificationRef = doc(db, 'notifications', notification.id);
+        batch.update(notificationRef, {
+          [`userReads.${userId}`]: true
+        });
+      }
+    });
+    
+    await batch.commit();
+    
+    // Update local state
+    setNotifications(prevNotifications =>
+      prevNotifications.map(notification => ({
+        ...notification,
+        userReads: {
+          ...notification.userReads,
+          [userId]: true
         }
-      });
-      
-      await batch.commit();
-      
-      setHasUnreadNotifications(false);
-      setNotificationCount(0);
-      setShowNotification(false);
-    } catch (error) {
-      console.error("Error clearing notifications:", error);
-    }
-  };
+      }))
+    );
+    
+    setHasUnreadNotifications(false);
+    setNotificationCount(0);
+    setShowNotification(false);
+    
+  } catch (error) {
+    console.error("Error clearing notifications:", error);
+  }
+};
 
   // Fungsi untuk menghitung waktu yang lalu
   const calculateTimeAgo = (date: Date | Timestamp): string => {
@@ -400,6 +471,8 @@ const markAsRead = async (notificationId: string) => {
 
     return () => clearInterval(interval);
   }, []);
+
+
 
   // Fungsi untuk update user stats di Firestore
   const updateUserStats = async (userId: string, userName: string) => {
@@ -567,39 +640,28 @@ const markAsRead = async (notificationId: string) => {
 
     return () => unsubscribe();
   }, []);
-
-
 // Load notifications from Firebase - REAL-TIME & MULTI-USER READY
 useEffect(() => {
   console.log("Memulai loading notifikasi realtime...");
   setIsLoadingNotifications(true);
 
-  const getOrCreateAnonymousId = () => {
-    if (typeof window === 'undefined') return 'server';
-    let id = localStorage.getItem('anonymous_user_id');
-    if (!id) {
-      id = 'anonymous_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-      localStorage.setItem('anonymous_user_id', id);
-    }
-    return id;
-  };
-
-  const getCurrentUserId = () => {
-    return user ? user.uid : getOrCreateAnonymousId();
-  };
+  if (!db) return;
 
   const notificationsRef = collection(db, 'notifications');
-  const q = query(notificationsRef, orderBy('timestamp', 'desc'), limit(50));
+  const q = query(
+    notificationsRef, 
+    where('isDeleted', '==', false),
+    orderBy('timestamp', 'desc'), 
+    limit(20)
+  );
 
   const unsubscribe = onSnapshot(q, (querySnapshot) => {
     const notificationsData: Notification[] = [];
     let unreadCount = 0;
-    const currentUserId = getCurrentUserId();
 
     querySnapshot.forEach((doc) => {
       const data = doc.data();
-      if (data.isDeleted) return;
-
+      
       // Filter berdasarkan recipientType
       let shouldShow = false;
       switch (data.recipientType) {
@@ -608,21 +670,22 @@ useEffect(() => {
           break;
         case 'specific':
           const ids = data.recipientIds || [];
-          shouldShow = ids.includes(currentUserId) || (user && ids.includes(user.uid));
+          shouldShow = user ? ids.includes(user.uid) : false;
           break;
         case 'email_only':
-          shouldShow = user && data.recipientEmails?.includes(user.email);
+          const emails = data.recipientEmails || [];
+          shouldShow = user && user.email ? emails.includes(user.email) : false;
           break;
         case 'app_only':
           shouldShow = !!user;
           break;
         default:
-          shouldShow = false;
+          shouldShow = true;
       }
 
       if (!shouldShow) return;
 
-      const notification = {
+      const notification: Notification = {
         id: doc.id,
         title: data.title || 'No Title',
         message: data.message || 'No Message',
@@ -644,17 +707,25 @@ useEffect(() => {
         views: data.views || 0,
         clicks: data.clicks || 0,
         likes: data.likes || [],
-        comments: data.comments || []
-      } as Notification;
+        comments: data.comments || [],
+        isAdminPost: data.isAdminPost || false,
+        adminName: data.adminName || 'Admin',
+        category: data.category || 'general'
+      };
 
-      const isRead = notification.userReads[currentUserId] ||
-                    (user && notification.userReads[user.uid]);
-      if (!isRead) unreadCount++;
+      // Cek apakah notifikasi sudah dibaca oleh user saat ini
+      const isRead = user ? 
+        (notification.userReads && notification.userReads[user.uid]) || false : 
+        false;
+      
+      if (!isRead && notification.id) {
+        unreadCount++;
+      }
 
       notificationsData.push(notification);
     });
 
-    // Urutkan descending
+    // Urutkan berdasarkan timestamp
     notificationsData.sort((a, b) => {
       const timeA = a.timestamp instanceof Timestamp ? a.timestamp.toMillis() : new Date(a.timestamp).getTime();
       const timeB = b.timestamp instanceof Timestamp ? b.timestamp.toMillis() : new Date(b.timestamp).getTime();
@@ -666,10 +737,12 @@ useEffect(() => {
     setNotificationCount(unreadCount);
     setIsLoadingNotifications(false);
 
+    // Set last document untuk pagination
     if (querySnapshot.docs.length > 0) {
       setLastNotificationDoc(querySnapshot.docs[querySnapshot.docs.length - 1]);
     }
-    if (querySnapshot.size < 50) {
+    
+    if (querySnapshot.size < 20) {
       setAllNotificationsLoaded(true);
     }
   }, (error) => {
@@ -678,8 +751,7 @@ useEffect(() => {
   });
 
   return () => unsubscribe();
-}, [user]);
-
+}, [db, user]); // Tambahkan db dan user sebagai dependency
   
 
 // Fungsi untuk load more notifications (pagination)
@@ -2404,20 +2476,41 @@ const loadMoreNotifications = async () => {
                   <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
                 </svg>
                 Notifications
-                {notificationCount > 0 && (
-                  <span style={{
-                    backgroundColor: '#FF4757',
-                    color: 'white',
-                    fontSize: '0.8rem',
-                    fontWeight: '600',
-                    padding: '0.1rem 0.5rem',
-                    borderRadius: '10px',
-                    marginLeft: '0.5rem'
-                  }}>
-                    {notificationCount} new
-                  </span>
-                )}
+                  // Di dalam component Notification Bell:
+{notificationCount > 0 && (
+  <motion.div
+    key={notificationCount} // Key penting untuk trigger animation ulang
+    initial={{ scale: 0 }}
+    animate={{ scale: 1 }}
+    transition={{ type: "spring", stiffness: 500, damping: 15 }}
+    style={{
+      position: 'absolute',
+      top: '-2px',
+      right: '-2px',
+      minWidth: '18px',
+      height: '18px',
+      backgroundColor: '#FF4757',
+      borderRadius: '50%',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      border: '2px solid black'
+    }}
+  >
+    <span style={{
+      color: 'white',
+      fontSize: '0.65rem',
+      fontWeight: '700',
+      fontFamily: 'Helvetica, Arial, sans-serif',
+      padding: '0 4px'
+    }}>
+      {notificationCount > 9 ? '9+' : notificationCount}
+    </span>
+  </motion.div>
+)}  
               </h3>
+
+            
               
               {hasUnreadNotifications && (
                 <motion.button
@@ -2495,40 +2588,46 @@ const loadMoreNotifications = async () => {
                 </div>
               ) : (
                 <>
-                  // Di bagian render notifikasi, pastikan data ditampilkan dengan benar
-{notifications.map((notification, index) => (
-  <motion.div
-    key={notification.id || index}
-    initial={{ opacity: 0, x: -10 }}
-    animate={{ opacity: 1, x: 0 }}
-    transition={{ delay: index * 0.05 }}
-    style={{
-      padding: '1rem 1.2rem',
-      borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
-      cursor: 'pointer',
-      transition: 'all 0.2s ease',
-      backgroundColor: notification.read ? 'transparent' : getBgColorByType(notification.type),
-      position: 'relative'
-    }}
-    whileHover={{ 
-      backgroundColor: notification.read ? 'rgba(255, 255, 255, 0.05)' : getBgColorByType(notification.type).replace('0.1', '0.2')
-    }}
-    onClick={() => handleNotificationClick(notification)}
-  >
-                      {/* Unread Indicator */}
-                      {!notification.read && (
-                        <div style={{
-                          position: 'absolute',
-                          left: '0.5rem',
-                          top: '50%',
-                          transform: 'translateY(-50%)',
-                          width: '6px',
-                          height: '6px',
-                          backgroundColor: getColorByType(notification.type),
-                          borderRadius: '50%'
-                        }} />
-                      )}
-                      
+
+                  // Di dalam mapping notifications, perbaiki bagian ini:
+{notifications.map((notification, index) => {
+  const isRead = user ? 
+    (notification.userReads && notification.userReads[user.uid]) || false : 
+    false;
+  
+  return (
+    <motion.div
+      key={notification.id || index}
+      initial={{ opacity: 0, x: -10 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ delay: index * 0.05 }}
+      style={{
+        padding: '1rem 1.2rem',
+        borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
+        cursor: 'pointer',
+        transition: 'all 0.2s ease',
+        backgroundColor: isRead ? 'transparent' : getBgColorByType(notification.type),
+        position: 'relative'
+      }}
+      whileHover={{ 
+        backgroundColor: isRead ? 'rgba(255, 255, 255, 0.05)' : getBgColorByType(notification.type).replace('0.1', '0.2')
+      }}
+      onClick={() => handleNotificationClick(notification)}
+    >
+      {/* Unread Indicator */}
+      {!isRead && (
+        <div style={{
+          position: 'absolute',
+          left: '0.5rem',
+          top: '50%',
+          transform: 'translateY(-50%)',
+          width: '6px',
+          height: '6px',
+          backgroundColor: getColorByType(notification.type),
+          borderRadius: '50%'
+        }} />
+      )}
+                
                       <div style={{
                         display: 'flex',
                         gap: '1rem',
@@ -6547,6 +6646,7 @@ const loadMoreNotifications = async () => {
     </div>
   );
 }
+
 
 
 
