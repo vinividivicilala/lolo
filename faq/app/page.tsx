@@ -88,25 +88,35 @@ interface UserStats {
   userName: string;
 }
 
-// Type untuk notifikasi - DIPERBARUI
+
 interface Notification {
   id?: string;
   title: string;
   message: string;
-  userId?: string;
-  userDisplayName?: string;
-  userEmail?: string;
-  userAvatar?: string;
-  type: 'announcement' | 'update' | 'alert' | 'system';
-  read: boolean;
+  type: 'system' | 'announcement' | 'alert' | 'update' | 'comment' | 'personal';
+  priority: 'low' | 'medium' | 'high' | 'urgent';
+  senderId?: string;
+  senderName?: string;
+  senderEmail?: string;
+  senderPhotoURL?: string;
+  recipientType: 'all' | 'specific' | 'email_only' | 'app_only';
+  recipientIds?: string[];
+  recipientEmails?: string[];
+  isRead?: boolean; // deprecated, ganti pakai userReads
+  isDeleted?: boolean;
   timestamp: Timestamp | Date;
+  actionUrl?: string;
   icon: string;
-  isAdminPost: boolean;
-  adminName?: string;
-  priority?: 'low' | 'medium' | 'high';
-  category?: 'general' | 'feature' | 'maintenance' | 'security';
-  readAt?: Timestamp | Date;
+  color: string;
+  userReads: Record<string, boolean>; // ✅ penting untuk multi-user read status
+  views?: number;
+  clicks?: number;
+  likes?: string[];
+  comments?: any[];
 }
+
+
+
 
 export default function HomePage(): React.JSX.Element {
   const router = useRouter();
@@ -295,30 +305,46 @@ const sendNotification = async (notificationData: {
     return false;
   }
 };
-  // Fungsi untuk mark notification as read
+
+
   const markAsRead = async (notificationId: string) => {
-    try {
-      const notificationRef = doc(db, 'notifications', notificationId);
-      await updateDoc(notificationRef, {
-        read: true,
-        readAt: serverTimestamp()
-      });
-      console.log("Notification marked as read:", notificationId);
-    } catch (error) {
-      console.error("Error marking notification as read:", error);
-    }
-  };
+  if (!db) return;
+  try {
+    const currentUserId = getCurrentUserId();
+    const userIdToUse = user ? user.uid : currentUserId;
+    const notificationRef = doc(db, 'notifications', notificationId);
 
-  // Handler untuk klik notifikasi
-  const handleNotificationClick = async (notification: Notification) => {
-    if (notification.id && !notification.read) {
-      await markAsRead(notification.id);
-    }
-    
-    console.log("Notification clicked:", notification);
-    setShowNotification(false);
-  };
+    await updateDoc(notificationRef, {
+      [`userReads.${userIdToUse}`]: true,
+      views: increment(1)
+    });
 
+    // Update lokal
+    setNotifications(prev =>
+      prev.map(n => 
+        n.id === notificationId 
+          ? { ...n, userReads: { ...n.userReads, [userIdToUse]: true }, views: (n.views || 0) + 1 }
+          : n
+      )
+    );
+    setNotificationCount(prev => Math.max(0, prev - 1));
+    setHasUnreadNotifications(prev => prev && notificationCount > 1);
+  } catch (error) {
+    console.error("Error marking as read:", error);
+  }
+};
+
+  
+ const handleNotificationClick = async (notification: Notification) => {
+  if (notification.id && !notification.userReads[getCurrentUserId()]) {
+    await markAsRead(notification.id);
+  }
+  setShowNotification(false);
+};
+
+
+
+  
   // Fungsi untuk clear all notifications
   const handleClearNotification = async () => {
     try {
@@ -549,82 +575,119 @@ const sendNotification = async (notificationData: {
 
 
 
-// Load notifications from Firebase - DIPERBAIKI UNTUK REAL-TIME
+// Load notifications from Firebase - REAL-TIME & MULTI-USER READY
 useEffect(() => {
-  console.log("Memulai loading notifikasi...");
+  console.log("Memulai loading notifikasi realtime...");
   setIsLoadingNotifications(true);
-  
+
+  // Helper: dapatkan ID user (login atau anonymous)
+  const getOrCreateAnonymousId = () => {
+    if (typeof window === 'undefined') return 'server';
+    let id = localStorage.getItem('anonymous_user_id');
+    if (!id) {
+      id = 'anonymous_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+      localStorage.setItem('anonymous_user_id', id);
+    }
+    return id;
+  };
+
+  const getCurrentUserId = () => {
+    return user ? user.uid : getOrCreateAnonymousId();
+  };
+
   const notificationsRef = collection(db, 'notifications');
   const q = query(notificationsRef, orderBy('timestamp', 'desc'), limit(50));
-  
+
   const unsubscribe = onSnapshot(q, (querySnapshot) => {
-    console.log("Snapshot notifikasi diterima:", querySnapshot.size, "notifikasi");
     const notificationsData: Notification[] = [];
     let unreadCount = 0;
-    
+    const currentUserId = getCurrentUserId();
+
     querySnapshot.forEach((doc) => {
       const data = doc.data();
-      
-      // Validasi data untuk memastikan semua field ada
-      const notification: Notification = {
+      if (data.isDeleted) return;
+
+      // Filter berdasarkan recipientType
+      let shouldShow = false;
+      switch (data.recipientType) {
+        case 'all':
+          shouldShow = true;
+          break;
+        case 'specific':
+          const ids = data.recipientIds || [];
+          shouldShow = ids.includes(currentUserId) || (user && ids.includes(user.uid));
+          break;
+        case 'email_only':
+          shouldShow = user && data.recipientEmails?.includes(user.email);
+          break;
+        case 'app_only':
+          shouldShow = !!user;
+          break;
+        default:
+          shouldShow = false;
+      }
+
+      if (!shouldShow) return;
+
+      // Bangun objek notifikasi dengan struktur baru
+      const notification = {
         id: doc.id,
         title: data.title || 'No Title',
         message: data.message || 'No Message',
         type: data.type || 'announcement',
-        read: data.read || false,
-        timestamp: data.timestamp || serverTimestamp(),
-        icon: getIconByType(data.type || 'announcement'),
-        isAdminPost: data.isAdminPost || false,
-        adminName: data.adminName || 'Admin',
         priority: data.priority || 'medium',
-        category: data.category || 'general',
-        userId: data.userId,
-        userDisplayName: data.userDisplayName,
-        userEmail: data.userEmail,
-        userAvatar: data.userAvatar || '👤',
-        readAt: data.readAt
-      };
+        senderId: data.senderId,
+        senderName: data.senderName || 'Admin',
+        senderEmail: data.senderEmail,
+        senderPhotoURL: data.senderPhotoURL,
+        recipientType: data.recipientType || 'all',
+        recipientIds: data.recipientIds || [],
+        recipientEmails: data.recipientEmails || [],
+        isDeleted: data.isDeleted || false,
+        timestamp: data.timestamp || serverTimestamp(),
+        actionUrl: data.actionUrl,
+        icon: data.icon || getIconByType(data.type || 'announcement'),
+        color: data.color || getColorByType(data.type || 'announcement'),
+        userReads: data.userReads || {}, // ✅ PENTING: ganti read dengan userReads
+        views: data.views || 0,
+        clicks: data.clicks || 0,
+        likes: data.likes || [],
+        comments: data.comments || []
+      } as Notification;
+
+      // Cek status baca berdasarkan user saat ini
+      const isRead = notification.userReads[currentUserId] || 
+                    (user && notification.userReads[user.uid]);
       
-      // Hanya tambahkan jika tipe valid
-      const allowedTypes = ['announcement', 'update', 'alert', 'system'];
-      if (allowedTypes.includes(notification.type)) {
-        notificationsData.push(notification);
-        if (!notification.read) {
-          unreadCount++;
-        }
-      }
+      if (!isRead) unreadCount++;
+      notificationsData.push(notification);
     });
-    
-    // Sort by timestamp descending
+
+    // Urutkan descending
     notificationsData.sort((a, b) => {
-      const dateA = a.timestamp instanceof Timestamp ? a.timestamp.toDate().getTime() : new Date(a.timestamp).getTime();
-      const dateB = b.timestamp instanceof Timestamp ? b.timestamp.toDate().getTime() : new Date(b.timestamp).getTime();
-      return dateB - dateA;
+      const timeA = a.timestamp instanceof Timestamp ? a.timestamp.toMillis() : new Date(a.timestamp).getTime();
+      const timeB = b.timestamp instanceof Timestamp ? b.timestamp.toMillis() : new Date(b.timestamp).getTime();
+      return timeB - timeA;
     });
-    
+
     setNotifications(notificationsData);
     setHasUnreadNotifications(unreadCount > 0);
     setNotificationCount(unreadCount);
     setIsLoadingNotifications(false);
-    
-    // Simpan dokumen terakhir untuk pagination
+
     if (querySnapshot.docs.length > 0) {
       setLastNotificationDoc(querySnapshot.docs[querySnapshot.docs.length - 1]);
     }
-    
     if (querySnapshot.size < 50) {
       setAllNotificationsLoaded(true);
     }
   }, (error) => {
     console.error("Error loading notifications:", error);
-    console.error("Error details:", error.message);
     setIsLoadingNotifications(false);
   });
 
   return () => unsubscribe();
-}, []);
-
-
+}, [user]); // 👈 Jangan lupa dependency [user]
 
 
 
@@ -6495,5 +6558,6 @@ const loadMoreNotifications = async () => {
     </div>
   );
 }
+
 
 
