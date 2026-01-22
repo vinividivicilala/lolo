@@ -102,19 +102,18 @@ interface Notification {
   recipientType: 'all' | 'specific' | 'email_only' | 'app_only';
   recipientIds?: string[];
   recipientEmails?: string[];
-  isRead?: boolean; // deprecated, ganti pakai userReads
+  isRead?: boolean; // deprecated
   isDeleted?: boolean;
   timestamp: Timestamp | Date;
   actionUrl?: string;
   icon: string;
   color: string;
-  userReads: Record<string, boolean>; // ✅ penting untuk multi-user read status
+  userReads: Record<string, boolean>;
   views?: number;
   clicks?: number;
   likes?: string[];
   comments?: any[];
 }
-
 
 
 
@@ -307,22 +306,19 @@ const sendNotification = async (notificationData: {
 };
 
 
-  const markAsRead = async (notificationId: string) => {
+const markAsRead = async (notificationId: string) => {
   if (!db) return;
   try {
     const currentUserId = getCurrentUserId();
     const userIdToUse = user ? user.uid : currentUserId;
     const notificationRef = doc(db, 'notifications', notificationId);
-
     await updateDoc(notificationRef, {
       [`userReads.${userIdToUse}`]: true,
       views: increment(1)
     });
-
-    // Update lokal
     setNotifications(prev =>
-      prev.map(n => 
-        n.id === notificationId 
+      prev.map(n =>
+        n.id === notificationId
           ? { ...n, userReads: { ...n.userReads, [userIdToUse]: true }, views: (n.views || 0) + 1 }
           : n
       )
@@ -333,7 +329,6 @@ const sendNotification = async (notificationData: {
     console.error("Error marking as read:", error);
   }
 };
-
   
  const handleNotificationClick = async (notification: Notification) => {
   if (notification.id && !notification.userReads[getCurrentUserId()]) {
@@ -574,13 +569,11 @@ const sendNotification = async (notificationData: {
   }, []);
 
 
-
 // Load notifications from Firebase - REAL-TIME & MULTI-USER READY
 useEffect(() => {
   console.log("Memulai loading notifikasi realtime...");
   setIsLoadingNotifications(true);
 
-  // Helper: dapatkan ID user (login atau anonymous)
   const getOrCreateAnonymousId = () => {
     if (typeof window === 'undefined') return 'server';
     let id = localStorage.getItem('anonymous_user_id');
@@ -629,7 +622,6 @@ useEffect(() => {
 
       if (!shouldShow) return;
 
-      // Bangun objek notifikasi dengan struktur baru
       const notification = {
         id: doc.id,
         title: data.title || 'No Title',
@@ -648,18 +640,17 @@ useEffect(() => {
         actionUrl: data.actionUrl,
         icon: data.icon || getIconByType(data.type || 'announcement'),
         color: data.color || getColorByType(data.type || 'announcement'),
-        userReads: data.userReads || {}, // ✅ PENTING: ganti read dengan userReads
+        userReads: data.userReads || {},
         views: data.views || 0,
         clicks: data.clicks || 0,
         likes: data.likes || [],
         comments: data.comments || []
       } as Notification;
 
-      // Cek status baca berdasarkan user saat ini
-      const isRead = notification.userReads[currentUserId] || 
+      const isRead = notification.userReads[currentUserId] ||
                     (user && notification.userReads[user.uid]);
-      
       if (!isRead) unreadCount++;
+
       notificationsData.push(notification);
     });
 
@@ -687,9 +678,7 @@ useEffect(() => {
   });
 
   return () => unsubscribe();
-}, [user]); // 👈 Jangan lupa dependency [user]
-
-
+}, [user]);
 
   
 
@@ -6558,6 +6547,7 @@ const loadMoreNotifications = async () => {
     </div>
   );
 }
+
 
 
 
