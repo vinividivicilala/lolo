@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect, useRef } from "react";
@@ -28,11 +29,7 @@ import {
   getDoc,
   updateDoc,
   increment,
-  writeBatch,
-  limit,
-  where,
-   getDocs,
-  startAfter
+  writeBatch
 } from "firebase/firestore";
 
 // Register GSAP plugins
@@ -88,38 +85,24 @@ interface UserStats {
   userName: string;
 }
 
-
-// Update interface Notification di bagian awal file
+// Type untuk notifikasi - DIPERBARUI
 interface Notification {
   id?: string;
   title: string;
   message: string;
-  type: 'announcement' | 'update' | 'alert' | 'system';
-  priority: 'low' | 'medium' | 'high' | 'urgent';
-  senderId?: string;
-  senderName?: string;
-  senderEmail?: string;
-  senderPhotoURL?: string;
-  recipientType: 'all' | 'specific' | 'email_only' | 'app_only';
-  recipientIds?: string[];
-  recipientEmails?: string[];
-  isRead?: boolean;
-  isDeleted?: boolean;
+  userId?: string;
+  userDisplayName?: string;
+  userEmail?: string;
+  userAvatar?: string;
+  type: 'announcement' | 'update' | 'alert' | 'system'; // Hanya 4 tipe yang diizinkan
+  read: boolean;
   timestamp: Timestamp | Date;
-  actionUrl?: string;
   icon: string;
-  color: string;
-  userReads?: Record<string, boolean>;
-  views?: number;
-  clicks?: number;
-  likes?: string[];
-  comments?: any[];
-  isAdminPost?: boolean;
-  adminName?: string;
-  category?: string;
+  isAdminPost: boolean; // Menandai apakah notifikasi dari admin
+  adminName?: string; // Nama admin yang mengirim
+  priority?: 'low' | 'medium' | 'high'; // Prioritas notifikasi
+  category?: 'general' | 'feature' | 'maintenance' | 'security'; // Kategori notifikasi
 }
-
-
 
 export default function HomePage(): React.JSX.Element {
   const router = useRouter();
@@ -175,8 +158,6 @@ export default function HomePage(): React.JSX.Element {
   const [notificationCount, setNotificationCount] = useState(0);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [isLoadingNotifications, setIsLoadingNotifications] = useState(false);
-  const [allNotificationsLoaded, setAllNotificationsLoaded] = useState(false);
-  const [lastNotificationDoc, setLastNotificationDoc] = useState<any>(null);
 
   const headerRef = useRef<HTMLDivElement>(null);
   const topNavRef = useRef<HTMLDivElement>(null);
@@ -198,7 +179,6 @@ export default function HomePage(): React.JSX.Element {
   const notificationDropdownRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const searchContainerRef = useRef<HTMLDivElement>(null);
-  const notificationListRef = useRef<HTMLDivElement>(null);
 
   // Animasi loading text
   const loadingTexts = [
@@ -237,7 +217,7 @@ export default function HomePage(): React.JSX.Element {
     { title: "Features", description: "Functionality & Integration" }
   ];
 
-  // Helper function untuk menentukan icon berdasarkan tipe
+  // Helper function untuk menentukan icon berdasarkan tipe - DIPERBARUI
   const getIconByType = (type: string): string => {
     switch (type) {
       case 'announcement': return '📢';
@@ -248,18 +228,18 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // Helper function untuk menentukan warna berdasarkan tipe
+  // Helper function untuk menentukan warna berdasarkan tipe - BARU
   const getColorByType = (type: string): string => {
     switch (type) {
-      case 'announcement': return '#3B82F6';
-      case 'update': return '#10B981';
-      case 'alert': return '#EF4444';
-      case 'system': return '#8B5CF6';
-      default: return '#6B7280';
+      case 'announcement': return '#3B82F6'; // Blue
+      case 'update': return '#10B981'; // Green
+      case 'alert': return '#EF4444'; // Red
+      case 'system': return '#8B5CF6'; // Purple
+      default: return '#6B7280'; // Gray
     }
   };
 
-  // Helper function untuk menentukan warna background berdasarkan tipe
+  // Helper function untuk menentukan warna background berdasarkan tipe - BARU
   const getBgColorByType = (type: string): string => {
     switch (type) {
       case 'announcement': return 'rgba(59, 130, 246, 0.1)';
@@ -270,172 +250,95 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
+  // Fungsi untuk mengirim notifikasi - DIPERBARUI
+  const sendNotification = async (notificationData: {
+    title: string;
+    message: string;
+    type: 'announcement' | 'update' | 'alert' | 'system';
+    userId?: string;
+    userDisplayName?: string;
+    userEmail?: string;
+    isAdminPost?: boolean;
+    adminName?: string;
+    priority?: 'low' | 'medium' | 'high';
+    category?: 'general' | 'feature' | 'maintenance' | 'security';
+  }) => {
+    try {
+      const newNotification = {
+        ...notificationData,
+        read: false,
+        timestamp: serverTimestamp(),
+        icon: getIconByType(notificationData.type),
+        userAvatar: notificationData.userDisplayName?.charAt(0).toUpperCase() || '👤',
+        isAdminPost: notificationData.isAdminPost || false,
+        adminName: notificationData.adminName || 'Admin',
+        priority: notificationData.priority || 'medium',
+        category: notificationData.category || 'general'
+      };
 
-  // Tambahkan fungsi helper untuk mendapatkan user ID
-const getCurrentUserId = (): string => {
-  if (user && user.uid) return user.uid;
-  
-  // Untuk anonymous users, gunakan localStorage ID
-  if (typeof window !== 'undefined') {
-    let anonymousId = localStorage.getItem('anonymous_user_id');
-    if (!anonymousId) {
-      anonymousId = 'anonymous_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-      localStorage.setItem('anonymous_user_id', anonymousId);
+      await addDoc(collection(db, 'notifications'), newNotification);
+      console.log("Notification sent successfully");
+      return true;
+    } catch (error) {
+      console.error("Error sending notification:", error);
+      return false;
     }
-    return anonymousId;
-  }
-  
-  return 'unknown';
-};
+  };
 
-// Fungsi untuk mengirim notifikasi (Admin)
-const sendNotification = async (notificationData: {
-  title: string;
-  message: string;
-  type: 'announcement' | 'update' | 'alert' | 'system';
-  userId?: string;
-  userDisplayName?: string;
-  userEmail?: string;
-  isAdminPost?: boolean;
-  adminName?: string;
-  priority?: 'low' | 'medium' | 'high';
-  category?: 'general' | 'feature' | 'maintenance' | 'security';
-}) => {
-  try {
-    const newNotification = {
-      ...notificationData,
-      read: false,
-      timestamp: serverTimestamp(),
-      icon: getIconByType(notificationData.type),
-      userAvatar: notificationData.userDisplayName?.charAt(0).toUpperCase() || '👤',
-      isAdminPost: notificationData.isAdminPost || false,
-      adminName: notificationData.adminName || 'Admin',
-      priority: notificationData.priority || 'medium',
-      category: notificationData.category || 'general',
-      // Tambahkan field tambahan untuk konsistensi
-      userId: notificationData.userId || null,
-      userDisplayName: notificationData.userDisplayName || 'Admin',
-      userEmail: notificationData.userEmail || null
-    };
+  // Fungsi untuk mark notification as read
+  const markAsRead = async (notificationId: string) => {
+    try {
+      const notificationRef = doc(db, 'notifications', notificationId);
+      await updateDoc(notificationRef, {
+        read: true,
+        readAt: serverTimestamp()
+      });
+      console.log("Notification marked as read:", notificationId);
+    } catch (error) {
+      console.error("Error marking notification as read:", error);
+    }
+  };
 
-    await addDoc(collection(db, 'notifications'), newNotification);
-    console.log("Notification sent successfully:", newNotification);
-    return true;
-  } catch (error) {
-    console.error("Error sending notification:", error);
-    return false;
-  }
-};
-
-const markAsRead = async (notificationId: string) => {
-  if (!db || !user) return;
-  
-  try {
-    const userId = user.uid;
-    const notificationRef = doc(db, 'notifications', notificationId);
-    
-    // Gunakan field userReads untuk tracking multi-user
-    await updateDoc(notificationRef, {
-      [`userReads.${userId}`]: true,
-      views: increment(1)
-    });
-    
-    // Update state notifications
-    setNotifications(prevNotifications =>
-      prevNotifications.map(notification =>
-        notification.id === notificationId
-          ? {
-              ...notification,
-              userReads: {
-                ...notification.userReads,
-                [userId]: true
-              },
-              views: (notification.views || 0) + 1
-            }
-          : notification
-      )
-    );
-    
-  } catch (error) {
-    console.error("Error marking as read:", error);
-  }
-};
-
-
-
+  // Handler untuk klik notifikasi - DIPERBARUI
   const handleNotificationClick = async (notification: Notification) => {
-  if (notification.id && user) {
-    // Tandai sebagai sudah dibaca
-    await markAsRead(notification.id);
+    // Mark as read ketika diklik
+    if (notification.id && !notification.read) {
+      await markAsRead(notification.id);
+    }
     
-    // Update state untuk menghapus badge unread
-    setNotifications(prevNotifications =>
-      prevNotifications.map(n =>
-        n.id === notification.id
-          ? {
-              ...n,
-              userReads: {
-                ...n.userReads,
-                [user.uid]: true
-              }
-            }
-          : n
-      )
-    );
+    // Untuk notifikasi admin, tidak ada navigasi khusus
+    // Hanya menampilkan detail notifikasi
+    console.log("Notification clicked:", notification);
     
-    // Update unread count
-    setNotificationCount(prev => Math.max(0, prev - 1));
-    setHasUnreadNotifications(notificationCount > 1);
-  }
-  
-  // Tutup dropdown notifikasi
-  setShowNotification(false);
-  
-  // Jika ada actionUrl, redirect ke URL tersebut
-  if (notification.actionUrl) {
-    router.push(notification.actionUrl);
-  }
-};
-
-  
-const handleClearNotification = async () => {
-  if (!db || !user) return;
-  
-  try {
-    const batch = writeBatch(db);
-    const userId = user.uid;
-    
-    // Tandai semua notifikasi yang belum dibaca oleh user ini
-    notifications.forEach(notification => {
-      if (notification.id && notification.userReads && !notification.userReads[userId]) {
-        const notificationRef = doc(db, 'notifications', notification.id);
-        batch.update(notificationRef, {
-          [`userReads.${userId}`]: true
-        });
-      }
-    });
-    
-    await batch.commit();
-    
-    // Update local state
-    setNotifications(prevNotifications =>
-      prevNotifications.map(notification => ({
-        ...notification,
-        userReads: {
-          ...notification.userReads,
-          [userId]: true
-        }
-      }))
-    );
-    
-    setHasUnreadNotifications(false);
-    setNotificationCount(0);
     setShowNotification(false);
-    
-  } catch (error) {
-    console.error("Error clearing notifications:", error);
-  }
-};
+  };
+
+  // Fungsi untuk clear all notifications
+  const handleClearNotification = async () => {
+    try {
+      // Update semua notifikasi yang belum dibaca
+      const batch = writeBatch(db);
+      const unreadNotifications = notifications.filter(n => !n.read);
+      
+      unreadNotifications.forEach(notification => {
+        if (notification.id) {
+          const notificationRef = doc(db, 'notifications', notification.id);
+          batch.update(notificationRef, {
+            read: true,
+            readAt: serverTimestamp()
+          });
+        }
+      });
+      
+      await batch.commit();
+      
+      setHasUnreadNotifications(false);
+      setNotificationCount(0);
+      setShowNotification(false);
+    } catch (error) {
+      console.error("Error clearing notifications:", error);
+    }
+  };
 
   // Fungsi untuk menghitung waktu yang lalu
   const calculateTimeAgo = (date: Date | Timestamp): string => {
@@ -472,8 +375,6 @@ const handleClearNotification = async () => {
     return () => clearInterval(interval);
   }, []);
 
-
-
   // Fungsi untuk update user stats di Firestore
   const updateUserStats = async (userId: string, userName: string) => {
     try {
@@ -481,6 +382,7 @@ const handleClearNotification = async () => {
       const userStatsDoc = await getDoc(userStatsRef);
       
       if (userStatsDoc.exists()) {
+        // Update existing user stats
         await updateDoc(userStatsRef, {
           loginCount: increment(1),
           lastLogin: serverTimestamp(),
@@ -488,6 +390,7 @@ const handleClearNotification = async () => {
           updatedAt: serverTimestamp()
         });
         
+        // Update total logins count
         const totalLoginsRef = doc(db, 'appStats', 'totalLogins');
         const totalLoginsDoc = await getDoc(totalLoginsRef);
         
@@ -503,6 +406,7 @@ const handleClearNotification = async () => {
           });
         }
       } else {
+        // Create new user stats
         await setDoc(userStatsRef, {
           userId: userId,
           userName: userName,
@@ -513,6 +417,7 @@ const handleClearNotification = async () => {
           updatedAt: serverTimestamp()
         });
 
+        // Update total users count
         const totalUsersRef = doc(db, 'appStats', 'totalUsers');
         const totalUsersDoc = await getDoc(totalUsersRef);
         
@@ -528,6 +433,7 @@ const handleClearNotification = async () => {
           });
         }
         
+        // Initialize total logins
         const totalLoginsRef = doc(db, 'appStats', 'totalLogins');
         const totalLoginsDoc = await getDoc(totalLoginsRef);
         if (!totalLoginsDoc.exists()) {
@@ -584,13 +490,18 @@ const handleClearNotification = async () => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (currentUser) {
         setUser(currentUser);
+        // Get display name
         const name = currentUser.displayName || 
                      currentUser.email?.split('@')[0] || 
                      'User';
         setUserDisplayName(name);
         
+        // Update user stats
         await updateUserStats(currentUser.uid, name);
         
+        // TIDAK LAGI MENGIRIM NOTIFIKASI LOGIN
+        
+        // Load user stats
         try {
           const userStatsRef = doc(db, 'userStats', currentUser.uid);
           const userStatsDoc = await getDoc(userStatsRef);
@@ -640,176 +551,48 @@ const handleClearNotification = async () => {
 
     return () => unsubscribe();
   }, []);
-// Load notifications from Firebase - REAL-TIME & MULTI-USER READY
-useEffect(() => {
-  console.log("Memulai loading notifikasi realtime...");
-  setIsLoadingNotifications(true);
 
-  if (!db) return;
-
-  const notificationsRef = collection(db, 'notifications');
-  const q = query(
-    notificationsRef, 
-    where('isDeleted', '==', false),
-    orderBy('timestamp', 'desc'), 
-    limit(20)
-  );
-
-  const unsubscribe = onSnapshot(q, (querySnapshot) => {
-    const notificationsData: Notification[] = [];
-    let unreadCount = 0;
-
-    querySnapshot.forEach((doc) => {
-      const data = doc.data();
-      
-      // Filter berdasarkan recipientType
-      let shouldShow = false;
-      switch (data.recipientType) {
-        case 'all':
-          shouldShow = true;
-          break;
-        case 'specific':
-          const ids = data.recipientIds || [];
-          shouldShow = user ? ids.includes(user.uid) : false;
-          break;
-        case 'email_only':
-          const emails = data.recipientEmails || [];
-          shouldShow = user && user.email ? emails.includes(user.email) : false;
-          break;
-        case 'app_only':
-          shouldShow = !!user;
-          break;
-        default:
-          shouldShow = true;
-      }
-
-      if (!shouldShow) return;
-
-      const notification: Notification = {
-        id: doc.id,
-        title: data.title || 'No Title',
-        message: data.message || 'No Message',
-        type: data.type || 'announcement',
-        priority: data.priority || 'medium',
-        senderId: data.senderId,
-        senderName: data.senderName || 'Admin',
-        senderEmail: data.senderEmail,
-        senderPhotoURL: data.senderPhotoURL,
-        recipientType: data.recipientType || 'all',
-        recipientIds: data.recipientIds || [],
-        recipientEmails: data.recipientEmails || [],
-        isDeleted: data.isDeleted || false,
-        timestamp: data.timestamp || serverTimestamp(),
-        actionUrl: data.actionUrl,
-        icon: data.icon || getIconByType(data.type || 'announcement'),
-        color: data.color || getColorByType(data.type || 'announcement'),
-        userReads: data.userReads || {},
-        views: data.views || 0,
-        clicks: data.clicks || 0,
-        likes: data.likes || [],
-        comments: data.comments || [],
-        isAdminPost: data.isAdminPost || false,
-        adminName: data.adminName || 'Admin',
-        category: data.category || 'general'
-      };
-
-      // Cek apakah notifikasi sudah dibaca oleh user saat ini
-      const isRead = user ? 
-        (notification.userReads && notification.userReads[user.uid]) || false : 
-        false;
-      
-      if (!isRead && notification.id) {
-        unreadCount++;
-      }
-
-      notificationsData.push(notification);
-    });
-
-    // Urutkan berdasarkan timestamp
-    notificationsData.sort((a, b) => {
-      const timeA = a.timestamp instanceof Timestamp ? a.timestamp.toMillis() : new Date(a.timestamp).getTime();
-      const timeB = b.timestamp instanceof Timestamp ? b.timestamp.toMillis() : new Date(b.timestamp).getTime();
-      return timeB - timeA;
-    });
-
-    setNotifications(notificationsData);
-    setHasUnreadNotifications(unreadCount > 0);
-    setNotificationCount(unreadCount);
-    setIsLoadingNotifications(false);
-
-    // Set last document untuk pagination
-    if (querySnapshot.docs.length > 0) {
-      setLastNotificationDoc(querySnapshot.docs[querySnapshot.docs.length - 1]);
-    }
+  // Load notifications from Firebase - DIPERBARUI
+  useEffect(() => {
+    console.log("Memulai loading notifikasi...");
+    setIsLoadingNotifications(true);
     
-    if (querySnapshot.size < 20) {
-      setAllNotificationsLoaded(true);
-    }
-  }, (error) => {
-    console.error("Error loading notifications:", error);
-    setIsLoadingNotifications(false);
-  });
-
-  return () => unsubscribe();
-}, [db, user]); // Tambahkan db dan user sebagai dependency
-  
-
-// Fungsi untuk load more notifications (pagination)
-const loadMoreNotifications = async () => {
-  if (allNotificationsLoaded || !lastNotificationDoc) return;
-  
-  try {
     const notificationsRef = collection(db, 'notifications');
-    const q = query(
-      notificationsRef,
-      orderBy('timestamp', 'desc'),
-      startAfter(lastNotificationDoc),
-      limit(20)
-    );
+    const q = query(notificationsRef, orderBy('timestamp', 'desc'));
     
-    const querySnapshot = await getDocs(q);
-    
-    if (querySnapshot.empty) {
-      setAllNotificationsLoaded(true);
-      return;
-    }
-    
-    const newNotifications: Notification[] = [];
-    let newUnreadCount = 0;
-    
-    querySnapshot.forEach((doc) => {
-      const data = doc.data();
-      const notification = {
-        id: doc.id,
-        ...data
-      } as Notification;
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      console.log("Snapshot notifikasi diterima:", querySnapshot.size, "notifikasi");
+      const notificationsData: Notification[] = [];
+      let unreadCount = 0;
       
-      // Filter untuk hanya menampilkan notifikasi dengan tipe yang valid
-      if (data.type && ['announcement', 'update', 'alert', 'system'].includes(data.type)) {
-        newNotifications.push(notification);
-        if (!data.read) {
-          newUnreadCount++;
+      querySnapshot.forEach((doc) => {
+        const data = doc.data();
+        const notification = {
+          id: doc.id,
+          ...data
+        } as Notification;
+        
+        // Filter hanya notifikasi dengan tipe yang diinginkan
+        const allowedTypes = ['announcement', 'update', 'alert', 'system'];
+        if (allowedTypes.includes(notification.type)) {
+          notificationsData.push(notification);
+          if (!notification.read) {
+            unreadCount++;
+          }
         }
-      }
+      });
+      
+      setNotifications(notificationsData);
+      setHasUnreadNotifications(unreadCount > 0);
+      setNotificationCount(unreadCount);
+      setIsLoadingNotifications(false);
+    }, (error) => {
+      console.error("Error loading notifications:", error);
+      setIsLoadingNotifications(false);
     });
-    
-    setNotifications(prev => [...prev, ...newNotifications]);
-    setNotificationCount(prev => prev + newUnreadCount);
-    setHasUnreadNotifications(prev => prev || newUnreadCount > 0);
-    
-    setLastNotificationDoc(querySnapshot.docs[querySnapshot.docs.length - 1]);
-    
-    if (querySnapshot.size < 20) {
-      setAllNotificationsLoaded(true);
-    }
-  } catch (error) {
-    console.error("Error loading more notifications:", error);
-  }
-};
 
-
-
-  
+    return () => unsubscribe();
+  }, []);
 
   // Animasi teks nama user berjalan
   useEffect(() => {
@@ -852,6 +635,7 @@ const loadMoreNotifications = async () => {
           duration: 0.3,
           ease: "power2.out"
         });
+        // Auto focus input
         setTimeout(() => {
           if (searchInputRef.current) {
             searchInputRef.current.focus();
@@ -905,13 +689,16 @@ const loadMoreNotifications = async () => {
     const newLeftCounter = String(newIndex + 1).padStart(2, '0');
     
     if (leftCounterRef.current) {
+      // Animasi fade out current counter
       gsap.to(leftCounterRef.current, {
         opacity: 0,
         y: -10,
         duration: 0.2,
         onComplete: () => {
+          // Update text
           setLeftCounter(newLeftCounter);
           
+          // Animasi fade in new counter
           gsap.fromTo(leftCounterRef.current, 
             { opacity: 0, y: 10 },
             { 
@@ -1307,6 +1094,8 @@ const loadMoreNotifications = async () => {
       const docRef = await addDoc(collection(db, 'photoComments'), newComment);
       console.log("Komentar berhasil dikirim dengan ID:", docRef.id);
       
+      // TIDAK LAGI MENGIRIM NOTIFIKASI KOMENTAR
+      
       setMessage("");
       
       if (messageInputRef.current) {
@@ -1404,14 +1193,6 @@ const loadMoreNotifications = async () => {
 
   // Komentar untuk foto saat ini
   const currentPhotoComments = comments.filter(comment => comment.photoIndex === currentPhotoIndex);
-
-  // Handle scroll untuk load more notifications
-  const handleNotificationScroll = (e: React.UIEvent<HTMLDivElement>) => {
-    const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
-    if (scrollHeight - scrollTop <= clientHeight + 50 && !isLoadingNotifications && !allNotificationsLoaded) {
-      loadMoreNotifications();
-    }
-  };
 
   return (
     <div style={{
@@ -2425,7 +2206,7 @@ const loadMoreNotifications = async () => {
         )}
       </AnimatePresence>
 
-      {/* Notification Dropdown - DIPERBARUI DENGAN REAL-TIME */}
+      {/* Notification Dropdown - DIPERBARUI */}
       <AnimatePresence>
         {showNotification && (
           <motion.div
@@ -2476,41 +2257,20 @@ const loadMoreNotifications = async () => {
                   <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
                 </svg>
                 Notifications
-                  // Di dalam component Notification Bell:
-{notificationCount > 0 && (
-  <motion.div
-    key={notificationCount} // Key penting untuk trigger animation ulang
-    initial={{ scale: 0 }}
-    animate={{ scale: 1 }}
-    transition={{ type: "spring", stiffness: 500, damping: 15 }}
-    style={{
-      position: 'absolute',
-      top: '-2px',
-      right: '-2px',
-      minWidth: '18px',
-      height: '18px',
-      backgroundColor: '#FF4757',
-      borderRadius: '50%',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      border: '2px solid black'
-    }}
-  >
-    <span style={{
-      color: 'white',
-      fontSize: '0.65rem',
-      fontWeight: '700',
-      fontFamily: 'Helvetica, Arial, sans-serif',
-      padding: '0 4px'
-    }}>
-      {notificationCount > 9 ? '9+' : notificationCount}
-    </span>
-  </motion.div>
-)}  
+                {notificationCount > 0 && (
+                  <span style={{
+                    backgroundColor: '#FF4757',
+                    color: 'white',
+                    fontSize: '0.8rem',
+                    fontWeight: '600',
+                    padding: '0.1rem 0.5rem',
+                    borderRadius: '10px',
+                    marginLeft: '0.5rem'
+                  }}>
+                    {notificationCount} new
+                  </span>
+                )}
               </h3>
-
-            
               
               {hasUnreadNotifications && (
                 <motion.button
@@ -2536,281 +2296,217 @@ const loadMoreNotifications = async () => {
                 </motion.button>
               )}
             </div>
-
-            {/* List Notifikasi dari Firebase - REAL-TIME */}
-<div 
-  ref={notificationListRef}
-  style={{
-    flex: 1,
-    overflowY: 'auto',
-    padding: '0.5rem 0'
-  }}
-  onScroll={handleNotificationScroll}
->
-  {isLoadingNotifications ? (
-    <div style={{
-      padding: '2rem 1rem',
-      textAlign: 'center',
-      color: 'rgba(255, 255, 255, 0.5)',
-      fontFamily: 'Helvetica, Arial, sans-serif'
-    }}>
-      <motion.div
-        animate={{ rotate: 360 }}
-        transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-        style={{
-          width: '30px',
-          height: '30px',
-          border: '3px solid rgba(255, 255, 255, 0.1)',
-          borderTop: '3px solid #00FF00',
-          borderRadius: '50%',
-          margin: '0 auto 1rem auto'
-        }}
-      />
-      Loading notifications...
-    </div>
-  ) : notifications.length === 0 ? (
-    <div style={{
-      padding: '3rem 1rem',
-      textAlign: 'center',
-      color: 'rgba(255, 255, 255, 0.5)',
-      fontFamily: 'Helvetica, Arial, sans-serif'
-    }}>
-      <svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="rgba(255, 255, 255, 0.3)" strokeWidth="1">
-        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
-        <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
-      </svg>
-      <div style={{ marginTop: '1rem' }}>
-        No notifications yet
-      </div>
-      <div style={{ fontSize: '0.8rem', marginTop: '0.5rem', opacity: 0.7 }}>
-        You're all caught up!
-      </div>
-    </div>
-  ) : (
-    <>
-      {notifications.map((notification, index) => {
-        const isRead = user ? 
-          (notification.userReads && notification.userReads[user.uid]) || false : 
-          false;
-        
-        return (
-          <motion.div
-            key={notification.id || index}
-            initial={{ opacity: 0, x: -10 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: index * 0.05 }}
-            style={{
-              padding: '1rem 1.2rem',
-              borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
-              cursor: 'pointer',
-              transition: 'all 0.2s ease',
-              backgroundColor: isRead ? 'transparent' : getBgColorByType(notification.type),
-              position: 'relative'
-            }}
-            whileHover={{ 
-              backgroundColor: isRead ? 'rgba(255, 255, 255, 0.05)' : getBgColorByType(notification.type).replace('0.1', '0.2')
-            }}
-            onClick={() => handleNotificationClick(notification)}
-          >
-            {/* Unread Indicator */}
-            {!isRead && (
-              <div style={{
-                position: 'absolute',
-                left: '0.5rem',
-                top: '50%',
-                transform: 'translateY(-50%)',
-                width: '6px',
-                height: '6px',
-                backgroundColor: getColorByType(notification.type),
-                borderRadius: '50%'
-              }} />
-            )}
             
+            {/* List Notifikasi dari Firebase - DIPERBARUI */}
             <div style={{
-              display: 'flex',
-              gap: '1rem',
-              alignItems: 'flex-start'
+              flex: 1,
+              overflowY: 'auto',
+              padding: '0.5rem 0'
             }}>
-              {/* Notification Icon dengan warna sesuai tipe */}
-              <div style={{
-                width: '36px',
-                height: '36px',
-                borderRadius: '50%',
-                backgroundColor: isRead ? 'rgba(255, 255, 255, 0.1)' : `${getColorByType(notification.type)}20`,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '1rem',
-                flexShrink: 0,
-                color: getColorByType(notification.type)
-              }}>
-                {notification.icon}
-              </div>
-              
-              {/* Notification Content */}
-              <div style={{ flex: 1 }}>
+              {isLoadingNotifications ? (
                 <div style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'flex-start',
-                  marginBottom: '0.3rem'
-                }}>
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.5rem',
-                    flexWrap: 'wrap'
-                  }}>
-                    <h4 style={{
-                      color: 'white',
-                      fontSize: '0.95rem',
-                      fontWeight: '600',
-                      margin: 0,
-                      fontFamily: 'Helvetica, Arial, sans-serif'
-                    }}>
-                      {notification.title}
-                    </h4>
-                    
-                    {/* Badge Type */}
-                    <span style={{
-                      backgroundColor: getColorByType(notification.type),
-                      color: 'white',
-                      fontSize: '0.7rem',
-                      fontWeight: '600',
-                      padding: '0.1rem 0.4rem',
-                      borderRadius: '4px',
-                      textTransform: 'uppercase'
-                    }}>
-                      {notification.type}
-                    </span>
-                    
-                    {/* Badge Admin */}
-                    {notification.isAdminPost && (
-                      <span style={{
-                        backgroundColor: '#8B5CF6',
-                        color: 'white',
-                        fontSize: '0.7rem',
-                        fontWeight: '600',
-                        padding: '0.1rem 0.4rem',
-                        borderRadius: '4px'
-                      }}>
-                        ADMIN
-                      </span>
-                    )}
-                  </div>
-                  
-                  <span style={{
-                    color: 'rgba(255, 255, 255, 0.5)',
-                    fontSize: '0.75rem',
-                    whiteSpace: 'nowrap'
-                  }}>
-                    {calculateTimeAgo(notification.timestamp)}
-                  </span>
-                </div>
-                
-                <p style={{
-                  color: isRead ? 'rgba(255, 255, 255, 0.7)' : 'white',
-                  fontSize: '0.85rem',
-                  margin: 0,
-                  lineHeight: 1.4,
+                  padding: '2rem 1rem',
+                  textAlign: 'center',
+                  color: 'rgba(255, 255, 255, 0.5)',
                   fontFamily: 'Helvetica, Arial, sans-serif'
                 }}>
-                  {notification.message}
-                </p>
-                
-                {/* Tampilkan admin name jika dari admin */}
-                {notification.isAdminPost && notification.adminName && (
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.3rem',
-                    marginTop: '0.3rem'
-                  }}>
-                    <span style={{
-                      color: 'rgba(255, 255, 255, 0.5)',
-                      fontSize: '0.75rem'
-                    }}>
-                      Posted by: 
-                    </span>
-                    <span style={{
-                      color: '#8B5CF6',
-                      fontSize: '0.75rem',
-                      fontWeight: '500'
-                    }}>
-                      {notification.adminName}
-                    </span>
-                  </div>
-                )}
-                
-                {/* Priority dan Category */}
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.5rem',
-                  marginTop: '0.3rem'
-                }}>
-                  {notification.priority && (
-                    <span style={{
-                      color: notification.priority === 'high' ? '#EF4444' : 
-                             notification.priority === 'medium' ? '#F59E0B' : '#10B981',
-                      fontSize: '0.7rem',
-                      fontWeight: '500'
-                    }}>
-                      {notification.priority.toUpperCase()}
-                    </span>
-                  )}
-                  
-                  {notification.category && (
-                    <span style={{
-                      color: 'rgba(255, 255, 255, 0.7)',
-                      fontSize: '0.7rem',
-                      backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                      padding: '0.1rem 0.4rem',
-                      borderRadius: '4px'
-                    }}>
-                      {notification.category}
-                    </span>
-                  )}
+                  Loading notifications...
                 </div>
-              </div>
+              ) : notifications.length === 0 ? (
+                <div style={{
+                  padding: '2rem 1rem',
+                  textAlign: 'center',
+                  color: 'rgba(255, 255, 255, 0.5)',
+                  fontFamily: 'Helvetica, Arial, sans-serif'
+                }}>
+                  No notifications yet
+                </div>
+              ) : (
+                notifications.map((notification, index) => (
+                  <motion.div
+                    key={notification.id || index}
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: index * 0.05 }}
+                    style={{
+                      padding: '1rem 1.2rem',
+                      borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease',
+                      backgroundColor: notification.read ? 'transparent' : getBgColorByType(notification.type),
+                      position: 'relative'
+                    }}
+                    whileHover={{ 
+                      backgroundColor: notification.read ? 'rgba(255, 255, 255, 0.05)' : getBgColorByType(notification.type).replace('0.1', '0.2')
+                    }}
+                    onClick={() => handleNotificationClick(notification)}
+                  >
+                    {/* Unread Indicator */}
+                    {!notification.read && (
+                      <div style={{
+                        position: 'absolute',
+                        left: '0.5rem',
+                        top: '50%',
+                        transform: 'translateY(-50%)',
+                        width: '6px',
+                        height: '6px',
+                        backgroundColor: getColorByType(notification.type),
+                        borderRadius: '50%'
+                      }} />
+                    )}
+                    
+                    <div style={{
+                      display: 'flex',
+                      gap: '1rem',
+                      alignItems: 'flex-start'
+                    }}>
+                      {/* Notification Icon dengan warna sesuai tipe */}
+                      <div style={{
+                        width: '36px',
+                        height: '36px',
+                        borderRadius: '50%',
+                        backgroundColor: notification.read ? 'rgba(255, 255, 255, 0.1)' : `${getColorByType(notification.type)}20`,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '1rem',
+                        flexShrink: 0,
+                        color: getColorByType(notification.type)
+                      }}>
+                        {notification.icon}
+                      </div>
+                      
+                      {/* Notification Content */}
+                      <div style={{ flex: 1 }}>
+                        <div style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'flex-start',
+                          marginBottom: '0.3rem'
+                        }}>
+                          <div style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.5rem',
+                            flexWrap: 'wrap'
+                          }}>
+                            <h4 style={{
+                              color: 'white',
+                              fontSize: '0.95rem',
+                              fontWeight: '600',
+                              margin: 0,
+                              fontFamily: 'Helvetica, Arial, sans-serif'
+                            }}>
+                              {notification.title}
+                            </h4>
+                            
+                            {/* Badge Type */}
+                            <span style={{
+                              backgroundColor: getColorByType(notification.type),
+                              color: 'white',
+                              fontSize: '0.7rem',
+                              fontWeight: '600',
+                              padding: '0.1rem 0.4rem',
+                              borderRadius: '4px',
+                              textTransform: 'uppercase'
+                            }}>
+                              {notification.type}
+                            </span>
+                            
+                            {/* Badge Admin */}
+                            {notification.isAdminPost && (
+                              <span style={{
+                                backgroundColor: '#8B5CF6',
+                                color: 'white',
+                                fontSize: '0.7rem',
+                                fontWeight: '600',
+                                padding: '0.1rem 0.4rem',
+                                borderRadius: '4px'
+                              }}>
+                                ADMIN
+                              </span>
+                            )}
+                          </div>
+                          
+                          <span style={{
+                            color: 'rgba(255, 255, 255, 0.5)',
+                            fontSize: '0.75rem',
+                            whiteSpace: 'nowrap'
+                          }}>
+                            {calculateTimeAgo(notification.timestamp)}
+                          </span>
+                        </div>
+                        
+                        <p style={{
+                          color: notification.read ? 'rgba(255, 255, 255, 0.7)' : 'white',
+                          fontSize: '0.85rem',
+                          margin: 0,
+                          lineHeight: 1.4,
+                          fontFamily: 'Helvetica, Arial, sans-serif'
+                        }}>
+                          {notification.message}
+                        </p>
+                        
+                        {/* Admin info jika ada */}
+                        {notification.isAdminPost && notification.adminName && (
+                          <div style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.3rem',
+                            marginTop: '0.3rem'
+                          }}>
+                            <span style={{
+                              color: 'rgba(255, 255, 255, 0.5)',
+                              fontSize: '0.75rem'
+                            }}>
+                              Posted by: 
+                            </span>
+                            <span style={{
+                              color: '#8B5CF6',
+                              fontSize: '0.75rem',
+                              fontWeight: '500'
+                            }}>
+                              {notification.adminName}
+                            </span>
+                          </div>
+                        )}
+                        
+                        {/* Priority dan Category */}
+                        <div style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.5rem',
+                          marginTop: '0.3rem'
+                        }}>
+                          {notification.priority && (
+                            <span style={{
+                              color: notification.priority === 'high' ? '#EF4444' : 
+                                     notification.priority === 'medium' ? '#F59E0B' : '#10B981',
+                              fontSize: '0.7rem',
+                              fontWeight: '500'
+                            }}>
+                              {notification.priority.toUpperCase()}
+                            </span>
+                          )}
+                          
+                          {notification.category && (
+                            <span style={{
+                              color: 'rgba(255, 255, 255, 0.7)',
+                              fontSize: '0.7rem',
+                              backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                              padding: '0.1rem 0.4rem',
+                              borderRadius: '4px'
+                            }}>
+                              {notification.category}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
+                ))
+              )}
             </div>
-          </motion.div>
-        );
-      })}
-      
-      {/* Load More Indicator */}
-      {!allNotificationsLoaded && (
-        <div style={{
-          padding: '1rem',
-          textAlign: 'center'
-        }}>
-          <motion.button
-            onClick={loadMoreNotifications}
-            disabled={isLoadingNotifications}
-            style={{
-              backgroundColor: 'rgba(255, 255, 255, 0.1)',
-              border: '1px solid rgba(255, 255, 255, 0.2)',
-              color: 'white',
-              padding: '0.5rem 1rem',
-              borderRadius: '20px',
-              fontSize: '0.8rem',
-              cursor: 'pointer',
-              fontFamily: 'Helvetica, Arial, sans-serif'
-            }}
-            whileHover={{ 
-              backgroundColor: 'rgba(255, 255, 255, 0.2)'
-            }}
-            whileTap={{ scale: 0.95 }}
-          >
-            {isLoadingNotifications ? 'Loading...' : 'Load More'}
-          </motion.button>
-        </div>
-      )}
-    </>
-  )}
-</div>
-            
-           
             
             {/* Footer */}
             <div style={{
@@ -6581,75 +6277,111 @@ const loadMoreNotifications = async () => {
               width: isMobile ? '90%' : '700px',
               backgroundColor: 'white',
               borderRadius: '15px',
-              boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
-              padding: isMobile ? '1.2rem' : '1.5rem',
-              zIndex: 9999,
+              boxShadow: '0 10px 40px rgba(0,0,0,0.3)',
+              zIndex: 1000,
+              overflow: 'hidden',
               display: 'flex',
-              flexDirection: 'column',
-              gap: '1rem'
+              border: '2px solid rgba(0,0,0,0.1)'
             }}
           >
             <div style={{
+              flex: 1,
+              padding: isMobile ? '1.2rem' : '1.8rem',
+              backgroundColor: 'white',
               display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'flex-start',
-              gap: '1rem'
+              alignItems: 'center',
+              gap: isMobile ? '0.8rem' : '1.2rem'
             }}>
-              <div>
-                <h3 style={{
-                  color: '#333',
-                  fontSize: isMobile ? '1.1rem' : '1.3rem',
-                  fontWeight: '600',
-                  margin: '0 0 0.5rem 0',
-                  fontFamily: 'Helvetica, Arial, sans-serif'
-                }}>
-                  Cookie Consent
-                </h3>
+              <div style={{
+                width: isMobile ? '40px' : '50px',
+                height: isMobile ? '40px' : '50px',
+                backgroundColor: '#FBBF24',
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0
+              }}>
+                <svg 
+                  width={isMobile ? "20" : "25"} 
+                  height={isMobile ? "20" : "25"} 
+                  viewBox="0 0 24 24" 
+                  fill="none" 
+                  stroke="#92400E"
+                  strokeWidth="2"
+                >
+                  <path d="M12 2a10 10 0 1 0 10 10 4 4 0 0 1-5-5 4 4 0 0 1-5-5"/>
+                  <path d="M8.5 8.5v.01"/>
+                  <path d="M16 15.5v.01"/>
+                  <path d="M12 12v.01"/>
+                  <path d="M11 17v.01"/>
+                  <path d="M7 14v.01"/>
+                </svg>
+              </div>
+              
+              <div style={{
+                flex: 1
+              }}>
                 <p style={{
-                  color: '#666',
-                  fontSize: isMobile ? '0.9rem' : '1rem',
                   margin: 0,
-                  lineHeight: 1.5,
-                  fontFamily: 'Helvetica, Arial, sans-serif'
+                  fontSize: isMobile ? '0.85rem' : '0.95rem',
+                  color: 'black',
+                  fontFamily: 'Helvetica, Arial, sans-serif',
+                  lineHeight: 1.5
                 }}>
-                  We use cookies to enhance your experience. By continuing to visit this site you agree to our use of cookies.
+                  Kami menggunakan cookie untuk meningkatkan pengalaman Anda di website ini. 
+                  Cookie membantu kami mengingat preferensi Anda dan membuat website berfungsi lebih baik.
                 </p>
               </div>
             </div>
 
-            <div style={{
-              display: 'flex',
-              justifyContent: 'flex-end',
-              gap: '0.8rem'
-            }}>
-              <motion.button
-                onClick={handleAcceptCookies}
-                style={{
-                  padding: isMobile ? '0.6rem 1.2rem' : '0.7rem 1.5rem',
-                  backgroundColor: '#0050B7',
-                  border: 'none',
-                  borderRadius: '8px',
-                  color: 'white',
-                  fontSize: isMobile ? '0.9rem' : '1rem',
-                  fontWeight: '500',
-                  cursor: 'pointer',
-                  fontFamily: 'Helvetica, Arial, sans-serif'
-                }}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                Accept All
-              </motion.button>
-            </div>
+            <button
+              onClick={handleAcceptCookies}
+              style={{
+                width: isMobile ? '80px' : '100px',
+                backgroundColor: 'black',
+                color: 'white',
+                border: 'none',
+                fontSize: isMobile ? '0.9rem' : '1rem',
+                fontWeight: '600',
+                fontFamily: 'Helvetica, Arial, sans-serif',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                transition: 'all 0.3s ease',
+                padding: 0
+              }}
+            >
+              OK
+            </button>
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* CSS Animation untuk rotate effect */}
+      <style jsx global>{`
+        @keyframes rotate {
+          from {
+            transform: rotate(0deg);
+          }
+          to {
+            transform: rotate(360deg);
+          }
+        }
+        
+        @keyframes searchPulse {
+          0% {
+            box-shadow: 0 0 0 0 rgba(0, 255, 0, 0.7);
+          }
+          70% {
+            box-shadow: 0 0 0 10px rgba(0, 255, 0, 0);
+          }
+          100% {
+            boxShadow: 0 0 0 0 rgba(0, 255, 0, 0);
+          }
+        }
+      `}</style>
     </div>
   );
 }
-
-
-
-
-
-
