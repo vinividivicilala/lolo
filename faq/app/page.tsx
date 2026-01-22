@@ -2592,9 +2592,7 @@ const loadMoreNotifications = async () => {
         </span>
       </div>
     )}
-  </motion.div>
-))}
-                          
+               
                           {/* Priority dan Category */}
                           <div style={{
                             display: 'flex',
@@ -6497,4 +6495,5 @@ const loadMoreNotifications = async () => {
     </div>
   );
 }
+
 
