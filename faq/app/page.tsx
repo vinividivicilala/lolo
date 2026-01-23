@@ -1657,15 +1657,7 @@ useEffect(() => {
     }
   };
 
-  // Handler untuk key press di search
-  const handleSearchKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      handleSearch();
-    } else if (e.key === 'Escape') {
-      setShowSearch(false);
-    }
-  };
-
+  
   // Data untuk halaman Index
   const indexTopics = [
     {
@@ -7222,6 +7214,7 @@ useEffect(() => {
     </div>
   );
 }
+
 
 
 
