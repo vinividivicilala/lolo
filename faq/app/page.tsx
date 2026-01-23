@@ -200,6 +200,167 @@ export default function HomePage(): React.JSX.Element {
   const searchInputRef = useRef<HTMLInputElement>(null);
   const searchContainerRef = useRef<HTMLDivElement>(null);
 
+  // Tambahkan state baru untuk search results
+const [searchResults, setSearchResults] = useState<any[]>([]);
+const [showSearchResults, setShowSearchResults] = useState(false);
+
+// Data untuk pencarian
+const searchablePages = [
+  {
+    id: 1,
+    title: "Chatbot AI",
+    description: "AI Assistant dengan teknologi terbaru",
+    category: "Tools",
+    url: "/chatbot",
+    icon: "🤖"
+  },
+  {
+    id: 2,
+    title: "Sign In",
+    description: "Masuk ke akun Anda",
+    category: "Authentication",
+    url: "/signin",
+    icon: "🔐"
+  },
+  {
+    id: 3,
+    title: "Sign Up",
+    description: "Buat akun baru",
+    category: "Authentication",
+    url: "/signup",
+    icon: "👤"
+  },
+  {
+    id: 4,
+    title: "Notifikasi",
+    description: "Lihat semua notifikasi",
+    category: "System",
+    url: "/notifications",
+    icon: "🔔"
+  },
+  {
+    id: 5,
+    title: "Dokumentasi",
+    description: "Baca dokumentasi lengkap",
+    category: "Resources",
+    url: "/docs",
+    icon: "📚"
+  },
+  {
+    id: 6,
+    title: "Update",
+    description: "Pembaruan terbaru",
+    category: "News",
+    url: "/update",
+    icon: "🆕"
+  },
+  {
+    id: 7,
+    title: "Timeline",
+    description: "Linimasa aktivitas",
+    category: "Features",
+    url: "/timeline",
+    icon: "📅"
+  },
+  {
+    id: 8,
+    title: "Catatan",
+    description: "Catatan pribadi Anda",
+    category: "Personal",
+    url: "/notes",
+    icon: "📝"
+  }
+];
+
+// Fungsi untuk melakukan pencarian
+const performSearch = (query: string) => {
+  if (!query.trim()) {
+    setSearchResults([]);
+    setShowSearchResults(false);
+    return;
+  }
+
+  const lowerQuery = query.toLowerCase().trim();
+  
+  // Filter berdasarkan title atau description
+  const results = searchablePages.filter(page => 
+    page.title.toLowerCase().includes(lowerQuery) ||
+    page.description.toLowerCase().includes(lowerQuery) ||
+    page.category.toLowerCase().includes(lowerQuery)
+  );
+
+  setSearchResults(results);
+  setShowSearchResults(results.length > 0);
+  
+  // Animasi GSAP untuk munculnya results
+  if (results.length > 0 && searchContainerRef.current) {
+    gsap.fromTo(".search-result-item", 
+      { opacity: 0, y: -10 },
+      { 
+        opacity: 1, 
+        y: 0, 
+        duration: 0.3, 
+        stagger: 0.1,
+        ease: "power2.out" 
+      }
+    );
+  }
+};
+
+// Update handler untuk search query
+const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const value = e.target.value;
+  setSearchQuery(value);
+  performSearch(value);
+};
+
+// Handler untuk klik pada hasil pencarian
+const handleSearchResultClick = (url: string) => {
+  router.push(url);
+  setShowSearch(false);
+  setSearchQuery("");
+  setShowSearchResults(false);
+};
+
+// Handler untuk key press di search (Enter untuk navigasi ke hasil pertama)
+const handleSearchKeyPress = (e: React.KeyboardEvent) => {
+  if (e.key === 'Enter' && searchQuery.trim()) {
+    if (searchResults.length > 0) {
+      // Navigasi ke hasil pertama
+      handleSearchResultClick(searchResults[0].url);
+    } else {
+      // Fallback ke halaman search dengan query
+      router.push(`/search?q=${encodeURIComponent(searchQuery)}`);
+      setShowSearch(false);
+      setSearchQuery("");
+    }
+  } else if (e.key === 'Escape') {
+    setShowSearch(false);
+    setSearchQuery("");
+    setShowSearchResults(false);
+  }
+};
+
+// Handler untuk toggle search
+const handleSearchToggle = () => {
+  const newShowSearch = !showSearch;
+  setShowSearch(newShowSearch);
+  
+  if (newShowSearch) {
+    // Auto focus dan animasi expand
+    setTimeout(() => {
+      if (searchInputRef.current) {
+        searchInputRef.current.focus();
+      }
+    }, 100);
+  } else {
+    // Reset state saat search ditutup
+    setSearchQuery("");
+    setSearchResults([]);
+    setShowSearchResults(false);
+  }
+};
+
   // Animasi loading text
   const loadingTexts = [
     "NURU", "MBACA", "NULIS", "NGEXPLORASI", 
@@ -4021,116 +4182,309 @@ useEffect(() => {
           gap: isMobile ? '0.8rem' : '1rem',
           position: 'relative'
         }}>
-          {/* Search Bar dengan animasi GSAP */}
+         {/* Search Bar dengan animasi GSAP dan dropdown results */}
+<motion.div
+  ref={searchContainerRef}
+  initial={{ opacity: 0, x: -10 }}
+  animate={{ opacity: 1, x: 0 }}
+  transition={{ delay: 1, duration: 0.5 }}
+  style={{
+    display: 'flex',
+    flexDirection: 'column',
+    position: 'relative',
+    width: showSearch ? '350px' : '40px',
+    height: showSearch ? 'auto' : '40px',
+    borderRadius: '20px',
+    backgroundColor: 'rgba(20, 20, 20, 0.95)',
+    backdropFilter: 'blur(20px)',
+    border: '1px solid rgba(255, 255, 255, 0.15)',
+    overflow: 'hidden',
+    cursor: 'pointer',
+    transition: 'all 0.3s ease',
+    zIndex: 1002,
+    boxShadow: showSearch ? '0 20px 60px rgba(0, 0, 0, 0.5)' : 'none'
+  }}
+>
+  {/* Search Input Bar */}
+  <div style={{
+    display: 'flex',
+    alignItems: 'center',
+    width: '100%',
+    height: '40px',
+    padding: '0 10px',
+    boxSizing: 'border-box'
+  }}>
+    {/* Search Icon */}
+    <motion.div
+      onClick={handleSearchToggle}
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: '20px',
+        height: '100%',
+        cursor: 'pointer',
+        flexShrink: 0,
+        marginRight: '8px'
+      }}
+      whileHover={{ scale: 1.1 }}
+      whileTap={{ scale: 0.9 }}
+    >
+      <svg 
+        width="18" 
+        height="18" 
+        viewBox="0 0 24 24" 
+        fill="none" 
+        stroke={showSearch ? "#00FF00" : "white"} 
+        strokeWidth="2"
+      >
+        <circle cx="11" cy="11" r="8"/>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+    </motion.div>
+    
+    {/* Search Input */}
+    <input
+      ref={searchInputRef}
+      type="text"
+      value={searchQuery}
+      onChange={handleSearchInputChange}
+      onKeyDown={handleSearchKeyPress}
+      placeholder="Search chatbot, sign in, notifikasi..."
+      style={{
+        width: '100%',
+        height: '100%',
+        padding: '0 8px',
+        backgroundColor: 'transparent',
+        border: 'none',
+        color: 'white',
+        fontSize: '0.9rem',
+        outline: 'none',
+        fontFamily: 'Helvetica, Arial, sans-serif',
+        opacity: showSearch ? 1 : 0,
+        pointerEvents: showSearch ? 'auto' : 'none',
+        transition: 'opacity 0.2s ease'
+      }}
+    />
+    
+    {/* Clear/X Button */}
+    {showSearch && searchQuery && (
+      <motion.div
+        initial={{ opacity: 0, scale: 0.8 }}
+        animate={{ opacity: 1, scale: 1 }}
+        onClick={() => {
+          setSearchQuery("");
+          setSearchResults([]);
+          setShowSearchResults(false);
+        }}
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          width: '20px',
+          height: '20px',
+          cursor: 'pointer',
+          backgroundColor: 'rgba(255, 255, 255, 0.1)',
+          borderRadius: '50%',
+          flexShrink: 0,
+          marginLeft: '8px'
+        }}
+        whileHover={{ scale: 1.2, backgroundColor: 'rgba(255, 255, 255, 0.2)' }}
+        whileTap={{ scale: 0.9 }}
+      >
+        <svg 
+          width="12" 
+          height="12" 
+          viewBox="0 0 24 24" 
+          fill="none" 
+          stroke="white" 
+          strokeWidth="2"
+        >
+          <line x1="18" y1="6" x2="6" y2="18"/>
+          <line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </motion.div>
+    )}
+  </div>
+
+  {/* Search Results Dropdown */}
+  <AnimatePresence>
+    {showSearch && showSearchResults && searchResults.length > 0 && (
+      <motion.div
+        initial={{ opacity: 0, height: 0 }}
+        animate={{ opacity: 1, height: 'auto' }}
+        exit={{ opacity: 0, height: 0 }}
+        transition={{ duration: 0.3 }}
+        style={{
+          width: '100%',
+          maxHeight: '400px',
+          overflowY: 'auto',
+          backgroundColor: 'rgba(15, 15, 15, 0.98)',
+          borderTop: '1px solid rgba(255, 255, 255, 0.1)',
+          padding: '10px 0'
+        }}
+      >
+        {/* Search Results Header */}
+        <div style={{
+          padding: '0 15px 10px 15px',
+          borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
+          marginBottom: '5px'
+        }}>
+          <div style={{
+            color: 'rgba(255, 255, 255, 0.7)',
+            fontSize: '0.8rem',
+            fontWeight: '600',
+            textTransform: 'uppercase',
+            letterSpacing: '0.5px'
+          }}>
+            Hasil Pencarian ({searchResults.length})
+          </div>
+        </div>
+
+        {/* Search Results List */}
+        {searchResults.map((result, index) => (
           <motion.div
-            ref={searchContainerRef}
-            initial={{ opacity: 0, x: -10 }}
+            key={result.id}
+            className="search-result-item"
+            initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 1, duration: 0.5 }}
+            transition={{ delay: index * 0.05 }}
+            onClick={() => handleSearchResultClick(result.url)}
             style={{
+              padding: '12px 15px',
+              cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
-              width: '40px',
-              height: '40px',
-              borderRadius: '20px',
-              backgroundColor: 'rgba(255, 255, 255, 0.1)',
-              backdropFilter: 'blur(10px)',
-              border: '1px solid rgba(255, 255, 255, 0.15)',
-              overflow: 'hidden',
-              cursor: 'pointer',
-              transition: 'all 0.3s ease',
-              position: 'relative'
+              gap: '12px',
+              transition: 'all 0.2s ease',
+              borderBottom: '1px solid rgba(255, 255, 255, 0.03)'
             }}
+            whileHover={{ 
+              backgroundColor: 'rgba(0, 255, 0, 0.1)',
+              paddingLeft: '20px'
+            }}
+            whileTap={{ scale: 0.98 }}
           >
-            {/* Search Icon */}
-            <motion.div
-              onClick={() => setShowSearch(!showSearch)}
-              style={{
-                position: 'absolute',
-                left: '10px',
+            {/* Icon */}
+            <div style={{
+              width: '36px',
+              height: '36px',
+              borderRadius: '8px',
+              backgroundColor: 'rgba(255, 255, 255, 0.1)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '1.2rem',
+              flexShrink: 0
+            }}>
+              {result.icon}
+            </div>
+
+            {/* Content */}
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'flex-start',
+                marginBottom: '2px'
+              }}>
+                <div style={{
+                  color: 'white',
+                  fontSize: '0.95rem',
+                  fontWeight: '600',
+                  fontFamily: 'Helvetica, Arial, sans-serif',
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis'
+                }}>
+                  {result.title}
+                </div>
+                <div style={{
+                  backgroundColor: 'rgba(0, 80, 183, 0.3)',
+                  color: '#0050B7',
+                  fontSize: '0.7rem',
+                  fontWeight: '600',
+                  padding: '2px 6px',
+                  borderRadius: '10px',
+                  marginLeft: '8px',
+                  flexShrink: 0
+                }}>
+                  {result.category}
+                </div>
+              </div>
+              
+              <div style={{
+                color: 'rgba(255, 255, 255, 0.6)',
+                fontSize: '0.8rem',
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                marginBottom: '4px'
+              }}>
+                {result.description}
+              </div>
+              
+              <div style={{
+                color: '#00FF00',
+                fontSize: '0.75rem',
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'center',
-                width: '20px',
-                height: '100%',
-                cursor: 'pointer',
-                zIndex: 2
+                gap: '4px'
+              }}>
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+                  <polyline points="15 3 21 3 21 9"/>
+                  <line x1="10" y1="14" x2="21" y2="3"/>
+                </svg>
+                {result.url}
+              </div>
+            </div>
+
+            {/* Arrow Indicator */}
+            <motion.div
+              initial={{ opacity: 0, x: -5 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.2 }}
+              style={{
+                opacity: 0.5,
+                transition: 'all 0.2s ease'
               }}
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
             >
-              <svg 
-                width="18" 
-                height="18" 
-                viewBox="0 0 24 24" 
-                fill="none" 
-                stroke={showSearch ? "#00FF00" : "white"} 
-                strokeWidth="2"
-              >
-                <circle cx="11" cy="11" r="8"/>
-                <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M5 12h14"/>
+                <path d="m12 5 7 7-7 7"/>
               </svg>
             </motion.div>
-            
-            {/* Search Input */}
-            <input
-              ref={searchInputRef}
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onKeyDown={handleSearchKeyPress}
-              placeholder="Search..."
-              style={{
-                width: '100%',
-                height: '100%',
-                padding: '0 40px 0 35px',
-                backgroundColor: 'transparent',
-                border: 'none',
-                color: 'white',
-                fontSize: '0.9rem',
-                outline: 'none',
-                fontFamily: 'Helvetica, Arial, sans-serif',
-                opacity: showSearch ? 1 : 0,
-                pointerEvents: showSearch ? 'auto' : 'none',
-                transition: 'opacity 0.2s ease'
-              }}
-            />
-            
-            {/* Clear/X Button */}
-            {showSearch && searchQuery && (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                onClick={() => setSearchQuery("")}
-                style={{
-                  position: 'absolute',
-                  right: '10px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  width: '20px',
-                  height: '20px',
-                  cursor: 'pointer',
-                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                  borderRadius: '50%'
-                }}
-                whileHover={{ scale: 1.2, backgroundColor: 'rgba(255, 255, 255, 0.2)' }}
-                whileTap={{ scale: 0.9 }}
-              >
-                <svg 
-                  width="12" 
-                  height="12" 
-                  viewBox="0 0 24 24" 
-                  fill="none" 
-                  stroke="white" 
-                  strokeWidth="2"
-                >
-                  <line x1="18" y1="6" x2="6" y2="18"/>
-                  <line x1="6" y1="6" x2="18" y2="18"/>
-                </svg>
-              </motion.div>
-            )}
           </motion.div>
+        ))}
+      </motion.div>
+    )}
+  </AnimatePresence>
+
+  {/* No Results Message */}
+  <AnimatePresence>
+    {showSearch && searchQuery.trim() && searchResults.length === 0 && (
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        style={{
+          padding: '20px 15px',
+          textAlign: 'center',
+          color: 'rgba(255, 255, 255, 0.5)',
+          fontSize: '0.9rem',
+          backgroundColor: 'rgba(15, 15, 15, 0.98)',
+          borderTop: '1px solid rgba(255, 255, 255, 0.1)'
+        }}
+      >
+        Tidak ditemukan hasil untuk "{searchQuery}"
+        <div style={{ fontSize: '0.8rem', marginTop: '5px' }}>
+          Coba kata kunci lain seperti: chatbot, sign in, notifikasi
+        </div>
+      </motion.div>
+    )}
+  </AnimatePresence>
+</motion.div>
 
           {/* Notification Bell dengan Badge */}
           <motion.div
@@ -6820,6 +7174,28 @@ useEffect(() => {
         )}
       </AnimatePresence>
 
+
+  <style jsx>{`
+  /* Custom scrollbar for search results */
+  div::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  div::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 3px;
+  }
+  
+  div::-webkit-scrollbar-thumb {
+    background: rgba(0, 255, 0, 0.3);
+    border-radius: 3px;
+  }
+  
+  div::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 255, 0, 0.5);
+  }
+`}</style>
+
       {/* CSS Animation untuk rotate effect */}
       <style jsx global>{`
         @keyframes rotate {
@@ -6846,6 +7222,7 @@ useEffect(() => {
     </div>
   );
 }
+
 
 
 
