@@ -723,158 +723,183 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
             maxWidth: isMobile ? '100%' : '1200px',
           }}
         >
-          {/* Container Foto dan Kebijakan */}
+          {/* Foto Portrait - Hidden on mobile */}
           {!isMobile && (
             <div
               style={{
                 display: 'flex',
                 flexDirection: 'column',
-                width: '500px',
+                gap: '30px',
               }}
             >
-              {/* Foto Portrait */}
               <div
                 style={{
-                  width: '100%',
-                  height: '500px',
+                  width: '500px',
+                  height: '700px',
                   backgroundImage: 'url(/images/5.jpg)',
                   backgroundSize: 'cover',
                   backgroundPosition: 'center',
                   backgroundRepeat: 'no-repeat',
-                  borderRadius: '20px 20px 0 0',
+                  borderRadius: '20px',
                   boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
                 }}
               />
               
-              {/* Container Kebijakan dan Ketentuan */}
+              {/* Container Kebijakan dan Ketentuan di BAWAH foto */}
               <div
                 style={{
-                  backgroundColor: 'rgba(30, 30, 30, 0.9)',
-                  padding: '25px',
-                  borderRadius: '0 0 20px 20px',
-                  border: '1px solid rgba(255, 255, 255, 0.2)',
-                  borderTop: 'none',
-                  backdropFilter: 'blur(10px)',
-                  boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
+                  marginTop: '10px',
                 }}
               >
                 {/* Teks Kebijakan */}
                 <p
                   style={{
-                    color: 'rgba(255, 255, 255, 0.9)',
-                    fontSize: '16px',
-                    lineHeight: '1.6',
-                    marginBottom: '20px',
-                    fontFamily: "'Roboto', sans-serif",
-                    textAlign: 'center',
+                    color: 'rgba(255,255,255,0.9)',
+                    fontSize: '24px',
+                    fontFamily: 'Arame Mono, monospace',
+                    margin: '0 0 10px 0',
+                    lineHeight: '1.2',
+                    fontWeight: '600',
+                    textAlign: 'left',
                   }}
                 >
-                  Dengan melanjutkan, Anda menyetujui Kebijakan Privasi dan Ketentuan Layanan kami.
+                  POLICY & TERMS
+                </p>
+                
+                <p
+                  style={{
+                    color: 'rgba(255,255,255,0.8)',
+                    fontSize: '14px',
+                    lineHeight: '1.6',
+                    marginBottom: '20px',
+                    fontFamily: 'Arame Mono, monospace',
+                    textAlign: 'left',
+                  }}
+                >
+                  By continuing, you agree to our Privacy Policy and Terms of Service.
                 </p>
                 
                 {/* Tautan Kebijakan dan Ketentuan */}
                 <div
                   style={{
                     display: 'flex',
-                    justifyContent: 'center',
-                    gap: '25px',
-                    marginBottom: '20px',
-                    flexWrap: 'wrap',
+                    flexDirection: 'column',
+                    gap: '12px',
                   }}
                 >
                   <a
                     href="/privacy-policy"
                     style={{
-                      color: 'rgba(255, 255, 255, 0.8)',
+                      color: 'rgba(255,255,255,0.9)',
                       textDecoration: 'none',
-                      fontSize: '14px',
+                      fontSize: '16px',
+                      fontFamily: 'Arame Mono, monospace',
                       transition: 'all 0.3s ease',
-                      padding: '8px 12px',
-                      border: '1px solid rgba(255, 255, 255, 0.2)',
-                      borderRadius: '8px',
-                      backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                      padding: '8px 0',
+                      borderBottom: '1px solid rgba(255,255,255,0.2)',
+                      fontWeight: '500',
                     }}
                     onMouseEnter={(e) => {
                       e.currentTarget.style.color = '#ffffff';
-                      e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
-                      e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.4)';
-                      e.currentTarget.style.transform = 'translateY(-2px)';
+                      e.currentTarget.style.borderBottomColor = 'rgba(255,255,255,0.4)';
+                      e.currentTarget.style.transform = 'translateX(5px)';
                     }}
                     onMouseLeave={(e) => {
-                      e.currentTarget.style.color = 'rgba(255, 255, 255, 0.8)';
-                      e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.05)';
-                      e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.2)';
-                      e.currentTarget.style.transform = 'translateY(0)';
+                      e.currentTarget.style.color = 'rgba(255,255,255,0.9)';
+                      e.currentTarget.style.borderBottomColor = 'rgba(255,255,255,0.2)';
+                      e.currentTarget.style.transform = 'translateX(0)';
                     }}
                   >
-                    Kebijakan Privasi
+                    → Privacy Policy
                   </a>
                   
                   <a
                     href="/terms-of-service"
                     style={{
-                      color: 'rgba(255, 255, 255, 0.8)',
+                      color: 'rgba(255,255,255,0.9)',
                       textDecoration: 'none',
-                      fontSize: '14px',
+                      fontSize: '16px',
+                      fontFamily: 'Arame Mono, monospace',
                       transition: 'all 0.3s ease',
-                      padding: '8px 12px',
-                      border: '1px solid rgba(255, 255, 255, 0.2)',
-                      borderRadius: '8px',
-                      backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                      padding: '8px 0',
+                      borderBottom: '1px solid rgba(255,255,255,0.2)',
+                      fontWeight: '500',
                     }}
                     onMouseEnter={(e) => {
                       e.currentTarget.style.color = '#ffffff';
-                      e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
-                      e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.4)';
-                      e.currentTarget.style.transform = 'translateY(-2px)';
+                      e.currentTarget.style.borderBottomColor = 'rgba(255,255,255,0.4)';
+                      e.currentTarget.style.transform = 'translateX(5px)';
                     }}
                     onMouseLeave={(e) => {
-                      e.currentTarget.style.color = 'rgba(255, 255, 255, 0.8)';
-                      e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.05)';
-                      e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.2)';
-                      e.currentTarget.style.transform = 'translateY(0)';
+                      e.currentTarget.style.color = 'rgba(255,255,255,0.9)';
+                      e.currentTarget.style.borderBottomColor = 'rgba(255,255,255,0.2)';
+                      e.currentTarget.style.transform = 'translateX(0)';
                     }}
                   >
-                    Ketentuan Layanan
+                    → Terms of Service
                   </a>
                   
                   <a
                     href="/cookie-policy"
                     style={{
-                      color: 'rgba(255, 255, 255, 0.8)',
+                      color: 'rgba(255,255,255,0.9)',
                       textDecoration: 'none',
-                      fontSize: '14px',
+                      fontSize: '16px',
+                      fontFamily: 'Arame Mono, monospace',
                       transition: 'all 0.3s ease',
-                      padding: '8px 12px',
-                      border: '1px solid rgba(255, 255, 255, 0.2)',
-                      borderRadius: '8px',
-                      backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                      padding: '8px 0',
+                      borderBottom: '1px solid rgba(255,255,255,0.2)',
+                      fontWeight: '500',
                     }}
                     onMouseEnter={(e) => {
                       e.currentTarget.style.color = '#ffffff';
-                      e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
-                      e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.4)';
-                      e.currentTarget.style.transform = 'translateY(-2px)';
+                      e.currentTarget.style.borderBottomColor = 'rgba(255,255,255,0.4)';
+                      e.currentTarget.style.transform = 'translateX(5px)';
                     }}
                     onMouseLeave={(e) => {
-                      e.currentTarget.style.color = 'rgba(255, 255, 255, 0.8)';
-                      e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.05)';
-                      e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.2)';
-                      e.currentTarget.style.transform = 'translateY(0)';
+                      e.currentTarget.style.color = 'rgba(255,255,255,0.9)';
+                      e.currentTarget.style.borderBottomColor = 'rgba(255,255,255,0.2)';
+                      e.currentTarget.style.transform = 'translateX(0)';
                     }}
                   >
-                    Kebijakan Cookie
+                    → Cookie Policy
+                  </a>
+                  
+                  <a
+                    href="/community-guidelines"
+                    style={{
+                      color: 'rgba(255,255,255,0.9)',
+                      textDecoration: 'none',
+                      fontSize: '16px',
+                      fontFamily: 'Arame Mono, monospace',
+                      transition: 'all 0.3s ease',
+                      padding: '8px 0',
+                      borderBottom: '1px solid rgba(255,255,255,0.2)',
+                      fontWeight: '500',
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.color = '#ffffff';
+                      e.currentTarget.style.borderBottomColor = 'rgba(255,255,255,0.4)';
+                      e.currentTarget.style.transform = 'translateX(5px)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.color = 'rgba(255,255,255,0.9)';
+                      e.currentTarget.style.borderBottomColor = 'rgba(255,255,255,0.2)';
+                      e.currentTarget.style.transform = 'translateX(0)';
+                    }}
+                  >
+                    → Community Guidelines
                   </a>
                 </div>
                 
                 {/* Hak Cipta */}
                 <div style={{
-                  marginTop: '15px',
-                  color: 'rgba(255, 255, 255, 0.5)',
+                  marginTop: '25px',
+                  color: 'rgba(255,255,255,0.5)',
                   fontSize: '12px',
-                  fontFamily: "'Roboto', sans-serif",
-                  textAlign: 'center',
-                  borderTop: '1px solid rgba(255, 255, 255, 0.1)',
+                  fontFamily: 'Arame Mono, monospace',
+                  textAlign: 'left',
+                  borderTop: '1px solid rgba(255,255,255,0.1)',
                   paddingTop: '15px',
                 }}>
                   © {new Date().getFullYear()} NoteThink. All rights reserved.
