@@ -24,7 +24,7 @@ import {
   Timestamp,
   deleteDoc 
 } from "firebase/firestore";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import gsap from "gsap";
 
 // Konfigurasi Firebase
@@ -68,150 +68,9 @@ interface LoginHistory {
 }
 
 interface LocalUser extends LoginHistory {
-  password?: string;
+  password?: string; // Simpan password dalam bentuk plain (untuk demo, dalam produksi harus dienkripsi)
   autoLoginEnabled?: boolean;
 }
-
-// Komponen Connection dengan animasi minimalis
-const ConnectionMenu = () => {
-  const [isOpen, setIsOpen] = useState(false);
-  const menuRef = useRef(null);
-  
-  const socialLinks = [
-    { name: "GitHub", url: "https://github.com" },
-    { name: "Instagram", url: "https://instagram.com" },
-    { name: "Twitter", url: "https://twitter.com" },
-    { name: "Quora", url: "https://quora.com" },
-    { name: "YouTube", url: "https://youtube.com" }
-  ];
-
-  useEffect(() => {
-    if (isOpen && menuRef.current) {
-      gsap.fromTo(
-        menuRef.current,
-        { 
-          opacity: 0,
-          scale: 0.95,
-          y: 10
-        },
-        { 
-          opacity: 1,
-          scale: 1,
-          y: 0,
-          duration: 0.3,
-          ease: "power2.out"
-        }
-      );
-    }
-  }, [isOpen]);
-
-  return (
-    <div style={{
-      position: 'relative',
-      display: 'inline-block',
-    }}>
-      {/* Teks CONNECT minimalis */}
-      <div
-        onClick={() => setIsOpen(!isOpen)}
-        style={{
-          cursor: 'pointer',
-          position: 'relative',
-        }}
-      >
-        <motion.h4 
-          className="connect-text"
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          style={{
-            color: 'white',
-            fontSize: '4rem',
-            fontWeight: '600',
-            margin: '0 0 0.5rem 0',
-            fontFamily: 'Arame Mono, monospace',
-          }}
-        >
-          CONNECT
-        </motion.h4>
-      </div>
-
-      {/* Menu Social Media minimalis */}
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            ref={menuRef}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 10 }}
-            transition={{ duration: 0.2 }}
-            style={{
-              position: 'absolute',
-              top: '100%',
-              left: '0',
-              backgroundColor: 'rgba(0, 0, 0, 0.95)',
-              backdropFilter: 'blur(10px)',
-              border: '1px solid rgba(255, 255, 255, 0.1)',
-              borderRadius: '10px',
-              padding: '20px',
-              minWidth: '180px',
-              zIndex: 1000,
-              boxShadow: '0 10px 30px rgba(0, 0, 0, 0.3)',
-            }}
-          >
-            <div style={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '12px',
-            }}>
-              {socialLinks.map((social, index) => (
-                <motion.a
-                  key={social.name}
-                  href={social.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: index * 0.05 }}
-                  whileHover={{ x: 5 }}
-                  style={{
-                    color: 'rgba(255, 255, 255, 0.9)',
-                    textDecoration: 'none',
-                    fontSize: '16px',
-                    fontFamily: 'Arame Mono, monospace',
-                    fontWeight: '500',
-                    padding: '8px 12px',
-                    borderRadius: '6px',
-                    backgroundColor: 'rgba(255, 255, 255, 0.03)',
-                    transition: 'all 0.2s ease',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.08)';
-                    e.currentTarget.style.color = '#ffffff';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.03)';
-                    e.currentTarget.style.color = 'rgba(255, 255, 255, 0.9)';
-                  }}
-                >
-                  <span style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                  }}>
-                    <span style={{
-                      fontSize: '12px',
-                      opacity: 0.7,
-                    }}>↘</span>
-                    {social.name}
-                  </span>
-                </motion.a>
-              ))}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  );
-};
 
 export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgotPassword }: any) {
   const router = useRouter();
@@ -225,6 +84,11 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
   const [showAutoLoginModal, setShowAutoLoginModal] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
   const [autoLoginInProgress, setAutoLoginInProgress] = useState(false);
+  
+  // Refs untuk animasi
+  const arrowRef = useRef<SVGSVGElement>(null);
+  const connectTextRef = useRef<HTMLDivElement>(null);
+  const socialTextRefs = useRef<(HTMLParagraphElement | null)[]>([]);
 
   // Fungsi untuk menyimpan login history ke Firestore
   const saveLoginHistory = async (userData: any, provider: string, userPassword?: string) => {
@@ -243,6 +107,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
       await setDoc(historyRef, historyData, { merge: true });
       console.log("Login history saved for:", userData.email);
       
+      // Simpan ke localStorage juga jika rememberMe aktif
       if (rememberMe && userPassword) {
         saveUserToLocalStorage(historyData, userPassword);
       }
@@ -284,19 +149,139 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
     return [];
   };
 
+  // Animasi GSAP untuk tanda panah dan teks
+  useEffect(() => {
+    if (typeof window === 'undefined' || !arrowRef.current || !connectTextRef.current) return;
+
+    const arrow = arrowRef.current;
+    const connectText = connectTextRef.current;
+    
+    // Animasi panah dengan GSAP
+    gsap.fromTo(arrow,
+      {
+        opacity: 0,
+        scale: 0.8,
+        x: -50,
+        y: 50,
+        rotation: -45
+      },
+      {
+        opacity: 1,
+        scale: 1,
+        x: 0,
+        y: 0,
+        rotation: 0,
+        duration: 1.5,
+        ease: "power3.out",
+        delay: 0.5
+      }
+    );
+
+    // Animasi garis panah (stroke dasharray)
+    const path = arrow.querySelector('path');
+    if (path) {
+      const length = path.getTotalLength();
+      gsap.fromTo(path,
+        {
+          strokeDasharray: length,
+          strokeDashoffset: length
+        },
+        {
+          strokeDashoffset: 0,
+          duration: 2,
+          ease: "power2.inOut",
+          delay: 0.8
+        }
+      );
+    }
+
+    // Animasi teks CONNECT
+    gsap.fromTo(connectText,
+      {
+        opacity: 0,
+        y: 30,
+        scale: 0.9
+      },
+      {
+        opacity: 1,
+        y: 0,
+        scale: 1,
+        duration: 1,
+        ease: "back.out(1.7)",
+        delay: 0.3
+      }
+    );
+
+    // Animasi staggered untuk teks sosial media
+    socialTextRefs.current.forEach((ref, index) => {
+      if (ref) {
+        gsap.fromTo(ref,
+          {
+            opacity: 0,
+            x: -20,
+            scale: 0.8
+          },
+          {
+            opacity: 1,
+            x: 0,
+            scale: 1,
+            duration: 0.8,
+            ease: "power2.out",
+            delay: 1 + (index * 0.15)
+          }
+        );
+
+        // Hover animation
+        ref.addEventListener('mouseenter', () => {
+          gsap.to(ref, {
+            scale: 1.05,
+            x: 5,
+            color: '#ffffff',
+            duration: 0.3,
+            ease: "power2.out"
+          });
+        });
+
+        ref.addEventListener('mouseleave', () => {
+          gsap.to(ref, {
+            scale: 1,
+            x: 0,
+            color: 'rgba(255, 255, 255, 0.7)',
+            duration: 0.3,
+            ease: "power2.out"
+          });
+        });
+      }
+    });
+
+    // Continuous subtle animation for arrow
+    gsap.to(arrow, {
+      y: -5,
+      duration: 2,
+      repeat: -1,
+      yoyo: true,
+      ease: "sine.inOut",
+      delay: 3
+    });
+
+  }, [isMobile]);
+
   // Cek apakah ada user yang tersimpan untuk auto-login
   useEffect(() => {
     const checkSavedUser = async () => {
+      // Tunggu sebentar untuk memastikan Firebase auth sudah siap
       setTimeout(async () => {
         const currentUser = auth.currentUser;
         
         if (!currentUser) {
           const localHistory = getLocalLoginHistory();
           if (localHistory.length > 0) {
+            // Tampilkan modal pilih akun
             setShowAutoLoginModal(true);
             setLoginHistory(localHistory);
           }
           
+          // Juga ambil dari Firestore jika ada
           try {
             await fetchLoginHistory();
           } catch (error) {
@@ -315,9 +300,12 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
       setUser(currentUser);
       if (currentUser) {
         console.log("User logged in:", currentUser.email);
+        // Tutup modal jika sedang terbuka
         setShowAutoLoginModal(false);
+        // Reset form
         setEmail("");
         setPassword("");
+        // Redirect langsung ke /notes
         router.push('/notes');
       }
     });
@@ -341,6 +329,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
       const savedUsers = localStorage.getItem('savedLoginUsers');
       let users: LocalUser[] = savedUsers ? JSON.parse(savedUsers) : [];
       
+      // Cek apakah user sudah ada
       const existingIndex = users.findIndex((u: LocalUser) => u.uid === userData.uid);
       
       const userToSave: LocalUser = {
@@ -351,21 +340,26 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
         photoURL: userData.photoURL || `https://ui-avatars.com/api/?name=${userData.email}&background=random`,
         provider: userData.provider || 'email',
         lastLogin: userData.lastLogin || new Date().toISOString(),
-        password: plainPassword,
+        password: plainPassword, // Simpan password plain untuk auto-fill
         autoLoginEnabled: rememberMe
       };
       
       if (existingIndex >= 0) {
+        // Update existing user
         users[existingIndex] = userToSave;
       } else {
+        // Tambah user baru
         users.unshift(userToSave);
         
+        // Batasi hanya 5 user terakhir
         if (users.length > 5) {
           users = users.slice(0, 5);
         }
       }
       
       localStorage.setItem('savedLoginUsers', JSON.stringify(users));
+      
+      // Update state login history
       setLoginHistory(users);
     } catch (error) {
       console.error("Error saving to localStorage:", error);
@@ -381,8 +375,10 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
         users = users.filter((u: any) => u.uid !== uid);
         localStorage.setItem('savedLoginUsers', JSON.stringify(users));
         
+        // Update state
         setLoginHistory(users);
         
+        // Juga hapus dari Firestore
         deleteDoc(doc(db, "loginHistory", uid)).catch(() => {
           console.log("User not found in Firestore");
         });
@@ -405,6 +401,8 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
       const user = result.user;
       
       console.log("Google login successful:", user);
+      
+      // Simpan history dengan auto-login enabled
       await saveLoginHistory(user, 'google');
       
     } catch (error: any) {
@@ -436,6 +434,8 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
       const user = result.user;
       
       console.log("GitHub login successful:", user);
+      
+      // Simpan history dengan auto-login enabled
       await saveLoginHistory(user, 'github');
       
     } catch (error: any) {
@@ -465,6 +465,8 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
       const user = result.user;
       
       console.log("Email login successful");
+      
+      // Simpan history dengan password dan auto-login enabled
       await saveLoginHistory(user, 'email', password);
       
     } catch (error: any) {
@@ -494,18 +496,21 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
     }
   };
 
-  // Login dengan user yang sudah tersimpan
+  // Login dengan user yang sudah tersimpan - MODIFIKASI BESAR DI SINI
   const handleQuickLogin = async (savedUser: LocalUser) => {
     setAutoLoginInProgress(true);
     setShowAutoLoginModal(false);
     
     try {
+      // Untuk email login, otomatis isi form dan submit
       if (savedUser.provider === 'email') {
+        // Set email dan password untuk form
         setEmail(savedUser.email);
         
         if (savedUser.password) {
           setPassword(savedUser.password);
           
+          // Tunggu sebentar untuk state update, lalu auto submit
           setTimeout(async () => {
             try {
               setLoading(true);
@@ -513,11 +518,14 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
               const user = result.user;
               
               console.log("Auto login successful for:", savedUser.email);
+              
+              // Simpan history lagi dengan timestamp terbaru
               await saveLoginHistory(user, 'email', savedUser.password);
               
             } catch (error: any) {
               console.error("Auto login error:", error);
               
+              // Jika password salah atau ada masalah, hapus dari saved users
               if (error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found') {
                 removeUserFromLocalStorage(savedUser.uid);
                 setError("Password telah berubah. Silakan login manual.");
@@ -530,10 +538,12 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
             }
           }, 100);
         } else {
+          // Jika tidak ada password tersimpan, isi hanya email
           setEmail(savedUser.email);
           setError("Silakan masukkan password untuk melanjutkan");
           setAutoLoginInProgress(false);
           
+          // Fokus ke password field
           setTimeout(() => {
             const passwordInput = document.querySelector('input[type="password"]') as HTMLInputElement;
             if (passwordInput) {
@@ -542,6 +552,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
           }, 50);
         }
       } 
+      // Untuk Google/GitHub, langsung login dengan popup
       else if (savedUser.provider === 'google') {
         await handleGoogleLogin();
       } 
@@ -561,8 +572,10 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
     try {
       await signOut(auth);
       console.log("User logged out");
+      // Reset form
       setEmail("");
       setPassword("");
+      // Tampilkan modal lagi setelah logout
       setTimeout(() => {
         const localHistory = getLocalLoginHistory();
         if (localHistory.length > 0) {
@@ -582,46 +595,35 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
     router.push('/forgot-password');
   };
 
-  // Komponen Modal Auto Login minimalis
+  // Komponen Modal Auto Login
   const AutoLoginModal = () => (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        backgroundColor: 'rgba(0, 0, 0, 0.9)',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        zIndex: 1000,
-        backdropFilter: 'blur(5px)',
-      }}
-    >
-      <motion.div
-        initial={{ scale: 0.95 }}
-        animate={{ scale: 1 }}
-        transition={{ type: "spring", damping: 20 }}
-        style={{
-          backgroundColor: 'rgba(20, 20, 20, 0.95)',
-          borderRadius: '15px',
-          padding: '25px',
-          width: isMobile ? '90%' : '380px',
-          maxWidth: '450px',
-          border: '1px solid rgba(255, 255, 255, 0.1)',
-          boxShadow: '0 15px 50px rgba(0, 0, 0, 0.5)',
-          position: 'relative',
-        }}
-      >
+    <div style={{
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      backgroundColor: 'rgba(0, 0, 0, 0.8)',
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      zIndex: 1000,
+      backdropFilter: 'blur(10px)',
+    }}>
+      <div style={{
+        backgroundColor: 'rgba(30, 30, 30, 0.95)',
+        borderRadius: '20px',
+        padding: '30px',
+        width: isMobile ? '90%' : '400px',
+        maxWidth: '500px',
+        border: '1px solid rgba(255, 255, 255, 0.2)',
+        boxShadow: '0 20px 60px rgba(0, 0, 0, 0.5)',
+      }}>
         <h2 style={{
           color: 'white',
-          fontSize: '20px',
+          fontSize: '24px',
           fontWeight: 'bold',
-          marginBottom: '15px',
+          marginBottom: '20px',
           textAlign: 'center',
           fontFamily: "'Roboto', sans-serif",
         }}>
@@ -630,8 +632,8 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
         
         <p style={{
           color: 'rgba(255, 255, 255, 0.7)',
-          fontSize: '13px',
-          marginBottom: '20px',
+          fontSize: '14px',
+          marginBottom: '25px',
           textAlign: 'center',
         }}>
           Klik akun untuk login otomatis
@@ -639,7 +641,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
         
         {/* Daftar User yang Tersimpan */}
         <div style={{
-          maxHeight: '250px',
+          maxHeight: '300px',
           overflowY: 'auto',
           marginBottom: '20px',
         }}>
@@ -653,47 +655,62 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
             </div>
           ) : (
             loginHistory.map((user) => (
-              <motion.div
+              <div
                 key={user.id}
-                whileHover={{ scale: 1.01 }}
-                whileTap={{ scale: 0.99 }}
                 onClick={() => handleQuickLogin(user as LocalUser)}
                 style={{
                   display: 'flex',
                   alignItems: 'center',
-                  padding: '12px',
-                  marginBottom: '8px',
-                  backgroundColor: 'rgba(255, 255, 255, 0.03)',
-                  borderRadius: '8px',
+                  padding: '15px',
+                  marginBottom: '10px',
+                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                  borderRadius: '12px',
                   cursor: 'pointer',
-                  border: '1px solid rgba(255, 255, 255, 0.05)',
+                  transition: 'all 0.3s ease',
+                  border: '1px solid rgba(255, 255, 255, 0.1)',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+                  e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.3)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.05)';
+                  e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.1)';
                 }}
               >
                 <img 
                   src={user.photoURL} 
                   alt={user.displayName}
                   style={{
-                    width: '35px',
-                    height: '35px',
+                    width: '40px',
+                    height: '40px',
                     borderRadius: '50%',
-                    marginRight: '12px',
-                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                    marginRight: '15px',
+                    border: '2px solid rgba(255, 255, 255, 0.2)',
                   }}
                 />
                 <div style={{ flex: 1 }}>
                   <div style={{
                     color: 'white',
                     fontWeight: '500',
-                    fontSize: '14px',
-                    marginBottom: '3px',
+                    fontSize: '16px',
+                    marginBottom: '5px',
                   }}>
                     {user.displayName}
                   </div>
                   <div style={{
                     color: 'rgba(255, 255, 255, 0.6)',
-                    fontSize: '11px',
+                    fontSize: '12px',
                   }}>
                     {user.email}
+                  </div>
+                  <div style={{
+                    color: 'rgba(255, 255, 255, 0.4)',
+                    fontSize: '11px',
+                    marginTop: '5px',
+                    textTransform: 'capitalize',
+                  }}>
+                    {user.provider} • {(user as LocalUser).password ? "Password tersimpan" : "Login terakhir"}
                   </div>
                 </div>
                 <button
@@ -704,229 +721,105 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
                   style={{
                     background: 'none',
                     border: 'none',
-                    color: 'rgba(255, 255, 255, 0.4)',
+                    color: 'rgba(255, 255, 255, 0.5)',
                     cursor: 'pointer',
-                    padding: '4px',
-                    fontSize: '18px',
-                    width: '25px',
-                    height: '25px',
+                    padding: '5px',
+                    fontSize: '20px',
+                    width: '30px',
+                    height: '30px',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     borderRadius: '50%',
-                    transition: 'all 0.2s ease',
+                    transition: 'all 0.3s ease',
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = 'rgba(255, 0, 0, 0.1)';
-                    e.currentTarget.style.color = 'rgba(255, 255, 255, 0.8)';
+                    e.currentTarget.style.backgroundColor = 'rgba(255, 0, 0, 0.2)';
+                    e.currentTarget.style.color = 'rgba(255, 255, 255, 0.9)';
                   }}
                   onMouseLeave={(e) => {
                     e.currentTarget.style.backgroundColor = 'transparent';
-                    e.currentTarget.style.color = 'rgba(255, 255, 255, 0.4)';
+                    e.currentTarget.style.color = 'rgba(255, 255, 255, 0.5)';
                   }}
                   title="Hapus dari daftar"
                 >
                   ×
                 </button>
-              </motion.div>
+              </div>
             ))
           )}
-        </div>
-        
-        {/* Tautan Kebijakan dan Ketentuan dalam modal - MINIMALIS */}
-        <div style={{
-          marginBottom: '15px',
-        }}>
-          <p style={{
-            color: 'rgba(255, 255, 255, 0.7)',
-            fontSize: '12px',
-            marginBottom: '8px',
-            textAlign: 'center',
-          }}>
-            Kebijakan dan Ketentuan
-          </p>
-          
-          <div style={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '6px',
-          }}>
-            <motion.a
-              href="/privacy-policy"
-              whileHover={{ x: 3 }}
-              style={{
-                color: 'rgba(255, 255, 255, 0.8)',
-                textDecoration: 'none',
-                fontSize: '12px',
-                padding: '4px 8px',
-                borderRadius: '4px',
-                backgroundColor: 'rgba(255, 255, 255, 0.02)',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px',
-                transition: 'all 0.2s ease',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.05)';
-                e.currentTarget.style.color = '#ffffff';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.02)';
-                e.currentTarget.style.color = 'rgba(255, 255, 255, 0.8)';
-              }}
-            >
-              <span style={{ fontSize: '12px' }}>→</span>
-              Privacy Policy
-            </motion.a>
-            
-            <motion.a
-              href="/terms-of-service"
-              whileHover={{ x: 3 }}
-              style={{
-                color: 'rgba(255, 255, 255, 0.8)',
-                textDecoration: 'none',
-                fontSize: '12px',
-                padding: '4px 8px',
-                borderRadius: '4px',
-                backgroundColor: 'rgba(255, 255, 255, 0.02)',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px',
-                transition: 'all 0.2s ease',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.05)';
-                e.currentTarget.style.color = '#ffffff';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.02)';
-                e.currentTarget.style.color = 'rgba(255, 255, 255, 0.8)';
-              }}
-            >
-              <span style={{ fontSize: '12px' }}>→</span>
-              Terms of Service
-            </motion.a>
-            
-            <motion.a
-              href="/cookie-policy"
-              whileHover={{ x: 3 }}
-              style={{
-                color: 'rgba(255, 255, 255, 0.8)',
-                textDecoration: 'none',
-                fontSize: '12px',
-                padding: '4px 8px',
-                borderRadius: '4px',
-                backgroundColor: 'rgba(255, 255, 255, 0.02)',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px',
-                transition: 'all 0.2s ease',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.05)';
-                e.currentTarget.style.color = '#ffffff';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.02)';
-                e.currentTarget.style.color = 'rgba(255, 255, 255, 0.8)';
-              }}
-            >
-              <span style={{ fontSize: '12px' }}>→</span>
-              Cookie Policy
-            </motion.a>
-            
-            <motion.a
-              href="/community-guidelines"
-              whileHover={{ x: 3 }}
-              style={{
-                color: 'rgba(255, 255, 255, 0.8)',
-                textDecoration: 'none',
-                fontSize: '12px',
-                padding: '4px 8px',
-                borderRadius: '4px',
-                backgroundColor: 'rgba(255, 255, 255, 0.02)',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px',
-                transition: 'all 0.2s ease',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.05)';
-                e.currentTarget.style.color = '#ffffff';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.02)';
-                e.currentTarget.style.color = 'rgba(255, 255, 255, 0.8)';
-              }}
-            >
-              <span style={{ fontSize: '12px' }}>→</span>
-              Community Guidelines
-            </motion.a>
-          </div>
         </div>
         
         {/* Tombol Login dengan Metode Lain */}
         <div style={{
           display: 'flex',
           flexDirection: 'column',
-          gap: '8px',
+          gap: '10px',
         }}>
-          <motion.button
-            onClick={() => setShowAutoLoginModal(false)}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
+          <button
+            onClick={() => {
+              setShowAutoLoginModal(false);
+            }}
             style={{
               width: '100%',
-              padding: '10px',
-              backgroundColor: 'rgba(255, 255, 255, 0.05)',
-              border: '1px solid rgba(255, 255, 255, 0.1)',
-              borderRadius: '6px',
+              padding: '12px',
+              backgroundColor: 'rgba(255, 255, 255, 0.1)',
+              border: '1px solid rgba(255, 255, 255, 0.3)',
+              borderRadius: '8px',
               color: 'white',
               cursor: 'pointer',
-              fontSize: '13px',
-              transition: 'all 0.2s ease',
+              fontSize: '14px',
+              transition: 'all 0.3s ease',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.2)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
             }}
           >
             Gunakan Akun Lain
-          </motion.button>
+          </button>
           
-          <motion.button
+          <button
             onClick={() => setShowAutoLoginModal(false)}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
             style={{
               width: '100%',
-              padding: '10px',
+              padding: '12px',
               backgroundColor: 'transparent',
-              border: '1px solid rgba(255, 255, 255, 0.1)',
-              borderRadius: '6px',
-              color: 'rgba(255, 255, 255, 0.6)',
+              border: '1px solid rgba(255, 255, 255, 0.2)',
+              borderRadius: '8px',
+              color: 'rgba(255, 255, 255, 0.7)',
               cursor: 'pointer',
-              fontSize: '13px',
-              transition: 'all 0.2s ease',
+              fontSize: '14px',
+              transition: 'all 0.3s ease',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.05)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'transparent';
             }}
           >
             Batal
-          </motion.button>
+          </button>
         </div>
         
         <div style={{
-          marginTop: '15px',
+          marginTop: '20px',
           textAlign: 'center',
-          color: 'rgba(255, 255, 255, 0.4)',
-          fontSize: '11px',
+          color: 'rgba(255, 255, 255, 0.5)',
+          fontSize: '12px',
         }}>
           Akun disimpan secara lokal di browser Anda
         </div>
-      </motion.div>
-    </motion.div>
+      </div>
+    </div>
   );
 
   return (
     <>
-      <AnimatePresence>
-        {showAutoLoginModal && !user && <AutoLoginModal />}
-      </AnimatePresence>
+      {showAutoLoginModal && !user && <AutoLoginModal />}
       
       <div
         style={{
@@ -952,175 +845,20 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
             maxWidth: isMobile ? '100%' : '1200px',
           }}
         >
-          {/* Container Foto dan Kebijakan */}
+          {/* Foto Portrait - Hidden on mobile */}
           {!isMobile && (
             <div
               style={{
-                display: 'flex',
-                flexDirection: 'column',
                 width: '500px',
+                height: '700px',
+                backgroundImage: 'url(/images/5.jpg)',
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                backgroundRepeat: 'no-repeat',
+                borderRadius: '20px',
+                boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
               }}
-            >
-              {/* Foto Portrait */}
-              <div
-                style={{
-                  width: '100%',
-                  height: '500px',
-                  backgroundImage: 'url(/images/5.jpg)',
-                  backgroundSize: 'cover',
-                  backgroundPosition: 'center',
-                  backgroundRepeat: 'no-repeat',
-                  borderRadius: '20px 20px 0 0',
-                  boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
-                }}
-              />
-              
-              {/* Container Kebijakan dan Ketentuan - MINIMALIS */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 }}
-                style={{
-                  backgroundColor: 'rgba(20, 20, 20, 0.9)',
-                  padding: '25px',
-                  borderRadius: '0 0 20px 20px',
-                  border: '1px solid rgba(255, 255, 255, 0.1)',
-                  borderTop: 'none',
-                  backdropFilter: 'blur(10px)',
-                  boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
-                }}
-              >
-                {/* Teks Kebijakan */}
-                <p
-                  style={{
-                    color: 'rgba(255, 255, 255, 0.95)',
-                    fontSize: '22px',
-                    lineHeight: '1.4',
-                    marginBottom: '15px',
-                    fontFamily: 'Arame Mono, monospace',
-                    textAlign: 'left',
-                    fontWeight: '600',
-                  }}
-                >
-                  POLICY & TERMS
-                </p>
-                
-                <p
-                  style={{
-                    color: 'rgba(255, 255, 255, 0.8)',
-                    fontSize: '14px',
-                    lineHeight: '1.5',
-                    marginBottom: '20px',
-                    fontFamily: 'Arame Mono, monospace',
-                    textAlign: 'left',
-                  }}
-                >
-                  By continuing, you agree to our Privacy Policy and Terms of Service.
-                </p>
-                
-                {/* Tautan Kebijakan dan Ketentuan - MINIMALIS tanpa border */}
-                <div
-                  style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '10px',
-                  }}
-                >
-                  <motion.a
-                    href="/privacy-policy"
-                    whileHover={{ x: 5 }}
-                    style={{
-                      color: 'rgba(255,255,255,0.9)',
-                      textDecoration: 'none',
-                      fontSize: '15px',
-                      fontFamily: 'Arame Mono, monospace',
-                      transition: 'all 0.2s ease',
-                      padding: '6px 0',
-                      fontWeight: '500',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '8px',
-                    }}
-                  >
-                    <span style={{ fontSize: '14px' }}>→</span>
-                    Privacy Policy
-                  </motion.a>
-                  
-                  <motion.a
-                    href="/terms-of-service"
-                    whileHover={{ x: 5 }}
-                    style={{
-                      color: 'rgba(255,255,255,0.9)',
-                      textDecoration: 'none',
-                      fontSize: '15px',
-                      fontFamily: 'Arame Mono, monospace',
-                      transition: 'all 0.2s ease',
-                      padding: '6px 0',
-                      fontWeight: '500',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '8px',
-                    }}
-                  >
-                    <span style={{ fontSize: '14px' }}>→</span>
-                    Terms of Service
-                  </motion.a>
-                  
-                  <motion.a
-                    href="/cookie-policy"
-                    whileHover={{ x: 5 }}
-                    style={{
-                      color: 'rgba(255,255,255,0.9)',
-                      textDecoration: 'none',
-                      fontSize: '15px',
-                      fontFamily: 'Arame Mono, monospace',
-                      transition: 'all 0.2s ease',
-                      padding: '6px 0',
-                      fontWeight: '500',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '8px',
-                    }}
-                  >
-                    <span style={{ fontSize: '14px' }}>→</span>
-                    Cookie Policy
-                  </motion.a>
-                  
-                  <motion.a
-                    href="/community-guidelines"
-                    whileHover={{ x: 5 }}
-                    style={{
-                      color: 'rgba(255,255,255,0.9)',
-                      textDecoration: 'none',
-                      fontSize: '15px',
-                      fontFamily: 'Arame Mono, monospace',
-                      transition: 'all 0.2s ease',
-                      padding: '6px 0',
-                      fontWeight: '500',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '8px',
-                    }}
-                  >
-                    <span style={{ fontSize: '14px' }}>→</span>
-                    Community Guidelines
-                  </motion.a>
-                </div>
-                
-                {/* Hak Cipta */}
-                <div style={{
-                  marginTop: '25px',
-                  color: 'rgba(255,255,255,0.5)',
-                  fontSize: '12px',
-                  fontFamily: 'Arame Mono, monospace',
-                  textAlign: 'left',
-                  borderTop: '1px solid rgba(255,255,255,0.1)',
-                  paddingTop: '15px',
-                }}>
-                  © {new Date().getFullYear()} NoteThink. All rights reserved.
-                </div>
-              </motion.div>
-            </div>
+            />
           )}
 
           {/* Container Teks dan Login Options */}
@@ -1163,41 +901,33 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
               
               {/* Error Message */}
               {error && (
-                <motion.div
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  style={{
-                    backgroundColor: 'rgba(255, 0, 0, 0.1)',
-                    border: '1px solid rgba(255, 0, 0, 0.2)',
-                    borderRadius: '8px',
-                    padding: '12px',
-                    marginTop: '15px',
-                    color: '#ff6b6b',
-                    fontSize: '14px',
-                  }}
-                >
+                <div style={{
+                  backgroundColor: 'rgba(255, 0, 0, 0.1)',
+                  border: '1px solid rgba(255, 0, 0, 0.3)',
+                  borderRadius: '8px',
+                  padding: '12px',
+                  marginTop: '15px',
+                  color: '#ff6b6b',
+                  fontSize: '14px',
+                }}>
                   {error}
-                </motion.div>
+                </div>
               )}
               
               {/* Auto Login Progress Indicator */}
               {autoLoginInProgress && (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  style={{
-                    backgroundColor: 'rgba(0, 255, 0, 0.1)',
-                    border: '1px solid rgba(0, 255, 0, 0.2)',
-                    borderRadius: '8px',
-                    padding: '12px',
-                    marginTop: '15px',
-                    color: '#00ff00',
-                    fontSize: '14px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '10px',
-                  }}
-                >
+                <div style={{
+                  backgroundColor: 'rgba(0, 255, 0, 0.1)',
+                  border: '1px solid rgba(0, 255, 0, 0.3)',
+                  borderRadius: '8px',
+                  padding: '12px',
+                  marginTop: '15px',
+                  color: '#00ff00',
+                  fontSize: '14px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '10px',
+                }}>
                   <div style={{
                     width: '20px',
                     height: '20px',
@@ -1207,20 +937,18 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
                     animation: 'spin 1s linear infinite'
                   }} />
                   <span>Melakukan login otomatis...</span>
-                </motion.div>
+                </div>
               )}
               
               {/* Logout Button (if logged in) */}
               {user && (
-                <motion.button
+                <button
                   onClick={handleLogout}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
                   style={{
                     marginTop: '20px',
                     padding: '10px 20px',
                     backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                    border: '1px solid rgba(255, 255, 255, 0.3)',
                     borderRadius: '8px',
                     color: 'white',
                     cursor: 'pointer',
@@ -1228,7 +956,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
                   }}
                 >
                   Sign Out
-                </motion.button>
+                </button>
               )}
             </div>
 
@@ -1244,21 +972,32 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
                   }}
                 >
                   {/* Google Login */}
-                  <motion.div
+                  <div
                     onClick={handleGoogleLogin}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
                     style={{
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
                       padding: '15px 20px',
-                      border: '2px solid rgba(255, 255, 255, 0.2)',
-                      borderRadius: '10px',
-                      backgroundColor: 'rgba(255, 255, 255, 0.08)',
+                      border: '2px solid rgba(255, 255, 255, 0.3)',
+                      borderRadius: '12px',
+                      backgroundColor: 'rgba(255, 255, 255, 0.1)',
                       backdropFilter: 'blur(10px)',
                       cursor: loading ? 'not-allowed' : 'pointer',
+                      transition: 'all 0.3s ease',
                       opacity: loading ? 0.7 : 1,
+                    }}
+                    onMouseEnter={(e) => {
+                      if (!loading) {
+                        e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.2)';
+                        e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.5)';
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (!loading) {
+                        e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+                        e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.3)';
+                      }
                     }}
                   >
                     <svg width="24" height="24" viewBox="0 0 24 24" style={{ marginRight: '12px' }}>
@@ -1275,24 +1014,35 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
                     }}>
                       {loading ? 'Loading...' : 'Continue with Google'}
                     </span>
-                  </motion.div>
+                  </div>
 
                   {/* GitHub Login */}
-                  <motion.div
+                  <div
                     onClick={handleGitHubLogin}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
                     style={{
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
                       padding: '15px 20px',
-                      border: '2px solid rgba(255, 255, 255, 0.2)',
-                      borderRadius: '10px',
-                      backgroundColor: 'rgba(255, 255, 255, 0.08)',
+                      border: '2px solid rgba(255, 255, 255, 0.3)',
+                      borderRadius: '12px',
+                      backgroundColor: 'rgba(255, 255, 255, 0.1)',
                       backdropFilter: 'blur(10px)',
                       cursor: loading ? 'not-allowed' : 'pointer',
+                      transition: 'all 0.3s ease',
                       opacity: loading ? 0.7 : 1,
+                    }}
+                    onMouseEnter={(e) => {
+                      if (!loading) {
+                        e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.2)';
+                        e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.5)';
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (!loading) {
+                        e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+                        e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.3)';
+                      }
                     }}
                   >
                     <svg width="24" height="24" viewBox="0 0 24 24" style={{ marginRight: '12px' }}>
@@ -1306,23 +1056,20 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
                     }}>
                       {loading ? 'Loading...' : 'Continue with GitHub'}
                     </span>
-                  </motion.div>
+                  </div>
                 </div>
 
                 {/* Email dan Password Form */}
                 <form onSubmit={(e) => handleEmailLogin(e)}>
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.1 }}
+                  <div
                     style={{
                       display: 'flex',
                       flexDirection: 'column',
-                      gap: '15px',
-                      padding: isMobile ? '20px' : '22px',
-                      border: '2px solid rgba(255, 255, 255, 0.1)',
-                      borderRadius: '10px',
-                      backgroundColor: 'rgba(255, 255, 255, 0.08)',
+                      gap: '20px',
+                      padding: isMobile ? '20px' : '25px',
+                      border: '2px solid rgba(255, 255, 255, 0.3)',
+                      borderRadius: '12px',
+                      backgroundColor: 'rgba(255, 255, 255, 0.1)',
                       backdropFilter: 'blur(10px)',
                       marginBottom: '20px',
                     }}
@@ -1350,22 +1097,22 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
                         style={{
                           width: '100%',
                           padding: '12px 15px',
-                          border: '1px solid rgba(255, 255, 255, 0.1)',
+                          border: '1px solid rgba(255, 255, 255, 0.3)',
                           borderRadius: '8px',
-                          backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                          backgroundColor: 'rgba(255, 255, 255, 0.1)',
                           color: '#ffffff',
                           fontFamily: "'Roboto', sans-serif",
                           fontSize: '14px',
                           outline: 'none',
-                          transition: 'all 0.2s ease',
+                          transition: 'all 0.3s ease',
                         }}
                         onFocus={(e) => {
-                          e.target.style.borderColor = 'rgba(255, 255, 255, 0.3)';
-                          e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.08)';
+                          e.target.style.borderColor = 'rgba(255, 255, 255, 0.7)';
+                          e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.15)';
                         }}
                         onBlur={(e) => {
-                          e.target.style.borderColor = 'rgba(255, 255, 255, 0.1)';
-                          e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.05)';
+                          e.target.style.borderColor = 'rgba(255, 255, 255, 0.3)';
+                          e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
                         }}
                       />
                     </div>
@@ -1393,22 +1140,22 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
                         style={{
                           width: '100%',
                           padding: '12px 15px',
-                          border: '1px solid rgba(255, 255, 255, 0.1)',
+                          border: '1px solid rgba(255, 255, 255, 0.3)',
                           borderRadius: '8px',
-                          backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                          backgroundColor: 'rgba(255, 255, 255, 0.1)',
                           color: '#ffffff',
                           fontFamily: "'Roboto', sans-serif",
                           fontSize: '14px',
                           outline: 'none',
-                          transition: 'all 0.2s ease',
+                          transition: 'all 0.3s ease',
                         }}
                         onFocus={(e) => {
-                          e.target.style.borderColor = 'rgba(255, 255, 255, 0.3)';
-                          e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.08)';
+                          e.target.style.borderColor = 'rgba(255, 255, 255, 0.7)';
+                          e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.15)';
                         }}
                         onBlur={(e) => {
-                          e.target.style.borderColor = 'rgba(255, 255, 255, 0.1)';
-                          e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.05)';
+                          e.target.style.borderColor = 'rgba(255, 255, 255, 0.3)';
+                          e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
                         }}
                       />
                     </div>
@@ -1417,7 +1164,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
                     <div style={{
                       display: 'flex',
                       alignItems: 'center',
-                      marginTop: '5px',
+                      marginTop: '10px',
                     }}>
                       <input
                         type="checkbox"
@@ -1428,7 +1175,6 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
                           marginRight: '8px',
                           width: '16px',
                           height: '16px',
-                          accentColor: 'rgba(255, 255, 255, 0.8)',
                         }}
                       />
                       <label
@@ -1444,57 +1190,73 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
                     </div>
 
                     {/* Submit Button */}
-                    <motion.button
+                    <button
                       type="submit"
                       disabled={loading || autoLoginInProgress}
-                      whileHover={!loading && !autoLoginInProgress ? { scale: 1.02 } : {}}
-                      whileTap={!loading && !autoLoginInProgress ? { scale: 0.98 } : {}}
                       style={{
                         width: '100%',
                         padding: '14px',
                         border: 'none',
                         borderRadius: '8px',
-                        backgroundColor: (loading || autoLoginInProgress) ? 'rgba(255, 255, 255, 0.4)' : 'rgba(255, 255, 255, 0.9)',
+                        backgroundColor: (loading || autoLoginInProgress) ? 'rgba(255, 255, 255, 0.5)' : '#ffffff',
                         color: '#000000',
                         fontFamily: "'Roboto', sans-serif",
                         fontSize: isMobile ? '14px' : '16px',
                         fontWeight: '600',
                         cursor: (loading || autoLoginInProgress) ? 'not-allowed' : 'pointer',
-                        transition: 'all 0.2s ease',
-                        marginTop: '5px',
+                        transition: 'all 0.3s ease',
+                        marginTop: '10px',
+                      }}
+                      onMouseEnter={(e) => {
+                        if (!loading && !autoLoginInProgress) {
+                          e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.9)';
+                          e.currentTarget.style.transform = 'translateY(-2px)';
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        if (!loading && !autoLoginInProgress) {
+                          e.currentTarget.style.backgroundColor = '#ffffff';
+                          e.currentTarget.style.transform = 'translateY(0)';
+                        }
                       }}
                     >
                       {loading ? 'Signing In...' : autoLoginInProgress ? 'Auto Login...' : 'Sign In'}
-                    </motion.button>
-                  </motion.div>
+                    </button>
+                  </div>
                 </form>
 
                 {/* Tombol Lihat Akun Tersimpan */}
                 {getLocalLoginHistory().length > 0 && (
-                  <motion.button
+                  <button
                     onClick={() => setShowAutoLoginModal(true)}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
                     style={{
                       width: '100%',
                       padding: '12px',
-                      backgroundColor: 'rgba(255, 255, 255, 0.03)',
-                      border: '1px solid rgba(255, 255, 255, 0.1)',
+                      backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                      border: '1px solid rgba(255, 255, 255, 0.2)',
                       borderRadius: '8px',
                       color: 'rgba(255, 255, 255, 0.8)',
                       cursor: 'pointer',
                       fontSize: '14px',
                       marginBottom: '20px',
-                      transition: 'all 0.2s ease',
+                      transition: 'all 0.3s ease',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
                       gap: '8px',
                     }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+                      e.currentTarget.style.color = 'rgba(255, 255, 255, 0.95)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.05)';
+                      e.currentTarget.style.color = 'rgba(255, 255, 255, 0.8)';
+                    }}
                   >
                     <span>👤</span>
                     Lihat {getLocalLoginHistory().length} Akun Tersimpan
-                  </motion.button>
+                  </button>
                 )}
 
                 {/* Footer Links */}
@@ -1510,10 +1272,8 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
                   }}
                 >
                   {/* Lupa Password Link */}
-                  <motion.button
+                  <button
                     onClick={handleForgotPassword}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
                     style={{
                       border: 'none',
                       background: 'none',
@@ -1521,22 +1281,27 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
                       cursor: 'pointer',
                       textDecoration: 'underline',
                       opacity: '0.8',
+                      transition: 'all 0.3s ease',
                       fontFamily: "'Roboto', sans-serif",
                       fontSize: isMobile ? '13px' : '14px',
                     }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.opacity = '1';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.opacity = '0.8';
+                    }}
                   >
                     Forgot your password?
-                  </motion.button>
+                  </button>
 
                   {/* Sign Up Link */}
                   <div>
                     <span style={{ color: '#ffffff', opacity: '0.8', fontSize: isMobile ? '13px' : '14px' }}>
                       Don't have an account?{' '}
                     </span>
-                    <motion.button
+                    <button
                       onClick={handleSignUp}
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
                       style={{
                         border: 'none',
                         background: 'none',
@@ -1544,12 +1309,19 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
                         cursor: 'pointer',
                         textDecoration: 'underline',
                         fontWeight: '600',
+                        transition: 'all 0.3s ease',
                         fontFamily: "'Roboto', sans-serif",
                         fontSize: isMobile ? '13px' : '14px',
                       }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.opacity = '0.9';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.opacity = '1';
+                      }}
                     >
                       Sign up
-                    </motion.button>
+                    </button>
                   </div>
                 </div>
               </>
@@ -1558,10 +1330,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
         </div>
 
         {/* Teks LETS JOIN US NOTE THINK dan kelompok di bawah */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
+        <div
           style={{
             position: 'relative',
             textAlign: isMobile ? 'center' : 'left',
@@ -1600,7 +1369,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
             </p>
           </div>
 
-          {/* 6 Kelompok Menu */}
+          {/* 6 Kelompok Menu dengan CONNECT yang diperbarui */}
           <div style={{
             display: 'grid',
             gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(3, auto)',
@@ -1633,12 +1402,109 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
                 PRODUCT
               </h4>
             </div>
-            
-            {/* Ganti CONNECT dengan komponen ConnectionMenu */}
-            <div>
-              <ConnectionMenu />
+            <div style={{ position: 'relative' }}>
+              <h4 
+                ref={connectTextRef}
+                style={{
+                  color: 'white',
+                  fontSize: isMobile ? '1.8rem' : '4rem',
+                  fontWeight: '600',
+                  margin: '0 0 0.5rem 0',
+                  marginBottom: isMobile ? '0.5rem' : '1rem',
+                  fontFamily: 'Arame Mono, monospace',
+                  position: 'relative',
+                  zIndex: 2
+                }}
+              >
+                CONNECT
+              </h4>
+              
+              {/* Tanda panah SVG lurus serong kiri bawah */}
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 1, delay: 0.5 }}
+                style={{
+                  position: 'absolute',
+                  left: isMobile ? '-15px' : '-50px',
+                  bottom: isMobile ? '40px' : '60px',
+                  zIndex: 1,
+                  width: isMobile ? '80px' : '120px',
+                  height: isMobile ? '80px' : '120px',
+                  pointerEvents: 'none'
+                }}
+              >
+                <svg
+                  ref={arrowRef}
+                  width="100%"
+                  height="100%"
+                  viewBox="0 0 120 120"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                  style={{
+                    filter: 'drop-shadow(0 0 10px rgba(255,255,255,0.3))'
+                  }}
+                >
+                  <path
+                    d="M100 20 L40 80 L20 100"
+                    stroke="rgba(255, 255, 255, 0.7)"
+                    strokeWidth="3"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeDasharray="8 8"
+                  />
+                  <path
+                    d="M15 95 L20 100 L15 105"
+                    stroke="rgba(255, 255, 255, 0.9)"
+                    strokeWidth="4"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </motion.div>
+              
+              {/* Daftar teks sosial media dengan animasi */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 1 }}
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: isMobile ? '0.5rem' : '0.8rem',
+                  marginTop: isMobile ? '0.5rem' : '1rem',
+                }}
+              >
+                {['GitHub', 'Instagram', 'Twitter', 'Quora', 'YouTube'].map((social, index) => (
+                  <motion.p
+                    key={social}
+                    ref={el => socialTextRefs.current[index] = el}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.5, delay: 1.2 + index * 0.1 }}
+                    whileHover={{ scale: 1.05, x: 5 }}
+                    style={{
+                      color: 'rgba(255, 255, 255, 0.7)',
+                      fontSize: isMobile ? '1.1rem' : '1.5rem',
+                      fontFamily: 'Arame Mono, monospace',
+                      fontWeight: '400',
+                      margin: '0',
+                      cursor: 'pointer',
+                      transition: 'all 0.3s ease',
+                      letterSpacing: '0.5px'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.color = '#ffffff';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.color = 'rgba(255, 255, 255, 0.7)';
+                    }}
+                  >
+                    {social}
+                  </motion.p>
+                ))}
+              </motion.div>
             </div>
-            
             <div>
               <h4 style={{
                 color: 'white',
@@ -1676,13 +1542,24 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
               </h4>
             </div>
           </div>
-        </motion.div>
+        </div>
       </div>
       
       <style jsx>{`
         @keyframes spin {
           0% { transform: rotate(0deg); }
           100% { transform: rotate(360deg); }
+        }
+        
+        @keyframes float {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(-10px); }
+        }
+        
+        @keyframes dash {
+          to {
+            stroke-dashoffset: 0;
+          }
         }
       `}</style>
     </>
