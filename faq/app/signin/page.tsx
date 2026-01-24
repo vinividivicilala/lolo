@@ -68,7 +68,7 @@ interface LoginHistory {
 }
 
 interface LocalUser extends LoginHistory {
-  password?: string; // Simpan password dalam bentuk plain (untuk demo, dalam produksi harus dienkripsi)
+  password?: string;
   autoLoginEnabled?: boolean;
 }
 
@@ -86,9 +86,12 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
   const [autoLoginInProgress, setAutoLoginInProgress] = useState(false);
   
   // Refs untuk animasi
-  const arrowRef = useRef<SVGSVGElement>(null);
   const connectTextRef = useRef<HTMLDivElement>(null);
-  const socialTextRefs = useRef<(HTMLParagraphElement | null)[]>([]);
+  const socialTextRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const arrowRefs = useRef<(SVGSVGElement | null)[]>([]);
+
+  // Daftar media sosial
+  const socialMediaList = ['GitHub', 'Instagram', 'Twitter', 'Quora', 'YouTube'];
 
   // Fungsi untuk menyimpan login history ke Firestore
   const saveLoginHistory = async (userData: any, provider: string, userPassword?: string) => {
@@ -107,7 +110,6 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
       await setDoc(historyRef, historyData, { merge: true });
       console.log("Login history saved for:", userData.email);
       
-      // Simpan ke localStorage juga jika rememberMe aktif
       if (rememberMe && userPassword) {
         saveUserToLocalStorage(historyData, userPassword);
       }
@@ -151,50 +153,10 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
 
   // Animasi GSAP untuk tanda panah dan teks
   useEffect(() => {
-    if (typeof window === 'undefined' || !arrowRef.current || !connectTextRef.current) return;
+    if (typeof window === 'undefined' || !connectTextRef.current) return;
 
-    const arrow = arrowRef.current;
     const connectText = connectTextRef.current;
     
-    // Animasi panah dengan GSAP
-    gsap.fromTo(arrow,
-      {
-        opacity: 0,
-        scale: 0.8,
-        x: -50,
-        y: 50,
-        rotation: -45
-      },
-      {
-        opacity: 1,
-        scale: 1,
-        x: 0,
-        y: 0,
-        rotation: 0,
-        duration: 1.5,
-        ease: "power3.out",
-        delay: 0.5
-      }
-    );
-
-    // Animasi garis panah (stroke dasharray)
-    const path = arrow.querySelector('path');
-    if (path) {
-      const length = path.getTotalLength();
-      gsap.fromTo(path,
-        {
-          strokeDasharray: length,
-          strokeDashoffset: length
-        },
-        {
-          strokeDashoffset: 0,
-          duration: 2,
-          ease: "power2.inOut",
-          delay: 0.8
-        }
-      );
-    }
-
     // Animasi teks CONNECT
     gsap.fromTo(connectText,
       {
@@ -212,7 +174,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
       }
     );
 
-    // Animasi staggered untuk teks sosial media
+    // Animasi untuk setiap item media sosial
     socialTextRefs.current.forEach((ref, index) => {
       if (ref) {
         gsap.fromTo(ref,
@@ -227,41 +189,48 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
             scale: 1,
             duration: 0.8,
             ease: "power2.out",
-            delay: 1 + (index * 0.15)
+            delay: 0.5 + (index * 0.15)
           }
         );
-
-        // Hover animation
-        ref.addEventListener('mouseenter', () => {
-          gsap.to(ref, {
-            scale: 1.05,
-            x: 5,
-            color: '#ffffff',
-            duration: 0.3,
-            ease: "power2.out"
-          });
-        });
-
-        ref.addEventListener('mouseleave', () => {
-          gsap.to(ref, {
-            scale: 1,
-            x: 0,
-            color: 'rgba(255, 255, 255, 0.7)',
-            duration: 0.3,
-            ease: "power2.out"
-          });
-        });
       }
     });
 
-    // Continuous subtle animation for arrow
-    gsap.to(arrow, {
-      y: -5,
-      duration: 2,
-      repeat: -1,
-      yoyo: true,
-      ease: "sine.inOut",
-      delay: 3
+    // Animasi untuk setiap panah
+    arrowRefs.current.forEach((arrow, index) => {
+      if (arrow) {
+        // Reset animasi panah
+        const path = arrow.querySelector('path');
+        if (path) {
+          const length = path.getTotalLength();
+          path.style.strokeDasharray = `${length}`;
+          path.style.strokeDashoffset = `${length}`;
+          
+          // Animasi draw untuk panah
+          gsap.to(path, {
+            strokeDashoffset: 0,
+            duration: 1.5,
+            ease: "power2.inOut",
+            delay: 0.8 + (index * 0.2)
+          });
+        }
+
+        // Animasi masuk untuk panah
+        gsap.fromTo(arrow,
+          {
+            opacity: 0,
+            scale: 0.5,
+            rotation: -10
+          },
+          {
+            opacity: 1,
+            scale: 1,
+            rotation: 0,
+            duration: 1,
+            ease: "back.out(1.7)",
+            delay: 0.7 + (index * 0.2)
+          }
+        );
+      }
     });
 
   }, [isMobile]);
@@ -269,19 +238,16 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
   // Cek apakah ada user yang tersimpan untuk auto-login
   useEffect(() => {
     const checkSavedUser = async () => {
-      // Tunggu sebentar untuk memastikan Firebase auth sudah siap
       setTimeout(async () => {
         const currentUser = auth.currentUser;
         
         if (!currentUser) {
           const localHistory = getLocalLoginHistory();
           if (localHistory.length > 0) {
-            // Tampilkan modal pilih akun
             setShowAutoLoginModal(true);
             setLoginHistory(localHistory);
           }
           
-          // Juga ambil dari Firestore jika ada
           try {
             await fetchLoginHistory();
           } catch (error) {
@@ -300,12 +266,9 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
       setUser(currentUser);
       if (currentUser) {
         console.log("User logged in:", currentUser.email);
-        // Tutup modal jika sedang terbuka
         setShowAutoLoginModal(false);
-        // Reset form
         setEmail("");
         setPassword("");
-        // Redirect langsung ke /notes
         router.push('/notes');
       }
     });
@@ -329,7 +292,6 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
       const savedUsers = localStorage.getItem('savedLoginUsers');
       let users: LocalUser[] = savedUsers ? JSON.parse(savedUsers) : [];
       
-      // Cek apakah user sudah ada
       const existingIndex = users.findIndex((u: LocalUser) => u.uid === userData.uid);
       
       const userToSave: LocalUser = {
@@ -340,26 +302,21 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
         photoURL: userData.photoURL || `https://ui-avatars.com/api/?name=${userData.email}&background=random`,
         provider: userData.provider || 'email',
         lastLogin: userData.lastLogin || new Date().toISOString(),
-        password: plainPassword, // Simpan password plain untuk auto-fill
+        password: plainPassword,
         autoLoginEnabled: rememberMe
       };
       
       if (existingIndex >= 0) {
-        // Update existing user
         users[existingIndex] = userToSave;
       } else {
-        // Tambah user baru
         users.unshift(userToSave);
         
-        // Batasi hanya 5 user terakhir
         if (users.length > 5) {
           users = users.slice(0, 5);
         }
       }
       
       localStorage.setItem('savedLoginUsers', JSON.stringify(users));
-      
-      // Update state login history
       setLoginHistory(users);
     } catch (error) {
       console.error("Error saving to localStorage:", error);
@@ -375,10 +332,8 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
         users = users.filter((u: any) => u.uid !== uid);
         localStorage.setItem('savedLoginUsers', JSON.stringify(users));
         
-        // Update state
         setLoginHistory(users);
         
-        // Juga hapus dari Firestore
         deleteDoc(doc(db, "loginHistory", uid)).catch(() => {
           console.log("User not found in Firestore");
         });
@@ -401,8 +356,6 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
       const user = result.user;
       
       console.log("Google login successful:", user);
-      
-      // Simpan history dengan auto-login enabled
       await saveLoginHistory(user, 'google');
       
     } catch (error: any) {
@@ -434,8 +387,6 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
       const user = result.user;
       
       console.log("GitHub login successful:", user);
-      
-      // Simpan history dengan auto-login enabled
       await saveLoginHistory(user, 'github');
       
     } catch (error: any) {
@@ -465,8 +416,6 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
       const user = result.user;
       
       console.log("Email login successful");
-      
-      // Simpan history dengan password dan auto-login enabled
       await saveLoginHistory(user, 'email', password);
       
     } catch (error: any) {
@@ -496,21 +445,18 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
     }
   };
 
-  // Login dengan user yang sudah tersimpan - MODIFIKASI BESAR DI SINI
+  // Login dengan user yang sudah tersimpan
   const handleQuickLogin = async (savedUser: LocalUser) => {
     setAutoLoginInProgress(true);
     setShowAutoLoginModal(false);
     
     try {
-      // Untuk email login, otomatis isi form dan submit
       if (savedUser.provider === 'email') {
-        // Set email dan password untuk form
         setEmail(savedUser.email);
         
         if (savedUser.password) {
           setPassword(savedUser.password);
           
-          // Tunggu sebentar untuk state update, lalu auto submit
           setTimeout(async () => {
             try {
               setLoading(true);
@@ -518,14 +464,11 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
               const user = result.user;
               
               console.log("Auto login successful for:", savedUser.email);
-              
-              // Simpan history lagi dengan timestamp terbaru
               await saveLoginHistory(user, 'email', savedUser.password);
               
             } catch (error: any) {
               console.error("Auto login error:", error);
               
-              // Jika password salah atau ada masalah, hapus dari saved users
               if (error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found') {
                 removeUserFromLocalStorage(savedUser.uid);
                 setError("Password telah berubah. Silakan login manual.");
@@ -538,12 +481,10 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
             }
           }, 100);
         } else {
-          // Jika tidak ada password tersimpan, isi hanya email
           setEmail(savedUser.email);
           setError("Silakan masukkan password untuk melanjutkan");
           setAutoLoginInProgress(false);
           
-          // Fokus ke password field
           setTimeout(() => {
             const passwordInput = document.querySelector('input[type="password"]') as HTMLInputElement;
             if (passwordInput) {
@@ -552,7 +493,6 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
           }, 50);
         }
       } 
-      // Untuk Google/GitHub, langsung login dengan popup
       else if (savedUser.provider === 'google') {
         await handleGoogleLogin();
       } 
@@ -572,10 +512,8 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
     try {
       await signOut(auth);
       console.log("User logged out");
-      // Reset form
       setEmail("");
       setPassword("");
-      // Tampilkan modal lagi setelah logout
       setTimeout(() => {
         const localHistory = getLocalLoginHistory();
         if (localHistory.length > 0) {
@@ -594,6 +532,30 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
   const handleForgotPassword = () => {
     router.push('/forgot-password');
   };
+
+  // Komponen untuk tanda panah SVG
+  const ArrowIcon = ({ index }: { index: number }) => (
+    <svg
+      ref={el => arrowRefs.current[index] = el}
+      width={isMobile ? "30" : "50"}
+      height={isMobile ? "30" : "50"}
+      viewBox="0 0 50 50"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      style={{
+        marginRight: isMobile ? "10px" : "15px",
+        flexShrink: 0
+      }}
+    >
+      <path
+        d="M10 25 L40 25 M40 25 L32 17 M40 25 L32 33"
+        stroke="rgba(255, 255, 255, 0.9)"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
 
   // Komponen Modal Auto Login
   const AutoLoginModal = () => (
@@ -639,7 +601,6 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
           Klik akun untuk login otomatis
         </p>
         
-        {/* Daftar User yang Tersimpan */}
         <div style={{
           maxHeight: '300px',
           overflowY: 'auto',
@@ -750,7 +711,6 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
           )}
         </div>
         
-        {/* Tombol Login dengan Metode Lain */}
         <div style={{
           display: 'flex',
           flexDirection: 'column',
@@ -833,7 +793,6 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
           fontFamily: "'Inter', sans-serif",
         }}
       >
-        {/* Main Sign In Container */}
         <div
           style={{
             display: 'flex',
@@ -845,7 +804,6 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
             maxWidth: isMobile ? '100%' : '1200px',
           }}
         >
-          {/* Foto Portrait - Hidden on mobile */}
           {!isMobile && (
             <div
               style={{
@@ -861,7 +819,6 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
             />
           )}
 
-          {/* Container Teks dan Login Options */}
           <div
             style={{
               display: 'flex',
@@ -871,7 +828,6 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
               maxWidth: isMobile ? '400px' : 'none',
             }}
           >
-            {/* Teks Welcome */}
             <div style={{ 
               marginBottom: isMobile ? '30px' : '40px',
               textAlign: isMobile ? 'center' : 'left'
@@ -899,7 +855,6 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
                 {user ? 'You are signed in' : 'Sign in to your account to continue'}
               </p>
               
-              {/* Error Message */}
               {error && (
                 <div style={{
                   backgroundColor: 'rgba(255, 0, 0, 0.1)',
@@ -914,7 +869,6 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
                 </div>
               )}
               
-              {/* Auto Login Progress Indicator */}
               {autoLoginInProgress && (
                 <div style={{
                   backgroundColor: 'rgba(0, 255, 0, 0.1)',
@@ -940,7 +894,6 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
                 </div>
               )}
               
-              {/* Logout Button (if logged in) */}
               {user && (
                 <button
                   onClick={handleLogout}
@@ -960,7 +913,6 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
               )}
             </div>
 
-            {/* Social Login Options */}
             {!user && (
               <>
                 <div
@@ -971,7 +923,6 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
                     marginBottom: '30px',
                   }}
                 >
-                  {/* Google Login */}
                   <div
                     onClick={handleGoogleLogin}
                     style={{
@@ -1016,7 +967,6 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
                     </span>
                   </div>
 
-                  {/* GitHub Login */}
                   <div
                     onClick={handleGitHubLogin}
                     style={{
@@ -1059,7 +1009,6 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
                   </div>
                 </div>
 
-                {/* Email dan Password Form */}
                 <form onSubmit={(e) => handleEmailLogin(e)}>
                   <div
                     style={{
@@ -1074,7 +1023,6 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
                       marginBottom: '20px',
                     }}
                   >
-                    {/* Email Input */}
                     <div>
                       <label
                         style={{
@@ -1117,7 +1065,6 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
                       />
                     </div>
 
-                    {/* Password Input */}
                     <div>
                       <label
                         style={{
@@ -1160,7 +1107,6 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
                       />
                     </div>
 
-                    {/* Remember Me Checkbox */}
                     <div style={{
                       display: 'flex',
                       alignItems: 'center',
@@ -1189,7 +1135,6 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
                       </label>
                     </div>
 
-                    {/* Submit Button */}
                     <button
                       type="submit"
                       disabled={loading || autoLoginInProgress}
@@ -1225,7 +1170,6 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
                   </div>
                 </form>
 
-                {/* Tombol Lihat Akun Tersimpan */}
                 {getLocalLoginHistory().length > 0 && (
                   <button
                     onClick={() => setShowAutoLoginModal(true)}
@@ -1259,7 +1203,6 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
                   </button>
                 )}
 
-                {/* Footer Links */}
                 <div
                   style={{
                     display: 'flex',
@@ -1271,7 +1214,6 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
                     fontSize: '14px',
                   }}
                 >
-                  {/* Lupa Password Link */}
                   <button
                     onClick={handleForgotPassword}
                     style={{
@@ -1295,7 +1237,6 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
                     Forgot your password?
                   </button>
 
-                  {/* Sign Up Link */}
                   <div>
                     <span style={{ color: '#ffffff', opacity: '0.8', fontSize: isMobile ? '13px' : '14px' }}>
                       Don't have an account?{' '}
@@ -1329,7 +1270,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
           </div>
         </div>
 
-        {/* Teks LETS JOIN US NOTE THINK dan kelompok di bawah */}
+        {/* Bagian LETS JOIN US NOTE THINK dan menu */}
         <div
           style={{
             position: 'relative',
@@ -1342,7 +1283,6 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
             marginBottom: isMobile ? '1rem' : '2rem'
           }}
         >
-          {/* Teks LETS JOIN US NOTE THINK 2 baris */}
           <div style={{ 
             marginBottom: isMobile ? '2rem' : '4rem',
             padding: isMobile ? '0 1rem' : '0'
@@ -1369,7 +1309,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
             </p>
           </div>
 
-          {/* 6 Kelompok Menu dengan CONNECT yang diperbarui */}
+          {/* Grid untuk menu dengan CONNECT yang diperbarui */}
           <div style={{
             display: 'grid',
             gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(3, auto)',
@@ -1378,6 +1318,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
             padding: isMobile ? '0 1rem' : '0',
             justifyContent: isMobile ? 'center' : 'flex-start'
           }}>
+            {/* MENU */}
             <div>
               <h4 style={{
                 color: 'white',
@@ -1390,6 +1331,8 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
                 MENU
               </h4>
             </div>
+
+            {/* PRODUCT */}
             <div>
               <h4 style={{
                 color: 'white',
@@ -1402,109 +1345,70 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
                 PRODUCT
               </h4>
             </div>
-            <div style={{ position: 'relative' }}>
+
+            {/* CONNECT dengan daftar media sosial */}
+            <div>
               <h4 
                 ref={connectTextRef}
                 style={{
                   color: 'white',
                   fontSize: isMobile ? '1.8rem' : '4rem',
                   fontWeight: '600',
-                  margin: '0 0 0.5rem 0',
-                  marginBottom: isMobile ? '0.5rem' : '1rem',
-                  fontFamily: 'Arame Mono, monospace',
-                  position: 'relative',
-                  zIndex: 2
+                  margin: '0 0 1.5rem 0',
+                  fontFamily: 'Arame Mono, monospace'
                 }}
               >
                 CONNECT
               </h4>
               
-              {/* Tanda panah SVG lurus serong kiri bawah */}
-              <motion.div
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 1, delay: 0.5 }}
-                style={{
-                  position: 'absolute',
-                  left: isMobile ? '-15px' : '-50px',
-                  bottom: isMobile ? '40px' : '60px',
-                  zIndex: 1,
-                  width: isMobile ? '80px' : '120px',
-                  height: isMobile ? '80px' : '120px',
-                  pointerEvents: 'none'
-                }}
-              >
-                <svg
-                  ref={arrowRef}
-                  width="100%"
-                  height="100%"
-                  viewBox="0 0 120 120"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                  style={{
-                    filter: 'drop-shadow(0 0 10px rgba(255,255,255,0.3))'
-                  }}
-                >
-                  <path
-                    d="M100 20 L40 80 L20 100"
-                    stroke="rgba(255, 255, 255, 0.7)"
-                    strokeWidth="3"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeDasharray="8 8"
-                  />
-                  <path
-                    d="M15 95 L20 100 L15 105"
-                    stroke="rgba(255, 255, 255, 0.9)"
-                    strokeWidth="4"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </motion.div>
-              
-              {/* Daftar teks sosial media dengan animasi */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: 1 }}
-                style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: isMobile ? '0.5rem' : '0.8rem',
-                  marginTop: isMobile ? '0.5rem' : '1rem',
-                }}
-              >
-                {['GitHub', 'Instagram', 'Twitter', 'Quora', 'YouTube'].map((social, index) => (
-                  <motion.p
+              {/* Daftar media sosial dengan tanda panah */}
+              <div style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: isMobile ? '0.8rem' : '1.2rem',
+              }}>
+                {socialMediaList.map((social, index) => (
+                  <motion.div
                     key={social}
                     ref={el => socialTextRefs.current[index] = el}
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.5, delay: 1.2 + index * 0.1 }}
-                    whileHover={{ scale: 1.05, x: 5 }}
+                    transition={{ duration: 0.5, delay: 0.5 + index * 0.15 }}
+                    whileHover={{ scale: 1.02, x: 5 }}
                     style={{
-                      color: 'rgba(255, 255, 255, 0.7)',
-                      fontSize: isMobile ? '1.1rem' : '1.5rem',
-                      fontFamily: 'Arame Mono, monospace',
-                      fontWeight: '400',
-                      margin: '0',
+                      display: 'flex',
+                      alignItems: 'center',
                       cursor: 'pointer',
+                      padding: isMobile ? '5px 0' : '8px 0',
+                    }}
+                  >
+                    <ArrowIcon index={index} />
+                    
+                    <span style={{
+                      color: 'rgba(255, 255, 255, 0.9)',
+                      fontSize: isMobile ? '1.5rem' : '2.5rem',
+                      fontFamily: 'Arame Mono, monospace',
+                      fontWeight: '500',
+                      letterSpacing: '1px',
                       transition: 'all 0.3s ease',
-                      letterSpacing: '0.5px'
                     }}
                     onMouseEnter={(e) => {
                       e.currentTarget.style.color = '#ffffff';
+                      e.currentTarget.style.textShadow = '0 0 10px rgba(255,255,255,0.5)';
                     }}
                     onMouseLeave={(e) => {
-                      e.currentTarget.style.color = 'rgba(255, 255, 255, 0.7)';
+                      e.currentTarget.style.color = 'rgba(255, 255, 255, 0.9)';
+                      e.currentTarget.style.textShadow = 'none';
                     }}
-                  >
-                    {social}
-                  </motion.p>
+                    >
+                      {social}
+                    </span>
+                  </motion.div>
                 ))}
-              </motion.div>
+              </div>
             </div>
+
+            {/* Features */}
             <div>
               <h4 style={{
                 color: 'white',
@@ -1517,6 +1421,8 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
                 Features
               </h4>
             </div>
+
+            {/* Community */}
             <div>
               <h4 style={{
                 color: 'white',
@@ -1529,6 +1435,8 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
                 Community
               </h4>
             </div>
+
+            {/* BLOG */}
             <div>
               <h4 style={{
                 color: 'white',
@@ -1551,12 +1459,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
           100% { transform: rotate(360deg); }
         }
         
-        @keyframes float {
-          0%, 100% { transform: translateY(0px); }
-          50% { transform: translateY(-10px); }
-        }
-        
-        @keyframes dash {
+        @keyframes draw {
           to {
             stroke-dashoffset: 0;
           }
