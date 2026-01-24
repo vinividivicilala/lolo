@@ -74,11 +74,11 @@ interface LocalUser extends LoginHistory {
 
 // Data media sosial untuk komponen Connection
 const socialConnections = [
-  { id: 1, name: "GitHub", color: "#333" },
-  { id: 2, name: "Instagram", color: "#E1306C" },
-  { id: 3, name: "Twitter", color: "#1DA1F2" },
-  { id: 4, name: "Quora", color: "#B92B27" },
-  { id: 5, name: "YouTube", color: "#FF0000" }
+  { id: 1, name: "GitHub" },
+  { id: 2, name: "Instagram" },
+  { id: 3, name: "Twitter" },
+  { id: 4, name: "Quora" },
+  { id: 5, name: "YouTube" }
 ];
 
 export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgotPassword }: any) {
@@ -96,40 +96,30 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
   
   // State untuk komponen Connection
   const [connectionsOpen, setConnectionsOpen] = useState(false);
-  const connectionsRef = useRef<HTMLDivElement>(null);
   const socialItemsRef = useRef<(HTMLDivElement | null)[]>([]);
 
   // Animasi GSAP untuk komponen Connection
   useEffect(() => {
-    if (connectionsOpen && connectionsRef.current) {
+    if (connectionsOpen) {
       // Reset posisi semua item
       gsap.set(socialItemsRef.current, {
         y: 30,
-        opacity: 0,
-        scale: 0.8
+        opacity: 0
       });
 
       // Animasi masuk satu per satu dengan delay
       gsap.to(socialItemsRef.current, {
         y: 0,
         opacity: 1,
-        scale: 1,
         duration: 0.4,
-        stagger: 0.08,
-        ease: "back.out(1.7)"
+        stagger: 0.1,
+        ease: "power2.out"
       });
-
-      // Animasi untuk angka
-      gsap.fromTo(".connection-count",
-        { scale: 0, opacity: 0 },
-        { scale: 1, opacity: 1, duration: 0.3, delay: 0.2 }
-      );
-    } else if (!connectionsOpen && connectionsRef.current) {
+    } else {
       // Animasi keluar
       gsap.to(socialItemsRef.current, {
         y: 30,
         opacity: 0,
-        scale: 0.8,
         duration: 0.3,
         stagger: 0.05,
         ease: "power2.in"
@@ -497,23 +487,22 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
     router.push('/forgot-password');
   };
 
-  // Komponen Connection dengan animasi GSAP + Framer Motion
+  // Komponen Connection dengan animasi GSAP + Framer Motion - SIMPLE VERSION
   const ConnectionComponent = () => (
     <div
-      ref={connectionsRef}
       style={{
         position: 'relative',
         width: isMobile ? '100%' : 'auto',
-        marginTop: '1rem',
         zIndex: 10,
       }}
     >
       <motion.div
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
+        whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.98 }}
         style={{
           cursor: 'pointer',
           userSelect: 'none',
+          marginBottom: connectionsOpen ? '15px' : '0',
         }}
         onClick={() => setConnectionsOpen(!connectionsOpen)}
       >
@@ -522,7 +511,6 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
           display: 'flex',
           alignItems: 'center',
           gap: '10px',
-          marginBottom: '10px',
         }}>
           <h4 style={{
             color: 'white',
@@ -535,35 +523,28 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
             CONNECT
           </h4>
           
-          {/* Angka jumlah koneksi */}
+          {/* Angka jumlah koneksi - format (01) */}
           <motion.div
             className="connection-count"
-            initial={{ scale: 0, opacity: 0 }}
+            initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            transition={{ duration: 0.3 }}
+            transition={{ duration: 0.2 }}
             style={{
               position: 'absolute',
-              bottom: '-8px',
-              right: '-25px',
-              background: 'rgba(255, 255, 255, 0.9)',
-              color: '#000',
-              fontSize: isMobile ? '0.7rem' : '0.9rem',
-              fontWeight: 'bold',
-              borderRadius: '50%',
-              width: isMobile ? '20px' : '24px',
-              height: isMobile ? '20px' : '24px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              boxShadow: '0 2px 6px rgba(0,0,0,0.2)',
+              bottom: isMobile ? '-5px' : '-10px',
+              right: isMobile ? '-20px' : '-40px',
+              color: 'rgba(255, 255, 255, 0.8)',
+              fontSize: isMobile ? '0.7rem' : '1rem',
+              fontWeight: 'normal',
+              fontFamily: 'Arame Mono, monospace',
             }}
           >
-            {socialConnections.length}
+            ({socialConnections.length.toString().padStart(2, '0')})
           </motion.div>
         </div>
       </motion.div>
 
-      {/* Daftar media sosial dengan animasi */}
+      {/* Daftar media sosial dengan animasi - SIMPLE DESIGN */}
       <AnimatePresence>
         {connectionsOpen && (
           <motion.div
@@ -573,17 +554,13 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
             transition={{ duration: 0.3 }}
             style={{
               overflow: 'hidden',
-              marginTop: '1rem',
             }}
           >
             <div style={{
               display: 'flex',
               flexDirection: 'column',
-              gap: '12px',
-              padding: isMobile ? '10px' : '15px 20px',
-              borderRadius: '12px',
-              background: 'rgba(255, 255, 255, 0.05)',
-              backdropFilter: 'blur(10px)',
+              gap: isMobile ? '8px' : '12px',
+              paddingTop: '10px',
             }}>
               {socialConnections.map((social, index) => (
                 <motion.div
@@ -593,129 +570,42 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
                   animate={{ y: 0, opacity: 1 }}
                   exit={{ y: 20, opacity: 0 }}
                   transition={{ 
-                    duration: 0.4, 
-                    delay: index * 0.08,
-                    ease: "back.out(1.7)"
+                    duration: 0.3, 
+                    delay: index * 0.08
                   }}
-                  whileHover={{ 
-                    x: 10,
-                    scale: 1.05,
-                    transition: { duration: 0.2 }
-                  }}
-                  whileTap={{ scale: 0.95 }}
+                  whileHover={{ x: 5 }}
                   style={{
-                    cursor: 'pointer',
-                    padding: isMobile ? '12px 15px' : '15px 20px',
-                    borderRadius: '8px',
-                    background: 'rgba(255, 255, 255, 0.1)',
-                    border: `1px solid ${social.color}40`,
-                    backdropFilter: 'blur(5px)',
-                    transition: 'all 0.3s ease',
-                    position: 'relative',
-                    overflow: 'hidden',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.background = `${social.color}20`;
-                    e.currentTarget.style.borderColor = `${social.color}80`;
-                    e.currentTarget.style.boxShadow = `0 4px 15px ${social.color}40`;
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)';
-                    e.currentTarget.style.borderColor = `${social.color}40`;
-                    e.currentTarget.style.boxShadow = 'none';
-                  }}
-                >
-                  <div style={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    background: `linear-gradient(45deg, ${social.color}20, transparent)`,
-                    opacity: 0.5,
-                    zIndex: -1,
-                  }} />
-                  
-                  <p style={{
-                    color: 'white',
-                    fontSize: isMobile ? '1.2rem' : '1.5rem',
-                    fontWeight: '500',
-                    margin: 0,
-                    fontFamily: 'Arame Mono, monospace',
-                    letterSpacing: '1px',
-                    textShadow: '1px 1px 2px rgba(0,0,0,0.5)',
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '10px',
-                  }}>
-                    <span style={{
-                      color: social.color,
-                      fontSize: isMobile ? '1.5rem' : '1.8rem',
-                      fontWeight: 'bold',
-                      filter: 'brightness(1.2)',
-                    }}>
-                      •
-                    </span>
-                    {social.name}
-                  </p>
-                  
-                  <motion.div
-                    initial={{ scaleX: 0 }}
-                    whileHover={{ scaleX: 1 }}
-                    transition={{ duration: 0.3 }}
-                    style={{
-                      position: 'absolute',
-                      bottom: 0,
-                      left: 0,
-                      right: 0,
-                      height: '2px',
-                      background: `linear-gradient(90deg, ${social.color}, ${social.color}80)`,
-                      transformOrigin: 'left',
-                    }}
-                  />
-                </motion.div>
-              ))}
-              
-              {/* Tombol close dengan animasi */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: socialConnections.length * 0.08 + 0.1 }}
-                style={{ marginTop: '15px' }}
-              >
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => setConnectionsOpen(false)}
-                  style={{
-                    width: '100%',
-                    padding: '12px',
-                    background: 'rgba(255, 255, 255, 0.1)',
-                    border: '1px solid rgba(255, 255, 255, 0.2)',
-                    borderRadius: '8px',
-                    color: 'rgba(255, 255, 255, 0.9)',
-                    fontSize: isMobile ? '1rem' : '1.1rem',
-                    fontWeight: '500',
-                    cursor: 'pointer',
-                    fontFamily: 'Arame Mono, monospace',
-                    letterSpacing: '1px',
-                    transition: 'all 0.3s ease',
-                    backdropFilter: 'blur(5px)',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.2)';
-                    e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.4)';
-                    e.currentTarget.style.color = 'white';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)';
-                    e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.2)';
-                    e.currentTarget.style.color = 'rgba(255, 255, 255, 0.9)';
+                    gap: '15px',
+                    cursor: 'default',
                   }}
                 >
-                  Close Connections
-                </motion.button>
-              </motion.div>
+                  {/* Angka (01), (02), dst */}
+                  <div style={{
+                    color: 'rgba(255, 255, 255, 0.5)',
+                    fontSize: isMobile ? '1rem' : '1.5rem',
+                    fontFamily: 'Arame Mono, monospace',
+                    width: isMobile ? '30px' : '50px',
+                    textAlign: 'right',
+                  }}>
+                    ({index.toString().padStart(2, '0')})
+                  </div>
+                  
+                  {/* Nama Media Sosial */}
+                  <p style={{
+                    color: 'white',
+                    fontSize: isMobile ? '1.2rem' : '1.8rem',
+                    fontWeight: '600',
+                    margin: '0',
+                    fontFamily: 'Arame Mono, monospace',
+                    textShadow: '1px 1px 2px rgba(0,0,0,0.5)',
+                    letterSpacing: '0.5px',
+                  }}>
+                    {social.name}
+                  </p>
+                </motion.div>
+              ))}
             </div>
           </motion.div>
         )}
