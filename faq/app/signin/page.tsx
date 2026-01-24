@@ -24,7 +24,7 @@ import {
   Timestamp,
   deleteDoc 
 } from "firebase/firestore";
-import { motion } from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
 import gsap from "gsap";
 import Lenis from '@studio-freight/lenis';
 
@@ -92,6 +92,15 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
   const arrowRefs = useRef<(SVGSVGElement | null)[]>([]);
   const momentOfNoteRef = useRef<HTMLDivElement>(null);
   const diagonalArrowRef = useRef<SVGSVGElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Scroll tracking untuk animasi teks berjalan
+  const { scrollY } = useScroll();
+  const xTransform = useTransform(scrollY, [0, 1000], [100, -100]);
+  
+  // State untuk menentukan arah scroll
+  const [scrollDirection, setScrollDirection] = useState<'up' | 'down'>('down');
+  const lastScrollY = useRef(0);
 
   // Daftar media sosial
   const socialMediaList = ['GitHub', 'Instagram', 'Twitter', 'Quora', 'YouTube'];
@@ -117,6 +126,27 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
 
     return () => {
       lenis.destroy();
+    };
+  }, []);
+
+  // Track scroll direction
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      
+      if (currentScrollY > lastScrollY.current) {
+        setScrollDirection('down');
+      } else if (currentScrollY < lastScrollY.current) {
+        setScrollDirection('up');
+      }
+      
+      lastScrollY.current = currentScrollY;
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
     };
   }, []);
 
@@ -257,44 +287,62 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
       }
     });
 
-    // Animasi untuk panah diagonal kiri bawah
+    // Animasi untuk panah diagonal kiri bawah yang benar
     if (diagonalArrowRef.current) {
       const diagonalArrow = diagonalArrowRef.current;
-      const path = diagonalArrow.querySelector('path');
       
-      if (path) {
-        const length = path.getTotalLength();
-        path.style.strokeDasharray = `${length}`;
-        path.style.strokeDashoffset = `${length}`;
+      // Animasi garis utama diagonal
+      const mainPath = diagonalArrow.querySelector('.main-path');
+      if (mainPath) {
+        const length = (mainPath as SVGPathElement).getTotalLength();
+        (mainPath as SVGPathElement).style.strokeDasharray = `${length}`;
+        (mainPath as SVGPathElement).style.strokeDashoffset = `${length}`;
         
-        gsap.to(path, {
+        gsap.to(mainPath, {
           strokeDashoffset: 0,
           duration: 2,
           ease: "power2.inOut",
-          delay: 1
+          delay: 0.5
         });
+      }
+
+      // Animasi kepala panah
+      const arrowHead = diagonalArrow.querySelector('.arrow-head');
+      if (arrowHead) {
+        gsap.fromTo(arrowHead,
+          {
+            opacity: 0,
+            scale: 0
+          },
+          {
+            opacity: 1,
+            scale: 1,
+            duration: 0.8,
+            ease: "back.out(1.7)",
+            delay: 1.5
+          }
+        );
       }
 
       gsap.fromTo(diagonalArrow,
         {
           opacity: 0,
           scale: 0.5,
-          rotation: -45
         },
         {
           opacity: 1,
           scale: 1,
-          rotation: 0,
           duration: 1.5,
           ease: "power3.out",
-          delay: 0.5
+          delay: 0.3
         }
       );
 
-      // Continuous animation for diagonal arrow
+      // Continuous subtle animation for diagonal arrow
       gsap.to(diagonalArrow, {
-        y: -10,
-        duration: 2,
+        y: -5,
+        x: -5,
+        duration: 3,
         repeat: -1,
         yoyo: true,
         ease: "sine.inOut",
@@ -307,16 +355,16 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
       gsap.fromTo(momentOfNoteRef.current,
         {
           opacity: 0,
-          y: 50,
+          x: 100,
           scale: 0.8
         },
         {
           opacity: 1,
-          y: 0,
+          x: 0,
           scale: 1,
-          duration: 1.2,
+          duration: 1.5,
           ease: "power3.out",
-          delay: 1.2
+          delay: 1
         }
       );
     }
@@ -645,26 +693,37 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
     </svg>
   );
 
-  // Komponen untuk panah diagonal kiri bawah
+  // Komponen untuk panah diagonal kiri bawah YANG BENAR
   const DiagonalArrowIcon = () => (
     <svg
       ref={diagonalArrowRef}
-      width={isMobile ? "60" : "100"}
-      height={isMobile ? "60" : "100"}
-      viewBox="0 0 100 100"
+      width={isMobile ? "80" : "120"}
+      height={isMobile ? "80" : "120"}
+      viewBox="0 0 120 120"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       style={{
         position: 'absolute',
-        left: isMobile ? '-10px' : '-30px',
-        bottom: isMobile ? '-10px' : '-30px',
+        left: isMobile ? '-15px' : '-35px',
+        bottom: isMobile ? '-15px' : '-35px',
         zIndex: 1,
       }}
     >
+      {/* Garis diagonal dari kiri bawah ke kanan atas */}
       <path
-        d="M20 80 L80 20 M80 20 L70 10 M80 20 L90 30"
-        stroke="rgba(255, 255, 255, 0.7)"
+        className="main-path"
+        d="M20 100 L100 20"
+        stroke="rgba(255, 255, 255, 0.8)"
         strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      {/* Kepala panah di kanan atas */}
+      <path
+        className="arrow-head"
+        d="M90 10 L100 20 L90 30"
+        stroke="rgba(255, 255, 255, 1)"
+        strokeWidth="2.5"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
@@ -921,8 +980,9 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
       </div>
 
       <div
+        ref={containerRef}
         style={{
-          minHeight: '100vh',
+          minHeight: '200vh',
           backgroundColor: 'rgba(0,0,0,0.5)',
           display: 'flex',
           flexDirection: 'column',
@@ -931,6 +991,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
           padding: isMobile ? '20px 15px' : '40px 20px',
           fontFamily: "'Inter', sans-serif",
           position: 'relative',
+          overflow: 'hidden',
         }}
       >
         <div
@@ -1548,11 +1609,11 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
                 ))}
               </div>
 
-              {/* Panah Diagonal Kiri Bawah */}
+              {/* Panah Diagonal Kiri Bawah YANG BENAR */}
               <DiagonalArrowIcon />
             </div>
 
-            {/* Features */}
+            {/* Features dengan Moment of Note yang berjalan */}
             <div style={{ position: 'relative' }}>
               <h4 style={{
                 color: 'white',
@@ -1564,29 +1625,44 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
                 Features
               </h4>
               
-              {/* Teks "Moment of Note" di bawah Features */}
-              <div
+              {/* Teks "Moment of Note" yang berjalan sesuai scroll */}
+              <motion.div
                 ref={momentOfNoteRef}
                 style={{
                   position: 'absolute',
                   bottom: isMobile ? '-4rem' : '-6rem',
                   left: 0,
-                  width: isMobile ? '200px' : '350px',
+                  width: isMobile ? '300px' : '500px',
+                  overflow: 'hidden',
+                }}
+                animate={{
+                  x: scrollDirection === 'down' 
+                    ? ['100%', '-100%'] 
+                    : ['-100%', '100%']
+                }}
+                transition={{
+                  x: {
+                    duration: 20,
+                    repeat: Infinity,
+                    ease: "linear"
+                  }
                 }}
               >
                 <p style={{
-                  color: 'rgba(255, 255, 255, 0.8)',
-                  fontSize: isMobile ? '1.2rem' : '2rem',
+                  color: 'rgba(255, 255, 255, 0.9)',
+                  fontSize: isMobile ? '3rem' : '5rem',
                   fontFamily: 'Arame Mono, monospace',
-                  fontWeight: '400',
-                  lineHeight: '1.2',
+                  fontWeight: '700',
+                  lineHeight: '1.1',
                   margin: 0,
                   textTransform: 'uppercase',
-                  letterSpacing: '2px',
+                  letterSpacing: '3px',
+                  whiteSpace: 'nowrap',
+                  textShadow: '2px 2px 4px rgba(0,0,0,0.5)',
                 }}>
-                  Moment of Note
+                  Moment of Note • Moment of Note • Moment of Note •
                 </p>
-              </div>
+              </motion.div>
             </div>
 
             {/* Community */}
@@ -1633,8 +1709,26 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
         }
         
         @keyframes float {
-          0%, 100% { transform: translateY(0); }
-          50% { transform: translateY(-10px); }
+          0%, 100% { transform: translateY(0) translateX(0); }
+          50% { transform: translateY(-5px) translateX(-5px); }
+        }
+        
+        @keyframes marquee-down {
+          0% { transform: translateX(100%); }
+          100% { transform: translateX(-100%); }
+        }
+        
+        @keyframes marquee-up {
+          0% { transform: translateX(-100%); }
+          100% { transform: translateX(100%); }
+        }
+        
+        .marquee-down {
+          animation: marquee-down 20s linear infinite;
+        }
+        
+        .marquee-up {
+          animation: marquee-up 20s linear infinite;
         }
         
         .diagonal-arrow {
