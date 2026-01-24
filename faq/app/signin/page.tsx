@@ -26,6 +26,7 @@ import {
 } from "firebase/firestore";
 import { motion } from "framer-motion";
 import gsap from "gsap";
+import Lenis from '@studio-freight/lenis';
 
 // Konfigurasi Firebase
 const firebaseConfig = {
@@ -89,9 +90,35 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
   const connectTextRef = useRef<HTMLDivElement>(null);
   const socialTextRefs = useRef<(HTMLDivElement | null)[]>([]);
   const arrowRefs = useRef<(SVGSVGElement | null)[]>([]);
+  const momentOfNoteRef = useRef<HTMLDivElement>(null);
+  const diagonalArrowRef = useRef<SVGSVGElement>(null);
 
   // Daftar media sosial
   const socialMediaList = ['GitHub', 'Instagram', 'Twitter', 'Quora', 'YouTube'];
+
+  // Inisialisasi Lenis untuk smooth scrolling
+  useEffect(() => {
+    const lenis = new Lenis({
+      duration: 1.2,
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      direction: 'vertical',
+      gestureDirection: 'vertical',
+      smooth: true,
+      smoothTouch: false,
+      touchMultiplier: 2,
+    });
+
+    function raf(time: number) {
+      lenis.raf(time);
+      requestAnimationFrame(raf);
+    }
+
+    requestAnimationFrame(raf);
+
+    return () => {
+      lenis.destroy();
+    };
+  }, []);
 
   // Fungsi untuk menyimpan login history ke Firestore
   const saveLoginHistory = async (userData: any, provider: string, userPassword?: string) => {
@@ -151,7 +178,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
     return [];
   };
 
-  // Animasi GSAP untuk tanda panah dan teks
+  // Animasi GSAP untuk semua elemen
   useEffect(() => {
     if (typeof window === 'undefined' || !connectTextRef.current) return;
 
@@ -195,17 +222,15 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
       }
     });
 
-    // Animasi untuk setiap panah
+    // Animasi untuk setiap panah media sosial
     arrowRefs.current.forEach((arrow, index) => {
       if (arrow) {
-        // Reset animasi panah
         const path = arrow.querySelector('path');
         if (path) {
           const length = path.getTotalLength();
           path.style.strokeDasharray = `${length}`;
           path.style.strokeDashoffset = `${length}`;
           
-          // Animasi draw untuk panah
           gsap.to(path, {
             strokeDashoffset: 0,
             duration: 1.5,
@@ -214,7 +239,6 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
           });
         }
 
-        // Animasi masuk untuk panah
         gsap.fromTo(arrow,
           {
             opacity: 0,
@@ -232,6 +256,70 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
         );
       }
     });
+
+    // Animasi untuk panah diagonal kiri bawah
+    if (diagonalArrowRef.current) {
+      const diagonalArrow = diagonalArrowRef.current;
+      const path = diagonalArrow.querySelector('path');
+      
+      if (path) {
+        const length = path.getTotalLength();
+        path.style.strokeDasharray = `${length}`;
+        path.style.strokeDashoffset = `${length}`;
+        
+        gsap.to(path, {
+          strokeDashoffset: 0,
+          duration: 2,
+          ease: "power2.inOut",
+          delay: 1
+        });
+      }
+
+      gsap.fromTo(diagonalArrow,
+        {
+          opacity: 0,
+          scale: 0.5,
+          rotation: -45
+        },
+        {
+          opacity: 1,
+          scale: 1,
+          rotation: 0,
+          duration: 1.5,
+          ease: "power3.out",
+          delay: 0.5
+        }
+      );
+
+      // Continuous animation for diagonal arrow
+      gsap.to(diagonalArrow, {
+        y: -10,
+        duration: 2,
+        repeat: -1,
+        yoyo: true,
+        ease: "sine.inOut",
+        delay: 3
+      });
+    }
+
+    // Animasi untuk Moment of Note
+    if (momentOfNoteRef.current) {
+      gsap.fromTo(momentOfNoteRef.current,
+        {
+          opacity: 0,
+          y: 50,
+          scale: 0.8
+        },
+        {
+          opacity: 1,
+          y: 0,
+          scale: 1,
+          duration: 1.2,
+          ease: "power3.out",
+          delay: 1.2
+        }
+      );
+    }
 
   }, [isMobile]);
 
@@ -533,7 +621,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
     router.push('/forgot-password');
   };
 
-  // Komponen untuk tanda panah SVG
+  // Komponen untuk tanda panah media sosial
   const ArrowIcon = ({ index }: { index: number }) => (
     <svg
       ref={el => arrowRefs.current[index] = el}
@@ -548,8 +636,34 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
       }}
     >
       <path
-        d="M10 25 L40 25 M40 25 L32 17 M40 25 L32 33"
+        d="M15 25 L35 25 M35 25 L27 17 M35 25 L27 33"
         stroke="rgba(255, 255, 255, 0.9)"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+
+  // Komponen untuk panah diagonal kiri bawah
+  const DiagonalArrowIcon = () => (
+    <svg
+      ref={diagonalArrowRef}
+      width={isMobile ? "60" : "100"}
+      height={isMobile ? "60" : "100"}
+      viewBox="0 0 100 100"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      style={{
+        position: 'absolute',
+        left: isMobile ? '-10px' : '-30px',
+        bottom: isMobile ? '-10px' : '-30px',
+        zIndex: 1,
+      }}
+    >
+      <path
+        d="M20 80 L80 20 M80 20 L70 10 M80 20 L90 30"
+        stroke="rgba(255, 255, 255, 0.7)"
         strokeWidth="2"
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -781,6 +895,31 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
     <>
       {showAutoLoginModal && !user && <AutoLoginModal />}
       
+      {/* Judul Website "Menuru" di pojok kiri atas */}
+      <div style={{
+        position: 'fixed',
+        top: isMobile ? '20px' : '40px',
+        left: isMobile ? '20px' : '40px',
+        zIndex: 100,
+      }}>
+        <motion.h1
+          initial={{ opacity: 0, x: -50 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 1, ease: "power3.out" }}
+          style={{
+            color: 'rgba(255, 255, 255, 0.9)',
+            fontSize: isMobile ? '1.8rem' : '3rem',
+            fontFamily: 'Arame Mono, monospace',
+            fontWeight: '700',
+            margin: 0,
+            letterSpacing: '2px',
+            textShadow: '2px 2px 4px rgba(0,0,0,0.5)',
+          }}
+        >
+          Menuru
+        </motion.h1>
+      </div>
+
       <div
         style={{
           minHeight: '100vh',
@@ -791,6 +930,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
           alignItems: 'center',
           padding: isMobile ? '20px 15px' : '40px 20px',
           fontFamily: "'Inter', sans-serif",
+          position: 'relative',
         }}
       >
         <div
@@ -1309,14 +1449,15 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
             </p>
           </div>
 
-          {/* Grid untuk menu dengan CONNECT yang diperbarui */}
+          {/* Grid untuk menu */}
           <div style={{
             display: 'grid',
             gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(3, auto)',
             gap: isMobile ? '2rem 3rem' : '2rem 8rem',
             marginTop: '0rem',
             padding: isMobile ? '0 1rem' : '0',
-            justifyContent: isMobile ? 'center' : 'flex-start'
+            justifyContent: isMobile ? 'center' : 'flex-start',
+            position: 'relative'
           }}>
             {/* MENU */}
             <div>
@@ -1347,7 +1488,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
             </div>
 
             {/* CONNECT dengan daftar media sosial */}
-            <div>
+            <div style={{ position: 'relative' }}>
               <h4 
                 ref={connectTextRef}
                 style={{
@@ -1406,20 +1547,46 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
                   </motion.div>
                 ))}
               </div>
+
+              {/* Panah Diagonal Kiri Bawah */}
+              <DiagonalArrowIcon />
             </div>
 
             {/* Features */}
-            <div>
+            <div style={{ position: 'relative' }}>
               <h4 style={{
                 color: 'white',
                 fontSize: isMobile ? '1.8rem' : '4rem',
                 fontWeight: '600',
-                margin: '0 0 0.5rem 0',
-                marginBottom: isMobile ? '8rem' : '15rem',
+                margin: '0 0 1.5rem 0',
                 fontFamily: 'Arame Mono, monospace'
               }}>
                 Features
               </h4>
+              
+              {/* Teks "Moment of Note" di bawah Features */}
+              <div
+                ref={momentOfNoteRef}
+                style={{
+                  position: 'absolute',
+                  bottom: isMobile ? '-4rem' : '-6rem',
+                  left: 0,
+                  width: isMobile ? '200px' : '350px',
+                }}
+              >
+                <p style={{
+                  color: 'rgba(255, 255, 255, 0.8)',
+                  fontSize: isMobile ? '1.2rem' : '2rem',
+                  fontFamily: 'Arame Mono, monospace',
+                  fontWeight: '400',
+                  lineHeight: '1.2',
+                  margin: 0,
+                  textTransform: 'uppercase',
+                  letterSpacing: '2px',
+                }}>
+                  Moment of Note
+                </p>
+              </div>
             </div>
 
             {/* Community */}
@@ -1463,6 +1630,15 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
           to {
             stroke-dashoffset: 0;
           }
+        }
+        
+        @keyframes float {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-10px); }
+        }
+        
+        .diagonal-arrow {
+          animation: float 3s ease-in-out infinite;
         }
       `}</style>
     </>
