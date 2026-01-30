@@ -30,7 +30,8 @@ import {
   increment,
   writeBatch,
   where,
-  deleteDoc
+  deleteDoc,
+  getDocs
 } from "firebase/firestore";
 
 // Register GSAP plugins
@@ -115,6 +116,7 @@ interface Notification {
   isAdminPost?: boolean;
   adminName?: string;
   category?: string;
+  read?: boolean; // Untuk kompatibilitas
 }
 
 // Type untuk note
@@ -170,6 +172,9 @@ export default function HomePage(): React.JSX.Element {
   // State untuk komentar dari Firebase
   const [comments, setComments] = useState<Comment[]>([]);
   const [isLoadingComments, setIsLoadingComments] = useState(false);
+
+  // State untuk menu overlay
+  const [showMenuOverlay, setShowMenuOverlay] = useState(false);
 
   // State untuk notifikasi dan search
   const [showNotification, setShowNotification] = useState(false);
@@ -368,6 +373,36 @@ export default function HomePage(): React.JSX.Element {
     "NGAMATI", "NANCANG", "NGEMBANGKAN", "NYUSUN"
   ];
 
+  // Data foto untuk progress bar
+  const progressPhotos = [
+    { 
+      id: 1, 
+      src: "images/5.jpg", 
+      alt: "Photo 1",
+      uploadTime: new Date(Date.now() - 5 * 60 * 1000)
+    },
+    { 
+      id: 2, 
+      src: "images/6.jpg", 
+      alt: "Photo 2",
+      uploadTime: new Date(Date.now() - 2 * 60 * 1000)
+    },
+    { 
+      id: 3, 
+      src: "images/5.jpg", 
+      alt: "Photo 3",
+      uploadTime: new Date(Date.now() - 30 * 1000)
+    }
+  ];
+
+  // Data untuk Roles
+  const rolesData = [
+    { title: "My Roles", description: "Branding & Creative Direction" },
+    { title: "Design", description: "Visual identity & UI/UX" },
+    { title: "Development", description: "Frontend & Backend" },
+    { title: "Features", description: "Functionality & Integration" }
+  ];
+
   // Helper functions untuk notifikasi
   const getIconByType = (type: string): string => {
     switch (type) {
@@ -436,87 +471,6 @@ export default function HomePage(): React.JSX.Element {
       console.error("Error loading user notes:", error);
       setIsLoadingNotes(false);
     }
-  };
-
-  // Fungsi untuk menghapus akun
-  const handleDeleteAccount = async () => {
-    try {
-      if (!auth.currentUser) {
-        alert("No user logged in");
-        return;
-      }
-
-      const userId = auth.currentUser.uid;
-      
-      // Hapus semua data user dari Firestore
-      // Notes
-      const notesQuery = query(collection(db, 'notes'), where('userId', '==', userId));
-      const notesSnapshot = await getDocs(notesQuery);
-      const notesBatch = writeBatch(db);
-      notesSnapshot.forEach((doc) => {
-        notesBatch.delete(doc.ref);
-      });
-      await notesBatch.commit();
-
-      // User stats
-      const userStatsRef = doc(db, 'userStats', userId);
-      await deleteDoc(userStatsRef).catch(() => {});
-
-      // Delete user dari Firebase Auth
-      await deleteUser(auth.currentUser);
-
-      alert("Account deleted successfully");
-      setShowDeleteAccountModal(false);
-      setShowUserProfileModal(false);
-      router.push('/');
-    } catch (error) {
-      console.error("Error deleting account:", error);
-      alert("Failed to delete account. Please try again.");
-    }
-  };
-
-  // Fungsi untuk mengirim feedback
-  const handleSubmitFeedback = async () => {
-    if (!feedbackMessage.trim() || !user) {
-      alert("Please enter feedback message");
-      return;
-    }
-
-    try {
-      const feedbackData = {
-        userId: user.uid,
-        userName: user.displayName || user.email,
-        userEmail: user.email,
-        message: feedbackMessage.trim(),
-        createdAt: serverTimestamp(),
-        type: 'feedback',
-        status: 'new'
-      };
-
-      await addDoc(collection(db, 'feedbacks'), feedbackData);
-      alert("Thank you for your feedback!");
-      setFeedbackMessage("");
-      setActiveTab('notes');
-    } catch (error) {
-      console.error("Error submitting feedback:", error);
-      alert("Failed to submit feedback. Please try again.");
-    }
-  };
-
-  // Handler untuk membuka user profile modal
-  const handleOpenUserProfile = () => {
-    setShowUserProfileModal(true);
-    setShowUserDropdown(false);
-    if (user) {
-      loadUserNotes(user.uid);
-    }
-  };
-
-  // Handler untuk menutup user profile modal
-  const handleCloseUserProfile = () => {
-    setShowUserProfileModal(false);
-    setActiveTab('notes');
-    setFeedbackMessage("");
   };
 
   // Calculate time ago function
@@ -707,7 +661,7 @@ export default function HomePage(): React.JSX.Element {
         }
       }
       if (userProfileModalRef.current && !userProfileModalRef.current.contains(event.target as Node)) {
-        handleCloseUserProfile();
+        setShowUserProfileModal(false);
       }
       if (notificationDropdownRef.current && !notificationDropdownRef.current.contains(event.target as Node)) {
         setShowNotification(false);
@@ -768,7 +722,7 @@ export default function HomePage(): React.JSX.Element {
           setShowChatbotPopup(false);
         }
         if (showUserProfileModal) {
-          handleCloseUserProfile();
+          setShowUserProfileModal(false);
         }
         if (showNotification) {
           setShowNotification(false);
@@ -811,7 +765,8 @@ export default function HomePage(): React.JSX.Element {
   // Handler untuk Sign In / User Button
   const handleSignInClick = () => {
     if (user) {
-      handleOpenUserProfile();
+      setShowUserProfileModal(true);
+      loadUserNotes(user.uid);
     } else {
       router.push('/signin');
     }
@@ -1034,7 +989,7 @@ export default function HomePage(): React.JSX.Element {
                 </div>
 
                 <motion.button
-                  onClick={handleCloseUserProfile}
+                  onClick={() => setShowUserProfileModal(false)}
                   style={{
                     width: '40px',
                     height: '40px',
@@ -1298,29 +1253,6 @@ export default function HomePage(): React.JSX.Element {
                             }}>
                               {note.content || 'No content'}
                             </p>
-                            {note.tags && note.tags.length > 0 && (
-                              <div style={{
-                                display: 'flex',
-                                gap: '0.5rem',
-                                marginTop: '0.8rem',
-                                flexWrap: 'wrap'
-                              }}>
-                                {note.tags.slice(0, 3).map((tag, tagIndex) => (
-                                  <span
-                                    key={tagIndex}
-                                    style={{
-                                      backgroundColor: 'rgba(0, 80, 183, 0.2)',
-                                      color: '#0050B7',
-                                      fontSize: '0.7rem',
-                                      padding: '0.2rem 0.6rem',
-                                      borderRadius: '12px'
-                                    }}
-                                  >
-                                    {tag}
-                                  </span>
-                                ))}
-                              </div>
-                            )}
                           </motion.div>
                         ))}
                         
@@ -1478,78 +1410,7 @@ export default function HomePage(): React.JSX.Element {
                             {user.email}
                           </div>
                         </div>
-
-                        <div>
-                          <label style={{
-                            color: 'rgba(255, 255, 255, 0.7)',
-                            fontSize: '0.9rem',
-                            display: 'block',
-                            marginBottom: '0.5rem'
-                          }}>
-                            Account Created
-                          </label>
-                          <div style={{
-                            backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                            padding: '0.8rem 1rem',
-                            borderRadius: '8px',
-                            color: 'white',
-                            fontSize: '0.9rem'
-                          }}>
-                            {user.metadata?.creationTime ? new Date(user.metadata.creationTime).toLocaleDateString() : 'Unknown'}
-                          </div>
-                        </div>
                       </div>
-                    </div>
-
-                    <div style={{
-                      backgroundColor: 'rgba(255, 71, 87, 0.1)',
-                      borderRadius: '10px',
-                      padding: '1.5rem',
-                      border: '1px solid rgba(255, 71, 87, 0.3)'
-                    }}>
-                      <h5 style={{
-                        color: '#FF4757',
-                        fontSize: '1rem',
-                        fontWeight: '600',
-                        margin: '0 0 1rem 0'
-                      }}>
-                        Danger Zone
-                      </h5>
-                      <p style={{
-                        color: 'rgba(255, 255, 255, 0.7)',
-                        fontSize: '0.9rem',
-                        margin: '0 0 1rem 0',
-                        lineHeight: 1.5
-                      }}>
-                        Once you delete your account, there is no going back. Please be certain.
-                      </p>
-                      <motion.button
-                        onClick={() => setShowDeleteAccountModal(true)}
-                        style={{
-                          padding: '0.8rem 1.5rem',
-                          backgroundColor: 'rgba(255, 71, 87, 0.2)',
-                          border: '1px solid rgba(255, 71, 87, 0.4)',
-                          borderRadius: '8px',
-                          color: '#FF4757',
-                          fontSize: '0.9rem',
-                          fontWeight: '600',
-                          cursor: 'pointer',
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '0.5rem'
-                        }}
-                        whileHover={{ 
-                          backgroundColor: 'rgba(255, 71, 87, 0.3)',
-                          scale: 1.05
-                        }}
-                        whileTap={{ scale: 0.95 }}
-                      >
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <polyline points="3 6 5 6 21 6"/>
-                          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-                        </svg>
-                        Delete Account
-                      </motion.button>
                     </div>
                   </div>
                 )}
@@ -1568,8 +1429,7 @@ export default function HomePage(): React.JSX.Element {
                     <div style={{
                       backgroundColor: 'rgba(255, 255, 255, 0.05)',
                       borderRadius: '10px',
-                      padding: '1.5rem',
-                      marginBottom: '1.5rem'
+                      padding: '1.5rem'
                     }}>
                       <div style={{
                         display: 'flex',
@@ -1659,35 +1519,6 @@ export default function HomePage(): React.JSX.Element {
                             Open Chatbot
                           </motion.button>
                         </div>
-
-                        <div>
-                          <h5 style={{
-                            color: 'white',
-                            fontSize: '1rem',
-                            fontWeight: '600',
-                            margin: '0 0 0.8rem 0',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '0.5rem'
-                          }}>
-                            <span>📧</span> Contact Support
-                          </h5>
-                          <p style={{
-                            color: 'rgba(255, 255, 255, 0.7)',
-                            fontSize: '0.9rem',
-                            margin: '0 0 1rem 0',
-                            lineHeight: 1.5
-                          }}>
-                            Need direct assistance? Contact our support team for personalized help.
-                          </p>
-                          <div style={{
-                            color: 'rgba(255, 255, 255, 0.7)',
-                            fontSize: '0.9rem',
-                            marginTop: '0.5rem'
-                          }}>
-                            Email: support@menuru.com
-                          </div>
-                        </div>
                       </div>
                     </div>
                   </div>
@@ -1740,60 +1571,53 @@ export default function HomePage(): React.JSX.Element {
 
                       <div style={{
                         display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center'
+                        justifyContent: 'flex-end'
                       }}>
-                        <div style={{
-                          color: 'rgba(255, 255, 255, 0.5)',
-                          fontSize: '0.8rem'
-                        }}>
-                          We appreciate your feedback to improve our service.
-                        </div>
-                        <div style={{
-                          display: 'flex',
-                          gap: '1rem'
-                        }}>
-                          <motion.button
-                            onClick={() => setFeedbackMessage("")}
-                            style={{
-                              padding: '0.7rem 1.2rem',
-                              backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                              border: '1px solid rgba(255, 255, 255, 0.2)',
-                              borderRadius: '8px',
-                              color: 'rgba(255, 255, 255, 0.8)',
-                              fontSize: '0.9rem',
-                              fontWeight: '600',
-                              cursor: 'pointer'
-                            }}
-                            whileHover={{ 
-                              backgroundColor: 'rgba(255, 255, 255, 0.2)',
-                              scale: 1.05
-                            }}
-                            whileTap={{ scale: 0.95 }}
-                          >
-                            Clear
-                          </motion.button>
-                          <motion.button
-                            onClick={handleSubmitFeedback}
-                            disabled={!feedbackMessage.trim()}
-                            style={{
-                              padding: '0.7rem 1.5rem',
-                              backgroundColor: !feedbackMessage.trim() 
-                                ? 'rgba(0, 80, 183, 0.5)' 
-                                : '#0050B7',
-                              border: 'none',
-                              borderRadius: '8px',
-                              color: 'white',
-                              fontSize: '0.9rem',
-                              fontWeight: '600',
-                              cursor: !feedbackMessage.trim() ? 'not-allowed' : 'pointer'
-                            }}
-                            whileHover={feedbackMessage.trim() ? { scale: 1.05 } : {}}
-                            whileTap={feedbackMessage.trim() ? { scale: 0.95 } : {}}
-                          >
-                            Submit Feedback
-                          </motion.button>
-                        </div>
+                        <motion.button
+                          onClick={() => setFeedbackMessage("")}
+                          style={{
+                            padding: '0.7rem 1.2rem',
+                            backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                            border: '1px solid rgba(255, 255, 255, 0.2)',
+                            borderRadius: '8px',
+                            color: 'rgba(255, 255, 255, 0.8)',
+                            fontSize: '0.9rem',
+                            fontWeight: '600',
+                            cursor: 'pointer',
+                            marginRight: '1rem'
+                          }}
+                          whileHover={{ 
+                            backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                            scale: 1.05
+                          }}
+                          whileTap={{ scale: 0.95 }}
+                        >
+                          Clear
+                        </motion.button>
+                        <motion.button
+                          onClick={() => {
+                            alert("Thank you for your feedback!");
+                            setFeedbackMessage("");
+                            setActiveTab('notes');
+                          }}
+                          disabled={!feedbackMessage.trim()}
+                          style={{
+                            padding: '0.7rem 1.5rem',
+                            backgroundColor: !feedbackMessage.trim() 
+                              ? 'rgba(0, 80, 183, 0.5)' 
+                              : '#0050B7',
+                            border: 'none',
+                            borderRadius: '8px',
+                            color: 'white',
+                            fontSize: '0.9rem',
+                            fontWeight: '600',
+                            cursor: !feedbackMessage.trim() ? 'not-allowed' : 'pointer'
+                          }}
+                          whileHover={feedbackMessage.trim() ? { scale: 1.05 } : {}}
+                          whileTap={feedbackMessage.trim() ? { scale: 0.95 } : {}}
+                        >
+                          Submit Feedback
+                        </motion.button>
                       </div>
                     </div>
                   </div>
@@ -1835,152 +1659,6 @@ export default function HomePage(): React.JSX.Element {
                     <line x1="21" y1="12" x2="9" y2="12"/>
                   </svg>
                   Logout
-                </motion.button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* DELETE ACCOUNT MODAL */}
-      <AnimatePresence>
-        {showDeleteAccountModal && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
-            style={{
-              position: 'fixed',
-              top: 0,
-              left: 0,
-              width: '100%',
-              height: '100%',
-              backgroundColor: 'rgba(0, 0, 0, 0.9)',
-              zIndex: 10000,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              backdropFilter: 'blur(10px)'
-            }}
-            onClick={() => setShowDeleteAccountModal(false)}
-          >
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              transition={{ duration: 0.3 }}
-              style={{
-                backgroundColor: 'rgba(30, 30, 30, 0.95)',
-                borderRadius: '15px',
-                padding: isMobile ? '1.5rem' : '2rem',
-                width: isMobile ? '90%' : '500px',
-                maxWidth: '600px',
-                border: '1px solid rgba(255, 71, 87, 0.3)',
-                boxShadow: '0 20px 60px rgba(255, 71, 87, 0.2)'
-              }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
-                <div style={{
-                  width: '60px',
-                  height: '60px',
-                  backgroundColor: 'rgba(255, 71, 87, 0.2)',
-                  borderRadius: '50%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  margin: '0 auto 1rem auto'
-                }}>
-                  <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#FF4757" strokeWidth="2">
-                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
-                    <line x1="12" y1="9" x2="12" y2="13"/>
-                    <line x1="12" y1="17" x2="12.01" y2="17"/>
-                  </svg>
-                </div>
-                <h3 style={{
-                  color: '#FF4757',
-                  fontSize: '1.5rem',
-                  fontWeight: '600',
-                  margin: '0 0 0.5rem 0'
-                }}>
-                  Delete Account
-                </h3>
-                <p style={{
-                  color: 'rgba(255, 255, 255, 0.7)',
-                  fontSize: '0.9rem',
-                  margin: '0 0 1rem 0',
-                  lineHeight: 1.5
-                }}>
-                  Are you sure you want to delete your account? This action cannot be undone.
-                </p>
-                <div style={{
-                  backgroundColor: 'rgba(255, 71, 87, 0.1)',
-                  borderRadius: '8px',
-                  padding: '1rem',
-                  marginBottom: '1.5rem',
-                  textAlign: 'left'
-                }}>
-                  <p style={{
-                    color: 'rgba(255, 255, 255, 0.8)',
-                    fontSize: '0.85rem',
-                    margin: '0',
-                    display: 'flex',
-                    alignItems: 'flex-start',
-                    gap: '0.5rem'
-                  }}>
-                    <span>⚠️</span>
-                    All your data including notes, comments, and preferences will be permanently deleted.
-                  </p>
-                </div>
-              </div>
-
-              <div style={{
-                display: 'flex',
-                gap: '1rem',
-                justifyContent: 'center'
-              }}>
-                <motion.button
-                  onClick={() => setShowDeleteAccountModal(false)}
-                  style={{
-                    flex: 1,
-                    padding: '0.8rem 1.5rem',
-                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                    border: '1px solid rgba(255, 255, 255, 0.2)',
-                    borderRadius: '8px',
-                    color: 'white',
-                    fontSize: '0.9rem',
-                    fontWeight: '600',
-                    cursor: 'pointer'
-                  }}
-                  whileHover={{ 
-                    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-                    scale: 1.05
-                  }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  Cancel
-                </motion.button>
-                <motion.button
-                  onClick={handleDeleteAccount}
-                  style={{
-                    flex: 1,
-                    padding: '0.8rem 1.5rem',
-                    backgroundColor: '#FF4757',
-                    border: 'none',
-                    borderRadius: '8px',
-                    color: 'white',
-                    fontSize: '0.9rem',
-                    fontWeight: '600',
-                    cursor: 'pointer'
-                  }}
-                  whileHover={{ 
-                    backgroundColor: '#FF6B6B',
-                    scale: 1.05
-                  }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  Delete Account
                 </motion.button>
               </div>
             </motion.div>
@@ -2105,7 +1783,7 @@ export default function HomePage(): React.JSX.Element {
         )}
       </AnimatePresence>
 
-      {/* Notification Dropdown */}
+      {/* Notification Dropdown - FULLY RESTORED */}
       <AnimatePresence>
         {showNotification && (
           <motion.div
@@ -2171,6 +1849,33 @@ export default function HomePage(): React.JSX.Element {
                   </span>
                 )}
               </h3>
+              
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <motion.button
+                  onClick={() => {
+                    setIsLoadingNotifications(true);
+                    setTimeout(() => setIsLoadingNotifications(false), 500);
+                  }}
+                  style={{
+                    backgroundColor: 'rgba(0, 80, 183, 0.2)',
+                    border: '1px solid rgba(0, 80, 183, 0.4)',
+                    color: '#0050B7',
+                    fontSize: '0.8rem',
+                    fontWeight: '600',
+                    padding: '0.3rem 0.8rem',
+                    borderRadius: '20px',
+                    cursor: 'pointer',
+                    fontFamily: 'Helvetica, Arial, sans-serif'
+                  }}
+                  whileHover={{ 
+                    backgroundColor: 'rgba(0, 80, 183, 0.3)',
+                    scale: 1.05
+                  }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  Refresh
+                </motion.button>
+              </div>
             </div>
             
             {/* List Notifikasi */}
@@ -2240,24 +1945,39 @@ export default function HomePage(): React.JSX.Element {
                         borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
                         cursor: 'pointer',
                         transition: 'all 0.2s ease',
-                        backgroundColor: getBgColorByType(notification.type),
+                        backgroundColor: notification.read ? 'transparent' : getBgColorByType(notification.type),
                         position: 'relative'
                       }}
                       whileHover={{ 
-                        backgroundColor: getBgColorByType(notification.type).replace('0.1', '0.2')
+                        backgroundColor: notification.read ? 'rgba(255, 255, 255, 0.05)' : getBgColorByType(notification.type).replace('0.1', '0.2')
                       }}
                     >
+                      {/* Unread Indicator */}
+                      {!notification.read && (
+                        <div style={{
+                          position: 'absolute',
+                          left: '0.5rem',
+                          top: '50%',
+                          transform: 'translateY(-50%)',
+                          width: '8px',
+                          height: '8px',
+                          backgroundColor: getColorByType(notification.type),
+                          borderRadius: '50%'
+                        }} />
+                      )}
+                      
                       <div style={{
                         display: 'flex',
                         gap: '1rem',
                         alignItems: 'flex-start'
                       }}>
+                        {/* Notification Icon */}
                         <div style={{
                           width: '40px',
                           height: '40px',
                           minWidth: '40px',
                           borderRadius: '10px',
-                          backgroundColor: `${getColorByType(notification.type)}20`,
+                          backgroundColor: notification.read ? 'rgba(255, 255, 255, 0.1)' : `${getColorByType(notification.type)}20`,
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
@@ -2267,6 +1987,7 @@ export default function HomePage(): React.JSX.Element {
                           {notification.icon}
                         </div>
                         
+                        {/* Notification Content */}
                         <div style={{ flex: 1, minWidth: 0 }}>
                           <div style={{
                             display: 'flex',
@@ -2292,6 +2013,7 @@ export default function HomePage(): React.JSX.Element {
                                 {notification.title}
                               </h4>
                               
+                              {/* Badge Type */}
                               <span style={{
                                 backgroundColor: getColorByType(notification.type),
                                 color: 'white',
@@ -2315,7 +2037,7 @@ export default function HomePage(): React.JSX.Element {
                           </div>
                           
                           <p style={{
-                            color: 'white',
+                            color: notification.read ? 'rgba(255, 255, 255, 0.7)' : 'white',
                             fontSize: '0.9rem',
                             margin: '0 0 0.5rem 0',
                             lineHeight: 1.4,
@@ -2332,7 +2054,7 @@ export default function HomePage(): React.JSX.Element {
               )}
             </div>
             
-            {/* Footer */}
+            {/* Footer dengan statistik */}
             <div style={{
               padding: '1rem 1.5rem',
               borderTop: '1px solid rgba(255, 255, 255, 0.1)',
@@ -2378,7 +2100,7 @@ export default function HomePage(): React.JSX.Element {
         )}
       </AnimatePresence>
 
-      {/* POPUP CHATBOT */}
+      {/* POPUP CHATBOT - FULLY RESTORED */}
       <AnimatePresence>
         {showChatbotPopup && (
           <motion.div
@@ -3185,7 +2907,7 @@ export default function HomePage(): React.JSX.Element {
           gap: isMobile ? '0.8rem' : '1rem',
           position: 'relative'
         }}>
-          {/* Tombol Slider Index/Grid */}
+          {/* Tombol Slider Index/Grid - DIPINDAHKAN KE SAMPING SEARCH */}
           <div style={{
             display: 'flex',
             alignItems: 'center',
