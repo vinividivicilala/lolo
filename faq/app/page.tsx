@@ -66,6 +66,17 @@ if (typeof window !== "undefined") {
 const githubProvider = new GithubAuthProvider();
 const googleProvider = new GoogleAuthProvider();
 
+// Type untuk komentar
+interface Comment {
+  id?: string;
+  photoIndex: number;
+  text: string;
+  user: string;
+  userId?: string;
+  timestamp: Timestamp | Date;
+  userAvatar?: string;
+}
+
 // Type untuk user stats
 interface UserStats {
   totalLogins: number;
@@ -103,21 +114,18 @@ interface Notification {
   isAdminPost?: boolean;
   adminName?: string;
   category?: string;
+  read?: boolean;
 }
 
 // Type untuk note
 interface Note {
   id: string;
-  title: string;
-  content: string;
   userId: string;
   userName: string;
-  userEmail?: string;
-  createdAt: Timestamp | Date;
-  updatedAt: Timestamp | Date;
+  content: string;
+  timestamp: Timestamp | Date;
   category?: string;
-  tags?: string[];
-  isPinned?: boolean;
+  isPrivate?: boolean;
 }
 
 export default function HomePage(): React.JSX.Element {
@@ -127,57 +135,81 @@ export default function HomePage(): React.JSX.Element {
   const [isLoading, setIsLoading] = useState(true);
   const [currentView, setCurrentView] = useState<"main" | "index" | "grid">("main");
   const [sliderPosition, setSliderPosition] = useState<"index" | "grid">("grid");
+  const [hoveredTopic, setHoveredTopic] = useState<number | null>(null);
+  const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
+  const [isProgressActive, setIsProgressActive] = useState(true);
+  const [showCookieNotification, setShowCookieNotification] = useState(false);
+  const [showPhotoFullPage, setShowPhotoFullPage] = useState(false);
   const [user, setUser] = useState<any>(null);
   const [userDisplayName, setUserDisplayName] = useState("");
-  const [showUserProfileModal, setShowUserProfileModal] = useState(false);
+  const [isNameScrolling, setIsNameScrolling] = useState(false);
+  const [scrollDirection, setScrollDirection] = useState<"left" | "right">("right");
+  const [scrollPosition, setScrollPosition] = useState(0);
+  const [isHoveringSignIn, setIsHoveringSignIn] = useState(false);
   const [showUserDropdown, setShowUserDropdown] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [userStats, setUserStats] = useState<UserStats | null>(null);
   const [totalUsers, setTotalUsers] = useState(0);
   const [totalLoggedInUsers, setTotalLoggedInUsers] = useState(0);
   
-  // State untuk user notes
-  const [userNotes, setUserNotes] = useState<Note[]>([]);
-  const [totalNotes, setTotalNotes] = useState(0);
-  const [isLoadingNotes, setIsLoadingNotes] = useState(false);
-  
-  // State untuk profil user
-  const [userProfile, setUserProfile] = useState<any>(null);
-  const [loginMethod, setLoginMethod] = useState<string>("");
-  const [isEditingName, setIsEditingName] = useState(false);
-  const [editedName, setEditedName] = useState("");
-  
   // State untuk popup chatbot
   const [showChatbotPopup, setShowChatbotPopup] = useState(true);
   
-  // State untuk search
+  // State untuk counter foto
+  const [leftCounter, setLeftCounter] = useState("01");
+  const totalPhotos = "03";
+  
+  // State untuk posisi gambar
+  const [imagePosition, setImagePosition] = useState(0);
+  
+  // State untuk komentar
+  const [message, setMessage] = useState("");
+  const [photoTimeAgo, setPhotoTimeAgo] = useState<string[]>([]);
+  
+  // State untuk komentar dari Firebase
+  const [comments, setComments] = useState<Comment[]>([]);
+  const [isLoadingComments, setIsLoadingComments] = useState(false);
+
+  // State untuk notifikasi dan search
+  const [showNotification, setShowNotification] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [searchResults, setSearchResults] = useState<any[]>([]);
-  const [showSearchResults, setShowSearchResults] = useState(false);
-  
-  // State untuk notifikasi
-  const [showNotification, setShowNotification] = useState(false);
   const [hasUnreadNotifications, setHasUnreadNotifications] = useState(false);
   const [notificationCount, setNotificationCount] = useState(0);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [isLoadingNotifications, setIsLoadingNotifications] = useState(false);
 
+  // State baru untuk profil modal
+  const [showProfileModal, setShowProfileModal] = useState(false);
+  const [userNotes, setUserNotes] = useState<Note[]>([]);
+  const [totalNotes, setTotalNotes] = useState(0);
+  const [isLoadingNotes, setIsLoadingNotes] = useState(false);
+  const [loginMethod, setLoginMethod] = useState<string>("");
+  const [userEmail, setUserEmail] = useState<string>("");
+
   const headerRef = useRef<HTMLDivElement>(null);
   const topNavRef = useRef<HTMLDivElement>(null);
+  const topicContainerRef = useRef<HTMLDivElement>(null);
+  const progressAnimationRef = useRef<gsap.core.Tween | null>(null);
+  const plusSignRef = useRef<HTMLDivElement>(null);
+  const backslashRef = useRef<HTMLDivElement>(null);
   const userButtonRef = useRef<HTMLButtonElement>(null);
   const userTextRef = useRef<HTMLSpanElement>(null);
+  const leftCounterRef = useRef<HTMLSpanElement>(null);
+  const messageInputRef = useRef<HTMLInputElement>(null);
   const userDropdownRef = useRef<HTMLDivElement>(null);
-  const userProfileModalRef = useRef<HTMLDivElement>(null);
   const chatbotPopupRef = useRef<HTMLDivElement>(null);
+  const profileModalRef = useRef<HTMLDivElement>(null);
   
-  // Ref untuk search
-  const searchInputRef = useRef<HTMLInputElement>(null);
-  const searchContainerRef = useRef<HTMLDivElement>(null);
-  
-  // Ref untuk notifikasi
+  // Ref untuk notifikasi dan search
   const notificationRef = useRef<HTMLDivElement>(null);
   const notificationDropdownRef = useRef<HTMLDivElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  const searchContainerRef = useRef<HTMLDivElement>(null);
+
+  // State untuk search results
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [showSearchResults, setShowSearchResults] = useState(false);
 
   // Data untuk pencarian
   const searchablePages = [
@@ -247,11 +279,190 @@ export default function HomePage(): React.JSX.Element {
     }
   ];
 
+  // Helper functions untuk notifikasi
+  const getIconByType = (type: string): string => {
+    switch (type) {
+      case 'system': return '🔄';
+      case 'announcement': return '📢';
+      case 'alert': return '⚠️';
+      case 'update': return '🆕';
+      case 'comment': return '💬';
+      case 'personal': return '👤';
+      default: return '📌';
+    }
+  };
+
+  const getColorByType = (type: string): string => {
+    switch (type) {
+      case 'system': return '#6366F1';
+      case 'announcement': return '#0050B7';
+      case 'alert': return '#FF4757';
+      case 'update': return '#00FF00';
+      case 'comment': return '#8B5CF6';
+      case 'personal': return '#F59E0B';
+      default: return '#6B7280';
+    }
+  };
+
+  const getBgColorByType = (type: string): string => {
+    const color = getColorByType(type);
+    return color + '20';
+  };
+
+  // Fungsi untuk mendapatkan login method
+  const getLoginMethod = (user: any): string => {
+    if (!user) return "";
+    
+    if (user.providerData && user.providerData.length > 0) {
+      const provider = user.providerData[0].providerId;
+      switch (provider) {
+        case 'github.com':
+          return 'GitHub';
+        case 'google.com':
+          return 'Google';
+        case 'password':
+          return 'Email & Password';
+        default:
+          return 'Unknown';
+      }
+    }
+    return 'Email & Password';
+  };
+
+  // Load user notes
+  useEffect(() => {
+    if (user && showProfileModal) {
+      loadUserNotes();
+    }
+  }, [user, showProfileModal]);
+
+  const loadUserNotes = async () => {
+    if (!user || !db) return;
+    
+    setIsLoadingNotes(true);
+    try {
+      const notesRef = collection(db, 'notes');
+      const q = query(
+        notesRef, 
+        where('userId', '==', user.uid),
+        orderBy('timestamp', 'desc')
+      );
+      
+      const unsubscribe = onSnapshot(q, (querySnapshot) => {
+        const notesData: Note[] = [];
+        querySnapshot.forEach((doc) => {
+          notesData.push({
+            id: doc.id,
+            ...doc.data()
+          } as Note);
+        });
+        setUserNotes(notesData);
+        setTotalNotes(notesData.length);
+        setIsLoadingNotes(false);
+      }, (error) => {
+        console.error("Error loading notes:", error);
+        setIsLoadingNotes(false);
+      });
+
+      return () => unsubscribe();
+    } catch (error) {
+      console.error("Error in loadUserNotes:", error);
+      setIsLoadingNotes(false);
+    }
+  };
+
+  // Fungsi untuk menghapus akun
+  const handleDeleteAccount = async () => {
+    if (!user || !auth || !db) return;
+    
+    const confirmed = confirm("Apakah Anda yakin ingin menghapus akun? Tindakan ini tidak dapat dibatalkan.");
+    if (!confirmed) return;
+    
+    try {
+      // Hapus data user dari Firestore
+      const userStatsRef = doc(db, 'userStats', user.uid);
+      await setDoc(userStatsRef, { isDeleted: true }, { merge: true });
+      
+      // Hapus notes user
+      const notesQuery = query(collection(db, 'notes'), where('userId', '==', user.uid));
+      const notesSnapshot = await getDocs(notesQuery);
+      const batch = writeBatch(db);
+      notesSnapshot.forEach((noteDoc) => {
+        batch.delete(noteDoc.ref);
+      });
+      await batch.commit();
+      
+      // Delete user dari Firebase Auth
+      await user.delete();
+      
+      // Reset state
+      setShowProfileModal(false);
+      setUser(null);
+      setUserDisplayName("");
+      setUserStats(null);
+      setUserNotes([]);
+      setTotalNotes(0);
+      
+      alert("Akun berhasil dihapus.");
+    } catch (error: any) {
+      console.error("Error deleting account:", error);
+      alert(`Gagal menghapus akun: ${error.message}`);
+    }
+  };
+
+  // Fungsi untuk mengirim feedback
+  const handleSendFeedback = () => {
+    const feedback = prompt("Masukkan feedback atau saran Anda:");
+    if (feedback && feedback.trim()) {
+      alert("Terima kasih atas feedback Anda!");
+      // Di sini bisa ditambahkan kode untuk menyimpan feedback ke Firebase
+    }
+  };
+
+  // Handler untuk membuka modal profil
+  const handleOpenProfileModal = () => {
+    setShowUserDropdown(false);
+    setShowProfileModal(true);
+    
+    // Set login method dan email
+    if (user) {
+      setLoginMethod(getLoginMethod(user));
+      setUserEmail(user.email || "");
+    }
+  };
+
+  // Handler untuk menutup modal profil
+  const handleCloseProfileModal = () => {
+    setShowProfileModal(false);
+  };
+
   // Animasi loading text
   const loadingTexts = [
     "NURU", "MBACA", "NULIS", "NGEXPLORASI", 
     "NEMUKAN", "NCIPTA", "NGGALI", "NARIK",
     "NGAMATI", "NANCANG", "NGEMBANGKAN", "NYUSUN"
+  ];
+
+  // Data foto untuk progress bar
+  const progressPhotos = [
+    { 
+      id: 1, 
+      src: "images/5.jpg", 
+      alt: "Photo 1",
+      uploadTime: new Date(Date.now() - 5 * 60 * 1000)
+    },
+    { 
+      id: 2, 
+      src: "images/6.jpg", 
+      alt: "Photo 2",
+      uploadTime: new Date(Date.now() - 2 * 60 * 1000)
+    },
+    { 
+      id: 3, 
+      src: "images/5.jpg", 
+      alt: "Photo 3",
+      uploadTime: new Date(Date.now() - 30 * 1000)
+    }
   ];
 
   // Data untuk Roles
@@ -261,6 +472,798 @@ export default function HomePage(): React.JSX.Element {
     { title: "Development", description: "Frontend & Backend" },
     { title: "Features", description: "Functionality & Integration" }
   ];
+
+  // Update waktu yang lalu secara real-time
+  useEffect(() => {
+    const updateTimes = () => {
+      const newTimes = progressPhotos.map(photo => 
+        calculateTimeAgo(photo.uploadTime)
+      );
+      setPhotoTimeAgo(newTimes);
+    };
+
+    updateTimes();
+    const interval = setInterval(updateTimes, 1000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  // Fungsi untuk update user stats di Firestore
+  const updateUserStats = async (userId: string, userName: string) => {
+    try {
+      const userStatsRef = doc(db, 'userStats', userId);
+      const userStatsDoc = await getDoc(userStatsRef);
+      
+      if (userStatsDoc.exists()) {
+        await updateDoc(userStatsRef, {
+          loginCount: increment(1),
+          lastLogin: serverTimestamp(),
+          userName: userName,
+          updatedAt: serverTimestamp()
+        });
+        
+        const totalLoginsRef = doc(db, 'appStats', 'totalLogins');
+        const totalLoginsDoc = await getDoc(totalLoginsRef);
+        
+        if (totalLoginsDoc.exists()) {
+          await updateDoc(totalLoginsRef, {
+            count: increment(1),
+            updatedAt: serverTimestamp()
+          });
+        } else {
+          await setDoc(totalLoginsRef, {
+            count: 1,
+            updatedAt: serverTimestamp()
+          });
+        }
+      } else {
+        await setDoc(userStatsRef, {
+          userId: userId,
+          userName: userName,
+          loginCount: 1,
+          totalLogins: 1,
+          lastLogin: serverTimestamp(),
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp()
+        });
+
+        const totalUsersRef = doc(db, 'appStats', 'totalUsers');
+        const totalUsersDoc = await getDoc(totalUsersRef);
+        
+        if (totalUsersDoc.exists()) {
+          await updateDoc(totalUsersRef, {
+            count: increment(1),
+            updatedAt: serverTimestamp()
+          });
+        } else {
+          await setDoc(totalUsersRef, {
+            count: 1,
+            updatedAt: serverTimestamp()
+          });
+        }
+        
+        const totalLoginsRef = doc(db, 'appStats', 'totalLogins');
+        const totalLoginsDoc = await getDoc(totalLoginsRef);
+        if (!totalLoginsDoc.exists()) {
+          await setDoc(totalLoginsRef, {
+            count: 1,
+            updatedAt: serverTimestamp()
+          });
+        }
+      }
+
+    } catch (error) {
+      console.error("Error updating user stats:", error);
+    }
+  };
+
+  // Load total users count
+  useEffect(() => {
+    const loadTotalUsers = async () => {
+      try {
+        const totalUsersRef = doc(db, 'appStats', 'totalUsers');
+        const totalUsersDoc = await getDoc(totalUsersRef);
+        
+        if (totalUsersDoc.exists()) {
+          setTotalUsers(totalUsersDoc.data().count || 0);
+        }
+      } catch (error) {
+        console.error("Error loading total users:", error);
+      }
+    };
+
+    loadTotalUsers();
+  }, []);
+
+  // Load total logged in users
+  useEffect(() => {
+    const loadTotalLoggedInUsers = async () => {
+      try {
+        const totalLoginsRef = doc(db, 'appStats', 'totalLogins');
+        const totalLoginsDoc = await getDoc(totalLoginsRef);
+        
+        if (totalLoginsDoc.exists()) {
+          setTotalLoggedInUsers(totalLoginsDoc.data().count || 0);
+        }
+      } catch (error) {
+        console.error("Error loading total logged in users:", error);
+      }
+    };
+
+    loadTotalLoggedInUsers();
+  }, []);
+
+  // Listen to auth state changes
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      if (currentUser) {
+        setUser(currentUser);
+        const name = currentUser.displayName || 
+                     currentUser.email?.split('@')[0] || 
+                     'User';
+        setUserDisplayName(name);
+        
+        await updateUserStats(currentUser.uid, name);
+        
+        try {
+          const userStatsRef = doc(db, 'userStats', currentUser.uid);
+          const userStatsDoc = await getDoc(userStatsRef);
+          
+          if (userStatsDoc.exists()) {
+            setUserStats(userStatsDoc.data() as UserStats);
+          }
+        } catch (error) {
+          console.error("Error loading user stats:", error);
+        }
+      } else {
+        setUser(null);
+        setUserDisplayName("");
+        setUserStats(null);
+        setShowUserDropdown(false);
+        setShowProfileModal(false);
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  // Load comments from Firebase
+  useEffect(() => {
+    console.log("Memulai loading komentar...");
+    setIsLoadingComments(true);
+    
+    const commentsRef = collection(db, 'photoComments');
+    const q = query(commentsRef, orderBy('timestamp', 'desc'));
+    
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      console.log("Snapshot diterima, jumlah dokumen:", querySnapshot.size);
+      const commentsData: Comment[] = [];
+      querySnapshot.forEach((doc) => {
+        console.log("Komentar:", doc.id, doc.data());
+        commentsData.push({
+          id: doc.id,
+          ...doc.data()
+        } as Comment);
+      });
+      setComments(commentsData);
+      setIsLoadingComments(false);
+    }, (error) => {
+      console.error("Error loading comments:", error);
+      console.error("Error code:", error.code);
+      setIsLoadingComments(false);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  // Load notifications from Firebase
+  useEffect(() => {
+    console.log("🚀 Memulai loading notifikasi untuk halaman utama...");
+    
+    if (!db) {
+      console.log("❌ Firebase belum siap");
+      setIsLoadingNotifications(false);
+      return;
+    }
+    
+    setIsLoadingNotifications(true);
+    
+    try {
+      const notificationsRef = collection(db, 'notifications');
+      const q = query(notificationsRef, orderBy('createdAt', 'desc'));
+      
+      console.log("📡 Mendengarkan notifikasi dari Firestore...");
+      
+      const unsubscribe = onSnapshot(q, 
+        (querySnapshot) => {
+          console.log("✅ Notifikasi diterima:", querySnapshot.size, "dokumen");
+          
+          if (querySnapshot.empty) {
+            console.log("ℹ️ Tidak ada notifikasi di database");
+            setNotifications([]);
+            setHasUnreadNotifications(false);
+            setNotificationCount(0);
+            setIsLoadingNotifications(false);
+            return;
+          }
+          
+          const notificationsData: Notification[] = [];
+          let unreadCount = 0;
+          
+          const currentUser = auth?.currentUser;
+          const currentUserId = currentUser ? currentUser.uid : 
+                                localStorage.getItem('anonymous_user_id') || 
+                                'anonymous_' + Date.now();
+          
+          if (!currentUser && !localStorage.getItem('anonymous_user_id')) {
+            localStorage.setItem('anonymous_user_id', currentUserId);
+          }
+          
+          querySnapshot.forEach((doc) => {
+            try {
+              const data = doc.data();
+              
+              if (data.isDeleted === true) {
+                console.log(`⏭️ Skip notifikasi ${doc.id} karena deleted`);
+                return;
+              }
+              
+              let shouldShow = false;
+              
+              switch (data.recipientType) {
+                case 'all':
+                  shouldShow = true;
+                  break;
+                  
+                case 'specific':
+                  const recipientIds = data.recipientIds || [];
+                  if (recipientIds.includes(currentUserId) || 
+                      (currentUser && recipientIds.includes(currentUser.uid))) {
+                    shouldShow = true;
+                  }
+                  break;
+                  
+                case 'email_only':
+                  if (currentUser && data.recipientEmails?.includes(currentUser.email)) {
+                    shouldShow = true;
+                  }
+                  break;
+                  
+                case 'app_only':
+                  if (currentUser) {
+                    shouldShow = true;
+                  }
+                  break;
+                  
+                default:
+                  shouldShow = false;
+              }
+              
+              if (shouldShow) {
+                let timestamp = data.createdAt;
+                if (timestamp && typeof timestamp.toDate === 'function') {
+                  timestamp = timestamp.toDate();
+                }
+                
+                const notification: Notification = {
+                  id: doc.id,
+                  title: data.title || "No Title",
+                  message: data.message || "",
+                  type: data.type || 'announcement',
+                  priority: data.priority || 'medium',
+                  senderId: data.senderId || 'system',
+                  senderName: data.senderName || 'System',
+                  senderEmail: data.senderEmail,
+                  senderPhotoURL: data.senderPhotoURL,
+                  recipientType: data.recipientType || 'all',
+                  recipientIds: data.recipientIds || [],
+                  recipientEmails: data.recipientEmails || [],
+                  isRead: false,
+                  isDeleted: data.isDeleted || false,
+                  createdAt: timestamp || new Date(),
+                  actionUrl: data.actionUrl,
+                  icon: data.icon || getIconByType(data.type || 'announcement'),
+                  color: data.color || '#0050B7',
+                  userReads: data.userReads || {},
+                  views: data.views || 0,
+                  clicks: data.clicks || 0,
+                  likes: data.likes || [],
+                  comments: data.comments || [],
+                  allowComments: data.allowComments || false,
+                  read: data.read || false,
+                  isAdminPost: data.isAdminPost || false,
+                  adminName: data.adminName || '',
+                  category: data.category || 'general'
+                };
+                
+                const isReadByUser = notification.userReads[currentUserId] || 
+                                    (currentUser && notification.userReads[currentUser.uid]) || 
+                                    false;
+                
+                if (!isReadByUser) {
+                  unreadCount++;
+                }
+                
+                notificationsData.push(notification);
+              }
+            } catch (error) {
+              console.error(`❌ Error processing notification ${doc.id}:`, error);
+            }
+          });
+          
+          console.log(`📊 Total notifikasi untuk user: ${notificationsData.length}, Unread: ${unreadCount}`);
+          
+          setNotifications(notificationsData);
+          setHasUnreadNotifications(unreadCount > 0);
+          setNotificationCount(unreadCount);
+          setIsLoadingNotifications(false);
+        }, 
+        (error) => {
+          console.error("❌ Error loading notifications:", error);
+          console.error("Error code:", error.code);
+          console.error("Error message:", error.message);
+          
+          setIsLoadingNotifications(false);
+        }
+      );
+      
+      return () => unsubscribe();
+    } catch (error) {
+      console.error("❌ Error in notifications useEffect:", error);
+      setIsLoadingNotifications(false);
+    }
+  }, [db, auth?.currentUser]);
+
+  // Animasi teks nama user berjalan
+  useEffect(() => {
+    if (user && userTextRef.current && userButtonRef.current) {
+      const textWidth = userTextRef.current.scrollWidth;
+      const buttonWidth = userButtonRef.current.clientWidth;
+      
+      if (textWidth > buttonWidth) {
+        setIsNameScrolling(true);
+        
+        const animation = gsap.to(userTextRef.current, {
+          x: -(textWidth - buttonWidth + 20),
+          duration: 5,
+          repeat: -1,
+          yoyo: true,
+          ease: "power1.inOut",
+          onReverseComplete: () => {
+            setScrollDirection("right");
+          },
+          onComplete: () => {
+            setScrollDirection("left");
+          }
+        });
+
+        return () => {
+          animation.kill();
+        };
+      } else {
+        setIsNameScrolling(false);
+      }
+    }
+  }, [user, userDisplayName, isMobile]);
+
+  // Animasi GSAP untuk search expand
+  useEffect(() => {
+    if (searchContainerRef.current) {
+      if (showSearch) {
+        gsap.to(searchContainerRef.current, {
+          width: 250,
+          duration: 0.3,
+          ease: "power2.out"
+        });
+        setTimeout(() => {
+          if (searchInputRef.current) {
+            searchInputRef.current.focus();
+          }
+        }, 100);
+      } else {
+        gsap.to(searchContainerRef.current, {
+          width: 40,
+          duration: 0.3,
+          ease: "power2.in",
+          onComplete: () => {
+            setSearchQuery("");
+          }
+        });
+      }
+    }
+  }, [showSearch]);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (userDropdownRef.current && !userDropdownRef.current.contains(event.target as Node)) {
+        setShowUserDropdown(false);
+      }
+      if (chatbotPopupRef.current && !chatbotPopupRef.current.contains(event.target as Node)) {
+        const target = event.target as HTMLElement;
+        const isChatbotNavButton = target.closest('[data-nav-chatbot]');
+        if (!isChatbotNavButton) {
+          setShowChatbotPopup(false);
+        }
+      }
+      if (notificationDropdownRef.current && !notificationDropdownRef.current.contains(event.target as Node)) {
+        setShowNotification(false);
+      }
+      if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
+        setShowSearch(false);
+      }
+      if (profileModalRef.current && !profileModalRef.current.contains(event.target as Node)) {
+        handleCloseProfileModal();
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  // Fungsi untuk mengupdate counter angka kiri
+  const updateLeftCounter = (newIndex: number) => {
+    const newLeftCounter = String(newIndex + 1).padStart(2, '0');
+    
+    if (leftCounterRef.current) {
+      gsap.to(leftCounterRef.current, {
+        opacity: 0,
+        y: -10,
+        duration: 0.2,
+        onComplete: () => {
+          setLeftCounter(newLeftCounter);
+          
+          gsap.fromTo(leftCounterRef.current, 
+            { opacity: 0, y: 10 },
+            { 
+              opacity: 1, 
+              y: 0, 
+              duration: 0.3,
+              ease: "power2.out"
+            }
+          );
+        }
+      });
+    } else {
+      setLeftCounter(newLeftCounter);
+    }
+  };
+
+  // Update counter ketika currentPhotoIndex berubah
+  useEffect(() => {
+    updateLeftCounter(currentPhotoIndex);
+  }, [currentPhotoIndex]);
+
+  // Update posisi gambar ketika hoveredTopic berubah
+  useEffect(() => {
+    if (hoveredTopic !== null) {
+      const topicIndex = indexTopics.findIndex(topic => topic.id === hoveredTopic);
+      const newPosition = topicIndex * 40;
+      setImagePosition(newPosition);
+    } else {
+      setImagePosition(0);
+    }
+  }, [hoveredTopic]);
+
+  useEffect(() => {
+    const cookieAccepted = localStorage.getItem('cookiesAccepted');
+    if (!cookieAccepted) {
+      setTimeout(() => {
+        setShowCookieNotification(true);
+      }, 2000);
+    }
+
+    const chatbotShown = localStorage.getItem('chatbotPopupShown');
+    if (!chatbotShown) {
+      setTimeout(() => {
+        setShowChatbotPopup(true);
+      }, 3000);
+    }
+
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+
+    let currentIndex = 0;
+    const textInterval = setInterval(() => {
+      currentIndex = (currentIndex + 1) % loadingTexts.length;
+      setLoadingText(loadingTexts[currentIndex]);
+    }, 500);
+
+    const loadingTimeout = setTimeout(() => {
+      setIsLoading(false);
+      clearInterval(textInterval);
+    }, 3000);
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (showPhotoFullPage) {
+        if (e.key === 'ArrowLeft') {
+          prevPhoto();
+        } else if (e.key === 'ArrowRight') {
+          nextPhoto();
+        }
+      }
+      
+      if (e.key === 'Escape') {
+        if (showPhotoFullPage) {
+          handleClosePhotoFullPage();
+        }
+        if (showUserDropdown) {
+          setShowUserDropdown(false);
+        }
+        if (showLogoutModal) {
+          setShowLogoutModal(false);
+        }
+        if (showChatbotPopup) {
+          setShowChatbotPopup(false);
+        }
+        if (showNotification) {
+          setShowNotification(false);
+        }
+        if (showSearch) {
+          setShowSearch(false);
+        }
+        if (showProfileModal) {
+          handleCloseProfileModal();
+        }
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      window.removeEventListener('resize', checkMobile);
+      clearInterval(textInterval);
+      clearTimeout(loadingTimeout);
+      document.removeEventListener('keydown', handleKeyDown);
+      if (progressAnimationRef.current) {
+        progressAnimationRef.current.kill();
+      }
+      if (plusSignRef.current) {
+        gsap.killTweensOf(plusSignRef.current);
+      }
+      if (backslashRef.current) {
+        gsap.killTweensOf(backslashRef.current);
+      }
+      if (leftCounterRef.current) {
+        gsap.killTweensOf(leftCounterRef.current);
+      }
+      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
+    };
+  }, [isMobile, showPhotoFullPage, showUserDropdown, showLogoutModal, showChatbotPopup, showNotification, showSearch, showProfileModal]);
+
+  // Fungsi untuk handle cookie acceptance
+  const handleAcceptCookies = () => {
+    localStorage.setItem('cookiesAccepted', 'true');
+    setShowCookieNotification(false);
+    
+    const date = new Date();
+    date.setTime(date.getTime() + (30 * 24 * 60 * 60 * 1000));
+    document.cookie = `cookiesAccepted=true; expires=${date.toUTCString()}; path=/`;
+    
+    if (localStorage.getItem('themePreference')) {
+      const themePref = localStorage.getItem('themePreference');
+      document.cookie = `themePreference=${themePref}; expires=${date.toUTCString()}; path=/`;
+    }
+  };
+
+  // Fungsi untuk maju ke foto berikutnya
+  const nextPhoto = () => {
+    setCurrentPhotoIndex((prev) => {
+      const nextIndex = (prev + 1) % progressPhotos.length;
+      return nextIndex;
+    });
+  };
+
+  // Fungsi untuk mundur ke foto sebelumnya
+  const prevPhoto = () => {
+    setCurrentPhotoIndex((prev) => {
+      const prevIndex = (prev - 1 + progressPhotos.length) % progressPhotos.length;
+      return prevIndex;
+    });
+  };
+
+  // Start progress animation
+  const startProgressAnimation = () => {
+    if (progressAnimationRef.current) {
+      progressAnimationRef.current.kill();
+    }
+
+    const progressFills = document.querySelectorAll('.progress-fill');
+    progressFills.forEach(fill => {
+      (fill as HTMLElement).style.width = '0%';
+    });
+
+    const currentFill = document.querySelector(`.progress-fill[data-index="${currentPhotoIndex}"]`) as HTMLElement;
+    
+    if (currentFill) {
+      progressAnimationRef.current = gsap.to(currentFill, {
+        width: '100%',
+        duration: 15,
+        ease: "linear",
+        onComplete: () => {
+          if (isProgressActive) {
+            nextPhoto();
+          }
+        }
+      });
+    }
+  };
+
+  // Mulai animasi progress ketika currentPhotoIndex berubah
+  useEffect(() => {
+    if (isProgressActive) {
+      startProgressAnimation();
+    }
+  }, [currentPhotoIndex, isProgressActive]);
+
+  // Handler untuk topic hover
+  const handleTopicHover = (topicId: number | null) => {
+    setHoveredTopic(topicId);
+  };
+
+  // Fungsi untuk toggle slider
+  const toggleSlider = () => {
+    if (sliderPosition === "index") {
+      setSliderPosition("grid");
+      setCurrentView("main");
+    } else {
+      setSliderPosition("index");
+      setCurrentView("index");
+    }
+  };
+
+  // Handler untuk membuka tampilan foto full page
+  const handleOpenPhotoFullPage = () => {
+    setShowPhotoFullPage(true);
+  };
+
+  // Handler untuk menutup tampilan foto full page
+  const handleClosePhotoFullPage = () => {
+    setShowPhotoFullPage(false);
+  };
+
+  // Handler untuk klik foto
+  const handlePhotoClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    handleOpenPhotoFullPage();
+  };
+
+  // Handler untuk Sign In / User Button
+  const handleSignInClick = () => {
+    if (user) {
+      handleOpenProfileModal();
+    } else {
+      router.push('/signin');
+    }
+  };
+
+  // Handler untuk login dengan GitHub
+  const handleGitHubLogin = async () => {
+    try {
+      const result = await signInWithPopup(auth, githubProvider);
+      console.log("GitHub login successful:", result.user);
+      setShowUserDropdown(false);
+    } catch (error) {
+      console.error("GitHub login error:", error);
+      alert("Login dengan GitHub gagal. Silakan coba lagi.");
+    }
+  };
+
+  // Handler untuk login dengan Google
+  const handleGoogleLogin = async () => {
+    try {
+      const result = await signInWithPopup(auth, googleProvider);
+      console.log("Google login successful:", result.user);
+      setShowUserDropdown(false);
+    } catch (error) {
+      console.error("Google login error:", error);
+      alert("Login dengan Google gagal. Silakan coba lagi.");
+    }
+  };
+
+  // Handler untuk logout
+  const handleLogoutClick = () => {
+    setShowProfileModal(false);
+    setShowLogoutModal(true);
+  };
+
+  // Handler untuk konfirmasi logout
+  const handleConfirmLogout = async () => {
+    try {
+      await signOut(auth);
+      setShowLogoutModal(false);
+      setUser(null);
+      setUserDisplayName("");
+      setUserStats(null);
+      setUserNotes([]);
+      setTotalNotes(0);
+      router.push('/');
+    } catch (error) {
+      console.error("Logout error:", error);
+      alert("Logout gagal. Silakan coba lagi.");
+    }
+  };
+
+  // Handler untuk batal logout
+  const handleCancelLogout = () => {
+    setShowLogoutModal(false);
+  };
+
+  // Handler untuk mengirim komentar ke Firebase
+  const handleSendMessage = async () => {
+    if (message.trim() === "") {
+      alert("Komentar tidak boleh kosong");
+      return;
+    }
+    
+    try {
+      const userName = user ? userDisplayName : "Anonymous";
+      const userId = user ? user.uid : null;
+      const userEmail = user ? user.email : null;
+      const userAvatar = userName.charAt(0).toUpperCase();
+      
+      const newComment = {
+        photoIndex: currentPhotoIndex,
+        text: message.trim(),
+        user: userName,
+        userId: userId,
+        timestamp: serverTimestamp(),
+        userAvatar: userAvatar
+      };
+      
+      console.log("Mengirim komentar:", newComment);
+      
+      const docRef = await addDoc(collection(db, 'photoComments'), newComment);
+      console.log("Komentar berhasil dikirim dengan ID:", docRef.id);
+      
+      setMessage("");
+      
+      if (messageInputRef.current) {
+        messageInputRef.current.focus();
+      }
+      
+    } catch (error: any) {
+      console.error("Error detail:", error);
+      console.error("Error code:", error.code);
+      console.error("Error message:", error.message);
+      
+      let errorMessage = "Gagal mengirim komentar. Silakan coba lagi.";
+      
+      if (error.code === 'permission-denied') {
+        errorMessage = "Anda tidak memiliki izin untuk mengirim komentar. Periksa Firebase Rules.";
+      } else if (error.code === 'unauthenticated') {
+        errorMessage = "Silakan login terlebih dahulu untuk mengirim komentar.";
+      }
+      
+      alert(errorMessage);
+    }
+  };
+
+  // Handler untuk tekan Enter di input komentar
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSendMessage();
+    }
+  };
+
+  // Handler untuk menutup popup chatbot
+  const handleCloseChatbotPopup = () => {
+    setShowChatbotPopup(false);
+    localStorage.setItem('chatbotPopupShown', 'true');
+  };
+
+  // Handler untuk menuju ke halaman chatbot
+  const handleGoToChatbot = () => {
+    handleCloseChatbotPopup();
+    router.push('/chatbot');
+  };
 
   // Fungsi untuk melakukan pencarian
   const performSearch = (query: string) => {
@@ -272,7 +1275,6 @@ export default function HomePage(): React.JSX.Element {
 
     const lowerQuery = query.toLowerCase().trim();
     
-    // Filter berdasarkan title atau description
     const results = searchablePages.filter(page => 
       page.title.toLowerCase().includes(lowerQuery) ||
       page.description.toLowerCase().includes(lowerQuery) ||
@@ -282,7 +1284,6 @@ export default function HomePage(): React.JSX.Element {
     setSearchResults(results);
     setShowSearchResults(results.length > 0);
     
-    // Animasi GSAP untuk munculnya results
     if (results.length > 0 && searchContainerRef.current) {
       gsap.fromTo(".search-result-item", 
         { opacity: 0, y: -10 },
@@ -347,503 +1348,86 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // Helper functions untuk notifikasi
-  const getIconByType = (type: string): string => {
-    switch (type) {
-      case 'system': return '🔄';
-      case 'announcement': return '📢';
-      case 'alert': return '⚠️';
-      case 'update': return '🆕';
-      case 'comment': return '💬';
-      case 'personal': return '👤';
-      default: return '📌';
-    }
-  };
-
-  const getColorByType = (type: string): string => {
-    switch (type) {
-      case 'system': return '#6366F1';
-      case 'announcement': return '#0050B7';
-      case 'alert': return '#FF4757';
-      case 'update': return '#00FF00';
-      case 'comment': return '#8B5CF6';
-      case 'personal': return '#F59E0B';
-      default: return '#6B7280';
-    }
-  };
-
-  const getBgColorByType = (type: string): string => {
-    const color = getColorByType(type);
-    return color + '20';
-  };
-
-  // Fungsi untuk load user notes
-  const loadUserNotes = async (userId: string) => {
-    if (!db) return;
-    
-    setIsLoadingNotes(true);
+  const calculateTimeAgo = (date: Date | Timestamp | undefined | null): string => {
     try {
-      const notesRef = collection(db, 'notes');
-      const q = query(notesRef, 
-        where('userId', '==', userId),
-        orderBy('createdAt', 'desc')
-      );
-      
-      const unsubscribe = onSnapshot(q, (querySnapshot) => {
-        const notesData: Note[] = [];
-        querySnapshot.forEach((doc) => {
-          const data = doc.data();
-          notesData.push({
-            id: doc.id,
-            title: data.title || "Untitled",
-            content: data.content || "",
-            userId: data.userId,
-            userName: data.userName || "User",
-            userEmail: data.userEmail,
-            createdAt: data.createdAt,
-            updatedAt: data.updatedAt || data.createdAt,
-            category: data.category,
-            tags: data.tags || [],
-            isPinned: data.isPinned || false
-          } as Note);
-        });
-        
-        setUserNotes(notesData);
-        setTotalNotes(notesData.length);
-        setIsLoadingNotes(false);
-      });
-      
-      return unsubscribe;
-    } catch (error) {
-      console.error("Error loading user notes:", error);
-      setIsLoadingNotes(false);
-    }
-  };
-
-  // Fungsi untuk load user profile
-  const loadUserProfile = async (userId: string, userData: any) => {
-    try {
-      // Tentukan metode login
-      let method = "Email";
-      if (userData.providerData && userData.providerData.length > 0) {
-        const providerId = userData.providerData[0].providerId;
-        if (providerId.includes('github')) {
-          method = "GitHub";
-        } else if (providerId.includes('google')) {
-          method = "Google";
-        }
+      if (!date) {
+        return "Recently";
       }
-      setLoginMethod(method);
       
-      // Simpan data profil
-      setUserProfile({
-        uid: userId,
-        displayName: userData.displayName || userData.email?.split('@')[0] || 'User',
-        email: userData.email,
-        photoURL: userData.photoURL,
-        loginMethod: method,
-        createdAt: userData.metadata?.creationTime,
-        lastLogin: userData.metadata?.lastSignInTime
-      });
+      const now = new Date();
+      let commentDate: Date;
       
-      // Set nama untuk editing
-      setEditedName(userData.displayName || userData.email?.split('@')[0] || 'User');
-    } catch (error) {
-      console.error("Error loading user profile:", error);
-    }
-  };
-
-  // Fungsi untuk update nama user
-  const updateUserName = async () => {
-    if (!user || !editedName.trim()) return;
-    
-    try {
-      // Update di Firebase Auth
-      await updateProfile(user, {
-        displayName: editedName.trim()
-      });
-      
-      // Update di Firestore
-      const userStatsRef = doc(db, 'userStats', user.uid);
-      await updateDoc(userStatsRef, {
-        userName: editedName.trim(),
-        updatedAt: serverTimestamp()
-      });
-      
-      // Update local state
-      setUserDisplayName(editedName.trim());
-      setUserProfile((prev: any) => ({
-        ...prev,
-        displayName: editedName.trim()
-      }));
-      
-      setIsEditingName(false);
-      alert("Nama berhasil diperbarui!");
-    } catch (error) {
-      console.error("Error updating user name:", error);
-      alert("Gagal memperbarui nama. Silakan coba lagi.");
-    }
-  };
-
-  // Fungsi untuk hapus akun
-  const handleDeleteAccount = async () => {
-    if (!user || !window.confirm("Apakah Anda yakin ingin menghapus akun? Tindakan ini tidak dapat dibatalkan.")) {
-      return;
-    }
-    
-    try {
-      // Hapus data user dari Firestore
-      const batch = writeBatch(db);
-      
-      // Hapus user stats
-      const userStatsRef = doc(db, 'userStats', user.uid);
-      batch.delete(userStatsRef);
-      
-      // Hapus catatan user
-      const notesRef = collection(db, 'notes');
-      const userNotesQuery = query(notesRef, where('userId', '==', user.uid));
-      const notesSnapshot = await getDocs(userNotesQuery);
-      notesSnapshot.forEach((noteDoc) => {
-        batch.delete(noteDoc.ref);
-      });
-      
-      await batch.commit();
-      
-      // Hapus user dari Firebase Auth
-      await deleteUser(user);
-      
-      // Logout dan redirect
-      await signOut(auth);
-      setUser(null);
-      setShowUserProfileModal(false);
-      router.push('/');
-      alert("Akun berhasil dihapus.");
-    } catch (error) {
-      console.error("Error deleting account:", error);
-      alert("Gagal menghapus akun. Silakan coba lagi.");
-    }
-  };
-
-  // Fungsi untuk update user stats di Firestore
-  const updateUserStats = async (userId: string, userName: string) => {
-    try {
-      const userStatsRef = doc(db, 'userStats', userId);
-      const userStatsDoc = await getDoc(userStatsRef);
-      
-      if (userStatsDoc.exists()) {
-        await updateDoc(userStatsRef, {
-          loginCount: increment(1),
-          lastLogin: serverTimestamp(),
-          userName: userName,
-          updatedAt: serverTimestamp()
-        });
+      if (date instanceof Timestamp) {
+        commentDate = date.toDate();
+      } else if (date instanceof Date) {
+        commentDate = date;
       } else {
-        await setDoc(userStatsRef, {
-          userId: userId,
-          userName: userName,
-          loginCount: 1,
-          totalLogins: 1,
-          lastLogin: serverTimestamp(),
-          createdAt: serverTimestamp(),
-          updatedAt: serverTimestamp()
-        });
+        commentDate = new Date(date);
       }
-    } catch (error) {
-      console.error("Error updating user stats:", error);
-    }
-  };
-
-  // Listen to auth state changes
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      if (currentUser) {
-        setUser(currentUser);
-        const name = currentUser.displayName || 
-                     currentUser.email?.split('@')[0] || 
-                     'User';
-        setUserDisplayName(name);
-        
-        await updateUserStats(currentUser.uid, name);
-        
-        // Load user stats
-        try {
-          const userStatsRef = doc(db, 'userStats', currentUser.uid);
-          const userStatsDoc = await getDoc(userStatsRef);
-          
-          if (userStatsDoc.exists()) {
-            setUserStats(userStatsDoc.data() as UserStats);
-          }
-        } catch (error) {
-          console.error("Error loading user stats:", error);
-        }
-        
-        // Load user profile
-        loadUserProfile(currentUser.uid, currentUser);
-        
-        // Load user notes
-        loadUserNotes(currentUser.uid);
-      } else {
-        setUser(null);
-        setUserDisplayName("");
-        setUserStats(null);
-        setUserProfile(null);
-        setUserNotes([]);
-        setShowUserProfileModal(false);
-        setShowUserDropdown(false);
-      }
-    });
-
-    return () => unsubscribe();
-  }, []);
-
-  // Load total users count
-  useEffect(() => {
-    const loadTotalUsers = async () => {
-      try {
-        const totalUsersRef = doc(db, 'appStats', 'totalUsers');
-        const totalUsersDoc = await getDoc(totalUsersRef);
-        
-        if (totalUsersDoc.exists()) {
-          setTotalUsers(totalUsersDoc.data().count || 0);
-        }
-      } catch (error) {
-        console.error("Error loading total users:", error);
-      }
-    };
-
-    loadTotalUsers();
-  }, []);
-
-  // Load total logged in users
-  useEffect(() => {
-    const loadTotalLoggedInUsers = async () => {
-      try {
-        const totalLoginsRef = doc(db, 'appStats', 'totalLogins');
-        const totalLoginsDoc = await getDoc(totalLoginsRef);
-        
-        if (totalLoginsDoc.exists()) {
-          setTotalLoggedInUsers(totalLoginsDoc.data().count || 0);
-        }
-      } catch (error) {
-        console.error("Error loading total logged in users:", error);
-      }
-    };
-
-    loadTotalLoggedInUsers();
-  }, []);
-
-  // Animasi teks nama user berjalan
-  useEffect(() => {
-    if (user && userTextRef.current && userButtonRef.current) {
-      const textWidth = userTextRef.current.scrollWidth;
-      const buttonWidth = userButtonRef.current.clientWidth;
       
-      if (textWidth > buttonWidth) {
-        const animation = gsap.to(userTextRef.current, {
-          x: -(textWidth - buttonWidth + 20),
-          duration: 5,
-          repeat: -1,
-          yoyo: true,
-          ease: "power1.inOut"
-        });
-
-        return () => {
-          animation.kill();
-        };
+      if (!commentDate || isNaN(commentDate.getTime())) {
+        return "Recently";
       }
-    }
-  }, [user, userDisplayName, isMobile]);
-
-  // Animasi GSAP untuk search expand
-  useEffect(() => {
-    if (searchContainerRef.current) {
-      if (showSearch) {
-        gsap.to(searchContainerRef.current, {
-          width: 250,
-          duration: 0.3,
-          ease: "power2.out"
-        });
-        setTimeout(() => {
-          if (searchInputRef.current) {
-            searchInputRef.current.focus();
-          }
-        }, 100);
+      
+      const diffInSeconds = Math.floor((now.getTime() - commentDate.getTime()) / 1000);
+      
+      if (diffInSeconds < 60) {
+        return "Just now";
+      } else if (diffInSeconds < 3600) {
+        const minutes = Math.floor(diffInSeconds / 60);
+        return `${minutes}m ago`;
+      } else if (diffInSeconds < 86400) {
+        const hours = Math.floor(diffInSeconds / 3600);
+        return `${hours}h ago`;
+      } else if (diffInSeconds < 2592000) {
+        const days = Math.floor(diffInSeconds / 86400);
+        return `${days}d ago`;
       } else {
-        gsap.to(searchContainerRef.current, {
-          width: 40,
-          duration: 0.3,
-          ease: "power2.in",
-          onComplete: () => {
-            setSearchQuery("");
-          }
-        });
+        const months = Math.floor(diffInSeconds / 2592000);
+        return `${months}mo ago`;
       }
-    }
-  }, [showSearch]);
-
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (userDropdownRef.current && !userDropdownRef.current.contains(event.target as Node)) {
-        setShowUserDropdown(false);
-      }
-      if (userProfileModalRef.current && !userProfileModalRef.current.contains(event.target as Node)) {
-        setShowUserProfileModal(false);
-      }
-      if (chatbotPopupRef.current && !chatbotPopupRef.current.contains(event.target as Node)) {
-        const target = event.target as HTMLElement;
-        const isChatbotNavButton = target.closest('[data-nav-chatbot]');
-        if (!isChatbotNavButton) {
-          setShowChatbotPopup(false);
-        }
-      }
-      if (notificationDropdownRef.current && !notificationDropdownRef.current.contains(event.target as Node)) {
-        setShowNotification(false);
-      }
-      if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
-        setShowSearch(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, []);
-
-  // Initialize
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-
-    let currentIndex = 0;
-    const textInterval = setInterval(() => {
-      currentIndex = (currentIndex + 1) % loadingTexts.length;
-      setLoadingText(loadingTexts[currentIndex]);
-    }, 500);
-
-    const loadingTimeout = setTimeout(() => {
-      setIsLoading(false);
-      clearInterval(textInterval);
-    }, 3000);
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        if (showUserProfileModal) {
-          setShowUserProfileModal(false);
-        }
-        if (showUserDropdown) {
-          setShowUserDropdown(false);
-        }
-        if (showLogoutModal) {
-          setShowLogoutModal(false);
-        }
-        if (showChatbotPopup) {
-          setShowChatbotPopup(false);
-        }
-        if (showNotification) {
-          setShowNotification(false);
-        }
-        if (showSearch) {
-          setShowSearch(false);
-        }
-      }
-    };
-
-    document.addEventListener('keydown', handleKeyDown);
-
-    return () => {
-      window.removeEventListener('resize', checkMobile);
-      clearInterval(textInterval);
-      clearTimeout(loadingTimeout);
-      document.removeEventListener('keydown', handleKeyDown);
-      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
-    };
-  }, [isMobile, showUserProfileModal, showUserDropdown, showLogoutModal, showChatbotPopup, showNotification, showSearch]);
-
-  // Fungsi untuk toggle slider
-  const toggleSlider = () => {
-    if (sliderPosition === "index") {
-      setSliderPosition("grid");
-      setCurrentView("main");
-    } else {
-      setSliderPosition("index");
-      setCurrentView("index");
-    }
-  };
-
-  // Handler untuk Sign In / User Button
-  const handleSignInClick = () => {
-    if (user) {
-      setShowUserProfileModal(true);
-    } else {
-      router.push('/signin');
-    }
-  };
-
-  // Handler untuk login dengan GitHub
-  const handleGitHubLogin = async () => {
-    try {
-      const result = await signInWithPopup(auth, githubProvider);
-      console.log("GitHub login successful:", result.user);
     } catch (error) {
-      console.error("GitHub login error:", error);
-      alert("Login dengan GitHub gagal. Silakan coba lagi.");
+      console.error("Error calculating time ago:", error);
+      return "Recently";
     }
   };
 
-  // Handler untuk login dengan Google
-  const handleGoogleLogin = async () => {
-    try {
-      const result = await signInWithPopup(auth, googleProvider);
-      console.log("Google login successful:", result.user);
-    } catch (error) {
-      console.error("Google login error:", error);
-      alert("Login dengan Google gagal. Silakan coba lagi.");
+  // Data untuk halaman Index
+  const indexTopics = [
+    {
+      id: 1,
+      title: "Personal Journey",
+      description: "Exploring self-discovery.",
+      year: "2024"
+    },
+    {
+      id: 2,
+      title: "Creative Process",
+      description: "Ideas evolution documentation.",
+      year: "2024"
+    },
+    {
+      id: 3,
+      title: "Visual Storytelling",
+      description: "Photography for personal growth.",
+      year: "2024"
+    },
+    {
+      id: 4,
+      title: "Emotional Archive",
+      description: "Collection of feelings.",
+      year: "2024"
+    },
+    {
+      id: 5,
+      title: "Growth Metrics",
+      description: "Tracking development goals.",
+      year: "2024"
     }
-  };
+  ];
 
-  // Handler untuk logout
-  const handleLogoutClick = () => {
-    setShowUserProfileModal(false);
-    setShowLogoutModal(true);
-  };
-
-  // Handler untuk konfirmasi logout
-  const handleConfirmLogout = async () => {
-    try {
-      await signOut(auth);
-      setShowLogoutModal(false);
-      setUser(null);
-      setUserDisplayName("");
-      setUserStats(null);
-      router.push('/');
-    } catch (error) {
-      console.error("Logout error:", error);
-      alert("Logout gagal. Silakan coba lagi.");
-    }
-  };
-
-  // Handler untuk batal logout
-  const handleCancelLogout = () => {
-    setShowLogoutModal(false);
-  };
-
-  // Handler untuk menutup popup chatbot
-  const handleCloseChatbotPopup = () => {
-    setShowChatbotPopup(false);
-    localStorage.setItem('chatbotPopupShown', 'true');
-  };
-
-  // Handler untuk menuju ke halaman chatbot
-  const handleGoToChatbot = () => {
-    handleCloseChatbotPopup();
-    router.push('/chatbot');
-  };
+  // Komentar untuk foto saat ini
+  const currentPhotoComments = comments.filter(comment => comment.photoIndex === currentPhotoIndex);
 
   return (
     <div style={{
@@ -863,12 +1447,11 @@ export default function HomePage(): React.JSX.Element {
       MozOsxFontSmoothing: 'grayscale'
     }}>
 
-      {/* Modal Profil User - Full Page */}
+      {/* Modal Profil User */}
       <AnimatePresence>
-        {showUserProfileModal && user && (
+        {showProfileModal && user && (
           <motion.div
-            ref={userProfileModalRef}
-            key="user-profile-modal"
+            ref={profileModalRef}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -879,836 +1462,642 @@ export default function HomePage(): React.JSX.Element {
               left: 0,
               width: '100%',
               height: '100%',
-              backgroundColor: 'rgba(0, 0, 0, 0.95)',
+              backgroundColor: 'rgba(0, 0, 0, 0.8)',
               zIndex: 9999,
               display: 'flex',
-              flexDirection: 'column',
-              overflowY: 'auto',
-              backdropFilter: 'blur(10px)'
-            }}
-          >
-            {/* Header dengan tombol close */}
-            <div style={{
-              position: 'sticky',
-              top: 0,
-              left: 0,
-              width: '100%',
-              padding: isMobile ? '1rem' : '1.5rem',
-              display: 'flex',
-              justifyContent: 'space-between',
               alignItems: 'center',
-              zIndex: 100,
-              backgroundColor: 'rgba(20, 20, 20, 0.9)',
-              borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
-              backdropFilter: 'blur(20px)'
-            }}>
-              {/* Judul Profil */}
-              <div style={{
+              justifyContent: 'center',
+              backdropFilter: 'blur(5px)',
+              padding: isMobile ? '1rem' : '2rem'
+            }}
+            onClick={handleCloseProfileModal}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              style={{
+                backgroundColor: 'rgba(20, 20, 20, 0.95)',
+                borderRadius: '20px',
+                width: isMobile ? '100%' : '800px',
+                maxWidth: '900px',
+                maxHeight: '90vh',
+                overflow: 'hidden',
                 display: 'flex',
+                flexDirection: 'column',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                boxShadow: '0 20px 60px rgba(0, 0, 0, 0.5)',
+                position: 'relative'
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Header Modal */}
+              <div style={{
+                padding: isMobile ? '1.5rem' : '2rem',
+                borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+                display: 'flex',
+                justifyContent: 'space-between',
                 alignItems: 'center',
-                gap: '1rem'
+                backgroundColor: 'rgba(10, 10, 10, 0.8)'
               }}>
                 <div style={{
-                  width: '50px',
-                  height: '50px',
-                  borderRadius: '50%',
-                  backgroundColor: '#0050B7',
                   display: 'flex',
                   alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: '1.5rem',
-                  fontWeight: '600',
-                  color: 'white'
+                  gap: '1rem'
                 }}>
-                  {userDisplayName.charAt(0).toUpperCase()}
+                  <div style={{
+                    width: '60px',
+                    height: '60px',
+                    borderRadius: '50%',
+                    backgroundColor: '#0050B7',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '1.8rem',
+                    fontWeight: '600',
+                    color: 'white',
+                    flexShrink: 0
+                  }}>
+                    {userDisplayName.charAt(0).toUpperCase()}
+                  </div>
+                  <div>
+                    <h2 style={{
+                      color: 'white',
+                      fontSize: '1.8rem',
+                      fontWeight: '600',
+                      margin: 0,
+                      fontFamily: 'Helvetica, Arial, sans-serif'
+                    }}>
+                      {userDisplayName}
+                    </h2>
+                    <p style={{
+                      color: 'rgba(255, 255, 255, 0.6)',
+                      fontSize: '0.9rem',
+                      margin: '0.3rem 0 0 0'
+                    }}>
+                      Profile Settings
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <h2 style={{
+                <motion.button
+                  onClick={handleCloseProfileModal}
+                  style={{
+                    width: '40px',
+                    height: '40px',
+                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                    borderRadius: '50%',
                     color: 'white',
                     fontSize: '1.5rem',
-                    fontWeight: '600',
-                    margin: 0,
-                    fontFamily: 'Helvetica, Arial, sans-serif'
-                  }}>
-                    Profil Saya
-                  </h2>
-                  <p style={{
-                    color: 'rgba(255, 255, 255, 0.6)',
-                    fontSize: '0.9rem',
-                    margin: '0.2rem 0 0 0'
-                  }}>
-                    Kelola akun dan catatan Anda
-                  </p>
-                </div>
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    padding: 0,
+                    margin: 0
+                  }}
+                  whileHover={{ 
+                    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                    scale: 1.1
+                  }}
+                  whileTap={{ scale: 0.9 }}
+                >
+                  ×
+                </motion.button>
               </div>
 
-              {/* Tombol Close */}
-              <motion.button
-                onClick={() => setShowUserProfileModal(false)}
-                style={{
-                  width: '40px',
-                  height: '40px',
-                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                  border: '1px solid rgba(255, 255, 255, 0.2)',
-                  borderRadius: '50%',
-                  color: 'white',
-                  fontSize: '1.5rem',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  padding: 0
-                }}
-                whileHover={{ 
-                  backgroundColor: 'rgba(255, 255, 255, 0.2)',
-                  scale: 1.1
-                }}
-                whileTap={{ scale: 0.9 }}
-              >
-                ×
-              </motion.button>
-            </div>
-
-            {/* Konten Profil */}
-            <div style={{
-              flex: 1,
-              padding: isMobile ? '1.5rem' : '2rem',
-              maxWidth: '1200px',
-              margin: '0 auto',
-              width: '100%',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '2rem'
-            }}>
-              {/* Section 1: Info Profil */}
+              {/* Konten Modal */}
               <div style={{
-                backgroundColor: 'rgba(30, 30, 30, 0.8)',
-                borderRadius: '15px',
-                padding: '1.5rem',
-                border: '1px solid rgba(255, 255, 255, 0.1)'
+                flex: 1,
+                overflowY: 'auto',
+                padding: isMobile ? '1.5rem' : '2rem'
               }}>
-                <h3 style={{
-                  color: 'white',
-                  fontSize: '1.3rem',
-                  fontWeight: '600',
-                  margin: '0 0 1.5rem 0',
-                  fontFamily: 'Helvetica, Arial, sans-serif',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.5rem'
-                }}>
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                    <circle cx="12" cy="7" r="4"/>
-                  </svg>
-                  Informasi Profil
-                </h3>
-
+                {/* Stats Section */}
                 <div style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '1.5rem'
+                  backgroundColor: 'rgba(0, 80, 183, 0.1)',
+                  borderRadius: '15px',
+                  padding: '1.5rem',
+                  marginBottom: '2rem',
+                  border: '1px solid rgba(0, 80, 183, 0.3)'
                 }}>
-                  {/* Nama User - Editable */}
-                  <div>
-                    <div style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      marginBottom: '0.5rem'
-                    }}>
-                      <label style={{
-                        color: 'rgba(255, 255, 255, 0.7)',
-                        fontSize: '0.9rem',
-                        fontWeight: '500'
-                      }}>
-                        Nama
-                      </label>
-                      {!isEditingName ? (
-                        <motion.button
-                          onClick={() => setIsEditingName(true)}
-                          style={{
-                            backgroundColor: 'rgba(0, 80, 183, 0.2)',
-                            border: '1px solid rgba(0, 80, 183, 0.4)',
-                            color: '#0050B7',
-                            fontSize: '0.8rem',
-                            fontWeight: '500',
-                            padding: '0.3rem 0.8rem',
-                            borderRadius: '6px',
-                            cursor: 'pointer'
-                          }}
-                          whileHover={{ 
-                            backgroundColor: 'rgba(0, 80, 183, 0.3)',
-                            scale: 1.05
-                          }}
-                          whileTap={{ scale: 0.95 }}
-                        >
-                          Edit
-                        </motion.button>
-                      ) : (
-                        <div style={{ display: 'flex', gap: '0.5rem' }}>
-                          <motion.button
-                            onClick={updateUserName}
-                            style={{
-                              backgroundColor: '#00FF00',
-                              border: 'none',
-                              color: 'black',
-                              fontSize: '0.8rem',
-                              fontWeight: '600',
-                              padding: '0.3rem 0.8rem',
-                              borderRadius: '6px',
-                              cursor: 'pointer'
-                            }}
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
-                          >
-                            Simpan
-                          </motion.button>
-                          <motion.button
-                            onClick={() => {
-                              setIsEditingName(false);
-                              setEditedName(userDisplayName);
-                            }}
-                            style={{
-                              backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                              border: '1px solid rgba(255, 255, 255, 0.2)',
-                              color: 'white',
-                              fontSize: '0.8rem',
-                              fontWeight: '500',
-                              padding: '0.3rem 0.8rem',
-                              borderRadius: '6px',
-                              cursor: 'pointer'
-                            }}
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
-                          >
-                            Batal
-                          </motion.button>
-                        </div>
-                      )}
-                    </div>
-                    
-                    {isEditingName ? (
-                      <input
-                        type="text"
-                        value={editedName}
-                        onChange={(e) => setEditedName(e.target.value)}
-                        style={{
-                          width: '100%',
-                          padding: '0.8rem',
-                          backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                          border: '1px solid rgba(0, 80, 183, 0.5)',
-                          borderRadius: '8px',
-                          color: 'white',
-                          fontSize: '1rem',
-                          fontFamily: 'Helvetica, Arial, sans-serif',
-                          outline: 'none'
-                        }}
-                        autoFocus
-                      />
-                    ) : (
-                      <div style={{
-                        padding: '0.8rem',
-                        backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                        borderRadius: '8px',
-                        color: 'white',
-                        fontSize: '1rem',
-                        border: '1px solid rgba(255, 255, 255, 0.1)'
-                      }}>
-                        {userDisplayName}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Email - Non Editable */}
-                  <div>
-                    <label style={{
-                      color: 'rgba(255, 255, 255, 0.7)',
-                      fontSize: '0.9rem',
-                      fontWeight: '500',
-                      marginBottom: '0.5rem',
-                      display: 'block'
-                    }}>
-                      Email Address
-                    </label>
-                    <div style={{
-                      padding: '0.8rem',
-                      backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                      borderRadius: '8px',
+                  <div style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    marginBottom: '1rem'
+                  }}>
+                    <h3 style={{
                       color: 'white',
-                      fontSize: '1rem',
-                      border: '1px solid rgba(255, 255, 255, 0.1)',
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center'
+                      fontSize: '1.3rem',
+                      fontWeight: '600',
+                      margin: 0,
+                      fontFamily: 'Helvetica, Arial, sans-serif'
                     }}>
-                      <span>{user.email}</span>
-                      <span style={{
-                        backgroundColor: 'rgba(0, 255, 0, 0.1)',
-                        color: '#00FF00',
-                        fontSize: '0.7rem',
-                        fontWeight: '600',
-                        padding: '0.2rem 0.6rem',
-                        borderRadius: '12px',
-                        border: '1px solid rgba(0, 255, 0, 0.3)'
-                      }}>
-                        Verified
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Login Method */}
-                  <div>
-                    <label style={{
-                      color: 'rgba(255, 255, 255, 0.7)',
-                      fontSize: '0.9rem',
-                      fontWeight: '500',
-                      marginBottom: '0.5rem',
-                      display: 'block'
-                    }}>
-                      Login Method
-                    </label>
+                      User Statistics
+                    </h3>
                     <div style={{
-                      padding: '0.8rem',
-                      backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                      borderRadius: '8px',
-                      color: 'white',
-                      fontSize: '1rem',
-                      border: '1px solid rgba(255, 255, 255, 0.1)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '0.8rem'
+                      backgroundColor: '#00FF00',
+                      color: 'black',
+                      fontSize: '0.9rem',
+                      fontWeight: '700',
+                      padding: '0.3rem 0.8rem',
+                      borderRadius: '20px'
                     }}>
-                      {loginMethod === 'GitHub' && (
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                          <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
-                        </svg>
-                      )}
-                      {loginMethod === 'Google' && (
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                          <path d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z"/>
-                        </svg>
-                      )}
-                      {loginMethod === 'Email' && (
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
-                          <polyline points="22,6 12,13 2,6"/>
-                        </svg>
-                      )}
-                      <span>{loginMethod}</span>
+                      Active
                     </div>
                   </div>
-
-                  {/* Account Stats */}
+                  
                   <div style={{
                     display: 'grid',
-                    gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)',
-                    gap: '1rem',
-                    marginTop: '1rem'
+                    gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr',
+                    gap: '1rem'
                   }}>
                     <div style={{
-                      backgroundColor: 'rgba(0, 80, 183, 0.1)',
-                      border: '1px solid rgba(0, 80, 183, 0.3)',
-                      borderRadius: '10px',
+                      backgroundColor: 'rgba(0, 0, 0, 0.3)',
                       padding: '1rem',
-                      textAlign: 'center'
+                      borderRadius: '10px',
+                      border: '1px solid rgba(255, 255, 255, 0.1)'
                     }}>
+                      <div style={{
+                        color: 'rgba(255, 255, 255, 0.7)',
+                        fontSize: '0.9rem',
+                        marginBottom: '0.5rem'
+                      }}>
+                        Total Notes
+                      </div>
+                      <div style={{
+                        color: '#00FF00',
+                        fontSize: '2rem',
+                        fontWeight: '700',
+                        fontFamily: 'Helvetica, Arial, sans-serif'
+                      }}>
+                        {totalNotes}
+                      </div>
+                    </div>
+                    
+                    <div style={{
+                      backgroundColor: 'rgba(0, 0, 0, 0.3)',
+                      padding: '1rem',
+                      borderRadius: '10px',
+                      border: '1px solid rgba(255, 255, 255, 0.1)'
+                    }}>
+                      <div style={{
+                        color: 'rgba(255, 255, 255, 0.7)',
+                        fontSize: '0.9rem',
+                        marginBottom: '0.5rem'
+                      }}>
+                        Login Count
+                      </div>
                       <div style={{
                         color: '#0050B7',
                         fontSize: '2rem',
                         fontWeight: '700',
-                        marginBottom: '0.3rem'
+                        fontFamily: 'Helvetica, Arial, sans-serif'
                       }}>
                         {userStats?.loginCount || 0}
-                      </div>
-                      <div style={{
-                        color: 'rgba(255, 255, 255, 0.7)',
-                        fontSize: '0.8rem'
-                      }}>
-                        Total Login
-                      </div>
-                    </div>
-
-                    <div style={{
-                      backgroundColor: 'rgba(0, 255, 0, 0.1)',
-                      border: '1px solid rgba(0, 255, 0, 0.3)',
-                      borderRadius: '10px',
-                      padding: '1rem',
-                      textAlign: 'center'
-                    }}>
-                      <div style={{
-                        color: '#00FF00',
-                        fontSize: '2rem',
-                        fontWeight: '700',
-                        marginBottom: '0.3rem'
-                      }}>
-                        {totalNotes}
-                      </div>
-                      <div style={{
-                        color: 'rgba(255, 255, 255, 0.7)',
-                        fontSize: '0.8rem'
-                      }}>
-                        Total Notes
-                      </div>
-                    </div>
-
-                    <div style={{
-                      backgroundColor: 'rgba(255, 71, 87, 0.1)',
-                      border: '1px solid rgba(255, 71, 87, 0.3)',
-                      borderRadius: '10px',
-                      padding: '1rem',
-                      textAlign: 'center'
-                    }}>
-                      <div style={{
-                        color: '#FF4757',
-                        fontSize: '2rem',
-                        fontWeight: '700',
-                        marginBottom: '0.3rem'
-                      }}>
-                        {new Date(user.metadata?.creationTime).toLocaleDateString('id-ID')}
-                      </div>
-                      <div style={{
-                        color: 'rgba(255, 255, 255, 0.7)',
-                        fontSize: '0.8rem'
-                      }}>
-                        Joined Date
                       </div>
                     </div>
                   </div>
                 </div>
-              </div>
 
-              {/* Section 2: Riwayat Notes */}
-              <div style={{
-                backgroundColor: 'rgba(30, 30, 30, 0.8)',
-                borderRadius: '15px',
-                padding: '1.5rem',
-                border: '1px solid rgba(255, 255, 255, 0.1)'
-              }}>
+                {/* Notes History */}
                 <div style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  marginBottom: '1.5rem'
+                  marginBottom: '2rem'
+                }}>
+                  <div style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    marginBottom: '1rem'
+                  }}>
+                    <h3 style={{
+                      color: 'white',
+                      fontSize: '1.3rem',
+                      fontWeight: '600',
+                      margin: 0,
+                      fontFamily: 'Helvetica, Arial, sans-serif'
+                    }}>
+                      Notes History ({totalNotes})
+                    </h3>
+                    <motion.button
+                      onClick={() => router.push('/notes')}
+                      style={{
+                        backgroundColor: 'rgba(0, 255, 0, 0.1)',
+                        border: '1px solid rgba(0, 255, 0, 0.3)',
+                        color: '#00FF00',
+                        padding: '0.5rem 1rem',
+                        borderRadius: '8px',
+                        cursor: 'pointer',
+                        fontSize: '0.9rem',
+                        fontWeight: '500',
+                        fontFamily: 'Helvetica, Arial, sans-serif'
+                      }}
+                      whileHover={{ backgroundColor: 'rgba(0, 255, 0, 0.2)' }}
+                      whileTap={{ scale: 0.95 }}
+                    >
+                      View All
+                    </motion.button>
+                  </div>
+                  
+                  {isLoadingNotes ? (
+                    <div style={{
+                      padding: '2rem',
+                      textAlign: 'center',
+                      color: 'rgba(255, 255, 255, 0.5)',
+                      fontFamily: 'Helvetica, Arial, sans-serif'
+                    }}>
+                      Loading notes...
+                    </div>
+                  ) : userNotes.length === 0 ? (
+                    <div style={{
+                      backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                      padding: '2rem',
+                      borderRadius: '10px',
+                      textAlign: 'center',
+                      border: '1px dashed rgba(255, 255, 255, 0.1)'
+                    }}>
+                      <div style={{
+                        fontSize: '3rem',
+                        marginBottom: '1rem',
+                        opacity: 0.5
+                      }}>
+                        📝
+                      </div>
+                      <h4 style={{
+                        color: 'rgba(255, 255, 255, 0.8)',
+                        fontSize: '1.2rem',
+                        margin: '0 0 0.5rem 0'
+                      }}>
+                        No notes yet
+                      </h4>
+                      <p style={{
+                        color: 'rgba(255, 255, 255, 0.5)',
+                        fontSize: '0.9rem',
+                        margin: '0 0 1.5rem 0'
+                      }}>
+                        Start creating your first note!
+                      </p>
+                      <motion.button
+                        onClick={() => router.push('/notes')}
+                        style={{
+                          backgroundColor: '#0050B7',
+                          color: 'white',
+                          border: 'none',
+                          padding: '0.8rem 1.5rem',
+                          borderRadius: '8px',
+                          cursor: 'pointer',
+                          fontSize: '0.9rem',
+                          fontWeight: '600',
+                          fontFamily: 'Helvetica, Arial, sans-serif'
+                        }}
+                        whileHover={{ backgroundColor: '#0066CC' }}
+                        whileTap={{ scale: 0.95 }}
+                      >
+                        Create Note
+                      </motion.button>
+                    </div>
+                  ) : (
+                    <div style={{
+                      maxHeight: '300px',
+                      overflowY: 'auto',
+                      backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                      borderRadius: '10px',
+                      border: '1px solid rgba(255, 255, 255, 0.1)'
+                    }}>
+                      {userNotes.slice(0, 5).map((note, index) => (
+                        <motion.div
+                          key={note.id}
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: index * 0.05 }}
+                          style={{
+                            padding: '1rem',
+                            borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
+                            cursor: 'pointer',
+                            transition: 'all 0.2s ease'
+                          }}
+                          whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
+                          onClick={() => router.push(`/notes?note=${note.id}`)}
+                        >
+                          <div style={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'flex-start',
+                            marginBottom: '0.5rem'
+                          }}>
+                            <div style={{
+                              color: 'white',
+                              fontSize: '0.95rem',
+                              fontWeight: '600',
+                              fontFamily: 'Helvetica, Arial, sans-serif',
+                              flex: 1,
+                              marginRight: '1rem'
+                            }}>
+                              {note.content.length > 100 ? note.content.substring(0, 100) + '...' : note.content}
+                            </div>
+                            <span style={{
+                              color: 'rgba(255, 255, 255, 0.5)',
+                              fontSize: '0.75rem',
+                              whiteSpace: 'nowrap'
+                            }}>
+                              {calculateTimeAgo(note.timestamp)}
+                            </span>
+                          </div>
+                          {note.category && (
+                            <span style={{
+                              backgroundColor: 'rgba(0, 80, 183, 0.3)',
+                              color: '#0050B7',
+                              fontSize: '0.7rem',
+                              padding: '0.2rem 0.5rem',
+                              borderRadius: '4px',
+                              display: 'inline-block',
+                              marginTop: '0.5rem'
+                            }}>
+                              {note.category}
+                            </span>
+                          )}
+                        </motion.div>
+                      ))}
+                      {userNotes.length > 5 && (
+                        <div style={{
+                          padding: '1rem',
+                          textAlign: 'center',
+                          color: 'rgba(255, 255, 255, 0.5)',
+                          fontSize: '0.9rem',
+                          borderTop: '1px solid rgba(255, 255, 255, 0.05)'
+                        }}>
+                          + {userNotes.length - 5} more notes
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                {/* Account Settings */}
+                <div style={{
+                  marginBottom: '2rem'
                 }}>
                   <h3 style={{
                     color: 'white',
                     fontSize: '1.3rem',
                     fontWeight: '600',
-                    margin: 0,
-                    fontFamily: 'Helvetica, Arial, sans-serif',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.5rem'
+                    margin: '0 0 1rem 0',
+                    fontFamily: 'Helvetica, Arial, sans-serif'
                   }}>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                      <polyline points="14 2 14 8 20 8"/>
-                      <line x1="16" y1="13" x2="8" y2="13"/>
-                      <line x1="16" y1="17" x2="8" y2="17"/>
-                      <polyline points="10 9 9 9 8 9"/>
-                    </svg>
-                    Riwayat Notes ({totalNotes})
+                    Account Settings
                   </h3>
                   
-                  <motion.button
-                    onClick={() => router.push('/notes')}
-                    style={{
-                      backgroundColor: 'rgba(0, 255, 0, 0.1)',
-                      border: '1px solid rgba(0, 255, 0, 0.3)',
-                      color: '#00FF00',
-                      fontSize: '0.9rem',
-                      fontWeight: '600',
-                      padding: '0.5rem 1rem',
-                      borderRadius: '8px',
-                      cursor: 'pointer',
+                  <div style={{
+                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                    borderRadius: '10px',
+                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                    overflow: 'hidden'
+                  }}>
+                    <div style={{
+                      padding: '1rem',
+                      borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
                       display: 'flex',
-                      alignItems: 'center',
-                      gap: '0.5rem'
-                    }}
-                    whileHover={{ 
-                      backgroundColor: 'rgba(0, 255, 0, 0.2)',
-                      scale: 1.05
-                    }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <line x1="12" y1="5" x2="12" y2="19"/>
-                      <line x1="5" y1="12" x2="19" y2="12"/>
-                    </svg>
-                    Buat Note Baru
-                  </motion.button>
+                      justifyContent: 'space-between',
+                      alignItems: 'center'
+                    }}>
+                      <div>
+                        <div style={{
+                          color: 'rgba(255, 255, 255, 0.7)',
+                          fontSize: '0.9rem',
+                          marginBottom: '0.2rem'
+                        }}>
+                          Login Method
+                        </div>
+                        <div style={{
+                          color: 'white',
+                          fontSize: '1rem',
+                          fontWeight: '500'
+                        }}>
+                          {loginMethod}
+                        </div>
+                      </div>
+                      <div style={{
+                        backgroundColor: 'rgba(0, 80, 183, 0.2)',
+                        color: '#0050B7',
+                        fontSize: '0.8rem',
+                        padding: '0.3rem 0.8rem',
+                        borderRadius: '20px',
+                        fontWeight: '600'
+                      }}>
+                        Connected
+                      </div>
+                    </div>
+                    
+                    <div style={{
+                      padding: '1rem',
+                      borderBottom: '1px solid rgba(255, 255, 255, 0.1)'
+                    }}>
+                      <div style={{
+                        color: 'rgba(255, 255, 255, 0.7)',
+                        fontSize: '0.9rem',
+                        marginBottom: '0.2rem'
+                      }}>
+                        Email Address
+                      </div>
+                      <div style={{
+                        color: 'white',
+                        fontSize: '1rem',
+                        fontWeight: '500',
+                        wordBreak: 'break-all'
+                      }}>
+                        {userEmail}
+                      </div>
+                    </div>
+                    
+                    <div style={{
+                      padding: '1rem',
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center'
+                    }}>
+                      <div>
+                        <div style={{
+                          color: 'rgba(255, 255, 255, 0.7)',
+                          fontSize: '0.9rem',
+                          marginBottom: '0.2rem'
+                        }}>
+                          Account Status
+                        </div>
+                        <div style={{
+                          color: '#00FF00',
+                          fontSize: '1rem',
+                          fontWeight: '500'
+                        }}>
+                          Active
+                        </div>
+                      </div>
+                      <motion.button
+                        onClick={handleDeleteAccount}
+                        style={{
+                          backgroundColor: 'rgba(255, 71, 87, 0.1)',
+                          border: '1px solid rgba(255, 71, 87, 0.3)',
+                          color: '#FF4757',
+                          padding: '0.5rem 1rem',
+                          borderRadius: '8px',
+                          cursor: 'pointer',
+                          fontSize: '0.9rem',
+                          fontWeight: '600',
+                          fontFamily: 'Helvetica, Arial, sans-serif'
+                        }}
+                        whileHover={{ backgroundColor: 'rgba(255, 71, 87, 0.2)' }}
+                        whileTap={{ scale: 0.95 }}
+                      >
+                        Delete Account
+                      </motion.button>
+                    </div>
+                  </div>
                 </div>
 
-                {isLoadingNotes ? (
-                  <div style={{
-                    padding: '3rem',
-                    textAlign: 'center',
-                    color: 'rgba(255, 255, 255, 0.5)'
+                {/* Help & Feedback */}
+                <div style={{
+                  marginBottom: '2rem'
+                }}>
+                  <h3 style={{
+                    color: 'white',
+                    fontSize: '1.3rem',
+                    fontWeight: '600',
+                    margin: '0 0 1rem 0',
+                    fontFamily: 'Helvetica, Arial, sans-serif'
                   }}>
-                    <motion.div
-                      animate={{ rotate: 360 }}
-                      transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                      style={{ marginBottom: '1rem' }}
-                    >
-                      <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
-                      </svg>
-                    </motion.div>
-                    Memuat catatan...
-                  </div>
-                ) : userNotes.length === 0 ? (
+                    Help & Feedback
+                  </h3>
+                  
                   <div style={{
-                    padding: '3rem 1rem',
-                    textAlign: 'center',
-                    color: 'rgba(255, 255, 255, 0.5)'
+                    display: 'grid',
+                    gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr',
+                    gap: '1rem'
                   }}>
-                    <div style={{ 
-                      fontSize: '3rem',
-                      marginBottom: '1rem',
-                      opacity: 0.5
-                    }}>
-                      📝
-                    </div>
-                    <h4 style={{
-                      color: 'rgba(255, 255, 255, 0.8)',
-                      fontSize: '1.2rem',
-                      margin: '0 0 0.5rem 0'
-                    }}>
-                      Belum ada catatan
-                    </h4>
-                    <p style={{
-                      fontSize: '0.9rem',
-                      margin: '0 0 1.5rem 0',
-                      color: 'rgba(255, 255, 255, 0.4)'
-                    }}>
-                      Mulai buat catatan pertama Anda
-                    </p>
                     <motion.button
-                      onClick={() => router.push('/notes')}
+                      onClick={() => router.push('/help')}
                       style={{
-                        backgroundColor: '#00FF00',
-                        color: 'black',
-                        border: 'none',
-                        padding: '0.8rem 1.5rem',
-                        borderRadius: '8px',
-                        fontSize: '0.9rem',
-                        fontWeight: '600',
+                        backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                        color: 'white',
+                        padding: '1rem',
+                        borderRadius: '10px',
                         cursor: 'pointer',
+                        fontSize: '0.95rem',
+                        fontWeight: '500',
+                        fontFamily: 'Helvetica, Arial, sans-serif',
                         display: 'flex',
                         alignItems: 'center',
-                        gap: '0.5rem',
-                        margin: '0 auto'
+                        gap: '0.8rem',
+                        transition: 'all 0.3s ease'
                       }}
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
+                      whileHover={{ 
+                        backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                        border: '1px solid rgba(255, 255, 255, 0.2)'
+                      }}
+                      whileTap={{ scale: 0.98 }}
                     >
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <line x1="12" y1="5" x2="12" y2="19"/>
-                        <line x1="5" y1="12" x2="19" y2="12"/>
-                      </svg>
-                      Buat Note Pertama
+                      <div style={{
+                        width: '40px',
+                        height: '40px',
+                        borderRadius: '8px',
+                        backgroundColor: 'rgba(0, 80, 183, 0.2)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '1.2rem'
+                      }}>
+                        ❓
+                      </div>
+                      <div style={{ textAlign: 'left' }}>
+                        <div style={{ fontSize: '1rem', fontWeight: '600' }}>Help Center</div>
+                        <div style={{ fontSize: '0.8rem', opacity: 0.7, marginTop: '0.2rem' }}>Get help and support</div>
+                      </div>
+                    </motion.button>
+                    
+                    <motion.button
+                      onClick={handleSendFeedback}
+                      style={{
+                        backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                        color: 'white',
+                        padding: '1rem',
+                        borderRadius: '10px',
+                        cursor: 'pointer',
+                        fontSize: '0.95rem',
+                        fontWeight: '500',
+                        fontFamily: 'Helvetica, Arial, sans-serif',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.8rem',
+                        transition: 'all 0.3s ease'
+                      }}
+                      whileHover={{ 
+                        backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                        border: '1px solid rgba(255, 255, 255, 0.2)'
+                      }}
+                      whileTap={{ scale: 0.98 }}
+                    >
+                      <div style={{
+                        width: '40px',
+                        height: '40px',
+                        borderRadius: '8px',
+                        backgroundColor: 'rgba(0, 255, 0, 0.2)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '1.2rem'
+                      }}>
+                        💬
+                      </div>
+                      <div style={{ textAlign: 'left' }}>
+                        <div style={{ fontSize: '1rem', fontWeight: '600' }}>Send Feedback</div>
+                        <div style={{ fontSize: '0.8rem', opacity: 0.7, marginTop: '0.2rem' }}>Share your thoughts</div>
+                      </div>
                     </motion.button>
                   </div>
-                ) : (
-                  <div style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '1rem',
-                    maxHeight: '400px',
-                    overflowY: 'auto',
-                    paddingRight: '0.5rem'
-                  }}>
-                    {userNotes.map((note, index) => (
-                      <motion.div
-                        key={note.id}
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: index * 0.05 }}
-                        style={{
-                          backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                          borderRadius: '10px',
-                          padding: '1rem',
-                          border: '1px solid rgba(255, 255, 255, 0.1)',
-                          cursor: 'pointer',
-                          transition: 'all 0.2s ease'
-                        }}
-                        whileHover={{ 
-                          backgroundColor: 'rgba(255, 255, 255, 0.08)',
-                          borderColor: 'rgba(0, 80, 183, 0.5)'
-                        }}
-                        onClick={() => router.push(`/notes?edit=${note.id}`)}
-                      >
-                        <div style={{
-                          display: 'flex',
-                          justifyContent: 'space-between',
-                          alignItems: 'flex-start',
-                          marginBottom: '0.5rem'
-                        }}>
-                          <h4 style={{
-                            color: 'white',
-                            fontSize: '1rem',
-                            fontWeight: '600',
-                            margin: 0,
-                            flex: 1
-                          }}>
-                            {note.title}
-                          </h4>
-                          <span style={{
-                            color: 'rgba(255, 255, 255, 0.5)',
-                            fontSize: '0.75rem',
-                            whiteSpace: 'nowrap'
-                          }}>
-                            {note.createdAt instanceof Timestamp 
-                              ? note.createdAt.toDate().toLocaleDateString('id-ID')
-                              : new Date(note.createdAt).toLocaleDateString('id-ID')}
-                          </span>
-                        </div>
-                        
-                        <p style={{
-                          color: 'rgba(255, 255, 255, 0.7)',
-                          fontSize: '0.85rem',
-                          margin: '0 0 0.8rem 0',
-                          lineHeight: 1.4,
-                          display: '-webkit-box',
-                          WebkitLineClamp: 2,
-                          WebkitBoxOrient: 'vertical',
-                          overflow: 'hidden'
-                        }}>
-                          {note.content}
-                        </p>
-                        
-                        <div style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '0.5rem',
-                          flexWrap: 'wrap'
-                        }}>
-                          {note.category && (
-                            <span style={{
-                              backgroundColor: 'rgba(0, 80, 183, 0.2)',
-                              color: '#0050B7',
-                              fontSize: '0.7rem',
-                              fontWeight: '500',
-                              padding: '0.2rem 0.6rem',
-                              borderRadius: '12px',
-                              border: '1px solid rgba(0, 80, 183, 0.3)'
-                            }}>
-                              {note.category}
-                            </span>
-                          )}
-                          
-                          {note.isPinned && (
-                            <span style={{
-                              backgroundColor: 'rgba(255, 193, 7, 0.2)',
-                              color: '#FFC107',
-                              fontSize: '0.7rem',
-                              fontWeight: '500',
-                              padding: '0.2rem 0.6rem',
-                              borderRadius: '12px',
-                              border: '1px solid rgba(255, 193, 7, 0.3)',
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: '0.3rem'
-                            }}>
-                              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                              </svg>
-                              Pinned
-                            </span>
-                          )}
-                        </div>
-                      </motion.div>
-                    ))}
-                  </div>
-                )}
-              </div>
+                </div>
 
-              {/* Section 3: Pengaturan & Lainnya */}
-              <div style={{
-                backgroundColor: 'rgba(30, 30, 30, 0.8)',
-                borderRadius: '15px',
-                padding: '1.5rem',
-                border: '1px solid rgba(255, 255, 255, 0.1)'
-              }}>
-                <h3 style={{
-                  color: 'white',
-                  fontSize: '1.3rem',
-                  fontWeight: '600',
-                  margin: '0 0 1.5rem 0',
-                  fontFamily: 'Helvetica, Arial, sans-serif',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.5rem'
-                }}>
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <circle cx="12" cy="12" r="3"/>
-                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
-                  </svg>
-                  Pengaturan & Lainnya
-                </h3>
-
+                {/* Logout Button */}
                 <div style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '1rem'
+                  marginTop: '2rem',
+                  paddingTop: '1.5rem',
+                  borderTop: '1px solid rgba(255, 255, 255, 0.1)'
                 }}>
-                  {/* Help */}
-                  <motion.button
-                    onClick={() => router.push('/help')}
-                    style={{
-                      backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                      border: '1px solid rgba(255, 255, 255, 0.1)',
-                      borderRadius: '10px',
-                      padding: '1rem',
-                      color: 'white',
-                      fontSize: '1rem',
-                      fontWeight: '500',
-                      textAlign: 'left',
-                      cursor: 'pointer',
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      transition: 'all 0.2s ease'
-                    }}
-                    whileHover={{ 
-                      backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                      paddingLeft: '1.2rem'
-                    }}
-                    whileTap={{ scale: 0.98 }}
-                  >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <circle cx="12" cy="12" r="10"/>
-                        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
-                        <line x1="12" y1="17" x2="12.01" y2="17"/>
-                      </svg>
-                      <span>Bantuan & FAQ</span>
-                    </div>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M5 12h14"/>
-                      <path d="m12 5 7 7-7 7"/>
-                    </svg>
-                  </motion.button>
-
-                  {/* Feedback */}
-                  <motion.button
-                    onClick={() => router.push('/feedback')}
-                    style={{
-                      backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                      border: '1px solid rgba(255, 255, 255, 0.1)',
-                      borderRadius: '10px',
-                      padding: '1rem',
-                      color: 'white',
-                      fontSize: '1rem',
-                      fontWeight: '500',
-                      textAlign: 'left',
-                      cursor: 'pointer',
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      transition: 'all 0.2s ease'
-                    }}
-                    whileHover={{ 
-                      backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                      paddingLeft: '1.2rem'
-                    }}
-                    whileTap={{ scale: 0.98 }}
-                  >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
-                      </svg>
-                      <span>Kirim Feedback</span>
-                    </div>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M5 12h14"/>
-                      <path d="m12 5 7 7-7 7"/>
-                    </svg>
-                  </motion.button>
-
-                  {/* Delete Account */}
-                  <motion.button
-                    onClick={handleDeleteAccount}
-                    style={{
-                      backgroundColor: 'rgba(255, 71, 87, 0.1)',
-                      border: '1px solid rgba(255, 71, 87, 0.3)',
-                      borderRadius: '10px',
-                      padding: '1rem',
-                      color: '#FF4757',
-                      fontSize: '1rem',
-                      fontWeight: '500',
-                      textAlign: 'left',
-                      cursor: 'pointer',
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      transition: 'all 0.2s ease',
-                      marginTop: '1rem'
-                    }}
-                    whileHover={{ 
-                      backgroundColor: 'rgba(255, 71, 87, 0.2)',
-                      paddingLeft: '1.2rem'
-                    }}
-                    whileTap={{ scale: 0.98 }}
-                  >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M3 6h18"/>
-                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/>
-                        <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-                        <line x1="10" y1="11" x2="10" y2="17"/>
-                        <line x1="14" y1="11" x2="14" y2="17"/>
-                      </svg>
-                      <span>Hapus Akun</span>
-                    </div>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M5 12h14"/>
-                      <path d="m12 5 7 7-7 7"/>
-                    </svg>
-                  </motion.button>
-
-                  {/* Logout Button */}
                   <motion.button
                     onClick={handleLogoutClick}
                     style={{
-                      backgroundColor: 'rgba(255, 107, 107, 0.1)',
-                      border: '1px solid rgba(255, 107, 107, 0.3)',
-                      borderRadius: '10px',
+                      width: '100%',
+                      backgroundColor: 'rgba(255, 71, 87, 0.1)',
+                      border: '1px solid rgba(255, 71, 87, 0.3)',
+                      color: '#FF4757',
                       padding: '1rem',
-                      color: '#ff6b6b',
+                      borderRadius: '10px',
+                      cursor: 'pointer',
                       fontSize: '1rem',
                       fontWeight: '600',
-                      textAlign: 'left',
-                      cursor: 'pointer',
+                      fontFamily: 'Helvetica, Arial, sans-serif',
                       display: 'flex',
-                      justifyContent: 'space-between',
                       alignItems: 'center',
-                      transition: 'all 0.2s ease',
-                      marginTop: '1rem'
+                      justifyContent: 'center',
+                      gap: '0.8rem',
+                      transition: 'all 0.3s ease'
                     }}
                     whileHover={{ 
-                      backgroundColor: 'rgba(255, 107, 107, 0.2)',
-                      paddingLeft: '1.2rem'
+                      backgroundColor: 'rgba(255, 71, 87, 0.2)',
+                      border: '1px solid rgba(255, 71, 87, 0.5)'
                     }}
                     whileTap={{ scale: 0.98 }}
                   >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-                        <polyline points="16 17 21 12 16 7"/>
-                        <line x1="21" y1="12" x2="9" y2="12"/>
-                      </svg>
-                      <span>Logout</span>
-                    </div>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M5 12h14"/>
-                      <path d="m12 5 7 7-7 7"/>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                      <polyline points="16 17 21 12 16 7"/>
+                      <line x1="21" y1="12" x2="9" y2="12"/>
                     </svg>
+                    Logout from {userDisplayName}
                   </motion.button>
                 </div>
               </div>
-            </div>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
@@ -1830,6 +2219,481 @@ export default function HomePage(): React.JSX.Element {
         )}
       </AnimatePresence>
 
+      {/* Halaman Full Page untuk Foto dengan Komentar */}
+      <AnimatePresence>
+        {showPhotoFullPage && (
+          <motion.div
+            key="photo-fullpage"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.5 }}
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              backgroundColor: 'black',
+              zIndex: 9997,
+              display: 'flex',
+              flexDirection: 'column',
+              overflowY: 'auto'
+            }}
+          >
+            {/* Header sederhana dengan tombol close di KIRI */}
+            <div style={{
+              position: 'sticky',
+              top: 0,
+              left: 0,
+              width: '100%',
+              padding: isMobile ? '1rem' : '1.5rem',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              zIndex: 100,
+              backgroundColor: 'black',
+              borderBottom: '1px solid rgba(255,255,255,0.1)'
+            }}>
+              {/* Tombol close (×) di kiri */}
+              <motion.button
+                onClick={handleClosePhotoFullPage}
+                style={{
+                  backgroundColor: 'transparent',
+                  border: 'none',
+                  color: 'white',
+                  fontSize: isMobile ? '1.8rem' : '2.2rem',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontFamily: 'Arial, sans-serif',
+                  padding: '0.5rem 1rem',
+                  borderRadius: '4px',
+                  order: 1
+                }}
+                whileHover={{ 
+                  backgroundColor: 'rgba(255,255,255,0.1)'
+                }}
+                whileTap={{ scale: 0.95 }}
+              >
+                ×
+              </motion.button>
+
+              {/* Counter di kanan */}
+              <div style={{
+                color: 'white',
+                fontSize: isMobile ? '1.5rem' : '2rem',
+                fontWeight: '600',
+                display: 'flex',
+                alignItems: 'baseline',
+                gap: '0.3rem',
+                fontFamily: 'Helvetica, Arial, sans-serif',
+                order: 2
+              }}>
+                <span>{String(currentPhotoIndex + 1).padStart(2, '0')}</span>
+                <span style={{ opacity: 0.6, fontSize: '0.9em' }}>/</span>
+                <span style={{ opacity: 0.6 }}>{totalPhotos}</span>
+              </div>
+            </div>
+
+            {/* Container utama: foto di atas, komentar di bawah */}
+            <div style={{
+              display: 'flex',
+              flexDirection: 'column',
+              width: '100%',
+              flex: 1
+            }}>
+              {/* Foto slider */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: isMobile ? '1rem' : '2rem',
+                paddingTop: '0',
+                paddingBottom: '1rem'
+              }}>
+                <div style={{
+                  width: '100%',
+                  maxWidth: '800px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}>
+                  <AnimatePresence mode="wait">
+                    <motion.div
+                      key={currentPhotoIndex}
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 1.05 }}
+                      transition={{ duration: 0.3 }}
+                      style={{
+                        width: '100%',
+                        maxWidth: '600px',
+                        height: isMobile ? '70vh' : '80vh',
+                        position: 'relative',
+                        borderRadius: '15px',
+                        overflow: 'hidden',
+                        boxShadow: '0 8px 25px rgba(0,0,0,0.4)',
+                        border: '2px solid rgba(255,255,255,0.15)',
+                        cursor: 'pointer'
+                      }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const rect = e.currentTarget.getBoundingClientRect();
+                        const clickX = e.clientX - rect.left;
+                        const width = rect.width;
+                        
+                        if (clickX < width / 2) {
+                          prevPhoto();
+                        } else {
+                          nextPhoto();
+                        }
+                      }}
+                    >
+                      <img 
+                        src={progressPhotos[currentPhotoIndex].src}
+                        alt={progressPhotos[currentPhotoIndex].alt}
+                        style={{
+                          width: '100%',
+                          height: '100%',
+                          objectFit: 'cover',
+                          display: 'block'
+                        }}
+                        onError={(e) => {
+                          e.currentTarget.style.backgroundColor = '#222';
+                          e.currentTarget.style.display = 'flex';
+                          e.currentTarget.style.alignItems = 'center';
+                          e.currentTarget.style.justifyContent = 'center';
+                          e.currentTarget.style.color = '#fff';
+                          e.currentTarget.innerHTML = `<div style="padding: 2rem; text-align: center;">Photo ${currentPhotoIndex + 1}</div>`;
+                        }}
+                      />
+                    </motion.div>
+                  </AnimatePresence>
+                </div>
+              </div>
+
+              {/* Progress bar kecil di bawah foto */}
+              <div style={{
+                width: '100%',
+                maxWidth: '600px',
+                margin: '0 auto 2rem auto',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                padding: '0 1rem'
+              }}>
+                {progressPhotos.map((_, index) => (
+                  <div 
+                    key={index}
+                    style={{
+                      flex: 1,
+                      height: '4px',
+                      backgroundColor: index === currentPhotoIndex ? 'white' : 'rgba(255,255,255,0.2)',
+                      borderRadius: '2px',
+                      transition: 'background-color 0.3s ease'
+                    }}
+                  />
+                ))}
+              </div>
+
+              {/* Waktu update */}
+              <div style={{
+                width: '100%',
+                maxWidth: '600px',
+                margin: '0 auto 1.5rem auto',
+                padding: '0 1rem',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                color: 'rgba(255,255,255,0.7)',
+                fontSize: '0.9rem'
+              }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <circle cx="12" cy="12" r="10"/>
+                  <polyline points="12 6 12 12 16 14"/>
+                </svg>
+                {photoTimeAgo[currentPhotoIndex]}
+              </div>
+
+              {/* Area komentar di bawah foto */}
+              <div style={{
+                flex: 1,
+                padding: isMobile ? '1rem' : '2rem',
+                paddingTop: '0',
+                maxWidth: '800px',
+                margin: '0 auto',
+                width: '100%'
+              }}>
+                {/* Input komentar */}
+                <div style={{
+                  backgroundColor: 'rgba(255,255,255,0.05)',
+                  borderRadius: '12px',
+                  padding: '1.5rem',
+                  marginBottom: '2rem',
+                  border: '1px solid rgba(255,255,255,0.1)'
+                }}>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.8rem',
+                    marginBottom: '1rem'
+                  }}>
+                    <div style={{
+                      flex: 1,
+                      position: 'relative'
+                    }}>
+                      <input
+                        ref={messageInputRef}
+                        type="text"
+                        value={message}
+                        onChange={(e) => setMessage(e.target.value)}
+                        onKeyPress={handleKeyPress}
+                        placeholder="Tulis komentar..."
+                        style={{
+                          width: '100%',
+                          padding: '0.8rem 1rem',
+                          paddingRight: '3rem',
+                          backgroundColor: 'rgba(255,255,255,0.05)',
+                          border: '1px solid rgba(255,255,255,0.1)',
+                          borderRadius: '20px',
+                          color: 'white',
+                          fontSize: '0.9rem',
+                          fontFamily: 'Helvetica, Arial, sans-serif',
+                          outline: 'none',
+                          transition: 'all 0.3s ease'
+                        }}
+                      />
+                      <span style={{
+                        position: 'absolute',
+                        right: '1rem',
+                        top: '50%',
+                        transform: 'translateY(-50%)',
+                        color: 'rgba(255,255,255,0.3)',
+                        fontSize: '0.75rem'
+                      }}>
+                        Enter
+                      </span>
+                    </div>
+                    
+                    <motion.button
+                      onClick={handleSendMessage}
+                      disabled={message.trim() === ""}
+                      style={{
+                        width: '40px',
+                        height: '40px',
+                        backgroundColor: message.trim() === "" ? 'rgba(0, 80, 183, 0.5)' : '#0050B7',
+                        border: 'none',
+                        borderRadius: '50%',
+                        cursor: message.trim() === "" ? 'not-allowed' : 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        transition: 'all 0.3s ease',
+                        flexShrink: 0
+                      }}
+                      whileHover={message.trim() !== "" ? { 
+                        scale: 1.1,
+                        backgroundColor: '#0066CC'
+                      } : {}}
+                      whileTap={message.trim() !== "" ? { scale: 0.95 } : {}}
+                    >
+                      <svg 
+                        width="18" 
+                        height="18" 
+                        viewBox="0 0 24 24" 
+                        fill="none" 
+                        stroke="white" 
+                        strokeWidth="2"
+                      >
+                        <line x1="22" y1="2" x2="11" y2="13"/>
+                        <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                      </svg>
+                    </motion.button>
+                  </div>
+                  
+                  <div style={{
+                    textAlign: 'center'
+                  }}>
+                    <span style={{
+                      color: 'rgba(255,255,255,0.5)',
+                      fontSize: '0.75rem'
+                    }}>
+                      {user ? `Login sebagai: ${userDisplayName}` : 'Komentar sebagai: Anonymous'}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Header komentar */}
+                <div style={{
+                  marginBottom: '1.5rem',
+                  color: 'white',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between'
+                }}>
+                  <h3 style={{
+                    fontSize: isMobile ? '1.2rem' : '1.4rem',
+                    fontWeight: '600',
+                    margin: 0,
+                    fontFamily: 'Helvetica, Arial, sans-serif'
+                  }}>
+                    Komentar ({currentPhotoComments.length})
+                  </h3>
+                </div>
+
+                {/* Daftar komentar */}
+                <div style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '1rem',
+                  paddingBottom: '3rem'
+                }}>
+                  {isLoadingComments ? (
+                    <div style={{
+                      color: 'rgba(255,255,255,0.5)',
+                      textAlign: 'center',
+                      padding: '2rem',
+                      fontSize: '0.9rem'
+                    }}>
+                      Memuat komentar...
+                    </div>
+                  ) : currentPhotoComments.length === 0 ? (
+                    <div style={{
+                      color: 'rgba(255,255,255,0.5)',
+                      textAlign: 'center',
+                      padding: '2rem',
+                      fontSize: '0.9rem'
+                    }}>
+                      Belum ada komentar untuk foto ini.
+                      <div style={{ marginTop: '0.5rem', fontSize: '0.8rem' }}>
+                        Jadilah yang pertama berkomentar!
+                      </div>
+                    </div>
+                  ) : (
+                    currentPhotoComments.map((comment, index) => (
+                      <motion.div
+                        key={comment.id || index}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: index * 0.05 }}
+                        style={{
+                          backgroundColor: 'rgba(255,255,255,0.05)',
+                          padding: '1rem',
+                          borderRadius: '8px',
+                          borderLeft: '3px solid #0050B7'
+                        }}
+                      >
+                        <div style={{
+                          display: 'flex',
+                          alignItems: 'flex-start',
+                          gap: '0.8rem',
+                          marginBottom: '0.5rem'
+                        }}>
+                          <div style={{
+                            width: '32px',
+                            height: '32px',
+                            minWidth: '32px',
+                            borderRadius: '50%',
+                            backgroundColor: user && comment.user === userDisplayName ? '#0050B7' : '#333',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontSize: '0.9rem',
+                            fontWeight: '600',
+                            color: 'white'
+                          }}>
+                            {comment.userAvatar || comment.user.charAt(0).toUpperCase()}
+                          </div>
+                          <div style={{ flex: 1 }}>
+                            <div style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'space-between',
+                              marginBottom: '0.3rem'
+                            }}>
+                              <span style={{
+                                color: 'rgba(255,255,255,0.9)',
+                                fontSize: '0.9rem',
+                                fontWeight: '600'
+                              }}>
+                                {comment.user}
+                                {user && comment.user === userDisplayName && (
+                                  <span style={{
+                                    marginLeft: '0.5rem',
+                                    fontSize: '0.7rem',
+                                    backgroundColor: '#0050B7',
+                                    color: 'white',
+                                    padding: '0.1rem 0.4rem',
+                                    borderRadius: '4px'
+                                  }}>
+                                    Anda
+                                  </span>
+                                )}
+                              </span>
+                              <span style={{
+                                color: 'rgba(255,255,255,0.5)',
+                                fontSize: '0.75rem',
+                                whiteSpace: 'nowrap'
+                              }}>
+                                {calculateTimeAgo(comment.timestamp)}
+                              </span>
+                            </div>
+                            <p style={{
+                              color: 'white',
+                              margin: 0,
+                              fontSize: '0.9rem',
+                              lineHeight: 1.4
+                            }}>
+                              {comment.text}
+                            </p>
+                          </div>
+                        </div>
+                      </motion.div>
+                    ))
+                  )}
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Notification Dropdown */}
+      <AnimatePresence>
+        {showNotification && (
+          <motion.div
+            ref={notificationDropdownRef}
+            initial={{ opacity: 0, y: -10, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -10, scale: 0.95 }}
+            transition={{ duration: 0.2 }}
+            style={{
+              position: 'fixed',
+              top: isMobile ? '6rem' : '7.5rem',
+              right: isMobile ? '5.5rem' : '7rem',
+              backgroundColor: 'rgba(20, 20, 20, 0.98)',
+              backdropFilter: 'blur(20px)',
+              borderRadius: '15px',
+              padding: '1rem 0',
+              width: isMobile ? '320px' : '450px',
+              maxWidth: '90vw',
+              maxHeight: '80vh',
+              zIndex: 1001,
+              border: '1px solid rgba(255, 255, 255, 0.15)',
+              boxShadow: '0 20px 60px rgba(0, 0, 0, 0.5)',
+              display: 'flex',
+              flexDirection: 'column',
+              overflow: 'hidden'
+            }}
+          >
+            {/* Notification content - tetap sama seperti sebelumnya */}
+            {/* ... (kode notification dropdown tetap sama) ... */}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* POPUP CHATBOT */}
       <AnimatePresence>
         {showChatbotPopup && (
@@ -1853,6 +2717,7 @@ export default function HomePage(): React.JSX.Element {
               width: isMobile ? '90%' : '380px'
             }}
           >
+            {/* Chatbot content - tetap sama seperti sebelumnya */}
             {/* ... (kode chatbot popup tetap sama) ... */}
           </motion.div>
         )}
@@ -1883,36 +2748,6 @@ export default function HomePage(): React.JSX.Element {
         Selamat Tahun Baru 2026
       </motion.div>
 
-      {/* User Dropdown Menu */}
-      <AnimatePresence>
-        {showUserDropdown && user && (
-          <motion.div
-            ref={userDropdownRef}
-            initial={{ opacity: 0, y: -10, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -10, scale: 0.95 }}
-            transition={{ duration: 0.2 }}
-            style={{
-              position: 'fixed',
-              top: isMobile ? '6rem' : '7.5rem',
-              right: isMobile ? '1rem' : '2rem',
-              backgroundColor: 'rgba(30, 30, 30, 0.95)',
-              backdropFilter: 'blur(10px)',
-              borderRadius: '12px',
-              padding: '0.8rem 0',
-              minWidth: '200px',
-              zIndex: 1001,
-              border: '1px solid rgba(255, 255, 255, 0.1)',
-              boxShadow: '0 10px 30px rgba(0, 0, 0, 0.3)',
-              display: 'flex',
-              flexDirection: 'column'
-            }}
-          >
-            {/* ... (kode dropdown user tetap sama) ... */}
-          </motion.div>
-        )}
-      </AnimatePresence>
-
       {/* Top Navigation Bar */}
       <div 
         ref={topNavRef}
@@ -1942,7 +2777,287 @@ export default function HomePage(): React.JSX.Element {
           border: '1px solid rgba(255,255,255,0.15)',
           boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
         }}>
-          {/* ... (kode navigation buttons tetap sama) ... */}
+          {/* Docs */}
+          <motion.div
+            onClick={() => router.push('/docs')}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              cursor: 'pointer',
+              padding: '0.4rem 1rem 0.4rem 0.8rem',
+              borderRadius: '25px',
+              backgroundColor: 'rgba(255,255,255,0.9)',
+              border: '1px solid rgba(255,255,255,0.2)',
+              transition: 'all 0.3s ease',
+              position: 'relative'
+            }}
+            whileHover={{ 
+              backgroundColor: 'white',
+              scale: 1.05,
+              border: '1px solid white'
+            }}
+          >
+            <svg 
+              width={isMobile ? "18" : "20"} 
+              height={isMobile ? "18" : "20"} 
+              viewBox="0 0 24 24" 
+              fill="none" 
+              stroke="#6366F1"
+              strokeWidth="2"
+            >
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14,2 14,8 20,8"/>
+              <line x1="16" y1="13" x2="8" y2="13"/>
+              <line x1="16" y1="17" x2="8" y2="17"/>
+              <polyline points="10,9 9,9 8,9"/>
+            </svg>
+            <span style={{
+              color: '#6366F1',
+              fontSize: isMobile ? '0.8rem' : '0.9rem',
+              fontWeight: '600',
+              fontFamily: 'Helvetica, Arial, sans-serif',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.3rem'
+            }}>
+              Docs
+              <svg 
+                width={isMobile ? "12" : "14"} 
+                height={isMobile ? "12" : "14"} 
+                viewBox="0 0 24 24" 
+                fill="none" 
+                stroke="#6366F1"
+                strokeWidth="2"
+              >
+                <path d="M7 7l10 10" />
+                <path d="M17 7v10H7" />
+              </svg>
+            </span>
+            <div style={{
+              backgroundColor: '#EC4899',
+              color: 'white',
+              fontSize: '0.7rem',
+              fontWeight: '700',
+              padding: '0.1rem 0.4rem',
+              borderRadius: '10px',
+              marginLeft: '0.3rem',
+              border: 'none'
+            }}>
+              NEW
+            </div>
+          </motion.div>
+
+          {/* Chatbot */}
+          <motion.div
+            data-nav-chatbot
+            onClick={() => router.push('/chatbot')}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              cursor: 'pointer',
+              padding: '0.4rem 1rem 0.4rem 0.8rem',
+              borderRadius: '25px',
+              backgroundColor: 'rgba(255,255,255,0.9)',
+              border: '1px solid rgba(255,255,255,0.2)',
+              transition: 'all 0.3s ease',
+              position: 'relative'
+            }}
+            whileHover={{ 
+              backgroundColor: 'white',
+              scale: 1.05,
+              border: '1px solid white'
+            }}
+          >
+            <svg 
+              width={isMobile ? "18" : "20"} 
+              height={isMobile ? "18" : "20"} 
+              viewBox="0 0 24 24" 
+              fill="none" 
+              stroke="#6366F1"
+              strokeWidth="2"
+            >
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+              <line x1="8" y1="7" x2="16" y2="7"/>
+              <line x1="8" y1="11" x2="12" y2="11"/>
+            </svg>
+            <span style={{
+              color: '#6366F1',
+              fontSize: isMobile ? '0.8rem' : '0.9rem',
+              fontWeight: '600',
+              fontFamily: 'Helvetica, Arial, sans-serif',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.3rem'
+            }}>
+              Chatbot
+              <svg 
+                width={isMobile ? "12" : "14"} 
+                height={isMobile ? "12" : "14"} 
+                viewBox="0 0 24 24" 
+                fill="none" 
+                stroke="#6366F1"
+                strokeWidth="2"
+              >
+                <path d="M7 7l10 10" />
+                <path d="M17 7v10H7" />
+              </svg>
+            </span>
+            <div style={{
+              backgroundColor: '#EC4899',
+              color: 'white',
+              fontSize: '0.7rem',
+              fontWeight: '700',
+              padding: '0.1rem 0.4rem',
+              borderRadius: '10px',
+              marginLeft: '0.3rem',
+              border: 'none'
+            }}>
+              NEW
+            </div>
+          </motion.div>
+
+          {/* Update */}
+          <motion.div
+            onClick={() => router.push('/update')}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              cursor: 'pointer',
+              padding: '0.4rem 1rem 0.4rem 0.8rem',
+              borderRadius: '25px',
+              backgroundColor: 'rgba(255,255,255,0.9)',
+              border: '1px solid rgba(255,255,255,0.2)',
+              transition: 'all 0.3s ease',
+              position: 'relative'
+            }}
+            whileHover={{ 
+              backgroundColor: 'white',
+              scale: 1.05,
+              border: '1px solid white'
+            }}
+          >
+            <svg 
+              width={isMobile ? "18" : "20"} 
+              height={isMobile ? "18" : "20"} 
+              viewBox="0 0 24 24" 
+              fill="none" 
+              stroke="#6366F1"
+              strokeWidth="2"
+            >
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14,2 14,8 20,8"/>
+              <line x1="16" y1="13" x2="8" y2="13"/>
+              <line x1="16" y1="17" x2="8" y2="17"/>
+              <polyline points="10,9 9,9 8,9"/>
+            </svg>
+            <span style={{
+              color: '#6366F1',
+              fontSize: isMobile ? '0.8rem' : '0.9rem',
+              fontWeight: '600',
+              fontFamily: 'Helvetica, Arial, sans-serif',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.3rem'
+            }}>
+              Update
+              <svg 
+                width={isMobile ? "12" : "14"} 
+                height={isMobile ? "12" : "14"} 
+                viewBox="0 0 24 24" 
+                fill="none" 
+                stroke="#6366F1"
+                strokeWidth="2"
+              >
+                <path d="M7 7l10 10" />
+                <path d="M17 7v10H7" />
+              </svg>
+            </span>
+            <div style={{
+              backgroundColor: '#EC4899',
+              color: 'white',
+              fontSize: '0.7rem',
+              fontWeight: '700',
+              padding: '0.1rem 0.4rem',
+              borderRadius: '10px',
+              marginLeft: '0.3rem',
+              border: 'none'
+            }}>
+              NEW
+            </div>
+          </motion.div>
+
+          {/* Timeline */}
+          <motion.div
+            onClick={() => router.push('/timeline')}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              cursor: 'pointer',
+              padding: '0.4rem 1rem 0.4rem 0.8rem',
+              borderRadius: '25px',
+              backgroundColor: 'rgba(255,255,255,0.9)',
+              border: '1px solid rgba(255,255,255,0.2)',
+              transition: 'all 0.3s ease',
+              position: 'relative'
+            }}
+            whileHover={{ 
+              backgroundColor: 'white',
+              scale: 1.05,
+              border: '1px solid white'
+            }}
+          >
+            <svg 
+              width={isMobile ? "18" : "20"} 
+              height={isMobile ? "18" : "20"} 
+              viewBox="0 0 24 24" 
+              fill="none" 
+              stroke="#6366F1"
+              strokeWidth="2"
+            >
+              <polyline points="1 4 1 10 7 10"/>
+              <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>
+              <line x1="12" y1="7" x2="12" y2="13"/>
+              <line x1="16" y1="11" x2="12" y2="7"/>
+            </svg>
+            <span style={{
+              color: '#6366F1',
+              fontSize: isMobile ? '0.8rem' : '0.9rem',
+              fontWeight: '600',
+              fontFamily: 'Helvetica, Arial, sans-serif',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.3rem'
+            }}>
+              Timeline
+              <svg 
+                width={isMobile ? "12" : "14"} 
+                height={isMobile ? "12" : "14"} 
+                viewBox="0 0 24 24" 
+                fill="none" 
+                stroke="#6366F1"
+                strokeWidth="2"
+              >
+                <path d="M7 7l10 10" />
+                <path d="M17 7v10H7" />
+              </svg>
+            </span>
+            <div style={{
+              backgroundColor: '#EC4899',
+              color: 'white',
+              fontSize: '0.7rem',
+              fontWeight: '700',
+              padding: '0.1rem 0.4rem',
+              borderRadius: '10px',
+              marginLeft: '0.3rem',
+              border: 'none'
+            }}>
+              NEW
+            </div>
+          </motion.div>
         </div>
       </div>
 
@@ -2016,18 +3131,20 @@ export default function HomePage(): React.JSX.Element {
           </motion.div>
         </div>
         
-        {/* Right Side Buttons */}
+
+        {/* Right Side Buttons - DENGAN SEARCH DAN NOTIFIKASI BARU */}
         <div style={{
           display: 'flex',
           alignItems: 'center',
           gap: isMobile ? '0.8rem' : '1rem',
           position: 'relative'
         }}>
-          {/* Tombol Slider Index/Grid di samping search */}
-          <div style={{
+         {/* Tombol Slider Index/Grid di samping search */}
+         <div style={{
             display: 'flex',
             alignItems: 'center',
-            gap: '0.5rem'
+            gap: '0.5rem',
+            marginRight: '0.5rem'
           }}>
             <motion.button
               onClick={toggleSlider}
@@ -2078,16 +3195,16 @@ export default function HomePage(): React.JSX.Element {
               </div>
               
               <motion.div
-                animate={{ x: sliderPosition === "index" ? 12 : 52 }}
+                animate={{ x: sliderPosition === "index" ? 10 : 50 }}
                 transition={{ type: "spring", stiffness: 300, damping: 20 }}
                 style={{
-                  width: '28px',
-                  height: '28px',
+                  width: '30px',
+                  height: '30px',
                   backgroundColor: '#00FF00',
                   borderRadius: '50%',
                   position: 'absolute',
-                  left: '6px',
-                  boxShadow: '0 0 10px rgba(0, 255, 0, 0.7)'
+                  left: '5px',
+                  boxShadow: '0 0 15px rgba(0, 255, 0, 0.7)'
                 }}
               />
             </motion.button>
@@ -2116,10 +3233,11 @@ export default function HomePage(): React.JSX.Element {
               boxShadow: showSearch ? '0 20px 60px rgba(0, 0, 0, 0.5)' : 'none'
             }}
           >
+            {/* Search content - tetap sama seperti sebelumnya */}
             {/* ... (kode search bar tetap sama) ... */}
           </motion.div>
 
-          {/* Notification Bell */}
+          {/* Notification Bell dengan Badge */}
           <motion.div
             ref={notificationRef}
             initial={{ opacity: 0, x: -10 }}
@@ -2147,7 +3265,48 @@ export default function HomePage(): React.JSX.Element {
             }}
             whileTap={{ scale: 0.95 }}
           >
-            {/* ... (kode notification bell tetap sama) ... */}
+            <svg 
+              width="20" 
+              height="20" 
+              viewBox="0 0 24 24" 
+              fill="none" 
+              stroke="white" 
+              strokeWidth="2"
+            >
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+              <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+            </svg>
+            
+            {hasUnreadNotifications && notificationCount > 0 && (
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ type: "spring", stiffness: 500, damping: 15 }}
+                style={{
+                  position: 'absolute',
+                  top: '-2px',
+                  right: '-2px',
+                  minWidth: '18px',
+                  height: '18px',
+                  backgroundColor: '#FF4757',
+                  borderRadius: '50%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  border: '2px solid black'
+                }}
+              >
+                <span style={{
+                  color: 'white',
+                  fontSize: '0.65rem',
+                  fontWeight: '700',
+                  fontFamily: 'Helvetica, Arial, sans-serif',
+                  padding: '0 4px'
+                }}>
+                  {notificationCount > 9 ? '9+' : notificationCount}
+                </span>
+              </motion.div>
+            )}
           </motion.div>
 
           {/* User Stats Badge */}
@@ -2187,6 +3346,8 @@ export default function HomePage(): React.JSX.Element {
           <motion.button
             ref={userButtonRef}
             onClick={handleSignInClick}
+            onMouseEnter={() => setIsHoveringSignIn(true)}
+            onMouseLeave={() => setIsHoveringSignIn(false)}
             style={{
               padding: isMobile ? '0.4rem 1rem' : '0.6rem 1.5rem',
               fontSize: isMobile ? '0.9rem' : '1.5rem',
@@ -2252,11 +3413,26 @@ export default function HomePage(): React.JSX.Element {
                     style={{
                       display: 'inline-block',
                       whiteSpace: 'nowrap',
-                      paddingRight: '20px'
+                      paddingRight: '20px',
+                      transform: isNameScrolling ? `translateX(${scrollPosition}px)` : 'translateX(0)',
+                      willChange: 'transform'
                     }}
                   >
-                    {userDisplayName}
+                    {isHoveringSignIn ? `Hi, ${userDisplayName}` : userDisplayName}
                   </motion.span>
+                  
+                  {isHoveringSignIn && (
+                    <motion.span
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      style={{
+                        marginLeft: '0.5rem',
+                        fontSize: '0.8em'
+                      }}
+                    >
+                      ↓
+                    </motion.span>
+                  )}
                 </div>
               </>
             ) : (
@@ -2297,44 +3473,659 @@ export default function HomePage(): React.JSX.Element {
         zIndex: 10,
         position: 'relative'
       }}>
-        {/* Hapus semua section design collection dan slider foto */}
-        
-        {/* Simple Welcome Message */}
+
+        {/* PRODUCT AND Image Section - DI BAWAH JUDUL WEBSITE */}
         <div style={{
           width: '100%',
-          padding: isMobile ? '2rem' : '4rem',
-          textAlign: 'center'
+          padding: isMobile ? '1.5rem' : '3rem',
+          marginTop: isMobile ? '1rem' : '2rem',
+          boxSizing: 'border-box',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: isMobile ? '0.1rem' : '0.2rem'
         }}>
-          <motion.h1
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            style={{
-              color: 'white',
-              fontSize: isMobile ? '2.5rem' : '4rem',
-              fontWeight: '700',
-              marginBottom: '1rem',
-              fontFamily: 'Helvetica, Arial, sans-serif'
-            }}
-          >
-            Welcome to MENURU
-          </motion.h1>
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            style={{
-              color: 'rgba(255, 255, 255, 0.8)',
-              fontSize: isMobile ? '1.2rem' : '1.5rem',
-              maxWidth: '800px',
-              margin: '0 auto',
-              lineHeight: 1.6
-            }}
-          >
-            A personal branding journal documenting emotional journeys and creative exploration through visual storytelling.
-          </motion.p>
+          
+          {/* Baris 1: PRODUCT + AND + Foto + 01 */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            width: '100%',
+            justifyContent: 'space-between'
+          }}>
+            {/* PRODUCT - Di kiri */}
+            <div style={{
+              textAlign: 'left',
+              height: isMobile ? '5rem' : '7rem',
+              display: 'flex',
+              alignItems: 'center'
+            }}>
+              <h2 style={{
+                color: 'white',
+                fontSize: isMobile ? '5rem' : '7rem',
+                fontWeight: '900',
+                textTransform: 'uppercase',
+                fontFamily: 'Helvetica, Arial, sans-serif',
+                letterSpacing: '-3px',
+                margin: 0,
+                lineHeight: 0.8,
+                padding: 0
+              }}>
+                PRODUCT
+              </h2>
+            </div>
+
+            {/* AND + Foto Container - Di kanan, dekat satu sama lain */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: isMobile ? '0.5rem' : '1rem'
+            }}>
+              {/* AND */}
+              <div style={{
+                textAlign: 'center',
+                height: isMobile ? '5rem' : '7rem',
+                display: 'flex',
+                alignItems: 'center'
+              }}>
+                <h2 style={{
+                  color: 'white',
+                  fontSize: isMobile ? '5rem' : '7rem',
+                  fontWeight: '900',
+                  textTransform: 'uppercase',
+                  fontFamily: 'Helvetica, Arial, sans-serif',
+                  letterSpacing: '-3px',
+                  margin: 0,
+                  lineHeight: 0.8,
+                  padding: 0
+                }}>
+                  AND
+                </h2>
+              </div>
+
+              {/* Container Foto + Angka 01 */}
+              <div style={{
+                position: 'relative',
+                display: 'flex',
+                alignItems: 'flex-end'
+              }}>
+                {/* Foto */}
+                <div style={{
+                  width: isMobile ? '140px' : '180px',
+                  height: isMobile ? '5rem' : '7rem',
+                  borderRadius: '10px',
+                  overflow: 'hidden',
+                  border: '1px solid rgba(255, 255, 255, 0.3)',
+                  backgroundColor: '#222'
+                }}>
+                  <img 
+                    src="images/5.jpg" 
+                    alt="Product Image"
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'cover',
+                      display: 'block'
+                    }}
+                  />
+                </div>
+                
+                {/* Angka 01 */}
+                <div style={{
+                  position: 'absolute',
+                  bottom: '-0.8rem',
+                  right: '-1.5rem',
+                  color: 'rgba(255, 255, 255, 0.7)',
+                  fontSize: isMobile ? '1rem' : '1.2rem',
+                  fontWeight: '400',
+                  fontFamily: 'Helvetica, Arial, sans-serif',
+                  letterSpacing: '1px'
+                }}>
+                  01
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Baris 2: Foto + VISUAL DESIGNER */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            width: '100%',
+            justifyContent: 'flex-start',
+            gap: isMobile ? '4rem' : '8rem'
+          }}>
+            {/* Container Foto + Angka 02 - Di kiri */}
+            <div style={{
+              position: 'relative',
+              display: 'flex',
+              alignItems: 'flex-end'
+            }}>
+              {/* Foto */}
+              <div style={{
+                width: isMobile ? '140px' : '180px',
+                height: isMobile ? '5rem' : '7rem',
+                borderRadius: '10px',
+                overflow: 'hidden',
+                border: '1px solid rgba(255, 255, 255, 0.3)',
+                backgroundColor: '#222'
+              }}>
+                <img 
+                  src="images/5.jpg" 
+                  alt="Visual Designer"
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover',
+                    display: 'block'
+                  }}
+                />
+              </div>
+              
+              {/* Angka 02 */}
+              <div style={{
+                position: 'absolute',
+                bottom: '-0.8rem',
+                right: '-1.5rem',
+                color: 'rgba(255, 255, 255, 0.7)',
+                fontSize: isMobile ? '1rem' : '1.2rem',
+                fontWeight: '400',
+                fontFamily: 'Helvetica, Arial, sans-serif',
+                letterSpacing: '1px'
+              }}>
+                02
+              </div>
+            </div>
+
+            {/* VISUAL DESIGNER - 1 baris */}
+            <div style={{
+              textAlign: 'left',
+              height: isMobile ? '5rem' : '7rem',
+              display: 'flex',
+              alignItems: 'center'
+            }}>
+              <h2 style={{
+                color: 'white',
+                fontSize: isMobile ? '5rem' : '7rem',
+                fontWeight: '900',
+                textTransform: 'uppercase',
+                fontFamily: 'Helvetica, Arial, sans-serif',
+                letterSpacing: '-3px',
+                margin: 0,
+                lineHeight: 0.8,
+                whiteSpace: 'nowrap'
+              }}>
+                VISUAL DESIGNER
+              </h2>
+            </div>
+          </div>
+
+          {/* Baris 3: BASED + Foto + IN */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            width: '100%',
+            justifyContent: 'space-between'
+          }}>
+            {/* BASED - Kiri */}
+            <div style={{
+              textAlign: 'left',
+              height: isMobile ? '5rem' : '7rem',
+              display: 'flex',
+              alignItems: 'center'
+            }}>
+              <h2 style={{
+                color: 'white',
+                fontSize: isMobile ? '5rem' : '7rem',
+                fontWeight: '900',
+                textTransform: 'uppercase',
+                fontFamily: 'Helvetica, Arial, sans-serif',
+                letterSpacing: '-3px',
+                margin: 0,
+                lineHeight: 0.8
+              }}>
+                BASED
+              </h2>
+            </div>
+
+            {/* Container Foto + Angka 03 */}
+            <div style={{
+              position: 'relative',
+              display: 'flex',
+              alignItems: 'flex-end'
+            }}>
+              {/* Foto */}
+              <div style={{
+                width: isMobile ? '140px' : '180px',
+                height: isMobile ? '5rem' : '7rem',
+                borderRadius: '10px',
+                overflow: 'hidden',
+                border: '1px solid rgba(255, 255, 255, 0.3)',
+                backgroundColor: '#222'
+              }}>
+                <img 
+                  src="images/5.jpg" 
+                  alt="Based"
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover',
+                    display: 'block'
+                  }}
+                />
+              </div>
+              
+              {/* Angka 03 */}
+              <div style={{
+                position: 'absolute',
+                bottom: '-0.8rem',
+                right: '-1.5rem',
+                color: 'rgba(255, 255, 255, 0.7)',
+                fontSize: isMobile ? '1rem' : '1.2rem',
+                fontWeight: '400',
+                fontFamily: 'Helvetica, Arial, sans-serif',
+                letterSpacing: '1px'
+              }}>
+                03
+              </div>
+            </div>
+
+            {/* IN - Kanan */}
+            <div style={{
+              textAlign: 'right',
+              height: isMobile ? '5rem' : '7rem',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'flex-end'
+            }}>
+              <h2 style={{
+                color: 'white',
+                fontSize: isMobile ? '5rem' : '7rem',
+                fontWeight: '900',
+                textTransform: 'uppercase',
+                fontFamily: 'Helvetica, Arial, sans-serif',
+                letterSpacing: '-3px',
+                margin: 0,
+                lineHeight: 0.8
+              }}>
+                IN
+              </h2>
+            </div>
+          </div>
+
+          {/* Baris 4: Foto + INDONESIA */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            width: '100%',
+            justifyContent: 'flex-start',
+            gap: isMobile ? '4rem' : '8rem'
+          }}>
+            {/* Container Foto + Angka 04 - Di kiri */}
+            <div style={{
+              position: 'relative',
+              display: 'flex',
+              alignItems: 'flex-end'
+            }}>
+              {/* Foto */}
+              <div style={{
+                width: isMobile ? '140px' : '180px',
+                height: isMobile ? '5rem' : '7rem',
+                borderRadius: '10px',
+                overflow: 'hidden',
+                border: '1px solid rgba(255, 255, 255, 0.3)',
+                backgroundColor: '#222'
+              }}>
+                <img 
+                  src="images/5.jpg" 
+                  alt="Footer Image"
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover',
+                    display: 'block'
+                  }}
+                />
+              </div>
+              
+              {/* Angka 04 */}
+              <div style={{
+                position: 'absolute',
+                bottom: '-0.8rem',
+                right: '-1.5rem',
+                color: 'rgba(255, 255, 255, 0.7)',
+                fontSize: isMobile ? '1rem' : '1.2rem',
+                fontWeight: '400',
+                fontFamily: 'Helvetica, Arial, sans-serif',
+                letterSpacing: '1px'
+              }}>
+                04
+              </div>
+            </div>
+
+            {/* INDONESIA */}
+            <div style={{
+              textAlign: 'left',
+              height: isMobile ? '5rem' : '7rem',
+              display: 'flex',
+              alignItems: 'center'
+            }}>
+              <h2 style={{
+                color: 'white',
+                fontSize: isMobile ? '5rem' : '7rem',
+                fontWeight: '900',
+                textTransform: 'uppercase',
+                fontFamily: 'Helvetica, Arial, sans-serif',
+                letterSpacing: '-3px',
+                margin: 0,
+                lineHeight: 0.8
+              }}>
+                INDONESIA
+              </h2>
+            </div>
+          </div>
+
         </div>
+        
+        {/* Spacer kecil sebelum konten berikutnya */}
+        <div style={{
+          height: isMobile ? '3rem' : '4rem',
+          width: '100%'
+        }} />
+
+        {/* Progress Bar dengan 3 Foto dan Komentar */}
+        <div style={{
+          width: '100%',
+          padding: isMobile ? '1rem' : '2rem',
+          marginTop: isMobile ? '3rem' : '4rem',
+          marginBottom: isMobile ? '3rem' : '4rem',
+          boxSizing: 'border-box',
+          position: 'relative'
+        }}>
+          {/* Counter Foto di samping kiri */}
+          <div 
+            style={{
+              position: 'absolute',
+              left: isMobile ? '2rem' : '3rem',
+              top: isMobile ? '2rem' : '3rem',
+              zIndex: 20,
+              color: 'white',
+              fontSize: isMobile ? '2.5rem' : '3.5rem',
+              fontWeight: '600',
+              fontFamily: 'Helvetica, Arial, sans-serif',
+              textShadow: '0 2px 10px rgba(0,0,0,0.5)',
+              backgroundColor: 'rgba(0,0,0,0.3)',
+              padding: '0.5rem 1rem',
+              borderRadius: '10px',
+              backdropFilter: 'blur(5px)',
+              display: 'flex',
+              alignItems: 'baseline',
+              gap: '0.3rem'
+            }}
+          >
+            <span 
+              ref={leftCounterRef}
+              style={{
+                display: 'inline-block',
+                opacity: 1
+              }}
+            >
+              {leftCounter}
+            </span>
+            <span style={{
+              fontSize: isMobile ? '1.5rem' : '2rem',
+              fontWeight: '400',
+              opacity: 0.8,
+              margin: '0 0.2rem'
+            }}>
+              /
+            </span>
+            <span style={{
+              fontSize: isMobile ? '1.5rem' : '2rem',
+              fontWeight: '400',
+              opacity: 0.8
+            }}>
+              {totalPhotos}
+            </span>
+          </div>
+
+          {/* Waktu Update */}
+          <div style={{
+            position: 'absolute',
+            right: isMobile ? '2rem' : '3rem',
+            top: isMobile ? '2rem' : '3rem',
+            zIndex: 20,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'flex-end',
+            gap: '0.5rem'
+          }}>
+            <div style={{
+              backgroundColor: 'rgba(0,0,0,0.3)',
+              padding: '0.4rem 0.8rem',
+              borderRadius: '8px',
+              backdropFilter: 'blur(5px)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.4rem'
+            }}>
+              <svg 
+                width="14" 
+                height="14" 
+                viewBox="0 0 24 24" 
+                fill="none" 
+                stroke="currentColor" 
+                strokeWidth="2"
+              >
+                <circle cx="12" cy="12" r="10"/>
+                <polyline points="12 6 12 12 16 14"/>
+              </svg>
+              <span style={{
+                color: 'rgba(255,255,255,0.9)',
+                fontSize: isMobile ? '0.8rem' : '0.9rem',
+                fontWeight: '500',
+                fontFamily: 'Helvetica, Arial, sans-serif'
+              }}>
+                {photoTimeAgo[currentPhotoIndex]}
+              </span>
+            </div>
+          </div>
+
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: isMobile ? '1.5rem' : '2rem',
+            alignItems: 'center',
+            maxWidth: '800px',
+            margin: '0 auto'
+          }}>
+            {/* Container Progress Bar */}
+            <div style={{
+              width: '100%',
+              display: 'flex',
+              alignItems: 'center',
+              gap: isMobile ? '0.5rem' : '0.8rem',
+              marginBottom: '1rem'
+            }}>
+              {progressPhotos.map((_, index) => (
+                <div 
+                  key={index}
+                  style={{
+                    flex: 1,
+                    height: '12px',
+                    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                    borderRadius: '6px',
+                    overflow: 'hidden',
+                    position: 'relative'
+                  }}
+                >
+                  <div
+                    className="progress-fill"
+                    data-index={index}
+                    style={{
+                      position: 'absolute',
+                      left: 0,
+                      top: 0,
+                      bottom: 0,
+                      backgroundColor: 'white',
+                      borderRadius: '6px',
+                      width: index === currentPhotoIndex ? '100%' : (index < currentPhotoIndex ? '100%' : '0%')
+                    }}
+                  />
+                </div>
+              ))}
+            </div>
+
+            {/* Foto Portrait - KLIK UNTUK MEMBUKA FULL PAGE */}
+            <motion.div
+              onClick={handlePhotoClick}
+              style={{
+                position: 'relative',
+                width: '100%',
+                maxWidth: '600px',
+                height: isMobile ? '600px' : '800px',
+                borderRadius: '15px',
+                overflow: 'hidden',
+                boxShadow: '0 8px 25px rgba(0,0,0,0.4)',
+                border: '2px solid rgba(255,255,255,0.15)',
+                cursor: 'pointer',
+                margin: '0 auto'
+              }}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              {/* Foto Aktif */}
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={currentPhotoIndex}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.3 }}
+                  style={{
+                    width: '100%',
+                    height: '100%'
+                  }}
+                >
+                  <img 
+                    src={progressPhotos[currentPhotoIndex].src}
+                    alt={progressPhotos[currentPhotoIndex].alt}
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'cover',
+                      display: 'block'
+                    }}
+                    onError={(e) => {
+                      e.currentTarget.style.backgroundColor = '#222';
+                      e.currentTarget.style.display = 'flex';
+                      e.currentTarget.style.alignItems = 'center';
+                      e.currentTarget.style.justifyContent = 'center';
+                      e.currentTarget.style.color = '#fff';
+                      e.currentTarget.innerHTML = `<div style="padding: 2rem; text-align: center;">Photo ${currentPhotoIndex + 1}</div>`;
+                    }}
+                  />
+                </motion.div>
+              </AnimatePresence>
+            </motion.div>
+          </div>
+        </div>
+
       </div>
+
+      {/* Cookie Notification */}
+      <AnimatePresence>
+        {showCookieNotification && (
+          <motion.div
+            initial={{ opacity: 0, y: 100 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 100 }}
+            transition={{ duration: 0.5 }}
+            style={{
+              position: 'fixed',
+              bottom: '2rem',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              backgroundColor: 'rgba(20, 20, 20, 0.95)',
+              backdropFilter: 'blur(10px)',
+              borderRadius: '15px',
+              padding: '1.5rem',
+              width: isMobile ? '90%' : '500px',
+              maxWidth: '600px',
+              zIndex: 9999,
+              border: '1px solid rgba(255, 255, 255, 0.15)',
+              boxShadow: '0 20px 60px rgba(0, 0, 0, 0.5)',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '1rem'
+            }}
+          >
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '1rem',
+              marginBottom: '0.5rem'
+            }}>
+              <div style={{
+                width: '40px',
+                height: '40px',
+                borderRadius: '10px',
+                backgroundColor: 'rgba(0, 80, 183, 0.2)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '1.2rem'
+              }}>
+                🍪
+              </div>
+              <h3 style={{
+                color: 'white',
+                fontSize: '1.2rem',
+                fontWeight: '600',
+                margin: 0,
+                fontFamily: 'Helvetica, Arial, sans-serif'
+              }}>
+                Cookie Consent
+              </h3>
+            </div>
+            
+            <p style={{
+              color: 'rgba(255, 255, 255, 0.7)',
+              fontSize: '0.9rem',
+              lineHeight: 1.5,
+              margin: 0,
+              fontFamily: 'Helvetica, Arial, sans-serif'
+            }}>
+              We use cookies to enhance your experience. By continuing to visit this site you agree to our use of cookies.
+            </p>
+            
+            <div style={{
+              display: 'flex',
+              gap: '1rem',
+              justifyContent: 'flex-end'
+            }}>
+              <motion.button
+                onClick={handleAcceptCookies}
+                style={{
+                  backgroundColor: '#0050B7',
+                  color: 'white',
+                  border: 'none',
+                  padding: '0.7rem 1.5rem',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  fontSize: '0.9rem',
+                  fontWeight: '600',
+                  fontFamily: 'Helvetica, Arial, sans-serif'
+                }}
+                whileHover={{ backgroundColor: '#0066CC' }}
+                whileTap={{ scale: 0.95 }}
+              >
+                Accept Cookies
+              </motion.button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
     </div>
   );
 }
