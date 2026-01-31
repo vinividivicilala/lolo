@@ -2587,7 +2587,7 @@ export default function HomePage(): React.JSX.Element {
                             <li style={{ marginBottom: '0.5rem' }}>UI/UX improvements</li>
                             <li>Performance issues</li>
                           </ul>
-                        </div>
+                                </div>
                       </>
                     )}
                   </motion.div>
@@ -2596,7 +2596,10 @@ export default function HomePage(): React.JSX.Element {
             </div>
           </motion.div>
         </motion.div>
-      </AnimatePresence>
+      </motion.div>
+    )}
+  </AnimatePresence>
+);
 
       {/* Delete Account Confirmation Modal */}
       <AnimatePresence>
@@ -5742,3 +5745,4 @@ export default function HomePage(): React.JSX.Element {
     </div>
   );
 }
+
