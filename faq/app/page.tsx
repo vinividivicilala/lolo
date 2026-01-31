@@ -10,6 +10,7 @@ import {
   getAuth, 
   onAuthStateChanged, 
   signOut,
+  deleteUser,
   GithubAuthProvider,
   GoogleAuthProvider,
   signInWithPopup 
@@ -19,6 +20,7 @@ import {
   collection, 
   addDoc, 
   query, 
+  where,
   orderBy, 
   onSnapshot,
   serverTimestamp,
@@ -28,7 +30,8 @@ import {
   getDoc,
   updateDoc,
   increment,
-  writeBatch
+  writeBatch,
+  deleteDoc
 } from "firebase/firestore";
 
 // Register GSAP plugins
@@ -84,8 +87,7 @@ interface UserStats {
   userName: string;
 }
 
-
-// Type untuk notifikasi - SESUAIKAN DENGAN NOTIFICATIONS PAGE
+// Type untuk notifikasi
 interface Notification {
   id: string;
   title: string;
@@ -99,6 +101,7 @@ interface Notification {
   recipientType: 'all' | 'specific' | 'email_only' | 'app_only';
   recipientIds?: string[];
   recipientEmails?: string[];
+  read: boolean;
   isRead: boolean;
   isDeleted: boolean;
   createdAt: Timestamp | Date;
@@ -111,17 +114,22 @@ interface Notification {
   likes?: string[];
   comments?: any[];
   allowComments?: boolean;
-  isAdminPost?: boolean; // Tambahkan
-  adminName?: string; // Tambahkan
-  category?: string; // Tambahkan
+  isAdminPost?: boolean;
+  adminName?: string;
+  category?: string;
 }
 
-
-
-
-
-
-
+// Type untuk catatan user
+interface UserNote {
+  id: string;
+  title: string;
+  content: string;
+  userId: string;
+  userName: string;
+  category?: string;
+  createdAt: Timestamp | Date;
+  updatedAt: Timestamp | Date;
+}
 
 export default function HomePage(): React.JSX.Element {
   const router = useRouter();
@@ -166,7 +174,7 @@ export default function HomePage(): React.JSX.Element {
   // State untuk menu overlay
   const [showMenuOverlay, setShowMenuOverlay] = useState(false);
 
-  // State untuk notifikasi dan search - DIPERBARUI
+  // State untuk notifikasi dan search
   const [showNotification, setShowNotification] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -174,6 +182,16 @@ export default function HomePage(): React.JSX.Element {
   const [notificationCount, setNotificationCount] = useState(0);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [isLoadingNotifications, setIsLoadingNotifications] = useState(false);
+
+  // State baru untuk modal profil user
+  const [showProfileModal, setShowProfileModal] = useState(false);
+  const [userNotes, setUserNotes] = useState<UserNote[]>([]);
+  const [notesCount, setNotesCount] = useState(0);
+  const [activeTab, setActiveTab] = useState<'notes' | 'settings' | 'help' | 'feedback'>('notes');
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [feedbackMessage, setFeedbackMessage] = useState("");
+  const [feedbackSubmitted, setFeedbackSubmitted] = useState(false);
 
   const headerRef = useRef<HTMLDivElement>(null);
   const topNavRef = useRef<HTMLDivElement>(null);
@@ -195,166 +213,80 @@ export default function HomePage(): React.JSX.Element {
   const searchInputRef = useRef<HTMLInputElement>(null);
   const searchContainerRef = useRef<HTMLDivElement>(null);
 
+  // Ref untuk modal profil
+  const profileModalRef = useRef<HTMLDivElement>(null);
+
   // Tambahkan state baru untuk search results
-const [searchResults, setSearchResults] = useState<any[]>([]);
-const [showSearchResults, setShowSearchResults] = useState(false);
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [showSearchResults, setShowSearchResults] = useState(false);
 
-// Data untuk pencarian
-const searchablePages = [
-  {
-    id: 1,
-    title: "Chatbot AI",
-    description: "AI Assistant dengan teknologi terbaru",
-    category: "Tools",
-    url: "/chatbot",
-    icon: "🤖"
-  },
-  {
-    id: 2,
-    title: "Sign In",
-    description: "Masuk ke akun Anda",
-    category: "Authentication",
-    url: "/signin",
-    icon: "🔐"
-  },
-  {
-    id: 3,
-    title: "Sign Up",
-    description: "Buat akun baru",
-    category: "Authentication",
-    url: "/signup",
-    icon: "👤"
-  },
-  {
-    id: 4,
-    title: "Notifikasi",
-    description: "Lihat semua notifikasi",
-    category: "System",
-    url: "/notifications",
-    icon: "🔔"
-  },
-  {
-    id: 5,
-    title: "Dokumentasi",
-    description: "Baca dokumentasi lengkap",
-    category: "Resources",
-    url: "/docs",
-    icon: "📚"
-  },
-  {
-    id: 6,
-    title: "Update",
-    description: "Pembaruan terbaru",
-    category: "News",
-    url: "/update",
-    icon: "🆕"
-  },
-  {
-    id: 7,
-    title: "Timeline",
-    description: "Linimasa aktivitas",
-    category: "Features",
-    url: "/timeline",
-    icon: "📅"
-  },
-  {
-    id: 8,
-    title: "Catatan",
-    description: "Catatan pribadi Anda",
-    category: "Personal",
-    url: "/notes",
-    icon: "📝"
-  }
-];
-
-// Fungsi untuk melakukan pencarian
-const performSearch = (query: string) => {
-  if (!query.trim()) {
-    setSearchResults([]);
-    setShowSearchResults(false);
-    return;
-  }
-
-  const lowerQuery = query.toLowerCase().trim();
-  
-  // Filter berdasarkan title atau description
-  const results = searchablePages.filter(page => 
-    page.title.toLowerCase().includes(lowerQuery) ||
-    page.description.toLowerCase().includes(lowerQuery) ||
-    page.category.toLowerCase().includes(lowerQuery)
-  );
-
-  setSearchResults(results);
-  setShowSearchResults(results.length > 0);
-  
-  // Animasi GSAP untuk munculnya results
-  if (results.length > 0 && searchContainerRef.current) {
-    gsap.fromTo(".search-result-item", 
-      { opacity: 0, y: -10 },
-      { 
-        opacity: 1, 
-        y: 0, 
-        duration: 0.3, 
-        stagger: 0.1,
-        ease: "power2.out" 
-      }
-    );
-  }
-};
-
-// Update handler untuk search query
-const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  const value = e.target.value;
-  setSearchQuery(value);
-  performSearch(value);
-};
-
-// Handler untuk klik pada hasil pencarian
-const handleSearchResultClick = (url: string) => {
-  router.push(url);
-  setShowSearch(false);
-  setSearchQuery("");
-  setShowSearchResults(false);
-};
-
-// Handler untuk key press di search (Enter untuk navigasi ke hasil pertama)
-const handleSearchKeyPress = (e: React.KeyboardEvent) => {
-  if (e.key === 'Enter' && searchQuery.trim()) {
-    if (searchResults.length > 0) {
-      // Navigasi ke hasil pertama
-      handleSearchResultClick(searchResults[0].url);
-    } else {
-      // Fallback ke halaman search dengan query
-      router.push(`/search?q=${encodeURIComponent(searchQuery)}`);
-      setShowSearch(false);
-      setSearchQuery("");
+  // Data untuk pencarian
+  const searchablePages = [
+    {
+      id: 1,
+      title: "Chatbot AI",
+      description: "AI Assistant dengan teknologi terbaru",
+      category: "Tools",
+      url: "/chatbot",
+      icon: "🤖"
+    },
+    {
+      id: 2,
+      title: "Sign In",
+      description: "Masuk ke akun Anda",
+      category: "Authentication",
+      url: "/signin",
+      icon: "🔐"
+    },
+    {
+      id: 3,
+      title: "Sign Up",
+      description: "Buat akun baru",
+      category: "Authentication",
+      url: "/signup",
+      icon: "👤"
+    },
+    {
+      id: 4,
+      title: "Notifikasi",
+      description: "Lihat semua notifikasi",
+      category: "System",
+      url: "/notifications",
+      icon: "🔔"
+    },
+    {
+      id: 5,
+      title: "Dokumentasi",
+      description: "Baca dokumentasi lengkap",
+      category: "Resources",
+      url: "/docs",
+      icon: "📚"
+    },
+    {
+      id: 6,
+      title: "Update",
+      description: "Pembaruan terbaru",
+      category: "News",
+      url: "/update",
+      icon: "🆕"
+    },
+    {
+      id: 7,
+      title: "Timeline",
+      description: "Linimasa aktivitas",
+      category: "Features",
+      url: "/timeline",
+      icon: "📅"
+    },
+    {
+      id: 8,
+      title: "Catatan",
+      description: "Catatan pribadi Anda",
+      category: "Personal",
+      url: "/notes",
+      icon: "📝"
     }
-  } else if (e.key === 'Escape') {
-    setShowSearch(false);
-    setSearchQuery("");
-    setShowSearchResults(false);
-  }
-};
-
-// Handler untuk toggle search
-const handleSearchToggle = () => {
-  const newShowSearch = !showSearch;
-  setShowSearch(newShowSearch);
-  
-  if (newShowSearch) {
-    // Auto focus dan animasi expand
-    setTimeout(() => {
-      if (searchInputRef.current) {
-        searchInputRef.current.focus();
-      }
-    }, 100);
-  } else {
-    // Reset state saat search ditutup
-    setSearchQuery("");
-    setSearchResults([]);
-    setShowSearchResults(false);
-  }
-};
+  ];
 
   // Animasi loading text
   const loadingTexts = [
@@ -393,284 +325,382 @@ const handleSearchToggle = () => {
     { title: "Features", description: "Functionality & Integration" }
   ];
 
-
-// Helper functions yang HARUS ADA:
-const getIconByType = (type: string): string => {
-  switch (type) {
-    case 'system': return '🔄';
-    case 'announcement': return '📢';
-    case 'alert': return '⚠️';
-    case 'update': return '🆕';
-    case 'comment': return '💬';
-    case 'personal': return '👤';
-    default: return '📌';
-  }
-};
-
-const getColorByType = (type: string): string => {
-  switch (type) {
-    case 'system': return '#6366F1';
-    case 'announcement': return '#0050B7';
-    case 'alert': return '#FF4757';
-    case 'update': return '#00FF00';
-    case 'comment': return '#8B5CF6';
-    case 'personal': return '#F59E0B';
-    default: return '#6B7280';
-  }
-};
-
-const getPriorityColor = (priority: string): string => {
-  switch (priority) {
-    case 'urgent': return '#FF4757';
-    case 'high': return '#FF6B6B';
-    case 'medium': return '#FFA502';
-    case 'low': return '#2ED573';
-    default: return '#747D8C';
-  }
-};
-
-const getBgColorByType = (type: string): string => {
-  const color = getColorByType(type);
-  return color + '20'; // 20 = 12% opacity dalam hex
-};
-
-
-// Fungsi untuk mengirim notifikasi - DIPERBAIKI
-const sendNotification = async (notificationData: {
-  title: string;
-  message: string;
-  type: 'announcement' | 'update' | 'alert' | 'system';
-  userId?: string;
-  userDisplayName?: string;
-  userEmail?: string;
-  isAdminPost?: boolean;
-  adminName?: string;
-  priority?: 'low' | 'medium' | 'high';
-  category?: 'general' | 'feature' | 'maintenance' | 'security';
-}) => {
-  try {
-    if (!db) {
-      console.error("❌ Firebase tidak tersedia untuk mengirim notifikasi");
-      return false;
+  // Data untuk halaman Index
+  const indexTopics = [
+    {
+      id: 1,
+      title: "Personal Journey",
+      description: "Exploring self-discovery.",
+      year: "2024"
+    },
+    {
+      id: 2,
+      title: "Creative Process",
+      description: "Ideas evolution documentation.",
+      year: "2024"
+    },
+    {
+      id: 3,
+      title: "Visual Storytelling",
+      description: "Photography for personal growth.",
+      year: "2024"
+    },
+    {
+      id: 4,
+      title: "Emotional Archive",
+      description: "Collection of feelings.",
+      year: "2024"
+    },
+    {
+      id: 5,
+      title: "Growth Metrics",
+      description: "Tracking development goals.",
+      year: "2024"
     }
-    
-    const newNotification = {
-      title: notificationData.title,
-      message: notificationData.message,
-      type: notificationData.type,
-      read: false,
-      timestamp: serverTimestamp(),
-      icon: getIconByType(notificationData.type),
-      userId: notificationData.userId || '',
-      userDisplayName: notificationData.userDisplayName || '',
-      userEmail: notificationData.userEmail || '',
-      userAvatar: notificationData.userDisplayName?.charAt(0).toUpperCase() || '👤',
-      isAdminPost: notificationData.isAdminPost || false,
-      adminName: notificationData.adminName || 'Admin',
-      priority: notificationData.priority || 'medium',
-      category: notificationData.category || 'general',
-      createdAt: serverTimestamp()
-    };
+  ];
 
-    console.log("📤 Mengirim notifikasi:", newNotification);
-    
-    const docRef = await addDoc(collection(db, 'notifications'), newNotification);
-    console.log("✅ Notification sent successfully with ID:", docRef.id);
-    
-    // Auto-refresh notifications after sending
-    setTimeout(() => {
-      // Trigger re-fetch atau update state
-      console.log("🔄 Trigger refresh notifikasi");
-    }, 1000);
-    
-    return true;
-  } catch (error: any) {
-    console.error("❌ Error sending notification:", error);
-    console.error("Error code:", error.code);
-    console.error("Error message:", error.message);
-    return false;
-  }
-};
-
-
-// Fungsi untuk mark notification as read - PERBAIKI
-const markAsRead = async (notificationId: string) => {
-  try {
-    if (!db || !auth) return;
-    
-    const currentUser = auth.currentUser;
-    const currentUserId = currentUser ? currentUser.uid : 
-                         localStorage.getItem('anonymous_user_id');
-    
-    if (!currentUserId) {
-      console.error("❌ No user ID found for marking as read");
-      return;
+  // Helper functions untuk notifikasi
+  const getIconByType = (type: string): string => {
+    switch (type) {
+      case 'system': return '🔄';
+      case 'announcement': return '📢';
+      case 'alert': return '⚠️';
+      case 'update': return '🆕';
+      case 'comment': return '💬';
+      case 'personal': return '👤';
+      default: return '📌';
     }
-    
-    const userIdToUse = currentUser ? currentUser.uid : currentUserId;
-    const notificationRef = doc(db, 'notifications', notificationId);
-    
-    // Update di Firestore
-    await updateDoc(notificationRef, {
-      [`userReads.${userIdToUse}`]: true,
-      views: increment(1)
-    });
-    
-    console.log(`✅ Marked notification ${notificationId} as read for user ${userIdToUse}`);
-    
-    // Update local state
-    setNotifications(prev => prev.map(notif => {
-      if (notif.id === notificationId) {
-        return {
-          ...notif,
-          userReads: {
-            ...notif.userReads,
-            [userIdToUse]: true
-          },
-          views: (notif.views || 0) + 1
-        };
-      }
-      return notif;
-    }));
-    
-    // Update unread count
-    setNotificationCount(prev => Math.max(0, prev - 1));
-    setHasUnreadNotifications(prev => {
-      const newCount = notificationCount - 1;
-      return newCount > 0;
-    });
-    
-  } catch (error) {
-    console.error("❌ Error marking notification as read:", error);
-  }
-};
-
-
-
-
-  // Handler untuk klik notifikasi - DIPERBARUI
-  const handleNotificationClick = async (notification: Notification) => {
-    // Mark as read ketika diklik
-   if (notification.id && !notification.isRead) {
-      await markAsRead(notification.id);
-    }
-    
-    // Untuk notifikasi admin, tidak ada navigasi khusus
-    // Hanya menampilkan detail notifikasi
-    console.log("Notification clicked:", notification);
-    
-    setShowNotification(false);
   };
 
-
-
-// Fungsi untuk clear all notifications - PERBAIKI
-const handleClearNotification = async () => {
-  try {
-    if (!db || !auth) return;
-    
-    const currentUser = auth.currentUser;
-    const currentUserId = currentUser ? currentUser.uid : 
-                         localStorage.getItem('anonymous_user_id');
-    
-    if (!currentUserId) {
-      console.error("❌ No user ID found for clearing notifications");
-      return;
+  const getColorByType = (type: string): string => {
+    switch (type) {
+      case 'system': return '#6366F1';
+      case 'announcement': return '#0050B7';
+      case 'alert': return '#FF4757';
+      case 'update': return '#00FF00';
+      case 'comment': return '#8B5CF6';
+      case 'personal': return '#F59E0B';
+      default: return '#6B7280';
     }
-    
-    const userIdToUse = currentUser ? currentUser.uid : currentUserId;
-    
-    // Update semua notifikasi yang belum dibaca
-    const batch = writeBatch(db);
-    const unreadNotifications = notifications.filter(notification => {
-      return !notification.userReads?.[userIdToUse];
-    });
-    
-    console.log(`🗑️ Clearing ${unreadNotifications.length} unread notifications`);
-    
-    unreadNotifications.forEach(notification => {
-      const notificationRef = doc(db, 'notifications', notification.id);
-      batch.update(notificationRef, {
+  };
+
+  const getBgColorByType = (type: string): string => {
+    const color = getColorByType(type);
+    return color + '20';
+  };
+
+  // Fungsi untuk mengirim notifikasi
+  const sendNotification = async (notificationData: {
+    title: string;
+    message: string;
+    type: 'announcement' | 'update' | 'alert' | 'system';
+    userId?: string;
+    userDisplayName?: string;
+    userEmail?: string;
+    isAdminPost?: boolean;
+    adminName?: string;
+    priority?: 'low' | 'medium' | 'high';
+    category?: 'general' | 'feature' | 'maintenance' | 'security';
+  }) => {
+    try {
+      if (!db) {
+        console.error("❌ Firebase tidak tersedia untuk mengirim notifikasi");
+        return false;
+      }
+      
+      const newNotification = {
+        title: notificationData.title,
+        message: notificationData.message,
+        type: notificationData.type,
+        read: false,
+        timestamp: serverTimestamp(),
+        icon: getIconByType(notificationData.type),
+        userId: notificationData.userId || '',
+        userDisplayName: notificationData.userDisplayName || '',
+        userEmail: notificationData.userEmail || '',
+        userAvatar: notificationData.userDisplayName?.charAt(0).toUpperCase() || '👤',
+        isAdminPost: notificationData.isAdminPost || false,
+        adminName: notificationData.adminName || 'Admin',
+        priority: notificationData.priority || 'medium',
+        category: notificationData.category || 'general',
+        createdAt: serverTimestamp()
+      };
+
+      console.log("📤 Mengirim notifikasi:", newNotification);
+      
+      const docRef = await addDoc(collection(db, 'notifications'), newNotification);
+      console.log("✅ Notification sent successfully with ID:", docRef.id);
+      
+      return true;
+    } catch (error: any) {
+      console.error("❌ Error sending notification:", error);
+      return false;
+    }
+  };
+
+  // Fungsi untuk mark notification as read
+  const markAsRead = async (notificationId: string) => {
+    try {
+      if (!db || !auth) return;
+      
+      const currentUser = auth.currentUser;
+      const currentUserId = currentUser ? currentUser.uid : 
+                           localStorage.getItem('anonymous_user_id');
+      
+      if (!currentUserId) {
+        console.error("❌ No user ID found for marking as read");
+        return;
+      }
+      
+      const userIdToUse = currentUser ? currentUser.uid : currentUserId;
+      const notificationRef = doc(db, 'notifications', notificationId);
+      
+      await updateDoc(notificationRef, {
         [`userReads.${userIdToUse}`]: true,
-        views: firestoreIncrement(1)
+        views: increment(1)
       });
+      
+      console.log(`✅ Marked notification ${notificationId} as read for user ${userIdToUse}`);
+      
+      setNotifications(prev => prev.map(notif => {
+        if (notif.id === notificationId) {
+          return {
+            ...notif,
+            userReads: {
+              ...notif.userReads,
+              [userIdToUse]: true
+            },
+            views: (notif.views || 0) + 1
+          };
+        }
+        return notif;
+      }));
+      
+      setNotificationCount(prev => Math.max(0, prev - 1));
+      setHasUnreadNotifications(prev => {
+        const newCount = notificationCount - 1;
+        return newCount > 0;
+      });
+      
+    } catch (error) {
+      console.error("❌ Error marking notification as read:", error);
+    }
+  };
+
+  // Fungsi untuk clear all notifications
+  const handleClearNotification = async () => {
+    try {
+      if (!db || !auth) return;
+      
+      const currentUser = auth.currentUser;
+      const currentUserId = currentUser ? currentUser.uid : 
+                           localStorage.getItem('anonymous_user_id');
+      
+      if (!currentUserId) {
+        console.error("❌ No user ID found for clearing notifications");
+        return;
+      }
+      
+      const userIdToUse = currentUser ? currentUser.uid : currentUserId;
+      const batch = writeBatch(db);
+      const unreadNotifications = notifications.filter(notification => {
+        return !notification.userReads?.[userIdToUse];
+      });
+      
+      console.log(`🗑️ Clearing ${unreadNotifications.length} unread notifications`);
+      
+      unreadNotifications.forEach(notification => {
+        const notificationRef = doc(db, 'notifications', notification.id);
+        batch.update(notificationRef, {
+          [`userReads.${userIdToUse}`]: true,
+          views: increment(1)
+        });
+      });
+      
+      await batch.commit();
+      
+      setNotifications(prev => prev.map(notification => ({
+        ...notification,
+        userReads: {
+          ...notification.userReads,
+          [userIdToUse]: true
+        },
+        views: (notification.views || 0) + 1
+      })));
+      
+      setHasUnreadNotifications(false);
+      setNotificationCount(0);
+      setShowNotification(false);
+      
+      console.log("✅ All notifications marked as read");
+      
+    } catch (error) {
+      console.error("❌ Error clearing notifications:", error);
+    }
+  };
+
+  const calculateTimeAgo = (date: Date | Timestamp | undefined | null): string => {
+    try {
+      if (!date) {
+        return "Recently";
+      }
+      
+      const now = new Date();
+      let commentDate: Date;
+      
+      if (date instanceof Timestamp) {
+        commentDate = date.toDate();
+      } else if (date instanceof Date) {
+        commentDate = date;
+      } else {
+        commentDate = new Date(date);
+      }
+      
+      if (!commentDate || isNaN(commentDate.getTime())) {
+        return "Recently";
+      }
+      
+      const diffInSeconds = Math.floor((now.getTime() - commentDate.getTime()) / 1000);
+      
+      if (diffInSeconds < 60) {
+        return "Just now";
+      } else if (diffInSeconds < 3600) {
+        const minutes = Math.floor(diffInSeconds / 60);
+        return `${minutes}m ago`;
+      } else if (diffInSeconds < 86400) {
+        const hours = Math.floor(diffInSeconds / 3600);
+        return `${hours}h ago`;
+      } else if (diffInSeconds < 2592000) {
+        const days = Math.floor(diffInSeconds / 86400);
+        return `${days}d ago`;
+      } else {
+        const months = Math.floor(diffInSeconds / 2592000);
+        return `${months}mo ago`;
+      }
+    } catch (error) {
+      console.error("Error calculating time ago:", error);
+      return "Recently";
+    }
+  };
+
+  // Fungsi untuk membuka modal profil
+  const handleOpenProfileModal = () => {
+    setShowProfileModal(true);
+    setShowUserDropdown(false);
+    loadUserNotes();
+  };
+
+  // Fungsi untuk menutup modal profil
+  const handleCloseProfileModal = () => {
+    const tl = gsap.timeline();
+    
+    if (profileModalRef.current) {
+      tl.to(profileModalRef.current, {
+        scale: 0.9,
+        opacity: 0,
+        duration: 0.3,
+        ease: "power2.in"
+      });
+    }
+    
+    tl.to({}, {
+      duration: 0.1,
+      onComplete: () => {
+        setShowProfileModal(false);
+        setActiveTab('notes');
+        setFeedbackMessage("");
+        setFeedbackSubmitted(false);
+      }
     });
-    
-    await batch.commit();
-    
-    // Update semua notifikasi di local state
-    setNotifications(prev => prev.map(notification => ({
-      ...notification,
-      userReads: {
-        ...notification.userReads,
-        [userIdToUse]: true
-      },
-      views: (notification.views || 0) + 1
-    })));
-    
-    setHasUnreadNotifications(false);
-    setNotificationCount(0);
-    setShowNotification(false);
-    
-    console.log("✅ All notifications marked as read");
-    
-  } catch (error) {
-    console.error("❌ Error clearing notifications:", error);
-  }
-};
+  };
 
+  // Load user notes dari Firestore
+  const loadUserNotes = () => {
+    if (!user || !db) return;
 
+    const notesRef = collection(db, 'userNotes');
+    const q = query(
+      notesRef, 
+      where('userId', '==', user.uid),
+      orderBy('createdAt', 'desc')
+    );
 
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      const notes: UserNote[] = [];
+      querySnapshot.forEach((doc) => {
+        notes.push({
+          id: doc.id,
+          ...doc.data()
+        } as UserNote);
+      });
+      setUserNotes(notes);
+      setNotesCount(notes.length);
+    });
 
+    return unsubscribe;
+  };
 
-const calculateTimeAgo = (date: Date | Timestamp | undefined | null): string => {
-  try {
-    // Handle undefined atau null
-    if (!date) {
-      return "Recently";
+  // Fungsi untuk menghapus note
+  const handleDeleteNote = async (noteId: string) => {
+    if (!db) return;
+    
+    try {
+      await deleteDoc(doc(db, 'userNotes', noteId));
+      console.log("Note berhasil dihapus");
+    } catch (error) {
+      console.error("Error deleting note:", error);
     }
-    
-    const now = new Date();
-    let commentDate: Date;
-    
-    if (date instanceof Timestamp) {
-      commentDate = date.toDate();
-    } else if (date instanceof Date) {
-      commentDate = date;
-    } else {
-      // Coba parse jika string atau object lain
-      commentDate = new Date(date);
-    }
-    
-    // Validasi date
-    if (!commentDate || isNaN(commentDate.getTime())) {
-      return "Recently";
-    }
-    
-    const diffInSeconds = Math.floor((now.getTime() - commentDate.getTime()) / 1000);
-    
-    if (diffInSeconds < 60) {
-      return "Just now";
-    } else if (diffInSeconds < 3600) {
-      const minutes = Math.floor(diffInSeconds / 60);
-      return `${minutes}m ago`;
-    } else if (diffInSeconds < 86400) {
-      const hours = Math.floor(diffInSeconds / 3600);
-      return `${hours}h ago`;
-    } else if (diffInSeconds < 2592000) { // 30 hari
-      const days = Math.floor(diffInSeconds / 86400);
-      return `${days}d ago`;
-    } else {
-      const months = Math.floor(diffInSeconds / 2592000);
-      return `${months}mo ago`;
-    }
-  } catch (error) {
-    console.error("Error calculating time ago:", error);
-    return "Recently";
-  }
-};
-  
+  };
 
+  // Fungsi untuk mengirim feedback
+  const handleSubmitFeedback = async () => {
+    if (!feedbackMessage.trim() || !user || !db) return;
+
+    try {
+      const feedbackRef = collection(db, 'userFeedback');
+      await addDoc(feedbackRef, {
+        userId: user.uid,
+        userEmail: user.email,
+        userName: user.displayName || user.email?.split('@')[0],
+        message: feedbackMessage.trim(),
+        createdAt: new Date(),
+        status: 'pending'
+      });
+
+      setFeedbackSubmitted(true);
+      setFeedbackMessage("");
+      
+      setTimeout(() => {
+        setFeedbackSubmitted(false);
+      }, 3000);
+    } catch (error) {
+      console.error("Error submitting feedback:", error);
+    }
+  };
+
+  // Fungsi untuk menghapus akun
+  const handleDeleteAccount = async () => {
+    if (!user || !auth) return;
+    
+    setIsDeleting(true);
+    try {
+      // Hapus data user dari Firestore
+      const userDataRef = doc(db, 'users', user.uid);
+      await deleteDoc(userDataRef);
+      
+      // Hapus user dari Firebase Auth
+      await deleteUser(user);
+      
+      setShowDeleteConfirm(false);
+      handleCloseProfileModal();
+      router.push('/');
+    } catch (error) {
+      console.error("Error deleting account:", error);
+      alert("Gagal menghapus akun. Silakan coba lagi.");
+    } finally {
+      setIsDeleting(false);
+    }
+  };
 
   // Update waktu yang lalu secara real-time
   useEffect(() => {
@@ -694,7 +724,6 @@ const calculateTimeAgo = (date: Date | Timestamp | undefined | null): string => 
       const userStatsDoc = await getDoc(userStatsRef);
       
       if (userStatsDoc.exists()) {
-        // Update existing user stats
         await updateDoc(userStatsRef, {
           loginCount: increment(1),
           lastLogin: serverTimestamp(),
@@ -702,7 +731,6 @@ const calculateTimeAgo = (date: Date | Timestamp | undefined | null): string => 
           updatedAt: serverTimestamp()
         });
         
-        // Update total logins count
         const totalLoginsRef = doc(db, 'appStats', 'totalLogins');
         const totalLoginsDoc = await getDoc(totalLoginsRef);
         
@@ -718,7 +746,6 @@ const calculateTimeAgo = (date: Date | Timestamp | undefined | null): string => 
           });
         }
       } else {
-        // Create new user stats
         await setDoc(userStatsRef, {
           userId: userId,
           userName: userName,
@@ -729,7 +756,6 @@ const calculateTimeAgo = (date: Date | Timestamp | undefined | null): string => 
           updatedAt: serverTimestamp()
         });
 
-        // Update total users count
         const totalUsersRef = doc(db, 'appStats', 'totalUsers');
         const totalUsersDoc = await getDoc(totalUsersRef);
         
@@ -745,7 +771,6 @@ const calculateTimeAgo = (date: Date | Timestamp | undefined | null): string => 
           });
         }
         
-        // Initialize total logins
         const totalLoginsRef = doc(db, 'appStats', 'totalLogins');
         const totalLoginsDoc = await getDoc(totalLoginsRef);
         if (!totalLoginsDoc.exists()) {
@@ -776,8 +801,8 @@ const calculateTimeAgo = (date: Date | Timestamp | undefined | null): string => 
       }
     };
 
-    loadTotalUsers();
-  }, []);
+    if (db) loadTotalUsers();
+  }, [db]);
 
   // Load total logged in users
   useEffect(() => {
@@ -794,26 +819,21 @@ const calculateTimeAgo = (date: Date | Timestamp | undefined | null): string => 
       }
     };
 
-    loadTotalLoggedInUsers();
-  }, []);
+    if (db) loadTotalLoggedInUsers();
+  }, [db]);
 
   // Listen to auth state changes
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (currentUser) {
         setUser(currentUser);
-        // Get display name
         const name = currentUser.displayName || 
                      currentUser.email?.split('@')[0] || 
                      'User';
         setUserDisplayName(name);
         
-        // Update user stats
         await updateUserStats(currentUser.uid, name);
         
-        // TIDAK LAGI MENGIRIM NOTIFIKASI LOGIN
-        
-        // Load user stats
         try {
           const userStatsRef = doc(db, 'userStats', currentUser.uid);
           const userStatsDoc = await getDoc(userStatsRef);
@@ -833,10 +853,12 @@ const calculateTimeAgo = (date: Date | Timestamp | undefined | null): string => 
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [auth, db]);
 
   // Load comments from Firebase
   useEffect(() => {
+    if (!db) return;
+    
     console.log("Memulai loading komentar...");
     setIsLoadingComments(true);
     
@@ -857,242 +879,188 @@ const calculateTimeAgo = (date: Date | Timestamp | undefined | null): string => 
       setIsLoadingComments(false);
     }, (error) => {
       console.error("Error loading comments:", error);
-      console.error("Error code:", error.code);
       setIsLoadingComments(false);
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [db]);
 
-
-
-  
-// Load notifications from Firebase - PERBAIKI SESUAI DENGAN NOTIFICATIONS PAGE
-useEffect(() => {
-  console.log("🚀 Memulai loading notifikasi untuk halaman utama...");
-  
-  if (!db) {
-    console.log("❌ Firebase belum siap");
-    setIsLoadingNotifications(false);
-    return;
-  }
-  
-  setIsLoadingNotifications(true);
-  
-  try {
-    const notificationsRef = collection(db, 'notifications');
-    const q = query(notificationsRef, orderBy('createdAt', 'desc'));
+  // Load notifications from Firebase
+  useEffect(() => {
+    console.log("🚀 Memulai loading notifikasi untuk halaman utama...");
     
-    console.log("📡 Mendengarkan notifikasi dari Firestore...");
+    if (!db) {
+      console.log("❌ Firebase belum siap");
+      setIsLoadingNotifications(false);
+      return;
+    }
     
-    const unsubscribe = onSnapshot(q, 
-      (querySnapshot) => {
-        console.log("✅ Notifikasi diterima:", querySnapshot.size, "dokumen");
-        
-        if (querySnapshot.empty) {
-          console.log("ℹ️ Tidak ada notifikasi di database");
-          setNotifications([]);
-          setHasUnreadNotifications(false);
-          setNotificationCount(0);
-          setIsLoadingNotifications(false);
-          return;
-        }
-        
-        const notificationsData: Notification[] = [];
-        let unreadCount = 0;
-        
-        // Get current user info
-        const currentUser = auth?.currentUser;
-        const currentUserId = currentUser ? currentUser.uid : 
-                              localStorage.getItem('anonymous_user_id') || 
-                              'anonymous_' + Date.now();
-        
-        // Generate anonymous ID jika belum ada
-        if (!currentUser && !localStorage.getItem('anonymous_user_id')) {
-          localStorage.setItem('anonymous_user_id', currentUserId);
-        }
-        
-        querySnapshot.forEach((doc) => {
-          try {
-            const data = doc.data();
-            console.log(`📝 Memproses notifikasi ${doc.id}:`, {
-              title: data.title,
-              type: data.type,
-              isDeleted: data.isDeleted
-            });
-            
-            // Skip jika deleted
-            if (data.isDeleted === true) {
-              console.log(`⏭️ Skip notifikasi ${doc.id} karena deleted`);
-              return;
-            }
-            
-            // Cek apakah user bisa melihat notifikasi ini
-            let shouldShow = false;
-            
-            switch (data.recipientType) {
-              case 'all':
-                // Semua orang bisa lihat
-                shouldShow = true;
-                break;
-                
-              case 'specific':
-                // Hanya untuk user tertentu
-                const recipientIds = data.recipientIds || [];
-                if (recipientIds.includes(currentUserId) || 
-                    (currentUser && recipientIds.includes(currentUser.uid))) {
-                  shouldShow = true;
-                }
-                break;
-                
-              case 'email_only':
-                // Hanya untuk email tertentu
-                if (currentUser && data.recipientEmails?.includes(currentUser.email)) {
-                  shouldShow = true;
-                }
-                break;
-                
-              case 'app_only':
-                // Hanya untuk logged in users
-                if (currentUser) {
-                  shouldShow = true;
-                }
-                break;
-                
-              default:
-                shouldShow = false;
-            }
-            
-            if (shouldShow) {
-              // Convert timestamp
-              let timestamp = data.createdAt;
-              if (timestamp && typeof timestamp.toDate === 'function') {
-                timestamp = timestamp.toDate();
-              }
-              
-              const notification: Notification = {
-                id: doc.id,
-                title: data.title || "No Title",
-                message: data.message || "",
-                type: data.type || 'announcement',
-                priority: data.priority || 'medium',
-                senderId: data.senderId || 'system',
-                senderName: data.senderName || 'System',
-                senderEmail: data.senderEmail,
-                senderPhotoURL: data.senderPhotoURL,
-                recipientType: data.recipientType || 'all',
-                recipientIds: data.recipientIds || [],
-                recipientEmails: data.recipientEmails || [],
-                isRead: false, // Will be calculated based on userReads
-                isDeleted: data.isDeleted || false,
-                createdAt: timestamp || new Date(),
-                actionUrl: data.actionUrl,
-                icon: data.icon || getIconByType(data.type || 'announcement'),
-                color: data.color || '#0050B7',
-                userReads: data.userReads || {},
-                views: data.views || 0,
-                clicks: data.clicks || 0,
-                likes: data.likes || [],
-                comments: data.comments || [],
-                allowComments: data.allowComments || false,
-                 read: data.read || false, // Tambahkan properti read untuk kompatibilitas
-      isAdminPost: data.isAdminPost || false, // Tambahkan
-      adminName: data.adminName || '', // Tambahkan
-      category: data.category || 'general' // Tambahkan
-              };
-              
-              // Cek apakah user sudah baca notifikasi ini
-              const isReadByUser = notification.userReads[currentUserId] || 
-                                  (currentUser && notification.userReads[currentUser.uid]) || 
-                                  false;
-              
-              if (!isReadByUser) {
-                unreadCount++;
-              }
-              
-              notificationsData.push(notification);
-              console.log(`✅ Ditambahkan: ${notification.title} (${isReadByUser ? 'read' : 'unread'})`);
-            }
-          } catch (error) {
-            console.error(`❌ Error processing notification ${doc.id}:`, error);
-          }
-        });
-        
-        console.log(`📊 Total notifikasi untuk user: ${notificationsData.length}, Unread: ${unreadCount}`);
-        
-        setNotifications(notificationsData);
-        setHasUnreadNotifications(unreadCount > 0);
-        setNotificationCount(unreadCount);
-        setIsLoadingNotifications(false);
-      }, 
-      (error) => {
-        console.error("❌ Error loading notifications:", error);
-        console.error("Error code:", error.code);
-        console.error("Error message:", error.message);
-        
-        // Untuk debugging, tambahkan dummy data jika error
-        if (process.env.NODE_ENV === 'development') {
-          const dummyNotifications: Notification[] = [
-            {
-              id: 'dummy1',
-              title: "Welcome to MENURU!",
-              message: "Welcome to our platform. Notifications are working correctly.",
-              type: 'announcement',
-              priority: 'medium',
-              senderId: 'system',
-              senderName: 'System',
-              isRead: false,
-              isDeleted: false,
-              createdAt: new Date(),
-              icon: '📢',
-              color: '#0050B7',
-              userReads: {},
-              recipientType: 'all',
-              views: 0,
-              clicks: 0,
-              likes: []
-            },
-            {
-              id: 'dummy2',
-              title: "Firebase Connected",
-              message: "Successfully connected to Firebase database.",
-              type: 'system',
-              priority: 'low',
-              senderId: 'system',
-              senderName: 'System',
-              isRead: false,
-              isDeleted: false,
-              createdAt: new Date(Date.now() - 3600000),
-              icon: '🔄',
-              color: '#6366F1',
-              userReads: {},
-              recipientType: 'all',
-              views: 0,
-              clicks: 0,
-              likes: []
-            }
-          ];
+    setIsLoadingNotifications(true);
+    
+    try {
+      const notificationsRef = collection(db, 'notifications');
+      const q = query(notificationsRef, orderBy('createdAt', 'desc'));
+      
+      console.log("📡 Mendengarkan notifikasi dari Firestore...");
+      
+      const unsubscribe = onSnapshot(q, 
+        (querySnapshot) => {
+          console.log("✅ Notifikasi diterima:", querySnapshot.size, "dokumen");
           
-          setNotifications(dummyNotifications);
-          setHasUnreadNotifications(true);
-          setNotificationCount(2);
+          if (querySnapshot.empty) {
+            console.log("ℹ️ Tidak ada notifikasi di database");
+            setNotifications([]);
+            setHasUnreadNotifications(false);
+            setNotificationCount(0);
+            setIsLoadingNotifications(false);
+            return;
+          }
+          
+          const notificationsData: Notification[] = [];
+          let unreadCount = 0;
+          
+          const currentUser = auth?.currentUser;
+          const currentUserId = currentUser ? currentUser.uid : 
+                                localStorage.getItem('anonymous_user_id') || 
+                                'anonymous_' + Date.now();
+          
+          if (!currentUser && !localStorage.getItem('anonymous_user_id')) {
+            localStorage.setItem('anonymous_user_id', currentUserId);
+          }
+          
+          querySnapshot.forEach((doc) => {
+            try {
+              const data = doc.data();
+              console.log(`📝 Memproses notifikasi ${doc.id}:`, {
+                title: data.title,
+                type: data.type,
+                isDeleted: data.isDeleted
+              });
+              
+              if (data.isDeleted === true) {
+                console.log(`⏭️ Skip notifikasi ${doc.id} karena deleted`);
+                return;
+              }
+              
+              let shouldShow = false;
+              
+              switch (data.recipientType) {
+                case 'all':
+                  shouldShow = true;
+                  break;
+                  
+                case 'specific':
+                  const recipientIds = data.recipientIds || [];
+                  if (recipientIds.includes(currentUserId) || 
+                      (currentUser && recipientIds.includes(currentUser.uid))) {
+                    shouldShow = true;
+                  }
+                  break;
+                  
+                case 'email_only':
+                  if (currentUser && data.recipientEmails?.includes(currentUser.email)) {
+                    shouldShow = true;
+                  }
+                  break;
+                  
+                case 'app_only':
+                  if (currentUser) {
+                    shouldShow = true;
+                  }
+                  break;
+                  
+                default:
+                  shouldShow = false;
+              }
+              
+              if (shouldShow) {
+                let timestamp = data.createdAt;
+                if (timestamp && typeof timestamp.toDate === 'function') {
+                  timestamp = timestamp.toDate();
+                }
+                
+                const notification: Notification = {
+                  id: doc.id,
+                  title: data.title || "No Title",
+                  message: data.message || "",
+                  type: data.type || 'announcement',
+                  priority: data.priority || 'medium',
+                  senderId: data.senderId || 'system',
+                  senderName: data.senderName || 'System',
+                  senderEmail: data.senderEmail,
+                  senderPhotoURL: data.senderPhotoURL,
+                  recipientType: data.recipientType || 'all',
+                  recipientIds: data.recipientIds || [],
+                  recipientEmails: data.recipientEmails || [],
+                  isRead: false,
+                  read: data.read || false,
+                  isDeleted: data.isDeleted || false,
+                  createdAt: timestamp || new Date(),
+                  actionUrl: data.actionUrl,
+                  icon: data.icon || getIconByType(data.type || 'announcement'),
+                  color: data.color || '#0050B7',
+                  userReads: data.userReads || {},
+                  views: data.views || 0,
+                  clicks: data.clicks || 0,
+                  likes: data.likes || [],
+                  comments: data.comments || [],
+                  allowComments: data.allowComments || false,
+                  isAdminPost: data.isAdminPost || false,
+                  adminName: data.adminName || '',
+                  category: data.category || 'general'
+                };
+                
+                const isReadByUser = notification.userReads[currentUserId] || 
+                                    (currentUser && notification.userReads[currentUser.uid]) || 
+                                    false;
+                
+                if (!isReadByUser) {
+                  unreadCount++;
+                }
+                
+                notificationsData.push(notification);
+                console.log(`✅ Ditambahkan: ${notification.title} (${isReadByUser ? 'read' : 'unread'})`);
+              }
+            } catch (error) {
+              console.error(`❌ Error processing notification ${doc.id}:`, error);
+            }
+          });
+          
+          console.log(`📊 Total notifikasi untuk user: ${notificationsData.length}, Unread: ${unreadCount}`);
+          
+          setNotifications(notificationsData);
+          setHasUnreadNotifications(unreadCount > 0);
+          setNotificationCount(unreadCount);
+          setIsLoadingNotifications(false);
+        }, 
+        (error) => {
+          console.error("❌ Error loading notifications:", error);
+          setIsLoadingNotifications(false);
         }
-        
-        setIsLoadingNotifications(false);
-      }
-    );
-    
-    return () => unsubscribe();
-  } catch (error) {
-    console.error("❌ Error in notifications useEffect:", error);
-    setIsLoadingNotifications(false);
-  }
-}, [db, auth?.currentUser]); // Tambahkan auth sebagai dependency
+      );
+      
+      return () => unsubscribe();
+    } catch (error) {
+      console.error("❌ Error in notifications useEffect:", error);
+      setIsLoadingNotifications(false);
+    }
+  }, [db, auth?.currentUser]);
 
-
-
-
- 
+  // Animasi GSAP saat modal profil dibuka
+  useEffect(() => {
+    if (showProfileModal && profileModalRef.current) {
+      gsap.fromTo(profileModalRef.current,
+        { scale: 0.8, opacity: 0, y: 50 },
+        { 
+          scale: 1, 
+          opacity: 1, 
+          y: 0, 
+          duration: 0.5, 
+          ease: "back.out(1.7)" 
+        }
+      );
+    }
+  }, [showProfileModal]);
 
   // Animasi teks nama user berjalan
   useEffect(() => {
@@ -1135,7 +1103,6 @@ useEffect(() => {
           duration: 0.3,
           ease: "power2.out"
         });
-        // Auto focus input
         setTimeout(() => {
           if (searchInputRef.current) {
             searchInputRef.current.focus();
@@ -1169,6 +1136,9 @@ useEffect(() => {
       if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
         setShowSearch(false);
       }
+      if (profileModalRef.current && !profileModalRef.current.contains(event.target as Node)) {
+        handleCloseProfileModal();
+      }
     };
 
     document.addEventListener('mousedown', handleClickOutside);
@@ -1182,16 +1152,13 @@ useEffect(() => {
     const newLeftCounter = String(newIndex + 1).padStart(2, '0');
     
     if (leftCounterRef.current) {
-      // Animasi fade out current counter
       gsap.to(leftCounterRef.current, {
         opacity: 0,
         y: -10,
         duration: 0.2,
         onComplete: () => {
-          // Update text
           setLeftCounter(newLeftCounter);
           
-          // Animasi fade in new counter
           gsap.fromTo(leftCounterRef.current, 
             { opacity: 0, y: 10 },
             { 
@@ -1261,6 +1228,7 @@ useEffect(() => {
     }
   }, [showMenuOverlay]);
 
+  // Inisialisasi dan cleanup
   useEffect(() => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 768);
@@ -1311,6 +1279,12 @@ useEffect(() => {
         if (showSearch) {
           setShowSearch(false);
         }
+        if (showProfileModal) {
+          handleCloseProfileModal();
+        }
+        if (showDeleteConfirm) {
+          setShowDeleteConfirm(false);
+        }
       }
     };
 
@@ -1335,7 +1309,7 @@ useEffect(() => {
       }
       ScrollTrigger.getAll().forEach(trigger => trigger.kill());
     };
-  }, [isMobile, showMenuruFullPage, showPhotoFullPage, showUserDropdown, showLogoutModal, showMenuOverlay, showNotification, showSearch]);
+  }, [isMobile, showMenuruFullPage, showPhotoFullPage, showUserDropdown, showLogoutModal, showMenuOverlay, showNotification, showSearch, showProfileModal, showDeleteConfirm]);
 
   // Animasi GSAP untuk tanda + di tombol Menuru
   useEffect(() => {
@@ -1478,10 +1452,10 @@ useEffect(() => {
     handleOpenPhotoFullPage();
   };
 
-  // Handler untuk Sign In / User Button
+  // Handler untuk Sign In / User Button - UPDATED untuk modal profil
   const handleSignInClick = () => {
     if (user) {
-      setShowUserDropdown(!showUserDropdown);
+      handleOpenProfileModal();
     } else {
       router.push('/signin');
     }
@@ -1570,8 +1544,6 @@ useEffect(() => {
       const docRef = await addDoc(collection(db, 'photoComments'), newComment);
       console.log("Komentar berhasil dikirim dengan ID:", docRef.id);
       
-      // TIDAK LAGI MENGIRIM NOTIFIKASI KOMENTAR
-      
       setMessage("");
       
       if (messageInputRef.current) {
@@ -1580,8 +1552,6 @@ useEffect(() => {
       
     } catch (error: any) {
       console.error("Error detail:", error);
-      console.error("Error code:", error.code);
-      console.error("Error message:", error.message);
       
       let errorMessage = "Gagal mengirim komentar. Silakan coba lagi.";
       
@@ -1603,52 +1573,1172 @@ useEffect(() => {
     }
   };
 
-  // Handler untuk search
-  const handleSearch = () => {
-    if (searchQuery.trim()) {
-      console.log("Searching for:", searchQuery);
-      router.push(`/search?q=${encodeURIComponent(searchQuery)}`);
-      setShowSearch(false);
+  // Fungsi untuk melakukan pencarian
+  const performSearch = (query: string) => {
+    if (!query.trim()) {
+      setSearchResults([]);
+      setShowSearchResults(false);
+      return;
+    }
+
+    const lowerQuery = query.toLowerCase().trim();
+    
+    const results = searchablePages.filter(page => 
+      page.title.toLowerCase().includes(lowerQuery) ||
+      page.description.toLowerCase().includes(lowerQuery) ||
+      page.category.toLowerCase().includes(lowerQuery)
+    );
+
+    setSearchResults(results);
+    setShowSearchResults(results.length > 0);
+    
+    if (results.length > 0 && searchContainerRef.current) {
+      gsap.fromTo(".search-result-item", 
+        { opacity: 0, y: -10 },
+        { 
+          opacity: 1, 
+          y: 0, 
+          duration: 0.3, 
+          stagger: 0.1,
+          ease: "power2.out" 
+        }
+      );
     }
   };
 
-  
-  // Data untuk halaman Index
-  const indexTopics = [
-    {
-      id: 1,
-      title: "Personal Journey",
-      description: "Exploring self-discovery.",
-      year: "2024"
-    },
-    {
-      id: 2,
-      title: "Creative Process",
-      description: "Ideas evolution documentation.",
-      year: "2024"
-    },
-    {
-      id: 3,
-      title: "Visual Storytelling",
-      description: "Photography for personal growth.",
-      year: "2024"
-    },
-    {
-      id: 4,
-      title: "Emotional Archive",
-      description: "Collection of feelings.",
-      year: "2024"
-    },
-    {
-      id: 5,
-      title: "Growth Metrics",
-      description: "Tracking development goals.",
-      year: "2024"
+  // Update handler untuk search query
+  const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSearchQuery(value);
+    performSearch(value);
+  };
+
+  // Handler untuk klik pada hasil pencarian
+  const handleSearchResultClick = (url: string) => {
+    router.push(url);
+    setShowSearch(false);
+    setSearchQuery("");
+    setShowSearchResults(false);
+  };
+
+  // Handler untuk key press di search (Enter untuk navigasi ke hasil pertama)
+  const handleSearchKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && searchQuery.trim()) {
+      if (searchResults.length > 0) {
+        handleSearchResultClick(searchResults[0].url);
+      } else {
+        router.push(`/search?q=${encodeURIComponent(searchQuery)}`);
+        setShowSearch(false);
+        setSearchQuery("");
+      }
+    } else if (e.key === 'Escape') {
+      setShowSearch(false);
+      setSearchQuery("");
+      setShowSearchResults(false);
     }
-  ];
+  };
+
+  // Handler untuk toggle search
+  const handleSearchToggle = () => {
+    const newShowSearch = !showSearch;
+    setShowSearch(newShowSearch);
+    
+    if (newShowSearch) {
+      setTimeout(() => {
+        if (searchInputRef.current) {
+          searchInputRef.current.focus();
+        }
+      }, 100);
+    } else {
+      setSearchQuery("");
+      setSearchResults([]);
+      setShowSearchResults(false);
+    }
+  };
+
+  // Handler untuk klik notifikasi
+  const handleNotificationClick = async (notification: Notification) => {
+    if (notification.id && !notification.read) {
+      await markAsRead(notification.id);
+    }
+    
+    console.log("Notification clicked:", notification);
+    
+    setShowNotification(false);
+  };
 
   // Komentar untuk foto saat ini
   const currentPhotoComments = comments.filter(comment => comment.photoIndex === currentPhotoIndex);
+
+  // Komponen modal profil user
+  const ProfileModal = () => (
+    <AnimatePresence>
+      {showProfileModal && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.3 }}
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            backgroundColor: 'rgba(0, 0, 0, 0.85)',
+            backdropFilter: 'blur(10px)',
+            zIndex: 9998,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: isMobile ? '1rem' : '2rem'
+          }}
+          onClick={handleCloseProfileModal}
+        >
+          <motion.div
+            ref={profileModalRef}
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.9, opacity: 0 }}
+            transition={{ type: "spring", damping: 25, stiffness: 300 }}
+            style={{
+              width: isMobile ? '100%' : '90%',
+              maxWidth: isMobile ? '100%' : '900px',
+              height: isMobile ? '100%' : '85vh',
+              backgroundColor: 'rgba(20, 20, 20, 0.95)',
+              borderRadius: isMobile ? '0' : '25px',
+              border: '1px solid rgba(255, 255, 255, 0.15)',
+              overflow: 'hidden',
+              display: 'flex',
+              flexDirection: 'column',
+              boxShadow: '0 25px 100px rgba(0, 0, 0, 0.7)',
+              position: 'relative'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header Modal */}
+            <div style={{
+              padding: isMobile ? '1.5rem' : '2rem',
+              borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              backgroundColor: 'rgba(0, 0, 0, 0.3)',
+              backdropFilter: 'blur(10px)'
+            }}>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '1rem'
+              }}>
+                <motion.div 
+                  whileHover={{ rotate: 15 }}
+                  style={{
+                    width: '50px',
+                    height: '50px',
+                    borderRadius: '50%',
+                    backgroundColor: '#0050B7',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '1.2rem',
+                    fontWeight: 'bold',
+                    color: 'white',
+                    border: '3px solid rgba(255, 255, 255, 0.2)'
+                  }}
+                >
+                  {userDisplayName.charAt(0).toUpperCase()}
+                </motion.div>
+                <div>
+                  <h3 style={{
+                    color: 'white',
+                    fontSize: '1.3rem',
+                    fontWeight: '600',
+                    margin: '0 0 0.2rem 0'
+                  }}>
+                    {userDisplayName}
+                  </h3>
+                  <div style={{
+                    color: 'rgba(255, 255, 255, 0.6)',
+                    fontSize: '0.9rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem'
+                  }}>
+                    <span>{user?.email}</span>
+                    <motion.span 
+                      whileHover={{ scale: 1.1 }}
+                      style={{
+                        backgroundColor: user?.providerData?.[0]?.providerId === 'google.com' ? '#DB4437' : 
+                                       user?.providerData?.[0]?.providerId === 'github.com' ? '#333' : '#0050B7',
+                        color: 'white',
+                        fontSize: '0.7rem',
+                        padding: '0.1rem 0.5rem',
+                        borderRadius: '10px'
+                      }}
+                    >
+                      {user?.providerData?.[0]?.providerId === 'google.com' ? 'Google' : 
+                       user?.providerData?.[0]?.providerId === 'github.com' ? 'GitHub' : 'Email'}
+                    </motion.span>
+                  </div>
+                </div>
+              </div>
+
+              <motion.button
+                onClick={handleCloseProfileModal}
+                whileHover={{ rotate: 90, scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                style={{
+                  width: '40px',
+                  height: '40px',
+                  borderRadius: '50%',
+                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                  border: '1px solid rgba(255, 255, 255, 0.2)',
+                  color: 'white',
+                  fontSize: '1.5rem',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  padding: 0,
+                  margin: 0
+                }}
+              >
+                ×
+              </motion.button>
+            </div>
+
+            {/* Main Content */}
+            <div style={{
+              display: 'flex',
+              flex: 1,
+              overflow: 'hidden'
+            }}>
+              {/* Sidebar Navigation */}
+              <div style={{
+                width: isMobile ? '100%' : '250px',
+                backgroundColor: 'rgba(10, 10, 10, 0.8)',
+                borderRight: isMobile ? 'none' : '1px solid rgba(255, 255, 255, 0.1)',
+                padding: isMobile ? '1rem' : '1.5rem',
+                display: 'flex',
+                flexDirection: isMobile ? 'row' : 'column',
+                gap: isMobile ? '0.5rem' : '1rem',
+                overflowX: isMobile ? 'auto' : 'hidden',
+                flexShrink: 0
+              }}>
+                {[
+                  { id: 'notes', label: 'My Notes', icon: '📝', count: notesCount },
+                  { id: 'settings', label: 'Settings', icon: '⚙️' },
+                  { id: 'help', label: 'Help', icon: '❓' },
+                  { id: 'feedback', label: 'Feedback', icon: '💬' }
+                ].map((tab) => (
+                  <motion.button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id as any)}
+                    whileHover={{ x: 5, backgroundColor: 'rgba(0, 80, 183, 0.2)' }}
+                    whileTap={{ scale: 0.95 }}
+                    style={{
+                      padding: isMobile ? '0.8rem 1rem' : '1rem',
+                      backgroundColor: activeTab === tab.id ? 'rgba(0, 80, 183, 0.3)' : 'transparent',
+                      border: `1px solid ${activeTab === tab.id ? '#0050B7' : 'rgba(255, 255, 255, 0.1)'}`,
+                      borderRadius: '12px',
+                      color: activeTab === tab.id ? 'white' : 'rgba(255, 255, 255, 0.8)',
+                      fontSize: '0.95rem',
+                      fontWeight: '500',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '1rem',
+                      textAlign: 'left',
+                      transition: 'all 0.3s ease',
+                      whiteSpace: 'nowrap',
+                      flexShrink: 0
+                    }}
+                  >
+                    <span style={{ fontSize: '1.2rem' }}>{tab.icon}</span>
+                    {tab.label}
+                    {tab.count !== undefined && (
+                      <motion.span 
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        style={{
+                          marginLeft: 'auto',
+                          backgroundColor: '#00FF00',
+                          color: 'black',
+                          fontSize: '0.8rem',
+                          fontWeight: 'bold',
+                          padding: '0.1rem 0.6rem',
+                          borderRadius: '10px'
+                        }}
+                      >
+                        {tab.count}
+                      </motion.span>
+                    )}
+                  </motion.button>
+                ))}
+
+                {/* Logout Button */}
+                <motion.button
+                  onClick={() => {
+                    handleCloseProfileModal();
+                    setShowLogoutModal(true);
+                  }}
+                  whileHover={{ x: 5, backgroundColor: 'rgba(255, 71, 87, 0.2)' }}
+                  whileTap={{ scale: 0.95 }}
+                  style={{
+                    padding: isMobile ? '0.8rem 1rem' : '1rem',
+                    backgroundColor: 'transparent',
+                    border: '1px solid rgba(255, 71, 87, 0.3)',
+                    borderRadius: '12px',
+                    color: '#FF4757',
+                    fontSize: '0.95rem',
+                    fontWeight: '500',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '1rem',
+                    textAlign: 'left',
+                    transition: 'all 0.3s ease',
+                    marginTop: isMobile ? 0 : 'auto',
+                    whiteSpace: 'nowrap',
+                    flexShrink: 0
+                  }}
+                >
+                  <span style={{ fontSize: '1.2rem' }}>🚪</span>
+                  Logout
+                </motion.button>
+              </div>
+
+              {/* Content Area */}
+              <div style={{
+                flex: 1,
+                overflowY: 'auto',
+                padding: isMobile ? '1rem' : '2rem',
+                backgroundColor: 'rgba(15, 15, 15, 0.5)'
+              }}>
+                {/* Notes Tab */}
+                {activeTab === 'notes' && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <div style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      marginBottom: '1.5rem'
+                    }}>
+                      <h3 style={{
+                        color: 'white',
+                        fontSize: '1.5rem',
+                        fontWeight: '600',
+                        margin: 0
+                      }}>
+                        My Notes ({notesCount})
+                      </h3>
+                      <motion.button
+                        onClick={() => router.push('/notes')}
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        style={{
+                          backgroundColor: '#00FF00',
+                          color: 'black',
+                          border: 'none',
+                          padding: '0.5rem 1.2rem',
+                          borderRadius: '20px',
+                          fontSize: '0.9rem',
+                          fontWeight: '600',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.5rem'
+                        }}
+                      >
+                        <span>+</span> New Note
+                      </motion.button>
+                    </div>
+
+                    {userNotes.length === 0 ? (
+                      <motion.div 
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        style={{
+                          textAlign: 'center',
+                          padding: '3rem 1rem',
+                          color: 'rgba(255, 255, 255, 0.5)'
+                        }}
+                      >
+                        <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>📝</div>
+                        <h4 style={{ 
+                          color: 'rgba(255, 255, 255, 0.8)',
+                          margin: '0 0 0.5rem 0'
+                        }}>
+                          No notes yet
+                        </h4>
+                        <p style={{ margin: '0 0 1.5rem 0' }}>
+                          Create your first note to get started
+                        </p>
+                        <motion.button
+                          onClick={() => router.push('/notes')}
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          style={{
+                            backgroundColor: '#0050B7',
+                            color: 'white',
+                            border: 'none',
+                            padding: '0.8rem 1.5rem',
+                            borderRadius: '10px',
+                            fontSize: '0.9rem',
+                            fontWeight: '600',
+                            cursor: 'pointer'
+                          }}
+                        >
+                          Go to Notes Page
+                        </motion.button>
+                      </motion.div>
+                    ) : (
+                      <div style={{
+                        display: 'grid',
+                        gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fill, minmax(300px, 1fr))',
+                        gap: '1rem'
+                      }}>
+                        {userNotes.map((note, index) => (
+                          <motion.div
+                            key={note.id}
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            transition={{ delay: index * 0.05 }}
+                            whileHover={{ y: -5 }}
+                            style={{
+                              backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                              borderRadius: '15px',
+                              padding: '1.2rem',
+                              border: '1px solid rgba(255, 255, 255, 0.1)',
+                              position: 'relative'
+                            }}
+                          >
+                            <div style={{
+                              display: 'flex',
+                              justifyContent: 'space-between',
+                              alignItems: 'flex-start',
+                              marginBottom: '0.8rem'
+                            }}>
+                              <h4 style={{
+                                color: 'white',
+                                fontSize: '1rem',
+                                fontWeight: '600',
+                                margin: 0,
+                                flex: 1
+                              }}>
+                                {note.title || 'Untitled Note'}
+                              </h4>
+                              <motion.button
+                                onClick={() => handleDeleteNote(note.id)}
+                                whileHover={{ scale: 1.2, color: '#FF4757' }}
+                                whileTap={{ scale: 0.9 }}
+                                style={{
+                                  background: 'none',
+                                  border: 'none',
+                                  color: 'rgba(255, 255, 255, 0.5)',
+                                  cursor: 'pointer',
+                                  fontSize: '0.9rem',
+                                  padding: '0.2rem'
+                                }}
+                              >
+                                ✕
+                              </motion.button>
+                            </div>
+                            <p style={{
+                              color: 'rgba(255, 255, 255, 0.7)',
+                              fontSize: '0.9rem',
+                              lineHeight: 1.5,
+                              margin: '0 0 1rem 0',
+                              maxHeight: '4.5em',
+                              overflow: 'hidden',
+                              display: '-webkit-box',
+                              WebkitLineClamp: 3,
+                              WebkitBoxOrient: 'vertical'
+                            }}>
+                              {note.content || 'No content'}
+                            </p>
+                            <div style={{
+                              display: 'flex',
+                              justifyContent: 'space-between',
+                              alignItems: 'center',
+                              color: 'rgba(255, 255, 255, 0.4)',
+                              fontSize: '0.75rem'
+                            }}>
+                              <span>
+                                {calculateTimeAgo(note.createdAt)}
+                              </span>
+                              <span style={{
+                                backgroundColor: 'rgba(0, 255, 0, 0.1)',
+                                color: '#00FF00',
+                                padding: '0.1rem 0.5rem',
+                                borderRadius: '10px',
+                                fontSize: '0.7rem'
+                              }}>
+                                {note.category || 'General'}
+                              </span>
+                            </div>
+                          </motion.div>
+                        ))}
+                      </div>
+                    )}
+                  </motion.div>
+                )}
+
+                {/* Settings Tab */}
+                {activeTab === 'settings' && (
+                  <motion.div
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <h3 style={{
+                      color: 'white',
+                      fontSize: '1.5rem',
+                      fontWeight: '600',
+                      margin: '0 0 1.5rem 0'
+                    }}>
+                      Account Settings
+                    </h3>
+
+                    <div style={{
+                      backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                      borderRadius: '15px',
+                      padding: '1.5rem',
+                      border: '1px solid rgba(255, 255, 255, 0.1)',
+                      marginBottom: '1.5rem'
+                    }}>
+                      <h4 style={{
+                        color: 'white',
+                        fontSize: '1.1rem',
+                        fontWeight: '600',
+                        margin: '0 0 1rem 0'
+                      }}>
+                        Account Information
+                      </h4>
+                      
+                      <div style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '1rem'
+                      }}>
+                        <div style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          padding: '0.8rem 0',
+                          borderBottom: '1px solid rgba(255, 255, 255, 0.05)'
+                        }}>
+                          <span style={{ color: 'rgba(255, 255, 255, 0.7)' }}>
+                            Display Name
+                          </span>
+                          <span style={{ color: 'white', fontWeight: '500' }}>
+                            {userDisplayName}
+                          </span>
+                        </div>
+
+                        <div style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          padding: '0.8rem 0',
+                          borderBottom: '1px solid rgba(255, 255, 255, 0.05)'
+                        }}>
+                          <span style={{ color: 'rgba(255, 255, 255, 0.7)' }}>
+                            Email Address
+                          </span>
+                          <span style={{ color: 'white', fontWeight: '500' }}>
+                            {user?.email}
+                          </span>
+                        </div>
+
+                        <div style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          padding: '0.8rem 0'
+                        }}>
+                          <span style={{ color: 'rgba(255, 255, 255, 0.7)' }}>
+                            Login Method
+                          </span>
+                          <span style={{
+                            backgroundColor: user?.providerData?.[0]?.providerId === 'google.com' ? '#DB4437' : 
+                                           user?.providerData?.[0]?.providerId === 'github.com' ? '#333' : '#0050B7',
+                            color: 'white',
+                            fontSize: '0.8rem',
+                            padding: '0.3rem 0.8rem',
+                            borderRadius: '15px',
+                            fontWeight: '500'
+                          }}>
+                            {user?.providerData?.[0]?.providerId === 'google.com' ? 'Google' : 
+                             user?.providerData?.[0]?.providerId === 'github.com' ? 'GitHub' : 'Email/Password'}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Danger Zone */}
+                    <div style={{
+                      backgroundColor: 'rgba(255, 71, 87, 0.1)',
+                      borderRadius: '15px',
+                      padding: '1.5rem',
+                      border: '1px solid rgba(255, 71, 87, 0.3)'
+                    }}>
+                      <h4 style={{
+                        color: '#FF4757',
+                        fontSize: '1.1rem',
+                        fontWeight: '600',
+                        margin: '0 0 1rem 0',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.5rem'
+                      }}>
+                        ⚠️ Danger Zone
+                      </h4>
+                      
+                      <p style={{
+                        color: 'rgba(255, 255, 255, 0.6)',
+                        fontSize: '0.9rem',
+                        margin: '0 0 1.2rem 0',
+                        lineHeight: 1.5
+                      }}>
+                        Once you delete your account, there is no going back. All your data will be permanently removed.
+                      </p>
+
+                      <motion.button
+                        onClick={() => setShowDeleteConfirm(true)}
+                        whileHover={{ scale: 1.05, backgroundColor: 'rgba(255, 71, 87, 0.3)' }}
+                        whileTap={{ scale: 0.95 }}
+                        style={{
+                          backgroundColor: 'rgba(255, 71, 87, 0.2)',
+                          color: '#FF4757',
+                          border: '1px solid #FF4757',
+                          padding: '0.8rem 1.5rem',
+                          borderRadius: '10px',
+                          fontSize: '0.9rem',
+                          fontWeight: '600',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.5rem'
+                        }}
+                      >
+                        <span>🗑️</span>
+                        Delete Account
+                      </motion.button>
+                    </div>
+                  </motion.div>
+                )}
+
+                {/* Help Tab */}
+                {activeTab === 'help' && (
+                  <motion.div
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <h3 style={{
+                      color: 'white',
+                      fontSize: '1.5rem',
+                      fontWeight: '600',
+                      margin: '0 0 1.5rem 0'
+                    }}>
+                      Help & Support
+                    </h3>
+
+                    <div style={{
+                      display: 'grid',
+                      gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fill, minmax(300px, 1fr))',
+                      gap: '1.5rem',
+                      marginBottom: '2rem'
+                    }}>
+                      {[
+                        {
+                          title: "Getting Started",
+                          icon: "🚀",
+                          items: [
+                            "How to create notes",
+                            "Using the chatbot",
+                            "Understanding notifications"
+                          ]
+                        },
+                        {
+                          title: "Account",
+                          icon: "👤",
+                          items: [
+                            "Changing your profile",
+                            "Login methods",
+                            "Privacy settings"
+                          ]
+                        },
+                        {
+                          title: "Features",
+                          icon: "✨",
+                          items: [
+                            "Photo commenting",
+                            "Timeline usage",
+                            "Notification system"
+                          ]
+                        },
+                        {
+                          title: "Troubleshooting",
+                          icon: "🔧",
+                          items: [
+                            "Login issues",
+                            "Data not syncing",
+                            "Performance problems"
+                          ]
+                        }
+                      ].map((section, index) => (
+                        <motion.div
+                          key={section.title}
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: index * 0.1 }}
+                          whileHover={{ y: -5 }}
+                          style={{
+                            backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                            borderRadius: '15px',
+                            padding: '1.5rem',
+                            border: '1px solid rgba(255, 255, 255, 0.1)'
+                          }}
+                        >
+                          <div style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '1rem',
+                            marginBottom: '1rem'
+                          }}>
+                            <div style={{
+                              fontSize: '1.8rem'
+                            }}>
+                              {section.icon}
+                            </div>
+                            <h4 style={{
+                              color: 'white',
+                              fontSize: '1.1rem',
+                              fontWeight: '600',
+                              margin: 0
+                            }}>
+                              {section.title}
+                            </h4>
+                          </div>
+                          
+                          <ul style={{
+                            margin: 0,
+                            paddingLeft: '1.2rem',
+                            color: 'rgba(255, 255, 255, 0.7)'
+                          }}>
+                            {section.items.map((item, i) => (
+                              <motion.li 
+                                key={i}
+                                initial={{ opacity: 0, x: -10 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ delay: index * 0.1 + i * 0.05 }}
+                                style={{
+                                  marginBottom: '0.5rem',
+                                  fontSize: '0.9rem'
+                                }}
+                              >
+                                {item}
+                              </motion.li>
+                            ))}
+                          </ul>
+                        </motion.div>
+                      ))}
+                    </div>
+
+                    <div style={{
+                      backgroundColor: 'rgba(0, 80, 183, 0.1)',
+                      borderRadius: '15px',
+                      padding: '1.5rem',
+                      border: '1px solid rgba(0, 80, 183, 0.3)'
+                    }}>
+                      <h4 style={{
+                        color: '#0050B7',
+                        fontSize: '1.1rem',
+                        fontWeight: '600',
+                        margin: '0 0 1rem 0',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.5rem'
+                      }}>
+                        📞 Contact Support
+                      </h4>
+                      <p style={{
+                        color: 'rgba(255, 255, 255, 0.7)',
+                        fontSize: '0.9rem',
+                        margin: '0 0 1rem 0'
+                      }}>
+                        Need more help? Contact our support team directly.
+                      </p>
+                      <div style={{
+                        display: 'flex',
+                        gap: '1rem',
+                        flexWrap: 'wrap'
+                      }}>
+                        <motion.button
+                          onClick={() => window.location.href = 'mailto:support@menuru.com'}
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          style={{
+                            backgroundColor: '#0050B7',
+                            color: 'white',
+                            border: 'none',
+                            padding: '0.8rem 1.5rem',
+                            borderRadius: '10px',
+                            fontSize: '0.9rem',
+                            fontWeight: '600',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.5rem'
+                          }}
+                        >
+                          ✉️ Email Support
+                        </motion.button>
+                        <motion.button
+                          onClick={() => window.open('https://docs.menuru.com', '_blank')}
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          style={{
+                            backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                            color: 'white',
+                            border: '1px solid rgba(255, 255, 255, 0.2)',
+                            padding: '0.8rem 1.5rem',
+                            borderRadius: '10px',
+                            fontSize: '0.9rem',
+                            fontWeight: '600',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.5rem'
+                          }}
+                        >
+                          📚 View Documentation
+                        </motion.button>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+
+                {/* Feedback Tab */}
+                {activeTab === 'feedback' && (
+                  <motion.div
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.3 }}
+                    style={{
+                      maxWidth: '600px',
+                      margin: '0 auto'
+                    }}
+                  >
+                    <h3 style={{
+                      color: 'white',
+                      fontSize: '1.5rem',
+                      fontWeight: '600',
+                      margin: '0 0 1.5rem 0'
+                    }}>
+                      Send Feedback
+                    </h3>
+
+                    {feedbackSubmitted ? (
+                      <motion.div
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        style={{
+                          backgroundColor: 'rgba(0, 255, 0, 0.1)',
+                          border: '1px solid rgba(0, 255, 0, 0.3)',
+                          borderRadius: '15px',
+                          padding: '2rem',
+                          textAlign: 'center'
+                        }}
+                      >
+                        <motion.div
+                          animate={{ 
+                            scale: [1, 1.2, 1],
+                            rotate: [0, 10, -10, 0] 
+                          }}
+                          transition={{ duration: 0.5 }}
+                          style={{
+                            fontSize: '3rem',
+                            marginBottom: '1rem'
+                          }}
+                        >
+                          ✅
+                        </motion.div>
+                        <h4 style={{
+                          color: '#00FF00',
+                          fontSize: '1.2rem',
+                          margin: '0 0 0.5rem 0'
+                        }}>
+                          Thank You!
+                        </h4>
+                        <p style={{
+                          color: 'rgba(255, 255, 255, 0.8)',
+                          margin: 0
+                        }}>
+                          Your feedback has been submitted. We appreciate your input!
+                        </p>
+                      </motion.div>
+                    ) : (
+                      <>
+                        <div style={{
+                          backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                          borderRadius: '15px',
+                          padding: '1.5rem',
+                          border: '1px solid rgba(255, 255, 255, 0.1)',
+                          marginBottom: '1.5rem'
+                        }}>
+                          <p style={{
+                            color: 'rgba(255, 255, 255, 0.7)',
+                            fontSize: '0.95rem',
+                            lineHeight: 1.6,
+                            margin: '0 0 1.5rem 0'
+                          }}>
+                            We value your feedback! Please share your thoughts, suggestions, or report any issues you've encountered.
+                          </p>
+
+                          <textarea
+                            value={feedbackMessage}
+                            onChange={(e) => setFeedbackMessage(e.target.value)}
+                            placeholder="Type your feedback here..."
+                            style={{
+                              width: '100%',
+                              minHeight: '150px',
+                              backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                              border: '1px solid rgba(255, 255, 255, 0.1)',
+                              borderRadius: '10px',
+                              padding: '1rem',
+                              color: 'white',
+                              fontSize: '0.95rem',
+                              fontFamily: 'Helvetica, Arial, sans-serif',
+                              resize: 'vertical',
+                              outline: 'none',
+                              marginBottom: '1.5rem'
+                            }}
+                          />
+
+                          <div style={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center'
+                          }}>
+                            <div style={{
+                              color: 'rgba(255, 255, 255, 0.5)',
+                              fontSize: '0.8rem'
+                            }}>
+                              {feedbackMessage.length}/1000 characters
+                            </div>
+                            <motion.button
+                              onClick={handleSubmitFeedback}
+                              disabled={!feedbackMessage.trim()}
+                              whileHover={{ scale: 1.05 }}
+                              whileTap={{ scale: 0.95 }}
+                              style={{
+                                backgroundColor: feedbackMessage.trim() ? '#00FF00' : 'rgba(0, 255, 0, 0.3)',
+                                color: feedbackMessage.trim() ? 'black' : 'rgba(255, 255, 255, 0.5)',
+                                border: 'none',
+                                padding: '0.8rem 2rem',
+                                borderRadius: '10px',
+                                fontSize: '0.95rem',
+                                fontWeight: '600',
+                                cursor: feedbackMessage.trim() ? 'pointer' : 'not-allowed',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.5rem'
+                              }}
+                            >
+                              <span>📤</span>
+                              Send Feedback
+                            </motion.button>
+                          </div>
+                        </div>
+
+                        <div style={{
+                          backgroundColor: 'rgba(139, 92, 246, 0.1)',
+                          borderRadius: '15px',
+                          padding: '1.5rem',
+                          border: '1px solid rgba(139, 92, 246, 0.3)'
+                        }}>
+                          <h4 style={{
+                            color: '#8B5CF6',
+                            fontSize: '1.1rem',
+                            fontWeight: '600',
+                            margin: '0 0 1rem 0',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.5rem'
+                          }}>
+                            💡 Common Feedback Topics
+                          </h4>
+                          <ul style={{
+                            margin: 0,
+                            paddingLeft: '1.2rem',
+                            color: 'rgba(255, 255, 255, 0.7)',
+                            fontSize: '0.9rem'
+                          }}>
+                            <li style={{ marginBottom: '0.5rem' }}>Feature requests</li>
+                            <li style={{ marginBottom: '0.5rem' }}>Bug reports</li>
+                            <li style={{ marginBottom: '0.5rem' }}>UI/UX improvements</li>
+                            <li>Performance issues</li>
+                          </ul>
+                        </div>
+                      </>
+                    )}
+                  </motion.div>
+                )}
+              </div>
+            </div>
+          </motion.div>
+        </motion.div>
+      </AnimatePresence>
+
+      {/* Delete Account Confirmation Modal */}
+      <AnimatePresence>
+        {showDeleteConfirm && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              backgroundColor: 'rgba(0, 0, 0, 0.9)',
+              backdropFilter: 'blur(5px)',
+              zIndex: 9999,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '1rem'
+            }}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+              style={{
+                backgroundColor: 'rgba(30, 30, 30, 0.95)',
+                borderRadius: '20px',
+                padding: '2rem',
+                maxWidth: '500px',
+                width: '100%',
+                border: '1px solid rgba(255, 71, 87, 0.3)',
+                boxShadow: '0 20px 60px rgba(255, 71, 87, 0.2)'
+              }}
+            >
+              <h3 style={{
+                color: '#FF4757',
+                fontSize: '1.5rem',
+                fontWeight: '600',
+                margin: '0 0 1rem 0',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem'
+              }}>
+                ⚠️ Delete Account
+              </h3>
+              
+              <p style={{
+                color: 'rgba(255, 255, 255, 0.7)',
+                fontSize: '0.95rem',
+                lineHeight: 1.6,
+                margin: '0 0 1.5rem 0'
+              }}>
+                Are you sure you want to delete your account? This action cannot be undone. All your data including notes, comments, and preferences will be permanently deleted.
+              </p>
+
+              <div style={{
+                backgroundColor: 'rgba(255, 71, 87, 0.1)',
+                borderRadius: '10px',
+                padding: '1rem',
+                marginBottom: '1.5rem',
+                border: '1px solid rgba(255, 71, 87, 0.2)'
+              }}>
+                <p style={{
+                  color: '#FF4757',
+                  fontSize: '0.9rem',
+                  fontWeight: '500',
+                  margin: 0
+                }}>
+                  ⚠️ Warning: This will also delete {notesCount} notes you've created.
+                </p>
+              </div>
+
+              <div style={{
+                display: 'flex',
+                gap: '1rem',
+                justifyContent: 'flex-end'
+              }}>
+                <motion.button
+                  onClick={() => setShowDeleteConfirm(false)}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  style={{
+                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                    color: 'white',
+                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                    padding: '0.8rem 1.5rem',
+                    borderRadius: '10px',
+                    fontSize: '0.9rem',
+                    fontWeight: '600',
+                    cursor: 'pointer'
+                  }}
+                >
+                  Cancel
+                </motion.button>
+                
+                <motion.button
+                  onClick={handleDeleteAccount}
+                  disabled={isDeleting}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  style={{
+                    backgroundColor: isDeleting ? 'rgba(255, 71, 87, 0.5)' : '#FF4757',
+                    color: 'white',
+                    border: 'none',
+                    padding: '0.8rem 1.5rem',
+                    borderRadius: '10px',
+                    fontSize: '0.9rem',
+                    fontWeight: '600',
+                    cursor: isDeleting ? 'not-allowed' : 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem'
+                  }}
+                >
+                  {isDeleting ? (
+                    <>
+                      <motion.span
+                        animate={{ rotate: 360 }}
+                        transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                      >
+                        ⏳
+                      </motion.span>
+                      Deleting...
+                    </>
+                  ) : (
+                    <>
+                      <span>🗑️</span>
+                      Delete Account
+                    </>
+                  )}
+                </motion.button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </AnimatePresence>
+  );
 
   return (
     <div style={{
@@ -1667,6 +2757,9 @@ useEffect(() => {
       WebkitFontSmoothing: 'antialiased',
       MozOsxFontSmoothing: 'grayscale'
     }}>
+
+      {/* Render Profile Modal */}
+      <ProfileModal />
 
       {/* Menu Overlay dengan GSAP Animation */}
       <AnimatePresence>
@@ -2662,455 +3755,386 @@ useEffect(() => {
         )}
       </AnimatePresence>
 
-    {/* Notification Dropdown - DIPERBARUI LENGKAP */}
-<AnimatePresence>
-  {showNotification && (
-    <motion.div
-      ref={notificationDropdownRef}
-      initial={{ opacity: 0, y: -10, scale: 0.95 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      exit={{ opacity: 0, y: -10, scale: 0.95 }}
-      transition={{ duration: 0.2 }}
-      style={{
-        position: 'fixed',
-        top: isMobile ? '6rem' : '7.5rem',
-        right: isMobile ? '5.5rem' : '7rem',
-        backgroundColor: 'rgba(20, 20, 20, 0.98)',
-        backdropFilter: 'blur(20px)',
-        borderRadius: '15px',
-        padding: '1rem 0',
-        width: isMobile ? '320px' : '450px',
-        maxWidth: '90vw',
-        maxHeight: '80vh',
-        zIndex: 1001,
-        border: '1px solid rgba(255, 255, 255, 0.15)',
-        boxShadow: '0 20px 60px rgba(0, 0, 0, 0.5)',
-        display: 'flex',
-        flexDirection: 'column',
-        overflow: 'hidden'
-      }}
-    >
-      {/* Header Notifikasi */}
-      <div style={{
-        padding: '0 1.5rem 1rem 1.5rem',
-        borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        flexShrink: 0
-      }}>
-        <h3 style={{
-          color: 'white',
-          fontSize: '1.3rem',
-          fontWeight: '600',
-          margin: 0,
-          fontFamily: 'Helvetica, Arial, sans-serif',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '0.5rem'
-        }}>
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
-            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
-            <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
-          </svg>
-          Notifications
-          {notificationCount > 0 && (
-            <span style={{
-              backgroundColor: '#FF4757',
-              color: 'white',
-              fontSize: '0.8rem',
-              fontWeight: '700',
-              padding: '0.1rem 0.6rem',
-              borderRadius: '10px',
-              marginLeft: '0.5rem'
-            }}>
-              {notificationCount > 9 ? '9+' : notificationCount}
-            </span>
-          )}
-        </h3>
-        
-        <div style={{ display: 'flex', gap: '0.5rem' }}>
-          {notifications.length > 0 && hasUnreadNotifications && (
-            <motion.button
-              onClick={handleClearNotification}
-              style={{
-                backgroundColor: 'rgba(255, 71, 87, 0.2)',
-                border: '1px solid rgba(255, 71, 87, 0.4)',
-                color: '#FF4757',
-                fontSize: '0.8rem',
-                fontWeight: '600',
-                padding: '0.3rem 0.8rem',
-                borderRadius: '20px',
-                cursor: 'pointer',
-                fontFamily: 'Helvetica, Arial, sans-serif'
-              }}
-              whileHover={{ 
-                backgroundColor: 'rgba(255, 71, 87, 0.3)',
-                scale: 1.05
-              }}
-              whileTap={{ scale: 0.95 }}
-            >
-              Clear All
-            </motion.button>
-          )}
-          
-          {/* Tombol refresh */}
-          <motion.button
-            onClick={() => {
-              setIsLoadingNotifications(true);
-              // Simulate refresh
-              setTimeout(() => setIsLoadingNotifications(false), 500);
-            }}
+      {/* Notification Dropdown */}
+      <AnimatePresence>
+        {showNotification && (
+          <motion.div
+            ref={notificationDropdownRef}
+            initial={{ opacity: 0, y: -10, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -10, scale: 0.95 }}
+            transition={{ duration: 0.2 }}
             style={{
-              backgroundColor: 'rgba(0, 80, 183, 0.2)',
-              border: '1px solid rgba(0, 80, 183, 0.4)',
-              color: '#0050B7',
-              fontSize: '0.8rem',
-              fontWeight: '600',
-              padding: '0.3rem 0.8rem',
-              borderRadius: '20px',
-              cursor: 'pointer',
-              fontFamily: 'Helvetica, Arial, sans-serif'
+              position: 'fixed',
+              top: isMobile ? '6rem' : '7.5rem',
+              right: isMobile ? '5.5rem' : '7rem',
+              backgroundColor: 'rgba(20, 20, 20, 0.98)',
+              backdropFilter: 'blur(20px)',
+              borderRadius: '15px',
+              padding: '1rem 0',
+              width: isMobile ? '320px' : '450px',
+              maxWidth: '90vw',
+              maxHeight: '80vh',
+              zIndex: 1001,
+              border: '1px solid rgba(255, 255, 255, 0.15)',
+              boxShadow: '0 20px 60px rgba(0, 0, 0, 0.5)',
+              display: 'flex',
+              flexDirection: 'column',
+              overflow: 'hidden'
             }}
-            whileHover={{ 
-              backgroundColor: 'rgba(0, 80, 183, 0.3)',
-              scale: 1.05
-            }}
-            whileTap={{ scale: 0.95 }}
           >
-            Refresh
-          </motion.button>
-        </div>
-      </div>
-      
-      {/* List Notifikasi - DIPERBAIKI */}
-      <div style={{
-        flex: 1,
-        overflowY: 'auto',
-        padding: '0.5rem 0',
-        minHeight: '200px'
-      }}>
-        {isLoadingNotifications ? (
-          <div style={{
-            padding: '3rem 1rem',
-            textAlign: 'center',
-            color: 'rgba(255, 255, 255, 0.5)',
-            fontFamily: 'Helvetica, Arial, sans-serif'
-          }}>
-            <motion.div
-              animate={{ rotate: 360 }}
-              transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-              style={{ marginBottom: '1rem' }}
-            >
-              <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
-              </svg>
-            </motion.div>
-            Loading notifications...
-          </div>
-        ) : notifications.length === 0 ? (
-          <div style={{
-            padding: '3rem 1.5rem',
-            textAlign: 'center',
-            color: 'rgba(255, 255, 255, 0.5)',
-            fontFamily: 'Helvetica, Arial, sans-serif'
-          }}>
-            <div style={{ 
-              fontSize: '3rem',
-              marginBottom: '1rem',
-              opacity: 0.5
+            {/* Header Notifikasi */}
+            <div style={{
+              padding: '0 1.5rem 1rem 1.5rem',
+              borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              flexShrink: 0
             }}>
-              🔔
-            </div>
-            <h4 style={{
-              color: 'rgba(255, 255, 255, 0.8)',
-              fontSize: '1.2rem',
-              margin: '0 0 0.5rem 0'
-            }}>
-              No notifications yet
-            </h4>
-            <p style={{
-              fontSize: '0.9rem',
-              margin: '0 0 1.5rem 0',
-              color: 'rgba(255, 255, 255, 0.4)'
-            }}>
-              Check back later for updates
-            </p>
-            <motion.button
-              onClick={async () => {
-                // Tambahkan notifikasi contoh
-                const exampleNotification = {
-                  title: "Welcome to MENURU!",
-                  message: "This is an example notification. You'll see real notifications here when they're available.",
-                  type: 'announcement' as const,
-                  isAdminPost: true,
-                  adminName: 'System',
-                  priority: 'low' as const,
-                  category: 'general' as const
-                };
-                
-                const success = await sendNotification(exampleNotification);
-                if (success) {
-                  alert("Example notification added! Refresh to see.");
-                }
-              }}
-              style={{
-                backgroundColor: 'rgba(0, 255, 0, 0.1)',
-                border: '1px solid rgba(0, 255, 0, 0.3)',
-                color: '#00FF00',
-                padding: '0.5rem 1rem',
-                borderRadius: '8px',
-                cursor: 'pointer',
-                fontSize: '0.9rem',
-                fontWeight: '500'
-              }}
-              whileHover={{ backgroundColor: 'rgba(0, 255, 0, 0.2)' }}
-              whileTap={{ scale: 0.95 }}
-            >
-              Add Example Notification
-            </motion.button>
-          </div>
-        ) : (
-          <div>
-            {notifications.map((notification, index) => (
-              <motion.div
-                key={notification.id || index}
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: index * 0.05 }}
-                style={{
-                  padding: '1rem 1.5rem',
-                  borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease',
-                  backgroundColor: notification.isRead ? 'transparent' : getBgColorByType(notification.type),
-                  position: 'relative'
-                }}
-                whileHover={{ 
-                  backgroundColor: notification.read ? 'rgba(255, 255, 255, 0.05)' : getBgColorByType(notification.type).replace('0.1', '0.2')
-                }}
-                onClick={() => handleNotificationClick(notification)}
-              >
-                {/* Unread Indicator */}
-                {!notification.read && (
-                  <div style={{
-                    position: 'absolute',
-                    left: '0.5rem',
-                    top: '50%',
-                    transform: 'translateY(-50%)',
-                    width: '8px',
-                    height: '8px',
-                    backgroundColor: getColorByType(notification.type),
-                    borderRadius: '50%'
-                  }} />
+              <h3 style={{
+                color: 'white',
+                fontSize: '1.3rem',
+                fontWeight: '600',
+                margin: 0,
+                fontFamily: 'Helvetica, Arial, sans-serif',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem'
+              }}>
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
+                  <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                  <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                </svg>
+                Notifications
+                {notificationCount > 0 && (
+                  <span style={{
+                    backgroundColor: '#FF4757',
+                    color: 'white',
+                    fontSize: '0.8rem',
+                    fontWeight: '700',
+                    padding: '0.1rem 0.6rem',
+                    borderRadius: '10px',
+                    marginLeft: '0.5rem'
+                  }}>
+                    {notificationCount > 9 ? '9+' : notificationCount}
+                  </span>
+                )}
+              </h3>
+              
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                {notifications.length > 0 && hasUnreadNotifications && (
+                  <motion.button
+                    onClick={handleClearNotification}
+                    style={{
+                      backgroundColor: 'rgba(255, 71, 87, 0.2)',
+                      border: '1px solid rgba(255, 71, 87, 0.4)',
+                      color: '#FF4757',
+                      fontSize: '0.8rem',
+                      fontWeight: '600',
+                      padding: '0.3rem 0.8rem',
+                      borderRadius: '20px',
+                      cursor: 'pointer',
+                      fontFamily: 'Helvetica, Arial, sans-serif'
+                    }}
+                    whileHover={{ 
+                      backgroundColor: 'rgba(255, 71, 87, 0.3)',
+                      scale: 1.05
+                    }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    Clear All
+                  </motion.button>
                 )}
                 
+                {/* Tombol refresh */}
+                <motion.button
+                  onClick={() => {
+                    setIsLoadingNotifications(true);
+                    setTimeout(() => setIsLoadingNotifications(false), 500);
+                  }}
+                  style={{
+                    backgroundColor: 'rgba(0, 80, 183, 0.2)',
+                    border: '1px solid rgba(0, 80, 183, 0.4)',
+                    color: '#0050B7',
+                    fontSize: '0.8rem',
+                    fontWeight: '600',
+                    padding: '0.3rem 0.8rem',
+                    borderRadius: '20px',
+                    cursor: 'pointer',
+                    fontFamily: 'Helvetica, Arial, sans-serif'
+                  }}
+                  whileHover={{ 
+                    backgroundColor: 'rgba(0, 80, 183, 0.3)',
+                    scale: 1.05
+                  }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  Refresh
+                </motion.button>
+              </div>
+            </div>
+            
+            {/* List Notifikasi */}
+            <div style={{
+              flex: 1,
+              overflowY: 'auto',
+              padding: '0.5rem 0',
+              minHeight: '200px'
+            }}>
+              {isLoadingNotifications ? (
                 <div style={{
-                  display: 'flex',
-                  gap: '1rem',
-                  alignItems: 'flex-start'
+                  padding: '3rem 1rem',
+                  textAlign: 'center',
+                  color: 'rgba(255, 255, 255, 0.5)',
+                  fontFamily: 'Helvetica, Arial, sans-serif'
                 }}>
-                  {/* Notification Icon */}
-                  <div style={{
-                    width: '40px',
-                    height: '40px',
-                    minWidth: '40px',
-                    borderRadius: '10px',
-                    backgroundColor: notification.read ? 'rgba(255, 255, 255, 0.1)' : `${getColorByType(notification.type)}20`,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: '1.2rem',
-                    color: getColorByType(notification.type)
-                  }}>
-                    {notification.icon}
-                  </div>
-                  
-                  {/* Notification Content */}
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'flex-start',
-                      marginBottom: '0.3rem',
-                      flexWrap: 'wrap',
-                      gap: '0.5rem'
-                    }}>
-                      <div style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.5rem',
-                        flexWrap: 'wrap'
-                      }}>
-                        <h4 style={{
-                          color: 'white',
-                          fontSize: '1rem',
-                          fontWeight: '600',
-                          margin: 0,
-                          fontFamily: 'Helvetica, Arial, sans-serif'
-                        }}>
-                          {notification.title}
-                        </h4>
-                        
-                        {/* Badge Type */}
-                        <span style={{
-                          backgroundColor: getColorByType(notification.type),
-                          color: 'white',
-                          fontSize: '0.7rem',
-                          fontWeight: '600',
-                          padding: '0.1rem 0.5rem',
-                          borderRadius: '4px',
-                          textTransform: 'uppercase'
-                        }}>
-                          {notification.type}
-                        </span>
-                        
-                        {/* Badge Admin */}
-                        {notification.isAdminPost && (
-                          <span style={{
-                            backgroundColor: '#8B5CF6',
-                            color: 'white',
-                            fontSize: '0.7rem',
-                            fontWeight: '600',
-                            padding: '0.1rem 0.5rem',
-                            borderRadius: '4px'
-                          }}>
-                            ADMIN
-                          </span>
-                        )}
-                      </div>
-                      
-                      <span style={{
-                        color: 'rgba(255, 255, 255, 0.5)',
-                        fontSize: '0.75rem',
-                        whiteSpace: 'nowrap'
-                      }}>
-                        {calculateTimeAgo(notification.timestamp)}
-                      </span>
-                    </div>
-                    
-                    <p style={{
-                      color: notification.read ? 'rgba(255, 255, 255, 0.7)' : 'white',
-                      fontSize: '0.9rem',
-                      margin: '0 0 0.5rem 0',
-                      lineHeight: 1.4,
-                      fontFamily: 'Helvetica, Arial, sans-serif',
-                      wordBreak: 'break-word'
-                    }}>
-                      {notification.message}
-                    </p>
-                    
-                    {/* Admin info jika ada */}
-                    {notification.isAdminPost && notification.adminName && (
-                      <div style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.3rem',
-                        marginTop: '0.3rem'
-                      }}>
-                        <span style={{
-                          color: 'rgba(255, 255, 255, 0.5)',
-                          fontSize: '0.75rem'
-                        }}>
-                          From:
-                        </span>
-                        <span style={{
-                          color: '#8B5CF6',
-                          fontSize: '0.75rem',
-                          fontWeight: '500'
-                        }}>
-                          {notification.adminName}
-                        </span>
-                      </div>
-                    )}
-                    
-                    {/* Priority dan Category */}
-                    <div style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '0.5rem',
-                      marginTop: '0.5rem',
-                      flexWrap: 'wrap'
-                    }}>
-                      {notification.priority && (
-                        <span style={{
-                          color: notification.priority === 'high' ? '#EF4444' : 
-                                 notification.priority === 'medium' ? '#F59E0B' : '#10B981',
-                          fontSize: '0.7rem',
-                          fontWeight: '500',
-                          backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                          padding: '0.1rem 0.4rem',
-                          borderRadius: '4px'
-                        }}>
-                          {notification.priority.toUpperCase()}
-                        </span>
-                      )}
-                      
-                      {notification.category && (
-                        <span style={{
-                          color: 'rgba(255, 255, 255, 0.7)',
-                          fontSize: '0.7rem',
-                          backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                          padding: '0.1rem 0.4rem',
-                          borderRadius: '4px'
-                        }}>
-                          {notification.category}
-                        </span>
-                      )}
-                    </div>
-                  </div>
+                  <motion.div
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                    style={{ marginBottom: '1rem' }}
+                  >
+                    <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+                    </svg>
+                  </motion.div>
+                  Loading notifications...
                 </div>
-              </motion.div>
-            ))}
-          </div>
+              ) : notifications.length === 0 ? (
+                <div style={{
+                  padding: '3rem 1.5rem',
+                  textAlign: 'center',
+                  color: 'rgba(255, 255, 255, 0.5)',
+                  fontFamily: 'Helvetica, Arial, sans-serif'
+                }}>
+                  <div style={{ 
+                    fontSize: '3rem',
+                    marginBottom: '1rem',
+                    opacity: 0.5
+                  }}>
+                    🔔
+                  </div>
+                  <h4 style={{
+                    color: 'rgba(255, 255, 255, 0.8)',
+                    fontSize: '1.2rem',
+                    margin: '0 0 0.5rem 0'
+                  }}>
+                    No notifications yet
+                  </h4>
+                  <p style={{
+                    fontSize: '0.9rem',
+                    margin: '0 0 1.5rem 0',
+                    color: 'rgba(255, 255, 255, 0.4)'
+                  }}>
+                    Check back later for updates
+                  </p>
+                </div>
+              ) : (
+                <div>
+                  {notifications.map((notification, index) => (
+                    <motion.div
+                      key={notification.id || index}
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: index * 0.05 }}
+                      style={{
+                        padding: '1rem 1.5rem',
+                        borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s ease',
+                        backgroundColor: notification.read ? 'transparent' : getBgColorByType(notification.type),
+                        position: 'relative'
+                      }}
+                      whileHover={{ 
+                        backgroundColor: notification.read ? 'rgba(255, 255, 255, 0.05)' : getBgColorByType(notification.type).replace('0.1', '0.2')
+                      }}
+                      onClick={() => handleNotificationClick(notification)}
+                    >
+                      {/* Unread Indicator */}
+                      {!notification.read && (
+                        <div style={{
+                          position: 'absolute',
+                          left: '0.5rem',
+                          top: '50%',
+                          transform: 'translateY(-50%)',
+                          width: '8px',
+                          height: '8px',
+                          backgroundColor: getColorByType(notification.type),
+                          borderRadius: '50%'
+                        }} />
+                      )}
+                      
+                      <div style={{
+                        display: 'flex',
+                        gap: '1rem',
+                        alignItems: 'flex-start'
+                      }}>
+                        {/* Notification Icon */}
+                        <div style={{
+                          width: '40px',
+                          height: '40px',
+                          minWidth: '40px',
+                          borderRadius: '10px',
+                          backgroundColor: notification.read ? 'rgba(255, 255, 255, 0.1)' : `${getColorByType(notification.type)}20`,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontSize: '1.2rem',
+                          color: getColorByType(notification.type)
+                        }}>
+                          {notification.icon}
+                        </div>
+                        
+                        {/* Notification Content */}
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'flex-start',
+                            marginBottom: '0.3rem',
+                            flexWrap: 'wrap',
+                            gap: '0.5rem'
+                          }}>
+                            <div style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '0.5rem',
+                              flexWrap: 'wrap'
+                            }}>
+                              <h4 style={{
+                                color: 'white',
+                                fontSize: '1rem',
+                                fontWeight: '600',
+                                margin: 0,
+                                fontFamily: 'Helvetica, Arial, sans-serif'
+                              }}>
+                                {notification.title}
+                              </h4>
+                              
+                              {/* Badge Type */}
+                              <span style={{
+                                backgroundColor: getColorByType(notification.type),
+                                color: 'white',
+                                fontSize: '0.7rem',
+                                fontWeight: '600',
+                                padding: '0.1rem 0.5rem',
+                                borderRadius: '4px',
+                                textTransform: 'uppercase'
+                              }}>
+                                {notification.type}
+                              </span>
+                              
+                              {/* Badge Admin */}
+                              {notification.isAdminPost && (
+                                <span style={{
+                                  backgroundColor: '#8B5CF6',
+                                  color: 'white',
+                                  fontSize: '0.7rem',
+                                  fontWeight: '600',
+                                  padding: '0.1rem 0.5rem',
+                                  borderRadius: '4px'
+                                }}>
+                                  ADMIN
+                                </span>
+                              )}
+                            </div>
+                            
+                            <span style={{
+                              color: 'rgba(255, 255, 255, 0.5)',
+                              fontSize: '0.75rem',
+                              whiteSpace: 'nowrap'
+                            }}>
+                              {calculateTimeAgo(notification.timestamp)}
+                            </span>
+                          </div>
+                          
+                          <p style={{
+                            color: notification.read ? 'rgba(255, 255, 255, 0.7)' : 'white',
+                            fontSize: '0.9rem',
+                            margin: '0 0 0.5rem 0',
+                            lineHeight: 1.4,
+                            fontFamily: 'Helvetica, Arial, sans-serif',
+                            wordBreak: 'break-word'
+                          }}>
+                            {notification.message}
+                          </p>
+                          
+                          {/* Admin info jika ada */}
+                          {notification.isAdminPost && notification.adminName && (
+                            <div style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '0.3rem',
+                              marginTop: '0.3rem'
+                            }}>
+                              <span style={{
+                                color: 'rgba(255, 255, 255, 0.5)',
+                                fontSize: '0.75rem'
+                              }}>
+                                From:
+                              </span>
+                              <span style={{
+                                color: '#8B5CF6',
+                                fontSize: '0.75rem',
+                                fontWeight: '500'
+                              }}>
+                                {notification.adminName}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              )}
+            </div>
+            
+            {/* Footer dengan statistik */}
+            <div style={{
+              padding: '1rem 1.5rem',
+              borderTop: '1px solid rgba(255, 255, 255, 0.1)',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              flexShrink: 0,
+              backgroundColor: 'rgba(0, 0, 0, 0.2)'
+            }}>
+              <div style={{
+                color: 'rgba(255, 255, 255, 0.5)',
+                fontSize: '0.8rem',
+                fontFamily: 'Helvetica, Arial, sans-serif'
+              }}>
+                {notifications.length} total • {notificationCount} unread
+              </div>
+              
+              <motion.a
+                href="/notifications"
+                style={{
+                  color: '#00FF00',
+                  fontSize: '0.9rem',
+                  fontWeight: '600',
+                  textDecoration: 'none',
+                  fontFamily: 'Helvetica, Arial, sans-serif',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem'
+                }}
+                whileHover={{ 
+                  color: 'white',
+                  x: 5
+                }}
+              >
+                View All
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M5 12h14"/>
+                  <path d="m12 5 7 7-7 7"/>
+                </svg>
+              </motion.a>
+            </div>
+          </motion.div>
         )}
-      </div>
-      
-      {/* Footer dengan statistik */}
-      <div style={{
-        padding: '1rem 1.5rem',
-        borderTop: '1px solid rgba(255, 255, 255, 0.1)',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        flexShrink: 0,
-        backgroundColor: 'rgba(0, 0, 0, 0.2)'
-      }}>
-        <div style={{
-          color: 'rgba(255, 255, 255, 0.5)',
-          fontSize: '0.8rem',
-          fontFamily: 'Helvetica, Arial, sans-serif'
-        }}>
-          {notifications.length} total • {notificationCount} unread
-        </div>
-        
-        <motion.a
-          href="/notifications"
-          style={{
-            color: '#00FF00',
-            fontSize: '0.9rem',
-            fontWeight: '600',
-            textDecoration: 'none',
-            fontFamily: 'Helvetica, Arial, sans-serif',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.5rem'
-          }}
-          whileHover={{ 
-            color: 'white',
-            x: 5
-          }}
-        >
-          View All
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M5 12h14"/>
-            <path d="m12 5 7 7-7 7"/>
-          </svg>
-        </motion.a>
-      </div>
-    </motion.div>
-  )}
-</AnimatePresence>
+      </AnimatePresence>
 
       {/* Teks "Selamat Tahun Baru 2026" di pojok kiri atas */}
       <motion.div
@@ -3213,7 +4237,7 @@ useEffect(() => {
               padding: '0.5rem 0'
             }}>
               <motion.button
-                onClick={handleNotesClick}
+                onClick={() => router.push('/notes')}
                 style={{
                   padding: '0.8rem 1rem',
                   backgroundColor: 'transparent',
@@ -3731,7 +4755,7 @@ useEffect(() => {
         </div>
         
 
-        {/* Right Side Buttons - DENGAN SEARCH DAN NOTIFIKASI BARU */}
+        {/* Right Side Buttons */}
         <div style={{
           display: 'flex',
           alignItems: 'center',
@@ -3739,308 +4763,308 @@ useEffect(() => {
           position: 'relative'
         }}>
          {/* Search Bar dengan animasi GSAP dan dropdown results */}
-<motion.div
-  ref={searchContainerRef}
-  initial={{ opacity: 0, x: -10 }}
-  animate={{ opacity: 1, x: 0 }}
-  transition={{ delay: 1, duration: 0.5 }}
-  style={{
-    display: 'flex',
-    flexDirection: 'column',
-    position: 'relative',
-    width: showSearch ? '350px' : '40px',
-    height: showSearch ? 'auto' : '40px',
-    borderRadius: '20px',
-    backgroundColor: 'rgba(20, 20, 20, 0.95)',
-    backdropFilter: 'blur(20px)',
-    border: '1px solid rgba(255, 255, 255, 0.15)',
-    overflow: 'hidden',
-    cursor: 'pointer',
-    transition: 'all 0.3s ease',
-    zIndex: 1002,
-    boxShadow: showSearch ? '0 20px 60px rgba(0, 0, 0, 0.5)' : 'none'
-  }}
->
-  {/* Search Input Bar */}
-  <div style={{
-    display: 'flex',
-    alignItems: 'center',
-    width: '100%',
-    height: '40px',
-    padding: '0 10px',
-    boxSizing: 'border-box'
-  }}>
-    {/* Search Icon */}
-    <motion.div
-      onClick={handleSearchToggle}
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        width: '20px',
-        height: '100%',
-        cursor: 'pointer',
-        flexShrink: 0,
-        marginRight: '8px'
-      }}
-      whileHover={{ scale: 1.1 }}
-      whileTap={{ scale: 0.9 }}
-    >
-      <svg 
-        width="18" 
-        height="18" 
-        viewBox="0 0 24 24" 
-        fill="none" 
-        stroke={showSearch ? "#00FF00" : "white"} 
-        strokeWidth="2"
-      >
-        <circle cx="11" cy="11" r="8"/>
-        <line x1="21" y1="21" x2="16.65" y2="16.65"/>
-      </svg>
-    </motion.div>
-    
-    {/* Search Input */}
-    <input
-      ref={searchInputRef}
-      type="text"
-      value={searchQuery}
-      onChange={handleSearchInputChange}
-      onKeyDown={handleSearchKeyPress}
-      placeholder="Search chatbot, sign in, notifikasi..."
-      style={{
-        width: '100%',
-        height: '100%',
-        padding: '0 8px',
-        backgroundColor: 'transparent',
-        border: 'none',
-        color: 'white',
-        fontSize: '0.9rem',
-        outline: 'none',
-        fontFamily: 'Helvetica, Arial, sans-serif',
-        opacity: showSearch ? 1 : 0,
-        pointerEvents: showSearch ? 'auto' : 'none',
-        transition: 'opacity 0.2s ease'
-      }}
-    />
-    
-    {/* Clear/X Button */}
-    {showSearch && searchQuery && (
-      <motion.div
-        initial={{ opacity: 0, scale: 0.8 }}
-        animate={{ opacity: 1, scale: 1 }}
-        onClick={() => {
-          setSearchQuery("");
-          setSearchResults([]);
-          setShowSearchResults(false);
-        }}
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          width: '20px',
-          height: '20px',
-          cursor: 'pointer',
-          backgroundColor: 'rgba(255, 255, 255, 0.1)',
-          borderRadius: '50%',
-          flexShrink: 0,
-          marginLeft: '8px'
-        }}
-        whileHover={{ scale: 1.2, backgroundColor: 'rgba(255, 255, 255, 0.2)' }}
-        whileTap={{ scale: 0.9 }}
-      >
-        <svg 
-          width="12" 
-          height="12" 
-          viewBox="0 0 24 24" 
-          fill="none" 
-          stroke="white" 
-          strokeWidth="2"
-        >
-          <line x1="18" y1="6" x2="6" y2="18"/>
-          <line x1="6" y1="6" x2="18" y2="18"/>
-        </svg>
-      </motion.div>
-    )}
-  </div>
-
-  {/* Search Results Dropdown */}
-  <AnimatePresence>
-    {showSearch && showSearchResults && searchResults.length > 0 && (
-      <motion.div
-        initial={{ opacity: 0, height: 0 }}
-        animate={{ opacity: 1, height: 'auto' }}
-        exit={{ opacity: 0, height: 0 }}
-        transition={{ duration: 0.3 }}
-        style={{
-          width: '100%',
-          maxHeight: '400px',
-          overflowY: 'auto',
-          backgroundColor: 'rgba(15, 15, 15, 0.98)',
-          borderTop: '1px solid rgba(255, 255, 255, 0.1)',
-          padding: '10px 0'
-        }}
-      >
-        {/* Search Results Header */}
-        <div style={{
-          padding: '0 15px 10px 15px',
-          borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
-          marginBottom: '5px'
-        }}>
-          <div style={{
-            color: 'rgba(255, 255, 255, 0.7)',
-            fontSize: '0.8rem',
-            fontWeight: '600',
-            textTransform: 'uppercase',
-            letterSpacing: '0.5px'
-          }}>
-            Hasil Pencarian ({searchResults.length})
-          </div>
-        </div>
-
-        {/* Search Results List */}
-        {searchResults.map((result, index) => (
           <motion.div
-            key={result.id}
-            className="search-result-item"
-            initial={{ opacity: 0, x: -20 }}
+            ref={searchContainerRef}
+            initial={{ opacity: 0, x: -10 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: index * 0.05 }}
-            onClick={() => handleSearchResultClick(result.url)}
+            transition={{ delay: 1, duration: 0.5 }}
             style={{
-              padding: '12px 15px',
+              display: 'flex',
+              flexDirection: 'column',
+              position: 'relative',
+              width: showSearch ? '350px' : '40px',
+              height: showSearch ? 'auto' : '40px',
+              borderRadius: '20px',
+              backgroundColor: 'rgba(20, 20, 20, 0.95)',
+              backdropFilter: 'blur(20px)',
+              border: '1px solid rgba(255, 255, 255, 0.15)',
+              overflow: 'hidden',
               cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '12px',
-              transition: 'all 0.2s ease',
-              borderBottom: '1px solid rgba(255, 255, 255, 0.03)'
+              transition: 'all 0.3s ease',
+              zIndex: 1002,
+              boxShadow: showSearch ? '0 20px 60px rgba(0, 0, 0, 0.5)' : 'none'
             }}
-            whileHover={{ 
-              backgroundColor: 'rgba(0, 255, 0, 0.1)',
-              paddingLeft: '20px'
-            }}
-            whileTap={{ scale: 0.98 }}
           >
-            {/* Icon */}
+            {/* Search Input Bar */}
             <div style={{
-              width: '36px',
-              height: '36px',
-              borderRadius: '8px',
-              backgroundColor: 'rgba(255, 255, 255, 0.1)',
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '1.2rem',
-              flexShrink: 0
+              width: '100%',
+              height: '40px',
+              padding: '0 10px',
+              boxSizing: 'border-box'
             }}>
-              {result.icon}
-            </div>
-
-            {/* Content */}
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'flex-start',
-                marginBottom: '2px'
-              }}>
-                <div style={{
-                  color: 'white',
-                  fontSize: '0.95rem',
-                  fontWeight: '600',
-                  fontFamily: 'Helvetica, Arial, sans-serif',
-                  whiteSpace: 'nowrap',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis'
-                }}>
-                  {result.title}
-                </div>
-                <div style={{
-                  backgroundColor: 'rgba(0, 80, 183, 0.3)',
-                  color: '#0050B7',
-                  fontSize: '0.7rem',
-                  fontWeight: '600',
-                  padding: '2px 6px',
-                  borderRadius: '10px',
-                  marginLeft: '8px',
-                  flexShrink: 0
-                }}>
-                  {result.category}
-                </div>
-              </div>
-              
-              <div style={{
-                color: 'rgba(255, 255, 255, 0.6)',
-                fontSize: '0.8rem',
-                whiteSpace: 'nowrap',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                marginBottom: '4px'
-              }}>
-                {result.description}
-              </div>
-              
-              <div style={{
-                color: '#00FF00',
-                fontSize: '0.75rem',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '4px'
-              }}>
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
-                  <polyline points="15 3 21 3 21 9"/>
-                  <line x1="10" y1="14" x2="21" y2="3"/>
+              {/* Search Icon */}
+              <motion.div
+                onClick={handleSearchToggle}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: '20px',
+                  height: '100%',
+                  cursor: 'pointer',
+                  flexShrink: 0,
+                  marginRight: '8px'
+                }}
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+              >
+                <svg 
+                  width="18" 
+                  height="18" 
+                  viewBox="0 0 24 24" 
+                  fill="none" 
+                  stroke={showSearch ? "#00FF00" : "white"} 
+                  strokeWidth="2"
+                >
+                  <circle cx="11" cy="11" r="8"/>
+                  <line x1="21" y1="21" x2="16.65" y2="16.65"/>
                 </svg>
-                {result.url}
-              </div>
+              </motion.div>
+              
+              {/* Search Input */}
+              <input
+                ref={searchInputRef}
+                type="text"
+                value={searchQuery}
+                onChange={handleSearchInputChange}
+                onKeyDown={handleSearchKeyPress}
+                placeholder="Search chatbot, sign in, notifikasi..."
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  padding: '0 8px',
+                  backgroundColor: 'transparent',
+                  border: 'none',
+                  color: 'white',
+                  fontSize: '0.9rem',
+                  outline: 'none',
+                  fontFamily: 'Helvetica, Arial, sans-serif',
+                  opacity: showSearch ? 1 : 0,
+                  pointerEvents: showSearch ? 'auto' : 'none',
+                  transition: 'opacity 0.2s ease'
+                }}
+              />
+              
+              {/* Clear/X Button */}
+              {showSearch && searchQuery && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  onClick={() => {
+                    setSearchQuery("");
+                    setSearchResults([]);
+                    setShowSearchResults(false);
+                  }}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    width: '20px',
+                    height: '20px',
+                    cursor: 'pointer',
+                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                    borderRadius: '50%',
+                    flexShrink: 0,
+                    marginLeft: '8px'
+                  }}
+                  whileHover={{ scale: 1.2, backgroundColor: 'rgba(255, 255, 255, 0.2)' }}
+                  whileTap={{ scale: 0.9 }}
+                >
+                  <svg 
+                    width="12" 
+                    height="12" 
+                    viewBox="0 0 24 24" 
+                    fill="none" 
+                    stroke="white" 
+                    strokeWidth="2"
+                  >
+                    <line x1="18" y1="6" x2="6" y2="18"/>
+                    <line x1="6" y1="6" x2="18" y2="18"/>
+                  </svg>
+                </motion.div>
+              )}
             </div>
 
-            {/* Arrow Indicator */}
-            <motion.div
-              initial={{ opacity: 0, x: -5 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.2 }}
-              style={{
-                opacity: 0.5,
-                transition: 'all 0.2s ease'
-              }}
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M5 12h14"/>
-                <path d="m12 5 7 7-7 7"/>
-              </svg>
-            </motion.div>
-          </motion.div>
-        ))}
-      </motion.div>
-    )}
-  </AnimatePresence>
+            {/* Search Results Dropdown */}
+            <AnimatePresence>
+              {showSearch && showSearchResults && searchResults.length > 0 && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.3 }}
+                  style={{
+                    width: '100%',
+                    maxHeight: '400px',
+                    overflowY: 'auto',
+                    backgroundColor: 'rgba(15, 15, 15, 0.98)',
+                    borderTop: '1px solid rgba(255, 255, 255, 0.1)',
+                    padding: '10px 0'
+                  }}
+                >
+                  {/* Search Results Header */}
+                  <div style={{
+                    padding: '0 15px 10px 15px',
+                    borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
+                    marginBottom: '5px'
+                  }}>
+                    <div style={{
+                      color: 'rgba(255, 255, 255, 0.7)',
+                      fontSize: '0.8rem',
+                      fontWeight: '600',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.5px'
+                    }}>
+                      Hasil Pencarian ({searchResults.length})
+                    </div>
+                  </div>
 
-  {/* No Results Message */}
-  <AnimatePresence>
-    {showSearch && searchQuery.trim() && searchResults.length === 0 && (
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        style={{
-          padding: '20px 15px',
-          textAlign: 'center',
-          color: 'rgba(255, 255, 255, 0.5)',
-          fontSize: '0.9rem',
-          backgroundColor: 'rgba(15, 15, 15, 0.98)',
-          borderTop: '1px solid rgba(255, 255, 255, 0.1)'
-        }}
-      >
-        Tidak ditemukan hasil untuk "{searchQuery}"
-        <div style={{ fontSize: '0.8rem', marginTop: '5px' }}>
-          Coba kata kunci lain seperti: chatbot, sign in, notifikasi
-        </div>
-      </motion.div>
-    )}
-  </AnimatePresence>
-</motion.div>
+                  {/* Search Results List */}
+                  {searchResults.map((result, index) => (
+                    <motion.div
+                      key={result.id}
+                      className="search-result-item"
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: index * 0.05 }}
+                      onClick={() => handleSearchResultClick(result.url)}
+                      style={{
+                        padding: '12px 15px',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '12px',
+                        transition: 'all 0.2s ease',
+                        borderBottom: '1px solid rgba(255, 255, 255, 0.03)'
+                      }}
+                      whileHover={{ 
+                        backgroundColor: 'rgba(0, 255, 0, 0.1)',
+                        paddingLeft: '20px'
+                      }}
+                      whileTap={{ scale: 0.98 }}
+                    >
+                      {/* Icon */}
+                      <div style={{
+                        width: '36px',
+                        height: '36px',
+                        borderRadius: '8px',
+                        backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '1.2rem',
+                        flexShrink: 0
+                      }}>
+                        {result.icon}
+                      </div>
+
+                      {/* Content */}
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'flex-start',
+                          marginBottom: '2px'
+                        }}>
+                          <div style={{
+                            color: 'white',
+                            fontSize: '0.95rem',
+                            fontWeight: '600',
+                            fontFamily: 'Helvetica, Arial, sans-serif',
+                            whiteSpace: 'nowrap',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis'
+                          }}>
+                            {result.title}
+                          </div>
+                          <div style={{
+                            backgroundColor: 'rgba(0, 80, 183, 0.3)',
+                            color: '#0050B7',
+                            fontSize: '0.7rem',
+                            fontWeight: '600',
+                            padding: '2px 6px',
+                            borderRadius: '10px',
+                            marginLeft: '8px',
+                            flexShrink: 0
+                          }}>
+                            {result.category}
+                          </div>
+                        </div>
+                        
+                        <div style={{
+                          color: 'rgba(255, 255, 255, 0.6)',
+                          fontSize: '0.8rem',
+                          whiteSpace: 'nowrap',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          marginBottom: '4px'
+                        }}>
+                          {result.description}
+                        </div>
+                        
+                        <div style={{
+                          color: '#00FF00',
+                          fontSize: '0.75rem',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '4px'
+                        }}>
+                          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+                            <polyline points="15 3 21 3 21 9"/>
+                            <line x1="10" y1="14" x2="21" y2="3"/>
+                          </svg>
+                          {result.url}
+                        </div>
+                      </div>
+
+                      {/* Arrow Indicator */}
+                      <motion.div
+                        initial={{ opacity: 0, x: -5 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.2 }}
+                        style={{
+                          opacity: 0.5,
+                          transition: 'all 0.2s ease'
+                        }}
+                      >
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path d="M5 12h14"/>
+                          <path d="m12 5 7 7-7 7"/>
+                        </svg>
+                      </motion.div>
+                    </motion.div>
+                  ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* No Results Message */}
+            <AnimatePresence>
+              {showSearch && searchQuery.trim() && searchResults.length === 0 && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  style={{
+                    padding: '20px 15px',
+                    textAlign: 'center',
+                    color: 'rgba(255, 255, 255, 0.5)',
+                    fontSize: '0.9rem',
+                    backgroundColor: 'rgba(15, 15, 15, 0.98)',
+                    borderTop: '1px solid rgba(255, 255, 255, 0.1)'
+                  }}
+                >
+                  Tidak ditemukan hasil untuk "{searchQuery}"
+                  <div style={{ fontSize: '0.8rem', marginTop: '5px' }}>
+                    Coba kata kunci lain seperti: chatbot, sign in, notifikasi
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </motion.div>
 
           {/* Notification Bell dengan Badge */}
           <motion.div
@@ -4201,7 +5225,7 @@ useEffect(() => {
             MENU
           </motion.div>
 
-          {/* Sign In / User Button */}
+          {/* Sign In / User Button - UPDATED untuk modal profil */}
           <motion.button
             ref={userButtonRef}
             onClick={handleSignInClick}
