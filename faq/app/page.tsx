@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect, useRef } from "react";
@@ -446,7 +445,7 @@ export default function HomePage(): React.JSX.Element {
       
       const currentUser = auth.currentUser;
       const currentUserId = currentUser ? currentUser.uid : 
-                           localStorage.getItem('anonymous_user_id');
+                         localStorage.getItem('anonymous_user_id');
       
       if (!currentUserId) {
         console.error("❌ No user ID found for marking as read");
@@ -495,7 +494,7 @@ export default function HomePage(): React.JSX.Element {
       
       const currentUser = auth.currentUser;
       const currentUserId = currentUser ? currentUser.uid : 
-                           localStorage.getItem('anonymous_user_id');
+                         localStorage.getItem('anonymous_user_id');
       
       if (!currentUserId) {
         console.error("❌ No user ID found for clearing notifications");
@@ -829,8 +828,8 @@ export default function HomePage(): React.JSX.Element {
       if (currentUser) {
         setUser(currentUser);
         const name = currentUser.displayName || 
-                     currentUser.email?.split('@')[0] || 
-                     'User';
+                   currentUser.email?.split('@')[0] || 
+                   'User';
         setUserDisplayName(name);
         
         await updateUserStats(currentUser.uid, name);
@@ -922,8 +921,8 @@ export default function HomePage(): React.JSX.Element {
           
           const currentUser = auth?.currentUser;
           const currentUserId = currentUser ? currentUser.uid : 
-                                localStorage.getItem('anonymous_user_id') || 
-                                'anonymous_' + Date.now();
+                              localStorage.getItem('anonymous_user_id') || 
+                              'anonymous_' + Date.now();
           
           if (!currentUser && !localStorage.getItem('anonymous_user_id')) {
             localStorage.setItem('anonymous_user_id', currentUserId);
@@ -1063,34 +1062,22 @@ export default function HomePage(): React.JSX.Element {
     }
   }, [showProfileModal]);
 
-  // Animasi teks nama user berjalan
+  // PERBAIKAN: Hapus animasi teks nama user berjalan
+  // Efek ini menyebabkan nama user bergerak terus-menerus
+  // Saya telah menghapus useEffect yang menangani animasi scroll pada nama user
   useEffect(() => {
+    // Hapus logika animasi berjalan untuk nama user
+    // Biarkan nama user tetap statis
     if (user && userTextRef.current && userButtonRef.current) {
       const textWidth = userTextRef.current.scrollWidth;
       const buttonWidth = userButtonRef.current.clientWidth;
       
-      if (textWidth > buttonWidth) {
-        setIsNameScrolling(true);
-        
-        const animation = gsap.to(userTextRef.current, {
-          x: -(textWidth - buttonWidth + 20),
-          duration: 5,
-          repeat: -1,
-          yoyo: true,
-          ease: "power1.inOut",
-          onReverseComplete: () => {
-            setScrollDirection("right");
-          },
-          onComplete: () => {
-            setScrollDirection("left");
-          }
-        });
-
-        return () => {
-          animation.kill();
-        };
-      } else {
-        setIsNameScrolling(false);
+      // Hanya set isNameScrolling ke false
+      setIsNameScrolling(false);
+      
+      // Pastikan tidak ada animasi GSAP yang berjalan
+      if (userTextRef.current) {
+        gsap.killTweensOf(userTextRef.current);
       }
     }
   }, [user, userDisplayName, isMobile]);
@@ -1772,7 +1759,7 @@ export default function HomePage(): React.JSX.Element {
                         whileHover={{ scale: 1.1 }}
                         style={{
                           backgroundColor: user?.providerData?.[0]?.providerId === 'google.com' ? '#DB4437' : 
-                                         user?.providerData?.[0]?.providerId === 'github.com' ? '#333' : '#0050B7',
+                                       user?.providerData?.[0]?.providerId === 'github.com' ? '#333' : '#0050B7',
                           color: 'white',
                           fontSize: '0.7rem',
                           padding: '0.1rem 0.5rem',
@@ -2169,7 +2156,7 @@ export default function HomePage(): React.JSX.Element {
                             </span>
                             <span style={{
                               backgroundColor: user?.providerData?.[0]?.providerId === 'google.com' ? '#DB4437' : 
-                                             user?.providerData?.[0]?.providerId === 'github.com' ? '#333' : '#0050B7',
+                                           user?.providerData?.[0]?.providerId === 'github.com' ? '#333' : '#0050B7',
                               color: 'white',
                               fontSize: '0.8rem',
                               padding: '0.3rem 0.8rem',
@@ -5230,7 +5217,7 @@ export default function HomePage(): React.JSX.Element {
             MENU
           </motion.div>
 
-          {/* Sign In / User Button - UPDATED untuk modal profil */}
+          {/* PERBAIKAN: Sign In / User Button - Menghilangkan animasi berjalan */}
           <motion.button
             ref={userButtonRef}
             onClick={handleSignInClick}
@@ -5290,7 +5277,7 @@ export default function HomePage(): React.JSX.Element {
                   <circle cx="12" cy="7" r="4"/>
                 </svg>
                 
-                {/* Nama user */}
+                {/* PERBAIKAN: Nama user tanpa animasi berjalan */}
                 <div style={{
                   overflow: 'hidden',
                   width: '100%',
@@ -5298,18 +5285,20 @@ export default function HomePage(): React.JSX.Element {
                   display: 'flex',
                   alignItems: 'center'
                 }}>
-                  <motion.span
+                  <span
                     ref={userTextRef}
                     style={{
                       display: 'inline-block',
                       whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
                       paddingRight: '20px',
-                      transform: isNameScrolling ? `translateX(${scrollPosition}px)` : 'translateX(0)',
-                      willChange: 'transform'
+                      transform: 'translateX(0) !important', // Pastikan tidak ada animasi
+                      willChange: 'auto'
                     }}
                   >
                     {isHoveringSignIn ? `Hi, ${userDisplayName}` : userDisplayName}
-                  </motion.span>
+                  </span>
                   
                   {isHoveringSignIn && (
                     <motion.span
@@ -5747,4 +5736,3 @@ export default function HomePage(): React.JSX.Element {
     </div>
   );
 }
-
