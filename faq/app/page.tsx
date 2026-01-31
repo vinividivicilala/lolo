@@ -3341,19 +3341,21 @@ export default function HomePage(): React.JSX.Element {
                           objectFit: 'cover',
                           display: 'block'
                         }}
-                        onError={(e) => {
-                          e.currentTarget.style.backgroundColor = '#222';
-                          e.currentTarget.style.display = 'flex';
-                          e.currentTarget.style.alignItems = 'center';
-                          e.currentTarget.style.justifyContent: 'center';
-                          e.currentTarget.style.color = '#fff';
-                          e.currentTarget.innerHTML = `<div style="padding: 2rem; text-align: center;">Photo ${currentPhotoIndex + 1}</div>`;
-                        }}
+                       onError={(e) => {
+  e.currentTarget.style.backgroundColor = '#222';
+  e.currentTarget.style.display = 'flex';
+  e.currentTarget.style.alignItems = 'center';
+  e.currentTarget.style.justifyContent = 'center';
+  e.currentTarget.style.color = '#fff';
+  e.currentTarget.innerHTML = `<div style="padding: 2rem; text-align: center;">Photo ${currentPhotoIndex + 1}</div>`;
+}}
                       />
                     </motion.div>
                   </AnimatePresence>
                 </div>
               </div>
+
+              
 
               {/* Progress bar kecil di bawah foto */}
               <div style={{
@@ -5745,3 +5747,4 @@ export default function HomePage(): React.JSX.Element {
     </div>
   );
 }
+
