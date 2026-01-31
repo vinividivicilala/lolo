@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect, useRef } from "react";
@@ -1671,178 +1672,227 @@ export default function HomePage(): React.JSX.Element {
   const currentPhotoComments = comments.filter(comment => comment.photoIndex === currentPhotoIndex);
 
   // Komponen modal profil user
-  const ProfileModal = () => (
-    <AnimatePresence>
-      {showProfileModal && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.3 }}
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            width: '100%',
-            height: '100%',
-            backgroundColor: 'rgba(0, 0, 0, 0.85)',
-            backdropFilter: 'blur(10px)',
-            zIndex: 9998,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: isMobile ? '1rem' : '2rem'
-          }}
-          onClick={handleCloseProfileModal}
-        >
+  const ProfileModal = () => {
+    return (
+      <AnimatePresence>
+        {showProfileModal && (
           <motion.div
-            ref={profileModalRef}
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.9, opacity: 0 }}
-            transition={{ type: "spring", damping: 25, stiffness: 300 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
             style={{
-              width: isMobile ? '100%' : '90%',
-              maxWidth: isMobile ? '100%' : '900px',
-              height: isMobile ? '100%' : '85vh',
-              backgroundColor: 'rgba(20, 20, 20, 0.95)',
-              borderRadius: isMobile ? '0' : '25px',
-              border: '1px solid rgba(255, 255, 255, 0.15)',
-              overflow: 'hidden',
-              display: 'flex',
-              flexDirection: 'column',
-              boxShadow: '0 25px 100px rgba(0, 0, 0, 0.7)',
-              position: 'relative'
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Header Modal */}
-            <div style={{
-              padding: isMobile ? '1.5rem' : '2rem',
-              borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              backgroundColor: 'rgba(0, 0, 0, 0.85)',
+              backdropFilter: 'blur(10px)',
+              zIndex: 9998,
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'space-between',
-              backgroundColor: 'rgba(0, 0, 0, 0.3)',
-              backdropFilter: 'blur(10px)'
-            }}>
+              justifyContent: 'center',
+              padding: isMobile ? '1rem' : '2rem'
+            }}
+            onClick={handleCloseProfileModal}
+          >
+            <motion.div
+              ref={profileModalRef}
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+              style={{
+                width: isMobile ? '100%' : '90%',
+                maxWidth: isMobile ? '100%' : '900px',
+                height: isMobile ? '100%' : '85vh',
+                backgroundColor: 'rgba(20, 20, 20, 0.95)',
+                borderRadius: isMobile ? '0' : '25px',
+                border: '1px solid rgba(255, 255, 255, 0.15)',
+                overflow: 'hidden',
+                display: 'flex',
+                flexDirection: 'column',
+                boxShadow: '0 25px 100px rgba(0, 0, 0, 0.7)',
+                position: 'relative'
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Header Modal */}
               <div style={{
+                padding: isMobile ? '1.5rem' : '2rem',
+                borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '1rem'
+                justifyContent: 'space-between',
+                backgroundColor: 'rgba(0, 0, 0, 0.3)',
+                backdropFilter: 'blur(10px)'
               }}>
-                <motion.div 
-                  whileHover={{ rotate: 15 }}
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '1rem'
+                }}>
+                  <motion.div 
+                    whileHover={{ rotate: 15 }}
+                    style={{
+                      width: '50px',
+                      height: '50px',
+                      borderRadius: '50%',
+                      backgroundColor: '#0050B7',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '1.2rem',
+                      fontWeight: 'bold',
+                      color: 'white',
+                      border: '3px solid rgba(255, 255, 255, 0.2)'
+                    }}
+                  >
+                    {userDisplayName.charAt(0).toUpperCase()}
+                  </motion.div>
+                  <div>
+                    <h3 style={{
+                      color: 'white',
+                      fontSize: '1.3rem',
+                      fontWeight: '600',
+                      margin: '0 0 0.2rem 0'
+                    }}>
+                      {userDisplayName}
+                    </h3>
+                    <div style={{
+                      color: 'rgba(255, 255, 255, 0.6)',
+                      fontSize: '0.9rem',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.5rem'
+                    }}>
+                      <span>{user?.email}</span>
+                      <motion.span 
+                        whileHover={{ scale: 1.1 }}
+                        style={{
+                          backgroundColor: user?.providerData?.[0]?.providerId === 'google.com' ? '#DB4437' : 
+                                         user?.providerData?.[0]?.providerId === 'github.com' ? '#333' : '#0050B7',
+                          color: 'white',
+                          fontSize: '0.7rem',
+                          padding: '0.1rem 0.5rem',
+                          borderRadius: '10px'
+                        }}
+                      >
+                        {user?.providerData?.[0]?.providerId === 'google.com' ? 'Google' : 
+                         user?.providerData?.[0]?.providerId === 'github.com' ? 'GitHub' : 'Email'}
+                      </motion.span>
+                    </div>
+                  </div>
+                </div>
+
+                <motion.button
+                  onClick={handleCloseProfileModal}
+                  whileHover={{ rotate: 90, scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
                   style={{
-                    width: '50px',
-                    height: '50px',
+                    width: '40px',
+                    height: '40px',
                     borderRadius: '50%',
-                    backgroundColor: '#0050B7',
+                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                    color: 'white',
+                    fontSize: '1.5rem',
+                    cursor: 'pointer',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    fontSize: '1.2rem',
-                    fontWeight: 'bold',
-                    color: 'white',
-                    border: '3px solid rgba(255, 255, 255, 0.2)'
+                    padding: 0,
+                    margin: 0
                   }}
                 >
-                  {userDisplayName.charAt(0).toUpperCase()}
-                </motion.div>
-                <div>
-                  <h3 style={{
-                    color: 'white',
-                    fontSize: '1.3rem',
-                    fontWeight: '600',
-                    margin: '0 0 0.2rem 0'
-                  }}>
-                    {userDisplayName}
-                  </h3>
-                  <div style={{
-                    color: 'rgba(255, 255, 255, 0.6)',
-                    fontSize: '0.9rem',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.5rem'
-                  }}>
-                    <span>{user?.email}</span>
-                    <motion.span 
-                      whileHover={{ scale: 1.1 }}
-                      style={{
-                        backgroundColor: user?.providerData?.[0]?.providerId === 'google.com' ? '#DB4437' : 
-                                       user?.providerData?.[0]?.providerId === 'github.com' ? '#333' : '#0050B7',
-                        color: 'white',
-                        fontSize: '0.7rem',
-                        padding: '0.1rem 0.5rem',
-                        borderRadius: '10px'
-                      }}
-                    >
-                      {user?.providerData?.[0]?.providerId === 'google.com' ? 'Google' : 
-                       user?.providerData?.[0]?.providerId === 'github.com' ? 'GitHub' : 'Email'}
-                    </motion.span>
-                  </div>
-                </div>
+                  ×
+                </motion.button>
               </div>
 
-              <motion.button
-                onClick={handleCloseProfileModal}
-                whileHover={{ rotate: 90, scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-                style={{
-                  width: '40px',
-                  height: '40px',
-                  borderRadius: '50%',
-                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                  border: '1px solid rgba(255, 255, 255, 0.2)',
-                  color: 'white',
-                  fontSize: '1.5rem',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  padding: 0,
-                  margin: 0
-                }}
-              >
-                ×
-              </motion.button>
-            </div>
-
-            {/* Main Content */}
-            <div style={{
-              display: 'flex',
-              flex: 1,
-              overflow: 'hidden'
-            }}>
-              {/* Sidebar Navigation */}
+              {/* Main Content */}
               <div style={{
-                width: isMobile ? '100%' : '250px',
-                backgroundColor: 'rgba(10, 10, 10, 0.8)',
-                borderRight: isMobile ? 'none' : '1px solid rgba(255, 255, 255, 0.1)',
-                padding: isMobile ? '1rem' : '1.5rem',
                 display: 'flex',
-                flexDirection: isMobile ? 'row' : 'column',
-                gap: isMobile ? '0.5rem' : '1rem',
-                overflowX: isMobile ? 'auto' : 'hidden',
-                flexShrink: 0
+                flex: 1,
+                overflow: 'hidden'
               }}>
-                {[
-                  { id: 'notes', label: 'My Notes', icon: '📝', count: notesCount },
-                  { id: 'settings', label: 'Settings', icon: '⚙️' },
-                  { id: 'help', label: 'Help', icon: '❓' },
-                  { id: 'feedback', label: 'Feedback', icon: '💬' }
-                ].map((tab) => (
+                {/* Sidebar Navigation */}
+                <div style={{
+                  width: isMobile ? '100%' : '250px',
+                  backgroundColor: 'rgba(10, 10, 10, 0.8)',
+                  borderRight: isMobile ? 'none' : '1px solid rgba(255, 255, 255, 0.1)',
+                  padding: isMobile ? '1rem' : '1.5rem',
+                  display: 'flex',
+                  flexDirection: isMobile ? 'row' : 'column',
+                  gap: isMobile ? '0.5rem' : '1rem',
+                  overflowX: isMobile ? 'auto' : 'hidden',
+                  flexShrink: 0
+                }}>
+                  {[
+                    { id: 'notes', label: 'My Notes', icon: '📝', count: notesCount },
+                    { id: 'settings', label: 'Settings', icon: '⚙️' },
+                    { id: 'help', label: 'Help', icon: '❓' },
+                    { id: 'feedback', label: 'Feedback', icon: '💬' }
+                  ].map((tab) => (
+                    <motion.button
+                      key={tab.id}
+                      onClick={() => setActiveTab(tab.id as any)}
+                      whileHover={{ x: 5, backgroundColor: 'rgba(0, 80, 183, 0.2)' }}
+                      whileTap={{ scale: 0.95 }}
+                      style={{
+                        padding: isMobile ? '0.8rem 1rem' : '1rem',
+                        backgroundColor: activeTab === tab.id ? 'rgba(0, 80, 183, 0.3)' : 'transparent',
+                        border: `1px solid ${activeTab === tab.id ? '#0050B7' : 'rgba(255, 255, 255, 0.1)'}`,
+                        borderRadius: '12px',
+                        color: activeTab === tab.id ? 'white' : 'rgba(255, 255, 255, 0.8)',
+                        fontSize: '0.95rem',
+                        fontWeight: '500',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '1rem',
+                        textAlign: 'left',
+                        transition: 'all 0.3s ease',
+                        whiteSpace: 'nowrap',
+                        flexShrink: 0
+                      }}
+                    >
+                      <span style={{ fontSize: '1.2rem' }}>{tab.icon}</span>
+                      {tab.label}
+                      {tab.count !== undefined && (
+                        <motion.span 
+                          initial={{ scale: 0 }}
+                          animate={{ scale: 1 }}
+                          style={{
+                            marginLeft: 'auto',
+                            backgroundColor: '#00FF00',
+                            color: 'black',
+                            fontSize: '0.8rem',
+                            fontWeight: 'bold',
+                            padding: '0.1rem 0.6rem',
+                            borderRadius: '10px'
+                          }}
+                        >
+                          {tab.count}
+                        </motion.span>
+                      )}
+                    </motion.button>
+                  ))}
+
+                  {/* Logout Button */}
                   <motion.button
-                    key={tab.id}
-                    onClick={() => setActiveTab(tab.id as any)}
-                    whileHover={{ x: 5, backgroundColor: 'rgba(0, 80, 183, 0.2)' }}
+                    onClick={() => {
+                      handleCloseProfileModal();
+                      setShowLogoutModal(true);
+                    }}
+                    whileHover={{ x: 5, backgroundColor: 'rgba(255, 71, 87, 0.2)' }}
                     whileTap={{ scale: 0.95 }}
                     style={{
                       padding: isMobile ? '0.8rem 1rem' : '1rem',
-                      backgroundColor: activeTab === tab.id ? 'rgba(0, 80, 183, 0.3)' : 'transparent',
-                      border: `1px solid ${activeTab === tab.id ? '#0050B7' : 'rgba(255, 255, 255, 0.1)'}`,
+                      backgroundColor: 'transparent',
+                      border: '1px solid rgba(255, 71, 87, 0.3)',
                       borderRadius: '12px',
-                      color: activeTab === tab.id ? 'white' : 'rgba(255, 255, 255, 0.8)',
+                      color: '#FF4757',
                       fontSize: '0.95rem',
                       fontWeight: '500',
                       cursor: 'pointer',
@@ -1851,754 +1901,728 @@ export default function HomePage(): React.JSX.Element {
                       gap: '1rem',
                       textAlign: 'left',
                       transition: 'all 0.3s ease',
+                      marginTop: isMobile ? 0 : 'auto',
                       whiteSpace: 'nowrap',
                       flexShrink: 0
                     }}
                   >
-                    <span style={{ fontSize: '1.2rem' }}>{tab.icon}</span>
-                    {tab.label}
-                    {tab.count !== undefined && (
-                      <motion.span 
-                        initial={{ scale: 0 }}
-                        animate={{ scale: 1 }}
-                        style={{
-                          marginLeft: 'auto',
-                          backgroundColor: '#00FF00',
-                          color: 'black',
-                          fontSize: '0.8rem',
-                          fontWeight: 'bold',
-                          padding: '0.1rem 0.6rem',
-                          borderRadius: '10px'
-                        }}
-                      >
-                        {tab.count}
-                      </motion.span>
-                    )}
+                    <span style={{ fontSize: '1.2rem' }}>🚪</span>
+                    Logout
                   </motion.button>
-                ))}
+                </div>
 
-                {/* Logout Button */}
-                <motion.button
-                  onClick={() => {
-                    handleCloseProfileModal();
-                    setShowLogoutModal(true);
-                  }}
-                  whileHover={{ x: 5, backgroundColor: 'rgba(255, 71, 87, 0.2)' }}
-                  whileTap={{ scale: 0.95 }}
-                  style={{
-                    padding: isMobile ? '0.8rem 1rem' : '1rem',
-                    backgroundColor: 'transparent',
-                    border: '1px solid rgba(255, 71, 87, 0.3)',
-                    borderRadius: '12px',
-                    color: '#FF4757',
-                    fontSize: '0.95rem',
-                    fontWeight: '500',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '1rem',
-                    textAlign: 'left',
-                    transition: 'all 0.3s ease',
-                    marginTop: isMobile ? 0 : 'auto',
-                    whiteSpace: 'nowrap',
-                    flexShrink: 0
-                  }}
-                >
-                  <span style={{ fontSize: '1.2rem' }}>🚪</span>
-                  Logout
-                </motion.button>
-              </div>
-
-              {/* Content Area */}
-              <div style={{
-                flex: 1,
-                overflowY: 'auto',
-                padding: isMobile ? '1rem' : '2rem',
-                backgroundColor: 'rgba(15, 15, 15, 0.5)'
-              }}>
-                {/* Notes Tab */}
-                {activeTab === 'notes' && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <div style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      marginBottom: '1.5rem'
-                    }}>
-                      <h3 style={{
-                        color: 'white',
-                        fontSize: '1.5rem',
-                        fontWeight: '600',
-                        margin: 0
+                {/* Content Area */}
+                <div style={{
+                  flex: 1,
+                  overflowY: 'auto',
+                  padding: isMobile ? '1rem' : '2rem',
+                  backgroundColor: 'rgba(15, 15, 15, 0.5)'
+                }}>
+                  {/* Notes Tab */}
+                  {activeTab === 'notes' && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      <div style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        marginBottom: '1.5rem'
                       }}>
-                        My Notes ({notesCount})
-                      </h3>
-                      <motion.button
-                        onClick={() => router.push('/notes')}
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        style={{
-                          backgroundColor: '#00FF00',
-                          color: 'black',
-                          border: 'none',
-                          padding: '0.5rem 1.2rem',
-                          borderRadius: '20px',
-                          fontSize: '0.9rem',
+                        <h3 style={{
+                          color: 'white',
+                          fontSize: '1.5rem',
                           fontWeight: '600',
-                          cursor: 'pointer',
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '0.5rem'
-                        }}
-                      >
-                        <span>+</span> New Note
-                      </motion.button>
-                    </div>
-
-                    {userNotes.length === 0 ? (
-                      <motion.div 
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        style={{
-                          textAlign: 'center',
-                          padding: '3rem 1rem',
-                          color: 'rgba(255, 255, 255, 0.5)'
-                        }}
-                      >
-                        <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>📝</div>
-                        <h4 style={{ 
-                          color: 'rgba(255, 255, 255, 0.8)',
-                          margin: '0 0 0.5rem 0'
+                          margin: 0
                         }}>
-                          No notes yet
-                        </h4>
-                        <p style={{ margin: '0 0 1.5rem 0' }}>
-                          Create your first note to get started
-                        </p>
+                          My Notes ({notesCount})
+                        </h3>
                         <motion.button
                           onClick={() => router.push('/notes')}
                           whileHover={{ scale: 1.05 }}
                           whileTap={{ scale: 0.95 }}
                           style={{
-                            backgroundColor: '#0050B7',
-                            color: 'white',
+                            backgroundColor: '#00FF00',
+                            color: 'black',
                             border: 'none',
-                            padding: '0.8rem 1.5rem',
-                            borderRadius: '10px',
+                            padding: '0.5rem 1.2rem',
+                            borderRadius: '20px',
                             fontSize: '0.9rem',
                             fontWeight: '600',
-                            cursor: 'pointer'
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.5rem'
                           }}
                         >
-                          Go to Notes Page
+                          <span>+</span> New Note
                         </motion.button>
-                      </motion.div>
-                    ) : (
-                      <div style={{
-                        display: 'grid',
-                        gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fill, minmax(300px, 1fr))',
-                        gap: '1rem'
-                      }}>
-                        {userNotes.map((note, index) => (
-                          <motion.div
-                            key={note.id}
-                            initial={{ opacity: 0, scale: 0.9 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            transition={{ delay: index * 0.05 }}
-                            whileHover={{ y: -5 }}
+                      </div>
+
+                      {userNotes.length === 0 ? (
+                        <motion.div 
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          style={{
+                            textAlign: 'center',
+                            padding: '3rem 1rem',
+                            color: 'rgba(255, 255, 255, 0.5)'
+                          }}
+                        >
+                          <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>📝</div>
+                          <h4 style={{ 
+                            color: 'rgba(255, 255, 255, 0.8)',
+                            margin: '0 0 0.5rem 0'
+                          }}>
+                            No notes yet
+                          </h4>
+                          <p style={{ margin: '0 0 1.5rem 0' }}>
+                            Create your first note to get started
+                          </p>
+                          <motion.button
+                            onClick={() => router.push('/notes')}
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
                             style={{
-                              backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                              borderRadius: '15px',
-                              padding: '1.2rem',
-                              border: '1px solid rgba(255, 255, 255, 0.1)',
-                              position: 'relative'
+                              backgroundColor: '#0050B7',
+                              color: 'white',
+                              border: 'none',
+                              padding: '0.8rem 1.5rem',
+                              borderRadius: '10px',
+                              fontSize: '0.9rem',
+                              fontWeight: '600',
+                              cursor: 'pointer'
                             }}
                           >
-                            <div style={{
-                              display: 'flex',
-                              justifyContent: 'space-between',
-                              alignItems: 'flex-start',
-                              marginBottom: '0.8rem'
-                            }}>
-                              <h4 style={{
-                                color: 'white',
-                                fontSize: '1rem',
-                                fontWeight: '600',
-                                margin: 0,
-                                flex: 1
+                            Go to Notes Page
+                          </motion.button>
+                        </motion.div>
+                      ) : (
+                        <div style={{
+                          display: 'grid',
+                          gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fill, minmax(300px, 1fr))',
+                          gap: '1rem'
+                        }}>
+                          {userNotes.map((note, index) => (
+                            <motion.div
+                              key={note.id}
+                              initial={{ opacity: 0, scale: 0.9 }}
+                              animate={{ opacity: 1, scale: 1 }}
+                              transition={{ delay: index * 0.05 }}
+                              whileHover={{ y: -5 }}
+                              style={{
+                                backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                                borderRadius: '15px',
+                                padding: '1.2rem',
+                                border: '1px solid rgba(255, 255, 255, 0.1)',
+                                position: 'relative'
+                              }}
+                            >
+                              <div style={{
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                alignItems: 'flex-start',
+                                marginBottom: '0.8rem'
                               }}>
-                                {note.title || 'Untitled Note'}
-                              </h4>
-                              <motion.button
-                                onClick={() => handleDeleteNote(note.id)}
-                                whileHover={{ scale: 1.2, color: '#FF4757' }}
-                                whileTap={{ scale: 0.9 }}
-                                style={{
-                                  background: 'none',
-                                  border: 'none',
-                                  color: 'rgba(255, 255, 255, 0.5)',
-                                  cursor: 'pointer',
-                                  fontSize: '0.9rem',
-                                  padding: '0.2rem'
-                                }}
-                              >
-                                ✕
-                              </motion.button>
-                            </div>
-                            <p style={{
-                              color: 'rgba(255, 255, 255, 0.7)',
-                              fontSize: '0.9rem',
-                              lineHeight: 1.5,
-                              margin: '0 0 1rem 0',
-                              maxHeight: '4.5em',
-                              overflow: 'hidden',
-                              display: '-webkit-box',
-                              WebkitLineClamp: 3,
-                              WebkitBoxOrient: 'vertical'
-                            }}>
-                              {note.content || 'No content'}
-                            </p>
-                            <div style={{
-                              display: 'flex',
-                              justifyContent: 'space-between',
-                              alignItems: 'center',
-                              color: 'rgba(255, 255, 255, 0.4)',
-                              fontSize: '0.75rem'
-                            }}>
-                              <span>
-                                {calculateTimeAgo(note.createdAt)}
-                              </span>
-                              <span style={{
-                                backgroundColor: 'rgba(0, 255, 0, 0.1)',
-                                color: '#00FF00',
-                                padding: '0.1rem 0.5rem',
-                                borderRadius: '10px',
-                                fontSize: '0.7rem'
+                                <h4 style={{
+                                  color: 'white',
+                                  fontSize: '1rem',
+                                  fontWeight: '600',
+                                  margin: 0,
+                                  flex: 1
+                                }}>
+                                  {note.title || 'Untitled Note'}
+                                </h4>
+                                <motion.button
+                                  onClick={() => handleDeleteNote(note.id)}
+                                  whileHover={{ scale: 1.2, color: '#FF4757' }}
+                                  whileTap={{ scale: 0.9 }}
+                                  style={{
+                                    background: 'none',
+                                    border: 'none',
+                                    color: 'rgba(255, 255, 255, 0.5)',
+                                    cursor: 'pointer',
+                                    fontSize: '0.9rem',
+                                    padding: '0.2rem'
+                                  }}
+                                >
+                                  ✕
+                                </motion.button>
+                              </div>
+                              <p style={{
+                                color: 'rgba(255, 255, 255, 0.7)',
+                                fontSize: '0.9rem',
+                                lineHeight: 1.5,
+                                margin: '0 0 1rem 0',
+                                maxHeight: '4.5em',
+                                overflow: 'hidden',
+                                display: '-webkit-box',
+                                WebkitLineClamp: 3,
+                                WebkitBoxOrient: 'vertical'
                               }}>
-                                {note.category || 'General'}
-                              </span>
-                            </div>
-                          </motion.div>
-                        ))}
-                      </div>
-                    )}
-                  </motion.div>
-                )}
+                                {note.content || 'No content'}
+                              </p>
+                              <div style={{
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                alignItems: 'center',
+                                color: 'rgba(255, 255, 255, 0.4)',
+                                fontSize: '0.75rem'
+                              }}>
+                                <span>
+                                  {calculateTimeAgo(note.createdAt)}
+                                </span>
+                                <span style={{
+                                  backgroundColor: 'rgba(0, 255, 0, 0.1)',
+                                  color: '#00FF00',
+                                  padding: '0.1rem 0.5rem',
+                                  borderRadius: '10px',
+                                  fontSize: '0.7rem'
+                                }}>
+                                  {note.category || 'General'}
+                                </span>
+                              </div>
+                            </motion.div>
+                          ))}
+                        </div>
+                      )}
+                    </motion.div>
+                  )}
 
-                {/* Settings Tab */}
-                {activeTab === 'settings' && (
-                  <motion.div
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <h3 style={{
-                      color: 'white',
-                      fontSize: '1.5rem',
-                      fontWeight: '600',
-                      margin: '0 0 1.5rem 0'
-                    }}>
-                      Account Settings
-                    </h3>
-
-                    <div style={{
-                      backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                      borderRadius: '15px',
-                      padding: '1.5rem',
-                      border: '1px solid rgba(255, 255, 255, 0.1)',
-                      marginBottom: '1.5rem'
-                    }}>
-                      <h4 style={{
+                  {/* Settings Tab */}
+                  {activeTab === 'settings' && (
+                    <motion.div
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      <h3 style={{
                         color: 'white',
-                        fontSize: '1.1rem',
+                        fontSize: '1.5rem',
                         fontWeight: '600',
-                        margin: '0 0 1rem 0'
+                        margin: '0 0 1.5rem 0'
                       }}>
-                        Account Information
-                      </h4>
-                      
+                        Account Settings
+                      </h3>
+
                       <div style={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: '1rem'
+                        backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                        borderRadius: '15px',
+                        padding: '1.5rem',
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                        marginBottom: '1.5rem'
                       }}>
-                        <div style={{
-                          display: 'flex',
-                          justifyContent: 'space-between',
-                          alignItems: 'center',
-                          padding: '0.8rem 0',
-                          borderBottom: '1px solid rgba(255, 255, 255, 0.05)'
-                        }}>
-                          <span style={{ color: 'rgba(255, 255, 255, 0.7)' }}>
-                            Display Name
-                          </span>
-                          <span style={{ color: 'white', fontWeight: '500' }}>
-                            {userDisplayName}
-                          </span>
-                        </div>
-
-                        <div style={{
-                          display: 'flex',
-                          justifyContent: 'space-between',
-                          alignItems: 'center',
-                          padding: '0.8rem 0',
-                          borderBottom: '1px solid rgba(255, 255, 255, 0.05)'
-                        }}>
-                          <span style={{ color: 'rgba(255, 255, 255, 0.7)' }}>
-                            Email Address
-                          </span>
-                          <span style={{ color: 'white', fontWeight: '500' }}>
-                            {user?.email}
-                          </span>
-                        </div>
-
-                        <div style={{
-                          display: 'flex',
-                          justifyContent: 'space-between',
-                          alignItems: 'center',
-                          padding: '0.8rem 0'
-                        }}>
-                          <span style={{ color: 'rgba(255, 255, 255, 0.7)' }}>
-                            Login Method
-                          </span>
-                          <span style={{
-                            backgroundColor: user?.providerData?.[0]?.providerId === 'google.com' ? '#DB4437' : 
-                                           user?.providerData?.[0]?.providerId === 'github.com' ? '#333' : '#0050B7',
-                            color: 'white',
-                            fontSize: '0.8rem',
-                            padding: '0.3rem 0.8rem',
-                            borderRadius: '15px',
-                            fontWeight: '500'
-                          }}>
-                            {user?.providerData?.[0]?.providerId === 'google.com' ? 'Google' : 
-                             user?.providerData?.[0]?.providerId === 'github.com' ? 'GitHub' : 'Email/Password'}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Danger Zone */}
-                    <div style={{
-                      backgroundColor: 'rgba(255, 71, 87, 0.1)',
-                      borderRadius: '15px',
-                      padding: '1.5rem',
-                      border: '1px solid rgba(255, 71, 87, 0.3)'
-                    }}>
-                      <h4 style={{
-                        color: '#FF4757',
-                        fontSize: '1.1rem',
-                        fontWeight: '600',
-                        margin: '0 0 1rem 0',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.5rem'
-                      }}>
-                        ⚠️ Danger Zone
-                      </h4>
-                      
-                      <p style={{
-                        color: 'rgba(255, 255, 255, 0.6)',
-                        fontSize: '0.9rem',
-                        margin: '0 0 1.2rem 0',
-                        lineHeight: 1.5
-                      }}>
-                        Once you delete your account, there is no going back. All your data will be permanently removed.
-                      </p>
-
-                      <motion.button
-                        onClick={() => setShowDeleteConfirm(true)}
-                        whileHover={{ scale: 1.05, backgroundColor: 'rgba(255, 71, 87, 0.3)' }}
-                        whileTap={{ scale: 0.95 }}
-                        style={{
-                          backgroundColor: 'rgba(255, 71, 87, 0.2)',
-                          color: '#FF4757',
-                          border: '1px solid #FF4757',
-                          padding: '0.8rem 1.5rem',
-                          borderRadius: '10px',
-                          fontSize: '0.9rem',
+                        <h4 style={{
+                          color: 'white',
+                          fontSize: '1.1rem',
                           fontWeight: '600',
-                          cursor: 'pointer',
+                          margin: '0 0 1rem 0'
+                        }}>
+                          Account Information
+                        </h4>
+                        
+                        <div style={{
                           display: 'flex',
-                          alignItems: 'center',
-                          gap: '0.5rem'
-                        }}
-                      >
-                        <span>🗑️</span>
-                        Delete Account
-                      </motion.button>
-                    </div>
-                  </motion.div>
-                )}
-
-                {/* Help Tab */}
-                {activeTab === 'help' && (
-                  <motion.div
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <h3 style={{
-                      color: 'white',
-                      fontSize: '1.5rem',
-                      fontWeight: '600',
-                      margin: '0 0 1.5rem 0'
-                    }}>
-                      Help & Support
-                    </h3>
-
-                    <div style={{
-                      display: 'grid',
-                      gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fill, minmax(300px, 1fr))',
-                      gap: '1.5rem',
-                      marginBottom: '2rem'
-                    }}>
-                      {[
-                        {
-                          title: "Getting Started",
-                          icon: "🚀",
-                          items: [
-                            "How to create notes",
-                            "Using the chatbot",
-                            "Understanding notifications"
-                          ]
-                        },
-                        {
-                          title: "Account",
-                          icon: "👤",
-                          items: [
-                            "Changing your profile",
-                            "Login methods",
-                            "Privacy settings"
-                          ]
-                        },
-                        {
-                          title: "Features",
-                          icon: "✨",
-                          items: [
-                            "Photo commenting",
-                            "Timeline usage",
-                            "Notification system"
-                          ]
-                        },
-                        {
-                          title: "Troubleshooting",
-                          icon: "🔧",
-                          items: [
-                            "Login issues",
-                            "Data not syncing",
-                            "Performance problems"
-                          ]
-                        }
-                      ].map((section, index) => (
-                        <motion.div
-                          key={section.title}
-                          initial={{ opacity: 0, y: 20 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: index * 0.1 }}
-                          whileHover={{ y: -5 }}
-                          style={{
-                            backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                            borderRadius: '15px',
-                            padding: '1.5rem',
-                            border: '1px solid rgba(255, 255, 255, 0.1)'
-                          }}
-                        >
+                          flexDirection: 'column',
+                          gap: '1rem'
+                        }}>
                           <div style={{
                             display: 'flex',
+                            justifyContent: 'space-between',
                             alignItems: 'center',
-                            gap: '1rem',
-                            marginBottom: '1rem'
+                            padding: '0.8rem 0',
+                            borderBottom: '1px solid rgba(255, 255, 255, 0.05)'
                           }}>
-                            <div style={{
-                              fontSize: '1.8rem'
-                            }}>
-                              {section.icon}
-                            </div>
-                            <h4 style={{
-                              color: 'white',
-                              fontSize: '1.1rem',
-                              fontWeight: '600',
-                              margin: 0
-                            }}>
-                              {section.title}
-                            </h4>
+                            <span style={{ color: 'rgba(255, 255, 255, 0.7)' }}>
+                              Display Name
+                            </span>
+                            <span style={{ color: 'white', fontWeight: '500' }}>
+                              {userDisplayName}
+                            </span>
                           </div>
-                          
-                          <ul style={{
-                            margin: 0,
-                            paddingLeft: '1.2rem',
-                            color: 'rgba(255, 255, 255, 0.7)'
-                          }}>
-                            {section.items.map((item, i) => (
-                              <motion.li 
-                                key={i}
-                                initial={{ opacity: 0, x: -10 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                transition={{ delay: index * 0.1 + i * 0.05 }}
-                                style={{
-                                  marginBottom: '0.5rem',
-                                  fontSize: '0.9rem'
-                                }}
-                              >
-                                {item}
-                              </motion.li>
-                            ))}
-                          </ul>
-                        </motion.div>
-                      ))}
-                    </div>
-
-                    <div style={{
-                      backgroundColor: 'rgba(0, 80, 183, 0.1)',
-                      borderRadius: '15px',
-                      padding: '1.5rem',
-                      border: '1px solid rgba(0, 80, 183, 0.3)'
-                    }}>
-                      <h4 style={{
-                        color: '#0050B7',
-                        fontSize: '1.1rem',
-                        fontWeight: '600',
-                        margin: '0 0 1rem 0',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.5rem'
-                      }}>
-                        📞 Contact Support
-                      </h4>
-                      <p style={{
-                        color: 'rgba(255, 255, 255, 0.7)',
-                        fontSize: '0.9rem',
-                        margin: '0 0 1rem 0'
-                      }}>
-                        Need more help? Contact our support team directly.
-                      </p>
-                      <div style={{
-                        display: 'flex',
-                        gap: '1rem',
-                        flexWrap: 'wrap'
-                      }}>
-                        <motion.button
-                          onClick={() => window.location.href = 'mailto:support@menuru.com'}
-                          whileHover={{ scale: 1.05 }}
-                          whileTap={{ scale: 0.95 }}
-                          style={{
-                            backgroundColor: '#0050B7',
-                            color: 'white',
-                            border: 'none',
-                            padding: '0.8rem 1.5rem',
-                            borderRadius: '10px',
-                            fontSize: '0.9rem',
-                            fontWeight: '600',
-                            cursor: 'pointer',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '0.5rem'
-                          }}
-                        >
-                          ✉️ Email Support
-                        </motion.button>
-                        <motion.button
-                          onClick={() => window.open('https://docs.menuru.com', '_blank')}
-                          whileHover={{ scale: 1.05 }}
-                          whileTap={{ scale: 0.95 }}
-                          style={{
-                            backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                            color: 'white',
-                            border: '1px solid rgba(255, 255, 255, 0.2)',
-                            padding: '0.8rem 1.5rem',
-                            borderRadius: '10px',
-                            fontSize: '0.9rem',
-                            fontWeight: '600',
-                            cursor: 'pointer',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '0.5rem'
-                          }}
-                        >
-                          📚 View Documentation
-                        </motion.button>
-                      </div>
-                    </div>
-                  </motion.div>
-                )}
-
-                {/* Feedback Tab */}
-                {activeTab === 'feedback' && (
-                  <motion.div
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.3 }}
-                    style={{
-                      maxWidth: '600px',
-                      margin: '0 auto'
-                    }}
-                  >
-                    <h3 style={{
-                      color: 'white',
-                      fontSize: '1.5rem',
-                      fontWeight: '600',
-                      margin: '0 0 1.5rem 0'
-                    }}>
-                      Send Feedback
-                    </h3>
-
-                    {feedbackSubmitted ? (
-                      <motion.div
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        style={{
-                          backgroundColor: 'rgba(0, 255, 0, 0.1)',
-                          border: '1px solid rgba(0, 255, 0, 0.3)',
-                          borderRadius: '15px',
-                          padding: '2rem',
-                          textAlign: 'center'
-                        }}
-                      >
-                        <motion.div
-                          animate={{ 
-                            scale: [1, 1.2, 1],
-                            rotate: [0, 10, -10, 0] 
-                          }}
-                          transition={{ duration: 0.5 }}
-                          style={{
-                            fontSize: '3rem',
-                            marginBottom: '1rem'
-                          }}
-                        >
-                          ✅
-                        </motion.div>
-                        <h4 style={{
-                          color: '#00FF00',
-                          fontSize: '1.2rem',
-                          margin: '0 0 0.5rem 0'
-                        }}>
-                          Thank You!
-                        </h4>
-                        <p style={{
-                          color: 'rgba(255, 255, 255, 0.8)',
-                          margin: 0
-                        }}>
-                          Your feedback has been submitted. We appreciate your input!
-                        </p>
-                      </motion.div>
-                    ) : (
-                      <>
-                        <div style={{
-                          backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                          borderRadius: '15px',
-                          padding: '1.5rem',
-                          border: '1px solid rgba(255, 255, 255, 0.1)',
-                          marginBottom: '1.5rem'
-                        }}>
-                          <p style={{
-                            color: 'rgba(255, 255, 255, 0.7)',
-                            fontSize: '0.95rem',
-                            lineHeight: 1.6,
-                            margin: '0 0 1.5rem 0'
-                          }}>
-                            We value your feedback! Please share your thoughts, suggestions, or report any issues you've encountered.
-                          </p>
-
-                          <textarea
-                            value={feedbackMessage}
-                            onChange={(e) => setFeedbackMessage(e.target.value)}
-                            placeholder="Type your feedback here..."
-                            style={{
-                              width: '100%',
-                              minHeight: '150px',
-                              backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                              border: '1px solid rgba(255, 255, 255, 0.1)',
-                              borderRadius: '10px',
-                              padding: '1rem',
-                              color: 'white',
-                              fontSize: '0.95rem',
-                              fontFamily: 'Helvetica, Arial, sans-serif',
-                              resize: 'vertical',
-                              outline: 'none',
-                              marginBottom: '1.5rem'
-                            }}
-                          />
 
                           <div style={{
                             display: 'flex',
                             justifyContent: 'space-between',
-                            alignItems: 'center'
+                            alignItems: 'center',
+                            padding: '0.8rem 0',
+                            borderBottom: '1px solid rgba(255, 255, 255, 0.05)'
                           }}>
-                            <div style={{
-                              color: 'rgba(255, 255, 255, 0.5)',
-                              fontSize: '0.8rem'
+                            <span style={{ color: 'rgba(255, 255, 255, 0.7)' }}>
+                              Email Address
+                            </span>
+                            <span style={{ color: 'white', fontWeight: '500' }}>
+                              {user?.email}
+                            </span>
+                          </div>
+
+                          <div style={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            padding: '0.8rem 0'
+                          }}>
+                            <span style={{ color: 'rgba(255, 255, 255, 0.7)' }}>
+                              Login Method
+                            </span>
+                            <span style={{
+                              backgroundColor: user?.providerData?.[0]?.providerId === 'google.com' ? '#DB4437' : 
+                                             user?.providerData?.[0]?.providerId === 'github.com' ? '#333' : '#0050B7',
+                              color: 'white',
+                              fontSize: '0.8rem',
+                              padding: '0.3rem 0.8rem',
+                              borderRadius: '15px',
+                              fontWeight: '500'
                             }}>
-                              {feedbackMessage.length}/1000 characters
-                            </div>
-                            <motion.button
-                              onClick={handleSubmitFeedback}
-                              disabled={!feedbackMessage.trim()}
-                              whileHover={{ scale: 1.05 }}
-                              whileTap={{ scale: 0.95 }}
-                              style={{
-                                backgroundColor: feedbackMessage.trim() ? '#00FF00' : 'rgba(0, 255, 0, 0.3)',
-                                color: feedbackMessage.trim() ? 'black' : 'rgba(255, 255, 255, 0.5)',
-                                border: 'none',
-                                padding: '0.8rem 2rem',
-                                borderRadius: '10px',
-                                fontSize: '0.95rem',
-                                fontWeight: '600',
-                                cursor: feedbackMessage.trim() ? 'pointer' : 'not-allowed',
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '0.5rem'
-                              }}
-                            >
-                              <span>📤</span>
-                              Send Feedback
-                            </motion.button>
+                              {user?.providerData?.[0]?.providerId === 'google.com' ? 'Google' : 
+                               user?.providerData?.[0]?.providerId === 'github.com' ? 'GitHub' : 'Email/Password'}
+                            </span>
                           </div>
                         </div>
+                      </div>
 
-                        <div style={{
-                          backgroundColor: 'rgba(139, 92, 246, 0.1)',
-                          borderRadius: '15px',
-                          padding: '1.5rem',
-                          border: '1px solid rgba(139, 92, 246, 0.3)'
+                      {/* Danger Zone */}
+                      <div style={{
+                        backgroundColor: 'rgba(255, 71, 87, 0.1)',
+                        borderRadius: '15px',
+                        padding: '1.5rem',
+                        border: '1px solid rgba(255, 71, 87, 0.3)'
+                      }}>
+                        <h4 style={{
+                          color: '#FF4757',
+                          fontSize: '1.1rem',
+                          fontWeight: '600',
+                          margin: '0 0 1rem 0',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.5rem'
                         }}>
-                          <h4 style={{
-                            color: '#8B5CF6',
-                            fontSize: '1.1rem',
+                          ⚠️ Danger Zone
+                        </h4>
+                        
+                        <p style={{
+                          color: 'rgba(255, 255, 255, 0.6)',
+                          fontSize: '0.9rem',
+                          margin: '0 0 1.2rem 0',
+                          lineHeight: 1.5
+                        }}>
+                          Once you delete your account, there is no going back. All your data will be permanently removed.
+                        </p>
+
+                        <motion.button
+                          onClick={() => setShowDeleteConfirm(true)}
+                          whileHover={{ scale: 1.05, backgroundColor: 'rgba(255, 71, 87, 0.3)' }}
+                          whileTap={{ scale: 0.95 }}
+                          style={{
+                            backgroundColor: 'rgba(255, 71, 87, 0.2)',
+                            color: '#FF4757',
+                            border: '1px solid #FF4757',
+                            padding: '0.8rem 1.5rem',
+                            borderRadius: '10px',
+                            fontSize: '0.9rem',
                             fontWeight: '600',
-                            margin: '0 0 1rem 0',
+                            cursor: 'pointer',
                             display: 'flex',
                             alignItems: 'center',
                             gap: '0.5rem'
+                          }}
+                        >
+                          <span>🗑️</span>
+                          Delete Account
+                        </motion.button>
+                      </div>
+                    </motion.div>
+                  )}
+
+                  {/* Help Tab */}
+                  {activeTab === 'help' && (
+                    <motion.div
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      <h3 style={{
+                        color: 'white',
+                        fontSize: '1.5rem',
+                        fontWeight: '600',
+                        margin: '0 0 1.5rem 0'
+                      }}>
+                        Help & Support
+                      </h3>
+
+                      <div style={{
+                        display: 'grid',
+                        gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fill, minmax(300px, 1fr))',
+                        gap: '1.5rem',
+                        marginBottom: '2rem'
+                      }}>
+                        {[
+                          {
+                            title: "Getting Started",
+                            icon: "🚀",
+                            items: [
+                              "How to create notes",
+                              "Using the chatbot",
+                              "Understanding notifications"
+                            ]
+                          },
+                          {
+                            title: "Account",
+                            icon: "👤",
+                            items: [
+                              "Changing your profile",
+                              "Login methods",
+                              "Privacy settings"
+                            ]
+                          },
+                          {
+                            title: "Features",
+                            icon: "✨",
+                            items: [
+                              "Photo commenting",
+                              "Timeline usage",
+                              "Notification system"
+                            ]
+                          },
+                          {
+                            title: "Troubleshooting",
+                            icon: "🔧",
+                            items: [
+                              "Login issues",
+                              "Data not syncing",
+                              "Performance problems"
+                            ]
+                          }
+                        ].map((section, index) => (
+                          <motion.div
+                            key={section.title}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: index * 0.1 }}
+                            whileHover={{ y: -5 }}
+                            style={{
+                              backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                              borderRadius: '15px',
+                              padding: '1.5rem',
+                              border: '1px solid rgba(255, 255, 255, 0.1)'
+                            }}
+                          >
+                            <div style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '1rem',
+                              marginBottom: '1rem'
+                            }}>
+                              <div style={{
+                                fontSize: '1.8rem'
+                              }}>
+                                {section.icon}
+                              </div>
+                              <h4 style={{
+                                color: 'white',
+                                fontSize: '1.1rem',
+                                fontWeight: '600',
+                                margin: 0
+                              }}>
+                                {section.title}
+                              </h4>
+                            </div>
+                            
+                            <ul style={{
+                              margin: 0,
+                              paddingLeft: '1.2rem',
+                              color: 'rgba(255, 255, 255, 0.7)'
+                            }}>
+                              {section.items.map((item, i) => (
+                                <motion.li 
+                                  key={i}
+                                  initial={{ opacity: 0, x: -10 }}
+                                  animate={{ opacity: 1, x: 0 }}
+                                  transition={{ delay: index * 0.1 + i * 0.05 }}
+                                  style={{
+                                    marginBottom: '0.5rem',
+                                    fontSize: '0.9rem'
+                                  }}
+                                >
+                                  {item}
+                                </motion.li>
+                              ))}
+                            </ul>
+                          </motion.div>
+                        ))}
+                      </div>
+
+                      <div style={{
+                        backgroundColor: 'rgba(0, 80, 183, 0.1)',
+                        borderRadius: '15px',
+                        padding: '1.5rem',
+                        border: '1px solid rgba(0, 80, 183, 0.3)'
+                      }}>
+                        <h4 style={{
+                          color: '#0050B7',
+                          fontSize: '1.1rem',
+                          fontWeight: '600',
+                          margin: '0 0 1rem 0',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.5rem'
+                        }}>
+                          📞 Contact Support
+                        </h4>
+                        <p style={{
+                          color: 'rgba(255, 255, 255, 0.7)',
+                          fontSize: '0.9rem',
+                          margin: '0 0 1rem 0'
+                        }}>
+                          Need more help? Contact our support team directly.
+                        </p>
+                        <div style={{
+                          display: 'flex',
+                          gap: '1rem',
+                          flexWrap: 'wrap'
+                        }}>
+                          <motion.button
+                            onClick={() => window.location.href = 'mailto:support@menuru.com'}
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            style={{
+                              backgroundColor: '#0050B7',
+                              color: 'white',
+                              border: 'none',
+                              padding: '0.8rem 1.5rem',
+                              borderRadius: '10px',
+                              fontSize: '0.9rem',
+                              fontWeight: '600',
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '0.5rem'
+                            }}
+                          >
+                            ✉️ Email Support
+                          </motion.button>
+                          <motion.button
+                            onClick={() => window.open('https://docs.menuru.com', '_blank')}
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            style={{
+                              backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                              color: 'white',
+                              border: '1px solid rgba(255, 255, 255, 0.2)',
+                              padding: '0.8rem 1.5rem',
+                              borderRadius: '10px',
+                              fontSize: '0.9rem',
+                              fontWeight: '600',
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '0.5rem'
+                            }}
+                          >
+                            📚 View Documentation
+                          </motion.button>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+
+                  {/* Feedback Tab */}
+                  {activeTab === 'feedback' && (
+                    <motion.div
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ duration: 0.3 }}
+                      style={{
+                        maxWidth: '600px',
+                        margin: '0 auto'
+                      }}
+                    >
+                      <h3 style={{
+                        color: 'white',
+                        fontSize: '1.5rem',
+                        fontWeight: '600',
+                        margin: '0 0 1.5rem 0'
+                      }}>
+                        Send Feedback
+                      </h3>
+
+                      {feedbackSubmitted ? (
+                        <motion.div
+                          initial={{ opacity: 0, scale: 0.9 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          style={{
+                            backgroundColor: 'rgba(0, 255, 0, 0.1)',
+                            border: '1px solid rgba(0, 255, 0, 0.3)',
+                            borderRadius: '15px',
+                            padding: '2rem',
+                            textAlign: 'center'
+                          }}
+                        >
+                          <motion.div
+                            animate={{ 
+                              scale: [1, 1.2, 1],
+                              rotate: [0, 10, -10, 0] 
+                            }}
+                            transition={{ duration: 0.5 }}
+                            style={{
+                              fontSize: '3rem',
+                              marginBottom: '1rem'
+                            }}
+                          >
+                            ✅
+                          </motion.div>
+                          <h4 style={{
+                            color: '#00FF00',
+                            fontSize: '1.2rem',
+                            margin: '0 0 0.5rem 0'
                           }}>
-                            💡 Common Feedback Topics
+                            Thank You!
                           </h4>
-                          <ul style={{
-                            margin: 0,
-                            paddingLeft: '1.2rem',
-                            color: 'rgba(255, 255, 255, 0.7)',
-                            fontSize: '0.9rem'
+                          <p style={{
+                            color: 'rgba(255, 255, 255, 0.8)',
+                            margin: 0
                           }}>
-                            <li style={{ marginBottom: '0.5rem' }}>Feature requests</li>
-                            <li style={{ marginBottom: '0.5rem' }}>Bug reports</li>
-                            <li style={{ marginBottom: '0.5rem' }}>UI/UX improvements</li>
-                            <li>Performance issues</li>
-                          </ul>
-                                </div>
-                      </>
-                    )}
-                  </motion.div>
-                )}
+                            Your feedback has been submitted. We appreciate your input!
+                          </p>
+                        </motion.div>
+                      ) : (
+                        <>
+                          <div style={{
+                            backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                            borderRadius: '15px',
+                            padding: '1.5rem',
+                            border: '1px solid rgba(255, 255, 255, 0.1)',
+                            marginBottom: '1.5rem'
+                          }}>
+                            <p style={{
+                              color: 'rgba(255, 255, 255, 0.7)',
+                              fontSize: '0.95rem',
+                              lineHeight: 1.6,
+                              margin: '0 0 1.5rem 0'
+                            }}>
+                              We value your feedback! Please share your thoughts, suggestions, or report any issues you've encountered.
+                            </p>
+
+                            <textarea
+                              value={feedbackMessage}
+                              onChange={(e) => setFeedbackMessage(e.target.value)}
+                              placeholder="Type your feedback here..."
+                              style={{
+                                width: '100%',
+                                minHeight: '150px',
+                                backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                                border: '1px solid rgba(255, 255, 255, 0.1)',
+                                borderRadius: '10px',
+                                padding: '1rem',
+                                color: 'white',
+                                fontSize: '0.95rem',
+                                fontFamily: 'Helvetica, Arial, sans-serif',
+                                resize: 'vertical',
+                                outline: 'none',
+                                marginBottom: '1.5rem'
+                              }}
+                            />
+
+                            <div style={{
+                              display: 'flex',
+                              justifyContent: 'space-between',
+                              alignItems: 'center'
+                            }}>
+                              <div style={{
+                                color: 'rgba(255, 255, 255, 0.5)',
+                                fontSize: '0.8rem'
+                              }}>
+                                {feedbackMessage.length}/1000 characters
+                              </div>
+                              <motion.button
+                                onClick={handleSubmitFeedback}
+                                disabled={!feedbackMessage.trim()}
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                                style={{
+                                  backgroundColor: feedbackMessage.trim() ? '#00FF00' : 'rgba(0, 255, 0, 0.3)',
+                                  color: feedbackMessage.trim() ? 'black' : 'rgba(255, 255, 255, 0.5)',
+                                  border: 'none',
+                                  padding: '0.8rem 2rem',
+                                  borderRadius: '10px',
+                                  fontSize: '0.95rem',
+                                  fontWeight: '600',
+                                  cursor: feedbackMessage.trim() ? 'pointer' : 'not-allowed',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: '0.5rem'
+                                }}
+                              >
+                                <span>📤</span>
+                                Send Feedback
+                              </motion.button>
+                            </div>
+                          </div>
+
+                          <div style={{
+                            backgroundColor: 'rgba(139, 92, 246, 0.1)',
+                            borderRadius: '15px',
+                            padding: '1.5rem',
+                            border: '1px solid rgba(139, 92, 246, 0.3)'
+                          }}>
+                            <h4 style={{
+                              color: '#8B5CF6',
+                              fontSize: '1.1rem',
+                              fontWeight: '600',
+                              margin: '0 0 1rem 0',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '0.5rem'
+                            }}>
+                              💡 Common Feedback Topics
+                            </h4>
+                            <ul style={{
+                              margin: 0,
+                              paddingLeft: '1.2rem',
+                              color: 'rgba(255, 255, 255, 0.7)',
+                              fontSize: '0.9rem'
+                            }}>
+                              <li style={{ marginBottom: '0.5rem' }}>Feature requests</li>
+                              <li style={{ marginBottom: '0.5rem' }}>Bug reports</li>
+                              <li style={{ marginBottom: '0.5rem' }}>UI/UX improvements</li>
+                              <li>Performance issues</li>
+                            </ul>
+                          </div>
+                        </>
+                      )}
+                    </motion.div>
+                  )}
+                </div>
               </div>
-            </div>
+            </motion.div>
           </motion.div>
-        </motion.div>
-      </motion.div>
-    )}
-  </AnimatePresence>
+        )}
+      </AnimatePresence>
+    );
+  };
+
+  return (
+    <div style={{
+      minHeight: '100vh',
+      backgroundColor: 'black',
+      margin: 0,
+      padding: 0,
+      width: '100%',
+      display: 'flex',
+      flexDirection: 'column',
+      justifyContent: 'flex-start',
+      alignItems: 'center',
+      position: 'relative',
+      overflow: 'auto',
+      fontFamily: 'Helvetica, Arial, sans-serif',
+      WebkitFontSmoothing: 'antialiased',
+      MozOsxFontSmoothing: 'grayscale'
+    }}>
+
+      {/* Render Profile Modal */}
+      <ProfileModal />
 
       {/* Delete Account Confirmation Modal */}
       <AnimatePresence>
@@ -2739,29 +2763,6 @@ export default function HomePage(): React.JSX.Element {
           </motion.div>
         )}
       </AnimatePresence>
-    </AnimatePresence>
-  );
-
-  return (
-    <div style={{
-      minHeight: '100vh',
-      backgroundColor: 'black',
-      margin: 0,
-      padding: 0,
-      width: '100%',
-      display: 'flex',
-      flexDirection: 'column',
-      justifyContent: 'flex-start',
-      alignItems: 'center',
-      position: 'relative',
-      overflow: 'auto',
-      fontFamily: 'Helvetica, Arial, sans-serif',
-      WebkitFontSmoothing: 'antialiased',
-      MozOsxFontSmoothing: 'grayscale'
-    }}>
-
-      {/* Render Profile Modal */}
-      <ProfileModal />
 
       {/* Menu Overlay dengan GSAP Animation */}
       <AnimatePresence>
@@ -3344,7 +3345,7 @@ export default function HomePage(): React.JSX.Element {
                           e.currentTarget.style.backgroundColor = '#222';
                           e.currentTarget.style.display = 'flex';
                           e.currentTarget.style.alignItems = 'center';
-                          e.currentTarget.style.justifyContent = 'center';
+                          e.currentTarget.style.justifyContent: 'center';
                           e.currentTarget.style.color = '#fff';
                           e.currentTarget.innerHTML = `<div style="padding: 2rem; text-align: center;">Photo ${currentPhotoIndex + 1}</div>`;
                         }}
@@ -5744,5 +5745,3 @@ export default function HomePage(): React.JSX.Element {
     </div>
   );
 }
-
-
