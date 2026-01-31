@@ -2599,7 +2599,6 @@ export default function HomePage(): React.JSX.Element {
       </motion.div>
     )}
   </AnimatePresence>
-);
 
       {/* Delete Account Confirmation Modal */}
       <AnimatePresence>
@@ -5745,4 +5744,5 @@ export default function HomePage(): React.JSX.Element {
     </div>
   );
 }
+
 
