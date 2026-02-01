@@ -10,17 +10,18 @@ import {
   getAuth, 
   onAuthStateChanged, 
   signOut,
-  deleteUser,
   GithubAuthProvider,
   GoogleAuthProvider,
-  signInWithPopup 
+  signInWithPopup,
+  updateProfile,
+  updateEmail,
+  deleteUser
 } from "firebase/auth";
 import { 
   getFirestore, 
   collection, 
   addDoc, 
   query, 
-  where,
   orderBy, 
   onSnapshot,
   serverTimestamp,
@@ -31,7 +32,9 @@ import {
   updateDoc,
   increment,
   writeBatch,
-  deleteDoc
+  where,
+  deleteDoc,
+  getDocs
 } from "firebase/firestore";
 
 // Register GSAP plugins
@@ -101,7 +104,6 @@ interface Notification {
   recipientType: 'all' | 'specific' | 'email_only' | 'app_only';
   recipientIds?: string[];
   recipientEmails?: string[];
-  read: boolean;
   isRead: boolean;
   isDeleted: boolean;
   createdAt: Timestamp | Date;
@@ -119,16 +121,19 @@ interface Notification {
   category?: string;
 }
 
-// Type untuk catatan user
-interface UserNote {
+// Type untuk Note
+interface Note {
   id: string;
   title: string;
   content: string;
   userId: string;
   userName: string;
-  category?: string;
+  userEmail: string;
   createdAt: Timestamp | Date;
   updatedAt: Timestamp | Date;
+  isPinned: boolean;
+  category?: string;
+  tags?: string[];
 }
 
 export default function HomePage(): React.JSX.Element {
@@ -183,11 +188,20 @@ export default function HomePage(): React.JSX.Element {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [isLoadingNotifications, setIsLoadingNotifications] = useState(false);
 
-  // State baru untuk modal profil user - DIPERBAIKI: hanya untuk user info sederhana
-  const [showUserModal, setShowUserModal] = useState(false);
-  const [userNotes, setUserNotes] = useState<UserNote[]>([]);
-  const [notesCount, setNotesCount] = useState(0);
-  const [isDeleting, setIsDeleting] = useState(false);
+  // State untuk modal profil user
+  const [showUserProfileModal, setShowUserProfileModal] = useState(false);
+  const [userNotes, setUserNotes] = useState<Note[]>([]);
+  const [totalNotesCount, setTotalNotesCount] = useState(0);
+  const [isLoadingNotes, setIsLoadingNotes] = useState(false);
+  const [activeTab, setActiveTab] = useState<'notes' | 'settings' | 'help' | 'feedback'>('notes');
+  const [userProvider, setUserProvider] = useState<string>('');
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [editName, setEditName] = useState('');
+  const [editEmail, setEditEmail] = useState('');
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [showDeleteAccountModal, setShowDeleteAccountModal] = useState(false);
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [showSearchResults, setShowSearchResults] = useState(false);
 
   const headerRef = useRef<HTMLDivElement>(null);
   const topNavRef = useRef<HTMLDivElement>(null);
@@ -208,13 +222,7 @@ export default function HomePage(): React.JSX.Element {
   const notificationDropdownRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const searchContainerRef = useRef<HTMLDivElement>(null);
-
-  // Ref untuk modal user
-  const userModalRef = useRef<HTMLDivElement>(null);
-
-  // Tambahkan state baru untuk search results
-  const [searchResults, setSearchResults] = useState<any[]>([]);
-  const [showSearchResults, setShowSearchResults] = useState(false);
+  const userProfileModalRef = useRef<HTMLDivElement>(null);
 
   // Data untuk pencarian
   const searchablePages = [
@@ -321,41 +329,7 @@ export default function HomePage(): React.JSX.Element {
     { title: "Features", description: "Functionality & Integration" }
   ];
 
-  // Data untuk halaman Index
-  const indexTopics = [
-    {
-      id: 1,
-      title: "Personal Journey",
-      description: "Exploring self-discovery.",
-      year: "2024"
-    },
-    {
-      id: 2,
-      title: "Creative Process",
-      description: "Ideas evolution documentation.",
-      year: "2024"
-    },
-    {
-      id: 3,
-      title: "Visual Storytelling",
-      description: "Photography for personal growth.",
-      year: "2024"
-    },
-    {
-      id: 4,
-      title: "Emotional Archive",
-      description: "Collection of feelings.",
-      year: "2024"
-    },
-    {
-      id: 5,
-      title: "Growth Metrics",
-      description: "Tracking development goals.",
-      year: "2024"
-    }
-  ];
-
-  // Helper functions untuk notifikasi
+  // Helper functions
   const getIconByType = (type: string): string => {
     switch (type) {
       case 'system': return '🔄';
@@ -380,159 +354,19 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
+  const getPriorityColor = (priority: string): string => {
+    switch (priority) {
+      case 'urgent': return '#FF4757';
+      case 'high': return '#FF6B6B';
+      case 'medium': return '#FFA502';
+      case 'low': return '#2ED573';
+      default: return '#747D8C';
+    }
+  };
+
   const getBgColorByType = (type: string): string => {
     const color = getColorByType(type);
     return color + '20';
-  };
-
-  // Fungsi untuk mengirim notifikasi
-  const sendNotification = async (notificationData: {
-    title: string;
-    message: string;
-    type: 'announcement' | 'update' | 'alert' | 'system';
-    userId?: string;
-    userDisplayName?: string;
-    userEmail?: string;
-    isAdminPost?: boolean;
-    adminName?: string;
-    priority?: 'low' | 'medium' | 'high';
-    category?: 'general' | 'feature' | 'maintenance' | 'security';
-  }) => {
-    try {
-      if (!db) {
-        console.error("❌ Firebase tidak tersedia untuk mengirim notifikasi");
-        return false;
-      }
-      
-      const newNotification = {
-        title: notificationData.title,
-        message: notificationData.message,
-        type: notificationData.type,
-        read: false,
-        timestamp: serverTimestamp(),
-        icon: getIconByType(notificationData.type),
-        userId: notificationData.userId || '',
-        userDisplayName: notificationData.userDisplayName || '',
-        userEmail: notificationData.userEmail || '',
-        userAvatar: notificationData.userDisplayName?.charAt(0).toUpperCase() || '👤',
-        isAdminPost: notificationData.isAdminPost || false,
-        adminName: notificationData.adminName || 'Admin',
-        priority: notificationData.priority || 'medium',
-        category: notificationData.category || 'general',
-        createdAt: serverTimestamp()
-      };
-
-      console.log("📤 Mengirim notifikasi:", newNotification);
-      
-      const docRef = await addDoc(collection(db, 'notifications'), newNotification);
-      console.log("✅ Notification sent successfully with ID:", docRef.id);
-      
-      return true;
-    } catch (error: any) {
-      console.error("❌ Error sending notification:", error);
-      return false;
-    }
-  };
-
-  // Fungsi untuk mark notification as read
-  const markAsRead = async (notificationId: string) => {
-    try {
-      if (!db || !auth) return;
-      
-      const currentUser = auth.currentUser;
-      const currentUserId = currentUser ? currentUser.uid : 
-                         localStorage.getItem('anonymous_user_id');
-      
-      if (!currentUserId) {
-        console.error("❌ No user ID found for marking as read");
-        return;
-      }
-      
-      const userIdToUse = currentUser ? currentUser.uid : currentUserId;
-      const notificationRef = doc(db, 'notifications', notificationId);
-      
-      await updateDoc(notificationRef, {
-        [`userReads.${userIdToUse}`]: true,
-        views: increment(1)
-      });
-      
-      console.log(`✅ Marked notification ${notificationId} as read for user ${userIdToUse}`);
-      
-      setNotifications(prev => prev.map(notif => {
-        if (notif.id === notificationId) {
-          return {
-            ...notif,
-            userReads: {
-              ...notif.userReads,
-              [userIdToUse]: true
-            },
-            views: (notif.views || 0) + 1
-          };
-        }
-        return notif;
-      }));
-      
-      setNotificationCount(prev => Math.max(0, prev - 1));
-      setHasUnreadNotifications(prev => {
-        const newCount = notificationCount - 1;
-        return newCount > 0;
-      });
-      
-    } catch (error) {
-      console.error("❌ Error marking notification as read:", error);
-    }
-  };
-
-  // Fungsi untuk clear all notifications
-  const handleClearNotification = async () => {
-    try {
-      if (!db || !auth) return;
-      
-      const currentUser = auth.currentUser;
-      const currentUserId = currentUser ? currentUser.uid : 
-                         localStorage.getItem('anonymous_user_id');
-      
-      if (!currentUserId) {
-        console.error("❌ No user ID found for clearing notifications");
-        return;
-      }
-      
-      const userIdToUse = currentUser ? currentUser.uid : currentUserId;
-      const batch = writeBatch(db);
-      const unreadNotifications = notifications.filter(notification => {
-        return !notification.userReads?.[userIdToUse];
-      });
-      
-      console.log(`🗑️ Clearing ${unreadNotifications.length} unread notifications`);
-      
-      unreadNotifications.forEach(notification => {
-        const notificationRef = doc(db, 'notifications', notification.id);
-        batch.update(notificationRef, {
-          [`userReads.${userIdToUse}`]: true,
-          views: increment(1)
-        });
-      });
-      
-      await batch.commit();
-      
-      setNotifications(prev => prev.map(notification => ({
-        ...notification,
-        userReads: {
-          ...notification.userReads,
-          [userIdToUse]: true
-        },
-        views: (notification.views || 0) + 1
-      })));
-      
-      setHasUnreadNotifications(false);
-      setNotificationCount(0);
-      setShowNotification(false);
-      
-      console.log("✅ All notifications marked as read");
-      
-    } catch (error) {
-      console.error("❌ Error clearing notifications:", error);
-    }
   };
 
   const calculateTimeAgo = (date: Date | Timestamp | undefined | null): string => {
@@ -579,75 +413,254 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // DIPERBAIKI: Fungsi untuk membuka modal user sederhana
-  const handleOpenUserModal = () => {
-    setShowUserModal(true);
-    setShowUserDropdown(false);
-  };
+  // Fungsi untuk melakukan pencarian
+  const performSearch = (query: string) => {
+    if (!query.trim()) {
+      setSearchResults([]);
+      setShowSearchResults(false);
+      return;
+    }
 
-  // DIPERBAIKI: Fungsi untuk menutup modal user
-  const handleCloseUserModal = () => {
-    setShowUserModal(false);
-  };
-
-  // Load user notes dari Firestore
-  const loadUserNotes = () => {
-    if (!user || !db) return;
-
-    const notesRef = collection(db, 'userNotes');
-    const q = query(
-      notesRef, 
-      where('userId', '==', user.uid),
-      orderBy('createdAt', 'desc')
+    const lowerQuery = query.toLowerCase().trim();
+    
+    const results = searchablePages.filter(page => 
+      page.title.toLowerCase().includes(lowerQuery) ||
+      page.description.toLowerCase().includes(lowerQuery) ||
+      page.category.toLowerCase().includes(lowerQuery)
     );
 
-    const unsubscribe = onSnapshot(q, (querySnapshot) => {
-      const notes: UserNote[] = [];
-      querySnapshot.forEach((doc) => {
-        notes.push({
-          id: doc.id,
-          ...doc.data()
-        } as UserNote);
-      });
-      setUserNotes(notes);
-      setNotesCount(notes.length);
-    });
-
-    return unsubscribe;
-  };
-
-  // Fungsi untuk menghapus note
-  const handleDeleteNote = async (noteId: string) => {
-    if (!db) return;
+    setSearchResults(results);
+    setShowSearchResults(results.length > 0);
     
-    try {
-      await deleteDoc(doc(db, 'userNotes', noteId));
-      console.log("Note berhasil dihapus");
-    } catch (error) {
-      console.error("Error deleting note:", error);
+    if (results.length > 0 && searchContainerRef.current) {
+      gsap.fromTo(".search-result-item", 
+        { opacity: 0, y: -10 },
+        { 
+          opacity: 1, 
+          y: 0, 
+          duration: 0.3, 
+          stagger: 0.1,
+          ease: "power2.out" 
+        }
+      );
     }
   };
 
-  // Fungsi untuk menghapus akun
-  const handleDeleteAccount = async () => {
-    if (!user || !auth) return;
+  // Update handler untuk search query
+  const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSearchQuery(value);
+    performSearch(value);
+  };
+
+  // Handler untuk klik pada hasil pencarian
+  const handleSearchResultClick = (url: string) => {
+    router.push(url);
+    setShowSearch(false);
+    setSearchQuery("");
+    setShowSearchResults(false);
+  };
+
+  // Handler untuk key press di search
+  const handleSearchKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && searchQuery.trim()) {
+      if (searchResults.length > 0) {
+        handleSearchResultClick(searchResults[0].url);
+      } else {
+        router.push(`/search?q=${encodeURIComponent(searchQuery)}`);
+        setShowSearch(false);
+        setSearchQuery("");
+      }
+    } else if (e.key === 'Escape') {
+      setShowSearch(false);
+      setSearchQuery("");
+      setShowSearchResults(false);
+    }
+  };
+
+  // Handler untuk toggle search
+  const handleSearchToggle = () => {
+    const newShowSearch = !showSearch;
+    setShowSearch(newShowSearch);
     
-    setIsDeleting(true);
+    if (newShowSearch) {
+      setTimeout(() => {
+        if (searchInputRef.current) {
+          searchInputRef.current.focus();
+        }
+      }, 100);
+    } else {
+      setSearchQuery("");
+      setSearchResults([]);
+      setShowSearchResults(false);
+    }
+  };
+
+  // Fungsi untuk mengirim notifikasi
+  const sendNotification = async (notificationData: {
+    title: string;
+    message: string;
+    type: 'announcement' | 'update' | 'alert' | 'system';
+    userId?: string;
+    userDisplayName?: string;
+    userEmail?: string;
+    isAdminPost?: boolean;
+    adminName?: string;
+    priority?: 'low' | 'medium' | 'high';
+    category?: 'general' | 'feature' | 'maintenance' | 'security';
+  }) => {
     try {
-      // Hapus data user dari Firestore
-      const userDataRef = doc(db, 'users', user.uid);
-      await deleteDoc(userDataRef);
+      if (!db) {
+        console.error("❌ Firebase tidak tersedia untuk mengirim notifikasi");
+        return false;
+      }
       
-      // Hapus user dari Firebase Auth
-      await deleteUser(user);
+      const newNotification = {
+        title: notificationData.title,
+        message: notificationData.message,
+        type: notificationData.type,
+        read: false,
+        timestamp: serverTimestamp(),
+        icon: getIconByType(notificationData.type),
+        userId: notificationData.userId || '',
+        userDisplayName: notificationData.userDisplayName || '',
+        userEmail: notificationData.userEmail || '',
+        userAvatar: notificationData.userDisplayName?.charAt(0).toUpperCase() || '👤',
+        isAdminPost: notificationData.isAdminPost || false,
+        adminName: notificationData.adminName || 'Admin',
+        priority: notificationData.priority || 'medium',
+        category: notificationData.category || 'general',
+        createdAt: serverTimestamp()
+      };
+
+      console.log("📤 Mengirim notifikasi:", newNotification);
       
-      handleCloseUserModal();
-      router.push('/');
+      const docRef = await addDoc(collection(db, 'notifications'), newNotification);
+      console.log("✅ Notification sent successfully with ID:", docRef.id);
+      
+      setTimeout(() => {
+        console.log("🔄 Trigger refresh notifikasi");
+      }, 1000);
+      
+      return true;
+    } catch (error: any) {
+      console.error("❌ Error sending notification:", error);
+      console.error("Error code:", error.code);
+      console.error("Error message:", error.message);
+      return false;
+    }
+  };
+
+  // Fungsi untuk mark notification as read
+  const markAsRead = async (notificationId: string) => {
+    try {
+      if (!db || !auth) return;
+      
+      const currentUser = auth.currentUser;
+      const currentUserId = currentUser ? currentUser.uid : 
+                           localStorage.getItem('anonymous_user_id');
+      
+      if (!currentUserId) {
+        console.error("❌ No user ID found for marking as read");
+        return;
+      }
+      
+      const userIdToUse = currentUser ? currentUser.uid : currentUserId;
+      const notificationRef = doc(db, 'notifications', notificationId);
+      
+      await updateDoc(notificationRef, {
+        [`userReads.${userIdToUse}`]: true,
+        views: increment(1)
+      });
+      
+      console.log(`✅ Marked notification ${notificationId} as read for user ${userIdToUse}`);
+      
+      setNotifications(prev => prev.map(notif => {
+        if (notif.id === notificationId) {
+          return {
+            ...notif,
+            userReads: {
+              ...notif.userReads,
+              [userIdToUse]: true
+            },
+            views: (notif.views || 0) + 1
+          };
+        }
+        return notif;
+      }));
+      
+      setNotificationCount(prev => Math.max(0, prev - 1));
+      setHasUnreadNotifications(prev => {
+        const newCount = notificationCount - 1;
+        return newCount > 0;
+      });
+      
     } catch (error) {
-      console.error("Error deleting account:", error);
-      alert("Gagal menghapus akun. Silakan coba lagi.");
-    } finally {
-      setIsDeleting(false);
+      console.error("❌ Error marking notification as read:", error);
+    }
+  };
+
+  // Handler untuk klik notifikasi
+  const handleNotificationClick = async (notification: Notification) => {
+    if (notification.id && !notification.isRead) {
+      await markAsRead(notification.id);
+    }
+    
+    console.log("Notification clicked:", notification);
+    
+    setShowNotification(false);
+  };
+
+  // Fungsi untuk clear all notifications
+  const handleClearNotification = async () => {
+    try {
+      if (!db || !auth) return;
+      
+      const currentUser = auth.currentUser;
+      const currentUserId = currentUser ? currentUser.uid : 
+                           localStorage.getItem('anonymous_user_id');
+      
+      if (!currentUserId) {
+        console.error("❌ No user ID found for clearing notifications");
+        return;
+      }
+      
+      const userIdToUse = currentUser ? currentUser.uid : currentUserId;
+      
+      const batch = writeBatch(db);
+      const unreadNotifications = notifications.filter(notification => {
+        return !notification.userReads?.[userIdToUse];
+      });
+      
+      console.log(`🗑️ Clearing ${unreadNotifications.length} unread notifications`);
+      
+      unreadNotifications.forEach(notification => {
+        const notificationRef = doc(db, 'notifications', notification.id);
+        batch.update(notificationRef, {
+          [`userReads.${userIdToUse}`]: true,
+          views: increment(1)
+        });
+      });
+      
+      await batch.commit();
+      
+      setNotifications(prev => prev.map(notification => ({
+        ...notification,
+        userReads: {
+          ...notification.userReads,
+          [userIdToUse]: true
+        },
+        views: (notification.views || 0) + 1
+      })));
+      
+      setHasUnreadNotifications(false);
+      setNotificationCount(0);
+      setShowNotification(false);
+      
+      console.log("✅ All notifications marked as read");
+      
+    } catch (error) {
+      console.error("❌ Error clearing notifications:", error);
     }
   };
 
@@ -750,8 +763,8 @@ export default function HomePage(): React.JSX.Element {
       }
     };
 
-    if (db) loadTotalUsers();
-  }, [db]);
+    loadTotalUsers();
+  }, []);
 
   // Load total logged in users
   useEffect(() => {
@@ -768,8 +781,96 @@ export default function HomePage(): React.JSX.Element {
       }
     };
 
-    if (db) loadTotalLoggedInUsers();
-  }, [db]);
+    loadTotalLoggedInUsers();
+  }, []);
+
+  // Fungsi untuk load user notes
+  const loadUserNotes = async (userId: string) => {
+    if (!db) return;
+    
+    try {
+      setIsLoadingNotes(true);
+      const notesRef = collection(db, 'notes');
+      const q = query(
+        notesRef, 
+        where('userId', '==', userId),
+        orderBy('createdAt', 'desc')
+      );
+      
+      const querySnapshot = await getDocs(q);
+      const notesData: Note[] = [];
+      
+      querySnapshot.forEach((doc) => {
+        notesData.push({
+          id: doc.id,
+          ...doc.data()
+        } as Note);
+      });
+      
+      setUserNotes(notesData);
+      setTotalNotesCount(notesData.length);
+      setIsLoadingNotes(false);
+    } catch (error) {
+      console.error("Error loading user notes:", error);
+      setIsLoadingNotes(false);
+    }
+  };
+
+  // Fungsi untuk load user notes secara real-time
+  const loadUserNotesRealtime = (userId: string) => {
+    if (!db) return () => {};
+    
+    try {
+      const notesRef = collection(db, 'notes');
+      const q = query(
+        notesRef, 
+        where('userId', '==', userId),
+        orderBy('createdAt', 'desc')
+      );
+      
+      const unsubscribe = onSnapshot(q, (querySnapshot) => {
+        const notesData: Note[] = [];
+        
+        querySnapshot.forEach((doc) => {
+          notesData.push({
+            id: doc.id,
+            ...doc.data()
+          } as Note);
+        });
+        
+        setUserNotes(notesData);
+        setTotalNotesCount(notesData.length);
+      }, (error) => {
+        console.error("Error in realtime notes listener:", error);
+      });
+      
+      return unsubscribe;
+    } catch (error) {
+      console.error("Error setting up realtime notes:", error);
+      return () => {};
+    }
+  };
+
+  // Fungsi untuk detect provider
+  const detectProvider = (user: any) => {
+    if (!user) return 'Unknown';
+    
+    const providerData = user.providerData;
+    if (providerData && providerData.length > 0) {
+      const providerId = providerData[0].providerId;
+      switch (providerId) {
+        case 'password':
+          return 'Email/Password';
+        case 'google.com':
+          return 'Google';
+        case 'github.com':
+          return 'GitHub';
+        default:
+          return providerId;
+      }
+    }
+    return 'Email/Password';
+  };
 
   // Listen to auth state changes
   useEffect(() => {
@@ -777,9 +878,13 @@ export default function HomePage(): React.JSX.Element {
       if (currentUser) {
         setUser(currentUser);
         const name = currentUser.displayName || 
-                   currentUser.email?.split('@')[0] || 
-                   'User';
+                     currentUser.email?.split('@')[0] || 
+                     'User';
         setUserDisplayName(name);
+        setEditName(name);
+        setEditEmail(currentUser.email || '');
+        
+        setUserProvider(detectProvider(currentUser));
         
         await updateUserStats(currentUser.uid, name);
         
@@ -793,21 +898,36 @@ export default function HomePage(): React.JSX.Element {
         } catch (error) {
           console.error("Error loading user stats:", error);
         }
+        
+        if (showUserProfileModal) {
+          loadUserNotes(currentUser.uid);
+        }
       } else {
         setUser(null);
         setUserDisplayName("");
         setUserStats(null);
         setShowUserDropdown(false);
+        setShowUserProfileModal(false);
+        setUserNotes([]);
+        setTotalNotesCount(0);
       }
     });
 
     return () => unsubscribe();
-  }, [auth, db]);
+  }, [showUserProfileModal]);
+
+  // Real-time listener untuk notes ketika modal terbuka
+  useEffect(() => {
+    if (showUserProfileModal && user) {
+      const unsubscribe = loadUserNotesRealtime(user.uid);
+      return () => {
+        if (unsubscribe) unsubscribe();
+      };
+    }
+  }, [showUserProfileModal, user]);
 
   // Load comments from Firebase
   useEffect(() => {
-    if (!db) return;
-    
     console.log("Memulai loading komentar...");
     setIsLoadingComments(true);
     
@@ -828,11 +948,12 @@ export default function HomePage(): React.JSX.Element {
       setIsLoadingComments(false);
     }, (error) => {
       console.error("Error loading comments:", error);
+      console.error("Error code:", error.code);
       setIsLoadingComments(false);
     });
 
     return () => unsubscribe();
-  }, [db]);
+  }, []);
 
   // Load notifications from Firebase
   useEffect(() => {
@@ -870,8 +991,8 @@ export default function HomePage(): React.JSX.Element {
           
           const currentUser = auth?.currentUser;
           const currentUserId = currentUser ? currentUser.uid : 
-                              localStorage.getItem('anonymous_user_id') || 
-                              'anonymous_' + Date.now();
+                                localStorage.getItem('anonymous_user_id') || 
+                                'anonymous_' + Date.now();
           
           if (!currentUser && !localStorage.getItem('anonymous_user_id')) {
             localStorage.setItem('anonymous_user_id', currentUserId);
@@ -880,14 +1001,8 @@ export default function HomePage(): React.JSX.Element {
           querySnapshot.forEach((doc) => {
             try {
               const data = doc.data();
-              console.log(`📝 Memproses notifikasi ${doc.id}:`, {
-                title: data.title,
-                type: data.type,
-                isDeleted: data.isDeleted
-              });
               
               if (data.isDeleted === true) {
-                console.log(`⏭️ Skip notifikasi ${doc.id} karena deleted`);
                 return;
               }
               
@@ -942,7 +1057,6 @@ export default function HomePage(): React.JSX.Element {
                   recipientIds: data.recipientIds || [],
                   recipientEmails: data.recipientEmails || [],
                   isRead: false,
-                  read: data.read || false,
                   isDeleted: data.isDeleted || false,
                   createdAt: timestamp || new Date(),
                   actionUrl: data.actionUrl,
@@ -954,6 +1068,7 @@ export default function HomePage(): React.JSX.Element {
                   likes: data.likes || [],
                   comments: data.comments || [],
                   allowComments: data.allowComments || false,
+                  read: data.read || false,
                   isAdminPost: data.isAdminPost || false,
                   adminName: data.adminName || '',
                   category: data.category || 'general'
@@ -968,7 +1083,6 @@ export default function HomePage(): React.JSX.Element {
                 }
                 
                 notificationsData.push(notification);
-                console.log(`✅ Ditambahkan: ${notification.title} (${isReadByUser ? 'read' : 'unread'})`);
               }
             } catch (error) {
               console.error(`❌ Error processing notification ${doc.id}:`, error);
@@ -984,6 +1098,9 @@ export default function HomePage(): React.JSX.Element {
         }, 
         (error) => {
           console.error("❌ Error loading notifications:", error);
+          console.error("Error code:", error.code);
+          console.error("Error message:", error.message);
+          
           setIsLoadingNotifications(false);
         }
       );
@@ -994,6 +1111,38 @@ export default function HomePage(): React.JSX.Element {
       setIsLoadingNotifications(false);
     }
   }, [db, auth?.currentUser]);
+
+  // Animasi teks nama user berjalan
+  useEffect(() => {
+    if (user && userTextRef.current && userButtonRef.current) {
+      const textWidth = userTextRef.current.scrollWidth;
+      const buttonWidth = userButtonRef.current.clientWidth;
+      
+      if (textWidth > buttonWidth) {
+        setIsNameScrolling(true);
+        
+        const animation = gsap.to(userTextRef.current, {
+          x: -(textWidth - buttonWidth + 20),
+          duration: 5,
+          repeat: -1,
+          yoyo: true,
+          ease: "power1.inOut",
+          onReverseComplete: () => {
+            setScrollDirection("right");
+          },
+          onComplete: () => {
+            setScrollDirection("left");
+          }
+        });
+
+        return () => {
+          animation.kill();
+        };
+      } else {
+        setIsNameScrolling(false);
+      }
+    }
+  }, [user, userDisplayName, isMobile]);
 
   // Animasi GSAP untuk search expand
   useEffect(() => {
@@ -1037,8 +1186,8 @@ export default function HomePage(): React.JSX.Element {
       if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
         setShowSearch(false);
       }
-      if (userModalRef.current && !userModalRef.current.contains(event.target as Node)) {
-        handleCloseUserModal();
+      if (userProfileModalRef.current && !userProfileModalRef.current.contains(event.target as Node)) {
+        setShowUserProfileModal(false);
       }
     };
 
@@ -1048,7 +1197,7 @@ export default function HomePage(): React.JSX.Element {
     };
   }, []);
 
-  // Fungsi untuk mengupdate counter angka kiri dengan animasi GSAP
+  // Fungsi untuk mengupdate counter angka kiri
   const updateLeftCounter = (newIndex: number) => {
     const newLeftCounter = String(newIndex + 1).padStart(2, '0');
     
@@ -1092,12 +1241,12 @@ export default function HomePage(): React.JSX.Element {
     }
   }, [hoveredTopic]);
 
-  // Handler untuk membuka menu overlay dengan animasi GSAP
+  // Handler untuk membuka menu overlay
   const handleOpenMenu = () => {
     setShowMenuOverlay(true);
   };
 
-  // Handler untuk menutup menu overlay dengan animasi GSAP
+  // Handler untuk menutup menu overlay
   const handleCloseMenu = () => {
     if (menuOverlayRef.current) {
       const tl = gsap.timeline();
@@ -1129,7 +1278,6 @@ export default function HomePage(): React.JSX.Element {
     }
   }, [showMenuOverlay]);
 
-  // Inisialisasi dan cleanup
   useEffect(() => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 768);
@@ -1180,8 +1328,11 @@ export default function HomePage(): React.JSX.Element {
         if (showSearch) {
           setShowSearch(false);
         }
-        if (showUserModal) {
-          handleCloseUserModal();
+        if (showUserProfileModal) {
+          setShowUserProfileModal(false);
+        }
+        if (showDeleteAccountModal) {
+          setShowDeleteAccountModal(false);
         }
       }
     };
@@ -1207,7 +1358,7 @@ export default function HomePage(): React.JSX.Element {
       }
       ScrollTrigger.getAll().forEach(trigger => trigger.kill());
     };
-  }, [isMobile, showMenuruFullPage, showPhotoFullPage, showUserDropdown, showLogoutModal, showMenuOverlay, showNotification, showSearch, showUserModal]);
+  }, [isMobile, showMenuruFullPage, showPhotoFullPage, showUserDropdown, showLogoutModal, showMenuOverlay, showNotification, showSearch, showUserProfileModal, showDeleteAccountModal]);
 
   // Animasi GSAP untuk tanda + di tombol Menuru
   useEffect(() => {
@@ -1350,10 +1501,10 @@ export default function HomePage(): React.JSX.Element {
     handleOpenPhotoFullPage();
   };
 
-  // DIPERBAIKI: Handler untuk Sign In / User Button - sederhana tanpa animasi berlebihan
+  // Handler untuk Sign In / User Button
   const handleSignInClick = () => {
     if (user) {
-      handleOpenUserModal();
+      setShowUserProfileModal(true);
     } else {
       router.push('/signin');
     }
@@ -1391,7 +1542,7 @@ export default function HomePage(): React.JSX.Element {
 
   // Handler untuk logout
   const handleLogoutClick = () => {
-    setShowUserDropdown(false);
+    setShowUserProfileModal(false);
     setShowLogoutModal(true);
   };
 
@@ -1403,6 +1554,7 @@ export default function HomePage(): React.JSX.Element {
       setUser(null);
       setUserDisplayName("");
       setUserStats(null);
+      setShowUserProfileModal(false);
       router.push('/');
     } catch (error) {
       console.error("Logout error:", error);
@@ -1450,6 +1602,8 @@ export default function HomePage(): React.JSX.Element {
       
     } catch (error: any) {
       console.error("Error detail:", error);
+      console.error("Error code:", error.code);
+      console.error("Error message:", error.message);
       
       let errorMessage = "Gagal mengirim komentar. Silakan coba lagi.";
       
@@ -1471,545 +1625,123 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // Fungsi untuk melakukan pencarian
-  const performSearch = (query: string) => {
-    if (!query.trim()) {
-      setSearchResults([]);
-      setShowSearchResults(false);
-      return;
-    }
-
-    const lowerQuery = query.toLowerCase().trim();
-    
-    const results = searchablePages.filter(page => 
-      page.title.toLowerCase().includes(lowerQuery) ||
-      page.description.toLowerCase().includes(lowerQuery) ||
-      page.category.toLowerCase().includes(lowerQuery)
-    );
-
-    setSearchResults(results);
-    setShowSearchResults(results.length > 0);
-    
-    if (results.length > 0 && searchContainerRef.current) {
-      gsap.fromTo(".search-result-item", 
-        { opacity: 0, y: -10 },
-        { 
-          opacity: 1, 
-          y: 0, 
-          duration: 0.3, 
-          stagger: 0.1,
-          ease: "power2.out" 
-        }
-      );
-    }
-  };
-
-  // Update handler untuk search query
-  const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setSearchQuery(value);
-    performSearch(value);
-  };
-
-  // Handler untuk klik pada hasil pencarian
-  const handleSearchResultClick = (url: string) => {
-    router.push(url);
-    setShowSearch(false);
-    setSearchQuery("");
-    setShowSearchResults(false);
-  };
-
-  // Handler untuk key press di search (Enter untuk navigasi ke hasil pertama)
-  const handleSearchKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && searchQuery.trim()) {
-      if (searchResults.length > 0) {
-        handleSearchResultClick(searchResults[0].url);
-      } else {
-        router.push(`/search?q=${encodeURIComponent(searchQuery)}`);
-        setShowSearch(false);
-        setSearchQuery("");
-      }
-    } else if (e.key === 'Escape') {
+  // Handler untuk search
+  const handleSearch = () => {
+    if (searchQuery.trim()) {
+      console.log("Searching for:", searchQuery);
+      router.push(`/search?q=${encodeURIComponent(searchQuery)}`);
       setShowSearch(false);
-      setSearchQuery("");
-      setShowSearchResults(false);
     }
   };
 
-  // Handler untuk toggle search
-  const handleSearchToggle = () => {
-    const newShowSearch = !showSearch;
-    setShowSearch(newShowSearch);
+  // Handler untuk update profile
+  const handleUpdateProfile = async () => {
+    if (!user || !auth.currentUser) return;
     
-    if (newShowSearch) {
-      setTimeout(() => {
-        if (searchInputRef.current) {
-          searchInputRef.current.focus();
-        }
-      }, 100);
-    } else {
-      setSearchQuery("");
-      setSearchResults([]);
-      setShowSearchResults(false);
+    try {
+      setIsUpdating(true);
+      
+      if (editName !== userDisplayName) {
+        await updateProfile(auth.currentUser, {
+          displayName: editName
+        });
+        setUserDisplayName(editName);
+      }
+      
+      if (editEmail !== user.email && editEmail.trim() !== '') {
+        await updateEmail(auth.currentUser, editEmail);
+      }
+      
+      const userStatsRef = doc(db, 'userStats', user.uid);
+      await updateDoc(userStatsRef, {
+        userName: editName,
+        updatedAt: serverTimestamp()
+      });
+      
+      alert("Profil berhasil diperbarui!");
+      setIsEditingProfile(false);
+    } catch (error: any) {
+      console.error("Error updating profile:", error);
+      alert(`Gagal memperbarui profil: ${error.message}`);
+    } finally {
+      setIsUpdating(false);
     }
   };
 
-  // Handler untuk klik notifikasi
-  const handleNotificationClick = async (notification: Notification) => {
-    if (notification.id && !notification.read) {
-      await markAsRead(notification.id);
+  // Handler untuk hapus akun
+  const handleDeleteAccount = async () => {
+    if (!user || !auth.currentUser) return;
+    
+    try {
+      const notesRef = collection(db, 'notes');
+      const q = query(notesRef, where('userId', '==', user.uid));
+      const querySnapshot = await getDocs(q);
+      
+      const batch = writeBatch(db);
+      querySnapshot.forEach((doc) => {
+        batch.delete(doc.ref);
+      });
+      
+      const userStatsRef = doc(db, 'userStats', user.uid);
+      batch.delete(userStatsRef);
+      
+      await batch.commit();
+      
+      await deleteUser(auth.currentUser);
+      
+      alert("Akun berhasil dihapus!");
+      setShowDeleteAccountModal(false);
+      setShowUserProfileModal(false);
+    } catch (error: any) {
+      console.error("Error deleting account:", error);
+      alert(`Gagal menghapus akun: ${error.message}`);
     }
-    
-    console.log("Notification clicked:", notification);
-    
-    setShowNotification(false);
   };
+
+  // Handler untuk kirim feedback
+  const handleSendFeedback = () => {
+    const feedback = prompt("Masukkan feedback Anda:");
+    if (feedback && feedback.trim() !== '') {
+      alert("Terima kasih atas feedback Anda!");
+    }
+  };
+
+  // Data untuk halaman Index
+  const indexTopics = [
+    {
+      id: 1,
+      title: "Personal Journey",
+      description: "Exploring self-discovery.",
+      year: "2024"
+    },
+    {
+      id: 2,
+      title: "Creative Process",
+      description: "Ideas evolution documentation.",
+      year: "2024"
+    },
+    {
+      id: 3,
+      title: "Visual Storytelling",
+      description: "Photography for personal growth.",
+      year: "2024"
+    },
+    {
+      id: 4,
+      title: "Emotional Archive",
+      description: "Collection of feelings.",
+      year: "2024"
+    },
+    {
+      id: 5,
+      title: "Growth Metrics",
+      description: "Tracking development goals.",
+      year: "2024"
+    }
+  ];
 
   // Komentar untuk foto saat ini
   const currentPhotoComments = comments.filter(comment => comment.photoIndex === currentPhotoIndex);
-
-  // DIPERBAIKI: Komponen modal user sederhana - tanpa GSAP, Framer Motion berlebihan
-  const UserModal = () => {
-    return (
-      <AnimatePresence>
-        {showUserModal && (
-          <div
-            style={{
-              position: 'fixed',
-              top: 0,
-              left: 0,
-              width: '100%',
-              height: '100%',
-              backgroundColor: 'rgba(0, 0, 0, 0.95)',
-              zIndex: 9998,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              padding: isMobile ? '1rem' : '2rem'
-            }}
-            onClick={handleCloseUserModal}
-          >
-            <div
-              ref={userModalRef}
-              style={{
-                width: isMobile ? '100%' : '90%',
-                maxWidth: isMobile ? '100%' : '500px',
-                backgroundColor: '#000000',
-                borderRadius: '20px',
-                border: '1px solid rgba(255, 255, 255, 0.2)',
-                overflow: 'hidden',
-                display: 'flex',
-                flexDirection: 'column',
-                boxShadow: '0 25px 100px rgba(0, 0, 0, 0.7)',
-                position: 'relative'
-              }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              {/* Header Modal - Close Button */}
-              <div style={{
-                padding: isMobile ? '1.5rem' : '2rem',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'flex-end'
-              }}>
-                <button
-                  onClick={handleCloseUserModal}
-                  style={{
-                    width: '40px',
-                    height: '40px',
-                    borderRadius: '50%',
-                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                    border: '1px solid rgba(255, 255, 255, 0.2)',
-                    color: 'white',
-                    fontSize: '1.5rem',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    padding: 0,
-                    margin: 0
-                  }}
-                >
-                  ×
-                </button>
-              </div>
-
-              {/* User Info Section - Minimalist Design */}
-              <div style={{
-                padding: isMobile ? '1.5rem' : '3rem',
-                paddingTop: 0,
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                textAlign: 'center'
-              }}>
-                {/* Large User Icon */}
-                <div style={{
-                  width: isMobile ? '100px' : '120px',
-                  height: isMobile ? '100px' : '120px',
-                  borderRadius: '50%',
-                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  marginBottom: '2rem',
-                  border: '2px solid rgba(255, 255, 255, 0.3)'
-                }}>
-                  <svg 
-                    width={isMobile ? "60" : "70"} 
-                    height={isMobile ? "60" : "70"} 
-                    viewBox="0 0 24 24" 
-                    fill="none" 
-                    stroke="white" 
-                    strokeWidth="1.5"
-                  >
-                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                    <circle cx="12" cy="7" r="4"/>
-                  </svg>
-                </div>
-
-                {/* Large User Name */}
-                <h1 style={{
-                  color: 'white',
-                  fontSize: isMobile ? '3rem' : '4rem',
-                  fontWeight: '700',
-                  fontFamily: 'Helvetica, Arial, sans-serif',
-                  margin: '0 0 0.5rem 0',
-                  letterSpacing: '-1px'
-                }}>
-                  {userDisplayName}
-                </h1>
-
-                {/* User Email */}
-                <p style={{
-                  color: 'rgba(255, 255, 255, 0.7)',
-                  fontSize: isMobile ? '1rem' : '1.2rem',
-                  margin: '0 0 2rem 0',
-                  fontFamily: 'Helvetica, Arial, sans-serif'
-                }}>
-                  {user?.email}
-                </p>
-
-                {/* Login Method Badge */}
-                <div style={{
-                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                  padding: '0.5rem 1.5rem',
-                  borderRadius: '20px',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '0.5rem',
-                  marginBottom: '3rem'
-                }}>
-                  <span style={{
-                    color: 'rgba(255, 255, 255, 0.9)',
-                    fontSize: '0.9rem',
-                    fontWeight: '500'
-                  }}>
-                    {user?.providerData?.[0]?.providerId === 'google.com' ? 'Google Account' : 
-                     user?.providerData?.[0]?.providerId === 'github.com' ? 'GitHub Account' : 'Email Account'}
-                  </span>
-                </div>
-
-                {/* Stats Info */}
-                {userStats && (
-                  <div style={{
-                    width: '100%',
-                    maxWidth: '400px',
-                    margin: '0 auto 3rem auto'
-                  }}>
-                    <div style={{
-                      display: 'flex',
-                      justifyContent: 'center',
-                      gap: '2rem'
-                    }}>
-                      <div style={{
-                        textAlign: 'center'
-                      }}>
-                        <div style={{
-                          color: '#00FF00',
-                          fontSize: isMobile ? '2.5rem' : '3rem',
-                          fontWeight: '700',
-                          marginBottom: '0.5rem'
-                        }}>
-                          {userStats.loginCount || 0}
-                        </div>
-                        <div style={{
-                          color: 'rgba(255, 255, 255, 0.6)',
-                          fontSize: '0.9rem',
-                          textTransform: 'uppercase',
-                          letterSpacing: '1px'
-                        }}>
-                          Logins
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* Large Arrow SVG - Clear SVG */}
-                <div style={{
-                  marginTop: '2rem',
-                  marginBottom: '3rem'
-                }}>
-                  <svg 
-                    width={isMobile ? "60" : "80"} 
-                    height={isMobile ? "60" : "80"} 
-                    viewBox="0 0 24 24" 
-                    fill="none" 
-                    stroke="white" 
-                    strokeWidth="1.5"
-                  >
-                    <line x1="7" y1="17" x2="17" y2="7"/>
-                    <polyline points="17 7 17 17 7 17"/>
-                  </svg>
-                </div>
-
-                {/* Action Buttons - Simple */}
-                <div style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '1rem',
-                  width: '100%',
-                  maxWidth: '300px'
-                }}>
-                  <button
-                    onClick={() => {
-                      handleCloseUserModal();
-                      router.push('/notes');
-                    }}
-                    style={{
-                      padding: '1rem',
-                      backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                      border: '1px solid rgba(255, 255, 255, 0.2)',
-                      borderRadius: '10px',
-                      color: 'white',
-                      fontSize: '1rem',
-                      fontWeight: '500',
-                      cursor: 'pointer',
-                      fontFamily: 'Helvetica, Arial, sans-serif',
-                      transition: 'all 0.2s ease'
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.2)';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
-                    }}
-                  >
-                    My Notes
-                  </button>
-
-                  <button
-                    onClick={() => {
-                      handleCloseUserModal();
-                      setShowLogoutModal(true);
-                    }}
-                    style={{
-                      padding: '1rem',
-                      backgroundColor: 'rgba(255, 71, 87, 0.2)',
-                      border: '1px solid rgba(255, 71, 87, 0.4)',
-                      borderRadius: '10px',
-                      color: '#FF4757',
-                      fontSize: '1rem',
-                      fontWeight: '500',
-                      cursor: 'pointer',
-                      fontFamily: 'Helvetica, Arial, sans-serif',
-                      transition: 'all 0.2s ease'
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = 'rgba(255, 71, 87, 0.3)';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor = 'rgba(255, 71, 87, 0.2)';
-                    }}
-                  >
-                    Logout
-                  </button>
-                </div>
-              </div>
-
-              {/* Footer */}
-              <div style={{
-                padding: isMobile ? '1.5rem' : '2rem',
-                borderTop: '1px solid rgba(255, 255, 255, 0.1)',
-                textAlign: 'center'
-              }}>
-                <p style={{
-                  color: 'rgba(255, 255, 255, 0.4)',
-                  fontSize: '0.8rem',
-                  margin: 0,
-                  fontFamily: 'Helvetica, Arial, sans-serif'
-                }}>
-                  User ID: {user?.uid?.substring(0, 12)}...
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
-      </AnimatePresence>
-    );
-  };
-
-  // DIPERBAIKI: Render bagian tombol Sign In/User - tanpa animasi berlebihan
-  const renderSignInButton = () => {
-    const isLoggedIn = !!user;
-    
-    return (
-      <button
-        ref={userButtonRef}
-        onClick={handleSignInClick}
-        onMouseEnter={() => setIsHoveringSignIn(true)}
-        onMouseLeave={() => setIsHoveringSignIn(false)}
-        style={{
-          padding: isMobile ? '0.4rem 1rem' : '0.6rem 1.5rem',
-          fontSize: isMobile ? '0.9rem' : '1rem',
-          fontWeight: '600',
-          color: isLoggedIn ? '#000000' : 'white',
-          backgroundColor: isLoggedIn ? '#00FF00' : 'transparent',
-          border: isLoggedIn ? '1px solid #00FF00' : '1px solid rgba(255,255,255,0.15)',
-          borderRadius: '50px',
-          cursor: 'pointer',
-          fontFamily: 'Helvetica, Arial, sans-serif',
-          backdropFilter: 'blur(10px)',
-          whiteSpace: 'nowrap',
-          display: 'flex',
-          alignItems: 'center',
-          gap: isMobile ? '0.5rem' : '0.8rem',
-          margin: 0,
-          maxWidth: isMobile ? '180px' : '250px',
-          minWidth: isMobile ? '120px' : '180px',
-          height: isMobile ? '40px' : '45px',
-          overflow: 'hidden',
-          position: 'relative',
-          transition: 'all 0.2s ease'
-        }}
-        onMouseEnter={(e) => {
-          if (isLoggedIn) {
-            e.currentTarget.style.backgroundColor = '#00CC00';
-            e.currentTarget.style.border = '1px solid #00CC00';
-          } else {
-            e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.1)';
-            e.currentTarget.style.border = '1px solid rgba(255,255,255,0.3)';
-          }
-        }}
-        onMouseLeave={(e) => {
-          if (isLoggedIn) {
-            e.currentTarget.style.backgroundColor = '#00FF00';
-            e.currentTarget.style.border = '1px solid #00FF00';
-          } else {
-            e.currentTarget.style.backgroundColor = 'transparent';
-            e.currentTarget.style.border = '1px solid rgba(255,255,255,0.15)';
-          }
-        }}
-      >
-        {isLoggedIn ? (
-          <>
-            {/* Icon user setelah login - sederhana */}
-            <div style={{
-              width: isMobile ? '22px' : '26px',
-              height: isMobile ? '22px' : '26px',
-              borderRadius: '50%',
-              backgroundColor: '#000000',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              flexShrink: 0,
-              marginRight: '0.3rem'
-            }}>
-              <svg 
-                width={isMobile ? "14" : "16"} 
-                height={isMobile ? "14" : "16"} 
-                viewBox="0 0 24 24" 
-                fill="none" 
-                stroke="#00FF00" 
-                strokeWidth="2"
-              >
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                <circle cx="12" cy="7" r="4"/>
-              </svg>
-            </div>
-            
-            {/* Nama user setelah login - tanpa animasi */}
-            <div style={{
-              overflow: 'hidden',
-              width: '100%',
-              position: 'relative',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between'
-            }}>
-              <span
-                ref={userTextRef}
-                style={{
-                  display: 'inline-block',
-                  whiteSpace: 'nowrap',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  paddingRight: '10px',
-                  color: '#000000',
-                  fontWeight: '700',
-                  fontSize: isMobile ? '0.85rem' : '0.95rem'
-                }}
-              >
-                {isHoveringSignIn ? `Hi, ${userDisplayName}` : userDisplayName}
-              </span>
-              
-              {/* Panah serong kanan setelah login - SVG yang jelas */}
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  flexShrink: 0,
-                  opacity: isHoveringSignIn ? 1 : 0.7,
-                  transition: 'opacity 0.2s ease'
-                }}
-              >
-                <svg 
-                  width={isMobile ? "14" : "16"} 
-                  height={isMobile ? "14" : "16"} 
-                  viewBox="0 0 24 24" 
-                  fill="none" 
-                  stroke="#000000" 
-                  strokeWidth="2.5"
-                >
-                  <line x1="7" y1="17" x2="17" y2="7"/>
-                  <polyline points="17 7 17 17 7 17"/>
-                </svg>
-              </div>
-            </div>
-          </>
-        ) : (
-          <>
-            {/* Icon user sebelum login */}
-            <svg 
-              width={isMobile ? "18" : "20"} 
-              height={isMobile ? "18" : "20"} 
-              viewBox="0 0 24 24" 
-              fill="none" 
-              stroke="currentColor" 
-              strokeWidth="2"
-              style={{
-                flexShrink: 0,
-                marginRight: '0.5rem'
-              }}
-            >
-              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-              <circle cx="12" cy="7" r="4"/>
-            </svg>
-            <span style={{
-              whiteSpace: 'nowrap',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              fontWeight: '600'
-            }}>
-              SIGN IN
-            </span>
-          </>
-        )}
-      </button>
-    );
-  };
 
   return (
     <div style={{
@@ -2029,13 +1761,1030 @@ export default function HomePage(): React.JSX.Element {
       MozOsxFontSmoothing: 'grayscale'
     }}>
 
-      {/* Render User Modal - DIPERBAIKI: simple user modal */}
-      <UserModal />
+      {/* Modal Profil User */}
+      <AnimatePresence>
+        {showUserProfileModal && user && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              backgroundColor: 'rgba(0, 0, 0, 0.8)',
+              zIndex: 10000,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              backdropFilter: 'blur(5px)'
+            }}
+            onClick={() => setShowUserProfileModal(false)}
+          >
+            <motion.div
+              ref={userProfileModalRef}
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              transition={{ duration: 0.3 }}
+              style={{
+                backgroundColor: '#111111',
+                borderRadius: '15px',
+                width: isMobile ? '90%' : '800px',
+                maxWidth: '900px',
+                maxHeight: '90vh',
+                display: 'flex',
+                flexDirection: 'column',
+                overflow: 'hidden',
+                border: '1px solid #333333'
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Header */}
+              <div style={{
+                padding: '1.5rem 2rem',
+                borderBottom: '1px solid #333333',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                backgroundColor: '#0a0a0a'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                  <div style={{
+                    width: '50px',
+                    height: '50px',
+                    borderRadius: '50%',
+                    backgroundColor: '#0050B7',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '1.5rem',
+                    fontWeight: '600',
+                    color: 'white'
+                  }}>
+                    {userDisplayName.charAt(0).toUpperCase()}
+                  </div>
+                  <div>
+                    <h3 style={{
+                      color: 'white',
+                      fontSize: '1.5rem',
+                      fontWeight: '600',
+                      margin: 0,
+                      fontFamily: 'Helvetica, Arial, sans-serif'
+                    }}>
+                      {userDisplayName}
+                    </h3>
+                    <p style={{
+                      color: '#888888',
+                      fontSize: '0.9rem',
+                      margin: '0.2rem 0 0 0',
+                      fontFamily: 'Helvetica, Arial, sans-serif'
+                    }}>
+                      {user.email}
+                    </p>
+                  </div>
+                </div>
+                <motion.button
+                  onClick={() => setShowUserProfileModal(false)}
+                  style={{
+                    backgroundColor: 'transparent',
+                    border: 'none',
+                    color: '#888888',
+                    fontSize: '2rem',
+                    cursor: 'pointer',
+                    width: '40px',
+                    height: '40px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    borderRadius: '5px',
+                    fontFamily: 'Helvetica, Arial, sans-serif'
+                  }}
+                  whileHover={{ 
+                    backgroundColor: '#333333',
+                    color: 'white'
+                  }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  ×
+                </motion.button>
+              </div>
+
+              {/* Tabs Navigation */}
+              <div style={{
+                display: 'flex',
+                borderBottom: '1px solid #333333',
+                backgroundColor: '#0a0a0a'
+              }}>
+                {['notes', 'settings', 'help', 'feedback'].map((tab) => (
+                  <motion.button
+                    key={tab}
+                    onClick={() => setActiveTab(tab as any)}
+                    style={{
+                      flex: 1,
+                      padding: '1rem',
+                      backgroundColor: 'transparent',
+                      border: 'none',
+                      color: activeTab === tab ? 'white' : '#888888',
+                      fontSize: '0.9rem',
+                      fontWeight: '500',
+                      cursor: 'pointer',
+                      textTransform: 'capitalize',
+                      borderBottom: activeTab === tab ? '2px solid #0050B7' : 'none',
+                      fontFamily: 'Helvetica, Arial, sans-serif',
+                      transition: 'all 0.2s ease'
+                    }}
+                    whileHover={{ 
+                      backgroundColor: '#1a1a1a',
+                      color: 'white'
+                    }}
+                  >
+                    {tab === 'notes' ? `Notes (${totalNotesCount})` : tab}
+                  </motion.button>
+                ))}
+              </div>
+
+              {/* Content Area */}
+              <div style={{
+                flex: 1,
+                overflowY: 'auto',
+                padding: '2rem'
+              }}>
+                {/* Notes Tab */}
+                {activeTab === 'notes' && (
+                  <div>
+                    <div style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      marginBottom: '1.5rem'
+                    }}>
+                      <h4 style={{
+                        color: 'white',
+                        fontSize: '1.2rem',
+                        fontWeight: '600',
+                        margin: 0,
+                        fontFamily: 'Helvetica, Arial, sans-serif'
+                      }}>
+                        Your Notes
+                      </h4>
+                      <div style={{
+                        color: '#0050B7',
+                        fontSize: '0.9rem',
+                        fontFamily: 'Helvetica, Arial, sans-serif'
+                      }}>
+                        Total: {totalNotesCount} notes
+                      </div>
+                    </div>
+
+                    {isLoadingNotes ? (
+                      <div style={{
+                        padding: '3rem 0',
+                        textAlign: 'center',
+                        color: '#888888',
+                        fontFamily: 'Helvetica, Arial, sans-serif'
+                      }}>
+                        Loading notes...
+                      </div>
+                    ) : userNotes.length === 0 ? (
+                      <div style={{
+                        padding: '3rem 0',
+                        textAlign: 'center',
+                        color: '#888888',
+                        fontFamily: 'Helvetica, Arial, sans-serif'
+                      }}>
+                        <div style={{ fontSize: '3rem', marginBottom: '1rem', opacity: 0.5 }}>📝</div>
+                        <p style={{ margin: '0 0 1rem 0' }}>No notes yet</p>
+                        <motion.button
+                          onClick={() => router.push('/notes')}
+                          style={{
+                            backgroundColor: '#0050B7',
+                            color: 'white',
+                            border: 'none',
+                            padding: '0.8rem 1.5rem',
+                            borderRadius: '5px',
+                            cursor: 'pointer',
+                            fontSize: '0.9rem',
+                            fontWeight: '500',
+                            fontFamily: 'Helvetica, Arial, sans-serif'
+                          }}
+                          whileHover={{ backgroundColor: '#0066CC' }}
+                          whileTap={{ scale: 0.95 }}
+                        >
+                          Create Your First Note
+                        </motion.button>
+                      </div>
+                    ) : (
+                      <div style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '1rem'
+                      }}>
+                        {userNotes.slice(0, 10).map((note, index) => (
+                          <motion.div
+                            key={note.id}
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: index * 0.05 }}
+                            style={{
+                              backgroundColor: '#1a1a1a',
+                              borderRadius: '8px',
+                              padding: '1.2rem',
+                              borderLeft: '3px solid #0050B7',
+                              cursor: 'pointer'
+                            }}
+                            whileHover={{ 
+                              backgroundColor: '#222222',
+                              transform: 'translateX(5px)'
+                            }}
+                            onClick={() => router.push(`/notes#${note.id}`)}
+                          >
+                            <div style={{
+                              display: 'flex',
+                              justifyContent: 'space-between',
+                              alignItems: 'flex-start',
+                              marginBottom: '0.5rem'
+                            }}>
+                              <h5 style={{
+                                color: 'white',
+                                fontSize: '1rem',
+                                fontWeight: '600',
+                                margin: 0,
+                                fontFamily: 'Helvetica, Arial, sans-serif',
+                                flex: 1
+                              }}>
+                                {note.title || 'Untitled Note'}
+                              </h5>
+                              <span style={{
+                                color: '#888888',
+                                fontSize: '0.8rem',
+                                fontFamily: 'Helvetica, Arial, sans-serif',
+                                whiteSpace: 'nowrap',
+                                marginLeft: '1rem'
+                              }}>
+                                {calculateTimeAgo(note.createdAt)}
+                              </span>
+                            </div>
+                            <p style={{
+                              color: '#cccccc',
+                              fontSize: '0.9rem',
+                              margin: '0.5rem 0 0 0',
+                              fontFamily: 'Helvetica, Arial, sans-serif',
+                              lineHeight: 1.4,
+                              display: '-webkit-box',
+                              WebkitLineClamp: 2,
+                              WebkitBoxOrient: 'vertical',
+                              overflow: 'hidden'
+                            }}>
+                              {note.content}
+                            </p>
+                            {note.category && (
+                              <div style={{
+                                marginTop: '0.5rem',
+                                display: 'flex',
+                                gap: '0.5rem'
+                              }}>
+                                <span style={{
+                                  backgroundColor: '#333333',
+                                  color: '#888888',
+                                  fontSize: '0.7rem',
+                                  padding: '0.2rem 0.5rem',
+                                  borderRadius: '3px'
+                                }}>
+                                  {note.category}
+                                </span>
+                              </div>
+                            )}
+                          </motion.div>
+                        ))}
+                        
+                        {userNotes.length > 10 && (
+                          <div style={{
+                            textAlign: 'center',
+                            marginTop: '1rem',
+                            padding: '1rem'
+                          }}>
+                            <span style={{
+                              color: '#888888',
+                              fontSize: '0.9rem',
+                              fontFamily: 'Helvetica, Arial, sans-serif'
+                            }}>
+                              Showing 10 of {userNotes.length} notes
+                            </span>
+                            <motion.button
+                              onClick={() => router.push('/notes')}
+                              style={{
+                                backgroundColor: 'transparent',
+                                color: '#0050B7',
+                                border: '1px solid #0050B7',
+                                padding: '0.5rem 1rem',
+                                borderRadius: '5px',
+                                cursor: 'pointer',
+                                fontSize: '0.9rem',
+                                fontWeight: '500',
+                                fontFamily: 'Helvetica, Arial, sans-serif',
+                                marginLeft: '1rem'
+                              }}
+                              whileHover={{ 
+                                backgroundColor: 'rgba(0, 80, 183, 0.1)'
+                              }}
+                              whileTap={{ scale: 0.95 }}
+                            >
+                              View All Notes
+                            </motion.button>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Settings Tab */}
+                {activeTab === 'settings' && (
+                  <div>
+                    <h4 style={{
+                      color: 'white',
+                      fontSize: '1.2rem',
+                      fontWeight: '600',
+                      margin: '0 0 1.5rem 0',
+                      fontFamily: 'Helvetica, Arial, sans-serif'
+                    }}>
+                      Account Settings
+                    </h4>
+
+                    {isEditingProfile ? (
+                      <div style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '1.5rem'
+                      }}>
+                        <div>
+                          <label style={{
+                            color: '#cccccc',
+                            fontSize: '0.9rem',
+                            marginBottom: '0.5rem',
+                            display: 'block',
+                            fontFamily: 'Helvetica, Arial, sans-serif'
+                          }}>
+                            Display Name
+                          </label>
+                          <input
+                            type="text"
+                            value={editName}
+                            onChange={(e) => setEditName(e.target.value)}
+                            style={{
+                              width: '100%',
+                              padding: '0.8rem',
+                              backgroundColor: '#1a1a1a',
+                              border: '1px solid #333333',
+                              borderRadius: '5px',
+                              color: 'white',
+                              fontSize: '1rem',
+                              fontFamily: 'Helvetica, Arial, sans-serif',
+                              outline: 'none'
+                            }}
+                          />
+                        </div>
+
+                        <div>
+                          <label style={{
+                            color: '#cccccc',
+                            fontSize: '0.9rem',
+                            marginBottom: '0.5rem',
+                            display: 'block',
+                            fontFamily: 'Helvetica, Arial, sans-serif'
+                          }}>
+                            Email Address
+                          </label>
+                          <input
+                            type="email"
+                            value={editEmail}
+                            onChange={(e) => setEditEmail(e.target.value)}
+                            style={{
+                              width: '100%',
+                              padding: '0.8rem',
+                              backgroundColor: '#1a1a1a',
+                              border: '1px solid #333333',
+                              borderRadius: '5px',
+                              color: 'white',
+                              fontSize: '1rem',
+                              fontFamily: 'Helvetica, Arial, sans-serif',
+                              outline: 'none'
+                            }}
+                          />
+                        </div>
+
+                        <div>
+                          <label style={{
+                            color: '#cccccc',
+                            fontSize: '0.9rem',
+                            marginBottom: '0.5rem',
+                            display: 'block',
+                            fontFamily: 'Helvetica, Arial, sans-serif'
+                          }}>
+                            Login Method
+                          </label>
+                          <div style={{
+                            padding: '0.8rem',
+                            backgroundColor: '#1a1a1a',
+                            border: '1px solid #333333',
+                            borderRadius: '5px',
+                            color: '#888888',
+                            fontSize: '1rem',
+                            fontFamily: 'Helvetica, Arial, sans-serif'
+                          }}>
+                            {userProvider}
+                          </div>
+                        </div>
+
+                        <div style={{
+                          display: 'flex',
+                          gap: '1rem',
+                          justifyContent: 'flex-end'
+                        }}>
+                          <motion.button
+                            onClick={() => setIsEditingProfile(false)}
+                            style={{
+                              padding: '0.8rem 1.5rem',
+                              backgroundColor: '#333333',
+                              border: 'none',
+                              borderRadius: '5px',
+                              color: 'white',
+                              fontSize: '0.9rem',
+                              fontWeight: '500',
+                              cursor: 'pointer',
+                              fontFamily: 'Helvetica, Arial, sans-serif'
+                            }}
+                            whileHover={{ backgroundColor: '#444444' }}
+                            whileTap={{ scale: 0.95 }}
+                            disabled={isUpdating}
+                          >
+                            Cancel
+                          </motion.button>
+                          <motion.button
+                            onClick={handleUpdateProfile}
+                            style={{
+                              padding: '0.8rem 1.5rem',
+                              backgroundColor: '#0050B7',
+                              border: 'none',
+                              borderRadius: '5px',
+                              color: 'white',
+                              fontSize: '0.9rem',
+                              fontWeight: '500',
+                              cursor: 'pointer',
+                              fontFamily: 'Helvetica, Arial, sans-serif'
+                            }}
+                            whileHover={{ backgroundColor: '#0066CC' }}
+                            whileTap={{ scale: 0.95 }}
+                            disabled={isUpdating}
+                          >
+                            {isUpdating ? 'Updating...' : 'Save Changes'}
+                          </motion.button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '1.5rem'
+                      }}>
+                        <div style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          padding: '1rem',
+                          backgroundColor: '#1a1a1a',
+                          borderRadius: '5px'
+                        }}>
+                          <div>
+                            <div style={{
+                              color: '#cccccc',
+                              fontSize: '0.9rem',
+                              fontFamily: 'Helvetica, Arial, sans-serif'
+                            }}>
+                              Display Name
+                            </div>
+                            <div style={{
+                              color: 'white',
+                              fontSize: '1rem',
+                              fontWeight: '500',
+                              fontFamily: 'Helvetica, Arial, sans-serif'
+                            }}>
+                              {userDisplayName}
+                            </div>
+                          </div>
+                        </div>
+
+                        <div style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          padding: '1rem',
+                          backgroundColor: '#1a1a1a',
+                          borderRadius: '5px'
+                        }}>
+                          <div>
+                            <div style={{
+                              color: '#cccccc',
+                              fontSize: '0.9rem',
+                              fontFamily: 'Helvetica, Arial, sans-serif'
+                            }}>
+                              Email Address
+                            </div>
+                            <div style={{
+                              color: 'white',
+                              fontSize: '1rem',
+                              fontWeight: '500',
+                              fontFamily: 'Helvetica, Arial, sans-serif'
+                            }}>
+                              {user.email}
+                            </div>
+                          </div>
+                        </div>
+
+                        <div style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          padding: '1rem',
+                          backgroundColor: '#1a1a1a',
+                          borderRadius: '5px'
+                        }}>
+                          <div>
+                            <div style={{
+                              color: '#cccccc',
+                              fontSize: '0.9rem',
+                              fontFamily: 'Helvetica, Arial, sans-serif'
+                            }}>
+                              Login Method
+                            </div>
+                            <div style={{
+                              color: 'white',
+                              fontSize: '1rem',
+                              fontWeight: '500',
+                              fontFamily: 'Helvetica, Arial, sans-serif'
+                            }}>
+                              {userProvider}
+                            </div>
+                          </div>
+                        </div>
+
+                        <div style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          padding: '1rem',
+                          backgroundColor: '#1a1a1a',
+                          borderRadius: '5px'
+                        }}>
+                          <div>
+                            <div style={{
+                              color: '#cccccc',
+                              fontSize: '0.9rem',
+                              fontFamily: 'Helvetica, Arial, sans-serif'
+                            }}>
+                              Account Created
+                            </div>
+                            <div style={{
+                              color: 'white',
+                              fontSize: '1rem',
+                              fontWeight: '500',
+                              fontFamily: 'Helvetica, Arial, sans-serif'
+                            }}>
+                              {user.metadata.creationTime ? 
+                                new Date(user.metadata.creationTime).toLocaleDateString('id-ID') : 
+                                'Unknown'}
+                            </div>
+                          </div>
+                        </div>
+
+                        <div style={{
+                          display: 'flex',
+                          gap: '1rem',
+                          marginTop: '1rem'
+                        }}>
+                          <motion.button
+                            onClick={() => setIsEditingProfile(true)}
+                            style={{
+                              flex: 1,
+                              padding: '0.8rem',
+                              backgroundColor: '#0050B7',
+                              border: 'none',
+                              borderRadius: '5px',
+                              color: 'white',
+                              fontSize: '0.9rem',
+                              fontWeight: '500',
+                              cursor: 'pointer',
+                              fontFamily: 'Helvetica, Arial, sans-serif'
+                            }}
+                            whileHover={{ backgroundColor: '#0066CC' }}
+                            whileTap={{ scale: 0.95 }}
+                          >
+                            Edit Profile
+                          </motion.button>
+                          <motion.button
+                            onClick={() => setShowDeleteAccountModal(true)}
+                            style={{
+                              flex: 1,
+                              padding: '0.8rem',
+                              backgroundColor: '#ff4757',
+                              border: 'none',
+                              borderRadius: '5px',
+                              color: 'white',
+                              fontSize: '0.9rem',
+                              fontWeight: '500',
+                              cursor: 'pointer',
+                              fontFamily: 'Helvetica, Arial, sans-serif'
+                            }}
+                            whileHover={{ backgroundColor: '#ff6b81' }}
+                            whileTap={{ scale: 0.95 }}
+                          >
+                            Delete Account
+                          </motion.button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Help Tab */}
+                {activeTab === 'help' && (
+                  <div>
+                    <h4 style={{
+                      color: 'white',
+                      fontSize: '1.2rem',
+                      fontWeight: '600',
+                      margin: '0 0 1.5rem 0',
+                      fontFamily: 'Helvetica, Arial, sans-serif'
+                    }}>
+                      Help & Support
+                    </h4>
+
+                    <div style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '1.5rem'
+                    }}>
+                      <div style={{
+                        backgroundColor: '#1a1a1a',
+                        borderRadius: '5px',
+                        padding: '1.5rem'
+                      }}>
+                        <h5 style={{
+                          color: 'white',
+                          fontSize: '1rem',
+                          fontWeight: '600',
+                          margin: '0 0 1rem 0',
+                          fontFamily: 'Helvetica, Arial, sans-serif'
+                        }}>
+                          Frequently Asked Questions
+                        </h5>
+                        <div style={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: '1rem'
+                        }}>
+                          <div>
+                            <div style={{
+                              color: '#0050B7',
+                              fontSize: '0.9rem',
+                              fontWeight: '500',
+                              marginBottom: '0.5rem',
+                              fontFamily: 'Helvetica, Arial, sans-serif'
+                            }}>
+                              How to create a note?
+                            </div>
+                            <div style={{
+                              color: '#cccccc',
+                              fontSize: '0.9rem',
+                              fontFamily: 'Helvetica, Arial, sans-serif',
+                              lineHeight: 1.5
+                            }}>
+                              Go to the Notes page and click the "Create New Note" button. You can add a title, content, and category for your note.
+                            </div>
+                          </div>
+                          <div>
+                            <div style={{
+                              color: '#0050B7',
+                              fontSize: '0.9rem',
+                              fontWeight: '500',
+                              marginBottom: '0.5rem',
+                              fontFamily: 'Helvetica, Arial, sans-serif'
+                            }}>
+                              How to delete my account?
+                            </div>
+                            <div style={{
+                              color: '#cccccc',
+                              fontSize: '0.9rem',
+                              fontFamily: 'Helvetica, Arial, sans-serif',
+                              lineHeight: 1.5
+                            }}>
+                              Go to Settings tab and click "Delete Account" button. This will permanently delete your account and all your data.
+                            </div>
+                          </div>
+                          <div>
+                            <div style={{
+                              color: '#0050B7',
+                              fontSize: '0.9rem',
+                              fontWeight: '500',
+                              marginBottom: '0.5rem',
+                              fontFamily: 'Helvetica, Arial, sans-serif'
+                            }}>
+                              How to change my profile information?
+                            </div>
+                            <div style={{
+                              color: '#cccccc',
+                              fontSize: '0.9rem',
+                              fontFamily: 'Helvetica, Arial, sans-serif',
+                              lineHeight: 1.5
+                            }}>
+                              Go to Settings tab and click "Edit Profile" button. You can update your display name and email address.
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div style={{
+                        backgroundColor: '#1a1a1a',
+                        borderRadius: '5px',
+                        padding: '1.5rem'
+                      }}>
+                        <h5 style={{
+                          color: 'white',
+                          fontSize: '1rem',
+                          fontWeight: '600',
+                          margin: '0 0 1rem 0',
+                          fontFamily: 'Helvetica, Arial, sans-serif'
+                        }}>
+                          Contact Support
+                        </h5>
+                        <div style={{
+                          color: '#cccccc',
+                          fontSize: '0.9rem',
+                          fontFamily: 'Helvetica, Arial, sans-serif',
+                          lineHeight: 1.5,
+                          marginBottom: '1rem'
+                        }}>
+                          If you need further assistance, please contact our support team.
+                        </div>
+                        <div style={{
+                          display: 'flex',
+                          gap: '1rem'
+                        }}>
+                          <motion.button
+                            onClick={() => window.location.href = 'mailto:support@menuru.com'}
+                            style={{
+                              padding: '0.8rem 1.5rem',
+                              backgroundColor: '#0050B7',
+                              border: 'none',
+                              borderRadius: '5px',
+                              color: 'white',
+                              fontSize: '0.9rem',
+                              fontWeight: '500',
+                              cursor: 'pointer',
+                              fontFamily: 'Helvetica, Arial, sans-serif'
+                            }}
+                            whileHover={{ backgroundColor: '#0066CC' }}
+                            whileTap={{ scale: 0.95 }}
+                          >
+                            Email Support
+                          </motion.button>
+                          <motion.button
+                            onClick={() => window.open('https://docs.menuru.com', '_blank')}
+                            style={{
+                              padding: '0.8rem 1.5rem',
+                              backgroundColor: '#333333',
+                              border: 'none',
+                              borderRadius: '5px',
+                              color: 'white',
+                              fontSize: '0.9rem',
+                              fontWeight: '500',
+                              cursor: 'pointer',
+                              fontFamily: 'Helvetica, Arial, sans-serif'
+                            }}
+                            whileHover={{ backgroundColor: '#444444' }}
+                            whileTap={{ scale: 0.95 }}
+                          >
+                            Documentation
+                          </motion.button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Feedback Tab */}
+                {activeTab === 'feedback' && (
+                  <div>
+                    <h4 style={{
+                      color: 'white',
+                      fontSize: '1.2rem',
+                      fontWeight: '600',
+                      margin: '0 0 1.5rem 0',
+                      fontFamily: 'Helvetica, Arial, sans-serif'
+                    }}>
+                      Send Feedback
+                    </h4>
+
+                    <div style={{
+                      backgroundColor: '#1a1a1a',
+                      borderRadius: '5px',
+                      padding: '2rem'
+                    }}>
+                      <div style={{
+                        color: '#cccccc',
+                        fontSize: '0.9rem',
+                        fontFamily: 'Helvetica, Arial, sans-serif',
+                        lineHeight: 1.5,
+                        marginBottom: '2rem'
+                      }}>
+                        We value your feedback! Please let us know what you think about our platform, 
+                        what features you'd like to see, or report any issues you've encountered.
+                      </div>
+
+                      <div style={{
+                        display: 'flex',
+                        justifyContent: 'center'
+                      }}>
+                        <motion.button
+                          onClick={handleSendFeedback}
+                          style={{
+                            padding: '1rem 2rem',
+                            backgroundColor: '#00FF00',
+                            border: 'none',
+                            borderRadius: '5px',
+                            color: 'black',
+                            fontSize: '1rem',
+                            fontWeight: '600',
+                            cursor: 'pointer',
+                            fontFamily: 'Helvetica, Arial, sans-serif'
+                          }}
+                          whileHover={{ 
+                            backgroundColor: '#00CC00',
+                            transform: 'scale(1.05)'
+                          }}
+                          whileTap={{ scale: 0.95 }}
+                        >
+                          Send Feedback
+                        </motion.button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Footer with Logout Button */}
+              <div style={{
+                padding: '1.5rem 2rem',
+                borderTop: '1px solid #333333',
+                backgroundColor: '#0a0a0a',
+                display: 'flex',
+                justifyContent: 'flex-end'
+              }}>
+                <motion.button
+                  onClick={handleLogoutClick}
+                  style={{
+                    padding: '0.8rem 1.5rem',
+                    backgroundColor: '#ff4757',
+                    border: 'none',
+                    borderRadius: '5px',
+                    color: 'white',
+                    fontSize: '0.9rem',
+                    fontWeight: '500',
+                    cursor: 'pointer',
+                    fontFamily: 'Helvetica, Arial, sans-serif'
+                  }}
+                  whileHover={{ 
+                    backgroundColor: '#ff6b81',
+                    transform: 'scale(1.05)'
+                  }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  Logout
+                </motion.button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Modal Delete Account Confirmation */}
+      <AnimatePresence>
+        {showDeleteAccountModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              backgroundColor: 'rgba(0, 0, 0, 0.9)',
+              zIndex: 10001,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              backdropFilter: 'blur(10px)'
+            }}
+            onClick={() => setShowDeleteAccountModal(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              style={{
+                backgroundColor: '#111111',
+                borderRadius: '10px',
+                padding: '2rem',
+                width: isMobile ? '90%' : '400px',
+                maxWidth: '500px',
+                border: '1px solid #ff4757'
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <h4 style={{
+                color: 'white',
+                fontSize: '1.3rem',
+                fontWeight: '600',
+                margin: '0 0 1rem 0',
+                fontFamily: 'Helvetica, Arial, sans-serif'
+              }}>
+                Delete Account
+              </h4>
+              
+              <p style={{
+                color: '#cccccc',
+                fontSize: '0.9rem',
+                lineHeight: 1.5,
+                margin: '0 0 1.5rem 0',
+                fontFamily: 'Helvetica, Arial, sans-serif'
+              }}>
+                Are you sure you want to delete your account? This action cannot be undone. 
+                All your notes and data will be permanently deleted.
+              </p>
+              
+              <div style={{
+                display: 'flex',
+                gap: '1rem',
+                justifyContent: 'flex-end'
+              }}>
+                <motion.button
+                  onClick={() => setShowDeleteAccountModal(false)}
+                  style={{
+                    padding: '0.8rem 1.5rem',
+                    backgroundColor: '#333333',
+                    border: 'none',
+                    borderRadius: '5px',
+                    color: 'white',
+                    fontSize: '0.9rem',
+                    fontWeight: '500',
+                    cursor: 'pointer',
+                    fontFamily: 'Helvetica, Arial, sans-serif'
+                  }}
+                  whileHover={{ backgroundColor: '#444444' }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  Cancel
+                </motion.button>
+                <motion.button
+                  onClick={handleDeleteAccount}
+                  style={{
+                    padding: '0.8rem 1.5rem',
+                    backgroundColor: '#ff4757',
+                    border: 'none',
+                    borderRadius: '5px',
+                    color: 'white',
+                    fontSize: '0.9rem',
+                    fontWeight: '500',
+                    cursor: 'pointer',
+                    fontFamily: 'Helvetica, Arial, sans-serif'
+                  }}
+                  whileHover={{ backgroundColor: '#ff6b81' }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  Delete Account
+                </motion.button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Modal Logout Confirmation */}
       <AnimatePresence>
         {showLogoutModal && (
-          <div
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
             style={{
               position: 'fixed',
               top: 0,
@@ -2051,7 +2800,11 @@ export default function HomePage(): React.JSX.Element {
             }}
             onClick={handleCancelLogout}
           >
-            <div
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              transition={{ duration: 0.3 }}
               style={{
                 backgroundColor: 'rgba(30, 30, 30, 0.95)',
                 borderRadius: '15px',
@@ -2091,7 +2844,7 @@ export default function HomePage(): React.JSX.Element {
                 gap: '1rem',
                 justifyContent: 'center'
               }}>
-                <button
+                <motion.button
                   onClick={handleCancelLogout}
                   style={{
                     flex: 1,
@@ -2106,16 +2859,14 @@ export default function HomePage(): React.JSX.Element {
                     transition: 'all 0.3s ease',
                     fontFamily: 'Helvetica, Arial, sans-serif'
                   }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.2)';
+                  whileHover={{ 
+                    backgroundColor: 'rgba(255, 255, 255, 0.2)'
                   }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
-                  }}
+                  whileTap={{ scale: 0.95 }}
                 >
                   Tidak
-                </button>
-                <button
+                </motion.button>
+                <motion.button
                   onClick={handleConfirmLogout}
                   style={{
                     flex: 1,
@@ -2130,18 +2881,16 @@ export default function HomePage(): React.JSX.Element {
                     transition: 'all 0.3s ease',
                     fontFamily: 'Helvetica, Arial, sans-serif'
                   }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = '#0066CC';
+                  whileHover={{ 
+                    backgroundColor: '#0066CC'
                   }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = '#0050B7';
-                  }}
+                  whileTap={{ scale: 0.95 }}
                 >
                   Ya, Logout
-                </button>
+                </motion.button>
               </div>
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
         )}
       </AnimatePresence>
 
@@ -2171,8 +2920,7 @@ export default function HomePage(): React.JSX.Element {
               transform: 'translateY(-100%)'
             }}
           >
-            {/* Tombol Close - Hanya teks X */}
-            <div
+            <motion.div
               onClick={handleCloseMenu}
               style={{
                 position: 'absolute',
@@ -2189,11 +2937,14 @@ export default function HomePage(): React.JSX.Element {
                 alignItems: 'center',
                 justifyContent: 'center'
               }}
+              whileHover={{ 
+                scale: 1.2,
+                rotate: 90
+              }}
+              whileTap={{ scale: 0.9 }}
             >
               ×
-            </div>
-            
-            {/* Halaman Kosong - Tidak ada konten lain */}
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
@@ -2223,7 +2974,6 @@ export default function HomePage(): React.JSX.Element {
               paddingBottom: '4rem'
             }}
           >
-            {/* Header dengan teks MENURU dan tanda \ di sebelah kanan */}
             <div style={{
               position: 'sticky',
               top: 0,
@@ -2237,14 +2987,12 @@ export default function HomePage(): React.JSX.Element {
               backgroundColor: 'black',
               zIndex: 10
             }}>
-              {/* Container untuk MENURU, angka, dan roles - di kiri */}
               <div style={{
                 display: 'flex',
                 flexDirection: 'column',
                 width: isMobile ? '45%' : '40%',
                 marginTop: isMobile ? '1rem' : '2rem'
               }}>
-                {/* Teks MENURU \ di kiri */}
                 <motion.div
                   initial={{ x: -50, opacity: 0 }}
                   animate={{ x: 0, opacity: 1 }}
@@ -2263,7 +3011,6 @@ export default function HomePage(): React.JSX.Element {
                   MENURU \
                 </motion.div>
 
-                {/* Angka 99887 dengan jarak dari judul */}
                 <motion.div
                   initial={{ x: -50, opacity: 0 }}
                   animate={{ x: 0, opacity: 1 }}
@@ -2280,7 +3027,6 @@ export default function HomePage(): React.JSX.Element {
                   99887
                 </motion.div>
 
-                {/* Roles List dengan jarak yang cukup */}
                 <motion.div
                   initial={{ x: -50, opacity: 0 }}
                   animate={{ x: 0, opacity: 1 }}
@@ -2302,7 +3048,6 @@ export default function HomePage(): React.JSX.Element {
                         flexDirection: 'column'
                       }}
                     >
-                      {/* Role title */}
                       <div style={{
                         color: 'white',
                         fontSize: isMobile ? '1.2rem' : '1.8rem',
@@ -2314,7 +3059,6 @@ export default function HomePage(): React.JSX.Element {
                         {role.title}
                       </div>
                       
-                      {/* Role description */}
                       <div style={{
                         color: 'white',
                         fontSize: isMobile ? '1rem' : '1.3rem',
@@ -2330,7 +3074,6 @@ export default function HomePage(): React.JSX.Element {
                 </motion.div>
               </div>
 
-              {/* Container untuk bagian tengah - DESKRIPSI dan FOTO */}
               <div style={{
                 flex: 1,
                 display: 'flex',
@@ -2341,7 +3084,6 @@ export default function HomePage(): React.JSX.Element {
                 marginRight: isMobile ? '1.5rem' : '4rem',
                 marginTop: isMobile ? '1rem' : '2rem'
               }}>
-                {/* Deskripsi di tengah - BESAR dengan font Formula Condensed */}
                 <motion.div
                   initial={{ y: -20, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
@@ -2361,7 +3103,6 @@ export default function HomePage(): React.JSX.Element {
                   A personal branding journal documenting emotional journeys and creative exploration through visual storytelling and self-discovery narratives.
                 </motion.div>
 
-                {/* Foto di bawah deskripsi - BESAR */}
                 <motion.div
                   initial={{ y: 30, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
@@ -2397,7 +3138,6 @@ export default function HomePage(): React.JSX.Element {
                   />
                 </motion.div>
 
-                {/* Judul kecil di bawah foto */}
                 <motion.div
                   initial={{ y: 20, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
@@ -2418,7 +3158,6 @@ export default function HomePage(): React.JSX.Element {
                   Visual Journey • 2024 Collection
                 </motion.div>
 
-                {/* Teks link tautan besar di bawah judul */}
                 <motion.div
                   initial={{ y: 20, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
@@ -2428,7 +3167,7 @@ export default function HomePage(): React.JSX.Element {
                     marginBottom: isMobile ? '5rem' : '6rem'
                   }}
                 >
-                  <a
+                  <motion.a
                     href="/explore"
                     style={{
                       color: '#00FF00',
@@ -2443,23 +3182,44 @@ export default function HomePage(): React.JSX.Element {
                       position: 'relative',
                       padding: '1rem 0'
                     }}
+                    whileHover={{ 
+                      x: 10,
+                      color: '#FFFFFF'
+                    }}
+                    transition={{ duration: 0.3 }}
                   >
                     EXPLORE FULL COLLECTION
-                    <svg
+                    <motion.svg
                       width={isMobile ? "24" : "32"}
                       height={isMobile ? "24" : "32"}
                       viewBox="0 0 24 24"
                       fill="none"
                       stroke="currentColor"
                       strokeWidth="2"
+                      initial={{ x: 0 }}
+                      animate={{ x: 0 }}
+                      whileHover={{ x: 5 }}
+                      transition={{ duration: 0.3 }}
                     >
-                      <path d="M5 12h14"/>
-                      <path d="m12 5 7 7-7 7"/>
-                    </svg>
-                  </a>
+                      <path d="M5 12h14" />
+                      <path d="m12 5 7 7-7 7" />
+                    </motion.svg>
+                    <motion.div
+                      style={{
+                        position: 'absolute',
+                        bottom: '0.5rem',
+                        left: 0,
+                        width: '100%',
+                        height: '2px',
+                        backgroundColor: '#00FF00'
+                      }}
+                      initial={{ scaleX: 0 }}
+                      whileHover={{ scaleX: 1 }}
+                      transition={{ duration: 0.3 }}
+                    />
+                  </motion.a>
                 </motion.div>
 
-                {/* Container tambahan untuk konten di bawah tautan */}
                 <motion.div
                   initial={{ y: 30, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
@@ -2483,8 +3243,10 @@ export default function HomePage(): React.JSX.Element {
                 </motion.div>
               </div>
 
-              {/* Tanda \ di kanan dengan animasi GSAP - KLIK UNTUK KEMBALI */}
-              <div
+              <motion.div
+                initial={{ x: 50, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                transition={{ duration: 0.6, delay: 0.2 }}
                 onClick={handleCloseMenuruFullPage}
                 style={{
                   width: isMobile ? '50px' : '60px',
@@ -2500,8 +3262,12 @@ export default function HomePage(): React.JSX.Element {
                   borderRadius: '50%',
                   zIndex: 9999
                 }}
+                whileHover={{ 
+                  scale: 1.2,
+                  backgroundColor: 'rgba(0,0,0,0.8)'
+                }}
+                whileTap={{ scale: 0.95 }}
               >
-                {/* Tanda \ (backslash) dengan animasi GSAP */}
                 <div 
                   ref={backslashRef}
                   style={{
@@ -2514,10 +3280,9 @@ export default function HomePage(): React.JSX.Element {
                     transformOrigin: 'center'
                   }}
                 />
-              </div>
+              </motion.div>
             </div>
 
-            {/* Space untuk scroll ke bawah */}
             <div style={{
               height: '100vh',
               width: '100%',
@@ -2545,7 +3310,7 @@ export default function HomePage(): React.JSX.Element {
         )}
       </AnimatePresence>
 
-      {/* Halaman Full Page untuk Foto dengan Komentar - DESIGN SEDERHANA */}
+      {/* Halaman Full Page untuk Foto dengan Komentar */}
       <AnimatePresence>
         {showPhotoFullPage && (
           <motion.div
@@ -2567,7 +3332,6 @@ export default function HomePage(): React.JSX.Element {
               overflowY: 'auto'
             }}
           >
-            {/* Header sederhana dengan tombol close di KIRI */}
             <div style={{
               position: 'sticky',
               top: 0,
@@ -2581,8 +3345,7 @@ export default function HomePage(): React.JSX.Element {
               backgroundColor: 'black',
               borderBottom: '1px solid rgba(255,255,255,0.1)'
             }}>
-              {/* Tombol close (×) di kiri */}
-              <button
+              <motion.button
                 onClick={handleClosePhotoFullPage}
                 style={{
                   backgroundColor: 'transparent',
@@ -2598,11 +3361,14 @@ export default function HomePage(): React.JSX.Element {
                   borderRadius: '4px',
                   order: 1
                 }}
+                whileHover={{ 
+                  backgroundColor: 'rgba(255,255,255,0.1)'
+                }}
+                whileTap={{ scale: 0.95 }}
               >
                 ×
-              </button>
+              </motion.button>
 
-              {/* Counter di kanan */}
               <div style={{
                 color: 'white',
                 fontSize: isMobile ? '1.5rem' : '2rem',
@@ -2619,14 +3385,12 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* Container utama: foto di atas, komentar di bawah */}
             <div style={{
               display: 'flex',
               flexDirection: 'column',
               width: '100%',
               flex: 1
             }}>
-              {/* Foto slider - LEBIH PANJANG KE BAWAH */}
               <div style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -2682,23 +3446,20 @@ export default function HomePage(): React.JSX.Element {
                           objectFit: 'cover',
                           display: 'block'
                         }}
-                       onError={(e) => {
-  e.currentTarget.style.backgroundColor = '#222';
-  e.currentTarget.style.display = 'flex';
-  e.currentTarget.style.alignItems = 'center';
-  e.currentTarget.style.justifyContent = 'center';
-  e.currentTarget.style.color = '#fff';
-  e.currentTarget.innerHTML = `<div style="padding: 2rem; text-align: center;">Photo ${currentPhotoIndex + 1}</div>`;
-}}
+                        onError={(e) => {
+                          e.currentTarget.style.backgroundColor = '#222';
+                          e.currentTarget.style.display = 'flex';
+                          e.currentTarget.style.alignItems = 'center';
+                          e.currentTarget.style.justifyContent = 'center';
+                          e.currentTarget.style.color = '#fff';
+                          e.currentTarget.innerHTML = `<div style="padding: 2rem; text-align: center;">Photo ${currentPhotoIndex + 1}</div>`;
+                        }}
                       />
                     </motion.div>
                   </AnimatePresence>
                 </div>
               </div>
 
-              
-
-              {/* Progress bar kecil di bawah foto */}
               <div style={{
                 width: '100%',
                 maxWidth: '600px',
@@ -2722,7 +3483,6 @@ export default function HomePage(): React.JSX.Element {
                 ))}
               </div>
 
-              {/* Waktu update */}
               <div style={{
                 width: '100%',
                 maxWidth: '600px',
@@ -2741,7 +3501,6 @@ export default function HomePage(): React.JSX.Element {
                 {photoTimeAgo[currentPhotoIndex]}
               </div>
 
-              {/* Area komentar di bawah foto (bisa di-scroll) */}
               <div style={{
                 flex: 1,
                 padding: isMobile ? '1rem' : '2rem',
@@ -2750,7 +3509,6 @@ export default function HomePage(): React.JSX.Element {
                 margin: '0 auto',
                 width: '100%'
               }}>
-                {/* Input komentar */}
                 <div style={{
                   backgroundColor: 'rgba(255,255,255,0.05)',
                   borderRadius: '12px',
@@ -2801,7 +3559,7 @@ export default function HomePage(): React.JSX.Element {
                       </span>
                     </div>
                     
-                    <button
+                    <motion.button
                       onClick={handleSendMessage}
                       disabled={message.trim() === ""}
                       style={{
@@ -2817,6 +3575,11 @@ export default function HomePage(): React.JSX.Element {
                         transition: 'all 0.3s ease',
                         flexShrink: 0
                       }}
+                      whileHover={message.trim() !== "" ? { 
+                        scale: 1.1,
+                        backgroundColor: '#0066CC'
+                      } : {}}
+                      whileTap={message.trim() !== "" ? { scale: 0.95 } : {}}
                     >
                       <svg 
                         width="18" 
@@ -2829,7 +3592,7 @@ export default function HomePage(): React.JSX.Element {
                         <line x1="22" y1="2" x2="11" y2="13"/>
                         <polygon points="22 2 15 22 11 13 2 9 22 2"/>
                       </svg>
-                    </button>
+                    </motion.button>
                   </div>
                   
                   <div style={{
@@ -2844,7 +3607,6 @@ export default function HomePage(): React.JSX.Element {
                   </div>
                 </div>
 
-                {/* Header komentar */}
                 <div style={{
                   marginBottom: '1.5rem',
                   color: 'white',
@@ -2862,7 +3624,6 @@ export default function HomePage(): React.JSX.Element {
                   </h3>
                 </div>
 
-                {/* Daftar komentar */}
                 <div style={{
                   display: 'flex',
                   flexDirection: 'column',
@@ -2892,8 +3653,11 @@ export default function HomePage(): React.JSX.Element {
                     </div>
                   ) : (
                     currentPhotoComments.map((comment, index) => (
-                      <div
+                      <motion.div
                         key={comment.id || index}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: index * 0.05 }}
                         style={{
                           backgroundColor: 'rgba(255,255,255,0.05)',
                           padding: '1rem',
@@ -2966,7 +3730,7 @@ export default function HomePage(): React.JSX.Element {
                             </p>
                           </div>
                         </div>
-                      </div>
+                      </motion.div>
                     ))
                   )}
                 </div>
@@ -3004,7 +3768,6 @@ export default function HomePage(): React.JSX.Element {
               overflow: 'hidden'
             }}
           >
-            {/* Header Notifikasi */}
             <div style={{
               padding: '0 1.5rem 1rem 1.5rem',
               borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
@@ -3045,7 +3808,7 @@ export default function HomePage(): React.JSX.Element {
               
               <div style={{ display: 'flex', gap: '0.5rem' }}>
                 {notifications.length > 0 && hasUnreadNotifications && (
-                  <button
+                  <motion.button
                     onClick={handleClearNotification}
                     style={{
                       backgroundColor: 'rgba(255, 71, 87, 0.2)',
@@ -3058,13 +3821,17 @@ export default function HomePage(): React.JSX.Element {
                       cursor: 'pointer',
                       fontFamily: 'Helvetica, Arial, sans-serif'
                     }}
+                    whileHover={{ 
+                      backgroundColor: 'rgba(255, 71, 87, 0.3)',
+                      scale: 1.05
+                    }}
+                    whileTap={{ scale: 0.95 }}
                   >
                     Clear All
-                  </button>
+                  </motion.button>
                 )}
                 
-                {/* Tombol refresh */}
-                <button
+                <motion.button
                   onClick={() => {
                     setIsLoadingNotifications(true);
                     setTimeout(() => setIsLoadingNotifications(false), 500);
@@ -3080,13 +3847,17 @@ export default function HomePage(): React.JSX.Element {
                     cursor: 'pointer',
                     fontFamily: 'Helvetica, Arial, sans-serif'
                   }}
+                  whileHover={{ 
+                    backgroundColor: 'rgba(0, 80, 183, 0.3)',
+                    scale: 1.05
+                  }}
+                  whileTap={{ scale: 0.95 }}
                 >
                   Refresh
-                </button>
+                </motion.button>
               </div>
             </div>
             
-            {/* List Notifikasi */}
             <div style={{
               flex: 1,
               overflowY: 'auto',
@@ -3100,13 +3871,15 @@ export default function HomePage(): React.JSX.Element {
                   color: 'rgba(255, 255, 255, 0.5)',
                   fontFamily: 'Helvetica, Arial, sans-serif'
                 }}>
-                  <div
+                  <motion.div
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
                     style={{ marginBottom: '1rem' }}
                   >
                     <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                       <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
                     </svg>
-                  </div>
+                  </motion.div>
                   Loading notifications...
                 </div>
               ) : notifications.length === 0 ? (
@@ -3141,19 +3914,24 @@ export default function HomePage(): React.JSX.Element {
               ) : (
                 <div>
                   {notifications.map((notification, index) => (
-                    <div
+                    <motion.div
                       key={notification.id || index}
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: index * 0.05 }}
                       style={{
                         padding: '1rem 1.5rem',
                         borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
                         cursor: 'pointer',
                         transition: 'all 0.2s ease',
-                        backgroundColor: notification.read ? 'transparent' : getBgColorByType(notification.type),
+                        backgroundColor: notification.isRead ? 'transparent' : getBgColorByType(notification.type),
                         position: 'relative'
+                      }}
+                      whileHover={{ 
+                        backgroundColor: notification.read ? 'rgba(255, 255, 255, 0.05)' : getBgColorByType(notification.type).replace('0.1', '0.2')
                       }}
                       onClick={() => handleNotificationClick(notification)}
                     >
-                      {/* Unread Indicator */}
                       {!notification.read && (
                         <div style={{
                           position: 'absolute',
@@ -3172,7 +3950,6 @@ export default function HomePage(): React.JSX.Element {
                         gap: '1rem',
                         alignItems: 'flex-start'
                       }}>
-                        {/* Notification Icon */}
                         <div style={{
                           width: '40px',
                           height: '40px',
@@ -3188,7 +3965,6 @@ export default function HomePage(): React.JSX.Element {
                           {notification.icon}
                         </div>
                         
-                        {/* Notification Content */}
                         <div style={{ flex: 1, minWidth: 0 }}>
                           <div style={{
                             display: 'flex',
@@ -3214,7 +3990,6 @@ export default function HomePage(): React.JSX.Element {
                                 {notification.title}
                               </h4>
                               
-                              {/* Badge Type */}
                               <span style={{
                                 backgroundColor: getColorByType(notification.type),
                                 color: 'white',
@@ -3227,7 +4002,6 @@ export default function HomePage(): React.JSX.Element {
                                 {notification.type}
                               </span>
                               
-                              {/* Badge Admin */}
                               {notification.isAdminPost && (
                                 <span style={{
                                   backgroundColor: '#8B5CF6',
@@ -3262,7 +4036,6 @@ export default function HomePage(): React.JSX.Element {
                             {notification.message}
                           </p>
                           
-                          {/* Admin info jika ada */}
                           {notification.isAdminPost && notification.adminName && (
                             <div style={{
                               display: 'flex',
@@ -3285,15 +4058,48 @@ export default function HomePage(): React.JSX.Element {
                               </span>
                             </div>
                           )}
+                          
+                          <div style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.5rem',
+                            marginTop: '0.5rem',
+                            flexWrap: 'wrap'
+                          }}>
+                            {notification.priority && (
+                              <span style={{
+                                color: notification.priority === 'high' ? '#EF4444' : 
+                                       notification.priority === 'medium' ? '#F59E0B' : '#10B981',
+                                fontSize: '0.7rem',
+                                fontWeight: '500',
+                                backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                                padding: '0.1rem 0.4rem',
+                                borderRadius: '4px'
+                              }}>
+                                {notification.priority.toUpperCase()}
+                              </span>
+                            )}
+                            
+                            {notification.category && (
+                              <span style={{
+                                color: 'rgba(255, 255, 255, 0.7)',
+                                fontSize: '0.7rem',
+                                backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                                padding: '0.1rem 0.4rem',
+                                borderRadius: '4px'
+                              }}>
+                                {notification.category}
+                              </span>
+                            )}
+                          </div>
                         </div>
                       </div>
-                    </div>
+                    </motion.div>
                   ))}
                 </div>
               )}
             </div>
             
-            {/* Footer dengan statistik */}
             <div style={{
               padding: '1rem 1.5rem',
               borderTop: '1px solid rgba(255, 255, 255, 0.1)',
@@ -3311,7 +4117,7 @@ export default function HomePage(): React.JSX.Element {
                 {notifications.length} total • {notificationCount} unread
               </div>
               
-              <a
+              <motion.a
                 href="/notifications"
                 style={{
                   color: '#00FF00',
@@ -3323,216 +4129,27 @@ export default function HomePage(): React.JSX.Element {
                   alignItems: 'center',
                   gap: '0.5rem'
                 }}
+                whileHover={{ 
+                  color: 'white',
+                  x: 5
+                }}
               >
                 View All
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M5 12h14"/>
                   <path d="m12 5 7 7-7 7"/>
                 </svg>
-              </a>
+              </motion.a>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* User Dropdown Menu */}
-      {showUserDropdown && user && (
-        <div
-          ref={userDropdownRef}
-          style={{
-            position: 'fixed',
-            top: isMobile ? '6rem' : '7.5rem',
-            right: isMobile ? '1rem' : '2rem',
-            backgroundColor: 'rgba(30, 30, 30, 0.95)',
-            backdropFilter: 'blur(10px)',
-            borderRadius: '12px',
-            padding: '0.8rem 0',
-            minWidth: '200px',
-            zIndex: 1001,
-            border: '1px solid rgba(255, 255, 255, 0.1)',
-            boxShadow: '0 10px 30px rgba(0, 0, 0, 0.3)',
-            display: 'flex',
-            flexDirection: 'column'
-          }}
-        >
-          {/* User Info */}
-          <div style={{
-            padding: '0.8rem 1rem',
-            borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.8rem'
-          }}>
-            <div style={{
-              width: '40px',
-              height: '40px',
-              borderRadius: '50%',
-              backgroundColor: '#0050B7',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '1rem',
-              fontWeight: '600',
-              color: 'white',
-              flexShrink: 0
-            }}>
-              {userDisplayName.charAt(0).toUpperCase()}
-            </div>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{
-                color: 'white',
-                fontSize: '0.9rem',
-                fontWeight: '600',
-                whiteSpace: 'nowrap',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis'
-              }}>
-                {userDisplayName}
-              </div>
-              <div style={{
-                color: 'rgba(255, 255, 255, 0.6)',
-                fontSize: '0.75rem',
-                marginTop: '0.2rem'
-              }}>
-                {user.email}
-              </div>
-            </div>
-          </div>
-
-          {/* Menu Items */}
-          <div style={{
-            display: 'flex',
-            flexDirection: 'column',
-            padding: '0.5rem 0'
-          }}>
-            <button
-              onClick={() => router.push('/notes')}
-              style={{
-                padding: '0.8rem 1rem',
-                backgroundColor: 'transparent',
-                border: 'none',
-                color: 'rgba(255, 255, 255, 0.9)',
-                fontSize: '0.9rem',
-                fontWeight: '500',
-                textAlign: 'left',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.8rem',
-                transition: 'all 0.2s ease',
-                fontFamily: 'Helvetica, Arial, sans-serif'
-              }}
-            >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                <polyline points="14 2 14 8 20 8"/>
-                <line x1="16" y1="13" x2="8" y2="13"/>
-                <line x1="16" y1="17" x2="8" y2="17"/>
-                <polyline points="10 9 9 9 8 9"/>
-              </svg>
-              Catatan Saya
-            </button>
-
-            <button
-              onClick={handleLogoutClick}
-              style={{
-                padding: '0.8rem 1rem',
-                backgroundColor: 'transparent',
-                border: 'none',
-                color: '#ff6b6b',
-                fontSize: '0.9rem',
-                fontWeight: '500',
-                textAlign: 'left',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.8rem',
-                transition: 'all 0.2s ease',
-                fontFamily: 'Helvetica, Arial, sans-serif'
-              }}
-            >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-                <polyline points="16 17 21 12 16 7"/>
-                <line x1="21" y1="12" x2="9" y2="12"/>
-              </svg>
-              Logout
-            </button>
-          </div>
-
-          {/* Stats Section */}
-          {userStats && (
-            <div style={{
-              padding: '0.8rem 1rem',
-              borderTop: '1px solid rgba(255, 255, 255, 0.1)',
-              backgroundColor: 'rgba(0, 0, 0, 0.2)'
-            }}>
-              <div style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                marginBottom: '0.3rem'
-              }}>
-                <span style={{
-                  color: 'rgba(255, 255, 255, 0.7)',
-                  fontSize: '0.75rem'
-                }}>
-                  Login Anda:
-                </span>
-                <span style={{
-                  color: '#00FF00',
-                  fontSize: '0.9rem',
-                  fontWeight: '600'
-                }}>
-                  {userStats.loginCount || 0} kali
-                </span>
-              </div>
-              <div style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                marginBottom: '0.3rem'
-              }}>
-                <span style={{
-                  color: 'rgba(255, 255, 255, 0.7)',
-                  fontSize: '0.75rem'
-                }}>
-                  Total Users:
-                </span>
-                <span style={{
-                  color: '#0050B7',
-                  fontSize: '0.9rem',
-                  fontWeight: '600'
-                }}>
-                  {totalUsers}
-                </span>
-              </div>
-              <div style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center'
-              }}>
-                <span style={{
-                  color: 'rgba(255, 255, 255, 0.7)',
-                  fontSize: '0.75rem'
-                }}>
-                  Total Login:
-                </span>
-                <span style={{
-                  color: '#F59E0B',
-                  fontSize: '0.9rem',
-                  fontWeight: '600'
-                }}>
-                  {totalLoggedInUsers}
-                </span>
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-
       {/* Teks "Selamat Tahun Baru 2026" di pojok kiri atas */}
-      <div
+      <motion.div
+        initial={{ opacity: 0, x: -20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.8, delay: 0.3 }}
         style={{
           position: 'fixed',
           top: isMobile ? '0.8rem' : '1rem',
@@ -3551,7 +4168,214 @@ export default function HomePage(): React.JSX.Element {
         }}
       >
         Selamat Tahun Baru 2026
-      </div>
+      </motion.div>
+
+      {/* User Dropdown Menu */}
+      <AnimatePresence>
+        {showUserDropdown && user && (
+          <motion.div
+            ref={userDropdownRef}
+            initial={{ opacity: 0, y: -10, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -10, scale: 0.95 }}
+            transition={{ duration: 0.2 }}
+            style={{
+              position: 'fixed',
+              top: isMobile ? '6rem' : '7.5rem',
+              right: isMobile ? '1rem' : '2rem',
+              backgroundColor: 'rgba(30, 30, 30, 0.95)',
+              backdropFilter: 'blur(10px)',
+              borderRadius: '12px',
+              padding: '0.8rem 0',
+              minWidth: '200px',
+              zIndex: 1001,
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+              boxShadow: '0 10px 30px rgba(0, 0, 0, 0.3)',
+              display: 'flex',
+              flexDirection: 'column'
+            }}
+          >
+            <div style={{
+              padding: '0.8rem 1rem',
+              borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.8rem'
+            }}>
+              <div style={{
+                width: '40px',
+                height: '40px',
+                borderRadius: '50%',
+                backgroundColor: '#0050B7',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '1rem',
+                fontWeight: '600',
+                color: 'white',
+                flexShrink: 0
+              }}>
+                {userDisplayName.charAt(0).toUpperCase()}
+              </div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{
+                  color: 'white',
+                  fontSize: '0.9rem',
+                  fontWeight: '600',
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis'
+                }}>
+                  {userDisplayName}
+                </div>
+                <div style={{
+                  color: 'rgba(255, 255, 255, 0.6)',
+                  fontSize: '0.75rem',
+                  marginTop: '0.2rem'
+                }}>
+                  {user.email}
+                </div>
+              </div>
+            </div>
+
+            <div style={{
+              display: 'flex',
+              flexDirection: 'column',
+              padding: '0.5rem 0'
+            }}>
+              <motion.button
+                onClick={handleNotesClick}
+                style={{
+                  padding: '0.8rem 1rem',
+                  backgroundColor: 'transparent',
+                  border: 'none',
+                  color: 'rgba(255, 255, 255, 0.9)',
+                  fontSize: '0.9rem',
+                  fontWeight: '500',
+                  textAlign: 'left',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.8rem',
+                  transition: 'all 0.2s ease',
+                  fontFamily: 'Helvetica, Arial, sans-serif'
+                }}
+                whileHover={{ 
+                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                  paddingLeft: '1.2rem'
+                }}
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                  <polyline points="14 2 14 8 20 8"/>
+                  <line x1="16" y1="13" x2="8" y2="13"/>
+                  <line x1="16" y1="17" x2="8" y2="17"/>
+                  <polyline points="10 9 9 9 8 9"/>
+                </svg>
+                Catatan Saya
+              </motion.button>
+
+              <motion.button
+                onClick={handleLogoutClick}
+                style={{
+                  padding: '0.8rem 1rem',
+                  backgroundColor: 'transparent',
+                  border: 'none',
+                  color: '#ff6b6b',
+                  fontSize: '0.9rem',
+                  fontWeight: '500',
+                  textAlign: 'left',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.8rem',
+                  transition: 'all 0.2s ease',
+                  fontFamily: 'Helvetica, Arial, sans-serif'
+                }}
+                whileHover={{ 
+                  backgroundColor: 'rgba(255, 107, 107, 0.1)',
+                  paddingLeft: '1.2rem'
+                }}
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                  <polyline points="16 17 21 12 16 7"/>
+                  <line x1="21" y1="12" x2="9" y2="12"/>
+                </svg>
+                Logout
+              </motion.button>
+            </div>
+
+            {userStats && (
+              <div style={{
+                padding: '0.8rem 1rem',
+                borderTop: '1px solid rgba(255, 255, 255, 0.1)',
+                backgroundColor: 'rgba(0, 0, 0, 0.2)'
+              }}>
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  marginBottom: '0.3rem'
+                }}>
+                  <span style={{
+                    color: 'rgba(255, 255, 255, 0.7)',
+                    fontSize: '0.75rem'
+                  }}>
+                    Login Anda:
+                  </span>
+                  <span style={{
+                    color: '#00FF00',
+                    fontSize: '0.9rem',
+                    fontWeight: '600'
+                  }}>
+                    {userStats.loginCount || 0} kali
+                  </span>
+                </div>
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  marginBottom: '0.3rem'
+                }}>
+                  <span style={{
+                    color: 'rgba(255, 255, 255, 0.7)',
+                    fontSize: '0.75rem'
+                  }}>
+                    Total Users:
+                  </span>
+                  <span style={{
+                    color: '#0050B7',
+                    fontSize: '0.9rem',
+                    fontWeight: '600'
+                  }}>
+                    {totalUsers}
+                  </span>
+                </div>
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center'
+                }}>
+                  <span style={{
+                    color: 'rgba(255, 255, 255, 0.7)',
+                    fontSize: '0.75rem'
+                  }}>
+                    Total Login:
+                  </span>
+                  <span style={{
+                    color: '#F59E0B',
+                    fontSize: '0.9rem',
+                    fontWeight: '600'
+                  }}>
+                    {totalLoggedInUsers}
+                  </span>
+                </div>
+              </div>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Top Navigation Bar */}
       <div 
@@ -3583,7 +4407,7 @@ export default function HomePage(): React.JSX.Element {
           boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
         }}>
           {/* Docs */}
-          <div
+          <motion.div
             onClick={() => router.push('/docs')}
             style={{
               display: 'flex',
@@ -3596,6 +4420,11 @@ export default function HomePage(): React.JSX.Element {
               border: '1px solid rgba(255,255,255,0.2)',
               transition: 'all 0.3s ease',
               position: 'relative'
+            }}
+            whileHover={{ 
+              backgroundColor: 'white',
+              scale: 1.05,
+              border: '1px solid white'
             }}
           >
             <svg 
@@ -3630,8 +4459,8 @@ export default function HomePage(): React.JSX.Element {
                 stroke="#6366F1"
                 strokeWidth="2"
               >
-                <path d="M7 7l10 10"/>
-                <path d="M17 7v10H7"/>
+                <path d="M7 7l10 10" />
+                <path d="M17 7v10H7" />
               </svg>
             </span>
             <div style={{
@@ -3646,10 +4475,10 @@ export default function HomePage(): React.JSX.Element {
             }}>
               NEW
             </div>
-          </div>
+          </motion.div>
 
           {/* Chatbot */}
-          <div
+          <motion.div
             data-nav-chatbot
             onClick={() => router.push('/chatbot')}
             style={{
@@ -3663,6 +4492,11 @@ export default function HomePage(): React.JSX.Element {
               border: '1px solid rgba(255,255,255,0.2)',
               transition: 'all 0.3s ease',
               position: 'relative'
+            }}
+            whileHover={{ 
+              backgroundColor: 'white',
+              scale: 1.05,
+              border: '1px solid white'
             }}
           >
             <svg 
@@ -3695,8 +4529,8 @@ export default function HomePage(): React.JSX.Element {
                 stroke="#6366F1"
                 strokeWidth="2"
               >
-                <path d="M7 7l10 10"/>
-                <path d="M17 7v10H7"/>
+                <path d="M7 7l10 10" />
+                <path d="M17 7v10H7" />
               </svg>
             </span>
             <div style={{
@@ -3711,10 +4545,10 @@ export default function HomePage(): React.JSX.Element {
             }}>
               NEW
             </div>
-          </div>
+          </motion.div>
 
           {/* Update */}
-          <div
+          <motion.div
             onClick={() => router.push('/update')}
             style={{
               display: 'flex',
@@ -3727,6 +4561,11 @@ export default function HomePage(): React.JSX.Element {
               border: '1px solid rgba(255,255,255,0.2)',
               transition: 'all 0.3s ease',
               position: 'relative'
+            }}
+            whileHover={{ 
+              backgroundColor: 'white',
+              scale: 1.05,
+              border: '1px solid white'
             }}
           >
             <svg 
@@ -3761,8 +4600,8 @@ export default function HomePage(): React.JSX.Element {
                 stroke="#6366F1"
                 strokeWidth="2"
               >
-                <path d="M7 7l10 10"/>
-                <path d="M17 7v10H7"/>
+                <path d="M7 7l10 10" />
+                <path d="M17 7v10H7" />
               </svg>
             </span>
             <div style={{
@@ -3777,10 +4616,10 @@ export default function HomePage(): React.JSX.Element {
             }}>
               NEW
             </div>
-          </div>
+          </motion.div>
 
           {/* Timeline */}
-          <div
+          <motion.div
             onClick={() => router.push('/timeline')}
             style={{
               display: 'flex',
@@ -3793,6 +4632,11 @@ export default function HomePage(): React.JSX.Element {
               border: '1px solid rgba(255,255,255,0.2)',
               transition: 'all 0.3s ease',
               position: 'relative'
+            }}
+            whileHover={{ 
+              backgroundColor: 'white',
+              scale: 1.05,
+              border: '1px solid white'
             }}
           >
             <svg 
@@ -3826,8 +4670,8 @@ export default function HomePage(): React.JSX.Element {
                 stroke="#6366F1"
                 strokeWidth="2"
               >
-                <path d="M7 7l10 10"/>
-                <path d="M17 7v10H7"/>
+                <path d="M7 7l10 10" />
+                <path d="M17 7v10H7" />
               </svg>
             </span>
             <div style={{
@@ -3842,7 +4686,7 @@ export default function HomePage(): React.JSX.Element {
             }}>
               NEW
             </div>
-          </div>
+          </motion.div>
         </div>
       </div>
 
@@ -3868,7 +4712,11 @@ export default function HomePage(): React.JSX.Element {
           display: 'flex',
           alignItems: 'center'
         }}>
-          <div>
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.8, delay: 0.5 }}
+          >
             <div style={{
               fontSize: isMobile ? '1.5rem' : '2.5rem',
               fontWeight: '300',
@@ -3885,24 +4733,31 @@ export default function HomePage(): React.JSX.Element {
               ME
               <AnimatePresence mode="wait">
                 {isLoading ? (
-                  <span
+                  <motion.span
                     key={loadingText}
+                    initial={{ opacity: 0, y: 5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -5 }}
+                    transition={{ duration: 0.3 }}
                     style={{
                       display: 'inline-block'
                     }}
                   >
                     {loadingText}
-                  </span>
+                  </motion.span>
                 ) : (
-                  <span
+                  <motion.span
                     key="nuru-final"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.5 }}
                   >
                     NURU
-                  </span>
+                  </motion.span>
                 )}
               </AnimatePresence>
             </div>
-          </div>
+          </motion.div>
         </div>
         
 
@@ -3914,281 +4769,304 @@ export default function HomePage(): React.JSX.Element {
           position: 'relative'
         }}>
          {/* Search Bar dengan animasi GSAP dan dropdown results */}
-          <div
-            ref={searchContainerRef}
+<motion.div
+  ref={searchContainerRef}
+  initial={{ opacity: 0, x: -10 }}
+  animate={{ opacity: 1, x: 0 }}
+  transition={{ delay: 1, duration: 0.5 }}
+  style={{
+    display: 'flex',
+    flexDirection: 'column',
+    position: 'relative',
+    width: showSearch ? '350px' : '40px',
+    height: showSearch ? 'auto' : '40px',
+    borderRadius: '20px',
+    backgroundColor: 'rgba(20, 20, 20, 0.95)',
+    backdropFilter: 'blur(20px)',
+    border: '1px solid rgba(255, 255, 255, 0.15)',
+    overflow: 'hidden',
+    cursor: 'pointer',
+    transition: 'all 0.3s ease',
+    zIndex: 1002,
+    boxShadow: showSearch ? '0 20px 60px rgba(0, 0, 0, 0.5)' : 'none'
+  }}
+>
+  <div style={{
+    display: 'flex',
+    alignItems: 'center',
+    width: '100%',
+    height: '40px',
+    padding: '0 10px',
+    boxSizing: 'border-box'
+  }}>
+    <motion.div
+      onClick={handleSearchToggle}
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: '20px',
+        height: '100%',
+        cursor: 'pointer',
+        flexShrink: 0,
+        marginRight: '8px'
+      }}
+      whileHover={{ scale: 1.1 }}
+      whileTap={{ scale: 0.9 }}
+    >
+      <svg 
+        width="18" 
+        height="18" 
+        viewBox="0 0 24 24" 
+        fill="none" 
+        stroke={showSearch ? "#00FF00" : "white"} 
+        strokeWidth="2"
+      >
+        <circle cx="11" cy="11" r="8"/>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+    </motion.div>
+    
+    <input
+      ref={searchInputRef}
+      type="text"
+      value={searchQuery}
+      onChange={handleSearchInputChange}
+      onKeyDown={handleSearchKeyPress}
+      placeholder="Search chatbot, sign in, notifikasi..."
+      style={{
+        width: '100%',
+        height: '100%',
+        padding: '0 8px',
+        backgroundColor: 'transparent',
+        border: 'none',
+        color: 'white',
+        fontSize: '0.9rem',
+        outline: 'none',
+        fontFamily: 'Helvetica, Arial, sans-serif',
+        opacity: showSearch ? 1 : 0,
+        pointerEvents: showSearch ? 'auto' : 'none',
+        transition: 'opacity 0.2s ease'
+      }}
+    />
+    
+    {showSearch && searchQuery && (
+      <motion.div
+        initial={{ opacity: 0, scale: 0.8 }}
+        animate={{ opacity: 1, scale: 1 }}
+        onClick={() => {
+          setSearchQuery("");
+          setSearchResults([]);
+          setShowSearchResults(false);
+        }}
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          width: '20px',
+          height: '20px',
+          cursor: 'pointer',
+          backgroundColor: 'rgba(255, 255, 255, 0.1)',
+          borderRadius: '50%',
+          flexShrink: 0,
+          marginLeft: '8px'
+        }}
+        whileHover={{ scale: 1.2, backgroundColor: 'rgba(255, 255, 255, 0.2)' }}
+        whileTap={{ scale: 0.9 }}
+      >
+        <svg 
+          width="12" 
+          height="12" 
+          viewBox="0 0 24 24" 
+          fill="none" 
+          stroke="white" 
+          strokeWidth="2"
+        >
+          <line x1="18" y1="6" x2="6" y2="18"/>
+          <line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </motion.div>
+    )}
+  </div>
+
+  <AnimatePresence>
+    {showSearch && showSearchResults && searchResults.length > 0 && (
+      <motion.div
+        initial={{ opacity: 0, height: 0 }}
+        animate={{ opacity: 1, height: 'auto' }}
+        exit={{ opacity: 0, height: 0 }}
+        transition={{ duration: 0.3 }}
+        style={{
+          width: '100%',
+          maxHeight: '400px',
+          overflowY: 'auto',
+          backgroundColor: 'rgba(15, 15, 15, 0.98)',
+          borderTop: '1px solid rgba(255, 255, 255, 0.1)',
+          padding: '10px 0'
+        }}
+      >
+        <div style={{
+          padding: '0 15px 10px 15px',
+          borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
+          marginBottom: '5px'
+        }}>
+          <div style={{
+            color: 'rgba(255, 255, 255, 0.7)',
+            fontSize: '0.8rem',
+            fontWeight: '600',
+            textTransform: 'uppercase',
+            letterSpacing: '0.5px'
+          }}>
+            Hasil Pencarian ({searchResults.length})
+          </div>
+        </div>
+
+        {searchResults.map((result, index) => (
+          <motion.div
+            key={result.id}
+            className="search-result-item"
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: index * 0.05 }}
+            onClick={() => handleSearchResultClick(result.url)}
             style={{
-              display: 'flex',
-              flexDirection: 'column',
-              position: 'relative',
-              width: showSearch ? '350px' : '40px',
-              height: showSearch ? 'auto' : '40px',
-              borderRadius: '20px',
-              backgroundColor: 'rgba(20, 20, 20, 0.95)',
-              backdropFilter: 'blur(20px)',
-              border: '1px solid rgba(255, 255, 255, 0.15)',
-              overflow: 'hidden',
+              padding: '12px 15px',
               cursor: 'pointer',
-              transition: 'all 0.3s ease',
-              zIndex: 1002,
-              boxShadow: showSearch ? '0 20px 60px rgba(0, 0, 0, 0.5)' : 'none'
-            }}
-          >
-            {/* Search Input Bar */}
-            <div style={{
               display: 'flex',
               alignItems: 'center',
-              width: '100%',
-              height: '40px',
-              padding: '0 10px',
-              boxSizing: 'border-box'
+              gap: '12px',
+              transition: 'all 0.2s ease',
+              borderBottom: '1px solid rgba(255, 255, 255, 0.03)'
+            }}
+            whileHover={{ 
+              backgroundColor: 'rgba(0, 255, 0, 0.1)',
+              paddingLeft: '20px'
+            }}
+            whileTap={{ scale: 0.98 }}
+          >
+            <div style={{
+              width: '36px',
+              height: '36px',
+              borderRadius: '8px',
+              backgroundColor: 'rgba(255, 255, 255, 0.1)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '1.2rem',
+              flexShrink: 0
             }}>
-              {/* Search Icon */}
-              <div
-                onClick={handleSearchToggle}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  width: '20px',
-                  height: '100%',
-                  cursor: 'pointer',
-                  flexShrink: 0,
-                  marginRight: '8px'
-                }}
-              >
-                <svg 
-                  width="18" 
-                  height="18" 
-                  viewBox="0 0 24 24" 
-                  fill="none" 
-                  stroke={showSearch ? "#00FF00" : "white"} 
-                  strokeWidth="2"
-                >
-                  <circle cx="11" cy="11" r="8"/>
-                  <line x1="21" y1="21" x2="16.65" y2="16.65"/>
-                </svg>
-              </div>
-              
-              {/* Search Input */}
-              <input
-                ref={searchInputRef}
-                type="text"
-                value={searchQuery}
-                onChange={handleSearchInputChange}
-                onKeyDown={handleSearchKeyPress}
-                placeholder="Search chatbot, sign in, notifikasi..."
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  padding: '0 8px',
-                  backgroundColor: 'transparent',
-                  border: 'none',
-                  color: 'white',
-                  fontSize: '0.9rem',
-                  outline: 'none',
-                  fontFamily: 'Helvetica, Arial, sans-serif',
-                  opacity: showSearch ? 1 : 0,
-                  pointerEvents: showSearch ? 'auto' : 'none',
-                  transition: 'opacity 0.2s ease'
-                }}
-              />
-              
-              {/* Clear/X Button */}
-              {showSearch && searchQuery && (
-                <div
-                  onClick={() => {
-                    setSearchQuery("");
-                    setSearchResults([]);
-                    setShowSearchResults(false);
-                  }}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    width: '20px',
-                    height: '20px',
-                    cursor: 'pointer',
-                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                    borderRadius: '50%',
-                    flexShrink: 0,
-                    marginLeft: '8px'
-                  }}
-                >
-                  <svg 
-                    width="12" 
-                    height="12" 
-                    viewBox="0 0 24 24" 
-                    fill="none" 
-                    stroke="white" 
-                    strokeWidth="2"
-                  >
-                    <line x1="18" y1="6" x2="6" y2="18"/>
-                    <line x1="6" y1="6" x2="18" y2="18"/>
-                  </svg>
-                </div>
-              )}
+              {result.icon}
             </div>
 
-            {/* Search Results Dropdown */}
-            {showSearch && showSearchResults && searchResults.length > 0 && (
-              <div
-                style={{
-                  width: '100%',
-                  maxHeight: '400px',
-                  overflowY: 'auto',
-                  backgroundColor: 'rgba(15, 15, 15, 0.98)',
-                  borderTop: '1px solid rgba(255, 255, 255, 0.1)',
-                  padding: '10px 0'
-                }}
-              >
-                {/* Search Results Header */}
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'flex-start',
+                marginBottom: '2px'
+              }}>
                 <div style={{
-                  padding: '0 15px 10px 15px',
-                  borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
-                  marginBottom: '5px'
+                  color: 'white',
+                  fontSize: '0.95rem',
+                  fontWeight: '600',
+                  fontFamily: 'Helvetica, Arial, sans-serif',
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis'
                 }}>
-                  <div style={{
-                    color: 'rgba(255, 255, 255, 0.7)',
-                    fontSize: '0.8rem',
-                    fontWeight: '600',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.5px'
-                  }}>
-                    Hasil Pencarian ({searchResults.length})
-                  </div>
+                  {result.title}
                 </div>
-
-                {/* Search Results List */}
-                {searchResults.map((result, index) => (
-                  <div
-                    key={result.id}
-                    className="search-result-item"
-                    onClick={() => handleSearchResultClick(result.url)}
-                    style={{
-                      padding: '12px 15px',
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '12px',
-                      transition: 'all 0.2s ease',
-                      borderBottom: '1px solid rgba(255, 255, 255, 0.03)'
-                    }}
-                  >
-                    {/* Icon */}
-                    <div style={{
-                      width: '36px',
-                      height: '36px',
-                      borderRadius: '8px',
-                      backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: '1.2rem',
-                      flexShrink: 0
-                    }}>
-                      {result.icon}
-                    </div>
-
-                    {/* Content */}
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'flex-start',
-                        marginBottom: '2px'
-                      }}>
-                        <div style={{
-                          color: 'white',
-                          fontSize: '0.95rem',
-                          fontWeight: '600',
-                          fontFamily: 'Helvetica, Arial, sans-serif',
-                          whiteSpace: 'nowrap',
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis'
-                        }}>
-                          {result.title}
-                        </div>
-                        <div style={{
-                          backgroundColor: 'rgba(0, 80, 183, 0.3)',
-                          color: '#0050B7',
-                          fontSize: '0.7rem',
-                          fontWeight: '600',
-                          padding: '2px 6px',
-                          borderRadius: '10px',
-                          marginLeft: '8px',
-                          flexShrink: 0
-                        }}>
-                          {result.category}
-                        </div>
-                      </div>
-                      
-                      <div style={{
-                        color: 'rgba(255, 255, 255, 0.6)',
-                        fontSize: '0.8rem',
-                        whiteSpace: 'nowrap',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        marginBottom: '4px'
-                      }}>
-                        {result.description}
-                      </div>
-                      
-                      <div style={{
-                        color: '#00FF00',
-                        fontSize: '0.75rem',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '4px'
-                      }}>
-                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
-                          <polyline points="15 3 21 3 21 9"/>
-                          <line x1="10" y1="14" x2="21" y2="3"/>
-                        </svg>
-                        {result.url}
-                      </div>
-                    </div>
-
-                    {/* Arrow Indicator */}
-                    <div
-                      style={{
-                        opacity: 0.5,
-                        transition: 'all 0.2s ease'
-                      }}
-                    >
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M5 12h14"/>
-                        <path d="m12 5 7 7-7 7"/>
-                      </svg>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {/* No Results Message */}
-            {showSearch && searchQuery.trim() && searchResults.length === 0 && (
-              <div
-                style={{
-                  padding: '20px 15px',
-                  textAlign: 'center',
-                  color: 'rgba(255, 255, 255, 0.5)',
-                  fontSize: '0.9rem',
-                  backgroundColor: 'rgba(15, 15, 15, 0.98)',
-                  borderTop: '1px solid rgba(255, 255, 255, 0.1)'
-                }}
-              >
-                Tidak ditemukan hasil untuk "{searchQuery}"
-                <div style={{ fontSize: '0.8rem', marginTop: '5px' }}>
-                  Coba kata kunci lain seperti: chatbot, sign in, notifikasi
+                <div style={{
+                  backgroundColor: 'rgba(0, 80, 183, 0.3)',
+                  color: '#0050B7',
+                  fontSize: '0.7rem',
+                  fontWeight: '600',
+                  padding: '2px 6px',
+                  borderRadius: '10px',
+                  marginLeft: '8px',
+                  flexShrink: 0
+                }}>
+                  {result.category}
                 </div>
               </div>
-            )}
-          </div>
+              
+              <div style={{
+                color: 'rgba(255, 255, 255, 0.6)',
+                fontSize: '0.8rem',
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                marginBottom: '4px'
+              }}>
+                {result.description}
+              </div>
+              
+              <div style={{
+                color: '#00FF00',
+                fontSize: '0.75rem',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px'
+              }}>
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+                  <polyline points="15 3 21 3 21 9"/>
+                  <line x1="10" y1="14" x2="21" y2="3"/>
+                </svg>
+                {result.url}
+              </div>
+            </div>
+
+            <motion.div
+              initial={{ opacity: 0, x: -5 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.2 }}
+              style={{
+                opacity: 0.5,
+                transition: 'all 0.2s ease'
+              }}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M5 12h14"/>
+                <path d="m12 5 7 7-7 7"/>
+              </svg>
+            </motion.div>
+          </motion.div>
+        ))}
+      </motion.div>
+    )}
+  </AnimatePresence>
+
+  <AnimatePresence>
+    {showSearch && searchQuery.trim() && searchResults.length === 0 && (
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        style={{
+          padding: '20px 15px',
+          textAlign: 'center',
+          color: 'rgba(255, 255, 255, 0.5)',
+          fontSize: '0.9rem',
+          backgroundColor: 'rgba(15, 15, 15, 0.98)',
+          borderTop: '1px solid rgba(255, 255, 255, 0.1)'
+        }}
+      >
+        Tidak ditemukan hasil untuk "{searchQuery}"
+        <div style={{ fontSize: '0.8rem', marginTop: '5px' }}>
+          Coba kata kunci lain seperti: chatbot, sign in, notifikasi
+        </div>
+      </motion.div>
+    )}
+  </AnimatePresence>
+</motion.div>
 
           {/* Notification Bell dengan Badge */}
-          <div
+          <motion.div
             ref={notificationRef}
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 1.05, duration: 0.5 }}
             style={{
               position: 'relative',
               width: '40px',
@@ -4204,8 +5082,13 @@ export default function HomePage(): React.JSX.Element {
               transition: 'all 0.3s ease'
             }}
             onClick={() => setShowNotification(!showNotification)}
+            whileHover={{ 
+              scale: 1.1,
+              backgroundColor: 'rgba(255, 255, 255, 0.15)',
+              border: '1px solid rgba(255, 255, 255, 0.3)'
+            }}
+            whileTap={{ scale: 0.95 }}
           >
-            {/* Bell Icon */}
             <svg 
               width="20" 
               height="20" 
@@ -4218,9 +5101,11 @@ export default function HomePage(): React.JSX.Element {
               <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
             </svg>
             
-            {/* Notification Badge */}
             {hasUnreadNotifications && notificationCount > 0 && (
-              <div
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ type: "spring", stiffness: 500, damping: 15 }}
                 style={{
                   position: 'absolute',
                   top: '-2px',
@@ -4244,13 +5129,40 @@ export default function HomePage(): React.JSX.Element {
                 }}>
                   {notificationCount > 9 ? '9+' : notificationCount}
                 </span>
-              </div>
+              </motion.div>
             )}
-          </div>
+            
+            {hasUnreadNotifications && (
+              <motion.div
+                animate={{
+                  scale: [1, 1.2, 1],
+                  opacity: [0.7, 0, 0.7]
+                }}
+                transition={{
+                  duration: 2,
+                  repeat: Infinity,
+                  repeatType: "reverse"
+                }}
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  backgroundColor: '#FF4757',
+                  borderRadius: '50%',
+                  zIndex: -1
+                }}
+              />
+            )}
+          </motion.div>
 
           {/* User Stats Badge */}
           {user && userStats && (
-            <div
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.5, duration: 0.3 }}
               style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -4275,11 +5187,11 @@ export default function HomePage(): React.JSX.Element {
               }}>
                 {userStats.loginCount || 0}
               </span>
-            </div>
+            </motion.div>
           )}
 
           {/* Tombol MENU */}
-          <div
+          <motion.div
             onClick={handleOpenMenu}
             style={{
               color: 'white',
@@ -4293,12 +5205,138 @@ export default function HomePage(): React.JSX.Element {
               position: 'relative',
               transition: 'all 0.3s ease'
             }}
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 1.1, duration: 0.6 }}
+            whileHover={{ 
+              color: '#00FF00',
+              scale: 1.05
+            }}
+            whileTap={{ scale: 0.95 }}
           >
             MENU
-          </div>
+          </motion.div>
 
-          {/* Tombol Sign In yang sudah diperbaiki */}
-          {renderSignInButton()}
+          {/* Sign In / User Button */}
+          <motion.button
+            ref={userButtonRef}
+            onClick={handleSignInClick}
+            onMouseEnter={() => setIsHoveringSignIn(true)}
+            onMouseLeave={() => setIsHoveringSignIn(false)}
+            style={{
+              padding: isMobile ? '0.4rem 1rem' : '0.6rem 1.5rem',
+              fontSize: isMobile ? '0.9rem' : '1.5rem',
+              fontWeight: '600',
+              color: 'white',
+              backgroundColor: 'transparent',
+              border: '1px solid rgba(255,255,255,0.15)',
+              borderRadius: '50px',
+              cursor: 'pointer',
+              fontFamily: 'Helvetica, Arial, sans-serif',
+              backdropFilter: 'blur(10px)',
+              whiteSpace: 'nowrap',
+              display: 'flex',
+              alignItems: 'center',
+              gap: isMobile ? '0.3rem' : '0.5rem',
+              margin: 0,
+              maxWidth: isMobile ? '180px' : '250px',
+              minWidth: isMobile ? '120px' : '180px',
+              height: isMobile ? '40px' : '50px',
+              overflow: 'hidden',
+              position: 'relative',
+              transition: 'all 0.3s ease',
+              boxShadow: '0 4px 15px rgba(0,0,0,0.1)'
+            }}
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1.2, duration: 0.6 }}
+            whileHover={{ 
+              backgroundColor: 'rgba(255,255,255,0.1)',
+              scale: 1.05,
+              border: '1px solid rgba(255,255,255,0.3)',
+              transition: { duration: 0.2 }
+            }}
+            whileTap={{ scale: 0.95 }}
+          >
+            {user ? (
+              <>
+                <svg 
+                  width={isMobile ? "18" : "30"} 
+                  height={isMobile ? "18" : "30"} 
+                  viewBox="0 0 24 24" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  strokeWidth="2"
+                  style={{
+                    flexShrink: 0,
+                    marginRight: '0.5rem'
+                  }}
+                >
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                  <circle cx="12" cy="7" r="4"/>
+                </svg>
+                
+                <div style={{
+                  overflow: 'hidden',
+                  width: '100%',
+                  position: 'relative',
+                  display: 'flex',
+                  alignItems: 'center'
+                }}>
+                  <motion.span
+                    ref={userTextRef}
+                    style={{
+                      display: 'inline-block',
+                      whiteSpace: 'nowrap',
+                      paddingRight: '20px',
+                      transform: isNameScrolling ? `translateX(${scrollPosition}px)` : 'translateX(0)',
+                      willChange: 'transform'
+                    }}
+                  >
+                    {isHoveringSignIn ? `Hi, ${userDisplayName}` : userDisplayName}
+                  </motion.span>
+                  
+                  {isHoveringSignIn && (
+                    <motion.span
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      style={{
+                        marginLeft: '0.5rem',
+                        fontSize: '0.8em'
+                      }}
+                    >
+                      ↓
+                    </motion.span>
+                  )}
+                </div>
+              </>
+            ) : (
+              <>
+                <svg 
+                  width={isMobile ? "18" : "30"} 
+                  height={isMobile ? "18" : "30"} 
+                  viewBox="0 0 24 24" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  strokeWidth="2"
+                  style={{
+                    flexShrink: 0,
+                    marginRight: '0.5rem'
+                  }}
+                >
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                  <circle cx="12" cy="7" r="4"/>
+                </svg>
+                <span style={{
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis'
+                }}>
+                  SIGN IN
+                </span>
+              </>
+            )}
+          </motion.button>
         </div>
       </div>
 
@@ -4311,7 +5349,7 @@ export default function HomePage(): React.JSX.Element {
         position: 'relative'
       }}>
 
-        {/* PRODUCT AND Image Section - DI BAWAH JUDUL WEBSITE */}
+        {/* PRODUCT AND Image Section */}
         <div style={{
           width: '100%',
           padding: isMobile ? '1.5rem' : '3rem',
@@ -4329,7 +5367,6 @@ export default function HomePage(): React.JSX.Element {
             width: '100%',
             justifyContent: 'space-between'
           }}>
-            {/* PRODUCT - Di kiri */}
             <div style={{
               textAlign: 'left',
               height: isMobile ? '5rem' : '7rem',
@@ -4351,13 +5388,11 @@ export default function HomePage(): React.JSX.Element {
               </h2>
             </div>
 
-            {/* AND + Foto Container - Di kanan, dekat satu sama lain */}
             <div style={{
               display: 'flex',
               alignItems: 'center',
               gap: isMobile ? '0.5rem' : '1rem'
             }}>
-              {/* AND */}
               <div style={{
                 textAlign: 'center',
                 height: isMobile ? '5rem' : '7rem',
@@ -4379,13 +5414,11 @@ export default function HomePage(): React.JSX.Element {
                 </h2>
               </div>
 
-              {/* Container Foto + Angka 01 */}
               <div style={{
                 position: 'relative',
                 display: 'flex',
                 alignItems: 'flex-end'
               }}>
-                {/* Foto */}
                 <div style={{
                   width: isMobile ? '140px' : '180px',
                   height: isMobile ? '5rem' : '7rem',
@@ -4406,7 +5439,6 @@ export default function HomePage(): React.JSX.Element {
                   />
                 </div>
                 
-                {/* Angka 01 */}
                 <div style={{
                   position: 'absolute',
                   bottom: '-0.8rem',
@@ -4431,13 +5463,11 @@ export default function HomePage(): React.JSX.Element {
             justifyContent: 'flex-start',
             gap: isMobile ? '4rem' : '8rem'
           }}>
-            {/* Container Foto + Angka 02 - Di kiri */}
             <div style={{
               position: 'relative',
               display: 'flex',
               alignItems: 'flex-end'
             }}>
-              {/* Foto */}
               <div style={{
                 width: isMobile ? '140px' : '180px',
                 height: isMobile ? '5rem' : '7rem',
@@ -4458,7 +5488,6 @@ export default function HomePage(): React.JSX.Element {
                 />
               </div>
               
-              {/* Angka 02 */}
               <div style={{
                 position: 'absolute',
                 bottom: '-0.8rem',
@@ -4473,7 +5502,6 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* VISUAL DESIGNER - 1 baris */}
             <div style={{
               textAlign: 'left',
               height: isMobile ? '5rem' : '7rem',
@@ -4503,7 +5531,6 @@ export default function HomePage(): React.JSX.Element {
             width: '100%',
             justifyContent: 'space-between'
           }}>
-            {/* BASED - Kiri */}
             <div style={{
               textAlign: 'left',
               height: isMobile ? '5rem' : '7rem',
@@ -4524,13 +5551,11 @@ export default function HomePage(): React.JSX.Element {
               </h2>
             </div>
 
-            {/* Container Foto + Angka 03 */}
             <div style={{
               position: 'relative',
               display: 'flex',
               alignItems: 'flex-end'
             }}>
-              {/* Foto */}
               <div style={{
                 width: isMobile ? '140px' : '180px',
                 height: isMobile ? '5rem' : '7rem',
@@ -4551,7 +5576,6 @@ export default function HomePage(): React.JSX.Element {
                 />
               </div>
               
-              {/* Angka 03 */}
               <div style={{
                 position: 'absolute',
                 bottom: '-0.8rem',
@@ -4566,7 +5590,6 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* IN - Kanan */}
             <div style={{
               textAlign: 'right',
               height: isMobile ? '5rem' : '7rem',
@@ -4597,13 +5620,11 @@ export default function HomePage(): React.JSX.Element {
             justifyContent: 'flex-start',
             gap: isMobile ? '4rem' : '8rem'
           }}>
-            {/* Container Foto + Angka 04 - Di kiri */}
             <div style={{
               position: 'relative',
               display: 'flex',
               alignItems: 'flex-end'
             }}>
-              {/* Foto */}
               <div style={{
                 width: isMobile ? '140px' : '180px',
                 height: isMobile ? '5rem' : '7rem',
@@ -4624,7 +5645,6 @@ export default function HomePage(): React.JSX.Element {
                 />
               </div>
               
-              {/* Angka 04 */}
               <div style={{
                 position: 'absolute',
                 bottom: '-0.8rem',
@@ -4639,7 +5659,6 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* INDONESIA */}
             <div style={{
               textAlign: 'left',
               height: isMobile ? '5rem' : '7rem',
@@ -4669,7 +5688,6 @@ export default function HomePage(): React.JSX.Element {
           width: '100%'
         }} />
 
-        {/* AnimatePresence untuk transisi antara view */}
         <AnimatePresence mode="wait">
           {currentView === "main" && (
             <motion.div
@@ -4679,14 +5697,6 @@ export default function HomePage(): React.JSX.Element {
               exit={{ opacity: 0 }}
               transition={{ duration: 0.5 }}
             >
-              {/* Container untuk Tombol Slider dan Teks MENURU - TELAH DIHAPUS */}
-              
-              {/* Foto Card Design Section - 6 Card Horizontal - TELAH DIHAPUS */}
-              
-              {/* Progress Bar dengan 3 Foto dan Komentar - TELAH DIHAPUS */}
-              
-              {/* Foto Card Design Section - 4 Card Pojok Kanan - TELAH DIHAPUS */}
-              
             </motion.div>
           )}
         </AnimatePresence>
@@ -4694,4 +5704,3 @@ export default function HomePage(): React.JSX.Element {
     </div>
   );
 }
-
