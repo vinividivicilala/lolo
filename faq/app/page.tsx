@@ -193,7 +193,7 @@ export default function HomePage(): React.JSX.Element {
   const [userNotes, setUserNotes] = useState<Note[]>([]);
   const [totalNotesCount, setTotalNotesCount] = useState(0);
   const [isLoadingNotes, setIsLoadingNotes] = useState(false);
-  const [activeTab, setActiveTab] = useState<'notes' | 'settings' | 'help' | 'feedback'>('notes');
+  const [activeTab, setActiveTab] = useState<'notes' | 'settings'>('notes');
   const [userProvider, setUserProvider] = useState<string>('');
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [editName, setEditName] = useState('');
@@ -1743,6 +1743,115 @@ export default function HomePage(): React.JSX.Element {
   // Komentar untuk foto saat ini
   const currentPhotoComments = comments.filter(comment => comment.photoIndex === currentPhotoIndex);
 
+  // Ikon untuk UI
+  const icons = {
+    arrowRight: (
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <path d="M5 12h14"/>
+        <path d="m12 5 7 7-7 7"/>
+      </svg>
+    ),
+    notes: (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+        <polyline points="14 2 14 8 20 8"/>
+        <line x1="16" y1="13" x2="8" y2="13"/>
+        <line x1="16" y1="17" x2="8" y2="17"/>
+        <polyline points="10 9 9 9 8 9"/>
+      </svg>
+    ),
+    settings: (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+        <circle cx="12" cy="12" r="3"/>
+        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+      </svg>
+    ),
+    user: (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+        <circle cx="12" cy="7" r="4"/>
+      </svg>
+    ),
+    logout: (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+        <polyline points="16 17 21 12 16 7"/>
+        <line x1="21" y1="12" x2="9" y2="12"/>
+      </svg>
+    ),
+    close: (
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <line x1="18" y1="6" x2="6" y2="18"/>
+        <line x1="6" y1="6" x2="18" y2="18"/>
+      </svg>
+    ),
+    edit: (
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+      </svg>
+    ),
+    delete: (
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+        <path d="M3 6h18"/>
+        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/>
+        <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+        <line x1="10" y1="11" x2="10" y2="17"/>
+        <line x1="14" y1="11" x2="14" y2="17"/>
+      </svg>
+    ),
+    time: (
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+        <circle cx="12" cy="12" r="10"/>
+        <polyline points="12 6 12 12 16 14"/>
+      </svg>
+    ),
+    category: (
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+        <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/>
+        <line x1="7" y1="7" x2="7.01" y2="7"/>
+      </svg>
+    ),
+    email: (
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+        <rect x="2" y="4" width="20" height="16" rx="2"/>
+        <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
+      </svg>
+    ),
+    key: (
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+        <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0 3 3L22 7l-3-3m-3.5 3.5L19 4"/>
+      </svg>
+    ),
+    calendar: (
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+        <line x1="16" y1="2" x2="16" y2="6"/>
+        <line x1="8" y1="2" x2="8" y2="6"/>
+        <line x1="3" y1="10" x2="21" y2="10"/>
+      </svg>
+    ),
+    save: (
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+        <polyline points="17 21 17 13 7 13 7 21"/>
+        <polyline points="7 3 7 8 15 8"/>
+      </svg>
+    ),
+    cancel: (
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+        <circle cx="12" cy="12" r="10"/>
+        <line x1="15" y1="9" x2="9" y2="15"/>
+        <line x1="9" y1="9" x2="15" y2="15"/>
+      </svg>
+    ),
+    chevronRight: (
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <polyline points="9 18 15 12 9 6"/>
+      </svg>
+    )
+  };
+
   return (
     <div style={{
       minHeight: '100vh',
@@ -1756,92 +1865,93 @@ export default function HomePage(): React.JSX.Element {
       alignItems: 'center',
       position: 'relative',
       overflow: 'auto',
-      fontFamily: 'Helvetica, Arial, sans-serif',
+      fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
       WebkitFontSmoothing: 'antialiased',
       MozOsxFontSmoothing: 'grayscale'
     }}>
 
-      {/* Modal Profil User */}
+      {/* Modal Profil User - Minimalist Design */}
       <AnimatePresence>
         {showUserProfileModal && user && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
+            transition={{ duration: 0.2 }}
             style={{
               position: 'fixed',
               top: 0,
               left: 0,
               width: '100%',
               height: '100%',
-              backgroundColor: 'rgba(0, 0, 0, 0.8)',
+              backgroundColor: 'rgba(0, 0, 0, 0.85)',
               zIndex: 10000,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              backdropFilter: 'blur(5px)'
+              backdropFilter: 'blur(4px)'
             }}
             onClick={() => setShowUserProfileModal(false)}
           >
             <motion.div
               ref={userProfileModalRef}
-              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              initial={{ scale: 0.95, opacity: 0, y: 20 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.9, opacity: 0, y: 20 }}
-              transition={{ duration: 0.3 }}
+              exit={{ scale: 0.95, opacity: 0, y: 20 }}
+              transition={{ duration: 0.2 }}
               style={{
-                backgroundColor: '#111111',
-                borderRadius: '15px',
-                width: isMobile ? '90%' : '800px',
-                maxWidth: '900px',
+                backgroundColor: '#0f0f0f',
+                borderRadius: '12px',
+                width: isMobile ? '95%' : '600px',
+                maxWidth: '650px',
                 maxHeight: '90vh',
                 display: 'flex',
                 flexDirection: 'column',
                 overflow: 'hidden',
-                border: '1px solid #333333'
+                border: '1px solid #1a1a1a'
               }}
               onClick={(e) => e.stopPropagation()}
             >
               {/* Header */}
               <div style={{
-                padding: '1.5rem 2rem',
-                borderBottom: '1px solid #333333',
+                padding: '1.5rem',
+                borderBottom: '1px solid #1a1a1a',
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center',
                 backgroundColor: '#0a0a0a'
               }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                   <div style={{
-                    width: '50px',
-                    height: '50px',
-                    borderRadius: '50%',
-                    backgroundColor: '#0050B7',
+                    width: '40px',
+                    height: '40px',
+                    borderRadius: '8px',
+                    backgroundColor: '#1a1a1a',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    fontSize: '1.5rem',
-                    fontWeight: '600',
-                    color: 'white'
+                    fontSize: '1rem',
+                    fontWeight: '500',
+                    color: 'white',
+                    border: '1px solid #2a2a2a'
                   }}>
-                    {userDisplayName.charAt(0).toUpperCase()}
+                    {icons.user}
                   </div>
                   <div>
                     <h3 style={{
                       color: 'white',
-                      fontSize: '1.5rem',
-                      fontWeight: '600',
+                      fontSize: '1.25rem',
+                      fontWeight: '500',
                       margin: 0,
-                      fontFamily: 'Helvetica, Arial, sans-serif'
+                      fontFamily: 'Inter, sans-serif'
                     }}>
                       {userDisplayName}
                     </h3>
                     <p style={{
-                      color: '#888888',
-                      fontSize: '0.9rem',
+                      color: '#888',
+                      fontSize: '0.8rem',
                       margin: '0.2rem 0 0 0',
-                      fontFamily: 'Helvetica, Arial, sans-serif'
+                      fontFamily: 'Inter, sans-serif'
                     }}>
                       {user.email}
                     </p>
@@ -1850,59 +1960,64 @@ export default function HomePage(): React.JSX.Element {
                 <motion.button
                   onClick={() => setShowUserProfileModal(false)}
                   style={{
-                    backgroundColor: 'transparent',
-                    border: 'none',
-                    color: '#888888',
-                    fontSize: '2rem',
+                    backgroundColor: '#1a1a1a',
+                    border: '1px solid #2a2a2a',
+                    color: '#888',
+                    fontSize: '1rem',
                     cursor: 'pointer',
-                    width: '40px',
-                    height: '40px',
+                    width: '32px',
+                    height: '32px',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    borderRadius: '5px',
-                    fontFamily: 'Helvetica, Arial, sans-serif'
+                    borderRadius: '6px',
+                    fontFamily: 'Inter, sans-serif'
                   }}
                   whileHover={{ 
-                    backgroundColor: '#333333',
+                    backgroundColor: '#2a2a2a',
                     color: 'white'
                   }}
                   whileTap={{ scale: 0.95 }}
                 >
-                  ×
+                  {icons.close}
                 </motion.button>
               </div>
 
-              {/* Tabs Navigation */}
+              {/* Tabs Navigation - Vertical */}
               <div style={{
                 display: 'flex',
-                borderBottom: '1px solid #333333',
+                borderBottom: '1px solid #1a1a1a',
                 backgroundColor: '#0a0a0a'
               }}>
-                {['notes', 'settings', 'help', 'feedback'].map((tab) => (
+                {['notes', 'settings'].map((tab) => (
                   <motion.button
                     key={tab}
                     onClick={() => setActiveTab(tab as any)}
                     style={{
                       flex: 1,
-                      padding: '1rem',
+                      padding: '0.875rem',
                       backgroundColor: 'transparent',
                       border: 'none',
-                      color: activeTab === tab ? 'white' : '#888888',
-                      fontSize: '0.9rem',
+                      color: activeTab === tab ? 'white' : '#888',
+                      fontSize: '0.85rem',
                       fontWeight: '500',
                       cursor: 'pointer',
-                      textTransform: 'capitalize',
-                      borderBottom: activeTab === tab ? '2px solid #0050B7' : 'none',
-                      fontFamily: 'Helvetica, Arial, sans-serif',
-                      transition: 'all 0.2s ease'
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.5px',
+                      borderBottom: activeTab === tab ? '1px solid white' : 'none',
+                      fontFamily: 'Inter, sans-serif',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '0.5rem'
                     }}
                     whileHover={{ 
                       backgroundColor: '#1a1a1a',
                       color: 'white'
                     }}
                   >
-                    {tab === 'notes' ? `Notes (${totalNotesCount})` : tab}
+                    {tab === 'notes' ? icons.notes : icons.settings}
+                    {tab === 'notes' ? `Notes (${totalNotesCount})` : 'Settings'}
                   </motion.button>
                 ))}
               </div>
@@ -1911,7 +2026,7 @@ export default function HomePage(): React.JSX.Element {
               <div style={{
                 flex: 1,
                 overflowY: 'auto',
-                padding: '2rem'
+                padding: '1.5rem'
               }}>
                 {/* Notes Tab */}
                 {activeTab === 'notes' && (
@@ -1924,19 +2039,23 @@ export default function HomePage(): React.JSX.Element {
                     }}>
                       <h4 style={{
                         color: 'white',
-                        fontSize: '1.2rem',
-                        fontWeight: '600',
+                        fontSize: '1rem',
+                        fontWeight: '500',
                         margin: 0,
-                        fontFamily: 'Helvetica, Arial, sans-serif'
+                        fontFamily: 'Inter, sans-serif',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.5rem'
                       }}>
+                        {icons.notes}
                         Your Notes
                       </h4>
                       <div style={{
-                        color: '#0050B7',
-                        fontSize: '0.9rem',
-                        fontFamily: 'Helvetica, Arial, sans-serif'
+                        color: '#888',
+                        fontSize: '0.8rem',
+                        fontFamily: 'Inter, sans-serif'
                       }}>
-                        Total: {totalNotesCount} notes
+                        Total: {totalNotesCount}
                       </div>
                     </div>
 
@@ -1944,8 +2063,8 @@ export default function HomePage(): React.JSX.Element {
                       <div style={{
                         padding: '3rem 0',
                         textAlign: 'center',
-                        color: '#888888',
-                        fontFamily: 'Helvetica, Arial, sans-serif'
+                        color: '#888',
+                        fontFamily: 'Inter, sans-serif'
                       }}>
                         Loading notes...
                       </div>
@@ -1953,52 +2072,52 @@ export default function HomePage(): React.JSX.Element {
                       <div style={{
                         padding: '3rem 0',
                         textAlign: 'center',
-                        color: '#888888',
-                        fontFamily: 'Helvetica, Arial, sans-serif'
+                        color: '#888',
+                        fontFamily: 'Inter, sans-serif'
                       }}>
-                        <div style={{ fontSize: '3rem', marginBottom: '1rem', opacity: 0.5 }}>📝</div>
-                        <p style={{ margin: '0 0 1rem 0' }}>No notes yet</p>
+                        <div style={{ fontSize: '2rem', marginBottom: '1rem', opacity: 0.5 }}>{icons.notes}</div>
+                        <p style={{ margin: '0 0 1rem 0', fontSize: '0.9rem' }}>No notes yet</p>
                         <motion.button
                           onClick={() => router.push('/notes')}
                           style={{
-                            backgroundColor: '#0050B7',
+                            backgroundColor: '#1a1a1a',
                             color: 'white',
-                            border: 'none',
-                            padding: '0.8rem 1.5rem',
-                            borderRadius: '5px',
+                            border: '1px solid #2a2a2a',
+                            padding: '0.6rem 1rem',
+                            borderRadius: '6px',
                             cursor: 'pointer',
-                            fontSize: '0.9rem',
+                            fontSize: '0.8rem',
                             fontWeight: '500',
-                            fontFamily: 'Helvetica, Arial, sans-serif'
+                            fontFamily: 'Inter, sans-serif'
                           }}
-                          whileHover={{ backgroundColor: '#0066CC' }}
+                          whileHover={{ backgroundColor: '#2a2a2a' }}
                           whileTap={{ scale: 0.95 }}
                         >
-                          Create Your First Note
+                          Create First Note
                         </motion.button>
                       </div>
                     ) : (
                       <div style={{
                         display: 'flex',
                         flexDirection: 'column',
-                        gap: '1rem'
+                        gap: '0.75rem'
                       }}>
                         {userNotes.slice(0, 10).map((note, index) => (
                           <motion.div
                             key={note.id}
-                            initial={{ opacity: 0, y: 10 }}
+                            initial={{ opacity: 0, y: 5 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: index * 0.05 }}
                             style={{
                               backgroundColor: '#1a1a1a',
                               borderRadius: '8px',
-                              padding: '1.2rem',
-                              borderLeft: '3px solid #0050B7',
+                              padding: '1rem',
+                              border: '1px solid #2a2a2a',
                               cursor: 'pointer'
                             }}
                             whileHover={{ 
-                              backgroundColor: '#222222',
-                              transform: 'translateX(5px)'
+                              backgroundColor: '#222',
+                              borderColor: '#333'
                             }}
                             onClick={() => router.push(`/notes#${note.id}`)}
                           >
@@ -2010,29 +2129,37 @@ export default function HomePage(): React.JSX.Element {
                             }}>
                               <h5 style={{
                                 color: 'white',
-                                fontSize: '1rem',
-                                fontWeight: '600',
+                                fontSize: '0.9rem',
+                                fontWeight: '500',
                                 margin: 0,
-                                fontFamily: 'Helvetica, Arial, sans-serif',
-                                flex: 1
+                                fontFamily: 'Inter, sans-serif',
+                                flex: 1,
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.5rem'
                               }}>
+                                {icons.notes}
                                 {note.title || 'Untitled Note'}
                               </h5>
                               <span style={{
-                                color: '#888888',
-                                fontSize: '0.8rem',
-                                fontFamily: 'Helvetica, Arial, sans-serif',
+                                color: '#888',
+                                fontSize: '0.7rem',
+                                fontFamily: 'Inter, sans-serif',
                                 whiteSpace: 'nowrap',
-                                marginLeft: '1rem'
+                                marginLeft: '1rem',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.25rem'
                               }}>
+                                {icons.time}
                                 {calculateTimeAgo(note.createdAt)}
                               </span>
                             </div>
                             <p style={{
-                              color: '#cccccc',
-                              fontSize: '0.9rem',
+                              color: '#aaa',
+                              fontSize: '0.8rem',
                               margin: '0.5rem 0 0 0',
-                              fontFamily: 'Helvetica, Arial, sans-serif',
+                              fontFamily: 'Inter, sans-serif',
                               lineHeight: 1.4,
                               display: '-webkit-box',
                               WebkitLineClamp: 2,
@@ -2048,12 +2175,16 @@ export default function HomePage(): React.JSX.Element {
                                 gap: '0.5rem'
                               }}>
                                 <span style={{
-                                  backgroundColor: '#333333',
-                                  color: '#888888',
-                                  fontSize: '0.7rem',
+                                  backgroundColor: '#2a2a2a',
+                                  color: '#aaa',
+                                  fontSize: '0.65rem',
                                   padding: '0.2rem 0.5rem',
-                                  borderRadius: '3px'
+                                  borderRadius: '4px',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: '0.25rem'
                                 }}>
+                                  {icons.category}
                                   {note.category}
                                 </span>
                               </div>
@@ -2068,9 +2199,9 @@ export default function HomePage(): React.JSX.Element {
                             padding: '1rem'
                           }}>
                             <span style={{
-                              color: '#888888',
-                              fontSize: '0.9rem',
-                              fontFamily: 'Helvetica, Arial, sans-serif'
+                              color: '#888',
+                              fontSize: '0.8rem',
+                              fontFamily: 'Inter, sans-serif'
                             }}>
                               Showing 10 of {userNotes.length} notes
                             </span>
@@ -2078,18 +2209,18 @@ export default function HomePage(): React.JSX.Element {
                               onClick={() => router.push('/notes')}
                               style={{
                                 backgroundColor: 'transparent',
-                                color: '#0050B7',
-                                border: '1px solid #0050B7',
-                                padding: '0.5rem 1rem',
-                                borderRadius: '5px',
+                                color: '#aaa',
+                                border: '1px solid #2a2a2a',
+                                padding: '0.4rem 0.8rem',
+                                borderRadius: '6px',
                                 cursor: 'pointer',
-                                fontSize: '0.9rem',
+                                fontSize: '0.8rem',
                                 fontWeight: '500',
-                                fontFamily: 'Helvetica, Arial, sans-serif',
-                                marginLeft: '1rem'
+                                fontFamily: 'Inter, sans-serif',
+                                marginLeft: '0.75rem'
                               }}
                               whileHover={{ 
-                                backgroundColor: 'rgba(0, 80, 183, 0.1)'
+                                backgroundColor: '#1a1a1a'
                               }}
                               whileTap={{ scale: 0.95 }}
                             >
@@ -2107,11 +2238,15 @@ export default function HomePage(): React.JSX.Element {
                   <div>
                     <h4 style={{
                       color: 'white',
-                      fontSize: '1.2rem',
-                      fontWeight: '600',
+                      fontSize: '1rem',
+                      fontWeight: '500',
                       margin: '0 0 1.5rem 0',
-                      fontFamily: 'Helvetica, Arial, sans-serif'
+                      fontFamily: 'Inter, sans-serif',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.5rem'
                     }}>
+                      {icons.settings}
                       Account Settings
                     </h4>
 
@@ -2119,15 +2254,15 @@ export default function HomePage(): React.JSX.Element {
                       <div style={{
                         display: 'flex',
                         flexDirection: 'column',
-                        gap: '1.5rem'
+                        gap: '1rem'
                       }}>
                         <div>
                           <label style={{
-                            color: '#cccccc',
-                            fontSize: '0.9rem',
+                            color: '#aaa',
+                            fontSize: '0.8rem',
                             marginBottom: '0.5rem',
                             display: 'block',
-                            fontFamily: 'Helvetica, Arial, sans-serif'
+                            fontFamily: 'Inter, sans-serif'
                           }}>
                             Display Name
                           </label>
@@ -2137,13 +2272,13 @@ export default function HomePage(): React.JSX.Element {
                             onChange={(e) => setEditName(e.target.value)}
                             style={{
                               width: '100%',
-                              padding: '0.8rem',
+                              padding: '0.75rem',
                               backgroundColor: '#1a1a1a',
-                              border: '1px solid #333333',
-                              borderRadius: '5px',
+                              border: '1px solid #2a2a2a',
+                              borderRadius: '6px',
                               color: 'white',
-                              fontSize: '1rem',
-                              fontFamily: 'Helvetica, Arial, sans-serif',
+                              fontSize: '0.9rem',
+                              fontFamily: 'Inter, sans-serif',
                               outline: 'none'
                             }}
                           />
@@ -2151,11 +2286,11 @@ export default function HomePage(): React.JSX.Element {
 
                         <div>
                           <label style={{
-                            color: '#cccccc',
-                            fontSize: '0.9rem',
+                            color: '#aaa',
+                            fontSize: '0.8rem',
                             marginBottom: '0.5rem',
                             display: 'block',
-                            fontFamily: 'Helvetica, Arial, sans-serif'
+                            fontFamily: 'Inter, sans-serif'
                           }}>
                             Email Address
                           </label>
@@ -2165,13 +2300,13 @@ export default function HomePage(): React.JSX.Element {
                             onChange={(e) => setEditEmail(e.target.value)}
                             style={{
                               width: '100%',
-                              padding: '0.8rem',
+                              padding: '0.75rem',
                               backgroundColor: '#1a1a1a',
-                              border: '1px solid #333333',
-                              borderRadius: '5px',
+                              border: '1px solid #2a2a2a',
+                              borderRadius: '6px',
                               color: 'white',
-                              fontSize: '1rem',
-                              fontFamily: 'Helvetica, Arial, sans-serif',
+                              fontSize: '0.9rem',
+                              fontFamily: 'Inter, sans-serif',
                               outline: 'none'
                             }}
                           />
@@ -2179,69 +2314,82 @@ export default function HomePage(): React.JSX.Element {
 
                         <div>
                           <label style={{
-                            color: '#cccccc',
-                            fontSize: '0.9rem',
+                            color: '#aaa',
+                            fontSize: '0.8rem',
                             marginBottom: '0.5rem',
                             display: 'block',
-                            fontFamily: 'Helvetica, Arial, sans-serif'
+                            fontFamily: 'Inter, sans-serif'
                           }}>
                             Login Method
                           </label>
                           <div style={{
-                            padding: '0.8rem',
+                            padding: '0.75rem',
                             backgroundColor: '#1a1a1a',
-                            border: '1px solid #333333',
-                            borderRadius: '5px',
-                            color: '#888888',
-                            fontSize: '1rem',
-                            fontFamily: 'Helvetica, Arial, sans-serif'
+                            border: '1px solid #2a2a2a',
+                            borderRadius: '6px',
+                            color: '#888',
+                            fontSize: '0.9rem',
+                            fontFamily: 'Inter, sans-serif',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.5rem'
                           }}>
+                            {icons.key}
                             {userProvider}
                           </div>
                         </div>
 
                         <div style={{
                           display: 'flex',
-                          gap: '1rem',
-                          justifyContent: 'flex-end'
+                          gap: '0.75rem',
+                          justifyContent: 'flex-end',
+                          marginTop: '1rem'
                         }}>
                           <motion.button
                             onClick={() => setIsEditingProfile(false)}
                             style={{
-                              padding: '0.8rem 1.5rem',
-                              backgroundColor: '#333333',
-                              border: 'none',
-                              borderRadius: '5px',
+                              padding: '0.75rem 1rem',
+                              backgroundColor: '#1a1a1a',
+                              border: '1px solid #2a2a2a',
+                              borderRadius: '6px',
                               color: 'white',
-                              fontSize: '0.9rem',
+                              fontSize: '0.8rem',
                               fontWeight: '500',
                               cursor: 'pointer',
-                              fontFamily: 'Helvetica, Arial, sans-serif'
+                              fontFamily: 'Inter, sans-serif',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '0.5rem'
                             }}
-                            whileHover={{ backgroundColor: '#444444' }}
+                            whileHover={{ backgroundColor: '#2a2a2a' }}
                             whileTap={{ scale: 0.95 }}
                             disabled={isUpdating}
                           >
+                            {icons.cancel}
                             Cancel
                           </motion.button>
                           <motion.button
                             onClick={handleUpdateProfile}
                             style={{
-                              padding: '0.8rem 1.5rem',
-                              backgroundColor: '#0050B7',
-                              border: 'none',
-                              borderRadius: '5px',
+                              padding: '0.75rem 1rem',
+                              backgroundColor: '#1a1a1a',
+                              border: '1px solid #2a2a2a',
+                              borderRadius: '6px',
                               color: 'white',
-                              fontSize: '0.9rem',
+                              fontSize: '0.8rem',
                               fontWeight: '500',
                               cursor: 'pointer',
-                              fontFamily: 'Helvetica, Arial, sans-serif'
+                              fontFamily: 'Inter, sans-serif',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '0.5rem'
                             }}
-                            whileHover={{ backgroundColor: '#0066CC' }}
+                            whileHover={{ backgroundColor: '#2a2a2a' }}
                             whileTap={{ scale: 0.95 }}
                             disabled={isUpdating}
                           >
-                            {isUpdating ? 'Updating...' : 'Save Changes'}
+                            {icons.save}
+                            {isUpdating ? 'Saving...' : 'Save Changes'}
                           </motion.button>
                         </div>
                       </div>
@@ -2249,31 +2397,41 @@ export default function HomePage(): React.JSX.Element {
                       <div style={{
                         display: 'flex',
                         flexDirection: 'column',
-                        gap: '1.5rem'
+                        gap: '1rem'
                       }}>
                         <div style={{
                           display: 'flex',
                           justifyContent: 'space-between',
                           alignItems: 'center',
-                          padding: '1rem',
+                          padding: '0.875rem',
                           backgroundColor: '#1a1a1a',
-                          borderRadius: '5px'
+                          borderRadius: '6px',
+                          border: '1px solid #2a2a2a'
                         }}>
-                          <div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                             <div style={{
-                              color: '#cccccc',
-                              fontSize: '0.9rem',
-                              fontFamily: 'Helvetica, Arial, sans-serif'
+                              color: '#aaa',
+                              fontSize: '0.8rem',
+                              fontFamily: 'Inter, sans-serif'
                             }}>
-                              Display Name
+                              {icons.user}
                             </div>
-                            <div style={{
-                              color: 'white',
-                              fontSize: '1rem',
-                              fontWeight: '500',
-                              fontFamily: 'Helvetica, Arial, sans-serif'
-                            }}>
-                              {userDisplayName}
+                            <div>
+                              <div style={{
+                                color: '#aaa',
+                                fontSize: '0.8rem',
+                                fontFamily: 'Inter, sans-serif'
+                              }}>
+                                Display Name
+                              </div>
+                              <div style={{
+                                color: 'white',
+                                fontSize: '0.9rem',
+                                fontWeight: '500',
+                                fontFamily: 'Inter, sans-serif'
+                              }}>
+                                {userDisplayName}
+                              </div>
                             </div>
                           </div>
                         </div>
@@ -2282,25 +2440,35 @@ export default function HomePage(): React.JSX.Element {
                           display: 'flex',
                           justifyContent: 'space-between',
                           alignItems: 'center',
-                          padding: '1rem',
+                          padding: '0.875rem',
                           backgroundColor: '#1a1a1a',
-                          borderRadius: '5px'
+                          borderRadius: '6px',
+                          border: '1px solid #2a2a2a'
                         }}>
-                          <div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                             <div style={{
-                              color: '#cccccc',
-                              fontSize: '0.9rem',
-                              fontFamily: 'Helvetica, Arial, sans-serif'
+                              color: '#aaa',
+                              fontSize: '0.8rem',
+                              fontFamily: 'Inter, sans-serif'
                             }}>
-                              Email Address
+                              {icons.email}
                             </div>
-                            <div style={{
-                              color: 'white',
-                              fontSize: '1rem',
-                              fontWeight: '500',
-                              fontFamily: 'Helvetica, Arial, sans-serif'
-                            }}>
-                              {user.email}
+                            <div>
+                              <div style={{
+                                color: '#aaa',
+                                fontSize: '0.8rem',
+                                fontFamily: 'Inter, sans-serif'
+                              }}>
+                                Email Address
+                              </div>
+                              <div style={{
+                                color: 'white',
+                                fontSize: '0.9rem',
+                                fontWeight: '500',
+                                fontFamily: 'Inter, sans-serif'
+                              }}>
+                                {user.email}
+                              </div>
                             </div>
                           </div>
                         </div>
@@ -2309,25 +2477,35 @@ export default function HomePage(): React.JSX.Element {
                           display: 'flex',
                           justifyContent: 'space-between',
                           alignItems: 'center',
-                          padding: '1rem',
+                          padding: '0.875rem',
                           backgroundColor: '#1a1a1a',
-                          borderRadius: '5px'
+                          borderRadius: '6px',
+                          border: '1px solid #2a2a2a'
                         }}>
-                          <div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                             <div style={{
-                              color: '#cccccc',
-                              fontSize: '0.9rem',
-                              fontFamily: 'Helvetica, Arial, sans-serif'
+                              color: '#aaa',
+                              fontSize: '0.8rem',
+                              fontFamily: 'Inter, sans-serif'
                             }}>
-                              Login Method
+                              {icons.key}
                             </div>
-                            <div style={{
-                              color: 'white',
-                              fontSize: '1rem',
-                              fontWeight: '500',
-                              fontFamily: 'Helvetica, Arial, sans-serif'
-                            }}>
-                              {userProvider}
+                            <div>
+                              <div style={{
+                                color: '#aaa',
+                                fontSize: '0.8rem',
+                                fontFamily: 'Inter, sans-serif'
+                              }}>
+                                Login Method
+                              </div>
+                              <div style={{
+                                color: 'white',
+                                fontSize: '0.9rem',
+                                fontWeight: '500',
+                                fontFamily: 'Inter, sans-serif'
+                              }}>
+                                {userProvider}
+                              </div>
                             </div>
                           </div>
                         </div>
@@ -2336,72 +2514,92 @@ export default function HomePage(): React.JSX.Element {
                           display: 'flex',
                           justifyContent: 'space-between',
                           alignItems: 'center',
-                          padding: '1rem',
+                          padding: '0.875rem',
                           backgroundColor: '#1a1a1a',
-                          borderRadius: '5px'
+                          borderRadius: '6px',
+                          border: '1px solid #2a2a2a'
                         }}>
-                          <div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                             <div style={{
-                              color: '#cccccc',
-                              fontSize: '0.9rem',
-                              fontFamily: 'Helvetica, Arial, sans-serif'
+                              color: '#aaa',
+                              fontSize: '0.8rem',
+                              fontFamily: 'Inter, sans-serif'
                             }}>
-                              Account Created
+                              {icons.calendar}
                             </div>
-                            <div style={{
-                              color: 'white',
-                              fontSize: '1rem',
-                              fontWeight: '500',
-                              fontFamily: 'Helvetica, Arial, sans-serif'
-                            }}>
-                              {user.metadata.creationTime ? 
-                                new Date(user.metadata.creationTime).toLocaleDateString('id-ID') : 
-                                'Unknown'}
+                            <div>
+                              <div style={{
+                                color: '#aaa',
+                                fontSize: '0.8rem',
+                                fontFamily: 'Inter, sans-serif'
+                              }}>
+                                Account Created
+                              </div>
+                              <div style={{
+                                color: 'white',
+                                fontSize: '0.9rem',
+                                fontWeight: '500',
+                                fontFamily: 'Inter, sans-serif'
+                              }}>
+                                {user.metadata.creationTime ? 
+                                  new Date(user.metadata.creationTime).toLocaleDateString('id-ID') : 
+                                  'Unknown'}
+                              </div>
                             </div>
                           </div>
                         </div>
 
                         <div style={{
                           display: 'flex',
-                          gap: '1rem',
+                          gap: '0.75rem',
                           marginTop: '1rem'
                         }}>
                           <motion.button
                             onClick={() => setIsEditingProfile(true)}
                             style={{
                               flex: 1,
-                              padding: '0.8rem',
-                              backgroundColor: '#0050B7',
-                              border: 'none',
-                              borderRadius: '5px',
+                              padding: '0.75rem',
+                              backgroundColor: '#1a1a1a',
+                              border: '1px solid #2a2a2a',
+                              borderRadius: '6px',
                               color: 'white',
-                              fontSize: '0.9rem',
+                              fontSize: '0.8rem',
                               fontWeight: '500',
                               cursor: 'pointer',
-                              fontFamily: 'Helvetica, Arial, sans-serif'
+                              fontFamily: 'Inter, sans-serif',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              gap: '0.5rem'
                             }}
-                            whileHover={{ backgroundColor: '#0066CC' }}
+                            whileHover={{ backgroundColor: '#2a2a2a' }}
                             whileTap={{ scale: 0.95 }}
                           >
+                            {icons.edit}
                             Edit Profile
                           </motion.button>
                           <motion.button
                             onClick={() => setShowDeleteAccountModal(true)}
                             style={{
                               flex: 1,
-                              padding: '0.8rem',
-                              backgroundColor: '#ff4757',
-                              border: 'none',
-                              borderRadius: '5px',
-                              color: 'white',
-                              fontSize: '0.9rem',
+                              padding: '0.75rem',
+                              backgroundColor: '#1a1a1a',
+                              border: '1px solid #2a2a2a',
+                              borderRadius: '6px',
+                              color: '#ff6b6b',
+                              fontSize: '0.8rem',
                               fontWeight: '500',
                               cursor: 'pointer',
-                              fontFamily: 'Helvetica, Arial, sans-serif'
+                              fontFamily: 'Inter, sans-serif',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              gap: '0.5rem'
                             }}
-                            whileHover={{ backgroundColor: '#ff6b81' }}
+                            whileHover={{ backgroundColor: '#2a2a2a' }}
                             whileTap={{ scale: 0.95 }}
                           >
+                            {icons.delete}
                             Delete Account
                           </motion.button>
                         </div>
@@ -2409,260 +2607,46 @@ export default function HomePage(): React.JSX.Element {
                     )}
                   </div>
                 )}
-
-                {/* Help Tab */}
-                {activeTab === 'help' && (
-                  <div>
-                    <h4 style={{
-                      color: 'white',
-                      fontSize: '1.2rem',
-                      fontWeight: '600',
-                      margin: '0 0 1.5rem 0',
-                      fontFamily: 'Helvetica, Arial, sans-serif'
-                    }}>
-                      Help & Support
-                    </h4>
-
-                    <div style={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: '1.5rem'
-                    }}>
-                      <div style={{
-                        backgroundColor: '#1a1a1a',
-                        borderRadius: '5px',
-                        padding: '1.5rem'
-                      }}>
-                        <h5 style={{
-                          color: 'white',
-                          fontSize: '1rem',
-                          fontWeight: '600',
-                          margin: '0 0 1rem 0',
-                          fontFamily: 'Helvetica, Arial, sans-serif'
-                        }}>
-                          Frequently Asked Questions
-                        </h5>
-                        <div style={{
-                          display: 'flex',
-                          flexDirection: 'column',
-                          gap: '1rem'
-                        }}>
-                          <div>
-                            <div style={{
-                              color: '#0050B7',
-                              fontSize: '0.9rem',
-                              fontWeight: '500',
-                              marginBottom: '0.5rem',
-                              fontFamily: 'Helvetica, Arial, sans-serif'
-                            }}>
-                              How to create a note?
-                            </div>
-                            <div style={{
-                              color: '#cccccc',
-                              fontSize: '0.9rem',
-                              fontFamily: 'Helvetica, Arial, sans-serif',
-                              lineHeight: 1.5
-                            }}>
-                              Go to the Notes page and click the "Create New Note" button. You can add a title, content, and category for your note.
-                            </div>
-                          </div>
-                          <div>
-                            <div style={{
-                              color: '#0050B7',
-                              fontSize: '0.9rem',
-                              fontWeight: '500',
-                              marginBottom: '0.5rem',
-                              fontFamily: 'Helvetica, Arial, sans-serif'
-                            }}>
-                              How to delete my account?
-                            </div>
-                            <div style={{
-                              color: '#cccccc',
-                              fontSize: '0.9rem',
-                              fontFamily: 'Helvetica, Arial, sans-serif',
-                              lineHeight: 1.5
-                            }}>
-                              Go to Settings tab and click "Delete Account" button. This will permanently delete your account and all your data.
-                            </div>
-                          </div>
-                          <div>
-                            <div style={{
-                              color: '#0050B7',
-                              fontSize: '0.9rem',
-                              fontWeight: '500',
-                              marginBottom: '0.5rem',
-                              fontFamily: 'Helvetica, Arial, sans-serif'
-                            }}>
-                              How to change my profile information?
-                            </div>
-                            <div style={{
-                              color: '#cccccc',
-                              fontSize: '0.9rem',
-                              fontFamily: 'Helvetica, Arial, sans-serif',
-                              lineHeight: 1.5
-                            }}>
-                              Go to Settings tab and click "Edit Profile" button. You can update your display name and email address.
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div style={{
-                        backgroundColor: '#1a1a1a',
-                        borderRadius: '5px',
-                        padding: '1.5rem'
-                      }}>
-                        <h5 style={{
-                          color: 'white',
-                          fontSize: '1rem',
-                          fontWeight: '600',
-                          margin: '0 0 1rem 0',
-                          fontFamily: 'Helvetica, Arial, sans-serif'
-                        }}>
-                          Contact Support
-                        </h5>
-                        <div style={{
-                          color: '#cccccc',
-                          fontSize: '0.9rem',
-                          fontFamily: 'Helvetica, Arial, sans-serif',
-                          lineHeight: 1.5,
-                          marginBottom: '1rem'
-                        }}>
-                          If you need further assistance, please contact our support team.
-                        </div>
-                        <div style={{
-                          display: 'flex',
-                          gap: '1rem'
-                        }}>
-                          <motion.button
-                            onClick={() => window.location.href = 'mailto:support@menuru.com'}
-                            style={{
-                              padding: '0.8rem 1.5rem',
-                              backgroundColor: '#0050B7',
-                              border: 'none',
-                              borderRadius: '5px',
-                              color: 'white',
-                              fontSize: '0.9rem',
-                              fontWeight: '500',
-                              cursor: 'pointer',
-                              fontFamily: 'Helvetica, Arial, sans-serif'
-                            }}
-                            whileHover={{ backgroundColor: '#0066CC' }}
-                            whileTap={{ scale: 0.95 }}
-                          >
-                            Email Support
-                          </motion.button>
-                          <motion.button
-                            onClick={() => window.open('https://docs.menuru.com', '_blank')}
-                            style={{
-                              padding: '0.8rem 1.5rem',
-                              backgroundColor: '#333333',
-                              border: 'none',
-                              borderRadius: '5px',
-                              color: 'white',
-                              fontSize: '0.9rem',
-                              fontWeight: '500',
-                              cursor: 'pointer',
-                              fontFamily: 'Helvetica, Arial, sans-serif'
-                            }}
-                            whileHover={{ backgroundColor: '#444444' }}
-                            whileTap={{ scale: 0.95 }}
-                          >
-                            Documentation
-                          </motion.button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* Feedback Tab */}
-                {activeTab === 'feedback' && (
-                  <div>
-                    <h4 style={{
-                      color: 'white',
-                      fontSize: '1.2rem',
-                      fontWeight: '600',
-                      margin: '0 0 1.5rem 0',
-                      fontFamily: 'Helvetica, Arial, sans-serif'
-                    }}>
-                      Send Feedback
-                    </h4>
-
-                    <div style={{
-                      backgroundColor: '#1a1a1a',
-                      borderRadius: '5px',
-                      padding: '2rem'
-                    }}>
-                      <div style={{
-                        color: '#cccccc',
-                        fontSize: '0.9rem',
-                        fontFamily: 'Helvetica, Arial, sans-serif',
-                        lineHeight: 1.5,
-                        marginBottom: '2rem'
-                      }}>
-                        We value your feedback! Please let us know what you think about our platform, 
-                        what features you'd like to see, or report any issues you've encountered.
-                      </div>
-
-                      <div style={{
-                        display: 'flex',
-                        justifyContent: 'center'
-                      }}>
-                        <motion.button
-                          onClick={handleSendFeedback}
-                          style={{
-                            padding: '1rem 2rem',
-                            backgroundColor: '#00FF00',
-                            border: 'none',
-                            borderRadius: '5px',
-                            color: 'black',
-                            fontSize: '1rem',
-                            fontWeight: '600',
-                            cursor: 'pointer',
-                            fontFamily: 'Helvetica, Arial, sans-serif'
-                          }}
-                          whileHover={{ 
-                            backgroundColor: '#00CC00',
-                            transform: 'scale(1.05)'
-                          }}
-                          whileTap={{ scale: 0.95 }}
-                        >
-                          Send Feedback
-                        </motion.button>
-                      </div>
-                    </div>
-                  </div>
-                )}
               </div>
 
               {/* Footer with Logout Button */}
               <div style={{
-                padding: '1.5rem 2rem',
-                borderTop: '1px solid #333333',
+                padding: '1rem 1.5rem',
+                borderTop: '1px solid #1a1a1a',
                 backgroundColor: '#0a0a0a',
                 display: 'flex',
-                justifyContent: 'flex-end'
+                justifyContent: 'space-between',
+                alignItems: 'center'
               }}>
+                <div style={{
+                  color: '#888',
+                  fontSize: '0.8rem',
+                  fontFamily: 'Inter, sans-serif'
+                }}>
+                  {userStats?.loginCount || 0} logins
+                </div>
                 <motion.button
                   onClick={handleLogoutClick}
                   style={{
-                    padding: '0.8rem 1.5rem',
-                    backgroundColor: '#ff4757',
-                    border: 'none',
-                    borderRadius: '5px',
-                    color: 'white',
-                    fontSize: '0.9rem',
+                    padding: '0.6rem 1rem',
+                    backgroundColor: '#1a1a1a',
+                    border: '1px solid #2a2a2a',
+                    borderRadius: '6px',
+                    color: '#ff6b6b',
+                    fontSize: '0.8rem',
                     fontWeight: '500',
                     cursor: 'pointer',
-                    fontFamily: 'Helvetica, Arial, sans-serif'
+                    fontFamily: 'Inter, sans-serif',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem'
                   }}
                   whileHover={{ 
-                    backgroundColor: '#ff6b81',
-                    transform: 'scale(1.05)'
+                    backgroundColor: '#2a2a2a'
                   }}
                   whileTap={{ scale: 0.95 }}
                 >
+                  {icons.logout}
                   Logout
                 </motion.button>
               </div>
@@ -2678,7 +2662,7 @@ export default function HomePage(): React.JSX.Element {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
+            transition={{ duration: 0.2 }}
             style={{
               position: 'fixed',
               top: 0,
@@ -2690,65 +2674,84 @@ export default function HomePage(): React.JSX.Element {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              backdropFilter: 'blur(10px)'
+              backdropFilter: 'blur(4px)'
             }}
             onClick={() => setShowDeleteAccountModal(false)}
           >
             <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
+              initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              transition={{ duration: 0.3 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              transition={{ duration: 0.2 }}
               style={{
-                backgroundColor: '#111111',
-                borderRadius: '10px',
-                padding: '2rem',
-                width: isMobile ? '90%' : '400px',
-                maxWidth: '500px',
-                border: '1px solid #ff4757'
+                backgroundColor: '#0f0f0f',
+                borderRadius: '8px',
+                padding: '1.5rem',
+                width: isMobile ? '90%' : '350px',
+                maxWidth: '400px',
+                border: '1px solid #1a1a1a'
               }}
               onClick={(e) => e.stopPropagation()}
             >
-              <h4 style={{
-                color: 'white',
-                fontSize: '1.3rem',
-                fontWeight: '600',
-                margin: '0 0 1rem 0',
-                fontFamily: 'Helvetica, Arial, sans-serif'
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.75rem',
+                marginBottom: '1rem'
               }}>
-                Delete Account
-              </h4>
+                <div style={{
+                  width: '36px',
+                  height: '36px',
+                  borderRadius: '6px',
+                  backgroundColor: '#1a1a1a',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: '#ff6b6b',
+                  border: '1px solid #2a2a2a'
+                }}>
+                  {icons.delete}
+                </div>
+                <h4 style={{
+                  color: 'white',
+                  fontSize: '1rem',
+                  fontWeight: '500',
+                  margin: 0,
+                  fontFamily: 'Inter, sans-serif'
+                }}>
+                  Delete Account
+                </h4>
+              </div>
               
               <p style={{
-                color: '#cccccc',
-                fontSize: '0.9rem',
+                color: '#aaa',
+                fontSize: '0.85rem',
                 lineHeight: 1.5,
                 margin: '0 0 1.5rem 0',
-                fontFamily: 'Helvetica, Arial, sans-serif'
+                fontFamily: 'Inter, sans-serif'
               }}>
-                Are you sure you want to delete your account? This action cannot be undone. 
-                All your notes and data will be permanently deleted.
+                This action cannot be undone. All your data will be permanently deleted.
               </p>
               
               <div style={{
                 display: 'flex',
-                gap: '1rem',
+                gap: '0.75rem',
                 justifyContent: 'flex-end'
               }}>
                 <motion.button
                   onClick={() => setShowDeleteAccountModal(false)}
                   style={{
-                    padding: '0.8rem 1.5rem',
-                    backgroundColor: '#333333',
-                    border: 'none',
-                    borderRadius: '5px',
+                    padding: '0.6rem 1rem',
+                    backgroundColor: '#1a1a1a',
+                    border: '1px solid #2a2a2a',
+                    borderRadius: '6px',
                     color: 'white',
-                    fontSize: '0.9rem',
+                    fontSize: '0.8rem',
                     fontWeight: '500',
                     cursor: 'pointer',
-                    fontFamily: 'Helvetica, Arial, sans-serif'
+                    fontFamily: 'Inter, sans-serif'
                   }}
-                  whileHover={{ backgroundColor: '#444444' }}
+                  whileHover={{ backgroundColor: '#2a2a2a' }}
                   whileTap={{ scale: 0.95 }}
                 >
                   Cancel
@@ -2756,17 +2759,17 @@ export default function HomePage(): React.JSX.Element {
                 <motion.button
                   onClick={handleDeleteAccount}
                   style={{
-                    padding: '0.8rem 1.5rem',
-                    backgroundColor: '#ff4757',
-                    border: 'none',
-                    borderRadius: '5px',
-                    color: 'white',
-                    fontSize: '0.9rem',
+                    padding: '0.6rem 1rem',
+                    backgroundColor: '#1a1a1a',
+                    border: '1px solid #ff6b6b',
+                    borderRadius: '6px',
+                    color: '#ff6b6b',
+                    fontSize: '0.8rem',
                     fontWeight: '500',
                     cursor: 'pointer',
-                    fontFamily: 'Helvetica, Arial, sans-serif'
+                    fontFamily: 'Inter, sans-serif'
                   }}
-                  whileHover={{ backgroundColor: '#ff6b81' }}
+                  whileHover={{ backgroundColor: '#2a2a2a' }}
                   whileTap={{ scale: 0.95 }}
                 >
                   Delete Account
@@ -2784,109 +2787,114 @@ export default function HomePage(): React.JSX.Element {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
+            transition={{ duration: 0.2 }}
             style={{
               position: 'fixed',
               top: 0,
               left: 0,
               width: '100%',
               height: '100%',
-              backgroundColor: 'rgba(0, 0, 0, 0.7)',
+              backgroundColor: 'rgba(0, 0, 0, 0.85)',
               zIndex: 9999,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              backdropFilter: 'blur(5px)'
+              backdropFilter: 'blur(4px)'
             }}
             onClick={handleCancelLogout}
           >
             <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
+              initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              transition={{ duration: 0.3 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              transition={{ duration: 0.2 }}
               style={{
-                backgroundColor: 'rgba(30, 30, 30, 0.95)',
-                borderRadius: '15px',
-                padding: isMobile ? '1.5rem' : '2rem',
-                width: isMobile ? '90%' : '400px',
-                maxWidth: '500px',
-                border: '1px solid rgba(255, 255, 255, 0.1)',
-                boxShadow: '0 20px 60px rgba(0, 0, 0, 0.5)',
+                backgroundColor: '#0f0f0f',
+                borderRadius: '8px',
+                padding: '1.5rem',
+                width: isMobile ? '90%' : '320px',
+                maxWidth: '400px',
+                border: '1px solid #1a1a1a',
                 display: 'flex',
                 flexDirection: 'column',
-                gap: '1.5rem'
+                gap: '1rem'
               }}
               onClick={(e) => e.stopPropagation()}
             >
               <div style={{ textAlign: 'center' }}>
+                <div style={{
+                  width: '48px',
+                  height: '48px',
+                  borderRadius: '8px',
+                  backgroundColor: '#1a1a1a',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  margin: '0 auto 1rem auto',
+                  border: '1px solid #2a2a2a'
+                }}>
+                  {icons.logout}
+                </div>
                 <h3 style={{
                   color: 'white',
-                  fontSize: isMobile ? '1.3rem' : '1.5rem',
-                  fontWeight: '600',
+                  fontSize: '1rem',
+                  fontWeight: '500',
                   margin: '0 0 0.5rem 0',
-                  fontFamily: 'Helvetica, Arial, sans-serif'
+                  fontFamily: 'Inter, sans-serif'
                 }}>
                   Logout
                 </h3>
                 <p style={{
-                  color: 'rgba(255, 255, 255, 0.7)',
-                  fontSize: '0.9rem',
+                  color: '#aaa',
+                  fontSize: '0.85rem',
                   margin: 0,
                   lineHeight: 1.5
                 }}>
-                  Apakah Anda yakin ingin keluar dari akun {userDisplayName}?
+                  Are you sure you want to logout?
                 </p>
               </div>
 
               <div style={{
                 display: 'flex',
-                gap: '1rem',
-                justifyContent: 'center'
+                gap: '0.75rem'
               }}>
                 <motion.button
                   onClick={handleCancelLogout}
                   style={{
                     flex: 1,
-                    padding: '0.8rem 1.5rem',
-                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                    border: '1px solid rgba(255, 255, 255, 0.2)',
-                    borderRadius: '8px',
+                    padding: '0.75rem',
+                    backgroundColor: '#1a1a1a',
+                    border: '1px solid #2a2a2a',
+                    borderRadius: '6px',
                     color: 'white',
-                    fontSize: '0.9rem',
+                    fontSize: '0.85rem',
                     fontWeight: '500',
                     cursor: 'pointer',
-                    transition: 'all 0.3s ease',
-                    fontFamily: 'Helvetica, Arial, sans-serif'
+                    fontFamily: 'Inter, sans-serif'
                   }}
-                  whileHover={{ 
-                    backgroundColor: 'rgba(255, 255, 255, 0.2)'
-                  }}
+                  whileHover={{ backgroundColor: '#2a2a2a' }}
                   whileTap={{ scale: 0.95 }}
                 >
-                  Tidak
+                  Cancel
                 </motion.button>
                 <motion.button
                   onClick={handleConfirmLogout}
                   style={{
                     flex: 1,
-                    padding: '0.8rem 1.5rem',
-                    backgroundColor: '#0050B7',
-                    border: 'none',
-                    borderRadius: '8px',
-                    color: 'white',
-                    fontSize: '0.9rem',
+                    padding: '0.75rem',
+                    backgroundColor: '#1a1a1a',
+                    border: '1px solid #2a2a2a',
+                    borderRadius: '6px',
+                    color: '#ff6b6b',
+                    fontSize: '0.85rem',
                     fontWeight: '500',
                     cursor: 'pointer',
-                    transition: 'all 0.3s ease',
-                    fontFamily: 'Helvetica, Arial, sans-serif'
+                    fontFamily: 'Inter, sans-serif'
                   }}
-                  whileHover={{ 
-                    backgroundColor: '#0066CC'
-                  }}
+                  whileHover={{ backgroundColor: '#2a2a2a' }}
                   whileTap={{ scale: 0.95 }}
                 >
-                  Ya, Logout
+                  Logout
                 </motion.button>
               </div>
             </motion.div>
@@ -2903,7 +2911,7 @@ export default function HomePage(): React.JSX.Element {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
+            transition={{ duration: 0.2 }}
             style={{
               position: 'fixed',
               top: 0,
@@ -2930,7 +2938,7 @@ export default function HomePage(): React.JSX.Element {
                 fontSize: isMobile ? '2.5rem' : '3rem',
                 fontWeight: '300',
                 cursor: 'pointer',
-                fontFamily: 'Helvetica, Arial, sans-serif',
+                fontFamily: 'Inter, sans-serif',
                 zIndex: 10,
                 padding: '1rem',
                 display: 'flex',
@@ -2957,7 +2965,7 @@ export default function HomePage(): React.JSX.Element {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.5 }}
+            transition={{ duration: 0.2 }}
             style={{
               position: 'fixed',
               top: 0,
@@ -2996,12 +3004,12 @@ export default function HomePage(): React.JSX.Element {
                 <motion.div
                   initial={{ x: -50, opacity: 0 }}
                   animate={{ x: 0, opacity: 1 }}
-                  transition={{ duration: 0.6, delay: 0.1 }}
+                  transition={{ duration: 0.3, delay: 0.1 }}
                   style={{
                     color: 'white',
                     fontSize: isMobile ? '2.5rem' : '4rem',
                     fontWeight: '300',
-                    fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
+                    fontFamily: 'Inter, sans-serif',
                     textTransform: 'uppercase',
                     letterSpacing: '4px',
                     lineHeight: 1,
@@ -3014,12 +3022,12 @@ export default function HomePage(): React.JSX.Element {
                 <motion.div
                   initial={{ x: -50, opacity: 0 }}
                   animate={{ x: 0, opacity: 1 }}
-                  transition={{ duration: 0.6, delay: 0.2 }}
+                  transition={{ duration: 0.3, delay: 0.2 }}
                   style={{
                     color: 'white',
                     fontSize: isMobile ? '2rem' : '3rem',
                     fontWeight: '400',
-                    fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
+                    fontFamily: 'Inter, sans-serif',
                     letterSpacing: '3px',
                     marginBottom: isMobile ? '3rem' : '4rem'
                   }}
@@ -3030,7 +3038,7 @@ export default function HomePage(): React.JSX.Element {
                 <motion.div
                   initial={{ x: -50, opacity: 0 }}
                   animate={{ x: 0, opacity: 1 }}
-                  transition={{ duration: 0.6, delay: 0.3 }}
+                  transition={{ duration: 0.3, delay: 0.3 }}
                   style={{
                     display: 'flex',
                     flexDirection: 'column',
@@ -3042,7 +3050,7 @@ export default function HomePage(): React.JSX.Element {
                       key={role.title}
                       initial={{ x: -30, opacity: 0 }}
                       animate={{ x: 0, opacity: 1 }}
-                      transition={{ duration: 0.4, delay: 0.4 + (index * 0.1) }}
+                      transition={{ duration: 0.2, delay: 0.4 + (index * 0.1) }}
                       style={{
                         display: 'flex',
                         flexDirection: 'column'
@@ -3052,7 +3060,7 @@ export default function HomePage(): React.JSX.Element {
                         color: 'white',
                         fontSize: isMobile ? '1.2rem' : '1.8rem',
                         fontWeight: '500',
-                        fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
+                        fontFamily: 'Inter, sans-serif',
                         letterSpacing: '1px',
                         marginBottom: '0.8rem'
                       }}>
@@ -3063,7 +3071,7 @@ export default function HomePage(): React.JSX.Element {
                         color: 'white',
                         fontSize: isMobile ? '1rem' : '1.3rem',
                         fontWeight: '400',
-                        fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
+                        fontFamily: 'Inter, sans-serif',
                         opacity: 0.9,
                         lineHeight: 1.5
                       }}>
@@ -3087,12 +3095,12 @@ export default function HomePage(): React.JSX.Element {
                 <motion.div
                   initial={{ y: -20, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
-                  transition={{ duration: 0.6, delay: 0.3 }}
+                  transition={{ duration: 0.3, delay: 0.3 }}
                   style={{
                     color: 'white',
                     fontSize: isMobile ? '1.5rem' : '2.2rem',
                     fontWeight: '700',
-                    fontFamily: '"Formula Condensed", sans-serif',
+                    fontFamily: 'Inter, sans-serif',
                     lineHeight: 1.7,
                     textAlign: 'left',
                     maxWidth: isMobile ? '90%' : '75%',
@@ -3106,14 +3114,13 @@ export default function HomePage(): React.JSX.Element {
                 <motion.div
                   initial={{ y: 30, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
-                  transition={{ duration: 0.6, delay: 0.4 }}
+                  transition={{ duration: 0.3, delay: 0.4 }}
                   style={{
                     width: isMobile ? '95%' : '80%',
                     height: isMobile ? '350px' : '600px',
                     overflow: 'hidden',
-                    borderRadius: '20px',
-                    boxShadow: '0 20px 50px rgba(0,0,0,0.8)',
-                    border: '3px solid rgba(255,255,255,0.2)',
+                    borderRadius: '12px',
+                    border: '1px solid #2a2a2a',
                     marginBottom: isMobile ? '3rem' : '4rem',
                     alignSelf: 'flex-start'
                   }}
@@ -3128,7 +3135,7 @@ export default function HomePage(): React.JSX.Element {
                       objectFit: 'cover'
                     }}
                     onError={(e) => {
-                      e.currentTarget.style.backgroundColor = '#333';
+                      e.currentTarget.style.backgroundColor = '#1a1a1a';
                       e.currentTarget.style.display = 'flex';
                       e.currentTarget.style.alignItems = 'center';
                       e.currentTarget.style.justifyContent = 'center';
@@ -3141,12 +3148,12 @@ export default function HomePage(): React.JSX.Element {
                 <motion.div
                   initial={{ y: 20, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
-                  transition={{ duration: 0.6, delay: 0.5 }}
+                  transition={{ duration: 0.3, delay: 0.5 }}
                   style={{
                     color: 'white',
                     fontSize: isMobile ? '1rem' : '1.2rem',
                     fontWeight: '500',
-                    fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
+                    fontFamily: 'Inter, sans-serif',
                     letterSpacing: '1px',
                     textTransform: 'uppercase',
                     opacity: 0.8,
@@ -3161,7 +3168,7 @@ export default function HomePage(): React.JSX.Element {
                 <motion.div
                   initial={{ y: 20, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
-                  transition={{ duration: 0.6, delay: 0.6 }}
+                  transition={{ duration: 0.3, delay: 0.6 }}
                   style={{
                     alignSelf: 'flex-start',
                     marginBottom: isMobile ? '5rem' : '6rem'
@@ -3170,10 +3177,10 @@ export default function HomePage(): React.JSX.Element {
                   <motion.a
                     href="/explore"
                     style={{
-                      color: '#00FF00',
+                      color: 'white',
                       fontSize: isMobile ? '1.8rem' : '2.5rem',
                       fontWeight: '600',
-                      fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
+                      fontFamily: 'Inter, sans-serif',
                       textDecoration: 'none',
                       letterSpacing: '1px',
                       display: 'inline-flex',
@@ -3183,39 +3190,24 @@ export default function HomePage(): React.JSX.Element {
                       padding: '1rem 0'
                     }}
                     whileHover={{ 
-                      x: 10,
-                      color: '#FFFFFF'
+                      x: 10
                     }}
-                    transition={{ duration: 0.3 }}
+                    transition={{ duration: 0.2 }}
                   >
                     EXPLORE FULL COLLECTION
-                    <motion.svg
-                      width={isMobile ? "24" : "32"}
-                      height={isMobile ? "24" : "32"}
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      initial={{ x: 0 }}
-                      animate={{ x: 0 }}
-                      whileHover={{ x: 5 }}
-                      transition={{ duration: 0.3 }}
-                    >
-                      <path d="M5 12h14" />
-                      <path d="m12 5 7 7-7 7" />
-                    </motion.svg>
+                    {icons.arrowRight}
                     <motion.div
                       style={{
                         position: 'absolute',
                         bottom: '0.5rem',
                         left: 0,
                         width: '100%',
-                        height: '2px',
-                        backgroundColor: '#00FF00'
+                        height: '1px',
+                        backgroundColor: 'white'
                       }}
                       initial={{ scaleX: 0 }}
                       whileHover={{ scaleX: 1 }}
-                      transition={{ duration: 0.3 }}
+                      transition={{ duration: 0.2 }}
                     />
                   </motion.a>
                 </motion.div>
@@ -3223,7 +3215,7 @@ export default function HomePage(): React.JSX.Element {
                 <motion.div
                   initial={{ y: 30, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
-                  transition={{ duration: 0.6, delay: 0.7 }}
+                  transition={{ duration: 0.3, delay: 0.7 }}
                   style={{
                     width: isMobile ? '95%' : '80%',
                     alignSelf: 'flex-start',
@@ -3234,7 +3226,7 @@ export default function HomePage(): React.JSX.Element {
                     color: 'white',
                     fontSize: isMobile ? '1.1rem' : '1.4rem',
                     fontWeight: '300',
-                    fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
+                    fontFamily: 'Inter, sans-serif',
                     lineHeight: 1.8,
                     opacity: 0.9
                   }}>
@@ -3246,11 +3238,11 @@ export default function HomePage(): React.JSX.Element {
               <motion.div
                 initial={{ x: 50, opacity: 0 }}
                 animate={{ x: 0, opacity: 1 }}
-                transition={{ duration: 0.6, delay: 0.2 }}
+                transition={{ duration: 0.3, delay: 0.2 }}
                 onClick={handleCloseMenuruFullPage}
                 style={{
-                  width: isMobile ? '50px' : '60px',
-                  height: isMobile ? '50px' : '60px',
+                  width: isMobile ? '40px' : '48px',
+                  height: isMobile ? '40px' : '48px',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -3258,13 +3250,14 @@ export default function HomePage(): React.JSX.Element {
                   position: 'fixed',
                   right: isMobile ? '1.5rem' : '3rem',
                   top: isMobile ? '1.5rem' : '3rem',
-                  backgroundColor: 'rgba(0,0,0,0.5)',
-                  borderRadius: '50%',
-                  zIndex: 9999
+                  backgroundColor: '#1a1a1a',
+                  borderRadius: '8px',
+                  zIndex: 9999,
+                  border: '1px solid #2a2a2a'
                 }}
                 whileHover={{ 
-                  scale: 1.2,
-                  backgroundColor: 'rgba(0,0,0,0.8)'
+                  scale: 1.1,
+                  backgroundColor: '#2a2a2a'
                 }}
                 whileTap={{ scale: 0.95 }}
               >
@@ -3272,10 +3265,10 @@ export default function HomePage(): React.JSX.Element {
                   ref={backslashRef}
                   style={{
                     position: 'absolute',
-                    width: isMobile ? '30px' : '35px',
-                    height: '4px',
+                    width: isMobile ? '20px' : '24px',
+                    height: '2px',
                     backgroundColor: 'white',
-                    borderRadius: '2px',
+                    borderRadius: '1px',
                     transform: 'rotate(45deg)',
                     transformOrigin: 'center'
                   }}
@@ -3293,12 +3286,12 @@ export default function HomePage(): React.JSX.Element {
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 0.5 }}
-                transition={{ delay: 1, duration: 1 }}
+                transition={{ delay: 1, duration: 0.5 }}
                 style={{
                   color: 'white',
-                  fontSize: isMobile ? '1rem' : '1.2rem',
+                  fontSize: isMobile ? '0.9rem' : '1rem',
                   fontWeight: '300',
-                  fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
+                  fontFamily: 'Inter, sans-serif',
                   textTransform: 'uppercase',
                   letterSpacing: '2px'
                 }}
@@ -3318,7 +3311,7 @@ export default function HomePage(): React.JSX.Element {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.5 }}
+            transition={{ duration: 0.2 }}
             style={{
               position: 'fixed',
               top: 0,
@@ -3343,26 +3336,28 @@ export default function HomePage(): React.JSX.Element {
               alignItems: 'center',
               zIndex: 100,
               backgroundColor: 'black',
-              borderBottom: '1px solid rgba(255,255,255,0.1)'
+              borderBottom: '1px solid #1a1a1a'
             }}>
               <motion.button
                 onClick={handleClosePhotoFullPage}
                 style={{
-                  backgroundColor: 'transparent',
-                  border: 'none',
+                  backgroundColor: '#1a1a1a',
+                  border: '1px solid #2a2a2a',
                   color: 'white',
-                  fontSize: isMobile ? '1.8rem' : '2.2rem',
+                  fontSize: isMobile ? '1.5rem' : '1.8rem',
                   cursor: 'pointer',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  fontFamily: 'Arial, sans-serif',
-                  padding: '0.5rem 1rem',
-                  borderRadius: '4px',
-                  order: 1
+                  fontFamily: 'Inter, sans-serif',
+                  padding: '0.5rem',
+                  borderRadius: '6px',
+                  order: 1,
+                  width: '36px',
+                  height: '36px'
                 }}
                 whileHover={{ 
-                  backgroundColor: 'rgba(255,255,255,0.1)'
+                  backgroundColor: '#2a2a2a'
                 }}
                 whileTap={{ scale: 0.95 }}
               >
@@ -3371,12 +3366,12 @@ export default function HomePage(): React.JSX.Element {
 
               <div style={{
                 color: 'white',
-                fontSize: isMobile ? '1.5rem' : '2rem',
-                fontWeight: '600',
+                fontSize: isMobile ? '1.2rem' : '1.5rem',
+                fontWeight: '500',
                 display: 'flex',
                 alignItems: 'baseline',
                 gap: '0.3rem',
-                fontFamily: 'Helvetica, Arial, sans-serif',
+                fontFamily: 'Inter, sans-serif',
                 order: 2
               }}>
                 <span>{String(currentPhotoIndex + 1).padStart(2, '0')}</span>
@@ -3412,16 +3407,15 @@ export default function HomePage(): React.JSX.Element {
                       initial={{ opacity: 0, scale: 0.95 }}
                       animate={{ opacity: 1, scale: 1 }}
                       exit={{ opacity: 0, scale: 1.05 }}
-                      transition={{ duration: 0.3 }}
+                      transition={{ duration: 0.2 }}
                       style={{
                         width: '100%',
                         maxWidth: '600px',
                         height: isMobile ? '70vh' : '80vh',
                         position: 'relative',
-                        borderRadius: '15px',
+                        borderRadius: '8px',
                         overflow: 'hidden',
-                        boxShadow: '0 8px 25px rgba(0,0,0,0.4)',
-                        border: '2px solid rgba(255,255,255,0.15)',
+                        border: '1px solid #2a2a2a',
                         cursor: 'pointer'
                       }}
                       onClick={(e) => {
@@ -3447,7 +3441,7 @@ export default function HomePage(): React.JSX.Element {
                           display: 'block'
                         }}
                         onError={(e) => {
-                          e.currentTarget.style.backgroundColor = '#222';
+                          e.currentTarget.style.backgroundColor = '#1a1a1a';
                           e.currentTarget.style.display = 'flex';
                           e.currentTarget.style.alignItems = 'center';
                           e.currentTarget.style.justifyContent = 'center';
@@ -3474,10 +3468,10 @@ export default function HomePage(): React.JSX.Element {
                     key={index}
                     style={{
                       flex: 1,
-                      height: '4px',
-                      backgroundColor: index === currentPhotoIndex ? 'white' : 'rgba(255,255,255,0.2)',
-                      borderRadius: '2px',
-                      transition: 'background-color 0.3s ease'
+                      height: '2px',
+                      backgroundColor: index === currentPhotoIndex ? 'white' : '#2a2a2a',
+                      borderRadius: '1px',
+                      transition: 'background-color 0.2s ease'
                     }}
                   />
                 ))}
@@ -3491,13 +3485,10 @@ export default function HomePage(): React.JSX.Element {
                 display: 'flex',
                 alignItems: 'center',
                 gap: '0.5rem',
-                color: 'rgba(255,255,255,0.7)',
-                fontSize: '0.9rem'
+                color: '#888',
+                fontSize: '0.85rem'
               }}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <circle cx="12" cy="12" r="10"/>
-                  <polyline points="12 6 12 12 16 14"/>
-                </svg>
+                {icons.time}
                 {photoTimeAgo[currentPhotoIndex]}
               </div>
 
@@ -3510,16 +3501,16 @@ export default function HomePage(): React.JSX.Element {
                 width: '100%'
               }}>
                 <div style={{
-                  backgroundColor: 'rgba(255,255,255,0.05)',
-                  borderRadius: '12px',
-                  padding: '1.5rem',
+                  backgroundColor: '#1a1a1a',
+                  borderRadius: '8px',
+                  padding: '1.25rem',
                   marginBottom: '2rem',
-                  border: '1px solid rgba(255,255,255,0.1)'
+                  border: '1px solid #2a2a2a'
                 }}>
                   <div style={{
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '0.8rem',
+                    gap: '0.75rem',
                     marginBottom: '1rem'
                   }}>
                     <div style={{
@@ -3532,19 +3523,19 @@ export default function HomePage(): React.JSX.Element {
                         value={message}
                         onChange={(e) => setMessage(e.target.value)}
                         onKeyPress={handleKeyPress}
-                        placeholder="Tulis komentar..."
+                        placeholder="Write a comment..."
                         style={{
                           width: '100%',
-                          padding: '0.8rem 1rem',
+                          padding: '0.75rem 1rem',
                           paddingRight: '3rem',
-                          backgroundColor: 'rgba(255,255,255,0.05)',
-                          border: '1px solid rgba(255,255,255,0.1)',
-                          borderRadius: '20px',
+                          backgroundColor: '#0f0f0f',
+                          border: '1px solid #2a2a2a',
+                          borderRadius: '6px',
                           color: 'white',
-                          fontSize: '0.9rem',
-                          fontFamily: 'Helvetica, Arial, sans-serif',
+                          fontSize: '0.85rem',
+                          fontFamily: 'Inter, sans-serif',
                           outline: 'none',
-                          transition: 'all 0.3s ease'
+                          transition: 'all 0.2s ease'
                         }}
                       />
                       <span style={{
@@ -3552,7 +3543,7 @@ export default function HomePage(): React.JSX.Element {
                         right: '1rem',
                         top: '50%',
                         transform: 'translateY(-50%)',
-                        color: 'rgba(255,255,255,0.3)',
+                        color: '#888',
                         fontSize: '0.75rem'
                       }}>
                         Enter
@@ -3563,30 +3554,30 @@ export default function HomePage(): React.JSX.Element {
                       onClick={handleSendMessage}
                       disabled={message.trim() === ""}
                       style={{
-                        width: '40px',
-                        height: '40px',
-                        backgroundColor: message.trim() === "" ? 'rgba(0, 80, 183, 0.5)' : '#0050B7',
-                        border: 'none',
-                        borderRadius: '50%',
+                        width: '36px',
+                        height: '36px',
+                        backgroundColor: message.trim() === "" ? '#1a1a1a' : '#1a1a1a',
+                        border: '1px solid #2a2a2a',
+                        borderRadius: '6px',
                         cursor: message.trim() === "" ? 'not-allowed' : 'pointer',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        transition: 'all 0.3s ease',
+                        transition: 'all 0.2s ease',
                         flexShrink: 0
                       }}
                       whileHover={message.trim() !== "" ? { 
-                        scale: 1.1,
-                        backgroundColor: '#0066CC'
+                        scale: 1.05,
+                        backgroundColor: '#2a2a2a'
                       } : {}}
                       whileTap={message.trim() !== "" ? { scale: 0.95 } : {}}
                     >
                       <svg 
-                        width="18" 
-                        height="18" 
+                        width="16" 
+                        height="16" 
                         viewBox="0 0 24 24" 
                         fill="none" 
-                        stroke="white" 
+                        stroke={message.trim() === "" ? "#888" : "white"} 
                         strokeWidth="2"
                       >
                         <line x1="22" y1="2" x2="11" y2="13"/>
@@ -3599,10 +3590,10 @@ export default function HomePage(): React.JSX.Element {
                     textAlign: 'center'
                   }}>
                     <span style={{
-                      color: 'rgba(255,255,255,0.5)',
+                      color: '#888',
                       fontSize: '0.75rem'
                     }}>
-                      {user ? `Login sebagai: ${userDisplayName}` : 'Komentar sebagai: Anonymous'}
+                      {user ? `Logged in as: ${userDisplayName}` : 'Commenting as: Anonymous'}
                     </span>
                   </div>
                 </div>
@@ -3615,74 +3606,75 @@ export default function HomePage(): React.JSX.Element {
                   justifyContent: 'space-between'
                 }}>
                   <h3 style={{
-                    fontSize: isMobile ? '1.2rem' : '1.4rem',
-                    fontWeight: '600',
+                    fontSize: isMobile ? '1.1rem' : '1.3rem',
+                    fontWeight: '500',
                     margin: 0,
-                    fontFamily: 'Helvetica, Arial, sans-serif'
+                    fontFamily: 'Inter, sans-serif'
                   }}>
-                    Komentar ({currentPhotoComments.length})
+                    Comments ({currentPhotoComments.length})
                   </h3>
                 </div>
 
                 <div style={{
                   display: 'flex',
                   flexDirection: 'column',
-                  gap: '1rem',
+                  gap: '0.75rem',
                   paddingBottom: '3rem'
                 }}>
                   {isLoadingComments ? (
                     <div style={{
-                      color: 'rgba(255,255,255,0.5)',
+                      color: '#888',
                       textAlign: 'center',
                       padding: '2rem',
-                      fontSize: '0.9rem'
+                      fontSize: '0.85rem'
                     }}>
-                      Memuat komentar...
+                      Loading comments...
                     </div>
                   ) : currentPhotoComments.length === 0 ? (
                     <div style={{
-                      color: 'rgba(255,255,255,0.5)',
+                      color: '#888',
                       textAlign: 'center',
                       padding: '2rem',
-                      fontSize: '0.9rem'
+                      fontSize: '0.85rem'
                     }}>
-                      Belum ada komentar untuk foto ini.
-                      <div style={{ marginTop: '0.5rem', fontSize: '0.8rem' }}>
-                        Jadilah yang pertama berkomentar!
+                      No comments yet.
+                      <div style={{ marginTop: '0.5rem', fontSize: '0.75rem' }}>
+                        Be the first to comment!
                       </div>
                     </div>
                   ) : (
                     currentPhotoComments.map((comment, index) => (
                       <motion.div
                         key={comment.id || index}
-                        initial={{ opacity: 0, y: 10 }}
+                        initial={{ opacity: 0, y: 5 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: index * 0.05 }}
                         style={{
-                          backgroundColor: 'rgba(255,255,255,0.05)',
+                          backgroundColor: '#1a1a1a',
                           padding: '1rem',
                           borderRadius: '8px',
-                          borderLeft: '3px solid #0050B7'
+                          border: '1px solid #2a2a2a'
                         }}
                       >
                         <div style={{
                           display: 'flex',
                           alignItems: 'flex-start',
-                          gap: '0.8rem',
+                          gap: '0.75rem',
                           marginBottom: '0.5rem'
                         }}>
                           <div style={{
                             width: '32px',
                             height: '32px',
                             minWidth: '32px',
-                            borderRadius: '50%',
-                            backgroundColor: user && comment.user === userDisplayName ? '#0050B7' : '#333',
+                            borderRadius: '6px',
+                            backgroundColor: user && comment.user === userDisplayName ? '#2a2a2a' : '#1a1a1a',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            fontSize: '0.9rem',
-                            fontWeight: '600',
-                            color: 'white'
+                            fontSize: '0.85rem',
+                            fontWeight: '500',
+                            color: 'white',
+                            border: '1px solid #2a2a2a'
                           }}>
                             {comment.userAvatar || comment.user.charAt(0).toUpperCase()}
                           </div>
@@ -3695,25 +3687,25 @@ export default function HomePage(): React.JSX.Element {
                             }}>
                               <span style={{
                                 color: 'rgba(255,255,255,0.9)',
-                                fontSize: '0.9rem',
-                                fontWeight: '600'
+                                fontSize: '0.85rem',
+                                fontWeight: '500'
                               }}>
                                 {comment.user}
                                 {user && comment.user === userDisplayName && (
                                   <span style={{
                                     marginLeft: '0.5rem',
                                     fontSize: '0.7rem',
-                                    backgroundColor: '#0050B7',
+                                    backgroundColor: '#2a2a2a',
                                     color: 'white',
                                     padding: '0.1rem 0.4rem',
                                     borderRadius: '4px'
                                   }}>
-                                    Anda
+                                    You
                                   </span>
                                 )}
                               </span>
                               <span style={{
-                                color: 'rgba(255,255,255,0.5)',
+                                color: '#888',
                                 fontSize: '0.75rem',
                                 whiteSpace: 'nowrap'
                               }}>
@@ -3723,7 +3715,7 @@ export default function HomePage(): React.JSX.Element {
                             <p style={{
                               color: 'white',
                               margin: 0,
-                              fontSize: '0.9rem',
+                              fontSize: '0.85rem',
                               lineHeight: 1.4
                             }}>
                               {comment.text}
@@ -3753,24 +3745,22 @@ export default function HomePage(): React.JSX.Element {
               position: 'fixed',
               top: isMobile ? '6rem' : '7.5rem',
               right: isMobile ? '5.5rem' : '7rem',
-              backgroundColor: 'rgba(20, 20, 20, 0.98)',
-              backdropFilter: 'blur(20px)',
-              borderRadius: '15px',
+              backgroundColor: '#0f0f0f',
+              borderRadius: '8px',
               padding: '1rem 0',
               width: isMobile ? '320px' : '450px',
               maxWidth: '90vw',
               maxHeight: '80vh',
               zIndex: 1001,
-              border: '1px solid rgba(255, 255, 255, 0.15)',
-              boxShadow: '0 20px 60px rgba(0, 0, 0, 0.5)',
+              border: '1px solid #1a1a1a',
               display: 'flex',
               flexDirection: 'column',
               overflow: 'hidden'
             }}
           >
             <div style={{
-              padding: '0 1.5rem 1rem 1.5rem',
-              borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+              padding: '0 1.25rem 1rem 1.25rem',
+              borderBottom: '1px solid #1a1a1a',
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
@@ -3778,27 +3768,27 @@ export default function HomePage(): React.JSX.Element {
             }}>
               <h3 style={{
                 color: 'white',
-                fontSize: '1.3rem',
-                fontWeight: '600',
+                fontSize: '1rem',
+                fontWeight: '500',
                 margin: 0,
-                fontFamily: 'Helvetica, Arial, sans-serif',
+                fontFamily: 'Inter, sans-serif',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '0.5rem'
               }}>
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
                   <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
                   <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
                 </svg>
                 Notifications
                 {notificationCount > 0 && (
                   <span style={{
-                    backgroundColor: '#FF4757',
+                    backgroundColor: '#ff6b6b',
                     color: 'white',
-                    fontSize: '0.8rem',
-                    fontWeight: '700',
-                    padding: '0.1rem 0.6rem',
-                    borderRadius: '10px',
+                    fontSize: '0.7rem',
+                    fontWeight: '500',
+                    padding: '0.1rem 0.5rem',
+                    borderRadius: '8px',
                     marginLeft: '0.5rem'
                   }}>
                     {notificationCount > 9 ? '9+' : notificationCount}
@@ -3811,19 +3801,18 @@ export default function HomePage(): React.JSX.Element {
                   <motion.button
                     onClick={handleClearNotification}
                     style={{
-                      backgroundColor: 'rgba(255, 71, 87, 0.2)',
-                      border: '1px solid rgba(255, 71, 87, 0.4)',
-                      color: '#FF4757',
-                      fontSize: '0.8rem',
-                      fontWeight: '600',
-                      padding: '0.3rem 0.8rem',
-                      borderRadius: '20px',
+                      backgroundColor: '#1a1a1a',
+                      border: '1px solid #2a2a2a',
+                      color: '#ff6b6b',
+                      fontSize: '0.75rem',
+                      fontWeight: '500',
+                      padding: '0.3rem 0.75rem',
+                      borderRadius: '6px',
                       cursor: 'pointer',
-                      fontFamily: 'Helvetica, Arial, sans-serif'
+                      fontFamily: 'Inter, sans-serif'
                     }}
                     whileHover={{ 
-                      backgroundColor: 'rgba(255, 71, 87, 0.3)',
-                      scale: 1.05
+                      backgroundColor: '#2a2a2a'
                     }}
                     whileTap={{ scale: 0.95 }}
                   >
@@ -3837,19 +3826,18 @@ export default function HomePage(): React.JSX.Element {
                     setTimeout(() => setIsLoadingNotifications(false), 500);
                   }}
                   style={{
-                    backgroundColor: 'rgba(0, 80, 183, 0.2)',
-                    border: '1px solid rgba(0, 80, 183, 0.4)',
-                    color: '#0050B7',
-                    fontSize: '0.8rem',
-                    fontWeight: '600',
-                    padding: '0.3rem 0.8rem',
-                    borderRadius: '20px',
+                    backgroundColor: '#1a1a1a',
+                    border: '1px solid #2a2a2a',
+                    color: 'white',
+                    fontSize: '0.75rem',
+                    fontWeight: '500',
+                    padding: '0.3rem 0.75rem',
+                    borderRadius: '6px',
                     cursor: 'pointer',
-                    fontFamily: 'Helvetica, Arial, sans-serif'
+                    fontFamily: 'Inter, sans-serif'
                   }}
                   whileHover={{ 
-                    backgroundColor: 'rgba(0, 80, 183, 0.3)',
-                    scale: 1.05
+                    backgroundColor: '#2a2a2a'
                   }}
                   whileTap={{ scale: 0.95 }}
                 >
@@ -3868,15 +3856,15 @@ export default function HomePage(): React.JSX.Element {
                 <div style={{
                   padding: '3rem 1rem',
                   textAlign: 'center',
-                  color: 'rgba(255, 255, 255, 0.5)',
-                  fontFamily: 'Helvetica, Arial, sans-serif'
+                  color: '#888',
+                  fontFamily: 'Inter, sans-serif'
                 }}>
                   <motion.div
                     animate={{ rotate: 360 }}
                     transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
                     style={{ marginBottom: '1rem' }}
                   >
-                    <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                       <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
                     </svg>
                   </motion.div>
@@ -3886,27 +3874,27 @@ export default function HomePage(): React.JSX.Element {
                 <div style={{
                   padding: '3rem 1.5rem',
                   textAlign: 'center',
-                  color: 'rgba(255, 255, 255, 0.5)',
-                  fontFamily: 'Helvetica, Arial, sans-serif'
+                  color: '#888',
+                  fontFamily: 'Inter, sans-serif'
                 }}>
                   <div style={{ 
-                    fontSize: '3rem',
+                    fontSize: '2.5rem',
                     marginBottom: '1rem',
                     opacity: 0.5
                   }}>
                     🔔
                   </div>
                   <h4 style={{
-                    color: 'rgba(255, 255, 255, 0.8)',
-                    fontSize: '1.2rem',
+                    color: 'white',
+                    fontSize: '1rem',
                     margin: '0 0 0.5rem 0'
                   }}>
-                    No notifications yet
+                    No notifications
                   </h4>
                   <p style={{
-                    fontSize: '0.9rem',
+                    fontSize: '0.85rem',
                     margin: '0 0 1.5rem 0',
-                    color: 'rgba(255, 255, 255, 0.4)'
+                    color: '#888'
                   }}>
                     Check back later for updates
                   </p>
@@ -3920,15 +3908,15 @@ export default function HomePage(): React.JSX.Element {
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: index * 0.05 }}
                       style={{
-                        padding: '1rem 1.5rem',
-                        borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
+                        padding: '1rem 1.25rem',
+                        borderBottom: '1px solid #1a1a1a',
                         cursor: 'pointer',
                         transition: 'all 0.2s ease',
-                        backgroundColor: notification.isRead ? 'transparent' : getBgColorByType(notification.type),
+                        backgroundColor: notification.read ? 'transparent' : '#1a1a1a',
                         position: 'relative'
                       }}
                       whileHover={{ 
-                        backgroundColor: notification.read ? 'rgba(255, 255, 255, 0.05)' : getBgColorByType(notification.type).replace('0.1', '0.2')
+                        backgroundColor: notification.read ? '#1a1a1a' : '#222'
                       }}
                       onClick={() => handleNotificationClick(notification)}
                     >
@@ -3938,29 +3926,30 @@ export default function HomePage(): React.JSX.Element {
                           left: '0.5rem',
                           top: '50%',
                           transform: 'translateY(-50%)',
-                          width: '8px',
-                          height: '8px',
-                          backgroundColor: getColorByType(notification.type),
+                          width: '6px',
+                          height: '6px',
+                          backgroundColor: '#ff6b6b',
                           borderRadius: '50%'
                         }} />
                       )}
                       
                       <div style={{
                         display: 'flex',
-                        gap: '1rem',
+                        gap: '0.75rem',
                         alignItems: 'flex-start'
                       }}>
                         <div style={{
-                          width: '40px',
-                          height: '40px',
-                          minWidth: '40px',
-                          borderRadius: '10px',
-                          backgroundColor: notification.read ? 'rgba(255, 255, 255, 0.1)' : `${getColorByType(notification.type)}20`,
+                          width: '32px',
+                          height: '32px',
+                          minWidth: '32px',
+                          borderRadius: '6px',
+                          backgroundColor: notification.read ? '#1a1a1a' : '#2a2a2a',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
-                          fontSize: '1.2rem',
-                          color: getColorByType(notification.type)
+                          fontSize: '1rem',
+                          color: notification.read ? '#888' : 'white',
+                          border: '1px solid #2a2a2a'
                         }}>
                           {notification.icon}
                         </div>
@@ -3982,20 +3971,20 @@ export default function HomePage(): React.JSX.Element {
                             }}>
                               <h4 style={{
                                 color: 'white',
-                                fontSize: '1rem',
-                                fontWeight: '600',
+                                fontSize: '0.9rem',
+                                fontWeight: '500',
                                 margin: 0,
-                                fontFamily: 'Helvetica, Arial, sans-serif'
+                                fontFamily: 'Inter, sans-serif'
                               }}>
                                 {notification.title}
                               </h4>
                               
                               <span style={{
-                                backgroundColor: getColorByType(notification.type),
-                                color: 'white',
-                                fontSize: '0.7rem',
-                                fontWeight: '600',
-                                padding: '0.1rem 0.5rem',
+                                backgroundColor: '#2a2a2a',
+                                color: '#aaa',
+                                fontSize: '0.65rem',
+                                fontWeight: '500',
+                                padding: '0.1rem 0.4rem',
                                 borderRadius: '4px',
                                 textTransform: 'uppercase'
                               }}>
@@ -4004,11 +3993,11 @@ export default function HomePage(): React.JSX.Element {
                               
                               {notification.isAdminPost && (
                                 <span style={{
-                                  backgroundColor: '#8B5CF6',
-                                  color: 'white',
-                                  fontSize: '0.7rem',
-                                  fontWeight: '600',
-                                  padding: '0.1rem 0.5rem',
+                                  backgroundColor: '#2a2a2a',
+                                  color: '#aaa',
+                                  fontSize: '0.65rem',
+                                  fontWeight: '500',
+                                  padding: '0.1rem 0.4rem',
                                   borderRadius: '4px'
                                 }}>
                                   ADMIN
@@ -4017,7 +4006,7 @@ export default function HomePage(): React.JSX.Element {
                             </div>
                             
                             <span style={{
-                              color: 'rgba(255, 255, 255, 0.5)',
+                              color: '#888',
                               fontSize: '0.75rem',
                               whiteSpace: 'nowrap'
                             }}>
@@ -4026,11 +4015,11 @@ export default function HomePage(): React.JSX.Element {
                           </div>
                           
                           <p style={{
-                            color: notification.read ? 'rgba(255, 255, 255, 0.7)' : 'white',
-                            fontSize: '0.9rem',
+                            color: notification.read ? '#aaa' : 'white',
+                            fontSize: '0.85rem',
                             margin: '0 0 0.5rem 0',
                             lineHeight: 1.4,
-                            fontFamily: 'Helvetica, Arial, sans-serif',
+                            fontFamily: 'Inter, sans-serif',
                             wordBreak: 'break-word'
                           }}>
                             {notification.message}
@@ -4044,13 +4033,13 @@ export default function HomePage(): React.JSX.Element {
                               marginTop: '0.3rem'
                             }}>
                               <span style={{
-                                color: 'rgba(255, 255, 255, 0.5)',
+                                color: '#888',
                                 fontSize: '0.75rem'
                               }}>
                                 From:
                               </span>
                               <span style={{
-                                color: '#8B5CF6',
+                                color: '#aaa',
                                 fontSize: '0.75rem',
                                 fontWeight: '500'
                               }}>
@@ -4068,11 +4057,11 @@ export default function HomePage(): React.JSX.Element {
                           }}>
                             {notification.priority && (
                               <span style={{
-                                color: notification.priority === 'high' ? '#EF4444' : 
-                                       notification.priority === 'medium' ? '#F59E0B' : '#10B981',
-                                fontSize: '0.7rem',
+                                color: notification.priority === 'high' ? '#ff6b6b' : 
+                                       notification.priority === 'medium' ? '#ffa500' : '#00ff00',
+                                fontSize: '0.65rem',
                                 fontWeight: '500',
-                                backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                                backgroundColor: '#1a1a1a',
                                 padding: '0.1rem 0.4rem',
                                 borderRadius: '4px'
                               }}>
@@ -4082,9 +4071,9 @@ export default function HomePage(): React.JSX.Element {
                             
                             {notification.category && (
                               <span style={{
-                                color: 'rgba(255, 255, 255, 0.7)',
-                                fontSize: '0.7rem',
-                                backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                                color: '#888',
+                                fontSize: '0.65rem',
+                                backgroundColor: '#1a1a1a',
                                 padding: '0.1rem 0.4rem',
                                 borderRadius: '4px'
                               }}>
@@ -4101,18 +4090,18 @@ export default function HomePage(): React.JSX.Element {
             </div>
             
             <div style={{
-              padding: '1rem 1.5rem',
-              borderTop: '1px solid rgba(255, 255, 255, 0.1)',
+              padding: '1rem 1.25rem',
+              borderTop: '1px solid #1a1a1a',
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
               flexShrink: 0,
-              backgroundColor: 'rgba(0, 0, 0, 0.2)'
+              backgroundColor: '#0a0a0a'
             }}>
               <div style={{
-                color: 'rgba(255, 255, 255, 0.5)',
-                fontSize: '0.8rem',
-                fontFamily: 'Helvetica, Arial, sans-serif'
+                color: '#888',
+                fontSize: '0.75rem',
+                fontFamily: 'Inter, sans-serif'
               }}>
                 {notifications.length} total • {notificationCount} unread
               </div>
@@ -4120,25 +4109,22 @@ export default function HomePage(): React.JSX.Element {
               <motion.a
                 href="/notifications"
                 style={{
-                  color: '#00FF00',
-                  fontSize: '0.9rem',
-                  fontWeight: '600',
+                  color: 'white',
+                  fontSize: '0.85rem',
+                  fontWeight: '500',
                   textDecoration: 'none',
-                  fontFamily: 'Helvetica, Arial, sans-serif',
+                  fontFamily: 'Inter, sans-serif',
                   display: 'flex',
                   alignItems: 'center',
                   gap: '0.5rem'
                 }}
                 whileHover={{ 
-                  color: 'white',
+                  color: '#aaa',
                   x: 5
                 }}
               >
                 View All
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M5 12h14"/>
-                  <path d="m12 5 7 7-7 7"/>
-                </svg>
+                {icons.chevronRight}
               </motion.a>
             </div>
           </motion.div>
@@ -4149,22 +4135,23 @@ export default function HomePage(): React.JSX.Element {
       <motion.div
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.8, delay: 0.3 }}
+        transition={{ duration: 0.5, delay: 0.3 }}
         style={{
           position: 'fixed',
           top: isMobile ? '0.8rem' : '1rem',
           left: isMobile ? '1rem' : '2rem',
           color: 'white',
-          fontSize: isMobile ? '1rem' : '1.2rem',
+          fontSize: isMobile ? '0.9rem' : '1rem',
           fontWeight: '300',
-          fontFamily: 'Helvetica, Arial, sans-serif',
+          fontFamily: 'Inter, sans-serif',
           textTransform: 'uppercase',
           letterSpacing: '1px',
           zIndex: 1000,
-          backgroundColor: 'rgba(0,0,0,0.3)',
+          backgroundColor: 'rgba(15, 15, 15, 0.8)',
           padding: '0.5rem 1rem',
-          borderRadius: '4px',
-          backdropFilter: 'blur(5px)'
+          borderRadius: '6px',
+          backdropFilter: 'blur(4px)',
+          border: '1px solid #1a1a1a'
         }}
       >
         Selamat Tahun Baru 2026
@@ -4183,45 +4170,44 @@ export default function HomePage(): React.JSX.Element {
               position: 'fixed',
               top: isMobile ? '6rem' : '7.5rem',
               right: isMobile ? '1rem' : '2rem',
-              backgroundColor: 'rgba(30, 30, 30, 0.95)',
-              backdropFilter: 'blur(10px)',
-              borderRadius: '12px',
-              padding: '0.8rem 0',
-              minWidth: '200px',
+              backgroundColor: '#0f0f0f',
+              borderRadius: '8px',
+              padding: '0.75rem 0',
+              minWidth: '180px',
               zIndex: 1001,
-              border: '1px solid rgba(255, 255, 255, 0.1)',
-              boxShadow: '0 10px 30px rgba(0, 0, 0, 0.3)',
+              border: '1px solid #1a1a1a',
               display: 'flex',
               flexDirection: 'column'
             }}
           >
             <div style={{
-              padding: '0.8rem 1rem',
-              borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+              padding: '0.75rem 1rem',
+              borderBottom: '1px solid #1a1a1a',
               display: 'flex',
               alignItems: 'center',
-              gap: '0.8rem'
+              gap: '0.75rem'
             }}>
               <div style={{
-                width: '40px',
-                height: '40px',
-                borderRadius: '50%',
-                backgroundColor: '#0050B7',
+                width: '32px',
+                height: '32px',
+                borderRadius: '6px',
+                backgroundColor: '#1a1a1a',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                fontSize: '1rem',
-                fontWeight: '600',
+                fontSize: '0.85rem',
+                fontWeight: '500',
                 color: 'white',
-                flexShrink: 0
+                flexShrink: 0,
+                border: '1px solid #2a2a2a'
               }}>
                 {userDisplayName.charAt(0).toUpperCase()}
               </div>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{
                   color: 'white',
-                  fontSize: '0.9rem',
-                  fontWeight: '600',
+                  fontSize: '0.85rem',
+                  fontWeight: '500',
                   whiteSpace: 'nowrap',
                   overflow: 'hidden',
                   textOverflow: 'ellipsis'
@@ -4229,7 +4215,7 @@ export default function HomePage(): React.JSX.Element {
                   {userDisplayName}
                 </div>
                 <div style={{
-                  color: 'rgba(255, 255, 255, 0.6)',
+                  color: '#888',
                   fontSize: '0.75rem',
                   marginTop: '0.2rem'
                 }}>
@@ -4246,71 +4232,59 @@ export default function HomePage(): React.JSX.Element {
               <motion.button
                 onClick={handleNotesClick}
                 style={{
-                  padding: '0.8rem 1rem',
+                  padding: '0.75rem 1rem',
                   backgroundColor: 'transparent',
                   border: 'none',
-                  color: 'rgba(255, 255, 255, 0.9)',
-                  fontSize: '0.9rem',
+                  color: '#aaa',
+                  fontSize: '0.85rem',
                   fontWeight: '500',
                   textAlign: 'left',
                   cursor: 'pointer',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '0.8rem',
+                  gap: '0.75rem',
                   transition: 'all 0.2s ease',
-                  fontFamily: 'Helvetica, Arial, sans-serif'
+                  fontFamily: 'Inter, sans-serif'
                 }}
                 whileHover={{ 
-                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                  paddingLeft: '1.2rem'
+                  backgroundColor: '#1a1a1a'
                 }}
               >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                  <polyline points="14 2 14 8 20 8"/>
-                  <line x1="16" y1="13" x2="8" y2="13"/>
-                  <line x1="16" y1="17" x2="8" y2="17"/>
-                  <polyline points="10 9 9 9 8 9"/>
-                </svg>
-                Catatan Saya
+                {icons.notes}
+                My Notes
               </motion.button>
 
               <motion.button
                 onClick={handleLogoutClick}
                 style={{
-                  padding: '0.8rem 1rem',
+                  padding: '0.75rem 1rem',
                   backgroundColor: 'transparent',
                   border: 'none',
                   color: '#ff6b6b',
-                  fontSize: '0.9rem',
+                  fontSize: '0.85rem',
                   fontWeight: '500',
                   textAlign: 'left',
                   cursor: 'pointer',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '0.8rem',
+                  gap: '0.75rem',
                   transition: 'all 0.2s ease',
-                  fontFamily: 'Helvetica, Arial, sans-serif'
+                  fontFamily: 'Inter, sans-serif'
                 }}
                 whileHover={{ 
-                  backgroundColor: 'rgba(255, 107, 107, 0.1)',
-                  paddingLeft: '1.2rem'
+                  backgroundColor: '#1a1a1a'
                 }}
               >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-                  <polyline points="16 17 21 12 16 7"/>
-                  <line x1="21" y1="12" x2="9" y2="12"/>
-                </svg>
+                {icons.logout}
                 Logout
               </motion.button>
             </div>
 
             {userStats && (
               <div style={{
-                padding: '0.8rem 1rem',
-                borderTop: '1px solid rgba(255, 255, 255, 0.1)',
-                backgroundColor: 'rgba(0, 0, 0, 0.2)'
+                padding: '0.75rem 1rem',
+                borderTop: '1px solid #1a1a1a',
+                backgroundColor: '#0a0a0a'
               }}>
                 <div style={{
                   display: 'flex',
@@ -4319,37 +4293,17 @@ export default function HomePage(): React.JSX.Element {
                   marginBottom: '0.3rem'
                 }}>
                   <span style={{
-                    color: 'rgba(255, 255, 255, 0.7)',
+                    color: '#888',
                     fontSize: '0.75rem'
                   }}>
-                    Login Anda:
+                    Your logins:
                   </span>
                   <span style={{
-                    color: '#00FF00',
-                    fontSize: '0.9rem',
-                    fontWeight: '600'
+                    color: 'white',
+                    fontSize: '0.85rem',
+                    fontWeight: '500'
                   }}>
-                    {userStats.loginCount || 0} kali
-                  </span>
-                </div>
-                <div style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  marginBottom: '0.3rem'
-                }}>
-                  <span style={{
-                    color: 'rgba(255, 255, 255, 0.7)',
-                    fontSize: '0.75rem'
-                  }}>
-                    Total Users:
-                  </span>
-                  <span style={{
-                    color: '#0050B7',
-                    fontSize: '0.9rem',
-                    fontWeight: '600'
-                  }}>
-                    {totalUsers}
+                    {userStats.loginCount || 0}
                   </span>
                 </div>
                 <div style={{
@@ -4358,17 +4312,17 @@ export default function HomePage(): React.JSX.Element {
                   alignItems: 'center'
                 }}>
                   <span style={{
-                    color: 'rgba(255, 255, 255, 0.7)',
+                    color: '#888',
                     fontSize: '0.75rem'
                   }}>
-                    Total Login:
+                    Total users:
                   </span>
                   <span style={{
-                    color: '#F59E0B',
-                    fontSize: '0.9rem',
-                    fontWeight: '600'
+                    color: 'white',
+                    fontSize: '0.85rem',
+                    fontWeight: '500'
                   }}>
-                    {totalLoggedInUsers}
+                    {totalUsers}
                   </span>
                 </div>
               </div>
@@ -4399,12 +4353,11 @@ export default function HomePage(): React.JSX.Element {
           display: 'flex',
           alignItems: 'center',
           gap: isMobile ? '1rem' : '2rem',
-          backgroundColor: 'transparent',
-          backdropFilter: 'blur(10px)',
-          borderRadius: '50px',
+          backgroundColor: 'rgba(15, 15, 15, 0.8)',
+          backdropFilter: 'blur(4px)',
+          borderRadius: '8px',
           padding: isMobile ? '0.6rem 1rem' : '0.8rem 1.5rem',
-          border: '1px solid rgba(255,255,255,0.15)',
-          boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
+          border: '1px solid #1a1a1a'
         }}>
           {/* Docs */}
           <motion.div
@@ -4415,24 +4368,22 @@ export default function HomePage(): React.JSX.Element {
               gap: '0.5rem',
               cursor: 'pointer',
               padding: '0.4rem 1rem 0.4rem 0.8rem',
-              borderRadius: '25px',
-              backgroundColor: 'rgba(255,255,255,0.9)',
-              border: '1px solid rgba(255,255,255,0.2)',
-              transition: 'all 0.3s ease',
-              position: 'relative'
+              borderRadius: '6px',
+              backgroundColor: '#1a1a1a',
+              border: '1px solid #2a2a2a',
+              transition: 'all 0.2s ease'
             }}
             whileHover={{ 
-              backgroundColor: 'white',
-              scale: 1.05,
-              border: '1px solid white'
+              backgroundColor: '#2a2a2a',
+              scale: 1.05
             }}
           >
             <svg 
-              width={isMobile ? "18" : "20"} 
-              height={isMobile ? "18" : "20"} 
+              width={isMobile ? "16" : "18"} 
+              height={isMobile ? "16" : "18"} 
               viewBox="0 0 24 24" 
               fill="none" 
-              stroke="#6366F1"
+              stroke="#888"
               strokeWidth="2"
             >
               <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
@@ -4442,39 +4393,16 @@ export default function HomePage(): React.JSX.Element {
               <polyline points="10,9 9,9 8,9"/>
             </svg>
             <span style={{
-              color: '#6366F1',
-              fontSize: isMobile ? '0.8rem' : '0.9rem',
-              fontWeight: '600',
-              fontFamily: 'Helvetica, Arial, sans-serif',
+              color: '#888',
+              fontSize: isMobile ? '0.8rem' : '0.85rem',
+              fontWeight: '500',
+              fontFamily: 'Inter, sans-serif',
               display: 'flex',
               alignItems: 'center',
               gap: '0.3rem'
             }}>
               Docs
-              <svg 
-                width={isMobile ? "12" : "14"} 
-                height={isMobile ? "12" : "14"} 
-                viewBox="0 0 24 24" 
-                fill="none" 
-                stroke="#6366F1"
-                strokeWidth="2"
-              >
-                <path d="M7 7l10 10" />
-                <path d="M17 7v10H7" />
-              </svg>
             </span>
-            <div style={{
-              backgroundColor: '#EC4899',
-              color: 'white',
-              fontSize: '0.7rem',
-              fontWeight: '700',
-              padding: '0.1rem 0.4rem',
-              borderRadius: '10px',
-              marginLeft: '0.3rem',
-              border: 'none'
-            }}>
-              NEW
-            </div>
           </motion.div>
 
           {/* Chatbot */}
@@ -4487,24 +4415,22 @@ export default function HomePage(): React.JSX.Element {
               gap: '0.5rem',
               cursor: 'pointer',
               padding: '0.4rem 1rem 0.4rem 0.8rem',
-              borderRadius: '25px',
-              backgroundColor: 'rgba(255,255,255,0.9)',
-              border: '1px solid rgba(255,255,255,0.2)',
-              transition: 'all 0.3s ease',
-              position: 'relative'
+              borderRadius: '6px',
+              backgroundColor: '#1a1a1a',
+              border: '1px solid #2a2a2a',
+              transition: 'all 0.2s ease'
             }}
             whileHover={{ 
-              backgroundColor: 'white',
-              scale: 1.05,
-              border: '1px solid white'
+              backgroundColor: '#2a2a2a',
+              scale: 1.05
             }}
           >
             <svg 
-              width={isMobile ? "18" : "20"} 
-              height={isMobile ? "18" : "20"} 
+              width={isMobile ? "16" : "18"} 
+              height={isMobile ? "16" : "18"} 
               viewBox="0 0 24 24" 
               fill="none" 
-              stroke="#6366F1"
+              stroke="#888"
               strokeWidth="2"
             >
               <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
@@ -4512,39 +4438,16 @@ export default function HomePage(): React.JSX.Element {
               <line x1="8" y1="11" x2="12" y2="11"/>
             </svg>
             <span style={{
-              color: '#6366F1',
-              fontSize: isMobile ? '0.8rem' : '0.9rem',
-              fontWeight: '600',
-              fontFamily: 'Helvetica, Arial, sans-serif',
+              color: '#888',
+              fontSize: isMobile ? '0.8rem' : '0.85rem',
+              fontWeight: '500',
+              fontFamily: 'Inter, sans-serif',
               display: 'flex',
               alignItems: 'center',
               gap: '0.3rem'
             }}>
               Chatbot
-              <svg 
-                width={isMobile ? "12" : "14"} 
-                height={isMobile ? "12" : "14"} 
-                viewBox="0 0 24 24" 
-                fill="none" 
-                stroke="#6366F1"
-                strokeWidth="2"
-              >
-                <path d="M7 7l10 10" />
-                <path d="M17 7v10H7" />
-              </svg>
             </span>
-            <div style={{
-              backgroundColor: '#EC4899',
-              color: 'white',
-              fontSize: '0.7rem',
-              fontWeight: '700',
-              padding: '0.1rem 0.4rem',
-              borderRadius: '10px',
-              marginLeft: '0.3rem',
-              border: 'none'
-            }}>
-              NEW
-            </div>
           </motion.div>
 
           {/* Update */}
@@ -4556,24 +4459,22 @@ export default function HomePage(): React.JSX.Element {
               gap: '0.5rem',
               cursor: 'pointer',
               padding: '0.4rem 1rem 0.4rem 0.8rem',
-              borderRadius: '25px',
-              backgroundColor: 'rgba(255,255,255,0.9)',
-              border: '1px solid rgba(255,255,255,0.2)',
-              transition: 'all 0.3s ease',
-              position: 'relative'
+              borderRadius: '6px',
+              backgroundColor: '#1a1a1a',
+              border: '1px solid #2a2a2a',
+              transition: 'all 0.2s ease'
             }}
             whileHover={{ 
-              backgroundColor: 'white',
-              scale: 1.05,
-              border: '1px solid white'
+              backgroundColor: '#2a2a2a',
+              scale: 1.05
             }}
           >
             <svg 
-              width={isMobile ? "18" : "20"} 
-              height={isMobile ? "18" : "20"} 
+              width={isMobile ? "16" : "18"} 
+              height={isMobile ? "16" : "18"} 
               viewBox="0 0 24 24" 
               fill="none" 
-              stroke="#6366F1"
+              stroke="#888"
               strokeWidth="2"
             >
               <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
@@ -4583,39 +4484,16 @@ export default function HomePage(): React.JSX.Element {
               <polyline points="10,9 9,9 8,9"/>
             </svg>
             <span style={{
-              color: '#6366F1',
-              fontSize: isMobile ? '0.8rem' : '0.9rem',
-              fontWeight: '600',
-              fontFamily: 'Helvetica, Arial, sans-serif',
+              color: '#888',
+              fontSize: isMobile ? '0.8rem' : '0.85rem',
+              fontWeight: '500',
+              fontFamily: 'Inter, sans-serif',
               display: 'flex',
               alignItems: 'center',
               gap: '0.3rem'
             }}>
               Update
-              <svg 
-                width={isMobile ? "12" : "14"} 
-                height={isMobile ? "12" : "14"} 
-                viewBox="0 0 24 24" 
-                fill="none" 
-                stroke="#6366F1"
-                strokeWidth="2"
-              >
-                <path d="M7 7l10 10" />
-                <path d="M17 7v10H7" />
-              </svg>
             </span>
-            <div style={{
-              backgroundColor: '#EC4899',
-              color: 'white',
-              fontSize: '0.7rem',
-              fontWeight: '700',
-              padding: '0.1rem 0.4rem',
-              borderRadius: '10px',
-              marginLeft: '0.3rem',
-              border: 'none'
-            }}>
-              NEW
-            </div>
           </motion.div>
 
           {/* Timeline */}
@@ -4627,24 +4505,22 @@ export default function HomePage(): React.JSX.Element {
               gap: '0.5rem',
               cursor: 'pointer',
               padding: '0.4rem 1rem 0.4rem 0.8rem',
-              borderRadius: '25px',
-              backgroundColor: 'rgba(255,255,255,0.9)',
-              border: '1px solid rgba(255,255,255,0.2)',
-              transition: 'all 0.3s ease',
-              position: 'relative'
+              borderRadius: '6px',
+              backgroundColor: '#1a1a1a',
+              border: '1px solid #2a2a2a',
+              transition: 'all 0.2s ease'
             }}
             whileHover={{ 
-              backgroundColor: 'white',
-              scale: 1.05,
-              border: '1px solid white'
+              backgroundColor: '#2a2a2a',
+              scale: 1.05
             }}
           >
             <svg 
-              width={isMobile ? "18" : "20"} 
-              height={isMobile ? "18" : "20"} 
+              width={isMobile ? "16" : "18"} 
+              height={isMobile ? "16" : "18"} 
               viewBox="0 0 24 24" 
               fill="none" 
-              stroke="#6366F1"
+              stroke="#888"
               strokeWidth="2"
             >
               <polyline points="1 4 1 10 7 10"/>
@@ -4653,39 +4529,16 @@ export default function HomePage(): React.JSX.Element {
               <line x1="16" y1="11" x2="12" y2="7"/>
             </svg>
             <span style={{
-              color: '#6366F1',
-              fontSize: isMobile ? '0.8rem' : '0.9rem',
-              fontWeight: '600',
-              fontFamily: 'Helvetica, Arial, sans-serif',
+              color: '#888',
+              fontSize: isMobile ? '0.8rem' : '0.85rem',
+              fontWeight: '500',
+              fontFamily: 'Inter, sans-serif',
               display: 'flex',
               alignItems: 'center',
               gap: '0.3rem'
             }}>
               Timeline
-              <svg 
-                width={isMobile ? "12" : "14"} 
-                height={isMobile ? "12" : "14"} 
-                viewBox="0 0 24 24" 
-                fill="none" 
-                stroke="#6366F1"
-                strokeWidth="2"
-              >
-                <path d="M7 7l10 10" />
-                <path d="M17 7v10H7" />
-              </svg>
             </span>
-            <div style={{
-              backgroundColor: '#EC4899',
-              color: 'white',
-              fontSize: '0.7rem',
-              fontWeight: '700',
-              padding: '0.1rem 0.4rem',
-              borderRadius: '10px',
-              marginLeft: '0.3rem',
-              border: 'none'
-            }}>
-              NEW
-            </div>
           </motion.div>
         </div>
       </div>
@@ -4715,12 +4568,12 @@ export default function HomePage(): React.JSX.Element {
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8, delay: 0.5 }}
+            transition={{ duration: 0.5, delay: 0.5 }}
           >
             <div style={{
               fontSize: isMobile ? '1.5rem' : '2.5rem',
               fontWeight: '300',
-              fontFamily: 'Helvetica, Arial, sans-serif',
+              fontFamily: 'Inter, sans-serif',
               margin: 0,
               letterSpacing: '2px',
               lineHeight: 1,
@@ -4738,7 +4591,7 @@ export default function HomePage(): React.JSX.Element {
                     initial={{ opacity: 0, y: 5 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -5 }}
-                    transition={{ duration: 0.3 }}
+                    transition={{ duration: 0.2 }}
                     style={{
                       display: 'inline-block'
                     }}
@@ -4750,7 +4603,7 @@ export default function HomePage(): React.JSX.Element {
                     key="nuru-final"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
-                    transition={{ duration: 0.5 }}
+                    transition={{ duration: 0.2 }}
                   >
                     NURU
                   </motion.span>
@@ -4773,29 +4626,27 @@ export default function HomePage(): React.JSX.Element {
   ref={searchContainerRef}
   initial={{ opacity: 0, x: -10 }}
   animate={{ opacity: 1, x: 0 }}
-  transition={{ delay: 1, duration: 0.5 }}
+  transition={{ delay: 1, duration: 0.3 }}
   style={{
     display: 'flex',
     flexDirection: 'column',
     position: 'relative',
-    width: showSearch ? '350px' : '40px',
-    height: showSearch ? 'auto' : '40px',
-    borderRadius: '20px',
-    backgroundColor: 'rgba(20, 20, 20, 0.95)',
-    backdropFilter: 'blur(20px)',
-    border: '1px solid rgba(255, 255, 255, 0.15)',
+    width: showSearch ? '300px' : '36px',
+    height: showSearch ? 'auto' : '36px',
+    borderRadius: '6px',
+    backgroundColor: '#0f0f0f',
+    border: '1px solid #1a1a1a',
     overflow: 'hidden',
     cursor: 'pointer',
-    transition: 'all 0.3s ease',
-    zIndex: 1002,
-    boxShadow: showSearch ? '0 20px 60px rgba(0, 0, 0, 0.5)' : 'none'
+    transition: 'all 0.2s ease',
+    zIndex: 1002
   }}
 >
   <div style={{
     display: 'flex',
     alignItems: 'center',
     width: '100%',
-    height: '40px',
+    height: '36px',
     padding: '0 10px',
     boxSizing: 'border-box'
   }}>
@@ -4805,7 +4656,7 @@ export default function HomePage(): React.JSX.Element {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        width: '20px',
+        width: '18px',
         height: '100%',
         cursor: 'pointer',
         flexShrink: 0,
@@ -4815,11 +4666,11 @@ export default function HomePage(): React.JSX.Element {
       whileTap={{ scale: 0.9 }}
     >
       <svg 
-        width="18" 
-        height="18" 
+        width="16" 
+        height="16" 
         viewBox="0 0 24 24" 
         fill="none" 
-        stroke={showSearch ? "#00FF00" : "white"} 
+        stroke={showSearch ? "white" : "#888"} 
         strokeWidth="2"
       >
         <circle cx="11" cy="11" r="8"/>
@@ -4841,9 +4692,9 @@ export default function HomePage(): React.JSX.Element {
         backgroundColor: 'transparent',
         border: 'none',
         color: 'white',
-        fontSize: '0.9rem',
+        fontSize: '0.85rem',
         outline: 'none',
-        fontFamily: 'Helvetica, Arial, sans-serif',
+        fontFamily: 'Inter, sans-serif',
         opacity: showSearch ? 1 : 0,
         pointerEvents: showSearch ? 'auto' : 'none',
         transition: 'opacity 0.2s ease'
@@ -4863,20 +4714,21 @@ export default function HomePage(): React.JSX.Element {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          width: '20px',
-          height: '20px',
+          width: '18px',
+          height: '18px',
           cursor: 'pointer',
-          backgroundColor: 'rgba(255, 255, 255, 0.1)',
-          borderRadius: '50%',
+          backgroundColor: '#1a1a1a',
+          borderRadius: '4px',
           flexShrink: 0,
-          marginLeft: '8px'
+          marginLeft: '8px',
+          border: '1px solid #2a2a2a'
         }}
-        whileHover={{ scale: 1.2, backgroundColor: 'rgba(255, 255, 255, 0.2)' }}
+        whileHover={{ scale: 1.1, backgroundColor: '#2a2a2a' }}
         whileTap={{ scale: 0.9 }}
       >
         <svg 
-          width="12" 
-          height="12" 
+          width="10" 
+          height="10" 
           viewBox="0 0 24 24" 
           fill="none" 
           stroke="white" 
@@ -4895,29 +4747,29 @@ export default function HomePage(): React.JSX.Element {
         initial={{ opacity: 0, height: 0 }}
         animate={{ opacity: 1, height: 'auto' }}
         exit={{ opacity: 0, height: 0 }}
-        transition={{ duration: 0.3 }}
+        transition={{ duration: 0.2 }}
         style={{
           width: '100%',
-          maxHeight: '400px',
+          maxHeight: '300px',
           overflowY: 'auto',
-          backgroundColor: 'rgba(15, 15, 15, 0.98)',
-          borderTop: '1px solid rgba(255, 255, 255, 0.1)',
-          padding: '10px 0'
+          backgroundColor: '#0f0f0f',
+          borderTop: '1px solid #1a1a1a',
+          padding: '8px 0'
         }}
       >
         <div style={{
-          padding: '0 15px 10px 15px',
-          borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
-          marginBottom: '5px'
+          padding: '0 12px 8px 12px',
+          borderBottom: '1px solid #1a1a1a',
+          marginBottom: '4px'
         }}>
           <div style={{
-            color: 'rgba(255, 255, 255, 0.7)',
-            fontSize: '0.8rem',
-            fontWeight: '600',
+            color: '#888',
+            fontSize: '0.75rem',
+            fontWeight: '500',
             textTransform: 'uppercase',
             letterSpacing: '0.5px'
           }}>
-            Hasil Pencarian ({searchResults.length})
+            Results ({searchResults.length})
           </div>
         </div>
 
@@ -4930,30 +4782,30 @@ export default function HomePage(): React.JSX.Element {
             transition={{ delay: index * 0.05 }}
             onClick={() => handleSearchResultClick(result.url)}
             style={{
-              padding: '12px 15px',
+              padding: '10px 12px',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
-              gap: '12px',
+              gap: '10px',
               transition: 'all 0.2s ease',
-              borderBottom: '1px solid rgba(255, 255, 255, 0.03)'
+              borderBottom: '1px solid #1a1a1a'
             }}
             whileHover={{ 
-              backgroundColor: 'rgba(0, 255, 0, 0.1)',
-              paddingLeft: '20px'
+              backgroundColor: '#1a1a1a'
             }}
             whileTap={{ scale: 0.98 }}
           >
             <div style={{
-              width: '36px',
-              height: '36px',
-              borderRadius: '8px',
-              backgroundColor: 'rgba(255, 255, 255, 0.1)',
+              width: '32px',
+              height: '32px',
+              borderRadius: '6px',
+              backgroundColor: '#1a1a1a',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              fontSize: '1.2rem',
-              flexShrink: 0
+              fontSize: '1rem',
+              flexShrink: 0,
+              border: '1px solid #2a2a2a'
             }}>
               {result.icon}
             </div>
@@ -4967,9 +4819,9 @@ export default function HomePage(): React.JSX.Element {
               }}>
                 <div style={{
                   color: 'white',
-                  fontSize: '0.95rem',
-                  fontWeight: '600',
-                  fontFamily: 'Helvetica, Arial, sans-serif',
+                  fontSize: '0.85rem',
+                  fontWeight: '500',
+                  fontFamily: 'Inter, sans-serif',
                   whiteSpace: 'nowrap',
                   overflow: 'hidden',
                   textOverflow: 'ellipsis'
@@ -4977,22 +4829,23 @@ export default function HomePage(): React.JSX.Element {
                   {result.title}
                 </div>
                 <div style={{
-                  backgroundColor: 'rgba(0, 80, 183, 0.3)',
-                  color: '#0050B7',
-                  fontSize: '0.7rem',
-                  fontWeight: '600',
+                  backgroundColor: '#1a1a1a',
+                  color: '#888',
+                  fontSize: '0.65rem',
+                  fontWeight: '500',
                   padding: '2px 6px',
-                  borderRadius: '10px',
+                  borderRadius: '4px',
                   marginLeft: '8px',
-                  flexShrink: 0
+                  flexShrink: 0,
+                  border: '1px solid #2a2a2a'
                 }}>
                   {result.category}
                 </div>
               </div>
               
               <div style={{
-                color: 'rgba(255, 255, 255, 0.6)',
-                fontSize: '0.8rem',
+                color: '#888',
+                fontSize: '0.75rem',
                 whiteSpace: 'nowrap',
                 overflow: 'hidden',
                 textOverflow: 'ellipsis',
@@ -5002,13 +4855,13 @@ export default function HomePage(): React.JSX.Element {
               </div>
               
               <div style={{
-                color: '#00FF00',
-                fontSize: '0.75rem',
+                color: '#aaa',
+                fontSize: '0.7rem',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '4px'
               }}>
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
                   <polyline points="15 3 21 3 21 9"/>
                   <line x1="10" y1="14" x2="21" y2="3"/>
@@ -5026,10 +4879,7 @@ export default function HomePage(): React.JSX.Element {
                 transition: 'all 0.2s ease'
               }}
             >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M5 12h14"/>
-                <path d="m12 5 7 7-7 7"/>
-              </svg>
+              {icons.chevronRight}
             </motion.div>
           </motion.div>
         ))}
@@ -5044,17 +4894,17 @@ export default function HomePage(): React.JSX.Element {
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         style={{
-          padding: '20px 15px',
+          padding: '16px 12px',
           textAlign: 'center',
-          color: 'rgba(255, 255, 255, 0.5)',
-          fontSize: '0.9rem',
-          backgroundColor: 'rgba(15, 15, 15, 0.98)',
-          borderTop: '1px solid rgba(255, 255, 255, 0.1)'
+          color: '#888',
+          fontSize: '0.85rem',
+          backgroundColor: '#0f0f0f',
+          borderTop: '1px solid #1a1a1a'
         }}
       >
-        Tidak ditemukan hasil untuk "{searchQuery}"
-        <div style={{ fontSize: '0.8rem', marginTop: '5px' }}>
-          Coba kata kunci lain seperti: chatbot, sign in, notifikasi
+        No results for "{searchQuery}"
+        <div style={{ fontSize: '0.75rem', marginTop: '4px' }}>
+          Try: chatbot, sign in, notifikasi
         </div>
       </motion.div>
     )}
@@ -5066,32 +4916,31 @@ export default function HomePage(): React.JSX.Element {
             ref={notificationRef}
             initial={{ opacity: 0, x: -10 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 1.05, duration: 0.5 }}
+            transition={{ delay: 1.05, duration: 0.3 }}
             style={{
               position: 'relative',
-              width: '40px',
-              height: '40px',
-              borderRadius: '50%',
-              backgroundColor: 'rgba(255, 255, 255, 0.1)',
-              backdropFilter: 'blur(10px)',
-              border: '1px solid rgba(255, 255, 255, 0.15)',
+              width: '36px',
+              height: '36px',
+              borderRadius: '6px',
+              backgroundColor: '#0f0f0f',
+              border: '1px solid #1a1a1a',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               cursor: 'pointer',
-              transition: 'all 0.3s ease'
+              transition: 'all 0.2s ease'
             }}
             onClick={() => setShowNotification(!showNotification)}
             whileHover={{ 
-              scale: 1.1,
-              backgroundColor: 'rgba(255, 255, 255, 0.15)',
-              border: '1px solid rgba(255, 255, 255, 0.3)'
+              scale: 1.05,
+              backgroundColor: '#1a1a1a',
+              border: '1px solid #2a2a2a'
             }}
             whileTap={{ scale: 0.95 }}
           >
             <svg 
-              width="20" 
-              height="20" 
+              width="18" 
+              height="18" 
               viewBox="0 0 24 24" 
               fill="none" 
               stroke="white" 
@@ -5110,50 +4959,26 @@ export default function HomePage(): React.JSX.Element {
                   position: 'absolute',
                   top: '-2px',
                   right: '-2px',
-                  minWidth: '18px',
-                  height: '18px',
-                  backgroundColor: '#FF4757',
+                  minWidth: '16px',
+                  height: '16px',
+                  backgroundColor: '#ff6b6b',
                   borderRadius: '50%',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  border: '2px solid black'
+                  border: '2px solid #0f0f0f'
                 }}
               >
                 <span style={{
                   color: 'white',
-                  fontSize: '0.65rem',
-                  fontWeight: '700',
-                  fontFamily: 'Helvetica, Arial, sans-serif',
+                  fontSize: '0.6rem',
+                  fontWeight: '500',
+                  fontFamily: 'Inter, sans-serif',
                   padding: '0 4px'
                 }}>
                   {notificationCount > 9 ? '9+' : notificationCount}
                 </span>
               </motion.div>
-            )}
-            
-            {hasUnreadNotifications && (
-              <motion.div
-                animate={{
-                  scale: [1, 1.2, 1],
-                  opacity: [0.7, 0, 0.7]
-                }}
-                transition={{
-                  duration: 2,
-                  repeat: Infinity,
-                  repeatType: "reverse"
-                }}
-                style={{
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  backgroundColor: '#FF4757',
-                  borderRadius: '50%',
-                  zIndex: -1
-                }}
-              />
             )}
           </motion.div>
 
@@ -5162,28 +4987,27 @@ export default function HomePage(): React.JSX.Element {
             <motion.div
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.5, duration: 0.3 }}
+              transition={{ delay: 0.5, duration: 0.2 }}
               style={{
                 display: 'flex',
                 alignItems: 'center',
                 gap: '0.5rem',
-                backgroundColor: 'rgba(0, 80, 183, 0.3)',
-                padding: '0.3rem 0.8rem',
-                borderRadius: '20px',
-                border: '1px solid rgba(0, 80, 183, 0.5)',
-                backdropFilter: 'blur(5px)',
+                backgroundColor: '#1a1a1a',
+                padding: '0.3rem 0.75rem',
+                borderRadius: '6px',
+                border: '1px solid #2a2a2a',
                 marginRight: '0.5rem'
               }}
             >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#00FF00" strokeWidth="2">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#aaa" strokeWidth="2">
                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
                 <circle cx="12" cy="7" r="4"/>
               </svg>
               <span style={{
-                color: '#00FF00',
-                fontSize: '0.8rem',
-                fontWeight: '600',
-                fontFamily: 'Helvetica, Arial, sans-serif'
+                color: '#aaa',
+                fontSize: '0.75rem',
+                fontWeight: '500',
+                fontFamily: 'Inter, sans-serif'
               }}>
                 {userStats.loginCount || 0}
               </span>
@@ -5194,22 +5018,22 @@ export default function HomePage(): React.JSX.Element {
           <motion.div
             onClick={handleOpenMenu}
             style={{
-              color: 'white',
-              fontSize: isMobile ? '1rem' : '1.5rem',
-              fontWeight: '400',
-              fontFamily: 'Helvetica, Arial, sans-serif',
+              color: '#aaa',
+              fontSize: isMobile ? '0.9rem' : '1rem',
+              fontWeight: '500',
+              fontFamily: 'Inter, sans-serif',
               cursor: 'pointer',
-              padding: isMobile ? '0.3rem 0.8rem' : '0.5rem 1rem',
+              padding: isMobile ? '0.3rem 0.75rem' : '0.5rem 1rem',
               whiteSpace: 'nowrap',
               letterSpacing: '1px',
               position: 'relative',
-              transition: 'all 0.3s ease'
+              transition: 'all 0.2s ease'
             }}
             initial={{ opacity: 0, x: -10 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 1.1, duration: 0.6 }}
+            transition={{ delay: 1.1, duration: 0.3 }}
             whileHover={{ 
-              color: '#00FF00',
+              color: 'white',
               scale: 1.05
             }}
             whileTap={{ scale: 0.95 }}
@@ -5217,64 +5041,57 @@ export default function HomePage(): React.JSX.Element {
             MENU
           </motion.div>
 
-          {/* Sign In / User Button */}
+          {/* Sign In / User Button - Minimalist Design */}
           <motion.button
             ref={userButtonRef}
             onClick={handleSignInClick}
             onMouseEnter={() => setIsHoveringSignIn(true)}
             onMouseLeave={() => setIsHoveringSignIn(false)}
             style={{
-              padding: isMobile ? '0.4rem 1rem' : '0.6rem 1.5rem',
-              fontSize: isMobile ? '0.9rem' : '1.5rem',
-              fontWeight: '600',
+              padding: isMobile ? '0.4rem 1rem' : '0.5rem 1.25rem',
+              fontSize: isMobile ? '0.85rem' : '0.9rem',
+              fontWeight: '500',
               color: 'white',
-              backgroundColor: 'transparent',
-              border: '1px solid rgba(255,255,255,0.15)',
-              borderRadius: '50px',
+              backgroundColor: '#0f0f0f',
+              border: '1px solid #1a1a1a',
+              borderRadius: '6px',
               cursor: 'pointer',
-              fontFamily: 'Helvetica, Arial, sans-serif',
-              backdropFilter: 'blur(10px)',
+              fontFamily: 'Inter, sans-serif',
               whiteSpace: 'nowrap',
               display: 'flex',
               alignItems: 'center',
-              gap: isMobile ? '0.3rem' : '0.5rem',
+              gap: isMobile ? '0.5rem' : '0.75rem',
               margin: 0,
-              maxWidth: isMobile ? '180px' : '250px',
-              minWidth: isMobile ? '120px' : '180px',
-              height: isMobile ? '40px' : '50px',
+              maxWidth: isMobile ? '160px' : '200px',
+              minWidth: isMobile ? '100px' : '140px',
+              height: isMobile ? '36px' : '40px',
               overflow: 'hidden',
               position: 'relative',
-              transition: 'all 0.3s ease',
-              boxShadow: '0 4px 15px rgba(0,0,0,0.1)'
+              transition: 'all 0.2s ease'
             }}
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1.2, duration: 0.6 }}
+            transition={{ delay: 1.2, duration: 0.3 }}
             whileHover={{ 
-              backgroundColor: 'rgba(255,255,255,0.1)',
+              backgroundColor: '#1a1a1a',
               scale: 1.05,
-              border: '1px solid rgba(255,255,255,0.3)',
+              border: '1px solid #2a2a2a',
               transition: { duration: 0.2 }
             }}
             whileTap={{ scale: 0.95 }}
           >
             {user ? (
               <>
-                <svg 
-                  width={isMobile ? "18" : "30"} 
-                  height={isMobile ? "18" : "30"} 
-                  viewBox="0 0 24 24" 
-                  fill="none" 
-                  stroke="currentColor" 
-                  strokeWidth="2"
-                  style={{
-                    flexShrink: 0,
-                    marginRight: '0.5rem'
-                  }}
-                >
-                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                  <circle cx="12" cy="7" r="4"/>
-                </svg>
+                <div style={{
+                  width: '20px',
+                  height: '20px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0
+                }}>
+                  {icons.user}
+                </div>
                 
                 <div style={{
                   overflow: 'hidden',
@@ -5290,43 +5107,40 @@ export default function HomePage(): React.JSX.Element {
                       whiteSpace: 'nowrap',
                       paddingRight: '20px',
                       transform: isNameScrolling ? `translateX(${scrollPosition}px)` : 'translateX(0)',
-                      willChange: 'transform'
+                      willChange: 'transform',
+                      fontSize: '0.85rem'
                     }}
                   >
                     {isHoveringSignIn ? `Hi, ${userDisplayName}` : userDisplayName}
                   </motion.span>
                   
                   {isHoveringSignIn && (
-                    <motion.span
-                      initial={{ opacity: 0, x: -10 }}
+                    <motion.div
+                      initial={{ opacity: 0, x: -5 }}
                       animate={{ opacity: 1, x: 0 }}
                       style={{
-                        marginLeft: '0.5rem',
-                        fontSize: '0.8em'
+                        marginLeft: '0.25rem',
+                        display: 'flex',
+                        alignItems: 'center'
                       }}
                     >
-                      ↓
-                    </motion.span>
+                      {icons.chevronRight}
+                    </motion.div>
                   )}
                 </div>
               </>
             ) : (
               <>
-                <svg 
-                  width={isMobile ? "18" : "30"} 
-                  height={isMobile ? "18" : "30"} 
-                  viewBox="0 0 24 24" 
-                  fill="none" 
-                  stroke="currentColor" 
-                  strokeWidth="2"
-                  style={{
-                    flexShrink: 0,
-                    marginRight: '0.5rem'
-                  }}
-                >
-                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                  <circle cx="12" cy="7" r="4"/>
-                </svg>
+                <div style={{
+                  width: '20px',
+                  height: '20px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0
+                }}>
+                  {icons.user}
+                </div>
                 <span style={{
                   whiteSpace: 'nowrap',
                   overflow: 'hidden',
@@ -5378,7 +5192,7 @@ export default function HomePage(): React.JSX.Element {
                 fontSize: isMobile ? '5rem' : '7rem',
                 fontWeight: '900',
                 textTransform: 'uppercase',
-                fontFamily: 'Helvetica, Arial, sans-serif',
+                fontFamily: 'Inter, sans-serif',
                 letterSpacing: '-3px',
                 margin: 0,
                 lineHeight: 0.8,
@@ -5404,7 +5218,7 @@ export default function HomePage(): React.JSX.Element {
                   fontSize: isMobile ? '5rem' : '7rem',
                   fontWeight: '900',
                   textTransform: 'uppercase',
-                  fontFamily: 'Helvetica, Arial, sans-serif',
+                  fontFamily: 'Inter, sans-serif',
                   letterSpacing: '-3px',
                   margin: 0,
                   lineHeight: 0.8,
@@ -5422,10 +5236,10 @@ export default function HomePage(): React.JSX.Element {
                 <div style={{
                   width: isMobile ? '140px' : '180px',
                   height: isMobile ? '5rem' : '7rem',
-                  borderRadius: '10px',
+                  borderRadius: '8px',
                   overflow: 'hidden',
-                  border: '1px solid rgba(255, 255, 255, 0.3)',
-                  backgroundColor: '#222'
+                  border: '1px solid #2a2a2a',
+                  backgroundColor: '#1a1a1a'
                 }}>
                   <img 
                     src="images/5.jpg" 
@@ -5443,10 +5257,10 @@ export default function HomePage(): React.JSX.Element {
                   position: 'absolute',
                   bottom: '-0.8rem',
                   right: '-1.5rem',
-                  color: 'rgba(255, 255, 255, 0.7)',
-                  fontSize: isMobile ? '1rem' : '1.2rem',
+                  color: '#888',
+                  fontSize: isMobile ? '0.9rem' : '1rem',
                   fontWeight: '400',
-                  fontFamily: 'Helvetica, Arial, sans-serif',
+                  fontFamily: 'Inter, sans-serif',
                   letterSpacing: '1px'
                 }}>
                   01
@@ -5471,10 +5285,10 @@ export default function HomePage(): React.JSX.Element {
               <div style={{
                 width: isMobile ? '140px' : '180px',
                 height: isMobile ? '5rem' : '7rem',
-                borderRadius: '10px',
+                borderRadius: '8px',
                 overflow: 'hidden',
-                border: '1px solid rgba(255, 255, 255, 0.3)',
-                backgroundColor: '#222'
+                border: '1px solid #2a2a2a',
+                backgroundColor: '#1a1a1a'
               }}>
                 <img 
                   src="images/5.jpg" 
@@ -5492,10 +5306,10 @@ export default function HomePage(): React.JSX.Element {
                 position: 'absolute',
                 bottom: '-0.8rem',
                 right: '-1.5rem',
-                color: 'rgba(255, 255, 255, 0.7)',
-                fontSize: isMobile ? '1rem' : '1.2rem',
+                color: '#888',
+                fontSize: isMobile ? '0.9rem' : '1rem',
                 fontWeight: '400',
-                fontFamily: 'Helvetica, Arial, sans-serif',
+                fontFamily: 'Inter, sans-serif',
                 letterSpacing: '1px'
               }}>
                 02
@@ -5513,7 +5327,7 @@ export default function HomePage(): React.JSX.Element {
                 fontSize: isMobile ? '5rem' : '7rem',
                 fontWeight: '900',
                 textTransform: 'uppercase',
-                fontFamily: 'Helvetica, Arial, sans-serif',
+                fontFamily: 'Inter, sans-serif',
                 letterSpacing: '-3px',
                 margin: 0,
                 lineHeight: 0.8,
@@ -5542,7 +5356,7 @@ export default function HomePage(): React.JSX.Element {
                 fontSize: isMobile ? '5rem' : '7rem',
                 fontWeight: '900',
                 textTransform: 'uppercase',
-                fontFamily: 'Helvetica, Arial, sans-serif',
+                fontFamily: 'Inter, sans-serif',
                 letterSpacing: '-3px',
                 margin: 0,
                 lineHeight: 0.8
@@ -5559,10 +5373,10 @@ export default function HomePage(): React.JSX.Element {
               <div style={{
                 width: isMobile ? '140px' : '180px',
                 height: isMobile ? '5rem' : '7rem',
-                borderRadius: '10px',
+                borderRadius: '8px',
                 overflow: 'hidden',
-                border: '1px solid rgba(255, 255, 255, 0.3)',
-                backgroundColor: '#222'
+                border: '1px solid #2a2a2a',
+                backgroundColor: '#1a1a1a'
               }}>
                 <img 
                   src="images/5.jpg" 
@@ -5580,10 +5394,10 @@ export default function HomePage(): React.JSX.Element {
                 position: 'absolute',
                 bottom: '-0.8rem',
                 right: '-1.5rem',
-                color: 'rgba(255, 255, 255, 0.7)',
-                fontSize: isMobile ? '1rem' : '1.2rem',
+                color: '#888',
+                fontSize: isMobile ? '0.9rem' : '1rem',
                 fontWeight: '400',
-                fontFamily: 'Helvetica, Arial, sans-serif',
+                fontFamily: 'Inter, sans-serif',
                 letterSpacing: '1px'
               }}>
                 03
@@ -5602,7 +5416,7 @@ export default function HomePage(): React.JSX.Element {
                 fontSize: isMobile ? '5rem' : '7rem',
                 fontWeight: '900',
                 textTransform: 'uppercase',
-                fontFamily: 'Helvetica, Arial, sans-serif',
+                fontFamily: 'Inter, sans-serif',
                 letterSpacing: '-3px',
                 margin: 0,
                 lineHeight: 0.8
@@ -5628,10 +5442,10 @@ export default function HomePage(): React.JSX.Element {
               <div style={{
                 width: isMobile ? '140px' : '180px',
                 height: isMobile ? '5rem' : '7rem',
-                borderRadius: '10px',
+                borderRadius: '8px',
                 overflow: 'hidden',
-                border: '1px solid rgba(255, 255, 255, 0.3)',
-                backgroundColor: '#222'
+                border: '1px solid #2a2a2a',
+                backgroundColor: '#1a1a1a'
               }}>
                 <img 
                   src="images/5.jpg" 
@@ -5649,10 +5463,10 @@ export default function HomePage(): React.JSX.Element {
                 position: 'absolute',
                 bottom: '-0.8rem',
                 right: '-1.5rem',
-                color: 'rgba(255, 255, 255, 0.7)',
-                fontSize: isMobile ? '1rem' : '1.2rem',
+                color: '#888',
+                fontSize: isMobile ? '0.9rem' : '1rem',
                 fontWeight: '400',
-                fontFamily: 'Helvetica, Arial, sans-serif',
+                fontFamily: 'Inter, sans-serif',
                 letterSpacing: '1px'
               }}>
                 04
@@ -5670,7 +5484,7 @@ export default function HomePage(): React.JSX.Element {
                 fontSize: isMobile ? '5rem' : '7rem',
                 fontWeight: '900',
                 textTransform: 'uppercase',
-                fontFamily: 'Helvetica, Arial, sans-serif',
+                fontFamily: 'Inter, sans-serif',
                 letterSpacing: '-3px',
                 margin: 0,
                 lineHeight: 0.8
@@ -5695,7 +5509,7 @@ export default function HomePage(): React.JSX.Element {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.5 }}
+              transition={{ duration: 0.2 }}
             >
             </motion.div>
           )}
