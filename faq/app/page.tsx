@@ -2570,7 +2570,7 @@ export default function HomePage(): React.JSX.Element {
     );
   };
 
-  // Render bagian tombol Sign In/User yang sudah diperbaiki
+  // Render bagian tombol Sign In/User yang sudah diperbaiki - DIPERBARUI dengan ukuran font lebih besar dan panah jelas
   const renderSignInButton = () => {
     const isLoggedIn = !!user;
     
@@ -2581,9 +2581,9 @@ export default function HomePage(): React.JSX.Element {
         onMouseEnter={() => setIsHoveringSignIn(true)}
         onMouseLeave={() => setIsHoveringSignIn(false)}
         style={{
-          padding: isMobile ? '0.4rem 1rem' : '0.6rem 1.5rem',
-          fontSize: isMobile ? '0.9rem' : '1rem',
-          fontWeight: '600',
+          padding: isMobile ? '0.5rem 1.2rem' : '0.8rem 1.8rem',
+          fontSize: isMobile ? '1rem' : '1.1rem',
+          fontWeight: '700',
           color: isLoggedIn ? '#000000' : 'white',
           backgroundColor: isLoggedIn ? '#00FF00' : 'transparent',
           border: isLoggedIn ? '1px solid #00FF00' : '1px solid rgba(255,255,255,0.15)',
@@ -2596,9 +2596,9 @@ export default function HomePage(): React.JSX.Element {
           alignItems: 'center',
           gap: isMobile ? '0.5rem' : '0.8rem',
           margin: 0,
-          maxWidth: isMobile ? '180px' : '250px',
-          minWidth: isMobile ? '120px' : '180px',
-          height: isMobile ? '40px' : '45px',
+          maxWidth: isMobile ? '200px' : '280px',
+          minWidth: isMobile ? '140px' : '200px',
+          height: isMobile ? '45px' : '50px',
           overflow: 'hidden',
           position: 'relative',
           transition: 'all 0.3s ease',
@@ -2619,8 +2619,8 @@ export default function HomePage(): React.JSX.Element {
           <>
             {/* Icon user setelah login - dengan warna hijau */}
             <div style={{
-              width: isMobile ? '22px' : '26px',
-              height: isMobile ? '22px' : '26px',
+              width: isMobile ? '26px' : '30px',
+              height: isMobile ? '26px' : '30px',
               borderRadius: '50%',
               backgroundColor: '#000000',
               display: 'flex',
@@ -2630,8 +2630,8 @@ export default function HomePage(): React.JSX.Element {
               marginRight: '0.3rem'
             }}>
               <svg 
-                width={isMobile ? "14" : "16"} 
-                height={isMobile ? "14" : "16"} 
+                width={isMobile ? "16" : "18"} 
+                height={isMobile ? "16" : "18"} 
                 viewBox="0 0 24 24" 
                 fill="none" 
                 stroke="#00FF00" 
@@ -2658,16 +2658,16 @@ export default function HomePage(): React.JSX.Element {
                   whiteSpace: 'nowrap',
                   overflow: 'hidden',
                   textOverflow: 'ellipsis',
-                  paddingRight: '10px',
+                  paddingRight: '15px',
                   color: '#000000',
                   fontWeight: '700',
-                  fontSize: isMobile ? '0.85rem' : '0.95rem'
+                  fontSize: isMobile ? '0.95rem' : '1.05rem'
                 }}
               >
                 {isHoveringSignIn ? `Hi, ${userDisplayName}` : userDisplayName}
               </span>
               
-              {/* Panah serong kanan setelah login */}
+              {/* Panah serong kanan setelah login - LEBIH BESAR dan JELAS */}
               <motion.div
                 initial={{ opacity: 0, x: -5 }}
                 animate={{ opacity: isHoveringSignIn ? 1 : 0.7, x: 0 }}
@@ -2676,16 +2676,18 @@ export default function HomePage(): React.JSX.Element {
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  flexShrink: 0
+                  flexShrink: 0,
+                  width: isMobile ? '18px' : '20px',
+                  height: isMobile ? '18px' : '20px'
                 }}
               >
                 <svg 
-                  width={isMobile ? "14" : "16"} 
-                  height={isMobile ? "14" : "16"} 
+                  width={isMobile ? "18" : "20"} 
+                  height={isMobile ? "18" : "20"} 
                   viewBox="0 0 24 24" 
                   fill="none" 
                   stroke="#000000" 
-                  strokeWidth="2.5"
+                  strokeWidth="3"
                 >
                   <line x1="7" y1="17" x2="17" y2="7"/>
                   <polyline points="17 7 17 17 7 17"/>
@@ -2695,17 +2697,17 @@ export default function HomePage(): React.JSX.Element {
           </>
         ) : (
           <>
-            {/* Icon user sebelum login */}
+            {/* Icon user sebelum login - LEBIH BESAR */}
             <svg 
-              width={isMobile ? "18" : "20"} 
-              height={isMobile ? "18" : "20"} 
+              width={isMobile ? "22" : "24"} 
+              height={isMobile ? "22" : "24"} 
               viewBox="0 0 24 24" 
               fill="none" 
               stroke="currentColor" 
-              strokeWidth="2"
+              strokeWidth="2.5"
               style={{
                 flexShrink: 0,
-                marginRight: '0.5rem'
+                marginRight: '0.8rem'
               }}
             >
               <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
@@ -2715,7 +2717,8 @@ export default function HomePage(): React.JSX.Element {
               whiteSpace: 'nowrap',
               overflow: 'hidden',
               textOverflow: 'ellipsis',
-              fontWeight: '600'
+              fontWeight: '700',
+              fontSize: isMobile ? '1.05rem' : '1.15rem'
             }}>
               SIGN IN
             </span>
