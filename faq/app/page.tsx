@@ -4184,7 +4184,7 @@ export default function HomePage(): React.JSX.Element {
                 </div>
               </div>
             )}
-          </motion.div>
+          </div>
 
           {/* Notification Bell dengan Badge */}
           <div
@@ -4694,3 +4694,4 @@ export default function HomePage(): React.JSX.Element {
     </div>
   );
 }
+
