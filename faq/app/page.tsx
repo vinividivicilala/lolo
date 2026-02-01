@@ -1062,26 +1062,6 @@ export default function HomePage(): React.JSX.Element {
     }
   }, [showProfileModal]);
 
-  // PERBAIKAN: Hapus animasi teks nama user berjalan
-  // Efek ini menyebabkan nama user bergerak terus-menerus
-  // Saya telah menghapus useEffect yang menangani animasi scroll pada nama user
-  useEffect(() => {
-    // Hapus logika animasi berjalan untuk nama user
-    // Biarkan nama user tetap statis
-    if (user && userTextRef.current && userButtonRef.current) {
-      const textWidth = userTextRef.current.scrollWidth;
-      const buttonWidth = userButtonRef.current.clientWidth;
-      
-      // Hanya set isNameScrolling ke false
-      setIsNameScrolling(false);
-      
-      // Pastikan tidak ada animasi GSAP yang berjalan
-      if (userTextRef.current) {
-        gsap.killTweensOf(userTextRef.current);
-      }
-    }
-  }, [user, userDisplayName, isMobile]);
-
   // Animasi GSAP untuk search expand
   useEffect(() => {
     if (searchContainerRef.current) {
@@ -2590,6 +2570,161 @@ export default function HomePage(): React.JSX.Element {
     );
   };
 
+  // Render bagian tombol Sign In/User yang sudah diperbaiki
+  const renderSignInButton = () => {
+    const isLoggedIn = !!user;
+    
+    return (
+      <motion.button
+        ref={userButtonRef}
+        onClick={handleSignInClick}
+        onMouseEnter={() => setIsHoveringSignIn(true)}
+        onMouseLeave={() => setIsHoveringSignIn(false)}
+        style={{
+          padding: isMobile ? '0.4rem 1rem' : '0.6rem 1.5rem',
+          fontSize: isMobile ? '0.9rem' : '1rem',
+          fontWeight: '600',
+          color: isLoggedIn ? '#000000' : 'white',
+          backgroundColor: isLoggedIn ? '#00FF00' : 'transparent',
+          border: isLoggedIn ? '1px solid #00FF00' : '1px solid rgba(255,255,255,0.15)',
+          borderRadius: '50px',
+          cursor: 'pointer',
+          fontFamily: 'Helvetica, Arial, sans-serif',
+          backdropFilter: 'blur(10px)',
+          whiteSpace: 'nowrap',
+          display: 'flex',
+          alignItems: 'center',
+          gap: isMobile ? '0.5rem' : '0.8rem',
+          margin: 0,
+          maxWidth: isMobile ? '180px' : '250px',
+          minWidth: isMobile ? '120px' : '180px',
+          height: isMobile ? '40px' : '45px',
+          overflow: 'hidden',
+          position: 'relative',
+          transition: 'all 0.3s ease',
+          boxShadow: isLoggedIn ? '0 4px 15px rgba(0, 255, 0, 0.3)' : '0 4px 15px rgba(0,0,0,0.1)'
+        }}
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 1.2, duration: 0.6 }}
+        whileHover={{ 
+          backgroundColor: isLoggedIn ? '#00CC00' : 'rgba(255,255,255,0.1)',
+          scale: 1.05,
+          border: isLoggedIn ? '1px solid #00CC00' : '1px solid rgba(255,255,255,0.3)',
+          boxShadow: isLoggedIn ? '0 6px 20px rgba(0, 255, 0, 0.4)' : '0 6px 20px rgba(0,0,0,0.2)'
+        }}
+        whileTap={{ scale: 0.95 }}
+      >
+        {isLoggedIn ? (
+          <>
+            {/* Icon user setelah login - dengan warna hijau */}
+            <div style={{
+              width: isMobile ? '22px' : '26px',
+              height: isMobile ? '22px' : '26px',
+              borderRadius: '50%',
+              backgroundColor: '#000000',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexShrink: 0,
+              marginRight: '0.3rem'
+            }}>
+              <svg 
+                width={isMobile ? "14" : "16"} 
+                height={isMobile ? "14" : "16"} 
+                viewBox="0 0 24 24" 
+                fill="none" 
+                stroke="#00FF00" 
+                strokeWidth="2"
+              >
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                <circle cx="12" cy="7" r="4"/>
+              </svg>
+            </div>
+            
+            {/* Nama user setelah login - tanpa animasi berjalan */}
+            <div style={{
+              overflow: 'hidden',
+              width: '100%',
+              position: 'relative',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between'
+            }}>
+              <span
+                ref={userTextRef}
+                style={{
+                  display: 'inline-block',
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  paddingRight: '10px',
+                  color: '#000000',
+                  fontWeight: '700',
+                  fontSize: isMobile ? '0.85rem' : '0.95rem'
+                }}
+              >
+                {isHoveringSignIn ? `Hi, ${userDisplayName}` : userDisplayName}
+              </span>
+              
+              {/* Panah serong kanan setelah login */}
+              <motion.div
+                initial={{ opacity: 0, x: -5 }}
+                animate={{ opacity: isHoveringSignIn ? 1 : 0.7, x: 0 }}
+                transition={{ duration: 0.2 }}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0
+                }}
+              >
+                <svg 
+                  width={isMobile ? "14" : "16"} 
+                  height={isMobile ? "14" : "16"} 
+                  viewBox="0 0 24 24" 
+                  fill="none" 
+                  stroke="#000000" 
+                  strokeWidth="2.5"
+                >
+                  <line x1="7" y1="17" x2="17" y2="7"/>
+                  <polyline points="17 7 17 17 7 17"/>
+                </svg>
+              </motion.div>
+            </div>
+          </>
+        ) : (
+          <>
+            {/* Icon user sebelum login */}
+            <svg 
+              width={isMobile ? "18" : "20"} 
+              height={isMobile ? "18" : "20"} 
+              viewBox="0 0 24 24" 
+              fill="none" 
+              stroke="currentColor" 
+              strokeWidth="2"
+              style={{
+                flexShrink: 0,
+                marginRight: '0.5rem'
+              }}
+            >
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+              <circle cx="12" cy="7" r="4"/>
+            </svg>
+            <span style={{
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              fontWeight: '600'
+            }}>
+              SIGN IN
+            </span>
+          </>
+        )}
+      </motion.button>
+    );
+  };
+
   return (
     <div style={{
       minHeight: '100vh',
@@ -3073,8 +3208,8 @@ export default function HomePage(): React.JSX.Element {
                       whileHover={{ x: 5 }}
                       transition={{ duration: 0.3 }}
                     >
-                      <path d="M5 12h14" />
-                      <path d="m12 5 7 7-7 7" />
+                      <path d="M5 12h14"/>
+                      <path d="m12 5 7 7-7 7"/>
                     </motion.svg>
                     {/* Garis bawah animasi */}
                     <motion.div
@@ -4128,31 +4263,6 @@ export default function HomePage(): React.JSX.Element {
         )}
       </AnimatePresence>
 
-      {/* Teks "Selamat Tahun Baru 2026" di pojok kiri atas */}
-      <motion.div
-        initial={{ opacity: 0, x: -20 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.8, delay: 0.3 }}
-        style={{
-          position: 'fixed',
-          top: isMobile ? '0.8rem' : '1rem',
-          left: isMobile ? '1rem' : '2rem',
-          color: 'white',
-          fontSize: isMobile ? '1rem' : '1.2rem',
-          fontWeight: '300',
-          fontFamily: 'Helvetica, Arial, sans-serif',
-          textTransform: 'uppercase',
-          letterSpacing: '1px',
-          zIndex: 1000,
-          backgroundColor: 'rgba(0,0,0,0.3)',
-          padding: '0.5rem 1rem',
-          borderRadius: '4px',
-          backdropFilter: 'blur(5px)'
-        }}
-      >
-        Selamat Tahun Baru 2026
-      </motion.div>
-
       {/* User Dropdown Menu */}
       <AnimatePresence>
         {showUserDropdown && user && (
@@ -4363,6 +4473,31 @@ export default function HomePage(): React.JSX.Element {
         )}
       </AnimatePresence>
 
+      {/* Teks "Selamat Tahun Baru 2026" di pojok kiri atas */}
+      <motion.div
+        initial={{ opacity: 0, x: -20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.8, delay: 0.3 }}
+        style={{
+          position: 'fixed',
+          top: isMobile ? '0.8rem' : '1rem',
+          left: isMobile ? '1rem' : '2rem',
+          color: 'white',
+          fontSize: isMobile ? '1rem' : '1.2rem',
+          fontWeight: '300',
+          fontFamily: 'Helvetica, Arial, sans-serif',
+          textTransform: 'uppercase',
+          letterSpacing: '1px',
+          zIndex: 1000,
+          backgroundColor: 'rgba(0,0,0,0.3)',
+          padding: '0.5rem 1rem',
+          borderRadius: '4px',
+          backdropFilter: 'blur(5px)'
+        }}
+      >
+        Selamat Tahun Baru 2026
+      </motion.div>
+
       {/* Top Navigation Bar */}
       <div 
         ref={topNavRef}
@@ -4445,8 +4580,8 @@ export default function HomePage(): React.JSX.Element {
                 stroke="#6366F1"
                 strokeWidth="2"
               >
-                <path d="M7 7l10 10" />
-                <path d="M17 7v10H7" />
+                <path d="M7 7l10 10"/>
+                <path d="M17 7v10H7"/>
               </svg>
             </span>
             <div style={{
@@ -4515,8 +4650,8 @@ export default function HomePage(): React.JSX.Element {
                 stroke="#6366F1"
                 strokeWidth="2"
               >
-                <path d="M7 7l10 10" />
-                <path d="M17 7v10H7" />
+                <path d="M7 7l10 10"/>
+                <path d="M17 7v10H7"/>
               </svg>
             </span>
             <div style={{
@@ -4586,8 +4721,8 @@ export default function HomePage(): React.JSX.Element {
                 stroke="#6366F1"
                 strokeWidth="2"
               >
-                <path d="M7 7l10 10" />
-                <path d="M17 7v10H7" />
+                <path d="M7 7l10 10"/>
+                <path d="M17 7v10H7"/>
               </svg>
             </span>
             <div style={{
@@ -4656,8 +4791,8 @@ export default function HomePage(): React.JSX.Element {
                 stroke="#6366F1"
                 strokeWidth="2"
               >
-                <path d="M7 7l10 10" />
-                <path d="M17 7v10H7" />
+                <path d="M7 7l10 10"/>
+                <path d="M17 7v10H7"/>
               </svg>
             </span>
             <div style={{
@@ -5217,130 +5352,8 @@ export default function HomePage(): React.JSX.Element {
             MENU
           </motion.div>
 
-          {/* PERBAIKAN: Sign In / User Button - Menghilangkan animasi berjalan */}
-          <motion.button
-            ref={userButtonRef}
-            onClick={handleSignInClick}
-            onMouseEnter={() => setIsHoveringSignIn(true)}
-            onMouseLeave={() => setIsHoveringSignIn(false)}
-            style={{
-              padding: isMobile ? '0.4rem 1rem' : '0.6rem 1.5rem',
-              fontSize: isMobile ? '0.9rem' : '1.5rem',
-              fontWeight: '600',
-              color: 'white',
-              backgroundColor: 'transparent',
-              border: '1px solid rgba(255,255,255,0.15)',
-              borderRadius: '50px',
-              cursor: 'pointer',
-              fontFamily: 'Helvetica, Arial, sans-serif',
-              backdropFilter: 'blur(10px)',
-              whiteSpace: 'nowrap',
-              display: 'flex',
-              alignItems: 'center',
-              gap: isMobile ? '0.3rem' : '0.5rem',
-              margin: 0,
-              maxWidth: isMobile ? '180px' : '250px',
-              minWidth: isMobile ? '120px' : '180px',
-              height: isMobile ? '40px' : '50px',
-              overflow: 'hidden',
-              position: 'relative',
-              transition: 'all 0.3s ease',
-              boxShadow: '0 4px 15px rgba(0,0,0,0.1)'
-            }}
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1.2, duration: 0.6 }}
-            whileHover={{ 
-              backgroundColor: 'rgba(255,255,255,0.1)',
-              scale: 1.05,
-              border: '1px solid rgba(255,255,255,0.3)',
-              transition: { duration: 0.2 }
-            }}
-            whileTap={{ scale: 0.95 }}
-          >
-            {user ? (
-              <>
-                {/* Icon user */}
-                <svg 
-                  width={isMobile ? "18" : "30"} 
-                  height={isMobile ? "18" : "30"} 
-                  viewBox="0 0 24 24" 
-                  fill="none" 
-                  stroke="currentColor" 
-                  strokeWidth="2"
-                  style={{
-                    flexShrink: 0,
-                    marginRight: '0.5rem'
-                  }}
-                >
-                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                  <circle cx="12" cy="7" r="4"/>
-                </svg>
-                
-                {/* PERBAIKAN: Nama user tanpa animasi berjalan */}
-                <div style={{
-                  overflow: 'hidden',
-                  width: '100%',
-                  position: 'relative',
-                  display: 'flex',
-                  alignItems: 'center'
-                }}>
-                  <span
-                    ref={userTextRef}
-                    style={{
-                      display: 'inline-block',
-                      whiteSpace: 'nowrap',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      paddingRight: '20px',
-                      transform: 'translateX(0) !important', // Pastikan tidak ada animasi
-                      willChange: 'auto'
-                    }}
-                  >
-                    {isHoveringSignIn ? `Hi, ${userDisplayName}` : userDisplayName}
-                  </span>
-                  
-                  {isHoveringSignIn && (
-                    <motion.span
-                      initial={{ opacity: 0, x: -10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      style={{
-                        marginLeft: '0.5rem',
-                        fontSize: '0.8em'
-                      }}
-                    >
-                      ↓
-                    </motion.span>
-                  )}
-                </div>
-              </>
-            ) : (
-              <>
-                <svg 
-                  width={isMobile ? "18" : "30"} 
-                  height={isMobile ? "18" : "30"} 
-                  viewBox="0 0 24 24" 
-                  fill="none" 
-                  stroke="currentColor" 
-                  strokeWidth="2"
-                  style={{
-                    flexShrink: 0,
-                    marginRight: '0.5rem'
-                  }}
-                >
-                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                  <circle cx="12" cy="7" r="4"/>
-                </svg>
-                <span style={{
-                  whiteSpace: 'nowrap',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis'
-                }}>
-                  SIGN IN
-                </span>
-              </>
-            )}
-          </motion.button>
+          {/* Tombol Sign In yang sudah diperbaiki */}
+          {renderSignInButton()}
         </div>
       </div>
 
