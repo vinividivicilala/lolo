@@ -1501,7 +1501,7 @@ export default function HomePage(): React.JSX.Element {
     handleOpenPhotoFullPage();
   };
 
-  // Handler untuk Sign In / User Button
+  // Handler untuk Sign In / User Button - TELAH DIPERBAIKI
   const handleSignInClick = () => {
     if (user) {
       setShowUserProfileModal(true);
@@ -1761,7 +1761,7 @@ export default function HomePage(): React.JSX.Element {
       MozOsxFontSmoothing: 'grayscale'
     }}>
 
-      {/* Modal Profil User */}
+      {/* Modal Profil User - TELAH DIPERBAIKI */}
       <AnimatePresence>
         {showUserProfileModal && user && (
           <motion.div
@@ -1775,12 +1775,12 @@ export default function HomePage(): React.JSX.Element {
               left: 0,
               width: '100%',
               height: '100%',
-              backgroundColor: 'rgba(0, 0, 0, 0.9)',
+              backgroundColor: 'rgba(0, 0, 0, 0.95)',
               zIndex: 10000,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              backdropFilter: 'blur(5px)'
+              backdropFilter: 'blur(10px)'
             }}
             onClick={() => setShowUserProfileModal(false)}
           >
@@ -1793,174 +1793,200 @@ export default function HomePage(): React.JSX.Element {
               style={{
                 backgroundColor: '#0a0a0a',
                 borderRadius: '0',
-                width: isMobile ? '95%' : '500px',
-                maxWidth: '500px',
+                width: isMobile ? '95%' : '900px',
+                maxWidth: '900px',
+                height: isMobile ? '90vh' : '700px',
                 maxHeight: '90vh',
                 display: 'flex',
-                flexDirection: 'column',
+                flexDirection: 'row',
                 overflow: 'hidden',
                 border: '1px solid #1a1a1a'
               }}
               onClick={(e) => e.stopPropagation()}
             >
-              {/* Header */}
+              {/* Sidebar Tabs di Kiri */}
               <div style={{
-                padding: '1.5rem 2rem',
-                borderBottom: '1px solid #1a1a1a',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                backgroundColor: '#0a0a0a'
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                  <div style={{
-                    width: '40px',
-                    height: '40px',
-                    borderRadius: '0',
-                    backgroundColor: '#1a1a1a',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    border: '1px solid #333'
-                  }}>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5">
-                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                      <circle cx="12" cy="7" r="4"/>
-                    </svg>
-                  </div>
-                  <div>
-                    <h3 style={{
-                      color: 'white',
-                      fontSize: '1.2rem',
-                      fontWeight: '400',
-                      margin: 0,
-                      fontFamily: 'Helvetica, Arial, sans-serif',
-                      letterSpacing: '0.5px'
-                    }}>
-                      {userDisplayName}
-                    </h3>
-                    <p style={{
-                      color: '#888',
-                      fontSize: '0.8rem',
-                      margin: '0.2rem 0 0 0',
-                      fontFamily: 'Helvetica, Arial, sans-serif'
-                    }}>
-                      {user.email}
-                    </p>
-                  </div>
-                </div>
-                <motion.button
-                  onClick={() => setShowUserProfileModal(false)}
-                  style={{
-                    backgroundColor: 'transparent',
-                    border: 'none',
-                    color: '#888',
-                    fontSize: '1.5rem',
-                    cursor: 'pointer',
-                    width: '30px',
-                    height: '30px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    borderRadius: '0',
-                    fontFamily: 'Helvetica, Arial, sans-serif'
-                  }}
-                  whileHover={{ 
-                    color: 'white'
-                  }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  ×
-                </motion.button>
-              </div>
-
-              {/* Tabs Navigation - Vertikal */}
-              <div style={{
+                width: '250px',
+                backgroundColor: '#0a0a0a',
+                borderRight: '1px solid #1a1a1a',
                 display: 'flex',
                 flexDirection: 'column',
-                borderBottom: '1px solid #1a1a1a',
-                backgroundColor: '#0a0a0a'
+                padding: '2rem 0',
+                flexShrink: 0
               }}>
-                {['notes', 'settings'].map((tab) => (
+                <div style={{
+                  padding: '0 2rem',
+                  marginBottom: '2rem'
+                }}>
+                  <h3 style={{
+                    color: 'white',
+                    fontSize: '1.8rem',
+                    fontWeight: '300',
+                    fontFamily: 'Helvetica, Arial, sans-serif',
+                    margin: 0,
+                    letterSpacing: '2px',
+                    textTransform: 'uppercase'
+                  }}>
+                    {userDisplayName}
+                  </h3>
+                  <p style={{
+                    color: '#888',
+                    fontSize: '0.9rem',
+                    margin: '0.5rem 0 0 0',
+                    fontFamily: 'Helvetica, Arial, sans-serif'
+                  }}>
+                    {user.email}
+                  </p>
+                </div>
+
+                <div style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '0.5rem'
+                }}>
+                  {['notes', 'settings', 'help', 'feedback'].map((tab) => (
+                    <motion.button
+                      key={tab}
+                      onClick={() => setActiveTab(tab as any)}
+                      style={{
+                        width: '100%',
+                        padding: '1.2rem 2rem',
+                        backgroundColor: activeTab === tab ? '#1a1a1a' : 'transparent',
+                        border: 'none',
+                        color: activeTab === tab ? 'white' : '#888',
+                        fontSize: '1.1rem',
+                        fontWeight: '300',
+                        fontFamily: 'Helvetica, Arial, sans-serif',
+                        cursor: 'pointer',
+                        textTransform: 'uppercase',
+                        letterSpacing: '1.5px',
+                        textAlign: 'left',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        transition: 'all 0.3s ease'
+                      }}
+                      whileHover={{ 
+                        backgroundColor: '#1a1a1a',
+                        color: 'white'
+                      }}
+                    >
+                      <span>
+                        {tab === 'notes' ? 'Notes' :
+                         tab === 'settings' ? 'Settings' :
+                         tab === 'help' ? 'Help' :
+                         'Feedback'}
+                      </span>
+                      {activeTab === tab && (
+                        <motion.svg
+                          initial={{ opacity: 0, x: -10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          width="16"
+                          height="16"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="white"
+                          strokeWidth="2"
+                        >
+                          <path d="M5 12h14" />
+                          <path d="m12 5 7 7-7 7" />
+                        </motion.svg>
+                      )}
+                    </motion.button>
+                  ))}
+                </div>
+
+                <div style={{
+                  marginTop: 'auto',
+                  padding: '2rem',
+                  borderTop: '1px solid #1a1a1a'
+                }}>
                   <motion.button
-                    key={tab}
-                    onClick={() => setActiveTab(tab as any)}
+                    onClick={handleLogoutClick}
                     style={{
                       width: '100%',
-                      padding: '1.2rem 2rem',
-                      backgroundColor: 'transparent',
+                      padding: '1rem',
+                      backgroundColor: '#1a1a1a',
                       border: 'none',
-                      color: activeTab === tab ? 'white' : '#888',
-                      fontSize: '0.9rem',
-                      fontWeight: '400',
+                      borderRadius: '0',
+                      color: 'white',
+                      fontSize: '1rem',
+                      fontWeight: '300',
+                      fontFamily: 'Helvetica, Arial, sans-serif',
                       cursor: 'pointer',
                       textTransform: 'uppercase',
-                      letterSpacing: '1px',
-                      borderLeft: activeTab === tab ? '2px solid white' : 'none',
-                      fontFamily: 'Helvetica, Arial, sans-serif',
+                      letterSpacing: '1.5px',
                       display: 'flex',
                       alignItems: 'center',
-                      gap: '1rem',
-                      justifyContent: 'flex-start'
+                      justifyContent: 'center',
+                      gap: '0.8rem'
                     }}
                     whileHover={{ 
-                      backgroundColor: '#1a1a1a',
-                      color: 'white'
+                      backgroundColor: '#222',
                     }}
+                    whileTap={{ scale: 0.95 }}
                   >
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                      {tab === 'notes' ? (
-                        <>
-                          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                          <polyline points="14 2 14 8 20 8"/>
-                          <line x1="16" y1="13" x2="8" y2="13"/>
-                          <line x1="16" y1="17" x2="8" y2="17"/>
-                        </>
-                      ) : (
-                        <>
-                          <circle cx="12" cy="12" r="3"/>
-                          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
-                        </>
-                      )}
+                    LOGOUT
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                      <polyline points="16 17 21 12 16 7"/>
+                      <line x1="21" y1="12" x2="9" y2="12"/>
                     </svg>
-                    {tab === 'notes' ? `Notes (${totalNotesCount})` : 'Settings'}
                   </motion.button>
-                ))}
+                </div>
               </div>
 
-              {/* Content Area */}
+              {/* Content Area di Kanan */}
               <div style={{
                 flex: 1,
+                padding: '2rem',
                 overflowY: 'auto',
-                padding: '2rem'
+                backgroundColor: '#0a0a0a'
               }}>
+                {/* Close Button */}
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'flex-end',
+                  marginBottom: '2rem'
+                }}>
+                  <motion.button
+                    onClick={() => setShowUserProfileModal(false)}
+                    style={{
+                      backgroundColor: 'transparent',
+                      border: 'none',
+                      color: '#888',
+                      fontSize: '1.5rem',
+                      cursor: 'pointer',
+                      width: '30px',
+                      height: '30px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontFamily: 'Helvetica, Arial, sans-serif'
+                    }}
+                    whileHover={{ 
+                      color: 'white'
+                    }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    ×
+                  </motion.button>
+                </div>
+
                 {/* Notes Tab */}
                 {activeTab === 'notes' && (
                   <div>
-                    <div style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      marginBottom: '1.5rem'
+                    <h4 style={{
+                      color: 'white',
+                      fontSize: '2.5rem',
+                      fontWeight: '300',
+                      margin: '0 0 2rem 0',
+                      fontFamily: 'Helvetica, Arial, sans-serif',
+                      letterSpacing: '2px',
+                      textTransform: 'uppercase'
                     }}>
-                      <h4 style={{
-                        color: 'white',
-                        fontSize: '1rem',
-                        fontWeight: '400',
-                        margin: 0,
-                        fontFamily: 'Helvetica, Arial, sans-serif',
-                        letterSpacing: '0.5px'
-                      }}>
-                        YOUR NOTES
-                      </h4>
-                      <div style={{
-                        color: '#888',
-                        fontSize: '0.8rem',
-                        fontFamily: 'Helvetica, Arial, sans-serif'
-                      }}>
-                        {totalNotesCount} notes
-                      </div>
-                    </div>
+                      NOTES
+                    </h4>
 
                     {isLoadingNotes ? (
                       <div style={{
@@ -1982,7 +2008,7 @@ export default function HomePage(): React.JSX.Element {
                       </div>
                     ) : userNotes.length === 0 ? (
                       <div style={{
-                        padding: '3rem 0',
+                        padding: '4rem 0',
                         textAlign: 'center',
                         color: '#888',
                         fontFamily: 'Helvetica, Arial, sans-serif'
@@ -1995,31 +2021,41 @@ export default function HomePage(): React.JSX.Element {
                             <line x1="16" y1="17" x2="8" y2="17"/>
                           </svg>
                         </div>
-                        <p style={{ margin: '0 0 1rem 0', fontSize: '0.9rem' }}>No notes yet</p>
+                        <p style={{ margin: '0 0 2rem 0', fontSize: '1rem' }}>No notes yet</p>
                         <motion.button
                           onClick={() => router.push('/notes')}
                           style={{
                             backgroundColor: '#1a1a1a',
                             color: 'white',
                             border: '1px solid #333',
-                            padding: '0.8rem 1.5rem',
+                            padding: '1rem 2rem',
                             borderRadius: '0',
                             cursor: 'pointer',
-                            fontSize: '0.9rem',
-                            fontWeight: '400',
-                            fontFamily: 'Helvetica, Arial, sans-serif'
+                            fontSize: '1rem',
+                            fontWeight: '300',
+                            fontFamily: 'Helvetica, Arial, sans-serif',
+                            textTransform: 'uppercase',
+                            letterSpacing: '1.5px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.8rem',
+                            margin: '0 auto'
                           }}
                           whileHover={{ backgroundColor: '#222' }}
                           whileTap={{ scale: 0.95 }}
                         >
                           CREATE FIRST NOTE
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M5 12h14"/>
+                            <path d="m12 5 7 7-7 7"/>
+                          </svg>
                         </motion.button>
                       </div>
                     ) : (
                       <div style={{
                         display: 'flex',
                         flexDirection: 'column',
-                        gap: '0.8rem'
+                        gap: '1rem'
                       }}>
                         {userNotes.slice(0, 10).map((note, index) => (
                           <motion.div
@@ -2030,7 +2066,7 @@ export default function HomePage(): React.JSX.Element {
                             style={{
                               backgroundColor: '#1a1a1a',
                               borderRadius: '0',
-                              padding: '1rem',
+                              padding: '1.5rem',
                               borderLeft: '1px solid #333',
                               cursor: 'pointer'
                             }}
@@ -2043,21 +2079,23 @@ export default function HomePage(): React.JSX.Element {
                               display: 'flex',
                               justifyContent: 'space-between',
                               alignItems: 'flex-start',
-                              marginBottom: '0.5rem'
+                              marginBottom: '1rem'
                             }}>
                               <h5 style={{
                                 color: 'white',
-                                fontSize: '0.9rem',
-                                fontWeight: '400',
+                                fontSize: '1.2rem',
+                                fontWeight: '300',
                                 margin: 0,
                                 fontFamily: 'Helvetica, Arial, sans-serif',
+                                letterSpacing: '1px',
+                                textTransform: 'uppercase',
                                 flex: 1
                               }}>
                                 {note.title || 'Untitled Note'}
                               </h5>
                               <span style={{
                                 color: '#888',
-                                fontSize: '0.7rem',
+                                fontSize: '0.9rem',
                                 fontFamily: 'Helvetica, Arial, sans-serif',
                                 whiteSpace: 'nowrap',
                                 marginLeft: '1rem'
@@ -2067,7 +2105,7 @@ export default function HomePage(): React.JSX.Element {
                             </div>
                             <p style={{
                               color: '#aaa',
-                              fontSize: '0.8rem',
+                              fontSize: '1rem',
                               margin: '0.5rem 0 0 0',
                               fontFamily: 'Helvetica, Arial, sans-serif',
                               lineHeight: 1.4,
@@ -2084,36 +2122,38 @@ export default function HomePage(): React.JSX.Element {
                         {userNotes.length > 10 && (
                           <div style={{
                             textAlign: 'center',
-                            marginTop: '1rem',
-                            padding: '1rem'
+                            marginTop: '2rem',
+                            padding: '1.5rem'
                           }}>
-                            <span style={{
-                              color: '#888',
-                              fontSize: '0.8rem',
-                              fontFamily: 'Helvetica, Arial, sans-serif'
-                            }}>
-                              Showing 10 of {userNotes.length} notes
-                            </span>
                             <motion.button
                               onClick={() => router.push('/notes')}
                               style={{
                                 backgroundColor: 'transparent',
                                 color: 'white',
                                 border: '1px solid #333',
-                                padding: '0.5rem 1rem',
+                                padding: '1rem 2rem',
                                 borderRadius: '0',
                                 cursor: 'pointer',
-                                fontSize: '0.8rem',
-                                fontWeight: '400',
+                                fontSize: '1rem',
+                                fontWeight: '300',
                                 fontFamily: 'Helvetica, Arial, sans-serif',
-                                marginLeft: '1rem'
+                                textTransform: 'uppercase',
+                                letterSpacing: '1.5px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.8rem',
+                                margin: '0 auto'
                               }}
                               whileHover={{ 
                                 backgroundColor: '#1a1a1a'
                               }}
                               whileTap={{ scale: 0.95 }}
                             >
-                              VIEW ALL
+                              VIEW ALL {userNotes.length} NOTES
+                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <path d="M5 12h14"/>
+                                <path d="m12 5 7 7-7 7"/>
+                              </svg>
                             </motion.button>
                           </div>
                         )}
@@ -2127,28 +2167,32 @@ export default function HomePage(): React.JSX.Element {
                   <div>
                     <h4 style={{
                       color: 'white',
-                      fontSize: '1rem',
-                      fontWeight: '400',
-                      margin: '0 0 1.5rem 0',
+                      fontSize: '2.5rem',
+                      fontWeight: '300',
+                      margin: '0 0 2rem 0',
                       fontFamily: 'Helvetica, Arial, sans-serif',
-                      letterSpacing: '0.5px'
+                      letterSpacing: '2px',
+                      textTransform: 'uppercase'
                     }}>
-                      ACCOUNT SETTINGS
+                      SETTINGS
                     </h4>
 
                     {isEditingProfile ? (
                       <div style={{
                         display: 'flex',
                         flexDirection: 'column',
-                        gap: '1.5rem'
+                        gap: '2rem',
+                        maxWidth: '500px'
                       }}>
                         <div>
                           <label style={{
                             color: '#aaa',
-                            fontSize: '0.8rem',
-                            marginBottom: '0.5rem',
+                            fontSize: '1rem',
+                            marginBottom: '0.8rem',
                             display: 'block',
-                            fontFamily: 'Helvetica, Arial, sans-serif'
+                            fontFamily: 'Helvetica, Arial, sans-serif',
+                            textTransform: 'uppercase',
+                            letterSpacing: '1px'
                           }}>
                             Display Name
                           </label>
@@ -2158,12 +2202,12 @@ export default function HomePage(): React.JSX.Element {
                             onChange={(e) => setEditName(e.target.value)}
                             style={{
                               width: '100%',
-                              padding: '0.8rem',
+                              padding: '1rem',
                               backgroundColor: '#1a1a1a',
                               border: '1px solid #333',
                               borderRadius: '0',
                               color: 'white',
-                              fontSize: '0.9rem',
+                              fontSize: '1.1rem',
                               fontFamily: 'Helvetica, Arial, sans-serif',
                               outline: 'none'
                             }}
@@ -2173,10 +2217,12 @@ export default function HomePage(): React.JSX.Element {
                         <div>
                           <label style={{
                             color: '#aaa',
-                            fontSize: '0.8rem',
-                            marginBottom: '0.5rem',
+                            fontSize: '1rem',
+                            marginBottom: '0.8rem',
                             display: 'block',
-                            fontFamily: 'Helvetica, Arial, sans-serif'
+                            fontFamily: 'Helvetica, Arial, sans-serif',
+                            textTransform: 'uppercase',
+                            letterSpacing: '1px'
                           }}>
                             Email Address
                           </label>
@@ -2186,58 +2232,38 @@ export default function HomePage(): React.JSX.Element {
                             onChange={(e) => setEditEmail(e.target.value)}
                             style={{
                               width: '100%',
-                              padding: '0.8rem',
+                              padding: '1rem',
                               backgroundColor: '#1a1a1a',
                               border: '1px solid #333',
                               borderRadius: '0',
                               color: 'white',
-                              fontSize: '0.9rem',
+                              fontSize: '1.1rem',
                               fontFamily: 'Helvetica, Arial, sans-serif',
                               outline: 'none'
                             }}
                           />
                         </div>
 
-                        <div>
-                          <label style={{
-                            color: '#aaa',
-                            fontSize: '0.8rem',
-                            marginBottom: '0.5rem',
-                            display: 'block',
-                            fontFamily: 'Helvetica, Arial, sans-serif'
-                          }}>
-                            Login Method
-                          </label>
-                          <div style={{
-                            padding: '0.8rem',
-                            backgroundColor: '#1a1a1a',
-                            border: '1px solid #333',
-                            borderRadius: '0',
-                            color: '#888',
-                            fontSize: '0.9rem',
-                            fontFamily: 'Helvetica, Arial, sans-serif'
-                          }}>
-                            {userProvider}
-                          </div>
-                        </div>
-
                         <div style={{
                           display: 'flex',
                           gap: '1rem',
-                          justifyContent: 'flex-end'
+                          justifyContent: 'flex-end',
+                          marginTop: '1rem'
                         }}>
                           <motion.button
                             onClick={() => setIsEditingProfile(false)}
                             style={{
-                              padding: '0.8rem 1.5rem',
+                              padding: '1rem 2rem',
                               backgroundColor: '#1a1a1a',
                               border: '1px solid #333',
                               borderRadius: '0',
                               color: 'white',
-                              fontSize: '0.9rem',
-                              fontWeight: '400',
+                              fontSize: '1rem',
+                              fontWeight: '300',
                               cursor: 'pointer',
-                              fontFamily: 'Helvetica, Arial, sans-serif'
+                              fontFamily: 'Helvetica, Arial, sans-serif',
+                              textTransform: 'uppercase',
+                              letterSpacing: '1.5px'
                             }}
                             whileHover={{ backgroundColor: '#222' }}
                             whileTap={{ scale: 0.95 }}
@@ -2248,15 +2274,17 @@ export default function HomePage(): React.JSX.Element {
                           <motion.button
                             onClick={handleUpdateProfile}
                             style={{
-                              padding: '0.8rem 1.5rem',
+                              padding: '1rem 2rem',
                               backgroundColor: 'white',
                               border: '1px solid white',
                               borderRadius: '0',
                               color: 'black',
-                              fontSize: '0.9rem',
-                              fontWeight: '400',
+                              fontSize: '1rem',
+                              fontWeight: '300',
                               cursor: 'pointer',
-                              fontFamily: 'Helvetica, Arial, sans-serif'
+                              fontFamily: 'Helvetica, Arial, sans-serif',
+                              textTransform: 'uppercase',
+                              letterSpacing: '1.5px'
                             }}
                             whileHover={{ backgroundColor: '#f0f0f0' }}
                             whileTap={{ scale: 0.95 }}
@@ -2270,127 +2298,84 @@ export default function HomePage(): React.JSX.Element {
                       <div style={{
                         display: 'flex',
                         flexDirection: 'column',
-                        gap: '1.2rem'
+                        gap: '2rem',
+                        maxWidth: '600px'
                       }}>
                         <div style={{
-                          display: 'flex',
-                          justifyContent: 'space-between',
-                          alignItems: 'center',
-                          padding: '0.8rem 0',
-                          borderBottom: '1px solid #1a1a1a'
+                          padding: '1.5rem',
+                          backgroundColor: '#1a1a1a',
+                          borderRadius: '0'
                         }}>
-                          <div>
-                            <div style={{
-                              color: '#aaa',
-                              fontSize: '0.8rem',
-                              fontFamily: 'Helvetica, Arial, sans-serif'
-                            }}>
-                              Display Name
-                            </div>
-                            <div style={{
-                              color: 'white',
-                              fontSize: '0.9rem',
-                              fontWeight: '400',
-                              fontFamily: 'Helvetica, Arial, sans-serif'
-                            }}>
-                              {userDisplayName}
-                            </div>
+                          <div style={{
+                            color: '#aaa',
+                            fontSize: '0.9rem',
+                            fontFamily: 'Helvetica, Arial, sans-serif',
+                            textTransform: 'uppercase',
+                            letterSpacing: '1px',
+                            marginBottom: '0.5rem'
+                          }}>
+                            Display Name
                           </div>
-                          <motion.button
-                            onClick={() => setIsEditingProfile(true)}
-                            style={{
-                              backgroundColor: 'transparent',
-                              border: 'none',
-                              color: '#888',
-                              cursor: 'pointer',
-                              padding: '0.2rem'
-                            }}
-                            whileHover={{ color: 'white' }}
-                          >
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-                              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-                            </svg>
-                          </motion.button>
-                        </div>
-
-                        <div style={{
-                          display: 'flex',
-                          justifyContent: 'space-between',
-                          alignItems: 'center',
-                          padding: '0.8rem 0',
-                          borderBottom: '1px solid #1a1a1a'
-                        }}>
-                          <div>
-                            <div style={{
-                              color: '#aaa',
-                              fontSize: '0.8rem',
-                              fontFamily: 'Helvetica, Arial, sans-serif'
-                            }}>
-                              Email Address
-                            </div>
-                            <div style={{
-                              color: 'white',
-                              fontSize: '0.9rem',
-                              fontWeight: '400',
-                              fontFamily: 'Helvetica, Arial, sans-serif'
-                            }}>
-                              {user.email}
-                            </div>
+                          <div style={{
+                            color: 'white',
+                            fontSize: '1.2rem',
+                            fontWeight: '300',
+                            fontFamily: 'Helvetica, Arial, sans-serif',
+                            letterSpacing: '1px'
+                          }}>
+                            {userDisplayName}
                           </div>
                         </div>
 
                         <div style={{
-                          display: 'flex',
-                          justifyContent: 'space-between',
-                          alignItems: 'center',
-                          padding: '0.8rem 0',
-                          borderBottom: '1px solid #1a1a1a'
+                          padding: '1.5rem',
+                          backgroundColor: '#1a1a1a',
+                          borderRadius: '0'
                         }}>
-                          <div>
-                            <div style={{
-                              color: '#aaa',
-                              fontSize: '0.8rem',
-                              fontFamily: 'Helvetica, Arial, sans-serif'
-                            }}>
-                              Login Method
-                            </div>
-                            <div style={{
-                              color: 'white',
-                              fontSize: '0.9rem',
-                              fontWeight: '400',
-                              fontFamily: 'Helvetica, Arial, sans-serif'
-                            }}>
-                              {userProvider}
-                            </div>
+                          <div style={{
+                            color: '#aaa',
+                            fontSize: '0.9rem',
+                            fontFamily: 'Helvetica, Arial, sans-serif',
+                            textTransform: 'uppercase',
+                            letterSpacing: '1px',
+                            marginBottom: '0.5rem'
+                          }}>
+                            Email Address
+                          </div>
+                          <div style={{
+                            color: 'white',
+                            fontSize: '1.2rem',
+                            fontWeight: '300',
+                            fontFamily: 'Helvetica, Arial, sans-serif',
+                            letterSpacing: '1px'
+                          }}>
+                            {user.email}
                           </div>
                         </div>
 
                         <div style={{
-                          display: 'flex',
-                          justifyContent: 'space-between',
-                          alignItems: 'center',
-                          padding: '0.8rem 0',
-                          borderBottom: '1px solid #1a1a1a'
+                          padding: '1.5rem',
+                          backgroundColor: '#1a1a1a',
+                          borderRadius: '0'
                         }}>
-                          <div>
-                            <div style={{
-                              color: '#aaa',
-                              fontSize: '0.8rem',
-                              fontFamily: 'Helvetica, Arial, sans-serif'
-                            }}>
-                              Account Created
-                            </div>
-                            <div style={{
-                              color: 'white',
-                              fontSize: '0.9rem',
-                              fontWeight: '400',
-                              fontFamily: 'Helvetica, Arial, sans-serif'
-                            }}>
-                              {user.metadata.creationTime ? 
-                                new Date(user.metadata.creationTime).toLocaleDateString('en-US') : 
-                                'Unknown'}
-                            </div>
+                          <div style={{
+                            color: '#aaa',
+                            fontSize: '0.9rem',
+                            fontFamily: 'Helvetica, Arial, sans-serif',
+                            textTransform: 'uppercase',
+                            letterSpacing: '1px',
+                            marginBottom: '0.5rem'
+                          }}>
+                            Login Method
+                          </div>
+                          <div style={{
+                            color: 'white',
+                            fontSize: '1.2rem',
+                            fontWeight: '300',
+                            fontFamily: 'Helvetica, Arial, sans-serif',
+                            letterSpacing: '1px'
+                          }}>
+                            {userProvider}
                           </div>
                         </div>
 
@@ -2398,77 +2383,315 @@ export default function HomePage(): React.JSX.Element {
                           marginTop: '2rem'
                         }}>
                           <motion.button
-                            onClick={() => setShowDeleteAccountModal(true)}
+                            onClick={() => setIsEditingProfile(true)}
                             style={{
                               width: '100%',
-                              padding: '0.8rem',
+                              padding: '1.2rem',
                               backgroundColor: '#1a1a1a',
                               border: '1px solid #333',
                               borderRadius: '0',
                               color: 'white',
-                              fontSize: '0.9rem',
-                              fontWeight: '400',
+                              fontSize: '1rem',
+                              fontWeight: '300',
                               cursor: 'pointer',
                               fontFamily: 'Helvetica, Arial, sans-serif',
+                              textTransform: 'uppercase',
+                              letterSpacing: '1.5px',
                               display: 'flex',
                               alignItems: 'center',
                               justifyContent: 'center',
-                              gap: '0.5rem'
+                              gap: '0.8rem'
                             }}
                             whileHover={{ backgroundColor: '#222' }}
                             whileTap={{ scale: 0.95 }}
                           >
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                            EDIT PROFILE
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                            </svg>
+                          </motion.button>
+                        </div>
+
+                        <div style={{
+                          marginTop: '1rem'
+                        }}>
+                          <motion.button
+                            onClick={() => setShowDeleteAccountModal(true)}
+                            style={{
+                              width: '100%',
+                              padding: '1.2rem',
+                              backgroundColor: '#1a1a1a',
+                              border: '1px solid #333',
+                              borderRadius: '0',
+                              color: 'white',
+                              fontSize: '1rem',
+                              fontWeight: '300',
+                              cursor: 'pointer',
+                              fontFamily: 'Helvetica, Arial, sans-serif',
+                              textTransform: 'uppercase',
+                              letterSpacing: '1.5px',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              gap: '0.8rem'
+                            }}
+                            whileHover={{ backgroundColor: '#222' }}
+                            whileTap={{ scale: 0.95 }}
+                          >
+                            DELETE ACCOUNT
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                               <path d="M3 6h18"/>
                               <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
                             </svg>
-                            DELETE ACCOUNT
                           </motion.button>
                         </div>
                       </div>
                     )}
                   </div>
                 )}
-              </div>
 
-              {/* Footer with Logout Button */}
-              <div style={{
-                padding: '1.5rem 2rem',
-                borderTop: '1px solid #1a1a1a',
-                backgroundColor: '#0a0a0a',
-                display: 'flex',
-                justifyContent: 'center'
-              }}>
-                <motion.button
-                  onClick={handleLogoutClick}
-                  style={{
-                    width: '100%',
-                    padding: '0.8rem',
-                    backgroundColor: '#1a1a1a',
-                    border: '1px solid #333',
-                    borderRadius: '0',
-                    color: 'white',
-                    fontSize: '0.9rem',
-                    fontWeight: '400',
-                    cursor: 'pointer',
-                    fontFamily: 'Helvetica, Arial, sans-serif',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '0.5rem'
-                  }}
-                  whileHover={{ 
-                    backgroundColor: '#222',
-                  }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-                    <polyline points="16 17 21 12 16 7"/>
-                    <line x1="21" y1="12" x2="9" y2="12"/>
-                  </svg>
-                  LOGOUT
-                </motion.button>
+                {/* Help Tab */}
+                {activeTab === 'help' && (
+                  <div>
+                    <h4 style={{
+                      color: 'white',
+                      fontSize: '2.5rem',
+                      fontWeight: '300',
+                      margin: '0 0 2rem 0',
+                      fontFamily: 'Helvetica, Arial, sans-serif',
+                      letterSpacing: '2px',
+                      textTransform: 'uppercase'
+                    }}>
+                      HELP
+                    </h4>
+
+                    <div style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '2rem',
+                      maxWidth: '600px'
+                    }}>
+                      <div style={{
+                        padding: '2rem',
+                        backgroundColor: '#1a1a1a',
+                        borderRadius: '0'
+                      }}>
+                        <h5 style={{
+                          color: 'white',
+                          fontSize: '1.3rem',
+                          fontWeight: '300',
+                          margin: '0 0 1rem 0',
+                          fontFamily: 'Helvetica, Arial, sans-serif',
+                          letterSpacing: '1px',
+                          textTransform: 'uppercase'
+                        }}>
+                          Getting Started
+                        </h5>
+                        <p style={{
+                          color: '#aaa',
+                          fontSize: '1rem',
+                          lineHeight: 1.6,
+                          fontFamily: 'Helvetica, Arial, sans-serif'
+                        }}>
+                          Welcome to MENURU. This platform helps you organize your creative journey. Start by creating notes, exploring features, and customizing your profile.
+                        </p>
+                      </div>
+
+                      <div style={{
+                        padding: '2rem',
+                        backgroundColor: '#1a1a1a',
+                        borderRadius: '0'
+                      }}>
+                        <h5 style={{
+                          color: 'white',
+                          fontSize: '1.3rem',
+                          fontWeight: '300',
+                          margin: '0 0 1rem 0',
+                          fontFamily: 'Helvetica, Arial, sans-serif',
+                          letterSpacing: '1px',
+                          textTransform: 'uppercase'
+                        }}>
+                          Features Guide
+                        </h5>
+                        <p style={{
+                          color: '#aaa',
+                          fontSize: '1rem',
+                          lineHeight: 1.6,
+                          fontFamily: 'Helvetica, Arial, sans-serif'
+                        }}>
+                          • Notes: Create and organize your thoughts<br/>
+                          • Settings: Customize your profile and preferences<br/>
+                          • Chatbot: Get assistance with AI<br/>
+                          • Timeline: Track your progress<br/>
+                          • Notifications: Stay updated
+                        </p>
+                      </div>
+
+                      <motion.button
+                        onClick={() => router.push('/docs')}
+                        style={{
+                          padding: '1.2rem 2rem',
+                          backgroundColor: '#1a1a1a',
+                          border: '1px solid #333',
+                          borderRadius: '0',
+                          color: 'white',
+                          fontSize: '1rem',
+                          fontWeight: '300',
+                          cursor: 'pointer',
+                          fontFamily: 'Helvetica, Arial, sans-serif',
+                          textTransform: 'uppercase',
+                          letterSpacing: '1.5px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          marginTop: '1rem'
+                        }}
+                        whileHover={{ backgroundColor: '#222' }}
+                        whileTap={{ scale: 0.95 }}
+                      >
+                        <span>VIEW FULL DOCUMENTATION</span>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path d="M5 12h14"/>
+                          <path d="m12 5 7 7-7 7"/>
+                        </svg>
+                      </motion.button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Feedback Tab */}
+                {activeTab === 'feedback' && (
+                  <div>
+                    <h4 style={{
+                      color: 'white',
+                      fontSize: '2.5rem',
+                      fontWeight: '300',
+                      margin: '0 0 2rem 0',
+                      fontFamily: 'Helvetica, Arial, sans-serif',
+                      letterSpacing: '2px',
+                      textTransform: 'uppercase'
+                    }}>
+                      FEEDBACK
+                    </h4>
+
+                    <div style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '2rem',
+                      maxWidth: '600px'
+                    }}>
+                      <div style={{
+                        padding: '2rem',
+                        backgroundColor: '#1a1a1a',
+                        borderRadius: '0'
+                      }}>
+                        <h5 style={{
+                          color: 'white',
+                          fontSize: '1.3rem',
+                          fontWeight: '300',
+                          margin: '0 0 1rem 0',
+                          fontFamily: 'Helvetica, Arial, sans-serif',
+                          letterSpacing: '1px',
+                          textTransform: 'uppercase'
+                        }}>
+                          Share Your Thoughts
+                        </h5>
+                        <p style={{
+                          color: '#aaa',
+                          fontSize: '1rem',
+                          lineHeight: 1.6,
+                          fontFamily: 'Helvetica, Arial, sans-serif'
+                        }}>
+                          We value your feedback to improve MENURU. Share your suggestions, report issues, or tell us what features you'd like to see in future updates.
+                        </p>
+                      </div>
+
+                      <motion.button
+                        onClick={handleSendFeedback}
+                        style={{
+                          padding: '1.2rem 2rem',
+                          backgroundColor: '#1a1a1a',
+                          border: '1px solid #333',
+                          borderRadius: '0',
+                          color: 'white',
+                          fontSize: '1rem',
+                          fontWeight: '300',
+                          cursor: 'pointer',
+                          fontFamily: 'Helvetica, Arial, sans-serif',
+                          textTransform: 'uppercase',
+                          letterSpacing: '1.5px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between'
+                        }}
+                        whileHover={{ backgroundColor: '#222' }}
+                        whileTap={{ scale: 0.95 }}
+                      >
+                        <span>SEND FEEDBACK</span>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path d="M5 12h14"/>
+                          <path d="m12 5 7 7-7 7"/>
+                        </svg>
+                      </motion.button>
+
+                      <div style={{
+                        padding: '2rem',
+                        backgroundColor: '#1a1a1a',
+                        borderRadius: '0',
+                        marginTop: '1rem'
+                      }}>
+                        <h5 style={{
+                          color: 'white',
+                          fontSize: '1.3rem',
+                          fontWeight: '300',
+                          margin: '0 0 1rem 0',
+                          fontFamily: 'Helvetica, Arial, sans-serif',
+                          letterSpacing: '1px',
+                          textTransform: 'uppercase'
+                        }}>
+                          Contact Support
+                        </h5>
+                        <p style={{
+                          color: '#aaa',
+                          fontSize: '1rem',
+                          lineHeight: 1.6,
+                          fontFamily: 'Helvetica, Arial, sans-serif'
+                        }}>
+                          Need immediate assistance? Contact our support team for help with technical issues or account-related questions.
+                        </p>
+                        <motion.button
+                          onClick={() => router.push('/contact')}
+                          style={{
+                            padding: '1rem 1.5rem',
+                            backgroundColor: 'transparent',
+                            border: '1px solid #333',
+                            borderRadius: '0',
+                            color: 'white',
+                            fontSize: '0.9rem',
+                            fontWeight: '300',
+                            cursor: 'pointer',
+                            fontFamily: 'Helvetica, Arial, sans-serif',
+                            textTransform: 'uppercase',
+                            letterSpacing: '1.5px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            marginTop: '1rem'
+                          }}
+                          whileHover={{ backgroundColor: '#222' }}
+                          whileTap={{ scale: 0.95 }}
+                        >
+                          <span>CONTACT SUPPORT</span>
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M5 12h14"/>
+                            <path d="m12 5 7 7-7 7"/>
+                          </svg>
+                        </motion.button>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </motion.div>
           </motion.div>
@@ -4960,39 +5183,6 @@ export default function HomePage(): React.JSX.Element {
             )}
           </motion.div>
 
-          {/* User Stats Badge */}
-          {user && userStats && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.5, duration: 0.3 }}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem',
-                backgroundColor: 'rgba(0, 80, 183, 0.3)',
-                padding: '0.3rem 0.8rem',
-                borderRadius: '20px',
-                border: '1px solid rgba(0, 80, 183, 0.5)',
-                backdropFilter: 'blur(5px)',
-                marginRight: '0.5rem'
-              }}
-            >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#00FF00" strokeWidth="2">
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                <circle cx="12" cy="7" r="4"/>
-              </svg>
-              <span style={{
-                color: '#00FF00',
-                fontSize: '0.8rem',
-                fontWeight: '600',
-                fontFamily: 'Helvetica, Arial, sans-serif'
-              }}>
-                {userStats.loginCount || 0}
-              </span>
-            </motion.div>
-          )}
-
           {/* Tombol MENU */}
           <motion.div
             onClick={handleOpenMenu}
@@ -5020,134 +5210,72 @@ export default function HomePage(): React.JSX.Element {
             MENU
           </motion.div>
 
-          {/* Sign In / User Button - DIUBAH */}
-          <motion.button
-            ref={userButtonRef}
+          {/* Sign In / User Button - TELAH DIPERBAIKI */}
+          <motion.div
             onClick={handleSignInClick}
-            onMouseEnter={() => setIsHoveringSignIn(true)}
-            onMouseLeave={() => setIsHoveringSignIn(false)}
             style={{
-              padding: isMobile ? '0.4rem 1rem' : '0.6rem 1.5rem',
-              fontSize: isMobile ? '0.9rem' : '1rem',
-              fontWeight: '400',
               color: 'white',
-              backgroundColor: 'transparent',
-              border: '1px solid rgba(255,255,255,0.3)',
-              borderRadius: '0',
-              cursor: 'pointer',
+              fontSize: isMobile ? '1rem' : '1.5rem',
+              fontWeight: '300',
               fontFamily: 'Helvetica, Arial, sans-serif',
-              backdropFilter: 'blur(10px)',
+              cursor: 'pointer',
+              padding: isMobile ? '0.3rem 0.8rem' : '0.5rem 1rem',
               whiteSpace: 'nowrap',
+              letterSpacing: '2px',
+              position: 'relative',
+              textTransform: 'uppercase',
+              transition: 'all 0.3s ease',
               display: 'flex',
               alignItems: 'center',
-              gap: '0.5rem',
-              margin: 0,
-              maxWidth: isMobile ? '180px' : '200px',
-              minWidth: isMobile ? '100px' : '120px',
-              height: isMobile ? '40px' : '45px',
-              overflow: 'hidden',
-              position: 'relative',
-              transition: 'all 0.3s ease',
-              letterSpacing: '0.5px'
+              gap: '0.5rem'
             }}
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 1.2, duration: 0.6 }}
             whileHover={{ 
-              backgroundColor: 'rgba(255,255,255,0.1)',
-              border: '1px solid rgba(255,255,255,0.5)',
-              transition: { duration: 0.2 }
+              color: '#00FF00',
+              scale: 1.05
             }}
             whileTap={{ scale: 0.95 }}
           >
             {user ? (
               <>
-                <svg 
-                  width={isMobile ? "14" : "16"} 
-                  height={isMobile ? "14" : "16"} 
-                  viewBox="0 0 24 24" 
-                  fill="none" 
-                  stroke="currentColor" 
-                  strokeWidth="1.5"
+                {userDisplayName}
+                <motion.svg
+                  width={isMobile ? "14" : "16"}
+                  height={isMobile ? "14" : "16"}
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
                   style={{
-                    flexShrink: 0,
-                    marginRight: '0.3rem'
+                    flexShrink: 0
                   }}
                 >
-                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                  <circle cx="12" cy="7" r="4"/>
-                </svg>
-                
-                <div style={{
-                  overflow: 'hidden',
-                  width: '100%',
-                  position: 'relative',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between'
-                }}>
-                  <motion.span
-                    ref={userTextRef}
-                    style={{
-                      display: 'inline-block',
-                      whiteSpace: 'nowrap',
-                      paddingRight: '10px',
-                      transform: isNameScrolling ? `translateX(${scrollPosition}px)` : 'translateX(0)',
-                      willChange: 'transform',
-                      fontSize: isMobile ? '0.8rem' : '0.9rem'
-                    }}
-                  >
-                    {userDisplayName}
-                  </motion.span>
-                  
-                  {isHoveringSignIn && (
-                    <motion.svg
-                      width={isMobile ? "10" : "12"}
-                      height={isMobile ? "10" : "12"}
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      initial={{ x: 0 }}
-                      animate={{ x: 2 }}
-                      style={{
-                        flexShrink: 0
-                      }}
-                    >
-                      <path d="M5 12h14"/>
-                      <path d="m12 5 7 7-7 7"/>
-                    </motion.svg>
-                  )}
-                </div>
+                  <path d="M5 12h14"/>
+                  <path d="m12 5 7 7-7 7"/>
+                </motion.svg>
               </>
             ) : (
               <>
-                <svg 
-                  width={isMobile ? "14" : "16"} 
-                  height={isMobile ? "14" : "16"} 
-                  viewBox="0 0 24 24" 
-                  fill="none" 
-                  stroke="currentColor" 
-                  strokeWidth="1.5"
+                SIGN IN
+                <motion.svg
+                  width={isMobile ? "14" : "16"}
+                  height={isMobile ? "14" : "16"}
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
                   style={{
-                    flexShrink: 0,
-                    marginRight: '0.3rem'
+                    flexShrink: 0
                   }}
                 >
-                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                  <circle cx="12" cy="7" r="4"/>
-                </svg>
-                <span style={{
-                  whiteSpace: 'nowrap',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  fontSize: isMobile ? '0.8rem' : '0.9rem'
-                }}>
-                  SIGN IN
-                </span>
+                  <path d="M5 12h14"/>
+                  <path d="m12 5 7 7-7 7"/>
+                </motion.svg>
               </>
             )}
-          </motion.button>
+          </motion.div>
         </div>
       </div>
 
