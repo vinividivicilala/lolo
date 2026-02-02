@@ -1865,8 +1865,7 @@ export default function HomePage(): React.JSX.Element {
                 display: 'flex',
                 flexDirection: 'row',
                 overflow: 'hidden',
-                border: 'none',
-                boxShadow: '0 25px 50px rgba(0,0,0,0.5)'
+                border: 'none'
               }}
               onClick={(e) => e.stopPropagation()}
             >
@@ -1895,28 +1894,14 @@ export default function HomePage(): React.JSX.Element {
                     {userDisplayName}
                   </h3>
                   <p style={{
-                    color: '#aaa',
+                    color: 'white',
                     fontSize: '1rem',
                     margin: '0.5rem 0 0 0',
-                    fontFamily: 'Helvetica, Arial, sans-serif'
+                    fontFamily: 'Helvetica, Arial, sans-serif',
+                    opacity: 0.8
                   }}>
                     {user.email}
                   </p>
-                  <div style={{
-                    marginTop: '0.5rem',
-                    color: '#00FF00',
-                    fontSize: '0.9rem',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.5rem'
-                  }}>
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z"/>
-                      <line x1="16" y1="8" x2="2" y2="22"/>
-                      <line x1="17.5" y1="15" x2="9" y2="15"/>
-                    </svg>
-                    {totalNotesCount} Notes
-                  </div>
                 </div>
 
                 <div style={{
@@ -1938,7 +1923,7 @@ export default function HomePage(): React.JSX.Element {
                         padding: '1.5rem 2rem',
                         backgroundColor: 'transparent',
                         border: 'none',
-                        color: activeTab === tab ? 'white' : '#888',
+                        color: activeTab === tab ? 'white' : 'rgba(255, 255, 255, 0.7)',
                         fontSize: '1.3rem',
                         fontWeight: '300',
                         fontFamily: 'Helvetica, Arial, sans-serif',
@@ -1950,10 +1935,6 @@ export default function HomePage(): React.JSX.Element {
                         justifyContent: 'space-between',
                         transition: 'all 0.3s ease',
                         position: 'relative'
-                      }}
-                      whileHover={{ 
-                        backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                        color: 'white'
                       }}
                     >
                       <span>
@@ -1986,18 +1967,6 @@ export default function HomePage(): React.JSX.Element {
                           </svg>
                         </motion.div>
                       )}
-                      {tab === 'notes' && userNotes.length > 0 && (
-                        <span style={{
-                          backgroundColor: 'rgba(0, 255, 0, 0.2)',
-                          color: '#00FF00',
-                          fontSize: '0.8rem',
-                          padding: '0.2rem 0.5rem',
-                          borderRadius: '10px',
-                          marginLeft: '0.5rem'
-                        }}>
-                          {userNotes.length}
-                        </span>
-                      )}
                     </motion.button>
                   ))}
                 </div>
@@ -2012,8 +1981,8 @@ export default function HomePage(): React.JSX.Element {
                     style={{
                       width: '100%',
                       padding: '1.2rem',
-                      backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                      border: 'none',
+                      backgroundColor: 'transparent',
+                      border: '1px solid rgba(255, 255, 255, 0.3)',
                       borderRadius: '0',
                       color: 'white',
                       fontSize: '1.1rem',
@@ -2026,10 +1995,6 @@ export default function HomePage(): React.JSX.Element {
                       justifyContent: 'center',
                       gap: '0.8rem'
                     }}
-                    whileHover={{ 
-                      backgroundColor: 'rgba(255, 255, 255, 0.15)',
-                    }}
-                    whileTap={{ scale: 0.95 }}
                   >
                     Logout
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -2059,7 +2024,7 @@ export default function HomePage(): React.JSX.Element {
                     style={{
                       backgroundColor: 'transparent',
                       border: 'none',
-                      color: '#888',
+                      color: 'white',
                       fontSize: '2rem',
                       cursor: 'pointer',
                       width: '40px',
@@ -2067,13 +2032,9 @@ export default function HomePage(): React.JSX.Element {
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      fontFamily: 'Helvetica, Arial, sans-serif'
+                      fontFamily: 'Helvetica, Arial, sans-serif',
+                      opacity: 0.7
                     }}
-                    whileHover={{ 
-                      color: 'white',
-                      scale: 1.1
-                    }}
-                    whileTap={{ scale: 0.95 }}
                   >
                     ×
                   </motion.button>
@@ -2107,10 +2068,10 @@ export default function HomePage(): React.JSX.Element {
                           onClick={() => router.push('/notes')}
                           style={{
                             padding: '0.8rem 1.5rem',
-                            backgroundColor: 'rgba(0, 255, 0, 0.1)',
-                            border: '1px solid rgba(0, 255, 0, 0.3)',
+                            backgroundColor: 'transparent',
+                            border: '1px solid rgba(255, 255, 255, 0.3)',
                             borderRadius: '0',
-                            color: '#00FF00',
+                            color: 'white',
                             fontSize: '1rem',
                             fontWeight: '300',
                             cursor: 'pointer',
@@ -2120,11 +2081,6 @@ export default function HomePage(): React.JSX.Element {
                             alignItems: 'center',
                             gap: '0.5rem'
                           }}
-                          whileHover={{ 
-                            backgroundColor: 'rgba(0, 255, 0, 0.2)',
-                            border: '1px solid rgba(0, 255, 0, 0.5)'
-                          }}
-                          whileTap={{ scale: 0.95 }}
                         >
                           New Note
                           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -2144,7 +2100,7 @@ export default function HomePage(): React.JSX.Element {
                       <div style={{
                         padding: '4rem 0',
                         textAlign: 'center',
-                        color: '#888',
+                        color: 'rgba(255, 255, 255, 0.7)',
                         fontFamily: 'Helvetica, Arial, sans-serif'
                       }}>
                         <motion.div
@@ -2162,7 +2118,7 @@ export default function HomePage(): React.JSX.Element {
                       <div style={{
                         padding: '6rem 0',
                         textAlign: 'center',
-                        color: '#888',
+                        color: 'rgba(255, 255, 255, 0.7)',
                         fontFamily: 'Helvetica, Arial, sans-serif'
                       }}>
                         <div style={{ fontSize: '3rem', marginBottom: '1.5rem', opacity: 0.5 }}>
@@ -2177,9 +2133,9 @@ export default function HomePage(): React.JSX.Element {
                         <motion.button
                           onClick={() => router.push('/notes')}
                           style={{
-                            backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                            backgroundColor: 'transparent',
                             color: 'white',
-                            border: 'none',
+                            border: '1px solid rgba(255, 255, 255, 0.3)',
                             padding: '1.2rem 2.5rem',
                             borderRadius: '0',
                             cursor: 'pointer',
@@ -2192,8 +2148,6 @@ export default function HomePage(): React.JSX.Element {
                             gap: '1rem',
                             margin: '0 auto'
                           }}
-                          whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.15)' }}
-                          whileTap={{ scale: 0.95 }}
                         >
                           Create first note
                           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -2215,18 +2169,15 @@ export default function HomePage(): React.JSX.Element {
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: index * 0.05 }}
                             style={{
-                              backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                              backgroundColor: 'transparent',
                               borderRadius: '0',
                               padding: '1.8rem',
-                              borderLeft: '2px solid rgba(255, 255, 255, 0.2)',
+                              border: '1px solid rgba(255, 255, 255, 0.2)',
                               cursor: 'pointer',
                               height: '200px',
                               display: 'flex',
                               flexDirection: 'column',
                               position: 'relative'
-                            }}
-                            whileHover={{ 
-                              backgroundColor: 'rgba(255, 255, 255, 0.1)',
                             }}
                             onClick={() => router.push(`/notes#${note.id}`)}
                           >
@@ -2258,7 +2209,7 @@ export default function HomePage(): React.JSX.Element {
                                 {note.title || 'Untitled Note'}
                               </h5>
                               <span style={{
-                                color: '#888',
+                                color: 'rgba(255, 255, 255, 0.5)',
                                 fontSize: '0.9rem',
                                 fontFamily: 'Helvetica, Arial, sans-serif',
                                 whiteSpace: 'nowrap',
@@ -2268,7 +2219,7 @@ export default function HomePage(): React.JSX.Element {
                               </span>
                             </div>
                             <p style={{
-                              color: '#aaa',
+                              color: 'rgba(255, 255, 255, 0.7)',
                               fontSize: '1rem',
                               margin: '0.5rem 0 0 0',
                               fontFamily: 'Helvetica, Arial, sans-serif',
@@ -2281,22 +2232,6 @@ export default function HomePage(): React.JSX.Element {
                             }}>
                               {note.content}
                             </p>
-                            {note.category && (
-                              <div style={{
-                                marginTop: 'auto',
-                                paddingTop: '1rem'
-                              }}>
-                                <span style={{
-                                  backgroundColor: 'rgba(0, 80, 183, 0.2)',
-                                  color: '#0050B7',
-                                  fontSize: '0.7rem',
-                                  padding: '0.2rem 0.5rem',
-                                  borderRadius: '4px'
-                                }}>
-                                  {note.category}
-                                </span>
-                              </div>
-                            )}
                           </motion.div>
                         ))}
                         
@@ -2304,7 +2239,7 @@ export default function HomePage(): React.JSX.Element {
                           onClick={() => router.push('/notes')}
                           style={{
                             gridColumn: '1 / -1',
-                            backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                            backgroundColor: 'transparent',
                             borderRadius: '0',
                             padding: '2rem',
                             textAlign: 'center',
@@ -2313,12 +2248,9 @@ export default function HomePage(): React.JSX.Element {
                             flexDirection: 'column',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            gap: '1rem'
+                            gap: '1rem',
+                            border: '1px solid rgba(255, 255, 255, 0.2)'
                           }}
-                          whileHover={{ 
-                            backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                          }}
-                          whileTap={{ scale: 0.95 }}
                         >
                           <div style={{
                             color: 'white',
@@ -2328,7 +2260,7 @@ export default function HomePage(): React.JSX.Element {
                             View all {userNotes.length} notes
                           </div>
                           <div style={{
-                            color: '#888',
+                            color: 'rgba(255, 255, 255, 0.5)',
                             fontSize: '0.9rem'
                           }}>
                             Click to see all your notes in the notes page
@@ -2375,7 +2307,7 @@ export default function HomePage(): React.JSX.Element {
                       }}>
                         <div>
                           <label style={{
-                            color: '#aaa',
+                            color: 'rgba(255, 255, 255, 0.8)',
                             fontSize: '1.1rem',
                             marginBottom: '1rem',
                             display: 'block',
@@ -2391,8 +2323,8 @@ export default function HomePage(): React.JSX.Element {
                             style={{
                               width: '100%',
                               padding: '1.2rem',
-                              backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                              border: '1px solid rgba(255, 255, 255, 0.2)',
+                              backgroundColor: 'transparent',
+                              border: '1px solid rgba(255, 255, 255, 0.3)',
                               borderRadius: '0',
                               color: 'white',
                               fontSize: '1.2rem',
@@ -2404,7 +2336,7 @@ export default function HomePage(): React.JSX.Element {
 
                         <div>
                           <label style={{
-                            color: '#aaa',
+                            color: 'rgba(255, 255, 255, 0.8)',
                             fontSize: '1.1rem',
                             marginBottom: '1rem',
                             display: 'block',
@@ -2420,8 +2352,8 @@ export default function HomePage(): React.JSX.Element {
                             style={{
                               width: '100%',
                               padding: '1.2rem',
-                              backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                              border: '1px solid rgba(255, 255, 255, 0.2)',
+                              backgroundColor: 'transparent',
+                              border: '1px solid rgba(255, 255, 255, 0.3)',
                               borderRadius: '0',
                               color: 'white',
                               fontSize: '1.2rem',
@@ -2441,8 +2373,8 @@ export default function HomePage(): React.JSX.Element {
                             onClick={() => setIsEditingProfile(false)}
                             style={{
                               padding: '1.2rem 2.5rem',
-                              backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                              border: 'none',
+                              backgroundColor: 'transparent',
+                              border: '1px solid rgba(255, 255, 255, 0.3)',
                               borderRadius: '0',
                               color: 'white',
                               fontSize: '1.1rem',
@@ -2451,8 +2383,6 @@ export default function HomePage(): React.JSX.Element {
                               fontFamily: 'Helvetica, Arial, sans-serif',
                               letterSpacing: '0.5px'
                             }}
-                            whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.15)' }}
-                            whileTap={{ scale: 0.95 }}
                             disabled={isUpdating}
                           >
                             Cancel
@@ -2461,18 +2391,16 @@ export default function HomePage(): React.JSX.Element {
                             onClick={handleUpdateProfile}
                             style={{
                               padding: '1.2rem 2.5rem',
-                              backgroundColor: 'rgba(255, 255, 255, 0.9)',
-                              border: 'none',
+                              backgroundColor: 'transparent',
+                              border: '1px solid white',
                               borderRadius: '0',
-                              color: 'black',
+                              color: 'white',
                               fontSize: '1.1rem',
                               fontWeight: '300',
                               cursor: 'pointer',
                               fontFamily: 'Helvetica, Arial, sans-serif',
                               letterSpacing: '0.5px'
                             }}
-                            whileHover={{ backgroundColor: 'white' }}
-                            whileTap={{ scale: 0.95 }}
                             disabled={isUpdating}
                           >
                             {isUpdating ? 'Updating...' : 'Save'}
@@ -2491,17 +2419,13 @@ export default function HomePage(): React.JSX.Element {
                             padding: '2rem',
                             backgroundColor: 'transparent',
                             borderRadius: '0',
-                            border: '1px solid rgba(255, 255, 255, 0.1)',
+                            border: '1px solid rgba(255, 255, 255, 0.2)',
                             cursor: 'pointer'
-                          }}
-                          whileHover={{ 
-                            backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                            border: '1px solid rgba(255, 255, 255, 0.2)'
                           }}
                           onClick={() => setIsEditingProfile(true)}
                         >
                           <div style={{
-                            color: '#aaa',
+                            color: 'rgba(255, 255, 255, 0.8)',
                             fontSize: '1rem',
                             fontFamily: 'Helvetica, Arial, sans-serif',
                             letterSpacing: '0.5px',
@@ -2532,17 +2456,13 @@ export default function HomePage(): React.JSX.Element {
                             padding: '2rem',
                             backgroundColor: 'transparent',
                             borderRadius: '0',
-                            border: '1px solid rgba(255, 255, 255, 0.1)',
+                            border: '1px solid rgba(255, 255, 255, 0.2)',
                             cursor: 'pointer'
-                          }}
-                          whileHover={{ 
-                            backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                            border: '1px solid rgba(255, 255, 255, 0.2)'
                           }}
                           onClick={() => setIsEditingProfile(true)}
                         >
                           <div style={{
-                            color: '#aaa',
+                            color: 'rgba(255, 255, 255, 0.8)',
                             fontSize: '1rem',
                             fontFamily: 'Helvetica, Arial, sans-serif',
                             letterSpacing: '0.5px',
@@ -2572,10 +2492,10 @@ export default function HomePage(): React.JSX.Element {
                           padding: '2rem',
                           backgroundColor: 'transparent',
                           borderRadius: '0',
-                          border: '1px solid rgba(255, 255, 255, 0.1)'
+                          border: '1px solid rgba(255, 255, 255, 0.2)'
                         }}>
                           <div style={{
-                            color: '#aaa',
+                            color: 'rgba(255, 255, 255, 0.8)',
                             fontSize: '1rem',
                             fontFamily: 'Helvetica, Arial, sans-serif',
                             letterSpacing: '0.5px',
@@ -2598,10 +2518,10 @@ export default function HomePage(): React.JSX.Element {
                           padding: '2rem',
                           backgroundColor: 'transparent',
                           borderRadius: '0',
-                          border: '1px solid rgba(255, 255, 255, 0.1)'
+                          border: '1px solid rgba(255, 255, 255, 0.2)'
                         }}>
                           <div style={{
-                            color: '#aaa',
+                            color: 'rgba(255, 255, 255, 0.8)',
                             fontSize: '1rem',
                             fontFamily: 'Helvetica, Arial, sans-serif',
                             letterSpacing: '0.5px',
@@ -2620,62 +2540,6 @@ export default function HomePage(): React.JSX.Element {
                           </div>
                         </div>
 
-                        {userStats && (
-                          <div style={{
-                            padding: '2rem',
-                            backgroundColor: 'transparent',
-                            borderRadius: '0',
-                            border: '1px solid rgba(255, 255, 255, 0.1)'
-                          }}>
-                            <div style={{
-                              color: '#aaa',
-                              fontSize: '1rem',
-                              fontFamily: 'Helvetica, Arial, sans-serif',
-                              letterSpacing: '0.5px',
-                              marginBottom: '1rem'
-                            }}>
-                              Stats
-                            </div>
-                            <div style={{
-                              display: 'grid',
-                              gridTemplateColumns: 'repeat(2, 1fr)',
-                              gap: '1rem'
-                            }}>
-                              <div>
-                                <div style={{
-                                  color: 'rgba(255, 255, 255, 0.7)',
-                                  fontSize: '0.9rem',
-                                  marginBottom: '0.3rem'
-                                }}>
-                                  Login Count
-                                </div>
-                                <div style={{
-                                  color: '#00FF00',
-                                  fontSize: '1.2rem',
-                                  fontWeight: '500'
-                                }}>
-                                  {userStats.loginCount || 0}
-                                </div>
-                              </div>
-                              <div>
-                                <div style={{
-                                  color: 'rgba(255, 255, 255, 0.7)',
-                                  fontSize: '0.9rem',
-                                  marginBottom: '0.3rem'
-                                }}>
-                                  Last Login
-                                </div>
-                                <div style={{
-                                  color: '#F59E0B',
-                                  fontSize: '1rem'
-                                }}>
-                                  {calculateTimeAgo(userStats.lastLogin)}
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        )}
-
                         <div style={{
                           marginTop: '1.5rem'
                         }}>
@@ -2684,10 +2548,10 @@ export default function HomePage(): React.JSX.Element {
                             style={{
                               width: '100%',
                               padding: '1.5rem',
-                              backgroundColor: 'rgba(255, 71, 87, 0.1)',
-                              border: '1px solid rgba(255, 71, 87, 0.3)',
+                              backgroundColor: 'transparent',
+                              border: '1px solid rgba(255, 255, 255, 0.3)',
                               borderRadius: '0',
-                              color: '#FF4757',
+                              color: 'white',
                               fontSize: '1.2rem',
                               fontWeight: '300',
                               cursor: 'pointer',
@@ -2698,11 +2562,6 @@ export default function HomePage(): React.JSX.Element {
                               justifyContent: 'center',
                               gap: '1rem'
                             }}
-                            whileHover={{ 
-                              backgroundColor: 'rgba(255, 71, 87, 0.2)',
-                              border: '1px solid rgba(255, 71, 87, 0.5)'
-                            }}
-                            whileTap={{ scale: 0.95 }}
                           >
                             Delete account
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -2736,16 +2595,11 @@ export default function HomePage(): React.JSX.Element {
                       gap: '2.5rem',
                       maxWidth: '800px'
                     }}>
-                      <motion.div
+                      <div
                         style={{
                           padding: '2.5rem',
                           backgroundColor: 'transparent',
                           borderRadius: '0',
-                          border: '1px solid rgba(255, 255, 255, 0.1)',
-                          cursor: 'pointer'
-                        }}
-                        whileHover={{ 
-                          backgroundColor: 'rgba(255, 255, 255, 0.05)',
                           border: '1px solid rgba(255, 255, 255, 0.2)'
                         }}
                       >
@@ -2760,25 +2614,20 @@ export default function HomePage(): React.JSX.Element {
                           Getting started
                         </h5>
                         <p style={{
-                          color: '#aaa',
+                          color: 'rgba(255, 255, 255, 0.8)',
                           fontSize: '1.1rem',
                           lineHeight: 1.6,
                           fontFamily: 'Helvetica, Arial, sans-serif'
                         }}>
                           Welcome to MENURU. This platform helps you organize your creative journey. Start by creating notes, exploring features, and customizing your profile.
                         </p>
-                      </motion.div>
+                      </div>
 
-                      <motion.div
+                      <div
                         style={{
                           padding: '2.5rem',
                           backgroundColor: 'transparent',
                           borderRadius: '0',
-                          border: '1px solid rgba(255, 255, 255, 0.1)',
-                          cursor: 'pointer'
-                        }}
-                        whileHover={{ 
-                          backgroundColor: 'rgba(255, 255, 255, 0.05)',
                           border: '1px solid rgba(255, 255, 255, 0.2)'
                         }}
                       >
@@ -2793,7 +2642,7 @@ export default function HomePage(): React.JSX.Element {
                           Features guide
                         </h5>
                         <p style={{
-                          color: '#aaa',
+                          color: 'rgba(255, 255, 255, 0.8)',
                           fontSize: '1.1rem',
                           lineHeight: 1.6,
                           fontFamily: 'Helvetica, Arial, sans-serif'
@@ -2804,14 +2653,14 @@ export default function HomePage(): React.JSX.Element {
                           • Timeline: Track your progress<br/>
                           • Notifications: Stay updated
                         </p>
-                      </motion.div>
+                      </div>
 
                       <motion.button
                         onClick={() => router.push('/docs')}
                         style={{
                           padding: '1.5rem 3rem',
-                          backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                          border: 'none',
+                          backgroundColor: 'transparent',
+                          border: '1px solid rgba(255, 255, 255, 0.3)',
                           borderRadius: '0',
                           color: 'white',
                           fontSize: '1.2rem',
@@ -2824,8 +2673,6 @@ export default function HomePage(): React.JSX.Element {
                           justifyContent: 'space-between',
                           marginTop: '1rem'
                         }}
-                        whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.15)' }}
-                        whileTap={{ scale: 0.95 }}
                       >
                         <span>View full documentation</span>
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -2857,16 +2704,11 @@ export default function HomePage(): React.JSX.Element {
                       gap: '2.5rem',
                       maxWidth: '800px'
                     }}>
-                      <motion.div
+                      <div
                         style={{
                           padding: '2.5rem',
                           backgroundColor: 'transparent',
                           borderRadius: '0',
-                          border: '1px solid rgba(255, 255, 255, 0.1)',
-                          cursor: 'pointer'
-                        }}
-                        whileHover={{ 
-                          backgroundColor: 'rgba(255, 255, 255, 0.05)',
                           border: '1px solid rgba(255, 255, 255, 0.2)'
                         }}
                       >
@@ -2881,21 +2723,21 @@ export default function HomePage(): React.JSX.Element {
                           Share your thoughts
                         </h5>
                         <p style={{
-                          color: '#aaa',
+                          color: 'rgba(255, 255, 255, 0.8)',
                           fontSize: '1.1rem',
                           lineHeight: 1.6,
                           fontFamily: 'Helvetica, Arial, sans-serif'
                         }}>
                           We value your feedback to improve MENURU. Share your suggestions, report issues, or tell us what features you'd like to see in future updates.
                         </p>
-                      </motion.div>
+                      </div>
 
                       <motion.button
                         onClick={handleSendFeedback}
                         style={{
                           padding: '1.5rem 3rem',
-                          backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                          border: 'none',
+                          backgroundColor: 'transparent',
+                          border: '1px solid rgba(255, 255, 255, 0.3)',
                           borderRadius: '0',
                           color: 'white',
                           fontSize: '1.2rem',
@@ -2907,8 +2749,6 @@ export default function HomePage(): React.JSX.Element {
                           alignItems: 'center',
                           justifyContent: 'space-between'
                         }}
-                        whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.15)' }}
-                        whileTap={{ scale: 0.95 }}
                       >
                         <span>Send feedback</span>
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -2917,12 +2757,12 @@ export default function HomePage(): React.JSX.Element {
                         </svg>
                       </motion.button>
 
-                      <motion.div
+                      <div
                         style={{
                           padding: '2.5rem',
                           backgroundColor: 'transparent',
                           borderRadius: '0',
-                          border: '1px solid rgba(255, 255, 255, 0.1)',
+                          border: '1px solid rgba(255, 255, 255, 0.2)',
                           marginTop: '1rem'
                         }}
                       >
@@ -2937,7 +2777,7 @@ export default function HomePage(): React.JSX.Element {
                           Contact support
                         </h5>
                         <p style={{
-                          color: '#aaa',
+                          color: 'rgba(255, 255, 255, 0.8)',
                           fontSize: '1.1rem',
                           lineHeight: 1.6,
                           fontFamily: 'Helvetica, Arial, sans-serif'
@@ -2949,7 +2789,7 @@ export default function HomePage(): React.JSX.Element {
                           style={{
                             padding: '1.2rem 2rem',
                             backgroundColor: 'transparent',
-                            border: '1px solid rgba(255, 255, 255, 0.2)',
+                            border: '1px solid rgba(255, 255, 255, 0.3)',
                             borderRadius: '0',
                             color: 'white',
                             fontSize: '1rem',
@@ -2962,8 +2802,6 @@ export default function HomePage(): React.JSX.Element {
                             justifyContent: 'space-between',
                             marginTop: '1.5rem'
                           }}
-                          whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
-                          whileTap={{ scale: 0.95 }}
                         >
                           <span>Contact support</span>
                           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -2971,7 +2809,7 @@ export default function HomePage(): React.JSX.Element {
                             <path d="M12 5l7 7-7 7"/>
                           </svg>
                         </motion.button>
-                      </motion.div>
+                      </div>
                     </div>
                   </div>
                 )}
@@ -3015,7 +2853,7 @@ export default function HomePage(): React.JSX.Element {
                 padding: '2.5rem',
                 width: isMobile ? '90%' : '500px',
                 maxWidth: '600px',
-                border: '1px solid rgba(255, 255, 255, 0.1)'
+                border: '1px solid rgba(255, 255, 255, 0.2)'
               }}
               onClick={(e) => e.stopPropagation()}
             >
@@ -3031,7 +2869,7 @@ export default function HomePage(): React.JSX.Element {
               </h4>
               
               <p style={{
-                color: '#aaa',
+                color: 'rgba(255, 255, 255, 0.8)',
                 fontSize: '1rem',
                 lineHeight: 1.6,
                 margin: '0 0 2rem 0',
@@ -3050,8 +2888,8 @@ export default function HomePage(): React.JSX.Element {
                   onClick={() => setShowDeleteAccountModal(false)}
                   style={{
                     padding: '1rem 2rem',
-                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                    border: 'none',
+                    backgroundColor: 'transparent',
+                    border: '1px solid rgba(255, 255, 255, 0.3)',
                     borderRadius: '0',
                     color: 'white',
                     fontSize: '1rem',
@@ -3059,8 +2897,6 @@ export default function HomePage(): React.JSX.Element {
                     cursor: 'pointer',
                     fontFamily: 'Helvetica, Arial, sans-serif'
                   }}
-                  whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.15)' }}
-                  whileTap={{ scale: 0.95 }}
                 >
                   Cancel
                 </motion.button>
@@ -3068,17 +2904,15 @@ export default function HomePage(): React.JSX.Element {
                   onClick={handleDeleteAccount}
                   style={{
                     padding: '1rem 2rem',
-                    backgroundColor: 'rgba(255, 71, 87, 0.2)',
-                    border: 'none',
+                    backgroundColor: 'transparent',
+                    border: '1px solid rgba(255, 255, 255, 0.3)',
                     borderRadius: '0',
-                    color: '#ff6b6b',
+                    color: 'white',
                     fontSize: '1rem',
                     fontWeight: '300',
                     cursor: 'pointer',
                     fontFamily: 'Helvetica, Arial, sans-serif'
                   }}
-                  whileHover={{ backgroundColor: 'rgba(255, 71, 87, 0.3)' }}
-                  whileTap={{ scale: 0.95 }}
                 >
                   Delete
                 </motion.button>
@@ -3122,7 +2956,7 @@ export default function HomePage(): React.JSX.Element {
                 padding: isMobile ? '1.5rem' : '2.5rem',
                 width: isMobile ? '90%' : '500px',
                 maxWidth: '600px',
-                border: '1px solid rgba(255, 255, 255, 0.1)',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
                 display: 'flex',
                 flexDirection: 'column',
                 gap: '2rem'
@@ -3141,7 +2975,7 @@ export default function HomePage(): React.JSX.Element {
                   Logout
                 </h3>
                 <p style={{
-                  color: 'rgba(255, 255, 255, 0.7)',
+                  color: 'rgba(255, 255, 255, 0.8)',
                   fontSize: '1rem',
                   margin: 0,
                   lineHeight: 1.6
@@ -3160,8 +2994,8 @@ export default function HomePage(): React.JSX.Element {
                   style={{
                     flex: 1,
                     padding: '1rem 1.5rem',
-                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                    border: 'none',
+                    backgroundColor: 'transparent',
+                    border: '1px solid rgba(255, 255, 255, 0.3)',
                     borderRadius: '0',
                     color: 'white',
                     fontSize: '1rem',
@@ -3169,10 +3003,6 @@ export default function HomePage(): React.JSX.Element {
                     cursor: 'pointer',
                     fontFamily: 'Helvetica, Arial, sans-serif'
                   }}
-                  whileHover={{ 
-                    backgroundColor: 'rgba(255, 255, 255, 0.15)'
-                  }}
-                  whileTap={{ scale: 0.95 }}
                 >
                   No
                 </motion.button>
@@ -3181,8 +3011,8 @@ export default function HomePage(): React.JSX.Element {
                   style={{
                     flex: 1,
                     padding: '1rem 1.5rem',
-                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                    border: 'none',
+                    backgroundColor: 'transparent',
+                    border: '1px solid rgba(255, 255, 255, 0.3)',
                     borderRadius: '0',
                     color: 'white',
                     fontSize: '1rem',
@@ -3190,10 +3020,6 @@ export default function HomePage(): React.JSX.Element {
                     cursor: 'pointer',
                     fontFamily: 'Helvetica, Arial, sans-serif'
                   }}
-                  whileHover={{ 
-                    backgroundColor: 'rgba(255, 255, 255, 0.15)'
-                  }}
-                  whileTap={{ scale: 0.95 }}
                 >
                   Yes
                 </motion.button>
@@ -3244,13 +3070,9 @@ export default function HomePage(): React.JSX.Element {
                 padding: '1rem',
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'center'
+                justifyContent: 'center',
+                opacity: 0.7
               }}
-              whileHover={{ 
-                scale: 1.2,
-                rotate: 90
-              }}
-              whileTap={{ scale: 0.9 }}
             >
               ×
             </motion.div>
@@ -3421,8 +3243,7 @@ export default function HomePage(): React.JSX.Element {
                     height: isMobile ? '350px' : '600px',
                     overflow: 'hidden',
                     borderRadius: '20px',
-                    boxShadow: '0 20px 50px rgba(0,0,0,0.8)',
-                    border: '3px solid rgba(255,255,255,0.2)',
+                    border: '1px solid rgba(255,255,255,0.2)',
                     marginBottom: isMobile ? '3rem' : '4rem',
                     alignSelf: 'flex-start'
                   }}
@@ -3479,7 +3300,7 @@ export default function HomePage(): React.JSX.Element {
                   <motion.a
                     href="/explore"
                     style={{
-                      color: '#00FF00',
+                      color: 'white',
                       fontSize: isMobile ? '1.8rem' : '2.5rem',
                       fontWeight: '600',
                       fontFamily: 'NeueHaasGrotesk, "Helvetica Neue", Helvetica, Arial, sans-serif',
@@ -3491,11 +3312,6 @@ export default function HomePage(): React.JSX.Element {
                       position: 'relative',
                       padding: '1rem 0'
                     }}
-                    whileHover={{ 
-                      x: 10,
-                      color: '#FFFFFF'
-                    }}
-                    transition={{ duration: 0.3 }}
                   >
                     EXPLORE FULL COLLECTION
                     <motion.svg
@@ -3505,27 +3321,10 @@ export default function HomePage(): React.JSX.Element {
                       fill="none"
                       stroke="currentColor"
                       strokeWidth="2"
-                      initial={{ x: 0 }}
-                      animate={{ x: 0 }}
-                      whileHover={{ x: 5 }}
-                      transition={{ duration: 0.3 }}
                     >
                       <path d="M5 12h14" />
                       <path d="M12 5l7 7-7 7" />
                     </motion.svg>
-                    <motion.div
-                      style={{
-                        position: 'absolute',
-                        bottom: '0.5rem',
-                        left: 0,
-                        width: '100%',
-                        height: '2px',
-                        backgroundColor: '#00FF00'
-                      }}
-                      initial={{ scaleX: 0 }}
-                      whileHover={{ scaleX: 1 }}
-                      transition={{ duration: 0.3 }}
-                    />
                   </motion.a>
                 </motion.div>
 
@@ -3567,15 +3366,11 @@ export default function HomePage(): React.JSX.Element {
                   position: 'fixed',
                   right: isMobile ? '1.5rem' : '3rem',
                   top: isMobile ? '1.5rem' : '3rem',
-                  backgroundColor: 'rgba(0,0,0,0.5)',
+                  backgroundColor: 'transparent',
                   borderRadius: '50%',
-                  zIndex: 9999
+                  zIndex: 9999,
+                  border: '1px solid rgba(255, 255, 255, 0.3)'
                 }}
-                whileHover={{ 
-                  scale: 1.2,
-                  backgroundColor: 'rgba(0,0,0,0.8)'
-                }}
-                whileTap={{ scale: 0.95 }}
               >
                 <div 
                   ref={backslashRef}
@@ -3668,12 +3463,9 @@ export default function HomePage(): React.JSX.Element {
                   fontFamily: 'Arial, sans-serif',
                   padding: '0.5rem 1rem',
                   borderRadius: '4px',
-                  order: 1
+                  order: 1,
+                  opacity: 0.7
                 }}
-                whileHover={{ 
-                  backgroundColor: 'rgba(255,255,255,0.1)'
-                }}
-                whileTap={{ scale: 0.95 }}
               >
                 ×
               </motion.button>
@@ -3729,8 +3521,7 @@ export default function HomePage(): React.JSX.Element {
                         position: 'relative',
                         borderRadius: '15px',
                         overflow: 'hidden',
-                        boxShadow: '0 8px 25px rgba(0,0,0,0.4)',
-                        border: '2px solid rgba(255,255,255,0.15)',
+                        border: '1px solid rgba(255,255,255,0.2)',
                         cursor: 'pointer'
                       }}
                       onClick={(e) => {
@@ -3819,11 +3610,11 @@ export default function HomePage(): React.JSX.Element {
                 width: '100%'
               }}>
                 <div style={{
-                  backgroundColor: 'rgba(255,255,255,0.05)',
+                  backgroundColor: 'transparent',
                   borderRadius: '12px',
                   padding: '1.5rem',
                   marginBottom: '2rem',
-                  border: '1px solid rgba(255,255,255,0.1)'
+                  border: '1px solid rgba(255,255,255,0.2)'
                 }}>
                   <div style={{
                     display: 'flex',
@@ -3846,8 +3637,8 @@ export default function HomePage(): React.JSX.Element {
                           width: '100%',
                           padding: '0.8rem 1rem',
                           paddingRight: '3rem',
-                          backgroundColor: 'rgba(255,255,255,0.05)',
-                          border: '1px solid rgba(255,255,255,0.1)',
+                          backgroundColor: 'transparent',
+                          border: '1px solid rgba(255,255,255,0.2)',
                           borderRadius: '20px',
                           color: 'white',
                           fontSize: '0.9rem',
@@ -3874,8 +3665,8 @@ export default function HomePage(): React.JSX.Element {
                       style={{
                         width: '40px',
                         height: '40px',
-                        backgroundColor: message.trim() === "" ? 'rgba(0, 80, 183, 0.5)' : '#0050B7',
-                        border: 'none',
+                        backgroundColor: 'transparent',
+                        border: '1px solid rgba(255, 255, 255, 0.3)',
                         borderRadius: '50%',
                         cursor: message.trim() === "" ? 'not-allowed' : 'pointer',
                         display: 'flex',
@@ -3884,11 +3675,6 @@ export default function HomePage(): React.JSX.Element {
                         transition: 'all 0.3s ease',
                         flexShrink: 0
                       }}
-                      whileHover={message.trim() !== "" ? { 
-                        scale: 1.1,
-                        backgroundColor: '#0066CC'
-                      } : {}}
-                      whileTap={message.trim() !== "" ? { scale: 0.95 } : {}}
                     >
                       <svg 
                         width="18" 
@@ -3968,10 +3754,10 @@ export default function HomePage(): React.JSX.Element {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: index * 0.05 }}
                         style={{
-                          backgroundColor: 'rgba(255,255,255,0.05)',
+                          backgroundColor: 'transparent',
                           padding: '1rem',
                           borderRadius: '8px',
-                          borderLeft: '3px solid #0050B7'
+                          border: '1px solid rgba(255, 255, 255, 0.2)'
                         }}
                       >
                         <div style={{
@@ -3985,7 +3771,8 @@ export default function HomePage(): React.JSX.Element {
                             height: '32px',
                             minWidth: '32px',
                             borderRadius: '50%',
-                            backgroundColor: user && comment.user === userDisplayName ? '#0050B7' : '#333',
+                            backgroundColor: 'transparent',
+                            border: '1px solid rgba(255, 255, 255, 0.3)',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
@@ -4012,10 +3799,11 @@ export default function HomePage(): React.JSX.Element {
                                   <span style={{
                                     marginLeft: '0.5rem',
                                     fontSize: '0.7rem',
-                                    backgroundColor: '#0050B7',
+                                    backgroundColor: 'transparent',
                                     color: 'white',
                                     padding: '0.1rem 0.4rem',
-                                    borderRadius: '4px'
+                                    borderRadius: '4px',
+                                    border: '1px solid rgba(255, 255, 255, 0.3)'
                                   }}>
                                     Anda
                                   </span>
@@ -4070,8 +3858,7 @@ export default function HomePage(): React.JSX.Element {
               maxWidth: '90vw',
               maxHeight: '80vh',
               zIndex: 1001,
-              border: '1px solid rgba(255, 255, 255, 0.15)',
-              boxShadow: '0 20px 60px rgba(0, 0, 0, 0.5)',
+              border: '1px solid rgba(255, 255, 255, 0.2)',
               display: 'flex',
               flexDirection: 'column',
               overflow: 'hidden'
@@ -4102,13 +3889,14 @@ export default function HomePage(): React.JSX.Element {
                 Notifications
                 {notificationCount > 0 && (
                   <span style={{
-                    backgroundColor: '#FF4757',
+                    backgroundColor: 'transparent',
                     color: 'white',
                     fontSize: '0.8rem',
                     fontWeight: '700',
                     padding: '0.1rem 0.6rem',
                     borderRadius: '10px',
-                    marginLeft: '0.5rem'
+                    marginLeft: '0.5rem',
+                    border: '1px solid rgba(255, 255, 255, 0.3)'
                   }}>
                     {notificationCount > 9 ? '9+' : notificationCount}
                   </span>
@@ -4120,9 +3908,9 @@ export default function HomePage(): React.JSX.Element {
                   <motion.button
                     onClick={handleClearNotification}
                     style={{
-                      backgroundColor: 'rgba(255, 71, 87, 0.2)',
-                      border: '1px solid rgba(255, 71, 87, 0.4)',
-                      color: '#FF4757',
+                      backgroundColor: 'transparent',
+                      border: '1px solid rgba(255, 255, 255, 0.3)',
+                      color: 'white',
                       fontSize: '0.8rem',
                       fontWeight: '600',
                       padding: '0.3rem 0.8rem',
@@ -4130,11 +3918,6 @@ export default function HomePage(): React.JSX.Element {
                       cursor: 'pointer',
                       fontFamily: 'Helvetica, Arial, sans-serif'
                     }}
-                    whileHover={{ 
-                      backgroundColor: 'rgba(255, 71, 87, 0.3)',
-                      scale: 1.05
-                    }}
-                    whileTap={{ scale: 0.95 }}
                   >
                     Clear All
                 </motion.button>
@@ -4146,9 +3929,9 @@ export default function HomePage(): React.JSX.Element {
                     setTimeout(() => setIsLoadingNotifications(false), 500);
                   }}
                   style={{
-                    backgroundColor: 'rgba(0, 80, 183, 0.2)',
-                    border: '1px solid rgba(0, 80, 183, 0.4)',
-                    color: '#0050B7',
+                    backgroundColor: 'transparent',
+                    border: '1px solid rgba(255, 255, 255, 0.3)',
+                    color: 'white',
                     fontSize: '0.8rem',
                     fontWeight: '600',
                     padding: '0.3rem 0.8rem',
@@ -4156,11 +3939,6 @@ export default function HomePage(): React.JSX.Element {
                     cursor: 'pointer',
                     fontFamily: 'Helvetica, Arial, sans-serif'
                   }}
-                  whileHover={{ 
-                    backgroundColor: 'rgba(0, 80, 183, 0.3)',
-                    scale: 1.05
-                  }}
-                  whileTap={{ scale: 0.95 }}
                 >
                   Refresh
                 </motion.button>
@@ -4177,7 +3955,7 @@ export default function HomePage(): React.JSX.Element {
                 <div style={{
                   padding: '3rem 1rem',
                   textAlign: 'center',
-                  color: 'rgba(255, 255, 255, 0.5)',
+                  color: 'rgba(255, 255, 255, 0.7)',
                   fontFamily: 'Helvetica, Arial, sans-serif'
                 }}>
                   <motion.div
@@ -4195,7 +3973,7 @@ export default function HomePage(): React.JSX.Element {
                 <div style={{
                   padding: '3rem 1.5rem',
                   textAlign: 'center',
-                  color: 'rgba(255, 255, 255, 0.5)',
+                  color: 'rgba(255, 255, 255, 0.7)',
                   fontFamily: 'Helvetica, Arial, sans-serif'
                 }}>
                   <div style={{ 
@@ -4206,7 +3984,7 @@ export default function HomePage(): React.JSX.Element {
                     🔔
                   </div>
                   <h4 style={{
-                    color: 'rgba(255, 255, 255, 0.8)',
+                    color: 'rgba(255, 255, 255, 0.9)',
                     fontSize: '1.2rem',
                     margin: '0 0 0.5rem 0'
                   }}>
@@ -4215,7 +3993,7 @@ export default function HomePage(): React.JSX.Element {
                   <p style={{
                     fontSize: '0.9rem',
                     margin: '0 0 1.5rem 0',
-                    color: 'rgba(255, 255, 255, 0.4)'
+                    color: 'rgba(255, 255, 255, 0.6)'
                   }}>
                     Check back later for updates
                   </p>
@@ -4230,14 +4008,11 @@ export default function HomePage(): React.JSX.Element {
                       transition={{ delay: index * 0.05 }}
                       style={{
                         padding: '1rem 1.5rem',
-                        borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
+                        borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
                         cursor: 'pointer',
                         transition: 'all 0.2s ease',
-                        backgroundColor: notification.isRead ? 'transparent' : getBgColorByType(notification.type),
+                        backgroundColor: notification.isRead ? 'transparent' : 'transparent',
                         position: 'relative'
-                      }}
-                      whileHover={{ 
-                        backgroundColor: notification.read ? 'rgba(255, 255, 255, 0.05)' : getBgColorByType(notification.type).replace('0.1', '0.2')
                       }}
                       onClick={() => handleNotificationClick(notification)}
                     >
@@ -4249,7 +4024,7 @@ export default function HomePage(): React.JSX.Element {
                           transform: 'translateY(-50%)',
                           width: '8px',
                           height: '8px',
-                          backgroundColor: getColorByType(notification.type),
+                          backgroundColor: 'white',
                           borderRadius: '50%'
                         }} />
                       )}
@@ -4264,12 +4039,13 @@ export default function HomePage(): React.JSX.Element {
                           height: '40px',
                           minWidth: '40px',
                           borderRadius: '10px',
-                          backgroundColor: notification.read ? 'rgba(255, 255, 255, 0.1)' : `${getColorByType(notification.type)}20`,
+                          backgroundColor: 'transparent',
+                          border: '1px solid rgba(255, 255, 255, 0.3)',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
                           fontSize: '1.2rem',
-                          color: getColorByType(notification.type)
+                          color: 'white'
                         }}>
                           {notification.icon}
                         </div>
@@ -4300,25 +4076,27 @@ export default function HomePage(): React.JSX.Element {
                               </h4>
                               
                               <span style={{
-                                backgroundColor: getColorByType(notification.type),
+                                backgroundColor: 'transparent',
                                 color: 'white',
                                 fontSize: '0.7rem',
                                 fontWeight: '600',
                                 padding: '0.1rem 0.5rem',
                                 borderRadius: '4px',
-                                textTransform: 'uppercase'
+                                textTransform: 'uppercase',
+                                border: '1px solid rgba(255, 255, 255, 0.3)'
                               }}>
                                 {notification.type}
                               </span>
                               
                               {notification.isAdminPost && (
                                 <span style={{
-                                  backgroundColor: '#8B5CF6',
+                                  backgroundColor: 'transparent',
                                   color: 'white',
                                   fontSize: '0.7rem',
                                   fontWeight: '600',
                                   padding: '0.1rem 0.5rem',
-                                  borderRadius: '4px'
+                                  borderRadius: '4px',
+                                  border: '1px solid rgba(255, 255, 255, 0.3)'
                                 }}>
                                   ADMIN
                                 </span>
@@ -4326,7 +4104,7 @@ export default function HomePage(): React.JSX.Element {
                             </div>
                             
                             <span style={{
-                              color: 'rgba(255, 255, 255, 0.5)',
+                              color: 'rgba(255, 255, 255, 0.6)',
                               fontSize: '0.75rem',
                               whiteSpace: 'nowrap'
                             }}>
@@ -4335,7 +4113,7 @@ export default function HomePage(): React.JSX.Element {
                           </div>
                           
                           <p style={{
-                            color: notification.read ? 'rgba(255, 255, 255, 0.7)' : 'white',
+                            color: notification.read ? 'rgba(255, 255, 255, 0.8)' : 'white',
                             fontSize: '0.9rem',
                             margin: '0 0 0.5rem 0',
                             lineHeight: 1.4,
@@ -4353,13 +4131,13 @@ export default function HomePage(): React.JSX.Element {
                               marginTop: '0.3rem'
                             }}>
                               <span style={{
-                                color: 'rgba(255, 255, 255, 0.5)',
+                                color: 'rgba(255, 255, 255, 0.6)',
                                 fontSize: '0.75rem'
                               }}>
                                 From:
                               </span>
                               <span style={{
-                                color: '#8B5CF6',
+                                color: 'white',
                                 fontSize: '0.75rem',
                                 fontWeight: '500'
                               }}>
@@ -4367,40 +4145,6 @@ export default function HomePage(): React.JSX.Element {
                               </span>
                             </div>
                           )}
-                          
-                          <div style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '0.5rem',
-                            marginTop: '0.5rem',
-                            flexWrap: 'wrap'
-                          }}>
-                            {notification.priority && (
-                              <span style={{
-                                color: notification.priority === 'high' ? '#EF4444' : 
-                                       notification.priority === 'medium' ? '#F59E0B' : '#10B981',
-                                fontSize: '0.7rem',
-                                fontWeight: '500',
-                                backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                                padding: '0.1rem 0.4rem',
-                                borderRadius: '4px'
-                              }}>
-                                {notification.priority.toUpperCase()}
-                              </span>
-                            )}
-                            
-                            {notification.category && (
-                              <span style={{
-                                color: 'rgba(255, 255, 255, 0.7)',
-                                fontSize: '0.7rem',
-                                backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                                padding: '0.1rem 0.4rem',
-                                borderRadius: '4px'
-                              }}>
-                                {notification.category}
-                              </span>
-                            )}
-                          </div>
                         </div>
                       </div>
                     </motion.div>
@@ -4416,10 +4160,10 @@ export default function HomePage(): React.JSX.Element {
               justifyContent: 'space-between',
               alignItems: 'center',
               flexShrink: 0,
-              backgroundColor: 'rgba(0, 0, 0, 0.2)'
+              backgroundColor: 'transparent'
             }}>
               <div style={{
-                color: 'rgba(255, 255, 255, 0.5)',
+                color: 'rgba(255, 255, 255, 0.6)',
                 fontSize: '0.8rem',
                 fontFamily: 'Helvetica, Arial, sans-serif'
               }}>
@@ -4429,7 +4173,7 @@ export default function HomePage(): React.JSX.Element {
               <motion.a
                 href="/notifications"
                 style={{
-                  color: '#00FF00',
+                  color: 'white',
                   fontSize: '0.9rem',
                   fontWeight: '600',
                   textDecoration: 'none',
@@ -4437,10 +4181,6 @@ export default function HomePage(): React.JSX.Element {
                   display: 'flex',
                   alignItems: 'center',
                   gap: '0.5rem'
-                }}
-                whileHover={{ 
-                  color: 'white',
-                  x: 5
                 }}
               >
                 View All
@@ -4470,10 +4210,9 @@ export default function HomePage(): React.JSX.Element {
           textTransform: 'uppercase',
           letterSpacing: '1px',
           zIndex: 1000,
-          backgroundColor: 'rgba(0,0,0,0.3)',
+          backgroundColor: 'transparent',
           padding: '0.5rem 1rem',
-          borderRadius: '4px',
-          backdropFilter: 'blur(5px)'
+          borderRadius: '4px'
         }}
       >
         Selamat Tahun Baru 2026
@@ -4498,8 +4237,7 @@ export default function HomePage(): React.JSX.Element {
               padding: '0.8rem 0',
               minWidth: '200px',
               zIndex: 1001,
-              border: '1px solid rgba(255, 255, 255, 0.1)',
-              boxShadow: '0 10px 30px rgba(0, 0, 0, 0.3)',
+              border: '1px solid rgba(255, 255, 255, 0.2)',
               display: 'flex',
               flexDirection: 'column'
             }}
@@ -4515,7 +4253,8 @@ export default function HomePage(): React.JSX.Element {
                 width: '40px',
                 height: '40px',
                 borderRadius: '50%',
-                backgroundColor: '#0050B7',
+                backgroundColor: 'transparent',
+                border: '1px solid rgba(255, 255, 255, 0.3)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -4538,7 +4277,7 @@ export default function HomePage(): React.JSX.Element {
                   {userDisplayName}
                 </div>
                 <div style={{
-                  color: 'rgba(255, 255, 255, 0.6)',
+                  color: 'rgba(255, 255, 255, 0.7)',
                   fontSize: '0.75rem',
                   marginTop: '0.2rem'
                 }}>
@@ -4569,10 +4308,6 @@ export default function HomePage(): React.JSX.Element {
                   transition: 'all 0.2s ease',
                   fontFamily: 'Helvetica, Arial, sans-serif'
                 }}
-                whileHover={{ 
-                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                  paddingLeft: '1.2rem'
-                }}
               >
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
@@ -4590,7 +4325,7 @@ export default function HomePage(): React.JSX.Element {
                   padding: '0.8rem 1rem',
                   backgroundColor: 'transparent',
                   border: 'none',
-                  color: '#ff6b6b',
+                  color: 'white',
                   fontSize: '0.9rem',
                   fontWeight: '500',
                   textAlign: 'left',
@@ -4601,10 +4336,6 @@ export default function HomePage(): React.JSX.Element {
                   transition: 'all 0.2s ease',
                   fontFamily: 'Helvetica, Arial, sans-serif'
                 }}
-                whileHover={{ 
-                  backgroundColor: 'rgba(255, 107, 107, 0.1)',
-                  paddingLeft: '1.2rem'
-                }}
               >
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
@@ -4614,74 +4345,6 @@ export default function HomePage(): React.JSX.Element {
                 Logout
               </motion.button>
             </div>
-
-            {userStats && (
-              <div style={{
-                padding: '0.8rem 1rem',
-                borderTop: '1px solid rgba(255, 255, 255, 0.1)',
-                backgroundColor: 'rgba(0, 0, 0, 0.2)'
-              }}>
-                <div style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  marginBottom: '0.3rem'
-                }}>
-                  <span style={{
-                    color: 'rgba(255, 255, 255, 0.7)',
-                    fontSize: '0.75rem'
-                  }}>
-                    Login Anda:
-                  </span>
-                  <span style={{
-                    color: '#00FF00',
-                    fontSize: '0.9rem',
-                    fontWeight: '600'
-                  }}>
-                    {userStats.loginCount || 0} kali
-                  </span>
-                </div>
-                <div style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  marginBottom: '0.3rem'
-                }}>
-                  <span style={{
-                    color: 'rgba(255, 255, 255, 0.7)',
-                    fontSize: '0.75rem'
-                  }}>
-                    Total Users:
-                  </span>
-                  <span style={{
-                    color: '#0050B7',
-                    fontSize: '0.9rem',
-                    fontWeight: '600'
-                  }}>
-                    {totalUsers}
-                  </span>
-                </div>
-                <div style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center'
-                }}>
-                  <span style={{
-                    color: 'rgba(255, 255, 255, 0.7)',
-                    fontSize: '0.75rem'
-                  }}>
-                    Total Login:
-                  </span>
-                  <span style={{
-                    color: '#F59E0B',
-                    fontSize: '0.9rem',
-                    fontWeight: '600'
-                  }}>
-                    {totalLoggedInUsers}
-                  </span>
-                </div>
-              </div>
-            )}
           </motion.div>
         )}
       </AnimatePresence>
@@ -4709,11 +4372,9 @@ export default function HomePage(): React.JSX.Element {
           alignItems: 'center',
           gap: isMobile ? '1rem' : '2rem',
           backgroundColor: 'transparent',
-          backdropFilter: 'blur(10px)',
           borderRadius: '50px',
           padding: isMobile ? '0.6rem 1rem' : '0.8rem 1.5rem',
-          border: '1px solid rgba(255,255,255,0.15)',
-          boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
+          border: '1px solid rgba(255,255,255,0.2)'
         }}>
           {/* Docs */}
           <motion.div
@@ -4725,15 +4386,10 @@ export default function HomePage(): React.JSX.Element {
               cursor: 'pointer',
               padding: '0.4rem 1rem 0.4rem 0.8rem',
               borderRadius: '25px',
-              backgroundColor: 'rgba(255,255,255,0.9)',
+              backgroundColor: 'transparent',
               border: '1px solid rgba(255,255,255,0.2)',
               transition: 'all 0.3s ease',
               position: 'relative'
-            }}
-            whileHover={{ 
-              backgroundColor: 'white',
-              scale: 1.05,
-              border: '1px solid white'
             }}
           >
             <svg 
@@ -4741,7 +4397,7 @@ export default function HomePage(): React.JSX.Element {
               height={isMobile ? "18" : "20"} 
               viewBox="0 0 24 24" 
               fill="none" 
-              stroke="#6366F1"
+              stroke="white"
               strokeWidth="2"
             >
               <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
@@ -4751,7 +4407,7 @@ export default function HomePage(): React.JSX.Element {
               <polyline points="10,9 9,9 8,9"/>
             </svg>
             <span style={{
-              color: '#6366F1',
+              color: 'white',
               fontSize: isMobile ? '0.8rem' : '0.9rem',
               fontWeight: '600',
               fontFamily: 'Helvetica, Arial, sans-serif',
@@ -4765,25 +4421,13 @@ export default function HomePage(): React.JSX.Element {
                 height={isMobile ? "12" : "14"} 
                 viewBox="0 0 24 24" 
                 fill="none" 
-                stroke="#6366F1"
+                stroke="white"
                 strokeWidth="2"
               >
                 <path d="M5 12h14"/>
                 <path d="M12 5l7 7-7 7"/>
               </svg>
             </span>
-            <div style={{
-              backgroundColor: '#EC4899',
-              color: 'white',
-              fontSize: '0.7rem',
-              fontWeight: '700',
-              padding: '0.1rem 0.4rem',
-              borderRadius: '10px',
-              marginLeft: '0.3rem',
-              border: 'none'
-            }}>
-              NEW
-            </div>
           </motion.div>
 
           {/* Chatbot */}
@@ -4797,15 +4441,10 @@ export default function HomePage(): React.JSX.Element {
               cursor: 'pointer',
               padding: '0.4rem 1rem 0.4rem 0.8rem',
               borderRadius: '25px',
-              backgroundColor: 'rgba(255,255,255,0.9)',
+              backgroundColor: 'transparent',
               border: '1px solid rgba(255,255,255,0.2)',
               transition: 'all 0.3s ease',
               position: 'relative'
-            }}
-            whileHover={{ 
-              backgroundColor: 'white',
-              scale: 1.05,
-              border: '1px solid white'
             }}
           >
             <svg 
@@ -4813,7 +4452,7 @@ export default function HomePage(): React.JSX.Element {
               height={isMobile ? "18" : "20"} 
               viewBox="0 0 24 24" 
               fill="none" 
-              stroke="#6366F1"
+              stroke="white"
               strokeWidth="2"
             >
               <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
@@ -4821,7 +4460,7 @@ export default function HomePage(): React.JSX.Element {
               <line x1="8" y1="11" x2="12" y2="11"/>
             </svg>
             <span style={{
-              color: '#6366F1',
+              color: 'white',
               fontSize: isMobile ? '0.8rem' : '0.9rem',
               fontWeight: '600',
               fontFamily: 'Helvetica, Arial, sans-serif',
@@ -4835,25 +4474,13 @@ export default function HomePage(): React.JSX.Element {
                 height={isMobile ? "12" : "14"} 
                 viewBox="0 0 24 24" 
                 fill="none" 
-                stroke="#6366F1"
+                stroke="white"
                 strokeWidth="2"
               >
                 <path d="M5 12h14"/>
                 <path d="M12 5l7 7-7 7"/>
               </svg>
             </span>
-            <div style={{
-              backgroundColor: '#EC4899',
-              color: 'white',
-              fontSize: '0.7rem',
-              fontWeight: '700',
-              padding: '0.1rem 0.4rem',
-              borderRadius: '10px',
-              marginLeft: '0.3rem',
-              border: 'none'
-            }}>
-              NEW
-            </div>
           </motion.div>
 
           {/* Update */}
@@ -4866,15 +4493,10 @@ export default function HomePage(): React.JSX.Element {
               cursor: 'pointer',
               padding: '0.4rem 1rem 0.4rem 0.8rem',
               borderRadius: '25px',
-              backgroundColor: 'rgba(255,255,255,0.9)',
+              backgroundColor: 'transparent',
               border: '1px solid rgba(255,255,255,0.2)',
               transition: 'all 0.3s ease',
               position: 'relative'
-            }}
-            whileHover={{ 
-              backgroundColor: 'white',
-              scale: 1.05,
-              border: '1px solid white'
             }}
           >
             <svg 
@@ -4882,7 +4504,7 @@ export default function HomePage(): React.JSX.Element {
               height={isMobile ? "18" : "20"} 
               viewBox="0 0 24 24" 
               fill="none" 
-              stroke="#6366F1"
+              stroke="white"
               strokeWidth="2"
             >
               <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
@@ -4892,7 +4514,7 @@ export default function HomePage(): React.JSX.Element {
               <polyline points="10,9 9,9 8,9"/>
             </svg>
             <span style={{
-              color: '#6366F1',
+              color: 'white',
               fontSize: isMobile ? '0.8rem' : '0.9rem',
               fontWeight: '600',
               fontFamily: 'Helvetica, Arial, sans-serif',
@@ -4906,25 +4528,13 @@ export default function HomePage(): React.JSX.Element {
                 height={isMobile ? "12" : "14"} 
                 viewBox="0 0 24 24" 
                 fill="none" 
-                stroke="#6366F1"
+                stroke="white"
                 strokeWidth="2"
               >
                 <path d="M5 12h14"/>
                 <path d="M12 5l7 7-7 7"/>
               </svg>
             </span>
-            <div style={{
-              backgroundColor: '#EC4899',
-              color: 'white',
-              fontSize: '0.7rem',
-              fontWeight: '700',
-              padding: '0.1rem 0.4rem',
-              borderRadius: '10px',
-              marginLeft: '0.3rem',
-              border: 'none'
-            }}>
-              NEW
-            </div>
           </motion.div>
 
           {/* Timeline */}
@@ -4937,15 +4547,10 @@ export default function HomePage(): React.JSX.Element {
               cursor: 'pointer',
               padding: '0.4rem 1rem 0.4rem 0.8rem',
               borderRadius: '25px',
-              backgroundColor: 'rgba(255,255,255,0.9)',
+              backgroundColor: 'transparent',
               border: '1px solid rgba(255,255,255,0.2)',
               transition: 'all 0.3s ease',
               position: 'relative'
-            }}
-            whileHover={{ 
-              backgroundColor: 'white',
-              scale: 1.05,
-              border: '1px solid white'
             }}
           >
             <svg 
@@ -4953,7 +4558,7 @@ export default function HomePage(): React.JSX.Element {
               height={isMobile ? "18" : "20"} 
               viewBox="0 0 24 24" 
               fill="none" 
-              stroke="#6366F1"
+              stroke="white"
               strokeWidth="2"
             >
               <polyline points="1 4 1 10 7 10"/>
@@ -4962,7 +4567,7 @@ export default function HomePage(): React.JSX.Element {
               <line x1="16" y1="11" x2="12" y2="7"/>
             </svg>
             <span style={{
-              color: '#6366F1',
+              color: 'white',
               fontSize: isMobile ? '0.8rem' : '0.9rem',
               fontWeight: '600',
               fontFamily: 'Helvetica, Arial, sans-serif',
@@ -4976,25 +4581,13 @@ export default function HomePage(): React.JSX.Element {
                 height={isMobile ? "12" : "14"} 
                 viewBox="0 0 24 24" 
                 fill="none" 
-                stroke="#6366F1"
+                stroke="white"
                 strokeWidth="2"
               >
                 <path d="M5 12h14"/>
                 <path d="M12 5l7 7-7 7"/>
               </svg>
             </span>
-            <div style={{
-              backgroundColor: '#EC4899',
-              color: 'white',
-              fontSize: '0.7rem',
-              fontWeight: '700',
-              padding: '0.1rem 0.4rem',
-              borderRadius: '10px',
-              marginLeft: '0.3rem',
-              border: 'none'
-            }}>
-              NEW
-            </div>
           </motion.div>
         </div>
       </div>
@@ -5090,14 +4683,12 @@ export default function HomePage(): React.JSX.Element {
               width: showSearch ? '350px' : '40px',
               height: showSearch ? 'auto' : '40px',
               borderRadius: '20px',
-              backgroundColor: 'rgba(20, 20, 20, 0.95)',
-              backdropFilter: 'blur(20px)',
-              border: '1px solid rgba(255, 255, 255, 0.15)',
+              backgroundColor: 'transparent',
+              border: '1px solid rgba(255, 255, 255, 0.2)',
               overflow: 'hidden',
               cursor: 'pointer',
               transition: 'all 0.3s ease',
-              zIndex: 1002,
-              boxShadow: showSearch ? '0 20px 60px rgba(0, 0, 0, 0.5)' : 'none'
+              zIndex: 1002
             }}
           >
             <div style={{
@@ -5120,15 +4711,13 @@ export default function HomePage(): React.JSX.Element {
                   flexShrink: 0,
                   marginRight: '8px'
                 }}
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
               >
                 <svg 
                   width="18" 
                   height="18" 
                   viewBox="0 0 24 24" 
                   fill="none" 
-                  stroke={showSearch ? "#00FF00" : "white"} 
+                  stroke={showSearch ? "white" : "white"} 
                   strokeWidth="2"
                 >
                   <circle cx="11" cy="11" r="8"/>
@@ -5175,13 +4764,12 @@ export default function HomePage(): React.JSX.Element {
                     width: '20px',
                     height: '20px',
                     cursor: 'pointer',
-                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                    backgroundColor: 'transparent',
+                    border: '1px solid rgba(255, 255, 255, 0.3)',
                     borderRadius: '50%',
                     flexShrink: 0,
                     marginLeft: '8px'
                   }}
-                  whileHover={{ scale: 1.2, backgroundColor: 'rgba(255, 255, 255, 0.2)' }}
-                  whileTap={{ scale: 0.9 }}
                 >
                   <svg 
                     width="12" 
@@ -5210,17 +4798,17 @@ export default function HomePage(): React.JSX.Element {
                     maxHeight: '400px',
                     overflowY: 'auto',
                     backgroundColor: 'rgba(15, 15, 15, 0.98)',
-                    borderTop: '1px solid rgba(255, 255, 255, 0.1)',
+                    borderTop: '1px solid rgba(255, 255, 255, 0.2)',
                     padding: '10px 0'
                   }}
                 >
                   <div style={{
                     padding: '0 15px 10px 15px',
-                    borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
+                    borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
                     marginBottom: '5px'
                   }}>
                     <div style={{
-                      color: 'rgba(255, 255, 255, 0.7)',
+                      color: 'rgba(255, 255, 255, 0.8)',
                       fontSize: '0.8rem',
                       fontWeight: '600',
                       textTransform: 'uppercase',
@@ -5245,19 +4833,15 @@ export default function HomePage(): React.JSX.Element {
                         alignItems: 'center',
                         gap: '12px',
                         transition: 'all 0.2s ease',
-                        borderBottom: '1px solid rgba(255, 255, 255, 0.03)'
+                        borderBottom: '1px solid rgba(255, 255, 255, 0.1)'
                       }}
-                      whileHover={{ 
-                        backgroundColor: 'rgba(0, 255, 0, 0.1)',
-                        paddingLeft: '20px'
-                      }}
-                      whileTap={{ scale: 0.98 }}
                     >
                       <div style={{
                         width: '36px',
                         height: '36px',
                         borderRadius: '8px',
-                        backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                        backgroundColor: 'transparent',
+                        border: '1px solid rgba(255, 255, 255, 0.3)',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
@@ -5286,21 +4870,22 @@ export default function HomePage(): React.JSX.Element {
                             {result.title}
                           </div>
                           <div style={{
-                            backgroundColor: 'rgba(0, 80, 183, 0.3)',
-                            color: '#0050B7',
+                            backgroundColor: 'transparent',
+                            color: 'white',
                             fontSize: '0.7rem',
                             fontWeight: '600',
                             padding: '2px 6px',
                             borderRadius: '10px',
                             marginLeft: '8px',
-                            flexShrink: 0
+                            flexShrink: 0,
+                            border: '1px solid rgba(255, 255, 255, 0.3)'
                           }}>
                             {result.category}
                           </div>
                         </div>
                         
                         <div style={{
-                          color: 'rgba(255, 255, 255, 0.6)',
+                          color: 'rgba(255, 255, 255, 0.7)',
                           fontSize: '0.8rem',
                           whiteSpace: 'nowrap',
                           overflow: 'hidden',
@@ -5311,7 +4896,7 @@ export default function HomePage(): React.JSX.Element {
                         </div>
                         
                         <div style={{
-                          color: '#00FF00',
+                          color: 'white',
                           fontSize: '0.75rem',
                           display: 'flex',
                           alignItems: 'center',
@@ -5355,10 +4940,10 @@ export default function HomePage(): React.JSX.Element {
                   style={{
                     padding: '20px 15px',
                     textAlign: 'center',
-                    color: 'rgba(255, 255, 255, 0.5)',
+                    color: 'rgba(255, 255, 255, 0.6)',
                     fontSize: '0.9rem',
                     backgroundColor: 'rgba(15, 15, 15, 0.98)',
-                    borderTop: '1px solid rgba(255, 255, 255, 0.1)'
+                    borderTop: '1px solid rgba(255, 255, 255, 0.2)'
                   }}
                 >
                   Tidak ditemukan hasil untuk "{searchQuery}"
@@ -5381,9 +4966,8 @@ export default function HomePage(): React.JSX.Element {
               width: '40px',
               height: '40px',
               borderRadius: '50%',
-              backgroundColor: 'rgba(255, 255, 255, 0.1)',
-              backdropFilter: 'blur(10px)',
-              border: '1px solid rgba(255, 255, 255, 0.15)',
+              backgroundColor: 'transparent',
+              border: '1px solid rgba(255, 255, 255, 0.2)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -5391,12 +4975,6 @@ export default function HomePage(): React.JSX.Element {
               transition: 'all 0.3s ease'
             }}
             onClick={() => setShowNotification(!showNotification)}
-            whileHover={{ 
-              scale: 1.1,
-              backgroundColor: 'rgba(255, 255, 255, 0.15)',
-              border: '1px solid rgba(255, 255, 255, 0.3)'
-            }}
-            whileTap={{ scale: 0.95 }}
           >
             <svg 
               width="20" 
@@ -5421,12 +4999,12 @@ export default function HomePage(): React.JSX.Element {
                   right: '-2px',
                   minWidth: '18px',
                   height: '18px',
-                  backgroundColor: '#FF4757',
+                  backgroundColor: 'transparent',
                   borderRadius: '50%',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  border: '2px solid black'
+                  border: '1px solid rgba(255, 255, 255, 0.3)'
                 }}
               >
                 <span style={{
@@ -5439,30 +5017,6 @@ export default function HomePage(): React.JSX.Element {
                   {notificationCount > 9 ? '9+' : notificationCount}
                 </span>
               </motion.div>
-            )}
-            
-            {hasUnreadNotifications && (
-              <motion.div
-                animate={{
-                  scale: [1, 1.2, 1],
-                  opacity: [0.7, 0, 0.7]
-                }}
-                transition={{
-                  duration: 2,
-                  repeat: Infinity,
-                  repeatType: "reverse"
-                }}
-                style={{
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  backgroundColor: '#FF4757',
-                  borderRadius: '50%',
-                  zIndex: -1
-                }}
-              />
             )}
           </motion.div>
 
@@ -5484,11 +5038,6 @@ export default function HomePage(): React.JSX.Element {
             initial={{ opacity: 0, x: -10 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 1.1, duration: 0.6 }}
-            whileHover={{ 
-              color: '#00FF00',
-              scale: 1.05
-            }}
-            whileTap={{ scale: 0.95 }}
           >
             MENU
           </motion.div>
@@ -5515,11 +5064,6 @@ export default function HomePage(): React.JSX.Element {
             initial={{ opacity: 0, x: -10 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 1.2, duration: 0.6 }}
-            whileHover={{ 
-              color: '#00FF00',
-              scale: 1.05
-            }}
-            whileTap={{ scale: 0.95 }}
           >
             {user ? (
               <>
@@ -5529,7 +5073,7 @@ export default function HomePage(): React.JSX.Element {
                   height={isMobile ? "14" : "16"}
                   viewBox="0 0 24 24"
                   fill="none"
-                  stroke="currentColor"
+                  stroke="white"
                   strokeWidth="2"
                   style={{
                     flexShrink: 0
@@ -5547,7 +5091,7 @@ export default function HomePage(): React.JSX.Element {
                   height={isMobile ? "14" : "16"}
                   viewBox="0 0 24 24"
                   fill="none"
-                  stroke="currentColor"
+                  stroke="white"
                   strokeWidth="2"
                   style={{
                     flexShrink: 0
