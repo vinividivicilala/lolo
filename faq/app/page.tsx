@@ -134,6 +134,7 @@ interface Note {
   isPinned: boolean;
   category?: string;
   tags?: string[];
+  color?: string; 
 }
 
 export default function HomePage(): React.JSX.Element {
@@ -784,22 +785,63 @@ export default function HomePage(): React.JSX.Element {
     loadTotalLoggedInUsers();
   }, []);
 
-  // Fungsi untuk load user notes dari Firebase
-  const loadUserNotes = async (userId: string) => {
-    if (!db || !userId) return;
+ // Fungsi untuk load user notes dari Firebase - UPDATE INI
+const loadUserNotes = async (userId: string) => {
+  if (!db || !userId) return;
+  
+  try {
+    setIsLoadingNotes(true);
+    console.log(`📝 Loading notes for user: ${userId} from userNotes collection`);
     
-    try {
-      setIsLoadingNotes(true);
-      console.log(`📝 Loading notes for user: ${userId}`);
-      
-      const notesRef = collection(db, 'notes');
-      const q = query(
-        notesRef, 
-        where('userId', '==', userId),
-        orderBy('createdAt', 'desc')
-      );
-      
-      const querySnapshot = await getDocs(q);
+    // Gunakan collection 'userNotes' bukan 'notes'
+    const notesRef = collection(db, 'userNotes');
+    const q = query(
+      notesRef, 
+      where('userId', '==', userId),
+      orderBy('updatedAt', 'desc')
+    );
+    
+    const querySnapshot = await getDocs(q);
+    const notesData: Note[] = [];
+    
+    querySnapshot.forEach((doc) => {
+      const data = doc.data();
+      notesData.push({
+        id: doc.id,
+        title: data.title || 'Untitled Note',
+        content: data.content || '',
+        userId: data.userId || userId,
+        createdAt: data.createdAt || new Date(),
+        updatedAt: data.updatedAt || new Date(),
+        color: data.color || '#3B82F6'  // Tambahkan warna default
+      });
+    });
+    
+    console.log(`✅ Loaded ${notesData.length} notes for user ${userId}`);
+    setUserNotes(notesData);
+    setTotalNotesCount(notesData.length);
+    setIsLoadingNotes(false);
+  } catch (error) {
+    console.error("Error loading user notes:", error);
+    setIsLoadingNotes(false);
+  }
+};
+
+  
+ // Fungsi untuk load user notes secara real-time - UPDATE INI
+const loadUserNotesRealtime = (userId: string) => {
+  if (!db || !userId) return () => {};
+  
+  try {
+    // Gunakan collection 'userNotes' bukan 'notes'
+    const notesRef = collection(db, 'userNotes');
+    const q = query(
+      notesRef, 
+      where('userId', '==', userId),
+      orderBy('updatedAt', 'desc')
+    );
+    
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
       const notesData: Note[] = [];
       
       querySnapshot.forEach((doc) => {
@@ -809,71 +851,27 @@ export default function HomePage(): React.JSX.Element {
           title: data.title || 'Untitled Note',
           content: data.content || '',
           userId: data.userId || userId,
-          userName: data.userName || userDisplayName,
-          userEmail: data.userEmail || user?.email || '',
           createdAt: data.createdAt || new Date(),
           updatedAt: data.updatedAt || new Date(),
-          isPinned: data.isPinned || false,
-          category: data.category || '',
-          tags: data.tags || []
+          color: data.color || '#3B82F6'  // Tambahkan warna default
         });
       });
       
-      console.log(`✅ Loaded ${notesData.length} notes for user ${userId}`);
+      console.log(`🔄 Realtime update: ${notesData.length} notes from userNotes`);
       setUserNotes(notesData);
       setTotalNotesCount(notesData.length);
-      setIsLoadingNotes(false);
-    } catch (error) {
-      console.error("Error loading user notes:", error);
-      setIsLoadingNotes(false);
-    }
-  };
-
-  // Fungsi untuk load user notes secara real-time
-  const loadUserNotesRealtime = (userId: string) => {
-    if (!db || !userId) return () => {};
+    }, (error) => {
+      console.error("Error in realtime notes listener:", error);
+    });
     
-    try {
-      const notesRef = collection(db, 'notes');
-      const q = query(
-        notesRef, 
-        where('userId', '==', userId),
-        orderBy('createdAt', 'desc')
-      );
-      
-      const unsubscribe = onSnapshot(q, (querySnapshot) => {
-        const notesData: Note[] = [];
-        
-        querySnapshot.forEach((doc) => {
-          const data = doc.data();
-          notesData.push({
-            id: doc.id,
-            title: data.title || 'Untitled Note',
-            content: data.content || '',
-            userId: data.userId || userId,
-            userName: data.userName || userDisplayName,
-            userEmail: data.userEmail || user?.email || '',
-            createdAt: data.createdAt || new Date(),
-            updatedAt: data.updatedAt || new Date(),
-            isPinned: data.isPinned || false,
-            category: data.category || '',
-            tags: data.tags || []
-          });
-        });
-        
-        console.log(`🔄 Realtime update: ${notesData.length} notes`);
-        setUserNotes(notesData);
-        setTotalNotesCount(notesData.length);
-      }, (error) => {
-        console.error("Error in realtime notes listener:", error);
-      });
-      
-      return unsubscribe;
-    } catch (error) {
-      console.error("Error setting up realtime notes:", error);
-      return () => {};
-    }
-  };
+    return unsubscribe;
+  } catch (error) {
+    console.error("Error setting up realtime notes:", error);
+    return () => {};
+  }
+};
+
+  
 
   // Fungsi untuk detect provider
   const detectProvider = (user: any) => {
@@ -2039,249 +2037,260 @@ export default function HomePage(): React.JSX.Element {
                   </motion.button>
                 </div>
 
-                {/* Notes Tab */}
-                {activeTab === 'notes' && (
-                  <div>
-                    <div style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      marginBottom: '3rem'
-                    }}>
-                      <h4 style={{
-                        color: 'white',
-                        fontSize: '3rem',
-                        fontWeight: '300',
-                        margin: 0,
-                        fontFamily: 'Helvetica, Arial, sans-serif',
-                        letterSpacing: '0.5px'
-                      }}>
-                        Notes
-                      </h4>
-                      <div style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '1rem'
-                      }}>
-                        <motion.button
-                          onClick={() => router.push('/notes')}
-                          style={{
-                            padding: '0.8rem 1.5rem',
-                            backgroundColor: 'transparent',
-                            border: '1px solid rgba(255, 255, 255, 0.3)',
-                            borderRadius: '0',
-                            color: 'white',
-                            fontSize: '1rem',
-                            fontWeight: '300',
-                            cursor: 'pointer',
-                            fontFamily: 'Helvetica, Arial, sans-serif',
-                            letterSpacing: '0.5px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '0.5rem'
-                          }}
-                        >
-                          New Note
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <path d="M12 5v14M5 12h14"/>
-                          </svg>
-                        </motion.button>
-                        <div style={{
-                          color: 'rgba(255, 255, 255, 0.5)',
-                          fontSize: '0.9rem'
-                        }}>
-                          Total: {totalNotesCount}
-                        </div>
-                      </div>
-                    </div>
+             {/* Notes Tab */}
+{activeTab === 'notes' && (
+  <div>
+    <div style={{
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: '3rem'
+    }}>
+      <h4 style={{
+        color: 'white',
+        fontSize: '3rem',
+        fontWeight: '300',
+        margin: 0,
+        fontFamily: 'Helvetica, Arial, sans-serif',
+        letterSpacing: '0.5px'
+      }}>
+        Notes
+      </h4>
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: '1rem'
+      }}>
+        <motion.button
+          onClick={() => router.push('/notes')}
+          style={{
+            padding: '0.8rem 1.5rem',
+            backgroundColor: 'transparent',
+            border: '1px solid rgba(255, 255, 255, 0.3)',
+            borderRadius: '0',
+            color: 'white',
+            fontSize: '1rem',
+            fontWeight: '300',
+            cursor: 'pointer',
+            fontFamily: 'Helvetica, Arial, sans-serif',
+            letterSpacing: '0.5px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem'
+          }}
+        >
+          Go to Notes
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M12 5v14M5 12h14"/>
+          </svg>
+        </motion.button>
+        <div style={{
+          color: 'rgba(255, 255, 255, 0.5)',
+          fontSize: '0.9rem'
+        }}>
+          Total: {totalNotesCount}
+        </div>
+      </div>
+    </div>
 
-                    {isLoadingNotes ? (
-                      <div style={{
-                        padding: '4rem 0',
-                        textAlign: 'center',
-                        color: 'rgba(255, 255, 255, 0.7)',
-                        fontFamily: 'Helvetica, Arial, sans-serif'
-                      }}>
-                        <motion.div
-                          animate={{ rotate: 360 }}
-                          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                          style={{ marginBottom: '1rem' }}
-                        >
-                          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5">
-                            <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
-                          </svg>
-                        </motion.div>
-                        Loading notes...
-                      </div>
-                    ) : userNotes.length === 0 ? (
-                      <div style={{
-                        padding: '6rem 0',
-                        textAlign: 'center',
-                        color: 'rgba(255, 255, 255, 0.7)',
-                        fontFamily: 'Helvetica, Arial, sans-serif'
-                      }}>
-                        <div style={{ fontSize: '3rem', marginBottom: '1.5rem', opacity: 0.5 }}>
-                          <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                            <polyline points="14 2 14 8 20 8"/>
-                            <line x1="16" y1="13" x2="8" y2="13"/>
-                            <line x1="16" y1="17" x2="8" y2="17"/>
-                          </svg>
-                        </div>
-                        <p style={{ margin: '0 0 2rem 0', fontSize: '1.2rem' }}>No notes yet</p>
-                        <motion.button
-                          onClick={() => router.push('/notes')}
-                          style={{
-                            backgroundColor: 'transparent',
-                            color: 'white',
-                            border: '1px solid rgba(255, 255, 255, 0.3)',
-                            padding: '1.2rem 2.5rem',
-                            borderRadius: '0',
-                            cursor: 'pointer',
-                            fontSize: '1.1rem',
-                            fontWeight: '300',
-                            fontFamily: 'Helvetica, Arial, sans-serif',
-                            letterSpacing: '0.5px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '1rem',
-                            margin: '0 auto'
-                          }}
-                        >
-                          Create first note
-                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <path d="M18 6L6 18"/>
-                            <path d="M8 6h10v10"/>
-                          </svg>
-                        </motion.button>
-                      </div>
-                    ) : (
-                      <div style={{
-                        display: 'grid',
-                        gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
-                        gap: '1.5rem'
-                      }}>
-                        {userNotes.map((note, index) => (
-                          <motion.div
-                            key={note.id}
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: index * 0.05 }}
-                            style={{
-                              backgroundColor: 'transparent',
-                              borderRadius: '0',
-                              padding: '1.8rem',
-                              border: 'none',
-                              cursor: 'pointer',
-                              height: '200px',
-                              display: 'flex',
-                              flexDirection: 'column',
-                              position: 'relative'
-                            }}
-                            onClick={() => router.push(`/notes#${note.id}`)}
-                          >
-                            <div style={{
-                              position: 'absolute',
-                              top: '1rem',
-                              right: '1rem',
-                              color: 'rgba(255, 255, 255, 0.3)',
-                              fontSize: '0.8rem'
-                            }}>
-                              #{index + 1}
-                            </div>
-                            <div style={{
-                              display: 'flex',
-                              justifyContent: 'space-between',
-                              alignItems: 'flex-start',
-                              marginBottom: '1rem',
-                              flex: 1
-                            }}>
-                              <h5 style={{
-                                color: 'white',
-                                fontSize: '1.3rem',
-                                fontWeight: '300',
-                                margin: 0,
-                                fontFamily: 'Helvetica, Arial, sans-serif',
-                                letterSpacing: '0.5px',
-                                flex: 1
-                              }}>
-                                {note.title || 'Untitled Note'}
-                              </h5>
-                              <span style={{
-                                color: 'rgba(255, 255, 255, 0.5)',
-                                fontSize: '0.9rem',
-                                fontFamily: 'Helvetica, Arial, sans-serif',
-                                whiteSpace: 'nowrap',
-                                marginLeft: '1rem'
-                              }}>
-                                {calculateTimeAgo(note.createdAt)}
-                              </span>
-                            </div>
-                            <p style={{
-                              color: 'rgba(255, 255, 255, 0.7)',
-                              fontSize: '1rem',
-                              margin: '0.5rem 0 0 0',
-                              fontFamily: 'Helvetica, Arial, sans-serif',
-                              lineHeight: 1.4,
-                              display: '-webkit-box',
-                              WebkitLineClamp: 3,
-                              WebkitBoxOrient: 'vertical',
-                              overflow: 'hidden',
-                              flex: 2
-                            }}>
-                              {note.content}
-                            </p>
-                          </motion.div>
-                        ))}
-                        
-                        <motion.div
-                          onClick={() => router.push('/notes')}
-                          style={{
-                            gridColumn: '1 / -1',
-                            backgroundColor: 'transparent',
-                            borderRadius: '0',
-                            padding: '2rem',
-                            textAlign: 'center',
-                            cursor: 'pointer',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            gap: '1rem',
-                            border: 'none'
-                          }}
-                        >
-                          <div style={{
-                            color: 'white',
-                            fontSize: '1.5rem',
-                            fontWeight: '300'
-                          }}>
-                            View all {userNotes.length} notes
-                          </div>
-                          <div style={{
-                            color: 'rgba(255, 255, 255, 0.5)',
-                            fontSize: '0.9rem'
-                          }}>
-                            Click to see all your notes in the notes page
-                          </div>
-                          <motion.svg
-                            width="24"
-                            height="24"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="white"
-                            strokeWidth="2"
-                            animate={{ x: [0, 5, 0] }}
-                            transition={{ repeat: Infinity, duration: 1.5 }}
-                          >
-                            <path d="M18 6L6 18"/>
-                            <path d="M8 6h10v10"/>
-                          </motion.svg>
-                        </motion.div>
-                      </div>
-                    )}
-                  </div>
-                )}
+    {isLoadingNotes ? (
+      <div style={{
+        padding: '4rem 0',
+        textAlign: 'center',
+        color: 'rgba(255, 255, 255, 0.7)',
+        fontFamily: 'Helvetica, Arial, sans-serif'
+      }}>
+        <motion.div
+          animate={{ rotate: 360 }}
+          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+          style={{ marginBottom: '1rem' }}
+        >
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5">
+            <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+          </svg>
+        </motion.div>
+        Loading notes...
+      </div>
+    ) : userNotes.length === 0 ? (
+      <div style={{
+        padding: '6rem 0',
+        textAlign: 'center',
+        color: 'rgba(255, 255, 255, 0.7)',
+        fontFamily: 'Helvetica, Arial, sans-serif'
+      }}>
+        <div style={{ fontSize: '3rem', marginBottom: '1.5rem', opacity: 0.5 }}>
+          <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+            <line x1="16" y1="13" x2="8" y2="13"/>
+            <line x1="16" y1="17" x2="8" y2="17"/>
+          </svg>
+        </div>
+        <p style={{ margin: '0 0 2rem 0', fontSize: '1.2rem' }}>No notes yet</p>
+        <motion.button
+          onClick={() => router.push('/notes')}
+          style={{
+            backgroundColor: 'transparent',
+            color: 'white',
+            border: '1px solid rgba(255, 255, 255, 0.3)',
+            padding: '1.2rem 2.5rem',
+            borderRadius: '0',
+            cursor: 'pointer',
+            fontSize: '1.1rem',
+            fontWeight: '300',
+            fontFamily: 'Helvetica, Arial, sans-serif',
+            letterSpacing: '0.5px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '1rem',
+            margin: '0 auto'
+          }}
+        >
+          Create first note
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M18 6L6 18"/>
+            <path d="M8 6h10v10"/>
+          </svg>
+        </motion.button>
+      </div>
+    ) : (
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+        gap: '1.5rem'
+      }}>
+        {userNotes.map((note, index) => (
+          <motion.div
+            key={note.id}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: index * 0.05 }}
+            style={{
+              backgroundColor: note.color ? `${note.color}20` : 'transparent',
+              borderRadius: '12px',
+              padding: '1.8rem',
+              border: `1px solid ${note.color || 'rgba(255, 255, 255, 0.2)'}`,
+              cursor: 'pointer',
+              minHeight: '200px',
+              display: 'flex',
+              flexDirection: 'column',
+              position: 'relative'
+            }}
+            onClick={() => router.push(`/notes`)}
+          >
+            <div style={{
+              position: 'absolute',
+              top: '1rem',
+              right: '1rem',
+              color: 'rgba(255, 255, 255, 0.3)',
+              fontSize: '0.8rem'
+            }}>
+              #{index + 1}
+            </div>
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'flex-start',
+              marginBottom: '1rem',
+              flex: 1
+            }}>
+              <h5 style={{
+                color: 'white',
+                fontSize: '1.3rem',
+                fontWeight: '300',
+                margin: 0,
+                fontFamily: 'Helvetica, Arial, sans-serif',
+                letterSpacing: '0.5px',
+                flex: 1
+              }}>
+                {note.title || 'Untitled Note'}
+              </h5>
+              <span style={{
+                color: 'rgba(255, 255, 255, 0.5)',
+                fontSize: '0.9rem',
+                fontFamily: 'Helvetica, Arial, sans-serif',
+                whiteSpace: 'nowrap',
+                marginLeft: '1rem'
+              }}>
+                {calculateTimeAgo(note.updatedAt)}
+              </span>
+            </div>
+            <p style={{
+              color: 'rgba(255, 255, 255, 0.7)',
+              fontSize: '1rem',
+              margin: '0.5rem 0 0 0',
+              fontFamily: 'Helvetica, Arial, sans-serif',
+              lineHeight: 1.4,
+              display: '-webkit-box',
+              WebkitLineClamp: 3,
+              WebkitBoxOrient: 'vertical',
+              overflow: 'hidden',
+              flex: 2
+            }}>
+              {note.content}
+            </p>
+            {note.color && (
+              <div style={{
+                position: 'absolute',
+                bottom: '1rem',
+                left: '1.8rem',
+                width: '12px',
+                height: '12px',
+                borderRadius: '50%',
+                backgroundColor: note.color
+              }} />
+            )}
+          </motion.div>
+        ))}
+        
+        <motion.div
+          onClick={() => router.push('/notes')}
+          style={{
+            gridColumn: '1 / -1',
+            backgroundColor: 'transparent',
+            borderRadius: '12px',
+            padding: '2rem',
+            textAlign: 'center',
+            cursor: 'pointer',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '1rem',
+            border: '1px solid rgba(255, 255, 255, 0.2)'
+          }}
+        >
+          <div style={{
+            color: 'white',
+            fontSize: '1.5rem',
+            fontWeight: '300'
+          }}>
+            View all {userNotes.length} notes in Notes Page
+          </div>
+          <div style={{
+            color: 'rgba(255, 255, 255, 0.5)',
+            fontSize: '0.9rem'
+          }}>
+            Click to see all your notes with full features
+          </div>
+          <motion.svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="white"
+            strokeWidth="2"
+            animate={{ x: [0, 5, 0] }}
+            transition={{ repeat: Infinity, duration: 1.5 }}
+          >
+            <path d="M18 6L6 18"/>
+            <path d="M8 6h10v10"/>
+          </motion.svg>
+        </motion.div>
+      </div>
+    )}
+  </div>
+)}
 
                 {/* Settings Tab */}
                 {activeTab === 'settings' && (
@@ -5469,3 +5478,4 @@ export default function HomePage(): React.JSX.Element {
     </div>
   );
 }
+
