@@ -784,12 +784,14 @@ export default function HomePage(): React.JSX.Element {
     loadTotalLoggedInUsers();
   }, []);
 
-  // Fungsi untuk load user notes
+  // Fungsi untuk load user notes dari Firebase
   const loadUserNotes = async (userId: string) => {
-    if (!db) return;
+    if (!db || !userId) return;
     
     try {
       setIsLoadingNotes(true);
+      console.log(`📝 Loading notes for user: ${userId}`);
+      
       const notesRef = collection(db, 'notes');
       const q = query(
         notesRef, 
@@ -801,12 +803,23 @@ export default function HomePage(): React.JSX.Element {
       const notesData: Note[] = [];
       
       querySnapshot.forEach((doc) => {
+        const data = doc.data();
         notesData.push({
           id: doc.id,
-          ...doc.data()
-        } as Note);
+          title: data.title || 'Untitled Note',
+          content: data.content || '',
+          userId: data.userId || userId,
+          userName: data.userName || userDisplayName,
+          userEmail: data.userEmail || user?.email || '',
+          createdAt: data.createdAt || new Date(),
+          updatedAt: data.updatedAt || new Date(),
+          isPinned: data.isPinned || false,
+          category: data.category || '',
+          tags: data.tags || []
+        });
       });
       
+      console.log(`✅ Loaded ${notesData.length} notes for user ${userId}`);
       setUserNotes(notesData);
       setTotalNotesCount(notesData.length);
       setIsLoadingNotes(false);
@@ -818,7 +831,7 @@ export default function HomePage(): React.JSX.Element {
 
   // Fungsi untuk load user notes secara real-time
   const loadUserNotesRealtime = (userId: string) => {
-    if (!db) return () => {};
+    if (!db || !userId) return () => {};
     
     try {
       const notesRef = collection(db, 'notes');
@@ -832,12 +845,23 @@ export default function HomePage(): React.JSX.Element {
         const notesData: Note[] = [];
         
         querySnapshot.forEach((doc) => {
+          const data = doc.data();
           notesData.push({
             id: doc.id,
-            ...doc.data()
-          } as Note);
+            title: data.title || 'Untitled Note',
+            content: data.content || '',
+            userId: data.userId || userId,
+            userName: data.userName || userDisplayName,
+            userEmail: data.userEmail || user?.email || '',
+            createdAt: data.createdAt || new Date(),
+            updatedAt: data.updatedAt || new Date(),
+            isPinned: data.isPinned || false,
+            category: data.category || '',
+            tags: data.tags || []
+          });
         });
         
+        console.log(`🔄 Realtime update: ${notesData.length} notes`);
         setUserNotes(notesData);
         setTotalNotesCount(notesData.length);
       }, (error) => {
@@ -900,7 +924,7 @@ export default function HomePage(): React.JSX.Element {
         }
         
         if (showUserProfileModal) {
-          loadUserNotes(currentUser.uid);
+          await loadUserNotes(currentUser.uid);
         }
       } else {
         setUser(null);
@@ -918,12 +942,15 @@ export default function HomePage(): React.JSX.Element {
 
   // Real-time listener untuk notes ketika modal terbuka
   useEffect(() => {
+    let unsubscribe: (() => void) | undefined;
+    
     if (showUserProfileModal && user) {
-      const unsubscribe = loadUserNotesRealtime(user.uid);
-      return () => {
-        if (unsubscribe) unsubscribe();
-      };
+      unsubscribe = loadUserNotesRealtime(user.uid);
     }
+    
+    return () => {
+      if (unsubscribe) unsubscribe();
+    };
   }, [showUserProfileModal, user]);
 
   // Load comments from Firebase
@@ -1170,6 +1197,34 @@ export default function HomePage(): React.JSX.Element {
       }
     }
   }, [showSearch]);
+
+  // Mouse wheel scroll handler
+  useEffect(() => {
+    const handleWheel = (e: WheelEvent) => {
+      // Biarkan scroll normal jika tidak dalam modal
+      if (!showUserProfileModal && !showMenuruFullPage && !showPhotoFullPage) {
+        return;
+      }
+      
+      // Jika dalam modal, izinkan scroll dengan mouse wheel
+      e.stopPropagation();
+    };
+
+    const handleMouseDown = (e: MouseEvent) => {
+      // Middle click (scroll wheel click) untuk scroll
+      if (e.button === 1) {
+        e.preventDefault();
+      }
+    };
+
+    document.addEventListener('wheel', handleWheel, { passive: false });
+    document.addEventListener('mousedown', handleMouseDown);
+
+    return () => {
+      document.removeEventListener('wheel', handleWheel);
+      document.removeEventListener('mousedown', handleMouseDown);
+    };
+  }, [showUserProfileModal, showMenuruFullPage, showPhotoFullPage]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -1501,10 +1556,14 @@ export default function HomePage(): React.JSX.Element {
     handleOpenPhotoFullPage();
   };
 
-  // Handler untuk Sign In / User Button - TELAH DIPERBAIKI
+  // Handler untuk Sign In / User Button - DIPERBAIKI
   const handleSignInClick = () => {
     if (user) {
       setShowUserProfileModal(true);
+      // Load notes ketika modal dibuka
+      if (user) {
+        loadUserNotes(user.uid);
+      }
     } else {
       router.push('/signin');
     }
@@ -1516,6 +1575,7 @@ export default function HomePage(): React.JSX.Element {
       const result = await signInWithPopup(auth, githubProvider);
       console.log("GitHub login successful:", result.user);
       setShowUserDropdown(false);
+      setShowUserProfileModal(true);
     } catch (error) {
       console.error("GitHub login error:", error);
       alert("Login dengan GitHub gagal. Silakan coba lagi.");
@@ -1528,6 +1588,7 @@ export default function HomePage(): React.JSX.Element {
       const result = await signInWithPopup(auth, googleProvider);
       console.log("Google login successful:", result.user);
       setShowUserDropdown(false);
+      setShowUserProfileModal(true);
     } catch (error) {
       console.error("Google login error:", error);
       alert("Login dengan Google gagal. Silakan coba lagi.");
@@ -1537,6 +1598,7 @@ export default function HomePage(): React.JSX.Element {
   // Handler untuk menuju halaman catatan
   const handleNotesClick = () => {
     setShowUserDropdown(false);
+    setShowUserProfileModal(false);
     router.push('/notes');
   };
 
@@ -1673,6 +1735,7 @@ export default function HomePage(): React.JSX.Element {
     if (!user || !auth.currentUser) return;
     
     try {
+      // Hapus semua notes user
       const notesRef = collection(db, 'notes');
       const q = query(notesRef, where('userId', '==', user.uid));
       const querySnapshot = await getDocs(q);
@@ -1682,11 +1745,13 @@ export default function HomePage(): React.JSX.Element {
         batch.delete(doc.ref);
       });
       
+      // Hapus user stats
       const userStatsRef = doc(db, 'userStats', user.uid);
       batch.delete(userStatsRef);
       
       await batch.commit();
       
+      // Hapus user dari authentication
       await deleteUser(auth.currentUser);
       
       alert("Akun berhasil dihapus!");
@@ -1761,7 +1826,7 @@ export default function HomePage(): React.JSX.Element {
       MozOsxFontSmoothing: 'grayscale'
     }}>
 
-      {/* Modal Profil User - TELAH DIPERBAIKI */}
+      {/* Modal Profil User - DIPERBAIKI */}
       <AnimatePresence>
         {showUserProfileModal && user && (
           <motion.div
@@ -1775,7 +1840,7 @@ export default function HomePage(): React.JSX.Element {
               left: 0,
               width: '100%',
               height: '100%',
-              backgroundColor: 'rgba(0, 0, 0, 0.95)',
+              backgroundColor: 'rgba(0, 0, 0, 0.98)',
               zIndex: 10000,
               display: 'flex',
               alignItems: 'center',
@@ -1837,6 +1902,21 @@ export default function HomePage(): React.JSX.Element {
                   }}>
                     {user.email}
                   </p>
+                  <div style={{
+                    marginTop: '0.5rem',
+                    color: '#00FF00',
+                    fontSize: '0.9rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem'
+                  }}>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z"/>
+                      <line x1="16" y1="8" x2="2" y2="22"/>
+                      <line x1="17.5" y1="15" x2="9" y2="15"/>
+                    </svg>
+                    {totalNotesCount} Notes
+                  </div>
                 </div>
 
                 <div style={{
@@ -1847,11 +1927,16 @@ export default function HomePage(): React.JSX.Element {
                   {['notes', 'settings', 'help', 'feedback'].map((tab) => (
                     <motion.button
                       key={tab}
-                      onClick={() => setActiveTab(tab as any)}
+                      onClick={() => {
+                        setActiveTab(tab as any);
+                        if (tab === 'notes' && user) {
+                          loadUserNotes(user.uid);
+                        }
+                      }}
                       style={{
                         width: '100%',
                         padding: '1.5rem 2rem',
-                        backgroundColor: activeTab === tab ? 'rgba(255, 255, 255, 0.1)' : 'transparent',
+                        backgroundColor: 'transparent',
                         border: 'none',
                         color: activeTab === tab ? 'white' : '#888',
                         fontSize: '1.3rem',
@@ -1863,7 +1948,8 @@ export default function HomePage(): React.JSX.Element {
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'space-between',
-                        transition: 'all 0.3s ease'
+                        transition: 'all 0.3s ease',
+                        position: 'relative'
                       }}
                       whileHover={{ 
                         backgroundColor: 'rgba(255, 255, 255, 0.1)',
@@ -1889,17 +1975,28 @@ export default function HomePage(): React.JSX.Element {
                           }}
                         >
                           <svg
-                            width="24"
-                            height="24"
+                            width="20"
+                            height="20"
                             viewBox="0 0 24 24"
                             fill="none"
                             stroke="white"
                             strokeWidth="2"
                           >
-                            <path d="M5 12h14" />
-                            <path d="m12 5 7 7-7 7" />
+                            <path d="M5 12h14M12 5l7 7-7 7"/>
                           </svg>
                         </motion.div>
+                      )}
+                      {tab === 'notes' && userNotes.length > 0 && (
+                        <span style={{
+                          backgroundColor: 'rgba(0, 255, 0, 0.2)',
+                          color: '#00FF00',
+                          fontSize: '0.8rem',
+                          padding: '0.2rem 0.5rem',
+                          borderRadius: '10px',
+                          marginLeft: '0.5rem'
+                        }}>
+                          {userNotes.length}
+                        </span>
                       )}
                     </motion.button>
                   ))}
@@ -1937,8 +2034,8 @@ export default function HomePage(): React.JSX.Element {
                     Logout
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                       <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-                      <polyline points="16 17 21 12 16 7"/>
-                      <line x1="21" y1="12" x2="9" y2="12"/>
+                      <path d="M16 17l5-5-5-5"/>
+                      <path d="M21 12H9"/>
                     </svg>
                   </motion.button>
                 </div>
@@ -1985,16 +2082,63 @@ export default function HomePage(): React.JSX.Element {
                 {/* Notes Tab */}
                 {activeTab === 'notes' && (
                   <div>
-                    <h4 style={{
-                      color: 'white',
-                      fontSize: '3rem',
-                      fontWeight: '300',
-                      margin: '0 0 3rem 0',
-                      fontFamily: 'Helvetica, Arial, sans-serif',
-                      letterSpacing: '0.5px'
+                    <div style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      marginBottom: '3rem'
                     }}>
-                      Notes
-                    </h4>
+                      <h4 style={{
+                        color: 'white',
+                        fontSize: '3rem',
+                        fontWeight: '300',
+                        margin: 0,
+                        fontFamily: 'Helvetica, Arial, sans-serif',
+                        letterSpacing: '0.5px'
+                      }}>
+                        Notes
+                      </h4>
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '1rem'
+                      }}>
+                        <motion.button
+                          onClick={() => router.push('/notes')}
+                          style={{
+                            padding: '0.8rem 1.5rem',
+                            backgroundColor: 'rgba(0, 255, 0, 0.1)',
+                            border: '1px solid rgba(0, 255, 0, 0.3)',
+                            borderRadius: '0',
+                            color: '#00FF00',
+                            fontSize: '1rem',
+                            fontWeight: '300',
+                            cursor: 'pointer',
+                            fontFamily: 'Helvetica, Arial, sans-serif',
+                            letterSpacing: '0.5px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.5rem'
+                          }}
+                          whileHover={{ 
+                            backgroundColor: 'rgba(0, 255, 0, 0.2)',
+                            border: '1px solid rgba(0, 255, 0, 0.5)'
+                          }}
+                          whileTap={{ scale: 0.95 }}
+                        >
+                          New Note
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M12 5v14M5 12h14"/>
+                          </svg>
+                        </motion.button>
+                        <div style={{
+                          color: 'rgba(255, 255, 255, 0.5)',
+                          fontSize: '0.9rem'
+                        }}>
+                          Total: {totalNotesCount}
+                        </div>
+                      </div>
+                    </div>
 
                     {isLoadingNotes ? (
                       <div style={{
@@ -2012,7 +2156,7 @@ export default function HomePage(): React.JSX.Element {
                             <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
                           </svg>
                         </motion.div>
-                        Loading...
+                        Loading notes...
                       </div>
                     ) : userNotes.length === 0 ? (
                       <div style={{
@@ -2054,7 +2198,7 @@ export default function HomePage(): React.JSX.Element {
                           Create first note
                           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                             <path d="M5 12h14"/>
-                            <path d="m12 5 7 7-7 7"/>
+                            <path d="M12 5l7 7-7 7"/>
                           </svg>
                         </motion.button>
                       </div>
@@ -2064,7 +2208,7 @@ export default function HomePage(): React.JSX.Element {
                         gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
                         gap: '1.5rem'
                       }}>
-                        {userNotes.slice(0, 12).map((note, index) => (
+                        {userNotes.map((note, index) => (
                           <motion.div
                             key={note.id}
                             initial={{ opacity: 0, y: 10 }}
@@ -2078,13 +2222,23 @@ export default function HomePage(): React.JSX.Element {
                               cursor: 'pointer',
                               height: '200px',
                               display: 'flex',
-                              flexDirection: 'column'
+                              flexDirection: 'column',
+                              position: 'relative'
                             }}
                             whileHover={{ 
                               backgroundColor: 'rgba(255, 255, 255, 0.1)',
                             }}
                             onClick={() => router.push(`/notes#${note.id}`)}
                           >
+                            <div style={{
+                              position: 'absolute',
+                              top: '1rem',
+                              right: '1rem',
+                              color: 'rgba(255, 255, 255, 0.3)',
+                              fontSize: '0.8rem'
+                            }}>
+                              #{index + 1}
+                            </div>
                             <div style={{
                               display: 'flex',
                               justifyContent: 'space-between',
@@ -2127,47 +2281,72 @@ export default function HomePage(): React.JSX.Element {
                             }}>
                               {note.content}
                             </p>
+                            {note.category && (
+                              <div style={{
+                                marginTop: 'auto',
+                                paddingTop: '1rem'
+                              }}>
+                                <span style={{
+                                  backgroundColor: 'rgba(0, 80, 183, 0.2)',
+                                  color: '#0050B7',
+                                  fontSize: '0.7rem',
+                                  padding: '0.2rem 0.5rem',
+                                  borderRadius: '4px'
+                                }}>
+                                  {note.category}
+                                </span>
+                              </div>
+                            )}
                           </motion.div>
                         ))}
                         
-                        {userNotes.length > 12 && (
-                          <div style={{
+                        <motion.div
+                          onClick={() => router.push('/notes')}
+                          style={{
                             gridColumn: '1 / -1',
+                            backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                            borderRadius: '0',
+                            padding: '2rem',
                             textAlign: 'center',
-                            marginTop: '2rem',
-                            padding: '2rem'
+                            cursor: 'pointer',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '1rem'
+                          }}
+                          whileHover={{ 
+                            backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                          }}
+                          whileTap={{ scale: 0.95 }}
+                        >
+                          <div style={{
+                            color: 'white',
+                            fontSize: '1.5rem',
+                            fontWeight: '300'
                           }}>
-                            <motion.button
-                              onClick={() => router.push('/notes')}
-                              style={{
-                                backgroundColor: 'transparent',
-                                color: 'white',
-                                border: '1px solid rgba(255, 255, 255, 0.2)',
-                                padding: '1.2rem 3rem',
-                                borderRadius: '0',
-                                cursor: 'pointer',
-                                fontSize: '1.1rem',
-                                fontWeight: '300',
-                                fontFamily: 'Helvetica, Arial, sans-serif',
-                                letterSpacing: '0.5px',
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '1rem',
-                                margin: '0 auto'
-                              }}
-                              whileHover={{ 
-                                backgroundColor: 'rgba(255, 255, 255, 0.1)'
-                              }}
-                              whileTap={{ scale: 0.95 }}
-                            >
-                              View all {userNotes.length} notes
-                              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                <path d="M5 12h14"/>
-                                <path d="m12 5 7 7-7 7"/>
-                              </svg>
-                            </motion.button>
+                            View all {userNotes.length} notes
                           </div>
-                        )}
+                          <div style={{
+                            color: '#888',
+                            fontSize: '0.9rem'
+                          }}>
+                            Click to see all your notes in the notes page
+                          </div>
+                          <motion.svg
+                            width="24"
+                            height="24"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="white"
+                            strokeWidth="2"
+                            animate={{ x: [0, 5, 0] }}
+                            transition={{ repeat: Infinity, duration: 1.5 }}
+                          >
+                            <path d="M5 12h14"/>
+                            <path d="M12 5l7 7-7 7"/>
+                          </motion.svg>
+                        </motion.div>
                       </div>
                     )}
                   </div>
@@ -2307,11 +2486,20 @@ export default function HomePage(): React.JSX.Element {
                         gap: '2.5rem',
                         maxWidth: '700px'
                       }}>
-                        <div style={{
-                          padding: '2rem',
-                          backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                          borderRadius: '0'
-                        }}>
+                        <motion.div
+                          style={{
+                            padding: '2rem',
+                            backgroundColor: 'transparent',
+                            borderRadius: '0',
+                            border: '1px solid rgba(255, 255, 255, 0.1)',
+                            cursor: 'pointer'
+                          }}
+                          whileHover={{ 
+                            backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                            border: '1px solid rgba(255, 255, 255, 0.2)'
+                          }}
+                          onClick={() => setIsEditingProfile(true)}
+                        >
                           <div style={{
                             color: '#aaa',
                             fontSize: '1rem',
@@ -2326,17 +2514,33 @@ export default function HomePage(): React.JSX.Element {
                             fontSize: '1.5rem',
                             fontWeight: '300',
                             fontFamily: 'Helvetica, Arial, sans-serif',
-                            letterSpacing: '0.5px'
+                            letterSpacing: '0.5px',
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center'
                           }}>
                             {userDisplayName}
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                            </svg>
                           </div>
-                        </div>
+                        </motion.div>
 
-                        <div style={{
-                          padding: '2rem',
-                          backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                          borderRadius: '0'
-                        }}>
+                        <motion.div
+                          style={{
+                            padding: '2rem',
+                            backgroundColor: 'transparent',
+                            borderRadius: '0',
+                            border: '1px solid rgba(255, 255, 255, 0.1)',
+                            cursor: 'pointer'
+                          }}
+                          whileHover={{ 
+                            backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                            border: '1px solid rgba(255, 255, 255, 0.2)'
+                          }}
+                          onClick={() => setIsEditingProfile(true)}
+                        >
                           <div style={{
                             color: '#aaa',
                             fontSize: '1rem',
@@ -2351,16 +2555,24 @@ export default function HomePage(): React.JSX.Element {
                             fontSize: '1.5rem',
                             fontWeight: '300',
                             fontFamily: 'Helvetica, Arial, sans-serif',
-                            letterSpacing: '0.5px'
+                            letterSpacing: '0.5px',
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center'
                           }}>
                             {user.email}
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                            </svg>
                           </div>
-                        </div>
+                        </motion.div>
 
                         <div style={{
                           padding: '2rem',
-                          backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                          borderRadius: '0'
+                          backgroundColor: 'transparent',
+                          borderRadius: '0',
+                          border: '1px solid rgba(255, 255, 255, 0.1)'
                         }}>
                           <div style={{
                             color: '#aaa',
@@ -2383,37 +2595,86 @@ export default function HomePage(): React.JSX.Element {
                         </div>
 
                         <div style={{
-                          marginTop: '3rem'
+                          padding: '2rem',
+                          backgroundColor: 'transparent',
+                          borderRadius: '0',
+                          border: '1px solid rgba(255, 255, 255, 0.1)'
                         }}>
-                          <motion.button
-                            onClick={() => setIsEditingProfile(true)}
-                            style={{
-                              width: '100%',
-                              padding: '1.5rem',
-                              backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                              border: 'none',
-                              borderRadius: '0',
-                              color: 'white',
-                              fontSize: '1.2rem',
-                              fontWeight: '300',
-                              cursor: 'pointer',
+                          <div style={{
+                            color: '#aaa',
+                            fontSize: '1rem',
+                            fontFamily: 'Helvetica, Arial, sans-serif',
+                            letterSpacing: '0.5px',
+                            marginBottom: '0.8rem'
+                          }}>
+                            User ID
+                          </div>
+                          <div style={{
+                            color: 'rgba(255, 255, 255, 0.7)',
+                            fontSize: '0.9rem',
+                            fontFamily: 'Helvetica, Arial, sans-serif',
+                            letterSpacing: '0.5px',
+                            wordBreak: 'break-all'
+                          }}>
+                            {user.uid}
+                          </div>
+                        </div>
+
+                        {userStats && (
+                          <div style={{
+                            padding: '2rem',
+                            backgroundColor: 'transparent',
+                            borderRadius: '0',
+                            border: '1px solid rgba(255, 255, 255, 0.1)'
+                          }}>
+                            <div style={{
+                              color: '#aaa',
+                              fontSize: '1rem',
                               fontFamily: 'Helvetica, Arial, sans-serif',
                               letterSpacing: '0.5px',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
+                              marginBottom: '1rem'
+                            }}>
+                              Stats
+                            </div>
+                            <div style={{
+                              display: 'grid',
+                              gridTemplateColumns: 'repeat(2, 1fr)',
                               gap: '1rem'
-                            }}
-                            whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.15)' }}
-                            whileTap={{ scale: 0.95 }}
-                          >
-                            Edit profile
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-                              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-                            </svg>
-                          </motion.button>
-                        </div>
+                            }}>
+                              <div>
+                                <div style={{
+                                  color: 'rgba(255, 255, 255, 0.7)',
+                                  fontSize: '0.9rem',
+                                  marginBottom: '0.3rem'
+                                }}>
+                                  Login Count
+                                </div>
+                                <div style={{
+                                  color: '#00FF00',
+                                  fontSize: '1.2rem',
+                                  fontWeight: '500'
+                                }}>
+                                  {userStats.loginCount || 0}
+                                </div>
+                              </div>
+                              <div>
+                                <div style={{
+                                  color: 'rgba(255, 255, 255, 0.7)',
+                                  fontSize: '0.9rem',
+                                  marginBottom: '0.3rem'
+                                }}>
+                                  Last Login
+                                </div>
+                                <div style={{
+                                  color: '#F59E0B',
+                                  fontSize: '1rem'
+                                }}>
+                                  {calculateTimeAgo(userStats.lastLogin)}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        )}
 
                         <div style={{
                           marginTop: '1.5rem'
@@ -2423,10 +2684,10 @@ export default function HomePage(): React.JSX.Element {
                             style={{
                               width: '100%',
                               padding: '1.5rem',
-                              backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                              border: 'none',
+                              backgroundColor: 'rgba(255, 71, 87, 0.1)',
+                              border: '1px solid rgba(255, 71, 87, 0.3)',
                               borderRadius: '0',
-                              color: 'white',
+                              color: '#FF4757',
                               fontSize: '1.2rem',
                               fontWeight: '300',
                               cursor: 'pointer',
@@ -2437,7 +2698,10 @@ export default function HomePage(): React.JSX.Element {
                               justifyContent: 'center',
                               gap: '1rem'
                             }}
-                            whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.15)' }}
+                            whileHover={{ 
+                              backgroundColor: 'rgba(255, 71, 87, 0.2)',
+                              border: '1px solid rgba(255, 71, 87, 0.5)'
+                            }}
                             whileTap={{ scale: 0.95 }}
                           >
                             Delete account
@@ -2472,11 +2736,19 @@ export default function HomePage(): React.JSX.Element {
                       gap: '2.5rem',
                       maxWidth: '800px'
                     }}>
-                      <div style={{
-                        padding: '2.5rem',
-                        backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                        borderRadius: '0'
-                      }}>
+                      <motion.div
+                        style={{
+                          padding: '2.5rem',
+                          backgroundColor: 'transparent',
+                          borderRadius: '0',
+                          border: '1px solid rgba(255, 255, 255, 0.1)',
+                          cursor: 'pointer'
+                        }}
+                        whileHover={{ 
+                          backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                          border: '1px solid rgba(255, 255, 255, 0.2)'
+                        }}
+                      >
                         <h5 style={{
                           color: 'white',
                           fontSize: '1.5rem',
@@ -2495,13 +2767,21 @@ export default function HomePage(): React.JSX.Element {
                         }}>
                           Welcome to MENURU. This platform helps you organize your creative journey. Start by creating notes, exploring features, and customizing your profile.
                         </p>
-                      </div>
+                      </motion.div>
 
-                      <div style={{
-                        padding: '2.5rem',
-                        backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                        borderRadius: '0'
-                      }}>
+                      <motion.div
+                        style={{
+                          padding: '2.5rem',
+                          backgroundColor: 'transparent',
+                          borderRadius: '0',
+                          border: '1px solid rgba(255, 255, 255, 0.1)',
+                          cursor: 'pointer'
+                        }}
+                        whileHover={{ 
+                          backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                          border: '1px solid rgba(255, 255, 255, 0.2)'
+                        }}
+                      >
                         <h5 style={{
                           color: 'white',
                           fontSize: '1.5rem',
@@ -2524,7 +2804,7 @@ export default function HomePage(): React.JSX.Element {
                           • Timeline: Track your progress<br/>
                           • Notifications: Stay updated
                         </p>
-                      </div>
+                      </motion.div>
 
                       <motion.button
                         onClick={() => router.push('/docs')}
@@ -2550,7 +2830,7 @@ export default function HomePage(): React.JSX.Element {
                         <span>View full documentation</span>
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                           <path d="M5 12h14"/>
-                          <path d="m12 5 7 7-7 7"/>
+                          <path d="M12 5l7 7-7 7"/>
                         </svg>
                       </motion.button>
                     </div>
@@ -2577,11 +2857,19 @@ export default function HomePage(): React.JSX.Element {
                       gap: '2.5rem',
                       maxWidth: '800px'
                     }}>
-                      <div style={{
-                        padding: '2.5rem',
-                        backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                        borderRadius: '0'
-                      }}>
+                      <motion.div
+                        style={{
+                          padding: '2.5rem',
+                          backgroundColor: 'transparent',
+                          borderRadius: '0',
+                          border: '1px solid rgba(255, 255, 255, 0.1)',
+                          cursor: 'pointer'
+                        }}
+                        whileHover={{ 
+                          backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                          border: '1px solid rgba(255, 255, 255, 0.2)'
+                        }}
+                      >
                         <h5 style={{
                           color: 'white',
                           fontSize: '1.5rem',
@@ -2600,7 +2888,7 @@ export default function HomePage(): React.JSX.Element {
                         }}>
                           We value your feedback to improve MENURU. Share your suggestions, report issues, or tell us what features you'd like to see in future updates.
                         </p>
-                      </div>
+                      </motion.div>
 
                       <motion.button
                         onClick={handleSendFeedback}
@@ -2625,16 +2913,19 @@ export default function HomePage(): React.JSX.Element {
                         <span>Send feedback</span>
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                           <path d="M5 12h14"/>
-                          <path d="m12 5 7 7-7 7"/>
+                          <path d="M12 5l7 7-7 7"/>
                         </svg>
                       </motion.button>
 
-                      <div style={{
-                        padding: '2.5rem',
-                        backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                        borderRadius: '0',
-                        marginTop: '1rem'
-                      }}>
+                      <motion.div
+                        style={{
+                          padding: '2.5rem',
+                          backgroundColor: 'transparent',
+                          borderRadius: '0',
+                          border: '1px solid rgba(255, 255, 255, 0.1)',
+                          marginTop: '1rem'
+                        }}
+                      >
                         <h5 style={{
                           color: 'white',
                           fontSize: '1.5rem',
@@ -2677,10 +2968,10 @@ export default function HomePage(): React.JSX.Element {
                           <span>Contact support</span>
                           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                             <path d="M5 12h14"/>
-                            <path d="m12 5 7 7-7 7"/>
+                            <path d="M12 5l7 7-7 7"/>
                           </svg>
                         </motion.button>
-                      </div>
+                      </motion.div>
                     </div>
                   </div>
                 )}
@@ -2704,7 +2995,7 @@ export default function HomePage(): React.JSX.Element {
               left: 0,
               width: '100%',
               height: '100%',
-              backgroundColor: 'rgba(0, 0, 0, 0.95)',
+              backgroundColor: 'rgba(0, 0, 0, 0.98)',
               zIndex: 10001,
               display: 'flex',
               alignItems: 'center',
@@ -2719,7 +3010,7 @@ export default function HomePage(): React.JSX.Element {
               exit={{ scale: 0.95, opacity: 0 }}
               transition={{ duration: 0.3 }}
               style={{
-                backgroundColor: 'rgba(20, 20, 20, 0.95)',
+                backgroundColor: 'transparent',
                 borderRadius: '0',
                 padding: '2.5rem',
                 width: isMobile ? '90%' : '500px',
@@ -2811,7 +3102,7 @@ export default function HomePage(): React.JSX.Element {
               left: 0,
               width: '100%',
               height: '100%',
-              backgroundColor: 'rgba(0, 0, 0, 0.9)',
+              backgroundColor: 'rgba(0, 0, 0, 0.98)',
               zIndex: 9999,
               display: 'flex',
               alignItems: 'center',
@@ -2826,7 +3117,7 @@ export default function HomePage(): React.JSX.Element {
               exit={{ scale: 0.95, opacity: 0 }}
               transition={{ duration: 0.3 }}
               style={{
-                backgroundColor: 'rgba(20, 20, 20, 0.95)',
+                backgroundColor: 'transparent',
                 borderRadius: '0',
                 padding: isMobile ? '1.5rem' : '2.5rem',
                 width: isMobile ? '90%' : '500px',
@@ -3220,7 +3511,7 @@ export default function HomePage(): React.JSX.Element {
                       transition={{ duration: 0.3 }}
                     >
                       <path d="M5 12h14" />
-                      <path d="m12 5 7 7-7 7" />
+                      <path d="M12 5l7 7-7 7" />
                     </motion.svg>
                     <motion.div
                       style={{
@@ -4155,7 +4446,7 @@ export default function HomePage(): React.JSX.Element {
                 View All
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M5 12h14"/>
-                  <path d="m12 5 7 7-7 7"/>
+                  <path d="M12 5l7 7-7 7"/>
                 </svg>
               </motion.a>
             </div>
@@ -4317,8 +4608,8 @@ export default function HomePage(): React.JSX.Element {
               >
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-                  <polyline points="16 17 21 12 16 7"/>
-                  <line x1="21" y1="12" x2="9" y2="12"/>
+                  <path d="M16 17l5-5-5-5"/>
+                  <path d="M21 12H9"/>
                 </svg>
                 Logout
               </motion.button>
@@ -4477,8 +4768,8 @@ export default function HomePage(): React.JSX.Element {
                 stroke="#6366F1"
                 strokeWidth="2"
               >
-                <path d="M7 7l10 10" />
-                <path d="M17 7v10H7" />
+                <path d="M5 12h14"/>
+                <path d="M12 5l7 7-7 7"/>
               </svg>
             </span>
             <div style={{
@@ -4547,8 +4838,8 @@ export default function HomePage(): React.JSX.Element {
                 stroke="#6366F1"
                 strokeWidth="2"
               >
-                <path d="M7 7l10 10" />
-                <path d="M17 7v10H7" />
+                <path d="M5 12h14"/>
+                <path d="M12 5l7 7-7 7"/>
               </svg>
             </span>
             <div style={{
@@ -4618,8 +4909,8 @@ export default function HomePage(): React.JSX.Element {
                 stroke="#6366F1"
                 strokeWidth="2"
               >
-                <path d="M7 7l10 10" />
-                <path d="M17 7v10H7" />
+                <path d="M5 12h14"/>
+                <path d="M12 5l7 7-7 7"/>
               </svg>
             </span>
             <div style={{
@@ -4688,8 +4979,8 @@ export default function HomePage(): React.JSX.Element {
                 stroke="#6366F1"
                 strokeWidth="2"
               >
-                <path d="M7 7l10 10" />
-                <path d="M17 7v10H7" />
+                <path d="M5 12h14"/>
+                <path d="M12 5l7 7-7 7"/>
               </svg>
             </span>
             <div style={{
@@ -5027,7 +5318,7 @@ export default function HomePage(): React.JSX.Element {
                           gap: '4px'
                         }}>
                           <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+                            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2 2V8a2 2 0 0 1 2-2h6"/>
                             <polyline points="15 3 21 3 21 9"/>
                             <line x1="10" y1="14" x2="21" y2="3"/>
                           </svg>
@@ -5046,7 +5337,7 @@ export default function HomePage(): React.JSX.Element {
                       >
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                           <path d="M5 12h14"/>
-                          <path d="m12 5 7 7-7 7"/>
+                          <path d="M12 5l7 7-7 7"/>
                         </svg>
                       </motion.div>
                     </motion.div>
@@ -5202,7 +5493,7 @@ export default function HomePage(): React.JSX.Element {
             MENU
           </motion.div>
 
-          {/* Sign In / User Button - TELAH DIPERBAIKI */}
+          {/* Sign In / User Button - DIPERBAIKI */}
           <motion.div
             onClick={handleSignInClick}
             style={{
@@ -5245,7 +5536,7 @@ export default function HomePage(): React.JSX.Element {
                   }}
                 >
                   <path d="M5 12h14"/>
-                  <path d="m12 5 7 7-7 7"/>
+                  <path d="M12 5l7 7-7 7"/>
                 </motion.svg>
               </>
             ) : (
@@ -5263,7 +5554,7 @@ export default function HomePage(): React.JSX.Element {
                   }}
                 >
                   <path d="M5 12h14"/>
-                  <path d="m12 5 7 7-7 7"/>
+                  <path d="M12 5l7 7-7 7"/>
                 </motion.svg>
               </>
             )}
