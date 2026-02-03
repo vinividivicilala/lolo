@@ -19,7 +19,8 @@ import {
   updateDoc,
   arrayUnion,
   where,
-  getDocs
+  getDocs,
+  getDoc
 } from "firebase/firestore";
 import { initializeApp, getApps } from "firebase/app";
 
@@ -73,6 +74,7 @@ export default function GroupsPage(): React.JSX.Element {
   const [isLoading, setIsLoading] = useState(true);
   const [auth, setAuth] = useState<any>(null);
   const [db, setDb] = useState<any>(null);
+  const [groupMembers, setGroupMembers] = useState<{[key: string]: string}>({});
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -125,15 +127,35 @@ export default function GroupsPage(): React.JSX.Element {
       const groupsRef = collection(db, 'groups');
       const q = query(groupsRef, where('members', 'array-contains', userId));
       
-      const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      const unsubscribe = onSnapshot(q, async (querySnapshot) => {
         const groupsData: Group[] = [];
-        querySnapshot.forEach((doc) => {
-          const groupData = doc.data() as Group;
+        for (const docSnap of querySnapshot.docs) {
+          const groupData = docSnap.data() as Group;
+          
+          // Ambil nama member dari users collection jika tidak ada di memberNames
+          if (!groupData.memberNames || Object.keys(groupData.memberNames).length === 0) {
+            groupData.memberNames = {};
+            for (const memberId of groupData.members) {
+              try {
+                const userRef = doc(db, 'users', memberId);
+                const userSnap = await getDoc(userRef);
+                if (userSnap.exists()) {
+                  groupData.memberNames![memberId] = userSnap.data().name || 'Unknown User';
+                } else {
+                  groupData.memberNames![memberId] = 'Unknown User';
+                }
+              } catch (error) {
+                console.error("Error loading member name:", error);
+                groupData.memberNames![memberId] = 'Unknown User';
+              }
+            }
+          }
+          
           groupsData.push({
-            id: doc.id,
+            id: docSnap.id,
             ...groupData
           });
-        });
+        }
         setGroups(groupsData);
         setIsLoading(false);
         
@@ -180,8 +202,55 @@ export default function GroupsPage(): React.JSX.Element {
   useEffect(() => {
     if (selectedGroup && db) {
       loadGroupMessages(selectedGroup.id!);
+      // Update group members when selected group changes
+      if (selectedGroup.memberNames) {
+        setGroupMembers(selectedGroup.memberNames);
+      } else {
+        // Load member names from users collection
+        loadMemberNames(selectedGroup.members);
+      }
     }
   }, [selectedGroup, db]);
+
+  const loadMemberNames = async (memberIds: string[]) => {
+    if (!db) return;
+    
+    const memberNames: {[key: string]: string} = {};
+    
+    for (const memberId of memberIds) {
+      try {
+        const userRef = doc(db, 'users', memberId);
+        const userSnap = await getDoc(userRef);
+        if (userSnap.exists()) {
+          memberNames[memberId] = userSnap.data().name || 'Unknown User';
+        } else {
+          memberNames[memberId] = 'Unknown User';
+        }
+      } catch (error) {
+        console.error("Error loading member name:", error);
+        memberNames[memberId] = 'Unknown User';
+      }
+    }
+    
+    setGroupMembers(memberNames);
+    
+    // Update group in state with member names
+    if (selectedGroup) {
+      setSelectedGroup({
+        ...selectedGroup,
+        memberNames: memberNames
+      });
+      
+      // Update groups list
+      setGroups(prevGroups => 
+        prevGroups.map(group => 
+          group.id === selectedGroup.id 
+            ? { ...group, memberNames: memberNames }
+            : group
+        )
+      );
+    }
+  };
 
   const handleCreateGroup = async () => {
     if (!user || !db || !newGroupName.trim()) {
@@ -360,6 +429,18 @@ export default function GroupsPage(): React.JSX.Element {
       day: 'numeric',
       month: 'short'
     });
+  };
+
+  // Fungsi untuk menampilkan daftar member
+  const showMemberList = () => {
+    if (!selectedGroup) return;
+    
+    const memberList = selectedGroup.members.map(memberId => {
+      const memberName = groupMembers[memberId] || selectedGroup.memberNames?.[memberId] || 'Unknown User';
+      return `${memberName}${memberId === selectedGroup.ownerId ? ' (Owner)' : ''}`;
+    }).join('\n');
+    
+    alert(`Anggota Grup "${selectedGroup.name}":\n\n${memberList}`);
   };
 
   if (!auth || !db) {
@@ -611,11 +692,39 @@ export default function GroupsPage(): React.JSX.Element {
                 borderBottom: '1px solid #333'
               }}>
                 <div style={{
-                  fontSize: '48px',
-                  fontWeight: 'bold',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
                   marginBottom: '20px'
                 }}>
-                  {selectedGroup.name}
+                  <div style={{
+                    fontSize: '48px',
+                    fontWeight: 'bold'
+                  }}>
+                    {selectedGroup.name}
+                  </div>
+                  <button
+                    onClick={showMemberList}
+                    style={{
+                      backgroundColor: 'transparent',
+                      border: 'none',
+                      color: 'white',
+                      padding: '10px',
+                      cursor: 'pointer',
+                      fontSize: '20px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '5px'
+                    }}
+                    title="Lihat Anggota Grup"
+                  >
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
+                      <circle cx="9" cy="7" r="4"/>
+                      <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/>
+                    </svg>
+                    Anggota
+                  </button>
                 </div>
                 <div style={{
                   fontSize: '22px',
