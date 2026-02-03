@@ -16,10 +16,10 @@ import {
   onSnapshot,
   serverTimestamp,
   doc,
-  deleteDoc,
   updateDoc,
   arrayUnion,
-  where
+  where,
+  getDocs
 } from "firebase/firestore";
 import { initializeApp, getApps } from "firebase/app";
 
@@ -38,6 +38,7 @@ interface Group {
   id?: string;
   name: string;
   ownerId: string;
+  ownerName: string;
   members: string[];
   memberNames?: {[key: string]: string};
   createdAt: any;
@@ -192,6 +193,7 @@ export default function GroupsPage(): React.JSX.Element {
       const groupData = {
         name: newGroupName.trim(),
         ownerId: user.uid,
+        ownerName: userDisplayName,
         members: [user.uid],
         memberNames: {
           [user.uid]: userDisplayName
@@ -221,7 +223,7 @@ export default function GroupsPage(): React.JSX.Element {
         userId: user.uid,
         userName: userDisplayName,
         groupId: selectedGroup.id,
-        type: 'text' as const,
+        type: 'text',
         createdAt: serverTimestamp()
       };
 
@@ -248,7 +250,7 @@ export default function GroupsPage(): React.JSX.Element {
         userId: user.uid,
         userName: userDisplayName,
         groupId: selectedGroup.id,
-        type: 'link' as const,
+        type: 'link',
         link: newLink.trim(),
         thumbnail: thumbnail,
         title: linkTitle || "Link yang dibagikan",
@@ -627,7 +629,7 @@ export default function GroupsPage(): React.JSX.Element {
                   </span>
                   <span>•</span>
                   <span>
-                    Pemilik: {selectedGroup.memberNames?.[selectedGroup.ownerId] || 'User'}
+                    Pemilik: {selectedGroup.ownerName}
                   </span>
                 </div>
               </div>
