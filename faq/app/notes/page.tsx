@@ -41,7 +41,6 @@ interface Note {
   userId: string;
   createdAt: any;
   updatedAt: any;
-  categoryColor?: string;
 }
 
 export default function NotesPage(): React.JSX.Element {
@@ -60,10 +59,23 @@ export default function NotesPage(): React.JSX.Element {
   const [auth, setAuth] = useState<any>(null);
   const [db, setDb] = useState<any>(null);
 
-  // Warna untuk kategori
-  const categoryColors = [
-    "#3B82F6", "#10B981", "#F59E0B", "#EF4444", "#8B5CF6",
-    "#EC4899", "#14B8A6", "#F97316", "#84CC16", "#6366F1"
+  // Kategori yang tersedia
+  const categories = [
+    "Makanan",
+    "Minuman", 
+    "Fotografi",
+    "Coding",
+    "Desain",
+    "Musik",
+    "Film",
+    "Buku",
+    "Olahraga",
+    "Travel",
+    "Pendidikan",
+    "Bisnis",
+    "Kesehatan",
+    "Teknologi",
+    "Hobi"
   ];
 
   // 1. Inisialisasi Firebase di client side
@@ -154,16 +166,12 @@ export default function NotesPage(): React.JSX.Element {
     }
 
     try {
-      // Pilih warna acak untuk kategori
-      const randomColor = categoryColors[Math.floor(Math.random() * categoryColors.length)];
-      
       const noteData = {
         title: newNote.title.trim(),
         category: newNote.category.trim(),
         link: newNote.link.trim(),
         description: newNote.description.trim(),
         userId: user.uid,
-        categoryColor: randomColor,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp()
       };
@@ -249,7 +257,7 @@ export default function NotesPage(): React.JSX.Element {
         justifyContent: 'center',
         color: 'white',
         fontFamily: 'Helvetica, Arial, sans-serif',
-        fontSize: '1rem'
+        fontSize: '16px'
       }}>
         Loading...
       </div>
@@ -272,7 +280,7 @@ export default function NotesPage(): React.JSX.Element {
         top: 0,
         left: 0,
         right: 0,
-        padding: '1.5rem 2rem',
+        padding: '20px 40px',
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
@@ -280,9 +288,8 @@ export default function NotesPage(): React.JSX.Element {
         zIndex: 100,
       }}>
         <div style={{
-          fontSize: '2rem',
-          fontWeight: 'bold',
-          letterSpacing: '-0.5px'
+          fontSize: '24px',
+          fontFamily: 'Helvetica, Arial, sans-serif',
         }}>
           Menuru
         </div>
@@ -290,29 +297,14 @@ export default function NotesPage(): React.JSX.Element {
         <div style={{
           display: 'flex',
           alignItems: 'center',
-          gap: '1.5rem'
+          gap: '20px'
         }}>
           <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.75rem',
-            fontSize: '1rem',
-            color: '#888'
+            fontSize: '18px',
+            fontFamily: 'Helvetica, Arial, sans-serif',
+            color: 'white'
           }}>
-            <div style={{
-              width: '36px',
-              height: '36px',
-              borderRadius: '50%',
-              backgroundColor: '#3B82F6',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontWeight: '600',
-              fontSize: '1rem'
-            }}>
-              {userDisplayName.charAt(0).toUpperCase()}
-            </div>
-            <span>{userDisplayName}</span>
+            {userDisplayName}
           </div>
           
           <button
@@ -321,12 +313,14 @@ export default function NotesPage(): React.JSX.Element {
               backgroundColor: 'transparent',
               border: 'none',
               color: 'white',
-              padding: '0.5rem',
+              padding: '8px',
               cursor: 'pointer',
-              fontSize: '1rem',
+              fontSize: '18px',
               display: 'flex',
               alignItems: 'center',
-              gap: '0.5rem'
+              justifyContent: 'center',
+              width: '36px',
+              height: '36px'
             }}
           >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -341,7 +335,7 @@ export default function NotesPage(): React.JSX.Element {
         width: '100%',
         maxWidth: '800px',
         margin: '0 auto',
-        padding: '7rem 1rem 2rem',
+        padding: '100px 20px 40px',
         boxSizing: 'border-box'
       }}>
         {/* Daftar catatan */}
@@ -349,8 +343,9 @@ export default function NotesPage(): React.JSX.Element {
           <div style={{
             display: 'flex',
             justifyContent: 'center',
-            padding: '3rem',
-            fontSize: '1rem',
+            padding: '60px',
+            fontSize: '16px',
+            fontFamily: 'Helvetica, Arial, sans-serif',
             color: '#888'
           }}>
             Memuat catatan...
@@ -358,17 +353,20 @@ export default function NotesPage(): React.JSX.Element {
         ) : notes.length === 0 ? (
           <div style={{
             textAlign: 'center',
-            padding: '4rem 1rem'
+            padding: '80px 20px',
+            fontFamily: 'Helvetica, Arial, sans-serif'
           }}>
             <div style={{
-              fontSize: '1.2rem',
+              fontSize: '18px',
+              fontFamily: 'Helvetica, Arial, sans-serif',
               color: '#888',
-              marginBottom: '1rem'
+              marginBottom: '10px'
             }}>
               Belum ada catatan
             </div>
             <div style={{
-              fontSize: '1rem',
+              fontSize: '14px',
+              fontFamily: 'Helvetica, Arial, sans-serif',
               color: '#555'
             }}>
               Buat catatan pertama Anda
@@ -378,7 +376,8 @@ export default function NotesPage(): React.JSX.Element {
           <div style={{
             display: 'flex',
             flexDirection: 'column',
-            gap: '3rem'
+            gap: '40px',
+            fontFamily: 'Helvetica, Arial, sans-serif'
           }}>
             {notes.map((note) => {
               const linkPreview = getLinkPreview(note.link);
@@ -389,49 +388,39 @@ export default function NotesPage(): React.JSX.Element {
                   style={{
                     display: 'flex',
                     flexDirection: 'column',
-                    gap: '0.75rem'
+                    gap: '10px',
+                    fontFamily: 'Helvetica, Arial, sans-serif'
                   }}
                 >
+                  {/* Kategori */}
+                  {note.category && (
+                    <div style={{
+                      fontSize: '14px',
+                      fontFamily: 'Helvetica, Arial, sans-serif',
+                      color: '#888',
+                      marginBottom: '5px'
+                    }}>
+                      {note.category}
+                    </div>
+                  )}
+
                   {/* Judul */}
                   <div style={{
-                    fontSize: '2.5rem',
-                    fontWeight: 'bold',
-                    lineHeight: 1.2
+                    fontSize: '28px',
+                    fontFamily: 'Helvetica, Arial, sans-serif',
+                    lineHeight: '1.4'
                   }}>
                     {note.title}
                   </div>
 
-                  {/* Kategori dengan label warna */}
-                  {note.category && (
-                    <div style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '0.5rem',
-                      marginTop: '0.25rem'
-                    }}>
-                      <div style={{
-                        width: '12px',
-                        height: '12px',
-                        borderRadius: '50%',
-                        backgroundColor: note.categoryColor || '#3B82F6'
-                      }} />
-                      <span style={{
-                        fontSize: '1rem',
-                        color: note.categoryColor || '#3B82F6',
-                        fontWeight: '500'
-                      }}>
-                        {note.category}
-                      </span>
-                    </div>
-                  )}
-
                   {/* Deskripsi */}
                   {note.description && (
                     <div style={{
-                      fontSize: '1.1rem',
-                      lineHeight: 1.6,
+                      fontSize: '16px',
+                      fontFamily: 'Helvetica, Arial, sans-serif',
+                      lineHeight: '1.6',
                       color: '#ccc',
-                      marginTop: '0.5rem',
+                      marginTop: '10px',
                       whiteSpace: 'pre-wrap'
                     }}>
                       {note.description}
@@ -441,7 +430,7 @@ export default function NotesPage(): React.JSX.Element {
                   {/* Link preview */}
                   {linkPreview && (
                     <div style={{
-                      margin: '1rem 0'
+                      margin: '15px 0'
                     }}>
                       <img
                         src={linkPreview}
@@ -460,15 +449,17 @@ export default function NotesPage(): React.JSX.Element {
                     </div>
                   )}
 
-                  {/* Footer dengan tanggal dan tombol link */}
+                  {/* Footer dengan tanggal dan tombol */}
                   <div style={{
                     display: 'flex',
                     justifyContent: 'space-between',
                     alignItems: 'center',
-                    marginTop: '1rem'
+                    marginTop: '15px',
+                    fontFamily: 'Helvetica, Arial, sans-serif'
                   }}>
                     <span style={{
-                      fontSize: '0.9rem',
+                      fontSize: '13px',
+                      fontFamily: 'Helvetica, Arial, sans-serif',
                       color: '#888'
                     }}>
                       {formatDate(note.updatedAt)}
@@ -477,7 +468,8 @@ export default function NotesPage(): React.JSX.Element {
                     <div style={{
                       display: 'flex',
                       alignItems: 'center',
-                      gap: '1rem'
+                      gap: '15px',
+                      fontFamily: 'Helvetica, Arial, sans-serif'
                     }}>
                       {note.link && (
                         <a
@@ -489,12 +481,13 @@ export default function NotesPage(): React.JSX.Element {
                             textDecoration: 'none',
                             display: 'flex',
                             alignItems: 'center',
-                            gap: '0.5rem',
-                            fontSize: '0.9rem'
+                            gap: '6px',
+                            fontSize: '13px',
+                            fontFamily: 'Helvetica, Arial, sans-serif'
                           }}
                         >
                           Buka Link
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                             <path d="M7 17l9.2-9.2M17 17V7H7"/>
                           </svg>
                         </a>
@@ -506,14 +499,15 @@ export default function NotesPage(): React.JSX.Element {
                           backgroundColor: 'transparent',
                           border: 'none',
                           color: '#888',
-                          fontSize: '1.2rem',
+                          fontSize: '18px',
                           cursor: 'pointer',
-                          padding: '0.25rem',
+                          padding: '0',
                           width: '24px',
                           height: '24px',
                           display: 'flex',
                           alignItems: 'center',
-                          justifyContent: 'center'
+                          justifyContent: 'center',
+                          fontFamily: 'Helvetica, Arial, sans-serif'
                         }}
                       >
                         ×
@@ -540,21 +534,24 @@ export default function NotesPage(): React.JSX.Element {
           alignItems: 'center',
           justifyContent: 'center',
           zIndex: 1000,
-          padding: '1rem'
+          padding: '20px',
+          fontFamily: 'Helvetica, Arial, sans-serif'
         }}>
           <div style={{
             backgroundColor: 'black',
             width: '100%',
             maxWidth: '600px',
-            padding: '2.5rem'
+            padding: '40px',
+            fontFamily: 'Helvetica, Arial, sans-serif'
           }}>
             <div style={{
-              marginBottom: '2.5rem'
+              marginBottom: '30px',
+              fontFamily: 'Helvetica, Arial, sans-serif'
             }}>
               <div style={{
-                fontSize: '1.8rem',
-                fontWeight: 'bold',
-                marginBottom: '0.5rem'
+                fontSize: '24px',
+                fontFamily: 'Helvetica, Arial, sans-serif',
+                marginBottom: '10px'
               }}>
                 Buat Catatan Baru
               </div>
@@ -563,7 +560,8 @@ export default function NotesPage(): React.JSX.Element {
             <div style={{
               display: 'flex',
               flexDirection: 'column',
-              gap: '1.5rem'
+              gap: '20px',
+              fontFamily: 'Helvetica, Arial, sans-serif'
             }}>
               {/* Input judul */}
               <div>
@@ -574,37 +572,51 @@ export default function NotesPage(): React.JSX.Element {
                   placeholder="Judul"
                   style={{
                     width: '100%',
-                    padding: '1rem',
+                    padding: '12px',
                     backgroundColor: 'transparent',
                     border: 'none',
                     color: 'white',
-                    fontSize: '2.5rem',
+                    fontSize: '28px',
                     outline: 'none',
                     fontFamily: 'Helvetica, Arial, sans-serif',
-                    fontWeight: 'bold',
-                    lineHeight: 1.2
+                    lineHeight: '1.4'
                   }}
                 />
               </div>
 
-              {/* Input kategori */}
+              {/* Input kategori - Dropdown */}
               <div>
-                <input
-                  type="text"
+                <select
                   value={newNote.category}
                   onChange={(e) => setNewNote({...newNote, category: e.target.value})}
-                  placeholder="Kategori"
                   style={{
                     width: '100%',
-                    padding: '1rem',
+                    padding: '12px',
                     backgroundColor: 'transparent',
                     border: 'none',
                     color: '#888',
-                    fontSize: '1rem',
+                    fontSize: '16px',
                     outline: 'none',
-                    fontFamily: 'Helvetica, Arial, sans-serif'
+                    fontFamily: 'Helvetica, Arial, sans-serif',
+                    cursor: 'pointer',
+                    appearance: 'none',
+                    backgroundImage: `url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e")`,
+                    backgroundRepeat: 'no-repeat',
+                    backgroundPosition: 'right 12px center',
+                    backgroundSize: '16px'
                   }}
-                />
+                >
+                  <option value="" style={{ backgroundColor: 'black', color: 'white' }}>Pilih Kategori</option>
+                  {categories.map((category) => (
+                    <option 
+                      key={category} 
+                      value={category}
+                      style={{ backgroundColor: 'black', color: 'white' }}
+                    >
+                      {category}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               {/* Input link */}
@@ -616,11 +628,11 @@ export default function NotesPage(): React.JSX.Element {
                   placeholder="Link (YouTube, dll.)"
                   style={{
                     width: '100%',
-                    padding: '1rem',
+                    padding: '12px',
                     backgroundColor: 'transparent',
                     border: 'none',
                     color: '#888',
-                    fontSize: '1rem',
+                    fontSize: '16px',
                     outline: 'none',
                     fontFamily: 'Helvetica, Arial, sans-serif'
                   }}
@@ -636,15 +648,15 @@ export default function NotesPage(): React.JSX.Element {
                   rows={8}
                   style={{
                     width: '100%',
-                    padding: '1rem',
+                    padding: '12px',
                     backgroundColor: 'transparent',
                     border: 'none',
                     color: '#ccc',
-                    fontSize: '1.1rem',
+                    fontSize: '16px',
                     outline: 'none',
                     fontFamily: 'Helvetica, Arial, sans-serif',
                     resize: 'none',
-                    lineHeight: 1.6
+                    lineHeight: '1.6'
                   }}
                 />
               </div>
@@ -653,18 +665,20 @@ export default function NotesPage(): React.JSX.Element {
               <div style={{
                 display: 'flex',
                 justifyContent: 'flex-end',
-                gap: '1rem',
-                marginTop: '2rem'
+                gap: '15px',
+                marginTop: '30px',
+                fontFamily: 'Helvetica, Arial, sans-serif'
               }}>
                 <button
                   onClick={() => setShowNewNoteForm(false)}
                   style={{
-                    padding: '0.8rem 1.5rem',
+                    padding: '10px 20px',
                     backgroundColor: 'transparent',
                     border: 'none',
                     color: '#888',
-                    fontSize: '0.9rem',
-                    cursor: 'pointer'
+                    fontSize: '14px',
+                    cursor: 'pointer',
+                    fontFamily: 'Helvetica, Arial, sans-serif'
                   }}
                 >
                   Batal
@@ -672,19 +686,20 @@ export default function NotesPage(): React.JSX.Element {
                 <button
                   onClick={handleCreateNote}
                   style={{
-                    padding: '0.8rem 1.5rem',
+                    padding: '10px 20px',
                     backgroundColor: 'transparent',
                     border: 'none',
                     color: 'white',
-                    fontSize: '0.9rem',
+                    fontSize: '14px',
                     cursor: 'pointer',
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '0.5rem'
+                    gap: '8px',
+                    fontFamily: 'Helvetica, Arial, sans-serif'
                   }}
                 >
                   Simpan
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <path d="M7 17l9.2-9.2M17 17V7H7"/>
                   </svg>
                 </button>
