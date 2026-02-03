@@ -1,753 +1,1068 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
-import gsap from "gsap";
+import { 
+  getAuth, 
+  onAuthStateChanged,
+  signOut
+} from "firebase/auth";
+import { 
+  getFirestore,
+  collection,
+  addDoc,
+  query,
+  orderBy,
+  onSnapshot,
+  serverTimestamp,
+  doc,
+  deleteDoc,
+  updateDoc,
+  arrayUnion,
+  where
+} from "firebase/firestore";
+import { initializeApp, getApps } from "firebase/app";
 
-export default function HomePage(): React.JSX.Element {
+const firebaseConfig = {
+  apiKey: "AIzaSyD_htQZ1TClnXKZGRJ4izbMQ02y6V3aNAQ",
+  authDomain: "wawa44-58d1e.firebaseapp.com",
+  databaseURL: "https://wawa44-58d1e-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "wawa44-58d1e",
+  storageBucket: "wawa44-58d1e.firebasestorage.app",
+  messagingSenderId: "836899520599",
+  appId: "1:836899520599:web:b346e4370ecfa9bb89e312",
+  measurementId: "G-8LMP7F4BE9"
+};
+
+interface Group {
+  id?: string;
+  name: string;
+  ownerId: string;
+  members: string[];
+  memberNames?: {[key: string]: string};
+  createdAt: any;
+}
+
+interface Message {
+  id?: string;
+  text: string;
+  userId: string;
+  userName: string;
+  groupId: string;
+  type: 'text' | 'link';
+  link?: string;
+  thumbnail?: string;
+  title?: string;
+  createdAt: any;
+}
+
+export default function GroupsPage(): React.JSX.Element {
   const router = useRouter();
-  const [isMobile, setIsMobile] = useState(false);
-  const [loadingText, setLoadingText] = useState("NURU");
+  const [user, setUser] = useState<any>(null);
+  const [userDisplayName, setUserDisplayName] = useState("");
+  const [groups, setGroups] = useState<Group[]>([]);
+  const [selectedGroup, setSelectedGroup] = useState<Group | null>(null);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [newMessage, setNewMessage] = useState("");
+  const [newLink, setNewLink] = useState("");
+  const [linkTitle, setLinkTitle] = useState("");
+  const [showLinkForm, setShowLinkForm] = useState(false);
+  const [showNewGroupForm, setShowNewGroupForm] = useState(false);
+  const [newGroupName, setNewGroupName] = useState("");
   const [isLoading, setIsLoading] = useState(true);
-  const [isDarkMode, setIsDarkMode] = useState(true);
-  const [cursorType, setCursorType] = useState("default");
-  const [cursorText, setCursorText] = useState("");
-  const [hoveredLink, setHoveredLink] = useState("");
-  const [showDescription, setShowDescription] = useState(true);
-  const headerRef = useRef<HTMLDivElement>(null);
-  const cursorRef = useRef<HTMLDivElement>(null);
-  const topNavRef = useRef<HTMLDivElement>(null);
-  const scrollTextRef = useRef<HTMLDivElement>(null);
-  const descriptionRef = useRef<HTMLDivElement>(null);
-
-  // Animasi loading text
-  const loadingTexts = [
-    "NURU", "MBACA", "NULIS", "NGEXPLORASI", 
-    "NEMUKAN", "NCIPTA", "NGGALI", "NARIK",
-    "NGAMATI", "NANCANG", "NGEMBANGKAN", "NYUSUN"
-  ];
+  const [auth, setAuth] = useState<any>(null);
+  const [db, setDb] = useState<any>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
+    if (typeof window === 'undefined') return;
 
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-
-    // Animasi loading text
-    let currentIndex = 0;
-    const textInterval = setInterval(() => {
-      currentIndex = (currentIndex + 1) % loadingTexts.length;
-      setLoadingText(loadingTexts[currentIndex]);
-    }, 500);
-
-    // Hentikan loading setelah selesai
-    const loadingTimeout = setTimeout(() => {
-      setIsLoading(false);
-      clearInterval(textInterval);
-    }, 3000);
-
-    // Animasi teks berjalan dari atas ke bawah
-    const setupAutoScroll = () => {
-      if (scrollTextRef.current) {
-        const itemHeight = isMobile ? 80 : 100;
-        const totalItems = 15;
-        const totalScrollDistance = totalItems * itemHeight - window.innerHeight;
-        
-        // Hapus animasi sebelumnya jika ada
-        gsap.killTweensOf(scrollTextRef.current);
-        
-        // Animasi infinite loop dari atas ke bawah
-        gsap.to(scrollTextRef.current, {
-          y: -totalScrollDistance,
-          duration: 20,
-          ease: "none",
-          repeat: -1,
-          yoyo: false
-        });
+    try {
+      let app;
+      if (getApps().length === 0) {
+        app = initializeApp(firebaseConfig);
+      } else {
+        app = getApps()[0];
       }
-    };
+      
+      const authInstance = getAuth(app);
+      const dbInstance = getFirestore(app);
+      
+      setAuth(authInstance);
+      setDb(dbInstance);
+      
+    } catch (error) {
+      console.error('Firebase initialization error:', error);
+    }
+  }, []);
 
-    // Handle scroll untuk hide/show description
-    const handleScroll = () => {
-      if (descriptionRef.current) {
-        const descriptionRect = descriptionRef.current.getBoundingClientRect();
-        // Jika deskripsi sudah hampir keluar dari viewport (atas), sembunyikan
-        if (descriptionRect.top < -50) {
-          setShowDescription(false);
-        } else {
-          setShowDescription(true);
-        }
+  useEffect(() => {
+    if (!auth) return;
+
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      if (currentUser) {
+        setUser(currentUser);
+        const name = currentUser.displayName || 
+                    currentUser.email?.split('@')[0] || 
+                    'User';
+        setUserDisplayName(name);
+        loadUserGroups(currentUser.uid);
+      } else {
+        router.push('/');
       }
-    };
-
-    // Setup auto scroll setelah component mount
-    setTimeout(setupAutoScroll, 100);
-    window.addEventListener('resize', setupAutoScroll);
-    window.addEventListener('scroll', handleScroll);
-
-    // Custom cursor animation
-    const moveCursor = (e: MouseEvent) => {
-      if (cursorRef.current) {
-        gsap.to(cursorRef.current, {
-          x: e.clientX,
-          y: e.clientY,
-          duration: 0.1,
-          ease: "power2.out"
-        });
-      }
-    };
-
-    document.addEventListener('mousemove', moveCursor);
+    });
 
     return () => {
-      window.removeEventListener('resize', checkMobile);
-      window.removeEventListener('resize', setupAutoScroll);
-      window.removeEventListener('scroll', handleScroll);
-      clearInterval(textInterval);
-      clearTimeout(loadingTimeout);
-      document.removeEventListener('mousemove', moveCursor);
-      if (scrollTextRef.current) {
-        gsap.killTweensOf(scrollTextRef.current);
-      }
+      if (unsubscribe) unsubscribe();
     };
-  }, [isMobile]);
+  }, [auth, router]);
 
-  // Fungsi toggle dark/light mode
-  const toggleColorMode = () => {
-    setIsDarkMode(!isDarkMode);
+  const loadUserGroups = async (userId: string) => {
+    if (!db) return;
+
+    try {
+      const groupsRef = collection(db, 'groups');
+      const q = query(groupsRef, where('members', 'array-contains', userId));
+      
+      const unsubscribe = onSnapshot(q, (querySnapshot) => {
+        const groupsData: Group[] = [];
+        querySnapshot.forEach((doc) => {
+          const groupData = doc.data() as Group;
+          groupsData.push({
+            id: doc.id,
+            ...groupData
+          });
+        });
+        setGroups(groupsData);
+        setIsLoading(false);
+        
+        if (groupsData.length > 0 && !selectedGroup) {
+          setSelectedGroup(groupsData[0]);
+        }
+      });
+
+      return unsubscribe;
+    } catch (error) {
+      console.error("Error loading groups:", error);
+      setIsLoading(false);
+    }
   };
 
-  // Handler untuk cursor hover
-  const handleLinkHover = (type: string, text: string = "", linkName: string = "") => {
-    setCursorType(type);
-    setCursorText(text);
-    setHoveredLink(linkName);
+  const loadGroupMessages = (groupId: string) => {
+    if (!db) return;
+
+    const messagesRef = collection(db, 'groupMessages');
+    const q = query(
+      messagesRef, 
+      where('groupId', '==', groupId),
+      orderBy('createdAt', 'asc')
+    );
+    
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      const messagesData: Message[] = [];
+      querySnapshot.forEach((doc) => {
+        messagesData.push({
+          id: doc.id,
+          ...doc.data() as Message
+        });
+      });
+      setMessages(messagesData);
+      
+      setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
+    });
+
+    return unsubscribe;
   };
 
-  const handleLinkLeave = () => {
-    setCursorType("default");
-    setCursorText("");
-    setHoveredLink("");
-  };
+  useEffect(() => {
+    if (selectedGroup && db) {
+      loadGroupMessages(selectedGroup.id!);
+    }
+  }, [selectedGroup, db]);
 
-  // Warna cursor
-  const getCursorColors = () => {
-    if (cursorType === "link") {
-      return {
-        dotColor: '#6366F1',
-        textColor: 'white'
+  const handleCreateGroup = async () => {
+    if (!user || !db || !newGroupName.trim()) {
+      alert("Nama grup harus diisi");
+      return;
+    }
+
+    try {
+      const groupData = {
+        name: newGroupName.trim(),
+        ownerId: user.uid,
+        members: [user.uid],
+        memberNames: {
+          [user.uid]: userDisplayName
+        },
+        createdAt: serverTimestamp()
       };
+
+      await addDoc(collection(db, 'groups'), groupData);
+      
+      setNewGroupName("");
+      setShowNewGroupForm(false);
+      
+      alert("Grup berhasil dibuat!");
+      
+    } catch (error) {
+      console.error("Error creating group:", error);
+      alert("Gagal membuat grup. Silakan coba lagi.");
+    }
+  };
+
+  const handleSendMessage = async () => {
+    if (!user || !db || !selectedGroup || !newMessage.trim()) return;
+
+    try {
+      const messageData = {
+        text: newMessage.trim(),
+        userId: user.uid,
+        userName: userDisplayName,
+        groupId: selectedGroup.id,
+        type: 'text' as const,
+        createdAt: serverTimestamp()
+      };
+
+      await addDoc(collection(db, 'groupMessages'), messageData);
+      setNewMessage("");
+      
+    } catch (error) {
+      console.error("Error sending message:", error);
+      alert("Gagal mengirim pesan.");
+    }
+  };
+
+  const handleSendLink = async () => {
+    if (!user || !db || !selectedGroup || !newLink.trim()) {
+      alert("Link harus diisi");
+      return;
+    }
+
+    try {
+      const thumbnail = generateThumbnail(newLink.trim());
+
+      const messageData = {
+        text: linkTitle || "Link yang dibagikan",
+        userId: user.uid,
+        userName: userDisplayName,
+        groupId: selectedGroup.id,
+        type: 'link' as const,
+        link: newLink.trim(),
+        thumbnail: thumbnail,
+        title: linkTitle || "Link yang dibagikan",
+        createdAt: serverTimestamp()
+      };
+
+      await addDoc(collection(db, 'groupMessages'), messageData);
+      
+      setNewLink("");
+      setLinkTitle("");
+      setShowLinkForm(false);
+      
+    } catch (error) {
+      console.error("Error sending link:", error);
+      alert("Gagal mengirim link.");
+    }
+  };
+
+  const generateThumbnail = (link: string): string => {
+    if (!link) return "";
+    
+    try {
+      const url = new URL(link);
+      
+      if (url.hostname.includes('youtube.com') || url.hostname.includes('youtu.be')) {
+        const videoId = url.searchParams.get('v') || url.pathname.split('/').pop();
+        if (videoId) {
+          return `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
+        }
+      }
+      
+      if (url.hostname.includes('vimeo.com')) {
+        const videoId = url.pathname.split('/').pop();
+        if (videoId) {
+          return `https://i.vimeocdn.com/video/${videoId}_640.jpg`;
+        }
+      }
+      
+      return "";
+    } catch {
+      return "";
+    }
+  };
+
+  const getVideoEmbedUrl = (link: string) => {
+    if (!link) return null;
+    
+    try {
+      const url = new URL(link);
+      
+      if (url.hostname.includes('youtube.com') || url.hostname.includes('youtu.be')) {
+        const videoId = url.searchParams.get('v') || url.pathname.split('/').pop();
+        if (videoId) {
+          return `https://www.youtube.com/embed/${videoId}?autoplay=0&rel=0&showinfo=0`;
+        }
+      }
+      
+      if (url.hostname.includes('vimeo.com')) {
+        const videoId = url.pathname.split('/').pop();
+        if (videoId) {
+          return `https://player.vimeo.com/video/${videoId}?autoplay=0&title=0&byline=0&portrait=0`;
+        }
+      }
+      
+      return null;
+    } catch {
+      return null;
+    }
+  };
+
+  const handleLogout = async () => {
+    if (auth) {
+      try {
+        await signOut(auth);
+        router.push('/');
+      } catch (error) {
+        console.error("Error logging out:", error);
+      }
+    }
+  };
+
+  const formatTime = (timestamp: any) => {
+    if (!timestamp) return "";
+    
+    const date = timestamp.toDate();
+    return date.toLocaleTimeString('id-ID', {
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
+  const formatDate = (timestamp: any) => {
+    if (!timestamp) return "";
+    
+    const date = timestamp.toDate();
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    
+    if (diffDays === 0) {
+      return "Hari ini";
+    } else if (diffDays === 1) {
+      return "Kemarin";
     }
     
-    return {
-      dotColor: '#EC4899',
-      textColor: 'white'
-    };
+    return date.toLocaleDateString('id-ID', {
+      day: 'numeric',
+      month: 'short'
+    });
   };
 
-  const cursorColors = getCursorColors();
+  if (!auth || !db) {
+    return (
+      <div style={{
+        minHeight: '100vh',
+        backgroundColor: 'black',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        color: 'white',
+        fontFamily: 'Helvetica, Arial, sans-serif',
+        fontSize: '20px'
+      }}>
+        Loading...
+      </div>
+    );
+  }
 
   return (
     <div style={{
       minHeight: '100vh',
-      backgroundColor: isDarkMode ? 'black' : '#ff0028',
+      backgroundColor: 'black',
       margin: 0,
       padding: 0,
       width: '100%',
-      display: 'flex',
-      flexDirection: 'column',
-      justifyContent: 'flex-start',
-      alignItems: 'center',
-      position: 'relative',
-      overflow: 'hidden',
       fontFamily: 'Helvetica, Arial, sans-serif',
-      WebkitFontSmoothing: 'antialiased',
-      MozOsxFontSmoothing: 'grayscale',
-      transition: 'background-color 0.5s ease',
-      cursor: 'none'
+      color: 'white',
+      position: 'relative'
     }}>
+      {/* Header */}
+      <div style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        padding: '20px 40px',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        backgroundColor: 'black',
+        zIndex: 100,
+      }}>
+        {/* Judul Website */}
+        <div style={{
+          fontSize: '42px',
+          fontFamily: 'Helvetica, Arial, sans-serif',
+          fontWeight: 'bold',
+          color: 'white',
+          letterSpacing: '1px',
+          cursor: 'pointer'
+        }} onClick={() => router.push('/')}>
+          Menuru
+        </div>
 
-      {/* Custom Cursor */}
-      <div
-        ref={cursorRef}
-        style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          width: cursorType === "link" ? '140px' : '20px',
-          height: cursorType === "link" ? '60px' : '20px',
-          backgroundColor: cursorColors.dotColor,
-          borderRadius: cursorType === "link" ? '30px' : '50%',
-          pointerEvents: 'none',
-          zIndex: 9999,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          fontSize: '14px',
-          fontWeight: '700',
-          color: cursorColors.textColor,
-          textAlign: 'center',
-          transition: 'all 0.2s ease',
-          transform: 'translate(-50%, -50%)',
-          padding: cursorType === "link" ? '0 20px' : '0',
-          boxShadow: '0 2px 10px rgba(0,0,0,0.3)',
-          border: 'none'
-        }}
-      >
-        {cursorType === "link" && (
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px'
-          }}>
-            <span style={{ 
-              fontSize: '14px', 
-              fontWeight: '700',
-              letterSpacing: '0.5px',
-              whiteSpace: 'nowrap'
-            }}>
-              {cursorText}
-            </span>
-            <svg 
-              width="20" 
-              height="20" 
-              viewBox="0 0 24 24" 
-              fill="none" 
-              stroke={cursorColors.textColor}
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M7 17L17 7M17 7H7M17 7V17"/>
-            </svg>
-          </div>
-        )}
-      </div>
-
-      {/* Top Navigation Bar */}
-      <div 
-        ref={topNavRef}
-        style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          width: '100%',
-          padding: isMobile ? '0.8rem 1rem' : '1rem 2rem',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          zIndex: 101,
-          boxSizing: 'border-box',
-          opacity: 1
-        }}
-      >
+        {/* Nama User dan Tombol */}
         <div style={{
           display: 'flex',
           alignItems: 'center',
-          gap: isMobile ? '1rem' : '2rem',
-          backgroundColor: 'transparent',
-          backdropFilter: 'blur(10px)',
-          borderRadius: '50px',
-          padding: isMobile ? '0.6rem 1rem' : '0.8rem 1.5rem',
-          border: `1px solid ${isDarkMode ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.3)'}`,
-          boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
+          gap: '30px'
         }}>
-          {/* Docs */}
-          <motion.div
-            onClick={() => router.push('/docs')}
-            onMouseEnter={() => handleLinkHover("link", "VIEW", "docs")}
-            onMouseLeave={handleLinkLeave}
+          {/* Nama User dengan South East Arrow */}
+          <div style={{
+            fontSize: '32px',
+            fontFamily: 'Helvetica, Arial, sans-serif',
+            color: 'white',
+            fontWeight: 'bold',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '10px'
+          }}>
+            {userDisplayName}
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M7 17l9.2-9.2M17 17V7H7"/>
+            </svg>
+          </div>
+          
+          {/* Tombol Kembali ke Notes */}
+          <button
+            onClick={() => router.push('/notes')}
             style={{
+              backgroundColor: 'transparent',
+              border: 'none',
+              color: 'white',
+              padding: '10px',
+              cursor: 'pointer',
+              fontSize: '20px',
               display: 'flex',
               alignItems: 'center',
-              gap: '0.5rem',
-              cursor: 'none',
-              padding: '0.4rem 0.8rem',
-              borderRadius: '25px',
-              backgroundColor: isDarkMode ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.95)',
-              border: isDarkMode ? '1px solid rgba(255,255,255,0.2)' : '1px solid rgba(255,255,255,0.3)',
-              transition: 'all 0.3s ease'
+              gap: '5px'
             }}
-            whileHover={{ 
-              backgroundColor: 'white',
-              scale: 1.05,
-              border: '1px solid white'
-            }}
+            title="Kembali ke Catatan"
           >
-            <svg 
-              width={isMobile ? "18" : "20"} 
-              height={isMobile ? "18" : "20"} 
-              viewBox="0 0 24 24" 
-              fill="none" 
-              stroke="#6366F1"
-              strokeWidth="2"
-            >
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-              <polyline points="14,2 14,8 20,8"/>
-              <line x1="16" y1="13" x2="8" y2="13"/>
-              <line x1="16" y1="17" x2="8" y2="17"/>
-              <polyline points="10,9 9,9 8,9"/>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M19 12H5M12 19l-7-7 7-7"/>
             </svg>
-            <span style={{
-              color: '#6366F1',
-              fontSize: isMobile ? '0.8rem' : '0.9rem',
-              fontWeight: '600',
-              fontFamily: 'Helvetica, Arial, sans-serif'
-            }}>
-              Docs
-            </span>
-            <div style={{
-              backgroundColor: '#EC4899',
-              color: 'white',
-              fontSize: '0.7rem',
-              fontWeight: '700',
-              padding: '0.1rem 0.4rem',
-              borderRadius: '10px',
-              marginLeft: '0.3rem',
-              border: 'none'
-            }}>
-              NEW
-            </div>
-          </motion.div>
+            Notes
+          </button>
 
-          {/* Chatbot */}
-          <motion.div
-            onClick={() => router.push('/chatbot')}
-            onMouseEnter={() => handleLinkHover("link", "VIEW", "chatbot")}
-            onMouseLeave={handleLinkLeave}
+          {/* Tombol Buat Grup Baru */}
+          <button
+            onClick={() => setShowNewGroupForm(true)}
             style={{
+              backgroundColor: 'transparent',
+              border: 'none',
+              color: 'white',
+              padding: '10px',
+              cursor: 'pointer',
+              fontSize: '24px',
               display: 'flex',
               alignItems: 'center',
-              gap: '0.5rem',
-              cursor: 'none',
-              padding: '0.4rem 0.8rem',
-              borderRadius: '25px',
-              backgroundColor: isDarkMode ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.95)',
-              border: isDarkMode ? '1px solid rgba(255,255,255,0.2)' : '1px solid rgba(255,255,255,0.3)',
-              transition: 'all 0.3s ease'
+              justifyContent: 'center'
             }}
-            whileHover={{ 
-              backgroundColor: 'white',
-              scale: 1.05,
-              border: '1px solid white'
-            }}
+            title="Buat Grup Baru"
           >
-            <svg 
-              width={isMobile ? "18" : "20"} 
-              height={isMobile ? "18" : "20"} 
-              viewBox="0 0 24 24" 
-              fill="none" 
-              stroke="#6366F1"
-              strokeWidth="2"
-            >
-              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-              <line x1="8" y1="7" x2="16" y2="7"/>
-              <line x1="8" y1="11" x2="12" y2="11"/>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M12 5v14M5 12h14"/>
             </svg>
-            <span style={{
-              color: '#6366F1',
-              fontSize: isMobile ? '0.8rem' : '0.9rem',
-              fontWeight: '600',
-              fontFamily: 'Helvetica, Arial, sans-serif'
-            }}>
-              Chatbot
-            </span>
-            <div style={{
-              backgroundColor: '#EC4899',
-              color: 'white',
-              fontSize: '0.7rem',
-              fontWeight: '700',
-              padding: '0.1rem 0.4rem',
-              borderRadius: '10px',
-              marginLeft: '0.3rem',
-              border: 'none'
-            }}>
-              NEW
-            </div>
-          </motion.div>
+          </button>
 
-          {/* Update */}
-          <motion.div
-            onClick={() => router.push('/update')}
-            onMouseEnter={() => handleLinkHover("link", "VIEW", "update")}
-            onMouseLeave={handleLinkLeave}
+          {/* Tombol Logout */}
+          <button
+            onClick={handleLogout}
             style={{
+              backgroundColor: 'transparent',
+              border: 'none',
+              color: 'white',
+              padding: '10px',
+              cursor: 'pointer',
+              fontSize: '24px',
               display: 'flex',
               alignItems: 'center',
-              gap: '0.5rem',
-              cursor: 'none',
-              padding: '0.4rem 0.8rem',
-              borderRadius: '25px',
-              backgroundColor: isDarkMode ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.95)',
-              border: isDarkMode ? '1px solid rgba(255,255,255,0.2)' : '1px solid rgba(255,255,255,0.3)',
-              transition: 'all 0.3s ease'
+              justifyContent: 'center'
             }}
-            whileHover={{ 
-              backgroundColor: 'white',
-              scale: 1.05,
-              border: '1px solid white'
-            }}
+            title="Logout"
           >
-            <svg 
-              width={isMobile ? "18" : "20"} 
-              height={isMobile ? "18" : "20"} 
-              viewBox="0 0 24 24" 
-              fill="none" 
-              stroke="#6366F1"
-              strokeWidth="2"
-            >
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-              <polyline points="14,2 14,8 20,8"/>
-              <line x1="16" y1="13" x2="8" y2="13"/>
-              <line x1="16" y1="17" x2="8" y2="17"/>
-              <polyline points="10,9 9,9 8,9"/>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/>
+              <polyline points="16 17 21 12 16 7"/>
+              <line x1="21" y1="12" x2="9" y2="12"/>
             </svg>
-            <span style={{
-              color: '#6366F1',
-              fontSize: isMobile ? '0.8rem' : '0.9rem',
-              fontWeight: '600',
-              fontFamily: 'Helvetica, Arial, sans-serif'
-            }}>
-              Update
-            </span>
-            <div style={{
-              backgroundColor: '#EC4899',
-              color: 'white',
-              fontSize: '0.7rem',
-              fontWeight: '700',
-              padding: '0.1rem 0.4rem',
-              borderRadius: '10px',
-              marginLeft: '0.3rem',
-              border: 'none'
-            }}>
-              NEW
-            </div>
-          </motion.div>
-
-          {/* Timeline */}
-          <motion.div
-            onClick={() => router.push('/timeline')}
-            onMouseEnter={() => handleLinkHover("link", "VIEW", "timeline")}
-            onMouseLeave={handleLinkLeave}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              cursor: 'none',
-              padding: '0.4rem 0.8rem',
-              borderRadius: '25px',
-              backgroundColor: isDarkMode ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.95)',
-              border: isDarkMode ? '1px solid rgba(255,255,255,0.2)' : '1px solid rgba(255,255,255,0.3)',
-              transition: 'all 0.3s ease'
-            }}
-            whileHover={{ 
-              backgroundColor: 'white',
-              scale: 1.05,
-              border: '1px solid white'
-            }}
-          >
-            <svg 
-              width={isMobile ? "18" : "20"} 
-              height={isMobile ? "18" : "20"} 
-              viewBox="0 0 24 24" 
-              fill="none" 
-              stroke="#6366F1"
-              strokeWidth="2"
-            >
-              <polyline points="1 4 1 10 7 10"/>
-              <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>
-              <line x1="12" y1="7" x2="12" y2="13"/>
-              <line x1="16" y1="11" x2="12" y2="7"/>
-            </svg>
-            <span style={{
-              color: '#6366F1',
-              fontSize: isMobile ? '0.8rem' : '0.9rem',
-              fontWeight: '600',
-              fontFamily: 'Helvetica, Arial, sans-serif'
-            }}>
-              Timeline
-            </span>
-            <div style={{
-              backgroundColor: '#EC4899',
-              color: 'white',
-              fontSize: '0.7rem',
-              fontWeight: '700',
-              padding: '0.1rem 0.4rem',
-              borderRadius: '10px',
-              marginLeft: '0.3rem',
-              border: 'none'
-            }}>
-              NEW
-            </div>
-          </motion.div>
+          </button>
         </div>
       </div>
 
-      {/* Header Section */}
-      <div 
-        ref={headerRef}
-        style={{
-          position: 'fixed',
-          top: isMobile ? '3.5rem' : '4.5rem',
-          left: 0,
-          width: '100%',
-          padding: isMobile ? '1rem' : '2rem',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          zIndex: 100,
-          boxSizing: 'border-box',
-          opacity: 1
-        }}
-      >
-        {/* Teks "MENURU" dengan animasi loading hanya di bagian NURU */}
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.8, delay: 0.5 }}
-        >
+      {/* Main Content */}
+      <div style={{
+        width: '100%',
+        maxWidth: '1200px',
+        margin: '0 auto',
+        padding: '160px 20px 100px',
+        boxSizing: 'border-box',
+        display: 'flex',
+        gap: '40px'
+      }}>
+        {/* Sidebar Grup */}
+        <div style={{
+          width: '300px',
+          flexShrink: 0
+        }}>
           <div style={{
-            fontSize: isMobile ? '1.5rem' : '2.5rem',
-            fontWeight: '300',
-            fontFamily: 'Helvetica, Arial, sans-serif',
-            margin: 0,
-            letterSpacing: '2px',
-            lineHeight: 1,
-            textTransform: 'uppercase',
-            color: isDarkMode ? 'white' : 'black',
-            minHeight: isMobile ? '1.8rem' : '2.8rem',
-            display: 'flex',
-            alignItems: 'center',
-            transition: 'color 0.5s ease'
+            fontSize: '36px',
+            fontWeight: 'bold',
+            marginBottom: '40px'
           }}>
-            ME
-            <AnimatePresence mode="wait">
-              {isLoading ? (
-                <motion.span
-                  key={loadingText}
-                  initial={{ opacity: 0, y: 5 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -5 }}
-                  transition={{ duration: 0.3 }}
+            Grup Anda
+          </div>
+          
+          {isLoading ? (
+            <div style={{
+              fontSize: '20px',
+              color: '#aaa'
+            }}>
+              Memuat grup...
+            </div>
+          ) : groups.length === 0 ? (
+            <div style={{
+              fontSize: '24px',
+              color: '#888'
+            }}>
+              Belum ada grup
+            </div>
+          ) : (
+            <div style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '15px'
+            }}>
+              {groups.map((group) => (
+                <div
+                  key={group.id}
+                  onClick={() => setSelectedGroup(group)}
                   style={{
-                    display: 'inline-block'
+                    padding: '20px',
+                    backgroundColor: selectedGroup?.id === group.id ? '#222' : 'transparent',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    border: selectedGroup?.id === group.id ? '1px solid #444' : '1px solid transparent',
+                    transition: 'all 0.3s'
                   }}
                 >
-                  {loadingText}
-                </motion.span>
-              ) : (
-                <motion.span
-                  key="nuru-final"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ duration: 0.5 }}
-                >
-                  NURU
-                </motion.span>
-              )}
-            </AnimatePresence>
-          </div>
-        </motion.div>
+                  <div style={{
+                    fontSize: '28px',
+                    fontWeight: 'bold',
+                    marginBottom: '10px'
+                  }}>
+                    {group.name}
+                  </div>
+                  <div style={{
+                    fontSize: '18px',
+                    color: '#aaa'
+                  }}>
+                    {group.members?.length || 0} anggota
+                  </div>
+                  <div style={{
+                    fontSize: '16px',
+                    color: '#666',
+                    marginTop: '5px'
+                  }}>
+                    Dibuat {formatDate(group.createdAt)}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
 
-        {/* Right Side Buttons */}
+        {/* Area Chat */}
         <div style={{
+          flex: 1,
+          display: 'flex',
+          flexDirection: 'column'
+        }}>
+          {!selectedGroup ? (
+            <div style={{
+              textAlign: 'center',
+              padding: '100px 20px',
+              fontSize: '28px',
+              color: '#888'
+            }}>
+              Pilih grup untuk memulai percakapan
+            </div>
+          ) : (
+            <>
+              {/* Header Chat */}
+              <div style={{
+                paddingBottom: '30px',
+                marginBottom: '30px',
+                borderBottom: '1px solid #333'
+              }}>
+                <div style={{
+                  fontSize: '48px',
+                  fontWeight: 'bold',
+                  marginBottom: '20px'
+                }}>
+                  {selectedGroup.name}
+                </div>
+                <div style={{
+                  fontSize: '22px',
+                  color: '#aaa',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '20px'
+                }}>
+                  <span>
+                    {selectedGroup.members?.length || 0} anggota
+                  </span>
+                  <span>•</span>
+                  <span>
+                    Pemilik: {selectedGroup.memberNames?.[selectedGroup.ownerId] || 'User'}
+                  </span>
+                </div>
+              </div>
+
+              {/* Daftar Pesan */}
+              <div style={{
+                flex: 1,
+                overflowY: 'auto',
+                maxHeight: '500px',
+                padding: '20px',
+                backgroundColor: '#111',
+                borderRadius: '12px',
+                marginBottom: '30px',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '25px'
+              }}>
+                {messages.length === 0 ? (
+                  <div style={{
+                    textAlign: 'center',
+                    padding: '50px',
+                    fontSize: '24px',
+                    color: '#888'
+                  }}>
+                    Belum ada pesan di grup ini
+                  </div>
+                ) : (
+                  messages.map((message) => {
+                    const videoEmbedUrl = getVideoEmbedUrl(message.link || "");
+                    
+                    return (
+                      <div
+                        key={message.id}
+                        style={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: message.userId === user?.uid ? 'flex-end' : 'flex-start'
+                        }}
+                      >
+                        {message.userId !== user?.uid && (
+                          <div style={{
+                            fontSize: '18px',
+                            color: '#aaa',
+                            marginBottom: '5px',
+                            alignSelf: 'flex-start'
+                          }}>
+                            {message.userName}
+                          </div>
+                        )}
+
+                        <div style={{
+                          backgroundColor: message.userId === user?.uid ? '#007bff' : '#333',
+                          padding: message.type === 'link' ? '0' : '20px',
+                          borderRadius: '15px',
+                          borderTopLeftRadius: message.userId === user?.uid ? '15px' : '5px',
+                          borderTopRightRadius: message.userId === user?.uid ? '5px' : '15px',
+                          maxWidth: '80%'
+                        }}>
+                          {message.type === 'text' && (
+                            <div style={{
+                              fontSize: '22px',
+                              whiteSpace: 'pre-wrap',
+                              wordBreak: 'break-word'
+                            }}>
+                              {message.text}
+                            </div>
+                          )}
+                          
+                          {message.type === 'link' && (
+                            <div style={{
+                              display: 'flex',
+                              flexDirection: 'column'
+                            }}>
+                              <a
+                                href={message.link}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                style={{
+                                  textDecoration: 'none',
+                                  color: 'white',
+                                  display: 'block'
+                                }}
+                              >
+                                <div style={{
+                                  padding: '20px',
+                                  borderBottom: message.thumbnail ? '1px solid rgba(255,255,255,0.1)' : 'none'
+                                }}>
+                                  <div style={{
+                                    fontSize: '22px',
+                                    fontWeight: 'bold',
+                                    marginBottom: '10px'
+                                  }}>
+                                    {message.title}
+                                  </div>
+                                  <div style={{
+                                    fontSize: '18px',
+                                    color: '#ccc',
+                                    wordBreak: 'break-all'
+                                  }}>
+                                    {message.link}
+                                  </div>
+                                </div>
+                                {message.thumbnail && (
+                                  <div>
+                                    <img 
+                                      src={message.thumbnail} 
+                                      alt="Thumbnail"
+                                      style={{
+                                        width: '100%',
+                                        height: 'auto',
+                                        borderBottomLeftRadius: '15px',
+                                        borderBottomRightRadius: '15px'
+                                      }}
+                                    />
+                                  </div>
+                                )}
+                              </a>
+                            </div>
+                          )}
+                          
+                          {videoEmbedUrl && message.type === 'link' && (
+                            <div style={{
+                              marginTop: '15px',
+                              padding: '0 20px 20px'
+                            }}>
+                              <div style={{
+                                position: 'relative',
+                                paddingBottom: '56.25%',
+                                height: 0,
+                                overflow: 'hidden',
+                                backgroundColor: '#000',
+                                borderRadius: '8px'
+                              }}>
+                                <iframe
+                                  src={videoEmbedUrl}
+                                  style={{
+                                    position: 'absolute',
+                                    top: 0,
+                                    left: 0,
+                                    width: '100%',
+                                    height: '100%',
+                                    border: 'none'
+                                  }}
+                                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                  allowFullScreen
+                                />
+                              </div>
+                            </div>
+                          )}
+                        </div>
+
+                        <div style={{
+                          fontSize: '16px',
+                          color: '#888',
+                          marginTop: '8px',
+                          alignSelf: message.userId === user?.uid ? 'flex-end' : 'flex-start'
+                        }}>
+                          {formatTime(message.createdAt)}
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
+                <div ref={messagesEndRef} />
+              </div>
+
+              {/* Form Kirim Pesan */}
+              <div style={{
+                backgroundColor: '#111',
+                borderRadius: '12px',
+                padding: '20px'
+              }}>
+                {showLinkForm ? (
+                  <div style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '15px'
+                  }}>
+                    <input
+                      type="text"
+                      value={newLink}
+                      onChange={(e) => setNewLink(e.target.value)}
+                      placeholder="Masukkan link (YouTube, Vimeo, artikel, dll.)"
+                      style={{
+                        width: '100%',
+                        padding: '15px',
+                        backgroundColor: 'transparent',
+                        border: 'none',
+                        color: 'white',
+                        fontSize: '20px',
+                        outline: 'none'
+                      }}
+                    />
+                    <input
+                      type="text"
+                      value={linkTitle}
+                      onChange={(e) => setLinkTitle(e.target.value)}
+                      placeholder="Judul link (opsional)"
+                      style={{
+                        width: '100%',
+                        padding: '15px',
+                        backgroundColor: 'transparent',
+                        border: 'none',
+                        color: 'white',
+                        fontSize: '20px',
+                        outline: 'none'
+                      }}
+                    />
+                    <div style={{
+                      display: 'flex',
+                      gap: '10px'
+                    }}>
+                      <button
+                        onClick={() => {
+                          setShowLinkForm(false);
+                          setNewLink("");
+                          setLinkTitle("");
+                        }}
+                        style={{
+                          flex: 1,
+                          padding: '15px',
+                          backgroundColor: 'transparent',
+                          border: 'none',
+                          color: 'white',
+                          fontSize: '20px',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        Batal
+                      </button>
+                      <button
+                        onClick={handleSendLink}
+                        style={{
+                          flex: 1,
+                          padding: '15px',
+                          backgroundColor: 'transparent',
+                          border: 'none',
+                          color: 'white',
+                          fontSize: '20px',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '10px'
+                        }}
+                      >
+                        Kirim Link
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div style={{
+                    display: 'flex',
+                    gap: '10px'
+                  }}>
+                    <button
+                      onClick={() => setShowLinkForm(true)}
+                      style={{
+                        padding: '15px',
+                        backgroundColor: 'transparent',
+                        border: 'none',
+                        color: 'white',
+                        fontSize: '24px',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                      }}
+                      title="Kirim Link dengan Thumbnail"
+                    >
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/>
+                        <path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/>
+                      </svg>
+                    </button>
+                    
+                    <input
+                      type="text"
+                      value={newMessage}
+                      onChange={(e) => setNewMessage(e.target.value)}
+                      onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                      placeholder="Ketik pesan..."
+                      style={{
+                        flex: 1,
+                        padding: '15px',
+                        backgroundColor: 'transparent',
+                        border: 'none',
+                        color: 'white',
+                        fontSize: '22px',
+                        outline: 'none'
+                      }}
+                    />
+                    
+                    <button
+                      onClick={handleSendMessage}
+                      disabled={!newMessage.trim()}
+                      style={{
+                        padding: '15px 30px',
+                        backgroundColor: 'transparent',
+                        border: 'none',
+                        color: newMessage.trim() ? 'white' : '#666',
+                        fontSize: '22px',
+                        cursor: newMessage.trim() ? 'pointer' : 'not-allowed',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '10px'
+                      }}
+                    >
+                      Kirim
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>
+                      </svg>
+                    </button>
+                  </div>
+                )}
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* Modal buat grup baru */}
+      {showNewGroupForm && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0,0,0,0.95)',
           display: 'flex',
           alignItems: 'center',
-          gap: isMobile ? '0.8rem' : '1rem'
+          justifyContent: 'center',
+          zIndex: 1001,
+          padding: '30px',
+          fontFamily: 'Helvetica, Arial, sans-serif'
         }}>
-          {/* Color Mode Toggle Button */}
-          <motion.button
-            onClick={toggleColorMode}
-            onMouseEnter={() => handleLinkHover("link", "VIEW", "theme")}
-            onMouseLeave={handleLinkLeave}
-            style={{
-              padding: isMobile ? '0.4rem 0.8rem' : '0.6rem 1rem',
-              fontSize: isMobile ? '0.8rem' : '1rem',
-              fontWeight: '600',
-              color: 'white',
-              backgroundColor: 'transparent',
-              border: `1px solid ${isDarkMode ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.3)'}`,
-              borderRadius: '50px',
-              cursor: 'none',
-              fontFamily: 'Helvetica, Arial, sans-serif',
-              backdropFilter: 'blur(10px)',
-              whiteSpace: 'nowrap',
+          <div style={{
+            backgroundColor: 'black',
+            width: '100%',
+            maxWidth: '500px',
+            padding: '50px',
+            fontFamily: 'Helvetica, Arial, sans-serif',
+          }}>
+            <div style={{
+              marginBottom: '40px',
+              fontFamily: 'Helvetica, Arial, sans-serif'
+            }}>
+              <div style={{
+                fontSize: '32px',
+                fontFamily: 'Helvetica, Arial, sans-serif',
+                marginBottom: '20px',
+                color: 'white',
+                fontWeight: 'bold'
+              }}>
+                Buat Grup Baru
+              </div>
+              <div style={{
+                fontSize: '20px',
+                color: 'white'
+              }}>
+                Buat grup untuk berbagi catatan dengan teman-teman
+              </div>
+            </div>
+
+            <div style={{
               display: 'flex',
-              alignItems: 'center',
-              gap: isMobile ? '0.3rem' : '0.5rem',
-              margin: 0,
-              transition: 'all 0.3s ease',
-              boxShadow: '0 4px 15px rgba(0,0,0,0.1)'
-            }}
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1, duration: 0.6 }}
-            whileHover={{ 
-              backgroundColor: isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.2)',
-              scale: 1.05,
-              border: `1px solid ${isDarkMode ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.5)'}`,
-              transition: { duration: 0.2 }
-            }}
-            whileTap={{ scale: 0.95 }}
-          >
-            <motion.div
-              animate={{ rotate: isDarkMode ? 0 : 180 }}
-              transition={{ duration: 0.5 }}
-            >
-              {isDarkMode ? '☀️' : '🌙'}
-            </motion.div>
-            {isMobile ? '' : (isDarkMode ? 'LIGHT' : 'DARK')}
-          </motion.button>
+              flexDirection: 'column',
+              gap: '25px'
+            }}>
+              <input
+                type="text"
+                value={newGroupName}
+                onChange={(e) => setNewGroupName(e.target.value)}
+                placeholder="Nama Grup"
+                style={{
+                  width: '100%',
+                  padding: '20px',
+                  backgroundColor: 'transparent',
+                  border: 'none',
+                  color: 'white',
+                  fontSize: '24px',
+                  outline: 'none'
+                }}
+              />
 
-          {/* Sign In Button */}
-          <motion.button
-            onClick={() => router.push('/signin')}
-            onMouseEnter={() => handleLinkHover("link", "VIEW", "signin")}
-            onMouseLeave={handleLinkLeave}
-            style={{
-              padding: isMobile ? '0.4rem 1rem' : '0.6rem 1.5rem',
-              fontSize: isMobile ? '0.9rem' : '1.5rem',
-              fontWeight: '600',
-              color: 'white',
-              backgroundColor: 'transparent',
-              border: `1px solid ${isDarkMode ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.3)'}`,
-              borderRadius: '50px',
-              cursor: 'none',
-              fontFamily: 'Helvetica, Arial, sans-serif',
-              backdropFilter: 'blur(10px)',
-              whiteSpace: 'nowrap',
-              display: 'flex',
-              alignItems: 'center',
-              gap: isMobile ? '0.3rem' : '0.5rem',
-              margin: 0,
-              maxWidth: isMobile ? '120px' : 'none',
-              transition: 'all 0.3s ease',
-              boxShadow: '0 4px 15px rgba(0,0,0,0.1)'
-            }}
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1.2, duration: 0.6 }}
-            whileHover={{ 
-              backgroundColor: isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.2)',
-              scale: 1.05,
-              border: `1px solid ${isDarkMode ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.5)'}`,
-              transition: { duration: 0.2 }
-            }}
-            whileTap={{ scale: 0.95 }}
-          >
-            <svg 
-              width={isMobile ? "18" : "30"} 
-              height={isMobile ? "18" : "30"} 
-              viewBox="0 0 24 24" 
-              fill="none" 
-              stroke="currentColor" 
-              strokeWidth="2"
-            >
-              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-              <circle cx="12" cy="7" r="4"/>
-            </svg>
-            {isMobile ? 'SIGN IN' : 'SIGN IN'}
-          </motion.button>
+              <div style={{
+                display: 'flex',
+                justifyContent: 'flex-end',
+                gap: '20px',
+                marginTop: '30px'
+              }}>
+                <button
+                  onClick={() => {
+                    setShowNewGroupForm(false);
+                    setNewGroupName("");
+                  }}
+                  style={{
+                    padding: '15px 30px',
+                    backgroundColor: 'transparent',
+                    border: 'none',
+                    color: 'white',
+                    fontSize: '20px',
+                    cursor: 'pointer'
+                  }}
+                >
+                  Batal
+                </button>
+                <button
+                  onClick={handleCreateGroup}
+                  style={{
+                    padding: '15px 30px',
+                    backgroundColor: 'transparent',
+                    border: 'none',
+                    color: 'white',
+                    fontSize: '20px',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '10px'
+                  }}
+                >
+                  Buat Grup
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M12 5v14M5 12h14"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
-
-      {/* Deskripsi MENURU di Body Halaman Utama - DIBUAT HILANG SAAT SCROLL */}
-      <motion.div
-        ref={descriptionRef}
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: showDescription ? 1 : 0, y: showDescription ? 0 : -20 }}
-        transition={{ duration: 0.5 }}
-        style={{
-          position: 'absolute',
-          top: isMobile ? '8rem' : '12rem',
-          left: isMobile ? '1rem' : '2rem',
-          width: isMobile ? 'calc(100% - 2rem)' : '800px',
-          maxWidth: '800px',
-          textAlign: 'left',
-          marginBottom: '2rem',
-          zIndex: 20,
-          pointerEvents: showDescription ? 'auto' : 'none'
-        }}
-      >
-        <p style={{
-          color: isDarkMode ? 'white' : 'black',
-          fontSize: isMobile ? '1.8rem' : '3.5rem',
-          fontWeight: '400',
-          fontFamily: 'HelveticaNowDisplay, Arial, sans-serif',
-          lineHeight: 1.1,
-          margin: 0,
-          marginBottom: isMobile ? '1.5rem' : '2rem',
-          transition: 'color 0.5s ease',
-          wordWrap: 'break-word',
-          overflowWrap: 'break-word'
-        }}>
-          Menuru is a branding personal journal life with a experiences of self about happy, sad, angry, etc.
-        </p>
-
-        {/* Foto di bawah teks deskripsi */}
-        <div style={{
-          width: isMobile ? 'calc(100% - 1rem)' : '650px', // Lebar sedikit lebih kecil
-          marginLeft: isMobile ? '0.5rem' : '1.5rem', // Geser ke kiri sedikit
-          overflow: 'hidden',
-          borderRadius: '15px',
-          boxShadow: '0 15px 40px rgba(0,0,0,0.4)',
-          border: `2px solid ${isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}`,
-          marginTop: '1rem' // Jarak dari teks
-        }}>
-          <img 
-            src="images/5.jpg" 
-            alt="Menuru Visual"
-            style={{
-              width: '100%',
-              height: 'auto',
-              display: 'block',
-              objectFit: 'cover',
-              borderRadius: '13px'
-            }}
-            onError={(e) => {
-              console.error("Gambar tidak ditemukan:", e);
-              e.currentTarget.style.backgroundColor = isDarkMode ? '#333' : '#eee';
-              e.currentTarget.style.display = 'flex';
-              e.currentTarget.style.alignItems = 'center';
-              e.currentTarget.style.justifyContent = 'center';
-              e.currentTarget.style.color = isDarkMode ? '#fff' : '#000';
-              e.currentTarget.style.height = '400px';
-              e.currentTarget.innerHTML = '<div style="padding: 2rem; text-align: center;">Image: 5.jpg</div>';
-            }}
-          />
-        </div>
-      </motion.div>
-
-      {/* Content tambahan untuk membuat halaman lebih panjang */}
-      <div style={{
-        height: '150vh',
-        width: '100%',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginTop: isMobile ? '90vh' : '80vh', // Disesuaikan agar ada jarak dengan foto
-        zIndex: 10,
-        position: 'relative'
-      }}>
-        <motion.p
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          transition={{ duration: 0.8 }}
-          style={{
-            color: isDarkMode ? 'white' : 'black',
-            fontSize: isMobile ? '1.5rem' : '2rem',
-            fontWeight: '300',
-            textAlign: 'center',
-            maxWidth: '600px',
-            padding: '0 2rem'
-          }}
-        >
-          More content coming soon...
-        </motion.p>
-      </div>
+      )}
     </div>
   );
 }
