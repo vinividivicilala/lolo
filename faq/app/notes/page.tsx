@@ -5,8 +5,7 @@ import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { 
   getAuth, 
-  onAuthStateChanged,
-  signOut 
+  onAuthStateChanged
 } from "firebase/auth";
 import { 
   getFirestore,
@@ -42,11 +41,13 @@ interface Note {
   userId: string;
   createdAt: any;
   updatedAt: any;
+  categoryColor?: string;
 }
 
 export default function NotesPage(): React.JSX.Element {
   const router = useRouter();
   const [user, setUser] = useState<any>(null);
+  const [userDisplayName, setUserDisplayName] = useState("");
   const [notes, setNotes] = useState<Note[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showNewNoteForm, setShowNewNoteForm] = useState(false);
@@ -58,6 +59,12 @@ export default function NotesPage(): React.JSX.Element {
   });
   const [auth, setAuth] = useState<any>(null);
   const [db, setDb] = useState<any>(null);
+
+  // Warna untuk kategori
+  const categoryColors = [
+    "#3B82F6", "#10B981", "#F59E0B", "#EF4444", "#8B5CF6",
+    "#EC4899", "#14B8A6", "#F97316", "#84CC16", "#6366F1"
+  ];
 
   // 1. Inisialisasi Firebase di client side
   useEffect(() => {
@@ -89,6 +96,10 @@ export default function NotesPage(): React.JSX.Element {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       if (currentUser) {
         setUser(currentUser);
+        const name = currentUser.displayName || 
+                    currentUser.email?.split('@')[0] || 
+                    'User';
+        setUserDisplayName(name);
         loadUserNotes(currentUser.uid);
       } else {
         router.push('/');
@@ -143,12 +154,16 @@ export default function NotesPage(): React.JSX.Element {
     }
 
     try {
+      // Pilih warna acak untuk kategori
+      const randomColor = categoryColors[Math.floor(Math.random() * categoryColors.length)];
+      
       const noteData = {
         title: newNote.title.trim(),
         category: newNote.category.trim(),
         link: newNote.link.trim(),
         description: newNote.description.trim(),
         userId: user.uid,
+        categoryColor: randomColor,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp()
       };
@@ -158,7 +173,6 @@ export default function NotesPage(): React.JSX.Element {
       setNewNote({ title: "", category: "", link: "", description: "" });
       setShowNewNoteForm(false);
       
-      alert("Catatan berhasil dibuat!");
     } catch (error) {
       console.error("Error creating note:", error);
       alert("Gagal membuat catatan. Silakan coba lagi.");
@@ -172,23 +186,10 @@ export default function NotesPage(): React.JSX.Element {
     if (confirm("Apakah Anda yakin ingin menghapus catatan ini?")) {
       try {
         await deleteDoc(doc(db, 'userNotes', noteId));
-        alert("Catatan berhasil dihapus!");
       } catch (error) {
         console.error("Error deleting note:", error);
         alert("Gagal menghapus catatan.");
       }
-    }
-  };
-
-  // Handle logout
-  const handleLogout = async () => {
-    if (!auth) return;
-    
-    try {
-      await signOut(auth);
-      router.push('/');
-    } catch (error) {
-      console.error("Logout error:", error);
     }
   };
 
@@ -197,6 +198,18 @@ export default function NotesPage(): React.JSX.Element {
     if (!timestamp) return "Baru saja";
     
     const date = timestamp.toDate();
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    
+    if (diffDays === 0) {
+      return "Hari ini";
+    } else if (diffDays === 1) {
+      return "Kemarin";
+    } else if (diffDays < 7) {
+      return `${diffDays} hari lalu`;
+    }
+    
     return date.toLocaleDateString('id-ID', {
       day: 'numeric',
       month: 'short',
@@ -210,12 +223,13 @@ export default function NotesPage(): React.JSX.Element {
     
     try {
       const url = new URL(link);
-      const domain = url.hostname;
       
       // Untuk YouTube
-      if (domain.includes('youtube.com') || domain.includes('youtu.be')) {
+      if (url.hostname.includes('youtube.com') || url.hostname.includes('youtu.be')) {
         const videoId = url.searchParams.get('v') || url.pathname.split('/').pop();
-        return `https://img.youtube.com/vi/${videoId}/0.jpg`;
+        if (videoId) {
+          return `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
+        }
       }
       
       return null;
@@ -235,8 +249,9 @@ export default function NotesPage(): React.JSX.Element {
         justifyContent: 'center',
         color: 'white',
         fontFamily: 'Helvetica, Arial, sans-serif',
+        fontSize: '1rem'
       }}>
-        Loading Notes...
+        Loading...
       </div>
     );
   }
@@ -257,58 +272,66 @@ export default function NotesPage(): React.JSX.Element {
         top: 0,
         left: 0,
         right: 0,
-        padding: '1rem 2rem',
+        padding: '1.5rem 2rem',
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
         backgroundColor: 'black',
-        borderBottom: '1px solid #333',
         zIndex: 100,
       }}>
         <div style={{
-          fontSize: '1.8rem',
+          fontSize: '2rem',
           fontWeight: 'bold',
+          letterSpacing: '-0.5px'
         }}>
-          CATATAN
+          Menuru
         </div>
 
         <div style={{
           display: 'flex',
           alignItems: 'center',
-          gap: '1rem',
+          gap: '1.5rem'
         }}>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.75rem',
+            fontSize: '1rem',
+            color: '#888'
+          }}>
+            <div style={{
+              width: '36px',
+              height: '36px',
+              borderRadius: '50%',
+              backgroundColor: '#3B82F6',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontWeight: '600',
+              fontSize: '1rem'
+            }}>
+              {userDisplayName.charAt(0).toUpperCase()}
+            </div>
+            <span>{userDisplayName}</span>
+          </div>
+          
           <button
             onClick={() => setShowNewNoteForm(true)}
             style={{
               backgroundColor: 'transparent',
-              border: '1px solid white',
+              border: 'none',
               color: 'white',
-              padding: '0.5rem 1rem',
+              padding: '0.5rem',
               cursor: 'pointer',
               fontSize: '1rem',
               display: 'flex',
               alignItems: 'center',
-              gap: '0.5rem',
+              gap: '0.5rem'
             }}
           >
-            TAMBAH
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M7 17l9.2-9.2M17 17V7H7"/>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M12 5v14M5 12h14"/>
             </svg>
-          </button>
-
-          <button
-            onClick={handleLogout}
-            style={{
-              backgroundColor: 'transparent',
-              border: '1px solid white',
-              color: 'white',
-              padding: '0.5rem 1rem',
-              cursor: 'pointer',
-              fontSize: '1rem',
-            }}
-          >
-            LOGOUT
           </button>
         </div>
       </div>
@@ -316,178 +339,11 @@ export default function NotesPage(): React.JSX.Element {
       {/* Main Content */}
       <div style={{
         width: '100%',
-        maxWidth: '1200px',
+        maxWidth: '800px',
         margin: '0 auto',
-        padding: '6rem 2rem 2rem',
-        boxSizing: 'border-box',
+        padding: '7rem 1rem 2rem',
+        boxSizing: 'border-box'
       }}>
-        {/* Form buat catatan baru */}
-        {showNewNoteForm && (
-          <div style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: 'rgba(0,0,0,0.9)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 1000,
-            padding: '2rem',
-          }}>
-            <div style={{
-              backgroundColor: '#111',
-              border: '1px solid #333',
-              width: '100%',
-              maxWidth: '600px',
-              padding: '2rem',
-            }}>
-              <div style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                marginBottom: '2rem',
-              }}>
-                <div style={{
-                  fontSize: '1.5rem',
-                  fontWeight: 'bold',
-                }}>
-                  BUAT CATATAN BARU
-                </div>
-                <button
-                  onClick={() => setShowNewNoteForm(false)}
-                  style={{
-                    backgroundColor: 'transparent',
-                    border: 'none',
-                    color: 'white',
-                    fontSize: '1.5rem',
-                    cursor: 'pointer',
-                    padding: '0',
-                  }}
-                >
-                  ×
-                </button>
-              </div>
-
-              <div style={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '1.5rem',
-              }}>
-                {/* Input judul */}
-                <div>
-                  <input
-                    type="text"
-                    value={newNote.title}
-                    onChange={(e) => setNewNote({...newNote, title: e.target.value})}
-                    placeholder="JUDUL"
-                    style={{
-                      width: '100%',
-                      padding: '1rem',
-                      backgroundColor: 'black',
-                      border: '1px solid #333',
-                      color: 'white',
-                      fontSize: '1rem',
-                      outline: 'none',
-                      fontFamily: 'Helvetica, Arial, sans-serif',
-                    }}
-                  />
-                </div>
-
-                {/* Input kategori */}
-                <div>
-                  <input
-                    type="text"
-                    value={newNote.category}
-                    onChange={(e) => setNewNote({...newNote, category: e.target.value})}
-                    placeholder="KATEGORI"
-                    style={{
-                      width: '100%',
-                      padding: '1rem',
-                      backgroundColor: 'black',
-                      border: '1px solid #333',
-                      color: 'white',
-                      fontSize: '1rem',
-                      outline: 'none',
-                      fontFamily: 'Helvetica, Arial, sans-serif',
-                    }}
-                  />
-                </div>
-
-                {/* Input link */}
-                <div>
-                  <input
-                    type="text"
-                    value={newNote.link}
-                    onChange={(e) => setNewNote({...newNote, link: e.target.value})}
-                    placeholder="LINK"
-                    style={{
-                      width: '100%',
-                      padding: '1rem',
-                      backgroundColor: 'black',
-                      border: '1px solid #333',
-                      color: 'white',
-                      fontSize: '1rem',
-                      outline: 'none',
-                      fontFamily: 'Helvetica, Arial, sans-serif',
-                    }}
-                  />
-                </div>
-
-                {/* Input deskripsi */}
-                <div>
-                  <textarea
-                    value={newNote.description}
-                    onChange={(e) => setNewNote({...newNote, description: e.target.value})}
-                    placeholder="DESKRIPSI"
-                    rows={6}
-                    style={{
-                      width: '100%',
-                      padding: '1rem',
-                      backgroundColor: 'black',
-                      border: '1px solid #333',
-                      color: 'white',
-                      fontSize: '1rem',
-                      outline: 'none',
-                      fontFamily: 'Helvetica, Arial, sans-serif',
-                      resize: 'vertical',
-                    }}
-                  />
-                </div>
-
-                {/* Tombol aksi */}
-                <div style={{
-                  display: 'flex',
-                  justifyContent: 'flex-end',
-                  gap: '1rem',
-                  marginTop: '1rem',
-                }}>
-                  <button
-                    onClick={handleCreateNote}
-                    style={{
-                      padding: '1rem 2rem',
-                      backgroundColor: 'black',
-                      border: '1px solid white',
-                      color: 'white',
-                      fontSize: '1rem',
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '0.5rem',
-                    }}
-                  >
-                    SIMPAN
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M7 17l9.2-9.2M17 17V7H7"/>
-                    </svg>
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
         {/* Daftar catatan */}
         {isLoading ? (
           <div style={{
@@ -495,22 +351,34 @@ export default function NotesPage(): React.JSX.Element {
             justifyContent: 'center',
             padding: '3rem',
             fontSize: '1rem',
+            color: '#888'
           }}>
-            MEMUAT CATATAN...
+            Memuat catatan...
           </div>
         ) : notes.length === 0 ? (
           <div style={{
             textAlign: 'center',
-            padding: '4rem 1rem',
-            fontSize: '1.2rem',
+            padding: '4rem 1rem'
           }}>
-            BELUM ADA CATATAN
+            <div style={{
+              fontSize: '1.2rem',
+              color: '#888',
+              marginBottom: '1rem'
+            }}>
+              Belum ada catatan
+            </div>
+            <div style={{
+              fontSize: '1rem',
+              color: '#555'
+            }}>
+              Buat catatan pertama Anda
+            </div>
           </div>
         ) : (
           <div style={{
             display: 'flex',
             flexDirection: 'column',
-            gap: '2rem',
+            gap: '3rem'
           }}>
             {notes.map((note) => {
               const linkPreview = getLinkPreview(note.link);
@@ -519,84 +387,41 @@ export default function NotesPage(): React.JSX.Element {
                 <div
                   key={note.id}
                   style={{
-                    border: '1px solid #333',
-                    padding: '2rem',
                     display: 'flex',
                     flexDirection: 'column',
-                    gap: '1rem',
+                    gap: '0.75rem'
                   }}
                 >
-                  {/* Header catatan */}
+                  {/* Judul */}
                   <div style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'flex-start',
+                    fontSize: '2.5rem',
+                    fontWeight: 'bold',
+                    lineHeight: 1.2
                   }}>
-                    <div>
-                      <div style={{
-                        fontSize: '1.8rem',
-                        fontWeight: 'bold',
-                        marginBottom: '0.5rem',
-                      }}>
-                        {note.title}
-                      </div>
-                      {note.category && (
-                        <div style={{
-                          fontSize: '1rem',
-                          color: '#888',
-                          marginBottom: '0.5rem',
-                        }}>
-                          {note.category}
-                        </div>
-                      )}
-                    </div>
-                    
-                    <button
-                      onClick={() => handleDeleteNote(note.id!)}
-                      style={{
-                        backgroundColor: 'transparent',
-                        border: 'none',
-                        color: 'white',
-                        fontSize: '1.2rem',
-                        cursor: 'pointer',
-                        padding: '0.5rem',
-                      }}
-                    >
-                      ×
-                    </button>
+                    {note.title}
                   </div>
 
-                  {/* Link preview */}
-                  {linkPreview && (
+                  {/* Kategori dengan label warna */}
+                  {note.category && (
                     <div style={{
-                      margin: '1rem 0',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '0.5rem',
+                      marginTop: '0.25rem'
                     }}>
-                      <img
-                        src={linkPreview}
-                        alt="Link preview"
-                        style={{
-                          width: '100%',
-                          maxWidth: '400px',
-                          height: 'auto',
-                          border: '1px solid #333',
-                        }}
-                      />
-                      {note.link && (
-                        <a
-                          href={note.link}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          style={{
-                            color: '#888',
-                            fontSize: '0.9rem',
-                            marginTop: '0.5rem',
-                            display: 'block',
-                            textDecoration: 'none',
-                          }}
-                        >
-                          {note.link}
-                        </a>
-                      )}
+                      <div style={{
+                        width: '12px',
+                        height: '12px',
+                        borderRadius: '50%',
+                        backgroundColor: note.categoryColor || '#3B82F6'
+                      }} />
+                      <span style={{
+                        fontSize: '1rem',
+                        color: note.categoryColor || '#3B82F6',
+                        fontWeight: '500'
+                      }}>
+                        {note.category}
+                      </span>
                     </div>
                   )}
 
@@ -605,48 +430,95 @@ export default function NotesPage(): React.JSX.Element {
                     <div style={{
                       fontSize: '1.1rem',
                       lineHeight: 1.6,
-                      whiteSpace: 'pre-wrap',
+                      color: '#ccc',
+                      marginTop: '0.5rem',
+                      whiteSpace: 'pre-wrap'
                     }}>
                       {note.description}
                     </div>
                   )}
 
-                  {/* Footer */}
+                  {/* Link preview */}
+                  {linkPreview && (
+                    <div style={{
+                      margin: '1rem 0'
+                    }}>
+                      <img
+                        src={linkPreview}
+                        alt="Link preview"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).style.display = 'none';
+                        }}
+                        style={{
+                          width: '100%',
+                          maxWidth: '560px',
+                          height: 'auto',
+                          aspectRatio: '16/9',
+                          objectFit: 'cover'
+                        }}
+                      />
+                    </div>
+                  )}
+
+                  {/* Footer dengan tanggal dan tombol link */}
                   <div style={{
                     display: 'flex',
                     justifyContent: 'space-between',
                     alignItems: 'center',
-                    marginTop: '1rem',
-                    paddingTop: '1rem',
-                    borderTop: '1px solid #333',
-                    fontSize: '0.9rem',
-                    color: '#888',
+                    marginTop: '1rem'
                   }}>
-                    <span>
+                    <span style={{
+                      fontSize: '0.9rem',
+                      color: '#888'
+                    }}>
                       {formatDate(note.updatedAt)}
                     </span>
                     
-                    {note.link && (
-                      <a
-                        href={note.link}
-                        target="_blank"
-                        rel="noopener noreferrer"
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '1rem'
+                    }}>
+                      {note.link && (
+                        <a
+                          href={note.link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{
+                            color: 'white',
+                            textDecoration: 'none',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.5rem',
+                            fontSize: '0.9rem'
+                          }}
+                        >
+                          Buka Link
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M7 17l9.2-9.2M17 17V7H7"/>
+                          </svg>
+                        </a>
+                      )}
+                      
+                      <button
+                        onClick={() => handleDeleteNote(note.id!)}
                         style={{
-                          color: 'white',
-                          textDecoration: 'none',
+                          backgroundColor: 'transparent',
+                          border: 'none',
+                          color: '#888',
+                          fontSize: '1.2rem',
+                          cursor: 'pointer',
+                          padding: '0.25rem',
+                          width: '24px',
+                          height: '24px',
                           display: 'flex',
                           alignItems: 'center',
-                          gap: '0.5rem',
-                          border: '1px solid white',
-                          padding: '0.5rem 1rem',
+                          justifyContent: 'center'
                         }}
                       >
-                        BUKA LINK
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <path d="M7 17l9.2-9.2M17 17V7H7"/>
-                        </svg>
-                      </a>
-                    )}
+                        ×
+                      </button>
+                    </div>
                   </div>
                 </div>
               );
@@ -654,6 +526,173 @@ export default function NotesPage(): React.JSX.Element {
           </div>
         )}
       </div>
+
+      {/* Modal buat catatan baru */}
+      {showNewNoteForm && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0,0,0,0.95)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000,
+          padding: '1rem'
+        }}>
+          <div style={{
+            backgroundColor: 'black',
+            width: '100%',
+            maxWidth: '600px',
+            padding: '2.5rem'
+          }}>
+            <div style={{
+              marginBottom: '2.5rem'
+            }}>
+              <div style={{
+                fontSize: '1.8rem',
+                fontWeight: 'bold',
+                marginBottom: '0.5rem'
+              }}>
+                Buat Catatan Baru
+              </div>
+            </div>
+
+            <div style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '1.5rem'
+            }}>
+              {/* Input judul */}
+              <div>
+                <input
+                  type="text"
+                  value={newNote.title}
+                  onChange={(e) => setNewNote({...newNote, title: e.target.value})}
+                  placeholder="Judul"
+                  style={{
+                    width: '100%',
+                    padding: '1rem',
+                    backgroundColor: 'transparent',
+                    border: 'none',
+                    color: 'white',
+                    fontSize: '2.5rem',
+                    outline: 'none',
+                    fontFamily: 'Helvetica, Arial, sans-serif',
+                    fontWeight: 'bold',
+                    lineHeight: 1.2
+                  }}
+                />
+              </div>
+
+              {/* Input kategori */}
+              <div>
+                <input
+                  type="text"
+                  value={newNote.category}
+                  onChange={(e) => setNewNote({...newNote, category: e.target.value})}
+                  placeholder="Kategori"
+                  style={{
+                    width: '100%',
+                    padding: '1rem',
+                    backgroundColor: 'transparent',
+                    border: 'none',
+                    color: '#888',
+                    fontSize: '1rem',
+                    outline: 'none',
+                    fontFamily: 'Helvetica, Arial, sans-serif'
+                  }}
+                />
+              </div>
+
+              {/* Input link */}
+              <div>
+                <input
+                  type="text"
+                  value={newNote.link}
+                  onChange={(e) => setNewNote({...newNote, link: e.target.value})}
+                  placeholder="Link (YouTube, dll.)"
+                  style={{
+                    width: '100%',
+                    padding: '1rem',
+                    backgroundColor: 'transparent',
+                    border: 'none',
+                    color: '#888',
+                    fontSize: '1rem',
+                    outline: 'none',
+                    fontFamily: 'Helvetica, Arial, sans-serif'
+                  }}
+                />
+              </div>
+
+              {/* Input deskripsi */}
+              <div>
+                <textarea
+                  value={newNote.description}
+                  onChange={(e) => setNewNote({...newNote, description: e.target.value})}
+                  placeholder="Deskripsi"
+                  rows={8}
+                  style={{
+                    width: '100%',
+                    padding: '1rem',
+                    backgroundColor: 'transparent',
+                    border: 'none',
+                    color: '#ccc',
+                    fontSize: '1.1rem',
+                    outline: 'none',
+                    fontFamily: 'Helvetica, Arial, sans-serif',
+                    resize: 'none',
+                    lineHeight: 1.6
+                  }}
+                />
+              </div>
+
+              {/* Tombol aksi */}
+              <div style={{
+                display: 'flex',
+                justifyContent: 'flex-end',
+                gap: '1rem',
+                marginTop: '2rem'
+              }}>
+                <button
+                  onClick={() => setShowNewNoteForm(false)}
+                  style={{
+                    padding: '0.8rem 1.5rem',
+                    backgroundColor: 'transparent',
+                    border: 'none',
+                    color: '#888',
+                    fontSize: '0.9rem',
+                    cursor: 'pointer'
+                  }}
+                >
+                  Batal
+                </button>
+                <button
+                  onClick={handleCreateNote}
+                  style={{
+                    padding: '0.8rem 1.5rem',
+                    backgroundColor: 'transparent',
+                    border: 'none',
+                    color: 'white',
+                    fontSize: '0.9rem',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem'
+                  }}
+                >
+                  Simpan
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M7 17l9.2-9.2M17 17V7H7"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
