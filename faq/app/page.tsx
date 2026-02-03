@@ -122,19 +122,21 @@ interface Notification {
 }
 
 // Type untuk Note
+// Type untuk Note - DIPERBAIKI
 interface Note {
   id: string;
   title: string;
-  content: string;
+  content: string;  // Ini akan menampung description dari Firestore
   userId: string;
   userName: string;
   userEmail: string;
   createdAt: Timestamp | Date;
   updatedAt: Timestamp | Date;
   isPinned: boolean;
-  category?: string;
+  category?: string;  // Tambahkan ini untuk kategori
+  link?: string;      // Tambahkan ini untuk link video/URL
   tags?: string[];
-  color?: string; 
+  color?: string;
 }
 
 export default function HomePage(): React.JSX.Element {
@@ -785,7 +787,8 @@ export default function HomePage(): React.JSX.Element {
     loadTotalLoggedInUsers();
   }, []);
 
- // Fungsi untuk load user notes dari Firebase - UPDATE INI
+
+// Fungsi untuk load user notes dari Firebase - DIPERBAIKI
 const loadUserNotes = async (userId: string) => {
   if (!db || !userId) return;
   
@@ -793,7 +796,7 @@ const loadUserNotes = async (userId: string) => {
     setIsLoadingNotes(true);
     console.log(`📝 Loading notes for user: ${userId} from userNotes collection`);
     
-    // Gunakan collection 'userNotes' bukan 'notes'
+    // Gunakan collection 'userNotes' yang sama dengan halaman notes
     const notesRef = collection(db, 'userNotes');
     const q = query(
       notesRef, 
@@ -806,18 +809,43 @@ const loadUserNotes = async (userId: string) => {
     
     querySnapshot.forEach((doc) => {
       const data = doc.data();
+      
+      // DEBUG: Tampilkan data yang diterima
+      console.log("Firestore note data:", {
+        id: doc.id,
+        data: data,
+        hasCategory: !!data.category,
+        hasLink: !!data.link,
+        hasDescription: !!data.description,
+        hasContent: !!data.content
+      });
+      
+      // Ambil field sesuai dengan struktur di halaman notes
+      const noteTitle = data.title?.trim() || 'Untitled Note';
+      const noteDescription = data.description?.trim() || data.content?.trim() || '';
+      const noteCategory = data.category?.trim() || '';
+      const noteLink = data.link?.trim() || '';
+      
       notesData.push({
         id: doc.id,
-        title: data.title || 'Untitled Note',
-        content: data.content || '',
+        title: noteTitle,
+        content: noteDescription, // Gunakan description sebagai content
         userId: data.userId || userId,
+        userName: data.userName || userDisplayName || 'User',
+        userEmail: data.userEmail || user?.email || '',
         createdAt: data.createdAt || new Date(),
         updatedAt: data.updatedAt || new Date(),
-        color: data.color || '#3B82F6'  // Tambahkan warna default
+        isPinned: data.isPinned || false,
+        category: noteCategory, // Tambahkan category
+        link: noteLink, // Tambahkan link
+        color: data.color || '#3B82F6',
+        tags: data.tags || []
       });
     });
     
     console.log(`✅ Loaded ${notesData.length} notes for user ${userId}`);
+    console.log("Sample note data:", notesData[0]); // Debug: tampilkan contoh data
+    
     setUserNotes(notesData);
     setTotalNotesCount(notesData.length);
     setIsLoadingNotes(false);
@@ -827,13 +855,12 @@ const loadUserNotes = async (userId: string) => {
   }
 };
 
-  
- // Fungsi untuk load user notes secara real-time - UPDATE INI
+// Fungsi untuk load user notes secara real-time - DIPERBAIKI
 const loadUserNotesRealtime = (userId: string) => {
   if (!db || !userId) return () => {};
   
   try {
-    // Gunakan collection 'userNotes' bukan 'notes'
+    // Gunakan collection 'userNotes' yang sama
     const notesRef = collection(db, 'userNotes');
     const q = query(
       notesRef, 
@@ -846,14 +873,27 @@ const loadUserNotesRealtime = (userId: string) => {
       
       querySnapshot.forEach((doc) => {
         const data = doc.data();
+        
+        // Ambil field sesuai dengan struktur di halaman notes
+        const noteTitle = data.title?.trim() || 'Untitled Note';
+        const noteDescription = data.description?.trim() || data.content?.trim() || '';
+        const noteCategory = data.category?.trim() || '';
+        const noteLink = data.link?.trim() || '';
+        
         notesData.push({
           id: doc.id,
-          title: data.title || 'Untitled Note',
-          content: data.content || '',
+          title: noteTitle,
+          content: noteDescription, // Gunakan description sebagai content
           userId: data.userId || userId,
+          userName: data.userName || userDisplayName || 'User',
+          userEmail: data.userEmail || user?.email || '',
           createdAt: data.createdAt || new Date(),
           updatedAt: data.updatedAt || new Date(),
-          color: data.color || '#3B82F6'  // Tambahkan warna default
+          isPinned: data.isPinned || false,
+          category: noteCategory, // Tambahkan category
+          link: noteLink, // Tambahkan link
+          color: data.color || '#3B82F6',
+          tags: data.tags || []
         });
       });
       
@@ -870,6 +910,12 @@ const loadUserNotesRealtime = (userId: string) => {
     return () => {};
   }
 };
+
+
+
+
+
+
 
   
 
@@ -5603,6 +5649,7 @@ const loadUserNotesRealtime = (userId: string) => {
     </div>
   );
 }
+
 
 
 
