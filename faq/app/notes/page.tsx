@@ -453,7 +453,6 @@ export default function NotesPage(): React.JSX.Element {
         alignItems: 'center',
         backgroundColor: 'black',
         zIndex: 100,
-        borderBottom: '1px solid #333'
       }}>
         {/* Judul Website - KIRI ATAS - DIPERBESAR */}
         <div style={{
@@ -472,14 +471,20 @@ export default function NotesPage(): React.JSX.Element {
           alignItems: 'center',
           gap: '30px'
         }}>
-          {/* Nama User - DIPERBESAR */}
+          {/* Nama User - DIPERBESAR dengan South East Arrow */}
           <div style={{
             fontSize: '32px', // DIPERBESAR dari 24px
             fontFamily: 'Helvetica, Arial, sans-serif',
             color: 'white',
-            fontWeight: 'bold'
+            fontWeight: 'bold',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '10px'
           }}>
             {userDisplayName}
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M7 17l9.2-9.2M17 17V7H7"/>
+            </svg>
           </div>
           
           {/* Grup Selector */}
@@ -498,11 +503,10 @@ export default function NotesPage(): React.JSX.Element {
                 style={{
                   padding: '10px 15px',
                   backgroundColor: 'transparent',
-                  border: '1px solid #555',
+                  border: 'none',
                   color: 'white',
                   fontSize: '18px',
                   outline: 'none',
-                  borderRadius: '8px',
                   cursor: 'pointer',
                   minWidth: '150px'
                 }}
@@ -519,24 +523,22 @@ export default function NotesPage(): React.JSX.Element {
                 onClick={() => setShowInviteModal(true)}
                 style={{
                   backgroundColor: 'transparent',
-                  border: '1px solid #555',
+                  border: 'none',
                   color: 'white',
-                  padding: '10px 15px',
+                  padding: '10px',
                   cursor: 'pointer',
-                  fontSize: '18px',
-                  borderRadius: '8px',
+                  fontSize: '24px',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '8px'
+                  justifyContent: 'center'
                 }}
               >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
                   <circle cx="8.5" cy="7" r="4"/>
                   <line x1="20" y1="8" x2="20" y2="14"/>
                   <line x1="23" y1="11" x2="17" y2="11"/>
                 </svg>
-                Invite
               </button>
             </div>
           )}
@@ -546,21 +548,19 @@ export default function NotesPage(): React.JSX.Element {
             onClick={() => setShowGroupModal(true)}
             style={{
               backgroundColor: 'transparent',
-              border: '1px solid #555',
+              border: 'none',
               color: 'white',
-              padding: '10px 15px',
+              padding: '10px',
               cursor: 'pointer',
-              fontSize: '18px',
-              borderRadius: '8px',
+              fontSize: '24px',
               display: 'flex',
               alignItems: 'center',
-              gap: '8px'
+              justifyContent: 'center'
             }}
           >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M12 5v14M5 12h14"/>
             </svg>
-            Buat Grup
           </button>
           
           {/* Tombol Tambah Catatan */}
@@ -590,23 +590,21 @@ export default function NotesPage(): React.JSX.Element {
             onClick={handleLogout}
             style={{
               backgroundColor: 'transparent',
-              border: '1px solid #555',
+              border: 'none',
               color: 'white',
-              padding: '10px 15px',
+              padding: '10px',
               cursor: 'pointer',
-              fontSize: '18px',
-              borderRadius: '8px',
+              fontSize: '24px',
               display: 'flex',
               alignItems: 'center',
-              gap: '8px'
+              justifyContent: 'center'
             }}
           >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/>
               <polyline points="16 17 21 12 16 7"/>
               <line x1="21" y1="12" x2="9" y2="12"/>
             </svg>
-            Logout
           </button>
         </div>
       </div>
@@ -619,17 +617,16 @@ export default function NotesPage(): React.JSX.Element {
           bottom: '40px',
           left: '40px',
           backgroundColor: 'transparent',
-          border: '1px solid #555',
+          border: 'none',
           color: 'white',
-          padding: '15px 25px',
+          padding: '15px 0',
           cursor: 'pointer',
           fontSize: '22px',
           display: 'flex',
           alignItems: 'center',
           gap: '12px',
           fontFamily: 'Helvetica, Arial, sans-serif',
-          zIndex: 99,
-          borderRadius: '8px'
+          zIndex: 99
         }}
       >
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -699,8 +696,6 @@ export default function NotesPage(): React.JSX.Element {
                     flexDirection: 'column',
                     gap: '25px',
                     fontFamily: 'Helvetica, Arial, sans-serif',
-                    borderBottom: '1px solid #333',
-                    paddingBottom: '40px'
                   }}
                 >
                   {/* Kategori - DIPERBESAR */}
@@ -754,8 +749,7 @@ export default function NotesPage(): React.JSX.Element {
                           paddingBottom: '56.25%',
                           height: 0,
                           overflow: 'hidden',
-                          backgroundColor: '#000',
-                          borderRadius: '12px'
+                          backgroundColor: '#000'
                         }}>
                           <iframe
                             src={videoEmbedUrl}
@@ -765,8 +759,7 @@ export default function NotesPage(): React.JSX.Element {
                               left: 0,
                               width: '100%',
                               height: '100%',
-                              border: 'none',
-                              borderRadius: '12px'
+                              border: 'none'
                             }}
                             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                             allowFullScreen
@@ -775,8 +768,7 @@ export default function NotesPage(): React.JSX.Element {
                       ) : (
                         <div style={{
                           position: 'relative',
-                          backgroundColor: '#000',
-                          borderRadius: '12px'
+                          backgroundColor: '#000'
                         }}>
                           <video
                             ref={(el) => {
@@ -789,8 +781,7 @@ export default function NotesPage(): React.JSX.Element {
                               height: 'auto',
                               aspectRatio: '16/9',
                               backgroundColor: '#000',
-                              cursor: 'pointer',
-                              borderRadius: '12px'
+                              cursor: 'pointer'
                             }}
                             onClick={() => togglePlayPause(note.id!)}
                             controls
@@ -859,10 +850,7 @@ export default function NotesPage(): React.JSX.Element {
                             alignItems: 'center',
                             gap: '12px',
                             fontSize: '22px', // DIPERBESAR
-                            fontFamily: 'Helvetica, Arial, sans-serif',
-                            border: '1px solid #555',
-                            padding: '10px 20px',
-                            borderRadius: '8px'
+                            fontFamily: 'Helvetica, Arial, sans-serif'
                           }}
                         >
                           Buka Link
@@ -876,16 +864,17 @@ export default function NotesPage(): React.JSX.Element {
                         onClick={() => handleDeleteNote(note.id!)}
                         style={{
                           backgroundColor: 'transparent',
-                          border: '1px solid #555',
+                          border: 'none',
                           color: 'white',
                           fontSize: '32px', // DIPERBESAR
                           cursor: 'pointer',
-                          padding: '5px 15px',
-                          borderRadius: '8px',
+                          padding: '0',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
-                          fontFamily: 'Helvetica, Arial, sans-serif'
+                          fontFamily: 'Helvetica, Arial, sans-serif',
+                          width: '40px',
+                          height: '40px'
                         }}
                       >
                         ×
@@ -921,8 +910,6 @@ export default function NotesPage(): React.JSX.Element {
             maxWidth: '700px',
             padding: '60px',
             fontFamily: 'Helvetica, Arial, sans-serif',
-            border: '1px solid #333',
-            borderRadius: '12px'
           }}>
             <div style={{
               marginBottom: '50px',
@@ -956,13 +943,12 @@ export default function NotesPage(): React.JSX.Element {
                     width: '100%',
                     padding: '20px',
                     backgroundColor: 'transparent',
-                    border: '1px solid #555',
+                    border: 'none',
                     color: 'white',
                     fontSize: '32px', // DIPERBESAR
                     outline: 'none',
                     fontFamily: 'Helvetica, Arial, sans-serif',
-                    lineHeight: '1.3',
-                    borderRadius: '8px'
+                    lineHeight: '1.3'
                   }}
                 />
               </div>
@@ -976,7 +962,7 @@ export default function NotesPage(): React.JSX.Element {
                     width: '100%',
                     padding: '20px',
                     backgroundColor: 'transparent',
-                    border: '1px solid #555',
+                    border: 'none',
                     color: 'white',
                     fontSize: '24px', // DIPERBESAR
                     outline: 'none',
@@ -986,8 +972,7 @@ export default function NotesPage(): React.JSX.Element {
                     backgroundImage: `url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e")`,
                     backgroundRepeat: 'no-repeat',
                     backgroundPosition: 'right 20px center',
-                    backgroundSize: '24px',
-                    borderRadius: '8px'
+                    backgroundSize: '24px'
                   }}
                 >
                   <option value="" style={{ backgroundColor: 'black', color: 'white', fontSize: '20px' }}>
@@ -1016,12 +1001,11 @@ export default function NotesPage(): React.JSX.Element {
                     width: '100%',
                     padding: '20px',
                     backgroundColor: 'transparent',
-                    border: '1px solid #555',
+                    border: 'none',
                     color: 'white',
                     fontSize: '24px', // DIPERBESAR
                     outline: 'none',
-                    fontFamily: 'Helvetica, Arial, sans-serif',
-                    borderRadius: '8px'
+                    fontFamily: 'Helvetica, Arial, sans-serif'
                   }}
                 />
               </div>
@@ -1037,14 +1021,13 @@ export default function NotesPage(): React.JSX.Element {
                     width: '100%',
                     padding: '20px',
                     backgroundColor: 'transparent',
-                    border: '1px solid #555',
+                    border: 'none',
                     color: 'white',
                     fontSize: '24px', // DIPERBESAR
                     outline: 'none',
                     fontFamily: 'Helvetica, Arial, sans-serif',
                     resize: 'none',
-                    lineHeight: '1.6',
-                    borderRadius: '8px'
+                    lineHeight: '1.6'
                   }}
                 />
               </div>
@@ -1062,12 +1045,11 @@ export default function NotesPage(): React.JSX.Element {
                   style={{
                     padding: '15px 30px',
                     backgroundColor: 'transparent',
-                    border: '1px solid #555',
+                    border: 'none',
                     color: 'white',
                     fontSize: '22px', // DIPERBESAR
                     cursor: 'pointer',
-                    fontFamily: 'Helvetica, Arial, sans-serif',
-                    borderRadius: '8px'
+                    fontFamily: 'Helvetica, Arial, sans-serif'
                   }}
                 >
                   Batal
@@ -1077,15 +1059,14 @@ export default function NotesPage(): React.JSX.Element {
                   style={{
                     padding: '15px 30px',
                     backgroundColor: 'transparent',
-                    border: '1px solid #555',
+                    border: 'none',
                     color: 'white',
                     fontSize: '22px', // DIPERBESAR
                     cursor: 'pointer',
                     display: 'flex',
                     alignItems: 'center',
                     gap: '12px',
-                    fontFamily: 'Helvetica, Arial, sans-serif',
-                    borderRadius: '8px'
+                    fontFamily: 'Helvetica, Arial, sans-serif'
                   }}
                 >
                   Simpan Catatan
@@ -1121,8 +1102,6 @@ export default function NotesPage(): React.JSX.Element {
             maxWidth: '500px',
             padding: '50px',
             fontFamily: 'Helvetica, Arial, sans-serif',
-            border: '1px solid #333',
-            borderRadius: '12px'
           }}>
             <div style={{
               marginBottom: '40px',
@@ -1139,7 +1118,7 @@ export default function NotesPage(): React.JSX.Element {
               </div>
               <div style={{
                 fontSize: '20px',
-                color: '#ccc'
+                color: 'white'
               }}>
                 Buat grup untuk berbagi catatan dengan teman-teman
               </div>
@@ -1159,11 +1138,10 @@ export default function NotesPage(): React.JSX.Element {
                   width: '100%',
                   padding: '20px',
                   backgroundColor: 'transparent',
-                  border: '1px solid #555',
+                  border: 'none',
                   color: 'white',
                   fontSize: '24px',
-                  outline: 'none',
-                  borderRadius: '8px'
+                  outline: 'none'
                 }}
               />
 
@@ -1181,11 +1159,10 @@ export default function NotesPage(): React.JSX.Element {
                   style={{
                     padding: '15px 30px',
                     backgroundColor: 'transparent',
-                    border: '1px solid #555',
+                    border: 'none',
                     color: 'white',
                     fontSize: '20px',
-                    cursor: 'pointer',
-                    borderRadius: '8px'
+                    cursor: 'pointer'
                   }}
                 >
                   Batal
@@ -1195,11 +1172,10 @@ export default function NotesPage(): React.JSX.Element {
                   style={{
                     padding: '15px 30px',
                     backgroundColor: 'transparent',
-                    border: '1px solid #555',
+                    border: 'none',
                     color: 'white',
                     fontSize: '20px',
                     cursor: 'pointer',
-                    borderRadius: '8px',
                     display: 'flex',
                     alignItems: 'center',
                     gap: '10px'
@@ -1238,8 +1214,6 @@ export default function NotesPage(): React.JSX.Element {
             maxWidth: '500px',
             padding: '50px',
             fontFamily: 'Helvetica, Arial, sans-serif',
-            border: '1px solid #333',
-            borderRadius: '12px'
           }}>
             <div style={{
               marginBottom: '40px',
@@ -1256,7 +1230,7 @@ export default function NotesPage(): React.JSX.Element {
               </div>
               <div style={{
                 fontSize: '20px',
-                color: '#ccc'
+                color: 'white'
               }}>
                 Undang user lain ke grup: <strong>{currentGroup?.name}</strong>
               </div>
@@ -1276,11 +1250,10 @@ export default function NotesPage(): React.JSX.Element {
                   width: '100%',
                   padding: '20px',
                   backgroundColor: 'transparent',
-                  border: '1px solid #555',
+                  border: 'none',
                   color: 'white',
                   fontSize: '20px',
-                  outline: 'none',
-                  borderRadius: '8px'
+                  outline: 'none'
                 }}
               />
 
@@ -1298,11 +1271,10 @@ export default function NotesPage(): React.JSX.Element {
                   style={{
                     padding: '15px 30px',
                     backgroundColor: 'transparent',
-                    border: '1px solid #555',
+                    border: 'none',
                     color: 'white',
                     fontSize: '20px',
-                    cursor: 'pointer',
-                    borderRadius: '8px'
+                    cursor: 'pointer'
                   }}
                 >
                   Batal
@@ -1312,11 +1284,10 @@ export default function NotesPage(): React.JSX.Element {
                   style={{
                     padding: '15px 30px',
                     backgroundColor: 'transparent',
-                    border: '1px solid #555',
+                    border: 'none',
                     color: 'white',
                     fontSize: '20px',
                     cursor: 'pointer',
-                    borderRadius: '8px',
                     display: 'flex',
                     alignItems: 'center',
                     gap: '10px'
