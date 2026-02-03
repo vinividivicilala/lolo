@@ -304,7 +304,7 @@ export default function NotesPage(): React.JSX.Element {
         justifyContent: 'center',
         color: 'white',
         fontFamily: 'Helvetica, Arial, sans-serif',
-        fontSize: '18px'
+        fontSize: '20px'
       }}>
         Loading...
       </div>
@@ -320,6 +320,7 @@ export default function NotesPage(): React.JSX.Element {
       width: '100%',
       fontFamily: 'Helvetica, Arial, sans-serif',
       color: 'white',
+      position: 'relative'
     }}>
       {/* Header */}
       <div style={{
@@ -327,39 +328,26 @@ export default function NotesPage(): React.JSX.Element {
         top: 0,
         left: 0,
         right: 0,
-        padding: '25px 40px',
+        padding: '30px 40px',
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
         backgroundColor: 'black',
         zIndex: 100,
       }}>
-        {/* Tombol halaman utama */}
-        <button
-          onClick={() => router.push('/')}
-          style={{
-            backgroundColor: 'transparent',
-            border: 'none',
-            color: 'white',
-            padding: '10px 0',
-            cursor: 'pointer',
-            fontSize: '20px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '10px',
-            fontFamily: 'Helvetica, Arial, sans-serif'
-          }}
-        >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M17 7l-9.2 9.2M7 17V7h10"/>
-          </svg>
-          Halaman Utama
-        </button>
+        {/* Judul Website - KIRI ATAS */}
+        <div style={{
+          fontSize: '28px',
+          fontFamily: 'Helvetica, Arial, sans-serif',
+        }}>
+          Menuru
+        </div>
 
+        {/* Nama User dan Tombol Tambah - KANAN ATAS */}
         <div style={{
           display: 'flex',
           alignItems: 'center',
-          gap: '25px'
+          gap: '30px'
         }}>
           <div style={{
             fontSize: '24px',
@@ -375,29 +363,55 @@ export default function NotesPage(): React.JSX.Element {
               backgroundColor: 'transparent',
               border: 'none',
               color: 'white',
-              padding: '10px',
+              padding: '12px',
               cursor: 'pointer',
-              fontSize: '22px',
+              fontSize: '24px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              width: '40px',
-              height: '40px'
+              width: '44px',
+              height: '44px'
             }}
           >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M12 5v14M5 12h14"/>
             </svg>
           </button>
         </div>
       </div>
 
+      {/* Tombol Halaman Utama - KIRI BAWAH */}
+      <button
+        onClick={() => router.push('/')}
+        style={{
+          position: 'fixed',
+          bottom: '40px',
+          left: '40px',
+          backgroundColor: 'transparent',
+          border: 'none',
+          color: 'white',
+          padding: '15px 0',
+          cursor: 'pointer',
+          fontSize: '22px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '12px',
+          fontFamily: 'Helvetica, Arial, sans-serif',
+          zIndex: 99
+        }}
+      >
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <path d="M7 17l9.2-9.2M17 17V7H7"/>
+        </svg>
+        Halaman Utama
+      </button>
+
       {/* Main Content */}
       <div style={{
         width: '100%',
         maxWidth: '800px',
         margin: '0 auto',
-        padding: '120px 20px 50px',
+        padding: '140px 20px 100px',
         boxSizing: 'border-box'
       }}>
         {/* Daftar catatan */}
@@ -405,8 +419,8 @@ export default function NotesPage(): React.JSX.Element {
           <div style={{
             display: 'flex',
             justifyContent: 'center',
-            padding: '80px',
-            fontSize: '20px',
+            padding: '100px',
+            fontSize: '22px',
             fontFamily: 'Helvetica, Arial, sans-serif',
             color: '#888'
           }}>
@@ -415,19 +429,19 @@ export default function NotesPage(): React.JSX.Element {
         ) : notes.length === 0 ? (
           <div style={{
             textAlign: 'center',
-            padding: '100px 20px',
+            padding: '120px 20px',
             fontFamily: 'Helvetica, Arial, sans-serif'
           }}>
             <div style={{
-              fontSize: '22px',
+              fontSize: '24px',
               fontFamily: 'Helvetica, Arial, sans-serif',
               color: '#888',
-              marginBottom: '15px'
+              marginBottom: '20px'
             }}>
               Belum ada catatan
             </div>
             <div style={{
-              fontSize: '18px',
+              fontSize: '20px',
               fontFamily: 'Helvetica, Arial, sans-serif',
               color: '#555'
             }}>
@@ -438,7 +452,7 @@ export default function NotesPage(): React.JSX.Element {
           <div style={{
             display: 'flex',
             flexDirection: 'column',
-            gap: '50px',
+            gap: '60px',
             fontFamily: 'Helvetica, Arial, sans-serif'
           }}>
             {notes.map((note) => {
@@ -451,17 +465,17 @@ export default function NotesPage(): React.JSX.Element {
                   style={{
                     display: 'flex',
                     flexDirection: 'column',
-                    gap: '15px',
+                    gap: '20px',
                     fontFamily: 'Helvetica, Arial, sans-serif'
                   }}
                 >
                   {/* Kategori */}
                   {note.category && (
                     <div style={{
-                      fontSize: '18px',
+                      fontSize: '20px',
                       fontFamily: 'Helvetica, Arial, sans-serif',
                       color: '#888',
-                      marginBottom: '5px'
+                      marginBottom: '10px'
                     }}>
                       {note.category}
                     </div>
@@ -469,7 +483,7 @@ export default function NotesPage(): React.JSX.Element {
 
                   {/* Judul */}
                   <div style={{
-                    fontSize: '36px',
+                    fontSize: '40px',
                     fontFamily: 'Helvetica, Arial, sans-serif',
                     lineHeight: '1.3',
                     color: 'white'
@@ -480,11 +494,11 @@ export default function NotesPage(): React.JSX.Element {
                   {/* Deskripsi */}
                   {note.description && (
                     <div style={{
-                      fontSize: '20px',
+                      fontSize: '22px',
                       fontFamily: 'Helvetica, Arial, sans-serif',
                       lineHeight: '1.6',
                       color: '#ccc',
-                      marginTop: '15px',
+                      marginTop: '20px',
                       whiteSpace: 'pre-wrap'
                     }}>
                       {note.description}
@@ -494,10 +508,10 @@ export default function NotesPage(): React.JSX.Element {
                   {/* Video Player */}
                   {videoEmbedUrl && (
                     <div style={{
-                      margin: '20px 0',
+                      margin: '25px 0',
                       position: 'relative'
                     }}>
-                      {/* YouTube Embed */}
+                      {/* YouTube/Vimeo Embed */}
                       {videoEmbedUrl.includes('youtube.com/embed') || videoEmbedUrl.includes('vimeo.com') ? (
                         <div style={{
                           position: 'relative',
@@ -554,15 +568,15 @@ export default function NotesPage(): React.JSX.Element {
                                 backgroundColor: 'rgba(0, 0, 0, 0.7)',
                                 border: 'none',
                                 borderRadius: '50%',
-                                width: '60px',
-                                height: '60px',
+                                width: '70px',
+                                height: '70px',
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
                                 cursor: 'pointer'
                               }}
                             >
-                              <svg width="30" height="30" viewBox="0 0 24 24" fill="white">
+                              <svg width="35" height="35" viewBox="0 0 24 24" fill="white">
                                 <path d="M8 5v14l11-7z"/>
                               </svg>
                             </button>
@@ -577,11 +591,11 @@ export default function NotesPage(): React.JSX.Element {
                     display: 'flex',
                     justifyContent: 'space-between',
                     alignItems: 'center',
-                    marginTop: '20px',
+                    marginTop: '25px',
                     fontFamily: 'Helvetica, Arial, sans-serif'
                   }}>
                     <span style={{
-                      fontSize: '16px',
+                      fontSize: '18px',
                       fontFamily: 'Helvetica, Arial, sans-serif',
                       color: '#888'
                     }}>
@@ -591,7 +605,7 @@ export default function NotesPage(): React.JSX.Element {
                     <div style={{
                       display: 'flex',
                       alignItems: 'center',
-                      gap: '20px',
+                      gap: '25px',
                       fontFamily: 'Helvetica, Arial, sans-serif'
                     }}>
                       {note.link && (
@@ -604,13 +618,13 @@ export default function NotesPage(): React.JSX.Element {
                             textDecoration: 'none',
                             display: 'flex',
                             alignItems: 'center',
-                            gap: '8px',
-                            fontSize: '16px',
+                            gap: '10px',
+                            fontSize: '18px',
                             fontFamily: 'Helvetica, Arial, sans-serif'
                           }}
                         >
                           Buka Link
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                             <path d="M7 17l9.2-9.2M17 17V7H7"/>
                           </svg>
                         </a>
@@ -622,11 +636,11 @@ export default function NotesPage(): React.JSX.Element {
                           backgroundColor: 'transparent',
                           border: 'none',
                           color: '#888',
-                          fontSize: '22px',
+                          fontSize: '26px',
                           cursor: 'pointer',
                           padding: '0',
-                          width: '30px',
-                          height: '30px',
+                          width: '35px',
+                          height: '35px',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
@@ -657,24 +671,24 @@ export default function NotesPage(): React.JSX.Element {
           alignItems: 'center',
           justifyContent: 'center',
           zIndex: 1000,
-          padding: '20px',
+          padding: '30px',
           fontFamily: 'Helvetica, Arial, sans-serif'
         }}>
           <div style={{
             backgroundColor: 'black',
             width: '100%',
             maxWidth: '600px',
-            padding: '50px',
+            padding: '60px',
             fontFamily: 'Helvetica, Arial, sans-serif'
           }}>
             <div style={{
-              marginBottom: '40px',
+              marginBottom: '50px',
               fontFamily: 'Helvetica, Arial, sans-serif'
             }}>
               <div style={{
-                fontSize: '28px',
+                fontSize: '32px',
                 fontFamily: 'Helvetica, Arial, sans-serif',
-                marginBottom: '15px',
+                marginBottom: '20px',
                 color: 'white'
               }}>
                 Buat Catatan Baru
@@ -684,7 +698,7 @@ export default function NotesPage(): React.JSX.Element {
             <div style={{
               display: 'flex',
               flexDirection: 'column',
-              gap: '25px',
+              gap: '30px',
               fontFamily: 'Helvetica, Arial, sans-serif'
             }}>
               {/* Input judul */}
@@ -696,11 +710,11 @@ export default function NotesPage(): React.JSX.Element {
                   placeholder="Judul Catatan"
                   style={{
                     width: '100%',
-                    padding: '15px',
+                    padding: '18px',
                     backgroundColor: 'transparent',
                     border: 'none',
                     color: 'white',
-                    fontSize: '32px',
+                    fontSize: '36px',
                     outline: 'none',
                     fontFamily: 'Helvetica, Arial, sans-serif',
                     lineHeight: '1.3'
@@ -715,29 +729,29 @@ export default function NotesPage(): React.JSX.Element {
                   onChange={(e) => setNewNote({...newNote, category: e.target.value})}
                   style={{
                     width: '100%',
-                    padding: '15px',
+                    padding: '18px',
                     backgroundColor: 'transparent',
                     border: 'none',
                     color: '#888',
-                    fontSize: '20px',
+                    fontSize: '22px',
                     outline: 'none',
                     fontFamily: 'Helvetica, Arial, sans-serif',
                     cursor: 'pointer',
                     appearance: 'none',
                     backgroundImage: `url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e")`,
                     backgroundRepeat: 'no-repeat',
-                    backgroundPosition: 'right 15px center',
-                    backgroundSize: '20px'
+                    backgroundPosition: 'right 18px center',
+                    backgroundSize: '22px'
                   }}
                 >
-                  <option value="" style={{ backgroundColor: 'black', color: 'white', fontSize: '16px' }}>
+                  <option value="" style={{ backgroundColor: 'black', color: 'white', fontSize: '18px' }}>
                     Pilih Kategori
                   </option>
                   {categories.map((category) => (
                     <option 
                       key={category} 
                       value={category}
-                      style={{ backgroundColor: 'black', color: 'white', fontSize: '16px' }}
+                      style={{ backgroundColor: 'black', color: 'white', fontSize: '18px' }}
                     >
                       {category}
                     </option>
@@ -754,11 +768,11 @@ export default function NotesPage(): React.JSX.Element {
                   placeholder="Link Video (YouTube, Vimeo, MP4, dll.)"
                   style={{
                     width: '100%',
-                    padding: '15px',
+                    padding: '18px',
                     backgroundColor: 'transparent',
                     border: 'none',
                     color: '#888',
-                    fontSize: '20px',
+                    fontSize: '22px',
                     outline: 'none',
                     fontFamily: 'Helvetica, Arial, sans-serif'
                   }}
@@ -774,11 +788,11 @@ export default function NotesPage(): React.JSX.Element {
                   rows={8}
                   style={{
                     width: '100%',
-                    padding: '15px',
+                    padding: '18px',
                     backgroundColor: 'transparent',
                     border: 'none',
                     color: '#ccc',
-                    fontSize: '20px',
+                    fontSize: '22px',
                     outline: 'none',
                     fontFamily: 'Helvetica, Arial, sans-serif',
                     resize: 'none',
@@ -791,18 +805,18 @@ export default function NotesPage(): React.JSX.Element {
               <div style={{
                 display: 'flex',
                 justifyContent: 'flex-end',
-                gap: '20px',
-                marginTop: '40px',
+                gap: '25px',
+                marginTop: '50px',
                 fontFamily: 'Helvetica, Arial, sans-serif'
               }}>
                 <button
                   onClick={() => setShowNewNoteForm(false)}
                   style={{
-                    padding: '12px 25px',
+                    padding: '15px 30px',
                     backgroundColor: 'transparent',
                     border: 'none',
                     color: '#888',
-                    fontSize: '18px',
+                    fontSize: '20px',
                     cursor: 'pointer',
                     fontFamily: 'Helvetica, Arial, sans-serif'
                   }}
@@ -812,20 +826,20 @@ export default function NotesPage(): React.JSX.Element {
                 <button
                   onClick={handleCreateNote}
                   style={{
-                    padding: '12px 25px',
+                    padding: '15px 30px',
                     backgroundColor: 'transparent',
                     border: 'none',
                     color: 'white',
-                    fontSize: '18px',
+                    fontSize: '20px',
                     cursor: 'pointer',
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '10px',
+                    gap: '12px',
                     fontFamily: 'Helvetica, Arial, sans-serif'
                   }}
                 >
                   Simpan Catatan
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <path d="M7 17l9.2-9.2M17 17V7H7"/>
                   </svg>
                 </button>
