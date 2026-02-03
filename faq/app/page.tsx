@@ -2037,7 +2037,7 @@ const loadUserNotesRealtime = (userId: string) => {
                   </motion.button>
                 </div>
 
-             {/* Notes Tab */}
+{/* Notes Tab */}
 {activeTab === 'notes' && (
   <div>
     <div style={{
@@ -2081,7 +2081,7 @@ const loadUserNotesRealtime = (userId: string) => {
         >
           Go to Notes
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M12 5v14M5 12h14"/>
+            <path d="M7 17l9.2-9.2M17 17V7H7"/>
           </svg>
         </motion.button>
         <div style={{
@@ -2148,149 +2148,163 @@ const loadUserNotesRealtime = (userId: string) => {
         >
           Create first note
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M18 6L6 18"/>
-            <path d="M8 6h10v10"/>
+            <path d="M7 17l9.2-9.2M17 17V7H7"/>
           </svg>
         </motion.button>
       </div>
     ) : (
       <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
-        gap: '1.5rem'
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '3rem'
       }}>
-        {userNotes.map((note, index) => (
+        {userNotes.map((note) => (
           <motion.div
             key={note.id}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.05 }}
             style={{
-              backgroundColor: note.color ? `${note.color}20` : 'transparent',
-              borderRadius: '12px',
-              padding: '1.8rem',
-              border: `1px solid ${note.color || 'rgba(255, 255, 255, 0.2)'}`,
               cursor: 'pointer',
-              minHeight: '200px',
               display: 'flex',
               flexDirection: 'column',
-              position: 'relative'
+              gap: '0.8rem'
             }}
-            onClick={() => router.push(`/notes`)}
+            onClick={() => router.push('/notes')}
           >
+            {/* Kategori */}
+            {note.category && (
+              <div style={{
+                fontSize: '1rem',
+                fontFamily: 'Helvetica, Arial, sans-serif',
+                color: 'rgba(255, 255, 255, 0.6)',
+                textTransform: 'uppercase',
+                letterSpacing: '0.5px'
+              }}>
+                {note.category}
+              </div>
+            )}
+
+            {/* Judul */}
             <div style={{
-              position: 'absolute',
-              top: '1rem',
-              right: '1rem',
-              color: 'rgba(255, 255, 255, 0.3)',
-              fontSize: '0.8rem'
+              fontSize: '2.5rem',
+              fontFamily: 'Helvetica, Arial, sans-serif',
+              lineHeight: '1.3',
+              color: 'white',
+              fontWeight: '400'
             }}>
-              #{index + 1}
+              {note.title || 'Untitled Note'}
             </div>
+
+            {/* Deskripsi */}
+            {note.content && (
+              <div style={{
+                fontSize: '1.2rem',
+                fontFamily: 'Helvetica, Arial, sans-serif',
+                lineHeight: '1.6',
+                color: 'rgba(255, 255, 255, 0.8)',
+                whiteSpace: 'pre-wrap'
+              }}>
+                {note.content.length > 150 ? note.content.substring(0, 150) + '...' : note.content}
+              </div>
+            )}
+
+            {/* Footer dengan tanggal dan aksi */}
             <div style={{
               display: 'flex',
               justifyContent: 'space-between',
-              alignItems: 'flex-start',
-              marginBottom: '1rem',
-              flex: 1
+              alignItems: 'center',
+              marginTop: '1rem'
             }}>
-              <h5 style={{
-                color: 'white',
-                fontSize: '1.3rem',
-                fontWeight: '300',
-                margin: 0,
-                fontFamily: 'Helvetica, Arial, sans-serif',
-                letterSpacing: '0.5px',
-                flex: 1
-              }}>
-                {note.title || 'Untitled Note'}
-              </h5>
               <span style={{
-                color: 'rgba(255, 255, 255, 0.5)',
                 fontSize: '0.9rem',
                 fontFamily: 'Helvetica, Arial, sans-serif',
-                whiteSpace: 'nowrap',
-                marginLeft: '1rem'
+                color: 'rgba(255, 255, 255, 0.5)'
               }}>
                 {calculateTimeAgo(note.updatedAt)}
               </span>
-            </div>
-            <p style={{
-              color: 'rgba(255, 255, 255, 0.7)',
-              fontSize: '1rem',
-              margin: '0.5rem 0 0 0',
-              fontFamily: 'Helvetica, Arial, sans-serif',
-              lineHeight: 1.4,
-              display: '-webkit-box',
-              WebkitLineClamp: 3,
-              WebkitBoxOrient: 'vertical',
-              overflow: 'hidden',
-              flex: 2
-            }}>
-              {note.content}
-            </p>
-            {note.color && (
+              
               <div style={{
-                position: 'absolute',
-                bottom: '1rem',
-                left: '1.8rem',
-                width: '12px',
-                height: '12px',
-                borderRadius: '50%',
-                backgroundColor: note.color
-              }} />
-            )}
+                display: 'flex',
+                alignItems: 'center',
+                gap: '1rem'
+              }}>
+                <a
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    router.push('/notes');
+                  }}
+                  style={{
+                    color: 'white',
+                    textDecoration: 'none',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                    fontSize: '0.9rem',
+                    fontFamily: 'Helvetica, Arial, sans-serif'
+                  }}
+                >
+                  Open Note
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M7 17l9.2-9.2M17 17V7H7"/>
+                  </svg>
+                </a>
+              </div>
+            </div>
           </motion.div>
         ))}
         
+        {/* Tombol View All */}
         <motion.div
           onClick={() => router.push('/notes')}
           style={{
-            gridColumn: '1 / -1',
-            backgroundColor: 'transparent',
-            borderRadius: '12px',
-            padding: '2rem',
+            padding: '1.5rem 0',
             textAlign: 'center',
             cursor: 'pointer',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            gap: '1rem',
-            border: '1px solid rgba(255, 255, 255, 0.2)'
+            gap: '0.5rem',
+            borderTop: '1px solid rgba(255, 255, 255, 0.1)',
+            marginTop: '1rem'
           }}
         >
           <div style={{
             color: 'white',
-            fontSize: '1.5rem',
-            fontWeight: '300'
+            fontSize: '1.2rem',
+            fontWeight: '300',
+            fontFamily: 'Helvetica, Arial, sans-serif'
           }}>
             View all {userNotes.length} notes in Notes Page
           </div>
           <div style={{
             color: 'rgba(255, 255, 255, 0.5)',
-            fontSize: '0.9rem'
+            fontSize: '0.9rem',
+            fontFamily: 'Helvetica, Arial, sans-serif'
           }}>
             Click to see all your notes with full features
           </div>
           <motion.svg
-            width="24"
-            height="24"
+            width="20"
+            height="20"
             viewBox="0 0 24 24"
             fill="none"
             stroke="white"
             strokeWidth="2"
             animate={{ x: [0, 5, 0] }}
             transition={{ repeat: Infinity, duration: 1.5 }}
+            style={{ marginTop: '0.5rem' }}
           >
-            <path d="M18 6L6 18"/>
-            <path d="M8 6h10v10"/>
+            <path d="M7 17l9.2-9.2M17 17V7H7"/>
           </motion.svg>
         </motion.div>
       </div>
     )}
   </div>
 )}
+
+                
 
                 {/* Settings Tab */}
                 {activeTab === 'settings' && (
@@ -2930,112 +2944,184 @@ const loadUserNotesRealtime = (userId: string) => {
         )}
       </AnimatePresence>
 
-      {/* Modal Logout Confirmation */}
-      <AnimatePresence>
-        {showLogoutModal && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
+
+{/* Modal Logout Confirmation */}
+<AnimatePresence>
+  {showLogoutModal && (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.3 }}
+      style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100%',
+        backgroundColor: 'rgba(0, 0, 0, 0.98)',
+        zIndex: 10001,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backdropFilter: 'blur(10px)'
+      }}
+      onClick={handleCancelLogout}
+    >
+      <motion.div
+        initial={{ scale: 0.95, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0.95, opacity: 0 }}
+        transition={{ duration: 0.3 }}
+        style={{
+          backgroundColor: 'transparent',
+          borderRadius: '0',
+          padding: isMobile ? '1.5rem' : '2.5rem',
+          width: isMobile ? '90%' : '500px',
+          maxWidth: '600px',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '2rem'
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Header dengan judul dan deskripsi */}
+        <div style={{ 
+          textAlign: 'center',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '1rem'
+        }}>
+          <h3 style={{
+            color: 'white',
+            fontSize: isMobile ? '2rem' : '2.5rem',
+            fontWeight: '400',
+            margin: 0,
+            fontFamily: 'Helvetica, Arial, sans-serif',
+            letterSpacing: '0.5px'
+          }}>
+            Logout
+          </h3>
+          <p style={{
+            color: 'rgba(255, 255, 255, 0.8)',
+            fontSize: '1.1rem',
+            margin: 0,
+            lineHeight: 1.6,
+            fontFamily: 'Helvetica, Arial, sans-serif'
+          }}>
+            Are you sure you want to logout from {userDisplayName}?
+          </p>
+        </div>
+
+        {/* Tombol aksi - tanpa border, clean design */}
+        <div style={{
+          display: 'flex',
+          gap: '1.5rem',
+          justifyContent: 'center',
+          alignItems: 'center',
+          marginTop: '1rem'
+        }}>
+          {/* Tombol No */}
+          <motion.button
+            onClick={handleCancelLogout}
             style={{
-              position: 'fixed',
-              top: 0,
-              left: 0,
-              width: '100%',
-              height: '100%',
-              backgroundColor: 'rgba(0, 0, 0, 0.98)',
-              zIndex: 9999,
+              padding: '1rem 2rem',
+              backgroundColor: 'transparent',
+              border: 'none',
+              color: 'white',
+              fontSize: '1.1rem',
+              fontWeight: '300',
+              cursor: 'pointer',
+              fontFamily: 'Helvetica, Arial, sans-serif',
+              letterSpacing: '0.5px',
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'center',
-              backdropFilter: 'blur(10px)'
+              gap: '0.8rem',
+              opacity: 0.9
             }}
-            onClick={handleCancelLogout}
+            whileHover={{ opacity: 1 }}
           >
-            <motion.div
-              initial={{ scale: 0.95, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.95, opacity: 0 }}
-              transition={{ duration: 0.3 }}
-              style={{
-                backgroundColor: 'transparent',
-                borderRadius: '0',
-                padding: isMobile ? '1.5rem' : '2.5rem',
-                width: isMobile ? '90%' : '500px',
-                maxWidth: '600px',
-                border: '1px solid rgba(255, 255, 255, 0.2)',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '2rem'
-              }}
-              onClick={(e) => e.stopPropagation()}
+            <span>No</span>
+            <svg 
+              width="18" 
+              height="18" 
+              viewBox="0 0 24 24" 
+              fill="none" 
+              stroke="currentColor" 
+              strokeWidth="2"
+              style={{ transform: 'rotate(180deg)' }}
             >
-              <div style={{ textAlign: 'center' }}>
-                <h3 style={{
-                  color: 'white',
-                  fontSize: isMobile ? '1.3rem' : '1.5rem',
-                  fontWeight: '300',
-                  margin: '0 0 1rem 0',
-                  fontFamily: 'Helvetica, Arial, sans-serif',
-                  letterSpacing: '0.5px'
-                }}>
-                  Logout
-                </h3>
-                <p style={{
-                  color: 'rgba(255, 255, 255, 0.8)',
-                  fontSize: '1rem',
-                  margin: 0,
-                  lineHeight: 1.6
-                }}>
-                  Are you sure you want to logout from {userDisplayName}?
-                </p>
-              </div>
+              <path d="M7 17l9.2-9.2M17 17V7H7"/>
+            </svg>
+          </motion.button>
 
-              <div style={{
-                display: 'flex',
-                gap: '1.5rem',
-                justifyContent: 'center'
-              }}>
-                <motion.button
-                  onClick={handleCancelLogout}
-                  style={{
-                    flex: 1,
-                    padding: '1rem 1.5rem',
-                    backgroundColor: 'transparent',
-                    border: '1px solid rgba(255, 255, 255, 0.3)',
-                    borderRadius: '0',
-                    color: 'white',
-                    fontSize: '1rem',
-                    fontWeight: '300',
-                    cursor: 'pointer',
-                    fontFamily: 'Helvetica, Arial, sans-serif'
-                  }}
-                >
-                  No
-                </motion.button>
-                <motion.button
-                  onClick={handleConfirmLogout}
-                  style={{
-                    flex: 1,
-                    padding: '1rem 1.5rem',
-                    backgroundColor: 'transparent',
-                    border: '1px solid rgba(255, 255, 255, 0.3)',
-                    borderRadius: '0',
-                    color: 'white',
-                    fontSize: '1rem',
-                    fontWeight: '300',
-                    cursor: 'pointer',
-                    fontFamily: 'Helvetica, Arial, sans-serif'
-                  }}
-                >
-                  Yes
-                </motion.button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          {/* Divider */}
+          <div style={{
+            width: '1px',
+            height: '20px',
+            backgroundColor: 'rgba(255, 255, 255, 0.2)'
+          }} />
+
+          {/* Tombol Yes */}
+          <motion.button
+            onClick={handleConfirmLogout}
+            style={{
+              padding: '1rem 2rem',
+              backgroundColor: 'transparent',
+              border: 'none',
+              color: 'white',
+              fontSize: '1.1rem',
+              fontWeight: '300',
+              cursor: 'pointer',
+              fontFamily: 'Helvetica, Arial, sans-serif',
+              letterSpacing: '0.5px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.8rem',
+              opacity: 0.9
+            }}
+            whileHover={{ opacity: 1 }}
+          >
+            <span>Yes</span>
+            <svg 
+              width="18" 
+              height="18" 
+              viewBox="0 0 24 24" 
+              fill="none" 
+              stroke="currentColor" 
+              strokeWidth="2"
+            >
+              <path d="M7 17l9.2-9.2M17 17V7H7"/>
+            </svg>
+          </motion.button>
+        </div>
+
+        {/* Pesan tambahan */}
+        <div style={{
+          textAlign: 'center',
+          marginTop: '0.5rem'
+        }}>
+          <p style={{
+            color: 'rgba(255, 255, 255, 0.5)',
+            fontSize: '0.9rem',
+            margin: 0,
+            fontFamily: 'Helvetica, Arial, sans-serif'
+          }}>
+            You can sign in again anytime
+          </p>
+        </div>
+      </motion.div>
+    </motion.div>
+  )}
+</AnimatePresence>
+
+
+
+
+
+
+
+      
 
       {/* Menu Overlay dengan GSAP Animation */}
       <AnimatePresence>
@@ -5478,4 +5564,5 @@ const loadUserNotesRealtime = (userId: string) => {
     </div>
   );
 }
+
 
