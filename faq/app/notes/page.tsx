@@ -21,7 +21,8 @@ import {
   arrayUnion,
   arrayRemove,
   getDocs,
-  where
+  where,
+  getDoc
 } from "firebase/firestore";
 import { initializeApp, getApps } from "firebase/app";
 
@@ -67,6 +68,7 @@ interface Notification {
   groupName: string;
   senderId: string;
   senderName: string;
+  senderEmail?: string;
   receiverId: string;
   receiverName?: string;
   receiverEmail?: string;
@@ -144,7 +146,7 @@ export default function NotesPage(): React.JSX.Element {
   useEffect(() => {
     if (!auth) return;
 
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (currentUser) {
         setUser(currentUser);
         const name = currentUser.displayName || 
@@ -153,6 +155,10 @@ export default function NotesPage(): React.JSX.Element {
         const email = currentUser.email || '';
         setUserDisplayName(name);
         setUserEmail(email);
+        
+        // Simpan/update user data di Firestore
+        await saveUserToFirestore(currentUser.uid, name, email);
+        
         loadUserNotes(currentUser.uid);
         loadUserGroups(currentUser.uid);
         loadUserNotifications(currentUser.uid);
@@ -166,6 +172,28 @@ export default function NotesPage(): React.JSX.Element {
     };
   }, [auth, router]);
 
+  // Simpan user ke Firestore jika belum ada
+  const saveUserToFirestore = async (userId: string, name: string, email: string) => {
+    if (!db) return;
+    
+    try {
+      const userRef = doc(db, 'users', userId);
+      const userSnap = await getDoc(userRef);
+      
+      if (!userSnap.exists()) {
+        await updateDoc(userRef, {
+          id: userId,
+          name: name,
+          email: email.toLowerCase(),
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp()
+        }, { merge: true });
+      }
+    } catch (error) {
+      console.error("Error saving user to Firestore:", error);
+    }
+  };
+
   const loadUserNotes = (userId: string) => {
     if (!db) {
       console.log('Database not ready yet');
@@ -175,7 +203,7 @@ export default function NotesPage(): React.JSX.Element {
     setIsLoading(true);
     try {
       const notesRef = collection(db, 'userNotes');
-      const q = query(notesRef, orderBy('updatedAt', 'desc'));
+      const q = query(notesRef, where('userId', '==', userId), orderBy('updatedAt', 'desc'));
       
       const unsubscribe = onSnapshot(q, (querySnapshot) => {
         const notesData: Note[] = [];
@@ -238,15 +266,42 @@ export default function NotesPage(): React.JSX.Element {
         orderBy('createdAt', 'desc')
       );
       
-      const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      const unsubscribe = onSnapshot(q, async (querySnapshot) => {
         const notificationsData: Notification[] = [];
-        querySnapshot.forEach((doc) => {
-          const notificationData = doc.data() as Notification;
+        for (const docSnap of querySnapshot.docs) {
+          const notificationData = docSnap.data() as Notification;
+          
+          // Jika groupName tidak ada, ambil dari grup
+          if (!notificationData.groupName && notificationData.groupId) {
+            try {
+              const groupRef = doc(db, 'groups', notificationData.groupId);
+              const groupSnap = await getDoc(groupRef);
+              if (groupSnap.exists()) {
+                notificationData.groupName = groupSnap.data().name;
+              }
+            } catch (error) {
+              console.error("Error loading group name:", error);
+            }
+          }
+          
+          // Jika senderName tidak ada, ambil dari users
+          if (!notificationData.senderName && notificationData.senderId) {
+            try {
+              const senderRef = doc(db, 'users', notificationData.senderId);
+              const senderSnap = await getDoc(senderRef);
+              if (senderSnap.exists()) {
+                notificationData.senderName = senderSnap.data().name || 'Unknown User';
+              }
+            } catch (error) {
+              console.error("Error loading sender name:", error);
+            }
+          }
+          
           notificationsData.push({
-            id: doc.id,
+            id: docSnap.id,
             ...notificationData
           });
-        });
+        }
         setNotifications(notificationsData);
       });
 
@@ -287,30 +342,27 @@ export default function NotesPage(): React.JSX.Element {
     }
   };
 
-  // Cari semua user berdasarkan email pattern
-  const findUsersByEmailPattern = async (emailPattern: string) => {
-    if (!db || !emailPattern) return [];
+  // Cari user berdasarkan email
+  const findUserByEmail = async (email: string) => {
+    if (!db || !email) return null;
 
     try {
       const usersRef = collection(db, 'users');
-      const q = query(usersRef);
+      const q = query(usersRef, where('email', '==', email.toLowerCase()));
       const querySnapshot = await getDocs(q);
       
-      const users: any[] = [];
-      querySnapshot.forEach((doc) => {
-        const userData = doc.data();
-        if (userData.email && userData.email.includes(emailPattern)) {
-          users.push({
-            id: doc.id,
-            ...userData
-          });
-        }
-      });
+      if (!querySnapshot.empty) {
+        const doc = querySnapshot.docs[0];
+        return {
+          id: doc.id,
+          ...doc.data()
+        };
+      }
       
-      return users;
+      return null;
     } catch (error) {
-      console.error("Error finding users:", error);
-      return [];
+      console.error("Error finding user:", error);
+      return null;
     }
   };
 
@@ -324,7 +376,8 @@ export default function NotesPage(): React.JSX.Element {
         id: userId,
         email: email.toLowerCase(),
         name: name || email.split('@')[0],
-        createdAt: serverTimestamp()
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
       };
 
       await addDoc(collection(db, 'users'), userData);
@@ -342,9 +395,8 @@ export default function NotesPage(): React.JSX.Element {
     }
 
     try {
-      // Cari user berdasarkan email pattern
-      const invitedUsers = await findUsersByEmailPattern(inviteEmail.trim());
-      let invitedUser = invitedUsers[0];
+      // Cari user berdasarkan email
+      const invitedUser = await findUserByEmail(inviteEmail.trim());
       let invitedUserId = invitedUser?.id;
       let invitedUserName = invitedUser?.name || inviteEmail.split('@')[0];
 
@@ -371,8 +423,9 @@ export default function NotesPage(): React.JSX.Element {
         groupName: currentGroup.name,
         senderId: user.uid,
         senderName: userDisplayName,
+        senderEmail: userEmail,
         receiverId: invitedUserId,
-        receiverEmail: inviteEmail.trim(),
+        receiverEmail: inviteEmail.trim().toLowerCase(),
         receiverName: invitedUserName,
         status: 'pending',
         message: `${userDisplayName} mengundang Anda untuk bergabung dengan grup "${currentGroup.name}"`,
@@ -410,20 +463,29 @@ export default function NotesPage(): React.JSX.Element {
       });
 
       if (accept && notification.groupId) {
-        // Tambahkan user ke grup
-        const groupRef = doc(db, 'groups', notification.groupId);
-        const groupSnap = await getDocs(query(collection(db, 'groups'), where('__name__', '==', notification.groupId)));
-        
-        if (!groupSnap.empty) {
-          await updateDoc(groupRef, {
-            members: arrayUnion(user.uid),
-            [`memberNames.${user.uid}`]: userDisplayName
-          });
+        try {
+          // Tambahkan user ke grup
+          const groupRef = doc(db, 'groups', notification.groupId);
           
-          alert(`Anda telah bergabung dengan grup "${notification.groupName}"`);
-          
-          // Reload groups
-          loadUserGroups(user.uid);
+          // Ambil data grup terbaru
+          const groupSnap = await getDoc(groupRef);
+          if (groupSnap.exists()) {
+            const groupData = groupSnap.data() as Group;
+            
+            // Update grup dengan member baru
+            await updateDoc(groupRef, {
+              members: arrayUnion(user.uid),
+              [`memberNames.${user.uid}`]: userDisplayName
+            });
+            
+            alert(`Anda telah bergabung dengan grup "${notification.groupName || groupData.name}"`);
+            
+            // Reload groups
+            loadUserGroups(user.uid);
+          }
+        } catch (error) {
+          console.error("Error adding user to group:", error);
+          alert("Gagal bergabung ke grup. Silakan coba lagi.");
         }
       }
 
@@ -824,9 +886,9 @@ export default function NotesPage(): React.JSX.Element {
                           color: '#666',
                           marginBottom: '10px'
                         }}>
-                          Dari: {notification.senderName}
+                          Dari: {notification.senderName || 'Unknown User'}
                           <br />
-                          Grup: {notification.groupName}
+                          Grup: {notification.groupName || 'Unknown Group'}
                           <br />
                           Waktu: {formatTime(notification.createdAt)}
                         </div>
