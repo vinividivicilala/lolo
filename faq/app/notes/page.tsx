@@ -18,7 +18,10 @@ import {
   doc,
   deleteDoc,
   updateDoc,
-  arrayUnion
+  arrayUnion,
+  arrayRemove,
+  getDocs,
+  where
 } from "firebase/firestore";
 import { initializeApp, getApps } from "firebase/app";
 
@@ -51,21 +54,24 @@ interface Group {
   id?: string;
   name: string;
   ownerId: string;
+  ownerName: string;
   members: string[];
   memberNames?: {[key: string]: string};
   createdAt: any;
 }
 
-interface Message {
+interface Notification {
   id?: string;
-  text: string;
-  userId: string;
-  userName: string;
+  type: 'group_invite';
   groupId: string;
-  type: 'text' | 'link';
-  link?: string;
-  thumbnail?: string;
-  title?: string;
+  groupName: string;
+  senderId: string;
+  senderName: string;
+  receiverId: string;
+  receiverName?: string;
+  receiverEmail?: string;
+  status: 'pending' | 'accepted' | 'rejected';
+  message: string;
   createdAt: any;
 }
 
@@ -73,12 +79,15 @@ export default function NotesPage(): React.JSX.Element {
   const router = useRouter();
   const [user, setUser] = useState<any>(null);
   const [userDisplayName, setUserDisplayName] = useState("");
+  const [userEmail, setUserEmail] = useState("");
   const [notes, setNotes] = useState<Note[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showNewNoteForm, setShowNewNoteForm] = useState(false);
   const [showGroupModal, setShowGroupModal] = useState(false);
   const [showInviteModal, setShowInviteModal] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
   const [groups, setGroups] = useState<Group[]>([]);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
   const [currentGroup, setCurrentGroup] = useState<Group | null>(null);
   const [newNote, setNewNote] = useState({ 
     title: "", 
@@ -141,9 +150,12 @@ export default function NotesPage(): React.JSX.Element {
         const name = currentUser.displayName || 
                     currentUser.email?.split('@')[0] || 
                     'User';
+        const email = currentUser.email || '';
         setUserDisplayName(name);
+        setUserEmail(email);
         loadUserNotes(currentUser.uid);
         loadUserGroups(currentUser.uid);
+        loadUserNotifications(currentUser.uid);
       } else {
         router.push('/');
       }
@@ -191,18 +203,16 @@ export default function NotesPage(): React.JSX.Element {
 
     try {
       const groupsRef = collection(db, 'groups');
-      const q = query(groupsRef);
+      const q = query(groupsRef, where('members', 'array-contains', userId));
       
       const unsubscribe = onSnapshot(q, (querySnapshot) => {
         const groupsData: Group[] = [];
         querySnapshot.forEach((doc) => {
           const groupData = doc.data() as Group;
-          if (groupData.members.includes(userId)) {
-            groupsData.push({
-              id: doc.id,
-              ...groupData
-            });
-          }
+          groupsData.push({
+            id: doc.id,
+            ...groupData
+          });
         });
         setGroups(groupsData);
         
@@ -217,6 +227,35 @@ export default function NotesPage(): React.JSX.Element {
     }
   };
 
+  const loadUserNotifications = (userId: string) => {
+    if (!db) return;
+
+    try {
+      const notificationsRef = collection(db, 'notifications');
+      const q = query(
+        notificationsRef, 
+        where('receiverId', '==', userId),
+        orderBy('createdAt', 'desc')
+      );
+      
+      const unsubscribe = onSnapshot(q, (querySnapshot) => {
+        const notificationsData: Notification[] = [];
+        querySnapshot.forEach((doc) => {
+          const notificationData = doc.data() as Notification;
+          notificationsData.push({
+            id: doc.id,
+            ...notificationData
+          });
+        });
+        setNotifications(notificationsData);
+      });
+
+      return unsubscribe;
+    } catch (error) {
+      console.error("Error loading notifications:", error);
+    }
+  };
+
   const handleCreateGroup = async () => {
     if (!user || !db || !newGroupName.trim()) {
       alert("Nama grup harus diisi");
@@ -227,6 +266,7 @@ export default function NotesPage(): React.JSX.Element {
       const groupData = {
         name: newGroupName.trim(),
         ownerId: user.uid,
+        ownerName: userDisplayName,
         members: [user.uid],
         memberNames: {
           [user.uid]: userDisplayName
@@ -247,6 +287,54 @@ export default function NotesPage(): React.JSX.Element {
     }
   };
 
+  // Cari semua user berdasarkan email pattern
+  const findUsersByEmailPattern = async (emailPattern: string) => {
+    if (!db || !emailPattern) return [];
+
+    try {
+      const usersRef = collection(db, 'users');
+      const q = query(usersRef);
+      const querySnapshot = await getDocs(q);
+      
+      const users: any[] = [];
+      querySnapshot.forEach((doc) => {
+        const userData = doc.data();
+        if (userData.email && userData.email.includes(emailPattern)) {
+          users.push({
+            id: doc.id,
+            ...userData
+          });
+        }
+      });
+      
+      return users;
+    } catch (error) {
+      console.error("Error finding users:", error);
+      return [];
+    }
+  };
+
+  // Buat user record jika belum ada
+  const createUserRecord = async (email: string, name?: string) => {
+    if (!db) return null;
+
+    try {
+      const userId = `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      const userData = {
+        id: userId,
+        email: email.toLowerCase(),
+        name: name || email.split('@')[0],
+        createdAt: serverTimestamp()
+      };
+
+      await addDoc(collection(db, 'users'), userData);
+      return userId;
+    } catch (error) {
+      console.error("Error creating user record:", error);
+      return null;
+    }
+  };
+
   const handleInviteUser = async () => {
     if (!user || !db || !currentGroup || !inviteEmail.trim()) {
       alert("Email harus diisi");
@@ -254,24 +342,103 @@ export default function NotesPage(): React.JSX.Element {
     }
 
     try {
-      // Simpan user yang diinvite dengan email sebagai ID sementara
-      const invitedUserId = `invite_${Date.now()}`;
-      
-      // Update grup dengan menambahkan member
-      const groupRef = doc(db, 'groups', currentGroup.id!);
-      await updateDoc(groupRef, {
-        members: arrayUnion(invitedUserId),
-        [`memberNames.${invitedUserId}`]: inviteEmail
-      });
+      // Cari user berdasarkan email pattern
+      const invitedUsers = await findUsersByEmailPattern(inviteEmail.trim());
+      let invitedUser = invitedUsers[0];
+      let invitedUserId = invitedUser?.id;
+      let invitedUserName = invitedUser?.name || inviteEmail.split('@')[0];
 
-      alert(`User ${inviteEmail} berhasil diundang ke grup "${currentGroup.name}"`);
+      // Jika user tidak ditemukan, buat record baru
+      if (!invitedUser) {
+        invitedUserId = await createUserRecord(inviteEmail.trim());
+        if (!invitedUserId) {
+          alert("Gagal membuat user record");
+          return;
+        }
+        invitedUserName = inviteEmail.split('@')[0];
+      }
+
+      // Cek apakah user sudah menjadi anggota grup
+      if (currentGroup.members.includes(invitedUserId)) {
+        alert("User sudah menjadi anggota grup ini");
+        return;
+      }
+
+      // Buat notifikasi invite
+      const notificationData = {
+        type: 'group_invite',
+        groupId: currentGroup.id,
+        groupName: currentGroup.name,
+        senderId: user.uid,
+        senderName: userDisplayName,
+        receiverId: invitedUserId,
+        receiverEmail: inviteEmail.trim(),
+        receiverName: invitedUserName,
+        status: 'pending',
+        message: `${userDisplayName} mengundang Anda untuk bergabung dengan grup "${currentGroup.name}"`,
+        createdAt: serverTimestamp()
+      };
+
+      await addDoc(collection(db, 'notifications'), notificationData);
       
       setInviteEmail("");
       setShowInviteModal(false);
       
+      alert(`Undangan telah dikirim ke ${inviteEmail}`);
+      
     } catch (error) {
       console.error("Error inviting user:", error);
       alert("Gagal mengundang user.");
+    }
+  };
+
+  const handleNotificationResponse = async (notificationId: string, accept: boolean) => {
+    if (!user || !db) return;
+
+    try {
+      const notificationRef = doc(db, 'notifications', notificationId);
+      const notification = notifications.find(n => n.id === notificationId);
+      
+      if (!notification) return;
+
+      // Update status notifikasi
+      await updateDoc(notificationRef, {
+        status: accept ? 'accepted' : 'rejected',
+        message: accept ? 
+          `Anda telah menerima undangan ke grup "${notification.groupName}"` :
+          `Anda telah menolak undangan ke grup "${notification.groupName}"`
+      });
+
+      if (accept && notification.groupId) {
+        // Tambahkan user ke grup
+        const groupRef = doc(db, 'groups', notification.groupId);
+        const groupSnap = await getDocs(query(collection(db, 'groups'), where('__name__', '==', notification.groupId)));
+        
+        if (!groupSnap.empty) {
+          await updateDoc(groupRef, {
+            members: arrayUnion(user.uid),
+            [`memberNames.${user.uid}`]: userDisplayName
+          });
+          
+          alert(`Anda telah bergabung dengan grup "${notification.groupName}"`);
+          
+          // Reload groups
+          loadUserGroups(user.uid);
+        }
+      }
+
+      // Hapus notifikasi setelah beberapa detik
+      setTimeout(async () => {
+        try {
+          await deleteDoc(notificationRef);
+        } catch (error) {
+          console.error("Error deleting notification:", error);
+        }
+      }, 3000);
+
+    } catch (error) {
+      console.error("Error responding to notification:", error);
+      alert("Gagal memproses undangan.");
     }
   };
 
@@ -379,7 +546,7 @@ export default function NotesPage(): React.JSX.Element {
         userId: user.uid,
         userName: userDisplayName,
         groupId: currentGroup.id,
-        type: 'link' as const,
+        type: 'link',
         link: note.link || "",
         thumbnail: note.thumbnail || "",
         title: note.title,
@@ -470,6 +637,19 @@ export default function NotesPage(): React.JSX.Element {
     });
   };
 
+  const formatTime = (timestamp: any) => {
+    if (!timestamp) return "";
+    
+    const date = timestamp.toDate();
+    return date.toLocaleTimeString('id-ID', {
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
+  const pendingNotifications = notifications.filter(n => n.status === 'pending');
+  const notificationCount = pendingNotifications.length;
+
   if (!auth || !db) {
     return (
       <div style={{
@@ -543,6 +723,180 @@ export default function NotesPage(): React.JSX.Element {
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M7 17l9.2-9.2M17 17V7H7"/>
             </svg>
+          </div>
+          
+          {/* Tombol Notifikasi */}
+          <div style={{ position: 'relative' }}>
+            <button
+              onClick={() => setShowNotifications(!showNotifications)}
+              style={{
+                backgroundColor: 'transparent',
+                border: 'none',
+                color: 'white',
+                padding: '10px',
+                cursor: 'pointer',
+                fontSize: '24px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                position: 'relative'
+              }}
+              title="Notifikasi"
+            >
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/>
+              </svg>
+              {notificationCount > 0 && (
+                <div style={{
+                  position: 'absolute',
+                  top: '5px',
+                  right: '5px',
+                  backgroundColor: 'red',
+                  color: 'white',
+                  borderRadius: '50%',
+                  width: '20px',
+                  height: '20px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '12px',
+                  fontWeight: 'bold'
+                }}>
+                  {notificationCount}
+                </div>
+              )}
+            </button>
+
+            {/* Dropdown Notifikasi */}
+            {showNotifications && (
+              <div style={{
+                position: 'absolute',
+                top: '50px',
+                right: 0,
+                backgroundColor: '#111',
+                border: '1px solid #333',
+                borderRadius: '8px',
+                width: '400px',
+                maxHeight: '500px',
+                overflowY: 'auto',
+                zIndex: 1000,
+                boxShadow: '0 4px 20px rgba(0,0,0,0.5)'
+              }}>
+                <div style={{
+                  padding: '20px',
+                  borderBottom: '1px solid #333',
+                  fontSize: '20px',
+                  fontWeight: 'bold'
+                }}>
+                  Notifikasi ({notifications.length})
+                </div>
+                
+                {notifications.length === 0 ? (
+                  <div style={{
+                    padding: '30px',
+                    textAlign: 'center',
+                    color: '#888',
+                    fontSize: '18px'
+                  }}>
+                    Tidak ada notifikasi
+                  </div>
+                ) : (
+                  <div>
+                    {notifications.map((notification) => (
+                      <div
+                        key={notification.id}
+                        style={{
+                          padding: '20px',
+                          borderBottom: '1px solid #222',
+                          backgroundColor: notification.status === 'pending' ? 'rgba(255,255,255,0.05)' : 'transparent'
+                        }}
+                      >
+                        <div style={{
+                          fontSize: '18px',
+                          marginBottom: '10px',
+                          color: notification.status === 'pending' ? 'white' : '#aaa'
+                        }}>
+                          {notification.message}
+                        </div>
+                        
+                        <div style={{
+                          fontSize: '14px',
+                          color: '#666',
+                          marginBottom: '10px'
+                        }}>
+                          Dari: {notification.senderName}
+                          <br />
+                          Grup: {notification.groupName}
+                          <br />
+                          Waktu: {formatTime(notification.createdAt)}
+                        </div>
+                        
+                        {notification.status === 'pending' && (
+                          <div style={{
+                            display: 'flex',
+                            gap: '10px',
+                            marginTop: '15px'
+                          }}>
+                            <button
+                              onClick={() => handleNotificationResponse(notification.id!, true)}
+                              style={{
+                                padding: '8px 20px',
+                                backgroundColor: 'green',
+                                border: 'none',
+                                color: 'white',
+                                borderRadius: '6px',
+                                cursor: 'pointer',
+                                fontSize: '16px',
+                                fontWeight: 'bold'
+                              }}
+                            >
+                              Terima
+                            </button>
+                            <button
+                              onClick={() => handleNotificationResponse(notification.id!, false)}
+                              style={{
+                                padding: '8px 20px',
+                                backgroundColor: 'red',
+                                border: 'none',
+                                color: 'white',
+                                borderRadius: '6px',
+                                cursor: 'pointer',
+                                fontSize: '16px',
+                                fontWeight: 'bold'
+                              }}
+                            >
+                              Tolak
+                            </button>
+                          </div>
+                        )}
+                        
+                        {notification.status === 'accepted' && (
+                          <div style={{
+                            color: 'green',
+                            fontSize: '16px',
+                            fontWeight: 'bold',
+                            marginTop: '10px'
+                          }}>
+                            ✓ Diterima
+                          </div>
+                        )}
+                        
+                        {notification.status === 'rejected' && (
+                          <div style={{
+                            color: 'red',
+                            fontSize: '16px',
+                            fontWeight: 'bold',
+                            marginTop: '10px'
+                          }}>
+                            ✗ Ditolak
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
           
           {/* Grup Selector */}
