@@ -2036,7 +2036,6 @@ const loadUserNotesRealtime = (userId: string) => {
                     ×
                   </motion.button>
                 </div>
-
 {/* Notes Tab */}
 {activeTab === 'notes' && (
   <div>
@@ -2156,103 +2155,221 @@ const loadUserNotesRealtime = (userId: string) => {
       <div style={{
         display: 'flex',
         flexDirection: 'column',
-        gap: '3rem'
+        gap: '4rem'
       }}>
-        {userNotes.map((note) => (
-          <motion.div
-            key={note.id}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            style={{
-              cursor: 'pointer',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '0.8rem'
-            }}
-            onClick={() => router.push('/notes')}
-          >
-            {/* Kategori */}
-            {note.category && (
-              <div style={{
-                fontSize: '1rem',
-                fontFamily: 'Helvetica, Arial, sans-serif',
-                color: 'rgba(255, 255, 255, 0.6)',
-                textTransform: 'uppercase',
-                letterSpacing: '0.5px'
-              }}>
-                {note.category}
-              </div>
-            )}
-
-            {/* Judul */}
-            <div style={{
-              fontSize: '2.5rem',
-              fontFamily: 'Helvetica, Arial, sans-serif',
-              lineHeight: '1.3',
-              color: 'white',
-              fontWeight: '400'
-            }}>
-              {note.title || 'Untitled Note'}
-            </div>
-
-            {/* Deskripsi */}
-            {note.content && (
-              <div style={{
-                fontSize: '1.2rem',
-                fontFamily: 'Helvetica, Arial, sans-serif',
-                lineHeight: '1.6',
-                color: 'rgba(255, 255, 255, 0.8)',
-                whiteSpace: 'pre-wrap'
-              }}>
-                {note.content.length > 150 ? note.content.substring(0, 150) + '...' : note.content}
-              </div>
-            )}
-
-            {/* Footer dengan tanggal dan aksi */}
-            <div style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              marginTop: '1rem'
-            }}>
-              <span style={{
-                fontSize: '0.9rem',
-                fontFamily: 'Helvetica, Arial, sans-serif',
-                color: 'rgba(255, 255, 255, 0.5)'
-              }}>
-                {calculateTimeAgo(note.updatedAt)}
-              </span>
+        {userNotes.map((note) => {
+          // Fungsi untuk mendapatkan embed URL video (sama seperti di halaman notes)
+          const getVideoEmbedUrl = (link: string) => {
+            if (!link) return null;
+            
+            try {
+              const url = new URL(link);
               
+              // YouTube
+              if (url.hostname.includes('youtube.com') || url.hostname.includes('youtu.be')) {
+                const videoId = url.searchParams.get('v') || url.pathname.split('/').pop();
+                if (videoId) {
+                  return `https://www.youtube.com/embed/${videoId}?autoplay=0&rel=0&showinfo=0`;
+                }
+              }
+              
+              // Vimeo
+              if (url.hostname.includes('vimeo.com')) {
+                const videoId = url.pathname.split('/').pop();
+                if (videoId) {
+                  return `https://player.vimeo.com/video/${videoId}?autoplay=0&title=0&byline=0&portrait=0`;
+                }
+              }
+              
+              // Video file langsung (MP4, WebM, etc.)
+              if (link.match(/\.(mp4|webm|ogg|mov|avi|wmv|flv|mkv)$/i)) {
+                return link;
+              }
+              
+              return null;
+            } catch {
+              return null;
+            }
+          };
+
+          // Fungsi untuk mendapatkan thumbnail YouTube
+          const getVideoThumbnail = (link: string) => {
+            if (!link) return null;
+            
+            try {
+              const url = new URL(link);
+              
+              // YouTube thumbnail
+              if (url.hostname.includes('youtube.com') || url.hostname.includes('youtu.be')) {
+                const videoId = url.searchParams.get('v') || url.pathname.split('/').pop();
+                if (videoId) {
+                  return `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
+                }
+              }
+              
+              return null;
+            } catch {
+              return null;
+            }
+          };
+
+          const videoEmbedUrl = note.link ? getVideoEmbedUrl(note.link) : null;
+          const videoThumbnail = note.link ? getVideoThumbnail(note.link) : null;
+
+          return (
+            <motion.div
+              key={note.id}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              style={{
+                cursor: 'pointer',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '1rem'
+              }}
+              onClick={() => router.push('/notes')}
+            >
+              {/* Kategori - sesuai dengan halaman notes */}
+              {note.category && (
+                <div style={{
+                  fontSize: '1.2rem',
+                  fontFamily: 'Helvetica, Arial, sans-serif',
+                  color: 'rgba(255, 255, 255, 0.6)',
+                  marginBottom: '0.5rem'
+                }}>
+                  {note.category}
+                </div>
+              )}
+
+              {/* Judul - sesuai dengan halaman notes */}
+              <div style={{
+                fontSize: '2.5rem',
+                fontFamily: 'Helvetica, Arial, sans-serif',
+                lineHeight: '1.3',
+                color: 'white',
+                fontWeight: '400'
+              }}>
+                {note.title || 'Untitled Note'}
+              </div>
+
+              {/* Deskripsi - sesuai dengan halaman notes */}
+              {note.content && (
+                <div style={{
+                  fontSize: '1.3rem',
+                  fontFamily: 'Helvetica, Arial, sans-serif',
+                  lineHeight: '1.6',
+                  color: 'rgba(255, 255, 255, 0.8)',
+                  marginTop: '1rem',
+                  whiteSpace: 'pre-wrap'
+                }}>
+                  {note.content}
+                </div>
+              )}
+
+              {/* Video Embed - sesuai dengan halaman notes */}
+              {videoEmbedUrl && (
+                <div style={{
+                  margin: '1.5rem 0',
+                  position: 'relative'
+                }}>
+                  {/* YouTube/Vimeo Embed */}
+                  {videoEmbedUrl.includes('youtube.com/embed') || videoEmbedUrl.includes('vimeo.com') ? (
+                    <div style={{
+                      position: 'relative',
+                      paddingBottom: '56.25%', // 16:9 aspect ratio
+                      height: 0,
+                      overflow: 'hidden',
+                      backgroundColor: '#000',
+                      borderRadius: '4px'
+                    }}>
+                      <iframe
+                        src={videoEmbedUrl}
+                        style={{
+                          position: 'absolute',
+                          top: 0,
+                          left: 0,
+                          width: '100%',
+                          height: '100%',
+                          border: 'none'
+                        }}
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                      />
+                    </div>
+                  ) : videoEmbedUrl.match(/\.(mp4|webm|ogg|mov|avi|wmv|flv|mkv)$/i) ? (
+                    // Native video player untuk file video langsung
+                    <div style={{
+                      position: 'relative',
+                      backgroundColor: '#000',
+                      borderRadius: '4px',
+                      overflow: 'hidden'
+                    }}>
+                      <video
+                        src={videoEmbedUrl}
+                        style={{
+                          width: '100%',
+                          maxWidth: '560px',
+                          height: 'auto',
+                          aspectRatio: '16/9',
+                          backgroundColor: '#000'
+                        }}
+                        controls
+                        poster={videoThumbnail || undefined}
+                      />
+                    </div>
+                  ) : null}
+                </div>
+              )}
+
+              {/* Footer dengan tanggal dan tombol link - sesuai dengan halaman notes */}
               <div style={{
                 display: 'flex',
+                justifyContent: 'space-between',
                 alignItems: 'center',
-                gap: '1rem'
+                marginTop: '1.5rem'
               }}>
-                <a
-                  href="#"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    router.push('/notes');
-                  }}
-                  style={{
-                    color: 'white',
-                    textDecoration: 'none',
+                {/* Tanggal */}
+                <span style={{
+                  fontSize: '1rem',
+                  fontFamily: 'Helvetica, Arial, sans-serif',
+                  color: 'rgba(255, 255, 255, 0.5)'
+                }}>
+                  {calculateTimeAgo(note.updatedAt)}
+                </span>
+                
+                {/* Tombol link jika ada */}
+                {note.link && (
+                  <div style={{
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '0.5rem',
-                    fontSize: '0.9rem',
-                    fontFamily: 'Helvetica, Arial, sans-serif'
-                  }}
-                >
-                  Open Note
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M7 17l9.2-9.2M17 17V7H7"/>
-                  </svg>
-                </a>
+                    gap: '1rem'
+                  }}>
+                    <a
+                      href={note.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={(e) => e.stopPropagation()}
+                      style={{
+                        color: 'white',
+                        textDecoration: 'none',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.5rem',
+                        fontSize: '1rem',
+                        fontFamily: 'Helvetica, Arial, sans-serif'
+                      }}
+                    >
+                      Buka Link
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M7 17l9.2-9.2M17 17V7H7"/>
+                      </svg>
+                    </a>
+                  </div>
+                )}
               </div>
-            </div>
-          </motion.div>
-        ))}
+            </motion.div>
+          );
+        })}
         
         {/* Tombol View All */}
         <motion.div
@@ -5564,5 +5681,6 @@ const loadUserNotesRealtime = (userId: string) => {
     </div>
   );
 }
+
 
 
