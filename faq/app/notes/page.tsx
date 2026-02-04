@@ -1032,49 +1032,79 @@ export default function NotesPage(): React.JSX.Element {
             </div>
           )}
           
-          {/* Tombol Buat Grup */}
-          <button
-            onClick={() => setShowGroupModal(true)}
-            style={{
-              backgroundColor: 'transparent',
-              border: 'none',
-              color: 'white',
-              padding: '10px',
-              cursor: 'pointer',
-              fontSize: '24px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}
-            title="Buat Grup Baru"
-          >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M12 5v14M5 12h14"/>
+          {/* Tombol Buat Grup Baru dengan Teks */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '5px'
+          }}>
+            <span style={{
+              fontSize: '20px',
+              color: 'white'
+            }}>
+              Buat Grup Baru
+            </span>
+            <button
+              onClick={() => setShowGroupModal(true)}
+              style={{
+                backgroundColor: 'transparent',
+                border: 'none',
+                color: 'white',
+                padding: '10px',
+                cursor: 'pointer',
+                fontSize: '24px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+              title="Buat Grup Baru"
+            >
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M12 5v14M5 12h14"/>
+              </svg>
+            </button>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M7 17L17 7M7 7H17V17"/>
             </svg>
-          </button>
+          </div>
           
-          {/* Tombol Tambah Catatan */}
-          <button
-            onClick={() => setShowNewNoteForm(true)}
-            style={{
-              backgroundColor: 'transparent',
-              border: 'none',
-              color: 'white',
-              padding: '12px',
-              cursor: 'pointer',
-              fontSize: '28px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              width: '50px',
-              height: '50px'
-            }}
-            title="Buat Catatan Baru"
-          >
-            <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M12 5v14M5 12h14"/>
+          {/* Tombol Buat Catatan Baru dengan Teks */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '5px'
+          }}>
+            <span style={{
+              fontSize: '20px',
+              color: 'white'
+            }}>
+              Buat Catatan Baru
+            </span>
+            <button
+              onClick={() => setShowNewNoteForm(true)}
+              style={{
+                backgroundColor: 'transparent',
+                border: 'none',
+                color: 'white',
+                padding: '12px',
+                cursor: 'pointer',
+                fontSize: '28px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '50px',
+                height: '50px'
+              }}
+              title="Buat Catatan Baru"
+            >
+              <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M12 5v14M5 12h14"/>
+              </svg>
+            </button>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M7 17L17 7M7 7H17V17"/>
             </svg>
-          </button>
+          </div>
 
           {/* Tombol Logout */}
           <button
@@ -1423,18 +1453,13 @@ export default function NotesPage(): React.JSX.Element {
         )}
       </div>
 
-      {/* Tombol Aksi di Pojok Kiri Bawah (Halaman Utama) */}
+      {/* Teks Halaman Utama dengan South West Arrow di Pojok Kiri Bawah */}
       <div style={{
         position: 'fixed',
         bottom: '40px',
         left: '40px',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'flex-start',
-        gap: '15px',
         zIndex: 99
       }}>
-        {/* Teks Halaman Utama dengan South West Arrow */}
         <a
           href="/"
           style={{
@@ -1445,86 +1470,14 @@ export default function NotesPage(): React.JSX.Element {
             display: 'flex',
             alignItems: 'center',
             gap: '10px',
-            fontWeight: 'bold',
-            transition: 'opacity 0.3s',
-            opacity: 0.8
+            fontWeight: 'bold'
           }}
-          onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
-          onMouseLeave={(e) => e.currentTarget.style.opacity = '0.8'}
         >
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M17 7L7 17M17 17V7H7"/>
           </svg>
           Halaman Utama
         </a>
-      </div>
-
-      {/* Tombol Aksi di Pojok Kanan Bawah */}
-      <div style={{
-        position: 'fixed',
-        bottom: '40px',
-        right: '40px',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'flex-end',
-        gap: '20px',
-        zIndex: 99
-      }}>
-        {/* Tombol Buat Grup Baru dengan North West Arrow */}
-        <button
-          onClick={() => setShowGroupModal(true)}
-          style={{
-            backgroundColor: 'transparent',
-            border: 'none',
-            color: 'white',
-            fontSize: '24px',
-            fontFamily: 'Helvetica, Arial, sans-serif',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '15px',
-            cursor: 'pointer',
-            padding: '15px 25px',
-            borderRadius: '8px',
-            transition: 'background-color 0.3s',
-            fontWeight: 'bold'
-          }}
-          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)'}
-          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-          title="Buat Grup Baru"
-        >
-          <span>Buat Grup Baru</span>
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M7 17L17 7M7 7H17V17"/>
-          </svg>
-        </button>
-
-        {/* Tombol Buat Catatan Baru dengan North West Arrow */}
-        <button
-          onClick={() => setShowNewNoteForm(true)}
-          style={{
-            backgroundColor: 'transparent',
-            border: 'none',
-            color: 'white',
-            fontSize: '24px',
-            fontFamily: 'Helvetica, Arial, sans-serif',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '15px',
-            cursor: 'pointer',
-            padding: '15px 25px',
-            borderRadius: '8px',
-            transition: 'background-color 0.3s',
-            fontWeight: 'bold'
-          }}
-          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)'}
-          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-          title="Buat Catatan Baru"
-        >
-          <span>Buat Catatan Baru</span>
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M7 17L17 7M7 7H17V17"/>
-          </svg>
-        </button>
       </div>
 
       {/* Modal buat catatan baru */}
