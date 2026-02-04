@@ -9,8 +9,20 @@ export default function UpdatePage() {
   return (
     <div style={{
       minHeight: '100vh',
-      backgroundColor: 'black'
+      backgroundColor: 'black',
+      color: 'white',
+      padding: '2rem',
+      fontFamily: 'Helvetica, Arial, sans-serif'
     }}>
+      <div style={{ display: 'flex', alignItems: 'center', marginBottom: '2rem' }}>
+        <h1 style={{ fontSize: '3rem', marginRight: '1rem' }}>Website Title</h1>
+        <span style={{ 
+          fontSize: '3rem',
+          color: 'rgba(255,255,255,0.8)'
+        }}>
+          Menuru
+        </span>
+      </div>
     </div>
   );
 }
