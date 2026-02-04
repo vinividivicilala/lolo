@@ -43,14 +43,15 @@ interface Update {
   title: string;
   category: string;
   description: string;
+  link: string;
   version: string;
-  status: 'pending' | 'in-progress' | 'completed' | 'deployed';
   userId: string;
   userName: string;
+  userEmail?: string;
   createdAt: any;
   updatedAt: any;
-  priority: 'low' | 'medium' | 'high' | 'critical';
-  impact: 'minor' | 'moderate' | 'major' | 'critical';
+  savedBy?: string[];
+  thumbnail?: string;
 }
 
 interface Message {
@@ -60,13 +61,12 @@ interface Message {
   userName: string;
   userEmail?: string;
   updateId?: string;
-  type: 'text' | 'comment' | 'update';
   createdAt: any;
 }
 
 interface Notification {
   id?: string;
-  type: 'update' | 'comment' | 'mention';
+  type: 'update' | 'comment' | 'share';
   updateId?: string;
   messageId?: string;
   senderId: string;
@@ -74,7 +74,6 @@ interface Notification {
   receiverId: string;
   receiverName?: string;
   message: string;
-  status: 'unread' | 'read';
   createdAt: any;
 }
 
@@ -94,15 +93,14 @@ export default function UpdatesPage(): React.JSX.Element {
     title: "", 
     category: "", 
     description: "",
-    version: "",
-    priority: "medium" as 'low' | 'medium' | 'high' | 'critical',
-    impact: "moderate" as 'minor' | 'moderate' | 'major' | 'critical',
-    status: "pending" as 'pending' | 'in-progress' | 'completed' | 'deployed'
+    link: "",
+    version: ""
   });
   const [newMessage, setNewMessage] = useState("");
   const [auth, setAuth] = useState<any>(null);
   const [db, setDb] = useState<any>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const videoRefs = useRef<{ [key: string]: HTMLVideoElement | null }>({});
 
   const categories = [
     "Frontend",
@@ -121,27 +119,6 @@ export default function UpdatesPage(): React.JSX.Element {
     "Migration",
     "Maintenance"
   ];
-
-  const statusColors: Record<string, string> = {
-    'pending': '#FFB800',
-    'in-progress': '#00C2FF',
-    'completed': '#00DC82',
-    'deployed': '#8B5CF6'
-  };
-
-  const priorityColors: Record<string, string> = {
-    'low': '#6B7280',
-    'medium': '#3B82F6',
-    'high': '#F59E0B',
-    'critical': '#EF4444'
-  };
-
-  const impactColors: Record<string, string> = {
-    'minor': '#6B7280',
-    'moderate': '#10B981',
-    'major': '#F59E0B',
-    'critical': '#EF4444'
-  };
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -213,7 +190,6 @@ export default function UpdatesPage(): React.JSX.Element {
         id: userId,
         name: name,
         email: email.toLowerCase(),
-        role: 'developer',
         lastActive: serverTimestamp(),
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp()
@@ -269,7 +245,7 @@ export default function UpdatesPage(): React.JSX.Element {
 
     try {
       const messagesRef = collection(db, 'updateMessages');
-      const q = query(messagesRef, orderBy('createdAt', 'asc'), where('type', '==', 'text'));
+      const q = query(messagesRef, orderBy('createdAt', 'asc'));
       
       const unsubscribe = onSnapshot(q, (querySnapshot) => {
         const messagesData: Message[] = [];
@@ -319,6 +295,32 @@ export default function UpdatesPage(): React.JSX.Element {
     }
   };
 
+  const generateThumbnail = (link: string): string => {
+    if (!link) return "";
+    
+    try {
+      const url = new URL(link);
+      
+      if (url.hostname.includes('youtube.com') || url.hostname.includes('youtu.be')) {
+        const videoId = url.searchParams.get('v') || url.pathname.split('/').pop();
+        if (videoId) {
+          return `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
+        }
+      }
+      
+      if (url.hostname.includes('vimeo.com')) {
+        const videoId = url.pathname.split('/').pop();
+        if (videoId) {
+          return `https://i.vimeocdn.com/video/${videoId}_640.jpg`;
+        }
+      }
+      
+      return "";
+    } catch {
+      return "";
+    }
+  };
+
   const handleCreateUpdate = async () => {
     if (!user || !db || !newUpdate.title.trim()) {
       alert("Judul update harus diisi");
@@ -326,31 +328,33 @@ export default function UpdatesPage(): React.JSX.Element {
     }
 
     try {
+      const thumbnail = generateThumbnail(newUpdate.link.trim());
+
       const updateData = {
         title: newUpdate.title.trim(),
         category: newUpdate.category.trim(),
         description: newUpdate.description.trim(),
+        link: newUpdate.link.trim(),
         version: newUpdate.version.trim(),
-        priority: newUpdate.priority,
-        impact: newUpdate.impact,
-        status: newUpdate.status,
+        thumbnail: thumbnail,
         userId: user.uid,
         userName: userDisplayName,
+        userEmail: userEmail,
+        savedBy: [],
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp()
       };
 
       const docRef = await addDoc(collection(db, 'updates'), updateData);
       
-      // Create system notification
+      // Create notification for all users
       await addDoc(collection(db, 'updateNotifications'), {
         type: 'update',
         updateId: docRef.id,
         senderId: user.uid,
         senderName: userDisplayName,
         receiverId: 'all',
-        message: `Update baru: "${newUpdate.title.trim()}" telah dibuat`,
-        status: 'unread',
+        message: `Update baru: "${newUpdate.title.trim()}"`,
         createdAt: serverTimestamp()
       });
       
@@ -358,10 +362,8 @@ export default function UpdatesPage(): React.JSX.Element {
         title: "", 
         category: "", 
         description: "",
-        version: "",
-        priority: "medium",
-        impact: "moderate",
-        status: "pending"
+        link: "",
+        version: ""
       });
       setShowNewUpdateForm(false);
       
@@ -371,31 +373,63 @@ export default function UpdatesPage(): React.JSX.Element {
     }
   };
 
-  const handleUpdateStatus = async (updateId: string, newStatus: Update['status']) => {
+  const handleSaveUpdate = async (updateId: string) => {
     if (!user || !db) return;
 
     try {
       const updateRef = doc(db, 'updates', updateId);
-      await updateDoc(updateRef, {
-        status: newStatus,
-        updatedAt: serverTimestamp()
-      });
-
       const update = updates.find(u => u.id === updateId);
-      if (update) {
-        await addDoc(collection(db, 'updateNotifications'), {
-          type: 'update',
-          updateId: updateId,
-          senderId: user.uid,
-          senderName: userDisplayName,
-          receiverId: 'all',
-          message: `Status update "${update.title}" diubah menjadi ${newStatus}`,
-          status: 'unread',
-          createdAt: serverTimestamp()
+      
+      if (update?.savedBy?.includes(user.uid)) {
+        // Unsave
+        await updateDoc(updateRef, {
+          savedBy: arrayRemove(user.uid)
+        });
+      } else {
+        // Save
+        await updateDoc(updateRef, {
+          savedBy: arrayUnion(user.uid)
         });
       }
+      
     } catch (error) {
-      console.error("Error updating status:", error);
+      console.error("Error saving update:", error);
+    }
+  };
+
+  const handleShareUpdate = async (updateId: string) => {
+    if (!user || !db) return;
+
+    try {
+      const update = updates.find(u => u.id === updateId);
+      if (!update) return;
+
+      // Create share notification
+      await addDoc(collection(db, 'updateNotifications'), {
+        type: 'share',
+        updateId: updateId,
+        senderId: user.uid,
+        senderName: userDisplayName,
+        receiverId: 'all',
+        message: `${userDisplayName} membagikan update: "${update.title}"`,
+        createdAt: serverTimestamp()
+      });
+
+      // Also post as message
+      await addDoc(collection(db, 'updateMessages'), {
+        text: `Saya membagikan update: "${update.title}"`,
+        userId: user.uid,
+        userName: userDisplayName,
+        userEmail: userEmail,
+        updateId: updateId,
+        createdAt: serverTimestamp()
+      });
+
+      alert("Update berhasil dibagikan!");
+      
+    } catch (error) {
+      console.error("Error sharing update:", error);
+      alert("Gagal membagikan update.");
     }
   };
 
@@ -424,7 +458,6 @@ export default function UpdatesPage(): React.JSX.Element {
         userId: user.uid,
         userName: userDisplayName,
         userEmail: userEmail,
-        type: 'text' as const,
         createdAt: serverTimestamp()
       };
 
@@ -435,7 +468,6 @@ export default function UpdatesPage(): React.JSX.Element {
       let match;
       while ((match = mentionRegex.exec(newMessage)) !== null) {
         const mentionedUser = match[1];
-        // Find user by display name (simplified)
         const usersRef = collection(db, 'users');
         const q = query(usersRef, where('name', '==', mentionedUser));
         const querySnapshot = await getDocs(q);
@@ -443,13 +475,12 @@ export default function UpdatesPage(): React.JSX.Element {
         if (!querySnapshot.empty) {
           const mentionedUserDoc = querySnapshot.docs[0];
           await addDoc(collection(db, 'updateNotifications'), {
-            type: 'mention',
+            type: 'comment',
             senderId: user.uid,
             senderName: userDisplayName,
             receiverId: mentionedUserDoc.id,
             receiverName: mentionedUserDoc.data().name,
             message: `${userDisplayName} menyebut Anda dalam pesan`,
-            status: 'unread',
             createdAt: serverTimestamp()
           });
         }
@@ -467,12 +498,9 @@ export default function UpdatesPage(): React.JSX.Element {
     if (!db) return;
 
     try {
-      const notificationRef = doc(db, 'updateNotifications', notificationId);
-      await updateDoc(notificationRef, {
-        status: 'read'
-      });
+      await deleteDoc(doc(db, 'updateNotifications', notificationId));
     } catch (error) {
-      console.error("Error marking notification as read:", error);
+      console.error("Error deleting notification:", error);
     }
   };
 
@@ -522,20 +550,49 @@ export default function UpdatesPage(): React.JSX.Element {
     });
   };
 
-  const pendingNotifications = notifications.filter(n => n.status === 'unread');
-  const notificationCount = pendingNotifications.length;
-
-  const getStatusStats = () => {
-    return {
-      total: updates.length,
-      pending: updates.filter(u => u.status === 'pending').length,
-      inProgress: updates.filter(u => u.status === 'in-progress').length,
-      completed: updates.filter(u => u.status === 'completed').length,
-      deployed: updates.filter(u => u.status === 'deployed').length
-    };
+  const getVideoEmbedUrl = (link: string) => {
+    if (!link) return null;
+    
+    try {
+      const url = new URL(link);
+      
+      if (url.hostname.includes('youtube.com') || url.hostname.includes('youtu.be')) {
+        const videoId = url.searchParams.get('v') || url.pathname.split('/').pop();
+        if (videoId) {
+          return `https://www.youtube.com/embed/${videoId}?autoplay=0&rel=0&showinfo=0`;
+        }
+      }
+      
+      if (url.hostname.includes('vimeo.com')) {
+        const videoId = url.pathname.split('/').pop();
+        if (videoId) {
+          return `https://player.vimeo.com/video/${videoId}?autoplay=0&title=0&byline=0&portrait=0`;
+        }
+      }
+      
+      if (link.match(/\.(mp4|webm|ogg|mov|avi|wmv|flv|mkv)$/i)) {
+        return link;
+      }
+      
+      return null;
+    } catch {
+      return null;
+    }
   };
 
-  const stats = getStatusStats();
+  const togglePlayPause = (updateId: string) => {
+    const video = videoRefs.current[updateId];
+    if (video) {
+      if (video.paused) {
+        video.play();
+      } else {
+        video.pause();
+      }
+    }
+  };
+
+  const pendingNotifications = notifications.filter(n => n.status === 'unread');
+  const notificationCount = notifications.length;
 
   if (!auth || !db) {
     return (
@@ -696,7 +753,7 @@ export default function UpdatesPage(): React.JSX.Element {
                         style={{
                           padding: '20px',
                           borderBottom: '1px solid #222',
-                          backgroundColor: notification.status === 'unread' ? 'rgba(255,255,255,0.05)' : 'transparent',
+                          backgroundColor: 'rgba(255,255,255,0.05)',
                           cursor: 'pointer'
                         }}
                         onClick={() => notification.id && handleMarkNotificationAsRead(notification.id)}
@@ -704,7 +761,7 @@ export default function UpdatesPage(): React.JSX.Element {
                         <div style={{
                           fontSize: '18px',
                           marginBottom: '10px',
-                          color: notification.status === 'unread' ? 'white' : '#aaa'
+                          color: 'white'
                         }}>
                           {notification.message}
                         </div>
@@ -718,17 +775,6 @@ export default function UpdatesPage(): React.JSX.Element {
                           <br />
                           Waktu: {formatTime(notification.createdAt)}
                         </div>
-                        
-                        {notification.status === 'unread' && (
-                          <div style={{
-                            color: '#00C2FF',
-                            fontSize: '12px',
-                            textTransform: 'uppercase',
-                            letterSpacing: '1px'
-                          }}>
-                            Baru
-                          </div>
-                        )}
                       </div>
                     ))}
                   </div>
@@ -849,47 +895,6 @@ export default function UpdatesPage(): React.JSX.Element {
       }}>
         {/* Updates Column */}
         <div>
-          {/* Stats Cards */}
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(5, 1fr)',
-            gap: '15px',
-            marginBottom: '50px'
-          }}>
-            {[
-              { label: 'Total', value: stats.total, color: '#FFFFFF' },
-              { label: 'Pending', value: stats.pending, color: statusColors.pending },
-              { label: 'Progress', value: stats.inProgress, color: statusColors['in-progress'] },
-              { label: 'Completed', value: stats.completed, color: statusColors.completed },
-              { label: 'Deployed', value: stats.deployed, color: statusColors.deployed }
-            ].map((stat, index) => (
-              <div key={index} style={{
-                backgroundColor: 'rgba(255,255,255,0.05)',
-                border: `1px solid ${stat.color}40`,
-                borderRadius: '12px',
-                padding: '20px',
-                textAlign: 'center'
-              }}>
-                <div style={{
-                  fontSize: '36px',
-                  fontWeight: 'bold',
-                  color: stat.color,
-                  marginBottom: '5px'
-                }}>
-                  {stat.value}
-                </div>
-                <div style={{
-                  fontSize: '14px',
-                  color: 'rgba(255,255,255,0.6)',
-                  textTransform: 'uppercase',
-                  letterSpacing: '1px'
-                }}>
-                  {stat.label}
-                </div>
-              </div>
-            ))}
-          </div>
-
           {isLoading ? (
             <div style={{
               display: 'flex',
@@ -927,232 +932,297 @@ export default function UpdatesPage(): React.JSX.Element {
             <div style={{
               display: 'flex',
               flexDirection: 'column',
-              gap: '40px',
+              gap: '80px',
               fontFamily: 'Helvetica, Arial, sans-serif'
             }}>
-              {updates.map((update) => (
-                <div
-                  key={update.id}
-                  style={{
-                    backgroundColor: 'rgba(255,255,255,0.02)',
-                    border: '1px solid rgba(255,255,255,0.1)',
-                    borderRadius: '20px',
-                    padding: '30px',
-                    fontFamily: 'Helvetica, Arial, sans-serif',
-                    position: 'relative',
-                    overflow: 'hidden'
-                  }}
-                >
-                  {/* Status Badge */}
-                  <div style={{
-                    position: 'absolute',
-                    top: '20px',
-                    right: '20px',
-                    padding: '6px 16px',
-                    backgroundColor: statusColors[update.status] + '20',
-                    border: `1px solid ${statusColors[update.status]}40`,
-                    borderRadius: '20px',
-                    fontSize: '14px',
-                    color: statusColors[update.status],
-                    textTransform: 'uppercase',
-                    fontWeight: 'bold',
-                    letterSpacing: '1px'
-                  }}>
-                    {update.status}
-                  </div>
+              {updates.map((update) => {
+                const videoEmbedUrl = getVideoEmbedUrl(update.link);
+                const isSaved = update.savedBy && update.savedBy.includes(user?.uid);
+                
+                return (
+                  <div
+                    key={update.id}
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '25px',
+                      fontFamily: 'Helvetica, Arial, sans-serif',
+                      borderBottom: '1px solid rgba(255,255,255,0.1)',
+                      paddingBottom: '40px'
+                    }}
+                  >
+                    {update.category && (
+                      <div style={{
+                        fontSize: '28px',
+                        fontFamily: 'Helvetica, Arial, sans-serif',
+                        color: 'white',
+                        marginBottom: '15px',
+                        fontWeight: '600'
+                      }}>
+                        {update.category}
+                      </div>
+                    )}
 
-                  {/* Priority and Impact Badges */}
-                  <div style={{
-                    display: 'flex',
-                    gap: '10px',
-                    marginBottom: '15px'
-                  }}>
                     <div style={{
-                      padding: '4px 12px',
-                      backgroundColor: priorityColors[update.priority] + '20',
-                      border: `1px solid ${priorityColors[update.priority]}40`,
-                      borderRadius: '12px',
-                      fontSize: '12px',
-                      color: priorityColors[update.priority],
-                      textTransform: 'uppercase',
+                      fontSize: '48px',
+                      fontFamily: 'Helvetica, Arial, sans-serif',
+                      lineHeight: '1.3',
+                      color: 'white',
                       fontWeight: 'bold'
                     }}>
-                      {update.priority}
+                      {update.title}
                     </div>
-                    <div style={{
-                      padding: '4px 12px',
-                      backgroundColor: impactColors[update.impact] + '20',
-                      border: `1px solid ${impactColors[update.impact]}40`,
-                      borderRadius: '12px',
-                      fontSize: '12px',
-                      color: impactColors[update.impact],
-                      textTransform: 'uppercase',
-                      fontWeight: 'bold'
-                    }}>
-                      {update.impact}
-                    </div>
-                  </div>
 
-                  {/* Category */}
-                  {update.category && (
-                    <div style={{
-                      fontSize: '18px',
-                      fontFamily: 'Helvetica, Arial, sans-serif',
-                      color: 'rgba(255,255,255,0.6)',
-                      marginBottom: '10px',
-                      fontWeight: '500'
-                    }}>
-                      {update.category}
-                    </div>
-                  )}
+                    {update.version && (
+                      <div style={{
+                        fontSize: '24px',
+                        fontFamily: 'Helvetica, Arial, sans-serif',
+                        color: 'rgba(255,255,255,0.7)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '10px'
+                      }}>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path d="M2 12h20M12 2v20"/>
+                        </svg>
+                        Version: {update.version}
+                      </div>
+                    )}
 
-                  {/* Title */}
-                  <div style={{
-                    fontSize: '32px',
-                    fontFamily: 'Helvetica, Arial, sans-serif',
-                    lineHeight: '1.3',
-                    color: 'white',
-                    fontWeight: 'bold',
-                    marginBottom: '15px'
-                  }}>
-                    {update.title}
-                  </div>
+                    {update.description && (
+                      <div style={{
+                        fontSize: '28px',
+                        fontFamily: 'Helvetica, Arial, sans-serif',
+                        lineHeight: '1.6',
+                        color: 'white',
+                        marginTop: '25px',
+                        whiteSpace: 'pre-wrap'
+                      }}>
+                        {update.description}
+                      </div>
+                    )}
 
-                  {/* Version */}
-                  {update.version && (
+                    {update.thumbnail && !videoEmbedUrl && (
+                      <div style={{
+                        margin: '20px 0'
+                      }}>
+                        <img 
+                          src={update.thumbnail} 
+                          alt="Thumbnail"
+                          style={{
+                            width: '100%',
+                            maxWidth: '600px',
+                            height: 'auto',
+                            borderRadius: '8px'
+                          }}
+                        />
+                      </div>
+                    )}
+
+                    {videoEmbedUrl && (
+                      <div style={{
+                        margin: '30px 0',
+                        position: 'relative'
+                      }}>
+                        {videoEmbedUrl.includes('youtube.com/embed') || videoEmbedUrl.includes('vimeo.com') ? (
+                          <div style={{
+                            position: 'relative',
+                            paddingBottom: '56.25%',
+                            height: 0,
+                            overflow: 'hidden',
+                            backgroundColor: '#000'
+                          }}>
+                            <iframe
+                              src={videoEmbedUrl}
+                              style={{
+                                position: 'absolute',
+                                top: 0,
+                                left: 0,
+                                width: '100%',
+                                height: '100%',
+                                border: 'none'
+                              }}
+                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                              allowFullScreen
+                            />
+                          </div>
+                        ) : (
+                          <div style={{
+                            position: 'relative',
+                            backgroundColor: '#000'
+                          }}>
+                            <video
+                              ref={(el) => {
+                                if (update.id) videoRefs.current[update.id] = el;
+                              }}
+                              src={videoEmbedUrl}
+                              style={{
+                                width: '100%',
+                                maxWidth: '600px',
+                                height: 'auto',
+                                aspectRatio: '16/9',
+                                backgroundColor: '#000',
+                                cursor: 'pointer'
+                              }}
+                              onClick={() => togglePlayPause(update.id!)}
+                              controls
+                            />
+                            {!update.thumbnail && (
+                              <button
+                                onClick={() => togglePlayPause(update.id!)}
+                                style={{
+                                  position: 'absolute',
+                                  top: '50%',
+                                  left: '50%',
+                                  transform: 'translate(-50%, -50%)',
+                                  backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                                  border: 'none',
+                                  borderRadius: '50%',
+                                  width: '80px',
+                                  height: '80px',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  cursor: 'pointer'
+                                }}
+                              >
+                                <svg width="40" height="40" viewBox="0 0 24 24" fill="white">
+                                  <path d="M8 5v14l11-7z"/>
+                                </svg>
+                              </button>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    )}
+
                     <div style={{
-                      fontSize: '18px',
-                      fontFamily: 'Helvetica, Arial, sans-serif',
-                      color: '#00C2FF',
-                      marginBottom: '20px',
                       display: 'flex',
+                      justifyContent: 'space-between',
                       alignItems: 'center',
-                      gap: '10px'
-                    }}>
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#00C2FF" strokeWidth="2">
-                        <path d="M2 12h20M12 2v20"/>
-                      </svg>
-                      Version: {update.version}
-                    </div>
-                  )}
-
-                  {/* Description */}
-                  {update.description && (
-                    <div style={{
-                      fontSize: '20px',
-                      fontFamily: 'Helvetica, Arial, sans-serif',
-                      lineHeight: '1.6',
-                      color: 'rgba(255,255,255,0.8)',
-                      marginTop: '20px',
-                      whiteSpace: 'pre-wrap'
-                    }}>
-                      {update.description}
-                    </div>
-                  )}
-
-                  {/* Footer */}
-                  <div style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    marginTop: '30px',
-                    paddingTop: '20px',
-                    borderTop: '1px solid rgba(255,255,255,0.1)'
-                  }}>
-                    <div style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '15px'
+                      marginTop: '30px',
+                      fontFamily: 'Helvetica, Arial, sans-serif'
                     }}>
                       <div style={{
                         display: 'flex',
                         alignItems: 'center',
-                        gap: '8px'
+                        gap: '20px'
                       }}>
-                        <div style={{
-                          width: '32px',
-                          height: '32px',
-                          backgroundColor: 'rgba(0,194,255,0.2)',
-                          borderRadius: '50%',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          fontSize: '14px',
-                          fontWeight: 'bold',
-                          color: '#00C2FF'
-                        }}>
-                          {update.userName?.charAt(0)?.toUpperCase() || 'U'}
-                        </div>
                         <span style={{
-                          fontSize: '16px',
-                          color: 'rgba(255,255,255,0.6)'
+                          fontSize: '22px',
+                          fontFamily: 'Helvetica, Arial, sans-serif',
+                          color: 'white'
+                        }}>
+                          {formatDate(update.createdAt)}
+                        </span>
+                        <span style={{
+                          fontSize: '18px',
+                          color: '#aaa'
                         }}>
                           oleh {update.userName}
                         </span>
                       </div>
-                      <span style={{
-                        fontSize: '16px',
-                        color: 'rgba(255,255,255,0.4)'
+                      
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '20px',
+                        fontFamily: 'Helvetica, Arial, sans-serif'
                       }}>
-                        {formatDate(update.createdAt)}
-                      </span>
-                    </div>
-                    
-                    <div style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '15px'
-                    }}>
-                      {/* Status Update Buttons */}
-                      <select
-                        value={update.status}
-                        onChange={(e) => update.id && handleUpdateStatus(update.id, e.target.value as Update['status'])}
-                        style={{
-                          padding: '8px 16px',
-                          backgroundColor: 'rgba(255,255,255,0.05)',
-                          border: '1px solid rgba(255,255,255,0.1)',
-                          borderRadius: '8px',
-                          color: 'white',
-                          fontSize: '14px',
-                          cursor: 'pointer',
-                          outline: 'none'
-                        }}
-                      >
-                        <option value="pending" style={{ backgroundColor: '#111' }}>Pending</option>
-                        <option value="in-progress" style={{ backgroundColor: '#111' }}>In Progress</option>
-                        <option value="completed" style={{ backgroundColor: '#111' }}>Completed</option>
-                        <option value="deployed" style={{ backgroundColor: '#111' }}>Deployed</option>
-                      </select>
-
-                      {/* Delete Button */}
-                      {update.userId === user?.uid && (
+                        {/* Save Button */}
                         <button
-                          onClick={() => update.id && handleDeleteUpdate(update.id)}
+                          onClick={() => handleSaveUpdate(update.id!)}
                           style={{
                             backgroundColor: 'transparent',
-                            border: '1px solid rgba(239,68,68,0.3)',
-                            color: '#EF4444',
-                            padding: '8px 16px',
-                            borderRadius: '8px',
-                            fontSize: '14px',
+                            border: 'none',
+                            color: isSaved ? 'gold' : 'white',
+                            fontSize: '24px',
                             cursor: 'pointer',
+                            padding: '5px',
                             display: 'flex',
                             alignItems: 'center',
-                            gap: '6px'
+                            justifyContent: 'center'
                           }}
-                          title="Hapus Update"
+                          title={isSaved ? "Disimpan" : "Simpan Update"}
                         >
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <polyline points="3 6 5 6 21 6" />
-                            <path d="M19 6l-2 14a2 2 0 01-2 2H9a2 2 0 01-2-2L5 6" />
+                          <svg width="24" height="24" viewBox="0 0 24 24" fill={isSaved ? "gold" : "none"} stroke="currentColor" strokeWidth="2">
+                            <path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/>
                           </svg>
-                          Hapus
                         </button>
-                      )}
+
+                        {/* Share Button */}
+                        <button
+                          onClick={() => handleShareUpdate(update.id!)}
+                          style={{
+                            backgroundColor: 'transparent',
+                            border: 'none',
+                            color: 'white',
+                            fontSize: '24px',
+                            cursor: 'pointer',
+                            padding: '5px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                          }}
+                          title="Bagikan Update"
+                        >
+                          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <circle cx="18" cy="5" r="3"/>
+                            <circle cx="6" cy="12" r="3"/>
+                            <circle cx="18" cy="19" r="3"/>
+                            <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
+                            <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+                          </svg>
+                        </button>
+
+                        {update.link && (
+                          <a
+                            href={update.link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{
+                              color: 'white',
+                              textDecoration: 'none',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '8px',
+                              fontSize: '20px',
+                              fontFamily: 'Helvetica, Arial, sans-serif'
+                            }}
+                          >
+                            Buka Link
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                              <path d="M7 17l9.2-9.2M17 17V7H7"/>
+                            </svg>
+                          </a>
+                        )}
+                        
+                        {update.userId === user?.uid && (
+                          <button
+                            onClick={() => handleDeleteUpdate(update.id!)}
+                            style={{
+                              backgroundColor: 'transparent',
+                              border: 'none',
+                              color: 'white',
+                              fontSize: '32px',
+                              cursor: 'pointer',
+                              padding: '0',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              width: '40px',
+                              height: '40px'
+                            }}
+                            title="Hapus Update"
+                          >
+                            ×
+                          </button>
+                        )}
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
@@ -1162,7 +1232,7 @@ export default function UpdatesPage(): React.JSX.Element {
           <div style={{
             backgroundColor: 'rgba(255,255,255,0.02)',
             border: '1px solid rgba(255,255,255,0.1)',
-            borderRadius: '20px',
+            borderRadius: '8px',
             height: 'calc(100vh - 220px)',
             display: 'flex',
             flexDirection: 'column'
@@ -1217,14 +1287,14 @@ export default function UpdatesPage(): React.JSX.Element {
                       <div style={{
                         width: '36px',
                         height: '36px',
-                        backgroundColor: 'rgba(0,220,130,0.2)',
+                        backgroundColor: 'rgba(255,255,255,0.1)',
                         borderRadius: '50%',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
                         fontSize: '14px',
                         fontWeight: 'bold',
-                        color: '#00DC82',
+                        color: 'white',
                         flexShrink: 0
                       }}>
                         {message.userName?.charAt(0)?.toUpperCase() || 'U'}
@@ -1290,7 +1360,7 @@ export default function UpdatesPage(): React.JSX.Element {
                     padding: '12px 16px',
                     backgroundColor: 'rgba(255,255,255,0.05)',
                     border: '1px solid rgba(255,255,255,0.1)',
-                    borderRadius: '12px',
+                    borderRadius: '8px',
                     color: 'white',
                     fontSize: '16px',
                     outline: 'none'
@@ -1301,9 +1371,9 @@ export default function UpdatesPage(): React.JSX.Element {
                   disabled={!newMessage.trim()}
                   style={{
                     padding: '12px 20px',
-                    backgroundColor: newMessage.trim() ? '#00C2FF' : 'rgba(0,194,255,0.3)',
-                    border: 'none',
-                    borderRadius: '12px',
+                    backgroundColor: 'transparent',
+                    border: '1px solid rgba(255,255,255,0.2)',
+                    borderRadius: '8px',
                     color: 'white',
                     fontSize: '16px',
                     cursor: newMessage.trim() ? 'pointer' : 'not-allowed',
@@ -1345,8 +1415,6 @@ export default function UpdatesPage(): React.JSX.Element {
             maxWidth: '800px',
             padding: '60px',
             fontFamily: 'Helvetica, Arial, sans-serif',
-            borderRadius: '20px',
-            border: '1px solid rgba(255,255,255,0.1)'
           }}>
             <div style={{
               marginBottom: '50px',
@@ -1366,68 +1434,66 @@ export default function UpdatesPage(): React.JSX.Element {
             <div style={{
               display: 'flex',
               flexDirection: 'column',
-              gap: '25px',
+              gap: '30px',
               fontFamily: 'Helvetica, Arial, sans-serif'
             }}>
-              <input
-                type="text"
-                value={newUpdate.title}
-                onChange={(e) => setNewUpdate({...newUpdate, title: e.target.value})}
-                placeholder="Judul Update"
-                style={{
-                  width: '100%',
-                  padding: '20px',
-                  backgroundColor: 'rgba(255,255,255,0.05)',
-                  border: '1px solid rgba(255,255,255,0.1)',
-                  color: 'white',
-                  fontSize: '24px',
-                  outline: 'none',
-                  fontFamily: 'Helvetica, Arial, sans-serif',
-                  lineHeight: '1.3',
-                  borderRadius: '12px'
-                }}
-              />
+              <div>
+                <input
+                  type="text"
+                  value={newUpdate.title}
+                  onChange={(e) => setNewUpdate({...newUpdate, title: e.target.value})}
+                  placeholder="Judul Update"
+                  style={{
+                    width: '100%',
+                    padding: '20px',
+                    backgroundColor: 'transparent',
+                    border: 'none',
+                    color: 'white',
+                    fontSize: '32px',
+                    outline: 'none',
+                    fontFamily: 'Helvetica, Arial, sans-serif',
+                    lineHeight: '1.3'
+                  }}
+                />
+              </div>
 
-              <div style={{
-                display: 'grid',
-                gridTemplateColumns: '1fr 1fr',
-                gap: '20px'
-              }}>
+              <div>
                 <select
                   value={newUpdate.category}
                   onChange={(e) => setNewUpdate({...newUpdate, category: e.target.value})}
                   style={{
                     width: '100%',
-                    padding: '15px',
-                    backgroundColor: 'rgba(255,255,255,0.05)',
-                    border: '1px solid rgba(255,255,255,0.1)',
+                    padding: '20px',
+                    backgroundColor: 'transparent',
+                    border: 'none',
                     color: 'white',
-                    fontSize: '18px',
+                    fontSize: '24px',
                     outline: 'none',
                     fontFamily: 'Helvetica, Arial, sans-serif',
                     cursor: 'pointer',
                     appearance: 'none',
                     backgroundImage: `url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e")`,
                     backgroundRepeat: 'no-repeat',
-                    backgroundPosition: 'right 15px center',
-                    backgroundSize: '20px',
-                    borderRadius: '12px'
+                    backgroundPosition: 'right 20px center',
+                    backgroundSize: '24px'
                   }}
                 >
-                  <option value="" style={{ backgroundColor: 'black', color: 'white', fontSize: '16px' }}>
+                  <option value="" style={{ backgroundColor: 'black', color: 'white', fontSize: '20px' }}>
                     Pilih Kategori
                   </option>
                   {categories.map((category) => (
                     <option 
                       key={category} 
                       value={category}
-                      style={{ backgroundColor: 'black', color: 'white', fontSize: '16px' }}
+                      style={{ backgroundColor: 'black', color: 'white', fontSize: '20px' }}
                     >
                       {category}
                     </option>
                   ))}
                 </select>
+              </div>
 
+              <div>
                 <input
                   type="text"
                   value={newUpdate.version}
@@ -1435,145 +1501,62 @@ export default function UpdatesPage(): React.JSX.Element {
                   placeholder="Version (contoh: v1.2.0)"
                   style={{
                     width: '100%',
-                    padding: '15px',
-                    backgroundColor: 'rgba(255,255,255,0.05)',
-                    border: '1px solid rgba(255,255,255,0.1)',
+                    padding: '20px',
+                    backgroundColor: 'transparent',
+                    border: 'none',
                     color: 'white',
-                    fontSize: '18px',
+                    fontSize: '24px',
+                    outline: 'none',
+                    fontFamily: 'Helvetica, Arial, sans-serif'
+                  }}
+                />
+              </div>
+
+              <div>
+                <input
+                  type="text"
+                  value={newUpdate.link}
+                  onChange={(e) => setNewUpdate({...newUpdate, link: e.target.value})}
+                  placeholder="Link Video (YouTube, Vimeo, dll.)"
+                  style={{
+                    width: '100%',
+                    padding: '20px',
+                    backgroundColor: 'transparent',
+                    border: 'none',
+                    color: 'white',
+                    fontSize: '24px',
+                    outline: 'none',
+                    fontFamily: 'Helvetica, Arial, sans-serif'
+                  }}
+                />
+              </div>
+
+              <div>
+                <textarea
+                  value={newUpdate.description}
+                  onChange={(e) => setNewUpdate({...newUpdate, description: e.target.value})}
+                  placeholder="Deskripsi Update"
+                  rows={8}
+                  style={{
+                    width: '100%',
+                    padding: '20px',
+                    backgroundColor: 'transparent',
+                    border: 'none',
+                    color: 'white',
+                    fontSize: '24px',
                     outline: 'none',
                     fontFamily: 'Helvetica, Arial, sans-serif',
-                    borderRadius: '12px'
+                    resize: 'none',
+                    lineHeight: '1.6'
                   }}
                 />
               </div>
 
               <div style={{
-                display: 'grid',
-                gridTemplateColumns: '1fr 1fr 1fr',
-                gap: '15px'
-              }}>
-                <select
-                  value={newUpdate.priority}
-                  onChange={(e) => setNewUpdate({...newUpdate, priority: e.target.value as any})}
-                  style={{
-                    width: '100%',
-                    padding: '15px',
-                    backgroundColor: priorityColors[newUpdate.priority] + '10',
-                    border: `1px solid ${priorityColors[newUpdate.priority]}30`,
-                    color: priorityColors[newUpdate.priority],
-                    fontSize: '16px',
-                    outline: 'none',
-                    fontFamily: 'Helvetica, Arial, sans-serif',
-                    cursor: 'pointer',
-                    appearance: 'none',
-                    backgroundImage: `url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='${priorityColors[newUpdate.priority]}' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e")`,
-                    backgroundRepeat: 'no-repeat',
-                    backgroundPosition: 'right 15px center',
-                    backgroundSize: '20px',
-                    borderRadius: '12px'
-                  }}
-                >
-                  {['low', 'medium', 'high', 'critical'].map((priority) => (
-                    <option 
-                      key={priority} 
-                      value={priority}
-                      style={{ backgroundColor: 'black', color: priorityColors[priority], fontSize: '16px' }}
-                    >
-                      Priority: {priority}
-                    </option>
-                  ))}
-                </select>
-
-                <select
-                  value={newUpdate.impact}
-                  onChange={(e) => setNewUpdate({...newUpdate, impact: e.target.value as any})}
-                  style={{
-                    width: '100%',
-                    padding: '15px',
-                    backgroundColor: impactColors[newUpdate.impact] + '10',
-                    border: `1px solid ${impactColors[newUpdate.impact]}30`,
-                    color: impactColors[newUpdate.impact],
-                    fontSize: '16px',
-                    outline: 'none',
-                    fontFamily: 'Helvetica, Arial, sans-serif',
-                    cursor: 'pointer',
-                    appearance: 'none',
-                    backgroundImage: `url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='${impactColors[newUpdate.impact]}' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e")`,
-                    backgroundRepeat: 'no-repeat',
-                    backgroundPosition: 'right 15px center',
-                    backgroundSize: '20px',
-                    borderRadius: '12px'
-                  }}
-                >
-                  {['minor', 'moderate', 'major', 'critical'].map((impact) => (
-                    <option 
-                      key={impact} 
-                      value={impact}
-                      style={{ backgroundColor: 'black', color: impactColors[impact], fontSize: '16px' }}
-                    >
-                      Impact: {impact}
-                    </option>
-                  ))}
-                </select>
-
-                <select
-                  value={newUpdate.status}
-                  onChange={(e) => setNewUpdate({...newUpdate, status: e.target.value as any})}
-                  style={{
-                    width: '100%',
-                    padding: '15px',
-                    backgroundColor: statusColors[newUpdate.status] + '10',
-                    border: `1px solid ${statusColors[newUpdate.status]}30`,
-                    color: statusColors[newUpdate.status],
-                    fontSize: '16px',
-                    outline: 'none',
-                    fontFamily: 'Helvetica, Arial, sans-serif',
-                    cursor: 'pointer',
-                    appearance: 'none',
-                    backgroundImage: `url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='${statusColors[newUpdate.status]}' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e")`,
-                    backgroundRepeat: 'no-repeat',
-                    backgroundPosition: 'right 15px center',
-                    backgroundSize: '20px',
-                    borderRadius: '12px'
-                  }}
-                >
-                  {['pending', 'in-progress', 'completed', 'deployed'].map((status) => (
-                    <option 
-                      key={status} 
-                      value={status}
-                      style={{ backgroundColor: 'black', color: statusColors[status], fontSize: '16px' }}
-                    >
-                      Status: {status}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <textarea
-                value={newUpdate.description}
-                onChange={(e) => setNewUpdate({...newUpdate, description: e.target.value})}
-                placeholder="Deskripsi Update"
-                rows={8}
-                style={{
-                  width: '100%',
-                  padding: '20px',
-                  backgroundColor: 'rgba(255,255,255,0.05)',
-                  border: '1px solid rgba(255,255,255,0.1)',
-                  color: 'white',
-                  fontSize: '20px',
-                  outline: 'none',
-                  fontFamily: 'Helvetica, Arial, sans-serif',
-                  resize: 'none',
-                  lineHeight: '1.6',
-                  borderRadius: '12px'
-                }}
-              />
-
-              <div style={{
                 display: 'flex',
                 justifyContent: 'flex-end',
-                gap: '20px',
-                marginTop: '40px',
+                gap: '25px',
+                marginTop: '50px',
                 fontFamily: 'Helvetica, Arial, sans-serif'
               }}>
                 <button
@@ -1581,12 +1564,11 @@ export default function UpdatesPage(): React.JSX.Element {
                   style={{
                     padding: '15px 30px',
                     backgroundColor: 'transparent',
-                    border: '1px solid rgba(255,255,255,0.2)',
+                    border: 'none',
                     color: 'white',
-                    fontSize: '18px',
+                    fontSize: '22px',
                     cursor: 'pointer',
-                    fontFamily: 'Helvetica, Arial, sans-serif',
-                    borderRadius: '12px'
+                    fontFamily: 'Helvetica, Arial, sans-serif'
                   }}
                 >
                   Batal
@@ -1595,17 +1577,15 @@ export default function UpdatesPage(): React.JSX.Element {
                   onClick={handleCreateUpdate}
                   style={{
                     padding: '15px 30px',
-                    backgroundColor: '#00C2FF',
+                    backgroundColor: 'transparent',
                     border: 'none',
                     color: 'white',
-                    fontSize: '18px',
+                    fontSize: '22px',
                     cursor: 'pointer',
                     display: 'flex',
                     alignItems: 'center',
                     gap: '12px',
-                    fontFamily: 'Helvetica, Arial, sans-serif',
-                    borderRadius: '12px',
-                    fontWeight: 'bold'
+                    fontFamily: 'Helvetica, Arial, sans-serif'
                   }}
                 >
                   Buat Update
