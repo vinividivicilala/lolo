@@ -26,9 +26,7 @@ import {
   getDoc
 } from "firebase/firestore";
 import { initializeApp, getApps } from "firebase/app";
-import { motion, AnimatePresence } from "framer-motion";
 
-// Firebase Configuration
 const firebaseConfig = {
   apiKey: "AIzaSyD_htQZ1TClnXKZGRJ4izbMQ02y6V3aNAQ",
   authDomain: "wawa44-58d1e.firebaseapp.com",
@@ -40,1019 +38,1586 @@ const firebaseConfig = {
   measurementId: "G-8LMP7F4BE9"
 };
 
-// Initialize Firebase
-let app;
-if (!getApps().length) {
-  app = initializeApp(firebaseConfig);
-} else {
-  app = getApps()[0];
+interface Update {
+  id?: string;
+  title: string;
+  category: string;
+  description: string;
+  version: string;
+  status: 'pending' | 'in-progress' | 'completed' | 'deployed';
+  userId: string;
+  userName: string;
+  createdAt: any;
+  updatedAt: any;
+  priority: 'low' | 'medium' | 'high' | 'critical';
+  impact: 'minor' | 'moderate' | 'major' | 'critical';
 }
 
-const auth = getAuth(app);
-const db = getFirestore(app);
+interface Message {
+  id?: string;
+  text: string;
+  userId: string;
+  userName: string;
+  userEmail?: string;
+  updateId?: string;
+  type: 'text' | 'comment' | 'update';
+  createdAt: any;
+}
 
-export default function UpdatePage() {
+interface Notification {
+  id?: string;
+  type: 'update' | 'comment' | 'mention';
+  updateId?: string;
+  messageId?: string;
+  senderId: string;
+  senderName: string;
+  receiverId: string;
+  receiverName?: string;
+  message: string;
+  status: 'unread' | 'read';
+  createdAt: any;
+}
+
+export default function UpdatesPage(): React.JSX.Element {
   const router = useRouter();
-  const [currentUser, setCurrentUser] = useState(null);
-  const [updates, setUpdates] = useState([]);
-  const [notifications, setNotifications] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [newUpdate, setNewUpdate] = useState({
-    title: '',
-    description: '',
-    category: 'feature',
-    status: 'pending'
+  const [user, setUser] = useState<any>(null);
+  const [userDisplayName, setUserDisplayName] = useState("");
+  const [userEmail, setUserEmail] = useState("");
+  const [updates, setUpdates] = useState<Update[]>([]);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [showNewUpdateForm, setShowNewUpdateForm] = useState(false);
+  const [showMessageModal, setShowMessageModal] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [newUpdate, setNewUpdate] = useState({ 
+    title: "", 
+    category: "", 
+    description: "",
+    version: "",
+    priority: "medium" as 'low' | 'medium' | 'high' | 'critical',
+    impact: "moderate" as 'minor' | 'moderate' | 'major' | 'critical',
+    status: "pending" as 'pending' | 'in-progress' | 'completed' | 'deployed'
   });
+  const [newMessage, setNewMessage] = useState("");
+  const [auth, setAuth] = useState<any>(null);
+  const [db, setDb] = useState<any>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const categories = [
+    "Frontend",
+    "Backend", 
+    "Database",
+    "Security",
+    "UI/UX",
+    "Performance",
+    "API",
+    "Mobile",
+    "DevOps",
+    "Feature",
+    "Bug Fix",
+    "Optimization",
+    "Integration",
+    "Migration",
+    "Maintenance"
+  ];
+
+  const statusColors: Record<string, string> = {
+    'pending': '#FFB800',
+    'in-progress': '#00C2FF',
+    'completed': '#00DC82',
+    'deployed': '#8B5CF6'
+  };
+
+  const priorityColors: Record<string, string> = {
+    'low': '#6B7280',
+    'medium': '#3B82F6',
+    'high': '#F59E0B',
+    'critical': '#EF4444'
+  };
+
+  const impactColors: Record<string, string> = {
+    'minor': '#6B7280',
+    'moderate': '#10B981',
+    'major': '#F59E0B',
+    'critical': '#EF4444'
+  };
 
   useEffect(() => {
-    const unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        setCurrentUser({
-          uid: user.uid,
-          displayName: user.displayName || user.email?.split('@')[0] || 'User',
-          email: user.email,
-          photoURL: user.photoURL
-        });
-        
-        // Load updates and notifications
-        loadUpdates();
-        loadNotifications();
+    if (typeof window === 'undefined') return;
+
+    try {
+      let app;
+      if (getApps().length === 0) {
+        app = initializeApp(firebaseConfig);
       } else {
-        setCurrentUser(null);
+        app = getApps()[0];
+      }
+      
+      const authInstance = getAuth(app);
+      const dbInstance = getFirestore(app);
+      
+      setAuth(authInstance);
+      setDb(dbInstance);
+      
+    } catch (error) {
+      console.error('Firebase initialization error:', error);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!auth) return;
+
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      if (currentUser) {
+        setUser(currentUser);
+        const name = currentUser.displayName || 
+                    currentUser.email?.split('@')[0] || 
+                    'User';
+        const email = currentUser.email || '';
+        setUserDisplayName(name);
+        setUserEmail(email);
+        
+        await saveUserToFirestore(currentUser.uid, name, email);
+        
+        loadUpdates();
+        loadMessages();
+        loadUserNotifications(currentUser.uid);
+      } else {
         router.push('/login');
       }
-      setLoading(false);
+      setIsLoading(false);
     });
 
-    return () => unsubscribeAuth();
-  }, [router]);
+    return () => {
+      if (unsubscribe) unsubscribe();
+    };
+  }, [auth, router]);
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  const saveUserToFirestore = async (userId: string, name: string, email: string) => {
+    if (!db) return;
+    
+    try {
+      const userRef = doc(db, 'users', userId);
+      const userSnap = await getDoc(userRef);
+      
+      const userData = {
+        id: userId,
+        name: name,
+        email: email.toLowerCase(),
+        role: 'developer',
+        lastActive: serverTimestamp(),
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      };
+      
+      if (!userSnap.exists()) {
+        await setDoc(userRef, userData);
+      } else {
+        await updateDoc(userRef, {
+          ...userData,
+          lastActive: serverTimestamp()
+        });
+      }
+    } catch (error) {
+      console.error("Error saving user to Firestore:", error);
+    }
+  };
 
   const loadUpdates = () => {
-    const updatesQuery = query(
-      collection(db, "updates"),
-      orderBy("createdAt", "desc")
-    );
+    if (!db) {
+      console.log('Database not ready yet');
+      return;
+    }
+    
+    setIsLoading(true);
+    try {
+      const updatesRef = collection(db, 'updates');
+      const q = query(updatesRef, orderBy('createdAt', 'desc'));
+      
+      const unsubscribe = onSnapshot(q, (querySnapshot) => {
+        const updatesData: Update[] = [];
+        querySnapshot.forEach((doc) => {
+          const updateData = doc.data() as Update;
+          updatesData.push({
+            id: doc.id,
+            ...updateData
+          });
+        });
+        setUpdates(updatesData);
+        setIsLoading(false);
+      });
 
-    const unsubscribe = onSnapshot(updatesQuery, (snapshot) => {
-      const updatesData = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-        createdAt: doc.data().createdAt?.toDate() || new Date()
-      }));
-      setUpdates(updatesData);
-    });
-
-    return unsubscribe;
+      return unsubscribe;
+    } catch (error) {
+      console.error("Error loading updates:", error);
+      setIsLoading(false);
+      return () => {};
+    }
   };
 
-  const loadNotifications = () => {
-    const notificationsQuery = query(
-      collection(db, "notifications"),
-      orderBy("createdAt", "desc"),
-      where("read", "==", false)
-    );
-
-    const unsubscribe = onSnapshot(notificationsQuery, (snapshot) => {
-      const notificationsData = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-        createdAt: doc.data().createdAt?.toDate() || new Date()
-      }));
-      setNotifications(notificationsData);
-    });
-
-    return unsubscribe;
-  };
-
-  const handleCreateUpdate = async (e) => {
-    e.preventDefault();
-    if (!currentUser || !newUpdate.title.trim()) return;
+  const loadMessages = () => {
+    if (!db) return;
 
     try {
-      await addDoc(collection(db, "updates"), {
-        title: newUpdate.title,
-        description: newUpdate.description,
-        category: newUpdate.category,
+      const messagesRef = collection(db, 'updateMessages');
+      const q = query(messagesRef, orderBy('createdAt', 'asc'), where('type', '==', 'text'));
+      
+      const unsubscribe = onSnapshot(q, (querySnapshot) => {
+        const messagesData: Message[] = [];
+        querySnapshot.forEach((doc) => {
+          const messageData = doc.data() as Message;
+          messagesData.push({
+            id: doc.id,
+            ...messageData
+          });
+        });
+        setMessages(messagesData);
+      });
+
+      return unsubscribe;
+    } catch (error) {
+      console.error("Error loading messages:", error);
+    }
+  };
+
+  const loadUserNotifications = (userId: string) => {
+    if (!db) return;
+
+    try {
+      const notificationsRef = collection(db, 'updateNotifications');
+      const q = query(
+        notificationsRef, 
+        where('receiverId', '==', userId),
+        orderBy('createdAt', 'desc')
+      );
+      
+      const unsubscribe = onSnapshot(q, async (querySnapshot) => {
+        const notificationsData: Notification[] = [];
+        for (const docSnap of querySnapshot.docs) {
+          const notificationData = docSnap.data() as Notification;
+          
+          notificationsData.push({
+            id: docSnap.id,
+            ...notificationData
+          });
+        }
+        setNotifications(notificationsData);
+      });
+
+      return unsubscribe;
+    } catch (error) {
+      console.error("Error loading notifications:", error);
+    }
+  };
+
+  const handleCreateUpdate = async () => {
+    if (!user || !db || !newUpdate.title.trim()) {
+      alert("Judul update harus diisi");
+      return;
+    }
+
+    try {
+      const updateData = {
+        title: newUpdate.title.trim(),
+        category: newUpdate.category.trim(),
+        description: newUpdate.description.trim(),
+        version: newUpdate.version.trim(),
+        priority: newUpdate.priority,
+        impact: newUpdate.impact,
         status: newUpdate.status,
-        createdBy: currentUser.uid,
-        createdByName: currentUser.displayName,
+        userId: user.uid,
+        userName: userDisplayName,
         createdAt: serverTimestamp(),
-        progress: newUpdate.status === 'completed' ? 100 : 
-                 newUpdate.status === 'in-progress' ? 50 : 0
-      });
-
-      // Create notification
-      await addDoc(collection(db, "notifications"), {
-        type: 'info',
-        message: `New update created: ${newUpdate.title}`,
-        createdBy: currentUser.uid,
-        createdAt: serverTimestamp(),
-        read: false
-      });
-
-      setNewUpdate({
-        title: '',
-        description: '',
-        category: 'feature',
-        status: 'pending'
-      });
-
-    } catch (error) {
-      console.error("Error creating update:", error);
-    }
-  };
-
-  const handleDeleteUpdate = async (updateId) => {
-    try {
-      await deleteDoc(doc(db, "updates", updateId));
-    } catch (error) {
-      console.error("Error deleting update:", error);
-    }
-  };
-
-  const handleUpdateStatus = async (updateId, newStatus) => {
-    try {
-      const progressMap = {
-        'pending': 0,
-        'in-progress': 50,
-        'completed': 100
+        updatedAt: serverTimestamp()
       };
 
-      await updateDoc(doc(db, "updates", updateId), {
+      const docRef = await addDoc(collection(db, 'updates'), updateData);
+      
+      // Create system notification
+      await addDoc(collection(db, 'updateNotifications'), {
+        type: 'update',
+        updateId: docRef.id,
+        senderId: user.uid,
+        senderName: userDisplayName,
+        receiverId: 'all',
+        message: `Update baru: "${newUpdate.title.trim()}" telah dibuat`,
+        status: 'unread',
+        createdAt: serverTimestamp()
+      });
+      
+      setNewUpdate({ 
+        title: "", 
+        category: "", 
+        description: "",
+        version: "",
+        priority: "medium",
+        impact: "moderate",
+        status: "pending"
+      });
+      setShowNewUpdateForm(false);
+      
+    } catch (error) {
+      console.error("Error creating update:", error);
+      alert("Gagal membuat update. Silakan coba lagi.");
+    }
+  };
+
+  const handleUpdateStatus = async (updateId: string, newStatus: Update['status']) => {
+    if (!user || !db) return;
+
+    try {
+      const updateRef = doc(db, 'updates', updateId);
+      await updateDoc(updateRef, {
         status: newStatus,
-        progress: progressMap[newStatus],
         updatedAt: serverTimestamp()
       });
+
+      const update = updates.find(u => u.id === updateId);
+      if (update) {
+        await addDoc(collection(db, 'updateNotifications'), {
+          type: 'update',
+          updateId: updateId,
+          senderId: user.uid,
+          senderName: userDisplayName,
+          receiverId: 'all',
+          message: `Status update "${update.title}" diubah menjadi ${newStatus}`,
+          status: 'unread',
+          createdAt: serverTimestamp()
+        });
+      }
     } catch (error) {
       console.error("Error updating status:", error);
     }
   };
 
-  const handleLogout = async () => {
-    try {
-      await signOut(auth);
-      router.push('/login');
-    } catch (error) {
-      console.error("Error signing out:", error);
+  const handleDeleteUpdate = async (updateId: string) => {
+    if (!db) return;
+    
+    if (confirm("Apakah Anda yakin ingin menghapus update ini?")) {
+      try {
+        await deleteDoc(doc(db, 'updates', updateId));
+      } catch (error) {
+        console.error("Error deleting update:", error);
+        alert("Gagal menghapus update.");
+      }
     }
   };
 
-  const handleMarkAsRead = async (notificationId) => {
+  const handleSendMessage = async () => {
+    if (!user || !db || !newMessage.trim()) {
+      alert("Pesan tidak boleh kosong");
+      return;
+    }
+
     try {
-      await updateDoc(doc(db, "notifications", notificationId), {
-        read: true
+      const messageData = {
+        text: newMessage.trim(),
+        userId: user.uid,
+        userName: userDisplayName,
+        userEmail: userEmail,
+        type: 'text' as const,
+        createdAt: serverTimestamp()
+      };
+
+      await addDoc(collection(db, 'updateMessages'), messageData);
+      
+      // Notify mentions
+      const mentionRegex = /@(\w+)/g;
+      let match;
+      while ((match = mentionRegex.exec(newMessage)) !== null) {
+        const mentionedUser = match[1];
+        // Find user by display name (simplified)
+        const usersRef = collection(db, 'users');
+        const q = query(usersRef, where('name', '==', mentionedUser));
+        const querySnapshot = await getDocs(q);
+        
+        if (!querySnapshot.empty) {
+          const mentionedUserDoc = querySnapshot.docs[0];
+          await addDoc(collection(db, 'updateNotifications'), {
+            type: 'mention',
+            senderId: user.uid,
+            senderName: userDisplayName,
+            receiverId: mentionedUserDoc.id,
+            receiverName: mentionedUserDoc.data().name,
+            message: `${userDisplayName} menyebut Anda dalam pesan`,
+            status: 'unread',
+            createdAt: serverTimestamp()
+          });
+        }
+      }
+      
+      setNewMessage("");
+      
+    } catch (error) {
+      console.error("Error sending message:", error);
+      alert("Gagal mengirim pesan.");
+    }
+  };
+
+  const handleMarkNotificationAsRead = async (notificationId: string) => {
+    if (!db) return;
+
+    try {
+      const notificationRef = doc(db, 'updateNotifications', notificationId);
+      await updateDoc(notificationRef, {
+        status: 'read'
       });
     } catch (error) {
       console.error("Error marking notification as read:", error);
     }
   };
 
-  const formatDate = (date) => {
-    if (!date) return '';
-    return new Date(date).toLocaleDateString('en-US', {
-      month: 'short',
+  const handleLogout = async () => {
+    if (auth) {
+      try {
+        await signOut(auth);
+        router.push('/');
+      } catch (error) {
+        console.error("Error logging out:", error);
+      }
+    }
+  };
+
+  const formatDate = (timestamp: any) => {
+    if (!timestamp) return "Baru saja";
+    
+    const date = timestamp.toDate();
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMinutes = Math.floor(diffMs / (1000 * 60));
+    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    
+    if (diffMinutes < 1) return "Baru saja";
+    if (diffMinutes < 60) return `${diffMinutes}m yang lalu`;
+    if (diffHours < 24) return `${diffHours}j yang lalu`;
+    if (diffDays === 1) return "Kemarin";
+    if (diffDays < 7) return `${diffDays}h yang lalu`;
+    
+    return date.toLocaleDateString('id-ID', {
       day: 'numeric',
+      month: 'short',
+      year: 'numeric',
       hour: '2-digit',
       minute: '2-digit'
     });
   };
 
-  const getStatusColor = (status) => {
-    switch(status) {
-      case 'completed': return '#00DC82';
-      case 'in-progress': return '#00C2FF';
-      case 'pending': return '#FFB800';
-      default: return '#666';
-    }
+  const formatTime = (timestamp: any) => {
+    if (!timestamp) return "";
+    
+    const date = timestamp.toDate();
+    return date.toLocaleTimeString('id-ID', {
+      hour: '2-digit',
+      minute: '2-digit'
+    });
   };
 
-  const getCategoryColor = (category) => {
-    switch(category) {
-      case 'feature': return '#8B5CF6';
-      case 'bug': return '#EF4444';
-      case 'improvement': return '#10B981';
-      case 'security': return '#F59E0B';
-      default: return '#6B7280';
-    }
+  const pendingNotifications = notifications.filter(n => n.status === 'unread');
+  const notificationCount = pendingNotifications.length;
+
+  const getStatusStats = () => {
+    return {
+      total: updates.length,
+      pending: updates.filter(u => u.status === 'pending').length,
+      inProgress: updates.filter(u => u.status === 'in-progress').length,
+      completed: updates.filter(u => u.status === 'completed').length,
+      deployed: updates.filter(u => u.status === 'deployed').length
+    };
   };
 
-  if (loading) {
+  const stats = getStatusStats();
+
+  if (!auth || !db) {
     return (
       <div style={{
         minHeight: '100vh',
-        backgroundColor: '#0A0A0A',
+        backgroundColor: 'black',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         color: 'white',
-        fontFamily: 'Helvetica, Arial, sans-serif'
+        fontFamily: 'Helvetica, Arial, sans-serif',
+        fontSize: '20px'
       }}>
         Loading...
       </div>
     );
   }
 
-  if (!currentUser) {
-    return null;
-  }
-
   return (
     <div style={{
       minHeight: '100vh',
-      backgroundColor: '#0A0A0A',
-      color: '#FFFFFF',
+      backgroundColor: 'black',
+      margin: 0,
+      padding: 0,
+      width: '100%',
       fontFamily: 'Helvetica, Arial, sans-serif',
-      position: 'relative',
-      overflow: 'hidden'
+      color: 'white',
+      position: 'relative'
     }}>
-      {/* Background Lines */}
+      {/* Header */}
       <div style={{
-        position: 'absolute',
+        position: 'fixed',
         top: 0,
         left: 0,
         right: 0,
-        bottom: 0,
-        backgroundImage: `
-          linear-gradient(to right, rgba(255,255,255,0.03) 1px, transparent 1px),
-          linear-gradient(to bottom, rgba(255,255,255,0.03) 1px, transparent 1px)
-        `,
-        backgroundSize: '50px 50px',
-        pointerEvents: 'none'
-      }} />
-
-      {/* Main Container */}
-      <div style={{
-        maxWidth: '1600px',
-        margin: '0 auto',
-        padding: '40px',
-        position: 'relative',
-        zIndex: 1
+        padding: '20px 40px',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        backgroundColor: 'black',
+        zIndex: 100,
+        borderBottom: '1px solid rgba(255,255,255,0.1)'
       }}>
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          style={{
+        {/* Judul Website */}
+        <div style={{
+          fontSize: '42px',
+          fontFamily: 'Helvetica, Arial, sans-serif',
+          fontWeight: 'bold',
+          color: 'white',
+          letterSpacing: '1px',
+          cursor: 'pointer'
+        }} onClick={() => router.push('/')}>
+          Menuru
+        </div>
+
+        {/* Nama User dan Tombol */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '30px'
+        }}>
+          {/* Nama User dengan South East Arrow */}
+          <div style={{
+            fontSize: '32px',
+            fontFamily: 'Helvetica, Arial, sans-serif',
+            color: 'white',
+            fontWeight: 'bold',
             display: 'flex',
-            justifyContent: 'space-between',
             alignItems: 'center',
-            marginBottom: '60px',
-            paddingBottom: '20px',
-            borderBottom: '1px solid rgba(255,255,255,0.05)'
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '12px'
-            }}>
-              <div style={{
-                width: '6px',
-                height: '40px',
-                background: 'linear-gradient(180deg, #00DC82 0%, #00C2FF 100%)'
-              }} />
-              <h1 style={{
-                fontSize: '32px',
-                fontWeight: '700',
-                letterSpacing: '-0.5px',
-                color: '#FFFFFF'
-              }}>
-                Menuru
-              </h1>
-            </div>
-            
-            <div style={{
-              fontSize: '13px',
-              color: 'rgba(255,255,255,0.4)',
-              letterSpacing: '1px',
-              textTransform: 'uppercase',
-              background: 'rgba(255,255,255,0.05)',
-              padding: '6px 12px',
-              borderRadius: '20px',
-              border: '1px solid rgba(255,255,255,0.1)'
-            }}>
-              Version 3.1.0
-            </div>
+            gap: '10px'
+          }}>
+            {userDisplayName}
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M7 17l9.2-9.2M17 17V7H7"/>
+            </svg>
           </div>
-
-          {/* User Info */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-            {/* Notifications */}
-            <div style={{ position: 'relative' }}>
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                style={{
-                  width: '40px',
-                  height: '40px',
-                  background: 'rgba(255,255,255,0.05)',
-                  border: '1px solid rgba(255,255,255,0.1)',
-                  borderRadius: '12px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  cursor: 'pointer'
-                }}
-              >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-                  <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-                </svg>
-              </motion.button>
-              
-              {notifications.length > 0 && (
-                <motion.div
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  style={{
-                    position: 'absolute',
-                    top: '-5px',
-                    right: '-5px',
-                    background: 'linear-gradient(45deg, #FF6B6B, #EC4899)',
-                    color: 'white',
-                    fontSize: '12px',
-                    fontWeight: 'bold',
-                    width: '20px',
-                    height: '20px',
-                    borderRadius: '50%',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
-                  }}
-                >
-                  {notifications.length}
-                </motion.div>
-              )}
-            </div>
-
-            {/* User Profile */}
-            <motion.div
-              whileHover={{ scale: 1.02 }}
+          
+          {/* Tombol Notifikasi */}
+          <div style={{ position: 'relative' }}>
+            <button
+              onClick={() => setShowNotifications(!showNotifications)}
               style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '12px',
-                padding: '12px 16px',
-                background: 'rgba(255,255,255,0.05)',
-                border: '1px solid rgba(255,255,255,0.1)',
-                borderRadius: '16px',
-                cursor: 'pointer'
-              }}
-            >
-              <div style={{
-                width: '36px',
-                height: '36px',
-                background: 'linear-gradient(135deg, #00DC82 0%, #00C2FF 100%)',
-                borderRadius: '50%',
+                backgroundColor: 'transparent',
+                border: 'none',
+                color: 'white',
+                padding: '10px',
+                cursor: 'pointer',
+                fontSize: '24px',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                fontSize: '14px',
-                fontWeight: '600',
-                color: '#000000'
-              }}>
-                {currentUser.displayName?.charAt(0).toUpperCase()}
-              </div>
-              <div>
+                position: 'relative'
+              }}
+              title="Notifikasi"
+            >
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/>
+              </svg>
+              {notificationCount > 0 && (
                 <div style={{
-                  fontSize: '14px',
-                  fontWeight: '600',
-                  marginBottom: '2px'
-                }}>
-                  {currentUser.displayName}
-                </div>
-                <div style={{
-                  fontSize: '12px',
-                  color: 'rgba(255,255,255,0.4)'
-                }}>
-                  {currentUser.email}
-                </div>
-              </div>
-              
-              <motion.button
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-                onClick={handleLogout}
-                style={{
-                  marginLeft: '8px',
-                  padding: '6px',
-                  background: 'rgba(255,255,255,0.1)',
-                  border: 'none',
-                  borderRadius: '8px',
-                  cursor: 'pointer',
+                  position: 'absolute',
+                  top: '5px',
+                  right: '5px',
+                  backgroundColor: 'red',
+                  color: 'white',
+                  borderRadius: '50%',
+                  width: '20px',
+                  height: '20px',
                   display: 'flex',
                   alignItems: 'center',
-                  justifyContent: 'center'
-                }}
-              >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-                  <polyline points="16 17 21 12 16 7" />
-                  <line x1="21" y1="12" x2="9" y2="12" />
-                </svg>
-              </motion.button>
-            </motion.div>
-          </div>
-        </motion.div>
-
-        {/* Main Content */}
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: '1fr 400px',
-          gap: '40px'
-        }}>
-          {/* Left Column - Updates */}
-          <div>
-            {/* Create Update Form */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              style={{
-                padding: '24px',
-                background: 'rgba(255,255,255,0.02)',
-                border: '1px solid rgba(255,255,255,0.05)',
-                borderRadius: '20px',
-                marginBottom: '40px'
-              }}
-            >
-              <h3 style={{
-                fontSize: '18px',
-                fontWeight: '600',
-                marginBottom: '20px',
-                color: '#FFFFFF'
-              }}>
-                Create New Update
-              </h3>
-              
-              <form onSubmit={handleCreateUpdate}>
-                <div style={{ marginBottom: '16px' }}>
-                  <input
-                    type="text"
-                    placeholder="Update title"
-                    value={newUpdate.title}
-                    onChange={(e) => setNewUpdate({...newUpdate, title: e.target.value})}
-                    style={{
-                      width: '100%',
-                      padding: '12px 16px',
-                      background: 'rgba(255,255,255,0.05)',
-                      border: '1px solid rgba(255,255,255,0.1)',
-                      borderRadius: '12px',
-                      color: 'white',
-                      fontSize: '14px',
-                      outline: 'none'
-                    }}
-                    required
-                  />
-                </div>
-                
-                <div style={{ marginBottom: '16px' }}>
-                  <textarea
-                    placeholder="Description"
-                    value={newUpdate.description}
-                    onChange={(e) => setNewUpdate({...newUpdate, description: e.target.value})}
-                    rows="3"
-                    style={{
-                      width: '100%',
-                      padding: '12px 16px',
-                      background: 'rgba(255,255,255,0.05)',
-                      border: '1px solid rgba(255,255,255,0.1)',
-                      borderRadius: '12px',
-                      color: 'white',
-                      fontSize: '14px',
-                      outline: 'none',
-                      resize: 'vertical'
-                    }}
-                  />
-                </div>
-                
-                <div style={{
-                  display: 'grid',
-                  gridTemplateColumns: '1fr 1fr',
-                  gap: '12px',
-                  marginBottom: '20px'
+                  justifyContent: 'center',
+                  fontSize: '12px',
+                  fontWeight: 'bold'
                 }}>
-                  <div>
-                    <label style={{
-                      display: 'block',
-                      fontSize: '12px',
-                      color: 'rgba(255,255,255,0.6)',
-                      marginBottom: '6px'
-                    }}>
-                      Category
-                    </label>
-                    <select
-                      value={newUpdate.category}
-                      onChange={(e) => setNewUpdate({...newUpdate, category: e.target.value})}
-                      style={{
-                        width: '100%',
-                        padding: '10px 12px',
-                        background: 'rgba(255,255,255,0.05)',
-                        border: '1px solid rgba(255,255,255,0.1)',
-                        borderRadius: '8px',
-                        color: 'white',
-                        fontSize: '14px',
-                        outline: 'none'
-                      }}
-                    >
-                      <option value="feature">Feature</option>
-                      <option value="bug">Bug Fix</option>
-                      <option value="improvement">Improvement</option>
-                      <option value="security">Security</option>
-                    </select>
-                  </div>
-                  
-                  <div>
-                    <label style={{
-                      display: 'block',
-                      fontSize: '12px',
-                      color: 'rgba(255,255,255,0.6)',
-                      marginBottom: '6px'
-                    }}>
-                      Status
-                    </label>
-                    <select
-                      value={newUpdate.status}
-                      onChange={(e) => setNewUpdate({...newUpdate, status: e.target.value})}
-                      style={{
-                        width: '100%',
-                        padding: '10px 12px',
-                        background: 'rgba(255,255,255,0.05)',
-                        border: '1px solid rgba(255,255,255,0.1)',
-                        borderRadius: '8px',
-                        color: 'white',
-                        fontSize: '14px',
-                        outline: 'none'
-                      }}
-                    >
-                      <option value="pending">Pending</option>
-                      <option value="in-progress">In Progress</option>
-                      <option value="completed">Completed</option>
-                    </select>
-                  </div>
+                  {notificationCount}
                 </div>
-                
-                <motion.button
-                  type="submit"
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  style={{
-                    width: '100%',
-                    padding: '12px',
-                    background: 'linear-gradient(135deg, #00DC82 0%, #00C2FF 100%)',
-                    border: 'none',
-                    borderRadius: '12px',
-                    color: '#000000',
-                    fontSize: '14px',
-                    fontWeight: '600',
-                    cursor: 'pointer'
-                  }}
-                >
-                  Create Update
-                </motion.button>
-              </form>
-            </motion.div>
+              )}
+            </button>
 
-            {/* Updates List */}
-            <div>
-              <h2 style={{
-                fontSize: '24px',
-                fontWeight: '700',
-                marginBottom: '20px',
-                color: '#FFFFFF'
-              }}>
-                Recent Updates
-              </h2>
-              
-              <AnimatePresence>
-                {updates.map((update, index) => (
-                  <motion.div
-                    key={update.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
-                    transition={{ delay: index * 0.05 }}
-                    style={{
-                      padding: '24px',
-                      background: 'rgba(255,255,255,0.02)',
-                      border: '1px solid rgba(255,255,255,0.05)',
-                      borderRadius: '20px',
-                      marginBottom: '16px',
-                      position: 'relative'
-                    }}
-                  >
-                    {/* Progress Bar */}
-                    <div style={{
-                      position: 'absolute',
-                      top: 0,
-                      left: 0,
-                      right: 0,
-                      height: '2px',
-                      background: 'rgba(255,255,255,0.1)',
-                      borderRadius: '20px 20px 0 0'
-                    }}>
-                      <div style={{
-                        width: `${update.progress || 0}%`,
-                        height: '100%',
-                        background: getStatusColor(update.status),
-                        borderRadius: '20px 20px 0 0',
-                        transition: 'width 0.3s ease'
-                      }} />
-                    </div>
-
-                    <div style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'flex-start',
-                      marginBottom: '12px'
-                    }}>
-                      <div>
-                        <div style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '12px',
-                          marginBottom: '8px'
-                        }}>
-                          <h3 style={{
-                            fontSize: '18px',
-                            fontWeight: '600',
-                            color: '#FFFFFF'
-                          }}>
-                            {update.title}
-                          </h3>
-                          <div style={{
-                            padding: '4px 12px',
-                            background: getCategoryColor(update.category) + '20',
-                            border: `1px solid ${getCategoryColor(update.category)}40`,
-                            borderRadius: '20px',
-                            fontSize: '12px',
-                            color: getCategoryColor(update.category),
-                            textTransform: 'capitalize'
-                          }}>
-                            {update.category}
-                          </div>
-                        </div>
-                        
-                        <p style={{
-                          fontSize: '14px',
-                          color: 'rgba(255,255,255,0.6)',
-                          lineHeight: '1.6',
-                          marginBottom: '16px'
-                        }}>
-                          {update.description}
-                        </p>
-                      </div>
-                      
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        {/* North West Arrow */}
-                        <motion.div
-                          whileHover={{ rotate: -45 }}
-                          style={{
-                            width: '32px',
-                            height: '32px',
-                            background: 'rgba(255,255,255,0.05)',
-                            border: '1px solid rgba(255,255,255,0.1)',
-                            borderRadius: '8px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            cursor: 'pointer'
-                          }}
-                        >
-                          <svg 
-                            width="16" 
-                            height="16" 
-                            viewBox="0 0 24 24" 
-                            fill="none" 
-                            stroke={getStatusColor(update.status)}
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          >
-                            <line x1="17" y1="7" x2="7" y2="17"></line>
-                            <polyline points="17 17 7 17 7 7"></polyline>
-                          </svg>
-                        </motion.div>
-                        
-                        <motion.button
-                          whileHover={{ scale: 1.05 }}
-                          whileTap={{ scale: 0.95 }}
-                          onClick={() => handleDeleteUpdate(update.id)}
-                          style={{
-                            width: '32px',
-                            height: '32px',
-                            background: 'rgba(239,68,68,0.1)',
-                            border: '1px solid rgba(239,68,68,0.2)',
-                            borderRadius: '8px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            cursor: 'pointer',
-                            color: '#EF4444'
-                          }}
-                        >
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <polyline points="3 6 5 6 21 6" />
-                            <path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6" />
-                            <path d="M10 11v6" />
-                            <path d="M14 11v6" />
-                          </svg>
-                        </motion.button>
-                      </div>
-                    </div>
-
-                    <div style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      fontSize: '13px'
-                    }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                        <div style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '6px'
-                        }}>
-                          <div style={{
-                            width: '8px',
-                            height: '8px',
-                            borderRadius: '50%',
-                            background: getStatusColor(update.status)
-                          }} />
-                          <span style={{
-                            color: getStatusColor(update.status),
-                            fontWeight: '500',
-                            textTransform: 'capitalize'
-                          }}>
-                            {update.status}
-                          </span>
-                        </div>
-                        
-                        <div style={{ color: 'rgba(255,255,255,0.4)' }}>
-                          by {update.createdByName}
-                        </div>
-                        
-                        <div style={{ color: 'rgba(255,255,255,0.4)' }}>
-                          {formatDate(update.createdAt)}
-                        </div>
-                      </div>
-                      
-                      <div style={{
-                        display: 'flex',
-                        gap: '8px'
-                      }}>
-                        {['pending', 'in-progress', 'completed'].map((status) => (
-                          <motion.button
-                            key={status}
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
-                            onClick={() => handleUpdateStatus(update.id, status)}
-                            style={{
-                              padding: '4px 12px',
-                              background: update.status === status 
-                                ? getStatusColor(status) 
-                                : 'rgba(255,255,255,0.05)',
-                              border: `1px solid ${getStatusColor(status)}40`,
-                              borderRadius: '12px',
-                              fontSize: '12px',
-                              color: update.status === status ? '#000000' : getStatusColor(status),
-                              cursor: 'pointer',
-                              textTransform: 'capitalize'
-                            }}
-                          >
-                            {status}
-                          </motion.button>
-                        ))}
-                      </div>
-                    </div>
-                  </motion.div>
-                ))}
-              </AnimatePresence>
-            </div>
-          </div>
-
-          {/* Right Column - Notifications & Stats */}
-          <div>
-            {/* Notifications */}
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              style={{
-                padding: '24px',
-                background: 'rgba(255,255,255,0.02)',
-                border: '1px solid rgba(255,255,255,0.05)',
-                borderRadius: '20px',
-                marginBottom: '40px'
-              }}
-            >
+            {/* Dropdown Notifikasi */}
+            {showNotifications && (
               <div style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                marginBottom: '20px'
+                position: 'absolute',
+                top: '50px',
+                right: 0,
+                backgroundColor: '#111',
+                border: '1px solid #333',
+                borderRadius: '8px',
+                width: '400px',
+                maxHeight: '500px',
+                overflowY: 'auto',
+                zIndex: 1000,
+                boxShadow: '0 4px 20px rgba(0,0,0,0.5)'
               }}>
-                <h3 style={{
-                  fontSize: '18px',
-                  fontWeight: '600',
-                  color: '#FFFFFF'
+                <div style={{
+                  padding: '20px',
+                  borderBottom: '1px solid #333',
+                  fontSize: '20px',
+                  fontWeight: 'bold'
                 }}>
-                  Notifications
-                </h3>
+                  Notifikasi ({notifications.length})
+                </div>
                 
-                {notifications.length > 0 && (
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => {
-                      notifications.forEach(notif => handleMarkAsRead(notif.id));
-                    }}
-                    style={{
-                      padding: '6px 12px',
-                      background: 'rgba(255,255,255,0.05)',
-                      border: '1px solid rgba(255,255,255,0.1)',
-                      borderRadius: '12px',
-                      fontSize: '12px',
-                      color: 'rgba(255,255,255,0.6)',
-                      cursor: 'pointer'
-                    }}
-                  >
-                    Mark all as read
-                  </motion.button>
-                )}
-              </div>
-              
-              <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
-                <AnimatePresence>
-                  {notifications.length === 0 ? (
-                    <div style={{
-                      textAlign: 'center',
-                      padding: '40px 0',
-                      color: 'rgba(255,255,255,0.4)'
-                    }}>
-                      No notifications
-                    </div>
-                  ) : (
-                    notifications.map((notification, index) => (
-                      <motion.div
+                {notifications.length === 0 ? (
+                  <div style={{
+                    padding: '30px',
+                    textAlign: 'center',
+                    color: '#888',
+                    fontSize: '18px'
+                  }}>
+                    Tidak ada notifikasi
+                  </div>
+                ) : (
+                  <div>
+                    {notifications.map((notification) => (
+                      <div
                         key={notification.id}
-                        initial={{ opacity: 0, x: 20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: -20 }}
-                        transition={{ delay: index * 0.05 }}
                         style={{
-                          padding: '16px',
-                          background: 'rgba(255,255,255,0.05)',
-                          border: '1px solid rgba(255,255,255,0.1)',
-                          borderRadius: '12px',
-                          marginBottom: '8px',
-                          position: 'relative',
+                          padding: '20px',
+                          borderBottom: '1px solid #222',
+                          backgroundColor: notification.status === 'unread' ? 'rgba(255,255,255,0.05)' : 'transparent',
                           cursor: 'pointer'
                         }}
-                        onClick={() => handleMarkAsRead(notification.id)}
+                        onClick={() => notification.id && handleMarkNotificationAsRead(notification.id)}
                       >
                         <div style={{
-                          position: 'absolute',
-                          left: 0,
-                          top: 0,
-                          bottom: 0,
-                          width: '3px',
-                          background: notification.type === 'alert' ? '#FFB800' : 
-                                   notification.type === 'success' ? '#00DC82' : '#00C2FF',
-                          borderRadius: '12px 0 0 12px'
-                        }} />
-                        
-                        <div style={{
-                          marginLeft: '12px',
-                          fontSize: '14px',
-                          color: 'rgba(255,255,255,0.8)'
+                          fontSize: '18px',
+                          marginBottom: '10px',
+                          color: notification.status === 'unread' ? 'white' : '#aaa'
                         }}>
                           {notification.message}
                         </div>
                         
                         <div style={{
-                          marginLeft: '12px',
-                          marginTop: '4px',
-                          fontSize: '12px',
-                          color: 'rgba(255,255,255,0.4)'
+                          fontSize: '14px',
+                          color: '#666',
+                          marginBottom: '10px'
                         }}>
-                          {formatDate(notification.createdAt)}
+                          Dari: {notification.senderName || 'System'}
+                          <br />
+                          Waktu: {formatTime(notification.createdAt)}
                         </div>
-                      </motion.div>
-                    ))
-                  )}
-                </AnimatePresence>
-              </div>
-            </motion.div>
-
-            {/* Stats */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              style={{
-                padding: '24px',
-                background: 'rgba(255,255,255,0.02)',
-                border: '1px solid rgba(255,255,255,0.05)',
-                borderRadius: '20px'
-              }}
-            >
-              <h3 style={{
-                fontSize: '18px',
-                fontWeight: '600',
-                marginBottom: '20px',
-                color: '#FFFFFF'
-              }}>
-                Statistics
-              </h3>
-              
-              <div style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(2, 1fr)',
-                gap: '16px'
-              }}>
-                {[
-                  { label: 'Total Updates', value: updates.length, color: '#00DC82' },
-                  { label: 'Pending', value: updates.filter(u => u.status === 'pending').length, color: '#FFB800' },
-                  { label: 'In Progress', value: updates.filter(u => u.status === 'in-progress').length, color: '#00C2FF' },
-                  { label: 'Completed', value: updates.filter(u => u.status === 'completed').length, color: '#8B5CF6' }
-                ].map((stat, index) => (
-                  <div key={index} style={{
-                    padding: '16px',
-                    background: 'rgba(255,255,255,0.05)',
-                    border: `1px solid ${stat.color}20`,
-                    borderRadius: '12px',
-                    textAlign: 'center'
-                  }}>
-                    <div style={{
-                      fontSize: '24px',
-                      fontWeight: '700',
-                      color: stat.color,
-                      marginBottom: '4px'
-                    }}>
-                      {stat.value}
-                    </div>
-                    <div style={{
-                      fontSize: '12px',
-                      color: 'rgba(255,255,255,0.6)'
-                    }}>
-                      {stat.label}
-                    </div>
+                        
+                        {notification.status === 'unread' && (
+                          <div style={{
+                            color: '#00C2FF',
+                            fontSize: '12px',
+                            textTransform: 'uppercase',
+                            letterSpacing: '1px'
+                          }}>
+                            Baru
+                          </div>
+                        )}
+                      </div>
+                    ))}
                   </div>
-                ))}
+                )}
               </div>
-              
-              {/* User Info */}
-              <div style={{
-                marginTop: '24px',
-                padding: '16px',
-                background: 'rgba(255,255,255,0.05)',
-                border: '1px solid rgba(255,255,255,0.1)',
-                borderRadius: '12px',
+            )}
+          </div>
+          
+          {/* Tombol Kirim Pesan */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '5px'
+          }}>
+            <span style={{
+              fontSize: '20px',
+              color: 'white'
+            }}>
+              Kirim Pesan
+            </span>
+            <button
+              onClick={() => setShowMessageModal(true)}
+              style={{
+                backgroundColor: 'transparent',
+                border: 'none',
+                color: 'white',
+                padding: '10px',
+                cursor: 'pointer',
+                fontSize: '24px',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '12px'
+                justifyContent: 'center'
+              }}
+              title="Kirim Pesan"
+            >
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+              </svg>
+            </button>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M7 17L17 7M7 7H17V17"/>
+            </svg>
+          </div>
+          
+          {/* Tombol Buat Update Baru dengan Teks */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '5px'
+          }}>
+            <span style={{
+              fontSize: '20px',
+              color: 'white'
+            }}>
+              Buat Update
+            </span>
+            <button
+              onClick={() => setShowNewUpdateForm(true)}
+              style={{
+                backgroundColor: 'transparent',
+                border: 'none',
+                color: 'white',
+                padding: '12px',
+                cursor: 'pointer',
+                fontSize: '28px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '50px',
+                height: '50px'
+              }}
+              title="Buat Update Baru"
+            >
+              <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M12 5v14M5 12h14"/>
+              </svg>
+            </button>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M7 17L17 7M7 7H17V17"/>
+            </svg>
+          </div>
+
+          {/* Tombol Logout */}
+          <button
+            onClick={handleLogout}
+            style={{
+              backgroundColor: 'transparent',
+              border: 'none',
+              color: 'white',
+              padding: '10px',
+              cursor: 'pointer',
+              fontSize: '24px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+            title="Logout"
+          >
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/>
+              <polyline points="16 17 21 12 16 7"/>
+              <line x1="21" y1="12" x2="9" y2="12"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div style={{
+        width: '100%',
+        maxWidth: '1400px',
+        margin: '0 auto',
+        padding: '160px 20px 100px',
+        boxSizing: 'border-box',
+        display: 'grid',
+        gridTemplateColumns: '1fr 400px',
+        gap: '40px'
+      }}>
+        {/* Updates Column */}
+        <div>
+          {/* Stats Cards */}
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(5, 1fr)',
+            gap: '15px',
+            marginBottom: '50px'
+          }}>
+            {[
+              { label: 'Total', value: stats.total, color: '#FFFFFF' },
+              { label: 'Pending', value: stats.pending, color: statusColors.pending },
+              { label: 'Progress', value: stats.inProgress, color: statusColors['in-progress'] },
+              { label: 'Completed', value: stats.completed, color: statusColors.completed },
+              { label: 'Deployed', value: stats.deployed, color: statusColors.deployed }
+            ].map((stat, index) => (
+              <div key={index} style={{
+                backgroundColor: 'rgba(255,255,255,0.05)',
+                border: `1px solid ${stat.color}40`,
+                borderRadius: '12px',
+                padding: '20px',
+                textAlign: 'center'
               }}>
                 <div style={{
-                  width: '40px',
-                  height: '40px',
-                  background: 'linear-gradient(135deg, #00DC82 0%, #00C2FF 100%)',
-                  borderRadius: '50%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: '16px',
-                  fontWeight: '600',
-                  color: '#000000'
+                  fontSize: '36px',
+                  fontWeight: 'bold',
+                  color: stat.color,
+                  marginBottom: '5px'
                 }}>
-                  {currentUser.displayName?.charAt(0).toUpperCase()}
+                  {stat.value}
                 </div>
-                <div>
-                  <div style={{
-                    fontSize: '14px',
-                    fontWeight: '600',
-                    color: '#FFFFFF'
-                  }}>
-                    {currentUser.displayName}
-                  </div>
-                  <div style={{
-                    fontSize: '12px',
-                    color: 'rgba(255,255,255,0.4)'
-                  }}>
-                    {currentUser.email}
-                  </div>
-                  <div style={{
-                    fontSize: '12px',
-                    color: 'rgba(255,255,255,0.6)',
-                    marginTop: '2px'
-                  }}>
-                    Last login: Today
-                  </div>
+                <div style={{
+                  fontSize: '14px',
+                  color: 'rgba(255,255,255,0.6)',
+                  textTransform: 'uppercase',
+                  letterSpacing: '1px'
+                }}>
+                  {stat.label}
                 </div>
               </div>
-            </motion.div>
+            ))}
+          </div>
+
+          {isLoading ? (
+            <div style={{
+              display: 'flex',
+              justifyContent: 'center',
+              padding: '100px',
+              fontSize: '26px',
+              fontFamily: 'Helvetica, Arial, sans-serif',
+              color: 'white'
+            }}>
+              Memuat update...
+            </div>
+          ) : updates.length === 0 ? (
+            <div style={{
+              textAlign: 'center',
+              padding: '120px 20px',
+              fontFamily: 'Helvetica, Arial, sans-serif'
+            }}>
+              <div style={{
+                fontSize: '32px',
+                fontFamily: 'Helvetica, Arial, sans-serif',
+                color: 'white',
+                marginBottom: '20px'
+              }}>
+                Belum ada update
+              </div>
+              <div style={{
+                fontSize: '24px',
+                fontFamily: 'Helvetica, Arial, sans-serif',
+                color: 'white'
+              }}>
+                Buat update pertama Anda
+              </div>
+            </div>
+          ) : (
+            <div style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '40px',
+              fontFamily: 'Helvetica, Arial, sans-serif'
+            }}>
+              {updates.map((update) => (
+                <div
+                  key={update.id}
+                  style={{
+                    backgroundColor: 'rgba(255,255,255,0.02)',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    borderRadius: '20px',
+                    padding: '30px',
+                    fontFamily: 'Helvetica, Arial, sans-serif',
+                    position: 'relative',
+                    overflow: 'hidden'
+                  }}
+                >
+                  {/* Status Badge */}
+                  <div style={{
+                    position: 'absolute',
+                    top: '20px',
+                    right: '20px',
+                    padding: '6px 16px',
+                    backgroundColor: statusColors[update.status] + '20',
+                    border: `1px solid ${statusColors[update.status]}40`,
+                    borderRadius: '20px',
+                    fontSize: '14px',
+                    color: statusColors[update.status],
+                    textTransform: 'uppercase',
+                    fontWeight: 'bold',
+                    letterSpacing: '1px'
+                  }}>
+                    {update.status}
+                  </div>
+
+                  {/* Priority and Impact Badges */}
+                  <div style={{
+                    display: 'flex',
+                    gap: '10px',
+                    marginBottom: '15px'
+                  }}>
+                    <div style={{
+                      padding: '4px 12px',
+                      backgroundColor: priorityColors[update.priority] + '20',
+                      border: `1px solid ${priorityColors[update.priority]}40`,
+                      borderRadius: '12px',
+                      fontSize: '12px',
+                      color: priorityColors[update.priority],
+                      textTransform: 'uppercase',
+                      fontWeight: 'bold'
+                    }}>
+                      {update.priority}
+                    </div>
+                    <div style={{
+                      padding: '4px 12px',
+                      backgroundColor: impactColors[update.impact] + '20',
+                      border: `1px solid ${impactColors[update.impact]}40`,
+                      borderRadius: '12px',
+                      fontSize: '12px',
+                      color: impactColors[update.impact],
+                      textTransform: 'uppercase',
+                      fontWeight: 'bold'
+                    }}>
+                      {update.impact}
+                    </div>
+                  </div>
+
+                  {/* Category */}
+                  {update.category && (
+                    <div style={{
+                      fontSize: '18px',
+                      fontFamily: 'Helvetica, Arial, sans-serif',
+                      color: 'rgba(255,255,255,0.6)',
+                      marginBottom: '10px',
+                      fontWeight: '500'
+                    }}>
+                      {update.category}
+                    </div>
+                  )}
+
+                  {/* Title */}
+                  <div style={{
+                    fontSize: '32px',
+                    fontFamily: 'Helvetica, Arial, sans-serif',
+                    lineHeight: '1.3',
+                    color: 'white',
+                    fontWeight: 'bold',
+                    marginBottom: '15px'
+                  }}>
+                    {update.title}
+                  </div>
+
+                  {/* Version */}
+                  {update.version && (
+                    <div style={{
+                      fontSize: '18px',
+                      fontFamily: 'Helvetica, Arial, sans-serif',
+                      color: '#00C2FF',
+                      marginBottom: '20px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '10px'
+                    }}>
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#00C2FF" strokeWidth="2">
+                        <path d="M2 12h20M12 2v20"/>
+                      </svg>
+                      Version: {update.version}
+                    </div>
+                  )}
+
+                  {/* Description */}
+                  {update.description && (
+                    <div style={{
+                      fontSize: '20px',
+                      fontFamily: 'Helvetica, Arial, sans-serif',
+                      lineHeight: '1.6',
+                      color: 'rgba(255,255,255,0.8)',
+                      marginTop: '20px',
+                      whiteSpace: 'pre-wrap'
+                    }}>
+                      {update.description}
+                    </div>
+                  )}
+
+                  {/* Footer */}
+                  <div style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    marginTop: '30px',
+                    paddingTop: '20px',
+                    borderTop: '1px solid rgba(255,255,255,0.1)'
+                  }}>
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '15px'
+                    }}>
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px'
+                      }}>
+                        <div style={{
+                          width: '32px',
+                          height: '32px',
+                          backgroundColor: 'rgba(0,194,255,0.2)',
+                          borderRadius: '50%',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontSize: '14px',
+                          fontWeight: 'bold',
+                          color: '#00C2FF'
+                        }}>
+                          {update.userName?.charAt(0)?.toUpperCase() || 'U'}
+                        </div>
+                        <span style={{
+                          fontSize: '16px',
+                          color: 'rgba(255,255,255,0.6)'
+                        }}>
+                          oleh {update.userName}
+                        </span>
+                      </div>
+                      <span style={{
+                        fontSize: '16px',
+                        color: 'rgba(255,255,255,0.4)'
+                      }}>
+                        {formatDate(update.createdAt)}
+                      </span>
+                    </div>
+                    
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '15px'
+                    }}>
+                      {/* Status Update Buttons */}
+                      <select
+                        value={update.status}
+                        onChange={(e) => update.id && handleUpdateStatus(update.id, e.target.value as Update['status'])}
+                        style={{
+                          padding: '8px 16px',
+                          backgroundColor: 'rgba(255,255,255,0.05)',
+                          border: '1px solid rgba(255,255,255,0.1)',
+                          borderRadius: '8px',
+                          color: 'white',
+                          fontSize: '14px',
+                          cursor: 'pointer',
+                          outline: 'none'
+                        }}
+                      >
+                        <option value="pending" style={{ backgroundColor: '#111' }}>Pending</option>
+                        <option value="in-progress" style={{ backgroundColor: '#111' }}>In Progress</option>
+                        <option value="completed" style={{ backgroundColor: '#111' }}>Completed</option>
+                        <option value="deployed" style={{ backgroundColor: '#111' }}>Deployed</option>
+                      </select>
+
+                      {/* Delete Button */}
+                      {update.userId === user?.uid && (
+                        <button
+                          onClick={() => update.id && handleDeleteUpdate(update.id)}
+                          style={{
+                            backgroundColor: 'transparent',
+                            border: '1px solid rgba(239,68,68,0.3)',
+                            color: '#EF4444',
+                            padding: '8px 16px',
+                            borderRadius: '8px',
+                            fontSize: '14px',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '6px'
+                          }}
+                          title="Hapus Update"
+                        >
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <polyline points="3 6 5 6 21 6" />
+                            <path d="M19 6l-2 14a2 2 0 01-2 2H9a2 2 0 01-2-2L5 6" />
+                          </svg>
+                          Hapus
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Messages Column */}
+        <div>
+          <div style={{
+            backgroundColor: 'rgba(255,255,255,0.02)',
+            border: '1px solid rgba(255,255,255,0.1)',
+            borderRadius: '20px',
+            height: 'calc(100vh - 220px)',
+            display: 'flex',
+            flexDirection: 'column'
+          }}>
+            {/* Messages Header */}
+            <div style={{
+              padding: '25px',
+              borderBottom: '1px solid rgba(255,255,255,0.1)'
+            }}>
+              <div style={{
+                fontSize: '24px',
+                fontWeight: 'bold',
+                color: 'white',
+                marginBottom: '5px'
+              }}>
+                Diskusi Update
+              </div>
+              <div style={{
+                fontSize: '14px',
+                color: 'rgba(255,255,255,0.6)'
+              }}>
+                {messages.length} pesan
+              </div>
+            </div>
+
+            {/* Messages Container */}
+            <div style={{
+              flex: 1,
+              overflowY: 'auto',
+              padding: '20px'
+            }}>
+              {messages.length === 0 ? (
+                <div style={{
+                  textAlign: 'center',
+                  padding: '60px 20px',
+                  color: 'rgba(255,255,255,0.4)',
+                  fontSize: '18px'
+                }}>
+                  Belum ada pesan
+                </div>
+              ) : (
+                <div style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '20px'
+                }}>
+                  {messages.map((message) => (
+                    <div key={message.id} style={{
+                      display: 'flex',
+                      gap: '12px'
+                    }}>
+                      <div style={{
+                        width: '36px',
+                        height: '36px',
+                        backgroundColor: 'rgba(0,220,130,0.2)',
+                        borderRadius: '50%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '14px',
+                        fontWeight: 'bold',
+                        color: '#00DC82',
+                        flexShrink: 0
+                      }}>
+                        {message.userName?.charAt(0)?.toUpperCase() || 'U'}
+                      </div>
+                      <div style={{ flex: 1 }}>
+                        <div style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '10px',
+                          marginBottom: '5px'
+                        }}>
+                          <span style={{
+                            fontSize: '16px',
+                            fontWeight: 'bold',
+                            color: 'white'
+                          }}>
+                            {message.userName}
+                          </span>
+                          <span style={{
+                            fontSize: '12px',
+                            color: 'rgba(255,255,255,0.4)'
+                          }}>
+                            {formatDate(message.createdAt)}
+                          </span>
+                        </div>
+                        <div style={{
+                          fontSize: '16px',
+                          color: 'rgba(255,255,255,0.8)',
+                          lineHeight: '1.5'
+                        }}>
+                          {message.text}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                  <div ref={messagesEndRef} />
+                </div>
+              )}
+            </div>
+
+            {/* Message Input */}
+            <div style={{
+              padding: '20px',
+              borderTop: '1px solid rgba(255,255,255,0.1)'
+            }}>
+              <div style={{
+                display: 'flex',
+                gap: '10px'
+              }}>
+                <input
+                  type="text"
+                  value={newMessage}
+                  onChange={(e) => setNewMessage(e.target.value)}
+                  placeholder="Ketik pesan... (Gunakan @nama untuk mention)"
+                  onKeyPress={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault();
+                      handleSendMessage();
+                    }
+                  }}
+                  style={{
+                    flex: 1,
+                    padding: '12px 16px',
+                    backgroundColor: 'rgba(255,255,255,0.05)',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    borderRadius: '12px',
+                    color: 'white',
+                    fontSize: '16px',
+                    outline: 'none'
+                  }}
+                />
+                <button
+                  onClick={handleSendMessage}
+                  disabled={!newMessage.trim()}
+                  style={{
+                    padding: '12px 20px',
+                    backgroundColor: newMessage.trim() ? '#00C2FF' : 'rgba(0,194,255,0.3)',
+                    border: 'none',
+                    borderRadius: '12px',
+                    color: 'white',
+                    fontSize: '16px',
+                    cursor: newMessage.trim() ? 'pointer' : 'not-allowed',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px'
+                  }}
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <line x1="22" y1="2" x2="11" y2="13"/>
+                    <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
+
+      {/* Modal buat update baru */}
+      {showNewUpdateForm && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0,0,0,0.95)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000,
+          padding: '30px',
+          fontFamily: 'Helvetica, Arial, sans-serif'
+        }}>
+          <div style={{
+            backgroundColor: 'black',
+            width: '100%',
+            maxWidth: '800px',
+            padding: '60px',
+            fontFamily: 'Helvetica, Arial, sans-serif',
+            borderRadius: '20px',
+            border: '1px solid rgba(255,255,255,0.1)'
+          }}>
+            <div style={{
+              marginBottom: '50px',
+              fontFamily: 'Helvetica, Arial, sans-serif'
+            }}>
+              <div style={{
+                fontSize: '36px',
+                fontFamily: 'Helvetica, Arial, sans-serif',
+                marginBottom: '20px',
+                color: 'white',
+                fontWeight: 'bold'
+              }}>
+                Buat Update Baru
+              </div>
+            </div>
+
+            <div style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '25px',
+              fontFamily: 'Helvetica, Arial, sans-serif'
+            }}>
+              <input
+                type="text"
+                value={newUpdate.title}
+                onChange={(e) => setNewUpdate({...newUpdate, title: e.target.value})}
+                placeholder="Judul Update"
+                style={{
+                  width: '100%',
+                  padding: '20px',
+                  backgroundColor: 'rgba(255,255,255,0.05)',
+                  border: '1px solid rgba(255,255,255,0.1)',
+                  color: 'white',
+                  fontSize: '24px',
+                  outline: 'none',
+                  fontFamily: 'Helvetica, Arial, sans-serif',
+                  lineHeight: '1.3',
+                  borderRadius: '12px'
+                }}
+              />
+
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: '1fr 1fr',
+                gap: '20px'
+              }}>
+                <select
+                  value={newUpdate.category}
+                  onChange={(e) => setNewUpdate({...newUpdate, category: e.target.value})}
+                  style={{
+                    width: '100%',
+                    padding: '15px',
+                    backgroundColor: 'rgba(255,255,255,0.05)',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    color: 'white',
+                    fontSize: '18px',
+                    outline: 'none',
+                    fontFamily: 'Helvetica, Arial, sans-serif',
+                    cursor: 'pointer',
+                    appearance: 'none',
+                    backgroundImage: `url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e")`,
+                    backgroundRepeat: 'no-repeat',
+                    backgroundPosition: 'right 15px center',
+                    backgroundSize: '20px',
+                    borderRadius: '12px'
+                  }}
+                >
+                  <option value="" style={{ backgroundColor: 'black', color: 'white', fontSize: '16px' }}>
+                    Pilih Kategori
+                  </option>
+                  {categories.map((category) => (
+                    <option 
+                      key={category} 
+                      value={category}
+                      style={{ backgroundColor: 'black', color: 'white', fontSize: '16px' }}
+                    >
+                      {category}
+                    </option>
+                  ))}
+                </select>
+
+                <input
+                  type="text"
+                  value={newUpdate.version}
+                  onChange={(e) => setNewUpdate({...newUpdate, version: e.target.value})}
+                  placeholder="Version (contoh: v1.2.0)"
+                  style={{
+                    width: '100%',
+                    padding: '15px',
+                    backgroundColor: 'rgba(255,255,255,0.05)',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    color: 'white',
+                    fontSize: '18px',
+                    outline: 'none',
+                    fontFamily: 'Helvetica, Arial, sans-serif',
+                    borderRadius: '12px'
+                  }}
+                />
+              </div>
+
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: '1fr 1fr 1fr',
+                gap: '15px'
+              }}>
+                <select
+                  value={newUpdate.priority}
+                  onChange={(e) => setNewUpdate({...newUpdate, priority: e.target.value as any})}
+                  style={{
+                    width: '100%',
+                    padding: '15px',
+                    backgroundColor: priorityColors[newUpdate.priority] + '10',
+                    border: `1px solid ${priorityColors[newUpdate.priority]}30`,
+                    color: priorityColors[newUpdate.priority],
+                    fontSize: '16px',
+                    outline: 'none',
+                    fontFamily: 'Helvetica, Arial, sans-serif',
+                    cursor: 'pointer',
+                    appearance: 'none',
+                    backgroundImage: `url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='${priorityColors[newUpdate.priority]}' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e")`,
+                    backgroundRepeat: 'no-repeat',
+                    backgroundPosition: 'right 15px center',
+                    backgroundSize: '20px',
+                    borderRadius: '12px'
+                  }}
+                >
+                  {['low', 'medium', 'high', 'critical'].map((priority) => (
+                    <option 
+                      key={priority} 
+                      value={priority}
+                      style={{ backgroundColor: 'black', color: priorityColors[priority], fontSize: '16px' }}
+                    >
+                      Priority: {priority}
+                    </option>
+                  ))}
+                </select>
+
+                <select
+                  value={newUpdate.impact}
+                  onChange={(e) => setNewUpdate({...newUpdate, impact: e.target.value as any})}
+                  style={{
+                    width: '100%',
+                    padding: '15px',
+                    backgroundColor: impactColors[newUpdate.impact] + '10',
+                    border: `1px solid ${impactColors[newUpdate.impact]}30`,
+                    color: impactColors[newUpdate.impact],
+                    fontSize: '16px',
+                    outline: 'none',
+                    fontFamily: 'Helvetica, Arial, sans-serif',
+                    cursor: 'pointer',
+                    appearance: 'none',
+                    backgroundImage: `url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='${impactColors[newUpdate.impact]}' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e")`,
+                    backgroundRepeat: 'no-repeat',
+                    backgroundPosition: 'right 15px center',
+                    backgroundSize: '20px',
+                    borderRadius: '12px'
+                  }}
+                >
+                  {['minor', 'moderate', 'major', 'critical'].map((impact) => (
+                    <option 
+                      key={impact} 
+                      value={impact}
+                      style={{ backgroundColor: 'black', color: impactColors[impact], fontSize: '16px' }}
+                    >
+                      Impact: {impact}
+                    </option>
+                  ))}
+                </select>
+
+                <select
+                  value={newUpdate.status}
+                  onChange={(e) => setNewUpdate({...newUpdate, status: e.target.value as any})}
+                  style={{
+                    width: '100%',
+                    padding: '15px',
+                    backgroundColor: statusColors[newUpdate.status] + '10',
+                    border: `1px solid ${statusColors[newUpdate.status]}30`,
+                    color: statusColors[newUpdate.status],
+                    fontSize: '16px',
+                    outline: 'none',
+                    fontFamily: 'Helvetica, Arial, sans-serif',
+                    cursor: 'pointer',
+                    appearance: 'none',
+                    backgroundImage: `url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='${statusColors[newUpdate.status]}' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e")`,
+                    backgroundRepeat: 'no-repeat',
+                    backgroundPosition: 'right 15px center',
+                    backgroundSize: '20px',
+                    borderRadius: '12px'
+                  }}
+                >
+                  {['pending', 'in-progress', 'completed', 'deployed'].map((status) => (
+                    <option 
+                      key={status} 
+                      value={status}
+                      style={{ backgroundColor: 'black', color: statusColors[status], fontSize: '16px' }}
+                    >
+                      Status: {status}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <textarea
+                value={newUpdate.description}
+                onChange={(e) => setNewUpdate({...newUpdate, description: e.target.value})}
+                placeholder="Deskripsi Update"
+                rows={8}
+                style={{
+                  width: '100%',
+                  padding: '20px',
+                  backgroundColor: 'rgba(255,255,255,0.05)',
+                  border: '1px solid rgba(255,255,255,0.1)',
+                  color: 'white',
+                  fontSize: '20px',
+                  outline: 'none',
+                  fontFamily: 'Helvetica, Arial, sans-serif',
+                  resize: 'none',
+                  lineHeight: '1.6',
+                  borderRadius: '12px'
+                }}
+              />
+
+              <div style={{
+                display: 'flex',
+                justifyContent: 'flex-end',
+                gap: '20px',
+                marginTop: '40px',
+                fontFamily: 'Helvetica, Arial, sans-serif'
+              }}>
+                <button
+                  onClick={() => setShowNewUpdateForm(false)}
+                  style={{
+                    padding: '15px 30px',
+                    backgroundColor: 'transparent',
+                    border: '1px solid rgba(255,255,255,0.2)',
+                    color: 'white',
+                    fontSize: '18px',
+                    cursor: 'pointer',
+                    fontFamily: 'Helvetica, Arial, sans-serif',
+                    borderRadius: '12px'
+                  }}
+                >
+                  Batal
+                </button>
+                <button
+                  onClick={handleCreateUpdate}
+                  style={{
+                    padding: '15px 30px',
+                    backgroundColor: '#00C2FF',
+                    border: 'none',
+                    color: 'white',
+                    fontSize: '18px',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '12px',
+                    fontFamily: 'Helvetica, Arial, sans-serif',
+                    borderRadius: '12px',
+                    fontWeight: 'bold'
+                  }}
+                >
+                  Buat Update
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M7 17l9.2-9.2M17 17V7H7"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
