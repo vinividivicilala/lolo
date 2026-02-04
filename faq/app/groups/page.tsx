@@ -11,6 +11,7 @@ import {
   getFirestore,
   collection,
   addDoc,
+  setDoc,
   query,
   orderBy,
   onSnapshot,
@@ -75,6 +76,7 @@ export default function GroupsPage(): React.JSX.Element {
   const [auth, setAuth] = useState<any>(null);
   const [db, setDb] = useState<any>(null);
   const [groupMembers, setGroupMembers] = useState<{[key: string]: string}>({});
+  const [showMemberModal, setShowMemberModal] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -102,13 +104,17 @@ export default function GroupsPage(): React.JSX.Element {
   useEffect(() => {
     if (!auth) return;
 
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (currentUser) {
         setUser(currentUser);
         const name = currentUser.displayName || 
                     currentUser.email?.split('@')[0] || 
                     'User';
         setUserDisplayName(name);
+        
+        // Simpan user ke Firestore
+        await saveUserToFirestore(currentUser.uid, name, currentUser.email || '');
+        
         loadUserGroups(currentUser.uid);
       } else {
         router.push('/');
@@ -119,6 +125,32 @@ export default function GroupsPage(): React.JSX.Element {
       if (unsubscribe) unsubscribe();
     };
   }, [auth, router]);
+
+  // Simpan user ke Firestore
+  const saveUserToFirestore = async (userId: string, name: string, email: string) => {
+    if (!db) return;
+    
+    try {
+      const userRef = doc(db, 'users', userId);
+      const userSnap = await getDoc(userRef);
+      
+      const userData = {
+        id: userId,
+        name: name,
+        email: email.toLowerCase(),
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      };
+      
+      if (!userSnap.exists()) {
+        await setDoc(userRef, userData);
+      } else {
+        await updateDoc(userRef, userData);
+      }
+    } catch (error) {
+      console.error("Error saving user to Firestore:", error);
+    }
+  };
 
   const loadUserGroups = async (userId: string) => {
     if (!db) return;
@@ -132,24 +164,9 @@ export default function GroupsPage(): React.JSX.Element {
         for (const docSnap of querySnapshot.docs) {
           const groupData = docSnap.data() as Group;
           
-          // Ambil nama member dari users collection jika tidak ada di memberNames
-          if (!groupData.memberNames || Object.keys(groupData.memberNames).length === 0) {
-            groupData.memberNames = {};
-            for (const memberId of groupData.members) {
-              try {
-                const userRef = doc(db, 'users', memberId);
-                const userSnap = await getDoc(userRef);
-                if (userSnap.exists()) {
-                  groupData.memberNames![memberId] = userSnap.data().name || 'Unknown User';
-                } else {
-                  groupData.memberNames![memberId] = 'Unknown User';
-                }
-              } catch (error) {
-                console.error("Error loading member name:", error);
-                groupData.memberNames![memberId] = 'Unknown User';
-              }
-            }
-          }
+          // Ambil nama member dari users collection
+          const memberNames = await loadMemberNames(groupData.members);
+          groupData.memberNames = memberNames;
           
           groupsData.push({
             id: docSnap.id,
@@ -160,7 +177,9 @@ export default function GroupsPage(): React.JSX.Element {
         setIsLoading(false);
         
         if (groupsData.length > 0 && !selectedGroup) {
-          setSelectedGroup(groupsData[0]);
+          const firstGroup = groupsData[0];
+          setSelectedGroup(firstGroup);
+          setGroupMembers(firstGroup.memberNames || {});
         }
       });
 
@@ -169,6 +188,29 @@ export default function GroupsPage(): React.JSX.Element {
       console.error("Error loading groups:", error);
       setIsLoading(false);
     }
+  };
+
+  const loadMemberNames = async (memberIds: string[]) => {
+    if (!db) return {};
+    
+    const memberNames: {[key: string]: string} = {};
+    
+    for (const memberId of memberIds) {
+      try {
+        const userRef = doc(db, 'users', memberId);
+        const userSnap = await getDoc(userRef);
+        if (userSnap.exists()) {
+          memberNames[memberId] = userSnap.data().name || 'Unknown User';
+        } else {
+          memberNames[memberId] = 'Unknown User';
+        }
+      } catch (error) {
+        console.error("Error loading member name:", error);
+        memberNames[memberId] = 'Unknown User';
+      }
+    }
+    
+    return memberNames;
   };
 
   const loadGroupMessages = (groupId: string) => {
@@ -202,55 +244,16 @@ export default function GroupsPage(): React.JSX.Element {
   useEffect(() => {
     if (selectedGroup && db) {
       loadGroupMessages(selectedGroup.id!);
-      // Update group members when selected group changes
+      // Load member names
       if (selectedGroup.memberNames) {
         setGroupMembers(selectedGroup.memberNames);
       } else {
-        // Load member names from users collection
-        loadMemberNames(selectedGroup.members);
+        loadMemberNames(selectedGroup.members).then(names => {
+          setGroupMembers(names);
+        });
       }
     }
   }, [selectedGroup, db]);
-
-  const loadMemberNames = async (memberIds: string[]) => {
-    if (!db) return;
-    
-    const memberNames: {[key: string]: string} = {};
-    
-    for (const memberId of memberIds) {
-      try {
-        const userRef = doc(db, 'users', memberId);
-        const userSnap = await getDoc(userRef);
-        if (userSnap.exists()) {
-          memberNames[memberId] = userSnap.data().name || 'Unknown User';
-        } else {
-          memberNames[memberId] = 'Unknown User';
-        }
-      } catch (error) {
-        console.error("Error loading member name:", error);
-        memberNames[memberId] = 'Unknown User';
-      }
-    }
-    
-    setGroupMembers(memberNames);
-    
-    // Update group in state with member names
-    if (selectedGroup) {
-      setSelectedGroup({
-        ...selectedGroup,
-        memberNames: memberNames
-      });
-      
-      // Update groups list
-      setGroups(prevGroups => 
-        prevGroups.map(group => 
-          group.id === selectedGroup.id 
-            ? { ...group, memberNames: memberNames }
-            : group
-        )
-      );
-    }
-  };
 
   const handleCreateGroup = async () => {
     if (!user || !db || !newGroupName.trim()) {
@@ -431,16 +434,9 @@ export default function GroupsPage(): React.JSX.Element {
     });
   };
 
-  // Fungsi untuk menampilkan daftar member
+  // Fungsi untuk menampilkan modal daftar member
   const showMemberList = () => {
-    if (!selectedGroup) return;
-    
-    const memberList = selectedGroup.members.map(memberId => {
-      const memberName = groupMembers[memberId] || selectedGroup.memberNames?.[memberId] || 'Unknown User';
-      return `${memberName}${memberId === selectedGroup.ownerId ? ' (Owner)' : ''}`;
-    }).join('\n');
-    
-    alert(`Anggota Grup "${selectedGroup.name}":\n\n${memberList}`);
+    setShowMemberModal(true);
   };
 
   if (!auth || !db) {
@@ -723,7 +719,7 @@ export default function GroupsPage(): React.JSX.Element {
                       <circle cx="9" cy="7" r="4"/>
                       <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/>
                     </svg>
-                    Anggota
+                    Anggota ({selectedGroup.members?.length || 0})
                   </button>
                 </div>
                 <div style={{
@@ -1170,6 +1166,123 @@ export default function GroupsPage(): React.JSX.Element {
                   </svg>
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Daftar Member */}
+      {showMemberModal && selectedGroup && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0,0,0,0.95)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1001,
+          padding: '30px',
+          fontFamily: 'Helvetica, Arial, sans-serif'
+        }}>
+          <div style={{
+            backgroundColor: 'black',
+            width: '100%',
+            maxWidth: '600px',
+            padding: '50px',
+            fontFamily: 'Helvetica, Arial, sans-serif',
+          }}>
+            <div style={{
+              marginBottom: '40px',
+              fontFamily: 'Helvetica, Arial, sans-serif'
+            }}>
+              <div style={{
+                fontSize: '32px',
+                fontFamily: 'Helvetica, Arial, sans-serif',
+                marginBottom: '20px',
+                color: 'white',
+                fontWeight: 'bold'
+              }}>
+                Anggota Grup: {selectedGroup.name}
+              </div>
+              <div style={{
+                fontSize: '20px',
+                color: '#aaa',
+                marginBottom: '30px'
+              }}>
+                Total: {selectedGroup.members?.length || 0} anggota
+              </div>
+            </div>
+
+            <div style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '15px',
+              maxHeight: '400px',
+              overflowY: 'auto'
+            }}>
+              {selectedGroup.members.map((memberId) => {
+                const memberName = groupMembers[memberId] || selectedGroup.memberNames?.[memberId] || 'Unknown User';
+                const isOwner = memberId === selectedGroup.ownerId;
+                
+                return (
+                  <div
+                    key={memberId}
+                    style={{
+                      padding: '20px',
+                      backgroundColor: '#111',
+                      borderRadius: '8px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between'
+                    }}
+                  >
+                    <div style={{
+                      fontSize: '22px',
+                      color: 'white'
+                    }}>
+                      {memberName}
+                      {isOwner && (
+                        <span style={{
+                          fontSize: '16px',
+                          color: 'gold',
+                          marginLeft: '10px'
+                        }}>
+                          (Owner)
+                        </span>
+                      )}
+                    </div>
+                    <div style={{
+                      fontSize: '16px',
+                      color: '#aaa'
+                    }}>
+                      {memberId === user?.uid ? '(Anda)' : ''}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            <div style={{
+              display: 'flex',
+              justifyContent: 'flex-end',
+              marginTop: '40px'
+            }}>
+              <button
+                onClick={() => setShowMemberModal(false)}
+                style={{
+                  padding: '15px 30px',
+                  backgroundColor: 'transparent',
+                  border: 'none',
+                  color: 'white',
+                  fontSize: '20px',
+                  cursor: 'pointer'
+                }}
+              >
+                Tutup
+              </button>
             </div>
           </div>
         </div>
