@@ -11,6 +11,7 @@ import {
   getFirestore,
   collection,
   addDoc,
+  setDoc,
   query,
   orderBy,
   onSnapshot,
@@ -180,14 +181,22 @@ export default function NotesPage(): React.JSX.Element {
       const userRef = doc(db, 'users', userId);
       const userSnap = await getDoc(userRef);
       
+      const userData = {
+        id: userId,
+        name: name,
+        email: email.toLowerCase(),
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      };
+      
       if (!userSnap.exists()) {
-        await updateDoc(userRef, {
-          id: userId,
-          name: name,
-          email: email.toLowerCase(),
-          createdAt: serverTimestamp(),
-          updatedAt: serverTimestamp()
-        }, { merge: true });
+        // Buat dokumen baru jika belum ada
+        await setDoc(userRef, userData);
+        console.log("User document created in Firestore");
+      } else {
+        // Update dokumen yang sudah ada
+        await updateDoc(userRef, userData);
+        console.log("User document updated in Firestore");
       }
     } catch (error) {
       console.error("Error saving user to Firestore:", error);
@@ -270,32 +279,6 @@ export default function NotesPage(): React.JSX.Element {
         const notificationsData: Notification[] = [];
         for (const docSnap of querySnapshot.docs) {
           const notificationData = docSnap.data() as Notification;
-          
-          // Jika groupName tidak ada, ambil dari grup
-          if (!notificationData.groupName && notificationData.groupId) {
-            try {
-              const groupRef = doc(db, 'groups', notificationData.groupId);
-              const groupSnap = await getDoc(groupRef);
-              if (groupSnap.exists()) {
-                notificationData.groupName = groupSnap.data().name;
-              }
-            } catch (error) {
-              console.error("Error loading group name:", error);
-            }
-          }
-          
-          // Jika senderName tidak ada, ambil dari users
-          if (!notificationData.senderName && notificationData.senderId) {
-            try {
-              const senderRef = doc(db, 'users', notificationData.senderId);
-              const senderSnap = await getDoc(senderRef);
-              if (senderSnap.exists()) {
-                notificationData.senderName = senderSnap.data().name || 'Unknown User';
-              }
-            } catch (error) {
-              console.error("Error loading sender name:", error);
-            }
-          }
           
           notificationsData.push({
             id: docSnap.id,
@@ -380,7 +363,10 @@ export default function NotesPage(): React.JSX.Element {
         updatedAt: serverTimestamp()
       };
 
-      await addDoc(collection(db, 'users'), userData);
+      const userRef = doc(db, 'users', userId);
+      await setDoc(userRef, userData);
+      
+      console.log("Created new user record:", userId);
       return userId;
     } catch (error) {
       console.error("Error creating user record:", error);
@@ -467,22 +453,29 @@ export default function NotesPage(): React.JSX.Element {
           // Tambahkan user ke grup
           const groupRef = doc(db, 'groups', notification.groupId);
           
-          // Ambil data grup terbaru
-          const groupSnap = await getDoc(groupRef);
-          if (groupSnap.exists()) {
-            const groupData = groupSnap.data() as Group;
-            
-            // Update grup dengan member baru
-            await updateDoc(groupRef, {
-              members: arrayUnion(user.uid),
-              [`memberNames.${user.uid}`]: userDisplayName
-            });
-            
-            alert(`Anda telah bergabung dengan grup "${notification.groupName || groupData.name}"`);
-            
-            // Reload groups
-            loadUserGroups(user.uid);
-          }
+          // Tambahkan user ke members array
+          await updateDoc(groupRef, {
+            members: arrayUnion(user.uid),
+            [`memberNames.${user.uid}`]: userDisplayName
+          });
+          
+          alert(`Anda telah bergabung dengan grup "${notification.groupName}"`);
+          
+          // Reload groups
+          loadUserGroups(user.uid);
+          
+          // Tampilkan pesan di chat grup
+          const messageData = {
+            text: `${userDisplayName} telah bergabung ke grup melalui undangan dari ${notification.senderName}`,
+            userId: 'system',
+            userName: 'System',
+            groupId: notification.groupId,
+            type: 'text',
+            createdAt: serverTimestamp()
+          };
+          
+          await addDoc(collection(db, 'groupMessages'), messageData);
+          
         } catch (error) {
           console.error("Error adding user to group:", error);
           alert("Gagal bergabung ke grup. Silakan coba lagi.");
