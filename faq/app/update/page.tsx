@@ -1,100 +1,266 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { getAuth, onAuthStateChanged } from 'firebase/auth';
-import { app } from '@/lib/firebase'; // Pastikan firebase sudah diinisialisasi
+import React, { useState, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
+import { 
+  getAuth, 
+  onAuthStateChanged,
+  signOut
+} from "firebase/auth";
+import { 
+  getFirestore,
+  collection,
+  addDoc,
+  setDoc,
+  query,
+  orderBy,
+  onSnapshot,
+  serverTimestamp,
+  doc,
+  deleteDoc,
+  updateDoc,
+  arrayUnion,
+  arrayRemove,
+  getDocs,
+  where,
+  getDoc
+} from "firebase/firestore";
+import { initializeApp, getApps } from "firebase/app";
+import { motion, AnimatePresence } from "framer-motion";
+
+// Firebase Configuration
+const firebaseConfig = {
+  apiKey: "AIzaSyD_htQZ1TClnXKZGRJ4izbMQ02y6V3aNAQ",
+  authDomain: "wawa44-58d1e.firebaseapp.com",
+  databaseURL: "https://wawa44-58d1e-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "wawa44-58d1e",
+  storageBucket: "wawa44-58d1e.firebasestorage.app",
+  messagingSenderId: "836899520599",
+  appId: "1:836899520599:web:b346e4370ecfa9bb89e312",
+  measurementId: "G-8LMP7F4BE9"
+};
+
+// Initialize Firebase
+let app;
+if (!getApps().length) {
+  app = initializeApp(firebaseConfig);
+} else {
+  app = getApps()[0];
+}
+
+const auth = getAuth(app);
+const db = getFirestore(app);
 
 export default function UpdatePage() {
+  const router = useRouter();
   const [currentUser, setCurrentUser] = useState(null);
-  const auth = getAuth(app);
+  const [updates, setUpdates] = useState([]);
+  const [notifications, setNotifications] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [newUpdate, setNewUpdate] = useState({
+    title: '',
+    description: '',
+    category: 'feature',
+    status: 'pending'
+  });
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
       if (user) {
         setCurrentUser({
+          uid: user.uid,
           displayName: user.displayName || user.email?.split('@')[0] || 'User',
           email: user.email,
           photoURL: user.photoURL
         });
+        
+        // Load updates and notifications
+        loadUpdates();
+        loadNotifications();
       } else {
         setCurrentUser(null);
+        router.push('/login');
       }
+      setLoading(false);
     });
-    
-    return () => unsubscribe();
-  }, [auth]);
 
-  const updates = [
-    {
-      id: 1,
-      date: 'MAR 20',
-      time: '14:30',
-      title: 'Quantum UI System',
-      category: 'Design System',
-      description: 'Implemented atomic design principles with responsive grid system',
-      status: 'Live',
-      statusColor: '#00DC82',
-      progress: 100
-    },
-    {
-      id: 2,
-      date: 'MAR 19',
-      time: '11:15',
-      title: 'Neural Analytics',
-      category: 'AI Features',
-      description: 'Real-time user behavior prediction engine deployed',
-      status: 'Testing',
-      statusColor: '#FFB800',
-      progress: 85
-    },
-    {
-      id: 3,
-      date: 'MAR 18',
-      time: '09:45',
-      title: 'Zero Latency Sync',
-      category: 'Performance',
-      description: 'Reduced API response time to under 50ms globally',
-      status: 'Deployed',
-      statusColor: '#00C2FF',
-      progress: 100
-    },
-    {
-      id: 4,
-      date: 'MAR 17',
-      time: '16:20',
-      title: 'Security Matrix v2',
-      category: 'Security',
-      description: 'Enhanced encryption protocols and biometric verification',
-      status: 'Rolling Out',
-      statusColor: '#FF6B8B',
-      progress: 70
-    },
-    {
-      id: 5,
-      date: 'MAR 16',
-      time: '13:10',
-      title: 'Cloud Infrastructure',
-      category: 'DevOps',
-      description: 'Migrated to edge computing with 99.99% uptime guarantee',
-      status: 'Complete',
-      statusColor: '#00DC82',
-      progress: 100
+    return () => unsubscribeAuth();
+  }, [router]);
+
+  const loadUpdates = () => {
+    const updatesQuery = query(
+      collection(db, "updates"),
+      orderBy("createdAt", "desc")
+    );
+
+    const unsubscribe = onSnapshot(updatesQuery, (snapshot) => {
+      const updatesData = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+        createdAt: doc.data().createdAt?.toDate() || new Date()
+      }));
+      setUpdates(updatesData);
+    });
+
+    return unsubscribe;
+  };
+
+  const loadNotifications = () => {
+    const notificationsQuery = query(
+      collection(db, "notifications"),
+      orderBy("createdAt", "desc"),
+      where("read", "==", false)
+    );
+
+    const unsubscribe = onSnapshot(notificationsQuery, (snapshot) => {
+      const notificationsData = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+        createdAt: doc.data().createdAt?.toDate() || new Date()
+      }));
+      setNotifications(notificationsData);
+    });
+
+    return unsubscribe;
+  };
+
+  const handleCreateUpdate = async (e) => {
+    e.preventDefault();
+    if (!currentUser || !newUpdate.title.trim()) return;
+
+    try {
+      await addDoc(collection(db, "updates"), {
+        title: newUpdate.title,
+        description: newUpdate.description,
+        category: newUpdate.category,
+        status: newUpdate.status,
+        createdBy: currentUser.uid,
+        createdByName: currentUser.displayName,
+        createdAt: serverTimestamp(),
+        progress: newUpdate.status === 'completed' ? 100 : 
+                 newUpdate.status === 'in-progress' ? 50 : 0
+      });
+
+      // Create notification
+      await addDoc(collection(db, "notifications"), {
+        type: 'info',
+        message: `New update created: ${newUpdate.title}`,
+        createdBy: currentUser.uid,
+        createdAt: serverTimestamp(),
+        read: false
+      });
+
+      setNewUpdate({
+        title: '',
+        description: '',
+        category: 'feature',
+        status: 'pending'
+      });
+
+    } catch (error) {
+      console.error("Error creating update:", error);
     }
-  ];
+  };
 
-  const notifications = [
-    { id: 1, type: 'alert', message: 'System maintenance in 2 hours' },
-    { id: 2, type: 'info', message: 'New team member joined' },
-    { id: 3, type: 'success', message: 'Update successfully deployed' }
-  ];
+  const handleDeleteUpdate = async (updateId) => {
+    try {
+      await deleteDoc(doc(db, "updates", updateId));
+    } catch (error) {
+      console.error("Error deleting update:", error);
+    }
+  };
+
+  const handleUpdateStatus = async (updateId, newStatus) => {
+    try {
+      const progressMap = {
+        'pending': 0,
+        'in-progress': 50,
+        'completed': 100
+      };
+
+      await updateDoc(doc(db, "updates", updateId), {
+        status: newStatus,
+        progress: progressMap[newStatus],
+        updatedAt: serverTimestamp()
+      });
+    } catch (error) {
+      console.error("Error updating status:", error);
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      router.push('/login');
+    } catch (error) {
+      console.error("Error signing out:", error);
+    }
+  };
+
+  const handleMarkAsRead = async (notificationId) => {
+    try {
+      await updateDoc(doc(db, "notifications", notificationId), {
+        read: true
+      });
+    } catch (error) {
+      console.error("Error marking notification as read:", error);
+    }
+  };
+
+  const formatDate = (date) => {
+    if (!date) return '';
+    return new Date(date).toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
+  const getStatusColor = (status) => {
+    switch(status) {
+      case 'completed': return '#00DC82';
+      case 'in-progress': return '#00C2FF';
+      case 'pending': return '#FFB800';
+      default: return '#666';
+    }
+  };
+
+  const getCategoryColor = (category) => {
+    switch(category) {
+      case 'feature': return '#8B5CF6';
+      case 'bug': return '#EF4444';
+      case 'improvement': return '#10B981';
+      case 'security': return '#F59E0B';
+      default: return '#6B7280';
+    }
+  };
+
+  if (loading) {
+    return (
+      <div style={{
+        minHeight: '100vh',
+        backgroundColor: '#0A0A0A',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        color: 'white',
+        fontFamily: 'Helvetica, Arial, sans-serif'
+      }}>
+        Loading...
+      </div>
+    );
+  }
+
+  if (!currentUser) {
+    return null;
+  }
 
   return (
     <div style={{
       minHeight: '100vh',
       backgroundColor: '#0A0A0A',
       color: '#FFFFFF',
-      padding: '40px',
       fontFamily: 'Helvetica, Arial, sans-serif',
       position: 'relative',
       overflow: 'hidden'
@@ -114,32 +280,32 @@ export default function UpdatePage() {
         pointerEvents: 'none'
       }} />
 
-      {/* Main Grid */}
+      {/* Main Container */}
       <div style={{
-        display: 'grid',
-        gridTemplateColumns: '280px 1fr 320px',
-        gap: '40px',
         maxWidth: '1600px',
         margin: '0 auto',
+        padding: '40px',
         position: 'relative',
         zIndex: 1
       }}>
-        {/* Left Sidebar */}
-        <div>
-          {/* Logo & Title */}
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            style={{
-              marginBottom: '60px',
-              position: 'relative'
-            }}
-          >
+        {/* Header */}
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: '60px',
+            paddingBottom: '20px',
+            borderBottom: '1px solid rgba(255,255,255,0.05)'
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
             <div style={{
               display: 'flex',
               alignItems: 'center',
-              gap: '12px',
-              marginBottom: '8px'
+              gap: '12px'
             }}>
               <div style={{
                 width: '6px',
@@ -155,259 +321,25 @@ export default function UpdatePage() {
                 Menuru
               </h1>
             </div>
+            
             <div style={{
               fontSize: '13px',
               color: 'rgba(255,255,255,0.4)',
               letterSpacing: '1px',
               textTransform: 'uppercase',
-              paddingLeft: '18px'
+              background: 'rgba(255,255,255,0.05)',
+              padding: '6px 12px',
+              borderRadius: '20px',
+              border: '1px solid rgba(255,255,255,0.1)'
             }}>
               Version 3.1.0
             </div>
-          </motion.div>
+          </div>
 
-          {/* User Profile */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            style={{
-              padding: '24px',
-              background: 'rgba(255,255,255,0.02)',
-              border: '1px solid rgba(255,255,255,0.05)',
-              borderRadius: '20px',
-              marginBottom: '40px'
-            }}
-          >
-            {currentUser ? (
-              <>
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '16px',
-                  marginBottom: '24px'
-                }}>
-                  <div style={{
-                    width: '56px',
-                    height: '56px',
-                    borderRadius: '16px',
-                    background: 'linear-gradient(135deg, #00DC82 0%, #00C2FF 100%)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: '20px',
-                    fontWeight: '600',
-                    color: '#000000'
-                  }}>
-                    {currentUser.displayName?.charAt(0).toUpperCase()}
-                  </div>
-                  <div>
-                    <div style={{
-                      fontSize: '18px',
-                      fontWeight: '600',
-                      marginBottom: '4px'
-                    }}>
-                      {currentUser.displayName}
-                    </div>
-                    <div style={{
-                      fontSize: '13px',
-                      color: 'rgba(255,255,255,0.4)'
-                    }}>
-                      {currentUser.email}
-                    </div>
-                  </div>
-                </div>
-                
-                <div style={{
-                  display: 'flex',
-                  gap: '12px',
-                  marginBottom: '20px'
-                }}>
-                  <div style={{
-                    flex: 1,
-                    padding: '12px',
-                    background: 'rgba(0,220,130,0.05)',
-                    border: '1px solid rgba(0,220,130,0.1)',
-                    borderRadius: '12px',
-                    textAlign: 'center'
-                  }}>
-                    <div style={{
-                      fontSize: '20px',
-                      fontWeight: '600',
-                      color: '#00DC82'
-                    }}>
-                      24
-                    </div>
-                    <div style={{
-                      fontSize: '11px',
-                      color: 'rgba(255,255,255,0.4)',
-                      textTransform: 'uppercase',
-                      letterSpacing: '1px'
-                    }}>
-                      Updates
-                    </div>
-                  </div>
-                  <div style={{
-                    flex: 1,
-                    padding: '12px',
-                    background: 'rgba(0,194,255,0.05)',
-                    border: '1px solid rgba(0,194,255,0.1)',
-                    borderRadius: '12px',
-                    textAlign: 'center'
-                  }}>
-                    <div style={{
-                      fontSize: '20px',
-                      fontWeight: '600',
-                      color: '#00C2FF'
-                    }}>
-                      156
-                    </div>
-                    <div style={{
-                      fontSize: '11px',
-                      color: 'rgba(255,255,255,0.4)',
-                      textTransform: 'uppercase',
-                      letterSpacing: '1px'
-                    }}>
-                      Active
-                    </div>
-                  </div>
-                </div>
-              </>
-            ) : (
-              <div style={{
-                textAlign: 'center',
-                padding: '20px',
-                color: 'rgba(255,255,255,0.4)'
-              }}>
-                Not logged in
-              </div>
-            )}
-          </motion.div>
-
-          {/* Quick Stats */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            style={{
-              padding: '24px',
-              background: 'rgba(255,255,255,0.02)',
-              border: '1px solid rgba(255,255,255,0.05)',
-              borderRadius: '20px'
-            }}
-          >
-            <div style={{
-              fontSize: '13px',
-              color: 'rgba(255,255,255,0.4)',
-              textTransform: 'uppercase',
-              letterSpacing: '1px',
-              marginBottom: '20px'
-            }}>
-              System Status
-            </div>
-            
-            {[
-              { label: 'API Health', value: 99.9, color: '#00DC82' },
-              { label: 'Database', value: 100, color: '#00C2FF' },
-              { label: 'CDN', value: 99.8, color: '#FFB800' },
-              { label: 'Security', value: 100, color: '#00DC82' }
-            ].map((stat, index) => (
-              <div key={index} style={{ marginBottom: '20px' }}>
-                <div style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  marginBottom: '8px'
-                }}>
-                  <span style={{
-                    fontSize: '14px',
-                    color: 'rgba(255,255,255,0.7)'
-                  }}>
-                    {stat.label}
-                  </span>
-                  <span style={{
-                    fontSize: '14px',
-                    fontWeight: '600',
-                    color: stat.color
-                  }}>
-                    {stat.value}%
-                  </span>
-                </div>
-                <div style={{
-                  height: '4px',
-                  background: 'rgba(255,255,255,0.1)',
-                  borderRadius: '2px',
-                  overflow: 'hidden'
-                }}>
-                  <motion.div
-                    initial={{ width: 0 }}
-                    animate={{ width: `${stat.value}%` }}
-                    transition={{ delay: index * 0.1 + 0.3, duration: 1 }}
-                    style={{
-                      height: '100%',
-                      background: stat.color,
-                      borderRadius: '2px'
-                    }}
-                  />
-                </div>
-              </div>
-            ))}
-          </motion.div>
-        </div>
-
-        {/* Main Content - Updates Timeline */}
-        <div>
-          {/* Header */}
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              marginBottom: '40px',
-              paddingBottom: '20px',
-              borderBottom: '1px solid rgba(255,255,255,0.05)'
-            }}
-          >
-            <div>
-              <div style={{
-                fontSize: '13px',
-                color: 'rgba(255,255,255,0.4)',
-                textTransform: 'uppercase',
-                letterSpacing: '1px',
-                marginBottom: '8px'
-              }}>
-                Development Timeline
-              </div>
-              <h2 style={{
-                fontSize: '32px',
-                fontWeight: '700',
-                letterSpacing: '-0.5px',
-                background: 'linear-gradient(90deg, #FFFFFF 0%, rgba(255,255,255,0.7) 100%)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text'
-              }}>
-                System Updates
-              </h2>
-            </div>
-            
-            <div style={{
-              display: 'flex',
-              gap: '12px',
-              alignItems: 'center'
-            }}>
-              <div style={{
-                padding: '8px 16px',
-                background: 'rgba(0,220,130,0.1)',
-                border: '1px solid rgba(0,220,130,0.2)',
-                borderRadius: '12px',
-                fontSize: '13px',
-                color: '#00DC82'
-              }}>
-                {updates.length} Active
-              </div>
+          {/* User Info */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+            {/* Notifications */}
+            <div style={{ position: 'relative' }}>
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
@@ -424,86 +356,289 @@ export default function UpdatePage() {
                 }}
               >
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <line x1="17" y1="7" x2="7" y2="17"></line>
-                  <polyline points="17 17 7 17 7 7"></polyline>
+                  <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                  <path d="M13.73 21a2 2 0 0 1-3.46 0" />
                 </svg>
               </motion.button>
-            </div>
-          </motion.div>
-
-          {/* Timeline */}
-          <div style={{ position: 'relative' }}>
-            {/* Vertical Line */}
-            <div style={{
-              position: 'absolute',
-              left: '30px',
-              top: '0',
-              bottom: '0',
-              width: '2px',
-              background: 'linear-gradient(180deg, rgba(255,255,255,0.1) 0%, transparent 100%)'
-            }} />
-
-            <AnimatePresence>
-              {updates.map((update, index) => (
+              
+              {notifications.length > 0 && (
                 <motion.div
-                  key={update.id}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: 20 }}
-                  transition={{ delay: index * 0.1 }}
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
                   style={{
+                    position: 'absolute',
+                    top: '-5px',
+                    right: '-5px',
+                    background: 'linear-gradient(45deg, #FF6B6B, #EC4899)',
+                    color: 'white',
+                    fontSize: '12px',
+                    fontWeight: 'bold',
+                    width: '20px',
+                    height: '20px',
+                    borderRadius: '50%',
                     display: 'flex',
-                    alignItems: 'flex-start',
-                    marginBottom: '32px',
-                    position: 'relative'
+                    alignItems: 'center',
+                    justifyContent: 'center'
                   }}
                 >
-                  {/* Timeline Dot */}
-                  <div style={{
-                    width: '62px',
-                    flexShrink: 0,
-                    position: 'relative'
-                  }}>
-                    <div style={{
-                      width: '12px',
-                      height: '12px',
-                      borderRadius: '50%',
-                      background: update.statusColor,
-                      position: 'absolute',
-                      left: '24px',
-                      top: '8px',
-                      zIndex: 2
-                    }} />
-                    <div style={{
-                      fontSize: '13px',
-                      color: 'rgba(255,255,255,0.6)',
-                      position: 'absolute',
-                      right: '0',
-                      top: '4px',
-                      textAlign: 'right',
-                      lineHeight: '1.2'
-                    }}>
-                      {update.date}
-                      <div style={{
-                        fontSize: '11px',
-                        color: 'rgba(255,255,255,0.4)'
-                      }}>
-                        {update.time}
-                      </div>
-                    </div>
-                  </div>
+                  {notifications.length}
+                </motion.div>
+              )}
+            </div>
 
-                  {/* Update Card */}
-                  <motion.div
-                    whileHover={{ scale: 1.02 }}
+            {/* User Profile */}
+            <motion.div
+              whileHover={{ scale: 1.02 }}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+                padding: '12px 16px',
+                background: 'rgba(255,255,255,0.05)',
+                border: '1px solid rgba(255,255,255,0.1)',
+                borderRadius: '16px',
+                cursor: 'pointer'
+              }}
+            >
+              <div style={{
+                width: '36px',
+                height: '36px',
+                background: 'linear-gradient(135deg, #00DC82 0%, #00C2FF 100%)',
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '14px',
+                fontWeight: '600',
+                color: '#000000'
+              }}>
+                {currentUser.displayName?.charAt(0).toUpperCase()}
+              </div>
+              <div>
+                <div style={{
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  marginBottom: '2px'
+                }}>
+                  {currentUser.displayName}
+                </div>
+                <div style={{
+                  fontSize: '12px',
+                  color: 'rgba(255,255,255,0.4)'
+                }}>
+                  {currentUser.email}
+                </div>
+              </div>
+              
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                onClick={handleLogout}
+                style={{
+                  marginLeft: '8px',
+                  padding: '6px',
+                  background: 'rgba(255,255,255,0.1)',
+                  border: 'none',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                  <polyline points="16 17 21 12 16 7" />
+                  <line x1="21" y1="12" x2="9" y2="12" />
+                </svg>
+              </motion.button>
+            </motion.div>
+          </div>
+        </motion.div>
+
+        {/* Main Content */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: '1fr 400px',
+          gap: '40px'
+        }}>
+          {/* Left Column - Updates */}
+          <div>
+            {/* Create Update Form */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              style={{
+                padding: '24px',
+                background: 'rgba(255,255,255,0.02)',
+                border: '1px solid rgba(255,255,255,0.05)',
+                borderRadius: '20px',
+                marginBottom: '40px'
+              }}
+            >
+              <h3 style={{
+                fontSize: '18px',
+                fontWeight: '600',
+                marginBottom: '20px',
+                color: '#FFFFFF'
+              }}>
+                Create New Update
+              </h3>
+              
+              <form onSubmit={handleCreateUpdate}>
+                <div style={{ marginBottom: '16px' }}>
+                  <input
+                    type="text"
+                    placeholder="Update title"
+                    value={newUpdate.title}
+                    onChange={(e) => setNewUpdate({...newUpdate, title: e.target.value})}
                     style={{
-                      flex: 1,
+                      width: '100%',
+                      padding: '12px 16px',
+                      background: 'rgba(255,255,255,0.05)',
+                      border: '1px solid rgba(255,255,255,0.1)',
+                      borderRadius: '12px',
+                      color: 'white',
+                      fontSize: '14px',
+                      outline: 'none'
+                    }}
+                    required
+                  />
+                </div>
+                
+                <div style={{ marginBottom: '16px' }}>
+                  <textarea
+                    placeholder="Description"
+                    value={newUpdate.description}
+                    onChange={(e) => setNewUpdate({...newUpdate, description: e.target.value})}
+                    rows="3"
+                    style={{
+                      width: '100%',
+                      padding: '12px 16px',
+                      background: 'rgba(255,255,255,0.05)',
+                      border: '1px solid rgba(255,255,255,0.1)',
+                      borderRadius: '12px',
+                      color: 'white',
+                      fontSize: '14px',
+                      outline: 'none',
+                      resize: 'vertical'
+                    }}
+                  />
+                </div>
+                
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: '1fr 1fr',
+                  gap: '12px',
+                  marginBottom: '20px'
+                }}>
+                  <div>
+                    <label style={{
+                      display: 'block',
+                      fontSize: '12px',
+                      color: 'rgba(255,255,255,0.6)',
+                      marginBottom: '6px'
+                    }}>
+                      Category
+                    </label>
+                    <select
+                      value={newUpdate.category}
+                      onChange={(e) => setNewUpdate({...newUpdate, category: e.target.value})}
+                      style={{
+                        width: '100%',
+                        padding: '10px 12px',
+                        background: 'rgba(255,255,255,0.05)',
+                        border: '1px solid rgba(255,255,255,0.1)',
+                        borderRadius: '8px',
+                        color: 'white',
+                        fontSize: '14px',
+                        outline: 'none'
+                      }}
+                    >
+                      <option value="feature">Feature</option>
+                      <option value="bug">Bug Fix</option>
+                      <option value="improvement">Improvement</option>
+                      <option value="security">Security</option>
+                    </select>
+                  </div>
+                  
+                  <div>
+                    <label style={{
+                      display: 'block',
+                      fontSize: '12px',
+                      color: 'rgba(255,255,255,0.6)',
+                      marginBottom: '6px'
+                    }}>
+                      Status
+                    </label>
+                    <select
+                      value={newUpdate.status}
+                      onChange={(e) => setNewUpdate({...newUpdate, status: e.target.value})}
+                      style={{
+                        width: '100%',
+                        padding: '10px 12px',
+                        background: 'rgba(255,255,255,0.05)',
+                        border: '1px solid rgba(255,255,255,0.1)',
+                        borderRadius: '8px',
+                        color: 'white',
+                        fontSize: '14px',
+                        outline: 'none'
+                      }}
+                    >
+                      <option value="pending">Pending</option>
+                      <option value="in-progress">In Progress</option>
+                      <option value="completed">Completed</option>
+                    </select>
+                  </div>
+                </div>
+                
+                <motion.button
+                  type="submit"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  style={{
+                    width: '100%',
+                    padding: '12px',
+                    background: 'linear-gradient(135deg, #00DC82 0%, #00C2FF 100%)',
+                    border: 'none',
+                    borderRadius: '12px',
+                    color: '#000000',
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    cursor: 'pointer'
+                  }}
+                >
+                  Create Update
+                </motion.button>
+              </form>
+            </motion.div>
+
+            {/* Updates List */}
+            <div>
+              <h2 style={{
+                fontSize: '24px',
+                fontWeight: '700',
+                marginBottom: '20px',
+                color: '#FFFFFF'
+              }}>
+                Recent Updates
+              </h2>
+              
+              <AnimatePresence>
+                {updates.map((update, index) => (
+                  <motion.div
+                    key={update.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    transition={{ delay: index * 0.05 }}
+                    style={{
                       padding: '24px',
                       background: 'rgba(255,255,255,0.02)',
                       border: '1px solid rgba(255,255,255,0.05)',
                       borderRadius: '20px',
-                      position: 'relative',
-                      overflow: 'hidden'
+                      marginBottom: '16px',
+                      position: 'relative'
                     }}
                   >
                     {/* Progress Bar */}
@@ -513,31 +648,30 @@ export default function UpdatePage() {
                       left: 0,
                       right: 0,
                       height: '2px',
-                      background: 'rgba(255,255,255,0.1)'
+                      background: 'rgba(255,255,255,0.1)',
+                      borderRadius: '20px 20px 0 0'
                     }}>
-                      <motion.div
-                        initial={{ width: 0 }}
-                        animate={{ width: `${update.progress}%` }}
-                        transition={{ duration: 1, delay: index * 0.2 }}
-                        style={{
-                          height: '100%',
-                          background: update.statusColor
-                        }}
-                      />
+                      <div style={{
+                        width: `${update.progress || 0}%`,
+                        height: '100%',
+                        background: getStatusColor(update.status),
+                        borderRadius: '20px 20px 0 0',
+                        transition: 'width 0.3s ease'
+                      }} />
                     </div>
 
                     <div style={{
                       display: 'flex',
                       justifyContent: 'space-between',
                       alignItems: 'flex-start',
-                      marginBottom: '16px'
+                      marginBottom: '12px'
                     }}>
                       <div>
                         <div style={{
                           display: 'flex',
                           alignItems: 'center',
                           gap: '12px',
-                          marginBottom: '12px'
+                          marginBottom: '8px'
                         }}>
                           <h3 style={{
                             fontSize: '18px',
@@ -548,262 +682,375 @@ export default function UpdatePage() {
                           </h3>
                           <div style={{
                             padding: '4px 12px',
-                            background: 'rgba(255,255,255,0.05)',
-                            border: '1px solid rgba(255,255,255,0.1)',
+                            background: getCategoryColor(update.category) + '20',
+                            border: `1px solid ${getCategoryColor(update.category)}40`,
                             borderRadius: '20px',
                             fontSize: '12px',
-                            color: 'rgba(255,255,255,0.6)'
+                            color: getCategoryColor(update.category),
+                            textTransform: 'capitalize'
                           }}>
                             {update.category}
                           </div>
                         </div>
+                        
                         <p style={{
                           fontSize: '14px',
                           color: 'rgba(255,255,255,0.6)',
                           lineHeight: '1.6',
-                          marginBottom: '20px'
+                          marginBottom: '16px'
                         }}>
                           {update.description}
                         </p>
                       </div>
-
-                      <motion.div
-                        whileHover={{ rotate: -45 }}
-                        style={{
-                          width: '32px',
-                          height: '32px',
-                          background: 'rgba(255,255,255,0.05)',
-                          border: '1px solid rgba(255,255,255,0.1)',
-                          borderRadius: '10px',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          cursor: 'pointer'
-                        }}
-                      >
-                        <svg 
-                          width="16" 
-                          height="16" 
-                          viewBox="0 0 24 24" 
-                          fill="none" 
-                          stroke={update.statusColor}
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
+                      
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        {/* North West Arrow */}
+                        <motion.div
+                          whileHover={{ rotate: -45 }}
+                          style={{
+                            width: '32px',
+                            height: '32px',
+                            background: 'rgba(255,255,255,0.05)',
+                            border: '1px solid rgba(255,255,255,0.1)',
+                            borderRadius: '8px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            cursor: 'pointer'
+                          }}
                         >
-                          <line x1="17" y1="7" x2="7" y2="17"></line>
-                          <polyline points="17 17 7 17 7 7"></polyline>
-                        </svg>
-                      </motion.div>
+                          <svg 
+                            width="16" 
+                            height="16" 
+                            viewBox="0 0 24 24" 
+                            fill="none" 
+                            stroke={getStatusColor(update.status)}
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
+                            <line x1="17" y1="7" x2="7" y2="17"></line>
+                            <polyline points="17 17 7 17 7 7"></polyline>
+                          </svg>
+                        </motion.div>
+                        
+                        <motion.button
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          onClick={() => handleDeleteUpdate(update.id)}
+                          style={{
+                            width: '32px',
+                            height: '32px',
+                            background: 'rgba(239,68,68,0.1)',
+                            border: '1px solid rgba(239,68,68,0.2)',
+                            borderRadius: '8px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            cursor: 'pointer',
+                            color: '#EF4444'
+                          }}
+                        >
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <polyline points="3 6 5 6 21 6" />
+                            <path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6" />
+                            <path d="M10 11v6" />
+                            <path d="M14 11v6" />
+                          </svg>
+                        </motion.button>
+                      </div>
                     </div>
 
                     <div style={{
                       display: 'flex',
                       justifyContent: 'space-between',
-                      alignItems: 'center'
+                      alignItems: 'center',
+                      fontSize: '13px'
                     }}>
-                      <div style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '16px'
-                      }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                         <div style={{
                           display: 'flex',
                           alignItems: 'center',
-                          gap: '8px'
+                          gap: '6px'
                         }}>
                           <div style={{
                             width: '8px',
                             height: '8px',
                             borderRadius: '50%',
-                            background: update.statusColor
+                            background: getStatusColor(update.status)
                           }} />
                           <span style={{
-                            fontSize: '13px',
+                            color: getStatusColor(update.status),
                             fontWeight: '500',
-                            color: update.statusColor
+                            textTransform: 'capitalize'
                           }}>
                             {update.status}
                           </span>
                         </div>
-                        <div style={{
-                          fontSize: '13px',
-                          color: 'rgba(255,255,255,0.4)'
-                        }}>
-                          {update.progress}% Complete
+                        
+                        <div style={{ color: 'rgba(255,255,255,0.4)' }}>
+                          by {update.createdByName}
+                        </div>
+                        
+                        <div style={{ color: 'rgba(255,255,255,0.4)' }}>
+                          {formatDate(update.createdAt)}
                         </div>
                       </div>
                       
                       <div style={{
-                        fontSize: '12px',
-                        color: 'rgba(255,255,255,0.4)',
                         display: 'flex',
-                        alignItems: 'center',
                         gap: '8px'
                       }}>
-                        Source: 
-                        <span style={{
-                          color: '#FFFFFF',
-                          fontWeight: '500'
-                        }}>
-                          {update.category.replace(/\s+/g, '')}
-                        </span>
+                        {['pending', 'in-progress', 'completed'].map((status) => (
+                          <motion.button
+                            key={status}
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            onClick={() => handleUpdateStatus(update.id, status)}
+                            style={{
+                              padding: '4px 12px',
+                              background: update.status === status 
+                                ? getStatusColor(status) 
+                                : 'rgba(255,255,255,0.05)',
+                              border: `1px solid ${getStatusColor(status)}40`,
+                              borderRadius: '12px',
+                              fontSize: '12px',
+                              color: update.status === status ? '#000000' : getStatusColor(status),
+                              cursor: 'pointer',
+                              textTransform: 'capitalize'
+                            }}
+                          >
+                            {status}
+                          </motion.button>
+                        ))}
                       </div>
                     </div>
                   </motion.div>
-                </motion.div>
-              ))}
-            </AnimatePresence>
-          </div>
-        </div>
-
-        {/* Right Sidebar - Notifications */}
-        <div>
-          {/* Notifications Header */}
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            style={{
-              marginBottom: '40px'
-            }}
-          >
-            <div style={{
-              fontSize: '13px',
-              color: 'rgba(255,255,255,0.4)',
-              textTransform: 'uppercase',
-              letterSpacing: '1px',
-              marginBottom: '8px'
-            }}>
-              Real-time Alerts
+                ))}
+              </AnimatePresence>
             </div>
-            <h3 style={{
-              fontSize: '24px',
-              fontWeight: '700',
-              letterSpacing: '-0.5px',
-              color: '#FFFFFF'
-            }}>
-              Notifications
-            </h3>
-          </motion.div>
-
-          {/* Notification List */}
-          <div style={{ marginBottom: '40px' }}>
-            <AnimatePresence>
-              {notifications.map((notification, index) => (
-                <motion.div
-                  key={notification.id}
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -20 }}
-                  transition={{ delay: index * 0.1 }}
-                  style={{
-                    padding: '20px',
-                    background: 'rgba(255,255,255,0.02)',
-                    border: '1px solid rgba(255,255,255,0.05)',
-                    borderRadius: '16px',
-                    marginBottom: '12px',
-                    position: 'relative',
-                    overflow: 'hidden'
-                  }}
-                >
-                  <div style={{
-                    position: 'absolute',
-                    left: 0,
-                    top: 0,
-                    bottom: 0,
-                    width: '4px',
-                    background: notification.type === 'alert' ? '#FFB800' : 
-                               notification.type === 'success' ? '#00DC82' : '#00C2FF'
-                  }} />
-                  
-                  <div style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'flex-start',
-                    marginLeft: '12px'
-                  }}>
-                    <div style={{
-                      fontSize: '14px',
-                      color: 'rgba(255,255,255,0.8)'
-                    }}>
-                      {notification.message}
-                    </div>
-                    <div style={{
-                      fontSize: '11px',
-                      color: 'rgba(255,255,255,0.4)',
-                      whiteSpace: 'nowrap',
-                      marginLeft: '12px'
-                    }}>
-                      5min
-                    </div>
-                  </div>
-                </motion.div>
-              ))}
-            </AnimatePresence>
           </div>
 
-          {/* Recent Activity */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-          >
-            <div style={{
-              fontSize: '13px',
-              color: 'rgba(255,255,255,0.4)',
-              textTransform: 'uppercase',
-              letterSpacing: '1px',
-              marginBottom: '20px'
-            }}>
-              Recent Activity
-            </div>
-            
-            {[
-              { user: 'Alex Chen', action: 'deployed update', time: '2 min ago' },
-              { user: 'Maria Garcia', action: 'reviewed code', time: '15 min ago' },
-              { user: 'David Kim', action: 'created feature', time: '1 hour ago' }
-            ].map((activity, index) => (
-              <div key={index} style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '12px',
-                padding: '16px',
+          {/* Right Column - Notifications & Stats */}
+          <div>
+            {/* Notifications */}
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              style={{
+                padding: '24px',
                 background: 'rgba(255,255,255,0.02)',
                 border: '1px solid rgba(255,255,255,0.05)',
-                borderRadius: '16px',
-                marginBottom: '8px'
+                borderRadius: '20px',
+                marginBottom: '40px'
+              }}
+            >
+              <div style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                marginBottom: '20px'
+              }}>
+                <h3 style={{
+                  fontSize: '18px',
+                  fontWeight: '600',
+                  color: '#FFFFFF'
+                }}>
+                  Notifications
+                </h3>
+                
+                {notifications.length > 0 && (
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => {
+                      notifications.forEach(notif => handleMarkAsRead(notif.id));
+                    }}
+                    style={{
+                      padding: '6px 12px',
+                      background: 'rgba(255,255,255,0.05)',
+                      border: '1px solid rgba(255,255,255,0.1)',
+                      borderRadius: '12px',
+                      fontSize: '12px',
+                      color: 'rgba(255,255,255,0.6)',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    Mark all as read
+                  </motion.button>
+                )}
+              </div>
+              
+              <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
+                <AnimatePresence>
+                  {notifications.length === 0 ? (
+                    <div style={{
+                      textAlign: 'center',
+                      padding: '40px 0',
+                      color: 'rgba(255,255,255,0.4)'
+                    }}>
+                      No notifications
+                    </div>
+                  ) : (
+                    notifications.map((notification, index) => (
+                      <motion.div
+                        key={notification.id}
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: -20 }}
+                        transition={{ delay: index * 0.05 }}
+                        style={{
+                          padding: '16px',
+                          background: 'rgba(255,255,255,0.05)',
+                          border: '1px solid rgba(255,255,255,0.1)',
+                          borderRadius: '12px',
+                          marginBottom: '8px',
+                          position: 'relative',
+                          cursor: 'pointer'
+                        }}
+                        onClick={() => handleMarkAsRead(notification.id)}
+                      >
+                        <div style={{
+                          position: 'absolute',
+                          left: 0,
+                          top: 0,
+                          bottom: 0,
+                          width: '3px',
+                          background: notification.type === 'alert' ? '#FFB800' : 
+                                   notification.type === 'success' ? '#00DC82' : '#00C2FF',
+                          borderRadius: '12px 0 0 12px'
+                        }} />
+                        
+                        <div style={{
+                          marginLeft: '12px',
+                          fontSize: '14px',
+                          color: 'rgba(255,255,255,0.8)'
+                        }}>
+                          {notification.message}
+                        </div>
+                        
+                        <div style={{
+                          marginLeft: '12px',
+                          marginTop: '4px',
+                          fontSize: '12px',
+                          color: 'rgba(255,255,255,0.4)'
+                        }}>
+                          {formatDate(notification.createdAt)}
+                        </div>
+                      </motion.div>
+                    ))
+                  )}
+                </AnimatePresence>
+              </div>
+            </motion.div>
+
+            {/* Stats */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              style={{
+                padding: '24px',
+                background: 'rgba(255,255,255,0.02)',
+                border: '1px solid rgba(255,255,255,0.05)',
+                borderRadius: '20px'
+              }}
+            >
+              <h3 style={{
+                fontSize: '18px',
+                fontWeight: '600',
+                marginBottom: '20px',
+                color: '#FFFFFF'
+              }}>
+                Statistics
+              </h3>
+              
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(2, 1fr)',
+                gap: '16px'
+              }}>
+                {[
+                  { label: 'Total Updates', value: updates.length, color: '#00DC82' },
+                  { label: 'Pending', value: updates.filter(u => u.status === 'pending').length, color: '#FFB800' },
+                  { label: 'In Progress', value: updates.filter(u => u.status === 'in-progress').length, color: '#00C2FF' },
+                  { label: 'Completed', value: updates.filter(u => u.status === 'completed').length, color: '#8B5CF6' }
+                ].map((stat, index) => (
+                  <div key={index} style={{
+                    padding: '16px',
+                    background: 'rgba(255,255,255,0.05)',
+                    border: `1px solid ${stat.color}20`,
+                    borderRadius: '12px',
+                    textAlign: 'center'
+                  }}>
+                    <div style={{
+                      fontSize: '24px',
+                      fontWeight: '700',
+                      color: stat.color,
+                      marginBottom: '4px'
+                    }}>
+                      {stat.value}
+                    </div>
+                    <div style={{
+                      fontSize: '12px',
+                      color: 'rgba(255,255,255,0.6)'
+                    }}>
+                      {stat.label}
+                    </div>
+                  </div>
+                ))}
+              </div>
+              
+              {/* User Info */}
+              <div style={{
+                marginTop: '24px',
+                padding: '16px',
+                background: 'rgba(255,255,255,0.05)',
+                border: '1px solid rgba(255,255,255,0.1)',
+                borderRadius: '12px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px'
               }}>
                 <div style={{
-                  width: '36px',
-                  height: '36px',
+                  width: '40px',
+                  height: '40px',
                   background: 'linear-gradient(135deg, #00DC82 0%, #00C2FF 100%)',
-                  borderRadius: '12px',
+                  borderRadius: '50%',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  fontSize: '14px',
+                  fontSize: '16px',
                   fontWeight: '600',
                   color: '#000000'
                 }}>
-                  {activity.user.charAt(0)}
+                  {currentUser.displayName?.charAt(0).toUpperCase()}
                 </div>
-                <div style={{ flex: 1 }}>
+                <div>
                   <div style={{
                     fontSize: '14px',
-                    color: 'rgba(255,255,255,0.8)'
+                    fontWeight: '600',
+                    color: '#FFFFFF'
                   }}>
-                    <span style={{ fontWeight: '500', color: '#FFFFFF' }}>{activity.user}</span> {activity.action}
+                    {currentUser.displayName}
                   </div>
                   <div style={{
                     fontSize: '12px',
                     color: 'rgba(255,255,255,0.4)'
                   }}>
-                    {activity.time}
+                    {currentUser.email}
+                  </div>
+                  <div style={{
+                    fontSize: '12px',
+                    color: 'rgba(255,255,255,0.6)',
+                    marginTop: '2px'
+                  }}>
+                    Last login: Today
                   </div>
                 </div>
               </div>
-            ))}
-          </motion.div>
+            </motion.div>
+          </div>
         </div>
       </div>
     </div>
