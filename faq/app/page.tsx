@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect, useRef } from "react";
@@ -204,16 +205,6 @@ export default function HomePage(): React.JSX.Element {
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [showSearchResults, setShowSearchResults] = useState(false);
 
-  // Refs untuk animasi loading
-  const loadingContainerRef = useRef<HTMLDivElement>(null);
-  const loadingPhotoRef = useRef<HTMLDivElement>(null);
-  const loadingTextRef1 = useRef<HTMLDivElement>(null);
-  const loadingTextRef2 = useRef<HTMLDivElement>(null);
-  const loadingTextRef3 = useRef<HTMLDivElement>(null);
-  const loadingLineRef = useRef<HTMLDivElement>(null);
-  const loadingButtonRef = useRef<HTMLDivElement>(null);
-  const loadingCounterRef = useRef<HTMLDivElement>(null);
-
   const headerRef = useRef<HTMLDivElement>(null);
   const topNavRef = useRef<HTMLDivElement>(null);
   const topicContainerRef = useRef<HTMLDivElement>(null);
@@ -339,247 +330,6 @@ export default function HomePage(): React.JSX.Element {
     { title: "Development", description: "Frontend & Backend" },
     { title: "Features", description: "Functionality & Integration" }
   ];
-
-  // ANIMASI LOADING GSAP - FUNGSI UTAMA
-  const runLoadingAnimation = () => {
-    if (!loadingContainerRef.current) return;
-
-    // Reset semua elemen loading
-    gsap.set([
-      loadingPhotoRef.current, 
-      loadingTextRef1.current, 
-      loadingTextRef2.current, 
-      loadingTextRef3.current,
-      loadingLineRef.current,
-      loadingButtonRef.current,
-      loadingCounterRef.current
-    ], { 
-      opacity: 0, 
-      y: 50 
-    });
-
-    // Timeline utama
-    const tl = gsap.timeline({
-      onComplete: () => {
-        // Selesaikan loading setelah animasi selesai
-        setTimeout(() => {
-          setIsLoading(false);
-          // Animasikan keluar loading screen
-          gsap.to(loadingContainerRef.current, {
-            opacity: 0,
-            duration: 1,
-            ease: "power2.inOut",
-            onComplete: () => {
-              if (loadingContainerRef.current) {
-                loadingContainerRef.current.style.display = 'none';
-              }
-            }
-          });
-        }, 500);
-      }
-    });
-
-    // 1. Foto masuk dari kiri dengan scale dan rotation
-    tl.fromTo(loadingPhotoRef.current, 
-      {
-        x: -200,
-        y: -100,
-        rotation: -15,
-        scale: 0.8,
-        opacity: 0
-      },
-      {
-        x: 0,
-        y: 0,
-        rotation: 0,
-        scale: 1,
-        opacity: 1,
-        duration: 1.5,
-        ease: "back.out(1.7)"
-      },
-      0
-    );
-
-    // 2. Animasi glow dan pulsasi pada foto
-    tl.to(loadingPhotoRef.current, {
-      boxShadow: "0 0 40px rgba(59, 130, 246, 0.8), 0 0 80px rgba(147, 51, 234, 0.6)",
-      duration: 1.5,
-      repeat: 3,
-      yoyo: true,
-      ease: "power1.inOut"
-    }, 0.5);
-
-    // 3. Teks pertama muncul (warna gradient)
-    tl.fromTo(loadingTextRef1.current,
-      {
-        y: 100,
-        opacity: 0,
-        scale: 0.5
-      },
-      {
-        y: 0,
-        opacity: 1,
-        scale: 1,
-        duration: 1,
-        ease: "elastic.out(1, 0.5)"
-      },
-      0.8
-    );
-
-    // 4. Animasi warna teks pertama (gradient berjalan)
-    tl.to(loadingTextRef1.current, {
-      backgroundPosition: "200% center",
-      duration: 3,
-      ease: "linear",
-      repeat: -1
-    }, 1);
-
-    // 5. Teks kedua muncul dengan delay
-    tl.fromTo(loadingTextRef2.current,
-      {
-        y: 80,
-        opacity: 0,
-        rotationX: 90
-      },
-      {
-        y: 0,
-        opacity: 1,
-        rotationX: 0,
-        duration: 1.2,
-        ease: "back.out(1.5)"
-      },
-      1.2
-    );
-
-    // 6. Animasi warna teks kedua (rainbow)
-    const colors = ["#FF6B6B", "#4ECDC4", "#45B7D1", "#96CEB4", "#FFEAA7", "#DDA0DD"];
-    tl.to(loadingTextRef2.current, {
-      color: colors,
-      duration: 4,
-      repeat: -1,
-      ease: "none",
-      stagger: {
-        each: 0.5,
-        repeat: -1,
-        yoyo: true
-      }
-    }, 1.5);
-
-    // 7. Teks ketiga muncul dengan efek typewriter
-    tl.fromTo(loadingTextRef3.current,
-      {
-        width: 0,
-        opacity: 0
-      },
-      {
-        width: "100%",
-        opacity: 1,
-        duration: 2,
-        ease: "power2.inOut"
-      },
-      1.8
-    );
-
-    // 8. Garis horizontal berkembang
-    tl.fromTo(loadingLineRef.current,
-      {
-        scaleX: 0,
-        opacity: 0
-      },
-      {
-        scaleX: 1,
-        opacity: 1,
-        duration: 1.5,
-        ease: "power3.out"
-      },
-      2
-    );
-
-    // 9. Counter muncul dengan animasi angka
-    tl.fromTo(loadingCounterRef.current,
-      {
-        y: 50,
-        opacity: 0,
-        scale: 0
-      },
-      {
-        y: 0,
-        opacity: 1,
-        scale: 1,
-        duration: 1,
-        ease: "back.out(1.7)"
-      },
-      2.5
-    );
-
-    // 10. Animasi angka counter
-    tl.to(loadingCounterRef.current, {
-      innerHTML: "01",
-      duration: 1,
-      snap: { innerHTML: 1 },
-      ease: "power2.inOut",
-      onUpdate: function() {
-        if (loadingCounterRef.current) {
-          const value = Math.floor(this.progress() * 100);
-          loadingCounterRef.current.innerHTML = value.toString().padStart(2, '0');
-        }
-      }
-    }, 2.5);
-
-    // 11. Tombol muncul dengan efek morphing
-    tl.fromTo(loadingButtonRef.current,
-      {
-        y: 60,
-        opacity: 0,
-        borderRadius: "100%",
-        scale: 0
-      },
-      {
-        y: 0,
-        opacity: 1,
-        borderRadius: "50px",
-        scale: 1,
-        duration: 1.2,
-        ease: "elastic.out(1, 0.5)"
-      },
-      3
-    );
-
-    // 12. Animasi hover pada tombol
-    tl.to(loadingButtonRef.current, {
-      boxShadow: "0 0 30px rgba(59, 130, 246, 0.7), 0 0 60px rgba(147, 51, 234, 0.5)",
-      duration: 2,
-      repeat: -1,
-      yoyo: true,
-      ease: "sine.inOut"
-    }, 3.5);
-
-    // 13. Animasi arrow dalam tombol
-    tl.to(".loading-arrow", {
-      x: 10,
-      duration: 1,
-      repeat: -1,
-      yoyo: true,
-      ease: "power1.inOut"
-    }, 3.7);
-
-    // 14. Final zoom in ke foto 01
-    tl.to(loadingPhotoRef.current, {
-      scale: 1.5,
-      x: 0,
-      y: 0,
-      duration: 2,
-      ease: "power2.inOut"
-    }, 4);
-
-    tl.to(loadingContainerRef.current, {
-      backgroundColor: "rgba(0, 0, 0, 0.95)",
-      duration: 1,
-      ease: "power2.inOut"
-    }, 4);
-
-    return tl;
-  };
 
   // Helper functions
   const getIconByType = (type: string): string => {
@@ -1036,6 +786,7 @@ export default function HomePage(): React.JSX.Element {
     loadTotalLoggedInUsers();
   }, []);
 
+
 // Fungsi untuk load user notes dari Firebase - DIPERBAIKI
 const loadUserNotes = async (userId: string) => {
   if (!db || !userId) return;
@@ -1158,6 +909,14 @@ const loadUserNotesRealtime = (userId: string) => {
     return () => {};
   }
 };
+
+
+
+
+
+
+
+  
 
   // Fungsi untuk detect provider
   const detectProvider = (user: any) => {
@@ -1625,17 +1384,16 @@ const loadUserNotesRealtime = (userId: string) => {
     checkMobile();
     window.addEventListener('resize', checkMobile);
 
-    // Jalankan animasi loading saat komponen mount
-    if (isLoading && loadingContainerRef.current) {
-      // Mulai animasi loading GSAP
-      setTimeout(() => {
-        runLoadingAnimation();
-      }, 300);
-    }
+    let currentIndex = 0;
+    const textInterval = setInterval(() => {
+      currentIndex = (currentIndex + 1) % loadingTexts.length;
+      setLoadingText(loadingTexts[currentIndex]);
+    }, 500);
 
     const loadingTimeout = setTimeout(() => {
       setIsLoading(false);
-    }, 6000); // Total durasi animasi + buffer
+      clearInterval(textInterval);
+    }, 3000);
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (showPhotoFullPage) {
@@ -1681,6 +1439,7 @@ const loadUserNotesRealtime = (userId: string) => {
 
     return () => {
       window.removeEventListener('resize', checkMobile);
+      clearInterval(textInterval);
       clearTimeout(loadingTimeout);
       document.removeEventListener('keydown', handleKeyDown);
       if (progressAnimationRef.current) {
@@ -2110,267 +1869,6 @@ const loadUserNotesRealtime = (userId: string) => {
       MozOsxFontSmoothing: 'grayscale'
     }}>
 
-      {/* Loading Screen dengan GSAP Animation */}
-      <div
-        ref={loadingContainerRef}
-        style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          width: '100%',
-          height: '100%',
-          backgroundColor: '#000',
-          zIndex: 9999,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          overflow: 'hidden'
-        }}
-      >
-        {/* Background gradient */}
-        <div style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          width: '100%',
-          height: '100%',
-          background: 'radial-gradient(circle at 30% 30%, #1e3a8a 0%, #000 70%)',
-          opacity: 0.7
-        }} />
-
-        {/* Animated Photo */}
-        <div
-          ref={loadingPhotoRef}
-          style={{
-            position: 'relative',
-            width: isMobile ? '200px' : '300px',
-            height: isMobile ? '200px' : '300px',
-            borderRadius: '20px',
-            overflow: 'hidden',
-            border: '3px solid rgba(255, 255, 255, 0.2)',
-            boxShadow: '0 0 50px rgba(59, 130, 246, 0.5)',
-            zIndex: 2,
-            transform: 'translateY(-50px)'
-          }}
-        >
-          <img 
-            src="images/5.jpg" 
-            alt="Loading Photo"
-            style={{
-              width: '100%',
-              height: '100%',
-              objectFit: 'cover'
-            }}
-          />
-          <div style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            width: '100%',
-            height: '100%',
-            background: 'linear-gradient(45deg, rgba(59, 130, 246, 0.3), rgba(147, 51, 234, 0.3))',
-            mixBlendMode: 'overlay'
-          }} />
-        </div>
-
-        {/* Animated Text 1 - Gradient */}
-        <div
-          ref={loadingTextRef1}
-          style={{
-            fontSize: isMobile ? '3rem' : '5rem',
-            fontWeight: '900',
-            fontFamily: 'Helvetica, Arial, sans-serif',
-            background: 'linear-gradient(90deg, #FF6B6B, #4ECDC4, #45B7D1, #96CEB4, #FFEAA7)',
-            backgroundSize: '200% auto',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            backgroundClip: 'text',
-            textFillColor: 'transparent',
-            marginTop: isMobile ? '2rem' : '3rem',
-            textTransform: 'uppercase',
-            letterSpacing: '5px',
-            zIndex: 2
-          }}
-        >
-          MENURU
-        </div>
-
-        {/* Animated Text 2 - Colorful */}
-        <div
-          ref={loadingTextRef2}
-          style={{
-            fontSize: isMobile ? '1.2rem' : '1.8rem',
-            fontWeight: '400',
-            fontFamily: 'Helvetica, Arial, sans-serif',
-            color: '#FF6B6B',
-            marginTop: '1rem',
-            textTransform: 'uppercase',
-            letterSpacing: '3px',
-            zIndex: 2
-          }}
-        >
-          Visual Journey 2024
-        </div>
-
-        {/* Animated Text 3 - Typewriter Effect */}
-        <div
-          ref={loadingTextRef3}
-          style={{
-            fontSize: isMobile ? '0.9rem' : '1.2rem',
-            fontWeight: '300',
-            fontFamily: 'Helvetica, Arial, sans-serif',
-            color: 'rgba(255, 255, 255, 0.8)',
-            marginTop: '2rem',
-            textAlign: 'center',
-            maxWidth: isMobile ? '80%' : '50%',
-            lineHeight: 1.5,
-            overflow: 'hidden',
-            whiteSpace: 'nowrap',
-            borderRight: '2px solid rgba(255, 255, 255, 0.8)',
-            paddingRight: '5px',
-            zIndex: 2
-          }}
-        >
-          Loading creative experience • Photo collection 01 • Visual storytelling
-        </div>
-
-        {/* Animated Line */}
-        <div
-          ref={loadingLineRef}
-          style={{
-            width: isMobile ? '200px' : '400px',
-            height: '2px',
-            background: 'linear-gradient(90deg, transparent, #3B82F6, #8B5CF6, #3B82F6, transparent)',
-            marginTop: isMobile ? '2rem' : '3rem',
-            transformOrigin: 'center',
-            zIndex: 2
-          }}
-        />
-
-        {/* Animated Counter */}
-        <div
-          ref={loadingCounterRef}
-          style={{
-            fontSize: isMobile ? '4rem' : '6rem',
-            fontWeight: '700',
-            fontFamily: 'Helvetica, Arial, sans-serif',
-            color: 'white',
-            marginTop: isMobile ? '1.5rem' : '2rem',
-            textShadow: '0 0 20px rgba(59, 130, 246, 0.8)',
-            zIndex: 2
-          }}
-        >
-          00
-        </div>
-
-        {/* Animated Button */}
-        <div
-          ref={loadingButtonRef}
-          style={{
-            padding: isMobile ? '1rem 2rem' : '1.5rem 3rem',
-            background: 'linear-gradient(45deg, #3B82F6, #8B5CF6)',
-            border: 'none',
-            borderRadius: '50px',
-            color: 'white',
-            fontSize: isMobile ? '1rem' : '1.2rem',
-            fontWeight: '600',
-            fontFamily: 'Helvetica, Arial, sans-serif',
-            cursor: 'pointer',
-            marginTop: isMobile ? '2rem' : '3rem',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '1rem',
-            boxShadow: '0 0 30px rgba(59, 130, 246, 0.5)',
-            zIndex: 2,
-            textTransform: 'uppercase',
-            letterSpacing: '2px'
-          }}
-        >
-          <span>Enter Photo 01</span>
-          <svg 
-            className="loading-arrow"
-            width="20" 
-            height="20" 
-            viewBox="0 0 24 24" 
-            fill="none" 
-            stroke="white" 
-            strokeWidth="2"
-          >
-            <path d="M5 12h14"/>
-            <path d="M12 5l7 7-7 7"/>
-          </svg>
-        </div>
-
-        {/* Floating Particles */}
-        <div style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          width: '100%',
-          height: '100%',
-          zIndex: 1,
-          pointerEvents: 'none'
-        }}>
-          {[...Array(20)].map((_, i) => (
-            <div
-              key={i}
-              className="particle"
-              style={{
-                position: 'absolute',
-                width: Math.random() * 5 + 2 + 'px',
-                height: Math.random() * 5 + 2 + 'px',
-                backgroundColor: ['#3B82F6', '#8B5CF6', '#EC4899', '#10B981'][Math.floor(Math.random() * 4)],
-                borderRadius: '50%',
-                left: Math.random() * 100 + '%',
-                top: Math.random() * 100 + '%',
-                opacity: 0.6
-              }}
-            />
-          ))}
-        </div>
-
-        {/* Audio Visualization Effect */}
-        <div style={{
-          position: 'absolute',
-          bottom: '50px',
-          width: isMobile ? '80%' : '60%',
-          height: '4px',
-          background: 'linear-gradient(90deg, #3B82F6, #8B5CF6, #EC4899)',
-          borderRadius: '2px',
-          zIndex: 2,
-          opacity: 0.7
-        }}>
-          <div className="audio-bar" style={{
-            position: 'absolute',
-            height: '100%',
-            width: '30%',
-            backgroundColor: 'white',
-            borderRadius: '2px',
-            animation: 'pulse 2s infinite'
-          }} />
-        </div>
-
-        {/* Progress Indicator */}
-        <div style={{
-          position: 'absolute',
-          bottom: '30px',
-          width: isMobile ? '80%' : '60%',
-          height: '2px',
-          backgroundColor: 'rgba(255, 255, 255, 0.2)',
-          borderRadius: '1px',
-          zIndex: 2
-        }}>
-          <div className="progress-bar" style={{
-            height: '100%',
-            width: '0%',
-            backgroundColor: '#3B82F6',
-            borderRadius: '1px',
-            transition: 'width 6s linear'
-          }} />
-        </div>
-      </div>
-
       {/* Modal Profil User - DIPERBAIKI */}
       <AnimatePresence>
         {showUserProfileModal && user && (
@@ -2583,6 +2081,8 @@ const loadUserNotesRealtime = (userId: string) => {
                     ×
                   </motion.button>
                 </div>
+ 
+       
 
 {/* Notes Tab */}
 {activeTab === 'notes' && (
@@ -3001,6 +2501,11 @@ const loadUserNotesRealtime = (userId: string) => {
     )}
   </div>
 )}
+
+
+
+                
+                
 
                 {/* Settings Tab */}
                 {activeTab === 'settings' && (
@@ -3640,175 +3145,184 @@ const loadUserNotesRealtime = (userId: string) => {
         )}
       </AnimatePresence>
 
-      {/* Modal Logout Confirmation */}
-      <AnimatePresence>
-        {showLogoutModal && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
+
+{/* Modal Logout Confirmation */}
+<AnimatePresence>
+  {showLogoutModal && (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.3 }}
+      style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100%',
+        backgroundColor: 'rgba(0, 0, 0, 0.98)',
+        zIndex: 10001,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backdropFilter: 'blur(10px)'
+      }}
+      onClick={handleCancelLogout}
+    >
+      <motion.div
+        initial={{ scale: 0.95, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0.95, opacity: 0 }}
+        transition={{ duration: 0.3 }}
+        style={{
+          backgroundColor: 'transparent',
+          borderRadius: '0',
+          padding: isMobile ? '1.5rem' : '2.5rem',
+          width: isMobile ? '90%' : '500px',
+          maxWidth: '600px',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '2rem'
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Header dengan judul dan deskripsi */}
+        <div style={{ 
+          textAlign: 'center',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '1rem'
+        }}>
+          <h3 style={{
+            color: 'white',
+            fontSize: isMobile ? '2rem' : '2.5rem',
+            fontWeight: '400',
+            margin: 0,
+            fontFamily: 'Helvetica, Arial, sans-serif',
+            letterSpacing: '0.5px'
+          }}>
+            Logout
+          </h3>
+          <p style={{
+            color: 'rgba(255, 255, 255, 0.8)',
+            fontSize: '1.1rem',
+            margin: 0,
+            lineHeight: 1.6,
+            fontFamily: 'Helvetica, Arial, sans-serif'
+          }}>
+            Are you sure you want to logout from {userDisplayName}?
+          </p>
+        </div>
+
+        {/* Tombol aksi - tanpa border, clean design */}
+        <div style={{
+          display: 'flex',
+          gap: '1.5rem',
+          justifyContent: 'center',
+          alignItems: 'center',
+          marginTop: '1rem'
+        }}>
+          {/* Tombol No */}
+          <motion.button
+            onClick={handleCancelLogout}
             style={{
-              position: 'fixed',
-              top: 0,
-              left: 0,
-              width: '100%',
-              height: '100%',
-              backgroundColor: 'rgba(0, 0, 0, 0.98)',
-              zIndex: 10001,
+              padding: '1rem 2rem',
+              backgroundColor: 'transparent',
+              border: 'none',
+              color: 'white',
+              fontSize: '1.1rem',
+              fontWeight: '300',
+              cursor: 'pointer',
+              fontFamily: 'Helvetica, Arial, sans-serif',
+              letterSpacing: '0.5px',
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'center',
-              backdropFilter: 'blur(10px)'
+              gap: '0.8rem',
+              opacity: 0.9
             }}
-            onClick={handleCancelLogout}
+            whileHover={{ opacity: 1 }}
           >
-            <motion.div
-              initial={{ scale: 0.95, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.95, opacity: 0 }}
-              transition={{ duration: 0.3 }}
-              style={{
-                backgroundColor: 'transparent',
-                borderRadius: '0',
-                padding: isMobile ? '1.5rem' : '2.5rem',
-                width: isMobile ? '90%' : '500px',
-                maxWidth: '600px',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '2rem'
-              }}
-              onClick={(e) => e.stopPropagation()}
+            <span>No</span>
+            <svg 
+              width="18" 
+              height="18" 
+              viewBox="0 0 24 24" 
+              fill="none" 
+              stroke="currentColor" 
+              strokeWidth="2"
+              style={{ transform: 'rotate(180deg)' }}
             >
-              {/* Header dengan judul dan deskripsi */}
-              <div style={{ 
-                textAlign: 'center',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '1rem'
-              }}>
-                <h3 style={{
-                  color: 'white',
-                  fontSize: isMobile ? '2rem' : '2.5rem',
-                  fontWeight: '400',
-                  margin: 0,
-                  fontFamily: 'Helvetica, Arial, sans-serif',
-                  letterSpacing: '0.5px'
-                }}>
-                  Logout
-                </h3>
-                <p style={{
-                  color: 'rgba(255, 255, 255, 0.8)',
-                  fontSize: '1.1rem',
-                  margin: 0,
-                  lineHeight: 1.6,
-                  fontFamily: 'Helvetica, Arial, sans-serif'
-                }}>
-                  Are you sure you want to logout from {userDisplayName}?
-                </p>
-              </div>
+              <path d="M7 17l9.2-9.2M17 17V7H7"/>
+            </svg>
+          </motion.button>
 
-              {/* Tombol aksi - tanpa border, clean design */}
-              <div style={{
-                display: 'flex',
-                gap: '1.5rem',
-                justifyContent: 'center',
-                alignItems: 'center',
-                marginTop: '1rem'
-              }}>
-                {/* Tombol No */}
-                <motion.button
-                  onClick={handleCancelLogout}
-                  style={{
-                    padding: '1rem 2rem',
-                    backgroundColor: 'transparent',
-                    border: 'none',
-                    color: 'white',
-                    fontSize: '1.1rem',
-                    fontWeight: '300',
-                    cursor: 'pointer',
-                    fontFamily: 'Helvetica, Arial, sans-serif',
-                    letterSpacing: '0.5px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.8rem',
-                    opacity: 0.9
-                  }}
-                  whileHover={{ opacity: 1 }}
-                >
-                  <span>No</span>
-                  <svg 
-                    width="18" 
-                    height="18" 
-                    viewBox="0 0 24 24" 
-                    fill="none" 
-                    stroke="currentColor" 
-                    strokeWidth="2"
-                    style={{ transform: 'rotate(180deg)' }}
-                  >
-                    <path d="M7 17l9.2-9.2M17 17V7H7"/>
-                  </svg>
-                </motion.button>
+          {/* Divider */}
+          <div style={{
+            width: '1px',
+            height: '20px',
+            backgroundColor: 'rgba(255, 255, 255, 0.2)'
+          }} />
 
-                {/* Divider */}
-                <div style={{
-                  width: '1px',
-                  height: '20px',
-                  backgroundColor: 'rgba(255, 255, 255, 0.2)'
-                }} />
+          {/* Tombol Yes */}
+          <motion.button
+            onClick={handleConfirmLogout}
+            style={{
+              padding: '1rem 2rem',
+              backgroundColor: 'transparent',
+              border: 'none',
+              color: 'white',
+              fontSize: '1.1rem',
+              fontWeight: '300',
+              cursor: 'pointer',
+              fontFamily: 'Helvetica, Arial, sans-serif',
+              letterSpacing: '0.5px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.8rem',
+              opacity: 0.9
+            }}
+            whileHover={{ opacity: 1 }}
+          >
+            <span>Yes</span>
+            <svg 
+              width="18" 
+              height="18" 
+              viewBox="0 0 24 24" 
+              fill="none" 
+              stroke="currentColor" 
+              strokeWidth="2"
+            >
+              <path d="M7 17l9.2-9.2M17 17V7H7"/>
+            </svg>
+          </motion.button>
+        </div>
 
-                {/* Tombol Yes */}
-                <motion.button
-                  onClick={handleConfirmLogout}
-                  style={{
-                    padding: '1rem 2rem',
-                    backgroundColor: 'transparent',
-                    border: 'none',
-                    color: 'white',
-                    fontSize: '1.1rem',
-                    fontWeight: '300',
-                    cursor: 'pointer',
-                    fontFamily: 'Helvetica, Arial, sans-serif',
-                    letterSpacing: '0.5px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.8rem',
-                    opacity: 0.9
-                  }}
-                  whileHover={{ opacity: 1 }}
-                >
-                  <span>Yes</span>
-                  <svg 
-                    width="18" 
-                    height="18" 
-                    viewBox="0 0 24 24" 
-                    fill="none" 
-                    stroke="currentColor" 
-                    strokeWidth="2"
-                  >
-                    <path d="M7 17l9.2-9.2M17 17V7H7"/>
-                  </svg>
-                </motion.button>
-              </div>
+        {/* Pesan tambahan */}
+        <div style={{
+          textAlign: 'center',
+          marginTop: '0.5rem'
+        }}>
+          <p style={{
+            color: 'rgba(255, 255, 255, 0.5)',
+            fontSize: '0.9rem',
+            margin: 0,
+            fontFamily: 'Helvetica, Arial, sans-serif'
+          }}>
+            You can sign in again anytime
+          </p>
+        </div>
+      </motion.div>
+    </motion.div>
+  )}
+</AnimatePresence>
 
-              {/* Pesan tambahan */}
-              <div style={{
-                textAlign: 'center',
-                marginTop: '0.5rem'
-              }}>
-                <p style={{
-                  color: 'rgba(255, 255, 255, 0.5)',
-                  fontSize: '0.9rem',
-                  margin: 0,
-                  fontFamily: 'Helvetica, Arial, sans-serif'
-                }}>
-                  You can sign in again anytime
-                </p>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+
+
+
+
+
+
+      
 
       {/* Menu Overlay dengan GSAP Animation */}
       <AnimatePresence>
@@ -6251,3 +5765,10 @@ const loadUserNotesRealtime = (userId: string) => {
     </div>
   );
 }
+
+
+
+
+
+
+
