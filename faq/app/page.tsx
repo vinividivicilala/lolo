@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect, useRef } from "react";
@@ -125,15 +124,15 @@ interface Notification {
 interface Note {
   id: string;
   title: string;
-  content: string;  // Ini akan menampung description dari Firestore
+  content: string;
   userId: string;
   userName: string;
   userEmail: string;
   createdAt: Timestamp | Date;
   updatedAt: Timestamp | Date;
   isPinned: boolean;
-  category?: string;  // Tambahkan ini untuk kategori
-  link?: string;      // Tambahkan ini untuk link video/URL
+  category?: string;
+  link?: string;
   tags?: string[];
   color?: string;
 }
@@ -205,6 +204,9 @@ export default function HomePage(): React.JSX.Element {
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [showSearchResults, setShowSearchResults] = useState(false);
 
+  // State untuk GSAP Loading
+  const [showGsapLoading, setShowGsapLoading] = useState(true);
+
   const headerRef = useRef<HTMLDivElement>(null);
   const topNavRef = useRef<HTMLDivElement>(null);
   const topicContainerRef = useRef<HTMLDivElement>(null);
@@ -225,6 +227,9 @@ export default function HomePage(): React.JSX.Element {
   const searchInputRef = useRef<HTMLInputElement>(null);
   const searchContainerRef = useRef<HTMLDivElement>(null);
   const userProfileModalRef = useRef<HTMLDivElement>(null);
+
+  // Ref untuk GSAP Loading
+  const gsapLoadingRef = useRef<HTMLDivElement>(null);
 
   // Data untuk pencarian
   const searchablePages = [
@@ -786,92 +791,37 @@ export default function HomePage(): React.JSX.Element {
     loadTotalLoggedInUsers();
   }, []);
 
-
-// Fungsi untuk load user notes dari Firebase - DIPERBAIKI
-const loadUserNotes = async (userId: string) => {
-  if (!db || !userId) return;
-  
-  try {
-    setIsLoadingNotes(true);
-    console.log(`📝 Loading notes for user: ${userId} from userNotes collection`);
+  // Fungsi untuk load user notes dari Firebase - DIPERBAIKI
+  const loadUserNotes = async (userId: string) => {
+    if (!db || !userId) return;
     
-    // Gunakan collection 'userNotes' yang sama dengan halaman notes
-    const notesRef = collection(db, 'userNotes');
-    const q = query(
-      notesRef, 
-      where('userId', '==', userId),
-      orderBy('updatedAt', 'desc')
-    );
-    
-    const querySnapshot = await getDocs(q);
-    const notesData: Note[] = [];
-    
-    querySnapshot.forEach((doc) => {
-      const data = doc.data();
+    try {
+      setIsLoadingNotes(true);
+      console.log(`📝 Loading notes for user: ${userId} from userNotes collection`);
       
-      // DEBUG: Tampilkan data yang diterima
-      console.log("Firestore note data:", {
-        id: doc.id,
-        data: data,
-        hasCategory: !!data.category,
-        hasLink: !!data.link,
-        hasDescription: !!data.description,
-        hasContent: !!data.content
-      });
+      // Gunakan collection 'userNotes' yang sama dengan halaman notes
+      const notesRef = collection(db, 'userNotes');
+      const q = query(
+        notesRef, 
+        where('userId', '==', userId),
+        orderBy('updatedAt', 'desc')
+      );
       
-      // Ambil field sesuai dengan struktur di halaman notes
-      const noteTitle = data.title?.trim() || 'Untitled Note';
-      const noteDescription = data.description?.trim() || data.content?.trim() || '';
-      const noteCategory = data.category?.trim() || '';
-      const noteLink = data.link?.trim() || '';
-      
-      notesData.push({
-        id: doc.id,
-        title: noteTitle,
-        content: noteDescription, // Gunakan description sebagai content
-        userId: data.userId || userId,
-        userName: data.userName || userDisplayName || 'User',
-        userEmail: data.userEmail || user?.email || '',
-        createdAt: data.createdAt || new Date(),
-        updatedAt: data.updatedAt || new Date(),
-        isPinned: data.isPinned || false,
-        category: noteCategory, // Tambahkan category
-        link: noteLink, // Tambahkan link
-        color: data.color || '#3B82F6',
-        tags: data.tags || []
-      });
-    });
-    
-    console.log(`✅ Loaded ${notesData.length} notes for user ${userId}`);
-    console.log("Sample note data:", notesData[0]); // Debug: tampilkan contoh data
-    
-    setUserNotes(notesData);
-    setTotalNotesCount(notesData.length);
-    setIsLoadingNotes(false);
-  } catch (error) {
-    console.error("Error loading user notes:", error);
-    setIsLoadingNotes(false);
-  }
-};
-
-// Fungsi untuk load user notes secara real-time - DIPERBAIKI
-const loadUserNotesRealtime = (userId: string) => {
-  if (!db || !userId) return () => {};
-  
-  try {
-    // Gunakan collection 'userNotes' yang sama
-    const notesRef = collection(db, 'userNotes');
-    const q = query(
-      notesRef, 
-      where('userId', '==', userId),
-      orderBy('updatedAt', 'desc')
-    );
-    
-    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      const querySnapshot = await getDocs(q);
       const notesData: Note[] = [];
       
       querySnapshot.forEach((doc) => {
         const data = doc.data();
+        
+        // DEBUG: Tampilkan data yang diterima
+        console.log("Firestore note data:", {
+          id: doc.id,
+          data: data,
+          hasCategory: !!data.category,
+          hasLink: !!data.link,
+          hasDescription: !!data.description,
+          hasContent: !!data.content
+        });
         
         // Ambil field sesuai dengan struktur di halaman notes
         const noteTitle = data.title?.trim() || 'Untitled Note';
@@ -896,27 +846,73 @@ const loadUserNotesRealtime = (userId: string) => {
         });
       });
       
-      console.log(`🔄 Realtime update: ${notesData.length} notes from userNotes`);
+      console.log(`✅ Loaded ${notesData.length} notes for user ${userId}`);
+      console.log("Sample note data:", notesData[0]); // Debug: tampilkan contoh data
+      
       setUserNotes(notesData);
       setTotalNotesCount(notesData.length);
-    }, (error) => {
-      console.error("Error in realtime notes listener:", error);
-    });
+      setIsLoadingNotes(false);
+    } catch (error) {
+      console.error("Error loading user notes:", error);
+      setIsLoadingNotes(false);
+    }
+  };
+
+  // Fungsi untuk load user notes secara real-time - DIPERBAIKI
+  const loadUserNotesRealtime = (userId: string) => {
+    if (!db || !userId) return () => {};
     
-    return unsubscribe;
-  } catch (error) {
-    console.error("Error setting up realtime notes:", error);
-    return () => {};
-  }
-};
-
-
-
-
-
-
-
-  
+    try {
+      // Gunakan collection 'userNotes' yang sama
+      const notesRef = collection(db, 'userNotes');
+      const q = query(
+        notesRef, 
+        where('userId', '==', userId),
+        orderBy('updatedAt', 'desc')
+      );
+      
+      const unsubscribe = onSnapshot(q, (querySnapshot) => {
+        const notesData: Note[] = [];
+        
+        querySnapshot.forEach((doc) => {
+          const data = doc.data();
+          
+          // Ambil field sesuai dengan struktur di halaman notes
+          const noteTitle = data.title?.trim() || 'Untitled Note';
+          const noteDescription = data.description?.trim() || data.content?.trim() || '';
+          const noteCategory = data.category?.trim() || '';
+          const noteLink = data.link?.trim() || '';
+          
+          notesData.push({
+            id: doc.id,
+            title: noteTitle,
+            content: noteDescription, // Gunakan description sebagai content
+            userId: data.userId || userId,
+            userName: data.userName || userDisplayName || 'User',
+            userEmail: data.userEmail || user?.email || '',
+            createdAt: data.createdAt || new Date(),
+            updatedAt: data.updatedAt || new Date(),
+            isPinned: data.isPinned || false,
+            category: noteCategory, // Tambahkan category
+            link: noteLink, // Tambahkan link
+            color: data.color || '#3B82F6',
+            tags: data.tags || []
+          });
+        });
+        
+        console.log(`🔄 Realtime update: ${notesData.length} notes from userNotes`);
+        setUserNotes(notesData);
+        setTotalNotesCount(notesData.length);
+      }, (error) => {
+        console.error("Error in realtime notes listener:", error);
+      });
+      
+      return unsubscribe;
+    } catch (error) {
+      console.error("Error setting up realtime notes:", error);
+      return () => {};
+    }
+  };
 
   // Fungsi untuk detect provider
   const detectProvider = (user: any) => {
@@ -1375,6 +1371,57 @@ const loadUserNotesRealtime = (userId: string) => {
       });
     }
   }, [showMenuOverlay]);
+
+  // Animasi GSAP Loading
+  useEffect(() => {
+    if (!gsapLoadingRef.current) return;
+
+    const loadingTimeline = gsap.timeline({
+      onComplete: () => {
+        setTimeout(() => {
+          gsap.to(gsapLoadingRef.current, {
+            opacity: 0,
+            duration: 0.8,
+            ease: "power2.out",
+            onComplete: () => {
+              setShowGsapLoading(false);
+            }
+          });
+        }, 300);
+      }
+    });
+
+    // Animasi masuk dari bawah
+    loadingTimeline.fromTo(gsapLoadingRef.current,
+      {
+        y: 100,
+        opacity: 0
+      },
+      {
+        y: 0,
+        opacity: 1,
+        duration: 1.5,
+        ease: "power3.out"
+      }
+    );
+
+    // Animasi scale
+    loadingTimeline.to(gsapLoadingRef.current, {
+      scale: 1.1,
+      duration: 0.8,
+      ease: "power2.inOut"
+    }, "-=0.3");
+
+    loadingTimeline.to(gsapLoadingRef.current, {
+      scale: 1,
+      duration: 0.8,
+      ease: "power2.inOut"
+    });
+
+    return () => {
+      loadingTimeline.kill();
+    };
+  }, []);
 
   useEffect(() => {
     const checkMobile = () => {
@@ -1869,6 +1916,51 @@ const loadUserNotesRealtime = (userId: string) => {
       MozOsxFontSmoothing: 'grayscale'
     }}>
 
+      {/* GSAP Modern Loading Animation */}
+      <AnimatePresence>
+        {showGsapLoading && (
+          <motion.div
+            initial={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.5 }}
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              backgroundColor: 'black',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              zIndex: 99999,
+              cursor: 'default'
+            }}
+          >
+            <div
+              ref={gsapLoadingRef}
+              style={{
+                color: 'white',
+                fontSize: isMobile ? '3.5rem' : '5rem',
+                fontWeight: 300,
+                fontFamily: 'Helvetica, Arial, sans-serif',
+                letterSpacing: '6px',
+                textTransform: 'uppercase',
+                opacity: 0,
+                textAlign: 'center',
+                lineHeight: 1,
+                userSelect: 'none',
+                WebkitUserSelect: 'none',
+                MozUserSelect: 'none',
+                msUserSelect: 'none'
+              }}
+            >
+              Menuru
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Modal Profil User - DIPERBAIKI */}
       <AnimatePresence>
         {showUserProfileModal && user && (
@@ -2081,431 +2173,410 @@ const loadUserNotesRealtime = (userId: string) => {
                     ×
                   </motion.button>
                 </div>
- 
-       
 
-{/* Notes Tab */}
-{activeTab === 'notes' && (
-  <div>
-    <div style={{
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      marginBottom: '3rem'
-    }}>
-      <h4 style={{
-        color: 'white',
-        fontSize: '3rem',
-        fontWeight: '300',
-        margin: 0,
-        fontFamily: 'Helvetica, Arial, sans-serif',
-        letterSpacing: '0.5px'
-      }}>
-        Notes
-      </h4>
-      <div style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: '1rem'
-      }}>
-        <motion.button
-          onClick={() => router.push('/notes')}
-          style={{
-            padding: '0.8rem 1.5rem',
-            backgroundColor: 'transparent',
-            border: '1px solid rgba(255, 255, 255, 0.3)',
-            borderRadius: '0',
-            color: 'white',
-            fontSize: '1rem',
-            fontWeight: '300',
-            cursor: 'pointer',
-            fontFamily: 'Helvetica, Arial, sans-serif',
-            letterSpacing: '0.5px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.5rem'
-          }}
-        >
-          Go to Notes
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M7 17l9.2-9.2M17 17V7H7"/>
-          </svg>
-        </motion.button>
-        <div style={{
-          color: 'rgba(255, 255, 255, 0.5)',
-          fontSize: '0.9rem'
-        }}>
-          Total: {totalNotesCount}
-        </div>
-      </div>
-    </div>
-
-    {isLoadingNotes ? (
-      <div style={{
-        padding: '4rem 0',
-        textAlign: 'center',
-        color: 'rgba(255, 255, 255, 0.7)',
-        fontFamily: 'Helvetica, Arial, sans-serif'
-      }}>
-        <motion.div
-          animate={{ rotate: 360 }}
-          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-          style={{ marginBottom: '1rem' }}
-        >
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5">
-            <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
-          </svg>
-        </motion.div>
-        Loading notes...
-      </div>
-    ) : !userNotes || userNotes.length === 0 ? (  // TAMBAH VALIDASI userNotes
-      <div style={{
-        padding: '6rem 0',
-        textAlign: 'center',
-        color: 'rgba(255, 255, 255, 0.7)',
-        fontFamily: 'Helvetica, Arial, sans-serif'
-      }}>
-        <div style={{ fontSize: '3rem', marginBottom: '1.5rem', opacity: 0.5 }}>
-          <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-            <polyline points="14 2 14 8 20 8"/>
-            <line x1="16" y1="13" x2="8" y2="13"/>
-            <line x1="16" y1="17" x2="8" y2="17"/>
-          </svg>
-        </div>
-        <p style={{ margin: '0 0 2rem 0', fontSize: '1.2rem' }}>No notes yet</p>
-        <motion.button
-          onClick={() => router.push('/notes')}
-          style={{
-            backgroundColor: 'transparent',
-            color: 'white',
-            border: '1px solid rgba(255, 255, 255, 0.3)',
-            padding: '1.2rem 2.5rem',
-            borderRadius: '0',
-            cursor: 'pointer',
-            fontSize: '1.1rem',
-            fontWeight: '300',
-            fontFamily: 'Helvetica, Arial, sans-serif',
-            letterSpacing: '0.5px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '1rem',
-            margin: '0 auto'
-          }}
-        >
-          Create first note
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M7 17l9.2-9.2M17 17V7H7"/>
-          </svg>
-        </motion.button>
-      </div>
-    ) : (
-      <div style={{
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '4rem'
-      }}>
-        {/* VALIDASI: Pastikan userNotes adalah array */}
-        {Array.isArray(userNotes) && userNotes.map((note) => {
-          // VALIDASI: Pastikan note tidak null/undefined
-          if (!note || !note.id) return null;
-          
-          // Fungsi untuk mendapatkan embed URL video dengan validasi
-          const getVideoEmbedUrl = (link: string | undefined) => {
-            if (!link || typeof link !== 'string' || link.trim() === '') return null;
-            
-            try {
-              const url = new URL(link);
-              
-              // YouTube
-              if (url.hostname.includes('youtube.com') || url.hostname.includes('youtu.be')) {
-                const videoId = url.searchParams.get('v') || url.pathname.split('/').pop();
-                if (videoId) {
-                  return `https://www.youtube.com/embed/${videoId}?autoplay=0&rel=0&showinfo=0`;
-                }
-              }
-              
-              // Vimeo
-              if (url.hostname.includes('vimeo.com')) {
-                const videoId = url.pathname.split('/').pop();
-                if (videoId) {
-                  return `https://player.vimeo.com/video/${videoId}?autoplay=0&title=0&byline=0&portrait=0`;
-                }
-              }
-              
-              // Video file langsung
-              if (link.match(/\.(mp4|webm|ogg|mov|avi|wmv|flv|mkv)$/i)) {
-                return link;
-              }
-              
-              return null;
-            } catch {
-              return null;
-            }
-          };
-
-          // Fungsi untuk thumbnail YouTube dengan validasi
-          const getVideoThumbnail = (link: string | undefined) => {
-            if (!link || typeof link !== 'string' || link.trim() === '') return null;
-            
-            try {
-              const url = new URL(link);
-              
-              if (url.hostname.includes('youtube.com') || url.hostname.includes('youtu.be')) {
-                const videoId = url.searchParams.get('v') || url.pathname.split('/').pop();
-                if (videoId) {
-                  return `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
-                }
-              }
-              
-              return null;
-            } catch {
-              return null;
-            }
-          };
-
-          const videoEmbedUrl = note.link ? getVideoEmbedUrl(note.link) : null;
-          const videoThumbnail = note.link ? getVideoThumbnail(note.link) : null;
-          const hasValidCategory = note.category && typeof note.category === 'string' && note.category.trim() !== '';
-          const hasValidContent = note.content && typeof note.content === 'string' && note.content.trim() !== '';
-          const hasValidLink = note.link && typeof note.link === 'string' && note.link.trim() !== '';
-
-          return (
-            <motion.div
-              key={note.id}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              style={{
-                cursor: 'pointer',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '1rem'
-              }}
-              onClick={() => router.push('/notes')}
-            >
-              {/* TAMPILKAN KATEGORI JIKA ADA DAN VALID */}
-              {hasValidCategory && (
-                <div style={{
-                  fontSize: '1.2rem',
-                  fontFamily: 'Helvetica, Arial, sans-serif',
-                  color: 'rgba(255, 255, 255, 0.6)',
-                  marginBottom: '0.5rem',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.5px'
-                }}>
-                  {note.category.trim()}
-                </div>
-              )}
-
-              {/* Judul dengan validasi */}
-              <div style={{
-                fontSize: '2.5rem',
-                fontFamily: 'Helvetica, Arial, sans-serif',
-                lineHeight: '1.3',
-                color: 'white',
-                fontWeight: '400'
-              }}>
-                {note.title || 'Untitled Note'}
-              </div>
-
-              {/* Deskripsi hanya jika ada dan valid */}
-              {hasValidContent && (
-                <div style={{
-                  fontSize: '1.3rem',
-                  fontFamily: 'Helvetica, Arial, sans-serif',
-                  lineHeight: '1.6',
-                  color: 'rgba(255, 255, 255, 0.8)',
-                  marginTop: '1rem',
-                  whiteSpace: 'pre-wrap'
-                }}>
-                  {note.content}
-                </div>
-              )}
-
-              {/* TAMPILKAN VIDEO/THUMBNAIL JIKA ADA LINK VALID */}
-              {hasValidLink && videoEmbedUrl && (
-                <div style={{
-                  margin: '1.5rem 0',
-                  position: 'relative'
-                }}>
-                  {videoEmbedUrl.includes('youtube.com/embed') || videoEmbedUrl.includes('vimeo.com') ? (
+                {/* Notes Tab */}
+                {activeTab === 'notes' && (
+                  <div>
                     <div style={{
-                      position: 'relative',
-                      paddingBottom: '56.25%',
-                      height: 0,
-                      overflow: 'hidden',
-                      backgroundColor: '#000',
-                      borderRadius: '4px'
-                    }}>
-                      <iframe
-                        src={videoEmbedUrl}
-                        style={{
-                          position: 'absolute',
-                          top: 0,
-                          left: 0,
-                          width: '100%',
-                          height: '100%',
-                          border: 'none'
-                        }}
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                        allowFullScreen
-                        title="Video embed"
-                      />
-                    </div>
-                  ) : videoEmbedUrl.match(/\.(mp4|webm|ogg|mov|avi|wmv|flv|mkv)$/i) ? (
-                    <div style={{
-                      position: 'relative',
-                      backgroundColor: '#000',
-                      borderRadius: '4px',
-                      overflow: 'hidden',
-                      maxWidth: '560px'
-                    }}>
-                      <video
-                        src={videoEmbedUrl}
-                        style={{
-                          width: '100%',
-                          height: 'auto',
-                          aspectRatio: '16/9',
-                          backgroundColor: '#000'
-                        }}
-                        controls
-                        poster={videoThumbnail || undefined}
-                      />
-                    </div>
-                  ) : (
-                    // Jika bukan video, tampilkan sebagai link biasa
-                    <div style={{
-                      padding: '1rem',
-                      backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                      borderRadius: '4px',
-                      border: '1px solid rgba(255, 255, 255, 0.2)'
-                    }}>
-                      <a
-                        href={note.link}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        onClick={(e) => e.stopPropagation()}
-                        style={{
-                          color: 'white',
-                          textDecoration: 'none',
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '0.5rem',
-                          fontSize: '1rem',
-                          fontFamily: 'Helvetica, Arial, sans-serif',
-                          wordBreak: 'break-all'
-                        }}
-                      >
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2 2V8a2 2 0 0 1 2-2h6"/>
-                          <polyline points="15 3 21 3 21 9"/>
-                          <line x1="10" y1="14" x2="21" y2="3"/>
-                        </svg>
-                        {note.link}
-                      </a>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* Footer dengan validasi tanggal */}
-              <div style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                marginTop: '1.5rem'
-              }}>
-                <span style={{
-                  fontSize: '1rem',
-                  fontFamily: 'Helvetica, Arial, sans-serif',
-                  color: 'rgba(255, 255, 255, 0.5)'
-                }}>
-                  {note.updatedAt ? calculateTimeAgo(note.updatedAt) : 'Recently'}
-                </span>
-                
-                {hasValidLink && (
-                  <a
-                    href={note.link}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onClick={(e) => e.stopPropagation()}
-                    style={{
-                      color: 'white',
-                      textDecoration: 'none',
                       display: 'flex',
+                      justifyContent: 'space-between',
                       alignItems: 'center',
-                      gap: '0.5rem',
-                      fontSize: '1rem',
-                      fontFamily: 'Helvetica, Arial, sans-serif'
-                    }}
-                  >
-                    Buka Link
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M7 17l9.2-9.2M17 17V7H7"/>
-                    </svg>
-                  </a>
+                      marginBottom: '3rem'
+                    }}>
+                      <h4 style={{
+                        color: 'white',
+                        fontSize: '3rem',
+                        fontWeight: '300',
+                        margin: 0,
+                        fontFamily: 'Helvetica, Arial, sans-serif',
+                        letterSpacing: '0.5px'
+                      }}>
+                        Notes
+                      </h4>
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '1rem'
+                      }}>
+                        <motion.button
+                          onClick={() => router.push('/notes')}
+                          style={{
+                            padding: '0.8rem 1.5rem',
+                            backgroundColor: 'transparent',
+                            border: '1px solid rgba(255, 255, 255, 0.3)',
+                            borderRadius: '0',
+                            color: 'white',
+                            fontSize: '1rem',
+                            fontWeight: '300',
+                            cursor: 'pointer',
+                            fontFamily: 'Helvetica, Arial, sans-serif',
+                            letterSpacing: '0.5px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.5rem'
+                          }}
+                        >
+                          Go to Notes
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M7 17l9.2-9.2M17 17V7H7"/>
+                          </svg>
+                        </motion.button>
+                        <div style={{
+                          color: 'rgba(255, 255, 255, 0.5)',
+                          fontSize: '0.9rem'
+                        }}>
+                          Total: {totalNotesCount}
+                        </div>
+                      </div>
+                    </div>
+
+                    {isLoadingNotes ? (
+                      <div style={{
+                        padding: '4rem 0',
+                        textAlign: 'center',
+                        color: 'rgba(255, 255, 255, 0.7)',
+                        fontFamily: 'Helvetica, Arial, sans-serif'
+                      }}>
+                        <motion.div
+                          animate={{ rotate: 360 }}
+                          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                          style={{ marginBottom: '1rem' }}
+                        >
+                          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5">
+                            <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+                          </svg>
+                        </motion.div>
+                        Loading notes...
+                      </div>
+                    ) : !userNotes || userNotes.length === 0 ? (
+                      <div style={{
+                        padding: '6rem 0',
+                        textAlign: 'center',
+                        color: 'rgba(255, 255, 255, 0.7)',
+                        fontFamily: 'Helvetica, Arial, sans-serif'
+                      }}>
+                        <div style={{ fontSize: '3rem', marginBottom: '1.5rem', opacity: 0.5 }}>
+                          <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                            <polyline points="14 2 14 8 20 8"/>
+                            <line x1="16" y1="13" x2="8" y2="13"/>
+                            <line x1="16" y1="17" x2="8" y2="17"/>
+                          </svg>
+                        </div>
+                        <p style={{ margin: '0 0 2rem 0', fontSize: '1.2rem' }}>No notes yet</p>
+                        <motion.button
+                          onClick={() => router.push('/notes')}
+                          style={{
+                            backgroundColor: 'transparent',
+                            color: 'white',
+                            border: '1px solid rgba(255, 255, 255, 0.3)',
+                            padding: '1.2rem 2.5rem',
+                            borderRadius: '0',
+                            cursor: 'pointer',
+                            fontSize: '1.1rem',
+                            fontWeight: '300',
+                            fontFamily: 'Helvetica, Arial, sans-serif',
+                            letterSpacing: '0.5px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '1rem',
+                            margin: '0 auto'
+                          }}
+                        >
+                          Create first note
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M7 17l9.2-9.2M17 17V7H7"/>
+                          </svg>
+                        </motion.button>
+                      </div>
+                    ) : (
+                      <div style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '4rem'
+                      }}>
+                        {Array.isArray(userNotes) && userNotes.map((note) => {
+                          if (!note || !note.id) return null;
+                          
+                          const getVideoEmbedUrl = (link: string | undefined) => {
+                            if (!link || typeof link !== 'string' || link.trim() === '') return null;
+                            
+                            try {
+                              const url = new URL(link);
+                              
+                              if (url.hostname.includes('youtube.com') || url.hostname.includes('youtu.be')) {
+                                const videoId = url.searchParams.get('v') || url.pathname.split('/').pop();
+                                if (videoId) {
+                                  return `https://www.youtube.com/embed/${videoId}?autoplay=0&rel=0&showinfo=0`;
+                                }
+                              }
+                              
+                              if (url.hostname.includes('vimeo.com')) {
+                                const videoId = url.pathname.split('/').pop();
+                                if (videoId) {
+                                  return `https://player.vimeo.com/video/${videoId}?autoplay=0&title=0&byline=0&portrait=0`;
+                                }
+                              }
+                              
+                              if (link.match(/\.(mp4|webm|ogg|mov|avi|wmv|flv|mkv)$/i)) {
+                                return link;
+                              }
+                              
+                              return null;
+                            } catch {
+                              return null;
+                            }
+                          };
+
+                          const getVideoThumbnail = (link: string | undefined) => {
+                            if (!link || typeof link !== 'string' || link.trim() === '') return null;
+                            
+                            try {
+                              const url = new URL(link);
+                              
+                              if (url.hostname.includes('youtube.com') || url.hostname.includes('youtu.be')) {
+                                const videoId = url.searchParams.get('v') || url.pathname.split('/').pop();
+                                if (videoId) {
+                                  return `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
+                                }
+                              }
+                              
+                              return null;
+                            } catch {
+                              return null;
+                            }
+                          };
+
+                          const videoEmbedUrl = note.link ? getVideoEmbedUrl(note.link) : null;
+                          const videoThumbnail = note.link ? getVideoThumbnail(note.link) : null;
+                          const hasValidCategory = note.category && typeof note.category === 'string' && note.category.trim() !== '';
+                          const hasValidContent = note.content && typeof note.content === 'string' && note.content.trim() !== '';
+                          const hasValidLink = note.link && typeof note.link === 'string' && note.link.trim() !== '';
+
+                          return (
+                            <motion.div
+                              key={note.id}
+                              initial={{ opacity: 0, y: 10 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              style={{
+                                cursor: 'pointer',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                gap: '1rem'
+                              }}
+                              onClick={() => router.push('/notes')}
+                            >
+                              {hasValidCategory && (
+                                <div style={{
+                                  fontSize: '1.2rem',
+                                  fontFamily: 'Helvetica, Arial, sans-serif',
+                                  color: 'rgba(255, 255, 255, 0.6)',
+                                  marginBottom: '0.5rem',
+                                  textTransform: 'uppercase',
+                                  letterSpacing: '0.5px'
+                                }}>
+                                  {note.category.trim()}
+                                </div>
+                              )}
+
+                              <div style={{
+                                fontSize: '2.5rem',
+                                fontFamily: 'Helvetica, Arial, sans-serif',
+                                lineHeight: '1.3',
+                                color: 'white',
+                                fontWeight: '400'
+                              }}>
+                                {note.title || 'Untitled Note'}
+                              </div>
+
+                              {hasValidContent && (
+                                <div style={{
+                                  fontSize: '1.3rem',
+                                  fontFamily: 'Helvetica, Arial, sans-serif',
+                                  lineHeight: '1.6',
+                                  color: 'rgba(255, 255, 255, 0.8)',
+                                  marginTop: '1rem',
+                                  whiteSpace: 'pre-wrap'
+                                }}>
+                                  {note.content}
+                                </div>
+                              )}
+
+                              {hasValidLink && videoEmbedUrl && (
+                                <div style={{
+                                  margin: '1.5rem 0',
+                                  position: 'relative'
+                                }}>
+                                  {videoEmbedUrl.includes('youtube.com/embed') || videoEmbedUrl.includes('vimeo.com') ? (
+                                    <div style={{
+                                      position: 'relative',
+                                      paddingBottom: '56.25%',
+                                      height: 0,
+                                      overflow: 'hidden',
+                                      backgroundColor: '#000',
+                                      borderRadius: '4px'
+                                    }}>
+                                      <iframe
+                                        src={videoEmbedUrl}
+                                        style={{
+                                          position: 'absolute',
+                                          top: 0,
+                                          left: 0,
+                                          width: '100%',
+                                          height: '100%',
+                                          border: 'none'
+                                        }}
+                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                        allowFullScreen
+                                        title="Video embed"
+                                      />
+                                    </div>
+                                  ) : videoEmbedUrl.match(/\.(mp4|webm|ogg|mov|avi|wmv|flv|mkv)$/i) ? (
+                                    <div style={{
+                                      position: 'relative',
+                                      backgroundColor: '#000',
+                                      borderRadius: '4px',
+                                      overflow: 'hidden',
+                                      maxWidth: '560px'
+                                    }}>
+                                      <video
+                                        src={videoEmbedUrl}
+                                        style={{
+                                          width: '100%',
+                                          height: 'auto',
+                                          aspectRatio: '16/9',
+                                          backgroundColor: '#000'
+                                        }}
+                                        controls
+                                        poster={videoThumbnail || undefined}
+                                      />
+                                    </div>
+                                  ) : (
+                                    <div style={{
+                                      padding: '1rem',
+                                      backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                                      borderRadius: '4px',
+                                      border: '1px solid rgba(255, 255, 255, 0.2)'
+                                    }}>
+                                      <a
+                                        href={note.link}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        onClick={(e) => e.stopPropagation()}
+                                        style={{
+                                          color: 'white',
+                                          textDecoration: 'none',
+                                          display: 'flex',
+                                          alignItems: 'center',
+                                          gap: '0.5rem',
+                                          fontSize: '1rem',
+                                          fontFamily: 'Helvetica, Arial, sans-serif',
+                                          wordBreak: 'break-all'
+                                        }}
+                                      >
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                          <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2 2V8a2 2 0 0 1 2-2h6"/>
+                                          <polyline points="15 3 21 3 21 9"/>
+                                          <line x1="10" y1="14" x2="21" y2="3"/>
+                                        </svg>
+                                        {note.link}
+                                      </a>
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+
+                              <div style={{
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                alignItems: 'center',
+                                marginTop: '1.5rem'
+                              }}>
+                                <span style={{
+                                  fontSize: '1rem',
+                                  fontFamily: 'Helvetica, Arial, sans-serif',
+                                  color: 'rgba(255, 255, 255, 0.5)'
+                                }}>
+                                  {note.updatedAt ? calculateTimeAgo(note.updatedAt) : 'Recently'}
+                                </span>
+                                
+                                {hasValidLink && (
+                                  <a
+                                    href={note.link}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    onClick={(e) => e.stopPropagation()}
+                                    style={{
+                                      color: 'white',
+                                      textDecoration: 'none',
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      gap: '0.5rem',
+                                      fontSize: '1rem',
+                                      fontFamily: 'Helvetica, Arial, sans-serif'
+                                    }}
+                                  >
+                                    Buka Link
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                      <path d="M7 17l9.2-9.2M17 17V7H7"/>
+                                    </svg>
+                                  </a>
+                                )}
+                              </div>
+                            </motion.div>
+                          );
+                        })}
+                        
+                        {Array.isArray(userNotes) && userNotes.length > 0 && (
+                          <motion.div
+                            onClick={() => router.push('/notes')}
+                            style={{
+                              padding: '1.5rem 0',
+                              textAlign: 'center',
+                              cursor: 'pointer',
+                              display: 'flex',
+                              flexDirection: 'column',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              gap: '0.5rem',
+                              borderTop: '1px solid rgba(255, 255, 255, 0.1)',
+                              marginTop: '1rem'
+                            }}
+                          >
+                            <div style={{
+                              color: 'white',
+                              fontSize: '1.2rem',
+                              fontWeight: '300',
+                              fontFamily: 'Helvetica, Arial, sans-serif'
+                            }}>
+                              View all {userNotes.length} notes in Notes Page
+                            </div>
+                            <div style={{
+                              color: 'rgba(255, 255, 255, 0.5)',
+                              fontSize: '0.9rem',
+                              fontFamily: 'Helvetica, Arial, sans-serif'
+                            }}>
+                              Click to see all your notes with full features
+                            </div>
+                            <motion.svg
+                              width="20"
+                              height="20"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="white"
+                              strokeWidth="2"
+                              animate={{ x: [0, 5, 0] }}
+                              transition={{ repeat: Infinity, duration: 1.5 }}
+                              style={{ marginTop: '0.5rem' }}
+                            >
+                              <path d="M7 17l9.2-9.2M17 17V7H7"/>
+                            </motion.svg>
+                          </motion.div>
+                        )}
+                      </div>
+                    )}
+                  </div>
                 )}
-              </div>
-            </motion.div>
-          );
-        })}
-        
-        {/* Tombol View All dengan validasi userNotes */}
-        {Array.isArray(userNotes) && userNotes.length > 0 && (
-          <motion.div
-            onClick={() => router.push('/notes')}
-            style={{
-              padding: '1.5rem 0',
-              textAlign: 'center',
-              cursor: 'pointer',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '0.5rem',
-              borderTop: '1px solid rgba(255, 255, 255, 0.1)',
-              marginTop: '1rem'
-            }}
-          >
-            <div style={{
-              color: 'white',
-              fontSize: '1.2rem',
-              fontWeight: '300',
-              fontFamily: 'Helvetica, Arial, sans-serif'
-            }}>
-              View all {userNotes.length} notes in Notes Page
-            </div>
-            <div style={{
-              color: 'rgba(255, 255, 255, 0.5)',
-              fontSize: '0.9rem',
-              fontFamily: 'Helvetica, Arial, sans-serif'
-            }}>
-              Click to see all your notes with full features
-            </div>
-            <motion.svg
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="white"
-              strokeWidth="2"
-              animate={{ x: [0, 5, 0] }}
-              transition={{ repeat: Infinity, duration: 1.5 }}
-              style={{ marginTop: '0.5rem' }}
-            >
-              <path d="M7 17l9.2-9.2M17 17V7H7"/>
-            </motion.svg>
-          </motion.div>
-        )}
-      </div>
-    )}
-  </div>
-)}
-
-
-
-                
-                
 
                 {/* Settings Tab */}
                 {activeTab === 'settings' && (
@@ -3145,184 +3216,169 @@ const loadUserNotesRealtime = (userId: string) => {
         )}
       </AnimatePresence>
 
-
-{/* Modal Logout Confirmation */}
-<AnimatePresence>
-  {showLogoutModal && (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.3 }}
-      style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        width: '100%',
-        height: '100%',
-        backgroundColor: 'rgba(0, 0, 0, 0.98)',
-        zIndex: 10001,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        backdropFilter: 'blur(10px)'
-      }}
-      onClick={handleCancelLogout}
-    >
-      <motion.div
-        initial={{ scale: 0.95, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        exit={{ scale: 0.95, opacity: 0 }}
-        transition={{ duration: 0.3 }}
-        style={{
-          backgroundColor: 'transparent',
-          borderRadius: '0',
-          padding: isMobile ? '1.5rem' : '2.5rem',
-          width: isMobile ? '90%' : '500px',
-          maxWidth: '600px',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '2rem'
-        }}
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Header dengan judul dan deskripsi */}
-        <div style={{ 
-          textAlign: 'center',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '1rem'
-        }}>
-          <h3 style={{
-            color: 'white',
-            fontSize: isMobile ? '2rem' : '2.5rem',
-            fontWeight: '400',
-            margin: 0,
-            fontFamily: 'Helvetica, Arial, sans-serif',
-            letterSpacing: '0.5px'
-          }}>
-            Logout
-          </h3>
-          <p style={{
-            color: 'rgba(255, 255, 255, 0.8)',
-            fontSize: '1.1rem',
-            margin: 0,
-            lineHeight: 1.6,
-            fontFamily: 'Helvetica, Arial, sans-serif'
-          }}>
-            Are you sure you want to logout from {userDisplayName}?
-          </p>
-        </div>
-
-        {/* Tombol aksi - tanpa border, clean design */}
-        <div style={{
-          display: 'flex',
-          gap: '1.5rem',
-          justifyContent: 'center',
-          alignItems: 'center',
-          marginTop: '1rem'
-        }}>
-          {/* Tombol No */}
-          <motion.button
+      {/* Modal Logout Confirmation */}
+      <AnimatePresence>
+        {showLogoutModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              backgroundColor: 'rgba(0, 0, 0, 0.98)',
+              zIndex: 10001,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              backdropFilter: 'blur(10px)'
+            }}
             onClick={handleCancelLogout}
-            style={{
-              padding: '1rem 2rem',
-              backgroundColor: 'transparent',
-              border: 'none',
-              color: 'white',
-              fontSize: '1.1rem',
-              fontWeight: '300',
-              cursor: 'pointer',
-              fontFamily: 'Helvetica, Arial, sans-serif',
-              letterSpacing: '0.5px',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.8rem',
-              opacity: 0.9
-            }}
-            whileHover={{ opacity: 1 }}
           >
-            <span>No</span>
-            <svg 
-              width="18" 
-              height="18" 
-              viewBox="0 0 24 24" 
-              fill="none" 
-              stroke="currentColor" 
-              strokeWidth="2"
-              style={{ transform: 'rotate(180deg)' }}
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              style={{
+                backgroundColor: 'transparent',
+                borderRadius: '0',
+                padding: isMobile ? '1.5rem' : '2.5rem',
+                width: isMobile ? '90%' : '500px',
+                maxWidth: '600px',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '2rem'
+              }}
+              onClick={(e) => e.stopPropagation()}
             >
-              <path d="M7 17l9.2-9.2M17 17V7H7"/>
-            </svg>
-          </motion.button>
+              <div style={{ 
+                textAlign: 'center',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '1rem'
+              }}>
+                <h3 style={{
+                  color: 'white',
+                  fontSize: isMobile ? '2rem' : '2.5rem',
+                  fontWeight: '400',
+                  margin: 0,
+                  fontFamily: 'Helvetica, Arial, sans-serif',
+                  letterSpacing: '0.5px'
+                }}>
+                  Logout
+                </h3>
+                <p style={{
+                  color: 'rgba(255, 255, 255, 0.8)',
+                  fontSize: '1.1rem',
+                  margin: 0,
+                  lineHeight: 1.6,
+                  fontFamily: 'Helvetica, Arial, sans-serif'
+                }}>
+                  Are you sure you want to logout from {userDisplayName}?
+                </p>
+              </div>
 
-          {/* Divider */}
-          <div style={{
-            width: '1px',
-            height: '20px',
-            backgroundColor: 'rgba(255, 255, 255, 0.2)'
-          }} />
+              <div style={{
+                display: 'flex',
+                gap: '1.5rem',
+                justifyContent: 'center',
+                alignItems: 'center',
+                marginTop: '1rem'
+              }}>
+                <motion.button
+                  onClick={handleCancelLogout}
+                  style={{
+                    padding: '1rem 2rem',
+                    backgroundColor: 'transparent',
+                    border: 'none',
+                    color: 'white',
+                    fontSize: '1.1rem',
+                    fontWeight: '300',
+                    cursor: 'pointer',
+                    fontFamily: 'Helvetica, Arial, sans-serif',
+                    letterSpacing: '0.5px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.8rem',
+                    opacity: 0.9
+                  }}
+                  whileHover={{ opacity: 1 }}
+                >
+                  <span>No</span>
+                  <svg 
+                    width="18" 
+                    height="18" 
+                    viewBox="0 0 24 24" 
+                    fill="none" 
+                    stroke="currentColor" 
+                    strokeWidth="2"
+                    style={{ transform: 'rotate(180deg)' }}
+                  >
+                    <path d="M7 17l9.2-9.2M17 17V7H7"/>
+                  </svg>
+                </motion.button>
 
-          {/* Tombol Yes */}
-          <motion.button
-            onClick={handleConfirmLogout}
-            style={{
-              padding: '1rem 2rem',
-              backgroundColor: 'transparent',
-              border: 'none',
-              color: 'white',
-              fontSize: '1.1rem',
-              fontWeight: '300',
-              cursor: 'pointer',
-              fontFamily: 'Helvetica, Arial, sans-serif',
-              letterSpacing: '0.5px',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.8rem',
-              opacity: 0.9
-            }}
-            whileHover={{ opacity: 1 }}
-          >
-            <span>Yes</span>
-            <svg 
-              width="18" 
-              height="18" 
-              viewBox="0 0 24 24" 
-              fill="none" 
-              stroke="currentColor" 
-              strokeWidth="2"
-            >
-              <path d="M7 17l9.2-9.2M17 17V7H7"/>
-            </svg>
-          </motion.button>
-        </div>
+                <div style={{
+                  width: '1px',
+                  height: '20px',
+                  backgroundColor: 'rgba(255, 255, 255, 0.2)'
+                }} />
 
-        {/* Pesan tambahan */}
-        <div style={{
-          textAlign: 'center',
-          marginTop: '0.5rem'
-        }}>
-          <p style={{
-            color: 'rgba(255, 255, 255, 0.5)',
-            fontSize: '0.9rem',
-            margin: 0,
-            fontFamily: 'Helvetica, Arial, sans-serif'
-          }}>
-            You can sign in again anytime
-          </p>
-        </div>
-      </motion.div>
-    </motion.div>
-  )}
-</AnimatePresence>
+                <motion.button
+                  onClick={handleConfirmLogout}
+                  style={{
+                    padding: '1rem 2rem',
+                    backgroundColor: 'transparent',
+                    border: 'none',
+                    color: 'white',
+                    fontSize: '1.1rem',
+                    fontWeight: '300',
+                    cursor: 'pointer',
+                    fontFamily: 'Helvetica, Arial, sans-serif',
+                    letterSpacing: '0.5px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.8rem',
+                    opacity: 0.9
+                  }}
+                  whileHover={{ opacity: 1 }}
+                >
+                  <span>Yes</span>
+                  <svg 
+                    width="18" 
+                    height="18" 
+                    viewBox="0 0 24 24" 
+                    fill="none" 
+                    stroke="currentColor" 
+                    strokeWidth="2"
+                  >
+                    <path d="M7 17l9.2-9.2M17 17V7H7"/>
+                  </svg>
+                </motion.button>
+              </div>
 
-
-
-
-
-
-
-      
+              <div style={{
+                textAlign: 'center',
+                marginTop: '0.5rem'
+              }}>
+                <p style={{
+                  color: 'rgba(255, 255, 255, 0.5)',
+                  fontSize: '0.9rem',
+                  margin: 0,
+                  fontFamily: 'Helvetica, Arial, sans-serif'
+                }}>
+                  You can sign in again anytime
+                </p>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Menu Overlay dengan GSAP Animation */}
       <AnimatePresence>
@@ -4957,7 +5013,6 @@ const loadUserNotesRealtime = (userId: string) => {
           </motion.div>
         </div>
         
-
         {/* Right Side Buttons */}
         <div style={{
           display: 'flex',
@@ -5765,10 +5820,3 @@ const loadUserNotesRealtime = (userId: string) => {
     </div>
   );
 }
-
-
-
-
-
-
-
