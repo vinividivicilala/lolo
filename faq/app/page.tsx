@@ -204,8 +204,9 @@ export default function HomePage(): React.JSX.Element {
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [showSearchResults, setShowSearchResults] = useState(false);
 
-  // State untuk GSAP Loading
-  const [showGsapLoading, setShowGsapLoading] = useState(true);
+  // State untuk GSAP Modern Loading
+  const [showModernLoading, setShowModernLoading] = useState(true);
+  const [loadingPercentage, setLoadingPercentage] = useState(0);
 
   const headerRef = useRef<HTMLDivElement>(null);
   const topNavRef = useRef<HTMLDivElement>(null);
@@ -228,8 +229,11 @@ export default function HomePage(): React.JSX.Element {
   const searchContainerRef = useRef<HTMLDivElement>(null);
   const userProfileModalRef = useRef<HTMLDivElement>(null);
 
-  // Ref untuk GSAP Loading
-  const gsapLoadingRef = useRef<HTMLDivElement>(null);
+  // Ref untuk GSAP Modern Loading
+  const modernLoadingRef = useRef<HTMLDivElement>(null);
+  const percentageRef = useRef<HTMLDivElement>(null);
+  const loadingCircleRef = useRef<SVGCircleElement>(null);
+  const loadingContainerRef = useRef<HTMLDivElement>(null);
 
   // Data untuk pencarian
   const searchablePages = [
@@ -1372,55 +1376,96 @@ export default function HomePage(): React.JSX.Element {
     }
   }, [showMenuOverlay]);
 
-  // Animasi GSAP Loading
+  // GSAP Modern Loading Animation Effect
   useEffect(() => {
-    if (!gsapLoadingRef.current) return;
+    if (!modernLoadingRef.current || !percentageRef.current) return;
 
-    const loadingTimeline = gsap.timeline({
-      onComplete: () => {
-        setTimeout(() => {
-          gsap.to(gsapLoadingRef.current, {
-            opacity: 0,
-            duration: 0.8,
-            ease: "power2.out",
-            onComplete: () => {
-              setShowGsapLoading(false);
-            }
-          });
-        }, 300);
-      }
+    const ctx = gsap.context(() => {
+      // Timeline untuk animasi loading utama
+      const loadingTimeline = gsap.timeline({
+        onComplete: () => {
+          console.log("Loading animation completed");
+          // Tunggu sebentar sebelum menghilangkan loading screen
+          setTimeout(() => {
+            gsap.to(modernLoadingRef.current, {
+              opacity: 0,
+              duration: 0.8,
+              ease: "power2.out",
+              onComplete: () => {
+                setShowModernLoading(false);
+                setIsLoading(false);
+              }
+            });
+          }, 500);
+        }
+      });
+
+      // Animasi awal: muncul dari tengah
+      loadingTimeline.fromTo(modernLoadingRef.current,
+        {
+          opacity: 0,
+          scale: 0.8
+        },
+        {
+          opacity: 1,
+          scale: 1,
+          duration: 1,
+          ease: "power3.out"
+        }
+      );
+
+      // Animasi angka persentase dari 0 ke 100
+      const numberAnimation = loadingTimeline.to({}, {
+        duration: 2.5,
+        onUpdate: function() {
+          const progress = Math.min(Math.floor(this.progress() * 100), 100);
+          setLoadingPercentage(progress);
+          
+          // Animasikan persentase dengan efek bounce
+          if (percentageRef.current) {
+            gsap.to(percentageRef.current, {
+              scale: 1.1,
+              duration: 0.1,
+              yoyo: true,
+              repeat: 1,
+              ease: "power2.out"
+            });
+          }
+          
+          // Update stroke circle
+          if (loadingCircleRef.current) {
+            const circumference = 2 * Math.PI * 45; // radius 45
+            const offset = circumference - (progress / 100) * circumference;
+            loadingCircleRef.current.style.strokeDashoffset = offset.toString();
+          }
+        },
+        "-=0.5"
+      });
+
+      // Animasi scale dan rotation untuk container
+      loadingTimeline.to(modernLoadingRef.current, {
+        scale: 1.05,
+        rotate: 2,
+        duration: 0.8,
+        ease: "power1.inOut",
+        yoyo: true,
+        repeat: 3
+      }, "-=2");
+
+      // Animasi akhir: kembali ke normal
+      loadingTimeline.to(modernLoadingRef.current, {
+        scale: 1,
+        rotate: 0,
+        duration: 0.5,
+        ease: "power2.out"
+      });
+
+      return () => {
+        loadingTimeline.kill();
+      };
     });
 
-    // Animasi masuk dari bawah
-    loadingTimeline.fromTo(gsapLoadingRef.current,
-      {
-        y: 100,
-        opacity: 0
-      },
-      {
-        y: 0,
-        opacity: 1,
-        duration: 1.5,
-        ease: "power3.out"
-      }
-    );
-
-    // Animasi scale
-    loadingTimeline.to(gsapLoadingRef.current, {
-      scale: 1.1,
-      duration: 0.8,
-      ease: "power2.inOut"
-    }, "-=0.3");
-
-    loadingTimeline.to(gsapLoadingRef.current, {
-      scale: 1,
-      duration: 0.8,
-      ease: "power2.inOut"
-    });
-
-    return () => {
-      loadingTimeline.kill();
-    };
+    return () => ctx.revert();
   }, []);
 
   useEffect(() => {
@@ -1436,11 +1481,6 @@ export default function HomePage(): React.JSX.Element {
       currentIndex = (currentIndex + 1) % loadingTexts.length;
       setLoadingText(loadingTexts[currentIndex]);
     }, 500);
-
-    const loadingTimeout = setTimeout(() => {
-      setIsLoading(false);
-      clearInterval(textInterval);
-    }, 3000);
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (showPhotoFullPage) {
@@ -1487,7 +1527,6 @@ export default function HomePage(): React.JSX.Element {
     return () => {
       window.removeEventListener('resize', checkMobile);
       clearInterval(textInterval);
-      clearTimeout(loadingTimeout);
       document.removeEventListener('keydown', handleKeyDown);
       if (progressAnimationRef.current) {
         progressAnimationRef.current.kill();
@@ -1918,7 +1957,7 @@ export default function HomePage(): React.JSX.Element {
 
       {/* GSAP Modern Loading Animation */}
       <AnimatePresence>
-        {showGsapLoading && (
+        {showModernLoading && (
           <motion.div
             initial={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -1938,24 +1977,159 @@ export default function HomePage(): React.JSX.Element {
             }}
           >
             <div
-              ref={gsapLoadingRef}
+              ref={modernLoadingRef}
               style={{
-                color: 'white',
-                fontSize: isMobile ? '3.5rem' : '5rem',
-                fontWeight: 300,
-                fontFamily: 'Helvetica, Arial, sans-serif',
-                letterSpacing: '6px',
-                textTransform: 'uppercase',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '2rem',
                 opacity: 0,
                 textAlign: 'center',
-                lineHeight: 1,
                 userSelect: 'none',
                 WebkitUserSelect: 'none',
                 MozUserSelect: 'none',
                 msUserSelect: 'none'
               }}
             >
-              Menuru
+              {/* Animated Circle Progress */}
+              <div style={{
+                position: 'relative',
+                width: '120px',
+                height: '120px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}>
+                <svg
+                  width="120"
+                  height="120"
+                  viewBox="0 0 100 100"
+                  style={{
+                    transform: 'rotate(-90deg)',
+                    filter: 'drop-shadow(0 0 10px rgba(255, 255, 255, 0.3))'
+                  }}
+                >
+                  {/* Background Circle */}
+                  <circle
+                    cx="50"
+                    cy="50"
+                    r="45"
+                    fill="none"
+                    stroke="rgba(255, 255, 255, 0.1)"
+                    strokeWidth="4"
+                  />
+                  
+                  {/* Progress Circle */}
+                  <circle
+                    ref={loadingCircleRef}
+                    cx="50"
+                    cy="50"
+                    r="45"
+                    fill="none"
+                    stroke="white"
+                    strokeWidth="4"
+                    strokeLinecap="round"
+                    strokeDasharray="283"
+                    strokeDashoffset="283"
+                    style={{
+                      transition: 'stroke-dashoffset 0.3s ease'
+                    }}
+                  />
+                </svg>
+                
+                {/* Percentage Text */}
+                <div
+                  ref={percentageRef}
+                  style={{
+                    position: 'absolute',
+                    top: '50%',
+                    left: '50%',
+                    transform: 'translate(-50%, -50%)',
+                    color: 'white',
+                    fontSize: '2.5rem',
+                    fontWeight: '300',
+                    fontFamily: 'Helvetica, Arial, sans-serif',
+                    letterSpacing: '-1px'
+                  }}
+                >
+                  {loadingPercentage}%
+                </div>
+              </div>
+
+              {/* Loading Text */}
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.5, duration: 0.8 }}
+                style={{
+                  color: 'white',
+                  fontSize: '1.8rem',
+                  fontWeight: '300',
+                  fontFamily: 'Helvetica, Arial, sans-serif',
+                  letterSpacing: '8px',
+                  textTransform: 'uppercase',
+                  textAlign: 'center',
+                  lineHeight: 1.2,
+                  marginTop: '1rem'
+                }}
+              >
+                MENURU
+                <motion.div
+                  style={{
+                    fontSize: '0.9rem',
+                    letterSpacing: '4px',
+                    marginTop: '1rem',
+                    opacity: 0.7,
+                    fontWeight: '300'
+                  }}
+                  animate={{ opacity: [0.5, 1, 0.5] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                >
+                  LOADING
+                </motion.div>
+              </motion.div>
+
+              {/* Subtle Particle Effects */}
+              <div style={{
+                position: 'absolute',
+                width: '100%',
+                height: '100%',
+                pointerEvents: 'none',
+                overflow: 'hidden'
+              }}>
+                {[...Array(8)].map((_, i) => (
+                  <motion.div
+                    key={i}
+                    style={{
+                      position: 'absolute',
+                      width: '3px',
+                      height: '3px',
+                      backgroundColor: 'white',
+                      borderRadius: '50%',
+                      opacity: 0.3
+                    }}
+                    animate={{
+                      x: [
+                        Math.random() * 200 - 100,
+                        Math.random() * 200 - 100,
+                        Math.random() * 200 - 100
+                      ],
+                      y: [
+                        Math.random() * 200 - 100,
+                        Math.random() * 200 - 100,
+                        Math.random() * 200 - 100
+                      ],
+                      opacity: [0.1, 0.6, 0.1]
+                    }}
+                    transition={{
+                      duration: 2 + Math.random() * 2,
+                      repeat: Infinity,
+                      ease: "linear"
+                    }}
+                  />
+                ))}
+              </div>
             </div>
           </motion.div>
         )}
