@@ -206,7 +206,7 @@ export default function HomePage(): React.JSX.Element {
 
   // State untuk GSAP Loading - DIPERBAIKI
   const [showGsapLoading, setShowGsapLoading] = useState(true);
-  const [loadingProgress, setLoadingProgress] = useState(0);
+  const [loadingPercentage, setLoadingPercentage] = useState(0);
 
   const headerRef = useRef<HTMLDivElement>(null);
   const topNavRef = useRef<HTMLDivElement>(null);
@@ -231,8 +231,8 @@ export default function HomePage(): React.JSX.Element {
 
   // Ref untuk GSAP Loading - DIPERBAIKI
   const gsapLoadingRef = useRef<HTMLDivElement>(null);
-  const progressNumberRef = useRef<HTMLSpanElement>(null);
-  const loadingContainerRef = useRef<HTMLDivElement>(null);
+  const loadingNumberRef = useRef<HTMLDivElement>(null);
+  const loadingProgressRef = useRef<HTMLDivElement>(null);
 
   // Data untuk pencarian
   const searchablePages = [
@@ -1375,82 +1375,64 @@ export default function HomePage(): React.JSX.Element {
     }
   }, [showMenuOverlay]);
 
-  // Animasi GSAP Loading - DIPERBAIKI
+  // Animasi GSAP Loading - DIPERBAIKI (hanya angka 0-100)
   useEffect(() => {
-    if (!loadingContainerRef.current || !progressNumberRef.current) return;
+    if (!loadingNumberRef.current) return;
 
-    const tl = gsap.timeline({
+    // Timeline untuk animasi angka
+    const loadingTimeline = gsap.timeline({
       onComplete: () => {
-        // Setelah animasi selesai, tutup loading screen
-        gsap.to(loadingContainerRef.current, {
-          opacity: 0,
-          duration: 0.8,
-          ease: "power2.out",
-          onComplete: () => {
-            setShowGsapLoading(false);
-            setIsLoading(false);
-          }
-        });
-      }
-    });
-
-    // 1. Animasi angka dari 0 ke 100 dengan counter
-    tl.to({}, {
-      duration: 3, // Durasi total 3 detik
-      onUpdate: function() {
-        const progress = Math.min(100, Math.floor(this.progress() * 100));
-        setLoadingProgress(progress);
-        
-        // Animasi angka dengan GSAP untuk efek yang lebih halus
-        if (progressNumberRef.current) {
-          gsap.to(progressNumberRef.current, {
-            textContent: progress,
-            duration: 0.1,
-            snap: { textContent: 1 }
+        // Setelah mencapai 100, tunggu sebentar lalu fade out
+        setTimeout(() => {
+          gsap.to(gsapLoadingRef.current, {
+            opacity: 0,
+            duration: 0.5,
+            ease: "power2.out",
+            onComplete: () => {
+              setShowGsapLoading(false);
+            }
           });
-        }
+        }, 300);
       }
     });
 
-    // 2. Animasi progress bar
-    tl.to(".loading-progress-bar", {
-      width: "100%",
+    // Animasikan angka dari 0 ke 100
+    loadingTimeline.to({}, {
       duration: 2.5,
-      ease: "power2.out"
-    }, 0);
+      ease: "power2.inOut",
+      onUpdate: function() {
+        const progress = Math.min(Math.round(this.progress() * 100), 100);
+        setLoadingPercentage(progress);
+      }
+    });
 
-    // 3. Animasi teks "Menuru" - muncul dan sedikit bergerak
-    tl.fromTo(".loading-text",
-      { 
-        opacity: 0,
-        scale: 0.9
+    // Animasi scale dan opacity untuk angka
+    loadingTimeline.fromTo(loadingNumberRef.current,
+      {
+        scale: 0.8,
+        opacity: 0.5
       },
-      { 
-        opacity: 1,
+      {
         scale: 1,
-        duration: 1.5,
-        ease: "power3.out"
+        opacity: 1,
+        duration: 0.5,
+        ease: "power2.out"
       },
       0
     );
 
-    // 4. Animasi subtitle (loading text)
-    tl.fromTo(".loading-subtitle",
-      { 
-        opacity: 0,
-        y: 10
-      },
-      { 
-        opacity: 0.7,
-        y: 0,
-        duration: 1,
-        ease: "power2.out"
-      },
-      0.5
-    );
+    // Animasi berkedip saat angka berubah
+    loadingTimeline.to(loadingNumberRef.current, {
+      keyframes: [
+        { scale: 1.05, duration: 0.1, ease: "power2.out" },
+        { scale: 1, duration: 0.1, ease: "power2.in" }
+      ],
+      repeat: 24, // Sekitar 24 kali untuk 100 angka
+      repeatDelay: 0.1
+    }, 0);
 
     return () => {
-      tl.kill();
+      loadingTimeline.kill();
     };
   }, []);
 
@@ -1461,6 +1443,17 @@ export default function HomePage(): React.JSX.Element {
 
     checkMobile();
     window.addEventListener('resize', checkMobile);
+
+    let currentIndex = 0;
+    const textInterval = setInterval(() => {
+      currentIndex = (currentIndex + 1) % loadingTexts.length;
+      setLoadingText(loadingTexts[currentIndex]);
+    }, 500);
+
+    const loadingTimeout = setTimeout(() => {
+      setIsLoading(false);
+      clearInterval(textInterval);
+    }, 3000);
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (showPhotoFullPage) {
@@ -1506,6 +1499,8 @@ export default function HomePage(): React.JSX.Element {
 
     return () => {
       window.removeEventListener('resize', checkMobile);
+      clearInterval(textInterval);
+      clearTimeout(loadingTimeout);
       document.removeEventListener('keydown', handleKeyDown);
       if (progressAnimationRef.current) {
         progressAnimationRef.current.kill();
@@ -1938,7 +1933,6 @@ export default function HomePage(): React.JSX.Element {
       <AnimatePresence>
         {showGsapLoading && (
           <motion.div
-            ref={loadingContainerRef}
             initial={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.5 }}
@@ -1950,96 +1944,66 @@ export default function HomePage(): React.JSX.Element {
               height: '100%',
               backgroundColor: 'black',
               display: 'flex',
-              flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
               zIndex: 99999,
               cursor: 'default'
             }}
           >
-            {/* Main Loading Text */}
-            <div className="loading-text" style={{
-              color: 'white',
-              fontSize: isMobile ? '3.5rem' : '5rem',
-              fontWeight: 300,
-              fontFamily: 'Helvetica, Arial, sans-serif',
-              letterSpacing: '6px',
-              textTransform: 'uppercase',
-              textAlign: 'center',
-              lineHeight: 1,
-              userSelect: 'none',
-              WebkitUserSelect: 'none',
-              MozUserSelect: 'none',
-              msUserSelect: 'none',
-              marginBottom: isMobile ? '1.5rem' : '2rem'
-            }}>
-              Menuru
-            </div>
-
-            {/* Loading Subtitle */}
-            <div className="loading-subtitle" style={{
-              color: 'rgba(255, 255, 255, 0.7)',
-              fontSize: isMobile ? '1rem' : '1.2rem',
-              fontWeight: 300,
-              fontFamily: 'Helvetica, Arial, sans-serif',
-              letterSpacing: '2px',
-              textAlign: 'center',
-              marginBottom: isMobile ? '2rem' : '3rem',
-              textTransform: 'uppercase'
-            }}>
-              Loading Experience
-            </div>
-
-            {/* Progress Container */}
-            <div style={{
-              width: isMobile ? '80%' : '60%',
-              maxWidth: '400px',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: isMobile ? '0.8rem' : '1rem'
-            }}>
-              {/* Progress Number */}
-              <div style={{
+            <div
+              ref={gsapLoadingRef}
+              style={{
                 color: 'white',
-                fontSize: isMobile ? '2rem' : '3rem',
+                fontSize: isMobile ? '6rem' : '8rem',
                 fontWeight: 300,
                 fontFamily: 'Helvetica, Arial, sans-serif',
                 textAlign: 'center',
-                marginBottom: isMobile ? '0.5rem' : '1rem'
-              }}>
-                <span ref={progressNumberRef}>0</span>
-                <span style={{ marginLeft: '0.2rem', opacity: 0.7 }}>%</span>
+                lineHeight: 1,
+                userSelect: 'none',
+                WebkitUserSelect: 'none',
+                MozUserSelect: 'none',
+                msUserSelect: 'none'
+              }}
+            >
+              {/* Angka loading dengan animasi GSAP */}
+              <div 
+                ref={loadingNumberRef}
+                style={{
+                  fontSize: isMobile ? '8rem' : '12rem',
+                  fontWeight: 700,
+                  fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif',
+                  letterSpacing: '-5px',
+                  color: 'white',
+                  textShadow: '0 0 30px rgba(255, 255, 255, 0.3)',
+                  opacity: 0
+                }}
+              >
+                {loadingPercentage}%
               </div>
-
-              {/* Progress Bar */}
-              <div style={{
-                width: '100%',
-                height: '2px',
-                backgroundColor: 'rgba(255, 255, 255, 0.2)',
-                borderRadius: '1px',
-                overflow: 'hidden'
-              }}>
-                <div className="loading-progress-bar" style={{
-                  width: '0%',
-                  height: '100%',
-                  backgroundColor: 'white',
-                  borderRadius: '1px'
-                }} />
-              </div>
-
-              {/* Progress Text */}
-              <div style={{
-                color: 'rgba(255, 255, 255, 0.5)',
-                fontSize: isMobile ? '0.8rem' : '0.9rem',
-                fontWeight: 300,
-                fontFamily: 'Helvetica, Arial, sans-serif',
-                textAlign: 'center',
-                letterSpacing: '1px',
-                textTransform: 'uppercase',
-                marginTop: isMobile ? '0.5rem' : '1rem'
-              }}>
-                Initializing System
+              
+              {/* Progress bar */}
+              <div 
+                ref={loadingProgressRef}
+                style={{
+                  width: isMobile ? '200px' : '300px',
+                  height: '2px',
+                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                  marginTop: '2rem',
+                  position: 'relative',
+                  overflow: 'hidden'
+                }}
+              >
+                <div 
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    height: '100%',
+                    width: `${loadingPercentage}%`,
+                    backgroundColor: 'white',
+                    transition: 'width 0.1s ease'
+                  }}
+                />
               </div>
             </div>
           </motion.div>
