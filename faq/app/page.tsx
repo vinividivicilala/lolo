@@ -1401,117 +1401,10 @@ export default function HomePage(): React.JSX.Element {
   };
 
 
-// Animasi GSAP untuk foto film strip - DIPERBAIKI
-useEffect(() => {
-  if (!photoFilmStripRef.current || !photoFilmContainerRef.current) return;
-  
-  // Reset posisi
-  gsap.set(photoFilmStripRef.current, { y: 0 });
-  
-  // Hitung tinggi total dengan jarak antar foto
-  const photoHeight = isMobile ? 80 : 120;
-  const gap = isMobile ? 15 : 20;
-  const totalPhotos = 5; // Hanya 5 foto
-  const totalHeight = (photoHeight + gap) * totalPhotos;
-  const containerHeight = isMobile ? 400 : 500;
-  const travelDistance = totalHeight - containerHeight + photoHeight;
-  
-  // Animasi timeline bolak-balik
-  const filmStripTimeline = gsap.timeline({
-    repeat: -1,
-    yoyo: true,
-    repeatDelay: 0.3
-  });
-  
-  // Fase 1: Bergerak ke atas (dari posisi 0 ke -travelDistance)
-  filmStripTimeline.to(photoFilmStripRef.current, {
-    y: -travelDistance,
-    duration: 3, // Lebih cepat: 3 detik
-    ease: "power1.inOut",
-    onStart: () => {
-      // Tambahkan blur saat mulai bergerak
-      gsap.to(photoFilmStripRef.current, {
-        filter: "blur(5px)",
-        opacity: 0.7,
-        duration: 0.3,
-        ease: "power2.out"
-      });
-    },
-    onUpdate: function() {
-      // Kurangi blur seiring progress
-      const progress = this.progress();
-      const blurAmount = 5 - (progress * 4); // dari 5px ke 1px
-      const opacity = 0.7 + (progress * 0.3); // dari 0.7 ke 1.0
-      gsap.set(photoFilmStripRef.current, { 
-        filter: `blur(${blurAmount}px)`,
-        opacity: opacity
-      });
-    },
-    onComplete: () => {
-      // Clear di akhir fase 1
-      gsap.to(photoFilmStripRef.current, {
-        filter: "blur(0px)",
-        opacity: 1,
-        duration: 0.2,
-        ease: "power2.in"
-      });
-    }
-  });
-  
-  // Fase 2: Berhenti sebentar di posisi atas
-  filmStripTimeline.to({}, {
-    duration: 0.2
-  });
-  
-  // Fase 3: Kembali ke bawah (dari -travelDistance ke 0)
-  filmStripTimeline.to(photoFilmStripRef.current, {
-    y: 0,
-    duration: 3, // Lebih cepat: 3 detik
-    ease: "power1.inOut",
-    onStart: () => {
-      // Tambahkan blur saat mulai bergerak kembali
-      gsap.to(photoFilmStripRef.current, {
-        filter: "blur(5px)",
-        opacity: 0.7,
-        duration: 0.3,
-        ease: "power2.out"
-      });
-    },
-    onUpdate: function() {
-      // Kurangi blur seiring progress
-      const progress = this.progress();
-      const blurAmount = 5 - (progress * 4); // dari 5px ke 1px
-      const opacity = 0.7 + (progress * 0.3); // dari 0.7 ke 1.0
-      gsap.set(photoFilmStripRef.current, { 
-        filter: `blur(${blurAmount}px)`,
-        opacity: opacity
-      });
-    },
-    onComplete: () => {
-      // Clear di akhir fase 3
-      gsap.to(photoFilmStripRef.current, {
-        filter: "blur(0px)",
-        opacity: 1,
-        duration: 0.2,
-        ease: "power2.in"
-      });
-    }
-  });
-  
-  // Fase 4: Berhenti sebentar di posisi bawah
-  filmStripTimeline.to({}, {
-    duration: 0.2
-  });
-  
-  return () => {
-    filmStripTimeline.kill();
-  };
-}, [isMobile]);
 
-
-  // Animasi GSAP Loading dengan angka acak dan foto film strip - DIPERBAIKI
+// Animasi GSAP Loading dengan angka acak besar - DIPERBAIKI
 useEffect(() => {
-  if (!loadingNumberRef.current || !photoFilmContainerRef.current) return;
+  if (!loadingNumberRef.current) return;
 
   // Timeline untuk animasi angka acak
   const loadingTimeline = gsap.timeline({
@@ -1530,12 +1423,12 @@ useEffect(() => {
     }
   });
 
-  // Total durasi animasi: 2.5 detik
-  const totalDuration = 2.5;
-  const numChanges = 15; // Perubahan angka
+  // Total durasi animasi: 3 detik
+  const totalDuration = 3;
+  const numChanges = 20; // Lebih banyak perubahan untuk efek smooth
   const changeInterval = totalDuration / numChanges;
 
-  // Animasikan perubahan angka acak
+  // Animasikan perubahan angka acak dengan efek yang lebih dramatis
   for (let i = 0; i < numChanges; i++) {
     loadingTimeline.to({}, {
       duration: changeInterval,
@@ -1543,14 +1436,25 @@ useEffect(() => {
         // Generate angka acak baru
         const newNumber = generateRandomNumber();
         setCurrentRandomNumber(newNumber);
+        
+        // Efek scale kecil setiap kali angka berubah
+        if (loadingNumberRef.current) {
+          gsap.to(loadingNumberRef.current, {
+            scale: 1.1,
+            duration: changeInterval / 3,
+            ease: "power1.out",
+            yoyo: true,
+            repeat: 1
+          });
+        }
       },
       onUpdate: function() {
         // Efek visual halus saat angka berubah
         if (loadingNumberRef.current) {
           const progress = this.progress();
-          const scale = 1 + (Math.sin(progress * Math.PI * 2) * 0.03);
+          const rotation = Math.sin(progress * Math.PI * 4) * 2; // Rotasi kecil
           gsap.to(loadingNumberRef.current, {
-            scale: scale,
+            rotation: rotation,
             duration: changeInterval / 2,
             ease: "power1.inOut"
           });
@@ -1559,52 +1463,73 @@ useEffect(() => {
     }, i * changeInterval);
   }
 
-  // Animasi awal untuk angka
+  // Animasi awal untuk angka - muncul dengan scale besar
   loadingTimeline.fromTo(loadingNumberRef.current,
     {
-      x: -50,
+      scale: 1.5,
       opacity: 0,
-      scale: 0.9
+      rotation: -10
     },
     {
-      x: 0,
       scale: 1,
+      rotation: 0,
       opacity: 1,
-      duration: 0.4,
-      ease: "power2.out"
+      duration: 0.6,
+      ease: "back.out(1.7)"
     },
     0
   );
 
-  // Animasi foto film strip
-  loadingTimeline.fromTo(photoFilmContainerRef.current,
-    {
-      opacity: 0,
-      x: 50
-    },
-    {
-      opacity: 1,
-      x: 0,
-      duration: 0.5,
-      ease: "power2.out"
-    },
-    0.1
-  );
-
-  // Animasi akhir - angka sedikit bergoyang
+  // Animasi pulsing selama loading
   loadingTimeline.to(loadingNumberRef.current, {
-    x: 10,
-    duration: 0.2,
+    scale: 1.05,
+    duration: 0.5,
     ease: "power1.inOut",
     yoyo: true,
-    repeat: 2
-  }, totalDuration - 0.5);
+    repeat: -1
+  }, 0.3);
+
+  // Efek glow intermiten
+  const glowTimeline = gsap.timeline({ repeat: -1 });
+  glowTimeline.to(loadingNumberRef.current, {
+    textShadow: '0 0 20px rgba(255, 255, 255, 0.8)',
+    duration: 0.3,
+    ease: "power2.out"
+  });
+  glowTimeline.to(loadingNumberRef.current, {
+    textShadow: '0 0 0px rgba(255, 255, 255, 0)',
+    duration: 0.5,
+    ease: "power2.in"
+  });
+  glowTimeline.to({}, {
+    duration: 0.8
+  });
+
+  // Animasi akhir sebelum fade out - efek zoom out
+  loadingTimeline.to(loadingNumberRef.current, {
+    scale: 1.2,
+    opacity: 0.8,
+    duration: 0.4,
+    ease: "power2.out"
+  }, totalDuration - 0.8);
+
+  loadingTimeline.to(loadingNumberRef.current, {
+    scale: 0.9,
+    opacity: 1,
+    duration: 0.3,
+    ease: "power2.inOut"
+  }, totalDuration - 0.4);
 
   return () => {
     loadingTimeline.kill();
+    glowTimeline.kill();
   };
 }, []);
 
+
+
+
+  
 
 
   
@@ -2103,7 +2028,7 @@ useEffect(() => {
     }}>
 
 
-// GSAP Modern Loading Animation dengan Foto Film Strip - DIPERBAIKI
+// GSAP Modern Loading Animation dengan Angka Besar Saja
 <AnimatePresence>
   {showGsapLoading && (
     <motion.div
@@ -2131,100 +2056,31 @@ useEffect(() => {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          gap: '3rem',
           userSelect: 'none',
           WebkitUserSelect: 'none',
           MozUserSelect: 'none',
           msUserSelect: 'none'
         }}
       >
-        {/* Angka loading acak di SAMPING kiri */}
+        {/* Angka loading acak BESAR di tengah */}
         <div 
           ref={loadingNumberRef}
           style={{
-            fontSize: isMobile ? '4rem' : '6rem',
+            fontSize: isMobile ? '8rem' : '12rem',
             fontWeight: 400,
             fontFamily: 'Helvetica, Arial, sans-serif',
             color: 'white',
             opacity: 0,
-            letterSpacing: '-2px',
-            textAlign: 'center',
-            marginRight: '2rem'
+            letterSpacing: '-5px',
+            textAlign: 'center'
           }}
         >
           {currentRandomNumber}
-        </div>
-
-        {/* Container untuk Foto Film Strip - DIPERBAIKI */}
-        <div
-          ref={photoFilmContainerRef}
-          style={{
-            position: 'relative',
-            width: isMobile ? '100px' : '150px',
-            height: isMobile ? '400px' : '500px',
-            overflow: 'hidden',
-            borderRadius: '0',
-            border: 'none',
-            backgroundColor: 'transparent',
-            opacity: 0
-          }}
-        >
-          {/* Foto Film Strip - 5 foto saja */}
-          <div
-            ref={photoFilmStripRef}
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: isMobile ? '15px' : '20px', // Jarak antar foto
-              padding: '10px 0',
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              width: '100%'
-            }}
-          >
-            {filmPhotos.slice(0, 5).map((photo) => ( // Hanya 5 foto
-              <motion.div
-                key={photo.id}
-                style={{
-                  width: isMobile ? '80px' : '120px',
-                  height: isMobile ? '80px' : '120px',
-                  borderRadius: '0',
-                  overflow: 'hidden',
-                  border: 'none',
-                  backgroundColor: '#111',
-                  position: 'relative'
-                }}
-              >
-                <img 
-                  src={photo.src} 
-                  alt={photo.alt}
-                  style={{
-                    width: '100%',
-                    height: '100%',
-                    objectFit: 'cover',
-                    display: 'block'
-                  }}
-                  onError={(e) => {
-                    e.currentTarget.style.backgroundColor = '#222';
-                    e.currentTarget.style.display = 'flex';
-                    e.currentTarget.style.alignItems = 'center';
-                    e.currentTarget.style.justifyContent = 'center';
-                    e.currentTarget.style.color = 'white';
-                    e.currentTarget.innerHTML = `<div style="padding: 1rem; text-align: center; font-size: 0.8rem;">Photo</div>`;
-                  }}
-                />
-              </motion.div>
-            ))}
-          </div>
         </div>
       </div>
     </motion.div>
   )}
 </AnimatePresence>
-
-
 
 
       
@@ -6087,5 +5943,6 @@ useEffect(() => {
     </div>
   );
 }
+
 
 
