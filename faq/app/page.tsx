@@ -1400,157 +1400,228 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // Animasi GSAP untuk foto film strip - DITAMBAHKAN
-  useEffect(() => {
-    if (!photoFilmStripRef.current || !photoFilmContainerRef.current) return;
-    
-    // Reset posisi
-    gsap.set(photoFilmStripRef.current, { y: 0 });
-    
-    // Animasi film strip seperti roll film
-    const filmStripTimeline = gsap.timeline({
-      repeat: -1,
-      yoyo: false
-    });
-    
-    // Hitung tinggi total dari semua foto
-    const photoHeight = 80; // tinggi setiap foto
-    const gap = 20; // jarak antar foto
-    const totalHeight = (photoHeight + gap) * filmPhotos.length;
-    
-    // Animasi bergerak dari atas ke bawah (seperti roll film)
-    filmStripTimeline.to(photoFilmStripRef.current, {
-      y: -totalHeight + photoHeight,
-      duration: 8,
-      ease: "none",
-      onComplete: () => {
-        // Reset ke posisi awal dengan mulus
-        gsap.set(photoFilmStripRef.current, { y: 0 });
-      }
-    });
-    
-    // Tambahkan efek blur dan opacity saat bergerak
-    filmStripTimeline.fromTo(
-      photoFilmStripRef.current,
-      { filter: "blur(0px)", opacity: 0.9 },
-      { 
-        filter: "blur(2px)", 
-        opacity: 1,
-        duration: 4,
-        yoyo: true,
-        repeat: 1,
-        ease: "power1.inOut"
-      },
-      0
-    );
-    
-    return () => {
-      filmStripTimeline.kill();
-    };
-  }, []);
 
-  // Animasi GSAP Loading dengan angka acak dan foto film strip - DIPERBAIKI
-  useEffect(() => {
-    if (!loadingNumberRef.current || !photoFilmContainerRef.current) return;
 
-    // Timeline untuk animasi angka acak
-    const loadingTimeline = gsap.timeline({
-      onComplete: () => {
-        // Setelah selesai, tunggu sebentar lalu fade out
-        setTimeout(() => {
-          gsap.to(gsapLoadingRef.current, {
-            opacity: 0,
-            duration: 0.5,
-            ease: "power2.out",
-            onComplete: () => {
-              setShowGsapLoading(false);
-            }
-          });
-        }, 500);
-      }
-    });
-
-    // Total durasi animasi: 3 detik
-    const totalDuration = 3;
-    const numChanges = 15; // Jumlah perubahan angka
-    const changeInterval = totalDuration / numChanges;
-
-    // Animasikan perubahan angka acak
-    for (let i = 0; i < numChanges; i++) {
-      loadingTimeline.to({}, {
-        duration: changeInterval,
-        onStart: () => {
-          // Generate angka acak baru
-          const newNumber = generateRandomNumber();
-          setCurrentRandomNumber(newNumber);
-        },
-        onUpdate: function() {
-          // Efek visual halus saat angka berubah
-          if (loadingNumberRef.current) {
-            const progress = this.progress();
-            const scale = 1 + (Math.sin(progress * Math.PI * 2) * 0.05);
-            gsap.to(loadingNumberRef.current, {
-              scale: scale,
-              duration: changeInterval / 2,
-              ease: "power1.inOut"
-            });
-          }
-        }
-      }, i * changeInterval);
-    }
-
-    // Animasi awal untuk angka pertama
-    loadingTimeline.fromTo(loadingNumberRef.current,
-      {
-        scale: 0.8,
-        opacity: 0
-      },
-      {
-        scale: 1,
-        opacity: 1,
+// Animasi GSAP untuk foto film strip - DIPERBAIKI
+useEffect(() => {
+  if (!photoFilmStripRef.current || !photoFilmContainerRef.current) return;
+  
+  // Reset posisi
+  gsap.set(photoFilmStripRef.current, { y: 0 });
+  
+  // Hitung tinggi total dari semua foto
+  const photoHeight = isMobile ? 100 : 120;
+  const totalPhotos = filmPhotos.length * 2; // original + duplicate
+  const totalHeight = photoHeight * totalPhotos;
+  const containerHeight = isMobile ? 600 : 700;
+  
+  // Animasi timeline dengan efek blur-to-clear dan bolak-balik
+  const filmStripTimeline = gsap.timeline({
+    repeat: -1,
+    yoyo: true,
+    repeatDelay: 0.5
+  });
+  
+  // Fase 1: Bergerak ke atas dengan blur
+  filmStripTimeline.to(photoFilmStripRef.current, {
+    y: -(totalHeight - containerHeight),
+    duration: 4, // Lebih cepat dari sebelumnya (8 detik -> 4 detik)
+    ease: "power1.inOut",
+    onStart: () => {
+      // Tambahkan efek blur saat mulai bergerak
+      gsap.to(photoFilmStripRef.current, {
+        filter: "blur(8px)",
         duration: 0.5,
         ease: "power2.out"
-      },
-      0
-    );
-
-    // Animasi foto film strip - DITAMBAHKAN
-    loadingTimeline.fromTo(photoFilmContainerRef.current,
-      {
-        opacity: 0,
-        scale: 0.9,
-        x: -50
-      },
-      {
-        opacity: 1,
-        scale: 1,
-        x: 0,
-        duration: 0.8,
+      });
+    },
+    onUpdate: function() {
+      // Efek blur berkurang seiring progress
+      const progress = this.progress();
+      const blurAmount = 8 - (progress * 6); // dari 8px ke 2px
+      gsap.set(photoFilmStripRef.current, { 
+        filter: `blur(${blurAmount}px)` 
+      });
+    },
+    onComplete: () => {
+      // Hapus blur saat selesai fase 1
+      gsap.to(photoFilmStripRef.current, {
+        filter: "blur(0px)",
+        duration: 0.3,
+        ease: "power2.in"
+      });
+    }
+  });
+  
+  // Fase 2: Berhenti sebentar dengan foto clear
+  filmStripTimeline.to({}, {
+    duration: 0.5
+  });
+  
+  // Fase 3: Kembali ke bawah dengan blur lagi
+  filmStripTimeline.to(photoFilmStripRef.current, {
+    y: 0,
+    duration: 4, // Lebih cepat dari sebelumnya
+    ease: "power1.inOut",
+    onStart: () => {
+      // Tambahkan efek blur saat mulai bergerak kembali
+      gsap.to(photoFilmStripRef.current, {
+        filter: "blur(8px)",
+        duration: 0.5,
         ease: "power2.out"
+      });
+    },
+    onUpdate: function() {
+      // Efek blur berkurang seiring progress
+      const progress = this.progress();
+      const blurAmount = 8 - (progress * 6); // dari 8px ke 2px
+      gsap.set(photoFilmStripRef.current, { 
+        filter: `blur(${blurAmount}px)` 
+      });
+    },
+    onComplete: () => {
+      // Hapus blur saat selesai
+      gsap.to(photoFilmStripRef.current, {
+        filter: "blur(0px)",
+        duration: 0.3,
+        ease: "power2.in"
+      });
+    }
+  });
+  
+  // Fase 4: Berhenti sebentar sebelum mengulang
+  filmStripTimeline.to({}, {
+    duration: 0.5
+  });
+  
+  return () => {
+    filmStripTimeline.kill();
+  };
+}, []);
+
+// Animasi GSAP Loading dengan angka acak dan foto film strip - DIPERBAIKI
+useEffect(() => {
+  if (!loadingNumberRef.current || !photoFilmContainerRef.current) return;
+
+  // Timeline untuk animasi angka acak
+  const loadingTimeline = gsap.timeline({
+    onComplete: () => {
+      // Setelah selesai, tunggu sebentar lalu fade out
+      setTimeout(() => {
+        gsap.to(gsapLoadingRef.current, {
+          opacity: 0,
+          duration: 0.5,
+          ease: "power2.out",
+          onComplete: () => {
+            setShowGsapLoading(false);
+          }
+        });
+      }, 500);
+    }
+  });
+
+  // Total durasi animasi: 3 detik
+  const totalDuration = 3;
+  const numChanges = 20; // Lebih banyak perubahan (15 -> 20)
+  const changeInterval = totalDuration / numChanges;
+
+  // Animasikan perubahan angka acak
+  for (let i = 0; i < numChanges; i++) {
+    loadingTimeline.to({}, {
+      duration: changeInterval,
+      onStart: () => {
+        // Generate angka acak baru
+        const newNumber = generateRandomNumber();
+        setCurrentRandomNumber(newNumber);
       },
-      0.2
-    );
+      onUpdate: function() {
+        // Efek visual halus saat angka berubah
+        if (loadingNumberRef.current) {
+          const progress = this.progress();
+          const scale = 1 + (Math.sin(progress * Math.PI * 2) * 0.05);
+          gsap.to(loadingNumberRef.current, {
+            scale: scale,
+            duration: changeInterval / 2,
+            ease: "power1.inOut"
+          });
+        }
+      }
+    }, i * changeInterval);
+  }
 
-    // Animasi akhir sebelum fade out
-    loadingTimeline.to(loadingNumberRef.current, {
-      scale: 1.1,
-      duration: 0.3,
-      ease: "power2.out",
-      yoyo: true,
-      repeat: 1
-    }, totalDuration - 0.6);
+  // Animasi awal untuk angka pertama - muncul dari kiri
+  loadingTimeline.fromTo(loadingNumberRef.current,
+    {
+      x: -100,
+      opacity: 0,
+      scale: 0.8
+    },
+    {
+      x: 0,
+      scale: 1,
+      opacity: 1,
+      duration: 0.6,
+      ease: "power2.out"
+    },
+    0
+  );
 
-    loadingTimeline.to(photoFilmContainerRef.current, {
-      opacity: 0.7,
-      scale: 0.95,
-      duration: 0.4,
-      ease: "power2.inOut"
-    }, totalDuration - 0.8);
+  // Animasi foto film strip - muncul dari kanan
+  loadingTimeline.fromTo(photoFilmContainerRef.current,
+    {
+      opacity: 0,
+      scale: 0.9,
+      x: 100
+    },
+    {
+      opacity: 1,
+      scale: 1,
+      x: 0,
+      duration: 0.6,
+      ease: "power2.out"
+    },
+    0.1
+  );
 
-    return () => {
-      loadingTimeline.kill();
-    };
-  }, []);
+  // Animasi akhir sebelum fade out
+  loadingTimeline.to(loadingNumberRef.current, {
+    scale: 1.1,
+    duration: 0.3,
+    ease: "power2.out",
+    yoyo: true,
+    repeat: 1
+  }, totalDuration - 0.6);
+
+  loadingTimeline.to(photoFilmContainerRef.current, {
+    opacity: 0.8,
+    scale: 0.95,
+    duration: 0.4,
+    ease: "power2.inOut"
+  }, totalDuration - 0.8);
+
+  // Angka terakhir sebelum fade out
+  loadingTimeline.to(loadingNumberRef.current, {
+    x: -50,
+    opacity: 0.5,
+    duration: 0.3,
+    ease: "power2.in"
+  }, totalDuration - 0.3);
+
+  return () => {
+    loadingTimeline.kill();
+  };
+}, []);
+
+  
+
+
+
+
+
+
+
+
+  
 
   useEffect(() => {
     const checkMobile = () => {
@@ -2045,225 +2116,173 @@ export default function HomePage(): React.JSX.Element {
       MozOsxFontSmoothing: 'grayscale'
     }}>
 
-      {/* GSAP Modern Loading Animation dengan Foto Film Strip */}
-      <AnimatePresence>
-        {showGsapLoading && (
-          <motion.div
-            initial={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.5 }}
+
+
+// GSAP Modern Loading Animation dengan Foto Film Strip - DIPERBAIKI
+<AnimatePresence>
+  {showGsapLoading && (
+    <motion.div
+      initial={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.5 }}
+      style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100%',
+        backgroundColor: 'black',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 99999,
+        cursor: 'default',
+        overflow: 'hidden'
+      }}
+    >
+      <div
+        ref={gsapLoadingRef}
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '4rem',
+          userSelect: 'none',
+          WebkitUserSelect: 'none',
+          MozUserSelect: 'none',
+          msUserSelect: 'none'
+        }}
+      >
+        {/* Angka loading acak di SAMPING kiri */}
+        <div 
+          ref={loadingNumberRef}
+          style={{
+            fontSize: isMobile ? '5rem' : '7rem',
+            fontWeight: 400,
+            fontFamily: 'Helvetica, Arial, sans-serif',
+            color: 'white',
+            opacity: 0,
+            letterSpacing: '-2px',
+            textAlign: 'center',
+            marginRight: '3rem'
+          }}
+        >
+          {currentRandomNumber}
+        </div>
+
+        {/* Container untuk Foto Film Strip - DIPERBAIKI */}
+        <div
+          ref={photoFilmContainerRef}
+          style={{
+            position: 'relative',
+            width: isMobile ? '100px' : '120px',
+            height: isMobile ? '600px' : '700px',
+            overflow: 'hidden',
+            borderRadius: '0',
+            border: 'none',
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            opacity: 0
+          }}
+        >
+          {/* Foto Film Strip */}
+          <div
+            ref={photoFilmStripRef}
             style={{
-              position: 'fixed',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '0',
+              padding: '0',
+              position: 'absolute',
               top: 0,
               left: 0,
-              width: '100%',
-              height: '100%',
-              backgroundColor: 'black',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              zIndex: 99999,
-              cursor: 'default',
-              overflow: 'hidden'
+              width: '100%'
             }}
           >
-            <div
-              ref={gsapLoadingRef}
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '3rem',
-                userSelect: 'none',
-                WebkitUserSelect: 'none',
-                MozUserSelect: 'none',
-                msUserSelect: 'none'
-              }}
-            >
-              {/* Angka loading acak dengan animasi GSAP */}
-              <div 
-                ref={loadingNumberRef}
+            {filmPhotos.map((photo) => (
+              <motion.div
+                key={photo.id}
                 style={{
-                  fontSize: isMobile ? '5rem' : '7rem',
-                  fontWeight: 400, // Normal, tidak bold
-                  fontFamily: 'Helvetica, Arial, sans-serif',
-                  color: 'white',
-                  opacity: 0,
-                  letterSpacing: '-2px',
-                  textAlign: 'center'
-                }}
-              >
-                {currentRandomNumber}
-              </div>
-
-              {/* Container untuk Foto Film Strip - DITAMBAHKAN */}
-              <div
-                ref={photoFilmContainerRef}
-                style={{
-                  position: 'relative',
-                  width: isMobile ? '120px' : '150px',
-                  height: isMobile ? '400px' : '500px',
-                  overflow: 'hidden',
-                  borderRadius: '10px',
-                  border: '1px solid rgba(255, 255, 255, 0.3)',
-                  backgroundColor: 'rgba(0, 0, 0, 0.5)',
-                  opacity: 0
-                }}
-              >
-                {/* Foto Film Strip */}
-                <div
-                  ref={photoFilmStripRef}
-                  style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    gap: '20px',
-                    padding: '20px 0',
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    width: '100%'
-                  }}
-                >
-                  {filmPhotos.map((photo) => (
-                    <motion.div
-                      key={photo.id}
-                      style={{
-                        width: isMobile ? '80px' : '100px',
-                        height: isMobile ? '80px' : '100px',
-                        borderRadius: '15px',
-                        overflow: 'hidden',
-                        border: '2px solid rgba(255, 255, 255, 0.4)',
-                        backgroundColor: '#222',
-                        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
-                        position: 'relative'
-                      }}
-                      initial={{ scale: 0.8, opacity: 0 }}
-                      animate={{ scale: 1, opacity: 1 }}
-                      transition={{ delay: photo.id * 0.1 }}
-                    >
-                      <img 
-                        src={photo.src} 
-                        alt={photo.alt}
-                        style={{
-                          width: '100%',
-                          height: '100%',
-                          objectFit: 'cover',
-                          display: 'block'
-                        }}
-                        onError={(e) => {
-                          e.currentTarget.style.backgroundColor = '#333';
-                          e.currentTarget.style.display = 'flex';
-                          e.currentTarget.style.alignItems = 'center';
-                          e.currentTarget.style.justifyContent = 'center';
-                          e.currentTarget.style.color = 'white';
-                          e.currentTarget.innerHTML = `<div style="padding: 1rem; text-align: center; font-size: 0.8rem;">Photo ${photo.id}</div>`;
-                        }}
-                      />
-                      {/* Nomor foto di sudut kanan bawah */}
-                      <div style={{
-                        position: 'absolute',
-                        bottom: '5px',
-                        right: '5px',
-                        backgroundColor: 'rgba(0, 0, 0, 0.7)',
-                        color: 'white',
-                        fontSize: '0.7rem',
-                        fontWeight: '600',
-                        padding: '2px 6px',
-                        borderRadius: '10px',
-                        border: '1px solid rgba(255, 255, 255, 0.3)'
-                      }}>
-                        {String(photo.id).padStart(2, '0')}
-                      </div>
-                    </motion.div>
-                  ))}
-                  
-                  {/* Duplikat foto untuk efek loop yang mulus */}
-                  {filmPhotos.map((photo) => (
-                    <motion.div
-                      key={`duplicate-${photo.id}`}
-                      style={{
-                        width: isMobile ? '80px' : '100px',
-                        height: isMobile ? '80px' : '100px',
-                        borderRadius: '15px',
-                        overflow: 'hidden',
-                        border: '2px solid rgba(255, 255, 255, 0.4)',
-                        backgroundColor: '#222',
-                        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
-                        position: 'relative'
-                      }}
-                    >
-                      <img 
-                        src={photo.src} 
-                        alt={`${photo.alt} duplicate`}
-                        style={{
-                          width: '100%',
-                          height: '100%',
-                          objectFit: 'cover',
-                          display: 'block'
-                        }}
-                        onError={(e) => {
-                          e.currentTarget.style.backgroundColor = '#333';
-                          e.currentTarget.style.display = 'flex';
-                          e.currentTarget.style.alignItems = 'center';
-                          e.currentTarget.style.justifyContent = 'center';
-                          e.currentTarget.style.color = 'white';
-                          e.currentTarget.innerHTML = `<div style="padding: 1rem; text-align: center; font-size: 0.8rem;">Photo ${photo.id}</div>`;
-                        }}
-                      />
-                      <div style={{
-                        position: 'absolute',
-                        bottom: '5px',
-                        right: '5px',
-                        backgroundColor: 'rgba(0, 0, 0, 0.7)',
-                        color: 'white',
-                        fontSize: '0.7rem',
-                        fontWeight: '600',
-                        padding: '2px 6px',
-                        borderRadius: '10px',
-                        border: '1px solid rgba(255, 255, 255, 0.3)'
-                      }}>
-                        {String(photo.id).padStart(2, '0')}
-                      </div>
-                    </motion.div>
-                  ))}
-                </div>
-                
-                {/* Overlay efek film strip */}
-                <div style={{
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
                   width: '100%',
-                  height: '100%',
-                  background: 'linear-gradient(to bottom, transparent 0%, rgba(0, 0, 0, 0.1) 50%, transparent 100%)',
-                  pointerEvents: 'none'
-                }} />
-                
-                {/* Garis film strip di sisi kiri dan kanan */}
-                <div style={{
-                  position: 'absolute',
-                  top: 0,
-                  left: '10px',
-                  width: '2px',
-                  height: '100%',
-                  backgroundColor: 'rgba(255, 255, 255, 0.2)'
-                }} />
-                <div style={{
-                  position: 'absolute',
-                  top: 0,
-                  right: '10px',
-                  width: '2px',
-                  height: '100%',
-                  backgroundColor: 'rgba(255, 255, 255, 0.2)'
-                }} />
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+                  height: isMobile ? '100px' : '120px',
+                  borderRadius: '0',
+                  overflow: 'hidden',
+                  border: 'none',
+                  backgroundColor: '#111',
+                  position: 'relative'
+                }}
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ delay: photo.id * 0.1 }}
+              >
+                <img 
+                  src={photo.src} 
+                  alt={photo.alt}
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover',
+                    display: 'block'
+                  }}
+                  onError={(e) => {
+                    e.currentTarget.style.backgroundColor = '#222';
+                    e.currentTarget.style.display = 'flex';
+                    e.currentTarget.style.alignItems = 'center';
+                    e.currentTarget.style.justifyContent = 'center';
+                    e.currentTarget.style.color = 'white';
+                    e.currentTarget.innerHTML = `<div style="padding: 1rem; text-align: center; font-size: 0.8rem;">Photo ${photo.id}</div>`;
+                  }}
+                />
+              </motion.div>
+            ))}
+            
+            {/* Duplikat foto untuk efek loop yang mulus */}
+            {filmPhotos.map((photo) => (
+              <motion.div
+                key={`duplicate-${photo.id}`}
+                style={{
+                  width: '100%',
+                  height: isMobile ? '100px' : '120px',
+                  borderRadius: '0',
+                  overflow: 'hidden',
+                  border: 'none',
+                  backgroundColor: '#111',
+                  position: 'relative'
+                }}
+              >
+                <img 
+                  src={photo.src} 
+                  alt={`${photo.alt} duplicate`}
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover',
+                    display: 'block'
+                  }}
+                  onError={(e) => {
+                    e.currentTarget.style.backgroundColor = '#222';
+                    e.currentTarget.style.display = 'flex';
+                    e.currentTarget.style.alignItems = 'center';
+                    e.currentTarget.style.justifyContent = 'center';
+                    e.currentTarget.style.color = 'white';
+                    e.currentTarget.innerHTML = `<div style="padding: 1rem; text-align: center; font-size: 0.8rem;">Photo ${photo.id}</div>`;
+                  }}
+                />
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </motion.div>
+  )}
+</AnimatePresence>
 
+
+
+
+
+
+      
       {/* Modal Profil User - DIPERBAIKI */}
       <AnimatePresence>
         {showUserProfileModal && user && (
@@ -6123,3 +6142,4 @@ export default function HomePage(): React.JSX.Element {
     </div>
   );
 }
+
