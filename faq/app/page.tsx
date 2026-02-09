@@ -207,6 +207,8 @@ export default function HomePage(): React.JSX.Element {
  // Type untuk state baru
 const [loadingNumber, setLoadingNumber] = useState("000");
 const [randomDigits, setRandomDigits] = useState([0, 0, 0]);
+  const [showGsapLoading, setShowGsapLoading] = useState(true);
+  
 
   const headerRef = useRef<HTMLDivElement>(null);
   const topNavRef = useRef<HTMLDivElement>(null);
