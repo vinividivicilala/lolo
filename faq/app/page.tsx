@@ -232,8 +232,6 @@ export default function HomePage(): React.JSX.Element {
   // Ref untuk GSAP Loading - DIPERBAIKI
   const gsapLoadingRef = useRef<HTMLDivElement>(null);
   const loadingNumberRef = useRef<HTMLDivElement>(null);
-  const photoFilmStripRef = useRef<HTMLDivElement>(null);
-  const photoFilmContainerRef = useRef<HTMLDivElement>(null);
 
   // Data untuk pencarian
   const searchablePages = [
@@ -339,14 +337,6 @@ export default function HomePage(): React.JSX.Element {
     { title: "Development", description: "Frontend & Backend" },
     { title: "Features", description: "Functionality & Integration" }
   ];
-
-  // Data untuk foto film strip (5 foto)
-  const filmPhotos = Array.from({ length: 5 }, (_, i) => ({
-    id: i + 1,
-    src: "images/5.jpg",
-    alt: `Photo ${i + 1}`,
-    order: i + 1
-  }));
 
   // Helper functions
   const getIconByType = (type: string): string => {
@@ -1400,139 +1390,84 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
+  // Animasi GSAP Loading dengan angka acak - DIPERBAIKI
+  useEffect(() => {
+    if (!loadingNumberRef.current) return;
 
-
-// Animasi GSAP Loading dengan angka acak besar - DIPERBAIKI
-useEffect(() => {
-  if (!loadingNumberRef.current) return;
-
-  // Timeline untuk animasi angka acak
-  const loadingTimeline = gsap.timeline({
-    onComplete: () => {
-      // Setelah selesai, tunggu sebentar lalu fade out
-      setTimeout(() => {
-        gsap.to(gsapLoadingRef.current, {
-          opacity: 0,
-          duration: 0.5,
-          ease: "power2.out",
-          onComplete: () => {
-            setShowGsapLoading(false);
-          }
-        });
-      }, 300);
-    }
-  });
-
-  // Total durasi animasi: 3 detik
-  const totalDuration = 3;
-  const numChanges = 20; // Lebih banyak perubahan untuk efek smooth
-  const changeInterval = totalDuration / numChanges;
-
-  // Animasikan perubahan angka acak dengan efek yang lebih dramatis
-  for (let i = 0; i < numChanges; i++) {
-    loadingTimeline.to({}, {
-      duration: changeInterval,
-      onStart: () => {
-        // Generate angka acak baru
-        const newNumber = generateRandomNumber();
-        setCurrentRandomNumber(newNumber);
-        
-        // Efek scale kecil setiap kali angka berubah
-        if (loadingNumberRef.current) {
-          gsap.to(loadingNumberRef.current, {
-            scale: 1.1,
-            duration: changeInterval / 3,
-            ease: "power1.out",
-            yoyo: true,
-            repeat: 1
+    // Timeline untuk animasi angka acak
+    const loadingTimeline = gsap.timeline({
+      onComplete: () => {
+        // Setelah selesai, tunggu sebentar lalu fade out
+        setTimeout(() => {
+          gsap.to(gsapLoadingRef.current, {
+            opacity: 0,
+            duration: 0.5,
+            ease: "power2.out",
+            onComplete: () => {
+              setShowGsapLoading(false);
+            }
           });
-        }
-      },
-      onUpdate: function() {
-        // Efek visual halus saat angka berubah
-        if (loadingNumberRef.current) {
-          const progress = this.progress();
-          const rotation = Math.sin(progress * Math.PI * 4) * 2; // Rotasi kecil
-          gsap.to(loadingNumberRef.current, {
-            rotation: rotation,
-            duration: changeInterval / 2,
-            ease: "power1.inOut"
-          });
-        }
+        }, 500);
       }
-    }, i * changeInterval);
-  }
+    });
 
-  // Animasi awal untuk angka - muncul dengan scale besar
-  loadingTimeline.fromTo(loadingNumberRef.current,
-    {
-      scale: 1.5,
-      opacity: 0,
-      rotation: -10
-    },
-    {
-      scale: 1,
-      rotation: 0,
-      opacity: 1,
-      duration: 0.6,
-      ease: "back.out(1.7)"
-    },
-    0
-  );
+    // Total durasi animasi: 3 detik
+    const totalDuration = 3;
+    const numChanges = 15; // Jumlah perubahan angka
+    const changeInterval = totalDuration / numChanges;
 
-  // Animasi pulsing selama loading
-  loadingTimeline.to(loadingNumberRef.current, {
-    scale: 1.05,
-    duration: 0.5,
-    ease: "power1.inOut",
-    yoyo: true,
-    repeat: -1
-  }, 0.3);
+    // Animasikan perubahan angka acak
+    for (let i = 0; i < numChanges; i++) {
+      loadingTimeline.to({}, {
+        duration: changeInterval,
+        onStart: () => {
+          // Generate angka acak baru
+          const newNumber = generateRandomNumber();
+          setCurrentRandomNumber(newNumber);
+        },
+        onUpdate: function() {
+          // Efek visual halus saat angka berubah
+          if (loadingNumberRef.current) {
+            const progress = this.progress();
+            const scale = 1 + (Math.sin(progress * Math.PI * 2) * 0.05);
+            gsap.to(loadingNumberRef.current, {
+              scale: scale,
+              duration: changeInterval / 2,
+              ease: "power1.inOut"
+            });
+          }
+        }
+      }, i * changeInterval);
+    }
 
-  // Efek glow intermiten
-  const glowTimeline = gsap.timeline({ repeat: -1 });
-  glowTimeline.to(loadingNumberRef.current, {
-    textShadow: '0 0 20px rgba(255, 255, 255, 0.8)',
-    duration: 0.3,
-    ease: "power2.out"
-  });
-  glowTimeline.to(loadingNumberRef.current, {
-    textShadow: '0 0 0px rgba(255, 255, 255, 0)',
-    duration: 0.5,
-    ease: "power2.in"
-  });
-  glowTimeline.to({}, {
-    duration: 0.8
-  });
+    // Animasi awal untuk angka pertama
+    loadingTimeline.fromTo(loadingNumberRef.current,
+      {
+        scale: 0.8,
+        opacity: 0
+      },
+      {
+        scale: 1,
+        opacity: 1,
+        duration: 0.5,
+        ease: "power2.out"
+      },
+      0
+    );
 
-  // Animasi akhir sebelum fade out - efek zoom out
-  loadingTimeline.to(loadingNumberRef.current, {
-    scale: 1.2,
-    opacity: 0.8,
-    duration: 0.4,
-    ease: "power2.out"
-  }, totalDuration - 0.8);
+    // Animasi akhir sebelum fade out
+    loadingTimeline.to(loadingNumberRef.current, {
+      scale: 1.1,
+      duration: 0.3,
+      ease: "power2.out",
+      yoyo: true,
+      repeat: 1
+    }, totalDuration - 0.6);
 
-  loadingTimeline.to(loadingNumberRef.current, {
-    scale: 0.9,
-    opacity: 1,
-    duration: 0.3,
-    ease: "power2.inOut"
-  }, totalDuration - 0.4);
-
-  return () => {
-    loadingTimeline.kill();
-    glowTimeline.kill();
-  };
-}, []);
-
-
-
-
-  
-
-
-  
+    return () => {
+      loadingTimeline.kill();
+    };
+  }, []);
 
   useEffect(() => {
     const checkMobile = () => {
@@ -2027,63 +1962,57 @@ useEffect(() => {
       MozOsxFontSmoothing: 'grayscale'
     }}>
 
+      {/* GSAP Modern Loading Animation - DIPERBAIKI DENGAN ANGKA ACAK */}
+      <AnimatePresence>
+        {showGsapLoading && (
+          <motion.div
+            initial={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.5 }}
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              backgroundColor: 'black',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              zIndex: 99999,
+              cursor: 'default'
+            }}
+          >
+            <div
+              ref={gsapLoadingRef}
+              style={{
+                color: 'white',
+                textAlign: 'center',
+                userSelect: 'none',
+                WebkitUserSelect: 'none',
+                MozUserSelect: 'none',
+                msUserSelect: 'none'
+              }}
+            >
+              {/* Angka loading acak dengan animasi GSAP */}
+              <div 
+                ref={loadingNumberRef}
+                style={{
+                  fontSize: isMobile ? '5rem' : '7rem',
+                  fontWeight: 400, // Normal, tidak bold
+                  fontFamily: 'Helvetica, Arial, sans-serif',
+                  color: 'white',
+                  opacity: 0,
+                  letterSpacing: '-2px'
+                }}
+              >
+                {currentRandomNumber}
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-// GSAP Modern Loading Animation dengan Angka Besar Saja
-<AnimatePresence>
-  {showGsapLoading && (
-    <motion.div
-      initial={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.5 }}
-      style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        width: '100%',
-        height: '100%',
-        backgroundColor: 'black',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        zIndex: 99999,
-        cursor: 'default',
-        overflow: 'hidden'
-      }}
-    >
-      <div
-        ref={gsapLoadingRef}
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          userSelect: 'none',
-          WebkitUserSelect: 'none',
-          MozUserSelect: 'none',
-          msUserSelect: 'none'
-        }}
-      >
-        {/* Angka loading acak BESAR di tengah */}
-        <div 
-          ref={loadingNumberRef}
-          style={{
-            fontSize: isMobile ? '8rem' : '12rem',
-            fontWeight: 400,
-            fontFamily: 'Helvetica, Arial, sans-serif',
-            color: 'white',
-            opacity: 0,
-            letterSpacing: '-5px',
-            textAlign: 'center'
-          }}
-        >
-          {currentRandomNumber}
-        </div>
-      </div>
-    </motion.div>
-  )}
-</AnimatePresence>
-
-
-      
       {/* Modal Profil User - DIPERBAIKI */}
       <AnimatePresence>
         {showUserProfileModal && user && (
@@ -5943,6 +5872,3 @@ useEffect(() => {
     </div>
   );
 }
-
-
-
