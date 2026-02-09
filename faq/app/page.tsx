@@ -1401,7 +1401,6 @@ export default function HomePage(): React.JSX.Element {
   };
 
 
-
 // Animasi GSAP untuk foto film strip - DIPERBAIKI
 useEffect(() => {
   if (!photoFilmStripRef.current || !photoFilmContainerRef.current) return;
@@ -1409,97 +1408,108 @@ useEffect(() => {
   // Reset posisi
   gsap.set(photoFilmStripRef.current, { y: 0 });
   
-  // Hitung tinggi total dari semua foto
-  const photoHeight = isMobile ? 100 : 120;
-  const totalPhotos = filmPhotos.length * 2; // original + duplicate
-  const totalHeight = photoHeight * totalPhotos;
-  const containerHeight = isMobile ? 600 : 700;
+  // Hitung tinggi total dengan jarak antar foto
+  const photoHeight = isMobile ? 80 : 120;
+  const gap = isMobile ? 15 : 20;
+  const totalPhotos = 5; // Hanya 5 foto
+  const totalHeight = (photoHeight + gap) * totalPhotos;
+  const containerHeight = isMobile ? 400 : 500;
+  const travelDistance = totalHeight - containerHeight + photoHeight;
   
-  // Animasi timeline dengan efek blur-to-clear dan bolak-balik
+  // Animasi timeline bolak-balik
   const filmStripTimeline = gsap.timeline({
     repeat: -1,
     yoyo: true,
-    repeatDelay: 0.5
+    repeatDelay: 0.3
   });
   
-  // Fase 1: Bergerak ke atas dengan blur
+  // Fase 1: Bergerak ke atas (dari posisi 0 ke -travelDistance)
   filmStripTimeline.to(photoFilmStripRef.current, {
-    y: -(totalHeight - containerHeight),
-    duration: 4, // Lebih cepat dari sebelumnya (8 detik -> 4 detik)
+    y: -travelDistance,
+    duration: 3, // Lebih cepat: 3 detik
     ease: "power1.inOut",
     onStart: () => {
-      // Tambahkan efek blur saat mulai bergerak
+      // Tambahkan blur saat mulai bergerak
       gsap.to(photoFilmStripRef.current, {
-        filter: "blur(8px)",
-        duration: 0.5,
+        filter: "blur(5px)",
+        opacity: 0.7,
+        duration: 0.3,
         ease: "power2.out"
       });
     },
     onUpdate: function() {
-      // Efek blur berkurang seiring progress
+      // Kurangi blur seiring progress
       const progress = this.progress();
-      const blurAmount = 8 - (progress * 6); // dari 8px ke 2px
+      const blurAmount = 5 - (progress * 4); // dari 5px ke 1px
+      const opacity = 0.7 + (progress * 0.3); // dari 0.7 ke 1.0
       gsap.set(photoFilmStripRef.current, { 
-        filter: `blur(${blurAmount}px)` 
+        filter: `blur(${blurAmount}px)`,
+        opacity: opacity
       });
     },
     onComplete: () => {
-      // Hapus blur saat selesai fase 1
+      // Clear di akhir fase 1
       gsap.to(photoFilmStripRef.current, {
         filter: "blur(0px)",
-        duration: 0.3,
+        opacity: 1,
+        duration: 0.2,
         ease: "power2.in"
       });
     }
   });
   
-  // Fase 2: Berhenti sebentar dengan foto clear
+  // Fase 2: Berhenti sebentar di posisi atas
   filmStripTimeline.to({}, {
-    duration: 0.5
+    duration: 0.2
   });
   
-  // Fase 3: Kembali ke bawah dengan blur lagi
+  // Fase 3: Kembali ke bawah (dari -travelDistance ke 0)
   filmStripTimeline.to(photoFilmStripRef.current, {
     y: 0,
-    duration: 4, // Lebih cepat dari sebelumnya
+    duration: 3, // Lebih cepat: 3 detik
     ease: "power1.inOut",
     onStart: () => {
-      // Tambahkan efek blur saat mulai bergerak kembali
+      // Tambahkan blur saat mulai bergerak kembali
       gsap.to(photoFilmStripRef.current, {
-        filter: "blur(8px)",
-        duration: 0.5,
+        filter: "blur(5px)",
+        opacity: 0.7,
+        duration: 0.3,
         ease: "power2.out"
       });
     },
     onUpdate: function() {
-      // Efek blur berkurang seiring progress
+      // Kurangi blur seiring progress
       const progress = this.progress();
-      const blurAmount = 8 - (progress * 6); // dari 8px ke 2px
+      const blurAmount = 5 - (progress * 4); // dari 5px ke 1px
+      const opacity = 0.7 + (progress * 0.3); // dari 0.7 ke 1.0
       gsap.set(photoFilmStripRef.current, { 
-        filter: `blur(${blurAmount}px)` 
+        filter: `blur(${blurAmount}px)`,
+        opacity: opacity
       });
     },
     onComplete: () => {
-      // Hapus blur saat selesai
+      // Clear di akhir fase 3
       gsap.to(photoFilmStripRef.current, {
         filter: "blur(0px)",
-        duration: 0.3,
+        opacity: 1,
+        duration: 0.2,
         ease: "power2.in"
       });
     }
   });
   
-  // Fase 4: Berhenti sebentar sebelum mengulang
+  // Fase 4: Berhenti sebentar di posisi bawah
   filmStripTimeline.to({}, {
-    duration: 0.5
+    duration: 0.2
   });
   
   return () => {
     filmStripTimeline.kill();
   };
-}, []);
+}, [isMobile]);
 
-// Animasi GSAP Loading dengan angka acak dan foto film strip - DIPERBAIKI
+
+  // Animasi GSAP Loading dengan angka acak dan foto film strip - DIPERBAIKI
 useEffect(() => {
   if (!loadingNumberRef.current || !photoFilmContainerRef.current) return;
 
@@ -1516,13 +1526,13 @@ useEffect(() => {
             setShowGsapLoading(false);
           }
         });
-      }, 500);
+      }, 300);
     }
   });
 
-  // Total durasi animasi: 3 detik
-  const totalDuration = 3;
-  const numChanges = 20; // Lebih banyak perubahan (15 -> 20)
+  // Total durasi animasi: 2.5 detik
+  const totalDuration = 2.5;
+  const numChanges = 15; // Perubahan angka
   const changeInterval = totalDuration / numChanges;
 
   // Animasikan perubahan angka acak
@@ -1538,7 +1548,7 @@ useEffect(() => {
         // Efek visual halus saat angka berubah
         if (loadingNumberRef.current) {
           const progress = this.progress();
-          const scale = 1 + (Math.sin(progress * Math.PI * 2) * 0.05);
+          const scale = 1 + (Math.sin(progress * Math.PI * 2) * 0.03);
           gsap.to(loadingNumberRef.current, {
             scale: scale,
             duration: changeInterval / 2,
@@ -1549,75 +1559,51 @@ useEffect(() => {
     }, i * changeInterval);
   }
 
-  // Animasi awal untuk angka pertama - muncul dari kiri
+  // Animasi awal untuk angka
   loadingTimeline.fromTo(loadingNumberRef.current,
     {
-      x: -100,
+      x: -50,
       opacity: 0,
-      scale: 0.8
+      scale: 0.9
     },
     {
       x: 0,
       scale: 1,
       opacity: 1,
-      duration: 0.6,
+      duration: 0.4,
       ease: "power2.out"
     },
     0
   );
 
-  // Animasi foto film strip - muncul dari kanan
+  // Animasi foto film strip
   loadingTimeline.fromTo(photoFilmContainerRef.current,
     {
       opacity: 0,
-      scale: 0.9,
-      x: 100
+      x: 50
     },
     {
       opacity: 1,
-      scale: 1,
       x: 0,
-      duration: 0.6,
+      duration: 0.5,
       ease: "power2.out"
     },
     0.1
   );
 
-  // Animasi akhir sebelum fade out
+  // Animasi akhir - angka sedikit bergoyang
   loadingTimeline.to(loadingNumberRef.current, {
-    scale: 1.1,
-    duration: 0.3,
-    ease: "power2.out",
+    x: 10,
+    duration: 0.2,
+    ease: "power1.inOut",
     yoyo: true,
-    repeat: 1
-  }, totalDuration - 0.6);
-
-  loadingTimeline.to(photoFilmContainerRef.current, {
-    opacity: 0.8,
-    scale: 0.95,
-    duration: 0.4,
-    ease: "power2.inOut"
-  }, totalDuration - 0.8);
-
-  // Angka terakhir sebelum fade out
-  loadingTimeline.to(loadingNumberRef.current, {
-    x: -50,
-    opacity: 0.5,
-    duration: 0.3,
-    ease: "power2.in"
-  }, totalDuration - 0.3);
+    repeat: 2
+  }, totalDuration - 0.5);
 
   return () => {
     loadingTimeline.kill();
   };
 }, []);
-
-  
-
-
-
-
-
 
 
 
@@ -2117,7 +2103,6 @@ useEffect(() => {
     }}>
 
 
-
 // GSAP Modern Loading Animation dengan Foto Film Strip - DIPERBAIKI
 <AnimatePresence>
   {showGsapLoading && (
@@ -2146,7 +2131,7 @@ useEffect(() => {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          gap: '4rem',
+          gap: '3rem',
           userSelect: 'none',
           WebkitUserSelect: 'none',
           MozUserSelect: 'none',
@@ -2157,14 +2142,14 @@ useEffect(() => {
         <div 
           ref={loadingNumberRef}
           style={{
-            fontSize: isMobile ? '5rem' : '7rem',
+            fontSize: isMobile ? '4rem' : '6rem',
             fontWeight: 400,
             fontFamily: 'Helvetica, Arial, sans-serif',
             color: 'white',
             opacity: 0,
             letterSpacing: '-2px',
             textAlign: 'center',
-            marginRight: '3rem'
+            marginRight: '2rem'
           }}
         >
           {currentRandomNumber}
@@ -2175,45 +2160,42 @@ useEffect(() => {
           ref={photoFilmContainerRef}
           style={{
             position: 'relative',
-            width: isMobile ? '100px' : '120px',
-            height: isMobile ? '600px' : '700px',
+            width: isMobile ? '100px' : '150px',
+            height: isMobile ? '400px' : '500px',
             overflow: 'hidden',
             borderRadius: '0',
             border: 'none',
-            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            backgroundColor: 'transparent',
             opacity: 0
           }}
         >
-          {/* Foto Film Strip */}
+          {/* Foto Film Strip - 5 foto saja */}
           <div
             ref={photoFilmStripRef}
             style={{
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              gap: '0',
-              padding: '0',
+              gap: isMobile ? '15px' : '20px', // Jarak antar foto
+              padding: '10px 0',
               position: 'absolute',
               top: 0,
               left: 0,
               width: '100%'
             }}
           >
-            {filmPhotos.map((photo) => (
+            {filmPhotos.slice(0, 5).map((photo) => ( // Hanya 5 foto
               <motion.div
                 key={photo.id}
                 style={{
-                  width: '100%',
-                  height: isMobile ? '100px' : '120px',
+                  width: isMobile ? '80px' : '120px',
+                  height: isMobile ? '80px' : '120px',
                   borderRadius: '0',
                   overflow: 'hidden',
                   border: 'none',
                   backgroundColor: '#111',
                   position: 'relative'
                 }}
-                initial={{ scale: 0.8, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ delay: photo.id * 0.1 }}
               >
                 <img 
                   src={photo.src} 
@@ -2230,42 +2212,7 @@ useEffect(() => {
                     e.currentTarget.style.alignItems = 'center';
                     e.currentTarget.style.justifyContent = 'center';
                     e.currentTarget.style.color = 'white';
-                    e.currentTarget.innerHTML = `<div style="padding: 1rem; text-align: center; font-size: 0.8rem;">Photo ${photo.id}</div>`;
-                  }}
-                />
-              </motion.div>
-            ))}
-            
-            {/* Duplikat foto untuk efek loop yang mulus */}
-            {filmPhotos.map((photo) => (
-              <motion.div
-                key={`duplicate-${photo.id}`}
-                style={{
-                  width: '100%',
-                  height: isMobile ? '100px' : '120px',
-                  borderRadius: '0',
-                  overflow: 'hidden',
-                  border: 'none',
-                  backgroundColor: '#111',
-                  position: 'relative'
-                }}
-              >
-                <img 
-                  src={photo.src} 
-                  alt={`${photo.alt} duplicate`}
-                  style={{
-                    width: '100%',
-                    height: '100%',
-                    objectFit: 'cover',
-                    display: 'block'
-                  }}
-                  onError={(e) => {
-                    e.currentTarget.style.backgroundColor = '#222';
-                    e.currentTarget.style.display = 'flex';
-                    e.currentTarget.style.alignItems = 'center';
-                    e.currentTarget.style.justifyContent = 'center';
-                    e.currentTarget.style.color = 'white';
-                    e.currentTarget.innerHTML = `<div style="padding: 1rem; text-align: center; font-size: 0.8rem;">Photo ${photo.id}</div>`;
+                    e.currentTarget.innerHTML = `<div style="padding: 1rem; text-align: center; font-size: 0.8rem;">Photo</div>`;
                   }}
                 />
               </motion.div>
@@ -2276,8 +2223,6 @@ useEffect(() => {
     </motion.div>
   )}
 </AnimatePresence>
-
-
 
 
 
@@ -6142,4 +6087,5 @@ useEffect(() => {
     </div>
   );
 }
+
 
