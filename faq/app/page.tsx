@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect, useRef } from "react";
@@ -165,7 +164,7 @@ export default function HomePage(): React.JSX.Element {
   
   // State untuk counter foto
   const [leftCounter, setLeftCounter] = useState("01");
-  const totalPhotos = "10";
+  const totalPhotos = "03";
   
   // State untuk posisi gambar
   const [imagePosition, setImagePosition] = useState(0);
@@ -209,9 +208,6 @@ export default function HomePage(): React.JSX.Element {
   const [showGsapLoading, setShowGsapLoading] = useState(true);
   const [currentRandomNumber, setCurrentRandomNumber] = useState(0);
 
-  // State untuk animasi roll film foto
-  const [isRollAnimating, setIsRollAnimating] = useState(false);
-
   const headerRef = useRef<HTMLDivElement>(null);
   const topNavRef = useRef<HTMLDivElement>(null);
   const topicContainerRef = useRef<HTMLDivElement>(null);
@@ -236,10 +232,8 @@ export default function HomePage(): React.JSX.Element {
   // Ref untuk GSAP Loading - DIPERBAIKI
   const gsapLoadingRef = useRef<HTMLDivElement>(null);
   const loadingNumberRef = useRef<HTMLDivElement>(null);
-
-  // Ref untuk animasi roll film foto
-  const photoRollContainerRef = useRef<HTMLDivElement>(null);
-  const photoRollTrackRef = useRef<HTMLDivElement>(null);
+  const photoFilmStripRef = useRef<HTMLDivElement>(null);
+  const photoFilmContainerRef = useRef<HTMLDivElement>(null);
 
   // Data untuk pencarian
   const searchablePages = [
@@ -316,67 +310,25 @@ export default function HomePage(): React.JSX.Element {
     "NGAMATI", "NANCANG", "NGEMBANGKAN", "NYUSUN"
   ];
 
-  // Data foto untuk progress bar - DIPERBAIKI MENJADI 10 FOTO
+  // Data foto untuk progress bar
   const progressPhotos = [
     { 
       id: 1, 
-      src: "images/photo1.jpg", 
+      src: "images/5.jpg", 
       alt: "Photo 1",
       uploadTime: new Date(Date.now() - 5 * 60 * 1000)
     },
     { 
       id: 2, 
-      src: "images/photo2.jpg", 
+      src: "images/6.jpg", 
       alt: "Photo 2",
-      uploadTime: new Date(Date.now() - 4 * 60 * 1000)
-    },
-    { 
-      id: 3, 
-      src: "images/photo3.jpg", 
-      alt: "Photo 3",
-      uploadTime: new Date(Date.now() - 3 * 60 * 1000)
-    },
-    { 
-      id: 4, 
-      src: "images/photo4.jpg", 
-      alt: "Photo 4",
       uploadTime: new Date(Date.now() - 2 * 60 * 1000)
     },
     { 
-      id: 5, 
-      src: "images/photo5.jpg", 
-      alt: "Photo 5",
-      uploadTime: new Date(Date.now() - 1.5 * 60 * 1000)
-    },
-    { 
-      id: 6, 
-      src: "images/photo6.jpg", 
-      alt: "Photo 6",
-      uploadTime: new Date(Date.now() - 1 * 60 * 1000)
-    },
-    { 
-      id: 7, 
-      src: "images/photo7.jpg", 
-      alt: "Photo 7",
-      uploadTime: new Date(Date.now() - 0.8 * 60 * 1000)
-    },
-    { 
-      id: 8, 
-      src: "images/photo8.jpg", 
-      alt: "Photo 8",
-      uploadTime: new Date(Date.now() - 0.6 * 60 * 1000)
-    },
-    { 
-      id: 9, 
-      src: "images/photo9.jpg", 
-      alt: "Photo 9",
-      uploadTime: new Date(Date.now() - 0.4 * 60 * 1000)
-    },
-    { 
-      id: 10, 
-      src: "images/photo10.jpg", 
-      alt: "Photo 10",
-      uploadTime: new Date(Date.now() - 0.2 * 60 * 1000)
+      id: 3, 
+      src: "images/5.jpg", 
+      alt: "Photo 3",
+      uploadTime: new Date(Date.now() - 30 * 1000)
     }
   ];
 
@@ -387,6 +339,14 @@ export default function HomePage(): React.JSX.Element {
     { title: "Development", description: "Frontend & Backend" },
     { title: "Features", description: "Functionality & Integration" }
   ];
+
+  // Data untuk foto film strip (5 foto)
+  const filmPhotos = Array.from({ length: 5 }, (_, i) => ({
+    id: i + 1,
+    src: "images/5.jpg",
+    alt: `Photo ${i + 1}`,
+    order: i + 1
+  }));
 
   // Helper functions
   const getIconByType = (type: string): string => {
@@ -1440,9 +1400,58 @@ export default function HomePage(): React.JSX.Element {
     }
   };
 
-  // Animasi GSAP Loading dengan angka acak - DIPERBAIKI
+  // Animasi GSAP untuk foto film strip - DITAMBAHKAN
   useEffect(() => {
-    if (!loadingNumberRef.current) return;
+    if (!photoFilmStripRef.current || !photoFilmContainerRef.current) return;
+    
+    // Reset posisi
+    gsap.set(photoFilmStripRef.current, { y: 0 });
+    
+    // Animasi film strip seperti roll film
+    const filmStripTimeline = gsap.timeline({
+      repeat: -1,
+      yoyo: false
+    });
+    
+    // Hitung tinggi total dari semua foto
+    const photoHeight = 80; // tinggi setiap foto
+    const gap = 20; // jarak antar foto
+    const totalHeight = (photoHeight + gap) * filmPhotos.length;
+    
+    // Animasi bergerak dari atas ke bawah (seperti roll film)
+    filmStripTimeline.to(photoFilmStripRef.current, {
+      y: -totalHeight + photoHeight,
+      duration: 8,
+      ease: "none",
+      onComplete: () => {
+        // Reset ke posisi awal dengan mulus
+        gsap.set(photoFilmStripRef.current, { y: 0 });
+      }
+    });
+    
+    // Tambahkan efek blur dan opacity saat bergerak
+    filmStripTimeline.fromTo(
+      photoFilmStripRef.current,
+      { filter: "blur(0px)", opacity: 0.9 },
+      { 
+        filter: "blur(2px)", 
+        opacity: 1,
+        duration: 4,
+        yoyo: true,
+        repeat: 1,
+        ease: "power1.inOut"
+      },
+      0
+    );
+    
+    return () => {
+      filmStripTimeline.kill();
+    };
+  }, []);
+
+  // Animasi GSAP Loading dengan angka acak dan foto film strip - DIPERBAIKI
+  useEffect(() => {
+    if (!loadingNumberRef.current || !photoFilmContainerRef.current) return;
 
     // Timeline untuk animasi angka acak
     const loadingTimeline = gsap.timeline({
@@ -1505,6 +1514,23 @@ export default function HomePage(): React.JSX.Element {
       0
     );
 
+    // Animasi foto film strip - DITAMBAHKAN
+    loadingTimeline.fromTo(photoFilmContainerRef.current,
+      {
+        opacity: 0,
+        scale: 0.9,
+        x: -50
+      },
+      {
+        opacity: 1,
+        scale: 1,
+        x: 0,
+        duration: 0.8,
+        ease: "power2.out"
+      },
+      0.2
+    );
+
     // Animasi akhir sebelum fade out
     loadingTimeline.to(loadingNumberRef.current, {
       scale: 1.1,
@@ -1514,111 +1540,16 @@ export default function HomePage(): React.JSX.Element {
       repeat: 1
     }, totalDuration - 0.6);
 
+    loadingTimeline.to(photoFilmContainerRef.current, {
+      opacity: 0.7,
+      scale: 0.95,
+      duration: 0.4,
+      ease: "power2.inOut"
+    }, totalDuration - 0.8);
+
     return () => {
       loadingTimeline.kill();
     };
-  }, []);
-
-  // ANIMASI GSAP ROLL FILM FOTO - DITAMBAHKAN
-  useEffect(() => {
-    if (!photoRollTrackRef.current || !photoRollContainerRef.current) return;
-
-    const photoElements = photoRollTrackRef.current.querySelectorAll('.photo-roll-item');
-    if (photoElements.length === 0) return;
-
-    // Reset posisi awal
-    gsap.set(photoElements, {
-      y: (i) => i * 120, // Atur posisi vertikal awal
-      opacity: 1,
-      scale: 1
-    });
-
-    // Timeline untuk animasi roll film
-    const rollTimeline = gsap.timeline({
-      repeat: -1,
-      defaults: {
-        ease: "none"
-      }
-    });
-
-    // Animasi roll dari atas ke bawah (seperti film yang berputar)
-    rollTimeline.to(photoElements, {
-      y: "+=1200", // Geser ke bawah sejauh tinggi total
-      duration: 20,
-      ease: "none",
-      modifiers: {
-        y: gsap.utils.unitize(y => parseFloat(y) % 1200) // Loop kembali ke atas
-      }
-    });
-
-    // Animasi efek parallax untuk setiap foto
-    photoElements.forEach((photo, i) => {
-      gsap.to(photo, {
-        scale: 1.05,
-        duration: 2,
-        repeat: -1,
-        yoyo: true,
-        delay: i * 0.2,
-        ease: "sine.inOut"
-      });
-    });
-
-    // Simpan timeline untuk cleanup
-    const rollAnimation = rollTimeline;
-
-    return () => {
-      if (rollAnimation) rollAnimation.kill();
-    };
-  }, []);
-
-  // ANIMASI GSAP UNTUK FOTO INDIVIDUAL - DITAMBAHKAN
-  useEffect(() => {
-    const photoItems = document.querySelectorAll('.photo-item');
-    
-    if (photoItems.length > 0) {
-      // Animasi masuk untuk setiap foto
-      photoItems.forEach((photo, index) => {
-        gsap.fromTo(photo,
-          {
-            opacity: 0,
-            scale: 0.8,
-            y: 50,
-            rotation: -5
-          },
-          {
-            opacity: 1,
-            scale: 1,
-            y: 0,
-            rotation: 0,
-            duration: 0.8,
-            delay: index * 0.1,
-            ease: "back.out(1.7)",
-            clearProps: "all"
-          }
-        );
-
-        // Efek hover
-        photo.addEventListener('mouseenter', () => {
-          gsap.to(photo, {
-            scale: 1.05,
-            y: -10,
-            rotation: 2,
-            duration: 0.3,
-            ease: "power2.out"
-          });
-        });
-
-        photo.addEventListener('mouseleave', () => {
-          gsap.to(photo, {
-            scale: 1,
-            y: 0,
-            rotation: 0,
-            duration: 0.3,
-            ease: "power2.out"
-          });
-        });
-      });
-    }
   }, []);
 
   useEffect(() => {
@@ -2114,7 +2045,7 @@ export default function HomePage(): React.JSX.Element {
       MozOsxFontSmoothing: 'grayscale'
     }}>
 
-      {/* GSAP Modern Loading Animation - DIPERBAIKI DENGAN ANGKA ACAK */}
+      {/* GSAP Modern Loading Animation dengan Foto Film Strip */}
       <AnimatePresence>
         {showGsapLoading && (
           <motion.div
@@ -2132,14 +2063,18 @@ export default function HomePage(): React.JSX.Element {
               alignItems: 'center',
               justifyContent: 'center',
               zIndex: 99999,
-              cursor: 'default'
+              cursor: 'default',
+              overflow: 'hidden'
             }}
           >
             <div
               ref={gsapLoadingRef}
               style={{
-                color: 'white',
-                textAlign: 'center',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '3rem',
                 userSelect: 'none',
                 WebkitUserSelect: 'none',
                 MozUserSelect: 'none',
@@ -2155,10 +2090,174 @@ export default function HomePage(): React.JSX.Element {
                   fontFamily: 'Helvetica, Arial, sans-serif',
                   color: 'white',
                   opacity: 0,
-                  letterSpacing: '-2px'
+                  letterSpacing: '-2px',
+                  textAlign: 'center'
                 }}
               >
                 {currentRandomNumber}
+              </div>
+
+              {/* Container untuk Foto Film Strip - DITAMBAHKAN */}
+              <div
+                ref={photoFilmContainerRef}
+                style={{
+                  position: 'relative',
+                  width: isMobile ? '120px' : '150px',
+                  height: isMobile ? '400px' : '500px',
+                  overflow: 'hidden',
+                  borderRadius: '10px',
+                  border: '1px solid rgba(255, 255, 255, 0.3)',
+                  backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                  opacity: 0
+                }}
+              >
+                {/* Foto Film Strip */}
+                <div
+                  ref={photoFilmStripRef}
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    gap: '20px',
+                    padding: '20px 0',
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%'
+                  }}
+                >
+                  {filmPhotos.map((photo) => (
+                    <motion.div
+                      key={photo.id}
+                      style={{
+                        width: isMobile ? '80px' : '100px',
+                        height: isMobile ? '80px' : '100px',
+                        borderRadius: '15px',
+                        overflow: 'hidden',
+                        border: '2px solid rgba(255, 255, 255, 0.4)',
+                        backgroundColor: '#222',
+                        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+                        position: 'relative'
+                      }}
+                      initial={{ scale: 0.8, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      transition={{ delay: photo.id * 0.1 }}
+                    >
+                      <img 
+                        src={photo.src} 
+                        alt={photo.alt}
+                        style={{
+                          width: '100%',
+                          height: '100%',
+                          objectFit: 'cover',
+                          display: 'block'
+                        }}
+                        onError={(e) => {
+                          e.currentTarget.style.backgroundColor = '#333';
+                          e.currentTarget.style.display = 'flex';
+                          e.currentTarget.style.alignItems = 'center';
+                          e.currentTarget.style.justifyContent = 'center';
+                          e.currentTarget.style.color = 'white';
+                          e.currentTarget.innerHTML = `<div style="padding: 1rem; text-align: center; font-size: 0.8rem;">Photo ${photo.id}</div>`;
+                        }}
+                      />
+                      {/* Nomor foto di sudut kanan bawah */}
+                      <div style={{
+                        position: 'absolute',
+                        bottom: '5px',
+                        right: '5px',
+                        backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                        color: 'white',
+                        fontSize: '0.7rem',
+                        fontWeight: '600',
+                        padding: '2px 6px',
+                        borderRadius: '10px',
+                        border: '1px solid rgba(255, 255, 255, 0.3)'
+                      }}>
+                        {String(photo.id).padStart(2, '0')}
+                      </div>
+                    </motion.div>
+                  ))}
+                  
+                  {/* Duplikat foto untuk efek loop yang mulus */}
+                  {filmPhotos.map((photo) => (
+                    <motion.div
+                      key={`duplicate-${photo.id}`}
+                      style={{
+                        width: isMobile ? '80px' : '100px',
+                        height: isMobile ? '80px' : '100px',
+                        borderRadius: '15px',
+                        overflow: 'hidden',
+                        border: '2px solid rgba(255, 255, 255, 0.4)',
+                        backgroundColor: '#222',
+                        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+                        position: 'relative'
+                      }}
+                    >
+                      <img 
+                        src={photo.src} 
+                        alt={`${photo.alt} duplicate`}
+                        style={{
+                          width: '100%',
+                          height: '100%',
+                          objectFit: 'cover',
+                          display: 'block'
+                        }}
+                        onError={(e) => {
+                          e.currentTarget.style.backgroundColor = '#333';
+                          e.currentTarget.style.display = 'flex';
+                          e.currentTarget.style.alignItems = 'center';
+                          e.currentTarget.style.justifyContent = 'center';
+                          e.currentTarget.style.color = 'white';
+                          e.currentTarget.innerHTML = `<div style="padding: 1rem; text-align: center; font-size: 0.8rem;">Photo ${photo.id}</div>`;
+                        }}
+                      />
+                      <div style={{
+                        position: 'absolute',
+                        bottom: '5px',
+                        right: '5px',
+                        backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                        color: 'white',
+                        fontSize: '0.7rem',
+                        fontWeight: '600',
+                        padding: '2px 6px',
+                        borderRadius: '10px',
+                        border: '1px solid rgba(255, 255, 255, 0.3)'
+                      }}>
+                        {String(photo.id).padStart(2, '0')}
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+                
+                {/* Overlay efek film strip */}
+                <div style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  width: '100%',
+                  height: '100%',
+                  background: 'linear-gradient(to bottom, transparent 0%, rgba(0, 0, 0, 0.1) 50%, transparent 100%)',
+                  pointerEvents: 'none'
+                }} />
+                
+                {/* Garis film strip di sisi kiri dan kanan */}
+                <div style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: '10px',
+                  width: '2px',
+                  height: '100%',
+                  backgroundColor: 'rgba(255, 255, 255, 0.2)'
+                }} />
+                <div style={{
+                  position: 'absolute',
+                  top: 0,
+                  right: '10px',
+                  width: '2px',
+                  height: '100%',
+                  backgroundColor: 'rgba(255, 255, 255, 0.2)'
+                }} />
               </div>
             </div>
           </motion.div>
@@ -4035,7 +4134,7 @@ export default function HomePage(): React.JSX.Element {
                 fontFamily: 'Helvetica, Arial, sans-serif',
                 order: 2
               }}>
-                <span ref={leftCounterRef}>{String(currentPhotoIndex + 1).padStart(2, '0')}</span>
+                <span>{String(currentPhotoIndex + 1).padStart(2, '0')}</span>
                 <span style={{ opacity: 0.6, fontSize: '0.9em' }}>/</span>
                 <span style={{ opacity: 0.6 }}>{totalPhotos}</span>
               </div>
@@ -5748,7 +5847,7 @@ export default function HomePage(): React.JSX.Element {
                   backgroundColor: '#222'
                 }}>
                   <img 
-                    src="images/photo1.jpg" 
+                    src="images/5.jpg" 
                     alt="Product Image"
                     style={{
                       width: '100%',
@@ -5797,7 +5896,7 @@ export default function HomePage(): React.JSX.Element {
                 backgroundColor: '#222'
               }}>
                 <img 
-                  src="images/photo2.jpg" 
+                  src="images/5.jpg" 
                   alt="Visual Designer"
                   style={{
                     width: '100%',
@@ -5885,7 +5984,7 @@ export default function HomePage(): React.JSX.Element {
                 backgroundColor: '#222'
               }}>
                 <img 
-                  src="images/photo3.jpg" 
+                  src="images/5.jpg" 
                   alt="Based"
                   style={{
                     width: '100%',
@@ -5954,7 +6053,7 @@ export default function HomePage(): React.JSX.Element {
                 backgroundColor: '#222'
               }}>
                 <img 
-                  src="images/photo4.jpg" 
+                  src="images/5.jpg" 
                   alt="Footer Image"
                   style={{
                     width: '100%',
@@ -6002,367 +6101,11 @@ export default function HomePage(): React.JSX.Element {
 
         </div>
         
-        {/* SECTION FOTO DENGAN ANIMASI ROLL FILM - DITAMBAHKAN */}
+        {/* Spacer kecil sebelum konten berikutnya */}
         <div style={{
-          width: '100%',
-          padding: isMobile ? '3rem 1rem' : '5rem 3rem',
-          marginTop: isMobile ? '3rem' : '5rem',
-          boxSizing: 'border-box',
-          position: 'relative',
-          overflow: 'hidden'
-        }}>
-          
-          {/* Judul Section */}
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            style={{
-              textAlign: 'center',
-              marginBottom: isMobile ? '3rem' : '5rem'
-            }}
-          >
-            <h2 style={{
-              color: 'white',
-              fontSize: isMobile ? '2.5rem' : '4rem',
-              fontWeight: '900',
-              textTransform: 'uppercase',
-              fontFamily: 'Helvetica, Arial, sans-serif',
-              letterSpacing: '-2px',
-              margin: '0 0 1rem 0',
-              lineHeight: 1
-            }}>
-              PHOTO ROLL
-            </h2>
-            <p style={{
-              color: 'rgba(255, 255, 255, 0.7)',
-              fontSize: isMobile ? '1rem' : '1.2rem',
-              fontFamily: 'Helvetica, Arial, sans-serif',
-              maxWidth: '600px',
-              margin: '0 auto',
-              lineHeight: 1.6
-            }}>
-              10 foto dalam bentuk roll film dengan animasi GSAP yang bergerak dari atas ke bawah
-            </p>
-          </motion.div>
-
-          {/* Container untuk animasi roll film */}
-          <div
-            ref={photoRollContainerRef}
-            style={{
-              position: 'relative',
-              width: '100%',
-              height: isMobile ? '500px' : '700px',
-              overflow: 'hidden',
-              borderRadius: '20px',
-              border: '1px solid rgba(255, 255, 255, 0.2)',
-              backgroundColor: 'rgba(20, 20, 20, 0.5)',
-              marginBottom: isMobile ? '3rem' : '5rem'
-            }}
-          >
-            {/* Track untuk foto-foto */}
-            <div
-              ref={photoRollTrackRef}
-              style={{
-                position: 'absolute',
-                width: '100%',
-                height: '1200px', // Tinggi untuk 10 foto dengan jarak
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                padding: '20px 0'
-              }}
-            >
-              {/* 10 Foto dengan animasi roll film */}
-              {progressPhotos.map((photo, index) => (
-                <motion.div
-                  key={photo.id}
-                  className="photo-roll-item"
-                  style={{
-                    width: isMobile ? '90%' : '70%',
-                    height: '100px',
-                    margin: '10px 0',
-                    borderRadius: '15px',
-                    overflow: 'hidden',
-                    border: '1px solid rgba(255, 255, 255, 0.3)',
-                    backgroundColor: '#222',
-                    position: 'relative',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '20px',
-                    padding: '0 20px',
-                    boxSizing: 'border-box'
-                  }}
-                >
-                  {/* Nomor foto */}
-                  <div style={{
-                    color: 'white',
-                    fontSize: '2rem',
-                    fontWeight: '700',
-                    fontFamily: 'Helvetica, Arial, sans-serif',
-                    minWidth: '60px',
-                    textAlign: 'center'
-                  }}>
-                    {String(index + 1).padStart(2, '0')}
-                  </div>
-                  
-                  {/* Garis pemisah */}
-                  <div style={{
-                    width: '2px',
-                    height: '60%',
-                    backgroundColor: 'rgba(255, 255, 255, 0.2)'
-                  }} />
-                  
-                  {/* Foto */}
-                  <div style={{
-                    flex: 1,
-                    height: '80px',
-                    borderRadius: '10px',
-                    overflow: 'hidden',
-                    border: '1px solid rgba(255, 255, 255, 0.2)'
-                  }}>
-                    <img 
-                      src={photo.src}
-                      alt={photo.alt}
-                      style={{
-                        width: '100%',
-                        height: '100%',
-                        objectFit: 'cover',
-                        display: 'block'
-                      }}
-                      onError={(e) => {
-                        e.currentTarget.style.backgroundColor = '#333';
-                        e.currentTarget.style.display = 'flex';
-                        e.currentTarget.style.alignItems = 'center';
-                        e.currentTarget.style.justifyContent = 'center';
-                        e.currentTarget.style.color = '#fff';
-                        e.currentTarget.innerHTML = `<div style="padding: 1rem; text-align: center;">Photo ${index + 1}</div>`;
-                      }}
-                    />
-                  </div>
-                  
-                  {/* Deskripsi */}
-                  <div style={{
-                    color: 'rgba(255, 255, 255, 0.8)',
-                    fontSize: '0.9rem',
-                    fontFamily: 'Helvetica, Arial, sans-serif',
-                    padding: '0 20px',
-                    maxWidth: '200px',
-                    textAlign: 'right'
-                  }}>
-                    {photo.alt}
-                    <div style={{
-                      fontSize: '0.8rem',
-                      color: 'rgba(255, 255, 255, 0.5)',
-                      marginTop: '5px'
-                    }}>
-                      {photoTimeAgo[index] || 'Just now'}
-                    </div>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-            
-            {/* Overlay gradient untuk efek fade */}
-            <div style={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              width: '100%',
-              height: '50px',
-              background: 'linear-gradient(to bottom, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 100%)',
-              pointerEvents: 'none'
-            }} />
-            <div style={{
-              position: 'absolute',
-              bottom: 0,
-              left: 0,
-              width: '100%',
-              height: '50px',
-              background: 'linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 100%)',
-              pointerEvents: 'none'
-            }} />
-          </div>
-
-          {/* Grid 10 Foto dengan Border Radius dan Animasi GSAP - DITAMBAHKAN */}
-          <div style={{
-            width: '100%',
-            padding: isMobile ? '2rem 0' : '3rem 0',
-            marginTop: isMobile ? '2rem' : '3rem'
-          }}>
-            <motion.h3
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              style={{
-                color: 'white',
-                fontSize: isMobile ? '2rem' : '3rem',
-                fontWeight: '700',
-                fontFamily: 'Helvetica, Arial, sans-serif',
-                textAlign: 'center',
-                marginBottom: isMobile ? '2rem' : '3rem',
-                letterSpacing: '-1px'
-              }}
-            >
-              10 FOTO DALAM GRID
-            </motion.h3>
-            
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(5, 1fr)',
-              gap: isMobile ? '1rem' : '2rem',
-              padding: isMobile ? '0 1rem' : '0 2rem'
-            }}>
-              {progressPhotos.map((photo, index) => (
-                <motion.div
-                  key={photo.id}
-                  className="photo-item"
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.5, delay: index * 0.1 }}
-                  style={{
-                    position: 'relative',
-                    borderRadius: '15px',
-                    overflow: 'hidden',
-                    border: '1px solid rgba(255, 255, 255, 0.3)',
-                    backgroundColor: '#222',
-                    aspectRatio: '1/1',
-                    cursor: 'pointer',
-                    transition: 'all 0.3s ease'
-                  }}
-                  onClick={() => {
-                    setCurrentPhotoIndex(index);
-                    handleOpenPhotoFullPage();
-                  }}
-                >
-                  <img 
-                    src={photo.src}
-                    alt={photo.alt}
-                    style={{
-                      width: '100%',
-                      height: '100%',
-                      objectFit: 'cover',
-                      display: 'block'
-                    }}
-                    onError={(e) => {
-                      e.currentTarget.style.backgroundColor = '#333';
-                      e.currentTarget.style.display = 'flex';
-                      e.currentTarget.style.alignItems = 'center';
-                      e.currentTarget.style.justifyContent = 'center';
-                      e.currentTarget.style.color = '#fff';
-                      e.currentTarget.innerHTML = `<div style="padding: 1rem; text-align: center;">Photo ${index + 1}</div>`;
-                    }}
-                  />
-                  
-                  {/* Overlay dengan nomor */}
-                  <div style={{
-                    position: 'absolute',
-                    bottom: '10px',
-                    right: '10px',
-                    backgroundColor: 'rgba(0, 0, 0, 0.7)',
-                    color: 'white',
-                    fontSize: '0.9rem',
-                    fontWeight: '600',
-                    padding: '5px 10px',
-                    borderRadius: '20px',
-                    border: '1px solid rgba(255, 255, 255, 0.3)'
-                  }}>
-                    {String(index + 1).padStart(2, '0')}
-                  </div>
-                  
-                  {/* Hover effect */}
-                  <div style={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    width: '100%',
-                    height: '100%',
-                    backgroundColor: 'rgba(0, 0, 0, 0)',
-                    transition: 'all 0.3s ease',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    opacity: 0
-                  }}
-                  className="photo-hover-overlay"
-                  >
-                    <div style={{
-                      color: 'white',
-                      fontSize: '1.2rem',
-                      fontWeight: '600',
-                      textAlign: 'center',
-                      padding: '1rem',
-                      backgroundColor: 'rgba(0, 0, 0, 0.7)',
-                      borderRadius: '10px',
-                      border: '1px solid rgba(255, 255, 255, 0.3)'
-                    }}>
-                      Klik untuk melihat
-                    </div>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-            
-            {/* Deskripsi */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.8, delay: 1 }}
-              style={{
-                textAlign: 'center',
-                marginTop: isMobile ? '3rem' : '4rem',
-                padding: isMobile ? '0 1rem' : '0 2rem'
-              }}
-            >
-              <p style={{
-                color: 'rgba(255, 255, 255, 0.8)',
-                fontSize: isMobile ? '1rem' : '1.2rem',
-                fontFamily: 'Helvetica, Arial, sans-serif',
-                lineHeight: 1.6,
-                maxWidth: '800px',
-                margin: '0 auto'
-              }}>
-                Koleksi 10 foto dengan animasi GSAP yang menarik. Setiap foto memiliki border radius 
-                dan efek hover yang halus. Foto-foto dapat diklik untuk membuka tampilan full screen 
-                dengan fitur komentar.
-              </p>
-              
-              <motion.button
-                onClick={() => {
-                  setCurrentPhotoIndex(0);
-                  handleOpenPhotoFullPage();
-                }}
-                style={{
-                  marginTop: '2rem',
-                  padding: isMobile ? '1rem 2rem' : '1.2rem 2.5rem',
-                  backgroundColor: 'transparent',
-                  border: '1px solid rgba(255, 255, 255, 0.3)',
-                  borderRadius: '30px',
-                  color: 'white',
-                  fontSize: isMobile ? '1rem' : '1.1rem',
-                  fontWeight: '600',
-                  cursor: 'pointer',
-                  fontFamily: 'Helvetica, Arial, sans-serif',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '10px',
-                  margin: '2rem auto 0 auto'
-                }}
-                whileHover={{ 
-                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                  borderColor: 'rgba(255, 255, 255, 0.5)'
-                }}
-              >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/>
-                  <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
-                </svg>
-                Lihat Semua Foto dalam Full Screen
-              </motion.button>
-            </motion.div>
-          </div>
-        </div>
+          height: isMobile ? '3rem' : '4rem',
+          width: '100%'
+        }} />
 
         <AnimatePresence mode="wait">
           {currentView === "main" && (
@@ -6380,5 +6123,3 @@ export default function HomePage(): React.JSX.Element {
     </div>
   );
 }
-
-
