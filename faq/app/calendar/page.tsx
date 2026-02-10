@@ -694,49 +694,49 @@ export default function CalendarPage(): React.JSX.Element {
           </div>
         </div>
         
-        {/* Nama user di bagian tengah kanan dengan panah NORTH WEST ARROW BESAR di kiri */}
-        <div style={{
-          flex: 1,
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center'
-        }}>
-          {user && (
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.8rem'
-            }}>
-              {/* Tanda panah NORTH WEST ARROW BESAR di samping kiri nama user */}
-              <svg 
-                width={isMobile ? "24" : "28"} 
-                height={isMobile ? "24" : "28"} 
-                viewBox="0 0 24 24" 
-                fill="none" 
-                stroke="currentColor" 
-                strokeWidth="2.5"
-              >
-                <path d="M7 17L17 7"/>
-                <path d="M7 7H17V17"/>
-              </svg>
-              
-              {/* Nama user BESAR */}
-              <span style={{
-                fontSize: isMobile ? '1.4rem' : '1.8rem',
-                fontWeight: '400',
-                color: 'rgba(255, 255, 255, 0.95)',
-                fontFamily: 'Helvetica, Arial, sans-serif',
-                whiteSpace: 'nowrap',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                maxWidth: isMobile ? '140px' : '200px'
-              }}>
-                {userDisplayName}
-              </span>
-            </div>
-          )}
-        </div>
-      </div>
+    {/* Nama user di bagian tengah kanan dengan panah NORTH WEST ARROW BESAR di kiri */}
+<div style={{
+  flex: 1,
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'center'
+}}>
+  {user && (
+    <div style={{
+      display: 'flex',
+      alignItems: 'center',
+      gap: '0.8rem'
+    }}>
+      {/* Tanda panah NORTH WEST ARROW BESAR di samping kiri nama user */}
+      <svg 
+        width={isMobile ? "24" : "28"} 
+        height={isMobile ? "24" : "28"} 
+        viewBox="0 0 24 24" 
+        fill="none" 
+        stroke="white" 
+        strokeWidth="2.5"
+        style={{ display: 'block' }}
+      >
+        <path d="M7 17L17 7" stroke="white" strokeWidth="2.5"/>
+        <path d="M7 7H17V17" stroke="white" strokeWidth="2.5"/>
+      </svg>
+      
+      {/* Nama user BESAR */}
+      <span style={{
+        fontSize: isMobile ? '1.4rem' : '1.8rem',
+        fontWeight: '400',
+        color: 'rgba(255, 255, 255, 0.95)',
+        fontFamily: 'Helvetica, Arial, sans-serif',
+        whiteSpace: 'nowrap',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        maxWidth: isMobile ? '140px' : '200px'
+      }}>
+        {userDisplayName}
+      </span>
+    </div>
+  )}
+</div>
       
       {/* Main Calendar Content */}
       <div style={{
@@ -1927,3 +1927,4 @@ export default function CalendarPage(): React.JSX.Element {
     </div>
   );
 }
+
