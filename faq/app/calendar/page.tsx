@@ -581,21 +581,30 @@ export default function CalendarPage(): React.JSX.Element {
           onClick={() => router.push('/')}
           style={{
             backgroundColor: 'transparent',
-            border: '1px solid rgba(255, 255, 255, 0.3)',
+            border: 'none',
             color: 'white',
-            width: '40px',
-            height: '40px',
-            borderRadius: '50%',
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: '1.5rem',
-            fontFamily: 'Helvetica, Arial, sans-serif'
+            justifyContent: 'flex-start',
+            fontSize: '1rem',
+            fontFamily: 'Helvetica, Arial, sans-serif',
+            padding: '0.5rem',
+            gap: '0.5rem'
           }}
-          whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
+          whileHover={{ opacity: 0.7 }}
         >
-          ←
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M7 17L17 7"/>
+            <path d="M7 7H17V17"/>
+          </svg>
+          <span style={{
+            fontSize: isMobile ? '0.9rem' : '1rem',
+            fontWeight: '400',
+            color: 'white'
+          }}>
+            Halaman utama
+          </span>
         </motion.button>
         
         <div style={{
@@ -613,35 +622,38 @@ export default function CalendarPage(): React.JSX.Element {
           }}>
             Kalender MENURU
           </h1>
-          <div style={{
-            backgroundColor: 'transparent',
-            color: 'white',
-            fontSize: '0.9rem',
-            padding: '0.3rem 0.8rem',
-            borderRadius: '20px',
-            border: '1px solid rgba(255, 255, 255, 0.3)'
-          }}>
-            {isAdmin ? 'Admin Mode' : 'User Mode'}
-          </div>
         </div>
         
-        <motion.button
-          onClick={handleTodayClick}
-          style={{
-            padding: '0.5rem 1.5rem',
-            backgroundColor: 'transparent',
-            border: '1px solid rgba(255, 255, 255, 0.3)',
-            borderRadius: '20px',
-            color: 'white',
-            fontSize: '0.9rem',
-            fontWeight: '300',
-            cursor: 'pointer',
-            fontFamily: 'Helvetica, Arial, sans-serif'
-          }}
-          whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
-        >
-          Today
-        </motion.button>
+        {user && (
+          <motion.button
+            style={{
+              backgroundColor: 'transparent',
+              border: 'none',
+              color: 'white',
+              cursor: 'default',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'flex-end',
+              fontSize: isMobile ? '0.9rem' : '1rem',
+              fontFamily: 'Helvetica, Arial, sans-serif',
+              padding: '0.5rem',
+              gap: '0.5rem',
+              marginRight: isMobile ? '0' : '1rem'
+            }}
+          >
+            <span style={{
+              fontSize: isMobile ? '0.9rem' : '1rem',
+              fontWeight: '400',
+              color: 'rgba(255, 255, 255, 0.9)'
+            }}>
+              {userDisplayName}
+            </span>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M7 17L17 7"/>
+              <path d="M7 7H17V17"/>
+            </svg>
+          </motion.button>
+        )}
       </div>
       
       {/* Main Calendar Content */}
@@ -966,51 +978,6 @@ export default function CalendarPage(): React.JSX.Element {
                 </motion.div>
               );
             })}
-          </div>
-        </div>
-        
-        {/* Legend for Event Colors */}
-        <div style={{
-          padding: '1.5rem',
-          backgroundColor: 'transparent',
-          border: '1px solid rgba(255, 255, 255, 0.2)',
-          borderRadius: '15px',
-          marginTop: '1rem'
-        }}>
-          <h3 style={{
-            color: 'white',
-            fontSize: '1.2rem',
-            fontWeight: '400',
-            margin: '0 0 1rem 0',
-            fontFamily: 'Helvetica, Arial, sans-serif'
-          }}>
-            Legend Warna Kegiatan
-          </h3>
-          <div style={{
-            display: 'flex',
-            flexWrap: 'wrap',
-            gap: '1rem'
-          }}>
-            {colorOptions.map(color => (
-              <div key={color.value} style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem'
-              }}>
-                <div style={{
-                  width: '15px',
-                  height: '15px',
-                  backgroundColor: color.value,
-                  borderRadius: '3px'
-                }} />
-                <span style={{
-                  color: 'rgba(255, 255, 255, 0.8)',
-                  fontSize: '0.9rem'
-                }}>
-                  {color.name}
-                </span>
-              </div>
-            ))}
           </div>
         </div>
         
@@ -1863,37 +1830,6 @@ export default function CalendarPage(): React.JSX.Element {
           </motion.div>
         )}
       </AnimatePresence>
-      
-      {/* Footer */}
-      <div style={{
-        width: '100%',
-        padding: isMobile ? '2rem 1rem' : '3rem 2rem',
-        marginTop: '3rem',
-        borderTop: '1px solid rgba(255, 255, 255, 0.2)',
-        textAlign: 'center'
-      }}>
-        <p style={{
-          color: 'rgba(255, 255, 255, 0.6)',
-          fontSize: '0.9rem',
-          fontFamily: 'Helvetica, Arial, sans-serif',
-          margin: '0 0 1rem 0'
-        }}>
-          Kalender MENURU • Data tersinkronisasi dengan halaman utama •
-          <span style={{ color: '#3B82F6', marginLeft: '0.3rem' }}>
-            Titik biru menunjukkan hari ini
-          </span>
-        </p>
-        <p style={{
-          color: 'rgba(255, 255, 255, 0.4)',
-          fontSize: '0.8rem',
-          fontFamily: 'Helvetica, Arial, sans-serif',
-          margin: 0
-        }}>
-          {isAdmin ? 
-            'Mode Admin: Anda dapat menambah, mengedit, dan menghapus kegiatan' : 
-            'Mode User: Anda hanya dapat melihat kegiatan'}
-        </p>
-      </div>
     </div>
   );
 }
