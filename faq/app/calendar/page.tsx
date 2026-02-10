@@ -278,6 +278,18 @@ export default function CalendarPage(): React.JSX.Element {
     return adminEmails.includes(email.toLowerCase());
   };
   
+  // Fungsi untuk menghitung total event dalam bulan ini
+  const getTotalEventsThisMonth = () => {
+    const eventsThisMonth = calendarEvents.filter(event => {
+      const eventDate = event.date instanceof Date ? event.date : event.date.toDate();
+      return (
+        eventDate.getMonth() === currentMonth &&
+        eventDate.getFullYear() === currentYear
+      );
+    });
+    return eventsThisMonth.length;
+  };
+  
   // Load user dan events dari Firebase
   useEffect(() => {
     const unsubscribeAuth = onAuthStateChanged(auth, (currentUser) => {
@@ -544,6 +556,9 @@ export default function CalendarPage(): React.JSX.Element {
     };
   }, [showAddEventModal, showEventDetailsModal]);
   
+  // Hitung total event bulan ini
+  const totalEventsThisMonth = getTotalEventsThisMonth();
+  
   return (
     <div style={{
       minHeight: '100vh',
@@ -577,40 +592,53 @@ export default function CalendarPage(): React.JSX.Element {
         borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
         backdropFilter: 'blur(10px)'
       }}>
-        <motion.button
-          onClick={() => router.push('/')}
-          style={{
-            backgroundColor: 'transparent',
-            border: 'none',
-            color: 'white',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'flex-start',
-            fontSize: '1rem',
-            fontFamily: 'Helvetica, Arial, sans-serif',
-            padding: '0.5rem',
-            gap: '0.5rem'
-          }}
-          whileHover={{ opacity: 0.7 }}
-        >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M7 17L17 7"/>
-            <path d="M7 7H17V17"/>
-          </svg>
-          <span style={{
-            fontSize: isMobile ? '0.9rem' : '1rem',
-            fontWeight: '400',
-            color: 'white'
-          }}>
-            Halaman utama
-          </span>
-        </motion.button>
-        
+        {/* Back Button kiri */}
         <div style={{
+          flex: 1,
           display: 'flex',
+          justifyContent: 'flex-start',
+          minWidth: isMobile ? '120px' : '150px'
+        }}>
+          <motion.button
+            onClick={() => router.push('/')}
+            style={{
+              backgroundColor: 'transparent',
+              border: 'none',
+              color: 'white',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'flex-start',
+              fontSize: isMobile ? '1rem' : '1.1rem',
+              fontFamily: 'Helvetica, Arial, sans-serif',
+              padding: '0.5rem',
+              gap: '0.5rem',
+              fontWeight: '400'
+            }}
+            whileHover={{ opacity: 0.7 }}
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M7 17L17 7"/>
+              <path d="M7 7H17V17"/>
+            </svg>
+            <span style={{
+              fontSize: isMobile ? '1rem' : '1.1rem',
+              fontWeight: '400',
+              color: 'white'
+            }}>
+              Halaman utama
+            </span>
+          </motion.button>
+        </div>
+        
+        {/* Judul kalender di tengah dengan event counter */}
+        <div style={{
+          flex: 2,
+          display: 'flex',
+          flexDirection: 'column',
           alignItems: 'center',
-          gap: '1rem'
+          justifyContent: 'center',
+          textAlign: 'center'
         }}>
           <h1 style={{
             color: 'white',
@@ -622,45 +650,74 @@ export default function CalendarPage(): React.JSX.Element {
           }}>
             Kalender MENURU
           </h1>
+          <div style={{
+            color: 'rgba(255, 255, 255, 0.7)',
+            fontSize: isMobile ? '0.9rem' : '1rem',
+            fontWeight: '400',
+            fontFamily: 'Helvetica, Arial, sans-serif',
+            marginTop: '0.3rem',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.3rem'
+          }}>
+            <span style={{
+              backgroundColor: '#3B82F6',
+              color: 'white',
+              padding: '0.2rem 0.5rem',
+              borderRadius: '10px',
+              fontSize: '0.8rem',
+              fontWeight: '600'
+            }}>
+              {totalEventsThisMonth}
+            </span>
+            <span>kegiatan di {getMonthName(currentMonth)} {currentYear}</span>
+          </div>
         </div>
         
-        {user && (
-          <motion.button
-            style={{
-              backgroundColor: 'transparent',
-              border: 'none',
-              color: 'white',
-              cursor: 'default',
+        {/* Nama user di kanan */}
+        <div style={{
+          flex: 1,
+          display: 'flex',
+          justifyContent: 'flex-end',
+          minWidth: isMobile ? '120px' : '150px'
+        }}>
+          {user && (
+            <div style={{
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'flex-end',
-              fontSize: isMobile ? '0.9rem' : '1rem',
-              fontFamily: 'Helvetica, Arial, sans-serif',
-              padding: '0.5rem',
               gap: '0.5rem',
-              marginRight: isMobile ? '0' : '1rem'
-            }}
-          >
-            <span style={{
-              fontSize: isMobile ? '0.9rem' : '1rem',
-              fontWeight: '400',
-              color: 'rgba(255, 255, 255, 0.9)'
+              padding: isMobile ? '0.3rem 0.5rem' : '0.5rem 1rem',
+              borderRadius: '20px',
+              backgroundColor: 'rgba(255, 255, 255, 0.05)',
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+              maxWidth: isMobile ? '180px' : '250px',
+              overflow: 'hidden'
             }}>
-              {userDisplayName}
-            </span>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M7 17L17 7"/>
-              <path d="M7 7H17V17"/>
-            </svg>
-          </motion.button>
-        )}
+              <span style={{
+                fontSize: isMobile ? '0.9rem' : '1.1rem',
+                fontWeight: '400',
+                color: 'rgba(255, 255, 255, 0.9)',
+                fontFamily: 'Helvetica, Arial, sans-serif',
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis'
+              }}>
+                {userDisplayName}
+              </span>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M7 17L17 7"/>
+                <path d="M7 7H17V17"/>
+              </svg>
+            </div>
+          )}
+        </div>
       </div>
       
       {/* Main Calendar Content */}
       <div style={{
         width: '100%',
         maxWidth: '1400px',
-        marginTop: isMobile ? '5rem' : '8rem',
+        marginTop: isMobile ? '7rem' : '10rem',
         padding: isMobile ? '1rem' : '2rem',
         display: 'flex',
         flexDirection: 'column',
