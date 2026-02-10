@@ -4,156 +4,550 @@ import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import gsap from "gsap";
+import { initializeApp, getApps } from "firebase/app";
+import { 
+  getAuth, 
+  onAuthStateChanged,
+  User
+} from "firebase/auth";
+import { 
+  getFirestore, 
+  collection, 
+  addDoc, 
+  query, 
+  orderBy, 
+  onSnapshot,
+  serverTimestamp,
+  Timestamp,
+  doc,
+  getDoc,
+  updateDoc,
+  deleteDoc,
+  where,
+  getDocs
+} from "firebase/firestore";
 
-export default function HomePage(): React.JSX.Element {
+// Konfigurasi Firebase (sama dengan halaman utama)
+const firebaseConfig = {
+  apiKey: "AIzaSyD_htQZ1TClnXKZGRJ4izbMQ02y6V3aNAQ",
+  authDomain: "wawa44-58d1e.firebaseapp.com",
+  databaseURL: "https://wawa44-58d1e-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "wawa44-58d1e",
+  storageBucket: "wawa44-58d1e.firebasestorage.app",
+  messagingSenderId: "836899520599",
+  appId: "1:836899520599:web:b346e4370ecfa9bb89e312",
+  measurementId: "G-8LMP7F4BE9"
+};
+
+let app = null;
+let auth = null;
+let db = null;
+
+if (typeof window !== "undefined") {
+  app = getApps().length === 0
+    ? initializeApp(firebaseConfig)
+    : getApps()[0];
+
+  auth = getAuth(app);
+  db = getFirestore(app);
+}
+
+// Type untuk event kalender
+interface CalendarEvent {
+  id: string;
+  title: string;
+  description: string;
+  date: Date;
+  time?: string;
+  color: string;
+  label: string;
+  createdBy: string;
+  createdByEmail: string;
+  isAdmin: boolean;
+  createdAt: Timestamp | Date;
+}
+
+// Type untuk event form
+interface EventFormData {
+  title: string;
+  description: string;
+  date: Date;
+  time: string;
+  color: string;
+  label: string;
+}
+
+export default function CalendarPage(): React.JSX.Element {
   const router = useRouter();
   const [isMobile, setIsMobile] = useState(false);
-  const [loadingText, setLoadingText] = useState("NURU");
+  const [user, setUser] = useState<User | null>(null);
+  const [userDisplayName, setUserDisplayName] = useState("");
+  const [userEmail, setUserEmail] = useState("");
+  const [isAdmin, setIsAdmin] = useState(false);
+  
+  // State untuk kalender
+  const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
+  const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
+  const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [showAddEventModal, setShowAddEventModal] = useState(false);
+  const [showEventDetailsModal, setShowEventDetailsModal] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [isDarkMode, setIsDarkMode] = useState(true);
-  const [cursorType, setCursorType] = useState("default");
-  const [cursorText, setCursorText] = useState("");
-  const [hoveredLink, setHoveredLink] = useState("");
-  const [showDescription, setShowDescription] = useState(true);
-  const headerRef = useRef<HTMLDivElement>(null);
-  const cursorRef = useRef<HTMLDivElement>(null);
-  const topNavRef = useRef<HTMLDivElement>(null);
-  const scrollTextRef = useRef<HTMLDivElement>(null);
-  const descriptionRef = useRef<HTMLDivElement>(null);
-
-  // Animasi loading text
-  const loadingTexts = [
-    "NURU", "MBACA", "NULIS", "NGEXPLORASI", 
-    "NEMUKAN", "NCIPTA", "NGGALI", "NARIK",
-    "NGAMATI", "NANCANG", "NGEMBANGKAN", "NYUSUN"
+  const [isLoadingEvents, setIsLoadingEvents] = useState(false);
+  
+  // State untuk form tambah event
+  const [eventForm, setEventForm] = useState<EventFormData>({
+    title: "",
+    description: "",
+    date: new Date(),
+    time: "09:00",
+    color: "#3B82F6",
+    label: "Meeting"
+  });
+  
+  // State untuk edit event
+  const [isEditingEvent, setIsEditingEvent] = useState(false);
+  const [editingEventId, setEditingEventId] = useState<string | null>(null);
+  
+  // Ref
+  const calendarModalRef = useRef<HTMLDivElement>(null);
+  const addEventModalRef = useRef<HTMLDivElement>(null);
+  const eventDetailsModalRef = useRef<HTMLDivElement>(null);
+  
+  // Warna dan label preset
+  const colorOptions = [
+    { value: "#3B82F6", label: "Blue", name: "Biru" },
+    { value: "#EF4444", label: "Red", name: "Merah" },
+    { value: "#10B981", label: "Green", name: "Hijau" },
+    { value: "#F59E0B", label: "Yellow", name: "Kuning" },
+    { value: "#8B5CF6", label: "Purple", name: "Ungu" },
+    { value: "#EC4899", label: "Pink", name: "Pink" },
+    { value: "#6366F1", label: "Indigo", name: "Indigo" },
+    { value: "#F97316", label: "Orange", name: "Oranye" }
   ];
-
+  
+  const labelOptions = [
+    { value: "Meeting", label: "Meeting" },
+    { value: "Event", label: "Event" },
+    { value: "Deadline", label: "Deadline" },
+    { value: "Reminder", label: "Reminder" },
+    { value: "Birthday", label: "Birthday" },
+    { value: "Holiday", label: "Holiday" },
+    { value: "Appointment", label: "Appointment" },
+    { value: "Task", label: "Task" },
+    { value: "Update", label: "Update" },
+    { value: "Maintenance", label: "Maintenance" },
+    { value: "Development", label: "Development" },
+    { value: "Security", label: "Security" },
+    { value: "Optimization", label: "Optimization" },
+    { value: "Feature", label: "Feature" }
+  ];
+  
+  // Fungsi untuk mendapatkan nama bulan
+  const getMonthName = (monthIndex: number): string => {
+    const months = [
+      'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+      'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+    ];
+    return months[monthIndex];
+  };
+  
+  // Fungsi untuk mendapatkan nama bulan singkat
+  const getShortMonthName = (monthIndex: number): string => {
+    const months = [
+      'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun',
+      'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'
+    ];
+    return months[monthIndex];
+  };
+  
+  // Fungsi untuk mendapatkan hari dalam seminggu
+  const getDayName = (dayIndex: number): string => {
+    const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+    return days[dayIndex];
+  };
+  
+  // Fungsi untuk mendapatkan hari dalam seminggu singkat
+  const getShortDayName = (dayIndex: number): string => {
+    const days = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
+    return days[dayIndex];
+  };
+  
+  // Fungsi untuk mendapatkan jumlah hari dalam bulan
+  const getDaysInMonth = (year: number, month: number): number => {
+    return new Date(year, month + 1, 0).getDate();
+  };
+  
+  // Fungsi untuk mendapatkan hari pertama dalam bulan (0 = Minggu, 1 = Senin, dst)
+  const getFirstDayOfMonth = (year: number, month: number): number => {
+    return new Date(year, month, 1).getDay();
+  };
+  
+  // Fungsi untuk generate kalender
+  const generateCalendar = () => {
+    const daysInMonth = getDaysInMonth(currentYear, currentMonth);
+    const firstDayOfMonth = getFirstDayOfMonth(currentYear, currentMonth);
+    const days = [];
+    
+    // Tambahkan hari kosong untuk hari-hari sebelum bulan dimulai
+    for (let i = 0; i < firstDayOfMonth; i++) {
+      days.push(null);
+    }
+    
+    // Tambahkan hari-hari dalam bulan
+    for (let i = 1; i <= daysInMonth; i++) {
+      const currentDate = new Date(currentYear, currentMonth, i);
+      const dayEvents = calendarEvents.filter(event => {
+        const eventDate = event.date instanceof Date ? event.date : event.date.toDate();
+        return (
+          eventDate.getDate() === i &&
+          eventDate.getMonth() === currentMonth &&
+          eventDate.getFullYear() === currentYear
+        );
+      });
+      
+      days.push({
+        date: i,
+        fullDate: currentDate,
+        isToday: currentDate.toDateString() === new Date().toDateString(),
+        isSelected: selectedDate ? currentDate.toDateString() === selectedDate.toDateString() : false,
+        events: dayEvents
+      });
+    }
+    
+    return days;
+  };
+  
+  // Fungsi untuk navigasi bulan
+  const navigateMonth = (direction: 'prev' | 'next') => {
+    if (direction === 'prev') {
+      if (currentMonth === 0) {
+        setCurrentMonth(11);
+        setCurrentYear(currentYear - 1);
+      } else {
+        setCurrentMonth(currentMonth - 1);
+      }
+    } else {
+      if (currentMonth === 11) {
+        setCurrentMonth(0);
+        setCurrentYear(currentYear + 1);
+      } else {
+        setCurrentMonth(currentMonth + 1);
+      }
+    }
+  };
+  
+  // Fungsi untuk pilih tahun
+  const handleYearSelect = (year: number) => {
+    setCurrentYear(year);
+  };
+  
+  // Fungsi untuk pilih bulan
+  const handleMonthSelect = (monthIndex: number) => {
+    setCurrentMonth(monthIndex);
+  };
+  
+  // Fungsi untuk pilih tanggal
+  const handleDateSelect = (date: Date) => {
+    setSelectedDate(date);
+    setEventForm(prev => ({
+      ...prev,
+      date: date
+    }));
+    setShowAddEventModal(true);
+  };
+  
+  // Fungsi untuk format tanggal
+  const formatDate = (date: Date): string => {
+    return `${getDayName(date.getDay())}, ${date.getDate()} ${getMonthName(date.getMonth())} ${date.getFullYear()}`;
+  };
+  
+  // Fungsi untuk format waktu
+  const formatTime = (date: Date, timeString?: string): string => {
+    if (timeString) {
+      const [hours, minutes] = timeString.split(':');
+      return `${hours}:${minutes}`;
+    }
+    return date.getHours().toString().padStart(2, '0') + ':' + date.getMinutes().toString().padStart(2, '0');
+  };
+  
+  // Fungsi untuk mengecek apakah user adalah admin
+  const checkIfAdmin = (email: string): boolean => {
+    const adminEmails = ['faridardiansyah061@gmail.com', 'admin@menuru.com'];
+    return adminEmails.includes(email.toLowerCase());
+  };
+  
+  // Load user dan events dari Firebase
+  useEffect(() => {
+    const unsubscribeAuth = onAuthStateChanged(auth, (currentUser) => {
+      if (currentUser) {
+        setUser(currentUser);
+        setUserDisplayName(currentUser.displayName || currentUser.email?.split('@')[0] || 'User');
+        setUserEmail(currentUser.email || '');
+        setIsAdmin(checkIfAdmin(currentUser.email || ''));
+      } else {
+        setUser(null);
+        setUserDisplayName('');
+        setUserEmail('');
+        setIsAdmin(false);
+      }
+      setIsLoading(false);
+    });
+    
+    return () => unsubscribeAuth();
+  }, []);
+  
+  // Load events dari Firebase
+  useEffect(() => {
+    if (!db) return;
+    
+    setIsLoadingEvents(true);
+    
+    const eventsRef = collection(db, 'calendarEvents');
+    const q = query(eventsRef, orderBy('date', 'asc'));
+    
+    const unsubscribe = onSnapshot(q, 
+      (querySnapshot) => {
+        const eventsData: CalendarEvent[] = [];
+        
+        querySnapshot.forEach((doc) => {
+          const data = doc.data();
+          let eventDate = data.date;
+          
+          // Convert Firestore Timestamp to Date if needed
+          if (eventDate && typeof eventDate.toDate === 'function') {
+            eventDate = eventDate.toDate();
+          } else if (typeof eventDate === 'string') {
+            eventDate = new Date(eventDate);
+          }
+          
+          eventsData.push({
+            id: doc.id,
+            title: data.title || "No Title",
+            description: data.description || "",
+            date: eventDate,
+            time: data.time || "00:00",
+            color: data.color || "#3B82F6",
+            label: data.label || "Event",
+            createdBy: data.createdBy || "Unknown",
+            createdByEmail: data.createdByEmail || "",
+            isAdmin: data.isAdmin || false,
+            createdAt: data.createdAt || new Date()
+          });
+        });
+        
+        console.log(`✅ Loaded ${eventsData.length} calendar events`);
+        setCalendarEvents(eventsData);
+        setIsLoadingEvents(false);
+      },
+      (error) => {
+        console.error("❌ Error loading calendar events:", error);
+        setIsLoadingEvents(false);
+      }
+    );
+    
+    return () => unsubscribe();
+  }, [db]);
+  
+  // Close modal when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (addEventModalRef.current && !addEventModalRef.current.contains(event.target as Node)) {
+        setShowAddEventModal(false);
+        setIsEditingEvent(false);
+        setEditingEventId(null);
+      }
+      if (eventDetailsModalRef.current && !eventDetailsModalRef.current.contains(event.target as Node)) {
+        setShowEventDetailsModal(false);
+        setSelectedEvent(null);
+      }
+    };
+    
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+  
+  // Handler untuk form input
+  const handleFormInputChange = (field: keyof EventFormData, value: string | Date) => {
+    setEventForm(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+  
+  // Handler untuk submit event baru
+  const handleSubmitEvent = async () => {
+    if (!user || !db) {
+      alert("Silakan login terlebih dahulu!");
+      return;
+    }
+    
+    if (!eventForm.title.trim()) {
+      alert("Judul kegiatan tidak boleh kosong!");
+      return;
+    }
+    
+    try {
+      // Combine date and time
+      const [hours, minutes] = eventForm.time.split(':');
+      const eventDate = new Date(eventForm.date);
+      eventDate.setHours(parseInt(hours), parseInt(minutes));
+      
+      const eventData = {
+        title: eventForm.title.trim(),
+        description: eventForm.description.trim(),
+        date: eventDate,
+        time: eventForm.time,
+        color: eventForm.color,
+        label: eventForm.label,
+        createdBy: userDisplayName,
+        createdByEmail: userEmail,
+        isAdmin: isAdmin,
+        createdAt: serverTimestamp()
+      };
+      
+      if (isEditingEvent && editingEventId) {
+        // Update existing event
+        const eventRef = doc(db, 'calendarEvents', editingEventId);
+        await updateDoc(eventRef, eventData);
+        console.log("✅ Event updated:", editingEventId);
+      } else {
+        // Add new event
+        const docRef = await addDoc(collection(db, 'calendarEvents'), eventData);
+        console.log("✅ Event added with ID:", docRef.id);
+      }
+      
+      // Reset form
+      setEventForm({
+        title: "",
+        description: "",
+        date: selectedDate || new Date(),
+        time: "09:00",
+        color: "#3B82F6",
+        label: "Meeting"
+      });
+      
+      setIsEditingEvent(false);
+      setEditingEventId(null);
+      setShowAddEventModal(false);
+      
+      alert(isEditingEvent ? "Kegiatan berhasil diperbarui!" : "Kegiatan berhasil ditambahkan!");
+      
+    } catch (error) {
+      console.error("❌ Error saving event:", error);
+      alert("Gagal menyimpan kegiatan. Silakan coba lagi.");
+    }
+  };
+  
+  // Handler untuk edit event
+  const handleEditEvent = (event: CalendarEvent) => {
+    const eventDate = event.date instanceof Date ? event.date : event.date.toDate();
+    
+    setEventForm({
+      title: event.title,
+      description: event.description,
+      date: eventDate,
+      time: event.time || "09:00",
+      color: event.color,
+      label: event.label
+    });
+    
+    setIsEditingEvent(true);
+    setEditingEventId(event.id);
+    setShowAddEventModal(true);
+    setShowEventDetailsModal(false);
+  };
+  
+  // Handler untuk hapus event
+  const handleDeleteEvent = async (eventId: string) => {
+    if (!db) return;
+    
+    if (!confirm("Apakah Anda yakin ingin menghapus kegiatan ini?")) {
+      return;
+    }
+    
+    try {
+      await deleteDoc(doc(db, 'calendarEvents', eventId));
+      console.log("✅ Event deleted:", eventId);
+      setShowEventDetailsModal(false);
+      setSelectedEvent(null);
+      alert("Kegiatan berhasil dihapus!");
+    } catch (error) {
+      console.error("❌ Error deleting event:", error);
+      alert("Gagal menghapus kegiatan. Silakan coba lagi.");
+    }
+  };
+  
+  // Handler untuk melihat detail event
+  const handleViewEventDetails = (event: CalendarEvent) => {
+    setSelectedEvent(event);
+    setShowEventDetailsModal(true);
+  };
+  
+  // Handler untuk today button
+  const handleTodayClick = () => {
+    const today = new Date();
+    setCurrentYear(today.getFullYear());
+    setCurrentMonth(today.getMonth());
+    setSelectedDate(today);
+  };
+  
+  // Effect untuk resize
   useEffect(() => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 768);
     };
-
+    
     checkMobile();
     window.addEventListener('resize', checkMobile);
-
-    // Animasi loading text
-    let currentIndex = 0;
-    const textInterval = setInterval(() => {
-      currentIndex = (currentIndex + 1) % loadingTexts.length;
-      setLoadingText(loadingTexts[currentIndex]);
-    }, 500);
-
-    // Hentikan loading setelah selesai
-    const loadingTimeout = setTimeout(() => {
-      setIsLoading(false);
-      clearInterval(textInterval);
-    }, 3000);
-
-    // Animasi teks berjalan dari atas ke bawah
-    const setupAutoScroll = () => {
-      if (scrollTextRef.current) {
-        const itemHeight = isMobile ? 80 : 100;
-        const totalItems = 15;
-        const totalScrollDistance = totalItems * itemHeight - window.innerHeight;
-        
-        // Hapus animasi sebelumnya jika ada
-        gsap.killTweensOf(scrollTextRef.current);
-        
-        // Animasi infinite loop dari atas ke bawah
-        gsap.to(scrollTextRef.current, {
-          y: -totalScrollDistance,
-          duration: 20,
-          ease: "none",
-          repeat: -1,
-          yoyo: false
-        });
-      }
+    
+    return () => {
+      window.removeEventListener('resize', checkMobile);
     };
-
-    // Handle scroll untuk hide/show description
-    const handleScroll = () => {
-      if (descriptionRef.current) {
-        const descriptionRect = descriptionRef.current.getBoundingClientRect();
-        // Jika deskripsi sudah hampir keluar dari viewport (atas), sembunyikan
-        if (descriptionRect.top < -50) {
-          setShowDescription(false);
-        } else {
-          setShowDescription(true);
+  }, []);
+  
+  // Handle escape key
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        if (showAddEventModal) {
+          setShowAddEventModal(false);
+          setIsEditingEvent(false);
+          setEditingEventId(null);
+        }
+        if (showEventDetailsModal) {
+          setShowEventDetailsModal(false);
+          setSelectedEvent(null);
         }
       }
     };
-
-    // Setup auto scroll setelah component mount
-    setTimeout(setupAutoScroll, 100);
-    window.addEventListener('resize', setupAutoScroll);
-    window.addEventListener('scroll', handleScroll);
-
-    // Custom cursor animation
-    const moveCursor = (e: MouseEvent) => {
-      if (cursorRef.current) {
-        gsap.to(cursorRef.current, {
-          x: e.clientX,
-          y: e.clientY,
-          duration: 0.1,
-          ease: "power2.out"
-        });
-      }
-    };
-
-    document.addEventListener('mousemove', moveCursor);
-
+    
+    document.addEventListener('keydown', handleKeyDown);
     return () => {
-      window.removeEventListener('resize', checkMobile);
-      window.removeEventListener('resize', setupAutoScroll);
-      window.removeEventListener('scroll', handleScroll);
-      clearInterval(textInterval);
-      clearTimeout(loadingTimeout);
-      document.removeEventListener('mousemove', moveCursor);
-      if (scrollTextRef.current) {
-        gsap.killTweensOf(scrollTextRef.current);
-      }
+      document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [isMobile]);
-
-  // Fungsi toggle dark/light mode
-  const toggleColorMode = () => {
-    setIsDarkMode(!isDarkMode);
-  };
-
-  // Handler untuk cursor hover
-  const handleLinkHover = (type: string, text: string = "", linkName: string = "") => {
-    setCursorType(type);
-    setCursorText(text);
-    setHoveredLink(linkName);
-  };
-
-  const handleLinkLeave = () => {
-    setCursorType("default");
-    setCursorText("");
-    setHoveredLink("");
-  };
-
-  // Warna cursor
-  const getCursorColors = () => {
-    if (cursorType === "link") {
-      return {
-        dotColor: '#6366F1',
-        textColor: 'white'
-      };
+  }, [showAddEventModal, showEventDetailsModal]);
+  
+  // Animasi untuk modal
+  useEffect(() => {
+    if (showAddEventModal || showEventDetailsModal) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'auto';
     }
     
-    return {
-      dotColor: '#EC4899',
-      textColor: 'white'
+    return () => {
+      document.body.style.overflow = 'auto';
     };
-  };
-
-  const cursorColors = getCursorColors();
-
+  }, [showAddEventModal, showEventDetailsModal]);
+  
   return (
     <div style={{
       minHeight: '100vh',
-      backgroundColor: isDarkMode ? 'black' : '#ff0028',
+      backgroundColor: 'black',
       margin: 0,
       padding: 0,
       width: '100%',
@@ -162,591 +556,1343 @@ export default function HomePage(): React.JSX.Element {
       justifyContent: 'flex-start',
       alignItems: 'center',
       position: 'relative',
-      overflow: 'hidden',
+      overflow: 'auto',
       fontFamily: 'Helvetica, Arial, sans-serif',
       WebkitFontSmoothing: 'antialiased',
-      MozOsxFontSmoothing: 'grayscale',
-      transition: 'background-color 0.5s ease',
-      cursor: 'none'
+      MozOsxFontSmoothing: 'grayscale'
     }}>
-
-      {/* Custom Cursor */}
-      <div
-        ref={cursorRef}
-        style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          width: cursorType === "link" ? '140px' : '20px',
-          height: cursorType === "link" ? '60px' : '20px',
-          backgroundColor: cursorColors.dotColor,
-          borderRadius: cursorType === "link" ? '30px' : '50%',
-          pointerEvents: 'none',
-          zIndex: 9999,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          fontSize: '14px',
-          fontWeight: '700',
-          color: cursorColors.textColor,
-          textAlign: 'center',
-          transition: 'all 0.2s ease',
-          transform: 'translate(-50%, -50%)',
-          padding: cursorType === "link" ? '0 20px' : '0',
-          boxShadow: '0 2px 10px rgba(0,0,0,0.3)',
-          border: 'none'
-        }}
-      >
-        {cursorType === "link" && (
-          <div style={{
+      
+      {/* Header dengan Back Button */}
+      <div style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        width: '100%',
+        padding: isMobile ? '1rem' : '2rem',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        zIndex: 100,
+        backgroundColor: 'black',
+        borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
+        backdropFilter: 'blur(10px)'
+      }}>
+        <motion.button
+          onClick={() => router.push('/')}
+          style={{
+            backgroundColor: 'transparent',
+            border: '1px solid rgba(255, 255, 255, 0.3)',
+            color: 'white',
+            width: '40px',
+            height: '40px',
+            borderRadius: '50%',
+            cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
-            gap: '8px'
-          }}>
-            <span style={{ 
-              fontSize: '14px', 
-              fontWeight: '700',
-              letterSpacing: '0.5px',
-              whiteSpace: 'nowrap'
-            }}>
-              {cursorText}
-            </span>
-            <svg 
-              width="20" 
-              height="20" 
-              viewBox="0 0 24 24" 
-              fill="none" 
-              stroke={cursorColors.textColor}
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M7 17L17 7M17 7H7M17 7V17"/>
-            </svg>
-          </div>
-        )}
-      </div>
-
-      {/* Top Navigation Bar */}
-      <div 
-        ref={topNavRef}
-        style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          width: '100%',
-          padding: isMobile ? '0.8rem 1rem' : '1rem 2rem',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          zIndex: 101,
-          boxSizing: 'border-box',
-          opacity: 1
-        }}
-      >
+            justifyContent: 'center',
+            fontSize: '1.5rem',
+            fontFamily: 'Helvetica, Arial, sans-serif'
+          }}
+          whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
+        >
+          ←
+        </motion.button>
+        
         <div style={{
           display: 'flex',
           alignItems: 'center',
-          gap: isMobile ? '1rem' : '2rem',
-          backgroundColor: 'transparent',
-          backdropFilter: 'blur(10px)',
-          borderRadius: '50px',
-          padding: isMobile ? '0.6rem 1rem' : '0.8rem 1.5rem',
-          border: `1px solid ${isDarkMode ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.3)'}`,
-          boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
+          gap: '1rem'
         }}>
-          {/* Docs */}
-          <motion.div
-            onClick={() => router.push('/docs')}
-            onMouseEnter={() => handleLinkHover("link", "VIEW", "docs")}
-            onMouseLeave={handleLinkLeave}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              cursor: 'none',
-              padding: '0.4rem 0.8rem',
-              borderRadius: '25px',
-              backgroundColor: isDarkMode ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.95)',
-              border: isDarkMode ? '1px solid rgba(255,255,255,0.2)' : '1px solid rgba(255,255,255,0.3)',
-              transition: 'all 0.3s ease'
-            }}
-            whileHover={{ 
-              backgroundColor: 'white',
-              scale: 1.05,
-              border: '1px solid white'
-            }}
-          >
-            <svg 
-              width={isMobile ? "18" : "20"} 
-              height={isMobile ? "18" : "20"} 
-              viewBox="0 0 24 24" 
-              fill="none" 
-              stroke="#6366F1"
-              strokeWidth="2"
-            >
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-              <polyline points="14,2 14,8 20,8"/>
-              <line x1="16" y1="13" x2="8" y2="13"/>
-              <line x1="16" y1="17" x2="8" y2="17"/>
-              <polyline points="10,9 9,9 8,9"/>
-            </svg>
-            <span style={{
-              color: '#6366F1',
-              fontSize: isMobile ? '0.8rem' : '0.9rem',
-              fontWeight: '600',
-              fontFamily: 'Helvetica, Arial, sans-serif'
-            }}>
-              Docs
-            </span>
-            <div style={{
-              backgroundColor: '#EC4899',
-              color: 'white',
-              fontSize: '0.7rem',
-              fontWeight: '700',
-              padding: '0.1rem 0.4rem',
-              borderRadius: '10px',
-              marginLeft: '0.3rem',
-              border: 'none'
-            }}>
-              NEW
-            </div>
-          </motion.div>
-
-          {/* Chatbot */}
-          <motion.div
-            onClick={() => router.push('/chatbot')}
-            onMouseEnter={() => handleLinkHover("link", "VIEW", "chatbot")}
-            onMouseLeave={handleLinkLeave}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              cursor: 'none',
-              padding: '0.4rem 0.8rem',
-              borderRadius: '25px',
-              backgroundColor: isDarkMode ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.95)',
-              border: isDarkMode ? '1px solid rgba(255,255,255,0.2)' : '1px solid rgba(255,255,255,0.3)',
-              transition: 'all 0.3s ease'
-            }}
-            whileHover={{ 
-              backgroundColor: 'white',
-              scale: 1.05,
-              border: '1px solid white'
-            }}
-          >
-            <svg 
-              width={isMobile ? "18" : "20"} 
-              height={isMobile ? "18" : "20"} 
-              viewBox="0 0 24 24" 
-              fill="none" 
-              stroke="#6366F1"
-              strokeWidth="2"
-            >
-              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-              <line x1="8" y1="7" x2="16" y2="7"/>
-              <line x1="8" y1="11" x2="12" y2="11"/>
-            </svg>
-            <span style={{
-              color: '#6366F1',
-              fontSize: isMobile ? '0.8rem' : '0.9rem',
-              fontWeight: '600',
-              fontFamily: 'Helvetica, Arial, sans-serif'
-            }}>
-              Chatbot
-            </span>
-            <div style={{
-              backgroundColor: '#EC4899',
-              color: 'white',
-              fontSize: '0.7rem',
-              fontWeight: '700',
-              padding: '0.1rem 0.4rem',
-              borderRadius: '10px',
-              marginLeft: '0.3rem',
-              border: 'none'
-            }}>
-              NEW
-            </div>
-          </motion.div>
-
-          {/* Update */}
-          <motion.div
-            onClick={() => router.push('/update')}
-            onMouseEnter={() => handleLinkHover("link", "VIEW", "update")}
-            onMouseLeave={handleLinkLeave}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              cursor: 'none',
-              padding: '0.4rem 0.8rem',
-              borderRadius: '25px',
-              backgroundColor: isDarkMode ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.95)',
-              border: isDarkMode ? '1px solid rgba(255,255,255,0.2)' : '1px solid rgba(255,255,255,0.3)',
-              transition: 'all 0.3s ease'
-            }}
-            whileHover={{ 
-              backgroundColor: 'white',
-              scale: 1.05,
-              border: '1px solid white'
-            }}
-          >
-            <svg 
-              width={isMobile ? "18" : "20"} 
-              height={isMobile ? "18" : "20"} 
-              viewBox="0 0 24 24" 
-              fill="none" 
-              stroke="#6366F1"
-              strokeWidth="2"
-            >
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-              <polyline points="14,2 14,8 20,8"/>
-              <line x1="16" y1="13" x2="8" y2="13"/>
-              <line x1="16" y1="17" x2="8" y2="17"/>
-              <polyline points="10,9 9,9 8,9"/>
-            </svg>
-            <span style={{
-              color: '#6366F1',
-              fontSize: isMobile ? '0.8rem' : '0.9rem',
-              fontWeight: '600',
-              fontFamily: 'Helvetica, Arial, sans-serif'
-            }}>
-              Update
-            </span>
-            <div style={{
-              backgroundColor: '#EC4899',
-              color: 'white',
-              fontSize: '0.7rem',
-              fontWeight: '700',
-              padding: '0.1rem 0.4rem',
-              borderRadius: '10px',
-              marginLeft: '0.3rem',
-              border: 'none'
-            }}>
-              NEW
-            </div>
-          </motion.div>
-
-          {/* Timeline */}
-          <motion.div
-            onClick={() => router.push('/timeline')}
-            onMouseEnter={() => handleLinkHover("link", "VIEW", "timeline")}
-            onMouseLeave={handleLinkLeave}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              cursor: 'none',
-              padding: '0.4rem 0.8rem',
-              borderRadius: '25px',
-              backgroundColor: isDarkMode ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.95)',
-              border: isDarkMode ? '1px solid rgba(255,255,255,0.2)' : '1px solid rgba(255,255,255,0.3)',
-              transition: 'all 0.3s ease'
-            }}
-            whileHover={{ 
-              backgroundColor: 'white',
-              scale: 1.05,
-              border: '1px solid white'
-            }}
-          >
-            <svg 
-              width={isMobile ? "18" : "20"} 
-              height={isMobile ? "18" : "20"} 
-              viewBox="0 0 24 24" 
-              fill="none" 
-              stroke="#6366F1"
-              strokeWidth="2"
-            >
-              <polyline points="1 4 1 10 7 10"/>
-              <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>
-              <line x1="12" y1="7" x2="12" y2="13"/>
-              <line x1="16" y1="11" x2="12" y2="7"/>
-            </svg>
-            <span style={{
-              color: '#6366F1',
-              fontSize: isMobile ? '0.8rem' : '0.9rem',
-              fontWeight: '600',
-              fontFamily: 'Helvetica, Arial, sans-serif'
-            }}>
-              Timeline
-            </span>
-            <div style={{
-              backgroundColor: '#EC4899',
-              color: 'white',
-              fontSize: '0.7rem',
-              fontWeight: '700',
-              padding: '0.1rem 0.4rem',
-              borderRadius: '10px',
-              marginLeft: '0.3rem',
-              border: 'none'
-            }}>
-              NEW
-            </div>
-          </motion.div>
+          <h1 style={{
+            color: 'white',
+            fontSize: isMobile ? '1.8rem' : '2.5rem',
+            fontWeight: '300',
+            margin: 0,
+            fontFamily: 'Helvetica, Arial, sans-serif',
+            letterSpacing: '1px'
+          }}>
+            Kalender MENURU
+          </h1>
+          <div style={{
+            backgroundColor: 'transparent',
+            color: 'white',
+            fontSize: '0.9rem',
+            padding: '0.3rem 0.8rem',
+            borderRadius: '20px',
+            border: '1px solid rgba(255, 255, 255, 0.3)'
+          }}>
+            {isAdmin ? 'Admin Mode' : 'User Mode'}
+          </div>
         </div>
+        
+        <motion.button
+          onClick={handleTodayClick}
+          style={{
+            padding: '0.5rem 1.5rem',
+            backgroundColor: 'transparent',
+            border: '1px solid rgba(255, 255, 255, 0.3)',
+            borderRadius: '20px',
+            color: 'white',
+            fontSize: '0.9rem',
+            fontWeight: '300',
+            cursor: 'pointer',
+            fontFamily: 'Helvetica, Arial, sans-serif'
+          }}
+          whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
+        >
+          Today
+        </motion.button>
       </div>
-
-      {/* Header Section */}
-      <div 
-        ref={headerRef}
-        style={{
-          position: 'fixed',
-          top: isMobile ? '3.5rem' : '4.5rem',
-          left: 0,
-          width: '100%',
-          padding: isMobile ? '1rem' : '2rem',
+      
+      {/* Main Calendar Content */}
+      <div style={{
+        width: '100%',
+        maxWidth: '1400px',
+        marginTop: isMobile ? '5rem' : '8rem',
+        padding: isMobile ? '1rem' : '2rem',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '2rem'
+      }}>
+        
+        {/* Kontrol Tahun & Bulan */}
+        <div style={{
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          zIndex: 100,
-          boxSizing: 'border-box',
-          opacity: 1
-        }}
-      >
-        {/* Teks "MENURU" dengan animasi loading hanya di bagian NURU */}
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.8, delay: 0.5 }}
-        >
+          flexWrap: 'wrap',
+          gap: '1rem',
+          padding: '1rem',
+          backgroundColor: 'transparent',
+          border: '1px solid rgba(255, 255, 255, 0.2)',
+          borderRadius: '15px'
+        }}>
+          {/* Navigasi Bulan */}
           <div style={{
-            fontSize: isMobile ? '1.5rem' : '2.5rem',
-            fontWeight: '300',
-            fontFamily: 'Helvetica, Arial, sans-serif',
-            margin: 0,
-            letterSpacing: '2px',
-            lineHeight: 1,
-            textTransform: 'uppercase',
-            color: isDarkMode ? 'white' : 'black',
-            minHeight: isMobile ? '1.8rem' : '2.8rem',
             display: 'flex',
             alignItems: 'center',
-            transition: 'color 0.5s ease'
+            gap: '1rem'
           }}>
-            ME
-            <AnimatePresence mode="wait">
-              {isLoading ? (
-                <motion.span
-                  key={loadingText}
-                  initial={{ opacity: 0, y: 5 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -5 }}
-                  transition={{ duration: 0.3 }}
-                  style={{
-                    display: 'inline-block'
-                  }}
-                >
-                  {loadingText}
-                </motion.span>
-              ) : (
-                <motion.span
-                  key="nuru-final"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ duration: 0.5 }}
-                >
-                  NURU
-                </motion.span>
-              )}
-            </AnimatePresence>
+            <motion.button
+              onClick={() => navigateMonth('prev')}
+              style={{
+                backgroundColor: 'transparent',
+                border: '1px solid rgba(255, 255, 255, 0.3)',
+                color: 'white',
+                width: '40px',
+                height: '40px',
+                borderRadius: '50%',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+              whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M15 18l-6-6 6-6"/>
+              </svg>
+            </motion.button>
+            
+            <div style={{
+              color: 'white',
+              fontSize: isMobile ? '1.5rem' : '2rem',
+              fontWeight: '400',
+              fontFamily: 'Helvetica, Arial, sans-serif',
+              minWidth: '200px',
+              textAlign: 'center'
+            }}>
+              {getMonthName(currentMonth)} {currentYear}
+            </div>
+            
+            <motion.button
+              onClick={() => navigateMonth('next')}
+              style={{
+                backgroundColor: 'transparent',
+                border: '1px solid rgba(255, 255, 255, 0.3)',
+                color: 'white',
+                width: '40px',
+                height: '40px',
+                borderRadius: '50%',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+              whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M9 18l6-6-6-6"/>
+              </svg>
+            </motion.button>
           </div>
-        </motion.div>
-
-        {/* Right Side Buttons */}
+          
+          {/* Pilih Tahun */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            flexWrap: 'wrap'
+          }}>
+            {[2024, 2025, 2026, 2027, 2028].map(year => (
+              <motion.button
+                key={year}
+                onClick={() => handleYearSelect(year)}
+                style={{
+                  backgroundColor: currentYear === year ? 'rgba(255, 255, 255, 0.2)' : 'transparent',
+                  border: '1px solid rgba(255, 255, 255, 0.3)',
+                  color: 'white',
+                  padding: '0.5rem 1rem',
+                  borderRadius: '20px',
+                  cursor: 'pointer',
+                  fontSize: '0.9rem',
+                  fontFamily: 'Helvetica, Arial, sans-serif',
+                  whiteSpace: 'nowrap'
+                }}
+                whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
+              >
+                {year}
+              </motion.button>
+            ))}
+          </div>
+          
+          {/* Pilih Bulan */}
+          <div style={{
+            display: 'flex',
+            gap: '0.5rem',
+            flexWrap: 'wrap'
+          }}>
+            {[
+              'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun',
+              'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'
+            ].map((month, index) => (
+              <motion.button
+                key={month}
+                onClick={() => handleMonthSelect(index)}
+                style={{
+                  backgroundColor: currentMonth === index ? 'rgba(255, 255, 255, 0.2)' : 'transparent',
+                  border: '1px solid rgba(255, 255, 255, 0.3)',
+                  color: 'white',
+                  padding: '0.4rem 0.8rem',
+                  borderRadius: '15px',
+                  cursor: 'pointer',
+                  fontSize: '0.8rem',
+                  fontFamily: 'Helvetica, Arial, sans-serif',
+                  minWidth: '40px'
+                }}
+                whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
+              >
+                {month}
+              </motion.button>
+            ))}
+          </div>
+        </div>
+        
+        {/* Grid Kalender */}
         <div style={{
           display: 'flex',
-          alignItems: 'center',
-          gap: isMobile ? '0.8rem' : '1rem'
+          flexDirection: 'column',
+          gap: '1rem'
         }}>
-          {/* Color Mode Toggle Button */}
-          <motion.button
-            onClick={toggleColorMode}
-            onMouseEnter={() => handleLinkHover("link", "VIEW", "theme")}
-            onMouseLeave={handleLinkLeave}
-            style={{
-              padding: isMobile ? '0.4rem 0.8rem' : '0.6rem 1rem',
-              fontSize: isMobile ? '0.8rem' : '1rem',
-              fontWeight: '600',
-              color: 'white',
-              backgroundColor: 'transparent',
-              border: `1px solid ${isDarkMode ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.3)'}`,
-              borderRadius: '50px',
-              cursor: 'none',
+          {/* Header Hari */}
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(7, 1fr)',
+            gap: '0.5rem',
+            padding: '0.5rem 0'
+          }}>
+            {['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'].map(day => (
+              <div key={day} style={{
+                color: 'rgba(255, 255, 255, 0.7)',
+                fontSize: isMobile ? '0.8rem' : '0.9rem',
+                fontWeight: '600',
+                textAlign: 'center',
+                padding: '0.5rem',
+                fontFamily: 'Helvetica, Arial, sans-serif',
+                textTransform: 'uppercase',
+                letterSpacing: '0.5px'
+              }}>
+                {day}
+              </div>
+            ))}
+          </div>
+          
+          {/* Grid Tanggal */}
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(7, 1fr)',
+            gap: '0.5rem'
+          }}>
+            {generateCalendar().map((day, index) => {
+              if (!day) {
+                return <div key={`empty-${index}`} style={{ height: isMobile ? '80px' : '120px' }} />;
+              }
+              
+              const hasEvents = day.events && day.events.length > 0;
+              
+              return (
+                <motion.div
+                  key={`day-${day.date}`}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: index * 0.005 }}
+                  onClick={() => isAdmin && handleDateSelect(day.fullDate)}
+                  style={{
+                    backgroundColor: 'transparent',
+                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                    borderRadius: '10px',
+                    padding: '0.8rem',
+                    minHeight: isMobile ? '80px' : '120px',
+                    cursor: isAdmin ? 'pointer' : 'default',
+                    position: 'relative',
+                    transition: 'all 0.3s ease'
+                  }}
+                  whileHover={isAdmin ? { 
+                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                    borderColor: 'rgba(255, 255, 255, 0.4)'
+                  } : {}}
+                >
+                  {/* Tanggal */}
+                  <div style={{
+                    color: day.isToday ? '#3B82F6' : (day.isSelected ? 'white' : 'rgba(255, 255, 255, 0.8)'),
+                    fontSize: isMobile ? '0.9rem' : '1rem',
+                    fontWeight: day.isToday ? '700' : '400',
+                    marginBottom: '0.5rem',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center'
+                  }}>
+                    <span>{day.date}</span>
+                    {day.isToday && (
+                      <div style={{
+                        width: '6px',
+                        height: '6px',
+                        backgroundColor: '#3B82F6',
+                        borderRadius: '50%'
+                      }} />
+                    )}
+                  </div>
+                  
+                  {/* Event Indicators */}
+                  {hasEvents && (
+                    <div style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '0.3rem',
+                      maxHeight: isMobile ? '50px' : '80px',
+                      overflowY: 'auto'
+                    }}>
+                      {day.events.slice(0, 3).map(event => (
+                        <div
+                          key={event.id}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleViewEventDetails(event);
+                          }}
+                          style={{
+                            backgroundColor: event.color + '20',
+                            borderLeft: `3px solid ${event.color}`,
+                            padding: '0.2rem 0.4rem',
+                            borderRadius: '3px',
+                            cursor: 'pointer'
+                          }}
+                        >
+                          <div style={{
+                            color: 'white',
+                            fontSize: isMobile ? '0.6rem' : '0.7rem',
+                            fontWeight: '600',
+                            whiteSpace: 'nowrap',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis'
+                          }}>
+                            {event.title}
+                          </div>
+                          <div style={{
+                            color: 'rgba(255, 255, 255, 0.7)',
+                            fontSize: isMobile ? '0.5rem' : '0.6rem',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.2rem'
+                          }}>
+                            <span style={{
+                              backgroundColor: event.color,
+                              width: '4px',
+                              height: '4px',
+                              borderRadius: '50%'
+                            }} />
+                            {event.label}
+                          </div>
+                        </div>
+                      ))}
+                      {day.events.length > 3 && (
+                        <div style={{
+                          color: 'rgba(255, 255, 255, 0.5)',
+                          fontSize: isMobile ? '0.5rem' : '0.6rem',
+                          textAlign: 'center'
+                        }}>
+                          +{day.events.length - 3} lainnya
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  
+                  {/* Add Event Button for Admin */}
+                  {isAdmin && !hasEvents && (
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 0.5 }}
+                      whileHover={{ opacity: 1 }}
+                      onClick={() => handleDateSelect(day.fullDate)}
+                      style={{
+                        position: 'absolute',
+                        bottom: '0.3rem',
+                        right: '0.3rem',
+                        width: '20px',
+                        height: '20px',
+                        borderRadius: '50%',
+                        backgroundColor: 'transparent',
+                        border: '1px solid rgba(255, 255, 255, 0.3)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        cursor: 'pointer',
+                        fontSize: '0.8rem',
+                        color: 'white'
+                      }}
+                    >
+                      +
+                    </motion.div>
+                  )}
+                </motion.div>
+              );
+            })}
+          </div>
+        </div>
+        
+        {/* Legend for Event Colors */}
+        <div style={{
+          padding: '1.5rem',
+          backgroundColor: 'transparent',
+          border: '1px solid rgba(255, 255, 255, 0.2)',
+          borderRadius: '15px',
+          marginTop: '1rem'
+        }}>
+          <h3 style={{
+            color: 'white',
+            fontSize: '1.2rem',
+            fontWeight: '400',
+            margin: '0 0 1rem 0',
+            fontFamily: 'Helvetica, Arial, sans-serif'
+          }}>
+            Legend Warna Kegiatan
+          </h3>
+          <div style={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            gap: '1rem'
+          }}>
+            {colorOptions.map(color => (
+              <div key={color.value} style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem'
+              }}>
+                <div style={{
+                  width: '15px',
+                  height: '15px',
+                  backgroundColor: color.value,
+                  borderRadius: '3px'
+                }} />
+                <span style={{
+                  color: 'rgba(255, 255, 255, 0.8)',
+                  fontSize: '0.9rem'
+                }}>
+                  {color.name}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+        
+        {/* Instructions for Admin */}
+        {isAdmin && (
+          <div style={{
+            padding: '1.5rem',
+            backgroundColor: 'transparent',
+            border: '1px solid rgba(59, 130, 246, 0.3)',
+            borderRadius: '15px',
+            marginTop: '1rem'
+          }}>
+            <h3 style={{
+              color: '#3B82F6',
+              fontSize: '1.2rem',
+              fontWeight: '400',
+              margin: '0 0 1rem 0',
               fontFamily: 'Helvetica, Arial, sans-serif',
-              backdropFilter: 'blur(10px)',
-              whiteSpace: 'nowrap',
               display: 'flex',
               alignItems: 'center',
-              gap: isMobile ? '0.3rem' : '0.5rem',
+              gap: '0.5rem'
+            }}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="12" cy="12" r="10"/>
+                <path d="M12 16v-4"/>
+                <path d="M12 8h.01"/>
+              </svg>
+              Panduan Admin
+            </h3>
+            <ul style={{
+              color: 'rgba(255, 255, 255, 0.8)',
+              fontSize: '0.9rem',
               margin: 0,
-              transition: 'all 0.3s ease',
-              boxShadow: '0 4px 15px rgba(0,0,0,0.1)'
+              paddingLeft: '1.5rem',
+              lineHeight: 1.6
+            }}>
+              <li>Klik pada tanggal untuk menambahkan kegiatan baru</li>
+              <li>Klik pada kegiatan untuk melihat detail atau mengedit</li>
+              <li>Hanya admin yang dapat menambah, edit, dan hapus kegiatan</li>
+              <li>Data tersinkronisasi dengan halaman utama</li>
+            </ul>
+          </div>
+        )}
+      </div>
+      
+      {/* Modal Add/Edit Event */}
+      <AnimatePresence>
+        {showAddEventModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              backgroundColor: 'rgba(0, 0, 0, 0.98)',
+              zIndex: 10002,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              backdropFilter: 'blur(10px)',
+              overflow: 'auto',
+              padding: isMobile ? '1rem' : '2rem'
             }}
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1, duration: 0.6 }}
-            whileHover={{ 
-              backgroundColor: isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.2)',
-              scale: 1.05,
-              border: `1px solid ${isDarkMode ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.5)'}`,
-              transition: { duration: 0.2 }
-            }}
-            whileTap={{ scale: 0.95 }}
           >
             <motion.div
-              animate={{ rotate: isDarkMode ? 0 : 180 }}
-              transition={{ duration: 0.5 }}
+              ref={addEventModalRef}
+              initial={{ scale: 0.95, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.95, opacity: 0, y: 20 }}
+              transition={{ duration: 0.4 }}
+              style={{
+                backgroundColor: 'transparent',
+                borderRadius: '20px',
+                width: '100%',
+                maxWidth: '600px',
+                maxHeight: '90vh',
+                display: 'flex',
+                flexDirection: 'column',
+                overflow: 'hidden',
+                border: '1px solid rgba(255, 255, 255, 0.2)'
+              }}
             >
-              {isDarkMode ? '☀️' : '🌙'}
+              {/* Header Modal */}
+              <div style={{
+                padding: isMobile ? '1.5rem' : '2rem',
+                borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                flexShrink: 0
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                  <h2 style={{
+                    color: 'white',
+                    fontSize: isMobile ? '1.5rem' : '2rem',
+                    fontWeight: '300',
+                    margin: 0,
+                    fontFamily: 'Helvetica, Arial, sans-serif',
+                    letterSpacing: '1px'
+                  }}>
+                    {isEditingEvent ? 'Edit Kegiatan' : 'Tambah Kegiatan'}
+                  </h2>
+                  <div style={{
+                    backgroundColor: 'transparent',
+                    color: 'white',
+                    fontSize: '0.9rem',
+                    padding: '0.3rem 0.8rem',
+                    borderRadius: '20px',
+                    border: '1px solid rgba(255, 255, 255, 0.3)'
+                  }}>
+                    {formatDate(eventForm.date)}
+                  </div>
+                </div>
+                
+                <motion.button
+                  onClick={() => {
+                    setShowAddEventModal(false);
+                    setIsEditingEvent(false);
+                    setEditingEventId(null);
+                  }}
+                  style={{
+                    backgroundColor: 'transparent',
+                    border: '1px solid rgba(255, 255, 255, 0.3)',
+                    color: 'white',
+                    width: '40px',
+                    height: '40px',
+                    borderRadius: '50%',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '1.5rem',
+                    fontFamily: 'Helvetica, Arial, sans-serif'
+                  }}
+                  whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
+                >
+                  ×
+                </motion.button>
+              </div>
+              
+              {/* Form Content */}
+              <div style={{
+                flex: 1,
+                overflowY: 'auto',
+                padding: isMobile ? '1.5rem' : '2rem',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '1.5rem'
+              }}>
+                {/* Title Input */}
+                <div>
+                  <label style={{
+                    color: 'rgba(255, 255, 255, 0.8)',
+                    fontSize: '0.9rem',
+                    marginBottom: '0.5rem',
+                    display: 'block',
+                    fontFamily: 'Helvetica, Arial, sans-serif'
+                  }}>
+                    Judul Kegiatan *
+                  </label>
+                  <input
+                    type="text"
+                    value={eventForm.title}
+                    onChange={(e) => handleFormInputChange('title', e.target.value)}
+                    placeholder="Masukkan judul kegiatan"
+                    style={{
+                      width: '100%',
+                      padding: '0.8rem 1rem',
+                      backgroundColor: 'transparent',
+                      border: '1px solid rgba(255, 255, 255, 0.3)',
+                      borderRadius: '10px',
+                      color: 'white',
+                      fontSize: '1rem',
+                      fontFamily: 'Helvetica, Arial, sans-serif',
+                      outline: 'none',
+                      transition: 'border-color 0.3s ease'
+                    }}
+                  />
+                </div>
+                
+                {/* Description Input */}
+                <div>
+                  <label style={{
+                    color: 'rgba(255, 255, 255, 0.8)',
+                    fontSize: '0.9rem',
+                    marginBottom: '0.5rem',
+                    display: 'block',
+                    fontFamily: 'Helvetica, Arial, sans-serif'
+                  }}>
+                    Deskripsi
+                  </label>
+                  <textarea
+                    value={eventForm.description}
+                    onChange={(e) => handleFormInputChange('description', e.target.value)}
+                    placeholder="Masukkan deskripsi kegiatan"
+                    rows={4}
+                    style={{
+                      width: '100%',
+                      padding: '0.8rem 1rem',
+                      backgroundColor: 'transparent',
+                      border: '1px solid rgba(255, 255, 255, 0.3)',
+                      borderRadius: '10px',
+                      color: 'white',
+                      fontSize: '1rem',
+                      fontFamily: 'Helvetica, Arial, sans-serif',
+                      outline: 'none',
+                      transition: 'border-color 0.3s ease',
+                      resize: 'vertical',
+                      minHeight: '100px'
+                    }}
+                  />
+                </div>
+                
+                {/* Date and Time */}
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr',
+                  gap: '1rem'
+                }}>
+                  <div>
+                    <label style={{
+                      color: 'rgba(255, 255, 255, 0.8)',
+                      fontSize: '0.9rem',
+                      marginBottom: '0.5rem',
+                      display: 'block',
+                      fontFamily: 'Helvetica, Arial, sans-serif'
+                    }}>
+                      Tanggal
+                    </label>
+                    <input
+                      type="date"
+                      value={eventForm.date.toISOString().split('T')[0]}
+                      onChange={(e) => handleFormInputChange('date', new Date(e.target.value))}
+                      style={{
+                        width: '100%',
+                        padding: '0.8rem 1rem',
+                        backgroundColor: 'transparent',
+                        border: '1px solid rgba(255, 255, 255, 0.3)',
+                        borderRadius: '10px',
+                        color: 'white',
+                        fontSize: '1rem',
+                        fontFamily: 'Helvetica, Arial, sans-serif',
+                        outline: 'none'
+                      }}
+                    />
+                  </div>
+                  
+                  <div>
+                    <label style={{
+                      color: 'rgba(255, 255, 255, 0.8)',
+                      fontSize: '0.9rem',
+                      marginBottom: '0.5rem',
+                      display: 'block',
+                      fontFamily: 'Helvetica, Arial, sans-serif'
+                    }}>
+                      Waktu
+                    </label>
+                    <input
+                      type="time"
+                      value={eventForm.time}
+                      onChange={(e) => handleFormInputChange('time', e.target.value)}
+                      style={{
+                        width: '100%',
+                        padding: '0.8rem 1rem',
+                        backgroundColor: 'transparent',
+                        border: '1px solid rgba(255, 255, 255, 0.3)',
+                        borderRadius: '10px',
+                        color: 'white',
+                        fontSize: '1rem',
+                        fontFamily: 'Helvetica, Arial, sans-serif',
+                        outline: 'none'
+                      }}
+                    />
+                  </div>
+                </div>
+                
+                {/* Color Selection */}
+                <div>
+                  <label style={{
+                    color: 'rgba(255, 255, 255, 0.8)',
+                    fontSize: '0.9rem',
+                    marginBottom: '0.5rem',
+                    display: 'block',
+                    fontFamily: 'Helvetica, Arial, sans-serif'
+                  }}>
+                    Warna
+                  </label>
+                  <div style={{
+                    display: 'flex',
+                    flexWrap: 'wrap',
+                    gap: '0.5rem'
+                  }}>
+                    {colorOptions.map(color => (
+                      <motion.button
+                        key={color.value}
+                        type="button"
+                        onClick={() => handleFormInputChange('color', color.value)}
+                        style={{
+                          width: '40px',
+                          height: '40px',
+                          backgroundColor: color.value,
+                          border: eventForm.color === color.value ? '3px solid white' : '1px solid rgba(255, 255, 255, 0.3)',
+                          borderRadius: '8px',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontSize: '0.8rem',
+                          color: 'white'
+                        }}
+                        whileHover={{ scale: 1.1 }}
+                      >
+                        {eventForm.color === color.value && '✓'}
+                      </motion.button>
+                    ))}
+                  </div>
+                </div>
+                
+                {/* Label Selection */}
+                <div>
+                  <label style={{
+                    color: 'rgba(255, 255, 255, 0.8)',
+                    fontSize: '0.9rem',
+                    marginBottom: '0.5rem',
+                    display: 'block',
+                    fontFamily: 'Helvetica, Arial, sans-serif'
+                  }}>
+                    Label
+                  </label>
+                  <div style={{
+                    display: 'flex',
+                    flexWrap: 'wrap',
+                    gap: '0.5rem'
+                  }}>
+                    {labelOptions.map(label => (
+                      <motion.button
+                        key={label.value}
+                        type="button"
+                        onClick={() => handleFormInputChange('label', label.value)}
+                        style={{
+                          padding: '0.5rem 1rem',
+                          backgroundColor: eventForm.label === label.value ? 'rgba(255, 255, 255, 0.2)' : 'transparent',
+                          border: '1px solid rgba(255, 255, 255, 0.3)',
+                          borderRadius: '20px',
+                          color: 'white',
+                          fontSize: '0.8rem',
+                          cursor: 'pointer',
+                          fontFamily: 'Helvetica, Arial, sans-serif',
+                          whiteSpace: 'nowrap'
+                        }}
+                        whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
+                      >
+                        {label.label}
+                      </motion.button>
+                    ))}
+                  </div>
+                </div>
+                
+                {/* User Info */}
+                {user && (
+                  <div style={{
+                    padding: '1rem',
+                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                    borderRadius: '10px',
+                    border: '1px solid rgba(255, 255, 255, 0.1)'
+                  }}>
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.8rem',
+                      marginBottom: '0.5rem'
+                    }}>
+                      <div style={{
+                        width: '32px',
+                        height: '32px',
+                        borderRadius: '50%',
+                        backgroundColor: 'transparent',
+                        border: '1px solid rgba(255, 255, 255, 0.3)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '0.9rem',
+                        fontWeight: '600',
+                        color: 'white'
+                      }}>
+                        {userDisplayName.charAt(0).toUpperCase()}
+                      </div>
+                      <div>
+                        <div style={{
+                          color: 'white',
+                          fontSize: '0.9rem',
+                          fontWeight: '600'
+                        }}>
+                          {userDisplayName}
+                        </div>
+                        <div style={{
+                          color: 'rgba(255, 255, 255, 0.7)',
+                          fontSize: '0.8rem'
+                        }}>
+                          {isAdmin ? 'Admin' : 'User'} • {userEmail}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+              
+              {/* Footer Modal */}
+              <div style={{
+                padding: isMobile ? '1.5rem' : '2rem',
+                borderTop: '1px solid rgba(255, 255, 255, 0.2)',
+                display: 'flex',
+                justifyContent: 'flex-end',
+                gap: '1rem',
+                flexShrink: 0
+              }}>
+                <motion.button
+                  onClick={() => {
+                    setShowAddEventModal(false);
+                    setIsEditingEvent(false);
+                    setEditingEventId(null);
+                  }}
+                  style={{
+                    padding: '0.8rem 1.5rem',
+                    backgroundColor: 'transparent',
+                    border: '1px solid rgba(255, 255, 255, 0.3)',
+                    borderRadius: '10px',
+                    color: 'white',
+                    fontSize: '0.9rem',
+                    fontWeight: '300',
+                    cursor: 'pointer',
+                    fontFamily: 'Helvetica, Arial, sans-serif'
+                  }}
+                  whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
+                >
+                  Batal
+                </motion.button>
+                
+                <motion.button
+                  onClick={handleSubmitEvent}
+                  disabled={!eventForm.title.trim()}
+                  style={{
+                    padding: '0.8rem 1.5rem',
+                    backgroundColor: eventForm.title.trim() ? 'transparent' : 'rgba(255, 255, 255, 0.1)',
+                    border: eventForm.title.trim() ? '1px solid rgba(255, 255, 255, 0.3)' : '1px solid rgba(255, 255, 255, 0.1)',
+                    borderRadius: '10px',
+                    color: eventForm.title.trim() ? 'white' : 'rgba(255, 255, 255, 0.5)',
+                    fontSize: '0.9rem',
+                    fontWeight: '300',
+                    cursor: eventForm.title.trim() ? 'pointer' : 'not-allowed',
+                    fontFamily: 'Helvetica, Arial, sans-serif'
+                  }}
+                  whileHover={eventForm.title.trim() ? { backgroundColor: 'rgba(255, 255, 255, 0.1)' } : {}}
+                >
+                  {isEditingEvent ? 'Update Kegiatan' : 'Simpan Kegiatan'}
+                </motion.button>
+              </div>
             </motion.div>
-            {isMobile ? '' : (isDarkMode ? 'LIGHT' : 'DARK')}
-          </motion.button>
-
-          {/* Sign In Button */}
-          <motion.button
-            onClick={() => router.push('/signin')}
-            onMouseEnter={() => handleLinkHover("link", "VIEW", "signin")}
-            onMouseLeave={handleLinkLeave}
+          </motion.div>
+        )}
+      </AnimatePresence>
+      
+      {/* Modal Event Details */}
+      <AnimatePresence>
+        {showEventDetailsModal && selectedEvent && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
             style={{
-              padding: isMobile ? '0.4rem 1rem' : '0.6rem 1.5rem',
-              fontSize: isMobile ? '0.9rem' : '1.5rem',
-              fontWeight: '600',
-              color: 'white',
-              backgroundColor: 'transparent',
-              border: `1px solid ${isDarkMode ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.3)'}`,
-              borderRadius: '50px',
-              cursor: 'none',
-              fontFamily: 'Helvetica, Arial, sans-serif',
-              backdropFilter: 'blur(10px)',
-              whiteSpace: 'nowrap',
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              backgroundColor: 'rgba(0, 0, 0, 0.98)',
+              zIndex: 10002,
               display: 'flex',
               alignItems: 'center',
-              gap: isMobile ? '0.3rem' : '0.5rem',
-              margin: 0,
-              maxWidth: isMobile ? '120px' : 'none',
-              transition: 'all 0.3s ease',
-              boxShadow: '0 4px 15px rgba(0,0,0,0.1)'
+              justifyContent: 'center',
+              backdropFilter: 'blur(10px)',
+              overflow: 'auto',
+              padding: isMobile ? '1rem' : '2rem'
             }}
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1.2, duration: 0.6 }}
-            whileHover={{ 
-              backgroundColor: isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.2)',
-              scale: 1.05,
-              border: `1px solid ${isDarkMode ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.5)'}`,
-              transition: { duration: 0.2 }
-            }}
-            whileTap={{ scale: 0.95 }}
           >
-            <svg 
-              width={isMobile ? "18" : "30"} 
-              height={isMobile ? "18" : "30"} 
-              viewBox="0 0 24 24" 
-              fill="none" 
-              stroke="currentColor" 
-              strokeWidth="2"
+            <motion.div
+              ref={eventDetailsModalRef}
+              initial={{ scale: 0.95, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.95, opacity: 0, y: 20 }}
+              transition={{ duration: 0.4 }}
+              style={{
+                backgroundColor: 'transparent',
+                borderRadius: '20px',
+                width: '100%',
+                maxWidth: '600px',
+                maxHeight: '90vh',
+                display: 'flex',
+                flexDirection: 'column',
+                overflow: 'hidden',
+                border: `1px solid ${selectedEvent.color}40`
+              }}
             >
-              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-              <circle cx="12" cy="7" r="4"/>
-            </svg>
-            {isMobile ? 'SIGN IN' : 'SIGN IN'}
-          </motion.button>
-        </div>
-      </div>
-
-      {/* Deskripsi MENURU di Body Halaman Utama - DIBUAT HILANG SAAT SCROLL */}
-      <motion.div
-        ref={descriptionRef}
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: showDescription ? 1 : 0, y: showDescription ? 0 : -20 }}
-        transition={{ duration: 0.5 }}
-        style={{
-          position: 'absolute',
-          top: isMobile ? '8rem' : '12rem',
-          left: isMobile ? '1rem' : '2rem',
-          width: isMobile ? 'calc(100% - 2rem)' : '800px',
-          maxWidth: '800px',
-          textAlign: 'left',
-          marginBottom: '2rem',
-          zIndex: 20,
-          pointerEvents: showDescription ? 'auto' : 'none'
-        }}
-      >
-        <p style={{
-          color: isDarkMode ? 'white' : 'black',
-          fontSize: isMobile ? '1.8rem' : '3.5rem',
-          fontWeight: '400',
-          fontFamily: 'HelveticaNowDisplay, Arial, sans-serif',
-          lineHeight: 1.1,
-          margin: 0,
-          marginBottom: isMobile ? '1.5rem' : '2rem',
-          transition: 'color 0.5s ease',
-          wordWrap: 'break-word',
-          overflowWrap: 'break-word'
-        }}>
-          Menuru is a branding personal journal life with a experiences of self about happy, sad, angry, etc.
-        </p>
-
-        {/* Foto di bawah teks deskripsi */}
-        <div style={{
-          width: isMobile ? 'calc(100% - 1rem)' : '650px', // Lebar sedikit lebih kecil
-          marginLeft: isMobile ? '0.5rem' : '1.5rem', // Geser ke kiri sedikit
-          overflow: 'hidden',
-          borderRadius: '15px',
-          boxShadow: '0 15px 40px rgba(0,0,0,0.4)',
-          border: `2px solid ${isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}`,
-          marginTop: '1rem' // Jarak dari teks
-        }}>
-          <img 
-            src="images/5.jpg" 
-            alt="Menuru Visual"
+              {/* Header Modal */}
+              <div style={{
+                padding: isMobile ? '1.5rem' : '2rem',
+                borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'flex-start',
+                flexShrink: 0
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+                  <div style={{
+                    width: '12px',
+                    height: '100%',
+                    backgroundColor: selectedEvent.color,
+                    borderRadius: '2px',
+                    flexShrink: 0
+                  }} />
+                  
+                  <div>
+                    <h2 style={{
+                      color: 'white',
+                      fontSize: isMobile ? '1.5rem' : '2rem',
+                      fontWeight: '300',
+                      margin: '0 0 0.5rem 0',
+                      fontFamily: 'Helvetica, Arial, sans-serif',
+                      letterSpacing: '1px'
+                    }}>
+                      {selectedEvent.title}
+                    </h2>
+                    
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.5rem',
+                      flexWrap: 'wrap'
+                    }}>
+                      <div style={{
+                        backgroundColor: selectedEvent.color + '30',
+                        color: selectedEvent.color,
+                        fontSize: '0.8rem',
+                        fontWeight: '700',
+                        padding: '0.2rem 0.8rem',
+                        borderRadius: '12px',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.5px',
+                        border: `1px solid ${selectedEvent.color}`
+                      }}>
+                        {selectedEvent.label}
+                      </div>
+                      
+                      {selectedEvent.isAdmin && (
+                        <div style={{
+                          backgroundColor: 'transparent',
+                          color: 'white',
+                          fontSize: '0.8rem',
+                          fontWeight: '700',
+                          padding: '0.2rem 0.8rem',
+                          borderRadius: '12px',
+                          border: '1px solid rgba(255, 255, 255, 0.3)'
+                        }}>
+                          ADMIN
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+                
+                <motion.button
+                  onClick={() => {
+                    setShowEventDetailsModal(false);
+                    setSelectedEvent(null);
+                  }}
+                  style={{
+                    backgroundColor: 'transparent',
+                    border: '1px solid rgba(255, 255, 255, 0.3)',
+                    color: 'white',
+                    width: '40px',
+                    height: '40px',
+                    borderRadius: '50%',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '1.5rem',
+                    fontFamily: 'Helvetica, Arial, sans-serif'
+                  }}
+                  whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
+                >
+                  ×
+                </motion.button>
+              </div>
+              
+              {/* Event Content */}
+              <div style={{
+                flex: 1,
+                overflowY: 'auto',
+                padding: isMobile ? '1.5rem' : '2rem',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '1.5rem'
+              }}>
+                {/* Date and Time */}
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '1rem',
+                  padding: '1rem',
+                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                  borderRadius: '10px',
+                  border: '1px solid rgba(255, 255, 255, 0.1)'
+                }}>
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <polyline points="12 6 12 12 16 14"/>
+                  </svg>
+                  <div>
+                    <div style={{
+                      color: 'white',
+                      fontSize: '1.1rem',
+                      fontWeight: '600',
+                      marginBottom: '0.2rem'
+                    }}>
+                      {formatDate(selectedEvent.date instanceof Date ? selectedEvent.date : selectedEvent.date.toDate())}
+                    </div>
+                    <div style={{
+                      color: 'rgba(255, 255, 255, 0.7)',
+                      fontSize: '0.9rem'
+                    }}>
+                      {formatTime(selectedEvent.date instanceof Date ? selectedEvent.date : selectedEvent.date.toDate(), selectedEvent.time)} WIB
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Description */}
+                {selectedEvent.description && (
+                  <div>
+                    <h3 style={{
+                      color: 'white',
+                      fontSize: '1.2rem',
+                      fontWeight: '400',
+                      margin: '0 0 1rem 0',
+                      fontFamily: 'Helvetica, Arial, sans-serif'
+                    }}>
+                      Deskripsi
+                    </h3>
+                    <div style={{
+                      color: 'rgba(255, 255, 255, 0.8)',
+                      fontSize: '1rem',
+                      lineHeight: 1.6,
+                      whiteSpace: 'pre-wrap'
+                    }}>
+                      {selectedEvent.description}
+                    </div>
+                  </div>
+                )}
+                
+                {/* Created By */}
+                <div style={{
+                  padding: '1rem',
+                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                  borderRadius: '10px',
+                  border: '1px solid rgba(255, 255, 255, 0.1)'
+                }}>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.8rem',
+                    marginBottom: '0.5rem'
+                  }}>
+                    <div style={{
+                      width: '40px',
+                      height: '40px',
+                      borderRadius: '50%',
+                      backgroundColor: 'transparent',
+                      border: '1px solid rgba(255, 255, 255, 0.3)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '1rem',
+                      fontWeight: '600',
+                      color: 'white'
+                    }}>
+                      {selectedEvent.createdBy.charAt(0).toUpperCase()}
+                    </div>
+                    <div>
+                      <div style={{
+                        color: 'white',
+                        fontSize: '1rem',
+                        fontWeight: '600'
+                      }}>
+                        {selectedEvent.createdBy}
+                        {selectedEvent.isAdmin && (
+                          <span style={{
+                            marginLeft: '0.5rem',
+                            fontSize: '0.7rem',
+                            backgroundColor: 'transparent',
+                            color: 'white',
+                            padding: '0.1rem 0.5rem',
+                            borderRadius: '4px',
+                            border: '1px solid rgba(255, 255, 255, 0.3)'
+                          }}>
+                            ADMIN
+                          </span>
+                        )}
+                      </div>
+                      <div style={{
+                        color: 'rgba(255, 255, 255, 0.7)',
+                        fontSize: '0.9rem'
+                      }}>
+                        {selectedEvent.createdByEmail}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Footer Modal with Actions */}
+              <div style={{
+                padding: isMobile ? '1.5rem' : '2rem',
+                borderTop: '1px solid rgba(255, 255, 255, 0.2)',
+                display: 'flex',
+                justifyContent: 'space-between',
+                gap: '1rem',
+                flexShrink: 0
+              }}>
+                <div style={{
+                  color: 'rgba(255, 255, 255, 0.6)',
+                  fontSize: '0.8rem',
+                  fontFamily: 'Helvetica, Arial, sans-serif'
+                }}>
+                  ID: {selectedEvent.id.substring(0, 8)}...
+                </div>
+                
+                <div style={{
+                  display: 'flex',
+                  gap: '1rem'
+                }}>
+                  {isAdmin && (
+                    <>
+                      <motion.button
+                        onClick={() => handleEditEvent(selectedEvent)}
+                        style={{
+                          padding: '0.8rem 1.5rem',
+                          backgroundColor: 'transparent',
+                          border: '1px solid rgba(255, 255, 255, 0.3)',
+                          borderRadius: '10px',
+                          color: 'white',
+                          fontSize: '0.9rem',
+                          fontWeight: '300',
+                          cursor: 'pointer',
+                          fontFamily: 'Helvetica, Arial, sans-serif',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.5rem'
+                        }}
+                        whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
+                      >
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                        </svg>
+                        Edit
+                      </motion.button>
+                      
+                      <motion.button
+                        onClick={() => handleDeleteEvent(selectedEvent.id)}
+                        style={{
+                          padding: '0.8rem 1.5rem',
+                          backgroundColor: 'transparent',
+                          border: '1px solid rgba(239, 68, 68, 0.3)',
+                          borderRadius: '10px',
+                          color: '#EF4444',
+                          fontSize: '0.9rem',
+                          fontWeight: '300',
+                          cursor: 'pointer',
+                          fontFamily: 'Helvetica, Arial, sans-serif',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.5rem'
+                        }}
+                        whileHover={{ backgroundColor: 'rgba(239, 68, 68, 0.1)' }}
+                      >
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path d="M3 6h18"/>
+                          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                        </svg>
+                        Hapus
+                      </motion.button>
+                    </>
+                  )}
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+      
+      {/* Loading State */}
+      <AnimatePresence>
+        {isLoading && (
+          <motion.div
+            initial={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.5 }}
             style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
               width: '100%',
-              height: 'auto',
-              display: 'block',
-              objectFit: 'cover',
-              borderRadius: '13px'
+              height: '100%',
+              backgroundColor: 'black',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              zIndex: 99999,
+              cursor: 'default'
             }}
-            onError={(e) => {
-              console.error("Gambar tidak ditemukan:", e);
-              e.currentTarget.style.backgroundColor = isDarkMode ? '#333' : '#eee';
-              e.currentTarget.style.display = 'flex';
-              e.currentTarget.style.alignItems = 'center';
-              e.currentTarget.style.justifyContent = 'center';
-              e.currentTarget.style.color = isDarkMode ? '#fff' : '#000';
-              e.currentTarget.style.height = '400px';
-              e.currentTarget.innerHTML = '<div style="padding: 2rem; text-align: center;">Image: 5.jpg</div>';
-            }}
-          />
-        </div>
-      </motion.div>
-
-      {/* Content tambahan untuk membuat halaman lebih panjang */}
+          >
+            <div style={{
+              color: 'white',
+              textAlign: 'center'
+            }}>
+              <motion.div
+                animate={{ rotate: 360 }}
+                transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                style={{ marginBottom: '1rem' }}
+              >
+                <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5">
+                  <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+                </svg>
+              </motion.div>
+              <div style={{
+                fontSize: '1.2rem',
+                fontWeight: '300',
+                fontFamily: 'Helvetica, Arial, sans-serif',
+                letterSpacing: '1px'
+              }}>
+                Loading Calendar...
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+      
+      {/* Footer */}
       <div style={{
-        height: '150vh',
         width: '100%',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginTop: isMobile ? '90vh' : '80vh', // Disesuaikan agar ada jarak dengan foto
-        zIndex: 10,
-        position: 'relative'
+        padding: isMobile ? '2rem 1rem' : '3rem 2rem',
+        marginTop: '3rem',
+        borderTop: '1px solid rgba(255, 255, 255, 0.2)',
+        textAlign: 'center'
       }}>
-        <motion.p
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          transition={{ duration: 0.8 }}
-          style={{
-            color: isDarkMode ? 'white' : 'black',
-            fontSize: isMobile ? '1.5rem' : '2rem',
-            fontWeight: '300',
-            textAlign: 'center',
-            maxWidth: '600px',
-            padding: '0 2rem'
-          }}
-        >
-          More content coming soon...
-        </motion.p>
+        <p style={{
+          color: 'rgba(255, 255, 255, 0.6)',
+          fontSize: '0.9rem',
+          fontFamily: 'Helvetica, Arial, sans-serif',
+          margin: '0 0 1rem 0'
+        }}>
+          Kalender MENURU • Data tersinkronisasi dengan halaman utama •
+          <span style={{ color: '#3B82F6', marginLeft: '0.3rem' }}>
+            Titik biru menunjukkan hari ini
+          </span>
+        </p>
+        <p style={{
+          color: 'rgba(255, 255, 255, 0.4)',
+          fontSize: '0.8rem',
+          fontFamily: 'Helvetica, Arial, sans-serif',
+          margin: 0
+        }}>
+          {isAdmin ? 
+            'Mode Admin: Anda dapat menambah, mengedit, dan menghapus kegiatan' : 
+            'Mode User: Anda hanya dapat melihat kegiatan'}
+        </p>
       </div>
     </div>
   );
