@@ -589,12 +589,13 @@ export default function CalendarPage(): React.JSX.Element {
         borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
         backdropFilter: 'blur(10px)'
       }}>
-        {/* Back Button kiri */}
+        {/* Back Button kiri - DIPERBAIKI */}
         <div style={{
           flex: 1,
           display: 'flex',
           justifyContent: 'flex-start',
-          alignItems: 'center'
+          alignItems: 'center',
+          minWidth: 0
         }}>
           <motion.button
             onClick={() => router.push('/')}
@@ -610,7 +611,8 @@ export default function CalendarPage(): React.JSX.Element {
               fontFamily: 'Helvetica, Arial, sans-serif',
               padding: '0.5rem',
               gap: '0.5rem',
-              fontWeight: '400'
+              fontWeight: '400',
+              whiteSpace: 'nowrap'
             }}
             whileHover={{ opacity: 0.7 }}
           >
@@ -630,14 +632,17 @@ export default function CalendarPage(): React.JSX.Element {
             <span style={{
               fontSize: isMobile ? '1rem' : '1.1rem',
               fontWeight: '400',
-              color: 'white'
+              color: 'white',
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis'
             }}>
               Halaman utama
             </span>
           </motion.button>
         </div>
         
-        {/* Judul kalender di tengah */}
+        {/* Judul kalender di tengah - DIPERBAIKI */}
         <div style={{
           flex: 2,
           display: 'flex',
@@ -645,7 +650,9 @@ export default function CalendarPage(): React.JSX.Element {
           alignItems: 'center',
           justifyContent: 'center',
           textAlign: 'center',
-          gap: '0.2rem'
+          gap: '0.2rem',
+          minWidth: 0,
+          padding: '0 1rem'
         }}>
           <h1 style={{
             color: 'white',
@@ -654,7 +661,10 @@ export default function CalendarPage(): React.JSX.Element {
             margin: 0,
             fontFamily: 'Helvetica, Arial, sans-serif',
             letterSpacing: '0.5px',
-            lineHeight: 1.2
+            lineHeight: 1.2,
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis'
           }}>
             Kalender MENURU
           </h1>
@@ -703,12 +713,13 @@ export default function CalendarPage(): React.JSX.Element {
           </div>
         </div>
         
-        {/* Nama user di bagian kanan dengan panah NORTH WEST ARROW BESAR di kiri */}
+        {/* Nama user di bagian kanan dengan panah NORTH WEST ARROW BESAR - DIPERBAIKI */}
         <div style={{
           flex: 1,
           display: 'flex',
           justifyContent: 'flex-end',
-          alignItems: 'center'
+          alignItems: 'center',
+          minWidth: 0
         }}>
           {user && (
             <motion.div
@@ -716,15 +727,18 @@ export default function CalendarPage(): React.JSX.Element {
                 display: 'flex',
                 alignItems: 'center',
                 gap: '0.8rem',
-                cursor: 'pointer'
+                cursor: 'pointer',
+                padding: '0.5rem',
+                borderRadius: '8px',
+                backgroundColor: 'transparent'
               }}
-              whileHover={{ opacity: 0.8 }}
+              whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
               onClick={() => router.push('/')}
             >
               {/* Tanda panah NORTH WEST ARROW BESAR di samping kiri nama user */}
               <svg 
-                width={isMobile ? "24" : "32"} 
-                height={isMobile ? "24" : "32"} 
+                width={isMobile ? "22" : "30"} 
+                height={isMobile ? "22" : "30"} 
                 viewBox="0 0 24 24" 
                 fill="none" 
                 stroke="currentColor" 
@@ -737,14 +751,14 @@ export default function CalendarPage(): React.JSX.Element {
               
               {/* Nama user BESAR */}
               <span style={{
-                fontSize: isMobile ? '1.3rem' : '1.8rem',
+                fontSize: isMobile ? '1.2rem' : '1.8rem',
                 fontWeight: '400',
                 color: 'rgba(255, 255, 255, 0.95)',
                 fontFamily: 'Helvetica, Arial, sans-serif',
                 whiteSpace: 'nowrap',
                 overflow: 'hidden',
                 textOverflow: 'ellipsis',
-                maxWidth: isMobile ? '120px' : '180px'
+                maxWidth: isMobile ? '120px' : '200px'
               }}>
                 {userDisplayName}
               </span>
