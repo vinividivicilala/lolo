@@ -565,7 +565,7 @@ export default function CalendarPage(): React.JSX.Element {
       alignItems: 'center',
       position: 'relative',
       overflow: 'auto',
-      fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif',
+      fontFamily: 'Helvetica, Arial, sans-serif',
       WebkitFontSmoothing: 'antialiased',
       MozOsxFontSmoothing: 'grayscale'
     }}>
@@ -603,7 +603,7 @@ export default function CalendarPage(): React.JSX.Element {
               alignItems: 'center',
               justifyContent: 'flex-start',
               fontSize: isMobile ? '1rem' : '1.1rem',
-              fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif',
+              fontFamily: 'Helvetica, Arial, sans-serif',
               padding: '0.5rem',
               gap: '0.5rem',
               fontWeight: '400'
@@ -637,9 +637,9 @@ export default function CalendarPage(): React.JSX.Element {
           <h1 style={{
             color: 'white',
             fontSize: isMobile ? '1.5rem' : '2rem',
-            fontWeight: '600',
+            fontWeight: '400',
             margin: 0,
-            fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif',
+            fontFamily: 'Helvetica, Arial, sans-serif',
             letterSpacing: '0.5px',
             lineHeight: 1.2
           }}>
@@ -657,8 +657,8 @@ export default function CalendarPage(): React.JSX.Element {
             <div style={{
               color: 'white',
               fontSize: isMobile ? '1rem' : '1.2rem',
-              fontWeight: '500',
-              fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif',
+              fontWeight: '400',
+              fontFamily: 'Helvetica, Arial, sans-serif',
               display: 'flex',
               alignItems: 'center',
               gap: '0.5rem'
@@ -672,8 +672,8 @@ export default function CalendarPage(): React.JSX.Element {
                 <span style={{
                   color: 'white',
                   fontSize: isMobile ? '1rem' : '1.2rem',
-                  fontWeight: '600',
-                  fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif'
+                  fontWeight: '400',
+                  fontFamily: 'Helvetica, Arial, sans-serif'
                 }}>
                   {totalEventsThisYear}
                 </span>
@@ -681,7 +681,7 @@ export default function CalendarPage(): React.JSX.Element {
                   color: 'rgba(255, 255, 255, 0.9)',
                   fontSize: isMobile ? '1rem' : '1.2rem',
                   fontWeight: '400',
-                  fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif'
+                  fontFamily: 'Helvetica, Arial, sans-serif'
                 }}>
                   Event
                 </span>
@@ -720,9 +720,9 @@ export default function CalendarPage(): React.JSX.Element {
               {/* Nama user BESAR */}
               <span style={{
                 fontSize: isMobile ? '1.4rem' : '1.8rem',
-                fontWeight: '500',
+                fontWeight: '400',
                 color: 'rgba(255, 255, 255, 0.95)',
-                fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif',
+                fontFamily: 'Helvetica, Arial, sans-serif',
                 whiteSpace: 'nowrap',
                 overflow: 'hidden',
                 textOverflow: 'ellipsis',
@@ -788,8 +788,8 @@ export default function CalendarPage(): React.JSX.Element {
             <div style={{
               color: 'white',
               fontSize: isMobile ? '1.5rem' : '1.8rem',
-              fontWeight: '600',
-              fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif',
+              fontWeight: '400',
+              fontFamily: 'Helvetica, Arial, sans-serif',
               minWidth: '200px',
               textAlign: 'center'
             }}>
@@ -837,9 +837,9 @@ export default function CalendarPage(): React.JSX.Element {
                   borderRadius: '20px',
                   cursor: 'pointer',
                   fontSize: '0.9rem',
-                  fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif',
+                  fontFamily: 'Helvetica, Arial, sans-serif',
                   whiteSpace: 'nowrap',
-                  fontWeight: currentYear === year ? '600' : '400'
+                  fontWeight: currentYear === year ? '500' : '400'
                 }}
                 whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
               >
@@ -869,9 +869,9 @@ export default function CalendarPage(): React.JSX.Element {
                   borderRadius: '15px',
                   cursor: 'pointer',
                   fontSize: '0.8rem',
-                  fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif',
+                  fontFamily: 'Helvetica, Arial, sans-serif',
                   minWidth: '40px',
-                  fontWeight: currentMonth === index ? '600' : '400'
+                  fontWeight: currentMonth === index ? '500' : '400'
                 }}
                 whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
               >
@@ -887,34 +887,30 @@ export default function CalendarPage(): React.JSX.Element {
           flexDirection: 'column',
           gap: '1rem'
         }}>
-          {/* Header Hari - TEXS BESAR */}
+          {/* Header Hari */}
           <div style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(7, 1fr)',
             gap: '0.5rem',
-            padding: '0.5rem 0',
-            marginBottom: '1rem'
+            padding: '0.5rem 0'
           }}>
-            {['MINGGU', 'SENIN', 'SELASA', 'RABU', 'KAMIS', 'JUMAT', 'SABTU'].map(day => (
+            {['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'].map(day => (
               <div key={day} style={{
-                color: 'rgba(255, 255, 255, 0.9)',
-                fontSize: isMobile ? '1rem' : '1.2rem',
+                color: 'rgba(255, 255, 255, 0.7)',
+                fontSize: isMobile ? '0.9rem' : '1rem',
                 fontWeight: '600',
                 textAlign: 'center',
-                padding: '0.8rem 0.5rem',
-                fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif',
+                padding: '0.5rem',
+                fontFamily: 'Helvetica, Arial, sans-serif',
                 textTransform: 'uppercase',
-                letterSpacing: '1px',
-                backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                borderRadius: '8px',
-                border: '1px solid rgba(255, 255, 255, 0.1)'
+                letterSpacing: '0.5px'
               }}>
                 {day}
               </div>
             ))}
           </div>
           
-          {/* Grid Tanggal - TEXS BESAR dan JELAS */}
+          {/* Grid Tanggal */}
           <div style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(7, 1fr)',
@@ -922,11 +918,7 @@ export default function CalendarPage(): React.JSX.Element {
           }}>
             {generateCalendar().map((day, index) => {
               if (!day) {
-                return <div key={`empty-${index}`} style={{ 
-                  height: isMobile ? '120px' : '160px',
-                  backgroundColor: 'rgba(255, 255, 255, 0.02)',
-                  borderRadius: '10px'
-                }} />;
+                return <div key={`empty-${index}`} style={{ height: isMobile ? '90px' : '130px' }} />;
               }
               
               const hasEvents = day.events && day.events.length > 0;
@@ -939,129 +931,98 @@ export default function CalendarPage(): React.JSX.Element {
                   transition={{ delay: index * 0.005 }}
                   onClick={() => isAdmin && handleDateSelect(day.fullDate)}
                   style={{
-                    backgroundColor: day.isToday ? 'rgba(59, 130, 246, 0.1)' : 'rgba(255, 255, 255, 0.03)',
-                    border: day.isToday ? '2px solid #3B82F6' : '1px solid rgba(255, 255, 255, 0.15)',
-                    borderRadius: '12px',
+                    backgroundColor: 'transparent',
+                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                    borderRadius: '10px',
                     padding: '0.8rem',
-                    minHeight: isMobile ? '120px' : '160px',
+                    minHeight: isMobile ? '90px' : '130px',
                     cursor: isAdmin ? 'pointer' : 'default',
                     position: 'relative',
-                    transition: 'all 0.3s ease',
-                    display: 'flex',
-                    flexDirection: 'column'
+                    transition: 'all 0.3s ease'
                   }}
                   whileHover={isAdmin ? { 
-                    backgroundColor: 'rgba(255, 255, 255, 0.07)',
-                    borderColor: 'rgba(255, 255, 255, 0.3)'
+                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                    borderColor: 'rgba(255, 255, 255, 0.4)'
                   } : {}}
                 >
-                  {/* Tanggal - TEXS BESAR */}
+                  {/* Tanggal */}
                   <div style={{
-                    color: day.isToday ? '#3B82F6' : (day.isSelected ? 'white' : 'rgba(255, 255, 255, 0.95)'),
-                    fontSize: isMobile ? '1.2rem' : '1.5rem',
-                    fontWeight: '600',
-                    marginBottom: '0.8rem',
+                    color: day.isToday ? '#3B82F6' : (day.isSelected ? 'white' : 'rgba(255, 255, 255, 0.8)'),
+                    fontSize: isMobile ? '1rem' : '1.1rem',
+                    fontWeight: day.isToday ? '700' : '400',
+                    marginBottom: '0.5rem',
                     display: 'flex',
                     justifyContent: 'space-between',
-                    alignItems: 'center',
-                    fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif'
+                    alignItems: 'center'
                   }}>
                     <span>{day.date}</span>
                     {day.isToday && (
                       <div style={{
-                        width: '8px',
-                        height: '8px',
+                        width: '6px',
+                        height: '6px',
                         backgroundColor: '#3B82F6',
                         borderRadius: '50%'
                       }} />
                     )}
                   </div>
                   
-                  {/* Event Indicators dengan highlight warna di belakang teks */}
+                  {/* Event Indicators */}
                   {hasEvents && (
                     <div style={{
-                      flex: 1,
                       display: 'flex',
                       flexDirection: 'column',
-                      gap: '0.4rem',
-                      maxHeight: isMobile ? '70px' : '110px',
+                      gap: '0.3rem',
+                      maxHeight: isMobile ? '55px' : '90px',
                       overflowY: 'auto'
                     }}>
                       {day.events.slice(0, 3).map(event => (
-                        <motion.div
+                        <div
                           key={event.id}
-                          initial={{ opacity: 0, x: -10 }}
-                          animate={{ opacity: 1, x: 0 }}
                           onClick={(e) => {
                             e.stopPropagation();
                             handleViewEventDetails(event);
                           }}
                           style={{
-                            backgroundColor: `${event.color}20`,
-                            padding: '0.4rem 0.6rem',
-                            borderRadius: '6px',
-                            cursor: 'pointer',
-                            position: 'relative',
-                            overflow: 'hidden'
+                            backgroundColor: event.color + '20',
+                            borderLeft: `3px solid ${event.color}`,
+                            padding: '0.2rem 0.4rem',
+                            borderRadius: '3px',
+                            cursor: 'pointer'
                           }}
-                          whileHover={{ backgroundColor: `${event.color}30` }}
                         >
-                          {/* Highlight background */}
                           <div style={{
-                            position: 'absolute',
-                            top: 0,
-                            left: 0,
-                            width: '100%',
-                            height: '100%',
-                            backgroundColor: event.color,
-                            opacity: 0.1,
-                            zIndex: 1
-                          }} />
-                          
-                          {/* Event content */}
+                            color: 'white',
+                            fontSize: isMobile ? '0.7rem' : '0.8rem',
+                            fontWeight: '600',
+                            whiteSpace: 'nowrap',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis'
+                          }}>
+                            {event.title}
+                          </div>
                           <div style={{
-                            position: 'relative',
-                            zIndex: 2,
+                            color: 'rgba(255, 255, 255, 0.7)',
+                            fontSize: isMobile ? '0.6rem' : '0.7rem',
                             display: 'flex',
-                            flexDirection: 'column',
+                            alignItems: 'center',
                             gap: '0.2rem'
                           }}>
-                            <div style={{
-                              color: 'white',
-                              fontSize: isMobile ? '0.8rem' : '0.9rem',
-                              fontWeight: '600',
-                              whiteSpace: 'nowrap',
-                              overflow: 'hidden',
-                              textOverflow: 'ellipsis',
-                              fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif'
-                            }}>
-                              {event.title}
-                            </div>
-                            <div style={{
-                              color: 'rgba(255, 255, 255, 0.8)',
-                              fontSize: isMobile ? '0.7rem' : '0.8rem',
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: '0.4rem',
-                              fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif'
-                            }}>
-                              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={event.color} strokeWidth="2">
-                                <circle cx="12" cy="12" r="10"/>
-                              </svg>
-                              {event.label}
-                            </div>
+                            <span style={{
+                              backgroundColor: event.color,
+                              width: '4px',
+                              height: '4px',
+                              borderRadius: '50%'
+                            }} />
+                            {event.label}
                           </div>
-                        </motion.div>
+                        </div>
                       ))}
                       {day.events.length > 3 && (
                         <div style={{
-                          color: 'rgba(255, 255, 255, 0.6)',
-                          fontSize: isMobile ? '0.7rem' : '0.8rem',
+                          color: 'rgba(255, 255, 255, 0.5)',
+                          fontSize: isMobile ? '0.6rem' : '0.7rem',
                           textAlign: 'center',
-                          padding: '0.2rem',
-                          fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif',
-                          backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                          borderRadius: '4px'
+                          padding: '0.1rem'
                         }}>
                           +{day.events.length - 3} lainnya
                         </div>
@@ -1069,32 +1030,31 @@ export default function CalendarPage(): React.JSX.Element {
                     </div>
                   )}
                   
-                  {/* Add Event Button for Admin dengan icon SVG */}
+                  {/* Add Event Button for Admin */}
                   {isAdmin && !hasEvents && (
                     <motion.div
                       initial={{ opacity: 0 }}
-                      animate={{ opacity: 0.7 }}
-                      whileHover={{ opacity: 1, scale: 1.1 }}
+                      animate={{ opacity: 0.5 }}
+                      whileHover={{ opacity: 1 }}
                       onClick={() => handleDateSelect(day.fullDate)}
                       style={{
                         position: 'absolute',
-                        bottom: '0.5rem',
-                        right: '0.5rem',
-                        width: '28px',
-                        height: '28px',
+                        bottom: '0.3rem',
+                        right: '0.3rem',
+                        width: '20px',
+                        height: '20px',
                         borderRadius: '50%',
                         backgroundColor: 'transparent',
-                        border: '1px solid rgba(255, 255, 255, 0.4)',
+                        border: '1px solid rgba(255, 255, 255, 0.3)',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
                         cursor: 'pointer',
-                        zIndex: 10
+                        fontSize: '0.8rem',
+                        color: 'white'
                       }}
                     >
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3">
-                        <path d="M12 5v14M5 12h14"/>
-                      </svg>
+                      +
                     </motion.div>
                   )}
                 </motion.div>
@@ -1106,23 +1066,23 @@ export default function CalendarPage(): React.JSX.Element {
         {/* Instructions for Admin */}
         {isAdmin && (
           <div style={{
-            padding: '1.5rem',
-            backgroundColor: 'rgba(255, 255, 255, 0.03)',
+            padding: '1.2rem',
+            backgroundColor: 'transparent',
             border: '1px solid rgba(59, 130, 246, 0.3)',
             borderRadius: '15px',
             marginTop: '1rem'
           }}>
             <h3 style={{
               color: '#3B82F6',
-              fontSize: '1.3rem',
-              fontWeight: '600',
-              margin: '0 0 1rem 0',
-              fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif',
+              fontSize: '1.2rem',
+              fontWeight: '500',
+              margin: '0 0 0.8rem 0',
+              fontFamily: 'Helvetica, Arial, sans-serif',
               display: 'flex',
               alignItems: 'center',
-              gap: '0.8rem'
+              gap: '0.5rem'
             }}>
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <circle cx="12" cy="12" r="10"/>
                 <path d="M12 16v-4"/>
                 <path d="M12 8h.01"/>
@@ -1130,12 +1090,11 @@ export default function CalendarPage(): React.JSX.Element {
               Panduan Admin
             </h3>
             <ul style={{
-              color: 'rgba(255, 255, 255, 0.9)',
-              fontSize: '1rem',
+              color: 'rgba(255, 255, 255, 0.8)',
+              fontSize: '0.9rem',
               margin: 0,
-              paddingLeft: '1.8rem',
-              lineHeight: 1.8,
-              fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif'
+              paddingLeft: '1.5rem',
+              lineHeight: 1.6
             }}>
               <li>Klik pada tanggal untuk menambahkan kegiatan baru</li>
               <li>Klik pada kegiatan untuk melihat detail atau mengedit</li>
@@ -1146,7 +1105,7 @@ export default function CalendarPage(): React.JSX.Element {
         )}
       </div>
       
-      {/* Modal Add/Edit Event - DESIGN LEBIH BAGUS */}
+      {/* Modal Add/Edit Event */}
       <AnimatePresence>
         {showAddEventModal && (
           <motion.div
@@ -1160,7 +1119,7 @@ export default function CalendarPage(): React.JSX.Element {
               left: 0,
               width: '100%',
               height: '100%',
-              backgroundColor: 'rgba(0, 0, 0, 0.95)',
+              backgroundColor: 'rgba(0, 0, 0, 0.98)',
               zIndex: 10002,
               display: 'flex',
               alignItems: 'center',
@@ -1177,7 +1136,7 @@ export default function CalendarPage(): React.JSX.Element {
               exit={{ scale: 0.95, opacity: 0, y: 20 }}
               transition={{ duration: 0.4 }}
               style={{
-                backgroundColor: 'rgba(10, 10, 10, 0.95)',
+                backgroundColor: 'transparent',
                 borderRadius: '20px',
                 width: '100%',
                 maxWidth: '600px',
@@ -1185,54 +1144,39 @@ export default function CalendarPage(): React.JSX.Element {
                 display: 'flex',
                 flexDirection: 'column',
                 overflow: 'hidden',
-                border: '1px solid rgba(255, 255, 255, 0.15)',
-                boxShadow: '0 20px 60px rgba(0, 0, 0, 0.5)'
+                border: '1px solid rgba(255, 255, 255, 0.2)'
               }}
             >
               {/* Header Modal */}
               <div style={{
                 padding: isMobile ? '1.5rem' : '2rem',
-                borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+                borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center',
-                flexShrink: 0,
-                backgroundColor: 'rgba(0, 0, 0, 0.5)'
+                flexShrink: 0
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                  <div style={{
-                    width: '40px',
-                    height: '40px',
-                    borderRadius: '10px',
-                    backgroundColor: eventForm.color + '20',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
+                  <h2 style={{
+                    color: 'white',
+                    fontSize: isMobile ? '1.5rem' : '1.8rem',
+                    fontWeight: '400',
+                    margin: 0,
+                    fontFamily: 'Helvetica, Arial, sans-serif',
+                    letterSpacing: '0.5px'
                   }}>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={eventForm.color} strokeWidth="2">
-                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                      <circle cx="12" cy="7" r="4"/>
-                    </svg>
-                  </div>
-                  <div>
-                    <h2 style={{
-                      color: 'white',
-                      fontSize: isMobile ? '1.5rem' : '1.8rem',
-                      fontWeight: '600',
-                      margin: 0,
-                      fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif',
-                      letterSpacing: '0.5px'
-                    }}>
-                      {isEditingEvent ? 'Edit Kegiatan' : 'Tambah Kegiatan'}
-                    </h2>
-                    <div style={{
-                      color: 'rgba(255, 255, 255, 0.7)',
-                      fontSize: '0.9rem',
-                      marginTop: '0.3rem',
-                      fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif'
-                    }}>
-                      {formatDate(eventForm.date)}
-                    </div>
+                    {isEditingEvent ? 'Edit Kegiatan' : 'Tambah Kegiatan'}
+                  </h2>
+                  <div style={{
+                    backgroundColor: 'transparent',
+                    color: 'white',
+                    fontSize: '0.9rem',
+                    padding: '0.3rem 0.8rem',
+                    borderRadius: '20px',
+                    border: '1px solid rgba(255, 255, 255, 0.3)',
+                    fontWeight: '400'
+                  }}>
+                    {formatDate(eventForm.date)}
                   </div>
                 </div>
                 
@@ -1244,23 +1188,21 @@ export default function CalendarPage(): React.JSX.Element {
                   }}
                   style={{
                     backgroundColor: 'transparent',
-                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                    border: '1px solid rgba(255, 255, 255, 0.3)',
                     color: 'white',
                     width: '40px',
                     height: '40px',
-                    borderRadius: '10px',
+                    borderRadius: '50%',
                     cursor: 'pointer',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     fontSize: '1.5rem',
-                    fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif'
+                    fontFamily: 'Helvetica, Arial, sans-serif'
                   }}
                   whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
                 >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                    <path d="M18 6L6 18M6 6l12 12"/>
-                  </svg>
+                  ×
                 </motion.button>
               </div>
               
@@ -1271,29 +1213,20 @@ export default function CalendarPage(): React.JSX.Element {
                 padding: isMobile ? '1.5rem' : '2rem',
                 display: 'flex',
                 flexDirection: 'column',
-                gap: '1.8rem'
+                gap: '1.5rem'
               }}>
                 {/* Title Input */}
                 <div>
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.5rem',
-                    marginBottom: '0.8rem'
+                  <label style={{
+                    color: 'rgba(255, 255, 255, 0.8)',
+                    fontSize: '0.9rem',
+                    marginBottom: '0.5rem',
+                    display: 'block',
+                    fontFamily: 'Helvetica, Arial, sans-serif',
+                    fontWeight: '400'
                   }}>
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(255, 255, 255, 0.7)" strokeWidth="2">
-                      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-                      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-                    </svg>
-                    <label style={{
-                      color: 'rgba(255, 255, 255, 0.9)',
-                      fontSize: '1rem',
-                      fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif',
-                      fontWeight: '500'
-                    }}>
-                      Judul Kegiatan *
-                    </label>
-                  </div>
+                    Judul Kegiatan *
+                  </label>
                   <input
                     type="text"
                     value={eventForm.title}
@@ -1301,45 +1234,31 @@ export default function CalendarPage(): React.JSX.Element {
                     placeholder="Masukkan judul kegiatan"
                     style={{
                       width: '100%',
-                      padding: '1rem 1.2rem',
-                      backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                      border: '1px solid rgba(255, 255, 255, 0.2)',
-                      borderRadius: '12px',
+                      padding: '0.8rem 1rem',
+                      backgroundColor: 'transparent',
+                      border: '1px solid rgba(255, 255, 255, 0.3)',
+                      borderRadius: '10px',
                       color: 'white',
                       fontSize: '1rem',
-                      fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif',
+                      fontFamily: 'Helvetica, Arial, sans-serif',
                       outline: 'none',
-                      transition: 'all 0.3s ease'
+                      transition: 'border-color 0.3s ease'
                     }}
-                    onFocus={(e) => e.target.style.borderColor = 'rgba(255, 255, 255, 0.4)'}
-                    onBlur={(e) => e.target.style.borderColor = 'rgba(255, 255, 255, 0.2)'}
                   />
                 </div>
                 
                 {/* Description Input */}
                 <div>
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.5rem',
-                    marginBottom: '0.8rem'
+                  <label style={{
+                    color: 'rgba(255, 255, 255, 0.8)',
+                    fontSize: '0.9rem',
+                    marginBottom: '0.5rem',
+                    display: 'block',
+                    fontFamily: 'Helvetica, Arial, sans-serif',
+                    fontWeight: '400'
                   }}>
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(255, 255, 255, 0.7)" strokeWidth="2">
-                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                      <polyline points="14 2 14 8 20 8"/>
-                      <line x1="16" y1="13" x2="8" y2="13"/>
-                      <line x1="16" y1="17" x2="8" y2="17"/>
-                      <polyline points="10 9 9 9 8 9"/>
-                    </svg>
-                    <label style={{
-                      color: 'rgba(255, 255, 255, 0.9)',
-                      fontSize: '1rem',
-                      fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif',
-                      fontWeight: '500'
-                    }}>
-                      Deskripsi
-                    </label>
-                  </div>
+                    Deskripsi
+                  </label>
                   <textarea
                     value={eventForm.description}
                     onChange={(e) => handleFormInputChange('description', e.target.value)}
@@ -1347,20 +1266,18 @@ export default function CalendarPage(): React.JSX.Element {
                     rows={4}
                     style={{
                       width: '100%',
-                      padding: '1rem 1.2rem',
-                      backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                      border: '1px solid rgba(255, 255, 255, 0.2)',
-                      borderRadius: '12px',
+                      padding: '0.8rem 1rem',
+                      backgroundColor: 'transparent',
+                      border: '1px solid rgba(255, 255, 255, 0.3)',
+                      borderRadius: '10px',
                       color: 'white',
                       fontSize: '1rem',
-                      fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif',
+                      fontFamily: 'Helvetica, Arial, sans-serif',
                       outline: 'none',
                       transition: 'border-color 0.3s ease',
                       resize: 'vertical',
-                      minHeight: '120px'
+                      minHeight: '100px'
                     }}
-                    onFocus={(e) => e.target.style.borderColor = 'rgba(255, 255, 255, 0.4)'}
-                    onBlur={(e) => e.target.style.borderColor = 'rgba(255, 255, 255, 0.2)'}
                   />
                 </div>
                 
@@ -1368,81 +1285,61 @@ export default function CalendarPage(): React.JSX.Element {
                 <div style={{
                   display: 'grid',
                   gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr',
-                  gap: '1.5rem'
+                  gap: '1rem'
                 }}>
                   <div>
-                    <div style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '0.5rem',
-                      marginBottom: '0.8rem'
+                    <label style={{
+                      color: 'rgba(255, 255, 255, 0.8)',
+                      fontSize: '0.9rem',
+                      marginBottom: '0.5rem',
+                      display: 'block',
+                      fontFamily: 'Helvetica, Arial, sans-serif',
+                      fontWeight: '400'
                     }}>
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(255, 255, 255, 0.7)" strokeWidth="2">
-                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-                        <line x1="16" y1="2" x2="16" y2="6"/>
-                        <line x1="8" y1="2" x2="8" y2="6"/>
-                        <line x1="3" y1="10" x2="21" y2="10"/>
-                      </svg>
-                      <label style={{
-                        color: 'rgba(255, 255, 255, 0.9)',
-                        fontSize: '1rem',
-                        fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif',
-                        fontWeight: '500'
-                      }}>
-                        Tanggal
-                      </label>
-                    </div>
+                      Tanggal
+                    </label>
                     <input
                       type="date"
                       value={eventForm.date.toISOString().split('T')[0]}
                       onChange={(e) => handleFormInputChange('date', new Date(e.target.value))}
                       style={{
                         width: '100%',
-                        padding: '1rem 1.2rem',
-                        backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                        border: '1px solid rgba(255, 255, 255, 0.2)',
-                        borderRadius: '12px',
+                        padding: '0.8rem 1rem',
+                        backgroundColor: 'transparent',
+                        border: '1px solid rgba(255, 255, 255, 0.3)',
+                        borderRadius: '10px',
                         color: 'white',
                         fontSize: '1rem',
-                        fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif',
+                        fontFamily: 'Helvetica, Arial, sans-serif',
                         outline: 'none'
                       }}
                     />
                   </div>
                   
                   <div>
-                    <div style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '0.5rem',
-                      marginBottom: '0.8rem'
+                    <label style={{
+                      color: 'rgba(255, 255, 255, 0.8)',
+                      fontSize: '0.9rem',
+                      marginBottom: '0.5rem',
+                      display: 'block',
+                      fontFamily: 'Helvetica, Arial, sans-serif',
+                      fontWeight: '400'
                     }}>
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(255, 255, 255, 0.7)" strokeWidth="2">
-                        <circle cx="12" cy="12" r="10"/>
-                        <polyline points="12 6 12 12 16 14"/>
-                      </svg>
-                      <label style={{
-                        color: 'rgba(255, 255, 255, 0.9)',
-                        fontSize: '1rem',
-                        fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif',
-                        fontWeight: '500'
-                      }}>
-                        Waktu
-                      </label>
-                    </div>
+                      Waktu
+                    </label>
                     <input
                       type="time"
                       value={eventForm.time}
                       onChange={(e) => handleFormInputChange('time', e.target.value)}
                       style={{
                         width: '100%',
-                        padding: '1rem 1.2rem',
-                        backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                        border: '1px solid rgba(255, 255, 255, 0.2)',
-                        borderRadius: '12px',
+                        padding: '0.8rem 1rem',
+                        backgroundColor: 'transparent',
+                        border: '1px solid rgba(255, 255, 255, 0.3)',
+                        borderRadius: '10px',
                         color: 'white',
                         fontSize: '1rem',
-                        fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif',
+                        fontFamily: 'Helvetica, Arial, sans-serif',
                         outline: 'none'
                       }}
                     />
@@ -1451,24 +1348,16 @@ export default function CalendarPage(): React.JSX.Element {
                 
                 {/* Color Selection */}
                 <div>
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.5rem',
-                    marginBottom: '0.8rem'
+                  <label style={{
+                    color: 'rgba(255, 255, 255, 0.8)',
+                    fontSize: '0.9rem',
+                    marginBottom: '0.5rem',
+                    display: 'block',
+                    fontFamily: 'Helvetica, Arial, sans-serif',
+                    fontWeight: '400'
                   }}>
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(255, 255, 255, 0.7)" strokeWidth="2">
-                      <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>
-                    </svg>
-                    <label style={{
-                      color: 'rgba(255, 255, 255, 0.9)',
-                      fontSize: '1rem',
-                      fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif',
-                      fontWeight: '500'
-                    }}>
-                      Warna
-                    </label>
-                  </div>
+                    Warna
+                  </label>
                   <div style={{
                     display: 'flex',
                     flexWrap: 'wrap',
@@ -1480,38 +1369,22 @@ export default function CalendarPage(): React.JSX.Element {
                         type="button"
                         onClick={() => handleFormInputChange('color', color.value)}
                         style={{
-                          width: '44px',
-                          height: '44px',
+                          width: '40px',
+                          height: '40px',
                           backgroundColor: color.value,
-                          border: eventForm.color === color.value ? '3px solid white' : '1px solid rgba(255, 255, 255, 0.3)',
-                          borderRadius: '10px',
+                          border: eventForm.color === color.value ? '2px solid white' : '1px solid rgba(255, 255, 255, 0.3)',
+                          borderRadius: '8px',
                           cursor: 'pointer',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
-                          fontSize: '1rem',
+                          fontSize: '0.8rem',
                           color: 'white',
-                          fontWeight: '600',
-                          position: 'relative',
-                          overflow: 'hidden'
+                          fontWeight: '400'
                         }}
                         whileHover={{ scale: 1.05 }}
                       >
-                        {eventForm.color === color.value && (
-                          <>
-                            <div style={{
-                              position: 'absolute',
-                              top: 0,
-                              left: 0,
-                              width: '100%',
-                              height: '100%',
-                              backgroundColor: 'rgba(255, 255, 255, 0.2)'
-                            }} />
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3">
-                              <path d="M20 6L9 17l-5-5"/>
-                            </svg>
-                          </>
-                        )}
+                        {eventForm.color === color.value && '✓'}
                       </motion.button>
                     ))}
                   </div>
@@ -1519,25 +1392,16 @@ export default function CalendarPage(): React.JSX.Element {
                 
                 {/* Label Selection */}
                 <div>
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.5rem',
-                    marginBottom: '0.8rem'
+                  <label style={{
+                    color: 'rgba(255, 255, 255, 0.8)',
+                    fontSize: '0.9rem',
+                    marginBottom: '0.5rem',
+                    display: 'block',
+                    fontFamily: 'Helvetica, Arial, sans-serif',
+                    fontWeight: '400'
                   }}>
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(255, 255, 255, 0.7)" strokeWidth="2">
-                      <path d="M7 7h10v10l-5 5-5-5V7z"/>
-                      <path d="M7 7l5-5 5 5"/>
-                    </svg>
-                    <label style={{
-                      color: 'rgba(255, 255, 255, 0.9)',
-                      fontSize: '1rem',
-                      fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif',
-                      fontWeight: '500'
-                    }}>
-                      Label
-                    </label>
-                  </div>
+                    Label
+                  </label>
                   <div style={{
                     display: 'flex',
                     flexWrap: 'wrap',
@@ -1549,30 +1413,19 @@ export default function CalendarPage(): React.JSX.Element {
                         type="button"
                         onClick={() => handleFormInputChange('label', label.value)}
                         style={{
-                          padding: '0.6rem 1.2rem',
-                          backgroundColor: eventForm.label === label.value ? eventForm.color + '30' : 'rgba(255, 255, 255, 0.05)',
-                          border: eventForm.label === label.value ? `1px solid ${eventForm.color}` : '1px solid rgba(255, 255, 255, 0.2)',
-                          borderRadius: '25px',
-                          color: eventForm.label === label.value ? eventForm.color : 'white',
-                          fontSize: '0.9rem',
+                          padding: '0.5rem 1rem',
+                          backgroundColor: eventForm.label === label.value ? 'rgba(255, 255, 255, 0.15)' : 'transparent',
+                          border: '1px solid rgba(255, 255, 255, 0.3)',
+                          borderRadius: '20px',
+                          color: 'white',
+                          fontSize: '0.8rem',
                           cursor: 'pointer',
-                          fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif',
+                          fontFamily: 'Helvetica, Arial, sans-serif',
                           whiteSpace: 'nowrap',
-                          fontWeight: eventForm.label === label.value ? '600' : '400',
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '0.4rem'
+                          fontWeight: eventForm.label === label.value ? '500' : '400'
                         }}
-                        whileHover={{ 
-                          backgroundColor: eventForm.label === label.value ? eventForm.color + '40' : 'rgba(255, 255, 255, 0.1)',
-                          transform: 'translateY(-2px)'
-                        }}
+                        whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
                       >
-                        {eventForm.label === label.value && (
-                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={eventForm.color} strokeWidth="3">
-                            <path d="M20 6L9 17l-5-5"/>
-                          </svg>
-                        )}
                         {label.label}
                       </motion.button>
                     ))}
@@ -1582,60 +1435,45 @@ export default function CalendarPage(): React.JSX.Element {
                 {/* User Info */}
                 {user && (
                   <div style={{
-                    padding: '1.2rem',
-                    backgroundColor: 'rgba(255, 255, 255, 0.03)',
-                    borderRadius: '12px',
+                    padding: '1rem',
+                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                    borderRadius: '10px',
                     border: '1px solid rgba(255, 255, 255, 0.1)'
                   }}>
                     <div style={{
                       display: 'flex',
                       alignItems: 'center',
-                      gap: '1rem',
+                      gap: '0.8rem',
                       marginBottom: '0.5rem'
                     }}>
                       <div style={{
-                        width: '42px',
-                        height: '42px',
+                        width: '35px',
+                        height: '35px',
                         borderRadius: '50%',
-                        backgroundColor: eventForm.color + '20',
-                        border: `1px solid ${eventForm.color}`,
+                        backgroundColor: 'transparent',
+                        border: '1px solid rgba(255, 255, 255, 0.3)',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        fontSize: '1.1rem',
-                        fontWeight: '600',
-                        color: eventForm.color
+                        fontSize: '0.9rem',
+                        fontWeight: '500',
+                        color: 'white'
                       }}>
                         {userDisplayName.charAt(0).toUpperCase()}
                       </div>
                       <div>
                         <div style={{
                           color: 'white',
-                          fontSize: '1rem',
-                          fontWeight: '600',
-                          fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif'
+                          fontSize: '0.9rem',
+                          fontWeight: '500'
                         }}>
                           {userDisplayName}
                         </div>
                         <div style={{
                           color: 'rgba(255, 255, 255, 0.7)',
-                          fontSize: '0.9rem',
-                          fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif',
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '0.5rem'
+                          fontSize: '0.8rem'
                         }}>
-                          <span style={{
-                            backgroundColor: isAdmin ? eventForm.color + '20' : 'rgba(255, 255, 255, 0.1)',
-                            color: isAdmin ? eventForm.color : 'rgba(255, 255, 255, 0.8)',
-                            padding: '0.2rem 0.6rem',
-                            borderRadius: '12px',
-                            fontSize: '0.8rem',
-                            fontWeight: '500'
-                          }}>
-                            {isAdmin ? 'Admin' : 'User'}
-                          </span>
-                          • {userEmail}
+                          {isAdmin ? 'Admin' : 'User'} • {userEmail}
                         </div>
                       </div>
                     </div>
@@ -1646,12 +1484,11 @@ export default function CalendarPage(): React.JSX.Element {
               {/* Footer Modal */}
               <div style={{
                 padding: isMobile ? '1.5rem' : '2rem',
-                borderTop: '1px solid rgba(255, 255, 255, 0.1)',
+                borderTop: '1px solid rgba(255, 255, 255, 0.2)',
                 display: 'flex',
                 justifyContent: 'flex-end',
                 gap: '1rem',
-                flexShrink: 0,
-                backgroundColor: 'rgba(0, 0, 0, 0.5)'
+                flexShrink: 0
               }}>
                 <motion.button
                   onClick={() => {
@@ -1660,24 +1497,18 @@ export default function CalendarPage(): React.JSX.Element {
                     setEditingEventId(null);
                   }}
                   style={{
-                    padding: '0.9rem 1.8rem',
+                    padding: '0.8rem 1.5rem',
                     backgroundColor: 'transparent',
-                    border: '1px solid rgba(255, 255, 255, 0.2)',
-                    borderRadius: '12px',
+                    border: '1px solid rgba(255, 255, 255, 0.3)',
+                    borderRadius: '10px',
                     color: 'white',
-                    fontSize: '1rem',
-                    fontWeight: '500',
+                    fontSize: '0.9rem',
+                    fontWeight: '400',
                     cursor: 'pointer',
-                    fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.6rem'
+                    fontFamily: 'Helvetica, Arial, sans-serif'
                   }}
                   whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
                 >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M18 6L6 18M6 6l12 12"/>
-                  </svg>
                   Batal
                 </motion.button>
                 
@@ -1685,30 +1516,18 @@ export default function CalendarPage(): React.JSX.Element {
                   onClick={handleSubmitEvent}
                   disabled={!eventForm.title.trim()}
                   style={{
-                    padding: '0.9rem 1.8rem',
-                    backgroundColor: eventForm.title.trim() ? eventForm.color : 'rgba(255, 255, 255, 0.1)',
-                    border: 'none',
-                    borderRadius: '12px',
+                    padding: '0.8rem 1.5rem',
+                    backgroundColor: eventForm.title.trim() ? 'transparent' : 'rgba(255, 255, 255, 0.1)',
+                    border: eventForm.title.trim() ? '1px solid rgba(255, 255, 255, 0.3)' : '1px solid rgba(255, 255, 255, 0.1)',
+                    borderRadius: '10px',
                     color: eventForm.title.trim() ? 'white' : 'rgba(255, 255, 255, 0.5)',
-                    fontSize: '1rem',
-                    fontWeight: '600',
+                    fontSize: '0.9rem',
+                    fontWeight: '400',
                     cursor: eventForm.title.trim() ? 'pointer' : 'not-allowed',
-                    fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.6rem'
+                    fontFamily: 'Helvetica, Arial, sans-serif'
                   }}
-                  whileHover={eventForm.title.trim() ? { 
-                    backgroundColor: eventForm.color,
-                    filter: 'brightness(1.2)',
-                    transform: 'translateY(-2px)'
-                  } : {}}
+                  whileHover={eventForm.title.trim() ? { backgroundColor: 'rgba(255, 255, 255, 0.1)' } : {}}
                 >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
-                    <polyline points="17 21 17 13 7 13 7 21"/>
-                    <polyline points="7 3 7 8 15 8"/>
-                  </svg>
                   {isEditingEvent ? 'Update Kegiatan' : 'Simpan Kegiatan'}
                 </motion.button>
               </div>
@@ -1717,7 +1536,7 @@ export default function CalendarPage(): React.JSX.Element {
         )}
       </AnimatePresence>
       
-      {/* Modal Event Details - DESIGN LEBIH BAGUS */}
+      {/* Modal Event Details */}
       <AnimatePresence>
         {showEventDetailsModal && selectedEvent && (
           <motion.div
@@ -1731,7 +1550,7 @@ export default function CalendarPage(): React.JSX.Element {
               left: 0,
               width: '100%',
               height: '100%',
-              backgroundColor: 'rgba(0, 0, 0, 0.95)',
+              backgroundColor: 'rgba(0, 0, 0, 0.98)',
               zIndex: 10002,
               display: 'flex',
               alignItems: 'center',
@@ -1748,7 +1567,7 @@ export default function CalendarPage(): React.JSX.Element {
               exit={{ scale: 0.95, opacity: 0, y: 20 }}
               transition={{ duration: 0.4 }}
               style={{
-                backgroundColor: 'rgba(10, 10, 10, 0.95)',
+                backgroundColor: 'transparent',
                 borderRadius: '20px',
                 width: '100%',
                 maxWidth: '600px',
@@ -1756,46 +1575,35 @@ export default function CalendarPage(): React.JSX.Element {
                 display: 'flex',
                 flexDirection: 'column',
                 overflow: 'hidden',
-                border: `1px solid ${selectedEvent.color}30`,
-                boxShadow: `0 20px 60px ${selectedEvent.color}10`
+                border: `1px solid ${selectedEvent.color}40`
               }}
             >
               {/* Header Modal */}
               <div style={{
                 padding: isMobile ? '1.5rem' : '2rem',
-                borderBottom: `1px solid ${selectedEvent.color}20`,
+                borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'flex-start',
-                flexShrink: 0,
-                backgroundColor: 'rgba(0, 0, 0, 0.5)'
+                flexShrink: 0
               }}>
-                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '1.2rem', flexWrap: 'wrap', flex: 1 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
                   <div style={{
-                    width: '50px',
-                    height: '50px',
-                    borderRadius: '12px',
-                    backgroundColor: selectedEvent.color + '20',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
+                    width: '12px',
+                    height: '100%',
+                    backgroundColor: selectedEvent.color,
+                    borderRadius: '2px',
                     flexShrink: 0
-                  }}>
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={selectedEvent.color} strokeWidth="2">
-                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                      <circle cx="12" cy="7" r="4"/>
-                    </svg>
-                  </div>
+                  }} />
                   
-                  <div style={{ flex: 1 }}>
+                  <div>
                     <h2 style={{
                       color: 'white',
-                      fontSize: isMobile ? '1.6rem' : '1.9rem',
-                      fontWeight: '600',
-                      margin: '0 0 0.8rem 0',
-                      fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif',
-                      letterSpacing: '0.5px',
-                      lineHeight: 1.3
+                      fontSize: isMobile ? '1.5rem' : '1.8rem',
+                      fontWeight: '400',
+                      margin: '0 0 0.5rem 0',
+                      fontFamily: 'Helvetica, Arial, sans-serif',
+                      letterSpacing: '0.5px'
                     }}>
                       {selectedEvent.title}
                     </h2>
@@ -1803,45 +1611,33 @@ export default function CalendarPage(): React.JSX.Element {
                     <div style={{
                       display: 'flex',
                       alignItems: 'center',
-                      gap: '0.8rem',
+                      gap: '0.5rem',
                       flexWrap: 'wrap'
                     }}>
                       <div style={{
-                        backgroundColor: selectedEvent.color + '20',
+                        backgroundColor: selectedEvent.color + '30',
                         color: selectedEvent.color,
-                        fontSize: '0.85rem',
+                        fontSize: '0.8rem',
                         fontWeight: '600',
-                        padding: '0.4rem 1rem',
-                        borderRadius: '25px',
-                        fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.4rem',
+                        padding: '0.2rem 0.8rem',
+                        borderRadius: '12px',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.5px',
                         border: `1px solid ${selectedEvent.color}`
                       }}>
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                          <circle cx="12" cy="12" r="10"/>
-                        </svg>
                         {selectedEvent.label}
                       </div>
                       
                       {selectedEvent.isAdmin && (
                         <div style={{
-                          backgroundColor: selectedEvent.color + '10',
-                          color: selectedEvent.color,
-                          fontSize: '0.85rem',
+                          backgroundColor: 'transparent',
+                          color: 'white',
+                          fontSize: '0.8rem',
                           fontWeight: '600',
-                          padding: '0.4rem 1rem',
-                          borderRadius: '25px',
-                          fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif',
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '0.4rem',
-                          border: `1px solid ${selectedEvent.color}30`
+                          padding: '0.2rem 0.8rem',
+                          borderRadius: '12px',
+                          border: '1px solid rgba(255, 255, 255, 0.3)'
                         }}>
-                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
-                          </svg>
                           ADMIN
                         </div>
                       )}
@@ -1856,24 +1652,21 @@ export default function CalendarPage(): React.JSX.Element {
                   }}
                   style={{
                     backgroundColor: 'transparent',
-                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                    border: '1px solid rgba(255, 255, 255, 0.3)',
                     color: 'white',
                     width: '40px',
                     height: '40px',
-                    borderRadius: '10px',
+                    borderRadius: '50%',
                     cursor: 'pointer',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     fontSize: '1.5rem',
-                    fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif',
-                    flexShrink: 0
+                    fontFamily: 'Helvetica, Arial, sans-serif'
                   }}
                   whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
                 >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                    <path d="M18 6L6 18M6 6l12 12"/>
-                  </svg>
+                  ×
                 </motion.button>
               </div>
               
@@ -1884,172 +1677,115 @@ export default function CalendarPage(): React.JSX.Element {
                 padding: isMobile ? '1.5rem' : '2rem',
                 display: 'flex',
                 flexDirection: 'column',
-                gap: '2rem'
+                gap: '1.5rem'
               }}>
-                {/* Date and Time Section */}
+                {/* Date and Time */}
                 <div style={{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '1.2rem',
-                  padding: '1.2rem',
-                  backgroundColor: 'rgba(255, 255, 255, 0.03)',
-                  borderRadius: '12px',
+                  gap: '1rem',
+                  padding: '1rem',
+                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                  borderRadius: '10px',
                   border: '1px solid rgba(255, 255, 255, 0.1)'
                 }}>
-                  <div style={{
-                    width: '48px',
-                    height: '48px',
-                    borderRadius: '12px',
-                    backgroundColor: selectedEvent.color + '15',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    flexShrink: 0
-                  }}>
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={selectedEvent.color} strokeWidth="2">
-                      <circle cx="12" cy="12" r="10"/>
-                      <polyline points="12 6 12 12 16 14"/>
-                    </svg>
-                  </div>
-                  <div style={{ flex: 1 }}>
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <polyline points="12 6 12 12 16 14"/>
+                  </svg>
+                  <div>
                     <div style={{
                       color: 'white',
-                      fontSize: '1.2rem',
-                      fontWeight: '600',
-                      marginBottom: '0.3rem',
-                      fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif'
+                      fontSize: '1.1rem',
+                      fontWeight: '500',
+                      marginBottom: '0.2rem'
                     }}>
                       {formatDate(selectedEvent.date instanceof Date ? selectedEvent.date : selectedEvent.date.toDate())}
                     </div>
                     <div style={{
-                      color: 'rgba(255, 255, 255, 0.8)',
-                      fontSize: '1rem',
-                      fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '0.5rem'
+                      color: 'rgba(255, 255, 255, 0.7)',
+                      fontSize: '0.9rem'
                     }}>
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <circle cx="12" cy="12" r="10"/>
-                        <polyline points="12 6 12 12 16 14"/>
-                      </svg>
                       {formatTime(selectedEvent.date instanceof Date ? selectedEvent.date : selectedEvent.date.toDate(), selectedEvent.time)} WIB
                     </div>
                   </div>
                 </div>
                 
-                {/* Description Section */}
+                {/* Description */}
                 {selectedEvent.description && (
                   <div>
-                    <div style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '0.8rem',
-                      marginBottom: '1rem'
+                    <h3 style={{
+                      color: 'white',
+                      fontSize: '1.2rem',
+                      fontWeight: '500',
+                      margin: '0 0 1rem 0',
+                      fontFamily: 'Helvetica, Arial, sans-serif'
                     }}>
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={selectedEvent.color} strokeWidth="2">
-                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                        <polyline points="14 2 14 8 20 8"/>
-                        <line x1="16" y1="13" x2="8" y2="13"/>
-                        <line x1="16" y1="17" x2="8" y2="17"/>
-                        <polyline points="10 9 9 9 8 9"/>
-                      </svg>
-                      <h3 style={{
-                        color: 'white',
-                        fontSize: '1.3rem',
-                        fontWeight: '600',
-                        margin: 0,
-                        fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif'
-                      }}>
-                        Deskripsi
-                      </h3>
-                    </div>
+                      Deskripsi
+                    </h3>
                     <div style={{
-                      color: 'rgba(255, 255, 255, 0.9)',
-                      fontSize: '1.05rem',
-                      lineHeight: 1.7,
-                      whiteSpace: 'pre-wrap',
-                      padding: '1rem',
-                      backgroundColor: 'rgba(255, 255, 255, 0.03)',
-                      borderRadius: '10px',
-                      border: '1px solid rgba(255, 255, 255, 0.08)',
-                      fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif'
+                      color: 'rgba(255, 255, 255, 0.8)',
+                      fontSize: '1rem',
+                      lineHeight: 1.6,
+                      whiteSpace: 'pre-wrap'
                     }}>
                       {selectedEvent.description}
                     </div>
                   </div>
                 )}
                 
-                {/* Created By Section */}
+                {/* Created By */}
                 <div style={{
-                  padding: '1.2rem',
-                  backgroundColor: 'rgba(255, 255, 255, 0.03)',
-                  borderRadius: '12px',
+                  padding: '1rem',
+                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                  borderRadius: '10px',
                   border: '1px solid rgba(255, 255, 255, 0.1)'
                 }}>
                   <div style={{
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '1.2rem',
+                    gap: '0.8rem',
                     marginBottom: '0.5rem'
                   }}>
                     <div style={{
-                      width: '48px',
-                      height: '48px',
+                      width: '38px',
+                      height: '38px',
                       borderRadius: '50%',
-                      backgroundColor: selectedEvent.color + '20',
-                      border: `2px solid ${selectedEvent.color}`,
+                      backgroundColor: 'transparent',
+                      border: '1px solid rgba(255, 255, 255, 0.3)',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      fontSize: '1.2rem',
-                      fontWeight: '600',
-                      color: selectedEvent.color
+                      fontSize: '1rem',
+                      fontWeight: '500',
+                      color: 'white'
                     }}>
                       {selectedEvent.createdBy.charAt(0).toUpperCase()}
                     </div>
-                    <div style={{ flex: 1 }}>
+                    <div>
                       <div style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.8rem',
-                        flexWrap: 'wrap',
-                        marginBottom: '0.3rem'
+                        color: 'white',
+                        fontSize: '1rem',
+                        fontWeight: '500'
                       }}>
-                        <div style={{
-                          color: 'white',
-                          fontSize: '1.1rem',
-                          fontWeight: '600',
-                          fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif'
-                        }}>
-                          {selectedEvent.createdBy}
-                        </div>
+                        {selectedEvent.createdBy}
                         {selectedEvent.isAdmin && (
-                          <div style={{
-                            backgroundColor: selectedEvent.color + '15',
-                            color: selectedEvent.color,
-                            fontSize: '0.75rem',
-                            fontWeight: '600',
-                            padding: '0.2rem 0.8rem',
-                            borderRadius: '12px',
-                            fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '0.3rem'
+                          <span style={{
+                            marginLeft: '0.5rem',
+                            fontSize: '0.7rem',
+                            backgroundColor: 'transparent',
+                            color: 'white',
+                            padding: '0.1rem 0.5rem',
+                            borderRadius: '4px',
+                            border: '1px solid rgba(255, 255, 255, 0.3)'
                           }}>
-                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-                              <polyline points="22 4 12 14.01 9 11.01"/>
-                            </svg>
                             ADMIN
-                          </div>
+                          </span>
                         )}
                       </div>
                       <div style={{
                         color: 'rgba(255, 255, 255, 0.7)',
-                        fontSize: '0.95rem',
-                        fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif',
-                        wordBreak: 'break-all'
+                        fontSize: '0.9rem'
                       }}>
                         {selectedEvent.createdByEmail}
                       </div>
@@ -2061,26 +1797,17 @@ export default function CalendarPage(): React.JSX.Element {
               {/* Footer Modal with Actions */}
               <div style={{
                 padding: isMobile ? '1.5rem' : '2rem',
-                borderTop: `1px solid ${selectedEvent.color}20`,
+                borderTop: '1px solid rgba(255, 255, 255, 0.2)',
                 display: 'flex',
                 justifyContent: 'space-between',
                 gap: '1rem',
-                flexShrink: 0,
-                backgroundColor: 'rgba(0, 0, 0, 0.5)'
+                flexShrink: 0
               }}>
                 <div style={{
-                  color: 'rgba(255, 255, 255, 0.5)',
+                  color: 'rgba(255, 255, 255, 0.6)',
                   fontSize: '0.8rem',
-                  fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.5rem'
+                  fontFamily: 'Helvetica, Arial, sans-serif'
                 }}>
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
-                    <line x1="12" y1="9" x2="12" y2="13"/>
-                    <line x1="12" y1="17" x2="12.01" y2="17"/>
-                  </svg>
                   ID: {selectedEvent.id.substring(0, 8)}...
                 </div>
                 
@@ -2094,22 +1821,19 @@ export default function CalendarPage(): React.JSX.Element {
                         onClick={() => handleEditEvent(selectedEvent)}
                         style={{
                           padding: '0.8rem 1.5rem',
-                          backgroundColor: selectedEvent.color + '15',
-                          border: `1px solid ${selectedEvent.color}30`,
+                          backgroundColor: 'transparent',
+                          border: '1px solid rgba(255, 255, 255, 0.3)',
                           borderRadius: '10px',
-                          color: selectedEvent.color,
-                          fontSize: '0.95rem',
-                          fontWeight: '600',
+                          color: 'white',
+                          fontSize: '0.9rem',
+                          fontWeight: '400',
                           cursor: 'pointer',
-                          fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif',
+                          fontFamily: 'Helvetica, Arial, sans-serif',
                           display: 'flex',
                           alignItems: 'center',
-                          gap: '0.6rem'
+                          gap: '0.5rem'
                         }}
-                        whileHover={{ 
-                          backgroundColor: selectedEvent.color + '25',
-                          transform: 'translateY(-2px)'
-                        }}
+                        whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
                       >
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                           <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
@@ -2122,22 +1846,19 @@ export default function CalendarPage(): React.JSX.Element {
                         onClick={() => handleDeleteEvent(selectedEvent.id)}
                         style={{
                           padding: '0.8rem 1.5rem',
-                          backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                          backgroundColor: 'transparent',
                           border: '1px solid rgba(239, 68, 68, 0.3)',
                           borderRadius: '10px',
                           color: '#EF4444',
-                          fontSize: '0.95rem',
-                          fontWeight: '600',
+                          fontSize: '0.9rem',
+                          fontWeight: '400',
                           cursor: 'pointer',
-                          fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif',
+                          fontFamily: 'Helvetica, Arial, sans-serif',
                           display: 'flex',
                           alignItems: 'center',
-                          gap: '0.6rem'
+                          gap: '0.5rem'
                         }}
-                        whileHover={{ 
-                          backgroundColor: 'rgba(239, 68, 68, 0.2)',
-                          transform: 'translateY(-2px)'
-                        }}
+                        whileHover={{ backgroundColor: 'rgba(239, 68, 68, 0.1)' }}
                       >
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                           <path d="M3 6h18"/>
@@ -2190,8 +1911,8 @@ export default function CalendarPage(): React.JSX.Element {
               </motion.div>
               <div style={{
                 fontSize: '1.2rem',
-                fontWeight: '500',
-                fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif',
+                fontWeight: '400',
+                fontFamily: 'Helvetica, Arial, sans-serif',
                 letterSpacing: '0.5px'
               }}>
                 Loading Calendar...
