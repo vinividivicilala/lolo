@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
+import gsap from "gsap";
 import { initializeApp, getApps } from "firebase/app";
 import { 
   getAuth, 
@@ -56,7 +57,7 @@ interface CalendarEvent {
   id: string;
   title: string;
   description: string;
-  date: Date | Timestamp;
+  date: Date;
   time?: string;
   color: string;
   label: string;
@@ -297,7 +298,7 @@ export default function CalendarPage(): React.JSX.Element {
     return () => unsubscribeAuth();
   }, []);
   
-  // Load events dari Firebase - SAMA DENGAN HALAMAN UTAMA
+  // Load events dari Firebase
   useEffect(() => {
     if (!db) return;
     
@@ -543,42 +544,6 @@ export default function CalendarPage(): React.JSX.Element {
     };
   }, [showAddEventModal, showEventDetailsModal]);
   
-  // Loading state untuk events
-  if (isLoading) {
-    return (
-      <div style={{
-        minHeight: '100vh',
-        backgroundColor: 'black',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center'
-      }}>
-        <div style={{
-          color: 'white',
-          textAlign: 'center'
-        }}>
-          <motion.div
-            animate={{ rotate: 360 }}
-            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-            style={{ marginBottom: '1rem' }}
-          >
-            <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5">
-              <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
-            </svg>
-          </motion.div>
-          <div style={{
-            fontSize: '1.2rem',
-            fontWeight: '300',
-            fontFamily: 'Helvetica, Arial, sans-serif',
-            letterSpacing: '1px'
-          }}>
-            Loading Calendar...
-          </div>
-        </div>
-      </div>
-    );
-  }
-  
   return (
     <div style={{
       minHeight: '100vh',
@@ -656,63 +621,27 @@ export default function CalendarPage(): React.JSX.Element {
             borderRadius: '20px',
             border: '1px solid rgba(255, 255, 255, 0.3)'
           }}>
-            {isAdmin ? 'Admin Mode' : 'View Only'}
+            {isAdmin ? 'Admin Mode' : 'User Mode'}
           </div>
         </div>
         
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '1rem'
-        }}>
-          <motion.button
-            onClick={handleTodayClick}
-            style={{
-              padding: '0.5rem 1.5rem',
-              backgroundColor: 'transparent',
-              border: '1px solid rgba(255, 255, 255, 0.3)',
-              borderRadius: '20px',
-              color: 'white',
-              fontSize: '0.9rem',
-              fontWeight: '300',
-              cursor: 'pointer',
-              fontFamily: 'Helvetica, Arial, sans-serif'
-            }}
-            whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
-          >
-            Today
-          </motion.button>
-          
-          {isAdmin && (
-            <motion.button
-              onClick={() => {
-                setSelectedDate(new Date());
-                setShowAddEventModal(true);
-              }}
-              style={{
-                padding: '0.5rem 1.5rem',
-                backgroundColor: 'transparent',
-                border: '1px solid #3B82F6',
-                borderRadius: '20px',
-                color: '#3B82F6',
-                fontSize: '0.9rem',
-                fontWeight: '300',
-                cursor: 'pointer',
-                fontFamily: 'Helvetica, Arial, sans-serif',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem'
-              }}
-              whileHover={{ backgroundColor: 'rgba(59, 130, 246, 0.1)' }}
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <line x1="12" y1="5" x2="12" y2="19"/>
-                <line x1="5" y1="12" x2="19" y2="12"/>
-              </svg>
-              Add Event
-            </motion.button>
-          )}
-        </div>
+        <motion.button
+          onClick={handleTodayClick}
+          style={{
+            padding: '0.5rem 1.5rem',
+            backgroundColor: 'transparent',
+            border: '1px solid rgba(255, 255, 255, 0.3)',
+            borderRadius: '20px',
+            color: 'white',
+            fontSize: '0.9rem',
+            fontWeight: '300',
+            cursor: 'pointer',
+            fontFamily: 'Helvetica, Arial, sans-serif'
+          }}
+          whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
+        >
+          Today
+        </motion.button>
       </div>
       
       {/* Main Calendar Content */}
@@ -859,253 +788,231 @@ export default function CalendarPage(): React.JSX.Element {
           </div>
         </div>
         
-        {isLoadingEvents ? (
+        {/* Grid Kalender */}
+        <div style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '1rem'
+        }}>
+          {/* Header Hari */}
           <div style={{
-            padding: '4rem 0',
-            textAlign: 'center',
-            color: 'rgba(255, 255, 255, 0.7)',
-            fontFamily: 'Helvetica, Arial, sans-serif'
+            display: 'grid',
+            gridTemplateColumns: 'repeat(7, 1fr)',
+            gap: '0.5rem',
+            padding: '0.5rem 0'
           }}>
-            <motion.div
-              animate={{ rotate: 360 }}
-              transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-              style={{ marginBottom: '1rem' }}
-            >
-              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
-              </svg>
-            </motion.div>
-            Loading calendar events...
-          </div>
-        ) : (
-          <>
-            {/* Grid Kalender */}
-            <div style={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '1rem'
-            }}>
-              {/* Header Hari */}
-              <div style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(7, 1fr)',
-                gap: '0.5rem',
-                padding: '0.5rem 0'
+            {['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'].map(day => (
+              <div key={day} style={{
+                color: 'rgba(255, 255, 255, 0.7)',
+                fontSize: isMobile ? '0.8rem' : '0.9rem',
+                fontWeight: '600',
+                textAlign: 'center',
+                padding: '0.5rem',
+                fontFamily: 'Helvetica, Arial, sans-serif',
+                textTransform: 'uppercase',
+                letterSpacing: '0.5px'
               }}>
-                {['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'].map(day => (
-                  <div key={day} style={{
-                    color: 'rgba(255, 255, 255, 0.7)',
-                    fontSize: isMobile ? '0.8rem' : '0.9rem',
-                    fontWeight: '600',
-                    textAlign: 'center',
-                    padding: '0.5rem',
-                    fontFamily: 'Helvetica, Arial, sans-serif',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.5px'
-                  }}>
-                    {day}
-                  </div>
-                ))}
+                {day}
               </div>
+            ))}
+          </div>
+          
+          {/* Grid Tanggal */}
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(7, 1fr)',
+            gap: '0.5rem'
+          }}>
+            {generateCalendar().map((day, index) => {
+              if (!day) {
+                return <div key={`empty-${index}`} style={{ height: isMobile ? '80px' : '120px' }} />;
+              }
               
-              {/* Grid Tanggal */}
-              <div style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(7, 1fr)',
-                gap: '0.5rem'
-              }}>
-                {generateCalendar().map((day, index) => {
-                  if (!day) {
-                    return <div key={`empty-${index}`} style={{ height: isMobile ? '80px' : '120px' }} />;
-                  }
-                  
-                  const hasEvents = day.events && day.events.length > 0;
-                  
-                  return (
-                    <motion.div
-                      key={`day-${day.date}`}
-                      initial={{ opacity: 0, scale: 0.9 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ delay: index * 0.005 }}
-                      onClick={() => isAdmin && handleDateSelect(day.fullDate)}
-                      style={{
-                        backgroundColor: 'transparent',
-                        border: '1px solid rgba(255, 255, 255, 0.2)',
-                        borderRadius: '10px',
-                        padding: '0.8rem',
-                        minHeight: isMobile ? '80px' : '120px',
-                        cursor: isAdmin ? 'pointer' : 'default',
-                        position: 'relative',
-                        transition: 'all 0.3s ease'
-                      }}
-                      whileHover={isAdmin ? { 
-                        backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                        borderColor: 'rgba(255, 255, 255, 0.4)'
-                      } : {}}
-                    >
-                      {/* Tanggal */}
+              const hasEvents = day.events && day.events.length > 0;
+              
+              return (
+                <motion.div
+                  key={`day-${day.date}`}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: index * 0.005 }}
+                  onClick={() => isAdmin && handleDateSelect(day.fullDate)}
+                  style={{
+                    backgroundColor: 'transparent',
+                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                    borderRadius: '10px',
+                    padding: '0.8rem',
+                    minHeight: isMobile ? '80px' : '120px',
+                    cursor: isAdmin ? 'pointer' : 'default',
+                    position: 'relative',
+                    transition: 'all 0.3s ease'
+                  }}
+                  whileHover={isAdmin ? { 
+                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                    borderColor: 'rgba(255, 255, 255, 0.4)'
+                  } : {}}
+                >
+                  {/* Tanggal */}
+                  <div style={{
+                    color: day.isToday ? '#3B82F6' : (day.isSelected ? 'white' : 'rgba(255, 255, 255, 0.8)'),
+                    fontSize: isMobile ? '0.9rem' : '1rem',
+                    fontWeight: day.isToday ? '700' : '400',
+                    marginBottom: '0.5rem',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center'
+                  }}>
+                    <span>{day.date}</span>
+                    {day.isToday && (
                       <div style={{
-                        color: day.isToday ? '#3B82F6' : (day.isSelected ? 'white' : 'rgba(255, 255, 255, 0.8)'),
-                        fontSize: isMobile ? '0.9rem' : '1rem',
-                        fontWeight: day.isToday ? '700' : '400',
-                        marginBottom: '0.5rem',
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center'
-                      }}>
-                        <span>{day.date}</span>
-                        {day.isToday && (
-                          <div style={{
-                            width: '6px',
-                            height: '6px',
-                            backgroundColor: '#3B82F6',
-                            borderRadius: '50%'
-                          }} />
-                        )}
-                      </div>
-                      
-                      {/* Event Indicators */}
-                      {hasEvents && (
-                        <div style={{
-                          display: 'flex',
-                          flexDirection: 'column',
-                          gap: '0.3rem',
-                          maxHeight: isMobile ? '50px' : '80px',
-                          overflowY: 'auto'
-                        }}>
-                          {day.events.slice(0, 3).map(event => (
-                            <div
-                              key={event.id}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleViewEventDetails(event);
-                              }}
-                              style={{
-                                backgroundColor: event.color + '20',
-                                borderLeft: `3px solid ${event.color}`,
-                                padding: '0.2rem 0.4rem',
-                                borderRadius: '3px',
-                                cursor: 'pointer'
-                              }}
-                            >
-                              <div style={{
-                                color: 'white',
-                                fontSize: isMobile ? '0.6rem' : '0.7rem',
-                                fontWeight: '600',
-                                whiteSpace: 'nowrap',
-                                overflow: 'hidden',
-                                textOverflow: 'ellipsis'
-                              }}>
-                                {event.title}
-                              </div>
-                              <div style={{
-                                color: 'rgba(255, 255, 255, 0.7)',
-                                fontSize: isMobile ? '0.5rem' : '0.6rem',
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '0.2rem'
-                              }}>
-                                <span style={{
-                                  backgroundColor: event.color,
-                                  width: '4px',
-                                  height: '4px',
-                                  borderRadius: '50%'
-                                }} />
-                                {event.label}
-                              </div>
-                            </div>
-                          ))}
-                          {day.events.length > 3 && (
-                            <div style={{
-                              color: 'rgba(255, 255, 255, 0.5)',
-                              fontSize: isMobile ? '0.5rem' : '0.6rem',
-                              textAlign: 'center'
-                            }}>
-                              +{day.events.length - 3} lainnya
-                            </div>
-                          )}
-                        </div>
-                      )}
-                      
-                      {/* Add Event Button for Admin */}
-                      {isAdmin && !hasEvents && (
-                        <motion.div
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 0.5 }}
-                          whileHover={{ opacity: 1 }}
-                          onClick={() => handleDateSelect(day.fullDate)}
+                        width: '6px',
+                        height: '6px',
+                        backgroundColor: '#3B82F6',
+                        borderRadius: '50%'
+                      }} />
+                    )}
+                  </div>
+                  
+                  {/* Event Indicators */}
+                  {hasEvents && (
+                    <div style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '0.3rem',
+                      maxHeight: isMobile ? '50px' : '80px',
+                      overflowY: 'auto'
+                    }}>
+                      {day.events.slice(0, 3).map(event => (
+                        <div
+                          key={event.id}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleViewEventDetails(event);
+                          }}
                           style={{
-                            position: 'absolute',
-                            bottom: '0.3rem',
-                            right: '0.3rem',
-                            width: '20px',
-                            height: '20px',
-                            borderRadius: '50%',
-                            backgroundColor: 'transparent',
-                            border: '1px solid rgba(255, 255, 255, 0.3)',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            cursor: 'pointer',
-                            fontSize: '0.8rem',
-                            color: 'white'
+                            backgroundColor: event.color + '20',
+                            borderLeft: `3px solid ${event.color}`,
+                            padding: '0.2rem 0.4rem',
+                            borderRadius: '3px',
+                            cursor: 'pointer'
                           }}
                         >
-                          +
-                        </motion.div>
+                          <div style={{
+                            color: 'white',
+                            fontSize: isMobile ? '0.6rem' : '0.7rem',
+                            fontWeight: '600',
+                            whiteSpace: 'nowrap',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis'
+                          }}>
+                            {event.title}
+                          </div>
+                          <div style={{
+                            color: 'rgba(255, 255, 255, 0.7)',
+                            fontSize: isMobile ? '0.5rem' : '0.6rem',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.2rem'
+                          }}>
+                            <span style={{
+                              backgroundColor: event.color,
+                              width: '4px',
+                              height: '4px',
+                              borderRadius: '50%'
+                            }} />
+                            {event.label}
+                          </div>
+                        </div>
+                      ))}
+                      {day.events.length > 3 && (
+                        <div style={{
+                          color: 'rgba(255, 255, 255, 0.5)',
+                          fontSize: isMobile ? '0.5rem' : '0.6rem',
+                          textAlign: 'center'
+                        }}>
+                          +{day.events.length - 3} lainnya
+                        </div>
                       )}
+                    </div>
+                  )}
+                  
+                  {/* Add Event Button for Admin */}
+                  {isAdmin && !hasEvents && (
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 0.5 }}
+                      whileHover={{ opacity: 1 }}
+                      onClick={() => handleDateSelect(day.fullDate)}
+                      style={{
+                        position: 'absolute',
+                        bottom: '0.3rem',
+                        right: '0.3rem',
+                        width: '20px',
+                        height: '20px',
+                        borderRadius: '50%',
+                        backgroundColor: 'transparent',
+                        border: '1px solid rgba(255, 255, 255, 0.3)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        cursor: 'pointer',
+                        fontSize: '0.8rem',
+                        color: 'white'
+                      }}
+                    >
+                      +
                     </motion.div>
-                  );
-                })}
-              </div>
-            </div>
-            
-            {/* Legend for Event Colors */}
-            <div style={{
-              padding: '1.5rem',
-              backgroundColor: 'transparent',
-              border: '1px solid rgba(255, 255, 255, 0.2)',
-              borderRadius: '15px',
-              marginTop: '1rem'
-            }}>
-              <h3 style={{
-                color: 'white',
-                fontSize: '1.2rem',
-                fontWeight: '400',
-                margin: '0 0 1rem 0',
-                fontFamily: 'Helvetica, Arial, sans-serif'
-              }}>
-                Legend Warna Kegiatan
-              </h3>
-              <div style={{
+                  )}
+                </motion.div>
+              );
+            })}
+          </div>
+        </div>
+        
+        {/* Legend for Event Colors */}
+        <div style={{
+          padding: '1.5rem',
+          backgroundColor: 'transparent',
+          border: '1px solid rgba(255, 255, 255, 0.2)',
+          borderRadius: '15px',
+          marginTop: '1rem'
+        }}>
+          <h3 style={{
+            color: 'white',
+            fontSize: '1.2rem',
+            fontWeight: '400',
+            margin: '0 0 1rem 0',
+            fontFamily: 'Helvetica, Arial, sans-serif'
+          }}>
+            Legend Warna Kegiatan
+          </h3>
+          <div style={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            gap: '1rem'
+          }}>
+            {colorOptions.map(color => (
+              <div key={color.value} style={{
                 display: 'flex',
-                flexWrap: 'wrap',
-                gap: '1rem'
+                alignItems: 'center',
+                gap: '0.5rem'
               }}>
-                {colorOptions.map(color => (
-                  <div key={color.value} style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.5rem'
-                  }}>
-                    <div style={{
-                      width: '15px',
-                      height: '15px',
-                      backgroundColor: color.value,
-                      borderRadius: '3px'
-                    }} />
-                    <span style={{
-                      color: 'rgba(255, 255, 255, 0.8)',
-                      fontSize: '0.9rem'
-                    }}>
-                      {color.name}
-                    </span>
-                  </div>
-                ))}
+                <div style={{
+                  width: '15px',
+                  height: '15px',
+                  backgroundColor: color.value,
+                  borderRadius: '3px'
+                }} />
+                <span style={{
+                  color: 'rgba(255, 255, 255, 0.8)',
+                  fontSize: '0.9rem'
+                }}>
+                  {color.name}
+                </span>
               </div>
-            </div>
-          </>
-        )}
+            ))}
+          </div>
+        </div>
         
         {/* Instructions for Admin */}
         {isAdmin && (
@@ -1910,6 +1817,53 @@ export default function CalendarPage(): React.JSX.Element {
         )}
       </AnimatePresence>
       
+      {/* Loading State */}
+      <AnimatePresence>
+        {isLoading && (
+          <motion.div
+            initial={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.5 }}
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              backgroundColor: 'black',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              zIndex: 99999,
+              cursor: 'default'
+            }}
+          >
+            <div style={{
+              color: 'white',
+              textAlign: 'center'
+            }}>
+              <motion.div
+                animate={{ rotate: 360 }}
+                transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                style={{ marginBottom: '1rem' }}
+              >
+                <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5">
+                  <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+                </svg>
+              </motion.div>
+              <div style={{
+                fontSize: '1.2rem',
+                fontWeight: '300',
+                fontFamily: 'Helvetica, Arial, sans-serif',
+                letterSpacing: '1px'
+              }}>
+                Loading Calendar...
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+      
       {/* Footer */}
       <div style={{
         width: '100%',
@@ -1937,7 +1891,7 @@ export default function CalendarPage(): React.JSX.Element {
         }}>
           {isAdmin ? 
             'Mode Admin: Anda dapat menambah, mengedit, dan menghapus kegiatan' : 
-            'Mode View Only: Anda hanya dapat melihat kegiatan'}
+            'Mode User: Anda hanya dapat melihat kegiatan'}
         </p>
       </div>
     </div>
