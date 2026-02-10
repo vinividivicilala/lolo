@@ -20,11 +20,14 @@ import {
   serverTimestamp,
   Timestamp,
   doc,
+  getDoc,
   updateDoc,
-  deleteDoc
+  deleteDoc,
+  where,
+  getDocs
 } from "firebase/firestore";
 
-// Konfigurasi Firebase
+// Konfigurasi Firebase (sama dengan halaman utama)
 const firebaseConfig = {
   apiKey: "AIzaSyD_htQZ1TClnXKZGRJ4izbMQ02y6V3aNAQ",
   authDomain: "wawa44-58d1e.firebaseapp.com",
@@ -114,31 +117,31 @@ export default function CalendarPage(): React.JSX.Element {
   
   // Warna dan label preset
   const colorOptions = [
-    { value: "#3B82F6", label: "Blue", name: "Biru", icon: "🟦" },
-    { value: "#EF4444", label: "Red", name: "Merah", icon: "🟥" },
-    { value: "#10B981", label: "Green", name: "Hijau", icon: "🟩" },
-    { value: "#F59E0B", label: "Yellow", name: "Kuning", icon: "🟨" },
-    { value: "#8B5CF6", label: "Purple", name: "Ungu", icon: "🟪" },
-    { value: "#EC4899", label: "Pink", name: "Pink", icon: "💗" },
-    { value: "#6366F1", label: "Indigo", name: "Indigo", icon: "🔵" },
-    { value: "#F97316", label: "Orange", name: "Oranye", icon: "🟧" }
+    { value: "#3B82F6", label: "Blue", name: "Biru" },
+    { value: "#EF4444", label: "Red", name: "Merah" },
+    { value: "#10B981", label: "Green", name: "Hijau" },
+    { value: "#F59E0B", label: "Yellow", name: "Kuning" },
+    { value: "#8B5CF6", label: "Purple", name: "Ungu" },
+    { value: "#EC4899", label: "Pink", name: "Pink" },
+    { value: "#6366F1", label: "Indigo", name: "Indigo" },
+    { value: "#F97316", label: "Orange", name: "Oranye" }
   ];
   
   const labelOptions = [
-    { value: "Meeting", label: "Meeting", icon: "📅" },
-    { value: "Event", label: "Event", icon: "🎉" },
-    { value: "Deadline", label: "Deadline", icon: "⏰" },
-    { value: "Reminder", label: "Reminder", icon: "🔔" },
-    { value: "Birthday", label: "Birthday", icon: "🎂" },
-    { value: "Holiday", label: "Holiday", icon: "🏖️" },
-    { value: "Appointment", label: "Appointment", icon: "👥" },
-    { value: "Task", label: "Task", icon: "✅" },
-    { value: "Update", label: "Update", icon: "🔄" },
-    { value: "Maintenance", label: "Maintenance", icon: "🔧" },
-    { value: "Development", label: "Development", icon: "💻" },
-    { value: "Security", label: "Security", icon: "🔒" },
-    { value: "Optimization", label: "Optimization", icon: "⚡" },
-    { value: "Feature", label: "Feature", icon: "🌟" }
+    { value: "Meeting", label: "Meeting" },
+    { value: "Event", label: "Event" },
+    { value: "Deadline", label: "Deadline" },
+    { value: "Reminder", label: "Reminder" },
+    { value: "Birthday", label: "Birthday" },
+    { value: "Holiday", label: "Holiday" },
+    { value: "Appointment", label: "Appointment" },
+    { value: "Task", label: "Task" },
+    { value: "Update", label: "Update" },
+    { value: "Maintenance", label: "Maintenance" },
+    { value: "Development", label: "Development" },
+    { value: "Security", label: "Security" },
+    { value: "Optimization", label: "Optimization" },
+    { value: "Feature", label: "Feature" }
   ];
   
   // Fungsi untuk mendapatkan nama bulan
@@ -540,41 +543,7 @@ export default function CalendarPage(): React.JSX.Element {
       document.body.style.overflow = 'auto';
     };
   }, [showAddEventModal, showEventDetailsModal]);
-
-  // SVG Icons - SEMUA SOUTH WEST ARROW
-  const SouthWestArrow = ({ size = 16, color = "currentColor", style = {} }) => (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" style={style}>
-      <path d="M17 7L7 17M7 17H17M7 17V7" strokeLinecap="round" strokeLinejoin="round"/>
-    </svg>
-  );
-
-  // Custom Font Styles
-  const fontStyles = {
-    fontFamily: 'Helvetica, Arial, sans-serif',
-    fontWeight: '300',
-    letterSpacing: '1px',
-    WebkitFontSmoothing: 'antialiased',
-    MozOsxFontSmoothing: 'grayscale'
-  };
-
-  const titleStyles = {
-    ...fontStyles,
-    fontSize: isMobile ? '1.8rem' : '2.5rem',
-    fontWeight: '300'
-  };
-
-  const subtitleStyles = {
-    ...fontStyles,
-    fontSize: isMobile ? '1.2rem' : '1.5rem',
-    fontWeight: '300'
-  };
-
-  const bodyStyles = {
-    ...fontStyles,
-    fontSize: isMobile ? '0.9rem' : '1rem',
-    fontWeight: '300'
-  };
-
+  
   return (
     <div style={{
       minHeight: '100vh',
@@ -588,7 +557,9 @@ export default function CalendarPage(): React.JSX.Element {
       alignItems: 'center',
       position: 'relative',
       overflow: 'auto',
-      ...fontStyles
+      fontFamily: 'Helvetica, Arial, sans-serif',
+      WebkitFontSmoothing: 'antialiased',
+      MozOsxFontSmoothing: 'grayscale'
     }}>
       
       {/* Header dengan Back Button */}
@@ -606,26 +577,25 @@ export default function CalendarPage(): React.JSX.Element {
         borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
         backdropFilter: 'blur(10px)'
       }}>
-        {/* Back Button dengan South West Arrow */}
         <motion.button
           onClick={() => router.push('/')}
           style={{
             backgroundColor: 'transparent',
             border: '1px solid rgba(255, 255, 255, 0.3)',
             color: 'white',
-            padding: '0.6rem 1.2rem',
-            borderRadius: '20px',
+            width: '40px',
+            height: '40px',
+            borderRadius: '50%',
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
-            gap: '0.5rem',
-            fontSize: '0.9rem',
-            ...bodyStyles
+            justifyContent: 'center',
+            fontSize: '1.5rem',
+            fontFamily: 'Helvetica, Arial, sans-serif'
           }}
           whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
         >
-          <SouthWestArrow size={14} />
-          Halaman utama
+          ←
         </motion.button>
         
         <div style={{
@@ -635,8 +605,11 @@ export default function CalendarPage(): React.JSX.Element {
         }}>
           <h1 style={{
             color: 'white',
-            ...titleStyles,
-            margin: 0
+            fontSize: isMobile ? '1.8rem' : '2.5rem',
+            fontWeight: '300',
+            margin: 0,
+            fontFamily: 'Helvetica, Arial, sans-serif',
+            letterSpacing: '1px'
           }}>
             Kalender MENURU
           </h1>
@@ -646,35 +619,29 @@ export default function CalendarPage(): React.JSX.Element {
             fontSize: '0.9rem',
             padding: '0.3rem 0.8rem',
             borderRadius: '20px',
-            border: '1px solid rgba(255, 255, 255, 0.3)',
-            ...bodyStyles
+            border: '1px solid rgba(255, 255, 255, 0.3)'
           }}>
             {isAdmin ? 'Admin Mode' : 'User Mode'}
           </div>
         </div>
         
-        {/* User Info menggantikan Today Button */}
-        {user && (
-          <motion.div
-            style={{
-              padding: '0.5rem 1.5rem',
-              backgroundColor: 'transparent',
-              border: '1px solid rgba(255, 255, 255, 0.3)',
-              borderRadius: '20px',
-              color: 'white',
-              fontSize: '0.9rem',
-              cursor: 'default',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              ...bodyStyles
-            }}
-            whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
-          >
-            {userDisplayName}
-            <SouthWestArrow size={12} />
-          </motion.div>
-        )}
+        <motion.button
+          onClick={handleTodayClick}
+          style={{
+            padding: '0.5rem 1.5rem',
+            backgroundColor: 'transparent',
+            border: '1px solid rgba(255, 255, 255, 0.3)',
+            borderRadius: '20px',
+            color: 'white',
+            fontSize: '0.9rem',
+            fontWeight: '300',
+            cursor: 'pointer',
+            fontFamily: 'Helvetica, Arial, sans-serif'
+          }}
+          whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
+        >
+          Today
+        </motion.button>
       </div>
       
       {/* Main Calendar Content */}
@@ -731,7 +698,7 @@ export default function CalendarPage(): React.JSX.Element {
               color: 'white',
               fontSize: isMobile ? '1.5rem' : '2rem',
               fontWeight: '400',
-              ...fontStyles,
+              fontFamily: 'Helvetica, Arial, sans-serif',
               minWidth: '200px',
               textAlign: 'center'
             }}>
@@ -779,7 +746,7 @@ export default function CalendarPage(): React.JSX.Element {
                   borderRadius: '20px',
                   cursor: 'pointer',
                   fontSize: '0.9rem',
-                  ...bodyStyles,
+                  fontFamily: 'Helvetica, Arial, sans-serif',
                   whiteSpace: 'nowrap'
                 }}
                 whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
@@ -810,7 +777,7 @@ export default function CalendarPage(): React.JSX.Element {
                   borderRadius: '15px',
                   cursor: 'pointer',
                   fontSize: '0.8rem',
-                  ...bodyStyles,
+                  fontFamily: 'Helvetica, Arial, sans-serif',
                   minWidth: '40px'
                 }}
                 whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
@@ -841,7 +808,7 @@ export default function CalendarPage(): React.JSX.Element {
                 fontWeight: '600',
                 textAlign: 'center',
                 padding: '0.5rem',
-                ...fontStyles,
+                fontFamily: 'Helvetica, Arial, sans-serif',
                 textTransform: 'uppercase',
                 letterSpacing: '0.5px'
               }}>
@@ -1015,7 +982,7 @@ export default function CalendarPage(): React.JSX.Element {
             fontSize: '1.2rem',
             fontWeight: '400',
             margin: '0 0 1rem 0',
-            ...fontStyles
+            fontFamily: 'Helvetica, Arial, sans-serif'
           }}>
             Legend Warna Kegiatan
           </h3>
@@ -1038,8 +1005,7 @@ export default function CalendarPage(): React.JSX.Element {
                 }} />
                 <span style={{
                   color: 'rgba(255, 255, 255, 0.8)',
-                  fontSize: '0.9rem',
-                  ...bodyStyles
+                  fontSize: '0.9rem'
                 }}>
                   {color.name}
                 </span>
@@ -1062,7 +1028,7 @@ export default function CalendarPage(): React.JSX.Element {
               fontSize: '1.2rem',
               fontWeight: '400',
               margin: '0 0 1rem 0',
-              ...fontStyles,
+              fontFamily: 'Helvetica, Arial, sans-serif',
               display: 'flex',
               alignItems: 'center',
               gap: '0.5rem'
@@ -1079,8 +1045,7 @@ export default function CalendarPage(): React.JSX.Element {
               fontSize: '0.9rem',
               margin: 0,
               paddingLeft: '1.5rem',
-              lineHeight: 1.6,
-              ...bodyStyles
+              lineHeight: 1.6
             }}>
               <li>Klik pada tanggal untuk menambahkan kegiatan baru</li>
               <li>Klik pada kegiatan untuk melihat detail atau mengedit</li>
@@ -1148,7 +1113,7 @@ export default function CalendarPage(): React.JSX.Element {
                     fontSize: isMobile ? '1.5rem' : '2rem',
                     fontWeight: '300',
                     margin: 0,
-                    ...fontStyles,
+                    fontFamily: 'Helvetica, Arial, sans-serif',
                     letterSpacing: '1px'
                   }}>
                     {isEditingEvent ? 'Edit Kegiatan' : 'Tambah Kegiatan'}
@@ -1159,8 +1124,7 @@ export default function CalendarPage(): React.JSX.Element {
                     fontSize: '0.9rem',
                     padding: '0.3rem 0.8rem',
                     borderRadius: '20px',
-                    border: '1px solid rgba(255, 255, 255, 0.3)',
-                    ...bodyStyles
+                    border: '1px solid rgba(255, 255, 255, 0.3)'
                   }}>
                     {formatDate(eventForm.date)}
                   </div>
@@ -1184,7 +1148,7 @@ export default function CalendarPage(): React.JSX.Element {
                     alignItems: 'center',
                     justifyContent: 'center',
                     fontSize: '1.5rem',
-                    ...fontStyles
+                    fontFamily: 'Helvetica, Arial, sans-serif'
                   }}
                   whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
                 >
@@ -1208,7 +1172,7 @@ export default function CalendarPage(): React.JSX.Element {
                     fontSize: '0.9rem',
                     marginBottom: '0.5rem',
                     display: 'block',
-                    ...fontStyles
+                    fontFamily: 'Helvetica, Arial, sans-serif'
                   }}>
                     Judul Kegiatan *
                   </label>
@@ -1225,7 +1189,7 @@ export default function CalendarPage(): React.JSX.Element {
                       borderRadius: '10px',
                       color: 'white',
                       fontSize: '1rem',
-                      ...fontStyles,
+                      fontFamily: 'Helvetica, Arial, sans-serif',
                       outline: 'none',
                       transition: 'border-color 0.3s ease'
                     }}
@@ -1239,7 +1203,7 @@ export default function CalendarPage(): React.JSX.Element {
                     fontSize: '0.9rem',
                     marginBottom: '0.5rem',
                     display: 'block',
-                    ...fontStyles
+                    fontFamily: 'Helvetica, Arial, sans-serif'
                   }}>
                     Deskripsi
                   </label>
@@ -1256,7 +1220,7 @@ export default function CalendarPage(): React.JSX.Element {
                       borderRadius: '10px',
                       color: 'white',
                       fontSize: '1rem',
-                      ...fontStyles,
+                      fontFamily: 'Helvetica, Arial, sans-serif',
                       outline: 'none',
                       transition: 'border-color 0.3s ease',
                       resize: 'vertical',
@@ -1277,7 +1241,7 @@ export default function CalendarPage(): React.JSX.Element {
                       fontSize: '0.9rem',
                       marginBottom: '0.5rem',
                       display: 'block',
-                      ...fontStyles
+                      fontFamily: 'Helvetica, Arial, sans-serif'
                     }}>
                       Tanggal
                     </label>
@@ -1293,7 +1257,7 @@ export default function CalendarPage(): React.JSX.Element {
                         borderRadius: '10px',
                         color: 'white',
                         fontSize: '1rem',
-                        ...fontStyles,
+                        fontFamily: 'Helvetica, Arial, sans-serif',
                         outline: 'none'
                       }}
                     />
@@ -1305,7 +1269,7 @@ export default function CalendarPage(): React.JSX.Element {
                       fontSize: '0.9rem',
                       marginBottom: '0.5rem',
                       display: 'block',
-                      ...fontStyles
+                      fontFamily: 'Helvetica, Arial, sans-serif'
                     }}>
                       Waktu
                     </label>
@@ -1321,7 +1285,7 @@ export default function CalendarPage(): React.JSX.Element {
                         borderRadius: '10px',
                         color: 'white',
                         fontSize: '1rem',
-                        ...fontStyles,
+                        fontFamily: 'Helvetica, Arial, sans-serif',
                         outline: 'none'
                       }}
                     />
@@ -1335,7 +1299,7 @@ export default function CalendarPage(): React.JSX.Element {
                     fontSize: '0.9rem',
                     marginBottom: '0.5rem',
                     display: 'block',
-                    ...fontStyles
+                    fontFamily: 'Helvetica, Arial, sans-serif'
                   }}>
                     Warna
                   </label>
@@ -1377,7 +1341,7 @@ export default function CalendarPage(): React.JSX.Element {
                     fontSize: '0.9rem',
                     marginBottom: '0.5rem',
                     display: 'block',
-                    ...fontStyles
+                    fontFamily: 'Helvetica, Arial, sans-serif'
                   }}>
                     Label
                   </label>
@@ -1399,7 +1363,7 @@ export default function CalendarPage(): React.JSX.Element {
                           color: 'white',
                           fontSize: '0.8rem',
                           cursor: 'pointer',
-                          ...fontStyles,
+                          fontFamily: 'Helvetica, Arial, sans-serif',
                           whiteSpace: 'nowrap'
                         }}
                         whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
@@ -1443,34 +1407,17 @@ export default function CalendarPage(): React.JSX.Element {
                         <div style={{
                           color: 'white',
                           fontSize: '0.9rem',
-                          fontWeight: '600',
-                          ...fontStyles
+                          fontWeight: '600'
                         }}>
                           {userDisplayName}
                         </div>
                         <div style={{
                           color: 'rgba(255, 255, 255, 0.7)',
-                          fontSize: '0.8rem',
-                          ...bodyStyles
+                          fontSize: '0.8rem'
                         }}>
                           {isAdmin ? 'Admin' : 'User'} • {userEmail}
                         </div>
                       </div>
-                    </div>
-                    <div style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '0.5rem',
-                      marginTop: '0.5rem'
-                    }}>
-                      <SouthWestArrow size={12} color="rgba(255, 255, 255, 0.5)" />
-                      <span style={{
-                        color: 'rgba(255, 255, 255, 0.5)',
-                        fontSize: '0.8rem',
-                        ...bodyStyles
-                      }}>
-                        {isEditingEvent ? 'Mengedit kegiatan' : 'Menambahkan kegiatan baru'}
-                      </span>
                     </div>
                   </div>
                 )}
@@ -1500,7 +1447,7 @@ export default function CalendarPage(): React.JSX.Element {
                     fontSize: '0.9rem',
                     fontWeight: '300',
                     cursor: 'pointer',
-                    ...fontStyles
+                    fontFamily: 'Helvetica, Arial, sans-serif'
                   }}
                   whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
                 >
@@ -1519,15 +1466,11 @@ export default function CalendarPage(): React.JSX.Element {
                     fontSize: '0.9rem',
                     fontWeight: '300',
                     cursor: eventForm.title.trim() ? 'pointer' : 'not-allowed',
-                    ...fontStyles,
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.5rem'
+                    fontFamily: 'Helvetica, Arial, sans-serif'
                   }}
                   whileHover={eventForm.title.trim() ? { backgroundColor: 'rgba(255, 255, 255, 0.1)' } : {}}
                 >
                   {isEditingEvent ? 'Update Kegiatan' : 'Simpan Kegiatan'}
-                  <SouthWestArrow size={12} />
                 </motion.button>
               </div>
             </motion.div>
@@ -1596,20 +1539,17 @@ export default function CalendarPage(): React.JSX.Element {
                   }} />
                   
                   <div>
-                    {/* Judul Kegiatan BESAR dengan font yang sama */}
                     <h2 style={{
                       color: 'white',
-                      fontSize: isMobile ? '1.8rem' : '2.5rem',
+                      fontSize: isMobile ? '1.5rem' : '2rem',
                       fontWeight: '300',
-                      margin: '0 0 0.8rem 0',
-                      ...fontStyles,
-                      letterSpacing: '1px',
-                      lineHeight: 1.2
+                      margin: '0 0 0.5rem 0',
+                      fontFamily: 'Helvetica, Arial, sans-serif',
+                      letterSpacing: '1px'
                     }}>
                       {selectedEvent.title}
                     </h2>
                     
-                    {/* Label dengan efek stabilo */}
                     <div style={{
                       display: 'flex',
                       alignItems: 'center',
@@ -1619,26 +1559,15 @@ export default function CalendarPage(): React.JSX.Element {
                       <div style={{
                         backgroundColor: selectedEvent.color + '30',
                         color: selectedEvent.color,
-                        fontSize: '0.9rem',
+                        fontSize: '0.8rem',
                         fontWeight: '700',
-                        padding: '0.3rem 1rem',
-                        borderRadius: '15px',
+                        padding: '0.2rem 0.8rem',
+                        borderRadius: '12px',
                         textTransform: 'uppercase',
-                        letterSpacing: '1px',
-                        border: `2px solid ${selectedEvent.color}`,
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.5rem',
-                        boxShadow: `0 2px 8px ${selectedEvent.color}40`
+                        letterSpacing: '0.5px',
+                        border: `1px solid ${selectedEvent.color}`
                       }}>
-                        <div style={{
-                          width: '8px',
-                          height: '8px',
-                          backgroundColor: selectedEvent.color,
-                          borderRadius: '50%'
-                        }} />
                         {selectedEvent.label}
-                        <SouthWestArrow size={12} color={selectedEvent.color} />
                       </div>
                       
                       {selectedEvent.isAdmin && (
@@ -1647,15 +1576,11 @@ export default function CalendarPage(): React.JSX.Element {
                           color: 'white',
                           fontSize: '0.8rem',
                           fontWeight: '700',
-                          padding: '0.3rem 1rem',
-                          borderRadius: '15px',
-                          border: '2px solid rgba(255, 255, 255, 0.3)',
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '0.5rem'
+                          padding: '0.2rem 0.8rem',
+                          borderRadius: '12px',
+                          border: '1px solid rgba(255, 255, 255, 0.3)'
                         }}>
                           ADMIN
-                          <SouthWestArrow size={12} />
                         </div>
                       )}
                     </div>
@@ -1679,7 +1604,7 @@ export default function CalendarPage(): React.JSX.Element {
                     alignItems: 'center',
                     justifyContent: 'center',
                     fontSize: '1.5rem',
-                    ...fontStyles
+                    fontFamily: 'Helvetica, Arial, sans-serif'
                   }}
                   whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
                 >
@@ -1696,7 +1621,7 @@ export default function CalendarPage(): React.JSX.Element {
                 flexDirection: 'column',
                 gap: '1.5rem'
               }}>
-                {/* Date and Time dengan South West Arrow */}
+                {/* Date and Time */}
                 <div style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -1706,41 +1631,23 @@ export default function CalendarPage(): React.JSX.Element {
                   borderRadius: '10px',
                   border: '1px solid rgba(255, 255, 255, 0.1)'
                 }}>
-                  <div style={{
-                    width: '40px',
-                    height: '40px',
-                    borderRadius: '10px',
-                    backgroundColor: `${selectedEvent.color}15`,
-                    border: `1px solid ${selectedEvent.color}30`,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    flexShrink: 0
-                  }}>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={selectedEvent.color} strokeWidth="1.5">
-                      <circle cx="12" cy="12" r="10"/>
-                      <polyline points="12 6 12 12 16 14"/>
-                    </svg>
-                  </div>
-                  <div style={{ flex: 1 }}>
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <polyline points="12 6 12 12 16 14"/>
+                  </svg>
+                  <div>
                     <div style={{
                       color: 'white',
                       fontSize: '1.1rem',
                       fontWeight: '600',
-                      marginBottom: '0.3rem',
-                      ...fontStyles
+                      marginBottom: '0.2rem'
                     }}>
                       {formatDate(selectedEvent.date instanceof Date ? selectedEvent.date : selectedEvent.date.toDate())}
                     </div>
                     <div style={{
                       color: 'rgba(255, 255, 255, 0.7)',
-                      fontSize: '0.9rem',
-                      ...bodyStyles,
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '0.5rem'
+                      fontSize: '0.9rem'
                     }}>
-                      <SouthWestArrow size={12} />
                       {formatTime(selectedEvent.date instanceof Date ? selectedEvent.date : selectedEvent.date.toDate(), selectedEvent.time)} WIB
                     </div>
                   </div>
@@ -1754,24 +1661,15 @@ export default function CalendarPage(): React.JSX.Element {
                       fontSize: '1.2rem',
                       fontWeight: '400',
                       margin: '0 0 1rem 0',
-                      ...fontStyles,
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '0.5rem'
+                      fontFamily: 'Helvetica, Arial, sans-serif'
                     }}>
-                      <SouthWestArrow size={14} />
                       Deskripsi
                     </h3>
                     <div style={{
                       color: 'rgba(255, 255, 255, 0.8)',
                       fontSize: '1rem',
                       lineHeight: 1.6,
-                      whiteSpace: 'pre-wrap',
-                      padding: '1rem',
-                      backgroundColor: 'rgba(255, 255, 255, 0.03)',
-                      borderRadius: '10px',
-                      border: '1px solid rgba(255, 255, 255, 0.1)',
-                      ...bodyStyles
+                      whiteSpace: 'pre-wrap'
                     }}>
                       {selectedEvent.description}
                     </div>
@@ -1789,7 +1687,7 @@ export default function CalendarPage(): React.JSX.Element {
                     display: 'flex',
                     alignItems: 'center',
                     gap: '0.8rem',
-                    marginBottom: '0.8rem'
+                    marginBottom: '0.5rem'
                   }}>
                     <div style={{
                       width: '40px',
@@ -1810,57 +1708,30 @@ export default function CalendarPage(): React.JSX.Element {
                       <div style={{
                         color: 'white',
                         fontSize: '1rem',
-                        fontWeight: '600',
-                        ...fontStyles,
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.5rem'
+                        fontWeight: '600'
                       }}>
                         {selectedEvent.createdBy}
                         {selectedEvent.isAdmin && (
                           <span style={{
-                            marginLeft: '0.3rem',
+                            marginLeft: '0.5rem',
                             fontSize: '0.7rem',
                             backgroundColor: 'transparent',
                             color: 'white',
-                            padding: '0.2rem 0.6rem',
-                            borderRadius: '10px',
-                            border: '1px solid rgba(255, 255, 255, 0.3)',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '0.3rem'
+                            padding: '0.1rem 0.5rem',
+                            borderRadius: '4px',
+                            border: '1px solid rgba(255, 255, 255, 0.3)'
                           }}>
                             ADMIN
-                            <SouthWestArrow size={10} />
                           </span>
                         )}
                       </div>
                       <div style={{
                         color: 'rgba(255, 255, 255, 0.7)',
-                        fontSize: '0.9rem',
-                        ...bodyStyles,
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.5rem',
-                        marginTop: '0.2rem'
+                        fontSize: '0.9rem'
                       }}>
-                        <SouthWestArrow size={10} />
                         {selectedEvent.createdByEmail}
                       </div>
                     </div>
-                  </div>
-                  <div style={{
-                    color: 'rgba(255, 255, 255, 0.5)',
-                    fontSize: '0.8rem',
-                    ...bodyStyles,
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.5rem'
-                  }}>
-                    <SouthWestArrow size={10} />
-                    Dibuat pada {selectedEvent.createdAt instanceof Date ? 
-                      selectedEvent.createdAt.toLocaleDateString('id-ID') : 
-                      selectedEvent.createdAt.toDate().toLocaleDateString('id-ID')}
                   </div>
                 </div>
               </div>
@@ -1871,25 +1742,20 @@ export default function CalendarPage(): React.JSX.Element {
                 borderTop: '1px solid rgba(255, 255, 255, 0.2)',
                 display: 'flex',
                 justifyContent: 'space-between',
-                alignItems: 'center',
                 gap: '1rem',
                 flexShrink: 0
               }}>
                 <div style={{
-                  color: 'rgba(255, 255, 255, 0.4)',
-                  fontSize: '0.75rem',
-                  ...bodyStyles,
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.5rem'
+                  color: 'rgba(255, 255, 255, 0.6)',
+                  fontSize: '0.8rem',
+                  fontFamily: 'Helvetica, Arial, sans-serif'
                 }}>
-                  <SouthWestArrow size={10} />
-                  Detail kegiatan
+                  ID: {selectedEvent.id.substring(0, 8)}...
                 </div>
                 
                 <div style={{
                   display: 'flex',
-                  gap: '0.8rem'
+                  gap: '1rem'
                 }}>
                   {isAdmin && (
                     <>
@@ -1904,7 +1770,7 @@ export default function CalendarPage(): React.JSX.Element {
                           fontSize: '0.9rem',
                           fontWeight: '300',
                           cursor: 'pointer',
-                          ...fontStyles,
+                          fontFamily: 'Helvetica, Arial, sans-serif',
                           display: 'flex',
                           alignItems: 'center',
                           gap: '0.5rem'
@@ -1916,7 +1782,6 @@ export default function CalendarPage(): React.JSX.Element {
                           <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
                         </svg>
                         Edit
-                        <SouthWestArrow size={12} />
                       </motion.button>
                       
                       <motion.button
@@ -1930,7 +1795,7 @@ export default function CalendarPage(): React.JSX.Element {
                           fontSize: '0.9rem',
                           fontWeight: '300',
                           cursor: 'pointer',
-                          ...fontStyles,
+                          fontFamily: 'Helvetica, Arial, sans-serif',
                           display: 'flex',
                           alignItems: 'center',
                           gap: '0.5rem'
@@ -1942,7 +1807,6 @@ export default function CalendarPage(): React.JSX.Element {
                           <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
                         </svg>
                         Hapus
-                        <SouthWestArrow size={12} />
                       </motion.button>
                     </>
                   )}
@@ -1990,7 +1854,7 @@ export default function CalendarPage(): React.JSX.Element {
               <div style={{
                 fontSize: '1.2rem',
                 fontWeight: '300',
-                ...fontStyles,
+                fontFamily: 'Helvetica, Arial, sans-serif',
                 letterSpacing: '1px'
               }}>
                 Loading Calendar...
@@ -2000,7 +1864,36 @@ export default function CalendarPage(): React.JSX.Element {
         )}
       </AnimatePresence>
       
-      {/* Footer - DIHAPUS sesuai permintaan */}
+      {/* Footer */}
+      <div style={{
+        width: '100%',
+        padding: isMobile ? '2rem 1rem' : '3rem 2rem',
+        marginTop: '3rem',
+        borderTop: '1px solid rgba(255, 255, 255, 0.2)',
+        textAlign: 'center'
+      }}>
+        <p style={{
+          color: 'rgba(255, 255, 255, 0.6)',
+          fontSize: '0.9rem',
+          fontFamily: 'Helvetica, Arial, sans-serif',
+          margin: '0 0 1rem 0'
+        }}>
+          Kalender MENURU • Data tersinkronisasi dengan halaman utama •
+          <span style={{ color: '#3B82F6', marginLeft: '0.3rem' }}>
+            Titik biru menunjukkan hari ini
+          </span>
+        </p>
+        <p style={{
+          color: 'rgba(255, 255, 255, 0.4)',
+          fontSize: '0.8rem',
+          fontFamily: 'Helvetica, Arial, sans-serif',
+          margin: 0
+        }}>
+          {isAdmin ? 
+            'Mode Admin: Anda dapat menambah, mengedit, dan menghapus kegiatan' : 
+            'Mode User: Anda hanya dapat melihat kegiatan'}
+        </p>
+      </div>
     </div>
   );
 }
