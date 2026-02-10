@@ -137,23 +137,17 @@ interface Note {
   color?: string;
 }
 
-
-// Type untuk event kalender - DIPERBAIKI
+// Type untuk event kalender
 interface CalendarEvent {
   id: string;
   title: string;
   description: string;
-  date: Date | Timestamp;
-  time?: string;
+  date: Date;
   color: string;
   label: string;
   createdBy: string;
-  createdByEmail: string;
   isAdmin: boolean;
-  createdAt: Timestamp | Date;
 }
-
-
 
 export default function HomePage(): React.JSX.Element {
   const router = useRouter();
@@ -226,18 +220,12 @@ export default function HomePage(): React.JSX.Element {
   const [showGsapLoading, setShowGsapLoading] = useState(true);
   const [currentRandomNumber, setCurrentRandomNumber] = useState(0);
 
-
-  // State untuk kalender - DIPERBAIKI
-const [showCalendarModal, setShowCalendarModal] = useState(false);
-const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
-const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
-const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
-const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-const [isLoadingCalendar, setIsLoadingCalendar] = useState(false);
-
-
-
-  
+  // State untuk kalender
+  const [showCalendarModal, setShowCalendarModal] = useState(false);
+  const [currentYear, setCurrentYear] = useState(2026);
+  const [currentMonth, setCurrentMonth] = useState(0); // 0 = Januari
+  const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
 
   const headerRef = useRef<HTMLDivElement>(null);
   const topNavRef = useRef<HTMLDivElement>(null);
@@ -332,15 +320,7 @@ const [isLoadingCalendar, setIsLoadingCalendar] = useState(false);
       category: "Personal",
       url: "/notes",
       icon: "📝"
-    },
-    {
-  id: 9,
-  title: "Calendar",
-  description: "Kalender kegiatan MENURU",
-  category: "Tools",
-  url: "/calendar",
-  icon: "📅"
-}
+    }
   ];
 
   // Animasi loading text
@@ -380,12 +360,89 @@ const [isLoadingCalendar, setIsLoadingCalendar] = useState(false);
     { title: "Features", description: "Functionality & Integration" }
   ];
 
-
-
-
-
-
-  
+  // Data dummy event kalender admin
+  const sampleCalendarEvents: CalendarEvent[] = [
+    {
+      id: '1',
+      title: 'Launch Update v2.0',
+      description: 'Peluncuran update besar dengan fitur chatbot AI baru',
+      date: new Date(2026, 0, 15), // 15 Januari 2026
+      color: '#3B82F6',
+      label: 'Update',
+      createdBy: 'Admin',
+      isAdmin: true
+    },
+    {
+      id: '2',
+      title: 'Maintenance Server',
+      description: 'Maintenance terjadwal untuk optimasi performa',
+      date: new Date(2026, 0, 20),
+      color: '#EF4444',
+      label: 'Maintenance',
+      createdBy: 'Admin',
+      isAdmin: true
+    },
+    {
+      id: '3',
+      title: 'Webinar: Creative Design',
+      description: 'Webinar online tentang creative design dengan MENURU',
+      date: new Date(2026, 0, 25),
+      color: '#10B981',
+      label: 'Event',
+      createdBy: 'Admin',
+      isAdmin: true
+    },
+    {
+      id: '4',
+      title: 'Bug Fix Sprint',
+      description: 'Sesi perbaikan bug dan improvement minor',
+      date: new Date(2026, 1, 5), // 5 Februari 2026
+      color: '#F59E0B',
+      label: 'Development',
+      createdBy: 'Admin',
+      isAdmin: true
+    },
+    {
+      id: '5',
+      title: 'User Feedback Review',
+      description: 'Review feedback pengguna untuk update berikutnya',
+      date: new Date(2026, 1, 12),
+      color: '#8B5CF6',
+      label: 'Meeting',
+      createdBy: 'Admin',
+      isAdmin: true
+    },
+    {
+      id: '6',
+      title: 'New Feature: Calendar',
+      description: 'Launch fitur kalender untuk kegiatan admin',
+      date: new Date(2026, 0, 1),
+      color: '#EC4899',
+      label: 'Feature',
+      createdBy: 'Admin',
+      isAdmin: true
+    },
+    {
+      id: '7',
+      title: 'Database Optimization',
+      description: 'Optimasi database untuk performa yang lebih baik',
+      date: new Date(2026, 2, 10),
+      color: '#6366F1',
+      label: 'Optimization',
+      createdBy: 'Admin',
+      isAdmin: true
+    },
+    {
+      id: '8',
+      title: 'Security Update',
+      description: 'Pembaruan keamanan sistem',
+      date: new Date(2026, 3, 5),
+      color: '#F97316',
+      label: 'Security',
+      createdBy: 'Admin',
+      isAdmin: true
+    }
+  ];
 
   // Data untuk halaman Index
   const indexTopics = [
@@ -505,106 +562,98 @@ const [isLoadingCalendar, setIsLoadingCalendar] = useState(false);
     }
   };
 
-  
+  // Fungsi untuk mendapatkan nama bulan
+  const getMonthName = (monthIndex: number): string => {
+    const months = [
+      'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+      'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+    ];
+    return months[monthIndex];
+  };
 
-// Fungsi untuk mendapatkan nama bulan
-const getMonthName = (monthIndex: number): string => {
-  const months = [
-    'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
-    'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
-  ];
-  return months[monthIndex];
-};
+  // Fungsi untuk mendapatkan hari dalam seminggu
+  const getDayName = (dayIndex: number): string => {
+    const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+    return days[dayIndex];
+  };
 
-// Fungsi untuk mendapatkan hari dalam seminggu
-const getDayName = (dayIndex: number): string => {
-  const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
-  return days[dayIndex];
-};
+  // Fungsi untuk mendapatkan jumlah hari dalam bulan
+  const getDaysInMonth = (year: number, month: number): number => {
+    return new Date(year, month + 1, 0).getDate();
+  };
 
-// Fungsi untuk mendapatkan jumlah hari dalam bulan
-const getDaysInMonth = (year: number, month: number): number => {
-  return new Date(year, month + 1, 0).getDate();
-};
+  // Fungsi untuk mendapatkan hari pertama dalam bulan (0 = Minggu, 1 = Senin, dst)
+  const getFirstDayOfMonth = (year: number, month: number): number => {
+    return new Date(year, month, 1).getDay();
+  };
 
-// Fungsi untuk mendapatkan hari pertama dalam bulan (0 = Minggu, 1 = Senin, dst)
-const getFirstDayOfMonth = (year: number, month: number): number => {
-  return new Date(year, month, 1).getDay();
-};
-
-// Fungsi untuk generate kalender
-const generateCalendar = () => {
-  const daysInMonth = getDaysInMonth(currentYear, currentMonth);
-  const firstDayOfMonth = getFirstDayOfMonth(currentYear, currentMonth);
-  const days = [];
-  
-  // Tambahkan hari kosong untuk hari-hari sebelum bulan dimulai
-  for (let i = 0; i < firstDayOfMonth; i++) {
-    days.push(null);
-  }
-  
-  // Tambahkan hari-hari dalam bulan
-  for (let i = 1; i <= daysInMonth; i++) {
-    const currentDate = new Date(currentYear, currentMonth, i);
-    const dayEvents = calendarEvents.filter(event => {
-      const eventDate = event.date instanceof Date ? event.date : event.date.toDate();
-      return (
-        eventDate.getDate() === i &&
-        eventDate.getMonth() === currentMonth &&
-        eventDate.getFullYear() === currentYear
-      );
-    });
+  // Fungsi untuk generate kalender
+  const generateCalendar = () => {
+    const daysInMonth = getDaysInMonth(currentYear, currentMonth);
+    const firstDayOfMonth = getFirstDayOfMonth(currentYear, currentMonth);
+    const days = [];
     
-    days.push({
-      date: i,
-      fullDate: currentDate,
-      isToday: currentDate.toDateString() === new Date().toDateString(),
-      events: dayEvents
-    });
-  }
-  
-  return days;
-};
-
-// Fungsi untuk navigasi bulan
-const navigateMonth = (direction: 'prev' | 'next') => {
-  if (direction === 'prev') {
-    if (currentMonth === 0) {
-      setCurrentMonth(11);
-      setCurrentYear(currentYear - 1);
-    } else {
-      setCurrentMonth(currentMonth - 1);
+    // Tambahkan hari kosong untuk hari-hari sebelum bulan dimulai
+    for (let i = 0; i < firstDayOfMonth; i++) {
+      days.push(null);
     }
-  } else {
-    if (currentMonth === 11) {
-      setCurrentMonth(0);
-      setCurrentYear(currentYear + 1);
-    } else {
-      setCurrentMonth(currentMonth + 1);
+    
+    // Tambahkan hari-hari dalam bulan
+    for (let i = 1; i <= daysInMonth; i++) {
+      const currentDate = new Date(currentYear, currentMonth, i);
+      const dayEvents = calendarEvents.filter(event => 
+        event.date.getDate() === i && 
+        event.date.getMonth() === currentMonth && 
+        event.date.getFullYear() === currentYear
+      );
+      
+      days.push({
+        date: i,
+        fullDate: currentDate,
+        isToday: currentDate.toDateString() === new Date().toDateString(),
+        events: dayEvents
+      });
     }
-  }
-};
+    
+    return days;
+  };
 
-// Fungsi untuk pilih tahun
-const handleYearSelect = (year: number) => {
-  setCurrentYear(year);
-};
+  // Fungsi untuk navigasi bulan
+  const navigateMonth = (direction: 'prev' | 'next') => {
+    if (direction === 'prev') {
+      if (currentMonth === 0) {
+        setCurrentMonth(11);
+        setCurrentYear(currentYear - 1);
+      } else {
+        setCurrentMonth(currentMonth - 1);
+      }
+    } else {
+      if (currentMonth === 11) {
+        setCurrentMonth(0);
+        setCurrentYear(currentYear + 1);
+      } else {
+        setCurrentMonth(currentMonth + 1);
+      }
+    }
+  };
 
-// Fungsi untuk pilih bulan
-const handleMonthSelect = (monthIndex: number) => {
-  setCurrentMonth(monthIndex);
-};
+  // Fungsi untuk pilih tahun
+  const handleYearSelect = (year: number) => {
+    setCurrentYear(year);
+  };
 
-// Handler untuk klik teks "Selamat Tahun Baru 2026"
-const handleNewYearTextClick = () => {
-  setShowCalendarModal(true);
-  setCurrentYear(2026);
-  setCurrentMonth(0);
-  setSelectedDate(null);
-};
+  // Fungsi untuk pilih bulan
+  const handleMonthSelect = (monthIndex: number) => {
+    setCurrentMonth(monthIndex);
+  };
 
-
-  
+  // Handler untuk klik teks "Selamat Tahun Baru 2026"
+  const handleNewYearTextClick = () => {
+    setShowCalendarModal(true);
+    setCurrentYear(2026);
+    setCurrentMonth(0);
+    setSelectedDate(null);
+  };
 
   // Fungsi untuk melakukan pencarian
   const performSearch = (query: string) => {
@@ -1517,66 +1566,6 @@ const handleNewYearTextClick = () => {
     }
   };
 
-// Load events kalender dari Firebase - DIPERBAIKI
-useEffect(() => {
-  if (!db || !showCalendarModal) return;
-  
-  setIsLoadingCalendar(true);
-  
-  const eventsRef = collection(db, 'calendarEvents');
-  const q = query(eventsRef, orderBy('date', 'asc'));
-  
-  const unsubscribe = onSnapshot(q, 
-    (querySnapshot) => {
-      const eventsData: CalendarEvent[] = [];
-      
-      querySnapshot.forEach((doc) => {
-        const data = doc.data();
-        let eventDate = data.date;
-        
-        // Convert Firestore Timestamp to Date if needed
-        if (eventDate && typeof eventDate.toDate === 'function') {
-          eventDate = eventDate.toDate();
-        } else if (typeof eventDate === 'string') {
-          eventDate = new Date(eventDate);
-        }
-        
-        eventsData.push({
-          id: doc.id,
-          title: data.title || "No Title",
-          description: data.description || "",
-          date: eventDate,
-          time: data.time || "00:00",
-          color: data.color || "#3B82F6",
-          label: data.label || "Event",
-          createdBy: data.createdBy || "Unknown",
-          createdByEmail: data.createdByEmail || "",
-          isAdmin: data.isAdmin || false,
-          createdAt: data.createdAt || new Date()
-        });
-      });
-      
-      console.log(`✅ Loaded ${eventsData.length} calendar events for main page`);
-      setCalendarEvents(eventsData);
-      setIsLoadingCalendar(false);
-    },
-    (error) => {
-      console.error("❌ Error loading calendar events for main page:", error);
-      setIsLoadingCalendar(false);
-    }
-  );
-  
-  return () => unsubscribe();
-}, [db, showCalendarModal]);
-
-
-
-
-
-
-
-  
-
   // Update counter ketika currentPhotoIndex berubah
   useEffect(() => {
     updateLeftCounter(currentPhotoIndex);
@@ -2239,745 +2228,637 @@ useEffect(() => {
         )}
       </AnimatePresence>
 
-
-      {/* Calendar */}
-<motion.div
-  onClick={() => router.push('/calendar')}
-  style={{
-    display: 'flex',
-    alignItems: 'center',
-    gap: '0.5rem',
-    cursor: 'pointer',
-    padding: '0.4rem 1rem 0.4rem 0.8rem',
-    borderRadius: '25px',
-    backgroundColor: 'transparent',
-    border: '1px solid rgba(255,255,255,0.2)',
-    transition: 'all 0.3s ease',
-    position: 'relative'
-  }}
->
-  <svg 
-    width={isMobile ? "18" : "20"} 
-    height={isMobile ? "18" : "20"} 
-    viewBox="0 0 24 24" 
-    fill="none" 
-    stroke="white"
-    strokeWidth="2"
-  >
-    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-    <line x1="16" y1="2" x2="16" y2="6"/>
-    <line x1="8" y1="2" x2="8" y2="6"/>
-    <line x1="3" y1="10" x2="21" y2="10"/>
-  </svg>
-  <span style={{
-    color: 'white',
-    fontSize: isMobile ? '0.8rem' : '0.9rem',
-    fontWeight: '600',
-    fontFamily: 'Helvetica, Arial, sans-serif',
-    display: 'flex',
-    alignItems: 'center',
-    gap: '0.3rem'
-  }}>
-    Calendar
-    <svg 
-      width={isMobile ? "12" : "14"} 
-      height={isMobile ? "12" : "14"} 
-      viewBox="0 0 24 24" 
-      fill="none" 
-      stroke="white"
-      strokeWidth="2"
-    >
-      <path d="M5 12h14"/>
-      <path d="M12 5l7 7-7 7"/>
-    </svg>
-  </span>
-</motion.div>
-
-
-// Modal Kalender Tahun Baru - DIPERBAIKI
-<AnimatePresence>
-  {showCalendarModal && (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.3 }}
-      style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        width: '100%',
-        height: '100%',
-        backgroundColor: 'rgba(0, 0, 0, 0.98)',
-        zIndex: 10002,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        backdropFilter: 'blur(10px)',
-        overflow: 'auto',
-        padding: isMobile ? '1rem' : '2rem'
-      }}
-    >
-      <motion.div
-        ref={calendarModalRef}
-        initial={{ scale: 0.95, opacity: 0, y: 20 }}
-        animate={{ scale: 1, opacity: 1, y: 0 }}
-        exit={{ scale: 0.95, opacity: 0, y: 20 }}
-        transition={{ duration: 0.4 }}
-        style={{
-          backgroundColor: 'transparent',
-          borderRadius: '20px',
-          width: '100%',
-          maxWidth: '1200px',
-          maxHeight: '90vh',
-          display: 'flex',
-          flexDirection: 'column',
-          overflow: 'hidden',
-          border: '1px solid rgba(255, 255, 255, 0.2)'
-        }}
-      >
-        {/* Header Modal */}
-        <div style={{
-          padding: isMobile ? '1.5rem' : '2rem',
-          borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          flexShrink: 0
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-            <h2 style={{
-              color: 'white',
-              fontSize: isMobile ? '1.8rem' : '2.5rem',
-              fontWeight: '300',
-              margin: 0,
-              fontFamily: 'Helvetica, Arial, sans-serif',
-              letterSpacing: '1px'
-            }}>
-              Kalender MENURU {currentYear}
-            </h2>
-            <div style={{
-              backgroundColor: 'transparent',
-              color: 'white',
-              fontSize: '0.9rem',
-              padding: '0.3rem 0.8rem',
-              borderRadius: '20px',
-              border: '1px solid rgba(255, 255, 255, 0.3)'
-            }}>
-              View Only
-            </div>
-          </div>
-          
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-            <motion.button
-              onClick={() => router.push('/calendar')}
+      {/* Modal Kalender Tahun Baru */}
+      <AnimatePresence>
+        {showCalendarModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              backgroundColor: 'rgba(0, 0, 0, 0.98)',
+              zIndex: 10002,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              backdropFilter: 'blur(10px)',
+              overflow: 'auto',
+              padding: isMobile ? '1rem' : '2rem'
+            }}
+          >
+            <motion.div
+              ref={calendarModalRef}
+              initial={{ scale: 0.95, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.95, opacity: 0, y: 20 }}
+              transition={{ duration: 0.4 }}
               style={{
-                padding: '0.5rem 1.5rem',
                 backgroundColor: 'transparent',
-                border: '1px solid rgba(255, 255, 255, 0.3)',
                 borderRadius: '20px',
-                color: 'white',
-                fontSize: '0.9rem',
-                fontWeight: '300',
-                cursor: 'pointer',
-                fontFamily: 'Helvetica, Arial, sans-serif',
+                width: '100%',
+                maxWidth: '1200px',
+                maxHeight: '90vh',
                 display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem'
+                flexDirection: 'column',
+                overflow: 'hidden',
+                border: '1px solid rgba(255, 255, 255, 0.2)'
               }}
-              whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
             >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-                <line x1="16" y1="2" x2="16" y2="6"/>
-                <line x1="8" y1="2" x2="8" y2="6"/>
-                <line x1="3" y1="10" x2="21" y2="10"/>
-              </svg>
-              Full Calendar
-            </motion.button>
-            
-            <motion.button
-              onClick={() => {
-                setShowCalendarModal(false);
-                setSelectedDate(null);
-              }}
-              style={{
-                backgroundColor: 'transparent',
-                border: '1px solid rgba(255, 255, 255, 0.3)',
-                color: 'white',
-                width: '40px',
-                height: '40px',
-                borderRadius: '50%',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '1.5rem',
-                fontFamily: 'Helvetica, Arial, sans-serif'
-              }}
-              whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
-            >
-              ×
-            </motion.button>
-          </div>
-        </div>
-
-        {/* Konten Kalender */}
-        <div style={{
-          flex: 1,
-          overflowY: 'auto',
-          padding: isMobile ? '1rem' : '2rem',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '2rem'
-        }}>
-          {/* Kontrol Tahun & Bulan */}
-          <div style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            flexWrap: 'wrap',
-            gap: '1rem'
-          }}>
-            {/* Navigasi Bulan */}
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '1rem'
-            }}>
-              <motion.button
-                onClick={() => navigateMonth('prev')}
-                style={{
-                  backgroundColor: 'transparent',
-                  border: '1px solid rgba(255, 255, 255, 0.3)',
-                  color: 'white',
-                  width: '40px',
-                  height: '40px',
-                  borderRadius: '50%',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}
-                whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
-              >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M15 18l-6-6 6-6"/>
-                </svg>
-              </motion.button>
-              
+              {/* Header Modal */}
               <div style={{
-                color: 'white',
-                fontSize: isMobile ? '1.5rem' : '2rem',
-                fontWeight: '400',
-                fontFamily: 'Helvetica, Arial, sans-serif',
-                minWidth: '200px',
-                textAlign: 'center'
+                padding: isMobile ? '1.5rem' : '2rem',
+                borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                flexShrink: 0
               }}>
-                {getMonthName(currentMonth)} {currentYear}
-              </div>
-              
-              <motion.button
-                onClick={() => navigateMonth('next')}
-                style={{
-                  backgroundColor: 'transparent',
-                  border: '1px solid rgba(255, 255, 255, 0.3)',
-                  color: 'white',
-                  width: '40px',
-                  height: '40px',
-                  borderRadius: '50%',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}
-                whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
-              >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M9 18l6-6-6-6"/>
-                </svg>
-              </motion.button>
-            </div>
-
-            {/* Pilih Tahun */}
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              flexWrap: 'wrap'
-            }}>
-              {[2024, 2025, 2026, 2027, 2028].map(year => (
-                <motion.button
-                  key={year}
-                  onClick={() => handleYearSelect(year)}
-                  style={{
-                    backgroundColor: currentYear === year ? 'rgba(255, 255, 255, 0.2)' : 'transparent',
-                    border: '1px solid rgba(255, 255, 255, 0.3)',
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                  <h2 style={{
                     color: 'white',
-                    padding: '0.5rem 1rem',
-                    borderRadius: '20px',
-                    cursor: 'pointer',
+                    fontSize: isMobile ? '1.8rem' : '2.5rem',
+                    fontWeight: '300',
+                    margin: 0,
+                    fontFamily: 'Helvetica, Arial, sans-serif',
+                    letterSpacing: '1px'
+                  }}>
+                    Kalender MENURU {currentYear}
+                  </h2>
+                  <div style={{
+                    backgroundColor: 'transparent',
+                    color: 'white',
                     fontSize: '0.9rem',
-                    fontFamily: 'Helvetica, Arial, sans-serif',
-                    whiteSpace: 'nowrap'
-                  }}
-                  whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
-                >
-                  {year}
-                </motion.button>
-              ))}
-            </div>
-
-            {/* Pilih Bulan */}
-            <div style={{
-              display: 'flex',
-              gap: '0.5rem',
-              flexWrap: 'wrap'
-            }}>
-              {[
-                'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun',
-                'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'
-              ].map((month, index) => (
+                    padding: '0.3rem 0.8rem',
+                    borderRadius: '20px',
+                    border: '1px solid rgba(255, 255, 255, 0.3)'
+                  }}>
+                    Admin Activities
+                  </div>
+                </div>
+                
                 <motion.button
-                  key={month}
-                  onClick={() => handleMonthSelect(index)}
+                  onClick={() => {
+                    setShowCalendarModal(false);
+                    setSelectedDate(null);
+                  }}
                   style={{
-                    backgroundColor: currentMonth === index ? 'rgba(255, 255, 255, 0.2)' : 'transparent',
+                    backgroundColor: 'transparent',
                     border: '1px solid rgba(255, 255, 255, 0.3)',
                     color: 'white',
-                    padding: '0.4rem 0.8rem',
-                    borderRadius: '15px',
+                    width: '40px',
+                    height: '40px',
+                    borderRadius: '50%',
                     cursor: 'pointer',
-                    fontSize: '0.8rem',
-                    fontFamily: 'Helvetica, Arial, sans-serif',
-                    minWidth: '40px'
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '1.5rem',
+                    fontFamily: 'Helvetica, Arial, sans-serif'
                   }}
                   whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
                 >
-                  {month}
+                  ×
                 </motion.button>
-              ))}
-            </div>
-          </div>
+              </div>
 
-          {/* Grid Kalender */}
-          <div style={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '1rem'
-          }}>
-            {/* Header Hari */}
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(7, 1fr)',
-              gap: '0.5rem',
-              padding: '0.5rem 0'
-            }}>
-              {['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'].map(day => (
-                <div key={day} style={{
-                  color: 'rgba(255, 255, 255, 0.7)',
-                  fontSize: isMobile ? '0.8rem' : '0.9rem',
-                  fontWeight: '600',
-                  textAlign: 'center',
-                  padding: '0.5rem',
-                  fontFamily: 'Helvetica, Arial, sans-serif',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.5px'
+              {/* Konten Kalender */}
+              <div style={{
+                flex: 1,
+                overflowY: 'auto',
+                padding: isMobile ? '1rem' : '2rem',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '2rem'
+              }}>
+                {/* Kontrol Tahun & Bulan */}
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  flexWrap: 'wrap',
+                  gap: '1rem'
                 }}>
-                  {day}
-                </div>
-              ))}
-            </div>
-
-            {/* Grid Tanggal */}
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(7, 1fr)',
-              gap: '0.5rem'
-            }}>
-              {generateCalendar().map((day, index) => {
-                if (!day) {
-                  return <div key={`empty-${index}`} style={{ height: '100px' }} />;
-                }
-
-                const hasEvents = day.events && day.events.length > 0;
-                
-                return (
-                  <motion.div
-                    key={`day-${day.date}`}
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: index * 0.005 }}
-                    onClick={() => setSelectedDate(day.fullDate)}
-                    style={{
-                      backgroundColor: 'transparent',
-                      border: '1px solid rgba(255, 255, 255, 0.2)',
-                      borderRadius: '10px',
-                      padding: '0.8rem',
-                      minHeight: '100px',
-                      cursor: 'pointer',
-                      position: 'relative',
-                      transition: 'all 0.3s ease'
-                    }}
-                    whileHover={{ 
-                      backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                      borderColor: 'rgba(255, 255, 255, 0.4)'
-                    }}
-                  >
-                    {/* Tanggal */}
-                    <div style={{
-                      color: day.isToday ? '#3B82F6' : 'white',
-                      fontSize: isMobile ? '0.9rem' : '1rem',
-                      fontWeight: day.isToday ? '700' : '400',
-                      marginBottom: '0.5rem',
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center'
-                    }}>
-                      <span>{day.date}</span>
-                      {day.isToday && (
-                        <div style={{
-                          width: '6px',
-                          height: '6px',
-                          backgroundColor: '#3B82F6',
-                          borderRadius: '50%'
-                        }} />
-                      )}
-                    </div>
-
-                    {/* Event Indicators */}
-                    {hasEvents && (
-                      <div style={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: '0.3rem',
-                        maxHeight: '70px',
-                        overflowY: 'auto'
-                      }}>
-                        {day.events.slice(0, 3).map(event => (
-                          <div
-                            key={event.id}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setSelectedDate(day.fullDate);
-                            }}
-                            style={{
-                              backgroundColor: event.color + '20',
-                              borderLeft: `3px solid ${event.color}`,
-                              padding: '0.2rem 0.4rem',
-                              borderRadius: '3px',
-                              cursor: 'pointer'
-                            }}
-                          >
-                            <div style={{
-                              color: 'white',
-                              fontSize: '0.7rem',
-                              fontWeight: '600',
-                              whiteSpace: 'nowrap',
-                              overflow: 'hidden',
-                              textOverflow: 'ellipsis'
-                            }}>
-                              {event.title}
-                            </div>
-                            <div style={{
-                              color: 'rgba(255, 255, 255, 0.7)',
-                              fontSize: '0.6rem',
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: '0.2rem'
-                            }}>
-                              <span style={{
-                                backgroundColor: event.color,
-                                width: '6px',
-                                height: '6px',
-                                borderRadius: '50%'
-                              }} />
-                              {event.label}
-                            </div>
-                          </div>
-                        ))}
-                        {day.events.length > 3 && (
-                          <div style={{
-                            color: 'rgba(255, 255, 255, 0.5)',
-                            fontSize: '0.6rem',
-                            textAlign: 'center'
-                          }}>
-                            +{day.events.length - 3} lainnya
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </motion.div>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Detail Event untuk Tanggal Terpilih */}
-          {selectedDate && (() => {
-            const eventsForSelectedDate = calendarEvents.filter(event => {
-              const eventDate = event.date instanceof Date ? event.date : event.date.toDate();
-              return (
-                eventDate.getDate() === selectedDate.getDate() &&
-                eventDate.getMonth() === selectedDate.getMonth() &&
-                eventDate.getFullYear() === selectedDate.getFullYear()
-              );
-            });
-
-            if (eventsForSelectedDate.length > 0) {
-              return (
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  style={{
-                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                    border: '1px solid rgba(255, 255, 255, 0.2)',
-                    borderRadius: '15px',
-                    padding: '1.5rem',
-                    marginTop: '1rem'
-                  }}
-                >
+                  {/* Navigasi Bulan */}
                   <div style={{
                     display: 'flex',
-                    justifyContent: 'space-between',
                     alignItems: 'center',
-                    marginBottom: '1.5rem'
+                    gap: '1rem'
                   }}>
-                    <h3 style={{
-                      color: 'white',
-                      fontSize: '1.3rem',
-                      fontWeight: '400',
-                      margin: 0,
-                      fontFamily: 'Helvetica, Arial, sans-serif'
-                    }}>
-                      {getDayName(selectedDate.getDay())}, {selectedDate.getDate()} {getMonthName(selectedDate.getMonth())} {selectedDate.getFullYear()}
-                    </h3>
                     <motion.button
-                      onClick={() => setSelectedDate(null)}
+                      onClick={() => navigateMonth('prev')}
                       style={{
                         backgroundColor: 'transparent',
                         border: '1px solid rgba(255, 255, 255, 0.3)',
                         color: 'white',
-                        width: '30px',
-                        height: '30px',
+                        width: '40px',
+                        height: '40px',
                         borderRadius: '50%',
                         cursor: 'pointer',
                         display: 'flex',
                         alignItems: 'center',
-                        justifyContent: 'center',
-                        fontSize: '1rem'
+                        justifyContent: 'center'
                       }}
                       whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
                     >
-                      ×
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M15 18l-6-6 6-6"/>
+                      </svg>
+                    </motion.button>
+                    
+                    <div style={{
+                      color: 'white',
+                      fontSize: isMobile ? '1.5rem' : '2rem',
+                      fontWeight: '400',
+                      fontFamily: 'Helvetica, Arial, sans-serif',
+                      minWidth: '200px',
+                      textAlign: 'center'
+                    }}>
+                      {getMonthName(currentMonth)} {currentYear}
+                    </div>
+                    
+                    <motion.button
+                      onClick={() => navigateMonth('next')}
+                      style={{
+                        backgroundColor: 'transparent',
+                        border: '1px solid rgba(255, 255, 255, 0.3)',
+                        color: 'white',
+                        width: '40px',
+                        height: '40px',
+                        borderRadius: '50%',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                      }}
+                      whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
+                    >
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M9 18l6-6-6-6"/>
+                      </svg>
                     </motion.button>
                   </div>
 
+                  {/* Pilih Tahun */}
                   <div style={{
                     display: 'flex',
-                    flexDirection: 'column',
-                    gap: '1rem'
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                    flexWrap: 'wrap'
                   }}>
-                    {eventsForSelectedDate.map(event => (
-                      <motion.div
-                        key={event.id}
-                        initial={{ opacity: 0, x: -10 }}
-                        animate={{ opacity: 1, x: 0 }}
+                    {[2024, 2025, 2026, 2027, 2028].map(year => (
+                      <motion.button
+                        key={year}
+                        onClick={() => handleYearSelect(year)}
                         style={{
-                          backgroundColor: 'transparent',
-                          border: `1px solid ${event.color}40`,
-                          borderRadius: '10px',
-                          padding: '1rem',
-                          display: 'flex',
-                          gap: '1rem',
-                          alignItems: 'flex-start'
+                          backgroundColor: currentYear === year ? 'rgba(255, 255, 255, 0.2)' : 'transparent',
+                          border: '1px solid rgba(255, 255, 255, 0.3)',
+                          color: 'white',
+                          padding: '0.5rem 1rem',
+                          borderRadius: '20px',
+                          cursor: 'pointer',
+                          fontSize: '0.9rem',
+                          fontFamily: 'Helvetica, Arial, sans-serif',
+                          whiteSpace: 'nowrap'
                         }}
+                        whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
                       >
-                        {/* Warna Label */}
-                        <div style={{
-                          width: '4px',
-                          height: '100%',
-                          backgroundColor: event.color,
-                          borderRadius: '2px',
-                          flexShrink: 0
-                        }} />
-
-                        {/* Konten Event */}
-                        <div style={{ flex: 1 }}>
-                          <div style={{
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                            alignItems: 'flex-start',
-                            marginBottom: '0.5rem',
-                            flexWrap: 'wrap',
-                            gap: '0.5rem'
-                          }}>
-                            <div style={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: '0.8rem',
-                              flexWrap: 'wrap'
-                            }}>
-                              <h4 style={{
-                                color: 'white',
-                                fontSize: '1.1rem',
-                                fontWeight: '600',
-                                margin: 0,
-                                fontFamily: 'Helvetica, Arial, sans-serif'
-                              }}>
-                                {event.title}
-                              </h4>
-                              <div style={{
-                                backgroundColor: event.color + '30',
-                                color: event.color,
-                                fontSize: '0.7rem',
-                                fontWeight: '700',
-                                padding: '0.2rem 0.6rem',
-                                borderRadius: '12px',
-                                textTransform: 'uppercase',
-                                letterSpacing: '0.5px',
-                                border: `1px solid ${event.color}`
-                              }}>
-                                {event.label}
-                              </div>
-                            </div>
-                            
-                            <div style={{
-                              color: 'rgba(255, 255, 255, 0.6)',
-                              fontSize: '0.8rem',
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: '0.3rem'
-                            }}>
-                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                <circle cx="12" cy="12" r="10"/>
-                                <polyline points="12 6 12 12 16 14"/>
-                              </svg>
-                              {event.time || '00:00'}
-                            </div>
-                          </div>
-
-                          <p style={{
-                            color: 'rgba(255, 255, 255, 0.8)',
-                            fontSize: '0.9rem',
-                            margin: '0 0 0.8rem 0',
-                            lineHeight: 1.5,
-                            fontFamily: 'Helvetica, Arial, sans-serif'
-                          }}>
-                            {event.description}
-                          </p>
-
-                          <div style={{
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                            alignItems: 'center',
-                            marginTop: '0.5rem'
-                          }}>
-                            <div style={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: '0.5rem'
-                            }}>
-                              <div style={{
-                                width: '24px',
-                                height: '24px',
-                                borderRadius: '50%',
-                                backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                fontSize: '0.8rem',
-                                fontWeight: '600',
-                                color: 'white'
-                              }}>
-                                {event.createdBy.charAt(0)}
-                              </div>
-                              <span style={{
-                                color: 'rgba(255, 255, 255, 0.7)',
-                                fontSize: '0.8rem'
-                              }}>
-                                {event.createdBy}
-                                {event.isAdmin && (
-                                  <span style={{
-                                    marginLeft: '0.3rem',
-                                    fontSize: '0.7rem',
-                                    backgroundColor: 'transparent',
-                                    color: 'white',
-                                    padding: '0.1rem 0.4rem',
-                                    borderRadius: '4px',
-                                    border: '1px solid rgba(255, 255, 255, 0.3)'
-                                  }}>
-                                    ADMIN
-                                  </span>
-                                )}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                      </motion.div>
+                        {year}
+                      </motion.button>
                     ))}
                   </div>
-                </motion.div>
-              );
-            }
-            return null;
-          })()}
 
-          {/* Footer Modal */}
-          <div style={{
-            paddingTop: '1.5rem',
-            borderTop: '1px solid rgba(255, 255, 255, 0.2)',
-            color: 'rgba(255, 255, 255, 0.6)',
-            fontSize: '0.85rem',
-            fontFamily: 'Helvetica, Arial, sans-serif',
-            textAlign: 'center'
-          }}>
-            Kalender kegiatan MENURU • Waktu dalam WIB (UTC+7) • 
-            <span style={{ color: '#3B82F6', marginLeft: '0.3rem' }}>
-              Titik biru menunjukkan hari ini
-            </span>
-            <div style={{ marginTop: '0.5rem' }}>
-              <motion.button
-                onClick={() => router.push('/calendar')}
-                style={{
-                  padding: '0.5rem 1.5rem',
-                  backgroundColor: 'transparent',
-                  border: '1px solid rgba(255, 255, 255, 0.3)',
-                  borderRadius: '20px',
-                  color: 'white',
-                  fontSize: '0.9rem',
-                  fontWeight: '300',
-                  cursor: 'pointer',
-                  fontFamily: 'Helvetica, Arial, sans-serif',
+                  {/* Pilih Bulan */}
+                  <div style={{
+                    display: 'flex',
+                    gap: '0.5rem',
+                    flexWrap: 'wrap'
+                  }}>
+                    {[
+                      'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun',
+                      'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'
+                    ].map((month, index) => (
+                      <motion.button
+                        key={month}
+                        onClick={() => handleMonthSelect(index)}
+                        style={{
+                          backgroundColor: currentMonth === index ? 'rgba(255, 255, 255, 0.2)' : 'transparent',
+                          border: '1px solid rgba(255, 255, 255, 0.3)',
+                          color: 'white',
+                          padding: '0.4rem 0.8rem',
+                          borderRadius: '15px',
+                          cursor: 'pointer',
+                          fontSize: '0.8rem',
+                          fontFamily: 'Helvetica, Arial, sans-serif',
+                          minWidth: '40px'
+                        }}
+                        whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
+                      >
+                        {month}
+                      </motion.button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Grid Kalender */}
+                <div style={{
                   display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.5rem',
-                  margin: '0 auto'
-                }}
-                whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
-              >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-                  <line x1="16" y1="2" x2="16" y2="6"/>
-                  <line x1="8" y1="2" x2="8" y2="6"/>
-                  <line x1="3" y1="10" x2="21" y2="10"/>
-                </svg>
-                Buka Halaman Kalender Lengkap
-              </motion.button>
-            </div>
-          </div>
-        </div>
-      </motion.div>
-    </motion.div>
-  )}
-</AnimatePresence>
+                  flexDirection: 'column',
+                  gap: '1rem'
+                }}>
+                  {/* Header Hari */}
+                  <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(7, 1fr)',
+                    gap: '0.5rem',
+                    padding: '0.5rem 0'
+                  }}>
+                    {['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'].map(day => (
+                      <div key={day} style={{
+                        color: 'rgba(255, 255, 255, 0.7)',
+                        fontSize: isMobile ? '0.8rem' : '0.9rem',
+                        fontWeight: '600',
+                        textAlign: 'center',
+                        padding: '0.5rem',
+                        fontFamily: 'Helvetica, Arial, sans-serif',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.5px'
+                      }}>
+                        {day}
+                      </div>
+                    ))}
+                  </div>
 
+                  {/* Grid Tanggal */}
+                  <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(7, 1fr)',
+                    gap: '0.5rem'
+                  }}>
+                    {generateCalendar().map((day, index) => {
+                      if (!day) {
+                        return <div key={`empty-${index}`} style={{ height: '100px' }} />;
+                      }
 
+                      const hasEvents = day.events && day.events.length > 0;
+                      
+                      return (
+                        <motion.div
+                          key={`day-${day.date}`}
+                          initial={{ opacity: 0, scale: 0.9 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          transition={{ delay: index * 0.005 }}
+                          onClick={() => setSelectedDate(day.fullDate)}
+                          style={{
+                            backgroundColor: 'transparent',
+                            border: '1px solid rgba(255, 255, 255, 0.2)',
+                            borderRadius: '10px',
+                            padding: '0.8rem',
+                            minHeight: '100px',
+                            cursor: 'pointer',
+                            position: 'relative',
+                            transition: 'all 0.3s ease'
+                          }}
+                          whileHover={{ 
+                            backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                            borderColor: 'rgba(255, 255, 255, 0.4)'
+                          }}
+                        >
+                          {/* Tanggal */}
+                          <div style={{
+                            color: day.isToday ? '#3B82F6' : 'white',
+                            fontSize: isMobile ? '0.9rem' : '1rem',
+                            fontWeight: day.isToday ? '700' : '400',
+                            marginBottom: '0.5rem',
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center'
+                          }}>
+                            <span>{day.date}</span>
+                            {day.isToday && (
+                              <div style={{
+                                width: '6px',
+                                height: '6px',
+                                backgroundColor: '#3B82F6',
+                                borderRadius: '50%'
+                              }} />
+                            )}
+                          </div>
 
+                          {/* Event Indicators */}
+                          {hasEvents && (
+                            <div style={{
+                              display: 'flex',
+                              flexDirection: 'column',
+                              gap: '0.3rem',
+                              maxHeight: '70px',
+                              overflowY: 'auto'
+                            }}>
+                              {day.events.slice(0, 3).map(event => (
+                                <div
+                                  key={event.id}
+                                  style={{
+                                    backgroundColor: event.color + '20',
+                                    borderLeft: `3px solid ${event.color}`,
+                                    padding: '0.2rem 0.4rem',
+                                    borderRadius: '3px',
+                                    cursor: 'pointer'
+                                  }}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setSelectedDate(day.fullDate);
+                                  }}
+                                >
+                                  <div style={{
+                                    color: 'white',
+                                    fontSize: '0.7rem',
+                                    fontWeight: '600',
+                                    whiteSpace: 'nowrap',
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis'
+                                  }}>
+                                    {event.title}
+                                  </div>
+                                  <div style={{
+                                    color: 'rgba(255, 255, 255, 0.7)',
+                                    fontSize: '0.6rem',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '0.2rem'
+                                  }}>
+                                    <span style={{
+                                      backgroundColor: event.color,
+                                      width: '6px',
+                                      height: '6px',
+                                      borderRadius: '50%'
+                                    }} />
+                                    {event.label}
+                                  </div>
+                                </div>
+                              ))}
+                              {day.events.length > 3 && (
+                                <div style={{
+                                  color: 'rgba(255, 255, 255, 0.5)',
+                                  fontSize: '0.6rem',
+                                  textAlign: 'center'
+                                }}>
+                                  +{day.events.length - 3} lainnya
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </motion.div>
+                      );
+                    })}
+                  </div>
+                </div>
 
+                {/* Detail Event untuk Tanggal Terpilih */}
+                {selectedDate && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    style={{
+                      backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                      border: '1px solid rgba(255, 255, 255, 0.2)',
+                      borderRadius: '15px',
+                      padding: '1.5rem',
+                      marginTop: '1rem'
+                    }}
+                  >
+                    <div style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      marginBottom: '1.5rem'
+                    }}>
+                      <h3 style={{
+                        color: 'white',
+                        fontSize: '1.3rem',
+                        fontWeight: '400',
+                        margin: 0,
+                        fontFamily: 'Helvetica, Arial, sans-serif'
+                      }}>
+                        {getDayName(selectedDate.getDay())}, {selectedDate.getDate()} {getMonthName(selectedDate.getMonth())} {selectedDate.getFullYear()}
+                      </h3>
+                      <motion.button
+                        onClick={() => setSelectedDate(null)}
+                        style={{
+                          backgroundColor: 'transparent',
+                          border: '1px solid rgba(255, 255, 255, 0.3)',
+                          color: 'white',
+                          width: '30px',
+                          height: '30px',
+                          borderRadius: '50%',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontSize: '1rem'
+                        }}
+                        whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
+                      >
+                        ×
+                      </motion.button>
+                    </div>
 
+                    {(() => {
+                      const eventsForSelectedDate = calendarEvents.filter(event => 
+                        event.date.getDate() === selectedDate.getDate() && 
+                        event.date.getMonth() === selectedDate.getMonth() && 
+                        event.date.getFullYear() === selectedDate.getFullYear()
+                      );
 
-      
+                      if (eventsForSelectedDate.length === 0) {
+                        return (
+                          <div style={{
+                            padding: '2rem',
+                            textAlign: 'center',
+                            color: 'rgba(255, 255, 255, 0.5)',
+                            fontFamily: 'Helvetica, Arial, sans-serif'
+                          }}>
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ opacity: 0.5 }}>
+                              <path d="M8 2v4M16 2v4M3 10h18M5 4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V6a2 2 0 00-2-2H5z"/>
+                            </svg>
+                            <p style={{ marginTop: '1rem' }}>Tidak ada kegiatan admin pada tanggal ini</p>
+                          </div>
+                        );
+                      }
+
+                      return (
+                        <div style={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: '1rem'
+                        }}>
+                          {eventsForSelectedDate.map(event => (
+                            <motion.div
+                              key={event.id}
+                              initial={{ opacity: 0, x: -10 }}
+                              animate={{ opacity: 1, x: 0 }}
+                              style={{
+                                backgroundColor: 'transparent',
+                                border: `1px solid ${event.color}40`,
+                                borderRadius: '10px',
+                                padding: '1rem',
+                                display: 'flex',
+                                gap: '1rem',
+                                alignItems: 'flex-start'
+                              }}
+                            >
+                              {/* Warna Label */}
+                              <div style={{
+                                width: '4px',
+                                height: '100%',
+                                backgroundColor: event.color,
+                                borderRadius: '2px',
+                                flexShrink: 0
+                              }} />
+
+                              {/* Konten Event */}
+                              <div style={{ flex: 1 }}>
+                                <div style={{
+                                  display: 'flex',
+                                  justifyContent: 'space-between',
+                                  alignItems: 'flex-start',
+                                  marginBottom: '0.5rem',
+                                  flexWrap: 'wrap',
+                                  gap: '0.5rem'
+                                }}>
+                                  <div style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '0.8rem',
+                                    flexWrap: 'wrap'
+                                  }}>
+                                    <h4 style={{
+                                      color: 'white',
+                                      fontSize: '1.1rem',
+                                      fontWeight: '600',
+                                      margin: 0,
+                                      fontFamily: 'Helvetica, Arial, sans-serif'
+                                    }}>
+                                      {event.title}
+                                    </h4>
+                                    <div style={{
+                                      backgroundColor: event.color + '30',
+                                      color: event.color,
+                                      fontSize: '0.7rem',
+                                      fontWeight: '700',
+                                      padding: '0.2rem 0.6rem',
+                                      borderRadius: '12px',
+                                      textTransform: 'uppercase',
+                                      letterSpacing: '0.5px',
+                                      border: `1px solid ${event.color}`
+                                    }}>
+                                      {event.label}
+                                    </div>
+                                  </div>
+                                  
+                                  <div style={{
+                                    color: 'rgba(255, 255, 255, 0.6)',
+                                    fontSize: '0.8rem',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '0.3rem'
+                                  }}>
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                      <circle cx="12" cy="12" r="10"/>
+                                      <polyline points="12 6 12 12 16 14"/>
+                                    </svg>
+                                    {event.date.getHours().toString().padStart(2, '0')}:{event.date.getMinutes().toString().padStart(2, '0')}
+                                  </div>
+                                </div>
+
+                                <p style={{
+                                  color: 'rgba(255, 255, 255, 0.8)',
+                                  fontSize: '0.9rem',
+                                  margin: '0 0 0.8rem 0',
+                                  lineHeight: 1.5,
+                                  fontFamily: 'Helvetica, Arial, sans-serif'
+                                }}>
+                                  {event.description}
+                                </p>
+
+                                <div style={{
+                                  display: 'flex',
+                                  justifyContent: 'space-between',
+                                  alignItems: 'center',
+                                  marginTop: '0.5rem'
+                                }}>
+                                  <div style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '0.5rem'
+                                  }}>
+                                    <div style={{
+                                      width: '24px',
+                                      height: '24px',
+                                      borderRadius: '50%',
+                                      backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      justifyContent: 'center',
+                                      fontSize: '0.8rem',
+                                      fontWeight: '600',
+                                      color: 'white'
+                                    }}>
+                                      {event.createdBy.charAt(0)}
+                                    </div>
+                                    <span style={{
+                                      color: 'rgba(255, 255, 255, 0.7)',
+                                      fontSize: '0.8rem'
+                                    }}>
+                                      {event.createdBy}
+                                      {event.isAdmin && (
+                                        <span style={{
+                                          marginLeft: '0.3rem',
+                                          fontSize: '0.7rem',
+                                          backgroundColor: 'transparent',
+                                          color: 'white',
+                                          padding: '0.1rem 0.4rem',
+                                          borderRadius: '4px',
+                                          border: '1px solid rgba(255, 255, 255, 0.3)'
+                                        }}>
+                                          ADMIN
+                                        </span>
+                                      )}
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+                            </motion.div>
+                          ))}
+                        </div>
+                      );
+                    })()}
+                  </motion.div>
+                )}
+
+                {/* Footer Modal */}
+                <div style={{
+                  paddingTop: '1.5rem',
+                  borderTop: '1px solid rgba(255, 255, 255, 0.2)',
+                  color: 'rgba(255, 255, 255, 0.6)',
+                  fontSize: '0.85rem',
+                  fontFamily: 'Helvetica, Arial, sans-serif',
+                  textAlign: 'center'
+                }}>
+                  Kalender kegiatan admin MENURU • Waktu dalam WIB (UTC+7) • 
+                  <span style={{ color: '#3B82F6', marginLeft: '0.3rem' }}>
+                    Titik biru menunjukkan hari ini
+                  </span>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Modal Profil User - DIPERBAIKI */}
       <AnimatePresence>
@@ -6845,4 +6726,3 @@ useEffect(() => {
     </div>
   );
 }
-
