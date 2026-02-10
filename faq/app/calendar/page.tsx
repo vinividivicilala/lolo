@@ -614,7 +614,16 @@ export default function CalendarPage(): React.JSX.Element {
             }}
             whileHover={{ opacity: 0.7 }}
           >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            {/* Tanda panah NORTH WEST ARROW di Back Button */}
+            <svg 
+              width={isMobile ? "18" : "20"} 
+              height={isMobile ? "18" : "20"} 
+              viewBox="0 0 24 24" 
+              fill="none" 
+              stroke="currentColor" 
+              strokeWidth="2"
+              style={{ flexShrink: 0 }}
+            >
               <path d="M7 17L17 7"/>
               <path d="M7 7H17V17"/>
             </svg>
@@ -628,7 +637,7 @@ export default function CalendarPage(): React.JSX.Element {
           </motion.button>
         </div>
         
-        {/* Judul kalender di tengah NORMAL */}
+        {/* Judul kalender di tengah */}
         <div style={{
           flex: 2,
           display: 'flex',
@@ -694,27 +703,33 @@ export default function CalendarPage(): React.JSX.Element {
           </div>
         </div>
         
-        {/* Nama user di bagian tengah kanan dengan panah NORTH WEST ARROW BESAR di kiri */}
+        {/* Nama user di bagian kanan dengan panah NORTH WEST ARROW BESAR di kiri */}
         <div style={{
           flex: 1,
           display: 'flex',
-          justifyContent: 'center',
+          justifyContent: 'flex-end',
           alignItems: 'center'
         }}>
           {user && (
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.8rem'
-            }}>
+            <motion.div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.8rem',
+                cursor: 'pointer'
+              }}
+              whileHover={{ opacity: 0.8 }}
+              onClick={() => router.push('/')}
+            >
               {/* Tanda panah NORTH WEST ARROW BESAR di samping kiri nama user */}
               <svg 
-                width={isMobile ? "24" : "28"} 
-                height={isMobile ? "24" : "28"} 
+                width={isMobile ? "24" : "32"} 
+                height={isMobile ? "24" : "32"} 
                 viewBox="0 0 24 24" 
                 fill="none" 
                 stroke="currentColor" 
                 strokeWidth="2.5"
+                style={{ flexShrink: 0 }}
               >
                 <path d="M7 17L17 7"/>
                 <path d="M7 7H17V17"/>
@@ -722,18 +737,18 @@ export default function CalendarPage(): React.JSX.Element {
               
               {/* Nama user BESAR */}
               <span style={{
-                fontSize: isMobile ? '1.4rem' : '1.8rem',
+                fontSize: isMobile ? '1.3rem' : '1.8rem',
                 fontWeight: '400',
                 color: 'rgba(255, 255, 255, 0.95)',
                 fontFamily: 'Helvetica, Arial, sans-serif',
                 whiteSpace: 'nowrap',
                 overflow: 'hidden',
                 textOverflow: 'ellipsis',
-                maxWidth: isMobile ? '140px' : '200px'
+                maxWidth: isMobile ? '120px' : '180px'
               }}>
                 {userDisplayName}
               </span>
-            </div>
+            </motion.div>
           )}
         </div>
       </div>
