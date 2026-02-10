@@ -321,7 +321,15 @@ export default function HomePage(): React.JSX.Element {
       category: "Personal",
       url: "/notes",
       icon: "📝"
-    }
+    },
+    {
+    id: 9,
+    title: "Calendar",
+    description: "Lihat kalender kegiatan admin",
+    category: "Features",
+    url: "/calendar",
+    icon: "🗓️"
+  }
   ];
 
   // Animasi loading text
@@ -5616,6 +5624,7 @@ fontFamily: 'Helvetica, Arial, sans-serif'
           padding: isMobile ? '0.6rem 1rem' : '0.8rem 1.5rem',
           border: '1px solid rgba(255,255,255,0.2)'
         }}>
+          
           {/* Docs */}
           <motion.div
             onClick={() => router.push('/docs')}
@@ -6281,6 +6290,57 @@ fontFamily: 'Helvetica, Arial, sans-serif'
             MENU
           </motion.div>
 
+          {/* Calendar Button di Header */}
+<motion.div
+  onClick={() => router.push('/calendar')}
+  style={{
+    color: 'white',
+    fontSize: isMobile ? '1rem' : '1.5rem',
+    fontWeight: '300',
+    fontFamily: 'Helvetica, Arial, sans-serif',
+    cursor: 'pointer',
+    padding: isMobile ? '0.3rem 0.8rem' : '0.5rem 1rem',
+    whiteSpace: 'nowrap',
+    letterSpacing: '1px',
+    position: 'relative',
+    transition: 'all 0.3s ease',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem'
+  }}
+  initial={{ opacity: 0, x: -10 }}
+  animate={{ opacity: 1, x: 0 }}
+  transition={{ delay: 1.0, duration: 0.6 }}
+>
+  <svg
+    width={isMobile ? "14" : "16"}
+    height={isMobile ? "14" : "16"}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="white"
+    strokeWidth="2"
+    style={{ flexShrink: 0 }}
+  >
+    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+    <line x1="16" y1="2" x2="16" y2="6"/>
+    <line x1="8" y1="2" x2="8" y2="6"/>
+    <line x1="3" y1="10" x2="21" y2="10"/>
+  </svg>
+  Calendar
+  <svg
+    width={isMobile ? "14" : "16"}
+    height={isMobile ? "14" : "16"}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="white"
+    strokeWidth="2"
+    style={{ flexShrink: 0 }}
+  >
+    <path d="M7 17L17 7"/>
+    <path d="M7 7h10v10"/>
+  </svg>
+</motion.div>
+
           {/* Sign In / User Button - DIPERBAIKI dengan North East Arrow ketika sudah login */}
           <motion.div
             onClick={handleSignInClick}
@@ -6709,5 +6769,6 @@ fontFamily: 'Helvetica, Arial, sans-serif'
     </div>
   );
 }
+
 
 
