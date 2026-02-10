@@ -694,7 +694,7 @@ export default function CalendarPage(): React.JSX.Element {
           </div>
         </div>
         
-        {/* Nama user di bagian tengah kanan dengan panah BESAR */}
+        {/* Nama user di bagian tengah kanan dengan panah NORTH WEST ARROW BESAR di kiri */}
         <div style={{
           flex: 1,
           display: 'flex',
@@ -709,15 +709,12 @@ export default function CalendarPage(): React.JSX.Element {
             }}>
               {/* Tanda panah NORTH WEST ARROW BESAR di samping kiri nama user */}
               <svg 
-                width={isMobile ? "22" : "26"} 
-                height={isMobile ? "22" : "26"} 
+                width={isMobile ? "24" : "28"} 
+                height={isMobile ? "24" : "28"} 
                 viewBox="0 0 24 24" 
                 fill="none" 
                 stroke="currentColor" 
-                strokeWidth="2"
-                style={{
-                  transform: 'rotate(-45deg)'
-                }}
+                strokeWidth="2.5"
               >
                 <path d="M7 17L17 7"/>
                 <path d="M7 7H17V17"/>
@@ -725,7 +722,7 @@ export default function CalendarPage(): React.JSX.Element {
               
               {/* Nama user BESAR */}
               <span style={{
-                fontSize: isMobile ? '1.3rem' : '1.6rem',
+                fontSize: isMobile ? '1.4rem' : '1.8rem',
                 fontWeight: '400',
                 color: 'rgba(255, 255, 255, 0.95)',
                 fontFamily: 'Helvetica, Arial, sans-serif',
@@ -745,7 +742,7 @@ export default function CalendarPage(): React.JSX.Element {
       <div style={{
         width: '100%',
         maxWidth: '1400px',
-        marginTop: isMobile ? '7rem' : '9rem',
+        marginTop: isMobile ? '8rem' : '10rem',
         padding: isMobile ? '1rem' : '2rem',
         display: 'flex',
         flexDirection: 'column',
