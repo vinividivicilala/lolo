@@ -694,7 +694,7 @@ export default function CalendarPage(): React.JSX.Element {
           </div>
         </div>
         
-        {/* Nama user di bagian tengah kanan */}
+        {/* Nama user di bagian tengah kanan dengan panah BESAR */}
         <div style={{
           flex: 1,
           display: 'flex',
@@ -705,23 +705,34 @@ export default function CalendarPage(): React.JSX.Element {
             <div style={{
               display: 'flex',
               alignItems: 'center',
-              gap: '0.5rem'
+              gap: '0.8rem'
             }}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{
-                transform: 'rotate(-45deg)'
-              }}>
+              {/* Tanda panah NORTH WEST ARROW BESAR di samping kiri nama user */}
+              <svg 
+                width={isMobile ? "22" : "26"} 
+                height={isMobile ? "22" : "26"} 
+                viewBox="0 0 24 24" 
+                fill="none" 
+                stroke="currentColor" 
+                strokeWidth="2"
+                style={{
+                  transform: 'rotate(-45deg)'
+                }}
+              >
                 <path d="M7 17L17 7"/>
                 <path d="M7 7H17V17"/>
               </svg>
+              
+              {/* Nama user BESAR */}
               <span style={{
-                fontSize: isMobile ? '1rem' : '1.2rem',
+                fontSize: isMobile ? '1.3rem' : '1.6rem',
                 fontWeight: '400',
                 color: 'rgba(255, 255, 255, 0.95)',
                 fontFamily: 'Helvetica, Arial, sans-serif',
                 whiteSpace: 'nowrap',
                 overflow: 'hidden',
                 textOverflow: 'ellipsis',
-                maxWidth: isMobile ? '120px' : '180px'
+                maxWidth: isMobile ? '140px' : '200px'
               }}>
                 {userDisplayName}
               </span>
