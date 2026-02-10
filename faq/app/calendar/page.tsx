@@ -589,13 +589,12 @@ export default function CalendarPage(): React.JSX.Element {
         borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
         backdropFilter: 'blur(10px)'
       }}>
-        {/* Back Button kiri - DIPERBAIKI */}
+        {/* Back Button kiri */}
         <div style={{
           flex: 1,
           display: 'flex',
           justifyContent: 'flex-start',
-          alignItems: 'center',
-          minWidth: 0
+          alignItems: 'center'
         }}>
           <motion.button
             onClick={() => router.push('/')}
@@ -611,38 +610,25 @@ export default function CalendarPage(): React.JSX.Element {
               fontFamily: 'Helvetica, Arial, sans-serif',
               padding: '0.5rem',
               gap: '0.5rem',
-              fontWeight: '400',
-              whiteSpace: 'nowrap'
+              fontWeight: '400'
             }}
             whileHover={{ opacity: 0.7 }}
           >
-            {/* Tanda panah NORTH WEST ARROW di Back Button */}
-            <svg 
-              width={isMobile ? "18" : "20"} 
-              height={isMobile ? "18" : "20"} 
-              viewBox="0 0 24 24" 
-              fill="none" 
-              stroke="currentColor" 
-              strokeWidth="2"
-              style={{ flexShrink: 0 }}
-            >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M7 17L17 7"/>
               <path d="M7 7H17V17"/>
             </svg>
             <span style={{
               fontSize: isMobile ? '1rem' : '1.1rem',
               fontWeight: '400',
-              color: 'white',
-              whiteSpace: 'nowrap',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis'
+              color: 'white'
             }}>
               Halaman utama
             </span>
           </motion.button>
         </div>
         
-        {/* Judul kalender di tengah - DIPERBAIKI */}
+        {/* Judul kalender di tengah NORMAL */}
         <div style={{
           flex: 2,
           display: 'flex',
@@ -650,9 +636,7 @@ export default function CalendarPage(): React.JSX.Element {
           alignItems: 'center',
           justifyContent: 'center',
           textAlign: 'center',
-          gap: '0.2rem',
-          minWidth: 0,
-          padding: '0 1rem'
+          gap: '0.2rem'
         }}>
           <h1 style={{
             color: 'white',
@@ -661,10 +645,7 @@ export default function CalendarPage(): React.JSX.Element {
             margin: 0,
             fontFamily: 'Helvetica, Arial, sans-serif',
             letterSpacing: '0.5px',
-            lineHeight: 1.2,
-            whiteSpace: 'nowrap',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis'
+            lineHeight: 1.2
           }}>
             Kalender MENURU
           </h1>
@@ -713,37 +694,27 @@ export default function CalendarPage(): React.JSX.Element {
           </div>
         </div>
         
-        {/* Nama user di bagian kanan dengan panah NORTH WEST ARROW BESAR - DIPERBAIKI */}
+        {/* Nama user di bagian tengah kanan dengan panah NORTH WEST ARROW BESAR di kiri */}
         <div style={{
           flex: 1,
           display: 'flex',
-          justifyContent: 'flex-end',
-          alignItems: 'center',
-          minWidth: 0
+          justifyContent: 'center',
+          alignItems: 'center'
         }}>
           {user && (
-            <motion.div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.8rem',
-                cursor: 'pointer',
-                padding: '0.5rem',
-                borderRadius: '8px',
-                backgroundColor: 'transparent'
-              }}
-              whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
-              onClick={() => router.push('/')}
-            >
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.8rem'
+            }}>
               {/* Tanda panah NORTH WEST ARROW BESAR di samping kiri nama user */}
               <svg 
-                width={isMobile ? "22" : "30"} 
-                height={isMobile ? "22" : "30"} 
+                width={isMobile ? "24" : "28"} 
+                height={isMobile ? "24" : "28"} 
                 viewBox="0 0 24 24" 
                 fill="none" 
                 stroke="currentColor" 
                 strokeWidth="2.5"
-                style={{ flexShrink: 0 }}
               >
                 <path d="M7 17L17 7"/>
                 <path d="M7 7H17V17"/>
@@ -751,18 +722,18 @@ export default function CalendarPage(): React.JSX.Element {
               
               {/* Nama user BESAR */}
               <span style={{
-                fontSize: isMobile ? '1.2rem' : '1.8rem',
+                fontSize: isMobile ? '1.4rem' : '1.8rem',
                 fontWeight: '400',
                 color: 'rgba(255, 255, 255, 0.95)',
                 fontFamily: 'Helvetica, Arial, sans-serif',
                 whiteSpace: 'nowrap',
                 overflow: 'hidden',
                 textOverflow: 'ellipsis',
-                maxWidth: isMobile ? '120px' : '200px'
+                maxWidth: isMobile ? '140px' : '200px'
               }}>
                 {userDisplayName}
               </span>
-            </motion.div>
+            </div>
           )}
         </div>
       </div>
