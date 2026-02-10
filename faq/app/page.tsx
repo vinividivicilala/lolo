@@ -226,6 +226,7 @@ export default function HomePage(): React.JSX.Element {
   const [currentMonth, setCurrentMonth] = useState(0); // 0 = Januari
   const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [isLoadingEvents, setIsLoadingEvents] = useState(false);
 
   const headerRef = useRef<HTMLDivElement>(null);
   const topNavRef = useRef<HTMLDivElement>(null);
@@ -360,89 +361,37 @@ export default function HomePage(): React.JSX.Element {
     { title: "Features", description: "Functionality & Integration" }
   ];
 
-  // Data dummy event kalender admin
-  const sampleCalendarEvents: CalendarEvent[] = [
-    {
-      id: '1',
-      title: 'Launch Update v2.0',
-      description: 'Peluncuran update besar dengan fitur chatbot AI baru',
-      date: new Date(2026, 0, 15), // 15 Januari 2026
-      color: '#3B82F6',
-      label: 'Update',
-      createdBy: 'Admin',
-      isAdmin: true
-    },
-    {
-      id: '2',
-      title: 'Maintenance Server',
-      description: 'Maintenance terjadwal untuk optimasi performa',
-      date: new Date(2026, 0, 20),
-      color: '#EF4444',
-      label: 'Maintenance',
-      createdBy: 'Admin',
-      isAdmin: true
-    },
-    {
-      id: '3',
-      title: 'Webinar: Creative Design',
-      description: 'Webinar online tentang creative design dengan MENURU',
-      date: new Date(2026, 0, 25),
-      color: '#10B981',
-      label: 'Event',
-      createdBy: 'Admin',
-      isAdmin: true
-    },
-    {
-      id: '4',
-      title: 'Bug Fix Sprint',
-      description: 'Sesi perbaikan bug dan improvement minor',
-      date: new Date(2026, 1, 5), // 5 Februari 2026
-      color: '#F59E0B',
-      label: 'Development',
-      createdBy: 'Admin',
-      isAdmin: true
-    },
-    {
-      id: '5',
-      title: 'User Feedback Review',
-      description: 'Review feedback pengguna untuk update berikutnya',
-      date: new Date(2026, 1, 12),
-      color: '#8B5CF6',
-      label: 'Meeting',
-      createdBy: 'Admin',
-      isAdmin: true
-    },
-    {
-      id: '6',
-      title: 'New Feature: Calendar',
-      description: 'Launch fitur kalender untuk kegiatan admin',
-      date: new Date(2026, 0, 1),
-      color: '#EC4899',
-      label: 'Feature',
-      createdBy: 'Admin',
-      isAdmin: true
-    },
-    {
-      id: '7',
-      title: 'Database Optimization',
-      description: 'Optimasi database untuk performa yang lebih baik',
-      date: new Date(2026, 2, 10),
-      color: '#6366F1',
-      label: 'Optimization',
-      createdBy: 'Admin',
-      isAdmin: true
-    },
-    {
-      id: '8',
-      title: 'Security Update',
-      description: 'Pembaruan keamanan sistem',
-      date: new Date(2026, 3, 5),
-      color: '#F97316',
-      label: 'Security',
-      createdBy: 'Admin',
-      isAdmin: true
-    }
-  ];
+
+  const generateCalendar = () => {
+const daysInMonth = getDaysInMonth(currentYear, currentMonth);
+const firstDayOfMonth = getFirstDayOfMonth(currentYear, currentMonth);
+const days = [];
+// Tambahkan hari kosong untuk hari-hari sebelum bulan dimulai
+for (let i = 0; i < firstDayOfMonth; i++) {
+days.push(null);
+}
+// Tambahkan hari-hari dalam bulan
+for (let i = 1; i <= daysInMonth; i++) {
+const currentDate = new Date(currentYear, currentMonth, i);
+const dayEvents = calendarEvents.filter(event => {
+const eventDate = event.date instanceof Date ? event.date : new Date(event.date);
+return (
+eventDate.getDate() === i &&
+eventDate.getMonth() === currentMonth &&
+eventDate.getFullYear() === currentYear
+);
+});
+days.push({
+date: i,
+fullDate: currentDate,
+isToday: currentDate.toDateString() === new Date().toDateString(),
+events: dayEvents
+});
+}
+return days;
+};
+
+
 
   // Data untuk halaman Index
   const indexTopics = [
@@ -1413,13 +1362,52 @@ export default function HomePage(): React.JSX.Element {
     }
   }, [db, auth?.currentUser]);
 
-  // Load events kalender
-  useEffect(() => {
-    if (showCalendarModal) {
-      // Untuk sekarang gunakan dummy data
-      setCalendarEvents(sampleCalendarEvents);
-    }
-  }, [showCalendarModal]);
+ // Load events kalender dari Firebase - DIPERBAIKI
+useEffect(() => {
+if (showCalendarModal && db) {
+setIsLoadingEvents(true);
+try {
+const eventsRef = collection(db, 'calendarEvents');
+const q = query(eventsRef, orderBy('date', 'asc'));
+const unsubscribe = onSnapshot(q,
+(querySnapshot) => {
+const eventsData: CalendarEvent[] = [];
+querySnapshot.forEach((doc) => {
+const data = doc.data();
+let eventDate = data.date;
+// Convert Firestore Timestamp to Date if needed
+if (eventDate && typeof eventDate.toDate === 'function') {
+eventDate = eventDate.toDate();
+} else if (typeof eventDate === 'string') {
+eventDate = new Date(eventDate);
+}
+eventsData.push({
+id: doc.id,
+title: data.title || "No Title",
+description: data.description || "",
+date: eventDate,
+color: data.color || "#3B82F6",
+label: data.label || "Event",
+createdBy: data.createdBy || "Unknown",
+isAdmin: data.isAdmin || false
+});
+});
+console.log(`✅ Loaded ${eventsData.length} calendar events for homepage`);
+setCalendarEvents(eventsData);
+setIsLoadingEvents(false);
+},
+(error) => {
+console.error("❌ Error loading calendar events:", error);
+setIsLoadingEvents(false);
+}
+);
+return () => unsubscribe();
+} catch (error) {
+console.error("❌ Error setting up calendar listener:", error);
+setIsLoadingEvents(false);
+}
+}
+}, [showCalendarModal, db]);
 
   // Animasi teks nama user berjalan
   useEffect(() => {
@@ -2228,6 +2216,29 @@ export default function HomePage(): React.JSX.Element {
         )}
       </AnimatePresence>
 
+
+
+      {/* Loading State */}
+{isLoadingEvents && (
+<div style={{
+padding: '3rem 0',
+textAlign: 'center',
+color: 'rgba(255, 255, 255, 0.7)',
+fontFamily: 'Helvetica, Arial, sans-serif'
+}}>
+<motion.div
+animate={{ rotate: 360 }}
+transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+style={{ marginBottom: '1rem' }}
+>
+<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+<path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+</svg>
+</motion.div>
+Loading events...
+</div>
+)}
+
       {/* Modal Kalender Tahun Baru */}
       <AnimatePresence>
         {showCalendarModal && (
@@ -2291,15 +2302,15 @@ export default function HomePage(): React.JSX.Element {
                     Kalender MENURU {currentYear}
                   </h2>
                   <div style={{
-                    backgroundColor: 'transparent',
-                    color: 'white',
-                    fontSize: '0.9rem',
-                    padding: '0.3rem 0.8rem',
-                    borderRadius: '20px',
-                    border: '1px solid rgba(255, 255, 255, 0.3)'
-                  }}>
-                    Admin Activities
-                  </div>
+backgroundColor: 'transparent',
+color: 'white',
+fontSize: '0.9rem',
+padding: '0.3rem 0.8rem',
+borderRadius: '20px',
+border: '1px solid rgba(255, 255, 255, 0.3)'
+}}>
+{calendarEvents.length} Events
+</div>
                 </div>
                 
                 <motion.button
@@ -2667,29 +2678,30 @@ export default function HomePage(): React.JSX.Element {
                       </motion.button>
                     </div>
 
-                    {(() => {
-                      const eventsForSelectedDate = calendarEvents.filter(event => 
-                        event.date.getDate() === selectedDate.getDate() && 
-                        event.date.getMonth() === selectedDate.getMonth() && 
-                        event.date.getFullYear() === selectedDate.getFullYear()
-                      );
-
-                      if (eventsForSelectedDate.length === 0) {
-                        return (
-                          <div style={{
-                            padding: '2rem',
-                            textAlign: 'center',
-                            color: 'rgba(255, 255, 255, 0.5)',
-                            fontFamily: 'Helvetica, Arial, sans-serif'
-                          }}>
-                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ opacity: 0.5 }}>
-                              <path d="M8 2v4M16 2v4M3 10h18M5 4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V6a2 2 0 00-2-2H5z"/>
-                            </svg>
-                            <p style={{ marginTop: '1rem' }}>Tidak ada kegiatan admin pada tanggal ini</p>
-                          </div>
-                        );
-                      }
-
+                   {(() => {
+if (isLoadingEvents) {
+return null; // Loading sudah ditampilkan di atas
+}
+const eventsForSelectedDate = calendarEvents.filter(event =>
+event.date.getDate() === selectedDate.getDate() &&
+event.date.getMonth() === selectedDate.getMonth() &&
+event.date.getFullYear() === selectedDate.getFullYear()
+);
+if (eventsForSelectedDate.length === 0) {
+return (
+<div style={{
+padding: '2rem',
+textAlign: 'center',
+color: 'rgba(255, 255, 255, 0.5)',
+fontFamily: 'Helvetica, Arial, sans-serif'
+}}>
+<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ opacity: 0.5 }}>
+<path d="M8 2v4M16 2v4M3 10h18M5 4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V6a2 2 0 00-2-2H5z"/>
+</svg>
+<p style={{ marginTop: '1rem' }}>Tidak ada kegiatan pada tanggal ini</p>
+</div>
+);
+}
                       return (
                         <div style={{
                           display: 'flex',
@@ -6726,3 +6738,4 @@ export default function HomePage(): React.JSX.Element {
     </div>
   );
 }
+
