@@ -362,36 +362,7 @@ export default function HomePage(): React.JSX.Element {
   ];
 
 
-  const generateCalendar = () => {
-const daysInMonth = getDaysInMonth(currentYear, currentMonth);
-const firstDayOfMonth = getFirstDayOfMonth(currentYear, currentMonth);
-const days = [];
-// Tambahkan hari kosong untuk hari-hari sebelum bulan dimulai
-for (let i = 0; i < firstDayOfMonth; i++) {
-days.push(null);
-}
-// Tambahkan hari-hari dalam bulan
-for (let i = 1; i <= daysInMonth; i++) {
-const currentDate = new Date(currentYear, currentMonth, i);
-const dayEvents = calendarEvents.filter(event => {
-const eventDate = event.date instanceof Date ? event.date : new Date(event.date);
-return (
-eventDate.getDate() === i &&
-eventDate.getMonth() === currentMonth &&
-eventDate.getFullYear() === currentYear
-);
-});
-days.push({
-date: i,
-fullDate: currentDate,
-isToday: currentDate.toDateString() === new Date().toDateString(),
-events: dayEvents
-});
-}
-return days;
-};
-
-
+ 
 
   // Data untuk halaman Index
   const indexTopics = [
@@ -536,36 +507,36 @@ return days;
     return new Date(year, month, 1).getDay();
   };
 
-  // Fungsi untuk generate kalender
   const generateCalendar = () => {
-    const daysInMonth = getDaysInMonth(currentYear, currentMonth);
-    const firstDayOfMonth = getFirstDayOfMonth(currentYear, currentMonth);
-    const days = [];
-    
-    // Tambahkan hari kosong untuk hari-hari sebelum bulan dimulai
-    for (let i = 0; i < firstDayOfMonth; i++) {
-      days.push(null);
-    }
-    
-    // Tambahkan hari-hari dalam bulan
-    for (let i = 1; i <= daysInMonth; i++) {
-      const currentDate = new Date(currentYear, currentMonth, i);
-      const dayEvents = calendarEvents.filter(event => 
-        event.date.getDate() === i && 
-        event.date.getMonth() === currentMonth && 
-        event.date.getFullYear() === currentYear
-      );
-      
-      days.push({
-        date: i,
-        fullDate: currentDate,
-        isToday: currentDate.toDateString() === new Date().toDateString(),
-        events: dayEvents
-      });
-    }
-    
-    return days;
-  };
+const daysInMonth = getDaysInMonth(currentYear, currentMonth);
+const firstDayOfMonth = getFirstDayOfMonth(currentYear, currentMonth);
+const days = [];
+// Tambahkan hari kosong untuk hari-hari sebelum bulan dimulai
+for (let i = 0; i < firstDayOfMonth; i++) {
+days.push(null);
+}
+// Tambahkan hari-hari dalam bulan
+for (let i = 1; i <= daysInMonth; i++) {
+const currentDate = new Date(currentYear, currentMonth, i);
+const dayEvents = calendarEvents.filter(event => {
+const eventDate = event.date instanceof Date ? event.date : new Date(event.date);
+return (
+eventDate.getDate() === i &&
+eventDate.getMonth() === currentMonth &&
+eventDate.getFullYear() === currentYear
+);
+});
+days.push({
+date: i,
+fullDate: currentDate,
+isToday: currentDate.toDateString() === new Date().toDateString(),
+events: dayEvents
+});
+}
+return days;
+};
+
+
 
   // Fungsi untuk navigasi bulan
   const navigateMonth = (direction: 'prev' | 'next') => {
@@ -6738,4 +6709,5 @@ fontFamily: 'Helvetica, Arial, sans-serif'
     </div>
   );
 }
+
 
