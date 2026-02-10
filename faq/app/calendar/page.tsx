@@ -694,20 +694,18 @@ export default function CalendarPage(): React.JSX.Element {
           </div>
         </div>
         
-        {/* Nama user di kanan - TANPA LINEBOX */}
+        {/* Nama user di bagian tengah kanan */}
         <div style={{
           flex: 1,
           display: 'flex',
-          justifyContent: 'flex-end',
-          alignItems: 'center',
-          marginRight: isMobile ? '0.5rem' : '1rem'
+          justifyContent: 'center',
+          alignItems: 'center'
         }}>
           {user && (
             <div style={{
               display: 'flex',
               alignItems: 'center',
-              gap: '0.5rem',
-              marginLeft: 'auto'
+              gap: '0.5rem'
             }}>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{
                 transform: 'rotate(-45deg)'
