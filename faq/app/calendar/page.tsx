@@ -76,8 +76,8 @@ interface EventFormData {
   label: string;
 }
 
-// Type untuk notifikasi
-interface Notification {
+// Type untuk notifikasi KALENDER
+interface CalendarNotification {
   id: string;
   eventId: string;
   title: string;
@@ -86,16 +86,21 @@ interface Notification {
   isRead: boolean;
   createdBy: string;
   createdAt: Timestamp | Date;
+  eventDate: Date;
+  eventLabel: string;
 }
 
-// Type untuk saved event
-interface SavedEvent {
+// Type untuk saved event KALENDER
+interface SavedCalendarEvent {
   id: string;
   eventId: string;
   userId: string;
   userEmail: string;
   title: string;
   date: Date;
+  description: string;
+  label: string;
+  createdBy: string;
   savedAt: Timestamp | Date;
 }
 
@@ -132,15 +137,15 @@ export default function CalendarPage(): React.JSX.Element {
   const [isEditingEvent, setIsEditingEvent] = useState(false);
   const [editingEventId, setEditingEventId] = useState<string | null>(null);
   
-  // State untuk notifikasi
-  const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [unreadNotifications, setUnreadNotifications] = useState(0);
-  const [showNotifications, setShowNotifications] = useState(false);
+  // State untuk notifikasi KALENDER
+  const [calendarNotifications, setCalendarNotifications] = useState<CalendarNotification[]>([]);
+  const [unreadCalendarNotifications, setUnreadCalendarNotifications] = useState(0);
+  const [showCalendarNotifications, setShowCalendarNotifications] = useState(false);
   const [isBlinking, setIsBlinking] = useState(false);
   
-  // State untuk saved events
-  const [savedEvents, setSavedEvents] = useState<SavedEvent[]>([]);
-  const [showSavedEvents, setShowSavedEvents] = useState(false);
+  // State untuk saved events KALENDER
+  const [savedCalendarEvents, setSavedCalendarEvents] = useState<SavedCalendarEvent[]>([]);
+  const [showSavedCalendarEvents, setShowSavedCalendarEvents] = useState(false);
   const [isSavingEvent, setIsSavingEvent] = useState(false);
   
   // Ref
@@ -310,68 +315,70 @@ export default function CalendarPage(): React.JSX.Element {
     return eventsThisYear.length;
   };
   
-  // Fungsi untuk membuat notifikasi
-  const createNotification = async (eventId: string, eventTitle: string, createdBy: string) => {
+  // Fungsi untuk membuat notifikasi KALENDER
+  const createCalendarNotification = async (eventId: string, eventTitle: string, createdBy: string, eventDate: Date, label: string) => {
     if (!db || !userEmail) return;
     
     try {
       const notificationData = {
         eventId,
-        title: "Kegiatan Baru Ditambahkan",
-        message: `${createdBy} telah menambahkan kegiatan "${eventTitle}"`,
+        title: "Kegiatan Kalender Baru",
+        message: `${createdBy} menambahkan kegiatan kalender "${eventTitle}"`,
         date: new Date(),
         isRead: false,
         createdBy,
-        createdAt: serverTimestamp()
+        createdAt: serverTimestamp(),
+        eventDate: eventDate,
+        eventLabel: label
       };
       
-      await addDoc(collection(db, 'notifications'), notificationData);
-      console.log("✅ Notification created for event:", eventId);
+      await addDoc(collection(db, 'calendarNotifications'), notificationData);
+      console.log("✅ Calendar notification created for event:", eventId);
     } catch (error) {
-      console.error("❌ Error creating notification:", error);
+      console.error("❌ Error creating calendar notification:", error);
     }
   };
   
-  // Fungsi untuk mark notifikasi sebagai read
-  const markNotificationsAsRead = async () => {
+  // Fungsi untuk mark notifikasi KALENDER sebagai read
+  const markCalendarNotificationsAsRead = async () => {
     if (!db || !userEmail) return;
     
     try {
-      const notificationsRef = collection(db, 'notifications');
+      const notificationsRef = collection(db, 'calendarNotifications');
       const q = query(notificationsRef, where('isRead', '==', false));
       
       const querySnapshot = await getDocs(q);
       const batch = writeBatch(db);
       
       querySnapshot.forEach((docSnapshot) => {
-        const notificationRef = doc(db, 'notifications', docSnapshot.id);
+        const notificationRef = doc(db, 'calendarNotifications', docSnapshot.id);
         batch.update(notificationRef, { isRead: true });
       });
       
       await batch.commit();
-      setUnreadNotifications(0);
+      setUnreadCalendarNotifications(0);
       
       // Update local state
-      setNotifications(prev => prev.map(notification => ({
+      setCalendarNotifications(prev => prev.map(notification => ({
         ...notification,
         isRead: true
       })));
       
     } catch (error) {
-      console.error("❌ Error marking notifications as read:", error);
+      console.error("❌ Error marking calendar notifications as read:", error);
     }
   };
   
-  // Fungsi untuk save event
-  const handleSaveEvent = async (event: CalendarEvent) => {
+  // Fungsi untuk save event KALENDER
+  const handleSaveCalendarEvent = async (event: CalendarEvent) => {
     if (!db || !user || isSavingEvent) return;
     
     setIsSavingEvent(true);
     
     // Cek apakah event sudah disimpan
-    const alreadySaved = savedEvents.some(saved => saved.eventId === event.id);
+    const alreadySaved = savedCalendarEvents.some(saved => saved.eventId === event.id);
     if (alreadySaved) {
-      alert("Kegiatan ini sudah disimpan!");
+      alert("Kegiatan kalender ini sudah disimpan!");
       setIsSavingEvent(false);
       return;
     }
@@ -383,34 +390,37 @@ export default function CalendarPage(): React.JSX.Element {
         userEmail: userEmail,
         title: event.title,
         date: event.date instanceof Date ? event.date : event.date.toDate(),
+        description: event.description || "",
+        label: event.label || "Event",
+        createdBy: event.createdBy || "Unknown",
         savedAt: serverTimestamp()
       };
       
-      const docRef = await addDoc(collection(db, 'savedEvents'), savedEventData);
-      console.log("✅ Event saved:", docRef.id);
+      const docRef = await addDoc(collection(db, 'savedCalendarEvents'), savedEventData);
+      console.log("✅ Calendar event saved:", docRef.id);
       
-      // Refresh saved events
-      loadSavedEvents();
+      // Refresh saved calendar events
+      loadSavedCalendarEvents();
       
-      alert("Kegiatan berhasil disimpan! Lihat di riwayat save Anda.");
+      alert("Kegiatan kalender berhasil disimpan! Lihat di riwayat save Anda.");
     } catch (error) {
-      console.error("❌ Error saving event:", error);
-      alert("Gagal menyimpan kegiatan. Silakan coba lagi.");
+      console.error("❌ Error saving calendar event:", error);
+      alert("Gagal menyimpan kegiatan kalender. Silakan coba lagi.");
     } finally {
       setIsSavingEvent(false);
     }
   };
   
-  // Fungsi untuk load saved events
-  const loadSavedEvents = async () => {
+  // Fungsi untuk load saved events KALENDER
+  const loadSavedCalendarEvents = async () => {
     if (!db || !user) return;
     
     try {
-      const savedEventsRef = collection(db, 'savedEvents');
+      const savedEventsRef = collection(db, 'savedCalendarEvents');
       const q = query(savedEventsRef, where('userId', '==', user.uid), orderBy('savedAt', 'desc'));
       
       const querySnapshot = await getDocs(q);
-      const savedData: SavedEvent[] = [];
+      const savedData: SavedCalendarEvent[] = [];
       
       querySnapshot.forEach((doc) => {
         const data = doc.data();
@@ -431,18 +441,21 @@ export default function CalendarPage(): React.JSX.Element {
           userEmail: data.userEmail || '',
           title: data.title || 'No Title',
           date: savedDate,
+          description: data.description || '',
+          label: data.label || 'Event',
+          createdBy: data.createdBy || 'Unknown',
           savedAt: data.savedAt || new Date()
         });
       });
       
-      setSavedEvents(savedData);
+      setSavedCalendarEvents(savedData);
     } catch (error) {
-      console.error("❌ Error loading saved events:", error);
+      console.error("❌ Error loading saved calendar events:", error);
     }
   };
   
-  // Fungsi untuk menghapus saved event
-  const handleRemoveSavedEvent = async (savedEventId: string) => {
+  // Fungsi untuk menghapus saved event KALENDER
+  const handleRemoveSavedCalendarEvent = async (savedEventId: string) => {
     if (!db) return;
     
     if (!confirm("Apakah Anda yakin ingin menghapus dari daftar save?")) {
@@ -450,12 +463,12 @@ export default function CalendarPage(): React.JSX.Element {
     }
     
     try {
-      await deleteDoc(doc(db, 'savedEvents', savedEventId));
-      console.log("✅ Saved event removed:", savedEventId);
-      loadSavedEvents();
-      alert("Kegiatan dihapus dari daftar save!");
+      await deleteDoc(doc(db, 'savedCalendarEvents', savedEventId));
+      console.log("✅ Saved calendar event removed:", savedEventId);
+      loadSavedCalendarEvents();
+      alert("Kegiatan kalender dihapus dari daftar save!");
     } catch (error) {
-      console.error("❌ Error removing saved event:", error);
+      console.error("❌ Error removing saved calendar event:", error);
       alert("Gagal menghapus dari daftar save.");
     }
   };
@@ -469,14 +482,14 @@ export default function CalendarPage(): React.JSX.Element {
         setUserEmail(currentUser.email || '');
         setIsAdmin(checkIfAdmin(currentUser.email || ''));
         
-        // Load saved events untuk user ini
-        loadSavedEvents();
+        // Load saved calendar events untuk user ini
+        loadSavedCalendarEvents();
       } else {
         setUser(null);
         setUserDisplayName('');
         setUserEmail('');
         setIsAdmin(false);
-        setSavedEvents([]);
+        setSavedCalendarEvents([]);
       }
       setIsLoading(false);
     });
@@ -538,29 +551,38 @@ export default function CalendarPage(): React.JSX.Element {
     return () => unsubscribe();
   }, [db]);
   
-  // Load notifications dari Firebase
+  // Load notifications KALENDER dari Firebase
   useEffect(() => {
     if (!db) return;
     
-    const notificationsRef = collection(db, 'notifications');
+    const notificationsRef = collection(db, 'calendarNotifications');
     const q = query(notificationsRef, orderBy('createdAt', 'desc'));
     
     const unsubscribe = onSnapshot(q, 
       (querySnapshot) => {
-        const notificationsData: Notification[] = [];
+        const notificationsData: CalendarNotification[] = [];
         let unreadCount = 0;
         
         querySnapshot.forEach((doc) => {
           const data = doc.data();
           let notificationDate = data.date;
+          let eventDate = data.eventDate;
           
-          // FIX: Handle undefined date safely
+          // Handle dates safely
           if (notificationDate && typeof notificationDate.toDate === 'function') {
             notificationDate = notificationDate.toDate();
           } else if (typeof notificationDate === 'string') {
             notificationDate = new Date(notificationDate);
           } else if (!notificationDate) {
             notificationDate = new Date();
+          }
+          
+          if (eventDate && typeof eventDate.toDate === 'function') {
+            eventDate = eventDate.toDate();
+          } else if (typeof eventDate === 'string') {
+            eventDate = new Date(eventDate);
+          } else if (!eventDate) {
+            eventDate = new Date();
           }
           
           notificationsData.push({
@@ -571,7 +593,9 @@ export default function CalendarPage(): React.JSX.Element {
             date: notificationDate,
             isRead: data.isRead || false,
             createdBy: data.createdBy || "System",
-            createdAt: data.createdAt || new Date()
+            createdAt: data.createdAt || new Date(),
+            eventDate: eventDate,
+            eventLabel: data.eventLabel || "Event"
           });
           
           if (!data.isRead) {
@@ -579,15 +603,15 @@ export default function CalendarPage(): React.JSX.Element {
           }
         });
         
-        setNotifications(notificationsData);
-        setUnreadNotifications(unreadCount);
+        setCalendarNotifications(notificationsData);
+        setUnreadCalendarNotifications(unreadCount);
         
-        // Blink effect jika ada notifikasi baru
+        // Blink effect jika ada notifikasi baru - PERBAIKAN BLINK DOT
         if (unreadCount > 0) {
           setIsBlinking(true);
           const blinkInterval = setInterval(() => {
             setIsBlinking(prev => !prev);
-          }, 800);
+          }, 500); // Lebih cepat untuk blink yang jelas
           
           return () => clearInterval(blinkInterval);
         } else {
@@ -595,7 +619,7 @@ export default function CalendarPage(): React.JSX.Element {
         }
       },
       (error) => {
-        console.error("❌ Error loading notifications:", error);
+        console.error("❌ Error loading calendar notifications:", error);
       }
     );
     
@@ -615,10 +639,10 @@ export default function CalendarPage(): React.JSX.Element {
         setSelectedEvent(null);
       }
       if (notificationsRef.current && !notificationsRef.current.contains(event.target as Node)) {
-        setShowNotifications(false);
+        setShowCalendarNotifications(false);
       }
       if (savedEventsRef.current && !savedEventsRef.current.contains(event.target as Node)) {
-        setShowSavedEvents(false);
+        setShowSavedCalendarEvents(false);
       }
     };
     
@@ -681,9 +705,9 @@ export default function CalendarPage(): React.JSX.Element {
         eventId = docRef.id;
         console.log("✅ Event added with ID:", docRef.id);
         
-        // Buat notifikasi hanya untuk event baru (bukan edit)
+        // Buat notifikasi KALENDER hanya untuk event baru (bukan edit)
         if (isAdmin) {
-          await createNotification(eventId, eventForm.title.trim(), userDisplayName);
+          await createCalendarNotification(eventId, eventForm.title.trim(), userDisplayName, eventDate, eventForm.label);
         }
       }
       
@@ -781,11 +805,11 @@ export default function CalendarPage(): React.JSX.Element {
           setShowEventDetailsModal(false);
           setSelectedEvent(null);
         }
-        if (showNotifications) {
-          setShowNotifications(false);
+        if (showCalendarNotifications) {
+          setShowCalendarNotifications(false);
         }
-        if (showSavedEvents) {
-          setShowSavedEvents(false);
+        if (showSavedCalendarEvents) {
+          setShowSavedCalendarEvents(false);
         }
       }
     };
@@ -794,11 +818,11 @@ export default function CalendarPage(): React.JSX.Element {
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [showAddEventModal, showEventDetailsModal, showNotifications, showSavedEvents]);
+  }, [showAddEventModal, showEventDetailsModal, showCalendarNotifications, showSavedCalendarEvents]);
   
   // Animasi untuk modal
   useEffect(() => {
-    if (showAddEventModal || showEventDetailsModal || showNotifications || showSavedEvents) {
+    if (showAddEventModal || showEventDetailsModal || showCalendarNotifications || showSavedCalendarEvents) {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = 'auto';
@@ -807,7 +831,7 @@ export default function CalendarPage(): React.JSX.Element {
     return () => {
       document.body.style.overflow = 'auto';
     };
-  }, [showAddEventModal, showEventDetailsModal, showNotifications, showSavedEvents]);
+  }, [showAddEventModal, showEventDetailsModal, showCalendarNotifications, showSavedCalendarEvents]);
   
   // Hitung total event
   const totalEventsThisYear = getTotalEventsThisYear();
@@ -991,7 +1015,7 @@ export default function CalendarPage(): React.JSX.Element {
           {user && (
             <div style={{ position: 'relative' }}>
               <motion.button
-                onClick={() => setShowNotifications(true)}
+                onClick={() => setShowCalendarNotifications(true)}
                 style={{
                   backgroundColor: 'transparent',
                   border: 'none',
@@ -1019,30 +1043,36 @@ export default function CalendarPage(): React.JSX.Element {
                   <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
                 </svg>
                 
-                {/* Blink Dot Pemancar - BESAR dan JELAS */}
-                {unreadNotifications > 0 && (
+                {/* Blink Dot Pemancar - BESAR dan JELAS - PERBAIKAN BLINK */}
+                {unreadCalendarNotifications > 0 && (
                   <motion.div
                     animate={{
-                      scale: isBlinking ? [1, 1.5, 1] : 1,
-                      opacity: isBlinking ? [1, 0.5, 1] : 1
+                      scale: isBlinking ? [1, 1.3, 1] : 1,
+                      opacity: isBlinking ? [1, 0.3, 1] : 1,
+                      boxShadow: isBlinking ? [
+                        '0 0 0 0 rgba(255, 59, 48, 0.7)',
+                        '0 0 0 10px rgba(255, 59, 48, 0)',
+                        '0 0 0 0 rgba(255, 59, 48, 0)'
+                      ] : 'none'
                     }}
                     transition={{
-                      duration: 0.8,
+                      duration: 1,
                       repeat: Infinity,
                       ease: "easeInOut"
                     }}
                     style={{
                       position: 'absolute',
-                      top: '5px',
-                      right: '5px',
-                      width: isMobile ? '14px' : '18px',
-                      height: isMobile ? '14px' : '18px',
+                      top: '3px',
+                      right: '3px',
+                      width: isMobile ? '18px' : '22px',
+                      height: isMobile ? '18px' : '22px',
                       backgroundColor: '#FF3B30',
                       borderRadius: '50%',
-                      border: '2px solid black',
+                      border: '3px solid black',
                       display: 'flex',
                       alignItems: 'center',
-                      justifyContent: 'center'
+                      justifyContent: 'center',
+                      zIndex: 10
                     }}
                   >
                     <span style={{
@@ -1051,7 +1081,7 @@ export default function CalendarPage(): React.JSX.Element {
                       fontWeight: 'bold',
                       fontFamily: 'Helvetica, Arial, sans-serif'
                     }}>
-                      {unreadNotifications > 9 ? '9+' : unreadNotifications}
+                      {unreadCalendarNotifications > 9 ? '9+' : unreadCalendarNotifications}
                     </span>
                   </motion.div>
                 )}
@@ -1063,7 +1093,7 @@ export default function CalendarPage(): React.JSX.Element {
           {user && (
             <div style={{ position: 'relative' }}>
               <motion.button
-                onClick={() => setShowSavedEvents(true)}
+                onClick={() => setShowSavedCalendarEvents(true)}
                 style={{
                   backgroundColor: 'transparent',
                   border: 'none',
@@ -1089,8 +1119,8 @@ export default function CalendarPage(): React.JSX.Element {
                   <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
                 </svg>
                 
-                {/* Counter untuk saved events */}
-                {savedEvents.length > 0 && (
+                {/* Counter untuk saved calendar events */}
+                {savedCalendarEvents.length > 0 && (
                   <div style={{
                     position: 'absolute',
                     top: '5px',
@@ -1110,7 +1140,7 @@ export default function CalendarPage(): React.JSX.Element {
                       fontWeight: 'bold',
                       fontFamily: 'Helvetica, Arial, sans-serif'
                     }}>
-                      {savedEvents.length > 9 ? '9+' : savedEvents.length}
+                      {savedCalendarEvents.length > 9 ? '9+' : savedCalendarEvents.length}
                     </span>
                   </div>
                 )}
@@ -1366,7 +1396,7 @@ export default function CalendarPage(): React.JSX.Element {
                     borderColor: 'rgba(255, 255, 255, 0.4)'
                   } : {}}
                 >
-                  {/* Tanggal */}
+                  {/* Tanggal dengan North West Arrow jika ada event */}
                   <div style={{
                     color: day.isToday ? '#3B82F6' : (day.isSelected ? 'white' : 'rgba(255, 255, 255, 0.8)'),
                     fontSize: isMobile ? '1.2rem' : '1.3rem',
@@ -1377,7 +1407,23 @@ export default function CalendarPage(): React.JSX.Element {
                     alignItems: 'center',
                     fontFamily: 'Helvetica, Arial, sans-serif'
                   }}>
-                    <span>{day.date}</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <span>{day.date}</span>
+                      {hasEvents && (
+                        <svg 
+                          width="16" 
+                          height="16" 
+                          viewBox="0 0 24 24" 
+                          fill="none" 
+                          stroke="white" 
+                          strokeWidth="2"
+                          style={{ opacity: 0.7 }}
+                        >
+                          <path d="M7 17L17 7"/>
+                          <path d="M7 7H17V17"/>
+                        </svg>
+                      )}
+                    </div>
                     {day.isToday && (
                       <div style={{
                         width: '8px',
@@ -1388,7 +1434,7 @@ export default function CalendarPage(): React.JSX.Element {
                     )}
                   </div>
                   
-                  {/* Event Indicators - MINIMALIST */}
+                  {/* Event Indicators dengan North West Arrow */}
                   {hasEvents && (
                     <div style={{
                       display: 'flex',
@@ -1410,7 +1456,10 @@ export default function CalendarPage(): React.JSX.Element {
                             padding: '0.3rem 0.5rem',
                             borderRadius: '5px',
                             cursor: 'pointer',
-                            transition: 'all 0.3s ease'
+                            transition: 'all 0.3s ease',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.4rem'
                           }}
                           onMouseEnter={(e) => {
                             e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.05)';
@@ -1419,6 +1468,20 @@ export default function CalendarPage(): React.JSX.Element {
                             e.currentTarget.style.backgroundColor = 'transparent';
                           }}
                         >
+                          {/* North West Arrow Icon untuk setiap event */}
+                          <svg 
+                            width="12" 
+                            height="12" 
+                            viewBox="0 0 24 24" 
+                            fill="none" 
+                            stroke="white" 
+                            strokeWidth="2"
+                            style={{ flexShrink: 0 }}
+                          >
+                            <path d="M7 17L17 7"/>
+                            <path d="M7 7H17V17"/>
+                          </svg>
+                          
                           <div style={{
                             color: 'white',
                             fontSize: isMobile ? '0.8rem' : '0.9rem',
@@ -2211,7 +2274,7 @@ export default function CalendarPage(): React.JSX.Element {
                 {/* Save Button untuk User */}
                 {user && !isAdmin && (
                   <motion.button
-                    onClick={() => handleSaveEvent(selectedEvent)}
+                    onClick={() => handleSaveCalendarEvent(selectedEvent)}
                     disabled={isSavingEvent}
                     style={{
                       padding: '0.8rem 1.5rem',
@@ -2242,7 +2305,7 @@ export default function CalendarPage(): React.JSX.Element {
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                           <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
                         </svg>
-                        Save Kegiatan
+                        Save Kegiatan Kalender
                       </>
                     )}
                   </motion.button>
@@ -2313,9 +2376,9 @@ export default function CalendarPage(): React.JSX.Element {
         )}
       </AnimatePresence>
       
-      {/* Modal Notifications */}
+      {/* Modal Notifications KALENDER */}
       <AnimatePresence>
-        {showNotifications && (
+        {showCalendarNotifications && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -2386,8 +2449,8 @@ export default function CalendarPage(): React.JSX.Element {
                     fontFamily: 'Helvetica, Arial, sans-serif',
                     letterSpacing: '0.5px'
                   }}>
-                    Notifikasi
-                    {unreadNotifications > 0 && (
+                    Notifikasi Kalender
+                    {unreadCalendarNotifications > 0 && (
                       <span style={{
                         marginLeft: '0.8rem',
                         backgroundColor: '#FF3B30',
@@ -2397,7 +2460,7 @@ export default function CalendarPage(): React.JSX.Element {
                         fontSize: '0.9rem',
                         fontWeight: '500'
                       }}>
-                        {unreadNotifications} baru
+                        {unreadCalendarNotifications} baru
                       </span>
                     )}
                   </h2>
@@ -2405,8 +2468,8 @@ export default function CalendarPage(): React.JSX.Element {
                 
                 <motion.button
                   onClick={() => {
-                    setShowNotifications(false);
-                    markNotificationsAsRead();
+                    setShowCalendarNotifications(false);
+                    markCalendarNotificationsAsRead();
                   }}
                   style={{
                     backgroundColor: 'transparent',
@@ -2437,7 +2500,7 @@ export default function CalendarPage(): React.JSX.Element {
                 flexDirection: 'column',
                 gap: '1rem'
               }}>
-                {notifications.length === 0 ? (
+                {calendarNotifications.length === 0 ? (
                   <div style={{
                     padding: '3rem 2rem',
                     textAlign: 'center',
@@ -2445,15 +2508,20 @@ export default function CalendarPage(): React.JSX.Element {
                     fontSize: '1.1rem',
                     fontFamily: 'Helvetica, Arial, sans-serif'
                   }}>
-                    Tidak ada notifikasi
+                    Tidak ada notifikasi kalender
                   </div>
                 ) : (
-                  notifications.map((notification) => {
-                    // FIX: Handle undefined date safely
+                  calendarNotifications.map((notification) => {
                     const notificationDate = notification.date instanceof Date ? 
                       notification.date : 
                       (notification.date && typeof notification.date.toDate === 'function' ? 
                         notification.date.toDate() : 
+                        new Date());
+                    
+                    const eventDate = notification.eventDate instanceof Date ?
+                      notification.eventDate :
+                      (notification.eventDate && typeof notification.eventDate.toDate === 'function' ?
+                        notification.eventDate.toDate() :
                         new Date());
                     
                     return (
@@ -2477,20 +2545,49 @@ export default function CalendarPage(): React.JSX.Element {
                           alignItems: 'flex-start'
                         }}>
                           <div style={{
-                            color: 'white',
-                            fontSize: '1.1rem',
-                            fontWeight: '500',
-                            fontFamily: 'Helvetica, Arial, sans-serif'
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.5rem'
                           }}>
-                            {notification.title}
+                            {/* North West Arrow Icon untuk notifikasi */}
+                            <svg 
+                              width="16" 
+                              height="16" 
+                              viewBox="0 0 24 24" 
+                              fill="none" 
+                              stroke="white" 
+                              strokeWidth="2"
+                            >
+                              <path d="M7 17L17 7"/>
+                              <path d="M7 7H17V17"/>
+                            </svg>
+                            
+                            <div style={{
+                              color: 'white',
+                              fontSize: '1.1rem',
+                              fontWeight: '500',
+                              fontFamily: 'Helvetica, Arial, sans-serif'
+                            }}>
+                              {notification.title}
+                            </div>
                           </div>
                           {!notification.isRead && (
-                            <div style={{
-                              width: '10px',
-                              height: '10px',
-                              backgroundColor: '#FF3B30',
-                              borderRadius: '50%'
-                            }} />
+                            <motion.div
+                              animate={{
+                                scale: [1, 1.2, 1],
+                                opacity: [1, 0.7, 1]
+                              }}
+                              transition={{
+                                duration: 1,
+                                repeat: Infinity
+                              }}
+                              style={{
+                                width: '12px',
+                                height: '12px',
+                                backgroundColor: '#FF3B30',
+                                borderRadius: '50%'
+                              }}
+                            />
                           )}
                         </div>
                         
@@ -2498,17 +2595,36 @@ export default function CalendarPage(): React.JSX.Element {
                           color: 'rgba(255, 255, 255, 0.8)',
                           fontSize: '1rem',
                           fontFamily: 'Helvetica, Arial, sans-serif',
-                          lineHeight: 1.4
+                          lineHeight: 1.4,
+                          paddingLeft: '1.5rem'
                         }}>
                           {notification.message}
                         </div>
                         
                         <div style={{
                           display: 'flex',
-                          justifyContent: 'space-between',
-                          alignItems: 'center',
-                          marginTop: '0.5rem'
+                          flexDirection: 'column',
+                          gap: '0.3rem',
+                          marginTop: '0.5rem',
+                          paddingLeft: '1.5rem'
                         }}>
+                          <div style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.5rem',
+                            color: 'rgba(255, 255, 255, 0.6)',
+                            fontSize: '0.9rem',
+                            fontFamily: 'Helvetica, Arial, sans-serif'
+                          }}>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                              <line x1="16" y1="2" x2="16" y2="6"/>
+                              <line x1="8" y1="2" x2="8" y2="6"/>
+                              <line x1="3" y1="10" x2="21" y2="10"/>
+                            </svg>
+                            Tanggal Kegiatan: {formatDate(eventDate)}
+                          </div>
+                          
                           <div style={{
                             display: 'flex',
                             alignItems: 'center',
@@ -2521,15 +2637,41 @@ export default function CalendarPage(): React.JSX.Element {
                               <circle cx="12" cy="12" r="10"/>
                               <polyline points="12 6 12 12 16 14"/>
                             </svg>
-                            {formatDate(notificationDate)}
+                            Notifikasi: {formatDate(notificationDate)}
                           </div>
-                          
+                        </div>
+                        
+                        <div style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          marginTop: '0.5rem',
+                          paddingLeft: '1.5rem'
+                        }}>
                           <div style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.5rem',
                             color: 'rgba(255, 255, 255, 0.7)',
                             fontSize: '0.9rem',
                             fontFamily: 'Helvetica, Arial, sans-serif'
                           }}>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                              <circle cx="12" cy="7" r="4"/>
+                            </svg>
                             oleh {notification.createdBy}
+                          </div>
+                          
+                          <div style={{
+                            color: 'rgba(255, 255, 255, 0.5)',
+                            fontSize: '0.8rem',
+                            fontFamily: 'Helvetica, Arial, sans-serif',
+                            padding: '0.2rem 0.6rem',
+                            border: '1px solid rgba(255, 255, 255, 0.2)',
+                            borderRadius: '10px'
+                          }}>
+                            {notification.eventLabel}
                           </div>
                         </div>
                       </motion.div>
@@ -2549,8 +2691,8 @@ export default function CalendarPage(): React.JSX.Element {
               }}>
                 <motion.button
                   onClick={() => {
-                    setShowNotifications(false);
-                    markNotificationsAsRead();
+                    setShowCalendarNotifications(false);
+                    markCalendarNotificationsAsRead();
                   }}
                   style={{
                     padding: '0.9rem 1.8rem',
@@ -2568,9 +2710,9 @@ export default function CalendarPage(): React.JSX.Element {
                   Tutup
                 </motion.button>
                 
-                {unreadNotifications > 0 && (
+                {unreadCalendarNotifications > 0 && (
                   <motion.button
-                    onClick={markNotificationsAsRead}
+                    onClick={markCalendarNotificationsAsRead}
                     style={{
                       padding: '0.9rem 1.8rem',
                       backgroundColor: 'transparent',
@@ -2593,9 +2735,9 @@ export default function CalendarPage(): React.JSX.Element {
         )}
       </AnimatePresence>
       
-      {/* Modal Saved Events */}
+      {/* Modal Saved Calendar Events */}
       <AnimatePresence>
-        {showSavedEvents && (
+        {showSavedCalendarEvents && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -2635,7 +2777,7 @@ export default function CalendarPage(): React.JSX.Element {
                 border: '1px solid rgba(255, 255, 255, 0.2)'
               }}
             >
-              {/* Header Modal Saved Events */}
+              {/* Header Modal Saved Calendar Events */}
               <div style={{
                 padding: isMobile ? '1.5rem' : '2rem',
                 borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
@@ -2665,7 +2807,7 @@ export default function CalendarPage(): React.JSX.Element {
                     fontFamily: 'Helvetica, Arial, sans-serif',
                     letterSpacing: '0.5px'
                   }}>
-                    Kegiatan Tersimpan
+                    Riwayat Save Kalender
                     <span style={{
                       marginLeft: '0.8rem',
                       backgroundColor: '#3B82F6',
@@ -2675,13 +2817,13 @@ export default function CalendarPage(): React.JSX.Element {
                       fontSize: '0.9rem',
                       fontWeight: '500'
                     }}>
-                      {savedEvents.length} kegiatan
+                      {savedCalendarEvents.length} kegiatan
                     </span>
                   </h2>
                 </div>
                 
                 <motion.button
-                  onClick={() => setShowSavedEvents(false)}
+                  onClick={() => setShowSavedCalendarEvents(false)}
                   style={{
                     backgroundColor: 'transparent',
                     border: '1px solid rgba(255, 255, 255, 0.3)',
@@ -2702,7 +2844,7 @@ export default function CalendarPage(): React.JSX.Element {
                 </motion.button>
               </div>
               
-              {/* Saved Events Content */}
+              {/* Saved Calendar Events Content */}
               <div style={{
                 flex: 1,
                 overflowY: 'auto',
@@ -2711,7 +2853,7 @@ export default function CalendarPage(): React.JSX.Element {
                 flexDirection: 'column',
                 gap: '1rem'
               }}>
-                {savedEvents.length === 0 ? (
+                {savedCalendarEvents.length === 0 ? (
                   <div style={{
                     padding: '3rem 2rem',
                     textAlign: 'center',
@@ -2719,11 +2861,10 @@ export default function CalendarPage(): React.JSX.Element {
                     fontSize: '1.1rem',
                     fontFamily: 'Helvetica, Arial, sans-serif'
                   }}>
-                    Belum ada kegiatan yang disimpan
+                    Belum ada kegiatan kalender yang disimpan
                   </div>
                 ) : (
-                  savedEvents.map((savedEvent) => {
-                    // FIX: Handle undefined date safely
+                  savedCalendarEvents.map((savedEvent) => {
                     const savedDate = savedEvent.date instanceof Date ? 
                       savedEvent.date : 
                       (savedEvent.date && typeof savedEvent.date.toDate === 'function' ? 
@@ -2768,18 +2909,28 @@ export default function CalendarPage(): React.JSX.Element {
                               <path d="M7 7H17V17"/>
                             </svg>
                             
-                            <div style={{
-                              color: 'white',
-                              fontSize: '1.1rem',
-                              fontWeight: '500',
-                              fontFamily: 'Helvetica, Arial, sans-serif'
-                            }}>
-                              {savedEvent.title}
+                            <div>
+                              <div style={{
+                                color: 'white',
+                                fontSize: '1.1rem',
+                                fontWeight: '500',
+                                fontFamily: 'Helvetica, Arial, sans-serif'
+                              }}>
+                                {savedEvent.title}
+                              </div>
+                              <div style={{
+                                color: 'rgba(255, 255, 255, 0.7)',
+                                fontSize: '0.9rem',
+                                fontFamily: 'Helvetica, Arial, sans-serif',
+                                marginTop: '0.2rem'
+                              }}>
+                                oleh {savedEvent.createdBy}
+                              </div>
                             </div>
                           </div>
                           
                           <motion.button
-                            onClick={() => handleRemoveSavedEvent(savedEvent.id)}
+                            onClick={() => handleRemoveSavedCalendarEvent(savedEvent.id)}
                             style={{
                               backgroundColor: 'transparent',
                               border: '1px solid rgba(255, 255, 255, 0.3)',
@@ -2806,46 +2957,91 @@ export default function CalendarPage(): React.JSX.Element {
                           fontFamily: 'Helvetica, Arial, sans-serif',
                           paddingLeft: '2rem'
                         }}>
-                          Tanggal: {formatDate(savedDate)}
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.3rem' }}>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                              <line x1="16" y1="2" x2="16" y2="6"/>
+                              <line x1="8" y1="2" x2="8" y2="6"/>
+                              <line x1="3" y1="10" x2="21" y2="10"/>
+                            </svg>
+                            Tanggal: {formatDate(savedDate)}
+                          </div>
+                          
+                          {savedEvent.description && (
+                            <div style={{ 
+                              color: 'rgba(255, 255, 255, 0.6)',
+                              fontSize: '0.9rem',
+                              marginTop: '0.3rem',
+                              lineHeight: 1.4
+                            }}>
+                              {savedEvent.description.length > 100 
+                                ? `${savedEvent.description.substring(0, 100)}...` 
+                                : savedEvent.description}
+                            </div>
+                          )}
                         </div>
                         
                         <div style={{
                           display: 'flex',
                           justifyContent: 'space-between',
                           alignItems: 'center',
-                          paddingLeft: '2rem'
+                          paddingLeft: '2rem',
+                          marginTop: '0.5rem'
                         }}>
                           <div style={{
                             color: 'rgba(255, 255, 255, 0.6)',
                             fontSize: '0.9rem',
-                            fontFamily: 'Helvetica, Arial, sans-serif'
+                            fontFamily: 'Helvetica, Arial, sans-serif',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.5rem'
                           }}>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                              <circle cx="12" cy="12" r="10"/>
+                              <polyline points="12 6 12 12 16 14"/>
+                            </svg>
                             Disimpan {formatSavedDate(savedDate)}
                           </div>
                           
-                          <motion.button
-                            onClick={() => {
-                              const originalEvent = calendarEvents.find(e => e.id === savedEvent.eventId);
-                              if (originalEvent) {
-                                handleViewEventDetails(originalEvent);
-                                setShowSavedEvents(false);
-                              }
-                            }}
-                            style={{
-                              padding: '0.4rem 0.8rem',
-                              backgroundColor: 'transparent',
-                              border: '1px solid rgba(255, 255, 255, 0.3)',
-                              borderRadius: '6px',
-                              color: 'white',
+                          <div style={{
+                            display: 'flex',
+                            gap: '0.5rem'
+                          }}>
+                            <div style={{
+                              color: 'rgba(255, 255, 255, 0.5)',
                               fontSize: '0.8rem',
-                              fontWeight: '400',
-                              cursor: 'pointer',
-                              fontFamily: 'Helvetica, Arial, sans-serif'
-                            }}
-                            whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
-                          >
-                            Lihat Detail
-                          </motion.button>
+                              fontFamily: 'Helvetica, Arial, sans-serif',
+                              padding: '0.2rem 0.6rem',
+                              border: '1px solid rgba(255, 255, 255, 0.2)',
+                              borderRadius: '10px'
+                            }}>
+                              {savedEvent.label}
+                            </div>
+                            
+                            <motion.button
+                              onClick={() => {
+                                const originalEvent = calendarEvents.find(e => e.id === savedEvent.eventId);
+                                if (originalEvent) {
+                                  handleViewEventDetails(originalEvent);
+                                  setShowSavedCalendarEvents(false);
+                                }
+                              }}
+                              style={{
+                                padding: '0.4rem 0.8rem',
+                                backgroundColor: 'transparent',
+                                border: '1px solid rgba(255, 255, 255, 0.3)',
+                                borderRadius: '6px',
+                                color: 'white',
+                                fontSize: '0.8rem',
+                                fontWeight: '400',
+                                cursor: 'pointer',
+                                fontFamily: 'Helvetica, Arial, sans-serif'
+                              }}
+                              whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
+                            >
+                              Lihat Detail
+                            </motion.button>
+                          </div>
                         </div>
                       </motion.div>
                     );
@@ -2853,7 +3049,7 @@ export default function CalendarPage(): React.JSX.Element {
                 )}
               </div>
               
-              {/* Footer Saved Events */}
+              {/* Footer Saved Calendar Events */}
               <div style={{
                 padding: isMobile ? '1.5rem' : '2rem',
                 borderTop: '1px solid rgba(255, 255, 255, 0.2)',
@@ -2863,7 +3059,7 @@ export default function CalendarPage(): React.JSX.Element {
                 flexShrink: 0
               }}>
                 <motion.button
-                  onClick={() => setShowSavedEvents(false)}
+                  onClick={() => setShowSavedCalendarEvents(false)}
                   style={{
                     padding: '0.9rem 1.8rem',
                     backgroundColor: 'transparent',
