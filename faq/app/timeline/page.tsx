@@ -29,11 +29,11 @@ export default function TimelinePage() {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        width: '50px',
-        height: '50px'
+        width: '40px',
+        height: '40px'
       }}
       animate={{ 
-        scale: [1, 1.3, 1],
+        scale: [1, 1.2, 1],
         opacity: [0.8, 1, 0.8]
       }}
       transition={{
@@ -42,12 +42,12 @@ export default function TimelinePage() {
         ease: "easeInOut"
       }}
     >
-      <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+      <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
         {/* Lingkaran luar berkedip */}
         <motion.circle
-          cx="16"
-          cy="16"
-          r="14"
+          cx="14"
+          cy="14"
+          r="12"
           stroke="#ffffff"
           strokeWidth="2"
           fill="none"
@@ -56,9 +56,9 @@ export default function TimelinePage() {
         />
         {/* Lingkaran tengah */}
         <motion.circle
-          cx="16"
-          cy="16"
-          r="9"
+          cx="14"
+          cy="14"
+          r="8"
           stroke="#ffffff"
           strokeWidth="2"
           fill="none"
@@ -66,14 +66,14 @@ export default function TimelinePage() {
           transition={{ duration: 1.5, repeat: Infinity, delay: 0.2 }}
         />
         {/* Titik tengah */}
-        <circle cx="16" cy="16" r="5" fill="#ffffff" />
+        <circle cx="14" cy="14" r="4" fill="#ffffff" />
       </svg>
     </motion.div>
   );
 
   const SouthEastArrow = () => (
-    <svg width="32" height="32" viewBox="0 0 32 32" fill="none" stroke="#ffffff" strokeWidth="2">
-      <path d="M10 10l12 12m0 0V10m0 12H10" strokeLinecap="round" strokeLinejoin="round"/>
+    <svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="#ffffff" strokeWidth="2">
+      <path d="M8 8l10 10m0 0V8m0 10H8" strokeLinecap="round" strokeLinejoin="round"/>
     </svg>
   );
 
@@ -160,29 +160,6 @@ export default function TimelinePage() {
           padding: '2rem 0'
         }}>
           
-          {/* Garis Timeline Utama dari Titik-titik Vertikal */}
-          <div style={{
-            position: 'absolute',
-            left: '200px',
-            top: '0',
-            bottom: '0',
-            display: 'flex',
-            justifyContent: 'center'
-          }}>
-            <div style={{
-              color: '#ffffff',
-              fontSize: '1.4rem',
-              letterSpacing: '4px',
-              fontFamily: 'monospace',
-              writingMode: 'vertical-rl',
-              textOrientation: 'mixed',
-              height: '100%',
-              opacity: 0.8
-            }}>
-              ..........................................................................................
-            </div>
-          </div>
-
           {/* Timeline Steps */}
           {timelineSteps.map((step, index) => (
             <motion.div
@@ -196,20 +173,20 @@ export default function TimelinePage() {
               style={{
                 display: 'flex',
                 alignItems: 'center',
-                marginBottom: '4rem',
+                marginBottom: '3.5rem',
                 position: 'relative',
-                minHeight: '120px'
+                minHeight: '100px'
               }}
             >
-              {/* Nomor Step */}
+              {/* Kolom 1: Angka dengan jarak dari garis */}
               <div style={{
-                width: '200px',
+                width: '180px',
                 display: 'flex',
                 justifyContent: 'flex-end',
-                paddingRight: '3rem'
+                paddingRight: '50px' // Jarak dari garis timeline
               }}>
                 <div style={{
-                  fontSize: '1.8rem',
+                  fontSize: '1.6rem',
                   opacity: step.status === 'pending' ? 0.4 : 1,
                   fontFamily: 'monospace',
                   fontWeight: 500,
@@ -219,16 +196,33 @@ export default function TimelinePage() {
                 </div>
               </div>
 
-              {/* Indikator di Garis Timeline */}
+              {/* Kolom 2: Garis Timeline Vertikal dari Titik-titik */}
               <div style={{
                 position: 'relative',
                 width: '40px',
                 display: 'flex',
                 justifyContent: 'center',
-                alignItems: 'center'
+                alignItems: 'center',
+                height: '100px'
               }}>
+                {/* Garis titik-titik vertikal */}
+                <div style={{
+                  color: '#ffffff',
+                  fontSize: '1.4rem',
+                  letterSpacing: '4px',
+                  fontFamily: 'monospace',
+                  writingMode: 'vertical-rl',
+                  textOrientation: 'mixed',
+                  height: '100%',
+                  opacity: 0.8,
+                  position: 'absolute'
+                }}>
+                  ....................
+                </div>
+
+                {/* Indikator di tengah garis titik-titik */}
                 {step.status === 'current' ? (
-                  // Pemancar berkedip di garis timeline
+                  // Blinking dot di tengah titik-titik
                   <div style={{
                     position: 'absolute',
                     zIndex: 2,
@@ -238,26 +232,26 @@ export default function TimelinePage() {
                     <TransmitterIcon />
                   </div>
                 ) : step.status === 'completed' ? (
-                  // Bulatan putih di garis timeline
+                  // Bulatan putih di tengah titik-titik
                   <div style={{
-                    width: '24px',
-                    height: '24px',
+                    width: '20px',
+                    height: '20px',
                     borderRadius: '50%',
                     backgroundColor: '#ffffff',
                     border: '4px solid #000000',
-                    boxShadow: '0 0 20px rgba(255,255,255,0.8)',
+                    boxShadow: '0 0 15px rgba(255,255,255,0.8)',
                     position: 'absolute',
                     zIndex: 2
                   }} />
                 ) : (
-                  // Titik-titik kecil untuk pending
+                  // Titik-titik untuk pending
                   <div style={{
                     color: '#ffffff',
-                    fontSize: '1.2rem',
-                    letterSpacing: '3px',
+                    fontSize: '1rem',
+                    letterSpacing: '2px',
                     fontFamily: 'monospace',
                     backgroundColor: '#000000',
-                    padding: '5px',
+                    padding: '3px 6px',
                     opacity: 0.6,
                     position: 'absolute',
                     zIndex: 2
@@ -267,7 +261,7 @@ export default function TimelinePage() {
                 )}
               </div>
 
-              {/* Garis Horizontal Titik-titik ke Konten */}
+              {/* Kolom 3: Garis Horizontal Titik-titik ke Konten */}
               <div style={{
                 width: '60px',
                 display: 'flex',
@@ -285,12 +279,12 @@ export default function TimelinePage() {
                 </div>
               </div>
 
-              {/* Konten Step */}
+              {/* Kolom 4: Konten Step - TANPA titik di deskripsi */}
               <div style={{
                 flex: 1,
                 paddingLeft: '1rem'
               }}>
-                {/* Judul */}
+                {/* Baris 1: Judul */}
                 <div style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -298,7 +292,7 @@ export default function TimelinePage() {
                   marginBottom: '0.75rem'
                 }}>
                   <h3 style={{
-                    fontSize: '2.2rem',
+                    fontSize: '2rem',
                     fontWeight: 400,
                     margin: 0,
                     opacity: step.status === 'pending' ? 0.5 : 1,
@@ -313,10 +307,10 @@ export default function TimelinePage() {
                         display: 'flex',
                         alignItems: 'center',
                         gap: '0.5rem',
-                        padding: '0.5rem 1.5rem',
+                        padding: '0.5rem 1.25rem',
                         backgroundColor: 'rgba(255,255,255,0.15)',
-                        borderRadius: '25px',
-                        fontSize: '1.1rem',
+                        borderRadius: '20px',
+                        fontSize: '1rem',
                         color: '#ffffff',
                         fontWeight: 500
                       }}
@@ -324,8 +318,8 @@ export default function TimelinePage() {
                       transition={{ duration: 1, repeat: Infinity }}
                     >
                       <div style={{
-                        width: '12px',
-                        height: '12px',
+                        width: '10px',
+                        height: '10px',
                         borderRadius: '50%',
                         backgroundColor: '#00ff00'
                       }} />
@@ -334,22 +328,7 @@ export default function TimelinePage() {
                   )}
                 </div>
                 
-                {/* Garis Pemisah Titik-titik */}
-                <div style={{
-                  marginBottom: '0.75rem',
-                  opacity: 0.8
-                }}>
-                  <div style={{
-                    color: '#ffffff',
-                    fontSize: '1.2rem',
-                    letterSpacing: '5px',
-                    fontFamily: 'monospace'
-                  }}>
-                    ..........................
-                  </div>
-                </div>
-                
-                {/* Tanggal dan Status */}
+                {/* Baris 2: Tanggal dan Status - TANPA titik-titik */}
                 <div style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -357,27 +336,18 @@ export default function TimelinePage() {
                   opacity: step.status === 'pending' ? 0.4 : 0.9
                 }}>
                   <span style={{
-                    fontSize: '1.4rem',
+                    fontSize: '1.3rem',
                     fontFamily: 'monospace',
                     fontWeight: 500,
-                    color: '#ffffff'
+                    color: '#ffffff',
+                    opacity: 0.9
                   }}>
                     {step.date}
                   </span>
                   
-                  <div style={{
-                    color: '#ffffff',
-                    fontSize: '1.2rem',
-                    letterSpacing: '4px',
-                    fontFamily: 'monospace',
-                    opacity: step.status === 'current' ? 0.9 : 0.7
-                  }}>
-                    ................
-                  </div>
-                  
                   {step.status === 'completed' && (
                     <span style={{ 
-                      fontSize: '1.4rem', 
+                      fontSize: '1.3rem', 
                       color: '#ffffff',
                       fontWeight: 500 
                     }}>
@@ -387,7 +357,7 @@ export default function TimelinePage() {
                   
                   {step.status === 'pending' && (
                     <span style={{ 
-                      fontSize: '1.4rem', 
+                      fontSize: '1.3rem', 
                       opacity: 0.6, 
                       color: '#ffffff',
                       fontWeight: 500 
@@ -405,7 +375,7 @@ export default function TimelinePage() {
                     marginLeft: '2rem',
                     opacity: 0.9
                   }}
-                  animate={{ x: [0, 10, 0] }}
+                  animate={{ x: [0, 8, 0] }}
                   transition={{ duration: 2, repeat: Infinity }}
                 >
                   <SouthEastArrow />
