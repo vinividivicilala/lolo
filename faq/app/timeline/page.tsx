@@ -187,7 +187,7 @@ export default function TimelinePage() {
               }}>
                 <div style={{
                   fontSize: '1.6rem',
-                  opacity: step.status === 'pending' ? 0.4 : 1,
+                  opacity: 1, // Selalu penuh
                   fontFamily: 'monospace',
                   fontWeight: 500,
                   color: '#ffffff'
@@ -196,7 +196,7 @@ export default function TimelinePage() {
                 </div>
               </div>
 
-              {/* Kolom 2: Garis Timeline Vertikal dari Titik-titik */}
+              {/* Kolom 2: Garis Vertikal Titik-titik dengan Blinking Dot di Tengah */}
               <div style={{
                 position: 'relative',
                 width: '40px',
@@ -205,10 +205,10 @@ export default function TimelinePage() {
                 alignItems: 'center',
                 height: '100px'
               }}>
-                {/* Garis titik-titik vertikal */}
+                {/* Garis titik-titik vertikal - panjang dari atas ke bawah */}
                 <div style={{
                   color: '#ffffff',
-                  fontSize: '1.4rem',
+                  fontSize: '1rem',
                   letterSpacing: '4px',
                   fontFamily: 'monospace',
                   writingMode: 'vertical-rl',
@@ -244,42 +244,40 @@ export default function TimelinePage() {
                     zIndex: 2
                   }} />
                 ) : (
-                  // Titik-titik untuk pending
+                  // Titik-titik untuk pending - SAMA dengan desain completed
                   <div style={{
-                    color: '#ffffff',
-                    fontSize: '1rem',
-                    letterSpacing: '2px',
-                    fontFamily: 'monospace',
-                    backgroundColor: '#000000',
-                    padding: '3px 6px',
-                    opacity: 0.6,
+                    width: '20px',
+                    height: '20px',
+                    borderRadius: '50%',
+                    backgroundColor: '#ffffff',
+                    border: '4px solid #000000',
+                    boxShadow: '0 0 15px rgba(255,255,255,0.8)',
                     position: 'absolute',
-                    zIndex: 2
-                  }}>
-                    ...
-                  </div>
+                    zIndex: 2,
+                    opacity: 0.5
+                  }} />
                 )}
               </div>
 
-              {/* Kolom 3: Garis Horizontal Titik-titik ke Konten */}
+              {/* Kolom 3: Garis Horizontal Titik-titik ke Awal Huruf Judul */}
               <div style={{
-                width: '60px',
+                width: '80px',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center'
               }}>
                 <div style={{
                   color: '#ffffff',
-                  fontSize: '1.4rem',
+                  fontSize: '1rem',
                   letterSpacing: '4px',
                   fontFamily: 'monospace',
-                  opacity: step.status === 'current' ? 0.9 : 0.7
+                  opacity: 0.8
                 }}>
-                  ................
+                  ........................
                 </div>
               </div>
 
-              {/* Kolom 4: Konten Step - TANPA titik di deskripsi */}
+              {/* Kolom 4: Konten Step - TEKS PUTIH TANPA PUDAR */}
               <div style={{
                 flex: 1,
                 paddingLeft: '1rem'
@@ -295,8 +293,7 @@ export default function TimelinePage() {
                     fontSize: '2rem',
                     fontWeight: 400,
                     margin: 0,
-                    opacity: step.status === 'pending' ? 0.5 : 1,
-                    color: '#ffffff'
+                    color: '#ffffff' // Putih penuh, tidak pudar
                   }}>
                     {step.title}
                   </h3>
@@ -328,19 +325,18 @@ export default function TimelinePage() {
                   )}
                 </div>
                 
-                {/* Baris 2: Tanggal dan Status - TANPA titik-titik */}
+                {/* Baris 2: Tanggal dan Status - TEKS PUTIH TANPA PUDAR */}
                 <div style={{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '1.5rem',
-                  opacity: step.status === 'pending' ? 0.4 : 0.9
+                  gap: '1.5rem'
                 }}>
                   <span style={{
                     fontSize: '1.3rem',
                     fontFamily: 'monospace',
                     fontWeight: 500,
-                    color: '#ffffff',
-                    opacity: 0.9
+                    color: '#ffffff', // Putih penuh
+                    opacity: 1
                   }}>
                     {step.date}
                   </span>
@@ -348,21 +344,22 @@ export default function TimelinePage() {
                   {step.status === 'completed' && (
                     <span style={{ 
                       fontSize: '1.3rem', 
-                      color: '#ffffff',
-                      fontWeight: 500 
+                      color: '#ffffff', // Putih penuh
+                      fontWeight: 500,
+                      opacity: 1
                     }}>
                       Completed
                     </span>
                   )}
                   
-                  {step.status === 'pending' && (
+                  {(step.status === 'pending' || step.status === 'current') && (
                     <span style={{ 
                       fontSize: '1.3rem', 
-                      opacity: 0.6, 
-                      color: '#ffffff',
-                      fontWeight: 500 
+                      color: '#ffffff', // Putih penuh
+                      fontWeight: 500,
+                      opacity: 1
                     }}>
-                      Upcoming
+                      {step.status === 'current' ? 'In Progress' : 'Upcoming'}
                     </span>
                   )}
                 </div>
@@ -373,7 +370,7 @@ export default function TimelinePage() {
                 <motion.div
                   style={{
                     marginLeft: '2rem',
-                    opacity: 0.9
+                    opacity: 1
                   }}
                   animate={{ x: [0, 8, 0] }}
                   transition={{ duration: 2, repeat: Infinity }}
