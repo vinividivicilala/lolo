@@ -22,82 +22,31 @@ export default function TimelinePage() {
     return () => clearInterval(interval);
   }, []);
 
-  // Modern Transmitter - Ukuran Normal, Kedap Kedip
-  const ModernTransmitter = () => (
-    <div style={{
-      position: 'relative',
-      width: '40px',
-      height: '40px',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center'
-    }}>
-      {/* Pulsing Rings */}
-      <motion.div
-        style={{
-          position: 'absolute',
-          width: '40px',
-          height: '40px',
-          borderRadius: '50%',
-          border: '1.5px solid rgba(0, 255, 157, 0.4)',
-        }}
-        animate={{
-          scale: [1, 1.8, 2.2],
-          opacity: [0.5, 0.2, 0],
-        }}
-        transition={{
-          duration: 2,
-          repeat: Infinity,
-          ease: "easeOut"
-        }}
-      />
-      <motion.div
-        style={{
-          position: 'absolute',
-          width: '40px',
-          height: '40px',
-          borderRadius: '50%',
-          border: '1.5px solid rgba(0, 255, 157, 0.3)',
-        }}
-        animate={{
-          scale: [1, 1.5, 2],
-          opacity: [0.4, 0.15, 0],
-        }}
-        transition={{
-          duration: 2,
-          repeat: Infinity,
-          ease: "easeOut",
-          delay: 0.5
-        }}
-      />
-      
-      {/* Central Dot - Kedap Kedip Modern */}
-      <motion.div
-        style={{
-          width: '12px',
-          height: '12px',
-          borderRadius: '50%',
-          backgroundColor: '#00ff9d',
-          position: 'relative',
-          zIndex: 10,
-          boxShadow: '0 0 20px #00ff9d'
-        }}
-        animate={{
-          scale: [1, 1.2, 1],
-          opacity: [1, 0.8, 1],
-          boxShadow: [
-            '0 0 20px #00ff9d',
-            '0 0 35px #00ff9d',
-            '0 0 20px #00ff9d'
-          ]
-        }}
-        transition={{
-          duration: 1.2,
-          repeat: Infinity,
-          ease: "easeInOut"
-        }}
-      />
-    </div>
+  // Modern Blinking Dot - SAMA PERSIS dengan yang di TRANSMITTING
+  const BlinkingDot = () => (
+    <motion.div
+      style={{
+        width: '12px',
+        height: '12px',
+        borderRadius: '50%',
+        backgroundColor: '#00ff9d',
+        boxShadow: '0 0 20px #00ff9d',
+      }}
+      animate={{
+        scale: [1, 1.2, 1],
+        opacity: [1, 0.8, 1],
+        boxShadow: [
+          '0 0 20px #00ff9d',
+          '0 0 35px #00ff9d',
+          '0 0 20px #00ff9d'
+        ]
+      }}
+      transition={{
+        duration: 1.2,
+        repeat: Infinity,
+        ease: "easeInOut"
+      }}
+    />
   );
 
   const SouthEastArrow = () => (
@@ -225,55 +174,57 @@ export default function TimelinePage() {
                 </div>
               </div>
 
-              {/* Kolom 2: Titik Vertikal + Horizontal + Indikator */}
+              {/* Kolom 2: Titik Vertikal + Titik Bulat + Titik Horizontal - SEMUA NYAMBUNG */}
               <div style={{
                 position: 'relative',
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
-                width: '120px',
+                width: '140px',
                 height: '100px'
               }}>
-                {/* Titik Vertikal */}
+                {/* Titik Vertikal - NYAMBUNG ke Titik Bulat */}
                 <div style={{
                   color: '#ffffff',
-                  fontSize: '1rem',
+                  fontSize: '0.9rem',
                   letterSpacing: '4px',
                   fontFamily: 'monospace',
                   writingMode: 'vertical-rl',
                   textOrientation: 'mixed',
                   height: '100%',
-                  opacity: 0.8,
+                  opacity: 0.6,
                   position: 'absolute',
                   left: '50%',
-                  transform: 'translateX(-50%)'
+                  transform: 'translateX(-50%)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
                 }}>
-                  ....................
+                  ••••••••••••••••••••••
                 </div>
 
-                {/* Modern Transmitter atau Indicator */}
+                {/* Titik Bulat Pemancar - DI TENGAH Garis Vertikal */}
                 <div style={{
                   position: 'absolute',
                   top: '50%',
                   left: '50%',
                   transform: 'translate(-50%, -50%)',
-                  zIndex: 2,
+                  zIndex: 3,
                   backgroundColor: '#000000',
-                  padding: '5px',
+                  padding: '6px',
                   borderRadius: '50%',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center'
                 }}>
                   {step.status === 'current' ? (
-                    <ModernTransmitter />
+                    <BlinkingDot />
                   ) : step.status === 'completed' ? (
                     <div style={{
                       width: '12px',
                       height: '12px',
                       borderRadius: '50%',
                       backgroundColor: '#ffffff',
-                      border: '2px solid #000000',
                       boxShadow: '0 0 15px rgba(255,255,255,0.8)'
                     }} />
                   ) : (
@@ -282,29 +233,31 @@ export default function TimelinePage() {
                       height: '12px',
                       borderRadius: '50%',
                       backgroundColor: '#ffffff',
-                      border: '2px solid #000000',
                       boxShadow: '0 0 15px rgba(255,255,255,0.8)',
                       opacity: 0.5
                     }} />
                   )}
                 </div>
 
-                {/* Titik Horizontal */}
+                {/* Titik Horizontal - NYAMBUNG dari Titik Bulat ke Kanan */}
                 <div style={{
                   position: 'absolute',
                   top: '50%',
                   left: '50%',
-                  width: '60px',
-                  transform: 'translateY(-50%)'
+                  width: '70px',
+                  transform: 'translateY(-50%)',
+                  display: 'flex',
+                  justifyContent: 'flex-start'
                 }}>
                   <div style={{
                     color: '#ffffff',
-                    fontSize: '1rem',
+                    fontSize: '0.9rem',
                     letterSpacing: '4px',
                     fontFamily: 'monospace',
-                    opacity: 0.8
+                    opacity: 0.6,
+                    marginLeft: '25px' // Mulai dari tepi titik bulat
                   }}>
-                    ................
+                    ••••••••••••••••
                   </div>
                 </div>
               </div>
@@ -312,7 +265,7 @@ export default function TimelinePage() {
               {/* Kolom 3: Konten */}
               <div style={{
                 flex: 1,
-                marginLeft: '80px'
+                marginLeft: '60px'
               }}>
                 {/* Judul */}
                 <div style={{
@@ -344,30 +297,7 @@ export default function TimelinePage() {
                       letterSpacing: '0.5px'
                     }}>
                       {/* Dot di teks TRANSMITTING - SAMA PERSIS dengan pemancar */}
-                      <motion.div
-                        style={{
-                          width: '12px',
-                          height: '12px',
-                          borderRadius: '50%',
-                          backgroundColor: '#00ff9d',
-                          boxShadow: '0 0 20px #00ff9d',
-                          marginRight: '4px'
-                        }}
-                        animate={{
-                          scale: [1, 1.2, 1],
-                          opacity: [1, 0.8, 1],
-                          boxShadow: [
-                            '0 0 20px #00ff9d',
-                            '0 0 35px #00ff9d',
-                            '0 0 20px #00ff9d'
-                          ]
-                        }}
-                        transition={{
-                          duration: 1.2,
-                          repeat: Infinity,
-                          ease: "easeInOut"
-                        }}
-                      />
+                      <BlinkingDot />
                       TRANSMITTING
                     </div>
                   )}
