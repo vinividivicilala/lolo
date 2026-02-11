@@ -22,115 +22,122 @@ export default function TimelinePage() {
     return () => clearInterval(interval);
   }, []);
 
-  // Modern Awwards-style Transmitter Animation
-  const ModernTransmitter = ({ isActive }) => (
+  // Modern Transmitter Animation - ONLY THIS PART CHANGED
+  const ModernTransmitter = () => (
     <div style={{
       position: 'relative',
-      width: '60px',
-      height: '60px',
+      width: '40px',
+      height: '40px',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center'
     }}>
       {/* Pulsing Rings - Modern Awwards Style */}
-      {isActive && (
-        <>
-          <motion.div
-            style={{
-              position: 'absolute',
-              width: '60px',
-              height: '60px',
-              borderRadius: '50%',
-              border: '1px solid rgba(255, 255, 255, 0.3)',
-            }}
-            animate={{
-              scale: [1, 1.5, 2],
-              opacity: [0.5, 0.25, 0],
-            }}
-            transition={{
-              duration: 2,
-              repeat: Infinity,
-              ease: "easeOut"
-            }}
-          />
-          <motion.div
-            style={{
-              position: 'absolute',
-              width: '60px',
-              height: '60px',
-              borderRadius: '50%',
-              border: '1px solid rgba(255, 255, 255, 0.4)',
-            }}
-            animate={{
-              scale: [1, 1.8, 2.2],
-              opacity: [0.6, 0.3, 0],
-            }}
-            transition={{
-              duration: 2,
-              repeat: Infinity,
-              ease: "easeOut",
-              delay: 0.5
-            }}
-          />
-        </>
-      )}
-      
-      {/* Central Dot with Glow */}
       <motion.div
         style={{
-          width: isActive ? '16px' : '14px',
-          height: isActive ? '16px' : '14px',
+          position: 'absolute',
+          width: '40px',
+          height: '40px',
+          borderRadius: '50%',
+          border: '1px solid rgba(255, 255, 255, 0.3)',
+        }}
+        animate={{
+          scale: [1, 1.8, 2.2],
+          opacity: [0.5, 0.2, 0],
+        }}
+        transition={{
+          duration: 2,
+          repeat: Infinity,
+          ease: "easeOut"
+        }}
+      />
+      <motion.div
+        style={{
+          position: 'absolute',
+          width: '40px',
+          height: '40px',
+          borderRadius: '50%',
+          border: '1px solid rgba(255, 255, 255, 0.2)',
+        }}
+        animate={{
+          scale: [1, 1.5, 2],
+          opacity: [0.4, 0.15, 0],
+        }}
+        transition={{
+          duration: 2,
+          repeat: Infinity,
+          ease: "easeOut",
+          delay: 0.5
+        }}
+      />
+      <motion.div
+        style={{
+          position: 'absolute',
+          width: '40px',
+          height: '40px',
+          borderRadius: '50%',
+          border: '1px solid rgba(255, 255, 255, 0.1)',
+        }}
+        animate={{
+          scale: [1, 1.3, 1.8],
+          opacity: [0.3, 0.1, 0],
+        }}
+        transition={{
+          duration: 2,
+          repeat: Infinity,
+          ease: "easeOut",
+          delay: 1
+        }}
+      />
+      
+      {/* Central Dot with Modern Glow */}
+      <motion.div
+        style={{
+          width: '12px',
+          height: '12px',
           borderRadius: '50%',
           backgroundColor: '#ffffff',
           position: 'relative',
           zIndex: 10,
-          boxShadow: isActive 
-            ? '0 0 20px rgba(255, 255, 255, 0.8), 0 0 40px rgba(255, 255, 255, 0.4)' 
-            : '0 0 10px rgba(255, 255, 255, 0.5)'
+          boxShadow: '0 0 20px rgba(255, 255, 255, 0.8)'
         }}
-        animate={
-          isActive ? {
-            scale: [1, 1.1, 1],
-            boxShadow: [
-              '0 0 20px rgba(255, 255, 255, 0.8), 0 0 40px rgba(255, 255, 255, 0.4)',
-              '0 0 30px rgba(255, 255, 255, 1), 0 0 60px rgba(255, 255, 255, 0.6)',
-              '0 0 20px rgba(255, 255, 255, 0.8), 0 0 40px rgba(255, 255, 255, 0.4)'
-            ]
-          } : {}
-        }
-        transition={
-          isActive ? {
-            duration: 1.5,
+        animate={{
+          scale: [1, 1.1, 1],
+          boxShadow: [
+            '0 0 20px rgba(255, 255, 255, 0.8)',
+            '0 0 30px rgba(255, 255, 255, 1)',
+            '0 0 20px rgba(255, 255, 255, 0.8)'
+          ]
+        }}
+        transition={{
+          duration: 1.5,
+          repeat: Infinity,
+          ease: "easeInOut"
+        }}
+      >
+        {/* Inner Dot with Green Glow */}
+        <motion.div
+          style={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: '4px',
+            height: '4px',
+            borderRadius: '50%',
+            backgroundColor: '#00ff9d',
+            boxShadow: '0 0 8px #00ff9d'
+          }}
+          animate={{
+            scale: [1, 1.5, 1],
+            opacity: [1, 0.6, 1]
+          }}
+          transition={{
+            duration: 1,
             repeat: Infinity,
             ease: "easeInOut"
-          } : {}
-        }
-      >
-        {/* Inner Glow for Active State */}
-        {isActive && (
-          <motion.div
-            style={{
-              position: 'absolute',
-              top: '50%',
-              left: '50%',
-              transform: 'translate(-50%, -50%)',
-              width: '4px',
-              height: '4px',
-              borderRadius: '50%',
-              backgroundColor: '#00ff9d',
-              filter: 'blur(1px)'
-            }}
-            animate={{
-              scale: [1, 1.5, 1],
-              opacity: [1, 0.5, 1]
-            }}
-            transition={{
-              duration: 1,
-              repeat: Infinity,
-              ease: "easeInOut"
-            }}
-          />
-        )}
+          }}
+        />
       </motion.div>
     </div>
   );
@@ -147,43 +154,30 @@ export default function TimelinePage() {
       backgroundColor: '#000000',
       color: '#ffffff',
       padding: '2rem',
-      fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, sans-serif',
+      fontFamily: 'Helvetica, Arial, sans-serif',
       position: 'relative',
       overflow: 'hidden'
     }}>
       
-      {/* Modern Gradient Background */}
+      {/* Animated Background Grid */}
       <div style={{
         position: 'absolute',
         top: 0,
         left: 0,
         right: 0,
         bottom: 0,
-        background: 'radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.1) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.05) 0%, transparent 50%)',
-        opacity: 0.3
-      }} />
-
-      {/* Grid Pattern */}
-      <div style={{
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        backgroundImage: `linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
-                         linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px)`,
+        backgroundImage: 'linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px)',
         backgroundSize: '50px 50px',
-        opacity: 0.2
+        opacity: 0.3
       }} />
 
       <motion.button
         onClick={() => router.back()}
         style={{
           padding: '1rem 2rem',
-          background: 'rgba(255, 255, 255, 0.05)',
-          backdropFilter: 'blur(10px)',
-          border: '1px solid rgba(255, 255, 255, 0.1)',
-          borderRadius: '8px',
+          backgroundColor: 'transparent',
+          border: '1px solid rgba(255,255,255,0.1)',
+          borderRadius: '4px',
           color: '#ffffff',
           cursor: 'pointer',
           marginBottom: '3rem',
@@ -192,51 +186,41 @@ export default function TimelinePage() {
           display: 'flex',
           alignItems: 'center',
           gap: '0.75rem',
-          fontSize: '1rem',
-          fontWeight: 500,
-          letterSpacing: '0.5px'
+          fontSize: '1.1rem'
         }}
-        whileHover={{ 
-          background: 'rgba(255, 255, 255, 0.1)',
-          borderColor: 'rgba(255, 255, 255, 0.2)',
-          transform: 'translateY(-2px)'
-        }}
+        whileHover={{ borderColor: 'rgba(255,255,255,0.3)' }}
         whileTap={{ scale: 0.98 }}
-        transition={{ duration: 0.2 }}
       >
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="2">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="2.5">
           <path d="M19 12H5M12 19l-7-7 7-7" strokeLinecap="round" strokeLinejoin="round"/>
         </svg>
         Back
       </motion.button>
 
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, ease: "easeOut" }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.8 }}
         style={{ position: 'relative', zIndex: 10 }}
       >
         <h1 style={{ 
-          fontSize: 'clamp(3.5rem, 7vw, 6rem)', 
-          marginBottom: '1rem',
+          fontSize: 'clamp(3rem, 6vw, 5rem)', 
+          marginBottom: '0.5rem',
           fontWeight: 300,
-          letterSpacing: '-0.03em',
-          color: '#ffffff',
-          lineHeight: 1.1
+          letterSpacing: '-0.02em',
+          color: '#ffffff'
         }}>
-          Project<br />Timeline
+          Project Timeline
         </h1>
         
         <p style={{ 
           fontSize: '1.2rem', 
-          opacity: 0.6,
+          opacity: 0.7,
           marginBottom: '4rem',
-          maxWidth: '500px',
-          color: '#ffffff',
-          lineHeight: 1.6,
-          fontWeight: 300
+          maxWidth: '600px',
+          color: '#ffffff'
         }}>
-          Visualizing development milestones with real-time transmission status
+          Development progress visualized through minimalist timeline with real-time status indicators
         </p>
 
         {/* Main Timeline Container */}
@@ -244,126 +228,143 @@ export default function TimelinePage() {
           position: 'relative',
           maxWidth: '1200px',
           margin: '0 auto',
-          padding: '3rem 0'
+          padding: '2rem 0'
         }}>
           
           {/* Timeline Steps */}
           {timelineSteps.map((step, index) => (
             <motion.div
               key={index}
-              initial={{ opacity: 0, x: -30 }}
+              initial={{ opacity: 0, x: -20 }}
               animate={{ 
                 opacity: 1, 
                 x: 0,
-                transition: { 
-                  delay: index * 0.15,
-                  duration: 0.6,
-                  ease: "easeOut"
-                }
+                transition: { delay: index * 0.1 }
               }}
               style={{
                 display: 'flex',
                 alignItems: 'center',
-                marginBottom: '3rem',
+                marginBottom: '4rem',
                 position: 'relative',
                 minHeight: '100px'
               }}
             >
-              {/* Step Number - Modern Design */}
+              {/* Kolom 1: Angka */}
               <div style={{
-                width: '140px',
+                width: '150px',
                 display: 'flex',
                 justifyContent: 'flex-end',
                 paddingRight: '40px'
               }}>
                 <div style={{
-                  fontSize: '1.4rem',
+                  fontSize: '1.6rem',
                   fontFamily: 'monospace',
-                  fontWeight: 400,
+                  fontWeight: 500,
                   color: '#ffffff',
-                  opacity: step.status === 'pending' ? 0.4 : 0.8,
-                  letterSpacing: '2px'
+                  opacity: step.status === 'pending' ? 0.4 : 1
                 }}>
                   {String(index + 1).padStart(2, '0')}
                 </div>
               </div>
 
-              {/* Dotted Line Connection */}
+              {/* Kolom 2: Titik Vertikal + Horizontal + Indikator */}
               <div style={{
                 position: 'relative',
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
-                width: '100px',
+                width: '120px',
                 height: '100px'
               }}>
-                {/* Vertical Dots */}
+                {/* Titik Vertikal */}
                 <div style={{
                   color: '#ffffff',
-                  fontSize: '0.9rem',
-                  letterSpacing: '6px',
+                  fontSize: '1rem',
+                  letterSpacing: '4px',
                   fontFamily: 'monospace',
                   writingMode: 'vertical-rl',
                   textOrientation: 'mixed',
                   height: '100%',
-                  opacity: 0.3,
+                  opacity: 0.8,
                   position: 'absolute',
                   left: '50%',
                   transform: 'translateX(-50%)'
                 }}>
-                  ••••••••••••••••••••••
+                  ....................
                 </div>
 
-                {/* Modern Transmitter at Connection Point */}
+                {/* Modern Transmitter or Indicator */}
                 <div style={{
                   position: 'absolute',
                   top: '50%',
                   left: '50%',
                   transform: 'translate(-50%, -50%)',
-                  zIndex: 2
+                  zIndex: 2,
+                  backgroundColor: '#000000',
+                  padding: '5px',
+                  borderRadius: '50%'
                 }}>
-                  <ModernTransmitter isActive={step.status === 'current'} />
+                  {step.status === 'current' ? (
+                    <ModernTransmitter />
+                  ) : step.status === 'completed' ? (
+                    <div style={{
+                      width: '20px',
+                      height: '20px',
+                      borderRadius: '50%',
+                      backgroundColor: '#ffffff',
+                      border: '4px solid #000000',
+                      boxShadow: '0 0 15px rgba(255,255,255,0.8)'
+                    }} />
+                  ) : (
+                    <div style={{
+                      width: '20px',
+                      height: '20px',
+                      borderRadius: '50%',
+                      backgroundColor: '#ffffff',
+                      border: '4px solid #000000',
+                      boxShadow: '0 0 15px rgba(255,255,255,0.8)',
+                      opacity: 0.5
+                    }} />
+                  )}
                 </div>
 
-                {/* Horizontal Dots to Content */}
+                {/* Titik Horizontal */}
                 <div style={{
                   position: 'absolute',
                   top: '50%',
                   left: '50%',
-                  width: '80px',
+                  width: '60px',
                   transform: 'translateY(-50%)'
                 }}>
                   <div style={{
                     color: '#ffffff',
-                    fontSize: '0.9rem',
-                    letterSpacing: '6px',
+                    fontSize: '1rem',
+                    letterSpacing: '4px',
                     fontFamily: 'monospace',
-                    opacity: 0.3
+                    opacity: 0.8
                   }}>
-                    ••••••••••••••••
+                    ................
                   </div>
                 </div>
               </div>
 
-              {/* Content Area */}
+              {/* Kolom 3: Konten */}
               <div style={{
                 flex: 1,
-                marginLeft: '80px',
-                paddingTop: '2px' // Fine-tune alignment
+                marginLeft: '80px'
               }}>
-                {/* Title with Status Badge */}
+                {/* Judul */}
                 <div style={{
                   display: 'flex',
                   alignItems: 'center',
                   gap: '1.5rem',
-                  marginBottom: '0.5rem'
+                  marginBottom: '0.75rem'
                 }}>
                   <h3 style={{
-                    fontSize: '2.2rem',
-                    fontWeight: 300,
+                    fontSize: '2rem',
+                    fontWeight: 400,
                     margin: 0,
-                    color: '#ffffff',
-                    letterSpacing: '-0.01em'
+                    color: '#ffffff'
                   }}>
                     {step.title}
                   </h3>
@@ -374,172 +375,73 @@ export default function TimelinePage() {
                         display: 'flex',
                         alignItems: 'center',
                         gap: '0.5rem',
-                        padding: '0.4rem 1.2rem',
-                        background: 'linear-gradient(135deg, rgba(0, 255, 157, 0.1), rgba(0, 200, 255, 0.1))',
-                        backdropFilter: 'blur(10px)',
-                        border: '1px solid rgba(0, 255, 157, 0.2)',
+                        padding: '0.5rem 1.25rem',
+                        backgroundColor: 'rgba(255,255,255,0.15)',
                         borderRadius: '20px',
-                        fontSize: '0.85rem',
-                        color: '#00ff9d',
-                        fontWeight: 500,
-                        letterSpacing: '1px'
+                        fontSize: '1rem',
+                        color: '#ffffff',
+                        fontWeight: 500
                       }}
-                      initial={{ scale: 0.9, opacity: 0 }}
-                      animate={{ scale: 1, opacity: 1 }}
-                      transition={{ 
-                        delay: 0.5,
-                        duration: 0.3 
-                      }}
-                      whileHover={{ scale: 1.05 }}
+                      animate={{ opacity: [1, 0.7, 1] }}
+                      transition={{ duration: 1, repeat: Infinity }}
                     >
-                      <motion.div
-                        style={{
-                          width: '8px',
-                          height: '8px',
-                          borderRadius: '50%',
-                          background: 'radial-gradient(circle, #00ff9d, #00ccff)',
-                          boxShadow: '0 0 10px #00ff9d'
-                        }}
-                        animate={{
-                          scale: [1, 1.2, 1],
-                          opacity: [1, 0.7, 1]
-                        }}
-                        transition={{
-                          duration: 1.5,
-                          repeat: Infinity
-                        }}
-                      />
+                      <div style={{
+                        width: '10px',
+                        height: '10px',
+                        borderRadius: '50%',
+                        backgroundColor: '#00ff9d',
+                        boxShadow: '0 0 8px #00ff9d'
+                      }} />
                       TRANSMITTING
                     </motion.div>
                   )}
                 </div>
                 
-                {/* Date and Status */}
+                {/* Tanggal dan Status */}
                 <div style={{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '1.5rem',
-                  marginTop: '0.5rem'
+                  gap: '1.5rem'
                 }}>
                   <span style={{
-                    fontSize: '1.1rem',
+                    fontSize: '1.3rem',
                     fontFamily: 'monospace',
-                    fontWeight: 400,
+                    fontWeight: 500,
                     color: '#ffffff',
-                    opacity: 0.7,
-                    letterSpacing: '1px'
+                    opacity: 0.9
                   }}>
                     {step.date}
                   </span>
                   
-                  <div style={{
-                    height: '1px',
-                    width: '40px',
-                    background: 'rgba(255, 255, 255, 0.2)'
-                  }} />
-                  
                   <span style={{ 
-                    fontSize: '1.1rem', 
+                    fontSize: '1.3rem', 
                     color: '#ffffff',
-                    fontWeight: 400,
-                    opacity: step.status === 'pending' ? 0.4 : 0.8
+                    fontWeight: 500,
+                    opacity: step.status === 'pending' ? 0.6 : 0.9
                   }}>
                     {step.status === 'completed' && 'Completed'}
-                    {step.status === 'current' && 'Live'}
+                    {step.status === 'current' && 'In Progress'}
                     {step.status === 'pending' && 'Upcoming'}
                   </span>
                 </div>
               </div>
 
-              {/* Modern Arrow for Current Step */}
+              {/* Southeast Arrow */}
               {step.status === 'current' && (
                 <motion.div
                   style={{
                     marginLeft: '2rem',
-                    opacity: 0.8
+                    opacity: 1
                   }}
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 0.8, x: 0 }}
-                  transition={{ delay: 0.8 }}
-                  whileHover={{ opacity: 1 }}
+                  animate={{ x: [0, 8, 0] }}
+                  transition={{ duration: 2, repeat: Infinity }}
                 >
-                  <div style={{
-                    padding: '0.8rem',
-                    background: 'rgba(255, 255, 255, 0.05)',
-                    border: '1px solid rgba(255, 255, 255, 0.1)',
-                    borderRadius: '8px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
-                  }}>
-                    <SouthEastArrow />
-                  </div>
+                  <SouthEastArrow />
                 </motion.div>
               )}
             </motion.div>
           ))}
         </div>
-
-        {/* Footer Note - Modern Style */}
-        <motion.div
-          style={{
-            marginTop: '5rem',
-            paddingTop: '3rem',
-            borderTop: '1px solid rgba(255, 255, 255, 0.1)',
-            textAlign: 'center'
-          }}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1 }}
-        >
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '1rem',
-            fontSize: '0.9rem',
-            color: 'rgba(255, 255, 255, 0.5)',
-            fontWeight: 300,
-            letterSpacing: '1px'
-          }}>
-            <motion.div
-              style={{
-                width: '6px',
-                height: '6px',
-                borderRadius: '50%',
-                background: 'radial-gradient(circle, #00ff9d, transparent)',
-                boxShadow: '0 0 10px #00ff9d'
-              }}
-              animate={{
-                scale: [1, 1.5, 1],
-                opacity: [1, 0.5, 1]
-              }}
-              transition={{
-                duration: 2,
-                repeat: Infinity
-              }}
-            />
-            REAL-TIME UPDATES • MINIMALIST DESIGN • ACTIVE TRANSMISSION
-            <motion.div
-              style={{
-                width: '6px',
-                height: '6px',
-                borderRadius: '50%',
-                background: 'radial-gradient(circle, #00ff9d, transparent)',
-                boxShadow: '0 0 10px #00ff9d'
-              }}
-              animate={{
-                scale: [1, 1.5, 1],
-                opacity: [1, 0.5, 1]
-              }}
-              transition={{
-                duration: 2,
-                repeat: Infinity,
-                delay: 1
-              }}
-            />
-          </div>
-        </motion.div>
       </motion.div>
     </div>
   );
