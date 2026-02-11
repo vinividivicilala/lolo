@@ -155,11 +155,34 @@ export default function TimelinePage() {
         {/* Main Timeline Container */}
         <div style={{
           position: 'relative',
-          maxWidth: '1000px',
+          maxWidth: '1200px',
           margin: '0 auto',
           padding: '2rem 0'
         }}>
           
+          {/* Garis Timeline Utama dari Titik-titik Vertikal */}
+          <div style={{
+            position: 'absolute',
+            left: '200px',
+            top: '0',
+            bottom: '0',
+            display: 'flex',
+            justifyContent: 'center'
+          }}>
+            <div style={{
+              color: '#ffffff',
+              fontSize: '1.4rem',
+              letterSpacing: '4px',
+              fontFamily: 'monospace',
+              writingMode: 'vertical-rl',
+              textOrientation: 'mixed',
+              height: '100%',
+              opacity: 0.8
+            }}>
+              ..........................................................................................
+            </div>
+          </div>
+
           {/* Timeline Steps */}
           {timelineSteps.map((step, index) => (
             <motion.div
@@ -172,23 +195,21 @@ export default function TimelinePage() {
               }}
               style={{
                 display: 'flex',
-                marginBottom: '3rem',
+                alignItems: 'center',
+                marginBottom: '4rem',
                 position: 'relative',
-                minHeight: '100px'
+                minHeight: '120px'
               }}
             >
-              {/* Kolom 1: Nomor Step TANPA titik */}
+              {/* Nomor Step */}
               <div style={{
-                width: '100px',
+                width: '200px',
                 display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'flex-end',
-                position: 'relative',
-                paddingRight: '2rem'
+                justifyContent: 'flex-end',
+                paddingRight: '3rem'
               }}>
-                {/* Nomor Step */}
                 <div style={{
-                  fontSize: '1.5rem',
+                  fontSize: '1.8rem',
                   opacity: step.status === 'pending' ? 0.4 : 1,
                   fontFamily: 'monospace',
                   fontWeight: 500,
@@ -198,91 +219,65 @@ export default function TimelinePage() {
                 </div>
               </div>
 
-              {/* Kolom 2: Garis vertikal utama titik-titik */}
+              {/* Indikator di Garis Timeline */}
               <div style={{
-                width: '60px',
+                position: 'relative',
+                width: '40px',
                 display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                position: 'relative'
-              }}>
-                {/* Titik-titik vertikal penuh */}
-                <div style={{
-                  color: '#ffffff',
-                  fontSize: '1.2rem',
-                  letterSpacing: '3px',
-                  fontFamily: 'monospace',
-                  writingMode: 'vertical-rl',
-                  textOrientation: 'mixed',
-                  height: '100%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  opacity: 0.8
-                }}>
-                  ................
-                </div>
-              </div>
-
-              {/* Kolom 3: Indikator Status di tengah garis vertikal */}
-              <div style={{
-                position: 'absolute',
-                left: '160px', // 100px (kolom1) + 60px (kolom2)
-                top: '50%',
-                transform: 'translateY(-50%)',
-                zIndex: 2
+                justifyContent: 'center',
+                alignItems: 'center'
               }}>
                 {step.status === 'current' ? (
-                  // Pemancar berkedip di tengah garis vertikal
+                  // Pemancar berkedip di garis timeline
                   <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    width: '60px',
-                    height: '60px',
+                    position: 'absolute',
+                    zIndex: 2,
                     backgroundColor: '#000000',
-                    borderRadius: '50%'
+                    padding: '5px'
                   }}>
                     <TransmitterIcon />
                   </div>
                 ) : step.status === 'completed' ? (
-                  // Dot solid di tengah garis vertikal
+                  // Bulatan putih di garis timeline
                   <div style={{
-                    width: '20px',
-                    height: '20px',
+                    width: '24px',
+                    height: '24px',
                     borderRadius: '50%',
                     backgroundColor: '#ffffff',
                     border: '4px solid #000000',
-                    boxShadow: '0 0 15px rgba(255,255,255,0.7)'
+                    boxShadow: '0 0 20px rgba(255,255,255,0.8)',
+                    position: 'absolute',
+                    zIndex: 2
                   }} />
                 ) : (
-                  // Titik-titik di tengah garis vertikal untuk pending
+                  // Titik-titik kecil untuk pending
                   <div style={{
                     color: '#ffffff',
                     fontSize: '1.2rem',
                     letterSpacing: '3px',
                     fontFamily: 'monospace',
                     backgroundColor: '#000000',
-                    padding: '5px 10px',
-                    opacity: 0.6
+                    padding: '5px',
+                    opacity: 0.6,
+                    position: 'absolute',
+                    zIndex: 2
                   }}>
-                    ......
+                    ...
                   </div>
                 )}
               </div>
 
-              {/* Kolom 4: Titik-titik horizontal dari tengah ke judul */}
+              {/* Garis Horizontal Titik-titik ke Konten */}
               <div style={{
                 width: '60px',
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'center',
-                paddingTop: '25px'
+                justifyContent: 'center'
               }}>
                 <div style={{
                   color: '#ffffff',
-                  fontSize: '1.2rem',
-                  letterSpacing: '3px',
+                  fontSize: '1.4rem',
+                  letterSpacing: '4px',
                   fontFamily: 'monospace',
                   opacity: step.status === 'current' ? 0.9 : 0.7
                 }}>
@@ -290,13 +285,12 @@ export default function TimelinePage() {
                 </div>
               </div>
 
-              {/* Kolom 5: Konten Step */}
+              {/* Konten Step */}
               <div style={{
                 flex: 1,
-                paddingLeft: '1rem',
-                paddingTop: '25px'
+                paddingLeft: '1rem'
               }}>
-                {/* Baris 1: Judul */}
+                {/* Judul */}
                 <div style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -304,7 +298,7 @@ export default function TimelinePage() {
                   marginBottom: '0.75rem'
                 }}>
                   <h3 style={{
-                    fontSize: '2rem',
+                    fontSize: '2.2rem',
                     fontWeight: 400,
                     margin: 0,
                     opacity: step.status === 'pending' ? 0.5 : 1,
@@ -319,18 +313,19 @@ export default function TimelinePage() {
                         display: 'flex',
                         alignItems: 'center',
                         gap: '0.5rem',
-                        padding: '0.5rem 1.25rem',
+                        padding: '0.5rem 1.5rem',
                         backgroundColor: 'rgba(255,255,255,0.15)',
-                        borderRadius: '20px',
-                        fontSize: '1rem',
-                        color: '#ffffff'
+                        borderRadius: '25px',
+                        fontSize: '1.1rem',
+                        color: '#ffffff',
+                        fontWeight: 500
                       }}
                       animate={{ opacity: [1, 0.7, 1] }}
                       transition={{ duration: 1, repeat: Infinity }}
                     >
                       <div style={{
-                        width: '10px',
-                        height: '10px',
+                        width: '12px',
+                        height: '12px',
                         borderRadius: '50%',
                         backgroundColor: '#00ff00'
                       }} />
@@ -339,32 +334,30 @@ export default function TimelinePage() {
                   )}
                 </div>
                 
-                {/* Baris 2: Garis pemisah dengan titik-titik */}
+                {/* Garis Pemisah Titik-titik */}
                 <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
                   marginBottom: '0.75rem',
                   opacity: 0.8
                 }}>
                   <div style={{
                     color: '#ffffff',
-                    fontSize: '1rem',
-                    letterSpacing: '4px',
+                    fontSize: '1.2rem',
+                    letterSpacing: '5px',
                     fontFamily: 'monospace'
                   }}>
-                    ........................
+                    ..........................
                   </div>
                 </div>
                 
-                {/* Baris 3: Tanggal dan Status */}
+                {/* Tanggal dan Status */}
                 <div style={{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '1rem',
+                  gap: '1.5rem',
                   opacity: step.status === 'pending' ? 0.4 : 0.9
                 }}>
                   <span style={{
-                    fontSize: '1.2rem',
+                    fontSize: '1.4rem',
                     fontFamily: 'monospace',
                     fontWeight: 500,
                     color: '#ffffff'
@@ -372,47 +365,35 @@ export default function TimelinePage() {
                     {step.date}
                   </span>
                   
+                  <div style={{
+                    color: '#ffffff',
+                    fontSize: '1.2rem',
+                    letterSpacing: '4px',
+                    fontFamily: 'monospace',
+                    opacity: step.status === 'current' ? 0.9 : 0.7
+                  }}>
+                    ................
+                  </div>
+                  
                   {step.status === 'completed' && (
-                    <>
-                      <div style={{
-                        color: '#ffffff',
-                        fontSize: '1rem',
-                        letterSpacing: '3px',
-                        fontFamily: 'monospace',
-                        opacity: 0.7
-                      }}>
-                        ................
-                      </div>
-                      <span style={{ 
-                        fontSize: '1.2rem', 
-                        color: '#ffffff',
-                        fontWeight: 500 
-                      }}>
-                        Completed
-                      </span>
-                    </>
+                    <span style={{ 
+                      fontSize: '1.4rem', 
+                      color: '#ffffff',
+                      fontWeight: 500 
+                    }}>
+                      Completed
+                    </span>
                   )}
                   
                   {step.status === 'pending' && (
-                    <>
-                      <div style={{
-                        color: '#ffffff',
-                        fontSize: '1rem',
-                        letterSpacing: '3px',
-                        fontFamily: 'monospace',
-                        opacity: 0.5
-                      }}>
-                        ................
-                      </div>
-                      <span style={{ 
-                        fontSize: '1.2rem', 
-                        opacity: 0.6, 
-                        color: '#ffffff',
-                        fontWeight: 500 
-                      }}>
-                        Upcoming
-                      </span>
-                    </>
+                    <span style={{ 
+                      fontSize: '1.4rem', 
+                      opacity: 0.6, 
+                      color: '#ffffff',
+                      fontWeight: 500 
+                    }}>
+                      Upcoming
+                    </span>
                   )}
                 </div>
               </div>
@@ -422,10 +403,9 @@ export default function TimelinePage() {
                 <motion.div
                   style={{
                     marginLeft: '2rem',
-                    marginTop: '25px',
                     opacity: 0.9
                   }}
-                  animate={{ x: [0, 8, 0] }}
+                  animate={{ x: [0, 10, 0] }}
                   transition={{ duration: 2, repeat: Infinity }}
                 >
                   <SouthEastArrow />
