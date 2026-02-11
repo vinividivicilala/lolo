@@ -130,8 +130,6 @@ export default function TimelinePage() {
 
   // Admin Controls
   const AdminControls = ({ step }) => {
-    const adminEmail = "faridardiansyah061@gmail.com";
-
     return (
       <div style={{
         position: 'absolute',
@@ -173,43 +171,67 @@ export default function TimelinePage() {
     );
   };
 
-  // Halaman Hitam Kosong
-  const BlackPage = ({ step, isOpen, onClose }) => {
+  // Halaman Kedua - Muncul di atas halaman utama
+  const SecondPage = ({ step, isOpen, onClose }) => {
     if (!isOpen) return null;
 
     return (
       <div style={{
         position: 'fixed',
-        top: '50%',
+        top: 0,
         left: 0,
         right: 0,
         bottom: 0,
         backgroundColor: '#000000',
-        borderTop: '1px solid rgba(255,255,255,0.1)',
-        zIndex: 1000,
+        zIndex: 9999,
         overflow: 'hidden'
       }}>
-        {/* Background Hitam Total */}
+        {/* Background Grid - Sama seperti halaman utama */}
         <div style={{
           position: 'absolute',
           top: 0,
           left: 0,
           right: 0,
           bottom: 0,
-          backgroundColor: '#000000'
+          backgroundImage: 'linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px)',
+          backgroundSize: '50px 50px',
+          opacity: 0.3
         }} />
-        
-        {/* Nomor Halaman - Kecil di pojok */}
+
+        {/* Halaman Utama Link - Sama persis */}
+        <div style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: '15px',
+          margin: '40px',
+          position: 'relative',
+          zIndex: 10
+        }}>
+          <NorthWestArrow />
+          <span style={{
+            fontSize: '24px',
+            fontWeight: 500,
+            letterSpacing: '2px',
+            color: '#ffffff'
+          }}>
+            HALAMAN UTAMA
+          </span>
+        </div>
+
+        {/* Nomor Halaman */}
         <div style={{
           position: 'absolute',
-          top: '20px',
-          left: '20px',
-          fontSize: '14px',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          fontSize: '120px',
           fontFamily: 'monospace',
-          color: 'rgba(255,255,255,0.3)',
-          zIndex: 1002
+          fontWeight: 600,
+          color: 'rgba(255,255,255,0.05)',
+          zIndex: 5,
+          letterSpacing: '-5px'
         }}>
-          PAGE {String(step.id).padStart(2, '0')}
+          {String(step.id).padStart(2, '0')}
         </div>
 
         {/* Tombol Close */}
@@ -217,22 +239,21 @@ export default function TimelinePage() {
           onClick={onClose}
           style={{
             position: 'absolute',
-            top: '20px',
-            right: '20px',
-            width: '32px',
-            height: '32px',
+            top: '40px',
+            right: '40px',
+            width: '48px',
+            height: '48px',
             borderRadius: '50%',
             background: 'rgba(255,255,255,0.1)',
             border: '1px solid rgba(255,255,255,0.2)',
             color: '#ffffff',
-            fontSize: '18px',
+            fontSize: '24px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             cursor: 'pointer',
-            zIndex: 1002
+            zIndex: 100
           }}
-          onClick={onClose}
         >
           ×
         </button>
@@ -263,7 +284,7 @@ export default function TimelinePage() {
           background: '#000000',
           border: '1px solid #00ff9d',
           borderRadius: '4px',
-          zIndex: 2000,
+          zIndex: 10000,
           color: '#ffffff',
           fontSize: '14px',
           borderLeft: '4px solid #00ff9d'
@@ -284,41 +305,25 @@ export default function TimelinePage() {
         opacity: 0.3
       }} />
 
-      {/* Halaman Utama Link */}
-      <a 
-        href="/"
-        style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: '15px',
-          marginBottom: '40px',
-          padding: '12px 24px',
-          border: '1px solid rgba(255,255,255,0.1)',
-          borderRadius: '4px',
-          textDecoration: 'none',
-          color: '#ffffff',
-          position: 'relative',
-          zIndex: 10
-        }}
-        onMouseEnter={(e) => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.3)'}
-        onMouseLeave={(e) => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'}
-      >
+      {/* Halaman Utama - Tanpa border box dan teks tambahan */}
+      <div style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: '15px',
+        marginBottom: '40px',
+        position: 'relative',
+        zIndex: 10
+      }}>
         <NorthWestArrow />
         <span style={{
           fontSize: '24px',
           fontWeight: 500,
-          letterSpacing: '2px'
+          letterSpacing: '2px',
+          color: '#ffffff'
         }}>
           HALAMAN UTAMA
         </span>
-        <span style={{
-          fontSize: '14px',
-          opacity: 0.5,
-          color: '#ffffff'
-        }}>
-          beranda
-        </span>
-      </a>
+      </div>
 
       <div style={{ position: 'relative', zIndex: 10 }}>
         <h1 style={{ 
@@ -369,7 +374,7 @@ export default function TimelinePage() {
                 position: 'relative'
               }}>
                 <div
-                  onClick={() => setSelectedStep(selectedStep === step.id ? null : step.id)}
+                  onClick={() => setSelectedStep(step.id)}
                   style={{
                     cursor: 'pointer',
                     position: 'relative',
@@ -385,23 +390,19 @@ export default function TimelinePage() {
                     width: '100px',
                     height: '100px',
                     backgroundColor: '#000000',
-                    boxShadow: selectedStep === step.id 
-                      ? '0 0 50px rgba(0,0,0,1), 0 0 100px rgba(0,0,0,0.9)'
-                      : '0 0 30px rgba(0,0,0,0.8)',
+                    boxShadow: '0 0 50px rgba(0,0,0,0.8)',
                     borderRadius: '50%',
-                    opacity: 0.9,
-                    transition: 'box-shadow 0.2s ease'
+                    opacity: 0.9
                   }} />
                   
                   <div style={{
                     fontSize: '24px',
                     fontFamily: 'monospace',
                     fontWeight: 500,
-                    color: selectedStep === step.id ? '#ffffff' : 'rgba(255,255,255,0.9)',
+                    color: '#ffffff',
                     opacity: step.status === 'pending' ? 0.5 : 1,
                     position: 'relative',
-                    zIndex: 2,
-                    transition: 'color 0.2s ease'
+                    zIndex: 2
                   }}>
                     {String(index + 1).padStart(2, '0')}
                   </div>
@@ -567,9 +568,9 @@ export default function TimelinePage() {
         </div>
       </div>
 
-      {/* Black Page - Setengah Layar Bawah Hitam Kosong */}
+      {/* Second Page - Full screen di atas halaman utama */}
       {selectedStep && (
-        <BlackPage 
+        <SecondPage 
           step={timelineSteps.find(s => s.id === selectedStep)} 
           isOpen={selectedStep !== null}
           onClose={() => setSelectedStep(null)}
