@@ -110,18 +110,7 @@ export default function CalendarPage(): React.JSX.Element {
   const addEventModalRef = useRef<HTMLDivElement>(null);
   const eventDetailsModalRef = useRef<HTMLDivElement>(null);
   
-  // Warna dan label preset
-  const colorOptions = [
-    { value: "#3B82F6", label: "Blue", name: "Biru" },
-    { value: "#EF4444", label: "Red", name: "Merah" },
-    { value: "#10B981", label: "Green", name: "Hijau" },
-    { value: "#F59E0B", label: "Yellow", name: "Kuning" },
-    { value: "#8B5CF6", label: "Purple", name: "Ungu" },
-    { value: "#EC4899", label: "Pink", name: "Pink" },
-    { value: "#6366F1", label: "Indigo", name: "Indigo" },
-    { value: "#F97316", label: "Orange", name: "Oranye" }
-  ];
-  
+  // Label preset saja (warna dihapus)
   const labelOptions = [
     { value: "Meeting", label: "Meeting" },
     { value: "Event", label: "Event" },
@@ -1060,7 +1049,7 @@ export default function CalendarPage(): React.JSX.Element {
         </div>
       </div>
       
-      {/* Modal Add/Edit Event */}
+      {/* Modal Add/Edit Event - DENGAN NORTH WEST ARROW BESAR & TANPA WARNA */}
       <AnimatePresence>
         {showAddEventModal && (
           <motion.div
@@ -1102,7 +1091,7 @@ export default function CalendarPage(): React.JSX.Element {
                 border: '1px solid rgba(255, 255, 255, 0.2)'
               }}
             >
-              {/* Header Modal */}
+              {/* Header Modal dengan North West Arrow BESAR */}
               <div style={{
                 padding: isMobile ? '1.5rem' : '2rem',
                 borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
@@ -1111,7 +1100,20 @@ export default function CalendarPage(): React.JSX.Element {
                 alignItems: 'center',
                 flexShrink: 0
               }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+                  {/* North West Arrow Icon BESAR */}
+                  <svg 
+                    width={isMobile ? "32" : "40"} 
+                    height={isMobile ? "32" : "40"} 
+                    viewBox="0 0 24 24" 
+                    fill="none" 
+                    stroke="white" 
+                    strokeWidth="2"
+                  >
+                    <path d="M7 17L17 7"/>
+                    <path d="M7 7H17V17"/>
+                  </svg>
+                  
                   <h2 style={{
                     color: 'white',
                     fontSize: isMobile ? '1.6rem' : '2rem',
@@ -1122,18 +1124,6 @@ export default function CalendarPage(): React.JSX.Element {
                   }}>
                     {isEditingEvent ? 'Edit Kegiatan' : 'Tambah Kegiatan'}
                   </h2>
-                  <div style={{
-                    backgroundColor: 'transparent',
-                    color: 'white',
-                    fontSize: '1rem',
-                    padding: '0.4rem 1rem',
-                    borderRadius: '20px',
-                    border: '1px solid rgba(255, 255, 255, 0.3)',
-                    fontWeight: '400',
-                    fontFamily: 'Helvetica, Arial, sans-serif'
-                  }}>
-                    {formatDate(eventForm.date)}
-                  </div>
                 </div>
                 
                 <motion.button
@@ -1162,7 +1152,7 @@ export default function CalendarPage(): React.JSX.Element {
                 </motion.button>
               </div>
               
-              {/* Form Content */}
+              {/* Form Content - TANPA PILIHAN WARNA */}
               <div style={{
                 flex: 1,
                 overflowY: 'auto',
@@ -1302,51 +1292,6 @@ export default function CalendarPage(): React.JSX.Element {
                   </div>
                 </div>
                 
-                {/* Color Selection */}
-                <div>
-                  <label style={{
-                    color: 'rgba(255, 255, 255, 0.8)',
-                    fontSize: '1.1rem',
-                    marginBottom: '0.8rem',
-                    display: 'block',
-                    fontFamily: 'Helvetica, Arial, sans-serif',
-                    fontWeight: '400'
-                  }}>
-                    Warna
-                  </label>
-                  <div style={{
-                    display: 'flex',
-                    flexWrap: 'wrap',
-                    gap: '0.5rem'
-                  }}>
-                    {colorOptions.map(color => (
-                      <motion.button
-                        key={color.value}
-                        type="button"
-                        onClick={() => handleFormInputChange('color', color.value)}
-                        style={{
-                          width: '45px',
-                          height: '45px',
-                          backgroundColor: color.value,
-                          border: eventForm.color === color.value ? '2px solid white' : '1px solid rgba(255, 255, 255, 0.3)',
-                          borderRadius: '8px',
-                          cursor: 'pointer',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          fontSize: '1rem',
-                          color: 'white',
-                          fontWeight: '400',
-                          fontFamily: 'Helvetica, Arial, sans-serif'
-                        }}
-                        whileHover={{ scale: 1.05 }}
-                      >
-                        {eventForm.color === color.value && '✓'}
-                      </motion.button>
-                    ))}
-                  </div>
-                </div>
-                
                 {/* Label Selection */}
                 <div>
                   <label style={{
@@ -1357,7 +1302,7 @@ export default function CalendarPage(): React.JSX.Element {
                     fontFamily: 'Helvetica, Arial, sans-serif',
                     fontWeight: '400'
                   }}>
-                    Label
+                    Kategori
                   </label>
                   <div style={{
                     display: 'flex',
@@ -1389,40 +1334,39 @@ export default function CalendarPage(): React.JSX.Element {
                   </div>
                 </div>
                 
-                {/* User Info */}
+                {/* User Info dengan North West Arrow */}
                 {user && (
                   <div style={{
                     padding: '1.2rem',
-                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                    backgroundColor: 'transparent',
                     borderRadius: '10px',
-                    border: '1px solid rgba(255, 255, 255, 0.1)'
+                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between'
                   }}>
                     <div style={{
                       display: 'flex',
                       alignItems: 'center',
-                      gap: '1rem',
-                      marginBottom: '0.5rem'
+                      gap: '1rem'
                     }}>
-                      <div style={{
-                        width: '40px',
-                        height: '40px',
-                        borderRadius: '50%',
-                        backgroundColor: 'transparent',
-                        border: '1px solid rgba(255, 255, 255, 0.3)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontSize: '1rem',
-                        fontWeight: '500',
-                        color: 'white',
-                        fontFamily: 'Helvetica, Arial, sans-serif'
-                      }}>
-                        {userDisplayName.charAt(0).toUpperCase()}
-                      </div>
+                      {/* North West Arrow Icon untuk User */}
+                      <svg 
+                        width="24" 
+                        height="24" 
+                        viewBox="0 0 24 24" 
+                        fill="none" 
+                        stroke="white" 
+                        strokeWidth="2"
+                      >
+                        <path d="M7 17L17 7"/>
+                        <path d="M7 7H17V17"/>
+                      </svg>
+                      
                       <div>
                         <div style={{
                           color: 'white',
-                          fontSize: '1rem',
+                          fontSize: '1.1rem',
                           fontWeight: '500',
                           fontFamily: 'Helvetica, Arial, sans-serif'
                         }}>
@@ -1433,9 +1377,20 @@ export default function CalendarPage(): React.JSX.Element {
                           fontSize: '0.9rem',
                           fontFamily: 'Helvetica, Arial, sans-serif'
                         }}>
-                          {isAdmin ? 'Admin' : 'User'} • {userEmail}
+                          {userEmail}
                         </div>
                       </div>
+                    </div>
+                    
+                    <div style={{
+                      color: 'rgba(255, 255, 255, 0.8)',
+                      fontSize: '0.9rem',
+                      fontFamily: 'Helvetica, Arial, sans-serif',
+                      padding: '0.3rem 0.8rem',
+                      border: '1px solid rgba(255, 255, 255, 0.2)',
+                      borderRadius: '15px'
+                    }}>
+                      {isAdmin ? 'Admin' : 'User'}
                     </div>
                   </div>
                 )}
@@ -1771,36 +1726,30 @@ export default function CalendarPage(): React.JSX.Element {
                     }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                         <div style={{
-                          width: '40px',
-                          height: '40px',
-                          borderRadius: '50%',
-                          backgroundColor: 'transparent',
-                          border: '1px solid rgba(255, 255, 255, 0.3)',
                           display: 'flex',
                           alignItems: 'center',
-                          justifyContent: 'center',
-                          fontSize: '1.2rem',
-                          fontWeight: '500',
-                          color: 'white',
-                          fontFamily: 'Helvetica, Arial, sans-serif'
+                          gap: '0.8rem'
                         }}>
-                          {selectedEvent.createdBy.charAt(0).toUpperCase()}
-                        </div>
-                        <div>
-                          <div style={{
-                            color: 'white',
-                            fontSize: '1.2rem',
-                            fontWeight: '500',
-                            fontFamily: 'Helvetica, Arial, sans-serif'
-                          }}>
-                            {selectedEvent.createdBy}
-                          </div>
-                          <div style={{
-                            color: 'rgba(255, 255, 255, 0.7)',
-                            fontSize: '1rem',
-                            fontFamily: 'Helvetica, Arial, sans-serif'
-                          }}>
-                            {selectedEvent.createdByEmail}
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
+                            <path d="M7 17L17 7"/>
+                            <path d="M7 7H17V17"/>
+                          </svg>
+                          <div>
+                            <div style={{
+                              color: 'white',
+                              fontSize: '1.2rem',
+                              fontWeight: '500',
+                              fontFamily: 'Helvetica, Arial, sans-serif'
+                            }}>
+                              {selectedEvent.createdBy}
+                            </div>
+                            <div style={{
+                              color: 'rgba(255, 255, 255, 0.7)',
+                              fontSize: '1rem',
+                              fontFamily: 'Helvetica, Arial, sans-serif'
+                            }}>
+                              {selectedEvent.createdByEmail}
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -1809,7 +1758,7 @@ export default function CalendarPage(): React.JSX.Element {
                 </div>
               </div>
               
-              {/* Footer Modal dengan Actions - TANPA ID FIREBASE */}
+              {/* Footer Modal dengan Actions */}
               <div style={{
                 padding: isMobile ? '1.8rem' : '2.5rem',
                 borderTop: '1px solid rgba(255, 255, 255, 0.2)',
