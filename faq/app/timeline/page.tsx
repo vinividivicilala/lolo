@@ -43,7 +43,6 @@ export default function TimelinePage() {
       }}
     >
       <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
-        {/* Lingkaran luar berkedip */}
         <motion.circle
           cx="14"
           cy="14"
@@ -54,7 +53,6 @@ export default function TimelinePage() {
           animate={{ strokeOpacity: [0.4, 0.8, 0.4] }}
           transition={{ duration: 1.5, repeat: Infinity }}
         />
-        {/* Lingkaran tengah */}
         <motion.circle
           cx="14"
           cy="14"
@@ -65,7 +63,6 @@ export default function TimelinePage() {
           animate={{ strokeOpacity: [0.6, 1, 0.6] }}
           transition={{ duration: 1.5, repeat: Infinity, delay: 0.2 }}
         />
-        {/* Titik tengah */}
         <circle cx="14" cy="14" r="4" fill="#ffffff" />
       </svg>
     </motion.div>
@@ -88,7 +85,6 @@ export default function TimelinePage() {
       overflow: 'hidden'
     }}>
       
-      {/* Animated Background Grid */}
       <div style={{
         position: 'absolute',
         top: 0,
@@ -173,21 +169,20 @@ export default function TimelinePage() {
               style={{
                 display: 'flex',
                 alignItems: 'center',
-                marginBottom: '3.5rem',
+                marginBottom: '4rem',
                 position: 'relative',
                 minHeight: '100px'
               }}
             >
-              {/* Kolom 1: Angka dengan jarak dari garis */}
+              {/* Kolom 1: Angka - TANPA titik */}
               <div style={{
-                width: '180px',
+                width: '150px',
                 display: 'flex',
                 justifyContent: 'flex-end',
-                paddingRight: '50px' // Jarak dari garis timeline
+                paddingRight: '40px'
               }}>
                 <div style={{
                   fontSize: '1.6rem',
-                  opacity: 1, // Selalu penuh
                   fontFamily: 'monospace',
                   fontWeight: 500,
                   color: '#ffffff'
@@ -196,16 +191,16 @@ export default function TimelinePage() {
                 </div>
               </div>
 
-              {/* Kolom 2: Garis Vertikal Titik-titik dengan Blinking Dot di Tengah */}
+              {/* Kolom 2: Titik Vertikal + Horizontal + Indikator */}
               <div style={{
                 position: 'relative',
-                width: '40px',
                 display: 'flex',
-                justifyContent: 'center',
+                flexDirection: 'column',
                 alignItems: 'center',
+                width: '120px',
                 height: '100px'
               }}>
-                {/* Garis titik-titik vertikal - panjang dari atas ke bawah */}
+                {/* Titik Vertikal - dari atas ke bawah */}
                 <div style={{
                   color: '#ffffff',
                   fontSize: '1rem',
@@ -215,74 +210,74 @@ export default function TimelinePage() {
                   textOrientation: 'mixed',
                   height: '100%',
                   opacity: 0.8,
-                  position: 'absolute'
+                  position: 'absolute',
+                  left: '50%',
+                  transform: 'translateX(-50%)'
                 }}>
                   ....................
                 </div>
 
-                {/* Indikator di tengah garis titik-titik */}
-                {step.status === 'current' ? (
-                  // Blinking dot di tengah titik-titik
-                  <div style={{
-                    position: 'absolute',
-                    zIndex: 2,
-                    backgroundColor: '#000000',
-                    padding: '5px'
-                  }}>
-                    <TransmitterIcon />
-                  </div>
-                ) : step.status === 'completed' ? (
-                  // Bulatan putih di tengah titik-titik
-                  <div style={{
-                    width: '20px',
-                    height: '20px',
-                    borderRadius: '50%',
-                    backgroundColor: '#ffffff',
-                    border: '4px solid #000000',
-                    boxShadow: '0 0 15px rgba(255,255,255,0.8)',
-                    position: 'absolute',
-                    zIndex: 2
-                  }} />
-                ) : (
-                  // Titik-titik untuk pending - SAMA dengan desain completed
-                  <div style={{
-                    width: '20px',
-                    height: '20px',
-                    borderRadius: '50%',
-                    backgroundColor: '#ffffff',
-                    border: '4px solid #000000',
-                    boxShadow: '0 0 15px rgba(255,255,255,0.8)',
-                    position: 'absolute',
-                    zIndex: 2,
-                    opacity: 0.5
-                  }} />
-                )}
-              </div>
-
-              {/* Kolom 3: Garis Horizontal Titik-titik ke Awal Huruf Judul */}
-              <div style={{
-                width: '80px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}>
+                {/* Indikator di tengah garis vertikal */}
                 <div style={{
-                  color: '#ffffff',
-                  fontSize: '1rem',
-                  letterSpacing: '4px',
-                  fontFamily: 'monospace',
-                  opacity: 0.8
+                  position: 'absolute',
+                  top: '50%',
+                  left: '50%',
+                  transform: 'translate(-50%, -50%)',
+                  zIndex: 2,
+                  backgroundColor: '#000000',
+                  padding: '5px'
                 }}>
-                  ........................
+                  {step.status === 'current' ? (
+                    <TransmitterIcon />
+                  ) : step.status === 'completed' ? (
+                    <div style={{
+                      width: '20px',
+                      height: '20px',
+                      borderRadius: '50%',
+                      backgroundColor: '#ffffff',
+                      border: '4px solid #000000',
+                      boxShadow: '0 0 15px rgba(255,255,255,0.8)'
+                    }} />
+                  ) : (
+                    <div style={{
+                      width: '20px',
+                      height: '20px',
+                      borderRadius: '50%',
+                      backgroundColor: '#ffffff',
+                      border: '4px solid #000000',
+                      boxShadow: '0 0 15px rgba(255,255,255,0.8)',
+                      opacity: 0.5
+                    }} />
+                  )}
+                </div>
+
+                {/* Titik Horizontal - dari tengah vertikal ke kanan */}
+                <div style={{
+                  position: 'absolute',
+                  top: '50%',
+                  left: '50%',
+                  width: '60px',
+                  transform: 'translateY(-50%)'
+                }}>
+                  <div style={{
+                    color: '#ffffff',
+                    fontSize: '1rem',
+                    letterSpacing: '4px',
+                    fontFamily: 'monospace',
+                    opacity: 0.8
+                  }}>
+                    ................
+                  </div>
                 </div>
               </div>
 
-              {/* Kolom 4: Konten Step - TEKS PUTIH TANPA PUDAR */}
+              {/* Kolom 3: Konten - SEJAJAR dengan titik vertikal dan pemancar */}
               <div style={{
                 flex: 1,
-                paddingLeft: '1rem'
+                marginLeft: '60px', // Jarak dari akhir titik horizontal
+                paddingTop: '0' // Sejajar dengan tengah vertikal
               }}>
-                {/* Baris 1: Judul */}
+                {/* Judul - SEJAJAR dengan pemancar */}
                 <div style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -293,7 +288,7 @@ export default function TimelinePage() {
                     fontSize: '2rem',
                     fontWeight: 400,
                     margin: 0,
-                    color: '#ffffff' // Putih penuh, tidak pudar
+                    color: '#ffffff'
                   }}>
                     {step.title}
                   </h3>
@@ -325,7 +320,7 @@ export default function TimelinePage() {
                   )}
                 </div>
                 
-                {/* Baris 2: Tanggal dan Status - TEKS PUTIH TANPA PUDAR */}
+                {/* Tanggal dan Status - SEJAJAR di bawah judul */}
                 <div style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -335,8 +330,7 @@ export default function TimelinePage() {
                     fontSize: '1.3rem',
                     fontFamily: 'monospace',
                     fontWeight: 500,
-                    color: '#ffffff', // Putih penuh
-                    opacity: 1
+                    color: '#ffffff'
                   }}>
                     {step.date}
                   </span>
@@ -344,9 +338,8 @@ export default function TimelinePage() {
                   {step.status === 'completed' && (
                     <span style={{ 
                       fontSize: '1.3rem', 
-                      color: '#ffffff', // Putih penuh
-                      fontWeight: 500,
-                      opacity: 1
+                      color: '#ffffff',
+                      fontWeight: 500
                     }}>
                       Completed
                     </span>
@@ -355,9 +348,8 @@ export default function TimelinePage() {
                   {(step.status === 'pending' || step.status === 'current') && (
                     <span style={{ 
                       fontSize: '1.3rem', 
-                      color: '#ffffff', // Putih penuh
-                      fontWeight: 500,
-                      opacity: 1
+                      color: '#ffffff',
+                      fontWeight: 500
                     }}>
                       {step.status === 'current' ? 'In Progress' : 'Upcoming'}
                     </span>
