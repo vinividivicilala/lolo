@@ -21,8 +21,8 @@ import {
   doc,
   updateDoc,
   deleteDoc,
-  getDoc,
-  setDoc,
+  getDocs,
+  writeBatch,
   where
 } from "firebase/firestore";
 
@@ -350,6 +350,13 @@ export default function CalendarPage(): React.JSX.Element {
       
       await batch.commit();
       setUnreadNotifications(0);
+      
+      // Update local state
+      setNotifications(prev => prev.map(notification => ({
+        ...notification,
+        isRead: true
+      })));
+      
     } catch (error) {
       console.error("❌ Error marking notifications as read:", error);
     }
@@ -411,16 +418,20 @@ export default function CalendarPage(): React.JSX.Element {
         
         if (savedDate && typeof savedDate.toDate === 'function') {
           savedDate = savedDate.toDate();
+        } else if (typeof savedDate === 'string') {
+          savedDate = new Date(savedDate);
+        } else if (!savedDate) {
+          savedDate = new Date();
         }
         
         savedData.push({
           id: doc.id,
-          eventId: data.eventId,
-          userId: data.userId,
-          userEmail: data.userEmail,
-          title: data.title,
+          eventId: data.eventId || '',
+          userId: data.userId || '',
+          userEmail: data.userEmail || '',
+          title: data.title || 'No Title',
           date: savedDate,
-          savedAt: data.savedAt
+          savedAt: data.savedAt || new Date()
         });
       });
       
@@ -495,6 +506,8 @@ export default function CalendarPage(): React.JSX.Element {
             eventDate = eventDate.toDate();
           } else if (typeof eventDate === 'string') {
             eventDate = new Date(eventDate);
+          } else if (!eventDate) {
+            eventDate = new Date();
           }
           
           eventsData.push({
@@ -541,13 +554,18 @@ export default function CalendarPage(): React.JSX.Element {
           const data = doc.data();
           let notificationDate = data.date;
           
+          // FIX: Handle undefined date safely
           if (notificationDate && typeof notificationDate.toDate === 'function') {
             notificationDate = notificationDate.toDate();
+          } else if (typeof notificationDate === 'string') {
+            notificationDate = new Date(notificationDate);
+          } else if (!notificationDate) {
+            notificationDate = new Date();
           }
           
           notificationsData.push({
             id: doc.id,
-            eventId: data.eventId,
+            eventId: data.eventId || '',
             title: data.title || "Notification",
             message: data.message || "",
             date: notificationDate,
@@ -813,9 +831,6 @@ export default function CalendarPage(): React.JSX.Element {
       return `${date.getDate()} ${getShortMonthName(date.getMonth())} ${date.getFullYear()}`;
     }
   };
-
-  // Import getDocs dan writeBatch yang diperlukan
-  const { getDocs, writeBatch } = require('firebase/firestore');
 
   return (
     <div style={{
@@ -2433,84 +2448,93 @@ export default function CalendarPage(): React.JSX.Element {
                     Tidak ada notifikasi
                   </div>
                 ) : (
-                  notifications.map((notification) => (
-                    <motion.div
-                      key={notification.id}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      style={{
-                        backgroundColor: notification.isRead ? 'transparent' : 'rgba(255, 255, 255, 0.05)',
-                        border: '1px solid rgba(255, 255, 255, 0.2)',
-                        borderRadius: '12px',
-                        padding: '1.2rem',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: '0.5rem'
-                      }}
-                    >
-                      <div style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'flex-start'
-                      }}>
-                        <div style={{
-                          color: 'white',
-                          fontSize: '1.1rem',
-                          fontWeight: '500',
-                          fontFamily: 'Helvetica, Arial, sans-serif'
-                        }}>
-                          {notification.title}
-                        </div>
-                        {!notification.isRead && (
-                          <div style={{
-                            width: '10px',
-                            height: '10px',
-                            backgroundColor: '#FF3B30',
-                            borderRadius: '50%'
-                          }} />
-                        )}
-                      </div>
-                      
-                      <div style={{
-                        color: 'rgba(255, 255, 255, 0.8)',
-                        fontSize: '1rem',
-                        fontFamily: 'Helvetica, Arial, sans-serif',
-                        lineHeight: 1.4
-                      }}>
-                        {notification.message}
-                      </div>
-                      
-                      <div style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        marginTop: '0.5rem'
-                      }}>
+                  notifications.map((notification) => {
+                    // FIX: Handle undefined date safely
+                    const notificationDate = notification.date instanceof Date ? 
+                      notification.date : 
+                      (notification.date && typeof notification.date.toDate === 'function' ? 
+                        notification.date.toDate() : 
+                        new Date());
+                    
+                    return (
+                      <motion.div
+                        key={notification.id}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        style={{
+                          backgroundColor: notification.isRead ? 'transparent' : 'rgba(255, 255, 255, 0.05)',
+                          border: '1px solid rgba(255, 255, 255, 0.2)',
+                          borderRadius: '12px',
+                          padding: '1.2rem',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: '0.5rem'
+                        }}
+                      >
                         <div style={{
                           display: 'flex',
-                          alignItems: 'center',
-                          gap: '0.5rem',
-                          color: 'rgba(255, 255, 255, 0.6)',
-                          fontSize: '0.9rem',
-                          fontFamily: 'Helvetica, Arial, sans-serif'
+                          justifyContent: 'space-between',
+                          alignItems: 'flex-start'
                         }}>
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <circle cx="12" cy="12" r="10"/>
-                            <polyline points="12 6 12 12 16 14"/>
-                          </svg>
-                          {formatDate(notification.date instanceof Date ? notification.date : notification.date.toDate())}
+                          <div style={{
+                            color: 'white',
+                            fontSize: '1.1rem',
+                            fontWeight: '500',
+                            fontFamily: 'Helvetica, Arial, sans-serif'
+                          }}>
+                            {notification.title}
+                          </div>
+                          {!notification.isRead && (
+                            <div style={{
+                              width: '10px',
+                              height: '10px',
+                              backgroundColor: '#FF3B30',
+                              borderRadius: '50%'
+                            }} />
+                          )}
                         </div>
                         
                         <div style={{
-                          color: 'rgba(255, 255, 255, 0.7)',
-                          fontSize: '0.9rem',
-                          fontFamily: 'Helvetica, Arial, sans-serif'
+                          color: 'rgba(255, 255, 255, 0.8)',
+                          fontSize: '1rem',
+                          fontFamily: 'Helvetica, Arial, sans-serif',
+                          lineHeight: 1.4
                         }}>
-                          oleh {notification.createdBy}
+                          {notification.message}
                         </div>
-                      </div>
-                    </motion.div>
-                  ))
+                        
+                        <div style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          marginTop: '0.5rem'
+                        }}>
+                          <div style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.5rem',
+                            color: 'rgba(255, 255, 255, 0.6)',
+                            fontSize: '0.9rem',
+                            fontFamily: 'Helvetica, Arial, sans-serif'
+                          }}>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                              <circle cx="12" cy="12" r="10"/>
+                              <polyline points="12 6 12 12 16 14"/>
+                            </svg>
+                            {formatDate(notificationDate)}
+                          </div>
+                          
+                          <div style={{
+                            color: 'rgba(255, 255, 255, 0.7)',
+                            fontSize: '0.9rem',
+                            fontFamily: 'Helvetica, Arial, sans-serif'
+                          }}>
+                            oleh {notification.createdBy}
+                          </div>
+                        </div>
+                      </motion.div>
+                    );
+                  })
                 )}
               </div>
               
@@ -2699,7 +2723,12 @@ export default function CalendarPage(): React.JSX.Element {
                   </div>
                 ) : (
                   savedEvents.map((savedEvent) => {
-                    const savedDate = savedEvent.date instanceof Date ? savedEvent.date : savedEvent.date.toDate();
+                    // FIX: Handle undefined date safely
+                    const savedDate = savedEvent.date instanceof Date ? 
+                      savedEvent.date : 
+                      (savedEvent.date && typeof savedEvent.date.toDate === 'function' ? 
+                        savedEvent.date.toDate() : 
+                        new Date());
                     
                     return (
                       <motion.div
