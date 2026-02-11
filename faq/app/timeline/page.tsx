@@ -22,24 +22,24 @@ export default function TimelinePage() {
     return () => clearInterval(interval);
   }, []);
 
-  // Modern Transmitter Animation - ONLY THIS PART CHANGED
+  // Modern Transmitter dengan titik bulat lebar seperti di teks TRANSMITTING
   const ModernTransmitter = () => (
     <div style={{
       position: 'relative',
-      width: '40px',
-      height: '40px',
+      width: '50px',
+      height: '50px',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center'
     }}>
-      {/* Pulsing Rings - Modern Awwards Style */}
+      {/* Pulsing Rings */}
       <motion.div
         style={{
           position: 'absolute',
-          width: '40px',
-          height: '40px',
+          width: '50px',
+          height: '50px',
           borderRadius: '50%',
-          border: '1px solid rgba(255, 255, 255, 0.3)',
+          border: '2px solid rgba(0, 255, 157, 0.3)',
         }}
         animate={{
           scale: [1, 1.8, 2.2],
@@ -54,10 +54,10 @@ export default function TimelinePage() {
       <motion.div
         style={{
           position: 'absolute',
-          width: '40px',
-          height: '40px',
+          width: '50px',
+          height: '50px',
           borderRadius: '50%',
-          border: '1px solid rgba(255, 255, 255, 0.2)',
+          border: '2px solid rgba(0, 255, 157, 0.2)',
         }}
         animate={{
           scale: [1, 1.5, 2],
@@ -70,43 +70,24 @@ export default function TimelinePage() {
           delay: 0.5
         }}
       />
-      <motion.div
-        style={{
-          position: 'absolute',
-          width: '40px',
-          height: '40px',
-          borderRadius: '50%',
-          border: '1px solid rgba(255, 255, 255, 0.1)',
-        }}
-        animate={{
-          scale: [1, 1.3, 1.8],
-          opacity: [0.3, 0.1, 0],
-        }}
-        transition={{
-          duration: 2,
-          repeat: Infinity,
-          ease: "easeOut",
-          delay: 1
-        }}
-      />
       
-      {/* Central Dot with Modern Glow */}
+      {/* Titik Bulat Lebar - SAMA SEPERTI DI TEKS TRANSMITTING */}
       <motion.div
         style={{
-          width: '12px',
-          height: '12px',
+          width: '24px',
+          height: '24px',
           borderRadius: '50%',
-          backgroundColor: '#ffffff',
+          background: 'radial-gradient(circle at 30% 30%, #00ff9d, #00cc88)',
           position: 'relative',
           zIndex: 10,
-          boxShadow: '0 0 20px rgba(255, 255, 255, 0.8)'
+          boxShadow: '0 0 30px #00ff9d, 0 0 60px rgba(0, 255, 157, 0.4)'
         }}
         animate={{
-          scale: [1, 1.1, 1],
+          scale: [1, 1.2, 1],
           boxShadow: [
-            '0 0 20px rgba(255, 255, 255, 0.8)',
-            '0 0 30px rgba(255, 255, 255, 1)',
-            '0 0 20px rgba(255, 255, 255, 0.8)'
+            '0 0 30px #00ff9d, 0 0 60px rgba(0, 255, 157, 0.4)',
+            '0 0 50px #00ff9d, 0 0 80px rgba(0, 255, 157, 0.6)',
+            '0 0 30px #00ff9d, 0 0 60px rgba(0, 255, 157, 0.4)'
           ]
         }}
         transition={{
@@ -115,29 +96,17 @@ export default function TimelinePage() {
           ease: "easeInOut"
         }}
       >
-        {/* Inner Dot with Green Glow */}
-        <motion.div
-          style={{
-            position: 'absolute',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            width: '4px',
-            height: '4px',
-            borderRadius: '50%',
-            backgroundColor: '#00ff9d',
-            boxShadow: '0 0 8px #00ff9d'
-          }}
-          animate={{
-            scale: [1, 1.5, 1],
-            opacity: [1, 0.6, 1]
-          }}
-          transition={{
-            duration: 1,
-            repeat: Infinity,
-            ease: "easeInOut"
-          }}
-        />
+        {/* Inner Glow */}
+        <div style={{
+          position: 'absolute',
+          top: '20%',
+          left: '20%',
+          width: '8px',
+          height: '8px',
+          borderRadius: '50%',
+          backgroundColor: 'rgba(255, 255, 255, 0.8)',
+          filter: 'blur(2px)'
+        }} />
       </motion.div>
     </div>
   );
@@ -293,7 +262,7 @@ export default function TimelinePage() {
                   ....................
                 </div>
 
-                {/* Modern Transmitter or Indicator */}
+                {/* Modern Transmitter dengan Titik Bulat Lebar atau Indicator */}
                 <div style={{
                   position: 'absolute',
                   top: '50%',
@@ -302,27 +271,30 @@ export default function TimelinePage() {
                   zIndex: 2,
                   backgroundColor: '#000000',
                   padding: '5px',
-                  borderRadius: '50%'
+                  borderRadius: '50%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
                 }}>
                   {step.status === 'current' ? (
                     <ModernTransmitter />
                   ) : step.status === 'completed' ? (
                     <div style={{
-                      width: '20px',
-                      height: '20px',
+                      width: '24px',
+                      height: '24px',
                       borderRadius: '50%',
                       backgroundColor: '#ffffff',
-                      border: '4px solid #000000',
-                      boxShadow: '0 0 15px rgba(255,255,255,0.8)'
+                      border: '3px solid #000000',
+                      boxShadow: '0 0 20px rgba(255,255,255,0.8)'
                     }} />
                   ) : (
                     <div style={{
-                      width: '20px',
-                      height: '20px',
+                      width: '24px',
+                      height: '24px',
                       borderRadius: '50%',
                       backgroundColor: '#ffffff',
-                      border: '4px solid #000000',
-                      boxShadow: '0 0 15px rgba(255,255,255,0.8)',
+                      border: '3px solid #000000',
+                      boxShadow: '0 0 20px rgba(255,255,255,0.8)',
                       opacity: 0.5
                     }} />
                   )}
@@ -370,30 +342,29 @@ export default function TimelinePage() {
                   </h3>
                   
                   {step.status === 'current' && (
-                    <motion.div
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.5rem',
-                        padding: '0.5rem 1.25rem',
-                        backgroundColor: 'rgba(255,255,255,0.15)',
-                        borderRadius: '20px',
-                        fontSize: '1rem',
-                        color: '#ffffff',
-                        fontWeight: 500
-                      }}
-                      animate={{ opacity: [1, 0.7, 1] }}
-                      transition={{ duration: 1, repeat: Infinity }}
-                    >
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.5rem',
+                      padding: '0.5rem 1.25rem',
+                      backgroundColor: 'rgba(255,255,255,0.15)',
+                      borderRadius: '20px',
+                      fontSize: '1rem',
+                      color: '#ffffff',
+                      fontWeight: 500,
+                      letterSpacing: '0.5px'
+                    }}>
+                      {/* Titik Bulat Lebar - SAMA dengan pemancar */}
                       <div style={{
-                        width: '10px',
-                        height: '10px',
+                        width: '24px',
+                        height: '24px',
                         borderRadius: '50%',
-                        backgroundColor: '#00ff9d',
-                        boxShadow: '0 0 8px #00ff9d'
+                        background: 'radial-gradient(circle at 30% 30%, #00ff9d, #00cc88)',
+                        boxShadow: '0 0 20px #00ff9d',
+                        marginRight: '4px'
                       }} />
                       TRANSMITTING
-                    </motion.div>
+                    </div>
                   )}
                 </div>
                 
