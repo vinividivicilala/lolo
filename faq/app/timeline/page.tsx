@@ -56,9 +56,6 @@ export default function TimelinePage() {
       fill="none" 
       stroke="#ffffff" 
       strokeWidth="2.5"
-      style={{
-        display: 'block'
-      }}
     >
       <path 
         d="M32 16L16 32m0-16h16v16" 
@@ -81,14 +78,7 @@ export default function TimelinePage() {
       <path d="M18 8C18 6.4087 17.3679 4.88258 16.2426 3.75736C15.1174 2.63214 13.5913 2 12 2C10.4087 2 8.88258 2.63214 7.75736 3.75736C6.63214 4.88258 6 6.4087 6 8C6 15 3 17 3 17H21C21 17 18 15 18 8Z" strokeLinecap="round" strokeLinejoin="round"/>
       <path d="M9 17V18C9 18.7956 9.31607 19.5587 9.87868 20.1213C10.4413 20.6839 11.2044 21 12 21C12.7956 21 13.5587 20.6839 14.1213 20.1213C14.6839 19.5587 15 18.7956 15 18V17" strokeLinecap="round" strokeLinejoin="round"/>
       {hasNotification && (
-        <circle cx="20" cy="4" r="3" fill="#ff4d4d" stroke="none">
-          <animate 
-            attributeName="r" 
-            values="3;3.5;3" 
-            dur="1s" 
-            repeatCount="indefinite" 
-          />
-        </circle>
+        <circle cx="20" cy="4" r="3" fill="#ff4d4d" stroke="none" />
       )}
     </svg>
   );
@@ -104,14 +94,12 @@ export default function TimelinePage() {
       };
       setNotifications([newNotification, ...notifications]);
       
-      // Broadcast to all users (simulated via localStorage event)
       localStorage.setItem('timelineNotification', JSON.stringify({
         ...newNotification,
         admin: 'faridardiansyah061@gmail.com'
       }));
     };
 
-    // Listen for notifications from admin
     useEffect(() => {
       const handleStorageChange = (e) => {
         if (e.key === 'timelineNotification' && e.newValue) {
@@ -133,12 +121,8 @@ export default function TimelinePage() {
         maxWidth: '400px',
         width: '100%'
       }}>
-        {/* Admin Controls - Only visible to faridardiansyah061@gmail.com */}
+        {/* Admin Controls */}
         <div style={{
-          backgroundColor: '#0a0a0a',
-          border: '1px solid rgba(255,255,255,0.1)',
-          borderRadius: '12px',
-          padding: '1.5rem',
           marginBottom: '1rem'
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
@@ -156,7 +140,7 @@ export default function TimelinePage() {
                 padding: '0.75rem 1rem',
                 backgroundColor: 'rgba(0,255,157,0.1)',
                 border: '1px solid rgba(0,255,157,0.3)',
-                borderRadius: '6px',
+                borderRadius: '4px',
                 color: '#00ff9d',
                 cursor: 'pointer',
                 fontSize: '0.9rem'
@@ -173,7 +157,7 @@ export default function TimelinePage() {
                 padding: '0.75rem 1rem',
                 backgroundColor: 'rgba(255,255,255,0.05)',
                 border: '1px solid rgba(255,255,255,0.1)',
-                borderRadius: '6px',
+                borderRadius: '4px',
                 color: '#ffffff',
                 cursor: 'pointer',
                 fontSize: '0.9rem'
@@ -186,17 +170,12 @@ export default function TimelinePage() {
 
         {/* Notifications List */}
         <div style={{
-          backgroundColor: '#0a0a0a',
-          border: '1px solid rgba(255,255,255,0.1)',
-          borderRadius: '12px',
+          backgroundColor: '#000000',
           maxHeight: '300px',
           overflowY: 'auto'
         }}>
-          <div style={{ padding: '1rem', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-            <span style={{ fontSize: '0.9rem', opacity: 0.7 }}>LIVE UPDATES</span>
-          </div>
           {notifications.length === 0 ? (
-            <div style={{ padding: '1.5rem', textAlign: 'center', opacity: 0.5 }}>
+            <div style={{ padding: '1.5rem 0', textAlign: 'center', opacity: 0.5 }}>
               No notifications
             </div>
           ) : (
@@ -204,9 +183,8 @@ export default function TimelinePage() {
               <div 
                 key={notif.id}
                 style={{
-                  padding: '1rem',
-                  borderBottom: '1px solid rgba(255,255,255,0.05)',
-                  backgroundColor: notif.read ? 'transparent' : 'rgba(0,255,157,0.05)'
+                  padding: '1rem 0',
+                  borderBottom: '1px solid rgba(255,255,255,0.05)'
                 }}
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
@@ -308,20 +286,19 @@ export default function TimelinePage() {
       {/* Main Content */}
       <div style={{ position: 'relative', zIndex: 10, maxWidth: '1400px', margin: '0 auto' }}>
         
-        {/* Home Button - Large */}
+        {/* Home Button - Large dengan North West Arrow */}
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5 }}
-          style={{ marginBottom: '2rem' }}
+          style={{ marginBottom: '3rem' }}
         >
           <motion.button
             onClick={() => router.push('/')}
             style={{
-              padding: '1.5rem 3rem',
+              padding: 0,
               backgroundColor: 'transparent',
-              border: '2px solid rgba(255,255,255,0.2)',
-              borderRadius: '8px',
+              border: 'none',
               color: '#ffffff',
               cursor: 'pointer',
               display: 'flex',
@@ -329,14 +306,9 @@ export default function TimelinePage() {
               gap: '1.5rem',
               fontSize: '2rem',
               fontWeight: 300,
-              letterSpacing: '2px',
-              transition: 'all 0.3s ease',
-              marginBottom: '1rem'
+              letterSpacing: '2px'
             }}
-            whileHover={{ 
-              borderColor: 'rgba(255,255,255,0.8)',
-              backgroundColor: 'rgba(255,255,255,0.02)'
-            }}
+            whileHover={{ opacity: 0.8 }}
             whileTap={{ scale: 0.98 }}
           >
             <NorthwestArrow />
@@ -373,8 +345,7 @@ export default function TimelinePage() {
           <div style={{
             position: 'relative',
             maxWidth: '1200px',
-            margin: '0 auto',
-            padding: '2rem 0'
+            margin: '0 auto'
           }}>
             
             {/* Timeline Steps */}
@@ -390,11 +361,11 @@ export default function TimelinePage() {
                   style={{
                     display: 'flex',
                     alignItems: 'center',
-                    marginBottom: selectedStep === step.id ? '1rem' : '4rem',
+                    marginBottom: selectedStep === step.id ? '2rem' : '4rem',
                     position: 'relative',
                     minHeight: '100px',
                     cursor: 'pointer',
-                    transition: 'margin-bottom 0.3s ease'
+                    transition: 'margin-bottom 0.2s ease'
                   }}
                   onClick={() => handleStepClick(step.id)}
                 >
@@ -591,97 +562,124 @@ export default function TimelinePage() {
                   </div>
                 </motion.div>
 
-                {/* Expanded Detail Page - Black Shadow Page */}
+                {/* BLACK SHADOW PAGE - Halaman Utama yang Memanfaatkan Ruang Kosong */}
                 {selectedStep === step.id && (
                   <motion.div
-                    initial={{ opacity: 0, y: -20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
                     transition={{ duration: 0.2 }}
                     style={{
                       marginLeft: '190px',
                       marginBottom: '4rem',
-                      marginTop: '-2rem',
-                      padding: '2.5rem',
-                      backgroundColor: '#0a0a0a',
-                      borderLeft: '4px solid rgba(255,255,255,0.1)',
-                      borderBottom: '1px solid rgba(255,255,255,0.05)',
-                      borderRight: '1px solid rgba(255,255,255,0.05)',
-                      borderTop: '1px solid rgba(255,255,255,0.05)',
+                      marginTop: '-1rem',
+                      padding: '2rem 0 2rem 2rem',
+                      backgroundColor: '#000000',
                       position: 'relative',
-                      boxShadow: '0 20px 40px rgba(0,0,0,0.8)',
-                      zIndex: 20
+                      color: '#ffffff'
                     }}
                   >
-                    {/* Page Number Indicator */}
+                    {/* Page Number - Very Subtle */}
                     <div style={{
                       position: 'absolute',
-                      top: '1rem',
-                      right: '1.5rem',
-                      fontSize: '0.8rem',
-                      opacity: 0.3,
-                      fontFamily: 'monospace'
+                      bottom: '1rem',
+                      right: '0',
+                      fontSize: '0.7rem',
+                      opacity: 0.15,
+                      fontFamily: 'monospace',
+                      letterSpacing: '2px'
                     }}>
-                      PAGE_{String(step.id).padStart(2, '0')}
+                      {String(step.id).padStart(2, '0')} / 05
                     </div>
 
-                    {/* Content */}
+                    {/* Main Content - Clean, No Borders, No Boxes */}
                     <div style={{ maxWidth: '800px' }}>
                       <div style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '1rem',
-                        marginBottom: '1.5rem'
+                        fontSize: '2.8rem',
+                        fontWeight: 300,
+                        marginBottom: '1.5rem',
+                        color: '#ffffff',
+                        opacity: 0.9
                       }}>
-                        <div style={{
-                          fontSize: '2.5rem',
-                          fontFamily: 'monospace',
-                          opacity: 0.2
-                        }}>
-                          {String(step.id).padStart(2, '0')}
-                        </div>
-                        <h4 style={{
-                          fontSize: '1.8rem',
-                          fontWeight: 300,
-                          margin: 0,
-                          color: '#ffffff'
-                        }}>
-                          {step.title}
-                        </h4>
+                        {step.title}
                       </div>
                       
                       <p style={{
-                        fontSize: '1.2rem',
+                        fontSize: '1.3rem',
                         lineHeight: '1.6',
                         opacity: 0.8,
-                        marginBottom: '2rem'
+                        marginBottom: '2.5rem',
+                        color: '#ffffff'
                       }}>
                         {step.details}
                       </p>
                       
-                      <div style={{
-                        display: 'grid',
-                        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-                        gap: '1.5rem',
-                        marginTop: '2rem'
-                      }}>
-                        <div>
-                          <div style={{ fontSize: '0.9rem', opacity: 0.5, marginBottom: '0.5rem' }}>TIMELINE</div>
-                          <div style={{ fontSize: '1.2rem', fontFamily: 'monospace' }}>{step.date}</div>
+                      {/* Simple Info Lines - No Cards */}
+                      <div style={{ marginTop: '2rem' }}>
+                        <div style={{ 
+                          display: 'flex', 
+                          alignItems: 'baseline',
+                          marginBottom: '0.75rem'
+                        }}>
+                          <span style={{ 
+                            fontSize: '0.9rem', 
+                            opacity: 0.4, 
+                            width: '100px',
+                            fontFamily: 'monospace'
+                          }}>
+                            TIMELINE
+                          </span>
+                          <span style={{ 
+                            fontSize: '1.2rem', 
+                            fontFamily: 'monospace',
+                            opacity: 0.9
+                          }}>
+                            {step.date}
+                          </span>
                         </div>
-                        <div>
-                          <div style={{ fontSize: '0.9rem', opacity: 0.5, marginBottom: '0.5rem' }}>STATUS</div>
-                          <div style={{ 
+                        
+                        <div style={{ 
+                          display: 'flex', 
+                          alignItems: 'baseline',
+                          marginBottom: '0.75rem'
+                        }}>
+                          <span style={{ 
+                            fontSize: '0.9rem', 
+                            opacity: 0.4, 
+                            width: '100px',
+                            fontFamily: 'monospace'
+                          }}>
+                            STATUS
+                          </span>
+                          <span style={{ 
                             fontSize: '1.2rem',
                             color: step.status === 'completed' ? '#ffffff' : 
-                                   step.status === 'current' ? '#00ff9d' : '#666666'
+                                   step.status === 'current' ? '#00ff9d' : '#666666',
+                            opacity: 0.9
                           }}>
                             {step.status.toUpperCase()}
-                          </div>
+                          </span>
                         </div>
-                        <div>
-                          <div style={{ fontSize: '0.9rem', opacity: 0.5, marginBottom: '0.5rem' }}>ID</div>
-                          <div style={{ fontSize: '1.2rem', fontFamily: 'monospace' }}>TASK-{step.id * 100}</div>
+                        
+                        <div style={{ 
+                          display: 'flex', 
+                          alignItems: 'baseline'
+                        }}>
+                          <span style={{ 
+                            fontSize: '0.9rem', 
+                            opacity: 0.4, 
+                            width: '100px',
+                            fontFamily: 'monospace'
+                          }}>
+                            MILESTONE
+                          </span>
+                          <span style={{ 
+                            fontSize: '1.2rem', 
+                            fontFamily: 'monospace',
+                            opacity: 0.9
+                          }}>
+                            MS-{step.id * 100}
+                          </span>
                         </div>
                       </div>
                     </div>
