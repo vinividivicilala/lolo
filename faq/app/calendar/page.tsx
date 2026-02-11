@@ -20,7 +20,10 @@ import {
   Timestamp,
   doc,
   updateDoc,
-  deleteDoc
+  deleteDoc,
+  getDoc,
+  setDoc,
+  where
 } from "firebase/firestore";
 
 // Konfigurasi Firebase
@@ -73,6 +76,29 @@ interface EventFormData {
   label: string;
 }
 
+// Type untuk notifikasi
+interface Notification {
+  id: string;
+  eventId: string;
+  title: string;
+  message: string;
+  date: Date;
+  isRead: boolean;
+  createdBy: string;
+  createdAt: Timestamp | Date;
+}
+
+// Type untuk saved event
+interface SavedEvent {
+  id: string;
+  eventId: string;
+  userId: string;
+  userEmail: string;
+  title: string;
+  date: Date;
+  savedAt: Timestamp | Date;
+}
+
 export default function CalendarPage(): React.JSX.Element {
   const router = useRouter();
   const [isMobile, setIsMobile] = useState(false);
@@ -106,9 +132,22 @@ export default function CalendarPage(): React.JSX.Element {
   const [isEditingEvent, setIsEditingEvent] = useState(false);
   const [editingEventId, setEditingEventId] = useState<string | null>(null);
   
+  // State untuk notifikasi
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [unreadNotifications, setUnreadNotifications] = useState(0);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [isBlinking, setIsBlinking] = useState(false);
+  
+  // State untuk saved events
+  const [savedEvents, setSavedEvents] = useState<SavedEvent[]>([]);
+  const [showSavedEvents, setShowSavedEvents] = useState(false);
+  const [isSavingEvent, setIsSavingEvent] = useState(false);
+  
   // Ref
   const addEventModalRef = useRef<HTMLDivElement>(null);
   const eventDetailsModalRef = useRef<HTMLDivElement>(null);
+  const notificationsRef = useRef<HTMLDivElement>(null);
+  const savedEventsRef = useRef<HTMLDivElement>(null);
   
   // Label preset saja (warna dihapus)
   const labelOptions = [
@@ -271,6 +310,145 @@ export default function CalendarPage(): React.JSX.Element {
     return eventsThisYear.length;
   };
   
+  // Fungsi untuk membuat notifikasi
+  const createNotification = async (eventId: string, eventTitle: string, createdBy: string) => {
+    if (!db || !userEmail) return;
+    
+    try {
+      const notificationData = {
+        eventId,
+        title: "Kegiatan Baru Ditambahkan",
+        message: `${createdBy} telah menambahkan kegiatan "${eventTitle}"`,
+        date: new Date(),
+        isRead: false,
+        createdBy,
+        createdAt: serverTimestamp()
+      };
+      
+      await addDoc(collection(db, 'notifications'), notificationData);
+      console.log("✅ Notification created for event:", eventId);
+    } catch (error) {
+      console.error("❌ Error creating notification:", error);
+    }
+  };
+  
+  // Fungsi untuk mark notifikasi sebagai read
+  const markNotificationsAsRead = async () => {
+    if (!db || !userEmail) return;
+    
+    try {
+      const notificationsRef = collection(db, 'notifications');
+      const q = query(notificationsRef, where('isRead', '==', false));
+      
+      const querySnapshot = await getDocs(q);
+      const batch = writeBatch(db);
+      
+      querySnapshot.forEach((docSnapshot) => {
+        const notificationRef = doc(db, 'notifications', docSnapshot.id);
+        batch.update(notificationRef, { isRead: true });
+      });
+      
+      await batch.commit();
+      setUnreadNotifications(0);
+    } catch (error) {
+      console.error("❌ Error marking notifications as read:", error);
+    }
+  };
+  
+  // Fungsi untuk save event
+  const handleSaveEvent = async (event: CalendarEvent) => {
+    if (!db || !user || isSavingEvent) return;
+    
+    setIsSavingEvent(true);
+    
+    // Cek apakah event sudah disimpan
+    const alreadySaved = savedEvents.some(saved => saved.eventId === event.id);
+    if (alreadySaved) {
+      alert("Kegiatan ini sudah disimpan!");
+      setIsSavingEvent(false);
+      return;
+    }
+    
+    try {
+      const savedEventData = {
+        eventId: event.id,
+        userId: user.uid,
+        userEmail: userEmail,
+        title: event.title,
+        date: event.date instanceof Date ? event.date : event.date.toDate(),
+        savedAt: serverTimestamp()
+      };
+      
+      const docRef = await addDoc(collection(db, 'savedEvents'), savedEventData);
+      console.log("✅ Event saved:", docRef.id);
+      
+      // Refresh saved events
+      loadSavedEvents();
+      
+      alert("Kegiatan berhasil disimpan! Lihat di riwayat save Anda.");
+    } catch (error) {
+      console.error("❌ Error saving event:", error);
+      alert("Gagal menyimpan kegiatan. Silakan coba lagi.");
+    } finally {
+      setIsSavingEvent(false);
+    }
+  };
+  
+  // Fungsi untuk load saved events
+  const loadSavedEvents = async () => {
+    if (!db || !user) return;
+    
+    try {
+      const savedEventsRef = collection(db, 'savedEvents');
+      const q = query(savedEventsRef, where('userId', '==', user.uid), orderBy('savedAt', 'desc'));
+      
+      const querySnapshot = await getDocs(q);
+      const savedData: SavedEvent[] = [];
+      
+      querySnapshot.forEach((doc) => {
+        const data = doc.data();
+        let savedDate = data.date;
+        
+        if (savedDate && typeof savedDate.toDate === 'function') {
+          savedDate = savedDate.toDate();
+        }
+        
+        savedData.push({
+          id: doc.id,
+          eventId: data.eventId,
+          userId: data.userId,
+          userEmail: data.userEmail,
+          title: data.title,
+          date: savedDate,
+          savedAt: data.savedAt
+        });
+      });
+      
+      setSavedEvents(savedData);
+    } catch (error) {
+      console.error("❌ Error loading saved events:", error);
+    }
+  };
+  
+  // Fungsi untuk menghapus saved event
+  const handleRemoveSavedEvent = async (savedEventId: string) => {
+    if (!db) return;
+    
+    if (!confirm("Apakah Anda yakin ingin menghapus dari daftar save?")) {
+      return;
+    }
+    
+    try {
+      await deleteDoc(doc(db, 'savedEvents', savedEventId));
+      console.log("✅ Saved event removed:", savedEventId);
+      loadSavedEvents();
+      alert("Kegiatan dihapus dari daftar save!");
+    } catch (error) {
+      console.error("❌ Error removing saved event:", error);
+      alert("Gagal menghapus dari daftar save.");
+    }
+  };
+  
   // Load user dan events dari Firebase
   useEffect(() => {
     const unsubscribeAuth = onAuthStateChanged(auth, (currentUser) => {
@@ -279,11 +457,15 @@ export default function CalendarPage(): React.JSX.Element {
         setUserDisplayName(currentUser.displayName || currentUser.email?.split('@')[0] || 'User');
         setUserEmail(currentUser.email || '');
         setIsAdmin(checkIfAdmin(currentUser.email || ''));
+        
+        // Load saved events untuk user ini
+        loadSavedEvents();
       } else {
         setUser(null);
         setUserDisplayName('');
         setUserEmail('');
         setIsAdmin(false);
+        setSavedEvents([]);
       }
       setIsLoading(false);
     });
@@ -343,6 +525,65 @@ export default function CalendarPage(): React.JSX.Element {
     return () => unsubscribe();
   }, [db]);
   
+  // Load notifications dari Firebase
+  useEffect(() => {
+    if (!db) return;
+    
+    const notificationsRef = collection(db, 'notifications');
+    const q = query(notificationsRef, orderBy('createdAt', 'desc'));
+    
+    const unsubscribe = onSnapshot(q, 
+      (querySnapshot) => {
+        const notificationsData: Notification[] = [];
+        let unreadCount = 0;
+        
+        querySnapshot.forEach((doc) => {
+          const data = doc.data();
+          let notificationDate = data.date;
+          
+          if (notificationDate && typeof notificationDate.toDate === 'function') {
+            notificationDate = notificationDate.toDate();
+          }
+          
+          notificationsData.push({
+            id: doc.id,
+            eventId: data.eventId,
+            title: data.title || "Notification",
+            message: data.message || "",
+            date: notificationDate,
+            isRead: data.isRead || false,
+            createdBy: data.createdBy || "System",
+            createdAt: data.createdAt || new Date()
+          });
+          
+          if (!data.isRead) {
+            unreadCount++;
+          }
+        });
+        
+        setNotifications(notificationsData);
+        setUnreadNotifications(unreadCount);
+        
+        // Blink effect jika ada notifikasi baru
+        if (unreadCount > 0) {
+          setIsBlinking(true);
+          const blinkInterval = setInterval(() => {
+            setIsBlinking(prev => !prev);
+          }, 800);
+          
+          return () => clearInterval(blinkInterval);
+        } else {
+          setIsBlinking(false);
+        }
+      },
+      (error) => {
+        console.error("❌ Error loading notifications:", error);
+      }
+    );
+    
+    return () => unsubscribe();
+  }, [db]);
+  
   // Close modal when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -354,6 +595,12 @@ export default function CalendarPage(): React.JSX.Element {
       if (eventDetailsModalRef.current && !eventDetailsModalRef.current.contains(event.target as Node)) {
         setShowEventDetailsModal(false);
         setSelectedEvent(null);
+      }
+      if (notificationsRef.current && !notificationsRef.current.contains(event.target as Node)) {
+        setShowNotifications(false);
+      }
+      if (savedEventsRef.current && !savedEventsRef.current.contains(event.target as Node)) {
+        setShowSavedEvents(false);
       }
     };
     
@@ -402,15 +649,24 @@ export default function CalendarPage(): React.JSX.Element {
         createdAt: serverTimestamp()
       };
       
+      let eventId = "";
+      
       if (isEditingEvent && editingEventId) {
         // Update existing event
         const eventRef = doc(db, 'calendarEvents', editingEventId);
         await updateDoc(eventRef, eventData);
+        eventId = editingEventId;
         console.log("✅ Event updated:", editingEventId);
       } else {
         // Add new event
         const docRef = await addDoc(collection(db, 'calendarEvents'), eventData);
+        eventId = docRef.id;
         console.log("✅ Event added with ID:", docRef.id);
+        
+        // Buat notifikasi hanya untuk event baru (bukan edit)
+        if (isAdmin) {
+          await createNotification(eventId, eventForm.title.trim(), userDisplayName);
+        }
       }
       
       // Reset form
@@ -507,6 +763,12 @@ export default function CalendarPage(): React.JSX.Element {
           setShowEventDetailsModal(false);
           setSelectedEvent(null);
         }
+        if (showNotifications) {
+          setShowNotifications(false);
+        }
+        if (showSavedEvents) {
+          setShowSavedEvents(false);
+        }
       }
     };
     
@@ -514,11 +776,11 @@ export default function CalendarPage(): React.JSX.Element {
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [showAddEventModal, showEventDetailsModal]);
+  }, [showAddEventModal, showEventDetailsModal, showNotifications, showSavedEvents]);
   
   // Animasi untuk modal
   useEffect(() => {
-    if (showAddEventModal || showEventDetailsModal) {
+    if (showAddEventModal || showEventDetailsModal || showNotifications || showSavedEvents) {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = 'auto';
@@ -527,11 +789,34 @@ export default function CalendarPage(): React.JSX.Element {
     return () => {
       document.body.style.overflow = 'auto';
     };
-  }, [showAddEventModal, showEventDetailsModal]);
+  }, [showAddEventModal, showEventDetailsModal, showNotifications, showSavedEvents]);
   
   // Hitung total event
   const totalEventsThisYear = getTotalEventsThisYear();
   
+  // Fungsi untuk format tanggal saved event
+  const formatSavedDate = (date: Date): string => {
+    const now = new Date();
+    const diffTime = Math.abs(now.getTime() - date.getTime());
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+    
+    if (diffDays === 0) {
+      return "Hari ini";
+    } else if (diffDays === 1) {
+      return "Kemarin";
+    } else if (diffDays < 7) {
+      return `${diffDays} hari lalu`;
+    } else if (diffDays < 30) {
+      const weeks = Math.floor(diffDays / 7);
+      return `${weeks} minggu lalu`;
+    } else {
+      return `${date.getDate()} ${getShortMonthName(date.getMonth())} ${date.getFullYear()}`;
+    }
+  };
+
+  // Import getDocs dan writeBatch yang diperlukan
+  const { getDocs, writeBatch } = require('firebase/firestore');
+
   return (
     <div style={{
       minHeight: '100vh',
@@ -684,8 +969,140 @@ export default function CalendarPage(): React.JSX.Element {
           flex: 1,
           display: 'flex',
           justifyContent: 'center',
-          alignItems: 'center'
+          alignItems: 'center',
+          gap: '1.5rem'
         }}>
+          {/* Notifikasi Bell Icon dengan counter - BESAR */}
+          {user && (
+            <div style={{ position: 'relative' }}>
+              <motion.button
+                onClick={() => setShowNotifications(true)}
+                style={{
+                  backgroundColor: 'transparent',
+                  border: 'none',
+                  color: 'white',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  position: 'relative',
+                  padding: '0.5rem'
+                }}
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                {/* Bell Icon BESAR */}
+                <svg 
+                  width={isMobile ? "32" : "40"} 
+                  height={isMobile ? "32" : "40"} 
+                  viewBox="0 0 24 24" 
+                  fill="none" 
+                  stroke="white" 
+                  strokeWidth="2"
+                >
+                  <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                  <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                </svg>
+                
+                {/* Blink Dot Pemancar - BESAR dan JELAS */}
+                {unreadNotifications > 0 && (
+                  <motion.div
+                    animate={{
+                      scale: isBlinking ? [1, 1.5, 1] : 1,
+                      opacity: isBlinking ? [1, 0.5, 1] : 1
+                    }}
+                    transition={{
+                      duration: 0.8,
+                      repeat: Infinity,
+                      ease: "easeInOut"
+                    }}
+                    style={{
+                      position: 'absolute',
+                      top: '5px',
+                      right: '5px',
+                      width: isMobile ? '14px' : '18px',
+                      height: isMobile ? '14px' : '18px',
+                      backgroundColor: '#FF3B30',
+                      borderRadius: '50%',
+                      border: '2px solid black',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}
+                  >
+                    <span style={{
+                      color: 'white',
+                      fontSize: isMobile ? '0.7rem' : '0.8rem',
+                      fontWeight: 'bold',
+                      fontFamily: 'Helvetica, Arial, sans-serif'
+                    }}>
+                      {unreadNotifications > 9 ? '9+' : unreadNotifications}
+                    </span>
+                  </motion.div>
+                )}
+              </motion.button>
+            </div>
+          )}
+          
+          {/* Save Events Icon - BESAR */}
+          {user && (
+            <div style={{ position: 'relative' }}>
+              <motion.button
+                onClick={() => setShowSavedEvents(true)}
+                style={{
+                  backgroundColor: 'transparent',
+                  border: 'none',
+                  color: 'white',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  padding: '0.5rem'
+                }}
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                {/* Bookmark Icon BESAR */}
+                <svg 
+                  width={isMobile ? "32" : "40"} 
+                  height={isMobile ? "32" : "40"} 
+                  viewBox="0 0 24 24" 
+                  fill="none" 
+                  stroke="white" 
+                  strokeWidth="2"
+                >
+                  <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+                </svg>
+                
+                {/* Counter untuk saved events */}
+                {savedEvents.length > 0 && (
+                  <div style={{
+                    position: 'absolute',
+                    top: '5px',
+                    right: '5px',
+                    width: isMobile ? '14px' : '18px',
+                    height: isMobile ? '14px' : '18px',
+                    backgroundColor: '#3B82F6',
+                    borderRadius: '50%',
+                    border: '2px solid black',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}>
+                    <span style={{
+                      color: 'white',
+                      fontSize: isMobile ? '0.7rem' : '0.8rem',
+                      fontWeight: 'bold',
+                      fontFamily: 'Helvetica, Arial, sans-serif'
+                    }}>
+                      {savedEvents.length > 9 ? '9+' : savedEvents.length}
+                    </span>
+                  </div>
+                )}
+              </motion.button>
+            </div>
+          )}
+          
           {user && (
             <div style={{
               display: 'flex',
@@ -1730,7 +2147,15 @@ export default function CalendarPage(): React.JSX.Element {
                           alignItems: 'center',
                           gap: '0.8rem'
                         }}>
-                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
+                          {/* North West Arrow Icon di samping nama pembuat - BESAR */}
+                          <svg 
+                            width={isMobile ? "20" : "24"} 
+                            height={isMobile ? "20" : "24"} 
+                            viewBox="0 0 24 24" 
+                            fill="none" 
+                            stroke="white" 
+                            strokeWidth="2"
+                          >
                             <path d="M7 17L17 7"/>
                             <path d="M7 7H17V17"/>
                           </svg>
@@ -1763,14 +2188,55 @@ export default function CalendarPage(): React.JSX.Element {
                 padding: isMobile ? '1.8rem' : '2.5rem',
                 borderTop: '1px solid rgba(255, 255, 255, 0.2)',
                 display: 'flex',
-                justifyContent: 'flex-end',
+                justifyContent: 'space-between',
                 alignItems: 'center',
                 gap: '1rem',
                 flexShrink: 0
               }}>
+                {/* Save Button untuk User */}
+                {user && !isAdmin && (
+                  <motion.button
+                    onClick={() => handleSaveEvent(selectedEvent)}
+                    disabled={isSavingEvent}
+                    style={{
+                      padding: '0.8rem 1.5rem',
+                      backgroundColor: 'transparent',
+                      border: '1px solid rgba(255, 255, 255, 0.3)',
+                      borderRadius: '8px',
+                      color: 'white',
+                      fontSize: '1rem',
+                      fontWeight: '400',
+                      cursor: isSavingEvent ? 'not-allowed' : 'pointer',
+                      fontFamily: 'Helvetica, Arial, sans-serif',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.6rem',
+                      opacity: isSavingEvent ? 0.7 : 1
+                    }}
+                    whileHover={!isSavingEvent ? { backgroundColor: 'rgba(255, 255, 255, 0.1)' } : {}}
+                  >
+                    {isSavingEvent ? (
+                      <>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+                        </svg>
+                        Menyimpan...
+                      </>
+                    ) : (
+                      <>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+                        </svg>
+                        Save Kegiatan
+                      </>
+                    )}
+                  </motion.button>
+                )}
+                
                 <div style={{
                   display: 'flex',
-                  gap: '1rem'
+                  gap: '1rem',
+                  marginLeft: 'auto'
                 }}>
                   {isAdmin && (
                     <>
@@ -1826,6 +2292,564 @@ export default function CalendarPage(): React.JSX.Element {
                     </>
                   )}
                 </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+      
+      {/* Modal Notifications */}
+      <AnimatePresence>
+        {showNotifications && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              backgroundColor: 'rgba(0, 0, 0, 0.98)',
+              zIndex: 10002,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              backdropFilter: 'blur(10px)',
+              overflow: 'auto',
+              padding: isMobile ? '1rem' : '2rem'
+            }}
+          >
+            <motion.div
+              ref={notificationsRef}
+              initial={{ scale: 0.95, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.95, opacity: 0, y: 20 }}
+              transition={{ duration: 0.4 }}
+              style={{
+                backgroundColor: 'transparent',
+                borderRadius: '20px',
+                width: '100%',
+                maxWidth: '600px',
+                maxHeight: '90vh',
+                display: 'flex',
+                flexDirection: 'column',
+                overflow: 'hidden',
+                border: '1px solid rgba(255, 255, 255, 0.2)'
+              }}
+            >
+              {/* Header Modal Notifications */}
+              <div style={{
+                padding: isMobile ? '1.5rem' : '2rem',
+                borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                flexShrink: 0
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+                  {/* Bell Icon BESAR */}
+                  <svg 
+                    width={isMobile ? "32" : "40"} 
+                    height={isMobile ? "32" : "40"} 
+                    viewBox="0 0 24 24" 
+                    fill="none" 
+                    stroke="white" 
+                    strokeWidth="2"
+                  >
+                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                    <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                  </svg>
+                  
+                  <h2 style={{
+                    color: 'white',
+                    fontSize: isMobile ? '1.6rem' : '2rem',
+                    fontWeight: '400',
+                    margin: 0,
+                    fontFamily: 'Helvetica, Arial, sans-serif',
+                    letterSpacing: '0.5px'
+                  }}>
+                    Notifikasi
+                    {unreadNotifications > 0 && (
+                      <span style={{
+                        marginLeft: '0.8rem',
+                        backgroundColor: '#FF3B30',
+                        color: 'white',
+                        padding: '0.2rem 0.6rem',
+                        borderRadius: '12px',
+                        fontSize: '0.9rem',
+                        fontWeight: '500'
+                      }}>
+                        {unreadNotifications} baru
+                      </span>
+                    )}
+                  </h2>
+                </div>
+                
+                <motion.button
+                  onClick={() => {
+                    setShowNotifications(false);
+                    markNotificationsAsRead();
+                  }}
+                  style={{
+                    backgroundColor: 'transparent',
+                    border: '1px solid rgba(255, 255, 255, 0.3)',
+                    color: 'white',
+                    width: '45px',
+                    height: '45px',
+                    borderRadius: '50%',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '1.8rem',
+                    fontFamily: 'Helvetica, Arial, sans-serif'
+                  }}
+                  whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
+                >
+                  ×
+                </motion.button>
+              </div>
+              
+              {/* Notifications Content */}
+              <div style={{
+                flex: 1,
+                overflowY: 'auto',
+                padding: isMobile ? '1rem' : '1.5rem',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '1rem'
+              }}>
+                {notifications.length === 0 ? (
+                  <div style={{
+                    padding: '3rem 2rem',
+                    textAlign: 'center',
+                    color: 'rgba(255, 255, 255, 0.5)',
+                    fontSize: '1.1rem',
+                    fontFamily: 'Helvetica, Arial, sans-serif'
+                  }}>
+                    Tidak ada notifikasi
+                  </div>
+                ) : (
+                  notifications.map((notification) => (
+                    <motion.div
+                      key={notification.id}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      style={{
+                        backgroundColor: notification.isRead ? 'transparent' : 'rgba(255, 255, 255, 0.05)',
+                        border: '1px solid rgba(255, 255, 255, 0.2)',
+                        borderRadius: '12px',
+                        padding: '1.2rem',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '0.5rem'
+                      }}
+                    >
+                      <div style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'flex-start'
+                      }}>
+                        <div style={{
+                          color: 'white',
+                          fontSize: '1.1rem',
+                          fontWeight: '500',
+                          fontFamily: 'Helvetica, Arial, sans-serif'
+                        }}>
+                          {notification.title}
+                        </div>
+                        {!notification.isRead && (
+                          <div style={{
+                            width: '10px',
+                            height: '10px',
+                            backgroundColor: '#FF3B30',
+                            borderRadius: '50%'
+                          }} />
+                        )}
+                      </div>
+                      
+                      <div style={{
+                        color: 'rgba(255, 255, 255, 0.8)',
+                        fontSize: '1rem',
+                        fontFamily: 'Helvetica, Arial, sans-serif',
+                        lineHeight: 1.4
+                      }}>
+                        {notification.message}
+                      </div>
+                      
+                      <div style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        marginTop: '0.5rem'
+                      }}>
+                        <div style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.5rem',
+                          color: 'rgba(255, 255, 255, 0.6)',
+                          fontSize: '0.9rem',
+                          fontFamily: 'Helvetica, Arial, sans-serif'
+                        }}>
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <polyline points="12 6 12 12 16 14"/>
+                          </svg>
+                          {formatDate(notification.date instanceof Date ? notification.date : notification.date.toDate())}
+                        </div>
+                        
+                        <div style={{
+                          color: 'rgba(255, 255, 255, 0.7)',
+                          fontSize: '0.9rem',
+                          fontFamily: 'Helvetica, Arial, sans-serif'
+                        }}>
+                          oleh {notification.createdBy}
+                        </div>
+                      </div>
+                    </motion.div>
+                  ))
+                )}
+              </div>
+              
+              {/* Footer Notifications */}
+              <div style={{
+                padding: isMobile ? '1.5rem' : '2rem',
+                borderTop: '1px solid rgba(255, 255, 255, 0.2)',
+                display: 'flex',
+                justifyContent: 'flex-end',
+                gap: '1.2rem',
+                flexShrink: 0
+              }}>
+                <motion.button
+                  onClick={() => {
+                    setShowNotifications(false);
+                    markNotificationsAsRead();
+                  }}
+                  style={{
+                    padding: '0.9rem 1.8rem',
+                    backgroundColor: 'transparent',
+                    border: '1px solid rgba(255, 255, 255, 0.3)',
+                    borderRadius: '10px',
+                    color: 'white',
+                    fontSize: '1rem',
+                    fontWeight: '400',
+                    cursor: 'pointer',
+                    fontFamily: 'Helvetica, Arial, sans-serif'
+                  }}
+                  whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
+                >
+                  Tutup
+                </motion.button>
+                
+                {unreadNotifications > 0 && (
+                  <motion.button
+                    onClick={markNotificationsAsRead}
+                    style={{
+                      padding: '0.9rem 1.8rem',
+                      backgroundColor: 'transparent',
+                      border: '1px solid rgba(255, 255, 255, 0.3)',
+                      borderRadius: '10px',
+                      color: 'white',
+                      fontSize: '1rem',
+                      fontWeight: '400',
+                      cursor: 'pointer',
+                      fontFamily: 'Helvetica, Arial, sans-serif'
+                    }}
+                    whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
+                  >
+                    Tandai Sudah Dibaca
+                  </motion.button>
+                )}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+      
+      {/* Modal Saved Events */}
+      <AnimatePresence>
+        {showSavedEvents && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              backgroundColor: 'rgba(0, 0, 0, 0.98)',
+              zIndex: 10002,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              backdropFilter: 'blur(10px)',
+              overflow: 'auto',
+              padding: isMobile ? '1rem' : '2rem'
+            }}
+          >
+            <motion.div
+              ref={savedEventsRef}
+              initial={{ scale: 0.95, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.95, opacity: 0, y: 20 }}
+              transition={{ duration: 0.4 }}
+              style={{
+                backgroundColor: 'transparent',
+                borderRadius: '20px',
+                width: '100%',
+                maxWidth: '700px',
+                maxHeight: '90vh',
+                display: 'flex',
+                flexDirection: 'column',
+                overflow: 'hidden',
+                border: '1px solid rgba(255, 255, 255, 0.2)'
+              }}
+            >
+              {/* Header Modal Saved Events */}
+              <div style={{
+                padding: isMobile ? '1.5rem' : '2rem',
+                borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                flexShrink: 0
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+                  {/* Bookmark Icon BESAR */}
+                  <svg 
+                    width={isMobile ? "32" : "40"} 
+                    height={isMobile ? "32" : "40"} 
+                    viewBox="0 0 24 24" 
+                    fill="none" 
+                    stroke="white" 
+                    strokeWidth="2"
+                  >
+                    <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+                  </svg>
+                  
+                  <h2 style={{
+                    color: 'white',
+                    fontSize: isMobile ? '1.6rem' : '2rem',
+                    fontWeight: '400',
+                    margin: 0,
+                    fontFamily: 'Helvetica, Arial, sans-serif',
+                    letterSpacing: '0.5px'
+                  }}>
+                    Kegiatan Tersimpan
+                    <span style={{
+                      marginLeft: '0.8rem',
+                      backgroundColor: '#3B82F6',
+                      color: 'white',
+                      padding: '0.2rem 0.6rem',
+                      borderRadius: '12px',
+                      fontSize: '0.9rem',
+                      fontWeight: '500'
+                    }}>
+                      {savedEvents.length} kegiatan
+                    </span>
+                  </h2>
+                </div>
+                
+                <motion.button
+                  onClick={() => setShowSavedEvents(false)}
+                  style={{
+                    backgroundColor: 'transparent',
+                    border: '1px solid rgba(255, 255, 255, 0.3)',
+                    color: 'white',
+                    width: '45px',
+                    height: '45px',
+                    borderRadius: '50%',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '1.8rem',
+                    fontFamily: 'Helvetica, Arial, sans-serif'
+                  }}
+                  whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
+                >
+                  ×
+                </motion.button>
+              </div>
+              
+              {/* Saved Events Content */}
+              <div style={{
+                flex: 1,
+                overflowY: 'auto',
+                padding: isMobile ? '1rem' : '1.5rem',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '1rem'
+              }}>
+                {savedEvents.length === 0 ? (
+                  <div style={{
+                    padding: '3rem 2rem',
+                    textAlign: 'center',
+                    color: 'rgba(255, 255, 255, 0.5)',
+                    fontSize: '1.1rem',
+                    fontFamily: 'Helvetica, Arial, sans-serif'
+                  }}>
+                    Belum ada kegiatan yang disimpan
+                  </div>
+                ) : (
+                  savedEvents.map((savedEvent) => {
+                    const savedDate = savedEvent.date instanceof Date ? savedEvent.date : savedEvent.date.toDate();
+                    
+                    return (
+                      <motion.div
+                        key={savedEvent.id}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        style={{
+                          backgroundColor: 'transparent',
+                          border: '1px solid rgba(255, 255, 255, 0.2)',
+                          borderRadius: '12px',
+                          padding: '1.2rem',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: '0.8rem'
+                        }}
+                      >
+                        <div style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'flex-start'
+                        }}>
+                          <div style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.8rem'
+                          }}>
+                            {/* North West Arrow Icon di setiap saved event - BESAR */}
+                            <svg 
+                              width={isMobile ? "20" : "24"} 
+                              height={isMobile ? "20" : "24"} 
+                              viewBox="0 0 24 24" 
+                              fill="none" 
+                              stroke="white" 
+                              strokeWidth="2"
+                            >
+                              <path d="M7 17L17 7"/>
+                              <path d="M7 7H17V17"/>
+                            </svg>
+                            
+                            <div style={{
+                              color: 'white',
+                              fontSize: '1.1rem',
+                              fontWeight: '500',
+                              fontFamily: 'Helvetica, Arial, sans-serif'
+                            }}>
+                              {savedEvent.title}
+                            </div>
+                          </div>
+                          
+                          <motion.button
+                            onClick={() => handleRemoveSavedEvent(savedEvent.id)}
+                            style={{
+                              backgroundColor: 'transparent',
+                              border: '1px solid rgba(255, 255, 255, 0.3)',
+                              color: 'white',
+                              width: '32px',
+                              height: '32px',
+                              borderRadius: '50%',
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              fontSize: '1.2rem',
+                              fontFamily: 'Helvetica, Arial, sans-serif'
+                            }}
+                            whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
+                          >
+                            ×
+                          </motion.button>
+                        </div>
+                        
+                        <div style={{
+                          color: 'rgba(255, 255, 255, 0.7)',
+                          fontSize: '0.95rem',
+                          fontFamily: 'Helvetica, Arial, sans-serif',
+                          paddingLeft: '2rem'
+                        }}>
+                          Tanggal: {formatDate(savedDate)}
+                        </div>
+                        
+                        <div style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          paddingLeft: '2rem'
+                        }}>
+                          <div style={{
+                            color: 'rgba(255, 255, 255, 0.6)',
+                            fontSize: '0.9rem',
+                            fontFamily: 'Helvetica, Arial, sans-serif'
+                          }}>
+                            Disimpan {formatSavedDate(savedDate)}
+                          </div>
+                          
+                          <motion.button
+                            onClick={() => {
+                              const originalEvent = calendarEvents.find(e => e.id === savedEvent.eventId);
+                              if (originalEvent) {
+                                handleViewEventDetails(originalEvent);
+                                setShowSavedEvents(false);
+                              }
+                            }}
+                            style={{
+                              padding: '0.4rem 0.8rem',
+                              backgroundColor: 'transparent',
+                              border: '1px solid rgba(255, 255, 255, 0.3)',
+                              borderRadius: '6px',
+                              color: 'white',
+                              fontSize: '0.8rem',
+                              fontWeight: '400',
+                              cursor: 'pointer',
+                              fontFamily: 'Helvetica, Arial, sans-serif'
+                            }}
+                            whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
+                          >
+                            Lihat Detail
+                          </motion.button>
+                        </div>
+                      </motion.div>
+                    );
+                  })
+                )}
+              </div>
+              
+              {/* Footer Saved Events */}
+              <div style={{
+                padding: isMobile ? '1.5rem' : '2rem',
+                borderTop: '1px solid rgba(255, 255, 255, 0.2)',
+                display: 'flex',
+                justifyContent: 'flex-end',
+                gap: '1.2rem',
+                flexShrink: 0
+              }}>
+                <motion.button
+                  onClick={() => setShowSavedEvents(false)}
+                  style={{
+                    padding: '0.9rem 1.8rem',
+                    backgroundColor: 'transparent',
+                    border: '1px solid rgba(255, 255, 255, 0.3)',
+                    borderRadius: '10px',
+                    color: 'white',
+                    fontSize: '1rem',
+                    fontWeight: '400',
+                    cursor: 'pointer',
+                    fontFamily: 'Helvetica, Arial, sans-serif'
+                  }}
+                  whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
+                >
+                  Tutup
+                </motion.button>
               </div>
             </motion.div>
           </motion.div>
