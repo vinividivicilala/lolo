@@ -49,9 +49,24 @@ export default function TimelinePage() {
     />
   );
 
-  const SouthEastArrow = () => (
-    <svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="#ffffff" strokeWidth="2">
-      <path d="M8 8l10 10m0 0V8m0 10H8" strokeLinecap="round" strokeLinejoin="round"/>
+  // Southeast Arrow - BESAR, seperti angka 3, TANPA ANIMASI
+  const SoutheastArrow = () => (
+    <svg 
+      width="48" 
+      height="48" 
+      viewBox="0 0 48 48" 
+      fill="none" 
+      stroke="#ffffff" 
+      strokeWidth="2.5"
+      style={{
+        display: 'block'
+      }}
+    >
+      <path 
+        d="M16 16l16 16m0 0V16m0 16H16" 
+        strokeLinecap="round" 
+        strokeLinejoin="round"
+      />
     </svg>
   );
 
@@ -262,89 +277,93 @@ export default function TimelinePage() {
                 </div>
               </div>
 
-              {/* Kolom 3: Konten */}
+              {/* Kolom 3: Konten dengan Arrow Besar di Depan Judul */}
               <div style={{
                 flex: 1,
-                marginLeft: '60px'
+                marginLeft: '60px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '1.5rem'
               }}>
-                {/* Judul */}
+                {/* Southeast Arrow BESAR - TANPA ANIMASI - UNTUK SEMUA JUDUL */}
                 <div style={{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '1.5rem',
-                  marginBottom: '0.75rem'
+                  justifyContent: 'center',
+                  opacity: step.status === 'pending' ? 0.4 : 0.9
                 }}>
-                  <h3 style={{
-                    fontSize: '2rem',
-                    fontWeight: 400,
-                    margin: 0,
-                    color: '#ffffff'
+                  <SoutheastArrow />
+                </div>
+
+                {/* Konten Teks */}
+                <div style={{
+                  flex: 1
+                }}>
+                  {/* Judul */}
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '1.5rem',
+                    marginBottom: '0.75rem'
                   }}>
-                    {step.title}
-                  </h3>
+                    <h3 style={{
+                      fontSize: '2rem',
+                      fontWeight: 400,
+                      margin: 0,
+                      color: '#ffffff'
+                    }}>
+                      {step.title}
+                    </h3>
+                    
+                    {step.status === 'current' && (
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.5rem',
+                        padding: '0.5rem 1.25rem',
+                        backgroundColor: 'rgba(255,255,255,0.15)',
+                        borderRadius: '20px',
+                        fontSize: '1rem',
+                        color: '#ffffff',
+                        fontWeight: 500,
+                        letterSpacing: '0.5px'
+                      }}>
+                        {/* Dot di teks TRANSMITTING - SAMA PERSIS dengan pemancar */}
+                        <BlinkingDot />
+                        TRANSMITTING
+                      </div>
+                    )}
+                  </div>
                   
-                  {step.status === 'current' && (
-                    <div style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '0.5rem',
-                      padding: '0.5rem 1.25rem',
-                      backgroundColor: 'rgba(255,255,255,0.15)',
-                      borderRadius: '20px',
-                      fontSize: '1rem',
+                  {/* Tanggal dan Status */}
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '1.5rem'
+                  }}>
+                    <span style={{
+                      fontSize: '1.3rem',
+                      fontFamily: 'monospace',
+                      fontWeight: 500,
+                      color: '#ffffff',
+                      opacity: 0.9
+                    }}>
+                      {step.date}
+                    </span>
+                    
+                    <span style={{ 
+                      fontSize: '1.3rem', 
                       color: '#ffffff',
                       fontWeight: 500,
-                      letterSpacing: '0.5px'
+                      opacity: step.status === 'pending' ? 0.6 : 0.9
                     }}>
-                      {/* Dot di teks TRANSMITTING - SAMA PERSIS dengan pemancar */}
-                      <BlinkingDot />
-                      TRANSMITTING
-                    </div>
-                  )}
-                </div>
-                
-                {/* Tanggal dan Status */}
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '1.5rem'
-                }}>
-                  <span style={{
-                    fontSize: '1.3rem',
-                    fontFamily: 'monospace',
-                    fontWeight: 500,
-                    color: '#ffffff',
-                    opacity: 0.9
-                  }}>
-                    {step.date}
-                  </span>
-                  
-                  <span style={{ 
-                    fontSize: '1.3rem', 
-                    color: '#ffffff',
-                    fontWeight: 500,
-                    opacity: step.status === 'pending' ? 0.6 : 0.9
-                  }}>
-                    {step.status === 'completed' && 'Completed'}
-                    {step.status === 'current' && 'In Progress'}
-                    {step.status === 'pending' && 'Upcoming'}
-                  </span>
+                      {step.status === 'completed' && 'Completed'}
+                      {step.status === 'current' && 'In Progress'}
+                      {step.status === 'pending' && 'Upcoming'}
+                    </span>
+                  </div>
                 </div>
               </div>
-
-              {/* Southeast Arrow */}
-              {step.status === 'current' && (
-                <motion.div
-                  style={{
-                    marginLeft: '2rem',
-                    opacity: 1
-                  }}
-                  animate={{ x: [0, 8, 0] }}
-                  transition={{ duration: 2, repeat: Infinity }}
-                >
-                  <SouthEastArrow />
-                </motion.div>
-              )}
             </motion.div>
           ))}
         </div>
