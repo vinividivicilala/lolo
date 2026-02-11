@@ -23,12 +23,52 @@ export default function TimelinePage() {
   }, []);
 
   const TransmitterIcon = () => (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-      <circle cx="12" cy="12" r="3" fill="currentColor" />
-      <circle cx="12" cy="12" r="6" stroke="currentColor" strokeOpacity="0.5" />
-      <circle cx="12" cy="12" r="9" stroke="currentColor" strokeOpacity="0.3" />
-      <circle cx="12" cy="12" r="12" stroke="currentColor" strokeOpacity="0.1" />
-    </svg>
+    <motion.div
+      style={{
+        position: 'relative',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: '40px',
+        height: '40px'
+      }}
+      animate={{ 
+        scale: [1, 1.2, 1],
+        opacity: [0.7, 1, 0.7]
+      }}
+      transition={{
+        duration: 1.5,
+        repeat: Infinity,
+        ease: "easeInOut"
+      }}
+    >
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+        {/* Lingkaran luar berkedip */}
+        <motion.circle
+          cx="12"
+          cy="12"
+          r="10"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          fill="none"
+          animate={{ strokeOpacity: [0.3, 0.7, 0.3] }}
+          transition={{ duration: 1.5, repeat: Infinity }}
+        />
+        {/* Lingkaran tengah */}
+        <motion.circle
+          cx="12"
+          cy="12"
+          r="6"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          fill="none"
+          animate={{ strokeOpacity: [0.5, 0.9, 0.5] }}
+          transition={{ duration: 1.5, repeat: Infinity, delay: 0.2 }}
+        />
+        {/* Titik tengah */}
+        <circle cx="12" cy="12" r="3" fill="currentColor" />
+      </svg>
+    </motion.div>
   );
 
   const SouthEastArrow = () => (
@@ -112,12 +152,12 @@ export default function TimelinePage() {
         {/* Main Timeline Container */}
         <div style={{
           position: 'relative',
-          maxWidth: '800px',
+          maxWidth: '900px',
           margin: '0 auto',
           padding: '2rem 0'
         }}>
           
-          {/* Timeline Steps dengan penghubung titik-titik */}
+          {/* Timeline Steps dengan semua penghubung titik-titik */}
           {timelineSteps.map((step, index) => (
             <motion.div
               key={index}
@@ -129,136 +169,160 @@ export default function TimelinePage() {
               }}
               style={{
                 display: 'flex',
-                alignItems: 'flex-start',
-                marginBottom: '4rem',
+                marginBottom: '3rem',
                 position: 'relative',
-                minHeight: '60px'
+                minHeight: '80px'
               }}
             >
-              {/* Bagian Kiri: Nomor dan titik-titik penghubung vertikal */}
+              {/* Kolom 1: Nomor Step dengan penghubung vertikal titik-titik */}
               <div style={{
-                width: '100px',
+                width: '80px',
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
                 position: 'relative'
               }}>
-                
                 {/* Nomor Step */}
                 <div style={{
                   fontSize: '0.875rem',
                   opacity: step.status === 'pending' ? 0.3 : 0.5,
                   fontFamily: 'monospace',
-                  marginBottom: '0.5rem'
+                  marginBottom: '8px'
                 }}>
                   {String(index + 1).padStart(2, '0')}
                 </div>
                 
-                {/* Titik-titik penghubung vertikal ke step berikutnya */}
+                {/* Titik-titik vertikal ke bawah */}
                 {index < timelineSteps.length - 1 && (
                   <div style={{
                     color: 'rgba(255,255,255,0.1)',
-                    fontSize: '0.8rem',
-                    letterSpacing: '1px',
+                    fontSize: '0.7rem',
+                    letterSpacing: '2px',
                     fontFamily: 'monospace',
                     writingMode: 'vertical-rl',
                     textOrientation: 'mixed',
-                    height: '40px',
+                    height: '50px',
                     display: 'flex',
                     alignItems: 'center',
-                    justifyContent: 'center'
+                    justifyContent: 'center',
+                    opacity: 0.5
                   }}>
-                    .......
+                    ................
                   </div>
                 )}
               </div>
 
-              {/* Bagian Tengah: Indikator Status dengan titik-titik penghubung horizontal */}
+              {/* Kolom 2: Garis vertikal utama titik-titik */}
               <div style={{
+                width: '40px',
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
-                width: '60px',
                 position: 'relative'
               }}>
-                
-                {/* Indikator Status */}
+                {/* Titik-titik vertikal penuh */}
+                <div style={{
+                  color: 'rgba(255,255,255,0.1)',
+                  fontSize: '0.7rem',
+                  letterSpacing: '2px',
+                  fontFamily: 'monospace',
+                  writingMode: 'vertical-rl',
+                  textOrientation: 'mixed',
+                  height: '100%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  opacity: 0.5
+                }}>
+                  ................
+                </div>
+              </div>
+
+              {/* Kolom 3: Indikator Status di tengah garis vertikal */}
+              <div style={{
+                position: 'absolute',
+                left: '120px', // 80px (kolom1) + 40px (kolom2)
+                top: '50%',
+                transform: 'translateY(-50%)',
+                zIndex: 2
+              }}>
                 {step.status === 'current' ? (
-                  // Pemancar berkedip untuk step aktif
-                  <motion.div
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      width: '40px',
-                      height: '40px'
-                    }}
-                    animate={{ 
-                      scale: [1, 1.1, 1],
-                      opacity: [0.8, 1, 0.8]
-                    }}
-                    transition={{
-                      duration: 2,
-                      repeat: Infinity,
-                      ease: "easeInOut"
-                    }}
-                  >
+                  // Pemancar berkedip di tengah garis vertikal
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    width: '40px',
+                    height: '40px',
+                    backgroundColor: '#000000',
+                    borderRadius: '50%'
+                  }}>
                     <TransmitterIcon />
-                  </motion.div>
+                  </div>
                 ) : step.status === 'completed' ? (
-                  // Dot solid untuk step selesai
+                  // Dot solid di tengah garis vertikal
                   <div style={{
                     width: '12px',
                     height: '12px',
                     borderRadius: '50%',
                     backgroundColor: '#ffffff',
-                    margin: '14px 0'
+                    border: '2px solid #000000'
                   }} />
                 ) : (
-                  // Titik-titik untuk step pending
+                  // Titik-titik di tengah garis vertikal
                   <div style={{
                     color: 'rgba(255,255,255,0.2)',
-                    fontSize: '1.2rem',
+                    fontSize: '0.8rem',
                     letterSpacing: '2px',
                     fontFamily: 'monospace',
-                    margin: '14px 0'
+                    backgroundColor: '#000000',
+                    padding: '0 5px'
                   }}>
-                    .......
+                    ......
                   </div>
                 )}
-                
-                {/* Titik-titik penghubung horizontal ke konten */}
+              </div>
+
+              {/* Kolom 4: Titik-titik horizontal ke konten */}
+              <div style={{
+                width: '40px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                paddingTop: '20px'
+              }}>
                 <div style={{
                   color: 'rgba(255,255,255,0.1)',
-                  fontSize: '0.8rem',
-                  letterSpacing: '1px',
+                  fontSize: '0.7rem',
+                  letterSpacing: '2px',
                   fontFamily: 'monospace',
-                  marginTop: '8px'
+                  opacity: 0.5
                 }}>
-                  .......
+                  ................
                 </div>
               </div>
 
-              {/* Bagian Kanan: Konten Step */}
+              {/* Kolom 5: Konten Step */}
               <div style={{
                 flex: 1,
-                paddingLeft: '1rem',
-                position: 'relative'
+                paddingLeft: '0.5rem',
+                paddingTop: '20px'
               }}>
+                {/* Baris 1: Judul dengan titik-titik di awal */}
                 <div style={{
                   display: 'flex',
                   alignItems: 'center',
                   gap: '1rem',
-                  marginBottom: '0.25rem'
+                  marginBottom: '0.5rem'
                 }}>
-                  {/* Titik-titik penghubung ke judul */}
                   <div style={{
                     color: step.status === 'current' ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.1)',
-                    fontSize: '0.8rem',
-                    letterSpacing: '1px',
-                    fontFamily: 'monospace'
+                    fontSize: '0.7rem',
+                    letterSpacing: '2px',
+                    fontFamily: 'monospace',
+                    opacity: 0.5
                   }}>
-                    .......
+                    ................
                   </div>
                   
                   <h3 style={{
@@ -295,7 +359,7 @@ export default function TimelinePage() {
                   )}
                 </div>
                 
-                {/* Garis pemisah dengan titik-titik */}
+                {/* Baris 2: Garis pemisah dengan titik-titik */}
                 <div style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -304,61 +368,45 @@ export default function TimelinePage() {
                 }}>
                   <div style={{
                     color: 'rgba(255,255,255,0.1)',
-                    fontSize: '0.7rem',
-                    letterSpacing: '1px',
+                    fontSize: '0.6rem',
+                    letterSpacing: '3px',
                     fontFamily: 'monospace',
                     marginRight: '0.5rem'
                   }}>
-                    ..........
+                    ........................
                   </div>
-                  <div style={{
-                    width: '1px',
-                    height: '12px',
-                    backgroundColor: 'rgba(255,255,255,0.1)',
-                    marginRight: '0.5rem'
-                  }} />
                 </div>
                 
-                {/* Tanggal dan Status */}
+                {/* Baris 3: Tanggal dan Status */}
                 <div style={{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '1rem',
+                  gap: '0.5rem',
                   opacity: step.status === 'pending' ? 0.3 : 0.7
                 }}>
                   <span style={{
                     fontSize: '0.875rem',
-                    fontFamily: 'monospace'
+                    fontFamily: 'monospace',
+                    opacity: 0.8
                   }}>
                     {step.date}
                   </span>
                   
+                  <div style={{
+                    color: step.status === 'current' ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.1)',
+                    fontSize: '0.7rem',
+                    letterSpacing: '2px',
+                    fontFamily: 'monospace'
+                  }}>
+                    ................
+                  </div>
+                  
                   {step.status === 'completed' && (
-                    <>
-                      <div style={{
-                        color: 'rgba(255,255,255,0.2)',
-                        fontSize: '0.8rem',
-                        letterSpacing: '1px',
-                        fontFamily: 'monospace'
-                      }}>
-                        ......
-                      </div>
-                      <span style={{ fontSize: '0.875rem' }}>Completed</span>
-                    </>
+                    <span style={{ fontSize: '0.875rem' }}>Completed</span>
                   )}
                   
                   {step.status === 'pending' && (
-                    <>
-                      <div style={{
-                        color: 'rgba(255,255,255,0.2)',
-                        fontSize: '0.8rem',
-                        letterSpacing: '1px',
-                        fontFamily: 'monospace'
-                      }}>
-                        ......
-                      </div>
-                      <span style={{ fontSize: '0.875rem', opacity: 0.5 }}>Upcoming</span>
-                    </>
+                    <span style={{ fontSize: '0.875rem', opacity: 0.5 }}>Upcoming</span>
                   )}
                 </div>
               </div>
@@ -368,8 +416,8 @@ export default function TimelinePage() {
                 <motion.div
                   style={{
                     marginLeft: '1rem',
-                    opacity: 0.8,
-                    alignSelf: 'center'
+                    marginTop: '20px',
+                    opacity: 0.8
                   }}
                   animate={{ x: [0, 5, 0] }}
                   transition={{ duration: 2, repeat: Infinity }}
