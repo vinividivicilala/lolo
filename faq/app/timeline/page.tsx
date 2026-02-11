@@ -270,41 +270,29 @@ export default function TimelinePage() {
                     letterSpacing: '4px',
                     fontFamily: 'monospace',
                     opacity: 0.6,
-                    marginLeft: '25px' // Mulai dari tepi titik bulat
+                    marginLeft: '25px'
                   }}>
                     ••••••••••••••••
                   </div>
                 </div>
               </div>
 
-              {/* Kolom 3: Konten dengan Arrow Besar di Depan Judul */}
+              {/* Kolom 3: Konten */}
               <div style={{
                 flex: 1,
-                marginLeft: '60px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '1.5rem'
+                marginLeft: '60px'
               }}>
-                {/* Southeast Arrow BESAR - TANPA ANIMASI - UNTUK SEMUA JUDUL */}
+                {/* Judul dengan Arrow di Sisi Kanan */}
                 <div style={{
                   display: 'flex',
                   alignItems: 'center',
-                  justifyContent: 'center',
-                  opacity: step.status === 'pending' ? 0.4 : 0.9
+                  justifyContent: 'space-between',
+                  marginBottom: '0.75rem'
                 }}>
-                  <SoutheastArrow />
-                </div>
-
-                {/* Konten Teks */}
-                <div style={{
-                  flex: 1
-                }}>
-                  {/* Judul */}
                   <div style={{
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '1.5rem',
-                    marginBottom: '0.75rem'
+                    gap: '1.5rem'
                   }}>
                     <h3 style={{
                       fontSize: '2rem',
@@ -328,40 +316,50 @@ export default function TimelinePage() {
                         fontWeight: 500,
                         letterSpacing: '0.5px'
                       }}>
-                        {/* Dot di teks TRANSMITTING - SAMA PERSIS dengan pemancar */}
                         <BlinkingDot />
                         TRANSMITTING
                       </div>
                     )}
                   </div>
                   
-                  {/* Tanggal dan Status */}
+                  {/* Southeast Arrow di SISI KANAN JUDUL */}
                   <div style={{
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '1.5rem'
+                    justifyContent: 'center',
+                    opacity: step.status === 'pending' ? 0.4 : 0.9,
+                    marginLeft: '1rem'
                   }}>
-                    <span style={{
-                      fontSize: '1.3rem',
-                      fontFamily: 'monospace',
-                      fontWeight: 500,
-                      color: '#ffffff',
-                      opacity: 0.9
-                    }}>
-                      {step.date}
-                    </span>
-                    
-                    <span style={{ 
-                      fontSize: '1.3rem', 
-                      color: '#ffffff',
-                      fontWeight: 500,
-                      opacity: step.status === 'pending' ? 0.6 : 0.9
-                    }}>
-                      {step.status === 'completed' && 'Completed'}
-                      {step.status === 'current' && 'In Progress'}
-                      {step.status === 'pending' && 'Upcoming'}
-                    </span>
+                    <SoutheastArrow />
                   </div>
+                </div>
+                
+                {/* Tanggal dan Status */}
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '1.5rem'
+                }}>
+                  <span style={{
+                    fontSize: '1.3rem',
+                    fontFamily: 'monospace',
+                    fontWeight: 500,
+                    color: '#ffffff',
+                    opacity: 0.9
+                  }}>
+                    {step.date}
+                  </span>
+                  
+                  <span style={{ 
+                    fontSize: '1.3rem', 
+                    color: '#ffffff',
+                    fontWeight: 500,
+                    opacity: step.status === 'pending' ? 0.6 : 0.9
+                  }}>
+                    {step.status === 'completed' && 'Completed'}
+                    {step.status === 'current' && 'In Progress'}
+                    {step.status === 'pending' && 'Upcoming'}
+                  </span>
                 </div>
               </div>
             </motion.div>
