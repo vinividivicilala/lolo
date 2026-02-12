@@ -73,6 +73,7 @@ export default function SignInPage() {
   const [loading, setLoading] = useState(false);
   const [user, setUser] = useState<any>(null);
   const [error, setError] = useState("");
+  const [loginSuccess, setLoginSuccess] = useState(false);
   
   // --- STATE UNTUK FIREBASE (HANYA CLIENT) ---
   const [firebaseInitialized, setFirebaseInitialized] = useState(false);
@@ -280,7 +281,7 @@ export default function SignInPage() {
   };
 
   // ============================================
-  // 8. AUTH STATE CHANGED LISTENER
+  // 8. AUTH STATE CHANGED LISTENER - TANPA REDIRECT OTOMATIS
   // ============================================
   useEffect(() => {
     if (!isMounted || !firebaseAuth || !firebaseInitialized) return;
@@ -291,7 +292,9 @@ export default function SignInPage() {
         console.log("User logged in:", currentUser.email);
         setEmail("");
         setPassword("");
-        router.push('/notes');
+        setLoginSuccess(true);
+        // HAPUS redirect otomatis ke /notes
+        // router.push('/notes');  // COMMENTED OUT - TIDAK LANGSUNG REDIRECT
       }
     });
 
@@ -299,13 +302,14 @@ export default function SignInPage() {
   }, [router, isMounted, firebaseAuth, firebaseInitialized]);
 
   // ============================================
-  // 9. LOGIN HANDLERS - TANPA MODAL AUTO LOGIN
+  // 9. LOGIN HANDLERS - DENGAN SUCCESS STATE
   // ============================================
   const handleGoogleLogin = async () => {
     if (!firebaseAuth) return;
     
     setLoading(true);
     setError("");
+    setLoginSuccess(false);
     
     try {
       const provider = new GoogleAuthProvider();
@@ -329,6 +333,7 @@ export default function SignInPage() {
     
     setLoading(true);
     setError("");
+    setLoginSuccess(false);
     
     try {
       const provider = new GithubAuthProvider();
@@ -353,6 +358,7 @@ export default function SignInPage() {
     
     setLoading(true);
     setError("");
+    setLoginSuccess(false);
     
     try {
       const result = await signInWithEmailAndPassword(firebaseAuth, email, password);
@@ -394,6 +400,8 @@ export default function SignInPage() {
       console.log("User logged out");
       setEmail("");
       setPassword("");
+      setUser(null);
+      setLoginSuccess(false);
     } catch (error) {
       console.error("Logout error:", error);
     }
@@ -405,6 +413,10 @@ export default function SignInPage() {
 
   const handleForgotPassword = () => {
     router.push('/forgot-password');
+  };
+
+  const handleGoToNotes = () => {
+    router.push('/notes');
   };
 
   // ============================================
@@ -654,7 +666,7 @@ export default function SignInPage() {
   );
 
   // ============================================
-  // 13. RENDER UTAMA - VERSI BIG TEXT, NO LINES, BIG ARROWS
+  // 13. RENDER UTAMA - TANPA REDIRECT OTOMATIS
   // ============================================
   return (
     <>
@@ -765,6 +777,66 @@ export default function SignInPage() {
               {user ? 'You are signed in' : 'Sign in to your account to continue'}
             </p>
             
+            {/* LOGIN SUCCESS MESSAGE - TAMBAHAN */}
+            {loginSuccess && user && (
+              <div style={{ 
+                marginTop: '30px',
+                marginBottom: '20px',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'flex-start',
+                gap: '20px'
+              }}>
+                <p style={{ 
+                  color: '#ffffff', 
+                  fontSize: isMobile ? '1.8rem' : '2.2rem', 
+                  fontFamily: 'Helvetica, Arial, sans-serif',
+                  fontWeight: '300',
+                  opacity: 0.9,
+                  margin: 0
+                }}>
+                  ✓ Login successful!
+                </p>
+                <button 
+                  onClick={handleGoToNotes} 
+                  style={{ 
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '15px',
+                    padding: '0', 
+                    border: 'none', 
+                    backgroundColor: 'transparent', 
+                    color: '#ffffff', 
+                    fontFamily: 'Helvetica, Arial, sans-serif', 
+                    fontSize: isMobile ? '1.8rem' : '2.2rem', 
+                    fontWeight: '300',
+                    cursor: 'pointer', 
+                    transition: 'opacity 0.2s ease', 
+                    letterSpacing: '2px',
+                    opacity: 0.8
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
+                  onMouseLeave={(e) => e.currentTarget.style.opacity = '0.8'}
+                >
+                  GO TO NOTES
+                  <svg 
+                    width={isMobile ? '40' : '60'} 
+                    height={isMobile ? '40' : '60'} 
+                    viewBox="0 0 24 24" 
+                    fill="none"
+                    stroke="white"
+                    strokeWidth="1"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M7 7L17 7" stroke="white"/>
+                    <path d="M7 7L7 17" stroke="white"/>
+                    <path d="M7 7L21 21" stroke="white"/>
+                  </svg>
+                </button>
+              </div>
+            )}
+            
             {/* ERROR MESSAGE - MINIMAL */}
             {error && (
               <div style={{ 
@@ -780,7 +852,7 @@ export default function SignInPage() {
             )}
             
             {/* LOGOUT BUTTON - NO LINE, BIG TEXT */}
-            {user && (
+            {user && !loginSuccess && (
               <button 
                 onClick={handleLogout} 
                 style={{ 
@@ -805,7 +877,7 @@ export default function SignInPage() {
             )}
           </div>
 
-          {/* FORM LOGIN - NO LINES, NO BORDERS, BIG TEXT */}
+          {/* FORM LOGIN - HANYA TAMPIL JIKA BELUM LOGIN */}
           {!user && (
             <>
               {/* SOCIAL LOGIN BUTTONS - NO LINES, BIG TEXT, BIG ARROWS */}
@@ -942,7 +1014,6 @@ export default function SignInPage() {
                         fontWeight: '300',
                         letterSpacing: '1px'
                       }} 
-                      placeholderStyle={{ color: 'rgba(255,255,255,0.4)' }}
                     />
                   </div>
 
