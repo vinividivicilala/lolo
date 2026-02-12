@@ -2,13 +2,15 @@
 
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export default function TimelinePage() {
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState(0);
   const [selectedStep, setSelectedStep] = useState(null);
   const [notifications, setNotifications] = useState([]);
+  const [selectedTimelineForNotification, setSelectedTimelineForNotification] = useState(3);
+  
   const timelineSteps = [
     { 
       id: 1,
@@ -65,39 +67,79 @@ export default function TimelinePage() {
     </svg>
   );
 
-  // Notification Bell Icon
-  const NotificationBell = ({ hasNotification }) => (
-    <svg 
-      width="24" 
-      height="24" 
-      viewBox="0 0 24 24" 
-      fill="none" 
-      stroke="#ffffff" 
-      strokeWidth="2"
-    >
-      <path d="M18 8C18 6.4087 17.3679 4.88258 16.2426 3.75736C15.1174 2.63214 13.5913 2 12 2C10.4087 2 8.88258 2.63214 7.75736 3.75736C6.63214 4.88258 6 6.4087 6 8C6 15 3 17 3 17H21C21 17 18 15 18 8Z" strokeLinecap="round" strokeLinejoin="round"/>
-      <path d="M9 17V18C9 18.7956 9.31607 19.5587 9.87868 20.1213C10.4413 20.6839 11.2044 21 12 21C12.7956 21 13.5587 20.6839 14.1213 20.1213C14.6839 19.5587 15 18.7956 15 18V17" strokeLinecap="round" strokeLinejoin="round"/>
-      {hasNotification && (
-        <circle cx="20" cy="4" r="3" fill="#ff4d4d" stroke="none" />
+  // Notification Bell Icon with Counter
+  const NotificationBell = ({ count }) => (
+    <div style={{ position: 'relative', display: 'inline-block' }}>
+      <svg 
+        width="24" 
+        height="24" 
+        viewBox="0 0 24 24" 
+        fill="none" 
+        stroke="#ffffff" 
+        strokeWidth="2"
+      >
+        <path d="M18 8C18 6.4087 17.3679 4.88258 16.2426 3.75736C15.1174 2.63214 13.5913 2 12 2C10.4087 2 8.88258 2.63214 7.75736 3.75736C6.63214 4.88258 6 6.4087 6 8C6 15 3 17 3 17H21C21 17 18 15 18 8Z" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M9 17V18C9 18.7956 9.31607 19.5587 9.87868 20.1213C10.4413 20.6839 11.2044 21 12 21C12.7956 21 13.5587 20.6839 14.1213 20.1213C14.6839 19.5587 15 18.7956 15 18V17" strokeLinecap="round" strokeLinejoin="round"/>
+      </svg>
+      {count > 0 && (
+        <div style={{
+          position: 'absolute',
+          top: '-8px',
+          right: '-8px',
+          backgroundColor: '#ff4d4d',
+          color: 'white',
+          borderRadius: '50%',
+          width: '18px',
+          height: '18px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontSize: '11px',
+          fontWeight: 'bold'
+        }}>
+          {count}
+        </div>
       )}
-    </svg>
+    </div>
   );
 
-  // Admin Notification Panel
+  // Admin Notification Panel - Only Timeline Updates
   const NotificationPanel = () => {
-    const addNotification = (message) => {
+    const unreadCount = notifications.filter(n => !n.read).length;
+    
+    const addNotification = (timelineId) => {
+      const step = timelineSteps.find(s => s.id === timelineId);
+      const progressMessages = {
+        1: 'Research phase completed with 200+ user interviews',
+        2: 'Design system finalized with 50+ components',
+        3: `Development ${Math.floor(Math.random() * 30) + 50}% complete - API integration ongoing`,
+        4: 'Testing environment prepared, test cases written',
+        5: 'Launch preparation: documentation and deployment strategy'
+      };
+      
+      const message = `Timeline Update - ${step.title}: ${progressMessages[timelineId]}`;
+      
       const newNotification = {
         id: Date.now(),
         message,
         timestamp: new Date().toLocaleTimeString(),
-        read: false
+        read: false,
+        timelineId: timelineId,
+        admin: 'faridardiansyah061@gmail.com'
       };
       setNotifications([newNotification, ...notifications]);
       
-      localStorage.setItem('timelineNotification', JSON.stringify({
-        ...newNotification,
-        admin: 'faridardiansyah061@gmail.com'
-      }));
+      localStorage.setItem('timelineNotification', JSON.stringify(newNotification));
+    };
+
+    const markAsRead = (id) => {
+      setNotifications(notifications.map(n => 
+        n.id === id ? { ...n, read: true } : n
+      ));
+    };
+
+    const markAllAsRead = () => {
+      setNotifications(notifications.map(n => ({ ...n, read: true })));
     };
 
     useEffect(() => {
@@ -118,83 +160,178 @@ export default function TimelinePage() {
         top: '2rem',
         right: '2rem',
         zIndex: 1000,
-        maxWidth: '400px',
-        width: '100%'
+        maxWidth: '420px',
+        width: '100%',
+        backgroundColor: 'rgba(0,0,0,0.95)',
+        backdropFilter: 'blur(10px)',
+        border: '1px solid rgba(255,255,255,0.05)',
+        borderRadius: '12px',
+        padding: '1.5rem'
       }}>
-        {/* Admin Controls */}
+        {/* Admin Header */}
         <div style={{
-          marginBottom: '1rem'
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          marginBottom: '1.5rem',
+          borderBottom: '1px solid rgba(255,255,255,0.1)',
+          paddingBottom: '1rem'
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
-            <NotificationBell hasNotification={notifications.some(n => !n.read)} />
-            <span style={{ fontSize: '1.1rem', fontWeight: 500 }}>Admin Panel</span>
-            <span style={{ fontSize: '0.8rem', opacity: 0.7 }}>faridardiansyah061@gmail.com</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <NotificationBell count={unreadCount} />
+            <div>
+              <span style={{ fontSize: '1.1rem', fontWeight: 600, display: 'block' }}>
+                Timeline Updates
+              </span>
+              <span style={{ fontSize: '0.75rem', opacity: 0.6 }}>
+                faridardiansyah061@gmail.com
+              </span>
+            </div>
           </div>
           
-          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+          {unreadCount > 0 && (
             <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={() => addNotification('Timeline updated: Development Phase 65% complete')}
+              whileHover={{ opacity: 0.8 }}
+              onClick={markAllAsRead}
               style={{
-                padding: '0.75rem 1rem',
-                backgroundColor: 'rgba(0,255,157,0.1)',
-                border: '1px solid rgba(0,255,157,0.3)',
-                borderRadius: '4px',
-                color: '#00ff9d',
-                cursor: 'pointer',
-                fontSize: '0.9rem'
-              }}
-            >
-              Update Progress
-            </motion.button>
-            
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={() => addNotification('New milestone: Testing phase scheduled')}
-              style={{
-                padding: '0.75rem 1rem',
-                backgroundColor: 'rgba(255,255,255,0.05)',
-                border: '1px solid rgba(255,255,255,0.1)',
-                borderRadius: '4px',
+                background: 'transparent',
+                border: '1px solid rgba(255,255,255,0.2)',
                 color: '#ffffff',
-                cursor: 'pointer',
-                fontSize: '0.9rem'
+                padding: '0.4rem 0.8rem',
+                borderRadius: '4px',
+                fontSize: '0.75rem',
+                cursor: 'pointer'
               }}
             >
-              Schedule Update
+              Mark all read
             </motion.button>
+          )}
+        </div>
+
+        {/* Admin Controls - Send Update for Timeline Numbers */}
+        <div style={{ marginBottom: '1.5rem' }}>
+          <div style={{ fontSize: '0.85rem', opacity: 0.7, marginBottom: '0.75rem' }}>
+            SEND UPDATE FOR TIMELINE:
+          </div>
+          <div style={{ 
+            display: 'flex', 
+            gap: '0.5rem',
+            flexWrap: 'wrap'
+          }}>
+            {[1, 2, 3, 4, 5].map((num) => (
+              <motion.button
+                key={num}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => addNotification(num)}
+                style={{
+                  width: '48px',
+                  height: '48px',
+                  backgroundColor: selectedTimelineForNotification === num ? 'rgba(0,255,157,0.2)' : 'rgba(255,255,255,0.05)',
+                  border: selectedTimelineForNotification === num ? '1px solid #00ff9d' : '1px solid rgba(255,255,255,0.1)',
+                  borderRadius: '8px',
+                  color: selectedTimelineForNotification === num ? '#00ff9d' : '#ffffff',
+                  fontSize: '1.1rem',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
+                onMouseEnter={() => setSelectedTimelineForNotification(num)}
+                onMouseLeave={() => setSelectedTimelineForNotification(3)}
+              >
+                {num}
+              </motion.button>
+            ))}
+          </div>
+          <div style={{
+            fontSize: '0.75rem',
+            marginTop: '0.5rem',
+            opacity: 0.5,
+            textAlign: 'center'
+          }}>
+            Click number to send update for that timeline
           </div>
         </div>
 
-        {/* Notifications List */}
-        <div style={{
-          backgroundColor: '#000000',
-          maxHeight: '300px',
-          overflowY: 'auto'
-        }}>
-          {notifications.length === 0 ? (
-            <div style={{ padding: '1.5rem 0', textAlign: 'center', opacity: 0.5 }}>
-              No notifications
-            </div>
-          ) : (
-            notifications.map((notif) => (
-              <div 
-                key={notif.id}
-                style={{
-                  padding: '1rem 0',
-                  borderBottom: '1px solid rgba(255,255,255,0.05)'
-                }}
-              >
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
-                  <span style={{ fontSize: '0.85rem', color: '#00ff9d' }}>Admin Update</span>
-                  <span style={{ fontSize: '0.7rem', opacity: 0.5 }}>{notif.timestamp}</span>
-                </div>
-                <p style={{ margin: 0, fontSize: '0.95rem' }}>{notif.message}</p>
+        {/* Notifications List - Only Timeline History */}
+        <div>
+          <div style={{ 
+            display: 'flex', 
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: '0.75rem'
+          }}>
+            <span style={{ fontSize: '0.85rem', opacity: 0.7 }}>
+              UPDATE HISTORY ({notifications.length})
+            </span>
+          </div>
+          
+          <div style={{
+            maxHeight: '300px',
+            overflowY: 'auto',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '0.75rem'
+          }}>
+            {notifications.length === 0 ? (
+              <div style={{ 
+                padding: '2rem 0', 
+                textAlign: 'center', 
+                opacity: 0.5,
+                fontSize: '0.9rem'
+              }}>
+                No timeline updates yet
               </div>
-            ))
-          )}
+            ) : (
+              notifications.map((notif) => (
+                <motion.div 
+                  key={notif.id}
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  onClick={() => markAsRead(notif.id)}
+                  style={{
+                    padding: '1rem',
+                    backgroundColor: !notif.read ? 'rgba(0,255,157,0.05)' : 'transparent',
+                    border: '1px solid rgba(255,255,255,0.05)',
+                    borderRadius: '6px',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease'
+                  }}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
+                    <span style={{ 
+                      fontSize: '0.75rem', 
+                      color: '#00ff9d',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.25rem'
+                    }}>
+                      <span style={{
+                        display: 'inline-block',
+                        width: '6px',
+                        height: '6px',
+                        borderRadius: '50%',
+                        backgroundColor: !notif.read ? '#00ff9d' : 'transparent',
+                        marginRight: '4px'
+                      }} />
+                      Timeline {notif.timelineId}
+                    </span>
+                    <span style={{ fontSize: '0.65rem', opacity: 0.5 }}>{notif.timestamp}</span>
+                  </div>
+                  <p style={{ 
+                    margin: '0.25rem 0 0 0', 
+                    fontSize: '0.85rem',
+                    opacity: 0.9,
+                    lineHeight: '1.4'
+                  }}>
+                    {notif.message}
+                  </p>
+                </motion.div>
+              ))
+            )}
+          </div>
         </div>
       </div>
     );
@@ -283,10 +420,197 @@ export default function TimelinePage() {
       {/* Notification Panel */}
       <NotificationPanel />
 
+      {/* Shadow Page - Full Half Screen */}
+      <AnimatePresence>
+        {selectedStep && (
+          <motion.div
+            initial={{ x: '100%', opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            exit={{ x: '100%', opacity: 0 }}
+            transition={{ type: 'tween', duration: 0.3 }}
+            style={{
+              position: 'fixed',
+              top: 0,
+              right: 0,
+              width: '50%',
+              height: '100vh',
+              backgroundColor: '#0a0a0a',
+              zIndex: 50,
+              borderLeft: '1px solid rgba(255,255,255,0.1)',
+              overflowY: 'auto',
+              padding: '3rem',
+              boxShadow: '-10px 0 30px rgba(0,0,0,0.8)'
+            }}
+          >
+            {timelineSteps.map((step) => (
+              step.id === selectedStep && (
+                <div key={step.id} style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+                  {/* Page Number */}
+                  <div style={{
+                    position: 'absolute',
+                    bottom: '2rem',
+                    right: '2rem',
+                    fontSize: '0.8rem',
+                    opacity: 0.15,
+                    fontFamily: 'monospace',
+                    letterSpacing: '4px'
+                  }}>
+                    {String(step.id).padStart(2, '0')} / 05
+                  </div>
+
+                  {/* Close Button */}
+                  <motion.button
+                    onClick={() => setSelectedStep(null)}
+                    style={{
+                      position: 'absolute',
+                      top: '2rem',
+                      right: '2rem',
+                      background: 'transparent',
+                      border: '1px solid rgba(255,255,255,0.2)',
+                      color: '#ffffff',
+                      width: '40px',
+                      height: '40px',
+                      borderRadius: '50%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '1.2rem',
+                      cursor: 'pointer',
+                      zIndex: 51
+                    }}
+                    whileHover={{ backgroundColor: 'rgba(255,255,255,0.1)' }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    ×
+                  </motion.button>
+
+                  {/* Main Content */}
+                  <div style={{ 
+                    maxWidth: '600px',
+                    marginTop: '4rem'
+                  }}>
+                    <div style={{
+                      fontSize: '0.9rem',
+                      opacity: 0.5,
+                      fontFamily: 'monospace',
+                      marginBottom: '1rem',
+                      letterSpacing: '2px'
+                    }}>
+                      TIMELINE DETAIL
+                    </div>
+                    
+                    <div style={{
+                      fontSize: '3.5rem',
+                      fontWeight: 300,
+                      marginBottom: '2rem',
+                      color: '#ffffff',
+                      lineHeight: '1.2'
+                    }}>
+                      {step.title}
+                    </div>
+                    
+                    <p style={{
+                      fontSize: '1.3rem',
+                      lineHeight: '1.7',
+                      opacity: 0.8,
+                      marginBottom: '3rem',
+                      color: '#ffffff',
+                      fontWeight: 300
+                    }}>
+                      {step.details}
+                    </p>
+                    
+                    {/* Info Grid */}
+                    <div style={{
+                      display: 'grid',
+                      gridTemplateColumns: '120px 1fr',
+                      gap: '1.2rem',
+                      marginTop: '2rem',
+                      paddingTop: '2rem',
+                      borderTop: '1px solid rgba(255,255,255,0.1)'
+                    }}>
+                      <div style={{ fontSize: '0.85rem', opacity: 0.4, fontFamily: 'monospace' }}>TIMELINE</div>
+                      <div style={{ fontSize: '1.3rem', fontFamily: 'monospace', opacity: 0.9 }}>{step.date}</div>
+                      
+                      <div style={{ fontSize: '0.85rem', opacity: 0.4, fontFamily: 'monospace' }}>STATUS</div>
+                      <div style={{ 
+                        fontSize: '1.3rem',
+                        color: step.status === 'completed' ? '#ffffff' : 
+                               step.status === 'current' ? '#00ff9d' : '#666666',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.75rem'
+                      }}>
+                        {step.status === 'current' && <BlinkingDot />}
+                        {step.status.toUpperCase()}
+                      </div>
+                      
+                      <div style={{ fontSize: '0.85rem', opacity: 0.4, fontFamily: 'monospace' }}>MILESTONE</div>
+                      <div style={{ fontSize: '1.3rem', fontFamily: 'monospace', opacity: 0.9 }}>MS-{step.id * 100}</div>
+                      
+                      <div style={{ fontSize: '0.85rem', opacity: 0.4, fontFamily: 'monospace' }}>PROGRESS</div>
+                      <div style={{ fontSize: '1.3rem', fontFamily: 'monospace', opacity: 0.9 }}>
+                        {step.status === 'completed' ? '100%' : 
+                         step.status === 'current' ? '65%' : '0%'}
+                      </div>
+                    </div>
+
+                    {/* Recent Updates */}
+                    <div style={{ marginTop: '3rem' }}>
+                      <div style={{
+                        fontSize: '0.85rem',
+                        opacity: 0.4,
+                        fontFamily: 'monospace',
+                        marginBottom: '1rem'
+                      }}>
+                        RECENT UPDATES
+                      </div>
+                      <div style={{
+                        backgroundColor: 'rgba(255,255,255,0.02)',
+                        padding: '1.5rem',
+                        borderRadius: '4px'
+                      }}>
+                        {notifications
+                          .filter(n => n.timelineId === step.id)
+                          .slice(0, 2)
+                          .map(n => (
+                            <div key={n.id} style={{ 
+                              marginBottom: '1rem',
+                              paddingBottom: '1rem',
+                              borderBottom: '1px solid rgba(255,255,255,0.05)'
+                            }}>
+                              <div style={{ fontSize: '0.75rem', opacity: 0.5, marginBottom: '0.25rem' }}>
+                                {n.timestamp}
+                              </div>
+                              <div style={{ fontSize: '0.95rem' }}>{n.message}</div>
+                            </div>
+                          ))}
+                        {notifications.filter(n => n.timelineId === step.id).length === 0 && (
+                          <div style={{ opacity: 0.5, fontSize: '0.9rem' }}>
+                            No updates yet
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Main Content */}
-      <div style={{ position: 'relative', zIndex: 10, maxWidth: '1400px', margin: '0 auto' }}>
+      <div style={{ 
+        position: 'relative', 
+        zIndex: 10, 
+        maxWidth: selectedStep ? 'calc(50% - 4rem)' : '1400px', 
+        margin: '0 auto',
+        transition: 'max-width 0.3s ease',
+        paddingRight: selectedStep ? '2rem' : '0'
+      }}>
         
-        {/* Home Button - Large dengan North West Arrow */}
+        {/* Home Button */}
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
@@ -361,13 +685,15 @@ export default function TimelinePage() {
                   style={{
                     display: 'flex',
                     alignItems: 'center',
-                    marginBottom: selectedStep === step.id ? '2rem' : '4rem',
+                    marginBottom: '4rem',
                     position: 'relative',
                     minHeight: '100px',
                     cursor: 'pointer',
-                    transition: 'margin-bottom 0.2s ease'
+                    opacity: selectedStep && selectedStep !== step.id ? 0.5 : 1,
+                    transition: 'opacity 0.2s ease'
                   }}
                   onClick={() => handleStepClick(step.id)}
+                  whileHover={{ opacity: 1 }}
                 >
                   {/* Kolom 1: Angka */}
                   <div style={{
@@ -416,7 +742,7 @@ export default function TimelinePage() {
                       ••••••••••••••••••••••
                     </div>
 
-                    {/* Titik Bulat Pemancar */}
+                    {/* Titik Bulat */}
                     <div style={{
                       position: 'absolute',
                       top: '50%',
@@ -432,14 +758,6 @@ export default function TimelinePage() {
                     }}>
                       {step.status === 'current' ? (
                         <BlinkingDot />
-                      ) : step.status === 'completed' ? (
-                        <div style={{
-                          width: '12px',
-                          height: '12px',
-                          borderRadius: '50%',
-                          backgroundColor: '#ffffff',
-                          boxShadow: '0 0 15px rgba(255,255,255,0.8)'
-                        }} />
                       ) : (
                         <div style={{
                           width: '12px',
@@ -447,7 +765,7 @@ export default function TimelinePage() {
                           borderRadius: '50%',
                           backgroundColor: '#ffffff',
                           boxShadow: '0 0 15px rgba(255,255,255,0.8)',
-                          opacity: 0.5
+                          opacity: step.status === 'pending' ? 0.5 : 1
                         }} />
                       )}
                     </div>
@@ -480,7 +798,6 @@ export default function TimelinePage() {
                     flex: 1,
                     marginLeft: '60px'
                   }}>
-                    {/* Judul dengan Arrow di Sisi Kanan */}
                     <div style={{
                       display: 'flex',
                       alignItems: 'center',
@@ -520,7 +837,6 @@ export default function TimelinePage() {
                         )}
                       </div>
                       
-                      {/* Southeast Arrow */}
                       <div style={{
                         display: 'flex',
                         alignItems: 'center',
@@ -532,7 +848,6 @@ export default function TimelinePage() {
                       </div>
                     </div>
                     
-                    {/* Tanggal dan Status */}
                     <div style={{
                       display: 'flex',
                       alignItems: 'center',
@@ -561,130 +876,6 @@ export default function TimelinePage() {
                     </div>
                   </div>
                 </motion.div>
-
-                {/* BLACK SHADOW PAGE - Halaman Utama yang Memanfaatkan Ruang Kosong */}
-                {selectedStep === step.id && (
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.2 }}
-                    style={{
-                      marginLeft: '190px',
-                      marginBottom: '4rem',
-                      marginTop: '-1rem',
-                      padding: '2rem 0 2rem 2rem',
-                      backgroundColor: '#000000',
-                      position: 'relative',
-                      color: '#ffffff'
-                    }}
-                  >
-                    {/* Page Number - Very Subtle */}
-                    <div style={{
-                      position: 'absolute',
-                      bottom: '1rem',
-                      right: '0',
-                      fontSize: '0.7rem',
-                      opacity: 0.15,
-                      fontFamily: 'monospace',
-                      letterSpacing: '2px'
-                    }}>
-                      {String(step.id).padStart(2, '0')} / 05
-                    </div>
-
-                    {/* Main Content - Clean, No Borders, No Boxes */}
-                    <div style={{ maxWidth: '800px' }}>
-                      <div style={{
-                        fontSize: '2.8rem',
-                        fontWeight: 300,
-                        marginBottom: '1.5rem',
-                        color: '#ffffff',
-                        opacity: 0.9
-                      }}>
-                        {step.title}
-                      </div>
-                      
-                      <p style={{
-                        fontSize: '1.3rem',
-                        lineHeight: '1.6',
-                        opacity: 0.8,
-                        marginBottom: '2.5rem',
-                        color: '#ffffff'
-                      }}>
-                        {step.details}
-                      </p>
-                      
-                      {/* Simple Info Lines - No Cards */}
-                      <div style={{ marginTop: '2rem' }}>
-                        <div style={{ 
-                          display: 'flex', 
-                          alignItems: 'baseline',
-                          marginBottom: '0.75rem'
-                        }}>
-                          <span style={{ 
-                            fontSize: '0.9rem', 
-                            opacity: 0.4, 
-                            width: '100px',
-                            fontFamily: 'monospace'
-                          }}>
-                            TIMELINE
-                          </span>
-                          <span style={{ 
-                            fontSize: '1.2rem', 
-                            fontFamily: 'monospace',
-                            opacity: 0.9
-                          }}>
-                            {step.date}
-                          </span>
-                        </div>
-                        
-                        <div style={{ 
-                          display: 'flex', 
-                          alignItems: 'baseline',
-                          marginBottom: '0.75rem'
-                        }}>
-                          <span style={{ 
-                            fontSize: '0.9rem', 
-                            opacity: 0.4, 
-                            width: '100px',
-                            fontFamily: 'monospace'
-                          }}>
-                            STATUS
-                          </span>
-                          <span style={{ 
-                            fontSize: '1.2rem',
-                            color: step.status === 'completed' ? '#ffffff' : 
-                                   step.status === 'current' ? '#00ff9d' : '#666666',
-                            opacity: 0.9
-                          }}>
-                            {step.status.toUpperCase()}
-                          </span>
-                        </div>
-                        
-                        <div style={{ 
-                          display: 'flex', 
-                          alignItems: 'baseline'
-                        }}>
-                          <span style={{ 
-                            fontSize: '0.9rem', 
-                            opacity: 0.4, 
-                            width: '100px',
-                            fontFamily: 'monospace'
-                          }}>
-                            MILESTONE
-                          </span>
-                          <span style={{ 
-                            fontSize: '1.2rem', 
-                            fontFamily: 'monospace',
-                            opacity: 0.9
-                          }}>
-                            MS-{step.id * 100}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </motion.div>
-                )}
               </React.Fragment>
             ))}
           </div>
