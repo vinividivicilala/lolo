@@ -146,10 +146,8 @@ export default function SignInPage() {
         marqueeLeftAnimation.current.kill();
       }
       
-      // Reset posisi awal
       gsap.set(marqueeLeftRef.current, { x: '-50%' });
       
-      // Animasi dari kiri ke kanan
       marqueeLeftAnimation.current = gsap.to(marqueeLeftRef.current, {
         x: '0%',
         duration: 80,
@@ -179,10 +177,8 @@ export default function SignInPage() {
         marqueeRightAnimation.current.kill();
       }
       
-      // Reset posisi awal
       gsap.set(marqueeRightRef.current, { x: '0%' });
       
-      // Animasi dari kanan ke kiri
       marqueeRightAnimation.current = gsap.to(marqueeRightRef.current, {
         x: '-50%',
         duration: 100,
@@ -210,7 +206,6 @@ export default function SignInPage() {
   useEffect(() => {
     if (!isMounted) return;
     
-    // Pastikan GSAP dan DOM sudah siap
     const timer = setTimeout(() => {
       startMarqueeLeft();
       startMarqueeRight();
@@ -304,7 +299,7 @@ export default function SignInPage() {
   }, [router, isMounted, firebaseAuth, firebaseInitialized]);
 
   // ============================================
-  // 9. LOGIN HANDLERS - TANPA MODAL AUTO LOGIN
+  // 9. LOGIN HANDLERS
   // ============================================
   const handleGoogleLogin = async () => {
     if (!firebaseAuth) return;
@@ -453,7 +448,6 @@ export default function SignInPage() {
             fontWeight: '600',
             margin: '0',
             fontFamily: 'Helvetica, Arial, sans-serif',
-            textShadow: '2px 2px 4px rgba(0,0,0,0.3)',
           }}>
             CONNECT
           </h4>
@@ -517,7 +511,6 @@ export default function SignInPage() {
                     fontWeight: '600',
                     margin: '0',
                     fontFamily: 'Helvetica, Arial, sans-serif',
-                    textShadow: '1px 1px 2px rgba(0,0,0,0.5)',
                     letterSpacing: '0.5px',
                   }}>
                     {social.name}
@@ -571,11 +564,9 @@ export default function SignInPage() {
               fontFamily: 'Helvetica, Arial, sans-serif',
               fontWeight: '400',
               letterSpacing: '8px',
-              textShadow: '2px 2px 4px rgba(0,0,0,0.3)',
             }}>
               CREATE FREE ACCESS ACCOUNT
             </span>
-            {/* NORTH EAST ARROW - MINIMALIST, TIDAK BOLD */}
             <svg 
               width={isMobile ? '80' : '120'} 
               height={isMobile ? '80' : '120'} 
@@ -585,7 +576,6 @@ export default function SignInPage() {
               strokeWidth="1"
               strokeLinecap="round"
               strokeLinejoin="round"
-              style={{ opacity: 0.9 }}
             >
               <path d="M7 7L17 7" stroke="white" strokeWidth="1"/>
               <path d="M7 7L7 17" stroke="white" strokeWidth="1"/>
@@ -634,11 +624,9 @@ export default function SignInPage() {
               fontFamily: 'Helvetica, Arial, sans-serif',
               fontWeight: '400',
               letterSpacing: '10px',
-              textShadow: '2px 2px 4px rgba(0,0,0,0.3)',
             }}>
               SIGN IN
             </span>
-            {/* NORTH EAST ARROW - MINIMALIST, TIDAK BOLD */}
             <svg 
               width={isMobile ? '100' : '160'} 
               height={isMobile ? '100' : '160'} 
@@ -648,7 +636,6 @@ export default function SignInPage() {
               strokeWidth="1"
               strokeLinecap="round"
               strokeLinejoin="round"
-              style={{ opacity: 0.9 }}
             >
               <path d="M7 7L17 7" stroke="white" strokeWidth="1"/>
               <path d="M7 7L7 17" stroke="white" strokeWidth="1"/>
@@ -661,7 +648,31 @@ export default function SignInPage() {
   );
 
   // ============================================
-  // 13. RENDER UTAMA
+  // 13. SOUTH WEST ARROW SVG COMPONENT
+  // ============================================
+  const SouthWestArrow = ({ size = isMobile ? 40 : 60 }) => (
+    <svg 
+      width={size} 
+      height={size} 
+      viewBox="0 0 24 24" 
+      fill="none"
+      stroke="white"
+      strokeWidth="1"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      style={{ 
+        transition: 'transform 0.2s ease',
+        opacity: 0.9
+      }}
+    >
+      <path d="M17 17L7 17" stroke="white" strokeWidth="1"/>
+      <path d="M7 17L7 7" stroke="white" strokeWidth="1"/>
+      <path d="M17 17L3 3" stroke="white" strokeWidth="1"/>
+    </svg>
+  );
+
+  // ============================================
+  // 14. RENDER UTAMA - TAMPILAN SISI KIRI DIPERBAIKI
   // ============================================
   return (
     <>
@@ -672,17 +683,17 @@ export default function SignInPage() {
           display: 'flex',
           flexDirection: 'column',
           justifyContent: isMobile ? 'flex-start' : 'center',
-          alignItems: 'center',
-          padding: isMobile ? '20px 15px' : '40px 20px',
+          alignItems: 'flex-start',
+          padding: isMobile ? '20px 15px' : '40px 60px',
           fontFamily: 'Helvetica, Arial, sans-serif',
           position: 'relative',
         }}
       >
-        {/* HALAMAN UTAMA - SISI KANAN ATAS DENGAN SVG MINIMALIST */}
+        {/* HALAMAN UTAMA - POSISI KIRI ATAS */}
         <div style={{
           position: 'absolute',
           top: isMobile ? '30px' : '50px',
-          right: isMobile ? '20px' : '50px',
+          left: isMobile ? '20px' : '60px',
           display: 'flex',
           alignItems: 'center',
           gap: '15px',
@@ -700,480 +711,497 @@ export default function SignInPage() {
               fontFamily: 'Helvetica, Arial, sans-serif',
               fontWeight: '400',
               letterSpacing: '2px',
-              textDecoration: 'none',
+              color: 'white',
             }}>
               HALAMAN UTAMA
             </span>
-            {/* NORTH EAST ARROW - MINIMALIST, TIDAK BOLD */}
-            <svg 
-              width={isMobile ? '40' : '60'} 
-              height={isMobile ? '40' : '60'} 
-              viewBox="0 0 24 24" 
-              fill="none"
-              stroke="white"
-              strokeWidth="1"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              style={{ 
-                transition: 'transform 0.2s ease',
-                opacity: 0.9
-              }}
-              onMouseEnter={(e) => { e.currentTarget.style.transform = 'translate(3px, -3px)'; }}
-              onMouseLeave={(e) => { e.currentTarget.style.transform = 'translate(0, 0)'; }}
-            >
-              <path d="M7 7L17 7" stroke="white" strokeWidth="1"/>
-              <path d="M7 7L7 17" stroke="white" strokeWidth="1"/>
-              <path d="M7 7L21 21" stroke="white" strokeWidth="1"/>
-            </svg>
+            <SouthWestArrow size={isMobile ? 40 : 60} />
           </Link>
         </div>
 
-        {/* TEKS BERJALAN 1 - KIRI KE KANAN DENGAN SVG MINIMALIST */}
+        {/* TEKS BERJALAN 1 */}
         <MarqueeLeftText />
 
-        {/* MAIN SIGN IN CONTAINER */}
+        {/* MAIN SIGN IN CONTAINER - FULL SISI KIRI */}
         <div
           style={{
             display: 'flex',
-            flexDirection: isMobile ? 'column' : 'row',
-            alignItems: isMobile ? 'center' : 'flex-start',
-            justifyContent: isMobile ? 'center' : 'flex-end',
-            gap: isMobile ? '30px' : '60px',
+            flexDirection: 'column',
+            alignItems: 'flex-start',
+            justifyContent: 'flex-start',
+            gap: isMobile ? '30px' : '40px',
             marginBottom: isMobile ? '30px' : '40px',
             marginTop: isMobile ? '20px' : '30px',
             width: '100%',
-            maxWidth: isMobile ? '100%' : '1200px',
+            maxWidth: isMobile ? '100%' : '800px',
+            marginLeft: '0',
+            marginRight: '0',
           }}
         >
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              marginTop: isMobile ? '0' : '40px',
-              width: isMobile ? '100%' : 'auto',
-              maxWidth: isMobile ? '400px' : '500px',
-              marginRight: isMobile ? '0' : '100px',
-            }}
-          >
-            {/* WELCOME TEXT */}
-            <div style={{ 
-              marginBottom: isMobile ? '30px' : '40px',
-              textAlign: isMobile ? 'center' : 'left'
+          {/* WELCOME TEXT - FULL KIRI, TEKS PUTIH BESAR */}
+          <div style={{ 
+            width: '100%',
+            textAlign: 'left'
+          }}>
+            <h1 style={{ 
+              fontFamily: 'Helvetica, Arial, sans-serif', 
+              fontSize: isMobile ? '48px' : '72px', 
+              fontWeight: '600', 
+              color: '#ffffff', 
+              marginBottom: '20px', 
+              marginTop: '0',
+              letterSpacing: '2px',
+              lineHeight: '1.1',
             }}>
-              <h1 style={{ 
-                fontFamily: 'Helvetica, Arial, sans-serif', 
-                fontSize: isMobile ? '32px' : '48px', 
-                fontWeight: 'bold', 
+              {user ? `WELCOME, ${(user.displayName || user.email).toUpperCase()}` : 'WELCOME BACK'}
+            </h1>
+            <p style={{ 
+              fontFamily: 'Helvetica, Arial, sans-serif', 
+              fontSize: isMobile ? '32px' : '48px', 
+              color: '#ffffff', 
+              marginBottom: '40px',
+              marginTop: '0',
+              fontWeight: '400',
+              letterSpacing: '1px',
+            }}>
+              {user ? 'YOU ARE SIGNED IN' : 'SIGN IN TO YOUR ACCOUNT'}
+            </p>
+            
+            {/* ERROR MESSAGE - TETAP PUTIH */}
+            {error && (
+              <div style={{ 
+                padding: '20px 0', 
                 color: '#ffffff', 
-                marginBottom: '15px', 
-                textShadow: '2px 2px 4px rgba(0,0,0,0.5)' 
+                fontSize: isMobile ? '20px' : '24px', 
+                fontFamily: 'Helvetica, Arial, sans-serif',
+                fontWeight: '400',
+                letterSpacing: '1px',
               }}>
-                {user ? `Welcome, ${user.displayName || user.email}` : 'Welcome back'}
-              </h1>
-              <p style={{ 
-                fontFamily: 'Helvetica, Arial, sans-serif', 
-                fontSize: isMobile ? '16px' : '18px', 
-                color: '#ffffff', 
-                textShadow: '1px 1px 2px rgba(0,0,0,0.5)' 
+                {error}
+              </div>
+            )}
+            
+            {/* LOGOUT BUTTON */}
+            {user && (
+              <button 
+                onClick={handleLogout} 
+                style={{ 
+                  marginTop: '30px', 
+                  padding: '20px 40px', 
+                  backgroundColor: 'transparent', 
+                  border: '2px solid white', 
+                  color: 'white', 
+                  fontSize: isMobile ? '24px' : '32px',
+                  fontFamily: 'Helvetica, Arial, sans-serif',
+                  fontWeight: '400',
+                  letterSpacing: '2px',
+                  cursor: 'pointer', 
+                  transition: 'all 0.3s ease',
+                }}
+              >
+                SIGN OUT
+              </button>
+            )}
+          </div>
+
+          {/* FORM LOGIN - HANYA TAMPIL JIKA BELUM LOGIN */}
+          {!user && (
+            <>
+              {/* SOCIAL LOGIN BUTTONS - TEKS PUTIH BESAR */}
+              <div style={{ 
+                display: 'flex', 
+                flexDirection: 'column', 
+                gap: '25px', 
+                width: '100%',
+                maxWidth: '600px',
+                marginBottom: '30px',
               }}>
-                {user ? 'You are signed in' : 'Sign in to your account to continue'}
-              </p>
-              
-              {/* ERROR MESSAGE */}
-              {error && (
-                <div style={{ 
-                  backgroundColor: 'rgba(255, 0, 0, 0.1)', 
-                  border: '1px solid rgba(255, 0, 0, 0.3)', 
-                  borderRadius: '8px', 
-                  padding: '12px', 
-                  marginTop: '15px', 
-                  color: '#ff6b6b', 
-                  fontSize: '14px', 
-                  fontFamily: 'Helvetica, Arial, sans-serif' 
-                }}>
-                  {error}
-                </div>
-              )}
-              
-              {/* LOGOUT BUTTON */}
-              {user && (
-                <button 
-                  onClick={handleLogout} 
+                {/* Google Login */}
+                <div 
+                  onClick={handleGoogleLogin} 
                   style={{ 
-                    marginTop: '20px', 
-                    padding: '10px 20px', 
-                    backgroundColor: 'rgba(255, 255, 255, 0.1)', 
-                    border: '1px solid rgba(255, 255, 255, 0.3)', 
-                    borderRadius: '8px', 
-                    color: 'white', 
-                    cursor: 'pointer', 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    justifyContent: 'flex-start', 
+                    padding: '20px 0', 
+                    border: 'none',
+                    borderBottom: '1px solid rgba(255,255,255,0.3)',
+                    backgroundColor: 'transparent', 
+                    cursor: loading ? 'not-allowed' : 'pointer', 
                     transition: 'all 0.3s ease', 
-                    fontFamily: 'Helvetica, Arial, sans-serif' 
+                    opacity: loading ? 0.7 : 1,
+                    width: '100%',
                   }}
                 >
-                  Sign Out
-                </button>
-              )}
-            </div>
-
-            {/* FORM LOGIN - HANYA TAMPIL JIKA BELUM LOGIN */}
-            {!user && (
-              <>
-                {/* SOCIAL LOGIN BUTTONS */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', marginBottom: '30px' }}>
-                  {/* Google Login */}
-                  <div 
-                    onClick={handleGoogleLogin} 
-                    style={{ 
-                      display: 'flex', 
-                      alignItems: 'center', 
-                      justifyContent: 'center', 
-                      padding: '15px 20px', 
-                      border: '2px solid rgba(255, 255, 255, 0.3)', 
-                      borderRadius: '12px', 
-                      backgroundColor: 'rgba(255, 255, 255, 0.1)', 
-                      backdropFilter: 'blur(10px)', 
-                      cursor: loading ? 'not-allowed' : 'pointer', 
-                      transition: 'all 0.3s ease', 
-                      opacity: loading ? 0.7 : 1 
-                    }}
-                  >
-                    <svg width="24" height="24" viewBox="0 0 24 24" style={{ marginRight: '12px' }}>
-                      <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                      <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                      <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-                      <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-                    </svg>
-                    <span style={{ 
-                      fontFamily: 'Helvetica, Arial, sans-serif', 
-                      fontSize: isMobile ? '14px' : '16px', 
-                      color: '#ffffff', 
-                      fontWeight: '500' 
-                    }}>
-                      {loading ? 'Loading...' : 'Continue with Google'}
-                    </span>
-                  </div>
-
-                  {/* GitHub Login */}
-                  <div 
-                    onClick={handleGitHubLogin} 
-                    style={{ 
-                      display: 'flex', 
-                      alignItems: 'center', 
-                      justifyContent: 'center', 
-                      padding: '15px 20px', 
-                      border: '2px solid rgba(255, 255, 255, 0.3)', 
-                      borderRadius: '12px', 
-                      backgroundColor: 'rgba(255, 255, 255, 0.1)', 
-                      backdropFilter: 'blur(10px)', 
-                      cursor: loading ? 'not-allowed' : 'pointer', 
-                      transition: 'all 0.3s ease', 
-                      opacity: loading ? 0.7 : 1 
-                    }}
-                  >
-                    <svg width="24" height="24" viewBox="0 0 24 24" style={{ marginRight: '12px' }}>
-                      <path fill="#ffffff" d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/>
-                    </svg>
-                    <span style={{ 
-                      fontFamily: 'Helvetica, Arial, sans-serif', 
-                      fontSize: isMobile ? '14px' : '16px', 
-                      color: '#ffffff', 
-                      fontWeight: '500' 
-                    }}>
-                      {loading ? 'Loading...' : 'Continue with GitHub'}
-                    </span>
-                  </div>
+                  <svg width="40" height="40" viewBox="0 0 24 24" style={{ marginRight: '20px' }}>
+                    <path fill="#ffffff" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                    <path fill="#ffffff" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                    <path fill="#ffffff" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                    <path fill="#ffffff" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                  </svg>
+                  <span style={{ 
+                    fontFamily: 'Helvetica, Arial, sans-serif', 
+                    fontSize: isMobile ? '28px' : '36px', 
+                    color: '#ffffff', 
+                    fontWeight: '400',
+                    letterSpacing: '2px',
+                  }}>
+                    {loading ? 'LOADING...' : 'CONTINUE WITH GOOGLE'}
+                  </span>
                 </div>
 
-                {/* EMAIL/PASSWORD FORM */}
-                <form onSubmit={(e) => handleEmailLogin(e)}>
-                  <div style={{ 
+                {/* GitHub Login */}
+                <div 
+                  onClick={handleGitHubLogin} 
+                  style={{ 
                     display: 'flex', 
-                    flexDirection: 'column', 
-                    gap: '20px', 
-                    padding: isMobile ? '20px' : '25px', 
-                    border: '2px solid rgba(255, 255, 255, 0.3)', 
-                    borderRadius: '12px', 
-                    backgroundColor: 'rgba(255, 255, 255, 0.1)', 
-                    backdropFilter: 'blur(10px)', 
-                    marginBottom: '20px' 
+                    alignItems: 'center', 
+                    justifyContent: 'flex-start', 
+                    padding: '20px 0', 
+                    border: 'none',
+                    borderBottom: '1px solid rgba(255,255,255,0.3)',
+                    backgroundColor: 'transparent', 
+                    cursor: loading ? 'not-allowed' : 'pointer', 
+                    transition: 'all 0.3s ease', 
+                    opacity: loading ? 0.7 : 1,
+                    width: '100%',
+                  }}
+                >
+                  <svg width="40" height="40" viewBox="0 0 24 24" style={{ marginRight: '20px' }}>
+                    <path fill="#ffffff" d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/>
+                  </svg>
+                  <span style={{ 
+                    fontFamily: 'Helvetica, Arial, sans-serif', 
+                    fontSize: isMobile ? '28px' : '36px', 
+                    color: '#ffffff', 
+                    fontWeight: '400',
+                    letterSpacing: '2px',
                   }}>
-                    {/* EMAIL INPUT */}
-                    <div>
-                      <label style={{ 
-                        display: 'block', 
-                        fontFamily: 'Helvetica, Arial, sans-serif', 
-                        fontSize: '14px', 
-                        fontWeight: '500', 
+                    {loading ? 'LOADING...' : 'CONTINUE WITH GITHUB'}
+                  </span>
+                </div>
+              </div>
+
+              {/* EMAIL/PASSWORD FORM - TANPA LINEBOX */}
+              <form onSubmit={(e) => handleEmailLogin(e)} style={{ width: '100%', maxWidth: '600px' }}>
+                <div style={{ 
+                  display: 'flex', 
+                  flexDirection: 'column', 
+                  gap: '30px', 
+                  padding: '0',
+                  backgroundColor: 'transparent', 
+                  marginBottom: '30px',
+                  width: '100%',
+                }}>
+                  {/* EMAIL INPUT */}
+                  <div style={{ width: '100%' }}>
+                    <label style={{ 
+                      display: 'block', 
+                      fontFamily: 'Helvetica, Arial, sans-serif', 
+                      fontSize: isMobile ? '24px' : '28px', 
+                      fontWeight: '400', 
+                      color: '#ffffff', 
+                      marginBottom: '15px',
+                      letterSpacing: '1px',
+                    }}>
+                      EMAIL
+                    </label>
+                    <input 
+                      type="email" 
+                      placeholder="ENTER YOUR EMAIL" 
+                      value={email} 
+                      onChange={(e) => setEmail(e.target.value)} 
+                      required 
+                      style={{ 
+                        width: '100%', 
+                        padding: '15px 0', 
+                        border: 'none',
+                        borderBottom: '1px solid rgba(255,255,255,0.5)',
+                        backgroundColor: 'transparent', 
                         color: '#ffffff', 
-                        marginBottom: '8px' 
-                      }}>
-                        Email
-                      </label>
+                        fontFamily: 'Helvetica, Arial, sans-serif', 
+                        fontSize: isMobile ? '24px' : '28px', 
+                        outline: 'none',
+                        letterSpacing: '1px',
+                      }} 
+                    />
+                  </div>
+
+                  {/* PASSWORD INPUT */}
+                  <div style={{ width: '100%' }}>
+                    <label style={{ 
+                      display: 'block', 
+                      fontFamily: 'Helvetica, Arial, sans-serif', 
+                      fontSize: isMobile ? '24px' : '28px', 
+                      fontWeight: '400', 
+                      color: '#ffffff', 
+                      marginBottom: '15px',
+                      letterSpacing: '1px',
+                    }}>
+                      PASSWORD
+                    </label>
+                    <div style={{ position: 'relative', width: '100%' }}>
                       <input 
-                        type="email" 
-                        placeholder="Enter your email" 
-                        value={email} 
-                        onChange={(e) => setEmail(e.target.value)} 
+                        type={showPassword ? "text" : "password"} 
+                        placeholder="ENTER YOUR PASSWORD" 
+                        value={password} 
+                        onChange={(e) => setPassword(e.target.value)} 
                         required 
                         style={{ 
                           width: '100%', 
-                          padding: '12px 15px', 
-                          border: '1px solid rgba(255, 255, 255, 0.3)', 
-                          borderRadius: '8px', 
-                          backgroundColor: 'rgba(255, 255, 255, 0.1)', 
+                          padding: '15px 0', 
+                          border: 'none',
+                          borderBottom: '1px solid rgba(255,255,255,0.5)',
+                          backgroundColor: 'transparent', 
                           color: '#ffffff', 
                           fontFamily: 'Helvetica, Arial, sans-serif', 
-                          fontSize: '14px', 
-                          outline: 'none' 
+                          fontSize: isMobile ? '24px' : '28px', 
+                          outline: 'none',
+                          letterSpacing: '1px',
+                          paddingRight: '60px',
                         }} 
                       />
+                      <button 
+                        type="button" 
+                        onClick={() => setShowPassword(!showPassword)} 
+                        style={{ 
+                          position: 'absolute', 
+                          right: '0', 
+                          top: '50%', 
+                          transform: 'translateY(-50%)', 
+                          background: 'none', 
+                          border: 'none', 
+                          cursor: 'pointer', 
+                          padding: '10px',
+                          color: 'white',
+                          fontSize: isMobile ? '20px' : '24px',
+                        }}
+                      >
+                        {showPassword ? 'HIDE' : 'SHOW'}
+                      </button>
                     </div>
-
-                    {/* PASSWORD INPUT */}
-                    <div>
-                      <label style={{ 
-                        display: 'block', 
-                        fontFamily: 'Helvetica, Arial, sans-serif', 
-                        fontSize: '14px', 
-                        fontWeight: '500', 
-                        color: '#ffffff', 
-                        marginBottom: '8px' 
-                      }}>
-                        Password
-                      </label>
-                      <div style={{ position: 'relative', width: '100%' }}>
-                        <input 
-                          type={showPassword ? "text" : "password"} 
-                          placeholder="Enter your password" 
-                          value={password} 
-                          onChange={(e) => setPassword(e.target.value)} 
-                          required 
-                          style={{ 
-                            width: '100%', 
-                            padding: '12px 15px', 
-                            paddingRight: '45px', 
-                            border: '1px solid rgba(255, 255, 255, 0.3)', 
-                            borderRadius: '8px', 
-                            backgroundColor: 'rgba(255, 255, 255, 0.1)', 
-                            color: '#ffffff', 
-                            fontFamily: 'Helvetica, Arial, sans-serif', 
-                            fontSize: '14px', 
-                            outline: 'none' 
-                          }} 
-                        />
-                        <button 
-                          type="button" 
-                          onClick={() => setShowPassword(!showPassword)} 
-                          style={{ 
-                            position: 'absolute', 
-                            right: '12px', 
-                            top: '50%', 
-                            transform: 'translateY(-50%)', 
-                            background: 'none', 
-                            border: 'none', 
-                            cursor: 'pointer', 
-                            padding: '5px' 
-                          }}
-                        >
-                          {showPassword ? (
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="rgba(255,255,255,0.6)">
-                              <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z" fill="rgba(255,255,255,0.6)"/>
-                            </svg>
-                          ) : (
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="rgba(255,255,255,0.6)">
-                              <path d="M12 7c2.76 0 5 2.24 5 5 0 .65-.13 1.26-.36 1.83l2.92 2.92c1.51-1.26 2.7-2.89 3.43-4.75-1.73-4.39-6-7.5-11-7.5-1.4 0-2.74.25-3.98.7l2.16 2.16C10.74 7.13 11.35 7 12 7zM2 4.27l2.28 2.28.46.46C3.08 8.3 1.78 10.02 1 12c1.73 4.39 6 7.5 11 7.5 1.55 0 3.03-.3 4.38-.84l.42.42L19.73 22 21 20.73 3.27 3 2 4.27z" fill="rgba(255,255,255,0.6)"/>
-                            </svg>
-                          )}
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* SUBMIT BUTTON */}
-                    <button 
-                      type="submit" 
-                      disabled={loading} 
-                      style={{ 
-                        width: '100%', 
-                        padding: '14px', 
-                        border: 'none', 
-                        borderRadius: '8px', 
-                        backgroundColor: loading ? 'rgba(255, 255, 255, 0.5)' : '#ffffff', 
-                        color: '#000000', 
-                        fontFamily: 'Helvetica, Arial, sans-serif', 
-                        fontSize: isMobile ? '14px' : '16px', 
-                        fontWeight: '600', 
-                        cursor: loading ? 'not-allowed' : 'pointer', 
-                        transition: 'all 0.3s ease', 
-                        marginTop: '10px' 
-                      }}
-                    >
-                      {loading ? 'Signing In...' : 'Sign In'}
-                    </button>
                   </div>
-                </form>
 
-                {/* FORGOT PASSWORD & SIGN UP */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', width: '100%' }}>
-                  <div style={{ 
-                    display: 'flex', 
-                    flexDirection: isMobile ? 'column' : 'row', 
-                    justifyContent: isMobile ? 'center' : 'space-between', 
-                    alignItems: 'center', 
-                    gap: isMobile ? '15px' : '0', 
-                    fontFamily: 'Helvetica, Arial, sans-serif', 
-                    fontSize: '14px' 
+                  {/* SUBMIT BUTTON */}
+                  <button 
+                    type="submit" 
+                    disabled={loading} 
+                    style={{ 
+                      width: '100%', 
+                      padding: '25px 0', 
+                      border: '2px solid white', 
+                      backgroundColor: 'transparent', 
+                      color: '#ffffff', 
+                      fontFamily: 'Helvetica, Arial, sans-serif', 
+                      fontSize: isMobile ? '28px' : '36px', 
+                      fontWeight: '400',
+                      letterSpacing: '2px',
+                      cursor: loading ? 'not-allowed' : 'pointer', 
+                      transition: 'all 0.3s ease', 
+                      marginTop: '20px',
+                    }}
+                  >
+                    {loading ? 'SIGNING IN...' : 'SIGN IN'}
+                  </button>
+                </div>
+              </form>
+
+              {/* FORGOT PASSWORD & SIGN UP - TANPA UNDERLINE, PAKAI SOUTH WEST ARROW */}
+              <div style={{ 
+                display: 'flex', 
+                flexDirection: 'column', 
+                gap: '30px', 
+                width: '100%',
+                maxWidth: '600px',
+              }}>
+                <div style={{ 
+                  display: 'flex', 
+                  flexDirection: isMobile ? 'column' : 'row', 
+                  justifyContent: 'space-between', 
+                  alignItems: isMobile ? 'flex-start' : 'center', 
+                  gap: isMobile ? '20px' : '0', 
+                  fontFamily: 'Helvetica, Arial, sans-serif', 
+                  fontSize: isMobile ? '24px' : '28px',
+                  width: '100%',
+                }}>
+                  <button 
+                    onClick={handleForgotPassword} 
+                    style={{ 
+                      border: 'none', 
+                      background: 'none', 
+                      color: '#ffffff', 
+                      cursor: 'pointer', 
+                      fontFamily: 'Helvetica, Arial, sans-serif', 
+                      fontSize: isMobile ? '24px' : '28px',
+                      fontWeight: '400',
+                      letterSpacing: '1px',
+                      padding: '0',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '15px',
+                    }}
+                  >
+                    FORGOT PASSWORD
+                    <SouthWestArrow size={isMobile ? 30 : 40} />
+                  </button>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '15px',
                   }}>
+                    <span style={{ 
+                      color: '#ffffff', 
+                      fontSize: isMobile ? '24px' : '28px',
+                      fontFamily: 'Helvetica, Arial, sans-serif',
+                      fontWeight: '400',
+                      letterSpacing: '1px',
+                    }}>
+                      NO ACCOUNT?
+                    </span>
                     <button 
-                      onClick={handleForgotPassword} 
+                      onClick={handleSignUp} 
                       style={{ 
                         border: 'none', 
                         background: 'none', 
                         color: '#ffffff', 
                         cursor: 'pointer', 
-                        textDecoration: 'underline', 
-                        opacity: '0.8', 
-                        transition: 'all 0.3s ease', 
                         fontFamily: 'Helvetica, Arial, sans-serif', 
-                        fontSize: isMobile ? '13px' : '14px' 
+                        fontSize: isMobile ? '24px' : '28px',
+                        fontWeight: '400',
+                        letterSpacing: '1px',
+                        padding: '0',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '15px',
                       }}
                     >
-                      Forgot your password?
+                      SIGN UP
+                      <SouthWestArrow size={isMobile ? 30 : 40} />
                     </button>
-                    <div>
-                      <span style={{ 
-                        color: '#ffffff', 
-                        opacity: '0.8', 
-                        fontSize: isMobile ? '13px' : '14px', 
-                        fontFamily: 'Helvetica, Arial, sans-serif' 
-                      }}>
-                        Don't have an account?{' '}
-                      </span>
-                      <button 
-                        onClick={handleSignUp} 
-                        style={{ 
-                          border: 'none', 
-                          background: 'none', 
-                          color: '#ffffff', 
-                          cursor: 'pointer', 
-                          textDecoration: 'underline', 
-                          fontWeight: '600', 
-                          transition: 'all 0.3s ease', 
-                          fontFamily: 'Helvetica, Arial, sans-serif', 
-                          fontSize: isMobile ? '13px' : '14px' 
-                        }}
-                      >
-                        Sign up
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* KEBIJAKAN PRIVASI & KETENTUAN KAMI */}
-                  <div style={{ 
-                    display: 'flex', 
-                    justifyContent: isMobile ? 'center' : 'flex-start', 
-                    gap: isMobile ? '20px' : '30px', 
-                    marginTop: '5px' 
-                  }}>
-                    <Link href="#" style={{ 
-                      color: 'rgba(255, 255, 255, 0.7)', 
-                      fontSize: isMobile ? '0.8rem' : '0.9rem', 
-                      fontFamily: 'Helvetica, Arial, sans-serif', 
-                      textDecoration: 'underline', 
-                      textUnderlineOffset: '3px', 
-                      opacity: 0.8, 
-                      transition: 'opacity 0.2s ease', 
-                      letterSpacing: '0.5px' 
-                    }}>
-                      KEBIJAKAN PRIVASI
-                    </Link>
-                    <Link href="#" style={{ 
-                      color: 'rgba(255, 255, 255, 0.7)', 
-                      fontSize: isMobile ? '0.8rem' : '0.9rem', 
-                      fontFamily: 'Helvetica, Arial, sans-serif', 
-                      textDecoration: 'underline', 
-                      textUnderlineOffset: '3px', 
-                      opacity: 0.8, 
-                      transition: 'opacity 0.2s ease', 
-                      letterSpacing: '0.5px' 
-                    }}>
-                      KETENTUAN KAMI
-                    </Link>
                   </div>
                 </div>
-              </>
-            )}
-          </div>
+
+                {/* KEBIJAKAN PRIVASI & KETENTUAN KAMI - TANPA UNDERLINE, PAKAI SOUTH WEST ARROW */}
+                <div style={{ 
+                  display: 'flex', 
+                  justifyContent: 'flex-start', 
+                  gap: isMobile ? '40px' : '60px', 
+                  marginTop: '20px',
+                  flexWrap: 'wrap',
+                }}>
+                  <Link href="#" style={{ 
+                    color: '#ffffff', 
+                    fontSize: isMobile ? '20px' : '24px', 
+                    fontFamily: 'Helvetica, Arial, sans-serif', 
+                    textDecoration: 'none',
+                    letterSpacing: '1px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '10px',
+                  }}>
+                    KEBIJAKAN PRIVASI
+                    <SouthWestArrow size={isMobile ? 25 : 30} />
+                  </Link>
+                  <Link href="#" style={{ 
+                    color: '#ffffff', 
+                    fontSize: isMobile ? '20px' : '24px', 
+                    fontFamily: 'Helvetica, Arial, sans-serif', 
+                    textDecoration: 'none',
+                    letterSpacing: '1px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '10px',
+                  }}>
+                    KETENTUAN KAMI
+                    <SouthWestArrow size={isMobile ? 25 : 30} />
+                  </Link>
+                </div>
+              </div>
+            </>
+          )}
         </div>
 
         {/* LETS JOIN US NOTE THINK */}
         <div style={{ 
           position: 'relative', 
-          textAlign: isMobile ? 'center' : 'left', 
-          marginTop: isMobile ? '2rem' : '4rem', 
+          textAlign: 'left', 
+          marginTop: isMobile ? '4rem' : '6rem', 
           width: '100%', 
           maxWidth: isMobile ? '100%' : '1200px', 
-          padding: isMobile ? '1rem' : '2rem', 
-          marginLeft: isMobile ? '0' : '2rem', 
-          marginBottom: isMobile ? '1rem' : '2rem' 
+          padding: '0',
+          marginLeft: '0', 
+          marginBottom: isMobile ? '2rem' : '3rem',
         }}>
           <div style={{ 
-            marginBottom: isMobile ? '2rem' : '4rem', 
-            padding: isMobile ? '0 1rem' : '0' 
+            marginBottom: isMobile ? '3rem' : '5rem', 
+            padding: '0',
           }}>
             <p style={{ 
-              color: 'rgba(255,255,255,0.9)', 
-              fontSize: isMobile ? '2.5rem' : '5rem', 
+              color: '#ffffff', 
+              fontSize: isMobile ? '48px' : '80px', 
               fontFamily: 'Helvetica, Arial, sans-serif', 
               margin: '0 0 0.3rem 0', 
               lineHeight: '1.1', 
-              fontWeight: '600' 
+              fontWeight: '600',
+              letterSpacing: '2px',
             }}>
               LETS JOIN US
             </p>
             <p style={{ 
-              color: 'rgba(255,255,255,0.9)', 
-              fontSize: isMobile ? '2.5rem' : '5rem', 
+              color: '#ffffff', 
+              fontSize: isMobile ? '48px' : '80px', 
               fontFamily: 'Helvetica, Arial, sans-serif', 
               margin: 0, 
               lineHeight: '1.1', 
-              fontWeight: '600' 
+              fontWeight: '600',
+              letterSpacing: '2px',
             }}>
               NOTE THINK.
             </p>
           </div>
 
-          {/* 6 KELOMPOK MENU */}
+          {/* 6 KELOMPOK MENU - SEMUA PAKAI SOUTH WEST ARROW */}
           <div style={{ 
             display: 'grid', 
             gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(3, auto)', 
-            gap: isMobile ? '2rem 3rem' : '2rem 8rem', 
-            marginTop: '0rem', 
-            padding: isMobile ? '0 1rem' : '0', 
-            justifyContent: isMobile ? 'center' : 'flex-start' 
+            gap: isMobile ? '3rem 4rem' : '3rem 8rem', 
+            marginTop: '0', 
+            padding: '0', 
+            justifyContent: 'flex-start',
+            alignItems: 'start',
           }}>
             <div>
               <h4 style={{ 
-                color: 'white', 
-                fontSize: isMobile ? '1.8rem' : '4rem', 
+                color: '#ffffff', 
+                fontSize: isMobile ? '32px' : '64px', 
                 fontWeight: '600', 
                 margin: '0 0 0.5rem 0', 
                 marginBottom: isMobile ? '3rem' : '5rem', 
-                fontFamily: 'Helvetica, Arial, sans-serif' 
+                fontFamily: 'Helvetica, Arial, sans-serif',
+                letterSpacing: '2px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '15px',
               }}>
                 MENU
+                <SouthWestArrow size={isMobile ? 35 : 50} />
               </h4>
             </div>
             <div>
               <h4 style={{ 
-                color: 'white', 
-                fontSize: isMobile ? '1.8rem' : '4rem', 
+                color: '#ffffff', 
+                fontSize: isMobile ? '32px' : '64px', 
                 fontWeight: '600', 
                 margin: '0 0 0.5rem 0', 
                 marginBottom: isMobile ? '3rem' : '5rem', 
-                fontFamily: 'Helvetica, Arial, sans-serif' 
+                fontFamily: 'Helvetica, Arial, sans-serif',
+                letterSpacing: '2px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '15px',
               }}>
                 PRODUCT
+                <SouthWestArrow size={isMobile ? 35 : 50} />
               </h4>
             </div>
             <div>
@@ -1181,53 +1209,61 @@ export default function SignInPage() {
             </div>
             <div>
               <h4 style={{ 
-                color: 'white', 
-                fontSize: isMobile ? '1.8rem' : '4rem', 
+                color: '#ffffff', 
+                fontSize: isMobile ? '32px' : '64px', 
                 fontWeight: '600', 
                 margin: '0 0 0.5rem 0', 
                 marginBottom: isMobile ? '8rem' : '15rem', 
-                fontFamily: 'Helvetica, Arial, sans-serif' 
+                fontFamily: 'Helvetica, Arial, sans-serif',
+                letterSpacing: '2px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '15px',
               }}>
-                Features
+                FEATURES
+                <SouthWestArrow size={isMobile ? 35 : 50} />
               </h4>
             </div>
             <div>
               <h4 style={{ 
-                color: 'white', 
-                fontSize: isMobile ? '1.8rem' : '4rem', 
+                color: '#ffffff', 
+                fontSize: isMobile ? '32px' : '64px', 
                 fontWeight: '600', 
                 margin: '0 0 0.5rem 0', 
                 marginBottom: isMobile ? '8rem' : '15rem', 
-                fontFamily: 'Helvetica, Arial, sans-serif' 
+                fontFamily: 'Helvetica, Arial, sans-serif',
+                letterSpacing: '2px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '15px',
               }}>
-                Community
+                COMMUNITY
+                <SouthWestArrow size={isMobile ? 35 : 50} />
               </h4>
             </div>
             <div>
               <h4 style={{ 
-                color: 'white', 
-                fontSize: isMobile ? '1.8rem' : '4rem', 
+                color: '#ffffff', 
+                fontSize: isMobile ? '32px' : '64px', 
                 fontWeight: '600', 
                 margin: '0 0 0.5rem 0', 
                 marginBottom: isMobile ? '8rem' : '15rem', 
-                fontFamily: 'Helvetica, Arial, sans-serif' 
+                fontFamily: 'Helvetica, Arial, sans-serif',
+                letterSpacing: '2px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '15px',
               }}>
                 BLOG
+                <SouthWestArrow size={isMobile ? 35 : 50} />
               </h4>
             </div>
           </div>
         </div>
 
-        {/* TEKS BERJALAN 2 - KANAN KE KIRI DENGAN SVG MINIMALIST */}
+        {/* TEKS BERJALAN 2 */}
         <MarqueeRightText />
       </div>
-      
-      <style jsx>{`
-        @keyframes spin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
-        }
-      `}</style>
     </>
   );
 }
