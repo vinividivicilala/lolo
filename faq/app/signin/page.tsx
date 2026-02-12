@@ -49,6 +49,17 @@ const socialConnections = [
   { id: 5, name: "YouTube" }
 ];
 
+// Data community items dengan GSAP modern
+const communityItems = [
+  { id: 1, name: "POINT BLANK", icon: "🎯" },
+  { id: 2, name: "LOST SAGA", icon: "⚔️" },
+  { id: 3, name: "PERSIB", icon: "⚽" },
+  { id: 4, name: "CODING", icon: "💻" },
+  { id: 5, name: "PEMBERSIHAN", icon: "🧹" },
+  { id: 6, name: "PENDIDIKAN", icon: "📚" },
+  { id: 7, name: "SOSIAL", icon: "🤝" }
+];
+
 interface LoginHistory {
   id: string;
   email: string;
@@ -89,6 +100,12 @@ export default function SignInPage() {
   // --- REFS UNTUK KONEKSI ---
   const [connectionsOpen, setConnectionsOpen] = useState(false);
   const socialItemsRef = useRef<(HTMLDivElement | null)[]>([]);
+  
+  // --- REFS UNTUK COMMUNITY GSAP MODERN ---
+  const [communityOpen, setCommunityOpen] = useState(false);
+  const communityItemsRef = useRef<(HTMLDivElement | null)[]>([]);
+  const communityTitleRef = useRef<HTMLDivElement>(null);
+  const communityContainerRef = useRef<HTMLDivElement>(null);
 
   // ============================================
   // 1. FIX HYDRATION: TANDAI KOMPONEN SUDAH DI-MOUNT
@@ -256,7 +273,140 @@ export default function SignInPage() {
   }, [connectionsOpen, isMounted]);
 
   // ============================================
-  // 7. FUNGSI FIRESTORE - TANPA SIMPAN PASSWORD
+  // 7. ANIMASI GSAP MODERN UNTUK COMMUNITY
+  // ============================================
+  useEffect(() => {
+    if (!isMounted) return;
+    
+    // Animasi GSAP Modern untuk Community
+    if (communityOpen) {
+      // Timeline untuk animasi yang lebih kompleks
+      const tl = gsap.timeline();
+      
+      // Animasi title dengan efek modern
+      if (communityTitleRef.current) {
+        tl.fromTo(communityTitleRef.current, 
+          { scale: 1, color: 'rgba(255,255,255,0.8)' },
+          { scale: 1.05, color: '#ffffff', duration: 0.3, ease: "power2.out" }
+        );
+      }
+      
+      // Animasi items dengan efek stagger modern
+      const validRefs = communityItemsRef.current.filter(Boolean);
+      if (validRefs.length > 0) {
+        // Reset posisi awal
+        gsap.set(validRefs, { 
+          x: -50, 
+          opacity: 0,
+          rotation: -5,
+          scale: 0.8
+        });
+        
+        // Animasi masuk dengan efek modern
+        tl.to(validRefs, {
+          x: 0,
+          opacity: 1,
+          rotation: 0,
+          scale: 1,
+          duration: 0.6,
+          stagger: {
+            amount: 0.8,
+            from: "start",
+            ease: "power3.out"
+          },
+          ease: "back.out(1.2)"
+        }, "-=0.2");
+        
+        // Efek hover untuk setiap item
+        validRefs.forEach((ref, index) => {
+          if (ref) {
+            ref.addEventListener('mouseenter', () => {
+              gsap.to(ref, {
+                x: 10,
+                scale: 1.1,
+                duration: 0.3,
+                ease: "power2.out"
+              });
+            });
+            ref.addEventListener('mouseleave', () => {
+              gsap.to(ref, {
+                x: 0,
+                scale: 1,
+                duration: 0.3,
+                ease: "power2.out"
+              });
+            });
+          }
+        });
+      }
+      
+      // Animasi container dengan efek modern
+      if (communityContainerRef.current) {
+        gsap.fromTo(communityContainerRef.current,
+          { height: 0, opacity: 0 },
+          { height: 'auto', opacity: 1, duration: 0.5, ease: "power3.inOut" }
+        );
+      }
+      
+    } else {
+      // Animasi keluar dengan efek modern
+      const validRefs = communityItemsRef.current.filter(Boolean);
+      if (validRefs.length > 0) {
+        gsap.to(validRefs, {
+          x: 50,
+          opacity: 0,
+          rotation: 5,
+          scale: 0.8,
+          duration: 0.4,
+          stagger: {
+            amount: 0.4,
+            from: "end",
+            ease: "power2.in"
+          },
+          ease: "back.in(1)"
+        });
+        
+        // Remove hover listeners
+        validRefs.forEach((ref) => {
+          if (ref) {
+            ref.removeEventListener('mouseenter', () => {});
+            ref.removeEventListener('mouseleave', () => {});
+          }
+        });
+      }
+      
+      if (communityContainerRef.current) {
+        gsap.to(communityContainerRef.current, {
+          height: 0,
+          opacity: 0,
+          duration: 0.4,
+          ease: "power3.inOut"
+        });
+      }
+      
+      if (communityTitleRef.current) {
+        gsap.to(communityTitleRef.current, {
+          scale: 1,
+          color: 'rgba(255,255,255,0.8)',
+          duration: 0.3
+        });
+      }
+    }
+    
+    // Cleanup function
+    return () => {
+      const validRefs = communityItemsRef.current.filter(Boolean);
+      validRefs.forEach((ref) => {
+        if (ref) {
+          ref.removeEventListener('mouseenter', () => {});
+          ref.removeEventListener('mouseleave', () => {});
+        }
+      });
+    };
+  }, [communityOpen, isMounted]);
+
+  // ============================================
+  // 8. FUNGSI FIRESTORE - TANPA SIMPAN PASSWORD
   // ============================================
   const saveLoginHistory = async (userData: any, provider: string) => {
     if (!firebaseDb || !firebaseAuth) return;
@@ -281,7 +431,7 @@ export default function SignInPage() {
   };
 
   // ============================================
-  // 8. AUTH STATE CHANGED LISTENER - TANPA REDIRECT OTOMATIS
+  // 9. AUTH STATE CHANGED LISTENER - TANPA REDIRECT OTOMATIS
   // ============================================
   useEffect(() => {
     if (!isMounted || !firebaseAuth || !firebaseInitialized) return;
@@ -300,7 +450,7 @@ export default function SignInPage() {
   }, [router, isMounted, firebaseAuth, firebaseInitialized]);
 
   // ============================================
-  // 9. LOGIN HANDLERS - DENGAN SUCCESS STATE
+  // 10. LOGIN HANDLERS - DENGAN SUCCESS STATE
   // ============================================
   const handleGoogleLogin = async () => {
     if (!firebaseAuth) return;
@@ -418,7 +568,7 @@ export default function SignInPage() {
   };
 
   // ============================================
-  // 10. FIX HYDRATION: JIKA BELUM MOUNT, TAMPILKAN LOADING
+  // 11. FIX HYDRATION: JIKA BELUM MOUNT, TAMPILKAN LOADING
   // ============================================
   if (!isMounted) {
     return (
@@ -441,7 +591,7 @@ export default function SignInPage() {
   }
 
   // ============================================
-  // 11. KOMPONEN CONNECTION
+  // 12. KOMPONEN CONNECTION
   // ============================================
   const ConnectionComponent = () => (
     <div style={{ position: 'relative', width: isMobile ? '100%' : 'auto', zIndex: 10 }}>
@@ -537,7 +687,159 @@ export default function SignInPage() {
   );
 
   // ============================================
-  // 12. KOMPONEN MARQUEE DENGAN SVG MINIMALIST
+  // 13. KOMPONEN COMMUNITY GSAP MODERN
+  // ============================================
+  const CommunityComponent = () => (
+    <div style={{ position: 'relative', width: isMobile ? '100%' : 'auto', zIndex: 10 }}>
+      <motion.div
+        whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.98 }}
+        style={{ cursor: 'pointer', userSelect: 'none', marginBottom: communityOpen ? '20px' : '0' }}
+        onClick={() => setCommunityOpen(!communityOpen)}
+      >
+        <div 
+          ref={communityTitleRef}
+          style={{ 
+            position: 'relative', 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: '15px',
+            color: 'rgba(255,255,255,0.8)',
+            transition: 'color 0.3s ease'
+          }}
+        >
+          <h4 style={{
+            color: 'inherit',
+            fontSize: isMobile ? '1.8rem' : '4rem',
+            fontWeight: '600',
+            margin: '0',
+            fontFamily: 'Helvetica, Arial, sans-serif',
+            textShadow: '2px 2px 4px rgba(0,0,0,0.3)',
+          }}>
+            COMMUNITY
+          </h4>
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ duration: 0.2 }}
+            style={{
+              position: 'absolute',
+              bottom: isMobile ? '-5px' : '-10px',
+              right: isMobile ? '-20px' : '-40px',
+              color: 'rgba(255, 255, 255, 0.8)',
+              fontSize: isMobile ? '0.7rem' : '1rem',
+              fontWeight: 'normal',
+              fontFamily: 'Helvetica, Arial, sans-serif',
+            }}
+          >
+            ({communityItems.length.toString().padStart(2, '0')})
+          </motion.div>
+          
+          {/* SOUTH WEST ARROW SVG */}
+          <svg 
+            width={isMobile ? '40' : '60'} 
+            height={isMobile ? '40' : '60'} 
+            viewBox="0 0 24 24" 
+            fill="none"
+            stroke="white"
+            strokeWidth="1"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            style={{ 
+              marginLeft: '15px',
+              opacity: 0.8,
+              transform: communityOpen ? 'rotate(0deg)' : 'rotate(-90deg)',
+              transition: 'transform 0.3s ease'
+            }}
+          >
+            <path d="M17 7L7 17" stroke="white"/>
+            <path d="M17 7H7" stroke="white"/>
+            <path d="M17 7V17" stroke="white"/>
+          </svg>
+        </div>
+      </motion.div>
+
+      <AnimatePresence>
+        {communityOpen && (
+          <motion.div
+            ref={communityContainerRef}
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.3 }}
+            style={{ overflow: 'hidden' }}
+          >
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, 1fr)',
+              gap: isMobile ? '12px' : '20px',
+              paddingTop: '20px',
+              paddingBottom: '10px',
+            }}>
+              {communityItems.map((item, index) => (
+                <div
+                  key={item.id}
+                  ref={el => { communityItemsRef.current[index] = el; }}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    padding: isMobile ? '12px 18px' : '15px 25px',
+                    background: 'rgba(255, 255, 255, 0.03)',
+                    backdropFilter: 'blur(5px)',
+                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                    borderRadius: '12px',
+                    cursor: 'pointer',
+                    transformOrigin: 'left center',
+                    boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                    <span style={{
+                      fontSize: isMobile ? '1.8rem' : '2.2rem',
+                      opacity: 0.9
+                    }}>
+                      {item.icon}
+                    </span>
+                    <p style={{
+                      color: 'white',
+                      fontSize: isMobile ? '1.3rem' : '1.8rem',
+                      fontWeight: '500',
+                      margin: '0',
+                      fontFamily: 'Helvetica, Arial, sans-serif',
+                      letterSpacing: '1px',
+                    }}>
+                      {item.name}
+                    </p>
+                  </div>
+                  
+                  {/* SOUTH WEST ARROW SVG untuk setiap item */}
+                  <svg 
+                    width={isMobile ? '28' : '40'} 
+                    height={isMobile ? '28' : '40'} 
+                    viewBox="0 0 24 24" 
+                    fill="none"
+                    stroke="white"
+                    strokeWidth="1"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    style={{ opacity: 0.6 }}
+                  >
+                    <path d="M17 7L7 17" stroke="white"/>
+                    <path d="M17 7H7" stroke="white"/>
+                    <path d="M17 7V17" stroke="white"/>
+                  </svg>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+
+  // ============================================
+  // 14. KOMPONEN MARQUEE DENGAN SVG MINIMALIST
   // ============================================
   const MarqueeLeftText = () => (
     <div style={{
@@ -664,7 +966,7 @@ export default function SignInPage() {
   );
 
   // ============================================
-  // 13. RENDER UTAMA - TANPA REDIRECT OTOMATIS
+  // 15. RENDER UTAMA - TANPA REDIRECT OTOMATIS
   // ============================================
   return (
     <>
@@ -1355,7 +1657,7 @@ export default function SignInPage() {
             </p>
           </div>
 
-          {/* 6 KELOMPOK MENU */}
+          {/* 6 KELOMPOK MENU - DENGAN COMMUNITY GSAP MODERN */}
           <div style={{ 
             display: 'grid', 
             gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(3, auto)', 
@@ -1397,23 +1699,15 @@ export default function SignInPage() {
                 fontSize: isMobile ? '2.2rem' : '4.5rem', 
                 fontWeight: '600', 
                 margin: '0 0 0.5rem 0', 
-                marginBottom: isMobile ? '8rem' : '15rem', 
+                marginBottom: isMobile ? '4rem' : '6rem', 
                 fontFamily: 'Helvetica, Arial, sans-serif' 
               }}>
                 Features
               </h4>
             </div>
             <div>
-              <h4 style={{ 
-                color: 'white', 
-                fontSize: isMobile ? '2.2rem' : '4.5rem', 
-                fontWeight: '600', 
-                margin: '0 0 0.5rem 0', 
-                marginBottom: isMobile ? '8rem' : '15rem', 
-                fontFamily: 'Helvetica, Arial, sans-serif' 
-              }}>
-                Community
-              </h4>
+              {/* COMMUNITY DENGAN GSAP MODERN */}
+              <CommunityComponent />
             </div>
             <div>
               <h4 style={{ 
