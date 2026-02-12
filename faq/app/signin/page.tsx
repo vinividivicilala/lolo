@@ -129,9 +129,10 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
     }
   }, [connectionsOpen]);
 
-  // Animasi teks berjalan - KIRI KE KANAN (CREATE FREE ACCESS ACCOUNT)
+  // Animasi teks berjalan - KIRI KE KANAN (CREATE FREE ACCESS ACCOUNT) - TANPA HENTI
   useEffect(() => {
     if (marqueeLeftRef.current) {
+      gsap.killTweensOf(marqueeLeftRef.current);
       gsap.fromTo(marqueeLeftRef.current, 
         { x: '-100%' },
         { 
@@ -139,15 +140,17 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
           duration: 50, 
           repeat: -1, 
           ease: 'none',
-          overwrite: true
+          overwrite: true,
+          repeatDelay: 0
         }
       );
     }
   }, []);
 
-  // Animasi teks berjalan - KANAN KE KIRI (SIGN IN)
+  // Animasi teks berjalan - KANAN KE KIRI (SIGN IN) - TANPA HENTI
   useEffect(() => {
     if (marqueeRightRef.current) {
+      gsap.killTweensOf(marqueeRightRef.current);
       gsap.fromTo(marqueeRightRef.current, 
         { x: '100%' },
         { 
@@ -155,7 +158,8 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
           duration: 60, 
           repeat: -1, 
           ease: 'none',
-          overwrite: true
+          overwrite: true,
+          repeatDelay: 0
         }
       );
     }
@@ -762,8 +766,8 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
       width: '100%',
       overflow: 'hidden',
       position: 'relative',
-      marginTop: isMobile ? '20px' : '30px',
-      marginBottom: isMobile ? '20px' : '30px',
+      marginTop: isMobile ? '80px' : '120px',
+      marginBottom: isMobile ? '40px' : '60px',
       padding: '0',
       backgroundColor: 'transparent',
       border: 'none',
@@ -776,6 +780,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
           gap: isMobile ? '80px' : '150px',
           whiteSpace: 'nowrap',
           width: 'fit-content',
+          willChange: 'transform',
         }}
       >
         {/* 3 ITEM SAJA - diulang untuk kontinuitas */}
@@ -815,7 +820,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
       width: '100%',
       overflow: 'hidden',
       position: 'relative',
-      marginTop: isMobile ? '20px' : '30px',
+      marginTop: isMobile ? '40px' : '60px',
       marginBottom: isMobile ? '20px' : '30px',
       padding: '0',
       backgroundColor: 'transparent',
@@ -829,6 +834,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
           gap: isMobile ? '80px' : '150px',
           whiteSpace: 'nowrap',
           width: 'fit-content',
+          willChange: 'transform',
         }}
       >
         {/* 3 ITEM SAJA - diulang untuk kontinuitas */}
@@ -932,7 +938,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
           </Link>
         </div>
 
-        {/* TEKS BERJALAN 1 - CREATE FREE ACCESS ACCOUNT (KIRI KE KANAN) - DI ATAS */}
+        {/* TEKS BERJALAN 1 - CREATE FREE ACCESS ACCOUNT (KIRI KE KANAN) - DI ATAS FORM LOGIN */}
         <MarqueeLeftText />
 
         {/* Main Sign In Container - TANPA FOTO */}
