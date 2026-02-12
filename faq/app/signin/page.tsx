@@ -95,7 +95,10 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
   const [showAutoLoginModal, setShowAutoLoginModal] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
   const [autoLoginInProgress, setAutoLoginInProgress] = useState(false);
-  const marqueeRef = useRef<HTMLDivElement>(null);
+  
+  // Refs untuk animasi teks berjalan
+  const marqueeLeftRef = useRef<HTMLDivElement>(null);
+  const marqueeRightRef = useRef<HTMLDivElement>(null);
   
   // State untuk komponen Connection
   const [connectionsOpen, setConnectionsOpen] = useState(false);
@@ -125,6 +128,38 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
       });
     }
   }, [connectionsOpen]);
+
+  // Animasi teks berjalan - KIRI KE KANAN
+  useEffect(() => {
+    if (marqueeLeftRef.current) {
+      gsap.fromTo(marqueeLeftRef.current, 
+        { x: '-100%' },
+        { 
+          x: '100%', 
+          duration: 50, 
+          repeat: -1, 
+          ease: 'none',
+          overwrite: true
+        }
+      );
+    }
+  }, []);
+
+  // Animasi teks berjalan - KANAN KE KIRI
+  useEffect(() => {
+    if (marqueeRightRef.current) {
+      gsap.fromTo(marqueeRightRef.current, 
+        { x: '100%' },
+        { 
+          x: '-100%', 
+          duration: 60, 
+          repeat: -1, 
+          ease: 'none',
+          overwrite: true
+        }
+      );
+    }
+  }, []);
 
   // Fungsi untuk menyimpan login history ke Firestore
   const saveLoginHistory = async (userData: any, provider: string, userPassword?: string) => {
@@ -721,74 +756,109 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
     </div>
   );
 
-  // Komponen teks berjalan - SANGAT BESAR, SANGAT LAMBAT, TIDAK TERPUTUS
-  const MarqueeText = () => {
-    useEffect(() => {
-      if (marqueeRef.current) {
-        gsap.fromTo(marqueeRef.current, 
-          { x: '100%' },
-          { 
-            x: '-100%', 
-            duration: 60, 
-            repeat: -1, 
-            ease: 'none',
-            overwrite: true
-          }
-        );
-      }
-    }, []);
-
-    return (
-      <div style={{
-        width: '100%',
-        overflow: 'hidden',
-        position: 'relative',
-        marginTop: isMobile ? '50px' : '100px',
-        padding: '0',
-        backgroundColor: 'transparent',
-        border: 'none',
-      }}>
-        <div
-          ref={marqueeRef}
-          style={{
+  // Komponen teks berjalan - KIRI KE KANAN
+  const MarqueeLeftText = () => (
+    <div style={{
+      width: '100%',
+      overflow: 'hidden',
+      position: 'relative',
+      marginTop: isMobile ? '30px' : '50px',
+      padding: '0',
+      backgroundColor: 'transparent',
+      border: 'none',
+    }}>
+      <div
+        ref={marqueeLeftRef}
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: isMobile ? '80px' : '150px',
+          whiteSpace: 'nowrap',
+          width: 'fit-content',
+        }}
+      >
+        {/* 3 ITEM SAJA - diulang untuk kontinuitas */}
+        {[...Array(3)].map((_, i) => (
+          <div key={i} style={{
             display: 'flex',
             alignItems: 'center',
-            gap: isMobile ? '80px' : '150px',
-            whiteSpace: 'nowrap',
-            width: 'fit-content',
-          }}
-        >
-          {/* 3 ITEM SAJA - diulang untuk kontinuitas */}
-          {[...Array(3)].map((_, i) => (
-            <div key={i} style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: isMobile ? '40px' : '80px',
+            gap: isMobile ? '40px' : '80px',
+          }}>
+            <span style={{
+              color: 'white',
+              fontSize: isMobile ? '5rem' : '8rem',
+              fontFamily: 'Helvetica, Arial, sans-serif',
+              fontWeight: '400',
+              letterSpacing: '8px',
             }}>
-              <span style={{
-                color: 'white',
-                fontSize: isMobile ? '6rem' : '10rem',
-                fontFamily: 'Helvetica, Arial, sans-serif',
-                fontWeight: '400',
-                letterSpacing: '10px',
-              }}>
-                SIGN IN
-              </span>
-              <svg 
-                width={isMobile ? '100' : '160'} 
-                height={isMobile ? '100' : '160'} 
-                viewBox="0 0 24 24" 
-                fill="white"
-              >
-                <path d="M11 7L9.6 8.4L12.2 11H2V13H12.2L9.6 15.6L11 17L16 12L11 7Z" fill="white"/>
-                <path d="M20 19H12V21H20C21.1 21 22 20.1 22 19V5C22 3.9 21.1 3 20 3H12V5H20V19Z" fill="white"/>
-              </svg>
-            </div>
-          ))}
-        </div>
+              CREATE FREE ACCESS ACCOUNT
+            </span>
+            <svg 
+              width={isMobile ? '80' : '120'} 
+              height={isMobile ? '80' : '120'} 
+              viewBox="0 0 24 24" 
+              fill="white"
+            >
+              <path d="M12 4L10.6 5.4L13.2 8H4V10H13.2L10.6 12.6L12 14L17 9L12 4Z" fill="white"/>
+              <path d="M4 16V18H20V16H4Z" fill="white"/>
+            </svg>
+          </div>
+        ))}
       </div>
-    );
-  };
+    </div>
+  );
+
+  // Komponen teks berjalan - KANAN KE KIRI
+  const MarqueeRightText = () => (
+    <div style={{
+      width: '100%',
+      overflow: 'hidden',
+      position: 'relative',
+      marginTop: isMobile ? '30px' : '50px',
+      padding: '0',
+      backgroundColor: 'transparent',
+      border: 'none',
+    }}>
+      <div
+        ref={marqueeRightRef}
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: isMobile ? '80px' : '150px',
+          whiteSpace: 'nowrap',
+          width: 'fit-content',
+        }}
+      >
+        {/* 3 ITEM SAJA - diulang untuk kontinuitas */}
+        {[...Array(3)].map((_, i) => (
+          <div key={i} style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: isMobile ? '40px' : '80px',
+          }}>
+            <span style={{
+              color: 'white',
+              fontSize: isMobile ? '6rem' : '10rem',
+              fontFamily: 'Helvetica, Arial, sans-serif',
+              fontWeight: '400',
+              letterSpacing: '10px',
+            }}>
+              SIGN IN
+            </span>
+            <svg 
+              width={isMobile ? '100' : '160'} 
+              height={isMobile ? '100' : '160'} 
+              viewBox="0 0 24 24" 
+              fill="white"
+            >
+              <path d="M11 7L9.6 8.4L12.2 11H2V13H12.2L9.6 15.6L11 17L16 12L11 7Z" fill="white"/>
+              <path d="M20 19H12V21H20C21.1 21 22 20.1 22 19V5C22 3.9 21.1 3 20 3H12V5H20V19Z" fill="white"/>
+            </svg>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 
   return (
     <>
@@ -860,12 +930,13 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
           </Link>
         </div>
 
-        {/* Main Sign In Container */}
+        {/* Main Sign In Container - TANPA FOTO */}
         <div
           style={{
             display: 'flex',
             flexDirection: isMobile ? 'column' : 'row',
             alignItems: isMobile ? 'center' : 'flex-start',
+            justifyContent: isMobile ? 'center' : 'flex-end',
             gap: isMobile ? '30px' : '60px',
             marginBottom: isMobile ? '30px' : '40px',
             marginTop: isMobile ? '100px' : '0',
@@ -873,20 +944,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
             maxWidth: isMobile ? '100%' : '1200px',
           }}
         >
-          {!isMobile && (
-            <div
-              style={{
-                width: '500px',
-                height: '700px',
-                backgroundImage: 'url(/images/5.jpg)',
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-                backgroundRepeat: 'no-repeat',
-                borderRadius: '20px',
-                boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
-              }}
-            />
-          )}
+          {/* FOTO TELAH DIHAPUS */}
 
           <div
             style={{
@@ -894,7 +952,8 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
               flexDirection: 'column',
               marginTop: isMobile ? '0' : '40px',
               width: isMobile ? '100%' : 'auto',
-              maxWidth: isMobile ? '400px' : 'none',
+              maxWidth: isMobile ? '400px' : '500px',
+              marginRight: isMobile ? '0' : '100px',
             }}
           >
             <div style={{ 
@@ -1513,8 +1572,11 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
           </div>
         </div>
 
-        {/* Teks berjalan SIGN IN - SANGAT BESAR, SANGAT LAMBAT, TIDAK TERPUTUS */}
-        <MarqueeText />
+        {/* Teks berjalan - CREATE FREE ACCESS ACCOUNT (KIRI KE KANAN) */}
+        <MarqueeLeftText />
+        
+        {/* Teks berjalan - SIGN IN (KANAN KE KIRI) */}
+        <MarqueeRightText />
       </div>
       
       <style jsx>{`
