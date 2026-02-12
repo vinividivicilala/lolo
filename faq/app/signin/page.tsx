@@ -293,8 +293,6 @@ export default function SignInPage() {
         setEmail("");
         setPassword("");
         setLoginSuccess(true);
-        // HAPUS redirect otomatis ke /notes
-        // router.push('/notes');  // COMMENTED OUT - TIDAK LANGSUNG REDIRECT
       }
     });
 
@@ -777,67 +775,6 @@ export default function SignInPage() {
               {user ? 'You are signed in' : 'Sign in to your account to continue'}
             </p>
             
-            {/* LOGIN SUCCESS MESSAGE - TAMBAHAN */}
-            {loginSuccess && user && (
-              <div style={{ 
-                marginTop: '30px',
-                marginBottom: '20px',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'flex-start',
-                gap: '25px'
-              }}>
-                <p style={{ 
-                  color: '#ffffff', 
-                  fontSize: isMobile ? '2.2rem' : '2.8rem', 
-                  fontFamily: 'Helvetica, Arial, sans-serif',
-                  fontWeight: '300',
-                  opacity: 0.9,
-                  margin: 0,
-                  letterSpacing: '2px'
-                }}>
-                  ✓ Login successful!
-                </p>
-                <button 
-                  onClick={handleGoToNotes} 
-                  style={{ 
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '20px',
-                    padding: '0', 
-                    border: 'none', 
-                    backgroundColor: 'transparent', 
-                    color: '#ffffff', 
-                    fontFamily: 'Helvetica, Arial, sans-serif', 
-                    fontSize: isMobile ? '2rem' : '2.6rem', 
-                    fontWeight: '300',
-                    cursor: 'pointer', 
-                    transition: 'opacity 0.2s ease', 
-                    letterSpacing: '4px',
-                    opacity: 0.8
-                  }}
-                  onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
-                  onMouseLeave={(e) => e.currentTarget.style.opacity = '0.8'}
-                >
-                  GO TO NOTES
-                  <svg 
-                    width={isMobile ? '50' : '70'} 
-                    height={isMobile ? '50' : '70'} 
-                    viewBox="0 0 24 24" 
-                    fill="none"
-                    stroke="white"
-                    strokeWidth="1"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M7 7L17 7" stroke="white"/>
-                    <path d="M7 7L7 17" stroke="white"/>
-                    <path d="M7 7L21 21" stroke="white"/>
-                  </svg>
-                </button>
-              </div>
-            )}
-            
             {/* ERROR MESSAGE - MINIMAL */}
             {error && (
               <div style={{ 
@@ -846,54 +783,10 @@ export default function SignInPage() {
                 marginTop: '20px', 
                 marginBottom: '20px',
                 fontFamily: 'Helvetica, Arial, sans-serif',
-                fontWeight: '300',
-                borderLeft: '1px solid rgba(255, 255, 255, 0.2)',
-                paddingLeft: '20px'
+                fontWeight: '300'
               }}>
                 {error}
               </div>
-            )}
-            
-            {/* LOGOUT BUTTON - NO LINE, BIG TEXT */}
-            {user && (
-              <button 
-                onClick={handleLogout} 
-                style={{ 
-                  marginTop: '30px', 
-                  padding: '0', 
-                  background: 'none', 
-                  border: 'none', 
-                  color: 'white', 
-                  cursor: 'pointer', 
-                  transition: 'opacity 0.2s ease', 
-                  fontFamily: 'Helvetica, Arial, sans-serif',
-                  fontSize: isMobile ? '1.8rem' : '2.2rem',
-                  fontWeight: '300',
-                  letterSpacing: '4px',
-                  opacity: 0.8,
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '15px'
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
-                onMouseLeave={(e) => e.currentTarget.style.opacity = '0.8'}
-              >
-                SIGN OUT
-                <svg 
-                  width={isMobile ? '40' : '55'} 
-                  height={isMobile ? '40' : '55'} 
-                  viewBox="0 0 24 24" 
-                  fill="none"
-                  stroke="white"
-                  strokeWidth="1"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" stroke="white"/>
-                  <polyline points="16 17 21 12 16 7" stroke="white"/>
-                  <line x1="21" y1="12" x2="9" y2="12" stroke="white"/>
-                </svg>
-              </button>
             )}
           </div>
 
@@ -1233,7 +1126,7 @@ export default function SignInPage() {
                   </div>
                 </div>
 
-                {/* KEBIJAKAN PRIVASI & KETENTUAN KAMI - BIG TEXT, BIG ARROWS, NO UNDERLINE, SOUTH EAST ARROW */}
+                {/* KEBIJAKAN PRIVASI & KETENTUAN KAMI - SELALU TAMPIL, BIG TEXT, BIG ARROWS, SOUTH EAST ARROW */}
                 <div style={{ 
                   display: 'flex', 
                   justifyContent: 'flex-start', 
@@ -1308,6 +1201,193 @@ export default function SignInPage() {
                 </div>
               </div>
             </>
+          )}
+
+          {/* SECTION AFTER LOGIN - DIPISAH, TAMPIL BESAR DENGAN SVG SOUTH EAST ARROW */}
+          {user && (
+            <div style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'flex-start',
+              width: '100%',
+              maxWidth: '800px',
+              marginTop: '20px'
+            }}>
+              {/* LOGIN SUCCESS MESSAGE - SANGAT BESAR */}
+              <div style={{ 
+                marginBottom: '50px',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'flex-start',
+                gap: '30px'
+              }}>
+                <p style={{ 
+                  color: '#ffffff', 
+                  fontSize: isMobile ? '3rem' : '4rem', 
+                  fontFamily: 'Helvetica, Arial, sans-serif',
+                  fontWeight: '300',
+                  opacity: 0.9,
+                  margin: 0,
+                  letterSpacing: '2px'
+                }}>
+                  ✓ Login successful!
+                </p>
+                
+                {/* GO TO NOTES BUTTON - BESAR DENGAN SVG */}
+                <button 
+                  onClick={handleGoToNotes} 
+                  style={{ 
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '25px',
+                    padding: '0', 
+                    border: 'none', 
+                    backgroundColor: 'transparent', 
+                    color: '#ffffff', 
+                    fontFamily: 'Helvetica, Arial, sans-serif', 
+                    fontSize: isMobile ? '2.4rem' : '3.2rem', 
+                    fontWeight: '300',
+                    cursor: 'pointer', 
+                    transition: 'opacity 0.2s ease', 
+                    letterSpacing: '4px',
+                    opacity: 0.8
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
+                  onMouseLeave={(e) => e.currentTarget.style.opacity = '0.8'}
+                >
+                  GO TO NOTES
+                  <svg 
+                    width={isMobile ? '70' : '90'} 
+                    height={isMobile ? '70' : '90'} 
+                    viewBox="0 0 24 24" 
+                    fill="none"
+                    stroke="white"
+                    strokeWidth="1"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M7 7L17 7" stroke="white"/>
+                    <path d="M7 7L7 17" stroke="white"/>
+                    <path d="M7 7L21 21" stroke="white"/>
+                  </svg>
+                </button>
+                
+                {/* SIGN OUT BUTTON - BESAR DENGAN SVG */}
+                <button 
+                  onClick={handleLogout} 
+                  style={{ 
+                    marginTop: '20px', 
+                    padding: '0', 
+                    background: 'none', 
+                    border: 'none', 
+                    color: 'white', 
+                    cursor: 'pointer', 
+                    transition: 'opacity 0.2s ease', 
+                    fontFamily: 'Helvetica, Arial, sans-serif',
+                    fontSize: isMobile ? '2rem' : '2.6rem',
+                    fontWeight: '300',
+                    letterSpacing: '4px',
+                    opacity: 0.8,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '20px'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
+                  onMouseLeave={(e) => e.currentTarget.style.opacity = '0.8'}
+                >
+                  SIGN OUT
+                  <svg 
+                    width={isMobile ? '50' : '70'} 
+                    height={isMobile ? '50' : '70'} 
+                    viewBox="0 0 24 24" 
+                    fill="none"
+                    stroke="white"
+                    strokeWidth="1"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" stroke="white"/>
+                    <polyline points="16 17 21 12 16 7" stroke="white"/>
+                    <line x1="21" y1="12" x2="9" y2="12" stroke="white"/>
+                  </svg>
+                </button>
+              </div>
+
+              {/* KEBIJAKAN PRIVASI & KETENTUAN KAMI - JUGA TAMPIL DI AFTER LOGIN DENGAN SOUTH EAST ARROW */}
+              <div style={{ 
+                display: 'flex', 
+                justifyContent: 'flex-start', 
+                gap: isMobile ? '40px' : '60px', 
+                marginTop: '40px',
+                marginBottom: '30px',
+                flexWrap: 'wrap'
+              }}>
+                <Link href="#" style={{ 
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '12px',
+                  color: 'rgba(255, 255, 255, 0.7)', 
+                  fontSize: isMobile ? '1.4rem' : '1.8rem', 
+                  fontFamily: 'Helvetica, Arial, sans-serif', 
+                  textDecoration: 'none', 
+                  opacity: 0.7, 
+                  transition: 'opacity 0.2s ease', 
+                  letterSpacing: '2px',
+                  fontWeight: '300'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
+                onMouseLeave={(e) => e.currentTarget.style.opacity = '0.7'}
+                >
+                  KEBIJAKAN PRIVASI
+                  <svg 
+                    width={isMobile ? '30' : '45'} 
+                    height={isMobile ? '30' : '45'} 
+                    viewBox="0 0 24 24" 
+                    fill="none"
+                    stroke="white"
+                    strokeWidth="1"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M7 7L17 7" stroke="white"/>
+                    <path d="M17 7L17 17" stroke="white"/>
+                    <path d="M17 7L3 21" stroke="white"/>
+                  </svg>
+                </Link>
+                <Link href="#" style={{ 
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '12px',
+                  color: 'rgba(255, 255, 255, 0.7)', 
+                  fontSize: isMobile ? '1.4rem' : '1.8rem', 
+                  fontFamily: 'Helvetica, Arial, sans-serif', 
+                  textDecoration: 'none', 
+                  opacity: 0.7, 
+                  transition: 'opacity 0.2s ease', 
+                  letterSpacing: '2px',
+                  fontWeight: '300'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
+                onMouseLeave={(e) => e.currentTarget.style.opacity = '0.7'}
+                >
+                  KETENTUAN KAMI
+                  <svg 
+                    width={isMobile ? '30' : '45'} 
+                    height={isMobile ? '30' : '45'} 
+                    viewBox="0 0 24 24" 
+                    fill="none"
+                    stroke="white"
+                    strokeWidth="1"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M7 7L17 7" stroke="white"/>
+                    <path d="M17 7L17 17" stroke="white"/>
+                    <path d="M17 7L3 21" stroke="white"/>
+                  </svg>
+                </Link>
+              </div>
+            </div>
           )}
         </div>
 
