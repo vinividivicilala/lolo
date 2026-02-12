@@ -570,7 +570,6 @@ export default function SignInPage() {
             }}>
               CREATE FREE ACCESS ACCOUNT
             </span>
-            {/* NORTH EAST ARROW - MINIMALIST, TIDAK BOLD */}
             <svg 
               width={isMobile ? '80' : '120'} 
               height={isMobile ? '80' : '120'} 
@@ -633,7 +632,6 @@ export default function SignInPage() {
             }}>
               SIGN IN
             </span>
-            {/* NORTH EAST ARROW - MINIMALIST, TIDAK BOLD */}
             <svg 
               width={isMobile ? '100' : '160'} 
               height={isMobile ? '100' : '160'} 
@@ -656,7 +654,7 @@ export default function SignInPage() {
   );
 
   // ============================================
-  // 13. RENDER UTAMA
+  // 13. RENDER UTAMA - VERSI BIG TEXT, NO LINES, BIG ARROWS
   // ============================================
   return (
     <>
@@ -668,30 +666,30 @@ export default function SignInPage() {
           flexDirection: 'column',
           justifyContent: isMobile ? 'flex-start' : 'center',
           alignItems: isMobile ? 'center' : 'flex-start',
-          padding: isMobile ? '20px 15px' : '40px 60px',
+          padding: isMobile ? '20px 25px' : '60px 80px',
           fontFamily: 'Helvetica, Arial, sans-serif',
           position: 'relative',
         }}
       >
-        {/* HALAMAN UTAMA - SISI KANAN ATAS DENGAN SVG MINIMALIST */}
+        {/* HALAMAN UTAMA - SISI KANAN ATAS DENGAN SVG BESAR */}
         <div style={{
           position: 'absolute',
           top: isMobile ? '30px' : '50px',
           right: isMobile ? '20px' : '50px',
           display: 'flex',
           alignItems: 'center',
-          gap: '15px',
+          gap: '20px',
           zIndex: 50,
         }}>
           <Link href="/" style={{
             display: 'flex',
             alignItems: 'center',
-            gap: '15px',
+            gap: '20px',
             textDecoration: 'none',
             color: 'white',
           }}>
             <span style={{
-              fontSize: isMobile ? '1.8rem' : '2.5rem',
+              fontSize: isMobile ? '2.2rem' : '3rem',
               fontFamily: 'Helvetica, Arial, sans-serif',
               fontWeight: '400',
               letterSpacing: '2px',
@@ -699,10 +697,9 @@ export default function SignInPage() {
             }}>
               HALAMAN UTAMA
             </span>
-            {/* NORTH EAST ARROW - MINIMALIST, TIDAK BOLD */}
             <svg 
-              width={isMobile ? '40' : '60'} 
-              height={isMobile ? '40' : '60'} 
+              width={isMobile ? '50' : '80'} 
+              height={isMobile ? '50' : '80'} 
               viewBox="0 0 24 24" 
               fill="none"
               stroke="white"
@@ -723,10 +720,10 @@ export default function SignInPage() {
           </Link>
         </div>
 
-        {/* TEKS BERJALAN 1 - KIRI KE KANAN DENGAN SVG MINIMALIST */}
+        {/* TEKS BERJALAN 1 - KIRI KE KANAN */}
         <MarqueeLeftText />
 
-        {/* MAIN SIGN IN CONTAINER - FULL LEFT ALIGNMENT */}
+        {/* MAIN SIGN IN CONTAINER - FULL LEFT, NO LINES, BIG TEXT */}
         <div
           style={{
             display: 'flex',
@@ -734,93 +731,91 @@ export default function SignInPage() {
             alignItems: 'flex-start',
             justifyContent: 'flex-start',
             width: '100%',
-            maxWidth: isMobile ? '100%' : '600px',
-            marginLeft: isMobile ? '0' : '0',
-            paddingLeft: isMobile ? '0' : '0',
+            maxWidth: isMobile ? '100%' : '800px',
+            marginLeft: '0',
+            paddingLeft: '0',
           }}
         >
-          {/* WELCOME TEXT - NO BOX, NO BACKGROUND, NO BORDER */}
+          {/* WELCOME TEXT - EXTRA LARGE, NO LINES, NO BOXES */}
           <div style={{ 
-            marginBottom: isMobile ? '40px' : '60px',
+            marginBottom: isMobile ? '50px' : '80px',
             width: '100%'
           }}>
             <h1 style={{ 
               fontFamily: 'Helvetica, Arial, sans-serif', 
-              fontSize: isMobile ? '2.5rem' : '4rem', 
+              fontSize: isMobile ? '4rem' : '6rem', 
               fontWeight: '400', 
               color: '#ffffff', 
-              marginBottom: '10px', 
+              marginBottom: '20px', 
               marginTop: '0',
-              lineHeight: '1.1',
-              letterSpacing: '-0.5px'
+              lineHeight: '1',
+              letterSpacing: '-1px'
             }}>
               {user ? `Welcome, ${user.displayName || user.email}` : 'Welcome back'}
             </h1>
             <p style={{ 
               fontFamily: 'Helvetica, Arial, sans-serif', 
-              fontSize: isMobile ? '1.1rem' : '1.3rem', 
+              fontSize: isMobile ? '1.8rem' : '2.4rem', 
               color: '#ffffff', 
               opacity: '0.8',
-              marginBottom: '20px',
+              marginBottom: '30px',
               fontWeight: '300',
-              letterSpacing: '0.5px'
+              letterSpacing: '1px'
             }}>
               {user ? 'You are signed in' : 'Sign in to your account to continue'}
             </p>
             
-            {/* ERROR MESSAGE - MINIMALIST */}
+            {/* ERROR MESSAGE - MINIMAL */}
             {error && (
               <div style={{ 
                 color: '#ff8a8a', 
-                fontSize: '0.9rem', 
-                marginTop: '10px', 
-                marginBottom: '10px',
+                fontSize: isMobile ? '1.2rem' : '1.4rem', 
+                marginTop: '20px', 
+                marginBottom: '20px',
                 fontFamily: 'Helvetica, Arial, sans-serif',
-                fontWeight: '300',
-                borderLeft: '1px solid rgba(255, 255, 255, 0.3)',
-                paddingLeft: '12px'
+                fontWeight: '300'
               }}>
                 {error}
               </div>
             )}
             
-            {/* LOGOUT BUTTON - MINIMALIST */}
+            {/* LOGOUT BUTTON - NO LINE, BIG TEXT */}
             {user && (
               <button 
                 onClick={handleLogout} 
                 style={{ 
-                  marginTop: '20px', 
-                  padding: '12px 0', 
+                  marginTop: '30px', 
+                  padding: '0', 
                   background: 'none', 
                   border: 'none', 
-                  borderBottom: '1px solid rgba(255, 255, 255, 0.3)', 
                   color: 'white', 
                   cursor: 'pointer', 
-                  transition: 'all 0.2s ease', 
+                  transition: 'opacity 0.2s ease', 
                   fontFamily: 'Helvetica, Arial, sans-serif',
-                  fontSize: '1rem',
+                  fontSize: isMobile ? '1.6rem' : '2rem',
                   fontWeight: '300',
-                  letterSpacing: '2px'
+                  letterSpacing: '4px',
+                  opacity: 0.8
                 }}
-                onMouseEnter={(e) => e.currentTarget.style.borderBottomColor = 'rgba(255, 255, 255, 0.8)'}
-                onMouseLeave={(e) => e.currentTarget.style.borderBottomColor = 'rgba(255, 255, 255, 0.3)'}
+                onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
+                onMouseLeave={(e) => e.currentTarget.style.opacity = '0.8'}
               >
                 SIGN OUT
               </button>
             )}
           </div>
 
-          {/* FORM LOGIN - NO BOX, NO BACKGROUND, NO BORDER */}
+          {/* FORM LOGIN - NO LINES, NO BORDERS, BIG TEXT */}
           {!user && (
             <>
-              {/* SOCIAL LOGIN BUTTONS - MINIMALIST */}
+              {/* SOCIAL LOGIN BUTTONS - NO LINES, BIG TEXT, BIG ARROWS */}
               <div style={{ 
                 display: 'flex', 
                 flexDirection: 'column', 
-                gap: '20px', 
-                marginBottom: '40px',
+                gap: '30px', 
+                marginBottom: '60px',
                 width: '100%',
-                maxWidth: '400px'
+                maxWidth: '600px'
               }}>
                 {/* Google Login */}
                 <div 
@@ -828,17 +823,18 @@ export default function SignInPage() {
                   style={{ 
                     display: 'flex', 
                     alignItems: 'center', 
-                    padding: '12px 0', 
-                    borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
+                    gap: '20px',
+                    padding: '0', 
+                    border: 'none',
                     cursor: loading ? 'not-allowed' : 'pointer', 
-                    transition: 'all 0.2s ease', 
-                    opacity: loading ? 0.5 : 1,
+                    transition: 'opacity 0.2s ease', 
+                    opacity: loading ? 0.5 : 0.8,
                     width: '100%'
                   }}
-                  onMouseEnter={(e) => !loading && (e.currentTarget.style.borderBottomColor = 'rgba(255, 255, 255, 0.8)')}
-                  onMouseLeave={(e) => !loading && (e.currentTarget.style.borderBottomColor = 'rgba(255, 255, 255, 0.2)')}
+                  onMouseEnter={(e) => !loading && (e.currentTarget.style.opacity = '1')}
+                  onMouseLeave={(e) => !loading && (e.currentTarget.style.opacity = '0.8')}
                 >
-                  <svg width="20" height="20" viewBox="0 0 24 24" style={{ marginRight: '15px' }}>
+                  <svg width={isMobile ? '32' : '40'} height={isMobile ? '32' : '40'} viewBox="0 0 24 24" style={{ marginRight: '5px' }}>
                     <path fill="#ffffff" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
                     <path fill="#ffffff" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
                     <path fill="#ffffff" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
@@ -846,13 +842,28 @@ export default function SignInPage() {
                   </svg>
                   <span style={{ 
                     fontFamily: 'Helvetica, Arial, sans-serif', 
-                    fontSize: isMobile ? '0.95rem' : '1rem', 
+                    fontSize: isMobile ? '1.8rem' : '2.4rem', 
                     color: '#ffffff', 
                     fontWeight: '300',
-                    letterSpacing: '1px'
+                    letterSpacing: '2px'
                   }}>
                     {loading ? 'Loading...' : 'Continue with Google'}
                   </span>
+                  <svg 
+                    width={isMobile ? '40' : '60'} 
+                    height={isMobile ? '40' : '60'} 
+                    viewBox="0 0 24 24" 
+                    fill="none"
+                    stroke="white"
+                    strokeWidth="1"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    style={{ marginLeft: '10px', opacity: 0.7 }}
+                  >
+                    <path d="M17 7L7 17" stroke="white"/>
+                    <path d="M17 7H7" stroke="white"/>
+                    <path d="M17 7V17" stroke="white"/>
+                  </svg>
                 </div>
 
                 {/* GitHub Login */}
@@ -861,41 +872,57 @@ export default function SignInPage() {
                   style={{ 
                     display: 'flex', 
                     alignItems: 'center', 
-                    padding: '12px 0', 
-                    borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
+                    gap: '20px',
+                    padding: '0', 
+                    border: 'none',
                     cursor: loading ? 'not-allowed' : 'pointer', 
-                    transition: 'all 0.2s ease', 
-                    opacity: loading ? 0.5 : 1,
+                    transition: 'opacity 0.2s ease', 
+                    opacity: loading ? 0.5 : 0.8,
                     width: '100%'
                   }}
-                  onMouseEnter={(e) => !loading && (e.currentTarget.style.borderBottomColor = 'rgba(255, 255, 255, 0.8)')}
-                  onMouseLeave={(e) => !loading && (e.currentTarget.style.borderBottomColor = 'rgba(255, 255, 255, 0.2)')}
+                  onMouseEnter={(e) => !loading && (e.currentTarget.style.opacity = '1')}
+                  onMouseLeave={(e) => !loading && (e.currentTarget.style.opacity = '0.8')}
                 >
-                  <svg width="20" height="20" viewBox="0 0 24 24" style={{ marginRight: '15px' }}>
+                  <svg width={isMobile ? '32' : '40'} height={isMobile ? '32' : '40'} viewBox="0 0 24 24" style={{ marginRight: '5px' }}>
                     <path fill="#ffffff" d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/>
                   </svg>
                   <span style={{ 
                     fontFamily: 'Helvetica, Arial, sans-serif', 
-                    fontSize: isMobile ? '0.95rem' : '1rem', 
+                    fontSize: isMobile ? '1.8rem' : '2.4rem', 
                     color: '#ffffff', 
                     fontWeight: '300',
-                    letterSpacing: '1px'
+                    letterSpacing: '2px'
                   }}>
                     {loading ? 'Loading...' : 'Continue with GitHub'}
                   </span>
+                  <svg 
+                    width={isMobile ? '40' : '60'} 
+                    height={isMobile ? '40' : '60'} 
+                    viewBox="0 0 24 24" 
+                    fill="none"
+                    stroke="white"
+                    strokeWidth="1"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    style={{ marginLeft: '10px', opacity: 0.7 }}
+                  >
+                    <path d="M17 7L7 17" stroke="white"/>
+                    <path d="M17 7H7" stroke="white"/>
+                    <path d="M17 7V17" stroke="white"/>
+                  </svg>
                 </div>
               </div>
 
-              {/* EMAIL/PASSWORD FORM - NO BOX, NO BACKGROUND */}
-              <form onSubmit={(e) => handleEmailLogin(e)} style={{ width: '100%', maxWidth: '400px' }}>
+              {/* EMAIL/PASSWORD FORM - NO LINES, BIG TEXT */}
+              <form onSubmit={(e) => handleEmailLogin(e)} style={{ width: '100%', maxWidth: '600px' }}>
                 <div style={{ 
                   display: 'flex', 
                   flexDirection: 'column', 
-                  gap: '25px', 
-                  marginBottom: '30px',
+                  gap: '35px', 
+                  marginBottom: '50px',
                   width: '100%'
                 }}>
-                  {/* EMAIL INPUT */}
+                  {/* EMAIL INPUT - NO BORDER */}
                   <div style={{ width: '100%' }}>
                     <input 
                       type="email" 
@@ -905,22 +932,21 @@ export default function SignInPage() {
                       required 
                       style={{ 
                         width: '100%', 
-                        padding: '12px 0', 
+                        padding: '0 0 5px 0', 
                         border: 'none', 
-                        borderBottom: '1px solid rgba(255, 255, 255, 0.2)', 
                         backgroundColor: 'transparent', 
                         color: '#ffffff', 
                         fontFamily: 'Helvetica, Arial, sans-serif', 
-                        fontSize: '1rem', 
+                        fontSize: isMobile ? '1.8rem' : '2.2rem', 
                         outline: 'none',
                         fontWeight: '300',
-                        letterSpacing: '0.5px'
+                        letterSpacing: '1px'
                       }} 
-                      placeholderStyle={{ color: 'rgba(255,255,255,0.5)' }}
+                      placeholderStyle={{ color: 'rgba(255,255,255,0.4)' }}
                     />
                   </div>
 
-                  {/* PASSWORD INPUT */}
+                  {/* PASSWORD INPUT - NO BORDER */}
                   <div style={{ position: 'relative', width: '100%' }}>
                     <input 
                       type={showPassword ? "text" : "password"} 
@@ -930,17 +956,15 @@ export default function SignInPage() {
                       required 
                       style={{ 
                         width: '100%', 
-                        padding: '12px 0', 
-                        paddingRight: '30px', 
+                        padding: '0 50px 5px 0', 
                         border: 'none', 
-                        borderBottom: '1px solid rgba(255, 255, 255, 0.2)', 
                         backgroundColor: 'transparent', 
                         color: '#ffffff', 
                         fontFamily: 'Helvetica, Arial, sans-serif', 
-                        fontSize: '1rem', 
+                        fontSize: isMobile ? '1.8rem' : '2.2rem', 
                         outline: 'none',
                         fontWeight: '300',
-                        letterSpacing: '0.5px'
+                        letterSpacing: '1px'
                       }} 
                     />
                     <button 
@@ -959,12 +983,12 @@ export default function SignInPage() {
                       }}
                     >
                       {showPassword ? (
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1">
+                        <svg width={isMobile ? '32' : '40'} height={isMobile ? '32' : '40'} viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1">
                           <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="white"/>
                           <circle cx="12" cy="12" r="3" stroke="white"/>
                         </svg>
                       ) : (
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1">
+                        <svg width={isMobile ? '32' : '40'} height={isMobile ? '32' : '40'} viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1">
                           <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" stroke="white"/>
                           <line x1="1" y1="1" x2="23" y2="23" stroke="white"/>
                         </svg>
@@ -972,78 +996,90 @@ export default function SignInPage() {
                     </button>
                   </div>
 
-                  {/* SUBMIT BUTTON - MINIMALIST */}
-                  <button 
-                    type="submit" 
-                    disabled={loading} 
-                    style={{ 
-                      width: 'auto',
-                      alignSelf: 'flex-start',
-                      padding: '12px 0', 
-                      border: 'none', 
-                      borderBottom: '1px solid rgba(255, 255, 255, 0.3)', 
-                      backgroundColor: 'transparent', 
-                      color: '#ffffff', 
-                      fontFamily: 'Helvetica, Arial, sans-serif', 
-                      fontSize: '1rem', 
-                      fontWeight: '300',
-                      cursor: loading ? 'not-allowed' : 'pointer', 
-                      transition: 'all 0.2s ease', 
-                      marginTop: '10px',
-                      letterSpacing: '2px',
-                      opacity: loading ? 0.5 : 1
-                    }}
-                    onMouseEnter={(e) => !loading && (e.currentTarget.style.borderBottomColor = 'rgba(255, 255, 255, 0.8)')}
-                    onMouseLeave={(e) => !loading && (e.currentTarget.style.borderBottomColor = 'rgba(255, 255, 255, 0.3)')}
-                  >
-                    {loading ? 'SIGNING IN...' : 'SIGN IN'}
-                  </button>
+                  {/* SUBMIT BUTTON - NO LINE, BIG TEXT, BIG ARROW */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '20px', marginTop: '20px' }}>
+                    <button 
+                      type="submit" 
+                      disabled={loading} 
+                      style={{ 
+                        padding: '0', 
+                        border: 'none', 
+                        backgroundColor: 'transparent', 
+                        color: '#ffffff', 
+                        fontFamily: 'Helvetica, Arial, sans-serif', 
+                        fontSize: isMobile ? '2rem' : '2.6rem', 
+                        fontWeight: '300',
+                        cursor: loading ? 'not-allowed' : 'pointer', 
+                        transition: 'opacity 0.2s ease', 
+                        letterSpacing: '4px',
+                        opacity: loading ? 0.5 : 0.8
+                      }}
+                      onMouseEnter={(e) => !loading && (e.currentTarget.style.opacity = '1')}
+                      onMouseLeave={(e) => !loading && (e.currentTarget.style.opacity = '0.8')}
+                    >
+                      {loading ? 'SIGNING IN...' : 'SIGN IN'}
+                    </button>
+                    <svg 
+                      width={isMobile ? '50' : '70'} 
+                      height={isMobile ? '50' : '70'} 
+                      viewBox="0 0 24 24" 
+                      fill="none"
+                      stroke="white"
+                      strokeWidth="1"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      style={{ opacity: 0.7 }}
+                    >
+                      <path d="M17 7L7 17" stroke="white"/>
+                      <path d="M17 7H7" stroke="white"/>
+                      <path d="M17 7V17" stroke="white"/>
+                    </svg>
+                  </div>
                 </div>
               </form>
 
-              {/* FORGOT PASSWORD & SIGN UP - NO UNDERLINE, WITH SVG SOUTH WEST ARROW */}
+              {/* FORGOT PASSWORD & SIGN UP - BIG TEXT, BIG ARROWS, NO UNDERLINE */}
               <div style={{ 
                 display: 'flex', 
                 flexDirection: 'column', 
-                gap: '20px', 
+                gap: '30px', 
                 width: '100%',
-                maxWidth: '400px',
-                marginTop: '10px'
+                maxWidth: '600px',
+                marginTop: '20px'
               }}>
                 <div style={{ 
                   display: 'flex', 
                   flexDirection: isMobile ? 'column' : 'row', 
                   justifyContent: 'flex-start', 
                   alignItems: isMobile ? 'flex-start' : 'center', 
-                  gap: isMobile ? '15px' : '30px', 
-                  fontFamily: 'Helvetica, Arial, sans-serif', 
-                  fontSize: '0.95rem' 
+                  gap: isMobile ? '25px' : '50px', 
+                  fontFamily: 'Helvetica, Arial, sans-serif'
                 }}>
                   <button 
                     onClick={handleForgotPassword} 
                     style={{ 
                       display: 'flex',
                       alignItems: 'center',
-                      gap: '8px',
+                      gap: '15px',
                       border: 'none', 
                       background: 'none', 
                       color: '#ffffff', 
                       cursor: 'pointer', 
-                      opacity: '0.8', 
-                      transition: 'all 0.2s ease', 
+                      opacity: 0.7, 
+                      transition: 'opacity 0.2s ease', 
                       fontFamily: 'Helvetica, Arial, sans-serif', 
-                      fontSize: isMobile ? '0.9rem' : '0.95rem',
+                      fontSize: isMobile ? '1.6rem' : '2rem',
                       fontWeight: '300',
                       padding: '0',
                       textDecoration: 'none'
                     }}
                     onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
-                    onMouseLeave={(e) => e.currentTarget.style.opacity = '0.8'}
+                    onMouseLeave={(e) => e.currentTarget.style.opacity = '0.7'}
                   >
                     Forgot your password?
                     <svg 
-                      width="16" 
-                      height="16" 
+                      width={isMobile ? '35' : '50'} 
+                      height={isMobile ? '35' : '50'} 
                       viewBox="0 0 24 24" 
                       fill="none"
                       stroke="white"
@@ -1056,11 +1092,11 @@ export default function SignInPage() {
                       <path d="M17 7V17" stroke="white"/>
                     </svg>
                   </button>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
                     <span style={{ 
                       color: '#ffffff', 
                       opacity: '0.6', 
-                      fontSize: isMobile ? '0.9rem' : '0.95rem', 
+                      fontSize: isMobile ? '1.6rem' : '2rem', 
                       fontFamily: 'Helvetica, Arial, sans-serif',
                       fontWeight: '300'
                     }}>
@@ -1071,26 +1107,26 @@ export default function SignInPage() {
                       style={{ 
                         display: 'flex',
                         alignItems: 'center',
-                        gap: '8px',
+                        gap: '15px',
                         border: 'none', 
                         background: 'none', 
                         color: '#ffffff', 
                         cursor: 'pointer', 
-                        opacity: '0.9', 
-                        transition: 'all 0.2s ease', 
+                        opacity: 0.8, 
+                        transition: 'opacity 0.2s ease', 
                         fontFamily: 'Helvetica, Arial, sans-serif', 
-                        fontSize: isMobile ? '0.9rem' : '0.95rem',
+                        fontSize: isMobile ? '1.6rem' : '2rem',
                         fontWeight: '400',
                         padding: '0',
                         textDecoration: 'none'
                       }}
                       onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
-                      onMouseLeave={(e) => e.currentTarget.style.opacity = '0.9'}
+                      onMouseLeave={(e) => e.currentTarget.style.opacity = '0.8'}
                     >
                       Sign up
                       <svg 
-                        width="16" 
-                        height="16" 
+                        width={isMobile ? '35' : '50'} 
+                        height={isMobile ? '35' : '50'} 
                         viewBox="0 0 24 24" 
                         fill="none"
                         stroke="white"
@@ -1106,34 +1142,34 @@ export default function SignInPage() {
                   </div>
                 </div>
 
-                {/* KEBIJAKAN PRIVASI & KETENTUAN KAMI - NO UNDERLINE, WITH SVG */}
+                {/* KEBIJAKAN PRIVASI & KETENTUAN KAMI - BIG TEXT, BIG ARROWS, NO UNDERLINE */}
                 <div style={{ 
                   display: 'flex', 
                   justifyContent: 'flex-start', 
-                  gap: isMobile ? '30px' : '40px', 
-                  marginTop: '15px',
+                  gap: isMobile ? '40px' : '60px', 
+                  marginTop: '30px',
                   flexWrap: 'wrap'
                 }}>
                   <Link href="#" style={{ 
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '6px',
+                    gap: '12px',
                     color: 'rgba(255, 255, 255, 0.7)', 
-                    fontSize: isMobile ? '0.8rem' : '0.85rem', 
+                    fontSize: isMobile ? '1.4rem' : '1.8rem', 
                     fontFamily: 'Helvetica, Arial, sans-serif', 
                     textDecoration: 'none', 
-                    opacity: 0.8, 
+                    opacity: 0.7, 
                     transition: 'opacity 0.2s ease', 
-                    letterSpacing: '1px',
+                    letterSpacing: '2px',
                     fontWeight: '300'
                   }}
                   onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
-                  onMouseLeave={(e) => e.currentTarget.style.opacity = '0.8'}
+                  onMouseLeave={(e) => e.currentTarget.style.opacity = '0.7'}
                   >
                     KEBIJAKAN PRIVASI
                     <svg 
-                      width="14" 
-                      height="14" 
+                      width={isMobile ? '30' : '45'} 
+                      height={isMobile ? '30' : '45'} 
                       viewBox="0 0 24 24" 
                       fill="none"
                       stroke="white"
@@ -1149,23 +1185,23 @@ export default function SignInPage() {
                   <Link href="#" style={{ 
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '6px',
+                    gap: '12px',
                     color: 'rgba(255, 255, 255, 0.7)', 
-                    fontSize: isMobile ? '0.8rem' : '0.85rem', 
+                    fontSize: isMobile ? '1.4rem' : '1.8rem', 
                     fontFamily: 'Helvetica, Arial, sans-serif', 
                     textDecoration: 'none', 
-                    opacity: 0.8, 
+                    opacity: 0.7, 
                     transition: 'opacity 0.2s ease', 
-                    letterSpacing: '1px',
+                    letterSpacing: '2px',
                     fontWeight: '300'
                   }}
                   onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
-                  onMouseLeave={(e) => e.currentTarget.style.opacity = '0.8'}
+                  onMouseLeave={(e) => e.currentTarget.style.opacity = '0.7'}
                   >
                     KETENTUAN KAMI
                     <svg 
-                      width="14" 
-                      height="14" 
+                      width={isMobile ? '30' : '45'} 
+                      height={isMobile ? '30' : '45'} 
                       viewBox="0 0 24 24" 
                       fill="none"
                       stroke="white"
@@ -1188,22 +1224,22 @@ export default function SignInPage() {
         <div style={{ 
           position: 'relative', 
           textAlign: isMobile ? 'center' : 'left', 
-          marginTop: isMobile ? '4rem' : '6rem', 
+          marginTop: isMobile ? '6rem' : '8rem', 
           width: '100%', 
           maxWidth: isMobile ? '100%' : '1200px', 
-          padding: isMobile ? '1rem 0' : '2rem 0', 
+          padding: isMobile ? '2rem 0' : '3rem 0', 
           marginLeft: isMobile ? '0' : '0', 
-          marginBottom: isMobile ? '1rem' : '2rem' 
+          marginBottom: isMobile ? '2rem' : '3rem' 
         }}>
           <div style={{ 
-            marginBottom: isMobile ? '2rem' : '4rem', 
+            marginBottom: isMobile ? '3rem' : '5rem', 
             padding: isMobile ? '0' : '0' 
           }}>
             <p style={{ 
               color: 'rgba(255,255,255,0.9)', 
-              fontSize: isMobile ? '2.5rem' : '5rem', 
+              fontSize: isMobile ? '3.5rem' : '7rem', 
               fontFamily: 'Helvetica, Arial, sans-serif', 
-              margin: '0 0 0.3rem 0', 
+              margin: '0 0 0.5rem 0', 
               lineHeight: '1.1', 
               fontWeight: '600' 
             }}>
@@ -1211,7 +1247,7 @@ export default function SignInPage() {
             </p>
             <p style={{ 
               color: 'rgba(255,255,255,0.9)', 
-              fontSize: isMobile ? '2.5rem' : '5rem', 
+              fontSize: isMobile ? '3.5rem' : '7rem', 
               fontFamily: 'Helvetica, Arial, sans-serif', 
               margin: 0, 
               lineHeight: '1.1', 
@@ -1225,18 +1261,18 @@ export default function SignInPage() {
           <div style={{ 
             display: 'grid', 
             gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(3, auto)', 
-            gap: isMobile ? '2rem 3rem' : '2rem 8rem', 
-            marginTop: '0rem', 
+            gap: isMobile ? '3rem 4rem' : '3rem 10rem', 
+            marginTop: '1rem', 
             padding: isMobile ? '0' : '0', 
             justifyContent: isMobile ? 'center' : 'flex-start' 
           }}>
             <div>
               <h4 style={{ 
                 color: 'white', 
-                fontSize: isMobile ? '1.8rem' : '4rem', 
+                fontSize: isMobile ? '2.2rem' : '4.5rem', 
                 fontWeight: '600', 
                 margin: '0 0 0.5rem 0', 
-                marginBottom: isMobile ? '3rem' : '5rem', 
+                marginBottom: isMobile ? '4rem' : '6rem', 
                 fontFamily: 'Helvetica, Arial, sans-serif' 
               }}>
                 MENU
@@ -1245,10 +1281,10 @@ export default function SignInPage() {
             <div>
               <h4 style={{ 
                 color: 'white', 
-                fontSize: isMobile ? '1.8rem' : '4rem', 
+                fontSize: isMobile ? '2.2rem' : '4.5rem', 
                 fontWeight: '600', 
                 margin: '0 0 0.5rem 0', 
-                marginBottom: isMobile ? '3rem' : '5rem', 
+                marginBottom: isMobile ? '4rem' : '6rem', 
                 fontFamily: 'Helvetica, Arial, sans-serif' 
               }}>
                 PRODUCT
@@ -1260,7 +1296,7 @@ export default function SignInPage() {
             <div>
               <h4 style={{ 
                 color: 'white', 
-                fontSize: isMobile ? '1.8rem' : '4rem', 
+                fontSize: isMobile ? '2.2rem' : '4.5rem', 
                 fontWeight: '600', 
                 margin: '0 0 0.5rem 0', 
                 marginBottom: isMobile ? '8rem' : '15rem', 
@@ -1272,7 +1308,7 @@ export default function SignInPage() {
             <div>
               <h4 style={{ 
                 color: 'white', 
-                fontSize: isMobile ? '1.8rem' : '4rem', 
+                fontSize: isMobile ? '2.2rem' : '4.5rem', 
                 fontWeight: '600', 
                 margin: '0 0 0.5rem 0', 
                 marginBottom: isMobile ? '8rem' : '15rem', 
@@ -1284,7 +1320,7 @@ export default function SignInPage() {
             <div>
               <h4 style={{ 
                 color: 'white', 
-                fontSize: isMobile ? '1.8rem' : '4rem', 
+                fontSize: isMobile ? '2.2rem' : '4.5rem', 
                 fontWeight: '600', 
                 margin: '0 0 0.5rem 0', 
                 marginBottom: isMobile ? '8rem' : '15rem', 
@@ -1296,7 +1332,7 @@ export default function SignInPage() {
           </div>
         </div>
 
-        {/* TEKS BERJALAN 2 - KANAN KE KIRI DENGAN SVG MINIMALIST */}
+        {/* TEKS BERJALAN 2 - KANAN KE KIRI */}
         <MarqueeRightText />
       </div>
       
@@ -1306,9 +1342,9 @@ export default function SignInPage() {
           100% { transform: rotate(360deg); }
         }
         input::placeholder {
-          color: rgba(255, 255, 255, 0.4);
+          color: rgba(255, 255, 255, 0.3);
           font-weight: 300;
-          letter-spacing: 0.5px;
+          letter-spacing: 1px;
         }
       `}</style>
     </>
