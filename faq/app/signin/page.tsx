@@ -748,7 +748,7 @@ export default function SignInPage() {
         >
           {/* WELCOME TEXT - EXTRA LARGE, NO LINES, NO BOXES */}
           <div style={{ 
-            marginBottom: isMobile ? '50px' : '80px',
+            marginBottom: isMobile ? '30px' : '40px',
             width: '100%'
           }}>
             <h1 style={{ 
@@ -768,7 +768,7 @@ export default function SignInPage() {
               fontSize: isMobile ? '1.8rem' : '2.4rem', 
               color: '#ffffff', 
               opacity: '0.8',
-              marginBottom: '30px',
+              marginBottom: '20px',
               fontWeight: '300',
               letterSpacing: '1px'
             }}>
@@ -790,8 +790,9 @@ export default function SignInPage() {
             )}
           </div>
 
-          {/* FORM LOGIN - HANYA TAMPIL JIKA BELUM LOGIN */}
-          {!user && (
+          {/* KONTEN BERSYARAT - LOGIN FORM ATAU AFTER LOGIN */}
+          {!user ? (
+            /* ============ FORM LOGIN - TAMPIL JIKA BELUM LOGIN ============ */
             <>
               {/* SOCIAL LOGIN BUTTONS - NO LINES, BIG TEXT, BIG ARROWS */}
               <div style={{ 
@@ -1125,86 +1126,10 @@ export default function SignInPage() {
                     </button>
                   </div>
                 </div>
-
-                {/* KEBIJAKAN PRIVASI & KETENTUAN KAMI - SELALU TAMPIL, BIG TEXT, BIG ARROWS, SOUTH EAST ARROW */}
-                <div style={{ 
-                  display: 'flex', 
-                  justifyContent: 'flex-start', 
-                  gap: isMobile ? '40px' : '60px', 
-                  marginTop: '30px',
-                  flexWrap: 'wrap'
-                }}>
-                  <Link href="#" style={{ 
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '12px',
-                    color: 'rgba(255, 255, 255, 0.7)', 
-                    fontSize: isMobile ? '1.4rem' : '1.8rem', 
-                    fontFamily: 'Helvetica, Arial, sans-serif', 
-                    textDecoration: 'none', 
-                    opacity: 0.7, 
-                    transition: 'opacity 0.2s ease', 
-                    letterSpacing: '2px',
-                    fontWeight: '300'
-                  }}
-                  onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
-                  onMouseLeave={(e) => e.currentTarget.style.opacity = '0.7'}
-                  >
-                    KEBIJAKAN PRIVASI
-                    <svg 
-                      width={isMobile ? '30' : '45'} 
-                      height={isMobile ? '30' : '45'} 
-                      viewBox="0 0 24 24" 
-                      fill="none"
-                      stroke="white"
-                      strokeWidth="1"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <path d="M7 7L17 7" stroke="white"/>
-                      <path d="M17 7L17 17" stroke="white"/>
-                      <path d="M17 7L3 21" stroke="white"/>
-                    </svg>
-                  </Link>
-                  <Link href="#" style={{ 
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '12px',
-                    color: 'rgba(255, 255, 255, 0.7)', 
-                    fontSize: isMobile ? '1.4rem' : '1.8rem', 
-                    fontFamily: 'Helvetica, Arial, sans-serif', 
-                    textDecoration: 'none', 
-                    opacity: 0.7, 
-                    transition: 'opacity 0.2s ease', 
-                    letterSpacing: '2px',
-                    fontWeight: '300'
-                  }}
-                  onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
-                  onMouseLeave={(e) => e.currentTarget.style.opacity = '0.7'}
-                  >
-                    KETENTUAN KAMI
-                    <svg 
-                      width={isMobile ? '30' : '45'} 
-                      height={isMobile ? '30' : '45'} 
-                      viewBox="0 0 24 24" 
-                      fill="none"
-                      stroke="white"
-                      strokeWidth="1"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <path d="M7 7L17 7" stroke="white"/>
-                      <path d="M17 7L17 17" stroke="white"/>
-                      <path d="M17 7L3 21" stroke="white"/>
-                    </svg>
-                  </Link>
-                </div>
               </div>
             </>
-          )}
-
-          {/* SECTION AFTER LOGIN - DIPISAH, TAMPIL BESAR DENGAN SVG SOUTH EAST ARROW */}
-          {user && (
+          ) : (
+            /* ============ AFTER LOGIN - TAMPIL JIKA SUDAH LOGIN ============ */
             <div style={{
               display: 'flex',
               flexDirection: 'column',
@@ -1312,83 +1237,85 @@ export default function SignInPage() {
                   </svg>
                 </button>
               </div>
-
-              {/* KEBIJAKAN PRIVASI & KETENTUAN KAMI - JUGA TAMPIL DI AFTER LOGIN DENGAN SOUTH EAST ARROW */}
-              <div style={{ 
-                display: 'flex', 
-                justifyContent: 'flex-start', 
-                gap: isMobile ? '40px' : '60px', 
-                marginTop: '40px',
-                marginBottom: '30px',
-                flexWrap: 'wrap'
-              }}>
-                <Link href="#" style={{ 
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '12px',
-                  color: 'rgba(255, 255, 255, 0.7)', 
-                  fontSize: isMobile ? '1.4rem' : '1.8rem', 
-                  fontFamily: 'Helvetica, Arial, sans-serif', 
-                  textDecoration: 'none', 
-                  opacity: 0.7, 
-                  transition: 'opacity 0.2s ease', 
-                  letterSpacing: '2px',
-                  fontWeight: '300'
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
-                onMouseLeave={(e) => e.currentTarget.style.opacity = '0.7'}
-                >
-                  KEBIJAKAN PRIVASI
-                  <svg 
-                    width={isMobile ? '30' : '45'} 
-                    height={isMobile ? '30' : '45'} 
-                    viewBox="0 0 24 24" 
-                    fill="none"
-                    stroke="white"
-                    strokeWidth="1"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M7 7L17 7" stroke="white"/>
-                    <path d="M17 7L17 17" stroke="white"/>
-                    <path d="M17 7L3 21" stroke="white"/>
-                  </svg>
-                </Link>
-                <Link href="#" style={{ 
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '12px',
-                  color: 'rgba(255, 255, 255, 0.7)', 
-                  fontSize: isMobile ? '1.4rem' : '1.8rem', 
-                  fontFamily: 'Helvetica, Arial, sans-serif', 
-                  textDecoration: 'none', 
-                  opacity: 0.7, 
-                  transition: 'opacity 0.2s ease', 
-                  letterSpacing: '2px',
-                  fontWeight: '300'
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
-                onMouseLeave={(e) => e.currentTarget.style.opacity = '0.7'}
-                >
-                  KETENTUAN KAMI
-                  <svg 
-                    width={isMobile ? '30' : '45'} 
-                    height={isMobile ? '30' : '45'} 
-                    viewBox="0 0 24 24" 
-                    fill="none"
-                    stroke="white"
-                    strokeWidth="1"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M7 7L17 7" stroke="white"/>
-                    <path d="M17 7L17 17" stroke="white"/>
-                    <path d="M17 7L3 21" stroke="white"/>
-                  </svg>
-                </Link>
-              </div>
             </div>
           )}
+
+          {/* KEBIJAKAN PRIVASI & KETENTUAN KAMI - TAMPIL DI SEMUA KONDISI (LUAR KONDISI !user) */}
+          <div style={{ 
+            display: 'flex', 
+            justifyContent: 'flex-start', 
+            gap: isMobile ? '40px' : '60px', 
+            marginTop: user ? '20px' : '40px',
+            marginBottom: '30px',
+            flexWrap: 'wrap',
+            width: '100%',
+            maxWidth: '800px'
+          }}>
+            <Link href="#" style={{ 
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px',
+              color: 'rgba(255, 255, 255, 0.7)', 
+              fontSize: isMobile ? '1.4rem' : '1.8rem', 
+              fontFamily: 'Helvetica, Arial, sans-serif', 
+              textDecoration: 'none', 
+              opacity: 0.7, 
+              transition: 'opacity 0.2s ease', 
+              letterSpacing: '2px',
+              fontWeight: '300'
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
+            onMouseLeave={(e) => e.currentTarget.style.opacity = '0.7'}
+            >
+              KEBIJAKAN PRIVASI
+              <svg 
+                width={isMobile ? '30' : '45'} 
+                height={isMobile ? '30' : '45'} 
+                viewBox="0 0 24 24" 
+                fill="none"
+                stroke="white"
+                strokeWidth="1"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M7 7L17 7" stroke="white"/>
+                <path d="M17 7L17 17" stroke="white"/>
+                <path d="M17 7L3 21" stroke="white"/>
+              </svg>
+            </Link>
+            <Link href="#" style={{ 
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px',
+              color: 'rgba(255, 255, 255, 0.7)', 
+              fontSize: isMobile ? '1.4rem' : '1.8rem', 
+              fontFamily: 'Helvetica, Arial, sans-serif', 
+              textDecoration: 'none', 
+              opacity: 0.7, 
+              transition: 'opacity 0.2s ease', 
+              letterSpacing: '2px',
+              fontWeight: '300'
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
+            onMouseLeave={(e) => e.currentTarget.style.opacity = '0.7'}
+            >
+              KETENTUAN KAMI
+              <svg 
+                width={isMobile ? '30' : '45'} 
+                height={isMobile ? '30' : '45'} 
+                viewBox="0 0 24 24" 
+                fill="none"
+                stroke="white"
+                strokeWidth="1"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M7 7L17 7" stroke="white"/>
+                <path d="M17 7L17 17" stroke="white"/>
+                <path d="M17 7L3 21" stroke="white"/>
+              </svg>
+            </Link>
+          </div>
         </div>
 
         {/* LETS JOIN US NOTE THINK */}
