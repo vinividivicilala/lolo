@@ -26,6 +26,7 @@ import {
   Timestamp,
   deleteDoc 
 } from "firebase/firestore";
+import Link from "next/link";
 
 // Konfigurasi Firebase
 const firebaseConfig = {
@@ -86,6 +87,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
   const [isMobile, setIsMobile] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [user, setUser] = useState<any>(null);
   const [error, setError] = useState("");
@@ -833,6 +835,63 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
     </div>
   );
 
+  // Komponen teks berjalan
+  const MarqueeText = () => (
+    <div style={{
+      width: '100%',
+      overflow: 'hidden',
+      position: 'relative',
+      marginTop: isMobile ? '30px' : '50px',
+      padding: isMobile ? '10px 0' : '20px 0',
+      borderTop: '1px solid rgba(255, 255, 255, 0.2)',
+      borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
+      backgroundColor: 'rgba(0, 0, 0, 0.3)',
+    }}>
+      <motion.div
+        initial={{ x: '100%' }}
+        animate={{ x: '-100%' }}
+        transition={{
+          duration: 20,
+          repeat: Infinity,
+          ease: 'linear',
+        }}
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: isMobile ? '20px' : '40px',
+          whiteSpace: 'nowrap',
+        }}
+      >
+        {[...Array(5)].map((_, i) => (
+          <div key={i} style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: isMobile ? '15px' : '30px',
+          }}>
+            <span style={{
+              color: 'white',
+              fontSize: isMobile ? '2rem' : '3.5rem',
+              fontFamily: 'Arame Mono, monospace',
+              fontWeight: '700',
+              letterSpacing: '4px',
+            }}>
+              SIGN IN
+            </span>
+            <svg 
+              width={isMobile ? '40' : '60'} 
+              height={isMobile ? '40' : '60'} 
+              viewBox="0 0 24 24" 
+              fill="white"
+            >
+              <path d="M11 7L9.6 8.4L12.2 11H2V13H12.2L9.6 15.6L11 17L16 12L11 7Z" fill="white"/>
+              <path d="M20 19H12V21H20C21.1 21 22 20.1 22 19V5C22 3.9 21.1 3 20 3H12V5H20V19Z" fill="white"/>
+            </svg>
+          </div>
+        ))}
+      </motion.div>
+    </div>
+  );
+
   return (
     <>
       {showAutoLoginModal && !user && <AutoLoginModal />}
@@ -849,6 +908,53 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
           fontFamily: "'Inter', sans-serif",
         }}
       >
+        {/* Halaman Utama Link - TAMBAHAN 1 */}
+        <div style={{
+          position: 'absolute',
+          top: isMobile ? '20px' : '40px',
+          left: isMobile ? '20px' : '40px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '15px',
+          zIndex: 50,
+        }}>
+          <Link href="/" style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px',
+            textDecoration: 'none',
+            color: 'white',
+          }}>
+            <svg 
+              width={isMobile ? '40' : '60'} 
+              height={isMobile ? '40' : '60'} 
+              viewBox="0 0 24 24" 
+              fill="white"
+              style={{
+                transition: 'transform 0.3s ease',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'translate(-4px, -4px)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translate(0, 0)';
+              }}
+            >
+              <path d="M5 19H19V5H5V19ZM4 3H20C20.6 3 21 3.4 21 4V20C21 20.6 20.6 21 20 21H4C3.4 21 3 20.6 3 20V4C3 3.4 3.4 3 4 3ZM8.5 8.5V13H10V8.5C10 8.2 10.2 8 10.5 8H15V6.5C15 6.2 15.2 6 15.5 6H18V8H16V11.5C16 11.8 15.8 12 15.5 12H11V14H14.5C14.8 14 15 14.2 15 14.5V18H13V16H10.5C10.2 16 10 15.8 10 15.5V10H8.5C8.2 10 8 9.8 8 9.5V8.5H8.5Z" fill="white"/>
+            </svg>
+            <span style={{
+              fontSize: isMobile ? '1.5rem' : '2.5rem',
+              fontFamily: 'Arame Mono, monospace',
+              fontWeight: '600',
+              letterSpacing: '2px',
+              borderBottom: '2px solid white',
+              paddingBottom: '5px',
+            }}>
+              HALAMAN UTAMA
+            </span>
+          </Link>
+        </div>
+
         {/* Main Sign In Container */}
         <div
           style={{
@@ -857,6 +963,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
             alignItems: isMobile ? 'center' : 'flex-start',
             gap: isMobile ? '30px' : '60px',
             marginBottom: isMobile ? '30px' : '40px',
+            marginTop: isMobile ? '80px' : '0',
             width: '100%',
             maxWidth: isMobile ? '100%' : '1200px',
           }}
@@ -1135,33 +1242,67 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
                       >
                         Password
                       </label>
-                      <input
-                        type="password"
-                        placeholder="Enter your password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        required
-                        style={{
-                          width: '100%',
-                          padding: '12px 15px',
-                          border: '1px solid rgba(255, 255, 255, 0.3)',
-                          borderRadius: '8px',
-                          backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                          color: '#ffffff',
-                          fontFamily: "'Roboto', sans-serif",
-                          fontSize: '14px',
-                          outline: 'none',
-                          transition: 'all 0.3s ease',
-                        }}
-                        onFocus={(e) => {
-                          e.target.style.borderColor = 'rgba(255, 255, 255, 0.7)';
-                          e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.15)';
-                        }}
-                        onBlur={(e) => {
-                          e.target.style.borderColor = 'rgba(255, 255, 255, 0.3)';
-                          e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
-                        }}
-                      />
+                      <div style={{
+                        position: 'relative',
+                        width: '100%',
+                      }}>
+                        <input
+                          type={showPassword ? "text" : "password"}
+                          placeholder="Enter your password"
+                          value={password}
+                          onChange={(e) => setPassword(e.target.value)}
+                          required
+                          style={{
+                            width: '100%',
+                            padding: '12px 15px',
+                            paddingRight: '45px',
+                            border: '1px solid rgba(255, 255, 255, 0.3)',
+                            borderRadius: '8px',
+                            backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                            color: '#ffffff',
+                            fontFamily: "'Roboto', sans-serif",
+                            fontSize: '14px',
+                            outline: 'none',
+                            transition: 'all 0.3s ease',
+                          }}
+                          onFocus={(e) => {
+                            e.target.style.borderColor = 'rgba(255, 255, 255, 0.7)';
+                            e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.15)';
+                          }}
+                          onBlur={(e) => {
+                            e.target.style.borderColor = 'rgba(255, 255, 255, 0.3)';
+                            e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+                          }}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          style={{
+                            position: 'absolute',
+                            right: '12px',
+                            top: '50%',
+                            transform: 'translateY(-50%)',
+                            background: 'none',
+                            border: 'none',
+                            cursor: 'pointer',
+                            padding: '5px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                          }}
+                        >
+                          {showPassword ? (
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="rgba(255,255,255,0.6)">
+                              <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+                              <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z" fill="rgba(255,255,255,0.6)"/>
+                            </svg>
+                          ) : (
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="rgba(255,255,255,0.6)">
+                              <path d="M12 7c2.76 0 5 2.24 5 5 0 .65-.13 1.26-.36 1.83l2.92 2.92c1.51-1.26 2.7-2.89 3.43-4.75-1.73-4.39-6-7.5-11-7.5-1.4 0-2.74.25-3.98.7l2.16 2.16C10.74 7.13 11.35 7 12 7zM2 4.27l2.28 2.28.46.46C3.08 8.3 1.78 10.02 1 12c1.73 4.39 6 7.5 11 7.5 1.55 0 3.03-.3 4.38-.84l.42.42L19.73 22 21 20.73 3.27 3 2 4.27zM7.53 9.8l1.55 1.55c-.05.21-.08.43-.08.65 0 1.66 1.34 3 3 3 .22 0 .44-.03.65-.08l1.55 1.55c-.67.33-1.41.53-2.2.53-2.76 0-5-2.24-5-5 0-.79.2-1.53.53-2.2zm4.31-.78l3.15 3.15.02-.16c0-1.66-1.34-3-3-3l-.17.01z" fill="rgba(255,255,255,0.6)"/>
+                            </svg>
+                          )}
+                        </button>
+                      </div>
                     </div>
 
                     <div style={{
@@ -1442,7 +1583,49 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
               </h4>
             </div>
           </div>
+
+          {/* Kebijakan Privasi dan Ketentuan Kami - TAMBAHAN 2 */}
+          <div style={{
+            display: 'flex',
+            justifyContent: isMobile ? 'center' : 'flex-start',
+            gap: isMobile ? '30px' : '50px',
+            marginTop: isMobile ? '30px' : '50px',
+            marginBottom: isMobile ? '20px' : '30px',
+            padding: isMobile ? '0 1rem' : '0',
+          }}>
+            <Link href="/privacy" style={{
+              color: 'white',
+              fontSize: isMobile ? '1rem' : '1.2rem',
+              fontFamily: 'Arame Mono, monospace',
+              textDecoration: 'underline',
+              textUnderlineOffset: '4px',
+              opacity: 0.8,
+              transition: 'opacity 0.3s ease',
+              letterSpacing: '1px',
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
+            onMouseLeave={(e) => e.currentTarget.style.opacity = '0.8'}>
+              KEBIJAKAN PRIVASI
+            </Link>
+            <Link href="/terms" style={{
+              color: 'white',
+              fontSize: isMobile ? '1rem' : '1.2rem',
+              fontFamily: 'Arame Mono, monospace',
+              textDecoration: 'underline',
+              textUnderlineOffset: '4px',
+              opacity: 0.8,
+              transition: 'opacity 0.3s ease',
+              letterSpacing: '1px',
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
+            onMouseLeave={(e) => e.currentTarget.style.opacity = '0.8'}>
+              KETENTUAN KAMI
+            </Link>
+          </div>
         </div>
+
+        {/* Teks berjalan SIGN IN dengan SVG - TAMBAHAN 3 */}
+        <MarqueeText />
       </div>
       
       <style jsx>{`
