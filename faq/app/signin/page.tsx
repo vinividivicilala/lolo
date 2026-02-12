@@ -97,8 +97,8 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
   const [autoLoginInProgress, setAutoLoginInProgress] = useState(false);
   
   // Refs untuk animasi teks berjalan
-  const marqueeLeftRef = useRef<HTMLDivElement>(null);
-  const marqueeRightRef = useRef<HTMLDivElement>(null);
+  const marqueeLeftRef = useRef<HTMLDivElement>(null);     // KIRI KE KANAN
+  const marqueeRightRef = useRef<HTMLDivElement>(null);    // KANAN KE KIRI
   const marqueeLeftAnimation = useRef<gsap.core.Tween | null>(null);
   const marqueeRightAnimation = useRef<gsap.core.Tween | null>(null);
   
@@ -106,7 +106,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
   const [connectionsOpen, setConnectionsOpen] = useState(false);
   const socialItemsRef = useRef<(HTMLDivElement | null)[]>([]);
 
-  // Fungsi untuk memulai animasi teks berjalan - KIRI KE KANAN
+  // Fungsi untuk memulai animasi teks berjalan - KIRI KE KANAN (CREATE FREE ACCESS ACCOUNT)
   const startMarqueeLeft = () => {
     if (marqueeLeftRef.current) {
       if (marqueeLeftAnimation.current) {
@@ -126,7 +126,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
     }
   };
 
-  // Fungsi untuk memulai animasi teks berjalan - KANAN KE KIRI
+  // Fungsi untuk memulai animasi teks berjalan - KANAN KE KIRI (SIGN IN)
   const startMarqueeRight = () => {
     if (marqueeRightRef.current) {
       if (marqueeRightAnimation.current) {
@@ -799,7 +799,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
       padding: '0',
       backgroundColor: 'transparent',
       border: 'none',
-      pointerEvents: 'none', // Mencegah interaksi yang bisa mengganggu animasi
+      pointerEvents: 'none',
     }}>
       <div
         ref={marqueeLeftRef}
@@ -812,7 +812,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
           willChange: 'transform',
         }}
       >
-        {/* 3 ITEM SAJA - diulang untuk kontinuitas */}
+        {/* 3 ITEM SAJA - BERGERAK KIRI KE KANAN */}
         {[...Array(3)].map((_, i) => (
           <div key={i} style={{
             display: 'flex',
@@ -854,7 +854,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
       padding: '0',
       backgroundColor: 'transparent',
       border: 'none',
-      pointerEvents: 'none', // Mencegah interaksi yang bisa mengganggu animasi
+      pointerEvents: 'none',
     }}>
       <div
         ref={marqueeRightRef}
@@ -867,7 +867,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
           willChange: 'transform',
         }}
       >
-        {/* 3 ITEM SAJA - diulang untuk kontinuitas */}
+        {/* 3 ITEM SAJA - BERGERAK KANAN KE KIRI */}
         {[...Array(3)].map((_, i) => (
           <div key={i} style={{
             display: 'flex',
@@ -968,7 +968,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
           </Link>
         </div>
 
-        {/* TEKS BERJALAN 1 - CREATE FREE ACCESS ACCOUNT (KIRI KE KANAN) - DI ATAS FORM LOGIN */}
+        {/* TEKS BERJALAN 1 - CREATE FREE ACCESS ACCOUNT - KIRI KE KANAN */}
         <MarqueeLeftText />
 
         {/* Main Sign In Container - TANPA FOTO */}
@@ -985,8 +985,6 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
             maxWidth: isMobile ? '100%' : '1200px',
           }}
         >
-          {/* FOTO TELAH DIHAPUS */}
-
           <div
             style={{
               display: 'flex',
@@ -997,6 +995,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
               marginRight: isMobile ? '0' : '100px',
             }}
           >
+            {/* FORM LOGIN - TIDAK BERUBAH */}
             <div style={{ 
               marginBottom: isMobile ? '30px' : '40px',
               textAlign: isMobile ? 'center' : 'left'
@@ -1095,6 +1094,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
                     marginBottom: '30px',
                   }}
                 >
+                  {/* Google Login */}
                   <div
                     onClick={handleGoogleLogin}
                     style={{
@@ -1109,18 +1109,6 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
                       cursor: loading ? 'not-allowed' : 'pointer',
                       transition: 'all 0.3s ease',
                       opacity: loading ? 0.7 : 1,
-                    }}
-                    onMouseEnter={(e) => {
-                      if (!loading) {
-                        e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.2)';
-                        e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.5)';
-                      }
-                    }}
-                    onMouseLeave={(e) => {
-                      if (!loading) {
-                        e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
-                        e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.3)';
-                      }
                     }}
                   >
                     <svg width="24" height="24" viewBox="0 0 24 24" style={{ marginRight: '12px' }}>
@@ -1139,6 +1127,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
                     </span>
                   </div>
 
+                  {/* GitHub Login */}
                   <div
                     onClick={handleGitHubLogin}
                     style={{
@@ -1153,18 +1142,6 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
                       cursor: loading ? 'not-allowed' : 'pointer',
                       transition: 'all 0.3s ease',
                       opacity: loading ? 0.7 : 1,
-                    }}
-                    onMouseEnter={(e) => {
-                      if (!loading) {
-                        e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.2)';
-                        e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.5)';
-                      }
-                    }}
-                    onMouseLeave={(e) => {
-                      if (!loading) {
-                        e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
-                        e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.3)';
-                      }
                     }}
                   >
                     <svg width="24" height="24" viewBox="0 0 24 24" style={{ marginRight: '12px' }}>
@@ -1181,6 +1158,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
                   </div>
                 </div>
 
+                {/* Form Email/Password */}
                 <form onSubmit={(e) => handleEmailLogin(e)}>
                   <div
                     style={{
@@ -1196,16 +1174,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
                     }}
                   >
                     <div>
-                      <label
-                        style={{
-                          display: 'block',
-                          fontFamily: 'Helvetica, Arial, sans-serif',
-                          fontSize: '14px',
-                          fontWeight: '500',
-                          color: '#ffffff',
-                          marginBottom: '8px',
-                        }}
-                      >
+                      <label style={{ display: 'block', fontFamily: 'Helvetica, Arial, sans-serif', fontSize: '14px', fontWeight: '500', color: '#ffffff', marginBottom: '8px' }}>
                         Email
                       </label>
                       <input
@@ -1226,28 +1195,11 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
                           outline: 'none',
                           transition: 'all 0.3s ease',
                         }}
-                        onFocus={(e) => {
-                          e.target.style.borderColor = 'rgba(255, 255, 255, 0.7)';
-                          e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.15)';
-                        }}
-                        onBlur={(e) => {
-                          e.target.style.borderColor = 'rgba(255, 255, 255, 0.3)';
-                          e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
-                        }}
                       />
                     </div>
 
                     <div>
-                      <label
-                        style={{
-                          display: 'block',
-                          fontFamily: 'Helvetica, Arial, sans-serif',
-                          fontSize: '14px',
-                          fontWeight: '500',
-                          color: '#ffffff',
-                          marginBottom: '8px',
-                        }}
-                      >
+                      <label style={{ display: 'block', fontFamily: 'Helvetica, Arial, sans-serif', fontSize: '14px', fontWeight: '500', color: '#ffffff', marginBottom: '8px' }}>
                         Password
                       </label>
                       <div style={{ position: 'relative', width: '100%' }}>
@@ -1270,14 +1222,6 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
                             outline: 'none',
                             transition: 'all 0.3s ease',
                           }}
-                          onFocus={(e) => {
-                            e.target.style.borderColor = 'rgba(255, 255, 255, 0.7)';
-                            e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.15)';
-                          }}
-                          onBlur={(e) => {
-                            e.target.style.borderColor = 'rgba(255, 255, 255, 0.3)';
-                            e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
-                          }}
                         />
                         <button
                           type="button"
@@ -1291,18 +1235,15 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
                             border: 'none',
                             cursor: 'pointer',
                             padding: '5px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
                           }}
                         >
                           {showPassword ? (
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="rgba(255,255,255,0.6)">
-                              <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z" fill="rgba(255,255,255,0.6)"/>
+                              <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z" fill="rgba(255,255,255,0.6)"/>
                             </svg>
                           ) : (
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="rgba(255,255,255,0.6)">
-                              <path d="M12 7c2.76 0 5 2.24 5 5 0 .65-.13 1.26-.36 1.83l2.92 2.92c1.51-1.26 2.7-2.89 3.43-4.75-1.73-4.39-6-7.5-11-7.5-1.4 0-2.74.25-3.98.7l2.16 2.16C10.74 7.13 11.35 7 12 7zM2 4.27l2.28 2.28.46.46C3.08 8.3 1.78 10.02 1 12c1.73 4.39 6 7.5 11 7.5 1.55 0 3.03-.3 4.38-.84l.42.42L19.73 22 21 20.73 3.27 3 2 4.27zM7.53 9.8l1.55 1.55c-.05.21-.08.43-.08.65 0 1.66 1.34 3 3 3 .22 0 .44-.03.65-.08l1.55 1.55c-.67.33-1.41.53-2.2.53-2.76 0-5-2.24-5-5 0-.79.2-1.53.53-2.2zm4.31-.78l3.15 3.15.02-.16c0-1.66-1.34-3-3-3l-.17.01z" fill="rgba(255,255,255,0.6)"/>
+                              <path d="M12 7c2.76 0 5 2.24 5 5 0 .65-.13 1.26-.36 1.83l2.92 2.92c1.51-1.26 2.7-2.89 3.43-4.75-1.73-4.39-6-7.5-11-7.5-1.4 0-2.74.25-3.98.7l2.16 2.16C10.74 7.13 11.35 7 12 7zM2 4.27l2.28 2.28.46.46C3.08 8.3 1.78 10.02 1 12c1.73 4.39 6 7.5 11 7.5 1.55 0 3.03-.3 4.38-.84l.42.42L19.73 22 21 20.73 3.27 3 2 4.27z" fill="rgba(255,255,255,0.6)"/>
                             </svg>
                           )}
                         </button>
@@ -1339,18 +1280,6 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
                         transition: 'all 0.3s ease',
                         marginTop: '10px',
                       }}
-                      onMouseEnter={(e) => {
-                        if (!loading && !autoLoginInProgress) {
-                          e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.9)';
-                          e.currentTarget.style.transform = 'translateY(-2px)';
-                        }
-                      }}
-                      onMouseLeave={(e) => {
-                        if (!loading && !autoLoginInProgress) {
-                          e.currentTarget.style.backgroundColor = '#ffffff';
-                          e.currentTarget.style.transform = 'translateY(0)';
-                        }
-                      }}
                     >
                       {loading ? 'Signing In...' : autoLoginInProgress ? 'Auto Login...' : 'Sign In'}
                     </button>
@@ -1377,14 +1306,6 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
                       gap: '8px',
                       fontFamily: 'Helvetica, Arial, sans-serif',
                     }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
-                      e.currentTarget.style.color = 'rgba(255, 255, 255, 0.95)';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.05)';
-                      e.currentTarget.style.color = 'rgba(255, 255, 255, 0.8)';
-                    }}
                   >
                     <span>👤</span>
                     Lihat {getLocalLoginHistory().length} Akun Tersimpan
@@ -1392,102 +1313,26 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
                 )}
 
                 {/* FORGOT PASSWORD, SIGN UP, KEBIJAKAN PRIVASI, KETENTUAN KAMI */}
-                <div
-                  style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '15px',
-                    width: '100%',
-                  }}
-                >
-                  <div
-                    style={{
-                      display: 'flex',
-                      flexDirection: isMobile ? 'column' : 'row',
-                      justifyContent: isMobile ? 'center' : 'space-between',
-                      alignItems: 'center',
-                      gap: isMobile ? '15px' : '0',
-                      fontFamily: 'Helvetica, Arial, sans-serif',
-                      fontSize: '14px',
-                    }}
-                  >
-                    <button
-                      onClick={handleForgotPassword}
-                      style={{
-                        border: 'none',
-                        background: 'none',
-                        color: '#ffffff',
-                        cursor: 'pointer',
-                        textDecoration: 'underline',
-                        opacity: '0.8',
-                        transition: 'all 0.3s ease',
-                        fontFamily: 'Helvetica, Arial, sans-serif',
-                        fontSize: isMobile ? '13px' : '14px',
-                      }}
-                      onMouseEnter={(e) => { e.currentTarget.style.opacity = '1'; }}
-                      onMouseLeave={(e) => { e.currentTarget.style.opacity = '0.8'; }}
-                    >
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', width: '100%' }}>
+                  <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', justifyContent: isMobile ? 'center' : 'space-between', alignItems: 'center', gap: isMobile ? '15px' : '0', fontFamily: 'Helvetica, Arial, sans-serif', fontSize: '14px' }}>
+                    <button onClick={handleForgotPassword} style={{ border: 'none', background: 'none', color: '#ffffff', cursor: 'pointer', textDecoration: 'underline', opacity: '0.8', transition: 'all 0.3s ease', fontFamily: 'Helvetica, Arial, sans-serif', fontSize: isMobile ? '13px' : '14px' }}>
                       Forgot your password?
                     </button>
-
                     <div>
                       <span style={{ color: '#ffffff', opacity: '0.8', fontSize: isMobile ? '13px' : '14px', fontFamily: 'Helvetica, Arial, sans-serif' }}>
                         Don't have an account?{' '}
                       </span>
-                      <button
-                        onClick={handleSignUp}
-                        style={{
-                          border: 'none',
-                          background: 'none',
-                          color: '#ffffff',
-                          cursor: 'pointer',
-                          textDecoration: 'underline',
-                          fontWeight: '600',
-                          transition: 'all 0.3s ease',
-                          fontFamily: 'Helvetica, Arial, sans-serif',
-                          fontSize: isMobile ? '13px' : '14px',
-                        }}
-                        onMouseEnter={(e) => { e.currentTarget.style.opacity = '0.9'; }}
-                        onMouseLeave={(e) => { e.currentTarget.style.opacity = '1'; }}
-                      >
+                      <button onClick={handleSignUp} style={{ border: 'none', background: 'none', color: '#ffffff', cursor: 'pointer', textDecoration: 'underline', fontWeight: '600', transition: 'all 0.3s ease', fontFamily: 'Helvetica, Arial, sans-serif', fontSize: isMobile ? '13px' : '14px' }}>
                         Sign up
                       </button>
                     </div>
                   </div>
 
-                  {/* KEBIJAKAN PRIVASI & KETENTUAN KAMI */}
-                  <div style={{
-                    display: 'flex',
-                    justifyContent: isMobile ? 'center' : 'flex-start',
-                    gap: isMobile ? '20px' : '30px',
-                    marginTop: '5px',
-                  }}>
-                    <Link href="/privacy" style={{
-                      color: 'rgba(255, 255, 255, 0.7)',
-                      fontSize: isMobile ? '0.8rem' : '0.9rem',
-                      fontFamily: 'Helvetica, Arial, sans-serif',
-                      textDecoration: 'underline',
-                      textUnderlineOffset: '3px',
-                      opacity: 0.8,
-                      transition: 'opacity 0.2s ease',
-                      letterSpacing: '0.5px',
-                    }}
-                    onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
-                    onMouseLeave={(e) => e.currentTarget.style.opacity = '0.8'}>
+                  <div style={{ display: 'flex', justifyContent: isMobile ? 'center' : 'flex-start', gap: isMobile ? '20px' : '30px', marginTop: '5px' }}>
+                    <Link href="/privacy" style={{ color: 'rgba(255, 255, 255, 0.7)', fontSize: isMobile ? '0.8rem' : '0.9rem', fontFamily: 'Helvetica, Arial, sans-serif', textDecoration: 'underline', textUnderlineOffset: '3px', opacity: 0.8, transition: 'opacity 0.2s ease', letterSpacing: '0.5px' }}>
                       KEBIJAKAN PRIVASI
                     </Link>
-                    <Link href="/terms" style={{
-                      color: 'rgba(255, 255, 255, 0.7)',
-                      fontSize: isMobile ? '0.8rem' : '0.9rem',
-                      fontFamily: 'Helvetica, Arial, sans-serif',
-                      textDecoration: 'underline',
-                      textUnderlineOffset: '3px',
-                      opacity: 0.8,
-                      transition: 'opacity 0.2s ease',
-                      letterSpacing: '0.5px',
-                    }}
-                    onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
-                    onMouseLeave={(e) => e.currentTarget.style.opacity = '0.8'}>
+                    <Link href="/terms" style={{ color: 'rgba(255, 255, 255, 0.7)', fontSize: isMobile ? '0.8rem' : '0.9rem', fontFamily: 'Helvetica, Arial, sans-serif', textDecoration: 'underline', textUnderlineOffset: '3px', opacity: 0.8, transition: 'opacity 0.2s ease', letterSpacing: '0.5px' }}>
                       KETENTUAN KAMI
                     </Link>
                   </div>
@@ -1498,122 +1343,50 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
         </div>
 
         {/* Teks LETS JOIN US NOTE THINK dan kelompok di bawah */}
-        <div
-          style={{
-            position: 'relative',
-            textAlign: isMobile ? 'center' : 'left',
-            marginTop: isMobile ? '2rem' : '4rem',
-            width: '100%',
-            maxWidth: isMobile ? '100%' : '1200px',
-            padding: isMobile ? '1rem' : '2rem',
-            marginLeft: isMobile ? '0' : '2rem',
-            marginBottom: isMobile ? '1rem' : '2rem'
-          }}
-        >
-          <div style={{ 
-            marginBottom: isMobile ? '2rem' : '4rem',
-            padding: isMobile ? '0 1rem' : '0'
-          }}>
-            <p style={{
-              color: 'rgba(255,255,255,0.9)',
-              fontSize: isMobile ? '2.5rem' : '5rem',
-              fontFamily: 'Helvetica, Arial, sans-serif',
-              margin: '0 0 0.3rem 0',
-              lineHeight: '1.1',
-              fontWeight: '600'
-            }}>
+        <div style={{ position: 'relative', textAlign: isMobile ? 'center' : 'left', marginTop: isMobile ? '2rem' : '4rem', width: '100%', maxWidth: isMobile ? '100%' : '1200px', padding: isMobile ? '1rem' : '2rem', marginLeft: isMobile ? '0' : '2rem', marginBottom: isMobile ? '1rem' : '2rem' }}>
+          <div style={{ marginBottom: isMobile ? '2rem' : '4rem', padding: isMobile ? '0 1rem' : '0' }}>
+            <p style={{ color: 'rgba(255,255,255,0.9)', fontSize: isMobile ? '2.5rem' : '5rem', fontFamily: 'Helvetica, Arial, sans-serif', margin: '0 0 0.3rem 0', lineHeight: '1.1', fontWeight: '600' }}>
               LETS JOIN US
             </p>
-            <p style={{
-              color: 'rgba(255,255,255,0.9)',
-              fontSize: isMobile ? '2.5rem' : '5rem',
-              fontFamily: 'Helvetica, Arial, sans-serif',
-              margin: 0,
-              lineHeight: '1.1',
-              fontWeight: '600'
-            }}>
+            <p style={{ color: 'rgba(255,255,255,0.9)', fontSize: isMobile ? '2.5rem' : '5rem', fontFamily: 'Helvetica, Arial, sans-serif', margin: 0, lineHeight: '1.1', fontWeight: '600' }}>
               NOTE THINK.
             </p>
           </div>
 
           {/* 6 Kelompok Menu */}
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(3, auto)',
-            gap: isMobile ? '2rem 3rem' : '2rem 8rem',
-            marginTop: '0rem',
-            padding: isMobile ? '0 1rem' : '0',
-            justifyContent: isMobile ? 'center' : 'flex-start'
-          }}>
+          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(3, auto)', gap: isMobile ? '2rem 3rem' : '2rem 8rem', marginTop: '0rem', padding: isMobile ? '0 1rem' : '0', justifyContent: isMobile ? 'center' : 'flex-start' }}>
             <div>
-              <h4 style={{
-                color: 'white',
-                fontSize: isMobile ? '1.8rem' : '4rem',
-                fontWeight: '600',
-                margin: '0 0 0.5rem 0',
-                marginBottom: isMobile ? '3rem' : '5rem',
-                fontFamily: 'Helvetica, Arial, sans-serif'
-              }}>
+              <h4 style={{ color: 'white', fontSize: isMobile ? '1.8rem' : '4rem', fontWeight: '600', margin: '0 0 0.5rem 0', marginBottom: isMobile ? '3rem' : '5rem', fontFamily: 'Helvetica, Arial, sans-serif' }}>
                 MENU
               </h4>
             </div>
             <div>
-              <h4 style={{
-                color: 'white',
-                fontSize: isMobile ? '1.8rem' : '4rem',
-                fontWeight: '600',
-                margin: '0 0 0.5rem 0',
-                marginBottom: isMobile ? '3rem' : '5rem',
-                fontFamily: 'Helvetica, Arial, sans-serif'
-              }}>
+              <h4 style={{ color: 'white', fontSize: isMobile ? '1.8rem' : '4rem', fontWeight: '600', margin: '0 0 0.5rem 0', marginBottom: isMobile ? '3rem' : '5rem', fontFamily: 'Helvetica, Arial, sans-serif' }}>
                 PRODUCT
               </h4>
             </div>
-            
             <div>
               <ConnectionComponent />
             </div>
-            
             <div>
-              <h4 style={{
-                color: 'white',
-                fontSize: isMobile ? '1.8rem' : '4rem',
-                fontWeight: '600',
-                margin: '0 0 0.5rem 0',
-                marginBottom: isMobile ? '8rem' : '15rem',
-                fontFamily: 'Helvetica, Arial, sans-serif'
-              }}>
+              <h4 style={{ color: 'white', fontSize: isMobile ? '1.8rem' : '4rem', fontWeight: '600', margin: '0 0 0.5rem 0', marginBottom: isMobile ? '8rem' : '15rem', fontFamily: 'Helvetica, Arial, sans-serif' }}>
                 Features
               </h4>
             </div>
             <div>
-              <h4 style={{
-                color: 'white',
-                fontSize: isMobile ? '1.8rem' : '4rem',
-                fontWeight: '600',
-                margin: '0 0 0.5rem 0',
-                marginBottom: isMobile ? '8rem' : '15rem',
-                fontFamily: 'Helvetica, Arial, sans-serif'
-              }}>
+              <h4 style={{ color: 'white', fontSize: isMobile ? '1.8rem' : '4rem', fontWeight: '600', margin: '0 0 0.5rem 0', marginBottom: isMobile ? '8rem' : '15rem', fontFamily: 'Helvetica, Arial, sans-serif' }}>
                 Community
               </h4>
             </div>
             <div>
-              <h4 style={{
-                color: 'white',
-                fontSize: isMobile ? '1.8rem' : '4rem',
-                fontWeight: '600',
-                margin: '0 0 0.5rem 0',
-                marginBottom: isMobile ? '8rem' : '15rem',
-                fontFamily: 'Helvetica, Arial, sans-serif'
-              }}>
+              <h4 style={{ color: 'white', fontSize: isMobile ? '1.8rem' : '4rem', fontWeight: '600', margin: '0 0 0.5rem 0', marginBottom: isMobile ? '8rem' : '15rem', fontFamily: 'Helvetica, Arial, sans-serif' }}>
                 BLOG
               </h4>
             </div>
           </div>
         </div>
 
-        {/* TEKS BERJALAN 2 - SIGN IN (KANAN KE KIRI) - DI BAWAH */}
+        {/* TEKS BERJALAN 2 - SIGN IN - KANAN KE KIRI */}
         <MarqueeRightText />
       </div>
       
