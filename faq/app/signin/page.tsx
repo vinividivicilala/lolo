@@ -95,6 +95,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
   const [showAutoLoginModal, setShowAutoLoginModal] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
   const [autoLoginInProgress, setAutoLoginInProgress] = useState(false);
+  const marqueeRef = useRef<HTMLDivElement>(null);
   
   // State untuk komponen Connection
   const [connectionsOpen, setConnectionsOpen] = useState(false);
@@ -720,64 +721,74 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
     </div>
   );
 
-  // Komponen teks berjalan - 3 ITEM SAJA, UKURAN FONT BESAR, TIDAK TERPUTUS
-  const MarqueeText = () => (
-    <div style={{
-      width: '100%',
-      overflow: 'hidden',
-      position: 'relative',
-      marginTop: isMobile ? '40px' : '80px',
-      padding: '0',
-      backgroundColor: 'transparent',
-      border: 'none',
-    }}>
-      <motion.div
-        initial={{ x: '100%' }}
-        animate={{ x: '-400%' }}
-        transition={{
-          duration: 30,
-          repeat: Infinity,
-          ease: 'linear',
-          repeatType: 'loop',
-        }}
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: isMobile ? '60px' : '100px',
-          whiteSpace: 'nowrap',
-          width: 'fit-content',
-        }}
-      >
-        {/* 3 ITEM SAJA - diulang untuk kontinuitas */}
-        {[...Array(3)].map((_, i) => (
-          <div key={i} style={{
+  // Komponen teks berjalan - SANGAT BESAR, SANGAT LAMBAT, TIDAK TERPUTUS
+  const MarqueeText = () => {
+    useEffect(() => {
+      if (marqueeRef.current) {
+        gsap.fromTo(marqueeRef.current, 
+          { x: '100%' },
+          { 
+            x: '-100%', 
+            duration: 60, 
+            repeat: -1, 
+            ease: 'none',
+            overwrite: true
+          }
+        );
+      }
+    }, []);
+
+    return (
+      <div style={{
+        width: '100%',
+        overflow: 'hidden',
+        position: 'relative',
+        marginTop: isMobile ? '50px' : '100px',
+        padding: '0',
+        backgroundColor: 'transparent',
+        border: 'none',
+      }}>
+        <div
+          ref={marqueeRef}
+          style={{
             display: 'flex',
             alignItems: 'center',
-            gap: isMobile ? '30px' : '50px',
-          }}>
-            <span style={{
-              color: 'white',
-              fontSize: isMobile ? '4rem' : '7rem',
-              fontFamily: 'Helvetica, Arial, sans-serif',
-              fontWeight: '400',
-              letterSpacing: '5px',
+            gap: isMobile ? '80px' : '150px',
+            whiteSpace: 'nowrap',
+            width: 'fit-content',
+          }}
+        >
+          {/* 3 ITEM SAJA - diulang untuk kontinuitas */}
+          {[...Array(3)].map((_, i) => (
+            <div key={i} style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: isMobile ? '40px' : '80px',
             }}>
-              SIGN IN
-            </span>
-            <svg 
-              width={isMobile ? '70' : '100'} 
-              height={isMobile ? '70' : '100'} 
-              viewBox="0 0 24 24" 
-              fill="white"
-            >
-              <path d="M11 7L9.6 8.4L12.2 11H2V13H12.2L9.6 15.6L11 17L16 12L11 7Z" fill="white"/>
-              <path d="M20 19H12V21H20C21.1 21 22 20.1 22 19V5C22 3.9 21.1 3 20 3H12V5H20V19Z" fill="white"/>
-            </svg>
-          </div>
-        ))}
-      </motion.div>
-    </div>
-  );
+              <span style={{
+                color: 'white',
+                fontSize: isMobile ? '6rem' : '10rem',
+                fontFamily: 'Helvetica, Arial, sans-serif',
+                fontWeight: '400',
+                letterSpacing: '10px',
+              }}>
+                SIGN IN
+              </span>
+              <svg 
+                width={isMobile ? '100' : '160'} 
+                height={isMobile ? '100' : '160'} 
+                viewBox="0 0 24 24" 
+                fill="white"
+              >
+                <path d="M11 7L9.6 8.4L12.2 11H2V13H12.2L9.6 15.6L11 17L16 12L11 7Z" fill="white"/>
+                <path d="M20 19H12V21H20C21.1 21 22 20.1 22 19V5C22 3.9 21.1 3 20 3H12V5H20V19Z" fill="white"/>
+              </svg>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
 
   return (
     <>
@@ -796,11 +807,11 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
           position: 'relative',
         }}
       >
-        {/* HALAMAN UTAMA - POSISI KIRI ATAS DENGAN PANAH MINIMALIS BESAR */}
+        {/* HALAMAN UTAMA - SISI KANAN ATAS DENGAN PANAH MINIMALIS EKOR PENDEK */}
         <div style={{
           position: 'absolute',
           top: isMobile ? '30px' : '50px',
-          left: isMobile ? '20px' : '50px',
+          right: isMobile ? '20px' : '50px',
           display: 'flex',
           alignItems: 'center',
           gap: '15px',
@@ -813,7 +824,16 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
             textDecoration: 'none',
             color: 'white',
           }}>
-            {/* NORTH WEST ARROW SVG - MINIMALIS, GARIS TIPIS, BESAR */}
+            <span style={{
+              fontSize: isMobile ? '1.8rem' : '2.5rem',
+              fontFamily: 'Helvetica, Arial, sans-serif',
+              fontWeight: '400',
+              letterSpacing: '2px',
+              textDecoration: 'none',
+            }}>
+              HALAMAN UTAMA
+            </span>
+            {/* NORTH WEST ARROW SVG - EKOR PENDEK */}
             <svg 
               width={isMobile ? '40' : '60'} 
               height={isMobile ? '40' : '60'} 
@@ -833,19 +853,10 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
                 e.currentTarget.style.transform = 'translate(0, 0)';
               }}
             >
+              <path d="M5 5L15 5" stroke="white" strokeWidth="1.5"/>
+              <path d="M5 5L5 15" stroke="white" strokeWidth="1.5"/>
               <path d="M5 5L19 19" stroke="white" strokeWidth="1.5"/>
-              <path d="M5 5H15" stroke="white" strokeWidth="1.5"/>
-              <path d="M5 5V15" stroke="white" strokeWidth="1.5"/>
             </svg>
-            <span style={{
-              fontSize: isMobile ? '1.8rem' : '2.5rem',
-              fontFamily: 'Helvetica, Arial, sans-serif',
-              fontWeight: '400',
-              letterSpacing: '2px',
-              textDecoration: 'none',
-            }}>
-              HALAMAN UTAMA
-            </span>
           </Link>
         </div>
 
@@ -1502,7 +1513,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
           </div>
         </div>
 
-        {/* Teks berjalan SIGN IN - 3 ITEM SAJA, FONT BESAR, TIDAK TERPUTUS */}
+        {/* Teks berjalan SIGN IN - SANGAT BESAR, SANGAT LAMBAT, TIDAK TERPUTUS */}
         <MarqueeText />
       </div>
       
