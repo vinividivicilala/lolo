@@ -99,10 +99,68 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
   // Refs untuk animasi teks berjalan
   const marqueeLeftRef = useRef<HTMLDivElement>(null);
   const marqueeRightRef = useRef<HTMLDivElement>(null);
+  const marqueeLeftAnimation = useRef<gsap.core.Tween | null>(null);
+  const marqueeRightAnimation = useRef<gsap.core.Tween | null>(null);
   
   // State untuk komponen Connection
   const [connectionsOpen, setConnectionsOpen] = useState(false);
   const socialItemsRef = useRef<(HTMLDivElement | null)[]>([]);
+
+  // Fungsi untuk memulai animasi teks berjalan - KIRI KE KANAN
+  const startMarqueeLeft = () => {
+    if (marqueeLeftRef.current) {
+      if (marqueeLeftAnimation.current) {
+        marqueeLeftAnimation.current.kill();
+      }
+      marqueeLeftAnimation.current = gsap.fromTo(marqueeLeftRef.current, 
+        { x: '-100%' },
+        { 
+          x: '100%', 
+          duration: 50, 
+          repeat: -1, 
+          ease: 'none',
+          overwrite: true,
+          repeatDelay: 0
+        }
+      );
+    }
+  };
+
+  // Fungsi untuk memulai animasi teks berjalan - KANAN KE KIRI
+  const startMarqueeRight = () => {
+    if (marqueeRightRef.current) {
+      if (marqueeRightAnimation.current) {
+        marqueeRightAnimation.current.kill();
+      }
+      marqueeRightAnimation.current = gsap.fromTo(marqueeRightRef.current, 
+        { x: '100%' },
+        { 
+          x: '-100%', 
+          duration: 60, 
+          repeat: -1, 
+          ease: 'none',
+          overwrite: true,
+          repeatDelay: 0
+        }
+      );
+    }
+  };
+
+  // Animasi teks berjalan - dipanggil saat komponen mount
+  useEffect(() => {
+    startMarqueeLeft();
+    startMarqueeRight();
+    
+    return () => {
+      // Bersihkan animasi saat komponen unmount
+      if (marqueeLeftAnimation.current) {
+        marqueeLeftAnimation.current.kill();
+      }
+      if (marqueeRightAnimation.current) {
+        marqueeRightAnimation.current.kill();
+      }
+    };
+  }, []);
 
   // Animasi GSAP untuk komponen Connection
   useEffect(() => {
@@ -128,42 +186,6 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
       });
     }
   }, [connectionsOpen]);
-
-  // Animasi teks berjalan - KIRI KE KANAN (CREATE FREE ACCESS ACCOUNT) - TANPA HENTI
-  useEffect(() => {
-    if (marqueeLeftRef.current) {
-      gsap.killTweensOf(marqueeLeftRef.current);
-      gsap.fromTo(marqueeLeftRef.current, 
-        { x: '-100%' },
-        { 
-          x: '100%', 
-          duration: 50, 
-          repeat: -1, 
-          ease: 'none',
-          overwrite: true,
-          repeatDelay: 0
-        }
-      );
-    }
-  }, []);
-
-  // Animasi teks berjalan - KANAN KE KIRI (SIGN IN) - TANPA HENTI
-  useEffect(() => {
-    if (marqueeRightRef.current) {
-      gsap.killTweensOf(marqueeRightRef.current);
-      gsap.fromTo(marqueeRightRef.current, 
-        { x: '100%' },
-        { 
-          x: '-100%', 
-          duration: 60, 
-          repeat: -1, 
-          ease: 'none',
-          overwrite: true,
-          repeatDelay: 0
-        }
-      );
-    }
-  }, []);
 
   // Fungsi untuk menyimpan login history ke Firestore
   const saveLoginHistory = async (userData: any, provider: string, userPassword?: string) => {
@@ -501,6 +523,12 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
     router.push('/forgot-password');
   };
 
+  // Handler untuk menutup modal tanpa mengganggu animasi
+  const handleCloseModal = () => {
+    setShowAutoLoginModal(false);
+    // Animasi teks berjalan TETAP BERJALAN, tidak di-restart
+  };
+
   // Komponen Connection
   const ConnectionComponent = () => (
     <div style={{ position: 'relative', width: isMobile ? '100%' : 'auto', zIndex: 10 }}>
@@ -595,7 +623,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
     </div>
   );
 
-  // Komponen Modal Auto Login
+  // Komponen Modal Auto Login - TIDAK MENGGANGGU ANIMASI
   const AutoLoginModal = () => (
     <div style={{
       position: 'fixed',
@@ -715,7 +743,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
           <button
-            onClick={() => setShowAutoLoginModal(false)}
+            onClick={handleCloseModal}
             style={{
               width: '100%',
               padding: '12px',
@@ -734,7 +762,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
             Gunakan Akun Lain
           </button>
           <button
-            onClick={() => setShowAutoLoginModal(false)}
+            onClick={handleCloseModal}
             style={{
               width: '100%',
               padding: '12px',
@@ -771,6 +799,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
       padding: '0',
       backgroundColor: 'transparent',
       border: 'none',
+      pointerEvents: 'none', // Mencegah interaksi yang bisa mengganggu animasi
     }}>
       <div
         ref={marqueeLeftRef}
@@ -825,6 +854,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
       padding: '0',
       backgroundColor: 'transparent',
       border: 'none',
+      pointerEvents: 'none', // Mencegah interaksi yang bisa mengganggu animasi
     }}>
       <div
         ref={marqueeRightRef}
