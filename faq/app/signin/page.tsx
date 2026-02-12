@@ -129,7 +129,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
     }
   }, [connectionsOpen]);
 
-  // Animasi teks berjalan - KIRI KE KANAN
+  // Animasi teks berjalan - KIRI KE KANAN (CREATE FREE ACCESS ACCOUNT)
   useEffect(() => {
     if (marqueeLeftRef.current) {
       gsap.fromTo(marqueeLeftRef.current, 
@@ -145,7 +145,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
     }
   }, []);
 
-  // Animasi teks berjalan - KANAN KE KIRI
+  // Animasi teks berjalan - KANAN KE KIRI (SIGN IN)
   useEffect(() => {
     if (marqueeRightRef.current) {
       gsap.fromTo(marqueeRightRef.current, 
@@ -756,13 +756,14 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
     </div>
   );
 
-  // Komponen teks berjalan - KIRI KE KANAN
+  // Komponen teks berjalan - KIRI KE KANAN (CREATE FREE ACCESS ACCOUNT) - DI ATAS
   const MarqueeLeftText = () => (
     <div style={{
       width: '100%',
       overflow: 'hidden',
       position: 'relative',
-      marginTop: isMobile ? '30px' : '50px',
+      marginTop: isMobile ? '20px' : '30px',
+      marginBottom: isMobile ? '20px' : '30px',
       padding: '0',
       backgroundColor: 'transparent',
       border: 'none',
@@ -808,13 +809,14 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
     </div>
   );
 
-  // Komponen teks berjalan - KANAN KE KIRI
+  // Komponen teks berjalan - KANAN KE KIRI (SIGN IN) - DI BAWAH
   const MarqueeRightText = () => (
     <div style={{
       width: '100%',
       overflow: 'hidden',
       position: 'relative',
-      marginTop: isMobile ? '30px' : '50px',
+      marginTop: isMobile ? '20px' : '30px',
+      marginBottom: isMobile ? '20px' : '30px',
       padding: '0',
       backgroundColor: 'transparent',
       border: 'none',
@@ -930,6 +932,9 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
           </Link>
         </div>
 
+        {/* TEKS BERJALAN 1 - CREATE FREE ACCESS ACCOUNT (KIRI KE KANAN) - DI ATAS */}
+        <MarqueeLeftText />
+
         {/* Main Sign In Container - TANPA FOTO */}
         <div
           style={{
@@ -939,7 +944,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
             justifyContent: isMobile ? 'center' : 'flex-end',
             gap: isMobile ? '30px' : '60px',
             marginBottom: isMobile ? '30px' : '40px',
-            marginTop: isMobile ? '100px' : '0',
+            marginTop: isMobile ? '20px' : '30px',
             width: '100%',
             maxWidth: isMobile ? '100%' : '1200px',
           }}
@@ -1572,10 +1577,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
           </div>
         </div>
 
-        {/* Teks berjalan - CREATE FREE ACCESS ACCOUNT (KIRI KE KANAN) */}
-        <MarqueeLeftText />
-        
-        {/* Teks berjalan - SIGN IN (KANAN KE KIRI) */}
+        {/* TEKS BERJALAN 2 - SIGN IN (KANAN KE KIRI) - DI BAWAH */}
         <MarqueeRightText />
       </div>
       
