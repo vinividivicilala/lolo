@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef, useLayoutEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { gsap } from "gsap";
@@ -40,15 +40,6 @@ const firebaseConfig = {
   measurementId: "G-8LMP7F4BE9"
 };
 
-// Inisialisasi Firebase - HANYA di client
-let app = null;
-let auth = null;
-let db = null;
-
-// Provider untuk berbagai platform
-const googleProvider = typeof window !== 'undefined' ? new GoogleAuthProvider() : null;
-const githubProvider = typeof window !== 'undefined' ? new GithubAuthProvider() : null;
-
 // Data media sosial untuk komponen Connection
 const socialConnections = [
   { id: 1, name: "GitHub" },
@@ -58,9 +49,30 @@ const socialConnections = [
   { id: 5, name: "YouTube" }
 ];
 
+// Interface untuk user login history
+interface LoginHistory {
+  id: string;
+  email: string;
+  displayName: string;
+  photoURL: string;
+  provider: string;
+  lastLogin: any;
+  uid: string;
+}
+
+interface LocalUser extends LoginHistory {
+  password?: string;
+  autoLoginEnabled?: boolean;
+}
+
 export default function SignInPage() {
   const router = useRouter();
+  
+  // --- STATE UNTUK HYDRATION FIX ---
+  const [isMounted, setIsMounted] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  
+  // --- STATE UNTUK FORM LOGIN ---
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -71,37 +83,81 @@ export default function SignInPage() {
   const [showAutoLoginModal, setShowAutoLoginModal] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
   const [autoLoginInProgress, setAutoLoginInProgress] = useState(false);
-  const [firebaseInitialized, setFirebaseInitialized] = useState(false);
   
-  // Refs untuk animasi teks berjalan
+  // --- STATE UNTUK FIREBASE (HANYA CLIENT) ---
+  const [firebaseInitialized, setFirebaseInitialized] = useState(false);
+  const [firebaseApp, setFirebaseApp] = useState<any>(null);
+  const [firebaseAuth, setFirebaseAuth] = useState<any>(null);
+  const [firebaseDb, setFirebaseDb] = useState<any>(null);
+  
+  // --- REFS UNTUK ANIMASI GSAP ---
   const marqueeLeftRef = useRef<HTMLDivElement>(null);
   const marqueeRightRef = useRef<HTMLDivElement>(null);
   const marqueeLeftAnimation = useRef<gsap.core.Tween | null>(null);
   const marqueeRightAnimation = useRef<gsap.core.Tween | null>(null);
   
-  // State untuk komponen Connection
+  // --- REFS UNTUK KONEKSI ---
   const [connectionsOpen, setConnectionsOpen] = useState(false);
   const socialItemsRef = useRef<(HTMLDivElement | null)[]>([]);
 
-  // Inisialisasi Firebase di client
+  // ============================================
+  // 1. FIX HYDRATION: TANDAI KOMPONEN SUDAH DI-MOUNT
+  // ============================================
   useEffect(() => {
-    if (typeof window !== 'undefined' && !firebaseInitialized) {
-      app = getApps().length === 0
+    setIsMounted(true);
+  }, []);
+
+  // ============================================
+  // 2. CEK UKURAN LAYAR - HANYA DI CLIENT
+  // ============================================
+  useEffect(() => {
+    if (!isMounted) return;
+    
+    const checkScreenSize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkScreenSize();
+    window.addEventListener('resize', checkScreenSize);
+    return () => window.removeEventListener('resize', checkScreenSize);
+  }, [isMounted]);
+
+  // ============================================
+  // 3. INISIALISASI FIREBASE - HANYA DI CLIENT
+  // ============================================
+  useEffect(() => {
+    if (!isMounted || firebaseInitialized) return;
+    
+    try {
+      const app = getApps().length === 0
         ? initializeApp(firebaseConfig)
         : getApps()[0];
       
-      auth = getAuth(app);
-      db = getFirestore(app);
+      const auth = getAuth(app);
+      const db = getFirestore(app);
+      
+      setFirebaseApp(app);
+      setFirebaseAuth(auth);
+      setFirebaseDb(db);
       setFirebaseInitialized(true);
+      
+      console.log("Firebase initialized successfully");
+    } catch (error) {
+      console.error("Firebase initialization error:", error);
     }
-  }, [firebaseInitialized]);
+  }, [isMounted, firebaseInitialized]);
 
-  // Fungsi untuk memulai animasi teks berjalan - KIRI KE KANAN
+  // ============================================
+  // 4. FUNGSI ANIMASI GSAP
+  // ============================================
   const startMarqueeLeft = () => {
-    if (marqueeLeftRef.current) {
+    if (!marqueeLeftRef.current) return;
+    
+    try {
       if (marqueeLeftAnimation.current) {
         marqueeLeftAnimation.current.kill();
       }
+      
       marqueeLeftAnimation.current = gsap.fromTo(marqueeLeftRef.current, 
         { x: '-100%' },
         { 
@@ -109,19 +165,23 @@ export default function SignInPage() {
           duration: 50, 
           repeat: -1, 
           ease: 'none',
-          overwrite: true,
-          repeatDelay: 0
+          repeatDelay: 0,
+          overwrite: true
         }
       );
+    } catch (error) {
+      console.error("GSAP Left Animation Error:", error);
     }
   };
 
-  // Fungsi untuk memulai animasi teks berjalan - KANAN KE KIRI
   const startMarqueeRight = () => {
-    if (marqueeRightRef.current) {
+    if (!marqueeRightRef.current) return;
+    
+    try {
       if (marqueeRightAnimation.current) {
         marqueeRightAnimation.current.kill();
       }
+      
       marqueeRightAnimation.current = gsap.fromTo(marqueeRightRef.current, 
         { x: '100%' },
         { 
@@ -129,24 +189,26 @@ export default function SignInPage() {
           duration: 60, 
           repeat: -1, 
           ease: 'none',
-          overwrite: true,
-          repeatDelay: 0
+          repeatDelay: 0,
+          overwrite: true
         }
       );
+    } catch (error) {
+      console.error("GSAP Right Animation Error:", error);
     }
   };
 
-  // Animasi teks berjalan - gunakan useLayoutEffect untuk akses DOM yang sudah siap
-  useLayoutEffect(() => {
-    // Beri sedikit waktu agar DOM benar-benar siap
+  // ============================================
+  // 5. MULAI ANIMASI GSAP - SETELAH SEMUA SIAP
+  // ============================================
+  useEffect(() => {
+    if (!isMounted) return;
+    
+    // Beri waktu agar DOM benar-benar siap
     const timer = setTimeout(() => {
-      if (marqueeLeftRef.current) {
-        startMarqueeLeft();
-      }
-      if (marqueeRightRef.current) {
-        startMarqueeRight();
-      }
-    }, 100);
+      startMarqueeLeft();
+      startMarqueeRight();
+    }, 500);
     
     return () => {
       clearTimeout(timer);
@@ -157,38 +219,48 @@ export default function SignInPage() {
         marqueeRightAnimation.current.kill();
       }
     };
-  }, []);
+  }, [isMounted]);
 
-  // Animasi GSAP untuk komponen Connection
+  // ============================================
+  // 6. ANIMASI GSAP UNTUK CONNECTION
+  // ============================================
   useEffect(() => {
-    if (connectionsOpen && socialItemsRef.current.length > 0) {
-      gsap.set(socialItemsRef.current.filter(Boolean), {
-        y: 30,
-        opacity: 0
-      });
-      gsap.to(socialItemsRef.current.filter(Boolean), {
-        y: 0,
-        opacity: 1,
-        duration: 0.4,
-        stagger: 0.1,
-        ease: "power2.out"
-      });
+    if (!isMounted) return;
+    
+    if (connectionsOpen) {
+      const validRefs = socialItemsRef.current.filter(Boolean);
+      if (validRefs.length > 0) {
+        gsap.set(validRefs, { y: 30, opacity: 0 });
+        gsap.to(validRefs, {
+          y: 0,
+          opacity: 1,
+          duration: 0.4,
+          stagger: 0.1,
+          ease: "power2.out"
+        });
+      }
     } else {
-      gsap.to(socialItemsRef.current.filter(Boolean), {
-        y: 30,
-        opacity: 0,
-        duration: 0.3,
-        stagger: 0.05,
-        ease: "power2.in"
-      });
+      const validRefs = socialItemsRef.current.filter(Boolean);
+      if (validRefs.length > 0) {
+        gsap.to(validRefs, {
+          y: 30,
+          opacity: 0,
+          duration: 0.3,
+          stagger: 0.05,
+          ease: "power2.in"
+        });
+      }
     }
-  }, [connectionsOpen]);
+  }, [connectionsOpen, isMounted]);
 
-  // Fungsi untuk menyimpan login history ke Firestore
+  // ============================================
+  // 7. FUNGSI FIRESTORE
+  // ============================================
   const saveLoginHistory = async (userData: any, provider: string, userPassword?: string) => {
-    if (!db || !auth) return;
+    if (!firebaseDb || !firebaseAuth) return;
+    
     try {
-      const historyRef = doc(db, "loginHistory", userData.uid);
+      const historyRef = doc(firebaseDb, "loginHistory", userData.uid);
       const historyData = {
         id: userData.uid,
         email: userData.email,
@@ -210,11 +282,11 @@ export default function SignInPage() {
     }
   };
 
-  // Fungsi untuk mengambil login history dari Firestore
   const fetchLoginHistory = async () => {
-    if (!db) return [];
+    if (!firebaseDb) return [];
+    
     try {
-      const historyRef = collection(db, "loginHistory");
+      const historyRef = collection(firebaseDb, "loginHistory");
       const q = query(historyRef, orderBy("lastLogin", "desc"), limit(10));
       const querySnapshot = await getDocs(q);
       
@@ -231,7 +303,9 @@ export default function SignInPage() {
     }
   };
 
-  // Fungsi untuk mengambil login history dari localStorage
+  // ============================================
+  // 8. LOCAL STORAGE FUNCTIONS
+  // ============================================
   const getLocalLoginHistory = (): LocalUser[] => {
     try {
       const savedUsers = localStorage.getItem('savedLoginUsers');
@@ -244,62 +318,6 @@ export default function SignInPage() {
     return [];
   };
 
-  // Cek apakah ada user yang tersimpan untuk auto-login
-  useEffect(() => {
-    if (!firebaseInitialized) return;
-    
-    const checkSavedUser = async () => {
-      setTimeout(async () => {
-        const currentUser = auth?.currentUser;
-        
-        if (!currentUser) {
-          const localHistory = getLocalLoginHistory();
-          if (localHistory.length > 0) {
-            setShowAutoLoginModal(true);
-            setLoginHistory(localHistory);
-          }
-          
-          try {
-            await fetchLoginHistory();
-          } catch (error) {
-            console.error("Failed to fetch from Firestore:", error);
-          }
-        }
-      }, 1000);
-    };
-
-    checkSavedUser();
-  }, [firebaseInitialized]);
-
-  // Mendengarkan perubahan status autentikasi
-  useEffect(() => {
-    if (!auth || !firebaseInitialized) return;
-    
-    const unsubscribe = onAuthStateChanged(auth, (currentUser: any) => {
-      setUser(currentUser);
-      if (currentUser) {
-        console.log("User logged in:", currentUser.email);
-        setShowAutoLoginModal(false);
-        setEmail("");
-        setPassword("");
-        router.push('/notes');
-      }
-    });
-
-    const checkScreenSize = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-
-    checkScreenSize();
-    window.addEventListener('resize', checkScreenSize);
-    
-    return () => {
-      window.removeEventListener('resize', checkScreenSize);
-      unsubscribe();
-    };
-  }, [router, firebaseInitialized]);
-
-  // Fungsi untuk menyimpan user ke localStorage
   const saveUserToLocalStorage = (userData: any, plainPassword?: string) => {
     try {
       const savedUsers = localStorage.getItem('savedLoginUsers');
@@ -323,7 +341,6 @@ export default function SignInPage() {
         users[existingIndex] = userToSave;
       } else {
         users.unshift(userToSave);
-        
         if (users.length > 5) {
           users = users.slice(0, 5);
         }
@@ -336,7 +353,6 @@ export default function SignInPage() {
     }
   };
 
-  // Fungsi untuk menghapus user dari localStorage
   const removeUserFromLocalStorage = (uid: string) => {
     try {
       const savedUsers = localStorage.getItem('savedLoginUsers');
@@ -345,8 +361,9 @@ export default function SignInPage() {
         users = users.filter((u: any) => u.uid !== uid);
         localStorage.setItem('savedLoginUsers', JSON.stringify(users));
         setLoginHistory(users);
-        if (db) {
-          deleteDoc(doc(db, "loginHistory", uid)).catch(() => {
+        
+        if (firebaseDb) {
+          deleteDoc(doc(firebaseDb, "loginHistory", uid)).catch(() => {
             console.log("User not found in Firestore");
           });
         }
@@ -356,16 +373,71 @@ export default function SignInPage() {
     }
   };
 
-  // Login dengan Google
+  // ============================================
+  // 9. CEK AUTO LOGIN
+  // ============================================
+  useEffect(() => {
+    if (!isMounted || !firebaseInitialized) return;
+    
+    const checkSavedUser = async () => {
+      setTimeout(async () => {
+        const currentUser = firebaseAuth?.currentUser;
+        
+        if (!currentUser) {
+          const localHistory = getLocalLoginHistory();
+          if (localHistory.length > 0) {
+            setShowAutoLoginModal(true);
+            setLoginHistory(localHistory);
+          }
+          
+          try {
+            await fetchLoginHistory();
+          } catch (error) {
+            console.error("Failed to fetch from Firestore:", error);
+          }
+        }
+      }, 1000);
+    };
+
+    checkSavedUser();
+  }, [isMounted, firebaseInitialized, firebaseAuth]);
+
+  // ============================================
+  // 10. AUTH STATE CHANGED LISTENER
+  // ============================================
+  useEffect(() => {
+    if (!isMounted || !firebaseAuth || !firebaseInitialized) return;
+    
+    const unsubscribe = onAuthStateChanged(firebaseAuth, (currentUser: any) => {
+      setUser(currentUser);
+      if (currentUser) {
+        console.log("User logged in:", currentUser.email);
+        setShowAutoLoginModal(false);
+        setEmail("");
+        setPassword("");
+        router.push('/notes');
+      }
+    });
+
+    return () => unsubscribe();
+  }, [router, isMounted, firebaseAuth, firebaseInitialized]);
+
+  // ============================================
+  // 11. LOGIN HANDLERS
+  // ============================================
   const handleGoogleLogin = async () => {
-    if (!auth || !googleProvider) return;
+    if (!firebaseAuth) return;
+    
     setLoading(true);
     setError("");
     setShowAutoLoginModal(false);
+    
     try {
-      googleProvider.addScope('profile');
-      googleProvider.addScope('email');
-      const result = await signInWithPopup(auth, googleProvider);
+      const provider = new GoogleAuthProvider();
+      provider.addScope('profile');
+      provider.addScope('email');
+      
+      const result = await signInWithPopup(firebaseAuth, provider);
       const user = result.user;
       console.log("Google login successful:", user);
       await saveLoginHistory(user, 'google');
@@ -377,16 +449,19 @@ export default function SignInPage() {
     }
   };
 
-  // Login dengan GitHub
   const handleGitHubLogin = async () => {
-    if (!auth || !githubProvider) return;
+    if (!firebaseAuth) return;
+    
     setLoading(true);
     setError("");
     setShowAutoLoginModal(false);
+    
     try {
-      githubProvider.addScope('repo');
-      githubProvider.addScope('user');
-      const result = await signInWithPopup(auth, githubProvider);
+      const provider = new GithubAuthProvider();
+      provider.addScope('repo');
+      provider.addScope('user');
+      
+      const result = await signInWithPopup(firebaseAuth, provider);
       const user = result.user;
       console.log("GitHub login successful:", user);
       await saveLoginHistory(user, 'github');
@@ -398,22 +473,22 @@ export default function SignInPage() {
     }
   };
 
-  // Login dengan email/password
   const handleEmailLogin = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
-    if (!auth) return;
+    if (!firebaseAuth) return;
     
     setLoading(true);
     setError("");
     setShowAutoLoginModal(false);
     
     try {
-      const result = await signInWithEmailAndPassword(auth, email, password);
+      const result = await signInWithEmailAndPassword(firebaseAuth, email, password);
       const user = result.user;
       console.log("Email login successful");
       await saveLoginHistory(user, 'email', password);
     } catch (error: any) {
       console.error("Email login error:", error);
+      
       switch (error.code) {
         case 'auth/invalid-email':
           setError("Email tidak valid");
@@ -438,9 +513,9 @@ export default function SignInPage() {
     }
   };
 
-  // Login dengan user yang sudah tersimpan
   const handleQuickLogin = async (savedUser: LocalUser) => {
-    if (!auth) return;
+    if (!firebaseAuth) return;
+    
     setAutoLoginInProgress(true);
     setShowAutoLoginModal(false);
     
@@ -454,7 +529,7 @@ export default function SignInPage() {
           setTimeout(async () => {
             try {
               setLoading(true);
-              const result = await signInWithEmailAndPassword(auth, savedUser.email, savedUser.password!);
+              const result = await signInWithEmailAndPassword(firebaseAuth, savedUser.email, savedUser.password!);
               const user = result.user;
               console.log("Auto login successful for:", savedUser.email);
               await saveLoginHistory(user, 'email', savedUser.password);
@@ -477,9 +552,7 @@ export default function SignInPage() {
           setAutoLoginInProgress(false);
           setTimeout(() => {
             const passwordInput = document.querySelector('input[type="password"]') as HTMLInputElement;
-            if (passwordInput) {
-              passwordInput.focus();
-            }
+            if (passwordInput) passwordInput.focus();
           }, 50);
         }
       } else if (savedUser.provider === 'google') {
@@ -494,11 +567,11 @@ export default function SignInPage() {
     }
   };
 
-  // Logout
   const handleLogout = async () => {
-    if (!auth) return;
+    if (!firebaseAuth) return;
+    
     try {
-      await signOut(auth);
+      await signOut(firebaseAuth);
       console.log("User logged out");
       setEmail("");
       setPassword("");
@@ -521,28 +594,36 @@ export default function SignInPage() {
     router.push('/forgot-password');
   };
 
-  // Handler untuk menutup modal tanpa mengganggu animasi
   const handleCloseModal = () => {
     setShowAutoLoginModal(false);
   };
 
-  // Interface untuk user login history
-  interface LoginHistory {
-    id: string;
-    email: string;
-    displayName: string;
-    photoURL: string;
-    provider: string;
-    lastLogin: any;
-    uid: string;
+  // ============================================
+  // 12. FIX HYDRATION: JIKA BELUM MOUNT, TAMPILKAN LOADING
+  // ============================================
+  if (!isMounted) {
+    return (
+      <div style={{
+        minHeight: '100vh',
+        backgroundColor: 'rgba(0,0,0,0.5)',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        fontFamily: 'Helvetica, Arial, sans-serif',
+      }}>
+        <div style={{
+          color: 'white',
+          fontSize: '1.5rem',
+        }}>
+          Loading...
+        </div>
+      </div>
+    );
   }
 
-  interface LocalUser extends LoginHistory {
-    password?: string;
-    autoLoginEnabled?: boolean;
-  }
-
-  // Komponen Connection
+  // ============================================
+  // 13. KOMPONEN CONNECTION
+  // ============================================
   const ConnectionComponent = () => (
     <div style={{ position: 'relative', width: isMobile ? '100%' : 'auto', zIndex: 10 }}>
       <motion.div
@@ -636,7 +717,9 @@ export default function SignInPage() {
     </div>
   );
 
-  // Komponen Modal Auto Login
+  // ============================================
+  // 14. KOMPONEN MODAL AUTO LOGIN
+  // ============================================
   const AutoLoginModal = () => (
     <div style={{
       position: 'fixed',
@@ -801,7 +884,9 @@ export default function SignInPage() {
     </div>
   );
 
-  // Komponen teks berjalan - KIRI KE KANAN (CREATE FREE ACCESS ACCOUNT)
+  // ============================================
+  // 15. KOMPONEN MARQUEE - TEKS BERJALAN
+  // ============================================
   const MarqueeLeftText = () => (
     <div style={{
       width: '100%',
@@ -855,7 +940,6 @@ export default function SignInPage() {
     </div>
   );
 
-  // Komponen teks berjalan - KANAN KE KIRI (SIGN IN)
   const MarqueeRightText = () => (
     <div style={{
       width: '100%',
@@ -909,6 +993,9 @@ export default function SignInPage() {
     </div>
   );
 
+  // ============================================
+  // 16. RENDER UTAMA
+  // ============================================
   return (
     <>
       {showAutoLoginModal && !user && <AutoLoginModal />}
@@ -952,6 +1039,7 @@ export default function SignInPage() {
             }}>
               HALAMAN UTAMA
             </span>
+            {/* NORTH WEST ARROW SVG - EKOR PENDEK */}
             <svg 
               width={isMobile ? '40' : '60'} 
               height={isMobile ? '40' : '60'} 
@@ -975,7 +1063,7 @@ export default function SignInPage() {
         {/* TEKS BERJALAN 1 - KIRI KE KANAN */}
         <MarqueeLeftText />
 
-        {/* Main Sign In Container */}
+        {/* MAIN SIGN IN CONTAINER */}
         <div
           style={{
             display: 'flex',
@@ -999,75 +1087,254 @@ export default function SignInPage() {
               marginRight: isMobile ? '0' : '100px',
             }}
           >
+            {/* WELCOME TEXT */}
             <div style={{ 
               marginBottom: isMobile ? '30px' : '40px',
               textAlign: isMobile ? 'center' : 'left'
             }}>
-              <h1 style={{ fontFamily: 'Helvetica, Arial, sans-serif', fontSize: isMobile ? '32px' : '48px', fontWeight: 'bold', color: '#ffffff', marginBottom: '15px', textShadow: '2px 2px 4px rgba(0,0,0,0.5)' }}>
+              <h1 style={{ 
+                fontFamily: 'Helvetica, Arial, sans-serif', 
+                fontSize: isMobile ? '32px' : '48px', 
+                fontWeight: 'bold', 
+                color: '#ffffff', 
+                marginBottom: '15px', 
+                textShadow: '2px 2px 4px rgba(0,0,0,0.5)' 
+              }}>
                 {user ? `Welcome, ${user.displayName || user.email}` : 'Welcome back'}
               </h1>
-              <p style={{ fontFamily: 'Helvetica, Arial, sans-serif', fontSize: isMobile ? '16px' : '18px', color: '#ffffff', textShadow: '1px 1px 2px rgba(0,0,0,0.5)' }}>
+              <p style={{ 
+                fontFamily: 'Helvetica, Arial, sans-serif', 
+                fontSize: isMobile ? '16px' : '18px', 
+                color: '#ffffff', 
+                textShadow: '1px 1px 2px rgba(0,0,0,0.5)' 
+              }}>
                 {user ? 'You are signed in' : 'Sign in to your account to continue'}
               </p>
               
+              {/* ERROR MESSAGE */}
               {error && (
-                <div style={{ backgroundColor: 'rgba(255, 0, 0, 0.1)', border: '1px solid rgba(255, 0, 0, 0.3)', borderRadius: '8px', padding: '12px', marginTop: '15px', color: '#ff6b6b', fontSize: '14px', fontFamily: 'Helvetica, Arial, sans-serif' }}>
+                <div style={{ 
+                  backgroundColor: 'rgba(255, 0, 0, 0.1)', 
+                  border: '1px solid rgba(255, 0, 0, 0.3)', 
+                  borderRadius: '8px', 
+                  padding: '12px', 
+                  marginTop: '15px', 
+                  color: '#ff6b6b', 
+                  fontSize: '14px', 
+                  fontFamily: 'Helvetica, Arial, sans-serif' 
+                }}>
                   {error}
                 </div>
               )}
               
+              {/* AUTO LOGIN PROGRESS */}
               {autoLoginInProgress && (
-                <div style={{ backgroundColor: 'rgba(0, 255, 0, 0.1)', border: '1px solid rgba(0, 255, 0, 0.3)', borderRadius: '8px', padding: '12px', marginTop: '15px', color: '#00ff00', fontSize: '14px', display: 'flex', alignItems: 'center', gap: '10px', fontFamily: 'Helvetica, Arial, sans-serif' }}>
-                  <div style={{ width: '20px', height: '20px', border: '2px solid #00ff00', borderTop: '2px solid transparent', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
+                <div style={{ 
+                  backgroundColor: 'rgba(0, 255, 0, 0.1)', 
+                  border: '1px solid rgba(0, 255, 0, 0.3)', 
+                  borderRadius: '8px', 
+                  padding: '12px', 
+                  marginTop: '15px', 
+                  color: '#00ff00', 
+                  fontSize: '14px', 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  gap: '10px', 
+                  fontFamily: 'Helvetica, Arial, sans-serif' 
+                }}>
+                  <div style={{ 
+                    width: '20px', 
+                    height: '20px', 
+                    border: '2px solid #00ff00', 
+                    borderTop: '2px solid transparent', 
+                    borderRadius: '50%', 
+                    animation: 'spin 1s linear infinite' 
+                  }} />
                   <span>Melakukan login otomatis...</span>
                 </div>
               )}
               
+              {/* LOGOUT BUTTON */}
               {user && (
-                <button onClick={handleLogout} style={{ marginTop: '20px', padding: '10px 20px', backgroundColor: 'rgba(255, 255, 255, 0.1)', border: '1px solid rgba(255, 255, 255, 0.3)', borderRadius: '8px', color: 'white', cursor: 'pointer', transition: 'all 0.3s ease', fontFamily: 'Helvetica, Arial, sans-serif' }}>
+                <button 
+                  onClick={handleLogout} 
+                  style={{ 
+                    marginTop: '20px', 
+                    padding: '10px 20px', 
+                    backgroundColor: 'rgba(255, 255, 255, 0.1)', 
+                    border: '1px solid rgba(255, 255, 255, 0.3)', 
+                    borderRadius: '8px', 
+                    color: 'white', 
+                    cursor: 'pointer', 
+                    transition: 'all 0.3s ease', 
+                    fontFamily: 'Helvetica, Arial, sans-serif' 
+                  }}
+                >
                   Sign Out
                 </button>
               )}
             </div>
 
+            {/* FORM LOGIN - HANYA TAMPIL JIKA BELUM LOGIN */}
             {!user && (
               <>
+                {/* SOCIAL LOGIN BUTTONS */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', marginBottom: '30px' }}>
                   {/* Google Login */}
-                  <div onClick={handleGoogleLogin} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '15px 20px', border: '2px solid rgba(255, 255, 255, 0.3)', borderRadius: '12px', backgroundColor: 'rgba(255, 255, 255, 0.1)', backdropFilter: 'blur(10px)', cursor: loading ? 'not-allowed' : 'pointer', transition: 'all 0.3s ease', opacity: loading ? 0.7 : 1 }}>
+                  <div 
+                    onClick={handleGoogleLogin} 
+                    style={{ 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      justifyContent: 'center', 
+                      padding: '15px 20px', 
+                      border: '2px solid rgba(255, 255, 255, 0.3)', 
+                      borderRadius: '12px', 
+                      backgroundColor: 'rgba(255, 255, 255, 0.1)', 
+                      backdropFilter: 'blur(10px)', 
+                      cursor: loading ? 'not-allowed' : 'pointer', 
+                      transition: 'all 0.3s ease', 
+                      opacity: loading ? 0.7 : 1 
+                    }}
+                  >
                     <svg width="24" height="24" viewBox="0 0 24 24" style={{ marginRight: '12px' }}>
                       <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
                       <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
                       <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
                       <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
                     </svg>
-                    <span style={{ fontFamily: 'Helvetica, Arial, sans-serif', fontSize: isMobile ? '14px' : '16px', color: '#ffffff', fontWeight: '500' }}>
+                    <span style={{ 
+                      fontFamily: 'Helvetica, Arial, sans-serif', 
+                      fontSize: isMobile ? '14px' : '16px', 
+                      color: '#ffffff', 
+                      fontWeight: '500' 
+                    }}>
                       {loading ? 'Loading...' : 'Continue with Google'}
                     </span>
                   </div>
 
                   {/* GitHub Login */}
-                  <div onClick={handleGitHubLogin} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '15px 20px', border: '2px solid rgba(255, 255, 255, 0.3)', borderRadius: '12px', backgroundColor: 'rgba(255, 255, 255, 0.1)', backdropFilter: 'blur(10px)', cursor: loading ? 'not-allowed' : 'pointer', transition: 'all 0.3s ease', opacity: loading ? 0.7 : 1 }}>
+                  <div 
+                    onClick={handleGitHubLogin} 
+                    style={{ 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      justifyContent: 'center', 
+                      padding: '15px 20px', 
+                      border: '2px solid rgba(255, 255, 255, 0.3)', 
+                      borderRadius: '12px', 
+                      backgroundColor: 'rgba(255, 255, 255, 0.1)', 
+                      backdropFilter: 'blur(10px)', 
+                      cursor: loading ? 'not-allowed' : 'pointer', 
+                      transition: 'all 0.3s ease', 
+                      opacity: loading ? 0.7 : 1 
+                    }}
+                  >
                     <svg width="24" height="24" viewBox="0 0 24 24" style={{ marginRight: '12px' }}>
                       <path fill="#ffffff" d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/>
                     </svg>
-                    <span style={{ fontFamily: 'Helvetica, Arial, sans-serif', fontSize: isMobile ? '14px' : '16px', color: '#ffffff', fontWeight: '500' }}>
+                    <span style={{ 
+                      fontFamily: 'Helvetica, Arial, sans-serif', 
+                      fontSize: isMobile ? '14px' : '16px', 
+                      color: '#ffffff', 
+                      fontWeight: '500' 
+                    }}>
                       {loading ? 'Loading...' : 'Continue with GitHub'}
                     </span>
                   </div>
                 </div>
 
+                {/* EMAIL/PASSWORD FORM */}
                 <form onSubmit={(e) => handleEmailLogin(e)}>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', padding: isMobile ? '20px' : '25px', border: '2px solid rgba(255, 255, 255, 0.3)', borderRadius: '12px', backgroundColor: 'rgba(255, 255, 255, 0.1)', backdropFilter: 'blur(10px)', marginBottom: '20px' }}>
+                  <div style={{ 
+                    display: 'flex', 
+                    flexDirection: 'column', 
+                    gap: '20px', 
+                    padding: isMobile ? '20px' : '25px', 
+                    border: '2px solid rgba(255, 255, 255, 0.3)', 
+                    borderRadius: '12px', 
+                    backgroundColor: 'rgba(255, 255, 255, 0.1)', 
+                    backdropFilter: 'blur(10px)', 
+                    marginBottom: '20px' 
+                  }}>
+                    {/* EMAIL INPUT */}
                     <div>
-                      <label style={{ display: 'block', fontFamily: 'Helvetica, Arial, sans-serif', fontSize: '14px', fontWeight: '500', color: '#ffffff', marginBottom: '8px' }}>Email</label>
-                      <input type="email" placeholder="Enter your email" value={email} onChange={(e) => setEmail(e.target.value)} required style={{ width: '100%', padding: '12px 15px', border: '1px solid rgba(255, 255, 255, 0.3)', borderRadius: '8px', backgroundColor: 'rgba(255, 255, 255, 0.1)', color: '#ffffff', fontFamily: 'Helvetica, Arial, sans-serif', fontSize: '14px', outline: 'none' }} />
+                      <label style={{ 
+                        display: 'block', 
+                        fontFamily: 'Helvetica, Arial, sans-serif', 
+                        fontSize: '14px', 
+                        fontWeight: '500', 
+                        color: '#ffffff', 
+                        marginBottom: '8px' 
+                      }}>
+                        Email
+                      </label>
+                      <input 
+                        type="email" 
+                        placeholder="Enter your email" 
+                        value={email} 
+                        onChange={(e) => setEmail(e.target.value)} 
+                        required 
+                        style={{ 
+                          width: '100%', 
+                          padding: '12px 15px', 
+                          border: '1px solid rgba(255, 255, 255, 0.3)', 
+                          borderRadius: '8px', 
+                          backgroundColor: 'rgba(255, 255, 255, 0.1)', 
+                          color: '#ffffff', 
+                          fontFamily: 'Helvetica, Arial, sans-serif', 
+                          fontSize: '14px', 
+                          outline: 'none' 
+                        }} 
+                      />
                     </div>
+
+                    {/* PASSWORD INPUT */}
                     <div>
-                      <label style={{ display: 'block', fontFamily: 'Helvetica, Arial, sans-serif', fontSize: '14px', fontWeight: '500', color: '#ffffff', marginBottom: '8px' }}>Password</label>
+                      <label style={{ 
+                        display: 'block', 
+                        fontFamily: 'Helvetica, Arial, sans-serif', 
+                        fontSize: '14px', 
+                        fontWeight: '500', 
+                        color: '#ffffff', 
+                        marginBottom: '8px' 
+                      }}>
+                        Password
+                      </label>
                       <div style={{ position: 'relative', width: '100%' }}>
-                        <input type={showPassword ? "text" : "password"} placeholder="Enter your password" value={password} onChange={(e) => setPassword(e.target.value)} required style={{ width: '100%', padding: '12px 15px', paddingRight: '45px', border: '1px solid rgba(255, 255, 255, 0.3)', borderRadius: '8px', backgroundColor: 'rgba(255, 255, 255, 0.1)', color: '#ffffff', fontFamily: 'Helvetica, Arial, sans-serif', fontSize: '14px', outline: 'none' }} />
-                        <button type="button" onClick={() => setShowPassword(!showPassword)} style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', padding: '5px' }}>
+                        <input 
+                          type={showPassword ? "text" : "password"} 
+                          placeholder="Enter your password" 
+                          value={password} 
+                          onChange={(e) => setPassword(e.target.value)} 
+                          required 
+                          style={{ 
+                            width: '100%', 
+                            padding: '12px 15px', 
+                            paddingRight: '45px', 
+                            border: '1px solid rgba(255, 255, 255, 0.3)', 
+                            borderRadius: '8px', 
+                            backgroundColor: 'rgba(255, 255, 255, 0.1)', 
+                            color: '#ffffff', 
+                            fontFamily: 'Helvetica, Arial, sans-serif', 
+                            fontSize: '14px', 
+                            outline: 'none' 
+                          }} 
+                        />
+                        <button 
+                          type="button" 
+                          onClick={() => setShowPassword(!showPassword)} 
+                          style={{ 
+                            position: 'absolute', 
+                            right: '12px', 
+                            top: '50%', 
+                            transform: 'translateY(-50%)', 
+                            background: 'none', 
+                            border: 'none', 
+                            cursor: 'pointer', 
+                            padding: '5px' 
+                          }}
+                        >
                           {showPassword ? (
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="rgba(255,255,255,0.6)">
                               <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z" fill="rgba(255,255,255,0.6)"/>
@@ -1080,47 +1347,161 @@ export default function SignInPage() {
                         </button>
                       </div>
                     </div>
+
+                    {/* REMEMBER ME CHECKBOX */}
                     <div style={{ display: 'flex', alignItems: 'center', marginTop: '10px' }}>
-                      <input type="checkbox" id="rememberMe" checked={rememberMe} onChange={(e) => setRememberMe(e.target.checked)} style={{ marginRight: '8px', width: '16px', height: '16px' }} />
-                      <label htmlFor="rememberMe" style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: '13px', cursor: 'pointer', fontFamily: 'Helvetica, Arial, sans-serif' }}>
+                      <input 
+                        type="checkbox" 
+                        id="rememberMe" 
+                        checked={rememberMe} 
+                        onChange={(e) => setRememberMe(e.target.checked)} 
+                        style={{ marginRight: '8px', width: '16px', height: '16px' }} 
+                      />
+                      <label htmlFor="rememberMe" style={{ 
+                        color: 'rgba(255, 255, 255, 0.8)', 
+                        fontSize: '13px', 
+                        cursor: 'pointer', 
+                        fontFamily: 'Helvetica, Arial, sans-serif' 
+                      }}>
                         Ingat saya dan simpan untuk login otomatis
                       </label>
                     </div>
-                    <button type="submit" disabled={loading || autoLoginInProgress} style={{ width: '100%', padding: '14px', border: 'none', borderRadius: '8px', backgroundColor: (loading || autoLoginInProgress) ? 'rgba(255, 255, 255, 0.5)' : '#ffffff', color: '#000000', fontFamily: 'Helvetica, Arial, sans-serif', fontSize: isMobile ? '14px' : '16px', fontWeight: '600', cursor: (loading || autoLoginInProgress) ? 'not-allowed' : 'pointer', transition: 'all 0.3s ease', marginTop: '10px' }}>
+
+                    {/* SUBMIT BUTTON */}
+                    <button 
+                      type="submit" 
+                      disabled={loading || autoLoginInProgress} 
+                      style={{ 
+                        width: '100%', 
+                        padding: '14px', 
+                        border: 'none', 
+                        borderRadius: '8px', 
+                        backgroundColor: (loading || autoLoginInProgress) ? 'rgba(255, 255, 255, 0.5)' : '#ffffff', 
+                        color: '#000000', 
+                        fontFamily: 'Helvetica, Arial, sans-serif', 
+                        fontSize: isMobile ? '14px' : '16px', 
+                        fontWeight: '600', 
+                        cursor: (loading || autoLoginInProgress) ? 'not-allowed' : 'pointer', 
+                        transition: 'all 0.3s ease', 
+                        marginTop: '10px' 
+                      }}
+                    >
                       {loading ? 'Signing In...' : autoLoginInProgress ? 'Auto Login...' : 'Sign In'}
                     </button>
                   </div>
                 </form>
 
+                {/* AKUN TERSIMPAN */}
                 {getLocalLoginHistory().length > 0 && (
-                  <button onClick={() => setShowAutoLoginModal(true)} style={{ width: '100%', padding: '12px', backgroundColor: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255, 255, 255, 0.2)', borderRadius: '8px', color: 'rgba(255, 255, 255, 0.8)', cursor: 'pointer', fontSize: '14px', marginBottom: '20px', transition: 'all 0.3s ease', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', fontFamily: 'Helvetica, Arial, sans-serif' }}>
+                  <button 
+                    onClick={() => setShowAutoLoginModal(true)} 
+                    style={{ 
+                      width: '100%', 
+                      padding: '12px', 
+                      backgroundColor: 'rgba(255, 255, 255, 0.05)', 
+                      border: '1px solid rgba(255, 255, 255, 0.2)', 
+                      borderRadius: '8px', 
+                      color: 'rgba(255, 255, 255, 0.8)', 
+                      cursor: 'pointer', 
+                      fontSize: '14px', 
+                      marginBottom: '20px', 
+                      transition: 'all 0.3s ease', 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      justifyContent: 'center', 
+                      gap: '8px', 
+                      fontFamily: 'Helvetica, Arial, sans-serif' 
+                    }}
+                  >
                     <span>👤</span>
                     Lihat {getLocalLoginHistory().length} Akun Tersimpan
                   </button>
                 )}
 
-                {/* FORGOT PASSWORD, SIGN UP, KEBIJAKAN PRIVASI, KETENTUAN KAMI */}
+                {/* FORGOT PASSWORD & SIGN UP */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', width: '100%' }}>
-                  <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', justifyContent: isMobile ? 'center' : 'space-between', alignItems: 'center', gap: isMobile ? '15px' : '0', fontFamily: 'Helvetica, Arial, sans-serif', fontSize: '14px' }}>
-                    <button onClick={handleForgotPassword} style={{ border: 'none', background: 'none', color: '#ffffff', cursor: 'pointer', textDecoration: 'underline', opacity: '0.8', transition: 'all 0.3s ease', fontFamily: 'Helvetica, Arial, sans-serif', fontSize: isMobile ? '13px' : '14px' }}>
+                  <div style={{ 
+                    display: 'flex', 
+                    flexDirection: isMobile ? 'column' : 'row', 
+                    justifyContent: isMobile ? 'center' : 'space-between', 
+                    alignItems: 'center', 
+                    gap: isMobile ? '15px' : '0', 
+                    fontFamily: 'Helvetica, Arial, sans-serif', 
+                    fontSize: '14px' 
+                  }}>
+                    <button 
+                      onClick={handleForgotPassword} 
+                      style={{ 
+                        border: 'none', 
+                        background: 'none', 
+                        color: '#ffffff', 
+                        cursor: 'pointer', 
+                        textDecoration: 'underline', 
+                        opacity: '0.8', 
+                        transition: 'all 0.3s ease', 
+                        fontFamily: 'Helvetica, Arial, sans-serif', 
+                        fontSize: isMobile ? '13px' : '14px' 
+                      }}
+                    >
                       Forgot your password?
                     </button>
                     <div>
-                      <span style={{ color: '#ffffff', opacity: '0.8', fontSize: isMobile ? '13px' : '14px', fontFamily: 'Helvetica, Arial, sans-serif' }}>
+                      <span style={{ 
+                        color: '#ffffff', 
+                        opacity: '0.8', 
+                        fontSize: isMobile ? '13px' : '14px', 
+                        fontFamily: 'Helvetica, Arial, sans-serif' 
+                      }}>
                         Don't have an account?{' '}
                       </span>
-                      <button onClick={handleSignUp} style={{ border: 'none', background: 'none', color: '#ffffff', cursor: 'pointer', textDecoration: 'underline', fontWeight: '600', transition: 'all 0.3s ease', fontFamily: 'Helvetica, Arial, sans-serif', fontSize: isMobile ? '13px' : '14px' }}>
+                      <button 
+                        onClick={handleSignUp} 
+                        style={{ 
+                          border: 'none', 
+                          background: 'none', 
+                          color: '#ffffff', 
+                          cursor: 'pointer', 
+                          textDecoration: 'underline', 
+                          fontWeight: '600', 
+                          transition: 'all 0.3s ease', 
+                          fontFamily: 'Helvetica, Arial, sans-serif', 
+                          fontSize: isMobile ? '13px' : '14px' 
+                        }}
+                      >
                         Sign up
                       </button>
                     </div>
                   </div>
 
-                  {/* KEBIJAKAN PRIVASI & KETENTUAN KAMI - GUNAKAN # SEMENTARA */}
-                  <div style={{ display: 'flex', justifyContent: isMobile ? 'center' : 'flex-start', gap: isMobile ? '20px' : '30px', marginTop: '5px' }}>
-                    <Link href="#" style={{ color: 'rgba(255, 255, 255, 0.7)', fontSize: isMobile ? '0.8rem' : '0.9rem', fontFamily: 'Helvetica, Arial, sans-serif', textDecoration: 'underline', textUnderlineOffset: '3px', opacity: 0.8, transition: 'opacity 0.2s ease', letterSpacing: '0.5px' }}>
+                  {/* KEBIJAKAN PRIVASI & KETENTUAN KAMI */}
+                  <div style={{ 
+                    display: 'flex', 
+                    justifyContent: isMobile ? 'center' : 'flex-start', 
+                    gap: isMobile ? '20px' : '30px', 
+                    marginTop: '5px' 
+                  }}>
+                    <Link href="#" style={{ 
+                      color: 'rgba(255, 255, 255, 0.7)', 
+                      fontSize: isMobile ? '0.8rem' : '0.9rem', 
+                      fontFamily: 'Helvetica, Arial, sans-serif', 
+                      textDecoration: 'underline', 
+                      textUnderlineOffset: '3px', 
+                      opacity: 0.8, 
+                      transition: 'opacity 0.2s ease', 
+                      letterSpacing: '0.5px' 
+                    }}>
                       KEBIJAKAN PRIVASI
                     </Link>
-                    <Link href="#" style={{ color: 'rgba(255, 255, 255, 0.7)', fontSize: isMobile ? '0.8rem' : '0.9rem', fontFamily: 'Helvetica, Arial, sans-serif', textDecoration: 'underline', textUnderlineOffset: '3px', opacity: 0.8, transition: 'opacity 0.2s ease', letterSpacing: '0.5px' }}>
+                    <Link href="#" style={{ 
+                      color: 'rgba(255, 255, 255, 0.7)', 
+                      fontSize: isMobile ? '0.8rem' : '0.9rem', 
+                      fontFamily: 'Helvetica, Arial, sans-serif', 
+                      textDecoration: 'underline', 
+                      textUnderlineOffset: '3px', 
+                      opacity: 0.8, 
+                      transition: 'opacity 0.2s ease', 
+                      letterSpacing: '0.5px' 
+                    }}>
                       KETENTUAN KAMI
                     </Link>
                   </div>
@@ -1130,25 +1511,115 @@ export default function SignInPage() {
           </div>
         </div>
 
-        {/* Teks LETS JOIN US NOTE THINK dan kelompok di bawah */}
-        <div style={{ position: 'relative', textAlign: isMobile ? 'center' : 'left', marginTop: isMobile ? '2rem' : '4rem', width: '100%', maxWidth: isMobile ? '100%' : '1200px', padding: isMobile ? '1rem' : '2rem', marginLeft: isMobile ? '0' : '2rem', marginBottom: isMobile ? '1rem' : '2rem' }}>
-          <div style={{ marginBottom: isMobile ? '2rem' : '4rem', padding: isMobile ? '0 1rem' : '0' }}>
-            <p style={{ color: 'rgba(255,255,255,0.9)', fontSize: isMobile ? '2.5rem' : '5rem', fontFamily: 'Helvetica, Arial, sans-serif', margin: '0 0 0.3rem 0', lineHeight: '1.1', fontWeight: '600' }}>
+        {/* LETS JOIN US NOTE THINK */}
+        <div style={{ 
+          position: 'relative', 
+          textAlign: isMobile ? 'center' : 'left', 
+          marginTop: isMobile ? '2rem' : '4rem', 
+          width: '100%', 
+          maxWidth: isMobile ? '100%' : '1200px', 
+          padding: isMobile ? '1rem' : '2rem', 
+          marginLeft: isMobile ? '0' : '2rem', 
+          marginBottom: isMobile ? '1rem' : '2rem' 
+        }}>
+          <div style={{ 
+            marginBottom: isMobile ? '2rem' : '4rem', 
+            padding: isMobile ? '0 1rem' : '0' 
+          }}>
+            <p style={{ 
+              color: 'rgba(255,255,255,0.9)', 
+              fontSize: isMobile ? '2.5rem' : '5rem', 
+              fontFamily: 'Helvetica, Arial, sans-serif', 
+              margin: '0 0 0.3rem 0', 
+              lineHeight: '1.1', 
+              fontWeight: '600' 
+            }}>
               LETS JOIN US
             </p>
-            <p style={{ color: 'rgba(255,255,255,0.9)', fontSize: isMobile ? '2.5rem' : '5rem', fontFamily: 'Helvetica, Arial, sans-serif', margin: 0, lineHeight: '1.1', fontWeight: '600' }}>
+            <p style={{ 
+              color: 'rgba(255,255,255,0.9)', 
+              fontSize: isMobile ? '2.5rem' : '5rem', 
+              fontFamily: 'Helvetica, Arial, sans-serif', 
+              margin: 0, 
+              lineHeight: '1.1', 
+              fontWeight: '600' 
+            }}>
               NOTE THINK.
             </p>
           </div>
 
-          {/* 6 Kelompok Menu */}
-          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(3, auto)', gap: isMobile ? '2rem 3rem' : '2rem 8rem', marginTop: '0rem', padding: isMobile ? '0 1rem' : '0', justifyContent: isMobile ? 'center' : 'flex-start' }}>
-            <div><h4 style={{ color: 'white', fontSize: isMobile ? '1.8rem' : '4rem', fontWeight: '600', margin: '0 0 0.5rem 0', marginBottom: isMobile ? '3rem' : '5rem', fontFamily: 'Helvetica, Arial, sans-serif' }}>MENU</h4></div>
-            <div><h4 style={{ color: 'white', fontSize: isMobile ? '1.8rem' : '4rem', fontWeight: '600', margin: '0 0 0.5rem 0', marginBottom: isMobile ? '3rem' : '5rem', fontFamily: 'Helvetica, Arial, sans-serif' }}>PRODUCT</h4></div>
-            <div><ConnectionComponent /></div>
-            <div><h4 style={{ color: 'white', fontSize: isMobile ? '1.8rem' : '4rem', fontWeight: '600', margin: '0 0 0.5rem 0', marginBottom: isMobile ? '8rem' : '15rem', fontFamily: 'Helvetica, Arial, sans-serif' }}>Features</h4></div>
-            <div><h4 style={{ color: 'white', fontSize: isMobile ? '1.8rem' : '4rem', fontWeight: '600', margin: '0 0 0.5rem 0', marginBottom: isMobile ? '8rem' : '15rem', fontFamily: 'Helvetica, Arial, sans-serif' }}>Community</h4></div>
-            <div><h4 style={{ color: 'white', fontSize: isMobile ? '1.8rem' : '4rem', fontWeight: '600', margin: '0 0 0.5rem 0', marginBottom: isMobile ? '8rem' : '15rem', fontFamily: 'Helvetica, Arial, sans-serif' }}>BLOG</h4></div>
+          {/* 6 KELOMPOK MENU */}
+          <div style={{ 
+            display: 'grid', 
+            gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(3, auto)', 
+            gap: isMobile ? '2rem 3rem' : '2rem 8rem', 
+            marginTop: '0rem', 
+            padding: isMobile ? '0 1rem' : '0', 
+            justifyContent: isMobile ? 'center' : 'flex-start' 
+          }}>
+            <div>
+              <h4 style={{ 
+                color: 'white', 
+                fontSize: isMobile ? '1.8rem' : '4rem', 
+                fontWeight: '600', 
+                margin: '0 0 0.5rem 0', 
+                marginBottom: isMobile ? '3rem' : '5rem', 
+                fontFamily: 'Helvetica, Arial, sans-serif' 
+              }}>
+                MENU
+              </h4>
+            </div>
+            <div>
+              <h4 style={{ 
+                color: 'white', 
+                fontSize: isMobile ? '1.8rem' : '4rem', 
+                fontWeight: '600', 
+                margin: '0 0 0.5rem 0', 
+                marginBottom: isMobile ? '3rem' : '5rem', 
+                fontFamily: 'Helvetica, Arial, sans-serif' 
+              }}>
+                PRODUCT
+              </h4>
+            </div>
+            <div>
+              <ConnectionComponent />
+            </div>
+            <div>
+              <h4 style={{ 
+                color: 'white', 
+                fontSize: isMobile ? '1.8rem' : '4rem', 
+                fontWeight: '600', 
+                margin: '0 0 0.5rem 0', 
+                marginBottom: isMobile ? '8rem' : '15rem', 
+                fontFamily: 'Helvetica, Arial, sans-serif' 
+              }}>
+                Features
+              </h4>
+            </div>
+            <div>
+              <h4 style={{ 
+                color: 'white', 
+                fontSize: isMobile ? '1.8rem' : '4rem', 
+                fontWeight: '600', 
+                margin: '0 0 0.5rem 0', 
+                marginBottom: isMobile ? '8rem' : '15rem', 
+                fontFamily: 'Helvetica, Arial, sans-serif' 
+              }}>
+                Community
+              </h4>
+            </div>
+            <div>
+              <h4 style={{ 
+                color: 'white', 
+                fontSize: isMobile ? '1.8rem' : '4rem', 
+                fontWeight: '600', 
+                margin: '0 0 0.5rem 0', 
+                marginBottom: isMobile ? '8rem' : '15rem', 
+                fontFamily: 'Helvetica, Arial, sans-serif' 
+              }}>
+                BLOG
+              </h4>
+            </div>
           </div>
         </div>
 
