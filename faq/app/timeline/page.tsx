@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
+import Image from 'next/image';
 
 export default function TimelinePage() {
   const router = useRouter();
@@ -15,35 +16,45 @@ export default function TimelinePage() {
       title: 'Research & Discovery', 
       date: 'Q1 2024', 
       status: 'completed',
-      details: 'Market research, competitor analysis, user interviews, and initial requirements gathering completed successfully.'
+      details: 'Market research, competitor analysis, user interviews, and initial requirements gathering completed successfully.',
+      longDescription: 'Tim riset melakukan analisis mendalam terhadap 15 kompetitor utama di industri, mewawancarai 50+ pengguna potensial dari 5 negara berbeda, dan mengumpulkan 200+ poin requirement. Proses discovery menghasilkan 3 persona pengguna utama dan 8 user journey maps yang menjadi fondasi pengembangan produk. Data kuantitatif dari 1000+ responden survei menunjukkan 78% pengguna menginginkan integrasi AI dalam workflow mereka. Temuan utama: kebutuhan akan otomatisasi proses manual, dashboard real-time, dan kolaborasi tim yang lebih seamless. Riset kompetitor mengungkapkan celah pasar di sektor enterprise dengan skala menengah yang selama ini terabaikan.',
+      image: '/5.jpg'
     },
     { 
       id: 2,
       title: 'Concept Design', 
       date: 'Q2 2024', 
       status: 'completed',
-      details: 'Wireframing, prototyping, UI/UX design, and design system creation completed.'
+      details: 'Wireframing, prototyping, UI/UX design, and design system creation completed.',
+      longDescription: 'Tim desain menghasilkan 120+ wireframe yang mencakup seluruh fitur utama, 30+ high-fidelity prototype dengan interaksi lengkap, dan design system dengan 200+ komponen reusable. Proses iterasi melibatkan 5 putaran user testing dengan 40 partisipan, menghasilkan peningkatan skor usability dari 65 menjadi 92. Design system yang dibangun mencakup color palette dengan 16 warna, tipografi dengan 6 level heading, icon set dengan 150+ ikon kustom, dan komponen UI seperti button, form, card, modal, dan navigation patterns. Seluruh aset desain telah didokumentasikan di Figma dengan 50+ halaman dan library terpusat untuk memudahkan kolaborasi dengan tim developer.',
+      image: '/5.jpg'
     },
     { 
       id: 3,
       title: 'Development Phase', 
       date: 'Q3 2024', 
       status: 'current',
-      details: 'Frontend and backend development in progress. Core features implementation and API integration.'
+      details: 'Frontend and backend development in progress. Core features implementation and API integration.',
+      longDescription: 'Pengembangan berjalan dengan 4 sprint parallel: Frontend menggunakan Next.js 14 dengan TypeScript, Tailwind CSS, dan Framer Motion untuk animasi. Backend menggunakan Node.js dengan Express, PostgreSQL untuk database utama, dan Redis untuk caching. API Gateway menangani 25+ endpoint REST dan 10+ GraphQL queries. Fitur authentication telah selesai dengan OAuth2 dan JWT, real-time notifications menggunakan WebSocket, dashboard analytics dengan Chart.js, dan file management system dengan upload/download terenkripsi. Tim development terdiri dari 3 frontend engineer, 2 backend engineer, 1 DevOps, dan 1 QA engineer. Progress saat ini 65% dengan target feature complete dalam 6 minggu.',
+      image: '/5.jpg'
     },
     { 
       id: 4,
       title: 'Testing & QA', 
       date: 'Q4 2024', 
       status: 'pending',
-      details: 'Comprehensive testing, bug fixes, performance optimization, and quality assurance.'
+      details: 'Comprehensive testing, bug fixes, performance optimization, and quality assurance.',
+      longDescription: 'Rencana pengujian mencakup 5 fase: Unit testing dengan Jest (target coverage 85%), Integration testing untuk API endpoints (200+ test cases), E2E testing dengan Cypress (50+ user scenarios), Performance testing dengan k6 (simulasi 10,000 concurrent users), dan Security testing meliputi penetration testing, SQL injection, XSS, dan CSRF protection. QA team akan melakukan regression testing pada setiap sprint, cross-browser testing di 5 browser berbeda, dan responsive testing di 20+ device. Target: 95% bug terselesaikan sebelum production, load time < 2 detik, dan zero critical vulnerabilities.',
+      image: '/5.jpg'
     },
     { 
       id: 5,
       title: 'Launch', 
       date: 'Q1 2025', 
       status: 'pending',
-      details: 'Production deployment, monitoring setup, and official product launch.'
+      details: 'Production deployment, monitoring setup, and official product launch.',
+      longDescription: 'Strategi launch mencakup 3 tahap: Soft launch untuk 100 early adopters (2 minggu), Beta launch untuk 1000 pengguna terdaftar (4 minggu), dan Public launch dengan campaign global. Infrastructure setup menggunakan AWS dengan auto-scaling, load balancer, multi-AZ deployment, dan disaster recovery plan. Monitoring stack: Datadog untuk APM, Sentry untuk error tracking, LogDNA untuk log management, dan PagerDuty untuk incident response. Marketing campaign: landing page baru, press release ke 20+ media, webinar dengan 500+ target attendees, dan email marketing ke 50,000+ leads. Success metrics: 99.9% uptime, < 500ms response time, 1000+ pengguna aktif di minggu pertama.',
+      image: '/5.jpg'
     },
   ];
 
@@ -432,23 +443,24 @@ export default function TimelinePage() {
                 </motion.div>
 
                 {/* SHADOW PAGE - Halaman Utama yang Memanfaatkan Ruang Kosong */}
-                {/* DESIGN TETAP SAMA, SEKARANG MENYATU DI HALAMAN UTAMA */}
+                {/* DENGAN FOTO 5.JPG DAN DESKRIPSI PANJANG */}
                 {selectedStep === step.id && (
                   <motion.div
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
-                    transition={{ duration: 0.2 }}
+                    transition={{ duration: 0.3 }}
                     style={{
                       marginLeft: '190px',
-                      marginBottom: '4rem',
-                      marginTop: '-1rem',
-                      padding: '2rem 0 2rem 2rem',
+                      marginBottom: '5rem',
+                      marginTop: '-0.5rem',
+                      padding: '2.5rem 0 2.5rem 2rem',
                       backgroundColor: '#000000',
                       position: 'relative',
                       color: '#ffffff',
                       borderLeft: 'none',
-                      borderBottom: 'none'
+                      borderBottom: 'none',
+                      borderTop: '1px solid rgba(255,255,255,0.05)'
                     }}
                   >
                     {/* Page Number - Very Subtle */}
@@ -464,94 +476,253 @@ export default function TimelinePage() {
                       {String(step.id).padStart(2, '0')} / 05
                     </div>
 
-                    {/* Main Content - Clean, No Borders, No Boxes */}
-                    <div style={{ maxWidth: '800px' }}>
-                      <div style={{
-                        fontSize: '2.8rem',
-                        fontWeight: 300,
-                        marginBottom: '1.5rem',
-                        color: '#ffffff',
-                        opacity: 0.9
-                      }}>
-                        {step.title}
+                    {/* Main Content - With Image and Long Description */}
+                    <div style={{ 
+                      display: 'grid',
+                      gridTemplateColumns: '1fr 1fr',
+                      gap: '2.5rem',
+                      maxWidth: '1100px'
+                    }}>
+                      {/* Left Column - Text Content */}
+                      <div>
+                        <div style={{
+                          fontSize: '2.8rem',
+                          fontWeight: 300,
+                          marginBottom: '1.5rem',
+                          color: '#ffffff',
+                          opacity: 0.9,
+                          lineHeight: '1.2'
+                        }}>
+                          {step.title}
+                        </div>
+                        
+                        {/* Short Details */}
+                        <p style={{
+                          fontSize: '1.1rem',
+                          lineHeight: '1.6',
+                          opacity: 0.7,
+                          marginBottom: '1.5rem',
+                          color: '#ffffff',
+                          fontStyle: 'italic',
+                          borderLeft: '2px solid rgba(255,255,255,0.2)',
+                          paddingLeft: '1.2rem'
+                        }}>
+                          {step.details}
+                        </p>
+                        
+                        {/* Long Description - More Detailed */}
+                        <div style={{
+                          marginBottom: '2rem'
+                        }}>
+                          <div style={{
+                            fontSize: '0.85rem',
+                            opacity: 0.5,
+                            fontFamily: 'monospace',
+                            marginBottom: '0.75rem',
+                            letterSpacing: '1px'
+                          }}>
+                            DETAILED REPORT
+                          </div>
+                          <p style={{
+                            fontSize: '1rem',
+                            lineHeight: '1.8',
+                            opacity: 0.85,
+                            color: '#ffffff',
+                            margin: 0,
+                            textAlign: 'justify'
+                          }}>
+                            {step.longDescription}
+                          </p>
+                        </div>
+                        
+                        {/* Info Grid */}
+                        <div style={{ 
+                          display: 'grid',
+                          gridTemplateColumns: 'repeat(2, 1fr)',
+                          gap: '1.2rem',
+                          marginTop: '1.5rem',
+                          paddingTop: '1.5rem',
+                          borderTop: '1px solid rgba(255,255,255,0.08)'
+                        }}>
+                          <div>
+                            <span style={{ 
+                              fontSize: '0.75rem', 
+                              opacity: 0.4, 
+                              fontFamily: 'monospace',
+                              display: 'block',
+                              marginBottom: '0.25rem'
+                            }}>
+                              TIMELINE
+                            </span>
+                            <span style={{ 
+                              fontSize: '1.1rem', 
+                              fontFamily: 'monospace',
+                              opacity: 0.9
+                            }}>
+                              {step.date}
+                            </span>
+                          </div>
+                          
+                          <div>
+                            <span style={{ 
+                              fontSize: '0.75rem', 
+                              opacity: 0.4, 
+                              fontFamily: 'monospace',
+                              display: 'block',
+                              marginBottom: '0.25rem'
+                            }}>
+                              STATUS
+                            </span>
+                            <span style={{ 
+                              fontSize: '1.1rem',
+                              color: step.status === 'completed' ? '#ffffff' : 
+                                     step.status === 'current' ? '#00ff9d' : '#666666',
+                              opacity: 0.9
+                            }}>
+                              {step.status.toUpperCase()}
+                            </span>
+                          </div>
+                          
+                          <div>
+                            <span style={{ 
+                              fontSize: '0.75rem', 
+                              opacity: 0.4, 
+                              fontFamily: 'monospace',
+                              display: 'block',
+                              marginBottom: '0.25rem'
+                            }}>
+                              MILESTONE
+                            </span>
+                            <span style={{ 
+                              fontSize: '1.1rem', 
+                              fontFamily: 'monospace',
+                              opacity: 0.9
+                            }}>
+                              MS-{step.id * 100}
+                            </span>
+                          </div>
+                          
+                          <div>
+                            <span style={{ 
+                              fontSize: '0.75rem', 
+                              opacity: 0.4, 
+                              fontFamily: 'monospace',
+                              display: 'block',
+                              marginBottom: '0.25rem'
+                            }}>
+                              PROGRESS
+                            </span>
+                            <span style={{ 
+                              fontSize: '1.1rem', 
+                              fontFamily: 'monospace',
+                              opacity: 0.9
+                            }}>
+                              {step.status === 'completed' ? '100%' : 
+                               step.status === 'current' ? '65%' : '0%'}
+                            </span>
+                          </div>
+                        </div>
                       </div>
-                      
-                      <p style={{
-                        fontSize: '1.3rem',
-                        lineHeight: '1.6',
-                        opacity: 0.8,
-                        marginBottom: '2.5rem',
-                        color: '#ffffff'
+
+                      {/* Right Column - Image 5.jpg */}
+                      <div style={{
+                        position: 'relative',
+                        width: '100%',
+                        height: '100%',
+                        minHeight: '400px'
                       }}>
-                        {step.details}
-                      </p>
-                      
-                      {/* Simple Info Lines - No Cards */}
-                      <div style={{ marginTop: '2rem' }}>
-                        <div style={{ 
-                          display: 'flex', 
-                          alignItems: 'baseline',
-                          marginBottom: '0.75rem'
+                        <div style={{
+                          position: 'relative',
+                          width: '100%',
+                          height: '100%',
+                          minHeight: '400px',
+                          backgroundColor: '#0a0a0a',
+                          border: '1px solid rgba(255,255,255,0.1)',
+                          overflow: 'hidden'
                         }}>
-                          <span style={{ 
-                            fontSize: '0.9rem', 
-                            opacity: 0.4, 
-                            width: '100px',
-                            fontFamily: 'monospace'
+                          {/* Placeholder untuk 5.jpg */}
+                          <div style={{
+                            width: '100%',
+                            height: '100%',
+                            minHeight: '400px',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            backgroundColor: '#050505',
+                            padding: '2rem',
+                            textAlign: 'center'
                           }}>
-                            TIMELINE
-                          </span>
-                          <span style={{ 
-                            fontSize: '1.2rem', 
-                            fontFamily: 'monospace',
-                            opacity: 0.9
-                          }}>
-                            {step.date}
-                          </span>
-                        </div>
-                        
-                        <div style={{ 
-                          display: 'flex', 
-                          alignItems: 'baseline',
-                          marginBottom: '0.75rem'
-                        }}>
-                          <span style={{ 
-                            fontSize: '0.9rem', 
-                            opacity: 0.4, 
-                            width: '100px',
-                            fontFamily: 'monospace'
-                          }}>
-                            STATUS
-                          </span>
-                          <span style={{ 
-                            fontSize: '1.2rem',
-                            color: step.status === 'completed' ? '#ffffff' : 
-                                   step.status === 'current' ? '#00ff9d' : '#666666',
-                            opacity: 0.9
-                          }}>
-                            {step.status.toUpperCase()}
-                          </span>
-                        </div>
-                        
-                        <div style={{ 
-                          display: 'flex', 
-                          alignItems: 'baseline'
-                        }}>
-                          <span style={{ 
-                            fontSize: '0.9rem', 
-                            opacity: 0.4, 
-                            width: '100px',
-                            fontFamily: 'monospace'
-                          }}>
-                            MILESTONE
-                          </span>
-                          <span style={{ 
-                            fontSize: '1.2rem', 
-                            fontFamily: 'monospace',
-                            opacity: 0.9
-                          }}>
-                            MS-{step.id * 100}
-                          </span>
+                            {/* Simulasi Foto 5.jpg */}
+                            <div style={{
+                              width: '100%',
+                              height: '220px',
+                              backgroundColor: '#111111',
+                              marginBottom: '1.5rem',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              border: '1px solid rgba(255,255,255,0.1)',
+                              position: 'relative',
+                              overflow: 'hidden'
+                            }}>
+                              <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="1">
+                                <rect x="2" y="2" width="20" height="20" rx="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                <circle cx="8.5" cy="8.5" r="1.5" fill="rgba(255,255,255,0.3)" stroke="none"/>
+                                <path d="M21 15L16 10L5 21" strokeLinecap="round" strokeLinejoin="round"/>
+                              </svg>
+                              <div style={{
+                                position: 'absolute',
+                                bottom: '1rem',
+                                left: '1rem',
+                                fontSize: '0.75rem',
+                                opacity: 0.5,
+                                fontFamily: 'monospace',
+                                backgroundColor: 'rgba(0,0,0,0.7)',
+                                padding: '0.25rem 0.75rem',
+                                borderRadius: '4px'
+                              }}>
+                                5.jpg · Timeline {step.id}
+                              </div>
+            </div>
+
+                            {/* Caption */}
+                            <div style={{
+                              width: '100%',
+                              textAlign: 'left'
+                            }}>
+                              <div style={{
+                                fontSize: '0.9rem',
+                                fontWeight: 500,
+                                marginBottom: '0.5rem',
+                                color: '#ffffff',
+                                opacity: 0.9
+                              }}>
+                                Project Snapshot: {step.title}
+                              </div>
+                              <div style={{
+                                fontSize: '0.8rem',
+                                opacity: 0.6,
+                                lineHeight: '1.6',
+                                fontFamily: 'monospace'
+                              }}>
+                                {step.id === 1 && 'User interview session dengan 50+ partisipan dari 5 negara, dokumentasi riset, dan competitive analysis matrix'}
+                                {step.id === 2 && 'Design system components, high-fidelity prototype, dan user testing documentation'}
+                                {step.id === 3 && 'Sprint planning, code review session, dan arsitektur sistem yang sedang dibangun'}
+                                {step.id === 4 && 'Test automation framework, QA checklist, dan performance testing dashboard'}
+                                {step.id === 5 && 'Launch strategy roadmap, infrastructure diagram, dan marketing campaign assets'}
+                              </div>
+                            </div>
+                          </div>
+                          
+                          {/* Catatan: Untuk menggunakan gambar real, uncomment kode di bawah ini dan hapus placeholder di atas */}
+                          {/* <Image
+                            src="/5.jpg"
+                            alt={`Timeline ${step.id} - ${step.title}`}
+                            fill
+                            style={{ objectFit: 'cover' }}
+                            priority
+                          /> */}
                         </div>
                       </div>
                     </div>
