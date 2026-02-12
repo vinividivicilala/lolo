@@ -18,7 +18,7 @@ export default function TimelinePage() {
       status: 'completed',
       details: 'Market research, competitor analysis, user interviews, and initial requirements gathering completed successfully.',
       longDescription: 'Tim riset melakukan analisis mendalam terhadap 15 kompetitor utama di industri, mewawancarai 50+ pengguna potensial dari 5 negara berbeda, dan mengumpulkan 200+ poin requirement. Proses discovery menghasilkan 3 persona pengguna utama dan 8 user journey maps yang menjadi fondasi pengembangan produk. Data kuantitatif dari 1000+ responden survei menunjukkan 78% pengguna menginginkan integrasi AI dalam workflow mereka. Temuan utama: kebutuhan akan otomatisasi proses manual, dashboard real-time, dan kolaborasi tim yang lebih seamless. Riset kompetitor mengungkapkan celah pasar di sektor enterprise dengan skala menengah yang selama ini terabaikan.',
-      image: '/5.jpg'
+      image: '/images/5.jpg'
     },
     { 
       id: 2,
@@ -27,7 +27,7 @@ export default function TimelinePage() {
       status: 'completed',
       details: 'Wireframing, prototyping, UI/UX design, and design system creation completed.',
       longDescription: 'Tim desain menghasilkan 120+ wireframe yang mencakup seluruh fitur utama, 30+ high-fidelity prototype dengan interaksi lengkap, dan design system dengan 200+ komponen reusable. Proses iterasi melibatkan 5 putaran user testing dengan 40 partisipan, menghasilkan peningkatan skor usability dari 65 menjadi 92. Design system yang dibangun mencakup color palette dengan 16 warna, tipografi dengan 6 level heading, icon set dengan 150+ ikon kustom, dan komponen UI seperti button, form, card, modal, dan navigation patterns. Seluruh aset desain telah didokumentasikan di Figma dengan 50+ halaman dan library terpusat untuk memudahkan kolaborasi dengan tim developer.',
-      image: '/5.jpg'
+      image: '/images/5.jpg'
     },
     { 
       id: 3,
@@ -36,7 +36,7 @@ export default function TimelinePage() {
       status: 'current',
       details: 'Frontend and backend development in progress. Core features implementation and API integration.',
       longDescription: 'Pengembangan berjalan dengan 4 sprint parallel: Frontend menggunakan Next.js 14 dengan TypeScript, Tailwind CSS, dan Framer Motion untuk animasi. Backend menggunakan Node.js dengan Express, PostgreSQL untuk database utama, dan Redis untuk caching. API Gateway menangani 25+ endpoint REST dan 10+ GraphQL queries. Fitur authentication telah selesai dengan OAuth2 dan JWT, real-time notifications menggunakan WebSocket, dashboard analytics dengan Chart.js, dan file management system dengan upload/download terenkripsi. Tim development terdiri dari 3 frontend engineer, 2 backend engineer, 1 DevOps, dan 1 QA engineer. Progress saat ini 65% dengan target feature complete dalam 6 minggu.',
-      image: '/5.jpg'
+      image: '/images/5.jpg'
     },
     { 
       id: 4,
@@ -45,7 +45,7 @@ export default function TimelinePage() {
       status: 'pending',
       details: 'Comprehensive testing, bug fixes, performance optimization, and quality assurance.',
       longDescription: 'Rencana pengujian mencakup 5 fase: Unit testing dengan Jest (target coverage 85%), Integration testing untuk API endpoints (200+ test cases), E2E testing dengan Cypress (50+ user scenarios), Performance testing dengan k6 (simulasi 10,000 concurrent users), dan Security testing meliputi penetration testing, SQL injection, XSS, dan CSRF protection. QA team akan melakukan regression testing pada setiap sprint, cross-browser testing di 5 browser berbeda, dan responsive testing di 20+ device. Target: 95% bug terselesaikan sebelum production, load time < 2 detik, dan zero critical vulnerabilities.',
-      image: '/5.jpg'
+      image: '/images/5.jpg'
     },
     { 
       id: 5,
@@ -54,7 +54,7 @@ export default function TimelinePage() {
       status: 'pending',
       details: 'Production deployment, monitoring setup, and official product launch.',
       longDescription: 'Strategi launch mencakup 3 tahap: Soft launch untuk 100 early adopters (2 minggu), Beta launch untuk 1000 pengguna terdaftar (4 minggu), dan Public launch dengan campaign global. Infrastructure setup menggunakan AWS dengan auto-scaling, load balancer, multi-AZ deployment, dan disaster recovery plan. Monitoring stack: Datadog untuk APM, Sentry untuk error tracking, LogDNA untuk log management, dan PagerDuty untuk incident response. Marketing campaign: landing page baru, press release ke 20+ media, webinar dengan 500+ target attendees, dan email marketing ke 50,000+ leads. Success metrics: 99.9% uptime, < 500ms response time, 1000+ pengguna aktif di minggu pertama.',
-      image: '/5.jpg'
+      image: '/images/5.jpg'
     },
   ];
 
@@ -443,7 +443,7 @@ export default function TimelinePage() {
                 </motion.div>
 
                 {/* SHADOW PAGE - Halaman Utama yang Memanfaatkan Ruang Kosong */}
-                {/* DENGAN FOTO 5.JPG DAN DESKRIPSI PANJANG */}
+                {/* DENGAN FOTO DARI /images/5.jpg DAN DESKRIPSI PANJANG */}
                 {selectedStep === step.id && (
                   <motion.div
                     initial={{ opacity: 0, y: -10 }}
@@ -476,7 +476,7 @@ export default function TimelinePage() {
                       {String(step.id).padStart(2, '0')} / 05
                     </div>
 
-                    {/* Main Content - With Image and Long Description */}
+                    {/* Main Content - With Image from /images/5.jpg and Long Description */}
                     <div style={{ 
                       display: 'grid',
                       gridTemplateColumns: '1fr 1fr',
@@ -624,105 +624,101 @@ export default function TimelinePage() {
                         </div>
                       </div>
 
-                      {/* Right Column - Image 5.jpg */}
+                      {/* Right Column - Image from /images/5.jpg */}
                       <div style={{
                         position: 'relative',
                         width: '100%',
                         height: '100%',
-                        minHeight: '400px'
+                        minHeight: '500px'
                       }}>
                         <div style={{
                           position: 'relative',
                           width: '100%',
                           height: '100%',
-                          minHeight: '400px',
+                          minHeight: '500px',
                           backgroundColor: '#0a0a0a',
                           border: '1px solid rgba(255,255,255,0.1)',
                           overflow: 'hidden'
                         }}>
-                          {/* Placeholder untuk 5.jpg */}
-                          <div style={{
-                            width: '100%',
-                            height: '100%',
-                            minHeight: '400px',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            backgroundColor: '#050505',
-                            padding: '2rem',
-                            textAlign: 'center'
-                          }}>
-                            {/* Simulasi Foto 5.jpg */}
-                            <div style={{
-                              width: '100%',
-                              height: '220px',
-                              backgroundColor: '#111111',
-                              marginBottom: '1.5rem',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              border: '1px solid rgba(255,255,255,0.1)',
-                              position: 'relative',
-                              overflow: 'hidden'
-                            }}>
-                              <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="1">
-                                <rect x="2" y="2" width="20" height="20" rx="2" strokeLinecap="round" strokeLinejoin="round"/>
-                                <circle cx="8.5" cy="8.5" r="1.5" fill="rgba(255,255,255,0.3)" stroke="none"/>
-                                <path d="M21 15L16 10L5 21" strokeLinecap="round" strokeLinejoin="round"/>
-                              </svg>
-                              <div style={{
-                                position: 'absolute',
-                                bottom: '1rem',
-                                left: '1rem',
-                                fontSize: '0.75rem',
-                                opacity: 0.5,
-                                fontFamily: 'monospace',
-                                backgroundColor: 'rgba(0,0,0,0.7)',
-                                padding: '0.25rem 0.75rem',
-                                borderRadius: '4px'
-                              }}>
-                                5.jpg · Timeline {step.id}
-                              </div>
-            </div>
-
-                            {/* Caption */}
-                            <div style={{
-                              width: '100%',
-                              textAlign: 'left'
-                            }}>
-                              <div style={{
-                                fontSize: '0.9rem',
-                                fontWeight: 500,
-                                marginBottom: '0.5rem',
-                                color: '#ffffff',
-                                opacity: 0.9
-                              }}>
-                                Project Snapshot: {step.title}
-                              </div>
-                              <div style={{
-                                fontSize: '0.8rem',
-                                opacity: 0.6,
-                                lineHeight: '1.6',
-                                fontFamily: 'monospace'
-                              }}>
-                                {step.id === 1 && 'User interview session dengan 50+ partisipan dari 5 negara, dokumentasi riset, dan competitive analysis matrix'}
-                                {step.id === 2 && 'Design system components, high-fidelity prototype, dan user testing documentation'}
-                                {step.id === 3 && 'Sprint planning, code review session, dan arsitektur sistem yang sedang dibangun'}
-                                {step.id === 4 && 'Test automation framework, QA checklist, dan performance testing dashboard'}
-                                {step.id === 5 && 'Launch strategy roadmap, infrastructure diagram, dan marketing campaign assets'}
-                              </div>
-                            </div>
-                          </div>
-                          
-                          {/* Catatan: Untuk menggunakan gambar real, uncomment kode di bawah ini dan hapus placeholder di atas */}
-                          {/* <Image
-                            src="/5.jpg"
+                          {/* REAL IMAGE FROM /images/5.jpg */}
+                          <Image
+                            src="/images/5.jpg"
                             alt={`Timeline ${step.id} - ${step.title}`}
                             fill
-                            style={{ objectFit: 'cover' }}
+                            sizes="(max-width: 768px) 100vw, 50vw"
+                            style={{ 
+                              objectFit: 'cover',
+                              objectPosition: 'center'
+                            }}
                             priority
-                          /> */}
+                            onError={(e) => {
+                              // Fallback jika gambar tidak ditemukan
+                              e.target.style.display = 'none';
+                              e.target.parentElement.innerHTML += `
+                                <div style="
+                                  width: 100%;
+                                  height: 100%;
+                                  display: flex;
+                                  flex-direction: column;
+                                  align-items: center;
+                                  justify-content: center;
+                                  background-color: #050505;
+                                  padding: 2rem;
+                                  text-align: center;
+                                ">
+                                  <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="1">
+                                    <rect x="2" y="2" width="20" height="20" rx="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                    <circle cx="8.5" cy="8.5" r="1.5" fill="rgba(255,255,255,0.3)" stroke="none"/>
+                                    <path d="M21 15L16 10L5 21" strokeLinecap="round" strokeLinejoin="round"/>
+                                  </svg>
+                                  <div style="margin-top: 1rem; font-size: 0.9rem; opacity: 0.7; font-family: monospace;">
+                                    /images/5.jpg
+                                  </div>
+                                  <div style="margin-top: 0.5rem; font-size: 0.8rem; opacity: 0.5;">
+                                    Timeline ${step.id} · ${step.title}
+                                  </div>
+                                </div>
+                              `;
+                            }}
+                          />
+                          
+                          {/* Overlay subtle untuk readability */}
+                          <div style={{
+                            position: 'absolute',
+                            bottom: 0,
+                            left: 0,
+                            right: 0,
+                            height: '80px',
+                            background: 'linear-gradient(to top, rgba(0,0,0,0.8), transparent)',
+                            pointerEvents: 'none',
+                            zIndex: 2
+                          }} />
+                          
+                          {/* Caption di atas gambar */}
+                          <div style={{
+                            position: 'absolute',
+                            bottom: '1.5rem',
+                            left: '1.5rem',
+                            zIndex: 3,
+                            color: '#ffffff',
+                            textShadow: '0 2px 4px rgba(0,0,0,0.5)'
+                          }}>
+                            <div style={{
+                              fontSize: '0.85rem',
+                              fontWeight: 500,
+                              marginBottom: '0.25rem',
+                              opacity: 0.95
+                            }}>
+                              Project Snapshot: {step.title}
+                            </div>
+                            <div style={{
+                              fontSize: '0.75rem',
+                              opacity: 0.8,
+                              fontFamily: 'monospace'
+                            }}>
+                              /images/5.jpg · Timeline {step.id}
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>
