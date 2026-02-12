@@ -49,7 +49,6 @@ const socialConnections = [
   { id: 5, name: "YouTube" }
 ];
 
-// Interface untuk user login history
 interface LoginHistory {
   id: string;
   email: string;
@@ -58,11 +57,6 @@ interface LoginHistory {
   provider: string;
   lastLogin: any;
   uid: string;
-}
-
-interface LocalUser extends LoginHistory {
-  password?: string;
-  autoLoginEnabled?: boolean;
 }
 
 export default function SignInPage() {
@@ -79,14 +73,9 @@ export default function SignInPage() {
   const [loading, setLoading] = useState(false);
   const [user, setUser] = useState<any>(null);
   const [error, setError] = useState("");
-  const [loginHistory, setLoginHistory] = useState<LoginHistory[]>([]);
-  const [showAutoLoginModal, setShowAutoLoginModal] = useState(false);
-  const [rememberMe, setRememberMe] = useState(true);
-  const [autoLoginInProgress, setAutoLoginInProgress] = useState(false);
   
   // --- STATE UNTUK FIREBASE (HANYA CLIENT) ---
   const [firebaseInitialized, setFirebaseInitialized] = useState(false);
-  const [firebaseApp, setFirebaseApp] = useState<any>(null);
   const [firebaseAuth, setFirebaseAuth] = useState<any>(null);
   const [firebaseDb, setFirebaseDb] = useState<any>(null);
   
@@ -136,7 +125,6 @@ export default function SignInPage() {
       const auth = getAuth(app);
       const db = getFirestore(app);
       
-      setFirebaseApp(app);
       setFirebaseAuth(auth);
       setFirebaseDb(db);
       setFirebaseInitialized(true);
@@ -148,7 +136,7 @@ export default function SignInPage() {
   }, [isMounted, firebaseInitialized]);
 
   // ============================================
-  // 4. FUNGSI ANIMASI GSAP
+  // 4. FUNGSI ANIMASI GSAP YANG DIPERBAIKI
   // ============================================
   const startMarqueeLeft = () => {
     if (!marqueeLeftRef.current) return;
@@ -158,17 +146,26 @@ export default function SignInPage() {
         marqueeLeftAnimation.current.kill();
       }
       
-      marqueeLeftAnimation.current = gsap.fromTo(marqueeLeftRef.current, 
-        { x: '-100%' },
-        { 
-          x: '100%', 
-          duration: 50, 
-          repeat: -1, 
-          ease: 'none',
-          repeatDelay: 0,
-          overwrite: true
+      // Reset posisi awal
+      gsap.set(marqueeLeftRef.current, { x: '-50%' });
+      
+      // Animasi dari kiri ke kanan
+      marqueeLeftAnimation.current = gsap.to(marqueeLeftRef.current, {
+        x: '0%',
+        duration: 80,
+        repeat: -1,
+        ease: 'none',
+        modifiers: {
+          x: (x) => {
+            const value = parseFloat(x);
+            if (value >= 0) {
+              gsap.set(marqueeLeftRef.current, { x: '-50%' });
+              return '-50%';
+            }
+            return x;
+          }
         }
-      );
+      });
     } catch (error) {
       console.error("GSAP Left Animation Error:", error);
     }
@@ -182,33 +179,42 @@ export default function SignInPage() {
         marqueeRightAnimation.current.kill();
       }
       
-      marqueeRightAnimation.current = gsap.fromTo(marqueeRightRef.current, 
-        { x: '100%' },
-        { 
-          x: '-100%', 
-          duration: 60, 
-          repeat: -1, 
-          ease: 'none',
-          repeatDelay: 0,
-          overwrite: true
+      // Reset posisi awal
+      gsap.set(marqueeRightRef.current, { x: '0%' });
+      
+      // Animasi dari kanan ke kiri
+      marqueeRightAnimation.current = gsap.to(marqueeRightRef.current, {
+        x: '-50%',
+        duration: 100,
+        repeat: -1,
+        ease: 'none',
+        modifiers: {
+          x: (x) => {
+            const value = parseFloat(x);
+            if (value <= -50) {
+              gsap.set(marqueeRightRef.current, { x: '0%' });
+              return '0%';
+            }
+            return x;
+          }
         }
-      );
+      });
     } catch (error) {
       console.error("GSAP Right Animation Error:", error);
     }
   };
 
   // ============================================
-  // 5. MULAI ANIMASI GSAP - SETELAH SEMUA SIAP
+  // 5. MULAI ANIMASI GSAP - SETELAH DOM SIAP
   // ============================================
   useEffect(() => {
     if (!isMounted) return;
     
-    // Beri waktu agar DOM benar-benar siap
+    // Pastikan GSAP dan DOM sudah siap
     const timer = setTimeout(() => {
       startMarqueeLeft();
       startMarqueeRight();
-    }, 500);
+    }, 300);
     
     return () => {
       clearTimeout(timer);
@@ -254,9 +260,9 @@ export default function SignInPage() {
   }, [connectionsOpen, isMounted]);
 
   // ============================================
-  // 7. FUNGSI FIRESTORE
+  // 7. FUNGSI FIRESTORE - TANPA SIMPAN PASSWORD
   // ============================================
-  const saveLoginHistory = async (userData: any, provider: string, userPassword?: string) => {
+  const saveLoginHistory = async (userData: any, provider: string) => {
     if (!firebaseDb || !firebaseAuth) return;
     
     try {
@@ -273,137 +279,13 @@ export default function SignInPage() {
       
       await setDoc(historyRef, historyData, { merge: true });
       console.log("Login history saved for:", userData.email);
-      
-      if (rememberMe && userPassword) {
-        saveUserToLocalStorage(historyData, userPassword);
-      }
     } catch (error) {
       console.error("Error saving login history:", error);
     }
   };
 
-  const fetchLoginHistory = async () => {
-    if (!firebaseDb) return [];
-    
-    try {
-      const historyRef = collection(firebaseDb, "loginHistory");
-      const q = query(historyRef, orderBy("lastLogin", "desc"), limit(10));
-      const querySnapshot = await getDocs(q);
-      
-      const history: LoginHistory[] = [];
-      querySnapshot.forEach((doc) => {
-        history.push(doc.data() as LoginHistory);
-      });
-      
-      setLoginHistory(history);
-      return history;
-    } catch (error) {
-      console.error("Error fetching login history:", error);
-      return [];
-    }
-  };
-
   // ============================================
-  // 8. LOCAL STORAGE FUNCTIONS
-  // ============================================
-  const getLocalLoginHistory = (): LocalUser[] => {
-    try {
-      const savedUsers = localStorage.getItem('savedLoginUsers');
-      if (savedUsers) {
-        return JSON.parse(savedUsers);
-      }
-    } catch (error) {
-      console.error("Error getting local history:", error);
-    }
-    return [];
-  };
-
-  const saveUserToLocalStorage = (userData: any, plainPassword?: string) => {
-    try {
-      const savedUsers = localStorage.getItem('savedLoginUsers');
-      let users: LocalUser[] = savedUsers ? JSON.parse(savedUsers) : [];
-      
-      const existingIndex = users.findIndex((u: LocalUser) => u.uid === userData.uid);
-      
-      const userToSave: LocalUser = {
-        uid: userData.uid,
-        id: userData.id || userData.uid,
-        email: userData.email,
-        displayName: userData.displayName || userData.email?.split('@')[0],
-        photoURL: userData.photoURL || `https://ui-avatars.com/api/?name=${userData.email}&background=random`,
-        provider: userData.provider || 'email',
-        lastLogin: userData.lastLogin || new Date().toISOString(),
-        password: plainPassword,
-        autoLoginEnabled: rememberMe
-      };
-      
-      if (existingIndex >= 0) {
-        users[existingIndex] = userToSave;
-      } else {
-        users.unshift(userToSave);
-        if (users.length > 5) {
-          users = users.slice(0, 5);
-        }
-      }
-      
-      localStorage.setItem('savedLoginUsers', JSON.stringify(users));
-      setLoginHistory(users);
-    } catch (error) {
-      console.error("Error saving to localStorage:", error);
-    }
-  };
-
-  const removeUserFromLocalStorage = (uid: string) => {
-    try {
-      const savedUsers = localStorage.getItem('savedLoginUsers');
-      if (savedUsers) {
-        let users = JSON.parse(savedUsers);
-        users = users.filter((u: any) => u.uid !== uid);
-        localStorage.setItem('savedLoginUsers', JSON.stringify(users));
-        setLoginHistory(users);
-        
-        if (firebaseDb) {
-          deleteDoc(doc(firebaseDb, "loginHistory", uid)).catch(() => {
-            console.log("User not found in Firestore");
-          });
-        }
-      }
-    } catch (error) {
-      console.error("Error removing user:", error);
-    }
-  };
-
-  // ============================================
-  // 9. CEK AUTO LOGIN
-  // ============================================
-  useEffect(() => {
-    if (!isMounted || !firebaseInitialized) return;
-    
-    const checkSavedUser = async () => {
-      setTimeout(async () => {
-        const currentUser = firebaseAuth?.currentUser;
-        
-        if (!currentUser) {
-          const localHistory = getLocalLoginHistory();
-          if (localHistory.length > 0) {
-            setShowAutoLoginModal(true);
-            setLoginHistory(localHistory);
-          }
-          
-          try {
-            await fetchLoginHistory();
-          } catch (error) {
-            console.error("Failed to fetch from Firestore:", error);
-          }
-        }
-      }, 1000);
-    };
-
-    checkSavedUser();
-  }, [isMounted, firebaseInitialized, firebaseAuth]);
-
-  // ============================================
-  // 10. AUTH STATE CHANGED LISTENER
+  // 8. AUTH STATE CHANGED LISTENER
   // ============================================
   useEffect(() => {
     if (!isMounted || !firebaseAuth || !firebaseInitialized) return;
@@ -412,7 +294,6 @@ export default function SignInPage() {
       setUser(currentUser);
       if (currentUser) {
         console.log("User logged in:", currentUser.email);
-        setShowAutoLoginModal(false);
         setEmail("");
         setPassword("");
         router.push('/notes');
@@ -423,14 +304,13 @@ export default function SignInPage() {
   }, [router, isMounted, firebaseAuth, firebaseInitialized]);
 
   // ============================================
-  // 11. LOGIN HANDLERS
+  // 9. LOGIN HANDLERS - TANPA MODAL AUTO LOGIN
   // ============================================
   const handleGoogleLogin = async () => {
     if (!firebaseAuth) return;
     
     setLoading(true);
     setError("");
-    setShowAutoLoginModal(false);
     
     try {
       const provider = new GoogleAuthProvider();
@@ -454,7 +334,6 @@ export default function SignInPage() {
     
     setLoading(true);
     setError("");
-    setShowAutoLoginModal(false);
     
     try {
       const provider = new GithubAuthProvider();
@@ -479,13 +358,12 @@ export default function SignInPage() {
     
     setLoading(true);
     setError("");
-    setShowAutoLoginModal(false);
     
     try {
       const result = await signInWithEmailAndPassword(firebaseAuth, email, password);
       const user = result.user;
       console.log("Email login successful");
-      await saveLoginHistory(user, 'email', password);
+      await saveLoginHistory(user, 'email');
     } catch (error: any) {
       console.error("Email login error:", error);
       
@@ -513,60 +391,6 @@ export default function SignInPage() {
     }
   };
 
-  const handleQuickLogin = async (savedUser: LocalUser) => {
-    if (!firebaseAuth) return;
-    
-    setAutoLoginInProgress(true);
-    setShowAutoLoginModal(false);
-    
-    try {
-      if (savedUser.provider === 'email') {
-        setEmail(savedUser.email);
-        
-        if (savedUser.password) {
-          setPassword(savedUser.password);
-          
-          setTimeout(async () => {
-            try {
-              setLoading(true);
-              const result = await signInWithEmailAndPassword(firebaseAuth, savedUser.email, savedUser.password!);
-              const user = result.user;
-              console.log("Auto login successful for:", savedUser.email);
-              await saveLoginHistory(user, 'email', savedUser.password);
-            } catch (error: any) {
-              console.error("Auto login error:", error);
-              if (error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found') {
-                removeUserFromLocalStorage(savedUser.uid);
-                setError("Password telah berubah. Silakan login manual.");
-              } else {
-                setError("Login otomatis gagal. Silakan login manual.");
-              }
-            } finally {
-              setLoading(false);
-              setAutoLoginInProgress(false);
-            }
-          }, 100);
-        } else {
-          setEmail(savedUser.email);
-          setError("Silakan masukkan password untuk melanjutkan");
-          setAutoLoginInProgress(false);
-          setTimeout(() => {
-            const passwordInput = document.querySelector('input[type="password"]') as HTMLInputElement;
-            if (passwordInput) passwordInput.focus();
-          }, 50);
-        }
-      } else if (savedUser.provider === 'google') {
-        await handleGoogleLogin();
-      } else if (savedUser.provider === 'github') {
-        await handleGitHubLogin();
-      }
-    } catch (error) {
-      console.error("Quick login error:", error);
-      setError("Gagal login dengan akun yang disimpan");
-      setAutoLoginInProgress(false);
-    }
-  };
-
   const handleLogout = async () => {
     if (!firebaseAuth) return;
     
@@ -575,12 +399,6 @@ export default function SignInPage() {
       console.log("User logged out");
       setEmail("");
       setPassword("");
-      setTimeout(() => {
-        const localHistory = getLocalLoginHistory();
-        if (localHistory.length > 0) {
-          setShowAutoLoginModal(true);
-        }
-      }, 500);
     } catch (error) {
       console.error("Logout error:", error);
     }
@@ -594,12 +412,8 @@ export default function SignInPage() {
     router.push('/forgot-password');
   };
 
-  const handleCloseModal = () => {
-    setShowAutoLoginModal(false);
-  };
-
   // ============================================
-  // 12. FIX HYDRATION: JIKA BELUM MOUNT, TAMPILKAN LOADING
+  // 10. FIX HYDRATION: JIKA BELUM MOUNT, TAMPILKAN LOADING
   // ============================================
   if (!isMounted) {
     return (
@@ -622,7 +436,7 @@ export default function SignInPage() {
   }
 
   // ============================================
-  // 13. KOMPONEN CONNECTION
+  // 11. KOMPONEN CONNECTION
   // ============================================
   const ConnectionComponent = () => (
     <div style={{ position: 'relative', width: isMobile ? '100%' : 'auto', zIndex: 10 }}>
@@ -718,174 +532,7 @@ export default function SignInPage() {
   );
 
   // ============================================
-  // 14. KOMPONEN MODAL AUTO LOGIN
-  // ============================================
-  const AutoLoginModal = () => (
-    <div style={{
-      position: 'fixed',
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      backgroundColor: 'rgba(0, 0, 0, 0.8)',
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      zIndex: 1000,
-      backdropFilter: 'blur(10px)',
-    }}>
-      <div style={{
-        backgroundColor: 'rgba(30, 30, 30, 0.95)',
-        borderRadius: '20px',
-        padding: '30px',
-        width: isMobile ? '90%' : '400px',
-        maxWidth: '500px',
-        border: '1px solid rgba(255, 255, 255, 0.2)',
-        boxShadow: '0 20px 60px rgba(0, 0, 0, 0.5)',
-      }}>
-        <h2 style={{ color: 'white', fontSize: '24px', fontWeight: 'bold', marginBottom: '20px', textAlign: 'center', fontFamily: 'Helvetica, Arial, sans-serif' }}>
-          Pilih Akun untuk Login
-        </h2>
-        <p style={{ color: 'rgba(255, 255, 255, 0.7)', fontSize: '14px', marginBottom: '25px', textAlign: 'center', fontFamily: 'Helvetica, Arial, sans-serif' }}>
-          Klik akun untuk login otomatis
-        </p>
-        <div style={{ maxHeight: '300px', overflowY: 'auto', marginBottom: '20px' }}>
-          {loginHistory.length === 0 ? (
-            <div style={{ textAlign: 'center', color: 'rgba(255, 255, 255, 0.5)', padding: '20px', fontFamily: 'Helvetica, Arial, sans-serif' }}>
-              Tidak ada akun yang tersimpan
-            </div>
-          ) : (
-            loginHistory.map((user) => (
-              <div
-                key={user.id}
-                onClick={() => handleQuickLogin(user as LocalUser)}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  padding: '15px',
-                  marginBottom: '10px',
-                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                  borderRadius: '12px',
-                  cursor: 'pointer',
-                  transition: 'all 0.3s ease',
-                  border: '1px solid rgba(255, 255, 255, 0.1)',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
-                  e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.3)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.05)';
-                  e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.1)';
-                }}
-              >
-                <img 
-                  src={user.photoURL} 
-                  alt={user.displayName}
-                  style={{
-                    width: '40px',
-                    height: '40px',
-                    borderRadius: '50%',
-                    marginRight: '15px',
-                    border: '2px solid rgba(255, 255, 255, 0.2)',
-                  }}
-                />
-                <div style={{ flex: 1 }}>
-                  <div style={{ color: 'white', fontWeight: '500', fontSize: '16px', marginBottom: '5px', fontFamily: 'Helvetica, Arial, sans-serif' }}>
-                    {user.displayName}
-                  </div>
-                  <div style={{ color: 'rgba(255, 255, 255, 0.6)', fontSize: '12px', fontFamily: 'Helvetica, Arial, sans-serif' }}>
-                    {user.email}
-                  </div>
-                  <div style={{ color: 'rgba(255, 255, 255, 0.4)', fontSize: '11px', marginTop: '5px', textTransform: 'capitalize', fontFamily: 'Helvetica, Arial, sans-serif' }}>
-                    {user.provider} • {(user as LocalUser).password ? "Password tersimpan" : "Login terakhir"}
-                  </div>
-                </div>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    removeUserFromLocalStorage(user.uid);
-                  }}
-                  style={{
-                    background: 'none',
-                    border: 'none',
-                    color: 'rgba(255, 255, 255, 0.5)',
-                    cursor: 'pointer',
-                    padding: '5px',
-                    fontSize: '20px',
-                    width: '30px',
-                    height: '30px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    borderRadius: '50%',
-                    transition: 'all 0.3s ease',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = 'rgba(255, 0, 0, 0.2)';
-                    e.currentTarget.style.color = 'rgba(255, 255, 255, 0.9)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = 'transparent';
-                    e.currentTarget.style.color = 'rgba(255, 255, 255, 0.5)';
-                  }}
-                  title="Hapus dari daftar"
-                >
-                  ×
-                </button>
-              </div>
-            ))
-          )}
-        </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-          <button
-            onClick={handleCloseModal}
-            style={{
-              width: '100%',
-              padding: '12px',
-              backgroundColor: 'rgba(255, 255, 255, 0.1)',
-              border: '1px solid rgba(255, 255, 255, 0.3)',
-              borderRadius: '8px',
-              color: 'white',
-              cursor: 'pointer',
-              fontSize: '14px',
-              transition: 'all 0.3s ease',
-              fontFamily: 'Helvetica, Arial, sans-serif',
-            }}
-            onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.2)'; }}
-            onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)'; }}
-          >
-            Gunakan Akun Lain
-          </button>
-          <button
-            onClick={handleCloseModal}
-            style={{
-              width: '100%',
-              padding: '12px',
-              backgroundColor: 'transparent',
-              border: '1px solid rgba(255, 255, 255, 0.2)',
-              borderRadius: '8px',
-              color: 'rgba(255, 255, 255, 0.7)',
-              cursor: 'pointer',
-              fontSize: '14px',
-              transition: 'all 0.3s ease',
-              fontFamily: 'Helvetica, Arial, sans-serif',
-            }}
-            onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.05)'; }}
-            onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; }}
-          >
-            Batal
-          </button>
-        </div>
-        <div style={{ marginTop: '20px', textAlign: 'center', color: 'rgba(255, 255, 255, 0.5)', fontSize: '12px', fontFamily: 'Helvetica, Arial, sans-serif' }}>
-          Akun disimpan secara lokal di browser Anda
-        </div>
-      </div>
-    </div>
-  );
-
-  // ============================================
-  // 15. KOMPONEN MARQUEE - TEKS BERJALAN
+  // 12. KOMPONEN MARQUEE YANG DIPERBAIKI
   // ============================================
   const MarqueeLeftText = () => (
     <div style={{
@@ -908,9 +555,11 @@ export default function SignInPage() {
           whiteSpace: 'nowrap',
           width: 'fit-content',
           willChange: 'transform',
+          position: 'relative',
+          left: '0',
         }}
       >
-        {[...Array(3)].map((_, i) => (
+        {[...Array(4)].map((_, i) => (
           <div key={i} style={{
             display: 'flex',
             alignItems: 'center',
@@ -922,6 +571,7 @@ export default function SignInPage() {
               fontFamily: 'Helvetica, Arial, sans-serif',
               fontWeight: '400',
               letterSpacing: '8px',
+              textShadow: '2px 2px 4px rgba(0,0,0,0.3)',
             }}>
               CREATE FREE ACCESS ACCOUNT
             </span>
@@ -961,9 +611,11 @@ export default function SignInPage() {
           whiteSpace: 'nowrap',
           width: 'fit-content',
           willChange: 'transform',
+          position: 'relative',
+          left: '0',
         }}
       >
-        {[...Array(3)].map((_, i) => (
+        {[...Array(4)].map((_, i) => (
           <div key={i} style={{
             display: 'flex',
             alignItems: 'center',
@@ -975,6 +627,7 @@ export default function SignInPage() {
               fontFamily: 'Helvetica, Arial, sans-serif',
               fontWeight: '400',
               letterSpacing: '10px',
+              textShadow: '2px 2px 4px rgba(0,0,0,0.3)',
             }}>
               SIGN IN
             </span>
@@ -994,12 +647,10 @@ export default function SignInPage() {
   );
 
   // ============================================
-  // 16. RENDER UTAMA
+  // 13. RENDER UTAMA
   // ============================================
   return (
     <>
-      {showAutoLoginModal && !user && <AutoLoginModal />}
-      
       <div
         style={{
           minHeight: '100vh',
@@ -1039,7 +690,6 @@ export default function SignInPage() {
             }}>
               HALAMAN UTAMA
             </span>
-            {/* NORTH WEST ARROW SVG - EKOR PENDEK */}
             <svg 
               width={isMobile ? '40' : '60'} 
               height={isMobile ? '40' : '60'} 
@@ -1124,33 +774,6 @@ export default function SignInPage() {
                   fontFamily: 'Helvetica, Arial, sans-serif' 
                 }}>
                   {error}
-                </div>
-              )}
-              
-              {/* AUTO LOGIN PROGRESS */}
-              {autoLoginInProgress && (
-                <div style={{ 
-                  backgroundColor: 'rgba(0, 255, 0, 0.1)', 
-                  border: '1px solid rgba(0, 255, 0, 0.3)', 
-                  borderRadius: '8px', 
-                  padding: '12px', 
-                  marginTop: '15px', 
-                  color: '#00ff00', 
-                  fontSize: '14px', 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  gap: '10px', 
-                  fontFamily: 'Helvetica, Arial, sans-serif' 
-                }}>
-                  <div style={{ 
-                    width: '20px', 
-                    height: '20px', 
-                    border: '2px solid #00ff00', 
-                    borderTop: '2px solid transparent', 
-                    borderRadius: '50%', 
-                    animation: 'spin 1s linear infinite' 
-                  }} />
-                  <span>Melakukan login otomatis...</span>
                 </div>
               )}
               
@@ -1348,75 +971,29 @@ export default function SignInPage() {
                       </div>
                     </div>
 
-                    {/* REMEMBER ME CHECKBOX */}
-                    <div style={{ display: 'flex', alignItems: 'center', marginTop: '10px' }}>
-                      <input 
-                        type="checkbox" 
-                        id="rememberMe" 
-                        checked={rememberMe} 
-                        onChange={(e) => setRememberMe(e.target.checked)} 
-                        style={{ marginRight: '8px', width: '16px', height: '16px' }} 
-                      />
-                      <label htmlFor="rememberMe" style={{ 
-                        color: 'rgba(255, 255, 255, 0.8)', 
-                        fontSize: '13px', 
-                        cursor: 'pointer', 
-                        fontFamily: 'Helvetica, Arial, sans-serif' 
-                      }}>
-                        Ingat saya dan simpan untuk login otomatis
-                      </label>
-                    </div>
-
                     {/* SUBMIT BUTTON */}
                     <button 
                       type="submit" 
-                      disabled={loading || autoLoginInProgress} 
+                      disabled={loading} 
                       style={{ 
                         width: '100%', 
                         padding: '14px', 
                         border: 'none', 
                         borderRadius: '8px', 
-                        backgroundColor: (loading || autoLoginInProgress) ? 'rgba(255, 255, 255, 0.5)' : '#ffffff', 
+                        backgroundColor: loading ? 'rgba(255, 255, 255, 0.5)' : '#ffffff', 
                         color: '#000000', 
                         fontFamily: 'Helvetica, Arial, sans-serif', 
                         fontSize: isMobile ? '14px' : '16px', 
                         fontWeight: '600', 
-                        cursor: (loading || autoLoginInProgress) ? 'not-allowed' : 'pointer', 
+                        cursor: loading ? 'not-allowed' : 'pointer', 
                         transition: 'all 0.3s ease', 
                         marginTop: '10px' 
                       }}
                     >
-                      {loading ? 'Signing In...' : autoLoginInProgress ? 'Auto Login...' : 'Sign In'}
+                      {loading ? 'Signing In...' : 'Sign In'}
                     </button>
                   </div>
                 </form>
-
-                {/* AKUN TERSIMPAN */}
-                {getLocalLoginHistory().length > 0 && (
-                  <button 
-                    onClick={() => setShowAutoLoginModal(true)} 
-                    style={{ 
-                      width: '100%', 
-                      padding: '12px', 
-                      backgroundColor: 'rgba(255, 255, 255, 0.05)', 
-                      border: '1px solid rgba(255, 255, 255, 0.2)', 
-                      borderRadius: '8px', 
-                      color: 'rgba(255, 255, 255, 0.8)', 
-                      cursor: 'pointer', 
-                      fontSize: '14px', 
-                      marginBottom: '20px', 
-                      transition: 'all 0.3s ease', 
-                      display: 'flex', 
-                      alignItems: 'center', 
-                      justifyContent: 'center', 
-                      gap: '8px', 
-                      fontFamily: 'Helvetica, Arial, sans-serif' 
-                    }}
-                  >
-                    <span>👤</span>
-                    Lihat {getLocalLoginHistory().length} Akun Tersimpan
-                  </button>
-                )}
 
                 {/* FORGOT PASSWORD & SIGN UP */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', width: '100%' }}>
