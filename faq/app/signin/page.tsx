@@ -532,7 +532,7 @@ export default function SignInPage() {
   );
 
   // ============================================
-  // 12. KOMPONEN MARQUEE YANG DIPERBAIKI
+  // 12. KOMPONEN MARQUEE DENGAN SVG MINIMALIST
   // ============================================
   const MarqueeLeftText = () => (
     <div style={{
@@ -575,14 +575,21 @@ export default function SignInPage() {
             }}>
               CREATE FREE ACCESS ACCOUNT
             </span>
+            {/* NORTH EAST ARROW - MINIMALIST, TIDAK BOLD */}
             <svg 
               width={isMobile ? '80' : '120'} 
               height={isMobile ? '80' : '120'} 
               viewBox="0 0 24 24" 
-              fill="white"
+              fill="none"
+              stroke="white"
+              strokeWidth="1"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              style={{ opacity: 0.9 }}
             >
-              <path d="M12 4L10.6 5.4L13.2 8H4V10H13.2L10.6 12.6L12 14L17 9L12 4Z" fill="white"/>
-              <path d="M4 16V18H20V16H4Z" fill="white"/>
+              <path d="M7 7L17 7" stroke="white" strokeWidth="1"/>
+              <path d="M7 7L7 17" stroke="white" strokeWidth="1"/>
+              <path d="M7 7L21 21" stroke="white" strokeWidth="1"/>
             </svg>
           </div>
         ))}
@@ -631,14 +638,21 @@ export default function SignInPage() {
             }}>
               SIGN IN
             </span>
+            {/* NORTH EAST ARROW - MINIMALIST, TIDAK BOLD */}
             <svg 
               width={isMobile ? '100' : '160'} 
               height={isMobile ? '100' : '160'} 
               viewBox="0 0 24 24" 
-              fill="white"
+              fill="none"
+              stroke="white"
+              strokeWidth="1"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              style={{ opacity: 0.9 }}
             >
-              <path d="M11 7L9.6 8.4L12.2 11H2V13H12.2L9.6 15.6L11 17L16 12L11 7Z" fill="white"/>
-              <path d="M20 19H12V21H20C21.1 21 22 20.1 22 19V5C22 3.9 21.1 3 20 3H12V5H20V19Z" fill="white"/>
+              <path d="M7 7L17 7" stroke="white" strokeWidth="1"/>
+              <path d="M7 7L7 17" stroke="white" strokeWidth="1"/>
+              <path d="M7 7L21 21" stroke="white" strokeWidth="1"/>
             </svg>
           </div>
         ))}
@@ -664,7 +678,7 @@ export default function SignInPage() {
           position: 'relative',
         }}
       >
-        {/* HALAMAN UTAMA - SISI KANAN ATAS */}
+        {/* HALAMAN UTAMA - SISI KANAN ATAS DENGAN SVG MINIMALIST */}
         <div style={{
           position: 'absolute',
           top: isMobile ? '30px' : '50px',
@@ -690,27 +704,31 @@ export default function SignInPage() {
             }}>
               HALAMAN UTAMA
             </span>
+            {/* NORTH EAST ARROW - MINIMALIST, TIDAK BOLD */}
             <svg 
               width={isMobile ? '40' : '60'} 
               height={isMobile ? '40' : '60'} 
               viewBox="0 0 24 24" 
               fill="none"
               stroke="white"
-              strokeWidth="1.5"
+              strokeWidth="1"
               strokeLinecap="round"
               strokeLinejoin="round"
-              style={{ transition: 'transform 0.2s ease' }}
-              onMouseEnter={(e) => { e.currentTarget.style.transform = 'translate(-3px, -3px)'; }}
+              style={{ 
+                transition: 'transform 0.2s ease',
+                opacity: 0.9
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.transform = 'translate(3px, -3px)'; }}
               onMouseLeave={(e) => { e.currentTarget.style.transform = 'translate(0, 0)'; }}
             >
-              <path d="M5 5L15 5" stroke="white" strokeWidth="1.5"/>
-              <path d="M5 5L5 15" stroke="white" strokeWidth="1.5"/>
-              <path d="M5 5L19 19" stroke="white" strokeWidth="1.5"/>
+              <path d="M7 7L17 7" stroke="white" strokeWidth="1"/>
+              <path d="M7 7L7 17" stroke="white" strokeWidth="1"/>
+              <path d="M7 7L21 21" stroke="white" strokeWidth="1"/>
             </svg>
           </Link>
         </div>
 
-        {/* TEKS BERJALAN 1 - KIRI KE KANAN */}
+        {/* TEKS BERJALAN 1 - KIRI KE KANAN DENGAN SVG MINIMALIST */}
         <MarqueeLeftText />
 
         {/* MAIN SIGN IN CONTAINER */}
@@ -1200,7 +1218,7 @@ export default function SignInPage() {
           </div>
         </div>
 
-        {/* TEKS BERJALAN 2 - KANAN KE KIRI */}
+        {/* TEKS BERJALAN 2 - KANAN KE KIRI DENGAN SVG MINIMALIST */}
         <MarqueeRightText />
       </div>
       
