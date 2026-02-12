@@ -443,7 +443,7 @@ export default function TimelinePage() {
                 </motion.div>
 
                 {/* SHADOW PAGE - Halaman Utama yang Memanfaatkan Ruang Kosong */}
-                {/* DENGAN FOTO DARI /images/5.jpg DAN DESKRIPSI PANJANG */}
+                {/* DENGAN FOTO DARI /images/5.jpg - TANPA TEKS */}
                 {selectedStep === step.id && (
                   <motion.div
                     initial={{ opacity: 0, y: -10 }}
@@ -476,7 +476,7 @@ export default function TimelinePage() {
                       {String(step.id).padStart(2, '0')} / 05
                     </div>
 
-                    {/* Main Content - With Image from /images/5.jpg and Long Description */}
+                    {/* Main Content - With Image from /images/5.jpg - NO TEXT CAPTION */}
                     <div style={{ 
                       display: 'grid',
                       gridTemplateColumns: '1fr 1fr',
@@ -624,7 +624,7 @@ export default function TimelinePage() {
                         </div>
                       </div>
 
-                      {/* Right Column - Image from /images/5.jpg */}
+                      {/* Right Column - Image from /images/5.jpg - NO TEXT, NO CAPTION, NO OVERLAY */}
                       <div style={{
                         position: 'relative',
                         width: '100%',
@@ -640,10 +640,10 @@ export default function TimelinePage() {
                           border: '1px solid rgba(255,255,255,0.1)',
                           overflow: 'hidden'
                         }}>
-                          {/* REAL IMAGE FROM /images/5.jpg */}
+                          {/* REAL IMAGE FROM /images/5.jpg - PURE IMAGE, NO TEXT, NO CAPTION, NO OVERLAY */}
                           <Image
                             src="/images/5.jpg"
-                            alt={`Timeline ${step.id} - ${step.title}`}
+                            alt=""
                             fill
                             sizes="(max-width: 768px) 100vw, 50vw"
                             style={{ 
@@ -651,74 +651,9 @@ export default function TimelinePage() {
                               objectPosition: 'center'
                             }}
                             priority
-                            onError={(e) => {
-                              // Fallback jika gambar tidak ditemukan
-                              e.target.style.display = 'none';
-                              e.target.parentElement.innerHTML += `
-                                <div style="
-                                  width: 100%;
-                                  height: 100%;
-                                  display: flex;
-                                  flex-direction: column;
-                                  align-items: center;
-                                  justify-content: center;
-                                  background-color: #050505;
-                                  padding: 2rem;
-                                  text-align: center;
-                                ">
-                                  <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="1">
-                                    <rect x="2" y="2" width="20" height="20" rx="2" strokeLinecap="round" strokeLinejoin="round"/>
-                                    <circle cx="8.5" cy="8.5" r="1.5" fill="rgba(255,255,255,0.3)" stroke="none"/>
-                                    <path d="M21 15L16 10L5 21" strokeLinecap="round" strokeLinejoin="round"/>
-                                  </svg>
-                                  <div style="margin-top: 1rem; font-size: 0.9rem; opacity: 0.7; font-family: monospace;">
-                                    /images/5.jpg
-                                  </div>
-                                  <div style="margin-top: 0.5rem; font-size: 0.8rem; opacity: 0.5;">
-                                    Timeline ${step.id} · ${step.title}
-                                  </div>
-                                </div>
-                              `;
-                            }}
                           />
                           
-                          {/* Overlay subtle untuk readability */}
-                          <div style={{
-                            position: 'absolute',
-                            bottom: 0,
-                            left: 0,
-                            right: 0,
-                            height: '80px',
-                            background: 'linear-gradient(to top, rgba(0,0,0,0.8), transparent)',
-                            pointerEvents: 'none',
-                            zIndex: 2
-                          }} />
-                          
-                          {/* Caption di atas gambar */}
-                          <div style={{
-                            position: 'absolute',
-                            bottom: '1.5rem',
-                            left: '1.5rem',
-                            zIndex: 3,
-                            color: '#ffffff',
-                            textShadow: '0 2px 4px rgba(0,0,0,0.5)'
-                          }}>
-                            <div style={{
-                              fontSize: '0.85rem',
-                              fontWeight: 500,
-                              marginBottom: '0.25rem',
-                              opacity: 0.95
-                            }}>
-                              Project Snapshot: {step.title}
-                            </div>
-                            <div style={{
-                              fontSize: '0.75rem',
-                              opacity: 0.8,
-                              fontFamily: 'monospace'
-                            }}>
-                              /images/5.jpg · Timeline {step.id}
-                            </div>
-                          </div>
+                          {/* ABSOLUTELY NO TEXT, NO CAPTION, NO OVERLAY - HANYA FOTO MURNI */}
                         </div>
                       </div>
                     </div>
