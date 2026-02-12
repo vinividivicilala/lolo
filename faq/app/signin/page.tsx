@@ -476,7 +476,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
             fontSize: isMobile ? '1.8rem' : '4rem',
             fontWeight: '600',
             margin: '0',
-            fontFamily: 'Arame Mono, monospace',
+            fontFamily: 'Helvetica, Arial, sans-serif',
             textShadow: '2px 2px 4px rgba(0,0,0,0.3)',
           }}>
             CONNECT
@@ -492,7 +492,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
               color: 'rgba(255, 255, 255, 0.8)',
               fontSize: isMobile ? '0.7rem' : '1rem',
               fontWeight: 'normal',
-              fontFamily: 'Arame Mono, monospace',
+              fontFamily: 'Helvetica, Arial, sans-serif',
             }}
           >
             ({socialConnections.length.toString().padStart(2, '0')})
@@ -529,7 +529,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
                   <div style={{
                     color: 'rgba(255, 255, 255, 0.5)',
                     fontSize: isMobile ? '1rem' : '1.5rem',
-                    fontFamily: 'Arame Mono, monospace',
+                    fontFamily: 'Helvetica, Arial, sans-serif',
                     width: isMobile ? '30px' : '50px',
                     textAlign: 'right',
                   }}>
@@ -540,7 +540,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
                     fontSize: isMobile ? '1.2rem' : '1.8rem',
                     fontWeight: '600',
                     margin: '0',
-                    fontFamily: 'Arame Mono, monospace',
+                    fontFamily: 'Helvetica, Arial, sans-serif',
                     textShadow: '1px 1px 2px rgba(0,0,0,0.5)',
                     letterSpacing: '0.5px',
                   }}>
@@ -579,15 +579,15 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
         border: '1px solid rgba(255, 255, 255, 0.2)',
         boxShadow: '0 20px 60px rgba(0, 0, 0, 0.5)',
       }}>
-        <h2 style={{ color: 'white', fontSize: '24px', fontWeight: 'bold', marginBottom: '20px', textAlign: 'center', fontFamily: "'Roboto', sans-serif" }}>
+        <h2 style={{ color: 'white', fontSize: '24px', fontWeight: 'bold', marginBottom: '20px', textAlign: 'center', fontFamily: 'Helvetica, Arial, sans-serif' }}>
           Pilih Akun untuk Login
         </h2>
-        <p style={{ color: 'rgba(255, 255, 255, 0.7)', fontSize: '14px', marginBottom: '25px', textAlign: 'center' }}>
+        <p style={{ color: 'rgba(255, 255, 255, 0.7)', fontSize: '14px', marginBottom: '25px', textAlign: 'center', fontFamily: 'Helvetica, Arial, sans-serif' }}>
           Klik akun untuk login otomatis
         </p>
         <div style={{ maxHeight: '300px', overflowY: 'auto', marginBottom: '20px' }}>
           {loginHistory.length === 0 ? (
-            <div style={{ textAlign: 'center', color: 'rgba(255, 255, 255, 0.5)', padding: '20px' }}>
+            <div style={{ textAlign: 'center', color: 'rgba(255, 255, 255, 0.5)', padding: '20px', fontFamily: 'Helvetica, Arial, sans-serif' }}>
               Tidak ada akun yang tersimpan
             </div>
           ) : (
@@ -627,13 +627,13 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
                   }}
                 />
                 <div style={{ flex: 1 }}>
-                  <div style={{ color: 'white', fontWeight: '500', fontSize: '16px', marginBottom: '5px' }}>
+                  <div style={{ color: 'white', fontWeight: '500', fontSize: '16px', marginBottom: '5px', fontFamily: 'Helvetica, Arial, sans-serif' }}>
                     {user.displayName}
                   </div>
-                  <div style={{ color: 'rgba(255, 255, 255, 0.6)', fontSize: '12px' }}>
+                  <div style={{ color: 'rgba(255, 255, 255, 0.6)', fontSize: '12px', fontFamily: 'Helvetica, Arial, sans-serif' }}>
                     {user.email}
                   </div>
-                  <div style={{ color: 'rgba(255, 255, 255, 0.4)', fontSize: '11px', marginTop: '5px', textTransform: 'capitalize' }}>
+                  <div style={{ color: 'rgba(255, 255, 255, 0.4)', fontSize: '11px', marginTop: '5px', textTransform: 'capitalize', fontFamily: 'Helvetica, Arial, sans-serif' }}>
                     {user.provider} • {(user as LocalUser).password ? "Password tersimpan" : "Login terakhir"}
                   </div>
                 </div>
@@ -686,6 +686,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
               cursor: 'pointer',
               fontSize: '14px',
               transition: 'all 0.3s ease',
+              fontFamily: 'Helvetica, Arial, sans-serif',
             }}
             onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.2)'; }}
             onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)'; }}
@@ -704,6 +705,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
               cursor: 'pointer',
               fontSize: '14px',
               transition: 'all 0.3s ease',
+              fontFamily: 'Helvetica, Arial, sans-serif',
             }}
             onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.05)'; }}
             onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; }}
@@ -711,58 +713,57 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
             Batal
           </button>
         </div>
-        <div style={{ marginTop: '20px', textAlign: 'center', color: 'rgba(255, 255, 255, 0.5)', fontSize: '12px' }}>
+        <div style={{ marginTop: '20px', textAlign: 'center', color: 'rgba(255, 255, 255, 0.5)', fontSize: '12px', fontFamily: 'Helvetica, Arial, sans-serif' }}>
           Akun disimpan secara lokal di browser Anda
         </div>
       </div>
     </div>
   );
 
-  // Komponen teks berjalan - DIPERKECIL UKURAN FONT
+  // Komponen teks berjalan - TANPA LINEBOX, TANPA BOLD, UKURAN BESAR
   const MarqueeText = () => (
     <div style={{
       width: '100%',
       overflow: 'hidden',
       position: 'relative',
-      marginTop: isMobile ? '20px' : '30px',
-      padding: isMobile ? '8px 0' : '12px 0',
-      borderTop: '1px solid rgba(255, 255, 255, 0.2)',
-      borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
-      backgroundColor: 'rgba(0, 0, 0, 0.2)',
+      marginTop: isMobile ? '30px' : '50px',
+      padding: '0',
+      backgroundColor: 'transparent',
+      border: 'none',
     }}>
       <motion.div
         initial={{ x: '100%' }}
         animate={{ x: '-100%' }}
         transition={{
-          duration: 20,
+          duration: 25,
           repeat: Infinity,
           ease: 'linear',
         }}
         style={{
           display: 'flex',
           alignItems: 'center',
-          gap: isMobile ? '15px' : '25px',
+          gap: isMobile ? '30px' : '50px',
           whiteSpace: 'nowrap',
         }}
       >
-        {[...Array(5)].map((_, i) => (
+        {[...Array(8)].map((_, i) => (
           <div key={i} style={{
             display: 'flex',
             alignItems: 'center',
-            gap: isMobile ? '8px' : '12px',
+            gap: isMobile ? '15px' : '25px',
           }}>
             <span style={{
               color: 'white',
-              fontSize: isMobile ? '0.9rem' : '1.2rem',
-              fontFamily: 'Arame Mono, monospace',
+              fontSize: isMobile ? '2.5rem' : '4rem',
+              fontFamily: 'Helvetica, Arial, sans-serif',
               fontWeight: '400',
               letterSpacing: '2px',
             }}>
               SIGN IN
             </span>
             <svg 
-              width={isMobile ? '16' : '20'} 
-              height={isMobile ? '16' : '20'} 
+              width={isMobile ? '40' : '60'} 
+              height={isMobile ? '40' : '60'} 
               viewBox="0 0 24 24" 
               fill="white"
             >
@@ -788,11 +789,11 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
           justifyContent: isMobile ? 'flex-start' : 'center',
           alignItems: 'center',
           padding: isMobile ? '20px 15px' : '40px 20px',
-          fontFamily: "'Inter', sans-serif",
+          fontFamily: 'Helvetica, Arial, sans-serif',
           position: 'relative',
         }}
       >
-        {/* HALAMAN UTAMA - POSISI KIRI ATAS DENGAN PANAH NORTH WEST */}
+        {/* HALAMAN UTAMA - POSISI KIRI ATAS DENGAN PANAH NORTH WEST ARROW, TANPA UNDERLINE */}
         <div style={{
           position: 'absolute',
           top: isMobile ? '20px' : '40px',
@@ -809,11 +810,16 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
             textDecoration: 'none',
             color: 'white',
           }}>
+            {/* NORTH WEST ARROW SVG - Panah ke arah kiri atas */}
             <svg 
-              width={isMobile ? '18' : '22'} 
-              height={isMobile ? '18' : '22'} 
+              width={isMobile ? '20' : '24'} 
+              height={isMobile ? '20' : '24'} 
               viewBox="0 0 24 24" 
-              fill="white"
+              fill="none"
+              stroke="white"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
               style={{
                 transition: 'transform 0.2s ease',
               }}
@@ -824,15 +830,16 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
                 e.currentTarget.style.transform = 'translate(0, 0)';
               }}
             >
-              <path d="M5 19H19V5H5V19ZM4 3H20C20.6 3 21 3.4 21 4V20C21 20.6 20.6 21 20 21H4C3.4 21 3 20.6 3 20V4C3 3.4 3.4 3 4 3ZM8.5 8.5V13H10V8.5C10 8.2 10.2 8 10.5 8H15V6.5C15 6.2 15.2 6 15.5 6H18V8H16V11.5C16 11.8 15.8 12 15.5 12H11V14H14.5C14.8 14 15 14.2 15 14.5V18H13V16H10.5C10.2 16 10 15.8 10 15.5V10H8.5C8.2 10 8 9.8 8 9.5V8.5H8.5Z" fill="white"/>
+              <path d="M5 5L19 19" stroke="white" strokeWidth="2"/>
+              <path d="M5 5H13" stroke="white" strokeWidth="2"/>
+              <path d="M5 5V13" stroke="white" strokeWidth="2"/>
             </svg>
             <span style={{
-              fontSize: isMobile ? '0.9rem' : '1.1rem',
-              fontFamily: 'Arame Mono, monospace',
+              fontSize: isMobile ? '1rem' : '1.2rem',
+              fontFamily: 'Helvetica, Arial, sans-serif',
               fontWeight: '400',
               letterSpacing: '1px',
-              borderBottom: '1px solid white',
-              paddingBottom: '2px',
+              textDecoration: 'none',
             }}>
               HALAMAN UTAMA
             </span>
@@ -882,7 +889,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
             }}>
               <h1
                 style={{
-                  fontFamily: "'Roboto', sans-serif",
+                  fontFamily: 'Helvetica, Arial, sans-serif',
                   fontSize: isMobile ? '32px' : '48px',
                   fontWeight: 'bold',
                   color: '#ffffff',
@@ -894,7 +901,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
               </h1>
               <p
                 style={{
-                  fontFamily: "'Roboto', sans-serif",
+                  fontFamily: 'Helvetica, Arial, sans-serif',
                   fontSize: isMobile ? '16px' : '18px',
                   color: '#ffffff',
                   textShadow: '1px 1px 2px rgba(0,0,0,0.5)',
@@ -912,6 +919,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
                   marginTop: '15px',
                   color: '#ff6b6b',
                   fontSize: '14px',
+                  fontFamily: 'Helvetica, Arial, sans-serif',
                 }}>
                   {error}
                 </div>
@@ -929,6 +937,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
                   display: 'flex',
                   alignItems: 'center',
                   gap: '10px',
+                  fontFamily: 'Helvetica, Arial, sans-serif',
                 }}>
                   <div style={{
                     width: '20px',
@@ -954,6 +963,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
                     color: 'white',
                     cursor: 'pointer',
                     transition: 'all 0.3s ease',
+                    fontFamily: 'Helvetica, Arial, sans-serif',
                   }}
                 >
                   Sign Out
@@ -1006,7 +1016,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
                       <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
                     </svg>
                     <span style={{ 
-                      fontFamily: "'Roboto', sans-serif",
+                      fontFamily: 'Helvetica, Arial, sans-serif',
                       fontSize: isMobile ? '14px' : '16px', 
                       color: '#ffffff',
                       fontWeight: '500',
@@ -1047,7 +1057,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
                       <path fill="#ffffff" d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/>
                     </svg>
                     <span style={{ 
-                      fontFamily: "'Roboto', sans-serif",
+                      fontFamily: 'Helvetica, Arial, sans-serif',
                       fontSize: isMobile ? '14px' : '16px', 
                       color: '#ffffff',
                       fontWeight: '500',
@@ -1075,7 +1085,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
                       <label
                         style={{
                           display: 'block',
-                          fontFamily: "'Roboto', sans-serif",
+                          fontFamily: 'Helvetica, Arial, sans-serif',
                           fontSize: '14px',
                           fontWeight: '500',
                           color: '#ffffff',
@@ -1097,7 +1107,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
                           borderRadius: '8px',
                           backgroundColor: 'rgba(255, 255, 255, 0.1)',
                           color: '#ffffff',
-                          fontFamily: "'Roboto', sans-serif",
+                          fontFamily: 'Helvetica, Arial, sans-serif',
                           fontSize: '14px',
                           outline: 'none',
                           transition: 'all 0.3s ease',
@@ -1117,7 +1127,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
                       <label
                         style={{
                           display: 'block',
-                          fontFamily: "'Roboto', sans-serif",
+                          fontFamily: 'Helvetica, Arial, sans-serif',
                           fontSize: '14px',
                           fontWeight: '500',
                           color: '#ffffff',
@@ -1141,7 +1151,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
                             borderRadius: '8px',
                             backgroundColor: 'rgba(255, 255, 255, 0.1)',
                             color: '#ffffff',
-                            fontFamily: "'Roboto', sans-serif",
+                            fontFamily: 'Helvetica, Arial, sans-serif',
                             fontSize: '14px',
                             outline: 'none',
                             transition: 'all 0.3s ease',
@@ -1193,7 +1203,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
                         onChange={(e) => setRememberMe(e.target.checked)}
                         style={{ marginRight: '8px', width: '16px', height: '16px' }}
                       />
-                      <label htmlFor="rememberMe" style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: '13px', cursor: 'pointer' }}>
+                      <label htmlFor="rememberMe" style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: '13px', cursor: 'pointer', fontFamily: 'Helvetica, Arial, sans-serif' }}>
                         Ingat saya dan simpan untuk login otomatis
                       </label>
                     </div>
@@ -1208,7 +1218,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
                         borderRadius: '8px',
                         backgroundColor: (loading || autoLoginInProgress) ? 'rgba(255, 255, 255, 0.5)' : '#ffffff',
                         color: '#000000',
-                        fontFamily: "'Roboto', sans-serif",
+                        fontFamily: 'Helvetica, Arial, sans-serif',
                         fontSize: isMobile ? '14px' : '16px',
                         fontWeight: '600',
                         cursor: (loading || autoLoginInProgress) ? 'not-allowed' : 'pointer',
@@ -1251,6 +1261,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
                       alignItems: 'center',
                       justifyContent: 'center',
                       gap: '8px',
+                      fontFamily: 'Helvetica, Arial, sans-serif',
                     }}
                     onMouseEnter={(e) => {
                       e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
@@ -1266,7 +1277,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
                   </button>
                 )}
 
-                {/* KEBJIAKAN PRIVASI DAN KETENTUAN KAMI - DIPINDAHKAN DI BAWAH FORGOT PASSWORD */}
+                {/* FORGOT PASSWORD, SIGN UP, KEBIJAKAN PRIVASI, KETENTUAN KAMI */}
                 <div
                   style={{
                     display: 'flex',
@@ -1282,7 +1293,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
                       justifyContent: isMobile ? 'center' : 'space-between',
                       alignItems: 'center',
                       gap: isMobile ? '15px' : '0',
-                      fontFamily: "'Roboto', sans-serif",
+                      fontFamily: 'Helvetica, Arial, sans-serif',
                       fontSize: '14px',
                     }}
                   >
@@ -1296,7 +1307,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
                         textDecoration: 'underline',
                         opacity: '0.8',
                         transition: 'all 0.3s ease',
-                        fontFamily: "'Roboto', sans-serif",
+                        fontFamily: 'Helvetica, Arial, sans-serif',
                         fontSize: isMobile ? '13px' : '14px',
                       }}
                       onMouseEnter={(e) => { e.currentTarget.style.opacity = '1'; }}
@@ -1306,7 +1317,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
                     </button>
 
                     <div>
-                      <span style={{ color: '#ffffff', opacity: '0.8', fontSize: isMobile ? '13px' : '14px' }}>
+                      <span style={{ color: '#ffffff', opacity: '0.8', fontSize: isMobile ? '13px' : '14px', fontFamily: 'Helvetica, Arial, sans-serif' }}>
                         Don't have an account?{' '}
                       </span>
                       <button
@@ -1319,7 +1330,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
                           textDecoration: 'underline',
                           fontWeight: '600',
                           transition: 'all 0.3s ease',
-                          fontFamily: "'Roboto', sans-serif",
+                          fontFamily: 'Helvetica, Arial, sans-serif',
                           fontSize: isMobile ? '13px' : '14px',
                         }}
                         onMouseEnter={(e) => { e.currentTarget.style.opacity = '0.9'; }}
@@ -1330,19 +1341,17 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
                     </div>
                   </div>
 
-                  {/* KEBJIAKAN PRIVASI & KETENTUAN KAMI - SEKARANG DI BAWAH FORGOT PASSWORD */}
+                  {/* KEBIJAKAN PRIVASI & KETENTUAN KAMI */}
                   <div style={{
                     display: 'flex',
                     justifyContent: isMobile ? 'center' : 'flex-start',
                     gap: isMobile ? '20px' : '30px',
                     marginTop: '5px',
-                    paddingTop: '10px',
-                    borderTop: '1px solid rgba(255, 255, 255, 0.1)',
                   }}>
                     <Link href="/privacy" style={{
                       color: 'rgba(255, 255, 255, 0.7)',
                       fontSize: isMobile ? '0.8rem' : '0.9rem',
-                      fontFamily: 'Arame Mono, monospace',
+                      fontFamily: 'Helvetica, Arial, sans-serif',
                       textDecoration: 'underline',
                       textUnderlineOffset: '3px',
                       opacity: 0.8,
@@ -1356,7 +1365,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
                     <Link href="/terms" style={{
                       color: 'rgba(255, 255, 255, 0.7)',
                       fontSize: isMobile ? '0.8rem' : '0.9rem',
-                      fontFamily: 'Arame Mono, monospace',
+                      fontFamily: 'Helvetica, Arial, sans-serif',
                       textDecoration: 'underline',
                       textUnderlineOffset: '3px',
                       opacity: 0.8,
@@ -1394,7 +1403,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
             <p style={{
               color: 'rgba(255,255,255,0.9)',
               fontSize: isMobile ? '2.5rem' : '5rem',
-              fontFamily: 'Arame Mono, monospace',
+              fontFamily: 'Helvetica, Arial, sans-serif',
               margin: '0 0 0.3rem 0',
               lineHeight: '1.1',
               fontWeight: '600'
@@ -1404,7 +1413,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
             <p style={{
               color: 'rgba(255,255,255,0.9)',
               fontSize: isMobile ? '2.5rem' : '5rem',
-              fontFamily: 'Arame Mono, monospace',
+              fontFamily: 'Helvetica, Arial, sans-serif',
               margin: 0,
               lineHeight: '1.1',
               fontWeight: '600'
@@ -1429,7 +1438,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
                 fontWeight: '600',
                 margin: '0 0 0.5rem 0',
                 marginBottom: isMobile ? '3rem' : '5rem',
-                fontFamily: 'Arame Mono, monospace'
+                fontFamily: 'Helvetica, Arial, sans-serif'
               }}>
                 MENU
               </h4>
@@ -1441,7 +1450,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
                 fontWeight: '600',
                 margin: '0 0 0.5rem 0',
                 marginBottom: isMobile ? '3rem' : '5rem',
-                fontFamily: 'Arame Mono, monospace'
+                fontFamily: 'Helvetica, Arial, sans-serif'
               }}>
                 PRODUCT
               </h4>
@@ -1458,7 +1467,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
                 fontWeight: '600',
                 margin: '0 0 0.5rem 0',
                 marginBottom: isMobile ? '8rem' : '15rem',
-                fontFamily: 'Arame Mono, monospace'
+                fontFamily: 'Helvetica, Arial, sans-serif'
               }}>
                 Features
               </h4>
@@ -1470,7 +1479,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
                 fontWeight: '600',
                 margin: '0 0 0.5rem 0',
                 marginBottom: isMobile ? '8rem' : '15rem',
-                fontFamily: 'Arame Mono, monospace'
+                fontFamily: 'Helvetica, Arial, sans-serif'
               }}>
                 Community
               </h4>
@@ -1482,7 +1491,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
                 fontWeight: '600',
                 margin: '0 0 0.5rem 0',
                 marginBottom: isMobile ? '8rem' : '15rem',
-                fontFamily: 'Arame Mono, monospace'
+                fontFamily: 'Helvetica, Arial, sans-serif'
               }}>
                 BLOG
               </h4>
@@ -1490,7 +1499,7 @@ export default function SignInPage({ onClose, onSwitchToSignUp, onSwitchToForgot
           </div>
         </div>
 
-        {/* Teks berjalan SIGN IN dengan SVG - UKURAN NORMAL */}
+        {/* Teks berjalan SIGN IN dengan SVG - UKURAN BESAR, TANPA BOLD, TANPA LINEBOX */}
         <MarqueeText />
       </div>
       
