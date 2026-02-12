@@ -16,9 +16,15 @@ import {
 } from "firebase/auth";
 import { 
   getFirestore, 
+  collection, 
   doc, 
   setDoc, 
-  Timestamp
+  getDocs, 
+  query, 
+  orderBy,
+  limit,
+  Timestamp,
+  deleteDoc 
 } from "firebase/firestore";
 import Link from "next/link";
 
@@ -34,7 +40,7 @@ const firebaseConfig = {
   measurementId: "G-8LMP7F4BE9"
 };
 
-// Data media sosial
+// Data media sosial untuk komponen Connection
 const socialConnections = [
   { id: 1, name: "GitHub" },
   { id: 2, name: "Instagram" },
@@ -43,85 +49,56 @@ const socialConnections = [
   { id: 5, name: "YouTube" }
 ];
 
+interface LoginHistory {
+  id: string;
+  email: string;
+  displayName: string;
+  photoURL: string;
+  provider: string;
+  lastLogin: any;
+  uid: string;
+}
+
 export default function SignInPage() {
   const router = useRouter();
   
-  // State
+  // --- STATE UNTUK HYDRATION FIX ---
   const [isMounted, setIsMounted] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  
+  // --- STATE UNTUK FORM LOGIN ---
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [user, setUser] = useState<any>(null);
   const [error, setError] = useState("");
+  
+  // --- STATE UNTUK FIREBASE (HANYA CLIENT) ---
+  const [firebaseInitialized, setFirebaseInitialized] = useState(false);
   const [firebaseAuth, setFirebaseAuth] = useState<any>(null);
   const [firebaseDb, setFirebaseDb] = useState<any>(null);
-  const [firebaseInitialized, setFirebaseInitialized] = useState(false);
   
-  // Refs untuk animasi
+  // --- REFS UNTUK ANIMASI GSAP ---
   const marqueeLeftRef = useRef<HTMLDivElement>(null);
   const marqueeRightRef = useRef<HTMLDivElement>(null);
   const marqueeLeftAnimation = useRef<gsap.core.Tween | null>(null);
   const marqueeRightAnimation = useRef<gsap.core.Tween | null>(null);
+  
+  // --- REFS UNTUK KONEKSI ---
   const [connectionsOpen, setConnectionsOpen] = useState(false);
   const socialItemsRef = useRef<(HTMLDivElement | null)[]>([]);
 
   // ============================================
-  // HANDLERS
-  // ============================================
-  const handleForgotPassword = () => {
-    router.push('/forgot-password');
-  };
-
-  const handleSignUp = () => {
-    router.push('/signup');
-  };
-
-  // SOUTH WEST ARROW SVG Component
-  const SouthWestArrow = ({ size = 60 }) => (
-    <svg 
-      width={size} 
-      height={size} 
-      viewBox="0 0 24 24" 
-      fill="none"
-      stroke="white"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      style={{ opacity: 0.9 }}
-    >
-      <path d="M17 17L7 17" stroke="white" strokeWidth="1.5"/>
-      <path d="M7 17L7 7" stroke="white" strokeWidth="1.5"/>
-      <path d="M17 17L3 3" stroke="white" strokeWidth="1.5"/>
-    </svg>
-  );
-
-  // NORTH EAST ARROW SVG Component
-  const NorthEastArrow = ({ size = 60 }) => (
-    <svg 
-      width={size} 
-      height={size} 
-      viewBox="0 0 24 24" 
-      fill="none"
-      stroke="white"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M7 7L17 7" stroke="white" strokeWidth="1.5"/>
-      <path d="M7 7L7 17" stroke="white" strokeWidth="1.5"/>
-      <path d="M7 7L21 21" stroke="white" strokeWidth="1.5"/>
-    </svg>
-  );
-
-  // ============================================
-  // HYDRATION FIX
+  // 1. FIX HYDRATION: TANDAI KOMPONEN SUDAH DI-MOUNT
   // ============================================
   useEffect(() => {
     setIsMounted(true);
   }, []);
 
+  // ============================================
+  // 2. CEK UKURAN LAYAR - HANYA DI CLIENT
+  // ============================================
   useEffect(() => {
     if (!isMounted) return;
     
@@ -135,7 +112,7 @@ export default function SignInPage() {
   }, [isMounted]);
 
   // ============================================
-  // FIREBASE INIT
+  // 3. INISIALISASI FIREBASE - HANYA DI CLIENT
   // ============================================
   useEffect(() => {
     if (!isMounted || firebaseInitialized) return;
@@ -151,20 +128,26 @@ export default function SignInPage() {
       setFirebaseAuth(auth);
       setFirebaseDb(db);
       setFirebaseInitialized(true);
+      
+      console.log("Firebase initialized successfully");
     } catch (error) {
       console.error("Firebase initialization error:", error);
     }
   }, [isMounted, firebaseInitialized]);
 
   // ============================================
-  // GSAP ANIMATIONS
+  // 4. FUNGSI ANIMASI GSAP YANG DIPERBAIKI
   // ============================================
   const startMarqueeLeft = () => {
     if (!marqueeLeftRef.current) return;
     
     try {
-      if (marqueeLeftAnimation.current) marqueeLeftAnimation.current.kill();
+      if (marqueeLeftAnimation.current) {
+        marqueeLeftAnimation.current.kill();
+      }
+      
       gsap.set(marqueeLeftRef.current, { x: '-50%' });
+      
       marqueeLeftAnimation.current = gsap.to(marqueeLeftRef.current, {
         x: '0%',
         duration: 80,
@@ -190,8 +173,12 @@ export default function SignInPage() {
     if (!marqueeRightRef.current) return;
     
     try {
-      if (marqueeRightAnimation.current) marqueeRightAnimation.current.kill();
+      if (marqueeRightAnimation.current) {
+        marqueeRightAnimation.current.kill();
+      }
+      
       gsap.set(marqueeRightRef.current, { x: '0%' });
+      
       marqueeRightAnimation.current = gsap.to(marqueeRightRef.current, {
         x: '-50%',
         duration: 100,
@@ -213,21 +200,34 @@ export default function SignInPage() {
     }
   };
 
+  // ============================================
+  // 5. MULAI ANIMASI GSAP - SETELAH DOM SIAP
+  // ============================================
   useEffect(() => {
     if (!isMounted) return;
+    
     const timer = setTimeout(() => {
       startMarqueeLeft();
       startMarqueeRight();
     }, 300);
+    
     return () => {
       clearTimeout(timer);
-      if (marqueeLeftAnimation.current) marqueeLeftAnimation.current.kill();
-      if (marqueeRightAnimation.current) marqueeRightAnimation.current.kill();
+      if (marqueeLeftAnimation.current) {
+        marqueeLeftAnimation.current.kill();
+      }
+      if (marqueeRightAnimation.current) {
+        marqueeRightAnimation.current.kill();
+      }
     };
   }, [isMounted]);
 
+  // ============================================
+  // 6. ANIMASI GSAP UNTUK CONNECTION
+  // ============================================
   useEffect(() => {
     if (!isMounted) return;
+    
     if (connectionsOpen) {
       const validRefs = socialItemsRef.current.filter(Boolean);
       if (validRefs.length > 0) {
@@ -255,10 +255,11 @@ export default function SignInPage() {
   }, [connectionsOpen, isMounted]);
 
   // ============================================
-  // AUTH FUNCTIONS
+  // 7. FUNGSI FIRESTORE - TANPA SIMPAN PASSWORD
   // ============================================
   const saveLoginHistory = async (userData: any, provider: string) => {
     if (!firebaseDb || !firebaseAuth) return;
+    
     try {
       const historyRef = doc(firebaseDb, "loginHistory", userData.uid);
       const historyData = {
@@ -270,34 +271,53 @@ export default function SignInPage() {
         lastLogin: Timestamp.now(),
         uid: userData.uid
       };
+      
       await setDoc(historyRef, historyData, { merge: true });
+      console.log("Login history saved for:", userData.email);
     } catch (error) {
       console.error("Error saving login history:", error);
     }
   };
 
+  // ============================================
+  // 8. AUTH STATE CHANGED LISTENER
+  // ============================================
   useEffect(() => {
     if (!isMounted || !firebaseAuth || !firebaseInitialized) return;
+    
     const unsubscribe = onAuthStateChanged(firebaseAuth, (currentUser: any) => {
       setUser(currentUser);
       if (currentUser) {
+        console.log("User logged in:", currentUser.email);
         setEmail("");
         setPassword("");
         router.push('/notes');
       }
     });
+
     return () => unsubscribe();
   }, [router, isMounted, firebaseAuth, firebaseInitialized]);
 
+  // ============================================
+  // 9. LOGIN HANDLERS - TANPA MODAL AUTO LOGIN
+  // ============================================
   const handleGoogleLogin = async () => {
     if (!firebaseAuth) return;
+    
     setLoading(true);
     setError("");
+    
     try {
       const provider = new GoogleAuthProvider();
+      provider.addScope('profile');
+      provider.addScope('email');
+      
       const result = await signInWithPopup(firebaseAuth, provider);
-      await saveLoginHistory(result.user, 'google');
+      const user = result.user;
+      console.log("Google login successful:", user);
+      await saveLoginHistory(user, 'google');
     } catch (error: any) {
+      console.error("Google login error:", error);
       setError(error.message || "Login dengan Google gagal");
     } finally {
       setLoading(false);
@@ -306,13 +326,21 @@ export default function SignInPage() {
 
   const handleGitHubLogin = async () => {
     if (!firebaseAuth) return;
+    
     setLoading(true);
     setError("");
+    
     try {
       const provider = new GithubAuthProvider();
+      provider.addScope('repo');
+      provider.addScope('user');
+      
       const result = await signInWithPopup(firebaseAuth, provider);
-      await saveLoginHistory(result.user, 'github');
+      const user = result.user;
+      console.log("GitHub login successful:", user);
+      await saveLoginHistory(user, 'github');
     } catch (error: any) {
+      console.error("GitHub login error:", error);
       setError(error.message || "Login dengan GitHub gagal");
     } finally {
       setLoading(false);
@@ -322,19 +350,36 @@ export default function SignInPage() {
   const handleEmailLogin = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     if (!firebaseAuth) return;
+    
     setLoading(true);
     setError("");
+    
     try {
       const result = await signInWithEmailAndPassword(firebaseAuth, email, password);
-      await saveLoginHistory(result.user, 'email');
+      const user = result.user;
+      console.log("Email login successful");
+      await saveLoginHistory(user, 'email');
     } catch (error: any) {
+      console.error("Email login error:", error);
+      
       switch (error.code) {
-        case 'auth/invalid-email': setError("EMAIL TIDAK VALID"); break;
-        case 'auth/user-disabled': setError("AKUN DINONAKTIFKAN"); break;
-        case 'auth/user-not-found': setError("AKUN TIDAK DITEMUKAN"); break;
-        case 'auth/wrong-password': setError("PASSWORD SALAH"); break;
-        case 'auth/too-many-requests': setError("TERLALU BANYAK PERCOBAAN"); break;
-        default: setError("LOGIN GAGAL");
+        case 'auth/invalid-email':
+          setError("Email tidak valid");
+          break;
+        case 'auth/user-disabled':
+          setError("Akun dinonaktifkan");
+          break;
+        case 'auth/user-not-found':
+          setError("Akun tidak ditemukan");
+          break;
+        case 'auth/wrong-password':
+          setError("Password salah");
+          break;
+        case 'auth/too-many-requests':
+          setError("Terlalu banyak percobaan gagal. Coba lagi nanti");
+          break;
+        default:
+          setError("Login gagal. Periksa email dan password Anda");
       }
     } finally {
       setLoading(false);
@@ -343,8 +388,10 @@ export default function SignInPage() {
 
   const handleLogout = async () => {
     if (!firebaseAuth) return;
+    
     try {
       await signOut(firebaseAuth);
+      console.log("User logged out");
       setEmail("");
       setPassword("");
     } catch (error) {
@@ -352,54 +399,75 @@ export default function SignInPage() {
     }
   };
 
+  const handleSignUp = () => {
+    router.push('/signup');
+  };
+
+  const handleForgotPassword = () => {
+    router.push('/forgot-password');
+  };
+
+  // ============================================
+  // 10. FIX HYDRATION: JIKA BELUM MOUNT, TAMPILKAN LOADING
+  // ============================================
   if (!isMounted) {
     return (
       <div style={{
         minHeight: '100vh',
-        backgroundColor: 'black',
+        backgroundColor: 'rgba(0,0,0,0.5)',
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
-        color: 'white',
-        fontSize: '2rem',
         fontFamily: 'Helvetica, Arial, sans-serif',
       }}>
-        LOADING...
+        <div style={{
+          color: 'white',
+          fontSize: '1.5rem',
+        }}>
+          Loading...
+        </div>
       </div>
     );
   }
 
   // ============================================
-  // CONNECTION COMPONENT
+  // 11. KOMPONEN CONNECTION
   // ============================================
   const ConnectionComponent = () => (
-    <div style={{ position: 'relative', zIndex: 10 }}>
+    <div style={{ position: 'relative', width: isMobile ? '100%' : 'auto', zIndex: 10 }}>
       <motion.div
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
-        style={{ cursor: 'pointer', userSelect: 'none' }}
+        style={{ cursor: 'pointer', userSelect: 'none', marginBottom: connectionsOpen ? '15px' : '0' }}
         onClick={() => setConnectionsOpen(!connectionsOpen)}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+        <div style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: '10px' }}>
           <h4 style={{
             color: 'white',
-            fontSize: isMobile ? '32px' : '64px',
-            fontWeight: '400',
+            fontSize: isMobile ? '1.8rem' : '4rem',
+            fontWeight: '600',
             margin: '0',
             fontFamily: 'Helvetica, Arial, sans-serif',
-            letterSpacing: '2px',
+            textShadow: '2px 2px 4px rgba(0,0,0,0.3)',
           }}>
             CONNECT
           </h4>
-          <span style={{
-            color: 'white',
-            fontSize: isMobile ? '20px' : '32px',
-            opacity: 0.7,
-            fontFamily: 'Helvetica, Arial, sans-serif',
-          }}>
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ duration: 0.2 }}
+            style={{
+              position: 'absolute',
+              bottom: isMobile ? '-5px' : '-10px',
+              right: isMobile ? '-20px' : '-40px',
+              color: 'rgba(255, 255, 255, 0.8)',
+              fontSize: isMobile ? '0.7rem' : '1rem',
+              fontWeight: 'normal',
+              fontFamily: 'Helvetica, Arial, sans-serif',
+            }}
+          >
             ({socialConnections.length.toString().padStart(2, '0')})
-          </span>
-          <SouthWestArrow size={isMobile ? 40 : 50} />
+          </motion.div>
         </div>
       </motion.div>
 
@@ -410,33 +478,45 @@ export default function SignInPage() {
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.3 }}
-            style={{ overflow: 'hidden', marginTop: '20px' }}
+            style={{ overflow: 'hidden' }}
           >
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+            <div style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: isMobile ? '8px' : '12px',
+              paddingTop: '10px',
+            }}>
               {socialConnections.map((social, index) => (
                 <motion.div
                   key={social.id}
                   ref={el => { socialItemsRef.current[index] = el; }}
-                  style={{ display: 'flex', alignItems: 'center', gap: '20px' }}
+                  initial={{ y: 20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  exit={{ y: 20, opacity: 0 }}
+                  transition={{ duration: 0.3, delay: index * 0.08 }}
+                  whileHover={{ x: 5 }}
+                  style={{ display: 'flex', alignItems: 'center', gap: '15px', cursor: 'default' }}
                 >
-                  <span style={{
-                    color: 'rgba(255,255,255,0.5)',
-                    fontSize: isMobile ? '20px' : '28px',
+                  <div style={{
+                    color: 'rgba(255, 255, 255, 0.5)',
+                    fontSize: isMobile ? '1rem' : '1.5rem',
                     fontFamily: 'Helvetica, Arial, sans-serif',
-                    width: '60px',
+                    width: isMobile ? '30px' : '50px',
+                    textAlign: 'right',
                   }}>
                     ({index.toString().padStart(2, '0')})
-                  </span>
-                  <span style={{
+                  </div>
+                  <p style={{
                     color: 'white',
-                    fontSize: isMobile ? '24px' : '36px',
-                    fontWeight: '400',
+                    fontSize: isMobile ? '1.2rem' : '1.8rem',
+                    fontWeight: '600',
+                    margin: '0',
                     fontFamily: 'Helvetica, Arial, sans-serif',
-                    letterSpacing: '1px',
+                    textShadow: '1px 1px 2px rgba(0,0,0,0.5)',
+                    letterSpacing: '0.5px',
                   }}>
                     {social.name}
-                  </span>
-                  <SouthWestArrow size={isMobile ? 30 : 40} />
+                  </p>
                 </motion.div>
               ))}
             </div>
@@ -447,37 +527,65 @@ export default function SignInPage() {
   );
 
   // ============================================
-  // MARQUEE COMPONENTS
+  // 12. KOMPONEN MARQUEE DENGAN SVG MINIMALIST
   // ============================================
   const MarqueeLeftText = () => (
     <div style={{
       width: '100%',
       overflow: 'hidden',
-      marginTop: isMobile ? '100px' : '150px',
-      marginBottom: isMobile ? '60px' : '80px',
+      position: 'relative',
+      marginTop: isMobile ? '80px' : '120px',
+      marginBottom: isMobile ? '40px' : '60px',
+      padding: '0',
+      backgroundColor: 'transparent',
+      border: 'none',
+      pointerEvents: 'none',
     }}>
       <div
         ref={marqueeLeftRef}
         style={{
           display: 'flex',
           alignItems: 'center',
-          gap: isMobile ? '60px' : '120px',
+          gap: isMobile ? '80px' : '150px',
           whiteSpace: 'nowrap',
           width: 'fit-content',
+          willChange: 'transform',
+          position: 'relative',
+          left: '0',
         }}
       >
         {[...Array(4)].map((_, i) => (
-          <div key={i} style={{ display: 'flex', alignItems: 'center', gap: isMobile ? '40px' : '80px' }}>
+          <div key={i} style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: isMobile ? '40px' : '80px',
+          }}>
             <span style={{
               color: 'white',
-              fontSize: isMobile ? '48px' : '80px',
+              fontSize: isMobile ? '5rem' : '8rem',
               fontFamily: 'Helvetica, Arial, sans-serif',
               fontWeight: '400',
-              letterSpacing: '4px',
+              letterSpacing: '8px',
+              textShadow: '2px 2px 4px rgba(0,0,0,0.3)',
             }}>
               CREATE FREE ACCESS ACCOUNT
             </span>
-            <NorthEastArrow size={isMobile ? 60 : 100} />
+            {/* NORTH EAST ARROW - MINIMALIST, TIDAK BOLD */}
+            <svg 
+              width={isMobile ? '80' : '120'} 
+              height={isMobile ? '80' : '120'} 
+              viewBox="0 0 24 24" 
+              fill="none"
+              stroke="white"
+              strokeWidth="1"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              style={{ opacity: 0.9 }}
+            >
+              <path d="M7 7L17 7" stroke="white" strokeWidth="1"/>
+              <path d="M7 7L7 17" stroke="white" strokeWidth="1"/>
+              <path d="M7 7L21 21" stroke="white" strokeWidth="1"/>
+            </svg>
           </div>
         ))}
       </div>
@@ -488,31 +596,59 @@ export default function SignInPage() {
     <div style={{
       width: '100%',
       overflow: 'hidden',
-      marginTop: isMobile ? '60px' : '80px',
-      marginBottom: isMobile ? '40px' : '60px',
+      position: 'relative',
+      marginTop: isMobile ? '40px' : '60px',
+      marginBottom: isMobile ? '20px' : '30px',
+      padding: '0',
+      backgroundColor: 'transparent',
+      border: 'none',
+      pointerEvents: 'none',
     }}>
       <div
         ref={marqueeRightRef}
         style={{
           display: 'flex',
           alignItems: 'center',
-          gap: isMobile ? '60px' : '120px',
+          gap: isMobile ? '80px' : '150px',
           whiteSpace: 'nowrap',
           width: 'fit-content',
+          willChange: 'transform',
+          position: 'relative',
+          left: '0',
         }}
       >
         {[...Array(4)].map((_, i) => (
-          <div key={i} style={{ display: 'flex', alignItems: 'center', gap: isMobile ? '40px' : '80px' }}>
+          <div key={i} style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: isMobile ? '40px' : '80px',
+          }}>
             <span style={{
               color: 'white',
-              fontSize: isMobile ? '64px' : '100px',
+              fontSize: isMobile ? '6rem' : '10rem',
               fontFamily: 'Helvetica, Arial, sans-serif',
               fontWeight: '400',
-              letterSpacing: '6px',
+              letterSpacing: '10px',
+              textShadow: '2px 2px 4px rgba(0,0,0,0.3)',
             }}>
               SIGN IN
             </span>
-            <NorthEastArrow size={isMobile ? 80 : 120} />
+            {/* NORTH EAST ARROW - MINIMALIST, TIDAK BOLD */}
+            <svg 
+              width={isMobile ? '100' : '160'} 
+              height={isMobile ? '100' : '160'} 
+              viewBox="0 0 24 24" 
+              fill="none"
+              stroke="white"
+              strokeWidth="1"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              style={{ opacity: 0.9 }}
+            >
+              <path d="M7 7L17 7" stroke="white" strokeWidth="1"/>
+              <path d="M7 7L7 17" stroke="white" strokeWidth="1"/>
+              <path d="M7 7L21 21" stroke="white" strokeWidth="1"/>
+            </svg>
           </div>
         ))}
       </div>
@@ -520,516 +656,661 @@ export default function SignInPage() {
   );
 
   // ============================================
-  // MAIN RENDER
+  // 13. RENDER UTAMA
   // ============================================
   return (
-    <div style={{
-      minHeight: '100vh',
-      backgroundColor: 'black',
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'flex-start',
-      justifyContent: 'flex-start',
-      padding: isMobile ? '30px 20px' : '40px 60px',
-      fontFamily: 'Helvetica, Arial, sans-serif',
-      position: 'relative',
-    }}>
-      
-      {/* HALAMAN UTAMA - TOP LEFT */}
-      <div style={{
-        position: 'absolute',
-        top: isMobile ? '30px' : '50px',
-        left: isMobile ? '20px' : '60px',
-        display: 'flex',
-        alignItems: 'center',
-        gap: '15px',
-        zIndex: 50,
-      }}>
-        <Link href="/" style={{
+    <>
+      <div
+        style={{
+          minHeight: '100vh',
+          backgroundColor: 'rgba(0,0,0,0.5)',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: isMobile ? 'flex-start' : 'center',
+          alignItems: isMobile ? 'center' : 'flex-start',
+          padding: isMobile ? '20px 15px' : '40px 60px',
+          fontFamily: 'Helvetica, Arial, sans-serif',
+          position: 'relative',
+        }}
+      >
+        {/* HALAMAN UTAMA - SISI KANAN ATAS DENGAN SVG MINIMALIST */}
+        <div style={{
+          position: 'absolute',
+          top: isMobile ? '30px' : '50px',
+          right: isMobile ? '20px' : '50px',
           display: 'flex',
           alignItems: 'center',
           gap: '15px',
-          textDecoration: 'none',
+          zIndex: 50,
         }}>
-          <span style={{
-            fontSize: isMobile ? '24px' : '32px',
-            fontFamily: 'Helvetica, Arial, sans-serif',
-            fontWeight: '400',
-            letterSpacing: '2px',
+          <Link href="/" style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '15px',
+            textDecoration: 'none',
             color: 'white',
           }}>
-            HALAMAN UTAMA
-          </span>
-          <SouthWestArrow size={isMobile ? 35 : 45} />
-        </Link>
-      </div>
-
-      {/* MARQUEE 1 */}
-      <MarqueeLeftText />
-
-      {/* MAIN CONTENT - LEFT ALIGNED */}
-      <div style={{
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'flex-start',
-        width: '100%',
-        maxWidth: '1000px',
-        marginLeft: '0',
-      }}>
-        
-        {/* WELCOME TEXT */}
-        <div style={{ width: '100%', marginBottom: '60px' }}>
-          <h1 style={{ 
-            fontSize: isMobile ? '48px' : '80px', 
-            fontWeight: '400', 
-            color: 'white', 
-            margin: '0 0 10px 0',
-            letterSpacing: '2px',
-            lineHeight: '1',
-          }}>
-            {user ? `WELCOME, ${(user.displayName || user.email).toUpperCase()}` : 'WELCOME BACK'}
-          </h1>
-          <p style={{ 
-            fontSize: isMobile ? '32px' : '48px', 
-            color: 'white', 
-            margin: '0',
-            fontWeight: '400',
-            letterSpacing: '1px',
-            opacity: 0.9,
-          }}>
-            {user ? 'YOU ARE SIGNED IN' : 'SIGN IN TO YOUR ACCOUNT'}
-          </p>
-        </div>
-
-        {/* ERROR MESSAGE */}
-        {error && (
-          <div style={{ 
-            color: 'white', 
-            fontSize: isMobile ? '20px' : '24px', 
-            marginBottom: '30px',
-            fontWeight: '400',
-            letterSpacing: '1px',
-          }}>
-            {error}
-          </div>
-        )}
-
-        {/* LOGOUT BUTTON */}
-        {user && (
-          <button 
-            onClick={handleLogout} 
-            style={{ 
-              marginBottom: '40px', 
-              padding: '0',
-              backgroundColor: 'transparent', 
-              border: 'none', 
-              color: 'white', 
-              fontSize: isMobile ? '28px' : '36px',
+            <span style={{
+              fontSize: isMobile ? '1.8rem' : '2.5rem',
+              fontFamily: 'Helvetica, Arial, sans-serif',
               fontWeight: '400',
               letterSpacing: '2px',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '15px',
-            }}
-          >
-            SIGN OUT
-            <SouthWestArrow size={isMobile ? 35 : 45} />
-          </button>
-        )}
-
-        {/* LOGIN FORM - NO LINES, NO BOXES */}
-        {!user && (
-          <>
-            {/* SOCIAL LOGIN */}
-            <div style={{ 
-              display: 'flex', 
-              flexDirection: 'column', 
-              gap: '20px', 
-              width: '100%',
-              maxWidth: '800px',
-              marginBottom: '50px',
+              textDecoration: 'none',
             }}>
-              <div 
-                onClick={handleGoogleLogin} 
-                style={{ 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  justifyContent: 'space-between',
-                  padding: '10px 0',
-                  backgroundColor: 'transparent', 
-                  cursor: loading ? 'not-allowed' : 'pointer', 
-                  opacity: loading ? 0.5 : 1,
-                }}
-              >
-                <span style={{ 
-                  fontSize: isMobile ? '28px' : '36px', 
-                  color: 'white', 
-                  fontWeight: '400',
-                  letterSpacing: '2px',
-                }}>
-                  {loading ? 'LOADING...' : 'CONTINUE WITH GOOGLE'}
-                </span>
-                <SouthWestArrow size={isMobile ? 35 : 45} />
-              </div>
+              HALAMAN UTAMA
+            </span>
+            {/* NORTH EAST ARROW - MINIMALIST, TIDAK BOLD */}
+            <svg 
+              width={isMobile ? '40' : '60'} 
+              height={isMobile ? '40' : '60'} 
+              viewBox="0 0 24 24" 
+              fill="none"
+              stroke="white"
+              strokeWidth="1"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              style={{ 
+                transition: 'transform 0.2s ease',
+                opacity: 0.9
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.transform = 'translate(3px, -3px)'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.transform = 'translate(0, 0)'; }}
+            >
+              <path d="M7 7L17 7" stroke="white" strokeWidth="1"/>
+              <path d="M7 7L7 17" stroke="white" strokeWidth="1"/>
+              <path d="M7 7L21 21" stroke="white" strokeWidth="1"/>
+            </svg>
+          </Link>
+        </div>
 
-              <div 
-                onClick={handleGitHubLogin} 
-                style={{ 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  justifyContent: 'space-between',
-                  padding: '10px 0',
-                  backgroundColor: 'transparent', 
-                  cursor: loading ? 'not-allowed' : 'pointer', 
-                  opacity: loading ? 0.5 : 1,
-                }}
-              >
-                <span style={{ 
-                  fontSize: isMobile ? '28px' : '36px', 
-                  color: 'white', 
-                  fontWeight: '400',
-                  letterSpacing: '2px',
-                }}>
-                  {loading ? 'LOADING...' : 'CONTINUE WITH GITHUB'}
-                </span>
-                <SouthWestArrow size={isMobile ? 35 : 45} />
-              </div>
-            </div>
+        {/* TEKS BERJALAN 1 - KIRI KE KANAN DENGAN SVG MINIMALIST */}
+        <MarqueeLeftText />
 
-            {/* EMAIL/PASSWORD FORM - NO BORDERS */}
-            <form onSubmit={handleEmailLogin} style={{ width: '100%', maxWidth: '800px' }}>
+        {/* MAIN SIGN IN CONTAINER - FULL LEFT ALIGNMENT */}
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'flex-start',
+            justifyContent: 'flex-start',
+            width: '100%',
+            maxWidth: isMobile ? '100%' : '600px',
+            marginLeft: isMobile ? '0' : '0',
+            paddingLeft: isMobile ? '0' : '0',
+          }}
+        >
+          {/* WELCOME TEXT - NO BOX, NO BACKGROUND, NO BORDER */}
+          <div style={{ 
+            marginBottom: isMobile ? '40px' : '60px',
+            width: '100%'
+          }}>
+            <h1 style={{ 
+              fontFamily: 'Helvetica, Arial, sans-serif', 
+              fontSize: isMobile ? '2.5rem' : '4rem', 
+              fontWeight: '400', 
+              color: '#ffffff', 
+              marginBottom: '10px', 
+              marginTop: '0',
+              lineHeight: '1.1',
+              letterSpacing: '-0.5px'
+            }}>
+              {user ? `Welcome, ${user.displayName || user.email}` : 'Welcome back'}
+            </h1>
+            <p style={{ 
+              fontFamily: 'Helvetica, Arial, sans-serif', 
+              fontSize: isMobile ? '1.1rem' : '1.3rem', 
+              color: '#ffffff', 
+              opacity: '0.8',
+              marginBottom: '20px',
+              fontWeight: '300',
+              letterSpacing: '0.5px'
+            }}>
+              {user ? 'You are signed in' : 'Sign in to your account to continue'}
+            </p>
+            
+            {/* ERROR MESSAGE - MINIMALIST */}
+            {error && (
+              <div style={{ 
+                color: '#ff8a8a', 
+                fontSize: '0.9rem', 
+                marginTop: '10px', 
+                marginBottom: '10px',
+                fontFamily: 'Helvetica, Arial, sans-serif',
+                fontWeight: '300',
+                borderLeft: '1px solid rgba(255, 255, 255, 0.3)',
+                paddingLeft: '12px'
+              }}>
+                {error}
+              </div>
+            )}
+            
+            {/* LOGOUT BUTTON - MINIMALIST */}
+            {user && (
+              <button 
+                onClick={handleLogout} 
+                style={{ 
+                  marginTop: '20px', 
+                  padding: '12px 0', 
+                  background: 'none', 
+                  border: 'none', 
+                  borderBottom: '1px solid rgba(255, 255, 255, 0.3)', 
+                  color: 'white', 
+                  cursor: 'pointer', 
+                  transition: 'all 0.2s ease', 
+                  fontFamily: 'Helvetica, Arial, sans-serif',
+                  fontSize: '1rem',
+                  fontWeight: '300',
+                  letterSpacing: '2px'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.borderBottomColor = 'rgba(255, 255, 255, 0.8)'}
+                onMouseLeave={(e) => e.currentTarget.style.borderBottomColor = 'rgba(255, 255, 255, 0.3)'}
+              >
+                SIGN OUT
+              </button>
+            )}
+          </div>
+
+          {/* FORM LOGIN - NO BOX, NO BACKGROUND, NO BORDER */}
+          {!user && (
+            <>
+              {/* SOCIAL LOGIN BUTTONS - MINIMALIST */}
               <div style={{ 
                 display: 'flex', 
                 flexDirection: 'column', 
-                gap: '40px', 
-                marginBottom: '50px',
+                gap: '20px', 
+                marginBottom: '40px',
+                width: '100%',
+                maxWidth: '400px'
               }}>
-                <div>
-                  <label style={{ 
-                    display: 'block', 
-                    fontSize: isMobile ? '24px' : '28px', 
-                    fontWeight: '400', 
-                    color: 'white', 
-                    marginBottom: '10px',
-                    letterSpacing: '1px',
+                {/* Google Login */}
+                <div 
+                  onClick={handleGoogleLogin} 
+                  style={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    padding: '12px 0', 
+                    borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
+                    cursor: loading ? 'not-allowed' : 'pointer', 
+                    transition: 'all 0.2s ease', 
+                    opacity: loading ? 0.5 : 1,
+                    width: '100%'
+                  }}
+                  onMouseEnter={(e) => !loading && (e.currentTarget.style.borderBottomColor = 'rgba(255, 255, 255, 0.8)')}
+                  onMouseLeave={(e) => !loading && (e.currentTarget.style.borderBottomColor = 'rgba(255, 255, 255, 0.2)')}
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" style={{ marginRight: '15px' }}>
+                    <path fill="#ffffff" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                    <path fill="#ffffff" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                    <path fill="#ffffff" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                    <path fill="#ffffff" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                  </svg>
+                  <span style={{ 
+                    fontFamily: 'Helvetica, Arial, sans-serif', 
+                    fontSize: isMobile ? '0.95rem' : '1rem', 
+                    color: '#ffffff', 
+                    fontWeight: '300',
+                    letterSpacing: '1px'
                   }}>
-                    EMAIL
-                  </label>
-                  <input 
-                    type="email" 
-                    placeholder="YOUR EMAIL" 
-                    value={email} 
-                    onChange={(e) => setEmail(e.target.value)} 
-                    required 
-                    style={{ 
-                      width: '100%', 
-                      padding: '10px 0', 
-                      border: 'none',
-                      backgroundColor: 'transparent', 
-                      color: 'white', 
-                      fontSize: isMobile ? '24px' : '28px', 
-                      outline: 'none',
-                      letterSpacing: '1px',
-                      fontFamily: 'Helvetica, Arial, sans-serif',
-                    }} 
-                  />
+                    {loading ? 'Loading...' : 'Continue with Google'}
+                  </span>
                 </div>
 
-                <div>
-                  <label style={{ 
-                    display: 'block', 
-                    fontSize: isMobile ? '24px' : '28px', 
-                    fontWeight: '400', 
-                    color: 'white', 
-                    marginBottom: '10px',
-                    letterSpacing: '1px',
+                {/* GitHub Login */}
+                <div 
+                  onClick={handleGitHubLogin} 
+                  style={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    padding: '12px 0', 
+                    borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
+                    cursor: loading ? 'not-allowed' : 'pointer', 
+                    transition: 'all 0.2s ease', 
+                    opacity: loading ? 0.5 : 1,
+                    width: '100%'
+                  }}
+                  onMouseEnter={(e) => !loading && (e.currentTarget.style.borderBottomColor = 'rgba(255, 255, 255, 0.8)')}
+                  onMouseLeave={(e) => !loading && (e.currentTarget.style.borderBottomColor = 'rgba(255, 255, 255, 0.2)')}
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" style={{ marginRight: '15px' }}>
+                    <path fill="#ffffff" d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/>
+                  </svg>
+                  <span style={{ 
+                    fontFamily: 'Helvetica, Arial, sans-serif', 
+                    fontSize: isMobile ? '0.95rem' : '1rem', 
+                    color: '#ffffff', 
+                    fontWeight: '300',
+                    letterSpacing: '1px'
                   }}>
-                    PASSWORD
-                  </label>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+                    {loading ? 'Loading...' : 'Continue with GitHub'}
+                  </span>
+                </div>
+              </div>
+
+              {/* EMAIL/PASSWORD FORM - NO BOX, NO BACKGROUND */}
+              <form onSubmit={(e) => handleEmailLogin(e)} style={{ width: '100%', maxWidth: '400px' }}>
+                <div style={{ 
+                  display: 'flex', 
+                  flexDirection: 'column', 
+                  gap: '25px', 
+                  marginBottom: '30px',
+                  width: '100%'
+                }}>
+                  {/* EMAIL INPUT */}
+                  <div style={{ width: '100%' }}>
+                    <input 
+                      type="email" 
+                      placeholder="Email" 
+                      value={email} 
+                      onChange={(e) => setEmail(e.target.value)} 
+                      required 
+                      style={{ 
+                        width: '100%', 
+                        padding: '12px 0', 
+                        border: 'none', 
+                        borderBottom: '1px solid rgba(255, 255, 255, 0.2)', 
+                        backgroundColor: 'transparent', 
+                        color: '#ffffff', 
+                        fontFamily: 'Helvetica, Arial, sans-serif', 
+                        fontSize: '1rem', 
+                        outline: 'none',
+                        fontWeight: '300',
+                        letterSpacing: '0.5px'
+                      }} 
+                      placeholderStyle={{ color: 'rgba(255,255,255,0.5)' }}
+                    />
+                  </div>
+
+                  {/* PASSWORD INPUT */}
+                  <div style={{ position: 'relative', width: '100%' }}>
                     <input 
                       type={showPassword ? "text" : "password"} 
-                      placeholder="YOUR PASSWORD" 
+                      placeholder="Password" 
                       value={password} 
                       onChange={(e) => setPassword(e.target.value)} 
                       required 
                       style={{ 
                         width: '100%', 
-                        padding: '10px 0', 
-                        border: 'none',
+                        padding: '12px 0', 
+                        paddingRight: '30px', 
+                        border: 'none', 
+                        borderBottom: '1px solid rgba(255, 255, 255, 0.2)', 
                         backgroundColor: 'transparent', 
-                        color: 'white', 
-                        fontSize: isMobile ? '24px' : '28px', 
+                        color: '#ffffff', 
+                        fontFamily: 'Helvetica, Arial, sans-serif', 
+                        fontSize: '1rem', 
                         outline: 'none',
-                        letterSpacing: '1px',
-                        fontFamily: 'Helvetica, Arial, sans-serif',
+                        fontWeight: '300',
+                        letterSpacing: '0.5px'
                       }} 
                     />
                     <button 
                       type="button" 
                       onClick={() => setShowPassword(!showPassword)} 
                       style={{ 
+                        position: 'absolute', 
+                        right: '0', 
+                        top: '50%', 
+                        transform: 'translateY(-50%)', 
                         background: 'none', 
                         border: 'none', 
-                        cursor: 'pointer',
-                        color: 'white',
-                        fontSize: isMobile ? '20px' : '24px',
-                        letterSpacing: '1px',
+                        cursor: 'pointer', 
+                        padding: '5px',
+                        opacity: 0.6
                       }}
                     >
-                      {showPassword ? 'HIDE' : 'SHOW'}
+                      {showPassword ? (
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1">
+                          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="white"/>
+                          <circle cx="12" cy="12" r="3" stroke="white"/>
+                        </svg>
+                      ) : (
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1">
+                          <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" stroke="white"/>
+                          <line x1="1" y1="1" x2="23" y2="23" stroke="white"/>
+                        </svg>
+                      )}
+                    </button>
+                  </div>
+
+                  {/* SUBMIT BUTTON - MINIMALIST */}
+                  <button 
+                    type="submit" 
+                    disabled={loading} 
+                    style={{ 
+                      width: 'auto',
+                      alignSelf: 'flex-start',
+                      padding: '12px 0', 
+                      border: 'none', 
+                      borderBottom: '1px solid rgba(255, 255, 255, 0.3)', 
+                      backgroundColor: 'transparent', 
+                      color: '#ffffff', 
+                      fontFamily: 'Helvetica, Arial, sans-serif', 
+                      fontSize: '1rem', 
+                      fontWeight: '300',
+                      cursor: loading ? 'not-allowed' : 'pointer', 
+                      transition: 'all 0.2s ease', 
+                      marginTop: '10px',
+                      letterSpacing: '2px',
+                      opacity: loading ? 0.5 : 1
+                    }}
+                    onMouseEnter={(e) => !loading && (e.currentTarget.style.borderBottomColor = 'rgba(255, 255, 255, 0.8)')}
+                    onMouseLeave={(e) => !loading && (e.currentTarget.style.borderBottomColor = 'rgba(255, 255, 255, 0.3)')}
+                  >
+                    {loading ? 'SIGNING IN...' : 'SIGN IN'}
+                  </button>
+                </div>
+              </form>
+
+              {/* FORGOT PASSWORD & SIGN UP - NO UNDERLINE, WITH SVG SOUTH WEST ARROW */}
+              <div style={{ 
+                display: 'flex', 
+                flexDirection: 'column', 
+                gap: '20px', 
+                width: '100%',
+                maxWidth: '400px',
+                marginTop: '10px'
+              }}>
+                <div style={{ 
+                  display: 'flex', 
+                  flexDirection: isMobile ? 'column' : 'row', 
+                  justifyContent: 'flex-start', 
+                  alignItems: isMobile ? 'flex-start' : 'center', 
+                  gap: isMobile ? '15px' : '30px', 
+                  fontFamily: 'Helvetica, Arial, sans-serif', 
+                  fontSize: '0.95rem' 
+                }}>
+                  <button 
+                    onClick={handleForgotPassword} 
+                    style={{ 
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      border: 'none', 
+                      background: 'none', 
+                      color: '#ffffff', 
+                      cursor: 'pointer', 
+                      opacity: '0.8', 
+                      transition: 'all 0.2s ease', 
+                      fontFamily: 'Helvetica, Arial, sans-serif', 
+                      fontSize: isMobile ? '0.9rem' : '0.95rem',
+                      fontWeight: '300',
+                      padding: '0',
+                      textDecoration: 'none'
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
+                    onMouseLeave={(e) => e.currentTarget.style.opacity = '0.8'}
+                  >
+                    Forgot your password?
+                    <svg 
+                      width="16" 
+                      height="16" 
+                      viewBox="0 0 24 24" 
+                      fill="none"
+                      stroke="white"
+                      strokeWidth="1"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M17 7L7 17" stroke="white"/>
+                      <path d="M17 7H7" stroke="white"/>
+                      <path d="M17 7V17" stroke="white"/>
+                    </svg>
+                  </button>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span style={{ 
+                      color: '#ffffff', 
+                      opacity: '0.6', 
+                      fontSize: isMobile ? '0.9rem' : '0.95rem', 
+                      fontFamily: 'Helvetica, Arial, sans-serif',
+                      fontWeight: '300'
+                    }}>
+                      Don't have an account?
+                    </span>
+                    <button 
+                      onClick={handleSignUp} 
+                      style={{ 
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        border: 'none', 
+                        background: 'none', 
+                        color: '#ffffff', 
+                        cursor: 'pointer', 
+                        opacity: '0.9', 
+                        transition: 'all 0.2s ease', 
+                        fontFamily: 'Helvetica, Arial, sans-serif', 
+                        fontSize: isMobile ? '0.9rem' : '0.95rem',
+                        fontWeight: '400',
+                        padding: '0',
+                        textDecoration: 'none'
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
+                      onMouseLeave={(e) => e.currentTarget.style.opacity = '0.9'}
+                    >
+                      Sign up
+                      <svg 
+                        width="16" 
+                        height="16" 
+                        viewBox="0 0 24 24" 
+                        fill="none"
+                        stroke="white"
+                        strokeWidth="1"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <path d="M17 7L7 17" stroke="white"/>
+                        <path d="M17 7H7" stroke="white"/>
+                        <path d="M17 7V17" stroke="white"/>
+                      </svg>
                     </button>
                   </div>
                 </div>
 
-                <button 
-                  type="submit" 
-                  disabled={loading} 
-                  style={{ 
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    padding: '15px 0',
-                    border: 'none', 
-                    backgroundColor: 'transparent', 
-                    color: 'white', 
-                    fontSize: isMobile ? '28px' : '36px', 
-                    fontWeight: '400',
-                    letterSpacing: '2px',
-                    cursor: loading ? 'not-allowed' : 'pointer', 
-                    opacity: loading ? 0.5 : 1,
-                    marginTop: '20px',
-                  }}
-                >
-                  <span>{loading ? 'SIGNING IN...' : 'SIGN IN'}</span>
-                  <SouthWestArrow size={isMobile ? 35 : 45} />
-                </button>
-              </div>
-            </form>
-
-            {/* FORGOT PASSWORD & SIGN UP */}
-            <div style={{ 
-              display: 'flex', 
-              flexDirection: isMobile ? 'column' : 'row', 
-              justifyContent: 'space-between', 
-              alignItems: isMobile ? 'flex-start' : 'center', 
-              gap: isMobile ? '30px' : '0', 
-              width: '100%',
-              maxWidth: '800px',
-              marginBottom: '50px',
-            }}>
-              <button 
-                onClick={handleForgotPassword} 
-                style={{ 
-                  border: 'none', 
-                  background: 'none', 
-                  color: 'white', 
-                  cursor: 'pointer', 
-                  fontSize: isMobile ? '24px' : '28px',
-                  fontWeight: '400',
-                  letterSpacing: '1px',
-                  padding: '0',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '15px',
-                }}
-              >
-                FORGOT PASSWORD
-                <SouthWestArrow size={isMobile ? 30 : 40} />
-              </button>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                <span style={{ 
-                  color: 'white', 
-                  fontSize: isMobile ? '24px' : '28px',
-                  fontWeight: '400',
-                  letterSpacing: '1px',
+                {/* KEBIJAKAN PRIVASI & KETENTUAN KAMI - NO UNDERLINE, WITH SVG */}
+                <div style={{ 
+                  display: 'flex', 
+                  justifyContent: 'flex-start', 
+                  gap: isMobile ? '30px' : '40px', 
+                  marginTop: '15px',
+                  flexWrap: 'wrap'
                 }}>
-                  NO ACCOUNT?
-                </span>
-                <button 
-                  onClick={handleSignUp} 
-                  style={{ 
-                    border: 'none', 
-                    background: 'none', 
-                    color: 'white', 
-                    cursor: 'pointer', 
-                    fontSize: isMobile ? '24px' : '28px',
-                    fontWeight: '400',
-                    letterSpacing: '1px',
-                    padding: '0',
+                  <Link href="#" style={{ 
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '15px',
+                    gap: '6px',
+                    color: 'rgba(255, 255, 255, 0.7)', 
+                    fontSize: isMobile ? '0.8rem' : '0.85rem', 
+                    fontFamily: 'Helvetica, Arial, sans-serif', 
+                    textDecoration: 'none', 
+                    opacity: 0.8, 
+                    transition: 'opacity 0.2s ease', 
+                    letterSpacing: '1px',
+                    fontWeight: '300'
                   }}
-                >
-                  SIGN UP
-                  <SouthWestArrow size={isMobile ? 30 : 40} />
-                </button>
+                  onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
+                  onMouseLeave={(e) => e.currentTarget.style.opacity = '0.8'}
+                  >
+                    KEBIJAKAN PRIVASI
+                    <svg 
+                      width="14" 
+                      height="14" 
+                      viewBox="0 0 24 24" 
+                      fill="none"
+                      stroke="white"
+                      strokeWidth="1"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M17 7L7 17" stroke="white"/>
+                      <path d="M17 7H7" stroke="white"/>
+                      <path d="M17 7V17" stroke="white"/>
+                    </svg>
+                  </Link>
+                  <Link href="#" style={{ 
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    color: 'rgba(255, 255, 255, 0.7)', 
+                    fontSize: isMobile ? '0.8rem' : '0.85rem', 
+                    fontFamily: 'Helvetica, Arial, sans-serif', 
+                    textDecoration: 'none', 
+                    opacity: 0.8, 
+                    transition: 'opacity 0.2s ease', 
+                    letterSpacing: '1px',
+                    fontWeight: '300'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
+                  onMouseLeave={(e) => e.currentTarget.style.opacity = '0.8'}
+                  >
+                    KETENTUAN KAMI
+                    <svg 
+                      width="14" 
+                      height="14" 
+                      viewBox="0 0 24 24" 
+                      fill="none"
+                      stroke="white"
+                      strokeWidth="1"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M17 7L7 17" stroke="white"/>
+                      <path d="M17 7H7" stroke="white"/>
+                      <path d="M17 7V17" stroke="white"/>
+                    </svg>
+                  </Link>
+                </div>
               </div>
-            </div>
-
-            {/* PRIVACY & TERMS */}
-            <div style={{ 
-              display: 'flex', 
-              gap: isMobile ? '40px' : '60px', 
-              flexWrap: 'wrap',
-            }}>
-              <Link href="#" style={{ 
-                color: 'white', 
-                fontSize: isMobile ? '20px' : '24px', 
-                textDecoration: 'none',
-                letterSpacing: '1px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '10px',
-              }}>
-                KEBIJAKAN PRIVASI
-                <SouthWestArrow size={isMobile ? 25 : 30} />
-              </Link>
-              <Link href="#" style={{ 
-                color: 'white', 
-                fontSize: isMobile ? '20px' : '24px', 
-                textDecoration: 'none',
-                letterSpacing: '1px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '10px',
-              }}>
-                KETENTUAN KAMI
-                <SouthWestArrow size={isMobile ? 25 : 30} />
-              </Link>
-            </div>
-          </>
-        )}
-      </div>
-
-      {/* LETS JOIN US SECTION */}
-      <div style={{ 
-        width: '100%',
-        maxWidth: '1400px',
-        marginTop: isMobile ? '100px' : '150px', 
-        marginBottom: isMobile ? '60px' : '80px',
-      }}>
-        <div style={{ marginBottom: isMobile ? '50px' : '70px' }}>
-          <p style={{ 
-            color: 'white', 
-            fontSize: isMobile ? '48px' : '80px', 
-            margin: '0 0 10px 0', 
-            lineHeight: '1', 
-            fontWeight: '400',
-            letterSpacing: '2px',
-          }}>
-            LETS JOIN US
-          </p>
-          <p style={{ 
-            color: 'white', 
-            fontSize: isMobile ? '48px' : '80px', 
-            margin: 0, 
-            lineHeight: '1', 
-            fontWeight: '400',
-            letterSpacing: '2px',
-          }}>
-            NOTE THINK.
-          </p>
+            </>
+          )}
         </div>
 
-        {/* MENU GRID */}
+        {/* LETS JOIN US NOTE THINK */}
         <div style={{ 
-          display: 'grid', 
-          gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(3, auto)', 
-          gap: isMobile ? '40px 60px' : '60px 120px', 
-          justifyContent: 'flex-start',
-          alignItems: 'start',
+          position: 'relative', 
+          textAlign: isMobile ? 'center' : 'left', 
+          marginTop: isMobile ? '4rem' : '6rem', 
+          width: '100%', 
+          maxWidth: isMobile ? '100%' : '1200px', 
+          padding: isMobile ? '1rem 0' : '2rem 0', 
+          marginLeft: isMobile ? '0' : '0', 
+          marginBottom: isMobile ? '1rem' : '2rem' 
         }}>
-          <div>
-            <h4 style={{ 
-              color: 'white', 
-              fontSize: isMobile ? '32px' : '64px', 
-              fontWeight: '400', 
-              margin: '0 0 10px 0', 
-              fontFamily: 'Helvetica, Arial, sans-serif',
-              letterSpacing: '2px',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '15px',
+          <div style={{ 
+            marginBottom: isMobile ? '2rem' : '4rem', 
+            padding: isMobile ? '0' : '0' 
+          }}>
+            <p style={{ 
+              color: 'rgba(255,255,255,0.9)', 
+              fontSize: isMobile ? '2.5rem' : '5rem', 
+              fontFamily: 'Helvetica, Arial, sans-serif', 
+              margin: '0 0 0.3rem 0', 
+              lineHeight: '1.1', 
+              fontWeight: '600' 
             }}>
-              MENU
-              <SouthWestArrow size={isMobile ? 35 : 50} />
-            </h4>
-          </div>
-          <div>
-            <h4 style={{ 
-              color: 'white', 
-              fontSize: isMobile ? '32px' : '64px', 
-              fontWeight: '400', 
-              margin: '0 0 10px 0', 
-              fontFamily: 'Helvetica, Arial, sans-serif',
-              letterSpacing: '2px',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '15px',
+              LETS JOIN US
+            </p>
+            <p style={{ 
+              color: 'rgba(255,255,255,0.9)', 
+              fontSize: isMobile ? '2.5rem' : '5rem', 
+              fontFamily: 'Helvetica, Arial, sans-serif', 
+              margin: 0, 
+              lineHeight: '1.1', 
+              fontWeight: '600' 
             }}>
-              PRODUCT
-              <SouthWestArrow size={isMobile ? 35 : 50} />
-            </h4>
+              NOTE THINK.
+            </p>
           </div>
-          <div>
-            <ConnectionComponent />
-          </div>
-          <div>
-            <h4 style={{ 
-              color: 'white', 
-              fontSize: isMobile ? '32px' : '64px', 
-              fontWeight: '400', 
-              margin: '0 0 10px 0', 
-              fontFamily: 'Helvetica, Arial, sans-serif',
-              letterSpacing: '2px',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '15px',
-            }}>
-              FEATURES
-              <SouthWestArrow size={isMobile ? 35 : 50} />
-            </h4>
-          </div>
-          <div>
-            <h4 style={{ 
-              color: 'white', 
-              fontSize: isMobile ? '32px' : '64px', 
-              fontWeight: '400', 
-              margin: '0 0 10px 0', 
-              fontFamily: 'Helvetica, Arial, sans-serif',
-              letterSpacing: '2px',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '15px',
-            }}>
-              COMMUNITY
-              <SouthWestArrow size={isMobile ? 35 : 50} />
-            </h4>
-          </div>
-          <div>
-            <h4 style={{ 
-              color: 'white', 
-              fontSize: isMobile ? '32px' : '64px', 
-              fontWeight: '400', 
-              margin: '0 0 10px 0', 
-              fontFamily: 'Helvetica, Arial, sans-serif',
-              letterSpacing: '2px',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '15px',
-            }}>
-              BLOG
-              <SouthWestArrow size={isMobile ? 35 : 50} />
-            </h4>
+
+          {/* 6 KELOMPOK MENU */}
+          <div style={{ 
+            display: 'grid', 
+            gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(3, auto)', 
+            gap: isMobile ? '2rem 3rem' : '2rem 8rem', 
+            marginTop: '0rem', 
+            padding: isMobile ? '0' : '0', 
+            justifyContent: isMobile ? 'center' : 'flex-start' 
+          }}>
+            <div>
+              <h4 style={{ 
+                color: 'white', 
+                fontSize: isMobile ? '1.8rem' : '4rem', 
+                fontWeight: '600', 
+                margin: '0 0 0.5rem 0', 
+                marginBottom: isMobile ? '3rem' : '5rem', 
+                fontFamily: 'Helvetica, Arial, sans-serif' 
+              }}>
+                MENU
+              </h4>
+            </div>
+            <div>
+              <h4 style={{ 
+                color: 'white', 
+                fontSize: isMobile ? '1.8rem' : '4rem', 
+                fontWeight: '600', 
+                margin: '0 0 0.5rem 0', 
+                marginBottom: isMobile ? '3rem' : '5rem', 
+                fontFamily: 'Helvetica, Arial, sans-serif' 
+              }}>
+                PRODUCT
+              </h4>
+            </div>
+            <div>
+              <ConnectionComponent />
+            </div>
+            <div>
+              <h4 style={{ 
+                color: 'white', 
+                fontSize: isMobile ? '1.8rem' : '4rem', 
+                fontWeight: '600', 
+                margin: '0 0 0.5rem 0', 
+                marginBottom: isMobile ? '8rem' : '15rem', 
+                fontFamily: 'Helvetica, Arial, sans-serif' 
+              }}>
+                Features
+              </h4>
+            </div>
+            <div>
+              <h4 style={{ 
+                color: 'white', 
+                fontSize: isMobile ? '1.8rem' : '4rem', 
+                fontWeight: '600', 
+                margin: '0 0 0.5rem 0', 
+                marginBottom: isMobile ? '8rem' : '15rem', 
+                fontFamily: 'Helvetica, Arial, sans-serif' 
+              }}>
+                Community
+              </h4>
+            </div>
+            <div>
+              <h4 style={{ 
+                color: 'white', 
+                fontSize: isMobile ? '1.8rem' : '4rem', 
+                fontWeight: '600', 
+                margin: '0 0 0.5rem 0', 
+                marginBottom: isMobile ? '8rem' : '15rem', 
+                fontFamily: 'Helvetica, Arial, sans-serif' 
+              }}>
+                BLOG
+              </h4>
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* MARQUEE 2 */}
-      <MarqueeRightText />
-    </div>
+        {/* TEKS BERJALAN 2 - KANAN KE KIRI DENGAN SVG MINIMALIST */}
+        <MarqueeRightText />
+      </div>
+      
+      <style jsx>{`
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+        input::placeholder {
+          color: rgba(255, 255, 255, 0.4);
+          font-weight: 300;
+          letter-spacing: 0.5px;
+        }
+      `}</style>
+    </>
   );
 }
