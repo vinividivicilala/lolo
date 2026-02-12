@@ -67,6 +67,17 @@ export default function SignInPage() {
   const [connectionsOpen, setConnectionsOpen] = useState(false);
   const socialItemsRef = useRef<(HTMLDivElement | null)[]>([]);
 
+  // ============================================
+  // HANDLERS
+  // ============================================
+  const handleForgotPassword = () => {
+    router.push('/forgot-password');
+  };
+
+  const handleSignUp = () => {
+    router.push('/signup');
+  };
+
   // SOUTH WEST ARROW SVG Component
   const SouthWestArrow = ({ size = 60 }) => (
     <svg 
