@@ -763,7 +763,7 @@ export default function SignInPage() {
               lineHeight: '1',
               letterSpacing: '-1px'
             }}>
-              {user ? `Welcome, ${user.displayName || user.email}` : 'Welcome back'}
+              {user ? `Welcome, ${user.displayName || user.email?.split('@')[0] || 'User'}` : 'Welcome back'}
             </h1>
             <p style={{ 
               fontFamily: 'Helvetica, Arial, sans-serif', 
@@ -785,15 +785,16 @@ export default function SignInPage() {
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'flex-start',
-                gap: '20px'
+                gap: '25px'
               }}>
                 <p style={{ 
                   color: '#ffffff', 
-                  fontSize: isMobile ? '1.8rem' : '2.2rem', 
+                  fontSize: isMobile ? '2.2rem' : '2.8rem', 
                   fontFamily: 'Helvetica, Arial, sans-serif',
                   fontWeight: '300',
                   opacity: 0.9,
-                  margin: 0
+                  margin: 0,
+                  letterSpacing: '2px'
                 }}>
                   ✓ Login successful!
                 </p>
@@ -802,17 +803,17 @@ export default function SignInPage() {
                   style={{ 
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '15px',
+                    gap: '20px',
                     padding: '0', 
                     border: 'none', 
                     backgroundColor: 'transparent', 
                     color: '#ffffff', 
                     fontFamily: 'Helvetica, Arial, sans-serif', 
-                    fontSize: isMobile ? '1.8rem' : '2.2rem', 
+                    fontSize: isMobile ? '2rem' : '2.6rem', 
                     fontWeight: '300',
                     cursor: 'pointer', 
                     transition: 'opacity 0.2s ease', 
-                    letterSpacing: '2px',
+                    letterSpacing: '4px',
                     opacity: 0.8
                   }}
                   onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
@@ -820,8 +821,8 @@ export default function SignInPage() {
                 >
                   GO TO NOTES
                   <svg 
-                    width={isMobile ? '40' : '60'} 
-                    height={isMobile ? '40' : '60'} 
+                    width={isMobile ? '50' : '70'} 
+                    height={isMobile ? '50' : '70'} 
                     viewBox="0 0 24 24" 
                     fill="none"
                     stroke="white"
@@ -845,14 +846,16 @@ export default function SignInPage() {
                 marginTop: '20px', 
                 marginBottom: '20px',
                 fontFamily: 'Helvetica, Arial, sans-serif',
-                fontWeight: '300'
+                fontWeight: '300',
+                borderLeft: '1px solid rgba(255, 255, 255, 0.2)',
+                paddingLeft: '20px'
               }}>
                 {error}
               </div>
             )}
             
             {/* LOGOUT BUTTON - NO LINE, BIG TEXT */}
-            {user && !loginSuccess && (
+            {user && (
               <button 
                 onClick={handleLogout} 
                 style={{ 
@@ -864,15 +867,32 @@ export default function SignInPage() {
                   cursor: 'pointer', 
                   transition: 'opacity 0.2s ease', 
                   fontFamily: 'Helvetica, Arial, sans-serif',
-                  fontSize: isMobile ? '1.6rem' : '2rem',
+                  fontSize: isMobile ? '1.8rem' : '2.2rem',
                   fontWeight: '300',
                   letterSpacing: '4px',
-                  opacity: 0.8
+                  opacity: 0.8,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '15px'
                 }}
                 onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
                 onMouseLeave={(e) => e.currentTarget.style.opacity = '0.8'}
               >
                 SIGN OUT
+                <svg 
+                  width={isMobile ? '40' : '55'} 
+                  height={isMobile ? '40' : '55'} 
+                  viewBox="0 0 24 24" 
+                  fill="none"
+                  stroke="white"
+                  strokeWidth="1"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" stroke="white"/>
+                  <polyline points="16 17 21 12 16 7" stroke="white"/>
+                  <line x1="21" y1="12" x2="9" y2="12" stroke="white"/>
+                </svg>
               </button>
             )}
           </div>
@@ -932,9 +952,9 @@ export default function SignInPage() {
                     strokeLinejoin="round"
                     style={{ marginLeft: '10px', opacity: 0.7 }}
                   >
-                    <path d="M17 7L7 17" stroke="white"/>
-                    <path d="M17 7H7" stroke="white"/>
-                    <path d="M17 7V17" stroke="white"/>
+                    <path d="M7 7L17 7" stroke="white"/>
+                    <path d="M7 7L7 17" stroke="white"/>
+                    <path d="M7 7L21 21" stroke="white"/>
                   </svg>
                 </div>
 
@@ -978,9 +998,9 @@ export default function SignInPage() {
                     strokeLinejoin="round"
                     style={{ marginLeft: '10px', opacity: 0.7 }}
                   >
-                    <path d="M17 7L7 17" stroke="white"/>
-                    <path d="M17 7H7" stroke="white"/>
-                    <path d="M17 7V17" stroke="white"/>
+                    <path d="M7 7L17 7" stroke="white"/>
+                    <path d="M7 7L7 17" stroke="white"/>
+                    <path d="M7 7L21 21" stroke="white"/>
                   </svg>
                 </div>
               </div>
@@ -1101,9 +1121,9 @@ export default function SignInPage() {
                       strokeLinejoin="round"
                       style={{ opacity: 0.7 }}
                     >
-                      <path d="M17 7L7 17" stroke="white"/>
-                      <path d="M17 7H7" stroke="white"/>
-                      <path d="M17 7V17" stroke="white"/>
+                      <path d="M7 7L17 7" stroke="white"/>
+                      <path d="M7 7L7 17" stroke="white"/>
+                      <path d="M7 7L21 21" stroke="white"/>
                     </svg>
                   </div>
                 </div>
@@ -1158,9 +1178,9 @@ export default function SignInPage() {
                       strokeLinecap="round"
                       strokeLinejoin="round"
                     >
-                      <path d="M17 7L7 17" stroke="white"/>
-                      <path d="M17 7H7" stroke="white"/>
-                      <path d="M17 7V17" stroke="white"/>
+                      <path d="M7 7L17 7" stroke="white"/>
+                      <path d="M7 7L7 17" stroke="white"/>
+                      <path d="M7 7L21 21" stroke="white"/>
                     </svg>
                   </button>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
@@ -1205,15 +1225,15 @@ export default function SignInPage() {
                         strokeLinecap="round"
                         strokeLinejoin="round"
                       >
-                        <path d="M17 7L7 17" stroke="white"/>
-                        <path d="M17 7H7" stroke="white"/>
-                        <path d="M17 7V17" stroke="white"/>
+                        <path d="M7 7L17 7" stroke="white"/>
+                        <path d="M7 7L7 17" stroke="white"/>
+                        <path d="M7 7L21 21" stroke="white"/>
                       </svg>
                     </button>
                   </div>
                 </div>
 
-                {/* KEBIJAKAN PRIVASI & KETENTUAN KAMI - BIG TEXT, BIG ARROWS, NO UNDERLINE */}
+                {/* KEBIJAKAN PRIVASI & KETENTUAN KAMI - BIG TEXT, BIG ARROWS, NO UNDERLINE, SOUTH EAST ARROW */}
                 <div style={{ 
                   display: 'flex', 
                   justifyContent: 'flex-start', 
@@ -1248,9 +1268,9 @@ export default function SignInPage() {
                       strokeLinecap="round"
                       strokeLinejoin="round"
                     >
-                      <path d="M17 7L7 17" stroke="white"/>
-                      <path d="M17 7H7" stroke="white"/>
-                      <path d="M17 7V17" stroke="white"/>
+                      <path d="M7 7L17 7" stroke="white"/>
+                      <path d="M17 7L17 17" stroke="white"/>
+                      <path d="M17 7L3 21" stroke="white"/>
                     </svg>
                   </Link>
                   <Link href="#" style={{ 
@@ -1280,9 +1300,9 @@ export default function SignInPage() {
                       strokeLinecap="round"
                       strokeLinejoin="round"
                     >
-                      <path d="M17 7L7 17" stroke="white"/>
-                      <path d="M17 7H7" stroke="white"/>
-                      <path d="M17 7V17" stroke="white"/>
+                      <path d="M7 7L17 7" stroke="white"/>
+                      <path d="M17 7L17 17" stroke="white"/>
+                      <path d="M17 7L3 21" stroke="white"/>
                     </svg>
                   </Link>
                 </div>
