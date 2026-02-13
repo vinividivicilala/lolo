@@ -60,6 +60,10 @@ const EMOTICONS = [
   { id: 'muscle', emoji: '💪', label: 'Kuat', color: '#b45309' }
 ];
 
+// Admin dan Verified Users
+const ADMIN_EMAIL = "faridardiansyah061@gmail.com";
+const VERIFIED_EMAIL = "faridardiansyah051@gmail.com";
+
 export default function BlogPage() {
   const router = useRouter();
   const [isMounted, setIsMounted] = useState(false);
@@ -86,6 +90,10 @@ export default function BlogPage() {
   const [newComment, setNewComment] = useState("");
   const [showCommentForm, setShowCommentForm] = useState(false);
   const [commentLoading, setCommentLoading] = useState(false);
+
+  // State untuk Hover Badge
+  const [hoveredAdminBadge, setHoveredAdminBadge] = useState<string | null>(null);
+  const [hoveredVerifiedBadge, setHoveredVerifiedBadge] = useState<string | null>(null);
 
   // Format tanggal
   const today = new Date();
@@ -400,7 +408,9 @@ export default function BlogPage() {
         text: replyText,
         createdAt: Timestamp.now(),
         likes: 0,
-        likedBy: []
+        likedBy: [],
+        isAdmin: user.email === ADMIN_EMAIL,
+        isVerified: user.email === VERIFIED_EMAIL
       };
 
       await updateDoc(commentRef, {
@@ -540,6 +550,180 @@ export default function BlogPage() {
     </svg>
   );
 
+  // Admin Badge Component
+  const AdminBadge = ({ email }: { email: string }) => (
+    <div style={{ position: 'relative', display: 'inline-block' }}>
+      <motion.div
+        onHoverStart={() => setHoveredAdminBadge(email)}
+        onHoverEnd={() => setHoveredAdminBadge(null)}
+        style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: '4px',
+          background: 'rgba(59,130,246,0.1)',
+          border: '1px solid #3b82f6',
+          borderRadius: '30px',
+          padding: '2px 10px',
+          marginLeft: '8px',
+          fontSize: '0.75rem',
+          color: '#3b82f6',
+          cursor: 'help',
+        }}
+      >
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" strokeWidth="2">
+          <path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z"/>
+          <path d="M12 6v6l4 2"/>
+        </svg>
+        <span>Admin</span>
+      </motion.div>
+      
+      <AnimatePresence>
+        {hoveredAdminBadge === email && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 10 }}
+            transition={{ duration: 0.2 }}
+            style={{
+              position: 'absolute',
+              bottom: '100%',
+              left: '0',
+              marginBottom: '10px',
+              width: '250px',
+              padding: '16px',
+              background: 'rgba(0,0,0,0.95)',
+              border: '1px solid #3b82f6',
+              borderRadius: '12px',
+              boxShadow: '0 10px 25px rgba(0,0,0,0.5)',
+              zIndex: 1000,
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
+              <div style={{
+                width: '40px',
+                height: '40px',
+                borderRadius: '50%',
+                background: 'rgba(59,130,246,0.2)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" strokeWidth="1.5">
+                  <path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z"/>
+                  <path d="M12 6v6l4 2"/>
+                </svg>
+              </div>
+              <div>
+                <div style={{ fontWeight: 'bold', color: 'white', fontSize: '1rem' }}>Administrator</div>
+                <div style={{ color: '#3b82f6', fontSize: '0.8rem' }}>{email}</div>
+              </div>
+            </div>
+            <div style={{ color: '#e0e0e0', fontSize: '0.9rem', lineHeight: '1.5' }}>
+              <p style={{ margin: '0 0 8px 0' }}>
+                <strong style={{ color: '#3b82f6' }}>Farid Ardiansyah</strong> adalah administrator utama blog ini.
+              </p>
+              <p style={{ margin: '0 0 8px 0' }}>
+                🎓 Alumni Universitas Gunadarma 2026
+              </p>
+              <p style={{ margin: '0 0 8px 0' }}>
+                💻 Full-stack Developer & Content Creator
+              </p>
+              <p style={{ margin: '0', color: '#999999', fontSize: '0.8rem' }}>
+                ✨ Bertanggung jawab atas konten dan moderasi
+              </p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+
+  // Verified Badge Component
+  const VerifiedBadge = ({ email }: { email: string }) => (
+    <div style={{ position: 'relative', display: 'inline-block' }}>
+      <motion.div
+        onHoverStart={() => setHoveredVerifiedBadge(email)}
+        onHoverEnd={() => setHoveredVerifiedBadge(null)}
+        style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: '4px',
+          background: 'rgba(29,155,240,0.1)',
+          border: '1px solid #1d9bf0',
+          borderRadius: '30px',
+          padding: '2px 10px',
+          marginLeft: '8px',
+          fontSize: '0.75rem',
+          color: '#1d9bf0',
+          cursor: 'help',
+        }}
+      >
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="#1d9bf0" stroke="none">
+          <path d="M22.5 12.5c0-1.58-.875-2.95-2.148-3.6.154-.435.238-.905.238-1.4 0-2.21-1.71-3.998-3.818-3.998-.47 0-.92.084-1.336.25C14.818 2.415 13.51 1.5 12 1.5s-2.816.917-3.437 2.25c-.415-.165-.866-.25-1.336-.25-2.11 0-3.818 1.79-3.818 4 0 .494.083.964.237 1.4-1.272.65-2.147 2.018-2.147 3.6 0 1.495.782 2.798 1.942 3.486-.02.17-.032.34-.032.514 0 2.21 1.708 4 3.818 4 .47 0 .92-.086 1.335-.25.62 1.334 1.926 2.25 3.437 2.25 1.512 0 2.818-.916 3.437-2.25.415.163.865.248 1.336.248 2.11 0 3.818-1.79 3.818-4 0-.174-.012-.344-.033-.513 1.158-.687 1.943-1.99 1.943-3.485z"/>
+        </svg>
+        <span>Resmi</span>
+      </motion.div>
+      
+      <AnimatePresence>
+        {hoveredVerifiedBadge === email && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 10 }}
+            transition={{ duration: 0.2 }}
+            style={{
+              position: 'absolute',
+              bottom: '100%',
+              left: '0',
+              marginBottom: '10px',
+              width: '280px',
+              padding: '16px',
+              background: 'rgba(0,0,0,0.95)',
+              border: '1px solid #1d9bf0',
+              borderRadius: '12px',
+              boxShadow: '0 10px 25px rgba(0,0,0,0.5)',
+              zIndex: 1000,
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
+              <div style={{
+                width: '40px',
+                height: '40px',
+                borderRadius: '50%',
+                background: 'rgba(29,155,240,0.2)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="#1d9bf0" stroke="none">
+                  <path d="M22.5 12.5c0-1.58-.875-2.95-2.148-3.6.154-.435.238-.905.238-1.4 0-2.21-1.71-3.998-3.818-3.998-.47 0-.92.084-1.336.25C14.818 2.415 13.51 1.5 12 1.5s-2.816.917-3.437 2.25c-.415-.165-.866-.25-1.336-.25-2.11 0-3.818 1.79-3.818 4 0 .494.083.964.237 1.4-1.272.65-2.147 2.018-2.147 3.6 0 1.495.782 2.798 1.942 3.486-.02.17-.032.34-.032.514 0 2.21 1.708 4 3.818 4 .47 0 .92-.086 1.335-.25.62 1.334 1.926 2.25 3.437 2.25 1.512 0 2.818-.916 3.437-2.25.415.163.865.248 1.336.248 2.11 0 3.818-1.79 3.818-4 0-.174-.012-.344-.033-.513 1.158-.687 1.943-1.99 1.943-3.485z"/>
+                </svg>
+              </div>
+              <div>
+                <div style={{ fontWeight: 'bold', color: 'white', fontSize: '1rem' }}>Akun Resmi Terverifikasi</div>
+                <div style={{ color: '#1d9bf0', fontSize: '0.8rem' }}>{email}</div>
+              </div>
+            </div>
+            <div style={{ color: '#e0e0e0', fontSize: '0.9rem', lineHeight: '1.5' }}>
+              <p style={{ margin: '0 0 8px 0' }}>
+                <strong style={{ color: '#1d9bf0' }}>Centang Biru Resmi</strong> - Identitas terverifikasi
+              </p>
+              <p style={{ margin: '0 0 8px 0' }}>
+                🏆 Kontributor Utama & Partner Resmi
+              </p>
+              <p style={{ margin: '0 0 8px 0' }}>
+                📌 Telah memverifikasi identitas dan kredibilitas
+              </p>
+              <p style={{ margin: '0', color: '#999999', fontSize: '0.8rem' }}>
+                ✨ Akun ini dijamin keasliannya oleh tim Gunadarma
+              </p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+
   // ============================================
   // 15. RANGKUMAN SECTIONS
   // ============================================
@@ -632,8 +816,12 @@ export default function BlogPage() {
               fontSize: '1rem',
               color: 'white',
               fontWeight: '500',
+              display: 'flex',
+              alignItems: 'center',
             }}>
               {user.displayName || user.email?.split('@')[0]}
+              {user.email === ADMIN_EMAIL && <AdminBadge email={user.email} />}
+              {user.email === VERIFIED_EMAIL && <VerifiedBadge email={user.email} />}
             </span>
             <motion.button
               whileHover={{ scale: 1.05 }}
@@ -830,7 +1018,7 @@ export default function BlogPage() {
             Bagaimana Rasa nya Masuk Kuliah Di Universitas Gunadarma
           </h2>
 
-          {/* KONTEN ARTIKEL - LENGKAP TIDAK DIHAPUS */}
+          {/* KONTEN ARTIKEL - LENGKAP */}
           <div style={{
             fontSize: isMobile ? '1.1rem' : '1.2rem',
             lineHeight: '1.8',
@@ -1115,7 +1303,7 @@ export default function BlogPage() {
             </section>
           </div>
 
-          {/* ===== EMOTICON REACTIONS - BESAR ===== */}
+          {/* ===== EMOTICON REACTIONS ===== */}
           <div style={{
             marginTop: '60px',
             marginBottom: '40px',
@@ -1271,7 +1459,7 @@ export default function BlogPage() {
             </div>
           </div>
 
-          {/* ===== COMMENT SECTION - BESAR ===== */}
+          {/* ===== COMMENT SECTION ===== */}
 
           {/* Add Comment Button */}
           <motion.button
@@ -1343,10 +1531,14 @@ export default function BlogPage() {
                         color: 'white', 
                         fontSize: '1.2rem',
                         fontWeight: '500',
-                        display: 'block',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
                         marginBottom: '4px'
                       }}>
                         {user?.displayName || user?.email?.split('@')[0]}
+                        {user.email === ADMIN_EMAIL && <AdminBadge email={user.email} />}
+                        {user.email === VERIFIED_EMAIL && <VerifiedBadge email={user.email} />}
                       </span>
                       <span style={{ color: '#666666', fontSize: '0.9rem' }}>
                         Berkomentar sebagai pengguna
@@ -1416,7 +1608,7 @@ export default function BlogPage() {
             )}
           </AnimatePresence>
 
-          {/* Comments List - BESAR */}
+          {/* Comments List */}
           <div style={{
             display: 'flex',
             flexDirection: 'column',
@@ -1490,10 +1682,14 @@ export default function BlogPage() {
                           fontSize: '1.2rem',
                           fontWeight: '500',
                           color: 'white',
-                          display: 'block',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '8px',
                           marginBottom: '4px',
                         }}>
                           {comment.userName}
+                          {comment.userEmail === ADMIN_EMAIL && <AdminBadge email={comment.userEmail} />}
+                          {comment.userEmail === VERIFIED_EMAIL && <VerifiedBadge email={comment.userEmail} />}
                         </span>
                         <span style={{
                           fontSize: '0.9rem',
@@ -1734,8 +1930,15 @@ export default function BlogPage() {
                                   fontSize: '1rem',
                                   fontWeight: '500',
                                   color: 'white',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: '8px',
                                 }}>
                                   {reply.userName}
+                                  {reply.userEmail === ADMIN_EMAIL && <AdminBadge email={reply.userEmail} />}
+                                  {reply.userEmail === VERIFIED_EMAIL && <VerifiedBadge email={reply.userEmail} />}
+                                  {reply.isAdmin && <AdminBadge email={reply.userEmail || ADMIN_EMAIL} />}
+                                  {reply.isVerified && <VerifiedBadge email={reply.userEmail || VERIFIED_EMAIL} />}
                                 </span>
                                 <span style={{
                                   fontSize: '0.8rem',
