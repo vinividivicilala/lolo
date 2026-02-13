@@ -40,7 +40,7 @@ const firebaseConfig = {
   measurementId: "G-8LMP7F4BE9"
 };
 
-// Data media sosial untuk komponen Connection
+// Data media sosial untuk komponen Connection - TANPA NOMOR
 const socialConnections = [
   { id: 1, name: "GitHub" },
   { id: 2, name: "Instagram" },
@@ -49,15 +49,15 @@ const socialConnections = [
   { id: 5, name: "YouTube" }
 ];
 
-// Data community items - huruf kecil semua, tanpa icon
+// Data community items - HURUF DEPAN BESAR, tanpa icon
 const communityItems = [
-  { id: 1, name: "point blank" },
-  { id: 2, name: "lost saga" },
-  { id: 3, name: "persib" },
-  { id: 4, name: "coding" },
-  { id: 5, name: "pembersihan" },
-  { id: 6, name: "pendidikan" },
-  { id: 7, name: "sosial" }
+  { id: 1, name: "Point Blank" },
+  { id: 2, name: "Lost Saga" },
+  { id: 3, name: "Persib" },
+  { id: 4, name: "Coding" },
+  { id: 5, name: "Pembersihan" },
+  { id: 6, name: "Pendidikan" },
+  { id: 7, name: "Sosial" }
 ];
 
 interface LoginHistory {
@@ -106,6 +106,10 @@ export default function SignInPage() {
   const communityItemsRef = useRef<(HTMLDivElement | null)[]>([]);
   const communityTitleRef = useRef<HTMLDivElement>(null);
   const communityContainerRef = useRef<HTMLDivElement>(null);
+  
+  // --- REFS UNTUK BLOG ---
+  const [blogOpen, setBlogOpen] = useState(false);
+  const blogContentRef = useRef<HTMLDivElement>(null);
 
   // ============================================
   // 1. FIX HYDRATION: TANDAI KOMPONEN SUDAH DI-MOUNT
@@ -278,12 +282,9 @@ export default function SignInPage() {
   useEffect(() => {
     if (!isMounted) return;
     
-    // Animasi GSAP Modern untuk Community
     if (communityOpen) {
-      // Timeline untuk animasi yang lebih kompleks
       const tl = gsap.timeline();
       
-      // Animasi title dengan efek modern
       if (communityTitleRef.current) {
         tl.fromTo(communityTitleRef.current, 
           { scale: 1, color: 'rgba(255,255,255,0.8)' },
@@ -291,17 +292,14 @@ export default function SignInPage() {
         );
       }
       
-      // Animasi items dengan efek stagger modern - VERTICAL LIST
       const validRefs = communityItemsRef.current.filter(Boolean);
       if (validRefs.length > 0) {
-        // Reset posisi awal
         gsap.set(validRefs, { 
           x: -30, 
           opacity: 0,
           scale: 0.9
         });
         
-        // Animasi masuk dengan efek stagger - SEJAJAR KE BAWAH
         tl.to(validRefs, {
           x: 0,
           opacity: 1,
@@ -315,7 +313,6 @@ export default function SignInPage() {
           ease: "power2.out"
         }, "-=0.2");
         
-        // Efek hover untuk setiap item
         validRefs.forEach((ref, index) => {
           if (ref) {
             ref.addEventListener('mouseenter', () => {
@@ -336,7 +333,6 @@ export default function SignInPage() {
         });
       }
       
-      // Animasi container dengan efek modern
       if (communityContainerRef.current) {
         gsap.fromTo(communityContainerRef.current,
           { height: 0, opacity: 0 },
@@ -345,7 +341,6 @@ export default function SignInPage() {
       }
       
     } else {
-      // Animasi keluar dengan efek modern
       const validRefs = communityItemsRef.current.filter(Boolean);
       if (validRefs.length > 0) {
         gsap.to(validRefs, {
@@ -361,7 +356,6 @@ export default function SignInPage() {
           ease: "power2.in"
         });
         
-        // Remove hover listeners
         validRefs.forEach((ref) => {
           if (ref) {
             ref.removeEventListener('mouseenter', () => {});
@@ -388,7 +382,6 @@ export default function SignInPage() {
       }
     }
     
-    // Cleanup function
     return () => {
       const validRefs = communityItemsRef.current.filter(Boolean);
       validRefs.forEach((ref) => {
@@ -401,7 +394,32 @@ export default function SignInPage() {
   }, [communityOpen, isMounted]);
 
   // ============================================
-  // 8. FUNGSI FIRESTORE - TANPA SIMPAN PASSWORD
+  // 8. ANIMASI GSAP UNTUK BLOG
+  // ============================================
+  useEffect(() => {
+    if (!isMounted) return;
+    
+    if (blogOpen) {
+      if (blogContentRef.current) {
+        gsap.fromTo(blogContentRef.current,
+          { y: 20, opacity: 0 },
+          { y: 0, opacity: 1, duration: 0.5, ease: "power2.out" }
+        );
+      }
+    } else {
+      if (blogContentRef.current) {
+        gsap.to(blogContentRef.current, {
+          y: 20,
+          opacity: 0,
+          duration: 0.3,
+          ease: "power2.in"
+        });
+      }
+    }
+  }, [blogOpen, isMounted]);
+
+  // ============================================
+  // 9. FUNGSI FIRESTORE - TANPA SIMPAN PASSWORD
   // ============================================
   const saveLoginHistory = async (userData: any, provider: string) => {
     if (!firebaseDb || !firebaseAuth) return;
@@ -426,7 +444,7 @@ export default function SignInPage() {
   };
 
   // ============================================
-  // 9. AUTH STATE CHANGED LISTENER - TANPA REDIRECT OTOMATIS
+  // 10. AUTH STATE CHANGED LISTENER - TANPA REDIRECT OTOMATIS
   // ============================================
   useEffect(() => {
     if (!isMounted || !firebaseAuth || !firebaseInitialized) return;
@@ -445,7 +463,7 @@ export default function SignInPage() {
   }, [router, isMounted, firebaseAuth, firebaseInitialized]);
 
   // ============================================
-  // 10. LOGIN HANDLERS - DENGAN SUCCESS STATE
+  // 11. LOGIN HANDLERS - DENGAN SUCCESS STATE
   // ============================================
   const handleGoogleLogin = async () => {
     if (!firebaseAuth) return;
@@ -563,7 +581,7 @@ export default function SignInPage() {
   };
 
   // ============================================
-  // 11. FIX HYDRATION: JIKA BELUM MOUNT, TAMPILKAN LOADING
+  // 12. FIX HYDRATION: JIKA BELUM MOUNT, TAMPILKAN LOADING
   // ============================================
   if (!isMounted) {
     return (
@@ -586,7 +604,7 @@ export default function SignInPage() {
   }
 
   // ============================================
-  // 12. KOMPONEN CONNECTION
+  // 13. KOMPONEN CONNECTION - TANPA NOMOR, DENGAN SVG SOUTH WEST ARROW
   // ============================================
   const ConnectionComponent = () => (
     <div style={{ position: 'relative', width: isMobile ? '100%' : 'auto', zIndex: 10 }}>
@@ -596,7 +614,12 @@ export default function SignInPage() {
         style={{ cursor: 'pointer', userSelect: 'none', marginBottom: connectionsOpen ? '15px' : '0' }}
         onClick={() => setConnectionsOpen(!connectionsOpen)}
       >
-        <div style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: '10px' }}>
+        <div style={{ 
+          position: 'relative', 
+          display: 'flex', 
+          alignItems: 'center', 
+          gap: '15px'
+        }}>
           <h4 style={{
             color: 'white',
             fontSize: isMobile ? '1.8rem' : '4rem',
@@ -623,6 +646,28 @@ export default function SignInPage() {
           >
             ({socialConnections.length.toString().padStart(2, '0')})
           </motion.div>
+          
+          {/* SOUTH WEST ARROW SVG */}
+          <svg 
+            width={isMobile ? '40' : '60'} 
+            height={isMobile ? '40' : '60'} 
+            viewBox="0 0 24 24" 
+            fill="none"
+            stroke="white"
+            strokeWidth="1"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            style={{ 
+              marginLeft: '15px',
+              opacity: 0.8,
+              transform: connectionsOpen ? 'rotate(0deg)' : 'rotate(-90deg)',
+              transition: 'transform 0.3s ease'
+            }}
+          >
+            <path d="M17 7L7 17" stroke="white"/>
+            <path d="M17 7H7" stroke="white"/>
+            <path d="M17 7V17" stroke="white"/>
+          </svg>
         </div>
       </motion.div>
 
@@ -650,17 +695,14 @@ export default function SignInPage() {
                   exit={{ y: 20, opacity: 0 }}
                   transition={{ duration: 0.3, delay: index * 0.08 }}
                   whileHover={{ x: 5 }}
-                  style={{ display: 'flex', alignItems: 'center', gap: '15px', cursor: 'default' }}
+                  style={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    justifyContent: 'space-between',
+                    cursor: 'default',
+                    padding: isMobile ? '4px 0' : '6px 0'
+                  }}
                 >
-                  <div style={{
-                    color: 'rgba(255, 255, 255, 0.5)',
-                    fontSize: isMobile ? '1rem' : '1.5rem',
-                    fontFamily: 'Helvetica, Arial, sans-serif',
-                    width: isMobile ? '30px' : '50px',
-                    textAlign: 'right',
-                  }}>
-                    ({index.toString().padStart(2, '0')})
-                  </div>
                   <p style={{
                     color: 'white',
                     fontSize: isMobile ? '1.2rem' : '1.8rem',
@@ -672,6 +714,23 @@ export default function SignInPage() {
                   }}>
                     {social.name}
                   </p>
+                  
+                  {/* SOUTH WEST ARROW SVG untuk setiap item */}
+                  <svg 
+                    width={isMobile ? '24' : '35'} 
+                    height={isMobile ? '24' : '35'} 
+                    viewBox="0 0 24 24" 
+                    fill="none"
+                    stroke="white"
+                    strokeWidth="1"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    style={{ opacity: 0.6, marginLeft: '15px' }}
+                  >
+                    <path d="M17 7L7 17" stroke="white"/>
+                    <path d="M17 7H7" stroke="white"/>
+                    <path d="M17 7V17" stroke="white"/>
+                  </svg>
                 </motion.div>
               ))}
             </div>
@@ -682,7 +741,7 @@ export default function SignInPage() {
   );
 
   // ============================================
-  // 13. KOMPONEN COMMUNITY GSAP MODERN - VERTICAL LIST, NO ICON, LOWERCASE
+  // 14. KOMPONEN COMMUNITY GSAP MODERN - HURUF DEPAN BESAR, TANPA NOMOR
   // ============================================
   const CommunityComponent = () => (
     <div style={{ position: 'relative', width: isMobile ? '100%' : 'auto', zIndex: 10 }}>
@@ -779,40 +838,22 @@ export default function SignInPage() {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
-                    padding: isMobile ? '8px 0' : '10px 0',
+                    padding: isMobile ? '4px 0' : '6px 0',
                     cursor: 'pointer',
                     borderBottom: 'none',
                     background: 'none',
-                    backdropFilter: 'none',
-                    boxShadow: 'none',
                   }}
                 >
-                  <div style={{ 
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    gap: isMobile ? '12px' : '15px' 
+                  <p style={{
+                    color: 'white',
+                    fontSize: isMobile ? '1.2rem' : '1.8rem',
+                    fontWeight: '400',
+                    margin: '0',
+                    fontFamily: 'Helvetica, Arial, sans-serif',
+                    letterSpacing: '0.5px',
                   }}>
-                    <div style={{
-                      color: 'rgba(255, 255, 255, 0.5)',
-                      fontSize: isMobile ? '0.9rem' : '1.2rem',
-                      fontFamily: 'Helvetica, Arial, sans-serif',
-                      width: isMobile ? '25px' : '40px',
-                      textAlign: 'right',
-                    }}>
-                      ({index.toString().padStart(2, '0')})
-                    </div>
-                    <p style={{
-                      color: 'white',
-                      fontSize: isMobile ? '1.2rem' : '1.8rem',
-                      fontWeight: '400',
-                      margin: '0',
-                      fontFamily: 'Helvetica, Arial, sans-serif',
-                      letterSpacing: '0.5px',
-                      textTransform: 'lowercase',
-                    }}>
-                      {item.name}
-                    </p>
-                  </div>
+                    {item.name}
+                  </p>
                   
                   {/* SOUTH WEST ARROW SVG untuk setiap item */}
                   <svg 
@@ -840,7 +881,118 @@ export default function SignInPage() {
   );
 
   // ============================================
-  // 14. KOMPONEN MARQUEE DENGAN SVG MINIMALIST
+  // 15. KOMPONEN BLOG DENGAN SOUTH EAST ARROW
+  // ============================================
+  const BlogComponent = () => (
+    <div style={{ position: 'relative', width: isMobile ? '100%' : 'auto', zIndex: 10 }}>
+      <motion.div
+        whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.98 }}
+        style={{ cursor: 'pointer', userSelect: 'none', marginBottom: blogOpen ? '20px' : '0' }}
+        onClick={() => setBlogOpen(!blogOpen)}
+      >
+        <div style={{ 
+          position: 'relative', 
+          display: 'flex', 
+          alignItems: 'center', 
+          gap: '15px'
+        }}>
+          <h4 style={{
+            color: 'white',
+            fontSize: isMobile ? '1.8rem' : '4rem',
+            fontWeight: '600',
+            margin: '0',
+            fontFamily: 'Helvetica, Arial, sans-serif',
+            textShadow: '2px 2px 4px rgba(0,0,0,0.3)',
+            textTransform: 'uppercase'
+          }}>
+            BLOG
+          </h4>
+          
+          {/* SOUTH EAST ARROW SVG */}
+          <svg 
+            width={isMobile ? '40' : '60'} 
+            height={isMobile ? '40' : '60'} 
+            viewBox="0 0 24 24" 
+            fill="none"
+            stroke="white"
+            strokeWidth="1"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            style={{ 
+              marginLeft: '15px',
+              opacity: 0.8,
+              transform: blogOpen ? 'rotate(0deg)' : 'rotate(90deg)',
+              transition: 'transform 0.3s ease'
+            }}
+          >
+            <path d="M7 7L17 7" stroke="white"/>
+            <path d="M17 7L17 17" stroke="white"/>
+            <path d="M17 7L3 21" stroke="white"/>
+          </svg>
+        </div>
+      </motion.div>
+
+      <AnimatePresence>
+        {blogOpen && (
+          <motion.div
+            ref={blogContentRef}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+            transition={{ duration: 0.3 }}
+            style={{ 
+              marginTop: '20px',
+              padding: isMobile ? '15px 0' : '20px 0',
+              borderTop: '1px solid rgba(255,255,255,0.1)'
+            }}
+          >
+            <Link 
+              href="#" 
+              style={{ 
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                textDecoration: 'none',
+                color: 'white',
+                padding: isMobile ? '10px 0' : '15px 0',
+              }}
+            >
+              <span style={{
+                fontSize: isMobile ? '1.6rem' : '2.2rem',
+                fontFamily: 'Helvetica, Arial, sans-serif',
+                fontWeight: '300',
+                letterSpacing: '1px',
+                color: 'rgba(255,255,255,0.9)',
+              }}>
+                Bagaimana Rasa nya Masuk Kuliah Di Universitas Gunadarma
+              </span>
+              
+              {/* SOUTH EAST ARROW SVG */}
+              <svg 
+                width={isMobile ? '35' : '50'} 
+                height={isMobile ? '35' : '50'} 
+                viewBox="0 0 24 24" 
+                fill="none"
+                stroke="white"
+                strokeWidth="1"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                style={{ opacity: 0.7 }}
+              >
+                <path d="M7 7L17 7" stroke="white"/>
+                <path d="M17 7L17 17" stroke="white"/>
+                <path d="M17 7L3 21" stroke="white"/>
+              </svg>
+            </Link>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+
+  // ============================================
+  // 16. KOMPONEN MARQUEE DENGAN SVG MINIMALIST
   // ============================================
   const MarqueeLeftText = () => (
     <div style={{
@@ -967,7 +1119,7 @@ export default function SignInPage() {
   );
 
   // ============================================
-  // 15. RENDER UTAMA - TANPA REDIRECT OTOMATIS
+  // 17. RENDER UTAMA - TANPA REDIRECT OTOMATIS
   // ============================================
   return (
     <>
@@ -1663,7 +1815,7 @@ export default function SignInPage() {
             </p>
           </div>
 
-          {/* 6 KELOMPOK MENU - DENGAN COMMUNITY GSAP MODERN */}
+          {/* 6 KELOMPOK MENU - DENGAN COMMUNITY GSAP MODERN DAN BLOG */}
           <div style={{ 
             display: 'grid', 
             gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(3, auto)', 
@@ -1715,21 +1867,12 @@ export default function SignInPage() {
               </h4>
             </div>
             <div>
-              {/* COMMUNITY DENGAN GSAP MODERN - VERTICAL LIST, LOWERCASE, NO ICON */}
+              {/* COMMUNITY DENGAN GSAP MODERN - HURUF DEPAN BESAR, TANPA NOMOR */}
               <CommunityComponent />
             </div>
             <div>
-              <h4 style={{ 
-                color: 'white', 
-                fontSize: isMobile ? '2.2rem' : '4.5rem', 
-                fontWeight: '600', 
-                margin: '0 0 0.5rem 0', 
-                marginBottom: isMobile ? '8rem' : '15rem', 
-                fontFamily: 'Helvetica, Arial, sans-serif',
-                textTransform: 'uppercase'
-              }}>
-                BLOG
-              </h4>
+              {/* BLOG DENGAN SOUTH EAST ARROW */}
+              <BlogComponent />
             </div>
           </div>
         </div>
