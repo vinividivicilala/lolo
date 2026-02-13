@@ -27,7 +27,6 @@ export default function BlogPage() {
     const handleScroll = () => {
       const scrollPosition = window.scrollY + 200;
       
-      // Cek section mana yang sedang aktif berdasarkan scroll
       let currentSection = "pendahuluan";
       
       Object.keys(sectionRefs.current).forEach((key) => {
@@ -168,7 +167,7 @@ export default function BlogPage() {
         </Link>
       </div>
 
-      {/* Layout 2 Kolom */}
+      {/* Layout 2 Kolom - Tanpa Footer */}
       <div style={{
         display: 'flex',
         flexDirection: isMobile ? 'column' : 'row',
@@ -189,25 +188,26 @@ export default function BlogPage() {
           paddingRight: '20px',
         }}>
           
-          {/* Blog Title - Posisi Kiri */}
+          {/* Blog Title - Judul Tema Blog Besar */}
           <div style={{
-            marginBottom: '40px',
+            marginBottom: '50px',
           }}>
             <h1 style={{
-              fontSize: isMobile ? '3rem' : '4rem',
+              fontSize: isMobile ? '4rem' : '6rem',
               fontWeight: 'normal',
               color: 'white',
-              margin: '0 0 10px 0',
-              lineHeight: '1',
+              margin: '0 0 20px 0',
+              lineHeight: '0.9',
+              letterSpacing: '-2px',
             }}>
               Blog
             </h1>
             
-            {/* Tanggal dan Waktu Baca */}
+            {/* Tanggal dan Waktu Baca - Tanpa Underline */}
             <div style={{
               display: 'flex',
               flexDirection: 'column',
-              gap: '10px',
+              gap: '12px',
               marginTop: '20px',
               color: '#999999',
               fontSize: isMobile ? '0.9rem' : '1rem',
@@ -231,27 +231,21 @@ export default function BlogPage() {
             </div>
           </div>
           
-          {/* Rangkuman Title */}
+          {/* Rangkuman Title - Tanpa Border/Garis */}
           <div style={{
-            marginBottom: '20px',
+            marginBottom: '25px',
           }}>
             <h3 style={{
-              fontSize: isMobile ? '1.2rem' : '1.3rem',
+              fontSize: isMobile ? '1.3rem' : '1.5rem',
               fontWeight: 'normal',
               color: 'white',
-              margin: '0 0 5px 0',
+              margin: '0',
             }}>
               Rangkuman
             </h3>
-            <div style={{
-              width: '40px',
-              height: '1px',
-              backgroundColor: 'rgba(255,255,255,0.3)',
-              marginTop: '10px',
-            }} />
           </div>
           
-          {/* Daftar Rangkuman - Hover Effect */}
+          {/* Daftar Rangkuman - Tanpa Border Left/Pipe */}
           <div style={{
             display: 'flex',
             flexDirection: 'column',
@@ -277,10 +271,9 @@ export default function BlogPage() {
                   fontSize: isMobile ? '0.95rem' : '1rem',
                   textAlign: 'left',
                   cursor: 'pointer',
-                  fontWeight: 'normal',
+                  fontWeight: activeSection === section.id ? 'normal' : 'normal',
                   transition: 'all 0.2s ease',
-                  borderLeft: activeSection === section.id ? '2px solid white' : '2px solid transparent',
-                  paddingLeft: activeSection === section.id ? '10px' : '0',
+                  paddingLeft: '0',
                 }}
               >
                 {section.title}
@@ -591,18 +584,6 @@ export default function BlogPage() {
               </p>
             </section>
             
-          </div>
-          
-          {/* Footer */}
-          <div style={{
-            marginTop: '60px',
-            paddingTop: '20px',
-            borderTop: '1px solid #333333',
-            fontSize: isMobile ? '0.9rem' : '1rem',
-            color: '#666666',
-            textAlign: 'center',
-          }}>
-            © 2026
           </div>
           
         </div>
