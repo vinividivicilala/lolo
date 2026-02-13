@@ -419,7 +419,7 @@ export default function BlogPage() {
           textAlign: 'right',
         }}>
           
-          {/* FOTO UTAMA */}
+          {/* FOTO UTAMA - images/1.jpg */}
           <div style={{
             marginBottom: '50px',
             borderRadius: '20px',
@@ -428,7 +428,7 @@ export default function BlogPage() {
             boxShadow: '0 20px 40px rgba(0,0,0,0.4)',
           }}>
             <img 
-              src="https://images.unsplash.com/photo-1562774053-701939374585?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1186&q=80" 
+              src="/images/1.jpg" 
               alt="Universitas Gunadarma"
               style={{
                 width: '100%',
@@ -550,11 +550,11 @@ export default function BlogPage() {
                   </p>
                 </div>
                 <div style={{
-                  flex: '0 0 isMobile ? '100%' : '250px',
+                  flex: isMobile ? '0 0 100%' : '0 0 250px',
                   order: isMobile ? 2 : 1,
                 }}>
                   <img 
-                    src="https://images.unsplash.com/photo-1523050854058-8df90110c9f1?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80" 
+                    src="/images/2.jpg" 
                     alt="Sejarah Gunadarma"
                     style={{
                       width: '100%',
@@ -586,7 +586,7 @@ export default function BlogPage() {
                 marginBottom: '20px',
               }}>
                 <img 
-                  src="https://images.unsplash.com/photo-1541339907198-e08756dedf3f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80" 
+                  src="/images/3.jpg" 
                   alt="Suasana Kampus"
                   style={{
                     width: '100%',
@@ -596,7 +596,7 @@ export default function BlogPage() {
                   }}
                 />
                 <img 
-                  src="https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80" 
+                  src="/images/4.jpg" 
                   alt="Perpustakaan"
                   style={{
                     width: '100%',
@@ -719,10 +719,10 @@ export default function BlogPage() {
                   </p>
                 </div>
                 <div style={{
-                  flex: '0 0 isMobile ? '100%' : '200px',
+                  flex: isMobile ? '0 0 100%' : '0 0 200px',
                 }}>
                   <img 
-                    src="https://images.unsplash.com/photo-1524178232363-1fb2b075b655?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80" 
+                    src="/images/5.jpg" 
                     alt="Dosen"
                     style={{
                       width: '100%',
@@ -777,19 +777,36 @@ export default function BlogPage() {
                 gap: '15px',
                 marginTop: '20px',
               }}>
-                {[1,2,3].map((i) => (
-                  <img 
-                    key={i}
-                    src={`https://images.unsplash.com/photo-${i === 1 ? '1522202176988-66273c2fd55f' : i === 2 ? '1517486808906-6ca8b6f8c42c' : '1529156069892-4561a8aacb43'}?ixlib=rb-4.0.3&auto=format&fit=crop&w=1170&q=80`}
-                    alt={`Pertemanan ${i}`}
-                    style={{
-                      width: '100%',
-                      height: '150px',
-                      objectFit: 'cover',
-                      borderRadius: '12px',
-                    }}
-                  />
-                ))}
+                <img 
+                  src="/images/6.jpg" 
+                  alt="Pertemanan 1"
+                  style={{
+                    width: '100%',
+                    height: '150px',
+                    objectFit: 'cover',
+                    borderRadius: '12px',
+                  }}
+                />
+                <img 
+                  src="/images/7.jpg" 
+                  alt="Pertemanan 2"
+                  style={{
+                    width: '100%',
+                    height: '150px',
+                    objectFit: 'cover',
+                    borderRadius: '12px',
+                  }}
+                />
+                <img 
+                  src="/images/8.jpg" 
+                  alt="Pertemanan 3"
+                  style={{
+                    width: '100%',
+                    height: '150px',
+                    objectFit: 'cover',
+                    borderRadius: '12px',
+                  }}
+                />
               </div>
             </section>
 
@@ -813,7 +830,7 @@ export default function BlogPage() {
               }}>
                 <div style={{ flex: '1' }}>
                   <img 
-                    src="https://images.unsplash.com/photo-1562774053-701939374585?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1186&q=80" 
+                    src="/images/9.jpg" 
                     alt="Laboratorium"
                     style={{
                       width: '100%',
@@ -825,7 +842,7 @@ export default function BlogPage() {
                 </div>
                 <div style={{ flex: '1' }}>
                   <img 
-                    src="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1122&q=80" 
+                    src="/images/10.jpg" 
                     alt="Perpustakaan"
                     style={{
                       width: '100%',
@@ -1020,9 +1037,9 @@ export default function BlogPage() {
                 </p>
               </div>
               
-              {/* FOTO PENUTUP */}
+              {/* FOTO PENUTUP - images/11.jpg */}
               <img 
-                src="https://images.unsplash.com/photo-1523580846011-d3a5bc25702b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80" 
+                src="/images/11.jpg" 
                 alt="Wisuda"
                 style={{
                   width: '100%',
