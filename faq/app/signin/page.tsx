@@ -298,38 +298,38 @@ export default function SignInPage() {
         gsap.set(validRefs, { 
           x: -30, 
           opacity: 0,
-          scale: 0.95
+          scale: 0.9
         });
         
-        // Animasi masuk dengan efek modern
+        // Animasi masuk dengan efek stagger - SEJAJAR KE BAWAH
         tl.to(validRefs, {
           x: 0,
           opacity: 1,
           scale: 1,
           duration: 0.5,
           stagger: {
-            amount: 0.6,
+            each: 0.08,
             from: "start",
             ease: "power2.out"
           },
           ease: "power2.out"
         }, "-=0.2");
         
-        // Efek hover untuk setiap item - minimal
+        // Efek hover untuk setiap item
         validRefs.forEach((ref, index) => {
           if (ref) {
             ref.addEventListener('mouseenter', () => {
               gsap.to(ref, {
-                x: 8,
-                duration: 0.2,
-                ease: "power1.out"
+                x: 10,
+                duration: 0.3,
+                ease: "power2.out"
               });
             });
             ref.addEventListener('mouseleave', () => {
               gsap.to(ref, {
                 x: 0,
-                duration: 0.2,
-                ease: "power1.out"
+                duration: 0.3,
+                ease: "power2.out"
               });
             });
           }
@@ -340,7 +340,7 @@ export default function SignInPage() {
       if (communityContainerRef.current) {
         gsap.fromTo(communityContainerRef.current,
           { height: 0, opacity: 0 },
-          { height: 'auto', opacity: 1, duration: 0.4, ease: "power2.out" }
+          { height: 'auto', opacity: 1, duration: 0.5, ease: "power3.inOut" }
         );
       }
       
@@ -351,13 +351,14 @@ export default function SignInPage() {
         gsap.to(validRefs, {
           x: -30,
           opacity: 0,
-          scale: 0.95,
+          scale: 0.9,
           duration: 0.3,
           stagger: {
-            amount: 0.3,
+            each: 0.05,
             from: "end",
             ease: "power2.in"
-          }
+          },
+          ease: "power2.in"
         });
         
         // Remove hover listeners
@@ -374,7 +375,7 @@ export default function SignInPage() {
           height: 0,
           opacity: 0,
           duration: 0.3,
-          ease: "power2.in"
+          ease: "power3.inOut"
         });
       }
       
@@ -382,7 +383,7 @@ export default function SignInPage() {
         gsap.to(communityTitleRef.current, {
           scale: 1,
           color: 'rgba(255,255,255,0.8)',
-          duration: 0.2
+          duration: 0.3
         });
       }
     }
@@ -512,22 +513,22 @@ export default function SignInPage() {
       
       switch (error.code) {
         case 'auth/invalid-email':
-          setError("email tidak valid");
+          setError("Email tidak valid");
           break;
         case 'auth/user-disabled':
-          setError("akun dinonaktifkan");
+          setError("Akun dinonaktifkan");
           break;
         case 'auth/user-not-found':
-          setError("akun tidak ditemukan");
+          setError("Akun tidak ditemukan");
           break;
         case 'auth/wrong-password':
-          setError("password salah");
+          setError("Password salah");
           break;
         case 'auth/too-many-requests':
-          setError("terlalu banyak percobaan gagal. coba lagi nanti");
+          setError("Terlalu banyak percobaan gagal. Coba lagi nanti");
           break;
         default:
-          setError("login gagal. periksa email dan password anda");
+          setError("Login gagal. Periksa email dan password Anda");
       }
     } finally {
       setLoading(false);
@@ -578,7 +579,7 @@ export default function SignInPage() {
           color: 'white',
           fontSize: '1.5rem',
         }}>
-          loading...
+          Loading...
         </div>
       </div>
     );
@@ -604,7 +605,7 @@ export default function SignInPage() {
             fontFamily: 'Helvetica, Arial, sans-serif',
             textShadow: '2px 2px 4px rgba(0,0,0,0.3)',
           }}>
-            connect
+            CONNECT
           </h4>
           <motion.div
             initial={{ scale: 0.8, opacity: 0 }}
@@ -681,7 +682,7 @@ export default function SignInPage() {
   );
 
   // ============================================
-  // 13. KOMPONEN COMMUNITY GSAP MODERN - HURUF KECIL, TANPA LINEBOX, LIST VERTIKAL
+  // 13. KOMPONEN COMMUNITY GSAP MODERN - VERTICAL LIST, NO ICON, LOWERCASE
   // ============================================
   const CommunityComponent = () => (
     <div style={{ position: 'relative', width: isMobile ? '100%' : 'auto', zIndex: 10 }}>
@@ -710,7 +711,7 @@ export default function SignInPage() {
             fontFamily: 'Helvetica, Arial, sans-serif',
             textShadow: '2px 2px 4px rgba(0,0,0,0.3)',
           }}>
-            community
+            COMMUNITY
           </h4>
           <motion.div
             initial={{ scale: 0.8, opacity: 0 }}
@@ -763,7 +764,6 @@ export default function SignInPage() {
             transition={{ duration: 0.3 }}
             style={{ overflow: 'hidden' }}
           >
-            {/* VERTICAL LIST - NO BACKGROUND, NO BORDER, NO ICON, NO LINEBOX */}
             <div style={{
               display: 'flex',
               flexDirection: 'column',
@@ -779,21 +779,24 @@ export default function SignInPage() {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
-                    width: '100%',
+                    padding: isMobile ? '8px 0' : '10px 0',
                     cursor: 'pointer',
-                    transformOrigin: 'left center',
+                    borderBottom: 'none',
+                    background: 'none',
+                    backdropFilter: 'none',
+                    boxShadow: 'none',
                   }}
                 >
                   <div style={{ 
                     display: 'flex', 
                     alignItems: 'center', 
-                    gap: '15px'
+                    gap: isMobile ? '12px' : '15px' 
                   }}>
                     <div style={{
                       color: 'rgba(255, 255, 255, 0.5)',
-                      fontSize: isMobile ? '1rem' : '1.5rem',
+                      fontSize: isMobile ? '0.9rem' : '1.2rem',
                       fontFamily: 'Helvetica, Arial, sans-serif',
-                      width: isMobile ? '30px' : '50px',
+                      width: isMobile ? '25px' : '40px',
                       textAlign: 'right',
                     }}>
                       ({index.toString().padStart(2, '0')})
@@ -813,15 +816,15 @@ export default function SignInPage() {
                   
                   {/* SOUTH WEST ARROW SVG untuk setiap item */}
                   <svg 
-                    width={isMobile ? '24' : '36'} 
-                    height={isMobile ? '24' : '36'} 
+                    width={isMobile ? '24' : '35'} 
+                    height={isMobile ? '24' : '35'} 
                     viewBox="0 0 24 24" 
                     fill="none"
                     stroke="white"
                     strokeWidth="1"
                     strokeLinecap="round"
                     strokeLinejoin="round"
-                    style={{ opacity: 0.5 }}
+                    style={{ opacity: 0.6 }}
                   >
                     <path d="M17 7L7 17" stroke="white"/>
                     <path d="M17 7H7" stroke="white"/>
@@ -878,7 +881,7 @@ export default function SignInPage() {
               letterSpacing: '8px',
               textShadow: '2px 2px 4px rgba(0,0,0,0.3)',
             }}>
-              create free access account
+              CREATE FREE ACCESS ACCOUNT
             </span>
             <svg 
               width={isMobile ? '80' : '120'} 
@@ -940,7 +943,7 @@ export default function SignInPage() {
               letterSpacing: '10px',
               textShadow: '2px 2px 4px rgba(0,0,0,0.3)',
             }}>
-              sign in
+              SIGN IN
             </span>
             <svg 
               width={isMobile ? '100' : '160'} 
@@ -981,7 +984,7 @@ export default function SignInPage() {
           position: 'relative',
         }}
       >
-        {/* HALAMAN UTAMA - SISI KANAN ATAS DENGAN SVG BESAR - HURUF KECIL */}
+        {/* HALAMAN UTAMA - SISI KANAN ATAS DENGAN HURUF DEPAN BESAR */}
         <div style={{
           position: 'absolute',
           top: isMobile ? '30px' : '50px',
@@ -1004,9 +1007,9 @@ export default function SignInPage() {
               fontWeight: '400',
               letterSpacing: '2px',
               textDecoration: 'none',
-              textTransform: 'lowercase',
+              textTransform: 'capitalize',
             }}>
-              halaman utama
+              Halaman Utama
             </span>
             <svg 
               width={isMobile ? '50' : '80'} 
@@ -1060,10 +1063,9 @@ export default function SignInPage() {
               marginBottom: '20px', 
               marginTop: '0',
               lineHeight: '1',
-              letterSpacing: '-1px',
-              textTransform: 'lowercase',
+              letterSpacing: '-1px'
             }}>
-              {user ? `welcome, ${user.displayName || user.email?.split('@')[0] || 'user'}` : 'welcome back'}
+              {user ? `Welcome, ${user.displayName || user.email?.split('@')[0] || 'User'}` : 'Welcome back'}
             </h1>
             <p style={{ 
               fontFamily: 'Helvetica, Arial, sans-serif', 
@@ -1072,10 +1074,9 @@ export default function SignInPage() {
               opacity: '0.8',
               marginBottom: '20px',
               fontWeight: '300',
-              letterSpacing: '1px',
-              textTransform: 'lowercase',
+              letterSpacing: '1px'
             }}>
-              {user ? 'you are signed in' : 'sign in to your account to continue'}
+              {user ? 'You are signed in' : 'Sign in to your account to continue'}
             </p>
             
             {/* ERROR MESSAGE - MINIMAL */}
@@ -1086,8 +1087,7 @@ export default function SignInPage() {
                 marginTop: '20px', 
                 marginBottom: '20px',
                 fontFamily: 'Helvetica, Arial, sans-serif',
-                fontWeight: '300',
-                textTransform: 'lowercase',
+                fontWeight: '300'
               }}>
                 {error}
               </div>
@@ -1135,10 +1135,9 @@ export default function SignInPage() {
                     fontSize: isMobile ? '1.8rem' : '2.4rem', 
                     color: '#ffffff', 
                     fontWeight: '300',
-                    letterSpacing: '2px',
-                    textTransform: 'lowercase',
+                    letterSpacing: '2px'
                   }}>
-                    {loading ? 'loading...' : 'continue with google'}
+                    {loading ? 'Loading...' : 'Continue with Google'}
                   </span>
                   <svg 
                     width={isMobile ? '40' : '60'} 
@@ -1182,10 +1181,9 @@ export default function SignInPage() {
                     fontSize: isMobile ? '1.8rem' : '2.4rem', 
                     color: '#ffffff', 
                     fontWeight: '300',
-                    letterSpacing: '2px',
-                    textTransform: 'lowercase',
+                    letterSpacing: '2px'
                   }}>
-                    {loading ? 'loading...' : 'continue with github'}
+                    {loading ? 'Loading...' : 'Continue with GitHub'}
                   </span>
                   <svg 
                     width={isMobile ? '40' : '60'} 
@@ -1218,7 +1216,7 @@ export default function SignInPage() {
                   <div style={{ width: '100%' }}>
                     <input 
                       type="email" 
-                      placeholder="email" 
+                      placeholder="Email" 
                       value={email} 
                       onChange={(e) => setEmail(e.target.value)} 
                       required 
@@ -1232,8 +1230,7 @@ export default function SignInPage() {
                         fontSize: isMobile ? '1.8rem' : '2.2rem', 
                         outline: 'none',
                         fontWeight: '300',
-                        letterSpacing: '1px',
-                        textTransform: 'lowercase',
+                        letterSpacing: '1px'
                       }} 
                     />
                   </div>
@@ -1242,7 +1239,7 @@ export default function SignInPage() {
                   <div style={{ position: 'relative', width: '100%' }}>
                     <input 
                       type={showPassword ? "text" : "password"} 
-                      placeholder="password" 
+                      placeholder="Password" 
                       value={password} 
                       onChange={(e) => setPassword(e.target.value)} 
                       required 
@@ -1256,8 +1253,7 @@ export default function SignInPage() {
                         fontSize: isMobile ? '1.8rem' : '2.2rem', 
                         outline: 'none',
                         fontWeight: '300',
-                        letterSpacing: '1px',
-                        textTransform: 'lowercase',
+                        letterSpacing: '1px'
                       }} 
                     />
                     <button 
@@ -1305,13 +1301,12 @@ export default function SignInPage() {
                         cursor: loading ? 'not-allowed' : 'pointer', 
                         transition: 'opacity 0.2s ease', 
                         letterSpacing: '4px',
-                        opacity: loading ? 0.5 : 0.8,
-                        textTransform: 'lowercase',
+                        opacity: loading ? 0.5 : 0.8
                       }}
                       onMouseEnter={(e) => !loading && (e.currentTarget.style.opacity = '1')}
                       onMouseLeave={(e) => !loading && (e.currentTarget.style.opacity = '0.8')}
                     >
-                      {loading ? 'signing in...' : 'sign in'}
+                      {loading ? 'SIGNING IN...' : 'SIGN IN'}
                     </button>
                     <svg 
                       width={isMobile ? '50' : '70'} 
@@ -1365,13 +1360,12 @@ export default function SignInPage() {
                       fontSize: isMobile ? '1.6rem' : '2rem',
                       fontWeight: '300',
                       padding: '0',
-                      textDecoration: 'none',
-                      textTransform: 'lowercase',
+                      textDecoration: 'none'
                     }}
                     onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
                     onMouseLeave={(e) => e.currentTarget.style.opacity = '0.7'}
                   >
-                    forgot your password?
+                    Forgot your password?
                     <svg 
                       width={isMobile ? '35' : '50'} 
                       height={isMobile ? '35' : '50'} 
@@ -1393,10 +1387,9 @@ export default function SignInPage() {
                       opacity: '0.6', 
                       fontSize: isMobile ? '1.6rem' : '2rem', 
                       fontFamily: 'Helvetica, Arial, sans-serif',
-                      fontWeight: '300',
-                      textTransform: 'lowercase',
+                      fontWeight: '300'
                     }}>
-                      don't have an account?
+                      Don't have an account?
                     </span>
                     <button 
                       onClick={handleSignUp} 
@@ -1414,13 +1407,12 @@ export default function SignInPage() {
                         fontSize: isMobile ? '1.6rem' : '2rem',
                         fontWeight: '400',
                         padding: '0',
-                        textDecoration: 'none',
-                        textTransform: 'lowercase',
+                        textDecoration: 'none'
                       }}
                       onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
                       onMouseLeave={(e) => e.currentTarget.style.opacity = '0.8'}
                     >
-                      sign up
+                      Sign up
                       <svg 
                         width={isMobile ? '35' : '50'} 
                         height={isMobile ? '35' : '50'} 
@@ -1465,10 +1457,9 @@ export default function SignInPage() {
                   fontWeight: '300',
                   opacity: 0.9,
                   margin: 0,
-                  letterSpacing: '2px',
-                  textTransform: 'lowercase',
+                  letterSpacing: '2px'
                 }}>
-                  ✓ login successful!
+                  ✓ Login successful!
                 </p>
                 
                 {/* GO TO NOTES BUTTON - BESAR DENGAN SVG */}
@@ -1488,13 +1479,12 @@ export default function SignInPage() {
                     cursor: 'pointer', 
                     transition: 'opacity 0.2s ease', 
                     letterSpacing: '4px',
-                    opacity: 0.8,
-                    textTransform: 'lowercase',
+                    opacity: 0.8
                   }}
                   onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
                   onMouseLeave={(e) => e.currentTarget.style.opacity = '0.8'}
                 >
-                  go to notes
+                  GO TO NOTES
                   <svg 
                     width={isMobile ? '70' : '90'} 
                     height={isMobile ? '70' : '90'} 
@@ -1529,13 +1519,12 @@ export default function SignInPage() {
                     opacity: 0.8,
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '20px',
-                    textTransform: 'lowercase',
+                    gap: '20px'
                   }}
                   onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
                   onMouseLeave={(e) => e.currentTarget.style.opacity = '0.8'}
                 >
-                  sign out
+                  SIGN OUT
                   <svg 
                     width={isMobile ? '50' : '70'} 
                     height={isMobile ? '50' : '70'} 
@@ -1578,12 +1567,12 @@ export default function SignInPage() {
               transition: 'opacity 0.2s ease', 
               letterSpacing: '2px',
               fontWeight: '300',
-              textTransform: 'lowercase',
+              textTransform: 'uppercase'
             }}
             onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
             onMouseLeave={(e) => e.currentTarget.style.opacity = '0.7'}
             >
-              kebijakan privasi
+              KEBIJAKAN PRIVASI
               <svg 
                 width={isMobile ? '30' : '45'} 
                 height={isMobile ? '30' : '45'} 
@@ -1611,12 +1600,12 @@ export default function SignInPage() {
               transition: 'opacity 0.2s ease', 
               letterSpacing: '2px',
               fontWeight: '300',
-              textTransform: 'lowercase',
+              textTransform: 'uppercase'
             }}
             onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
             onMouseLeave={(e) => e.currentTarget.style.opacity = '0.7'}
             >
-              ketentuan kami
+              KETENTUAN KAMI
               <svg 
                 width={isMobile ? '30' : '45'} 
                 height={isMobile ? '30' : '45'} 
@@ -1635,7 +1624,7 @@ export default function SignInPage() {
           </div>
         </div>
 
-        {/* LETS JOIN US NOTE THINK - HURUF KECIL */}
+        {/* LETS JOIN US NOTE THINK */}
         <div style={{ 
           position: 'relative', 
           textAlign: isMobile ? 'center' : 'left', 
@@ -1657,9 +1646,9 @@ export default function SignInPage() {
               margin: '0 0 0.5rem 0', 
               lineHeight: '1.1', 
               fontWeight: '600',
-              textTransform: 'lowercase',
+              textTransform: 'uppercase'
             }}>
-              lets join us
+              LETS JOIN US
             </p>
             <p style={{ 
               color: 'rgba(255,255,255,0.9)', 
@@ -1668,13 +1657,13 @@ export default function SignInPage() {
               margin: 0, 
               lineHeight: '1.1', 
               fontWeight: '600',
-              textTransform: 'lowercase',
+              textTransform: 'uppercase'
             }}>
-              note think.
+              NOTE THINK.
             </p>
           </div>
 
-          {/* 6 KELOMPOK MENU - DENGAN COMMUNITY GSAP MODERN - HURUF KECIL */}
+          {/* 6 KELOMPOK MENU - DENGAN COMMUNITY GSAP MODERN */}
           <div style={{ 
             display: 'grid', 
             gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(3, auto)', 
@@ -1691,9 +1680,9 @@ export default function SignInPage() {
                 margin: '0 0 0.5rem 0', 
                 marginBottom: isMobile ? '4rem' : '6rem', 
                 fontFamily: 'Helvetica, Arial, sans-serif',
-                textTransform: 'lowercase',
+                textTransform: 'uppercase'
               }}>
-                menu
+                MENU
               </h4>
             </div>
             <div>
@@ -1704,9 +1693,9 @@ export default function SignInPage() {
                 margin: '0 0 0.5rem 0', 
                 marginBottom: isMobile ? '4rem' : '6rem', 
                 fontFamily: 'Helvetica, Arial, sans-serif',
-                textTransform: 'lowercase',
+                textTransform: 'uppercase'
               }}>
-                product
+                PRODUCT
               </h4>
             </div>
             <div>
@@ -1720,13 +1709,13 @@ export default function SignInPage() {
                 margin: '0 0 0.5rem 0', 
                 marginBottom: isMobile ? '4rem' : '6rem', 
                 fontFamily: 'Helvetica, Arial, sans-serif',
-                textTransform: 'lowercase',
+                textTransform: 'uppercase'
               }}>
-                features
+                Features
               </h4>
             </div>
             <div>
-              {/* COMMUNITY DENGAN GSAP MODERN - HURUF KECIL, TANPA LINEBOX, LIST VERTIKAL */}
+              {/* COMMUNITY DENGAN GSAP MODERN - VERTICAL LIST, LOWERCASE, NO ICON */}
               <CommunityComponent />
             </div>
             <div>
@@ -1737,9 +1726,9 @@ export default function SignInPage() {
                 margin: '0 0 0.5rem 0', 
                 marginBottom: isMobile ? '8rem' : '15rem', 
                 fontFamily: 'Helvetica, Arial, sans-serif',
-                textTransform: 'lowercase',
+                textTransform: 'uppercase'
               }}>
-                blog
+                BLOG
               </h4>
             </div>
           </div>
@@ -1758,7 +1747,6 @@ export default function SignInPage() {
           color: rgba(255, 255, 255, 0.3);
           font-weight: 300;
           letter-spacing: 1px;
-          text-transform: lowercase;
         }
       `}</style>
     </>
