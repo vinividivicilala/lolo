@@ -49,15 +49,15 @@ const socialConnections = [
   { id: 5, name: "YouTube" }
 ];
 
-// Data community items dengan GSAP modern
+// Data community items - huruf kecil semua, tanpa icon
 const communityItems = [
-  { id: 1, name: "POINT BLANK", icon: "🎯" },
-  { id: 2, name: "LOST SAGA", icon: "⚔️" },
-  { id: 3, name: "PERSIB", icon: "⚽" },
-  { id: 4, name: "CODING", icon: "💻" },
-  { id: 5, name: "PEMBERSIHAN", icon: "🧹" },
-  { id: 6, name: "PENDIDIKAN", icon: "📚" },
-  { id: 7, name: "SOSIAL", icon: "🤝" }
+  { id: 1, name: "point blank" },
+  { id: 2, name: "lost saga" },
+  { id: 3, name: "persib" },
+  { id: 4, name: "coding" },
+  { id: 5, name: "pembersihan" },
+  { id: 6, name: "pendidikan" },
+  { id: 7, name: "sosial" }
 ];
 
 interface LoginHistory {
@@ -291,49 +291,45 @@ export default function SignInPage() {
         );
       }
       
-      // Animasi items dengan efek stagger modern
+      // Animasi items dengan efek stagger modern - VERTICAL LIST
       const validRefs = communityItemsRef.current.filter(Boolean);
       if (validRefs.length > 0) {
         // Reset posisi awal
         gsap.set(validRefs, { 
-          x: -50, 
+          x: -30, 
           opacity: 0,
-          rotation: -5,
-          scale: 0.8
+          scale: 0.95
         });
         
         // Animasi masuk dengan efek modern
         tl.to(validRefs, {
           x: 0,
           opacity: 1,
-          rotation: 0,
           scale: 1,
-          duration: 0.6,
+          duration: 0.5,
           stagger: {
-            amount: 0.8,
+            amount: 0.6,
             from: "start",
-            ease: "power3.out"
+            ease: "power2.out"
           },
-          ease: "back.out(1.2)"
+          ease: "power2.out"
         }, "-=0.2");
         
-        // Efek hover untuk setiap item
+        // Efek hover untuk setiap item - minimal
         validRefs.forEach((ref, index) => {
           if (ref) {
             ref.addEventListener('mouseenter', () => {
               gsap.to(ref, {
-                x: 10,
-                scale: 1.1,
-                duration: 0.3,
-                ease: "power2.out"
+                x: 8,
+                duration: 0.2,
+                ease: "power1.out"
               });
             });
             ref.addEventListener('mouseleave', () => {
               gsap.to(ref, {
                 x: 0,
-                scale: 1,
-                duration: 0.3,
-                ease: "power2.out"
+                duration: 0.2,
+                ease: "power1.out"
               });
             });
           }
@@ -344,7 +340,7 @@ export default function SignInPage() {
       if (communityContainerRef.current) {
         gsap.fromTo(communityContainerRef.current,
           { height: 0, opacity: 0 },
-          { height: 'auto', opacity: 1, duration: 0.5, ease: "power3.inOut" }
+          { height: 'auto', opacity: 1, duration: 0.4, ease: "power2.out" }
         );
       }
       
@@ -353,17 +349,15 @@ export default function SignInPage() {
       const validRefs = communityItemsRef.current.filter(Boolean);
       if (validRefs.length > 0) {
         gsap.to(validRefs, {
-          x: 50,
+          x: -30,
           opacity: 0,
-          rotation: 5,
-          scale: 0.8,
-          duration: 0.4,
+          scale: 0.95,
+          duration: 0.3,
           stagger: {
-            amount: 0.4,
+            amount: 0.3,
             from: "end",
             ease: "power2.in"
-          },
-          ease: "back.in(1)"
+          }
         });
         
         // Remove hover listeners
@@ -379,8 +373,8 @@ export default function SignInPage() {
         gsap.to(communityContainerRef.current, {
           height: 0,
           opacity: 0,
-          duration: 0.4,
-          ease: "power3.inOut"
+          duration: 0.3,
+          ease: "power2.in"
         });
       }
       
@@ -388,7 +382,7 @@ export default function SignInPage() {
         gsap.to(communityTitleRef.current, {
           scale: 1,
           color: 'rgba(255,255,255,0.8)',
-          duration: 0.3
+          duration: 0.2
         });
       }
     }
@@ -518,22 +512,22 @@ export default function SignInPage() {
       
       switch (error.code) {
         case 'auth/invalid-email':
-          setError("Email tidak valid");
+          setError("email tidak valid");
           break;
         case 'auth/user-disabled':
-          setError("Akun dinonaktifkan");
+          setError("akun dinonaktifkan");
           break;
         case 'auth/user-not-found':
-          setError("Akun tidak ditemukan");
+          setError("akun tidak ditemukan");
           break;
         case 'auth/wrong-password':
-          setError("Password salah");
+          setError("password salah");
           break;
         case 'auth/too-many-requests':
-          setError("Terlalu banyak percobaan gagal. Coba lagi nanti");
+          setError("terlalu banyak percobaan gagal. coba lagi nanti");
           break;
         default:
-          setError("Login gagal. Periksa email dan password Anda");
+          setError("login gagal. periksa email dan password anda");
       }
     } finally {
       setLoading(false);
@@ -584,7 +578,7 @@ export default function SignInPage() {
           color: 'white',
           fontSize: '1.5rem',
         }}>
-          Loading...
+          loading...
         </div>
       </div>
     );
@@ -610,7 +604,7 @@ export default function SignInPage() {
             fontFamily: 'Helvetica, Arial, sans-serif',
             textShadow: '2px 2px 4px rgba(0,0,0,0.3)',
           }}>
-            CONNECT
+            connect
           </h4>
           <motion.div
             initial={{ scale: 0.8, opacity: 0 }}
@@ -687,14 +681,14 @@ export default function SignInPage() {
   );
 
   // ============================================
-  // 13. KOMPONEN COMMUNITY GSAP MODERN
+  // 13. KOMPONEN COMMUNITY GSAP MODERN - HURUF KECIL, TANPA LINEBOX, LIST VERTIKAL
   // ============================================
   const CommunityComponent = () => (
     <div style={{ position: 'relative', width: isMobile ? '100%' : 'auto', zIndex: 10 }}>
       <motion.div
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
-        style={{ cursor: 'pointer', userSelect: 'none', marginBottom: communityOpen ? '20px' : '0' }}
+        style={{ cursor: 'pointer', userSelect: 'none', marginBottom: communityOpen ? '15px' : '0' }}
         onClick={() => setCommunityOpen(!communityOpen)}
       >
         <div 
@@ -716,7 +710,7 @@ export default function SignInPage() {
             fontFamily: 'Helvetica, Arial, sans-serif',
             textShadow: '2px 2px 4px rgba(0,0,0,0.3)',
           }}>
-            COMMUNITY
+            community
           </h4>
           <motion.div
             initial={{ scale: 0.8, opacity: 0 }}
@@ -769,12 +763,13 @@ export default function SignInPage() {
             transition={{ duration: 0.3 }}
             style={{ overflow: 'hidden' }}
           >
+            {/* VERTICAL LIST - NO BACKGROUND, NO BORDER, NO ICON, NO LINEBOX */}
             <div style={{
-              display: 'grid',
-              gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, 1fr)',
-              gap: isMobile ? '12px' : '20px',
-              paddingTop: '20px',
-              paddingBottom: '10px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: isMobile ? '8px' : '12px',
+              paddingTop: '15px',
+              paddingBottom: '5px',
             }}>
               {communityItems.map((item, index) => (
                 <div
@@ -784,30 +779,33 @@ export default function SignInPage() {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
-                    padding: isMobile ? '12px 18px' : '15px 25px',
-                    background: 'rgba(255, 255, 255, 0.03)',
-                    backdropFilter: 'blur(5px)',
-                    border: '1px solid rgba(255, 255, 255, 0.1)',
-                    borderRadius: '12px',
+                    width: '100%',
                     cursor: 'pointer',
                     transformOrigin: 'left center',
-                    boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
                   }}
                 >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                    <span style={{
-                      fontSize: isMobile ? '1.8rem' : '2.2rem',
-                      opacity: 0.9
+                  <div style={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    gap: '15px'
+                  }}>
+                    <div style={{
+                      color: 'rgba(255, 255, 255, 0.5)',
+                      fontSize: isMobile ? '1rem' : '1.5rem',
+                      fontFamily: 'Helvetica, Arial, sans-serif',
+                      width: isMobile ? '30px' : '50px',
+                      textAlign: 'right',
                     }}>
-                      {item.icon}
-                    </span>
+                      ({index.toString().padStart(2, '0')})
+                    </div>
                     <p style={{
                       color: 'white',
-                      fontSize: isMobile ? '1.3rem' : '1.8rem',
-                      fontWeight: '500',
+                      fontSize: isMobile ? '1.2rem' : '1.8rem',
+                      fontWeight: '400',
                       margin: '0',
                       fontFamily: 'Helvetica, Arial, sans-serif',
-                      letterSpacing: '1px',
+                      letterSpacing: '0.5px',
+                      textTransform: 'lowercase',
                     }}>
                       {item.name}
                     </p>
@@ -815,15 +813,15 @@ export default function SignInPage() {
                   
                   {/* SOUTH WEST ARROW SVG untuk setiap item */}
                   <svg 
-                    width={isMobile ? '28' : '40'} 
-                    height={isMobile ? '28' : '40'} 
+                    width={isMobile ? '24' : '36'} 
+                    height={isMobile ? '24' : '36'} 
                     viewBox="0 0 24 24" 
                     fill="none"
                     stroke="white"
                     strokeWidth="1"
                     strokeLinecap="round"
                     strokeLinejoin="round"
-                    style={{ opacity: 0.6 }}
+                    style={{ opacity: 0.5 }}
                   >
                     <path d="M17 7L7 17" stroke="white"/>
                     <path d="M17 7H7" stroke="white"/>
@@ -880,7 +878,7 @@ export default function SignInPage() {
               letterSpacing: '8px',
               textShadow: '2px 2px 4px rgba(0,0,0,0.3)',
             }}>
-              CREATE FREE ACCESS ACCOUNT
+              create free access account
             </span>
             <svg 
               width={isMobile ? '80' : '120'} 
@@ -942,7 +940,7 @@ export default function SignInPage() {
               letterSpacing: '10px',
               textShadow: '2px 2px 4px rgba(0,0,0,0.3)',
             }}>
-              SIGN IN
+              sign in
             </span>
             <svg 
               width={isMobile ? '100' : '160'} 
@@ -983,7 +981,7 @@ export default function SignInPage() {
           position: 'relative',
         }}
       >
-        {/* HALAMAN UTAMA - SISI KANAN ATAS DENGAN SVG BESAR */}
+        {/* HALAMAN UTAMA - SISI KANAN ATAS DENGAN SVG BESAR - HURUF KECIL */}
         <div style={{
           position: 'absolute',
           top: isMobile ? '30px' : '50px',
@@ -1006,8 +1004,9 @@ export default function SignInPage() {
               fontWeight: '400',
               letterSpacing: '2px',
               textDecoration: 'none',
+              textTransform: 'lowercase',
             }}>
-              HALAMAN UTAMA
+              halaman utama
             </span>
             <svg 
               width={isMobile ? '50' : '80'} 
@@ -1061,9 +1060,10 @@ export default function SignInPage() {
               marginBottom: '20px', 
               marginTop: '0',
               lineHeight: '1',
-              letterSpacing: '-1px'
+              letterSpacing: '-1px',
+              textTransform: 'lowercase',
             }}>
-              {user ? `Welcome, ${user.displayName || user.email?.split('@')[0] || 'User'}` : 'Welcome back'}
+              {user ? `welcome, ${user.displayName || user.email?.split('@')[0] || 'user'}` : 'welcome back'}
             </h1>
             <p style={{ 
               fontFamily: 'Helvetica, Arial, sans-serif', 
@@ -1072,9 +1072,10 @@ export default function SignInPage() {
               opacity: '0.8',
               marginBottom: '20px',
               fontWeight: '300',
-              letterSpacing: '1px'
+              letterSpacing: '1px',
+              textTransform: 'lowercase',
             }}>
-              {user ? 'You are signed in' : 'Sign in to your account to continue'}
+              {user ? 'you are signed in' : 'sign in to your account to continue'}
             </p>
             
             {/* ERROR MESSAGE - MINIMAL */}
@@ -1085,7 +1086,8 @@ export default function SignInPage() {
                 marginTop: '20px', 
                 marginBottom: '20px',
                 fontFamily: 'Helvetica, Arial, sans-serif',
-                fontWeight: '300'
+                fontWeight: '300',
+                textTransform: 'lowercase',
               }}>
                 {error}
               </div>
@@ -1133,9 +1135,10 @@ export default function SignInPage() {
                     fontSize: isMobile ? '1.8rem' : '2.4rem', 
                     color: '#ffffff', 
                     fontWeight: '300',
-                    letterSpacing: '2px'
+                    letterSpacing: '2px',
+                    textTransform: 'lowercase',
                   }}>
-                    {loading ? 'Loading...' : 'Continue with Google'}
+                    {loading ? 'loading...' : 'continue with google'}
                   </span>
                   <svg 
                     width={isMobile ? '40' : '60'} 
@@ -1179,9 +1182,10 @@ export default function SignInPage() {
                     fontSize: isMobile ? '1.8rem' : '2.4rem', 
                     color: '#ffffff', 
                     fontWeight: '300',
-                    letterSpacing: '2px'
+                    letterSpacing: '2px',
+                    textTransform: 'lowercase',
                   }}>
-                    {loading ? 'Loading...' : 'Continue with GitHub'}
+                    {loading ? 'loading...' : 'continue with github'}
                   </span>
                   <svg 
                     width={isMobile ? '40' : '60'} 
@@ -1214,7 +1218,7 @@ export default function SignInPage() {
                   <div style={{ width: '100%' }}>
                     <input 
                       type="email" 
-                      placeholder="Email" 
+                      placeholder="email" 
                       value={email} 
                       onChange={(e) => setEmail(e.target.value)} 
                       required 
@@ -1228,7 +1232,8 @@ export default function SignInPage() {
                         fontSize: isMobile ? '1.8rem' : '2.2rem', 
                         outline: 'none',
                         fontWeight: '300',
-                        letterSpacing: '1px'
+                        letterSpacing: '1px',
+                        textTransform: 'lowercase',
                       }} 
                     />
                   </div>
@@ -1237,7 +1242,7 @@ export default function SignInPage() {
                   <div style={{ position: 'relative', width: '100%' }}>
                     <input 
                       type={showPassword ? "text" : "password"} 
-                      placeholder="Password" 
+                      placeholder="password" 
                       value={password} 
                       onChange={(e) => setPassword(e.target.value)} 
                       required 
@@ -1251,7 +1256,8 @@ export default function SignInPage() {
                         fontSize: isMobile ? '1.8rem' : '2.2rem', 
                         outline: 'none',
                         fontWeight: '300',
-                        letterSpacing: '1px'
+                        letterSpacing: '1px',
+                        textTransform: 'lowercase',
                       }} 
                     />
                     <button 
@@ -1299,12 +1305,13 @@ export default function SignInPage() {
                         cursor: loading ? 'not-allowed' : 'pointer', 
                         transition: 'opacity 0.2s ease', 
                         letterSpacing: '4px',
-                        opacity: loading ? 0.5 : 0.8
+                        opacity: loading ? 0.5 : 0.8,
+                        textTransform: 'lowercase',
                       }}
                       onMouseEnter={(e) => !loading && (e.currentTarget.style.opacity = '1')}
                       onMouseLeave={(e) => !loading && (e.currentTarget.style.opacity = '0.8')}
                     >
-                      {loading ? 'SIGNING IN...' : 'SIGN IN'}
+                      {loading ? 'signing in...' : 'sign in'}
                     </button>
                     <svg 
                       width={isMobile ? '50' : '70'} 
@@ -1358,12 +1365,13 @@ export default function SignInPage() {
                       fontSize: isMobile ? '1.6rem' : '2rem',
                       fontWeight: '300',
                       padding: '0',
-                      textDecoration: 'none'
+                      textDecoration: 'none',
+                      textTransform: 'lowercase',
                     }}
                     onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
                     onMouseLeave={(e) => e.currentTarget.style.opacity = '0.7'}
                   >
-                    Forgot your password?
+                    forgot your password?
                     <svg 
                       width={isMobile ? '35' : '50'} 
                       height={isMobile ? '35' : '50'} 
@@ -1385,9 +1393,10 @@ export default function SignInPage() {
                       opacity: '0.6', 
                       fontSize: isMobile ? '1.6rem' : '2rem', 
                       fontFamily: 'Helvetica, Arial, sans-serif',
-                      fontWeight: '300'
+                      fontWeight: '300',
+                      textTransform: 'lowercase',
                     }}>
-                      Don't have an account?
+                      don't have an account?
                     </span>
                     <button 
                       onClick={handleSignUp} 
@@ -1405,12 +1414,13 @@ export default function SignInPage() {
                         fontSize: isMobile ? '1.6rem' : '2rem',
                         fontWeight: '400',
                         padding: '0',
-                        textDecoration: 'none'
+                        textDecoration: 'none',
+                        textTransform: 'lowercase',
                       }}
                       onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
                       onMouseLeave={(e) => e.currentTarget.style.opacity = '0.8'}
                     >
-                      Sign up
+                      sign up
                       <svg 
                         width={isMobile ? '35' : '50'} 
                         height={isMobile ? '35' : '50'} 
@@ -1455,9 +1465,10 @@ export default function SignInPage() {
                   fontWeight: '300',
                   opacity: 0.9,
                   margin: 0,
-                  letterSpacing: '2px'
+                  letterSpacing: '2px',
+                  textTransform: 'lowercase',
                 }}>
-                  ✓ Login successful!
+                  ✓ login successful!
                 </p>
                 
                 {/* GO TO NOTES BUTTON - BESAR DENGAN SVG */}
@@ -1477,12 +1488,13 @@ export default function SignInPage() {
                     cursor: 'pointer', 
                     transition: 'opacity 0.2s ease', 
                     letterSpacing: '4px',
-                    opacity: 0.8
+                    opacity: 0.8,
+                    textTransform: 'lowercase',
                   }}
                   onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
                   onMouseLeave={(e) => e.currentTarget.style.opacity = '0.8'}
                 >
-                  GO TO NOTES
+                  go to notes
                   <svg 
                     width={isMobile ? '70' : '90'} 
                     height={isMobile ? '70' : '90'} 
@@ -1517,12 +1529,13 @@ export default function SignInPage() {
                     opacity: 0.8,
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '20px'
+                    gap: '20px',
+                    textTransform: 'lowercase',
                   }}
                   onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
                   onMouseLeave={(e) => e.currentTarget.style.opacity = '0.8'}
                 >
-                  SIGN OUT
+                  sign out
                   <svg 
                     width={isMobile ? '50' : '70'} 
                     height={isMobile ? '50' : '70'} 
@@ -1564,12 +1577,13 @@ export default function SignInPage() {
               opacity: 0.7, 
               transition: 'opacity 0.2s ease', 
               letterSpacing: '2px',
-              fontWeight: '300'
+              fontWeight: '300',
+              textTransform: 'lowercase',
             }}
             onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
             onMouseLeave={(e) => e.currentTarget.style.opacity = '0.7'}
             >
-              KEBIJAKAN PRIVASI
+              kebijakan privasi
               <svg 
                 width={isMobile ? '30' : '45'} 
                 height={isMobile ? '30' : '45'} 
@@ -1596,12 +1610,13 @@ export default function SignInPage() {
               opacity: 0.7, 
               transition: 'opacity 0.2s ease', 
               letterSpacing: '2px',
-              fontWeight: '300'
+              fontWeight: '300',
+              textTransform: 'lowercase',
             }}
             onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
             onMouseLeave={(e) => e.currentTarget.style.opacity = '0.7'}
             >
-              KETENTUAN KAMI
+              ketentuan kami
               <svg 
                 width={isMobile ? '30' : '45'} 
                 height={isMobile ? '30' : '45'} 
@@ -1620,7 +1635,7 @@ export default function SignInPage() {
           </div>
         </div>
 
-        {/* LETS JOIN US NOTE THINK */}
+        {/* LETS JOIN US NOTE THINK - HURUF KECIL */}
         <div style={{ 
           position: 'relative', 
           textAlign: isMobile ? 'center' : 'left', 
@@ -1641,9 +1656,10 @@ export default function SignInPage() {
               fontFamily: 'Helvetica, Arial, sans-serif', 
               margin: '0 0 0.5rem 0', 
               lineHeight: '1.1', 
-              fontWeight: '600' 
+              fontWeight: '600',
+              textTransform: 'lowercase',
             }}>
-              LETS JOIN US
+              lets join us
             </p>
             <p style={{ 
               color: 'rgba(255,255,255,0.9)', 
@@ -1651,13 +1667,14 @@ export default function SignInPage() {
               fontFamily: 'Helvetica, Arial, sans-serif', 
               margin: 0, 
               lineHeight: '1.1', 
-              fontWeight: '600' 
+              fontWeight: '600',
+              textTransform: 'lowercase',
             }}>
-              NOTE THINK.
+              note think.
             </p>
           </div>
 
-          {/* 6 KELOMPOK MENU - DENGAN COMMUNITY GSAP MODERN */}
+          {/* 6 KELOMPOK MENU - DENGAN COMMUNITY GSAP MODERN - HURUF KECIL */}
           <div style={{ 
             display: 'grid', 
             gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(3, auto)', 
@@ -1673,9 +1690,10 @@ export default function SignInPage() {
                 fontWeight: '600', 
                 margin: '0 0 0.5rem 0', 
                 marginBottom: isMobile ? '4rem' : '6rem', 
-                fontFamily: 'Helvetica, Arial, sans-serif' 
+                fontFamily: 'Helvetica, Arial, sans-serif',
+                textTransform: 'lowercase',
               }}>
-                MENU
+                menu
               </h4>
             </div>
             <div>
@@ -1685,9 +1703,10 @@ export default function SignInPage() {
                 fontWeight: '600', 
                 margin: '0 0 0.5rem 0', 
                 marginBottom: isMobile ? '4rem' : '6rem', 
-                fontFamily: 'Helvetica, Arial, sans-serif' 
+                fontFamily: 'Helvetica, Arial, sans-serif',
+                textTransform: 'lowercase',
               }}>
-                PRODUCT
+                product
               </h4>
             </div>
             <div>
@@ -1700,13 +1719,14 @@ export default function SignInPage() {
                 fontWeight: '600', 
                 margin: '0 0 0.5rem 0', 
                 marginBottom: isMobile ? '4rem' : '6rem', 
-                fontFamily: 'Helvetica, Arial, sans-serif' 
+                fontFamily: 'Helvetica, Arial, sans-serif',
+                textTransform: 'lowercase',
               }}>
-                Features
+                features
               </h4>
             </div>
             <div>
-              {/* COMMUNITY DENGAN GSAP MODERN */}
+              {/* COMMUNITY DENGAN GSAP MODERN - HURUF KECIL, TANPA LINEBOX, LIST VERTIKAL */}
               <CommunityComponent />
             </div>
             <div>
@@ -1716,9 +1736,10 @@ export default function SignInPage() {
                 fontWeight: '600', 
                 margin: '0 0 0.5rem 0', 
                 marginBottom: isMobile ? '8rem' : '15rem', 
-                fontFamily: 'Helvetica, Arial, sans-serif' 
+                fontFamily: 'Helvetica, Arial, sans-serif',
+                textTransform: 'lowercase',
               }}>
-                BLOG
+                blog
               </h4>
             </div>
           </div>
@@ -1737,6 +1758,7 @@ export default function SignInPage() {
           color: rgba(255, 255, 255, 0.3);
           font-weight: 300;
           letter-spacing: 1px;
+          text-transform: lowercase;
         }
       `}</style>
     </>
