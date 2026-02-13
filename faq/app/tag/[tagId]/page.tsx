@@ -5,12 +5,12 @@ import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
 
-// Data blog posts
+// Data blog posts dengan tags
 const BLOG_POSTS = [
   {
     id: 'gunadarma-article',
     title: 'Bagaimana Rasa nya Masuk Kuliah Di Universitas Gunadarma',
-    slug: 'bagaimana-rasanya-masuk-kuliah-di-universitas-gunadarma',
+    slug: 'gunadarma',
     excerpt: 'Pengalaman pribadi menjalani perkuliahan di Universitas Gunadarma, dari akademik hingga organisasi.',
     tags: ['kuliah', 'gunadarma'],
     date: '2024-01-15',
@@ -21,47 +21,71 @@ const BLOG_POSTS = [
     title: 'Mengapa saya memilih jurusan tersebut',
     slug: 'memilih-jurusan',
     excerpt: 'Alasan di balik keputusan memilih program studi yang tepat.',
-    tags: ['kuliah'],
+    tags: ['jurusan', 'kuliah', 'karir'],
     date: '2024-01-10',
     readTime: 5
   },
   {
-    id: 'tips-belajar',
-    title: 'Tips Belajar Efektif untuk Mahasiswa',
-    slug: 'tips-belajar-efektif',
-    excerpt: 'Cara belajar yang efektif agar IPK tetap memuaskan.',
-    tags: ['kuliah'],
+    id: 'tips-belajar-coding',
+    title: 'Tips Belajar Coding untuk Pemula',
+    slug: 'tips-belajar-coding',
+    excerpt: 'Panduan praktis memulai perjalanan sebagai programmer.',
+    tags: ['it', 'kuliah', 'karir'],
     date: '2024-01-05',
     readTime: 6
   },
   {
-    id: 'organisasi-kampus',
-    title: 'Pentingnya Ikut Organisasi Kampus',
-    slug: 'pentingnya-ikut-organisasi-kampus',
-    excerpt: 'Manfaat mengikuti organisasi selama kuliah.',
-    tags: ['kuliah'],
+    id: 'prospek-karir-it',
+    title: 'Prospek Karir di Bidang IT',
+    slug: 'prospek-karir-it',
+    excerpt: 'Peluang kerja dan perkembangan karir di industri teknologi.',
+    tags: ['it', 'karir'],
     date: '2023-12-28',
     readTime: 7
   },
   {
-    id: 'dosen-favorit',
-    title: 'Dosen-Dosen Favorit di Gunadarma',
-    slug: 'dosen-favorit-gunadarma',
-    excerpt: 'Cerita tentang dosen-dosen yang menginspirasi.',
-    tags: ['gunadarma'],
+    id: 'tips-memilih-jurusan',
+    title: 'Tips Memilih Jurusan Kuliah',
+    slug: 'tips-memilih-jurusan',
+    excerpt: 'Panduan lengkap memilih jurusan yang tepat untuk masa depan.',
+    tags: ['jurusan', 'kuliah'],
     date: '2023-12-20',
-    readTime: 4
+    readTime: 6
   },
   {
-    id: 'fasilitas-kampus',
-    title: 'Fasilitas Keren di Gunadarma',
-    slug: 'fasilitas-keren-gunadarma',
-    excerpt: 'Mengulas fasilitas-fasilitas yang tersedia di kampus.',
-    tags: ['gunadarma'],
+    id: 'pengalaman-magang',
+    title: 'Pengalaman Magang di Perusahaan Teknologi',
+    slug: 'pengalaman-magang',
+    excerpt: 'Cerita magang dan persiapan memasuki dunia kerja.',
+    tags: ['it', 'karir', 'kuliah'],
     date: '2023-12-15',
     readTime: 5
   }
 ];
+
+// Data tag dan deskripsinya
+const TAG_INFO: { [key: string]: { name: string, description: string } } = {
+  kuliah: {
+    name: 'Kuliah',
+    description: 'Kumpulan artikel tentang pengalaman, tips, dan cerita seputar perkuliahan.'
+  },
+  gunadarma: {
+    name: 'Gunadarma',
+    description: 'Artikel-artikel yang membahas tentang Universitas Gunadarma, dari sejarah hingga kehidupan kampus.'
+  },
+  jurusan: {
+    name: 'Jurusan',
+    description: 'Informasi dan tips seputar pemilihan jurusan kuliah yang tepat.'
+  },
+  it: {
+    name: 'IT',
+    description: 'Artikel tentang dunia teknologi informasi, programming, dan perkembangan digital.'
+  },
+  karir: {
+    name: 'Karir',
+    description: 'Tips dan informasi seputar persiapan karir dan dunia kerja.'
+  }
+};
 
 // Icons
 const CalendarIcon = ({ width, height }: { width: number, height: number }) => (
@@ -80,6 +104,13 @@ const ClockIcon = ({ width, height }: { width: number, height: number }) => (
   </svg>
 );
 
+const TagIcon = ({ width, height }: { width: number, height: number }) => (
+  <svg width={width} height={height} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+    <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/>
+    <line x1="7" y1="7" x2="7.01" y2="7"/>
+  </svg>
+);
+
 export default function TagPage() {
   const router = useRouter();
   const params = useParams();
@@ -90,20 +121,8 @@ export default function TagPage() {
 
   // Filter posts berdasarkan tag
   const filteredPosts = BLOG_POSTS.filter(post => post.tags.includes(tagId));
-
-  // Info tag
-  const tagInfo: { [key: string]: { name: string, description: string } } = {
-    kuliah: {
-      name: 'Kuliah',
-      description: 'Kumpulan artikel tentang pengalaman, tips, dan cerita seputar perkuliahan.'
-    },
-    gunadarma: {
-      name: 'Gunadarma',
-      description: 'Artikel-artikel yang membahas tentang Universitas Gunadarma, dari sejarah hingga kehidupan kampus.'
-    }
-  };
-
-  const currentTag = tagInfo[tagId] || { name: tagId, description: '' };
+  const currentTag = TAG_INFO[tagId] || { name: tagId, description: '' };
+  const otherTags = Object.keys(TAG_INFO).filter(t => t !== tagId);
 
   useEffect(() => {
     setIsMounted(true);
@@ -133,7 +152,7 @@ export default function TagPage() {
     );
   }
 
-  if (!tagInfo[tagId]) {
+  if (!TAG_INFO[tagId]) {
     return (
       <div style={{
         minHeight: '100vh',
@@ -219,13 +238,16 @@ export default function TagPage() {
           }}
         >
           <div style={{
-            display: 'inline-block',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '10px',
             padding: '8px 24px',
             backgroundColor: '#222222',
             border: '1px solid #444444',
             borderRadius: '40px',
             marginBottom: '20px',
           }}>
+            <TagIcon width={20} height={20} />
             <span style={{
               fontSize: isMobile ? '1.5rem' : '2rem',
               color: 'white',
@@ -381,54 +403,57 @@ export default function TagPage() {
         )}
 
         {/* Other Tags */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.5 }}
-          style={{
-            marginTop: '80px',
-            paddingTop: '40px',
-            borderTop: '1px solid #333333',
-          }}
-        >
-          <h3 style={{
-            fontSize: '1.3rem',
-            fontWeight: 'normal',
-            color: 'white',
-            marginBottom: '20px',
-          }}>
-            Tags Lainnya
-          </h3>
-          
-          <div style={{
-            display: 'flex',
-            gap: '15px',
-          }}>
-            {Object.keys(tagInfo).filter(t => t !== tagId).map((otherTag) => (
-              <Link
-                key={otherTag}
-                href={`/tag/${otherTag}`}
-                style={{ textDecoration: 'none' }}
-              >
-                <motion.span
-                  whileHover={{ x: 5 }}
-                  style={{
-                    display: 'inline-block',
-                    padding: '6px 18px',
-                    backgroundColor: '#222222',
-                    border: '1px solid #444444',
-                    borderRadius: '30px',
-                    color: '#cccccc',
-                    fontSize: '0.95rem',
-                    cursor: 'pointer',
-                  }}
+        {otherTags.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.5 }}
+            style={{
+              marginTop: '80px',
+              paddingTop: '40px',
+              borderTop: '1px solid #333333',
+            }}
+          >
+            <h3 style={{
+              fontSize: '1.3rem',
+              fontWeight: 'normal',
+              color: 'white',
+              marginBottom: '20px',
+            }}>
+              Tags Lainnya
+            </h3>
+            
+            <div style={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: '12px',
+            }}>
+              {otherTags.map((otherTag) => (
+                <Link
+                  key={otherTag}
+                  href={`/tag/${otherTag}`}
+                  style={{ textDecoration: 'none' }}
                 >
-                  #{otherTag}
-                </motion.span>
-              </Link>
-            ))}
-          </div>
-        </motion.div>
+                  <motion.span
+                    whileHover={{ x: 5 }}
+                    style={{
+                      display: 'inline-block',
+                      padding: '8px 20px',
+                      backgroundColor: '#222222',
+                      border: '1px solid #444444',
+                      borderRadius: '30px',
+                      color: '#cccccc',
+                      fontSize: '0.95rem',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    #{TAG_INFO[otherTag].name}
+                  </motion.span>
+                </Link>
+              ))}
+            </div>
+          </motion.div>
+        )}
       </div>
     </div>
   );
