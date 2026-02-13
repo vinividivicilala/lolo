@@ -40,7 +40,7 @@ const firebaseConfig = {
   measurementId: "G-8LMP7F4BE9"
 };
 
-// Data media sosial untuk komponen Connection - TANPA NOMOR
+// Data media sosial untuk komponen Connection
 const socialConnections = [
   { id: 1, name: "GitHub" },
   { id: 2, name: "Instagram" },
@@ -49,7 +49,7 @@ const socialConnections = [
   { id: 5, name: "YouTube" }
 ];
 
-// Data community items - HURUF DEPAN BESAR, tanpa icon
+// Data community items - HURUF DEPAN BESAR
 const communityItems = [
   { id: 1, name: "Point Blank" },
   { id: 2, name: "Lost Saga" },
@@ -604,7 +604,68 @@ export default function SignInPage() {
   }
 
   // ============================================
-  // 13. KOMPONEN CONNECTION - TANPA NOMOR, DENGAN SVG SOUTH WEST ARROW
+  // 13. SVG ARROW COMPONENTS - EKOR PENDEK
+  // ============================================
+  
+  // SOUTH WEST ARROW - EKOR PENDEK (KIRI BAWAH)
+  const SouthWestArrow = ({ width, height, style }: { width: number | string, height: number | string, style?: React.CSSProperties }) => (
+    <svg 
+      width={width} 
+      height={height} 
+      viewBox="0 0 24 24" 
+      fill="none"
+      stroke="white"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      style={style}
+    >
+      <path d="M17 7L12 12" stroke="white"/>
+      <path d="M17 7H12" stroke="white"/>
+      <path d="M17 7V12" stroke="white"/>
+    </svg>
+  );
+
+  // SOUTH EAST ARROW - EKOR PENDEK (KANAN BAWAH)
+  const SouthEastArrow = ({ width, height, style }: { width: number | string, height: number | string, style?: React.CSSProperties }) => (
+    <svg 
+      width={width} 
+      height={height} 
+      viewBox="0 0 24 24" 
+      fill="none"
+      stroke="white"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      style={style}
+    >
+      <path d="M7 7L12 12" stroke="white"/>
+      <path d="M7 7H12" stroke="white"/>
+      <path d="M7 7V12" stroke="white"/>
+    </svg>
+  );
+
+  // NORTH EAST ARROW - EKOR PENDEK (KANAN ATAS)
+  const NorthEastArrow = ({ width, height, style }: { width: number | string, height: number | string, style?: React.CSSProperties }) => (
+    <svg 
+      width={width} 
+      height={height} 
+      viewBox="0 0 24 24" 
+      fill="none"
+      stroke="white"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      style={style}
+    >
+      <path d="M7 7L12 12" stroke="white"/>
+      <path d="M7 7H12" stroke="white"/>
+      <path d="M7 7V12" stroke="white"/>
+    </svg>
+  );
+
+  // ============================================
+  // 14. KOMPONEN CONNECTION - TANPA NOMOR, DENGAN SVG SOUTH WEST ARROW
   // ============================================
   const ConnectionComponent = () => (
     <div style={{ position: 'relative', width: isMobile ? '100%' : 'auto', zIndex: 10 }}>
@@ -647,27 +708,17 @@ export default function SignInPage() {
             ({socialConnections.length.toString().padStart(2, '0')})
           </motion.div>
           
-          {/* SOUTH WEST ARROW SVG */}
-          <svg 
-            width={isMobile ? '40' : '60'} 
-            height={isMobile ? '40' : '60'} 
-            viewBox="0 0 24 24" 
-            fill="none"
-            stroke="white"
-            strokeWidth="1"
-            strokeLinecap="round"
-            strokeLinejoin="round"
+          {/* SOUTH WEST ARROW - EKOR PENDEK */}
+          <SouthWestArrow 
+            width={isMobile ? 40 : 60} 
+            height={isMobile ? 40 : 60} 
             style={{ 
               marginLeft: '15px',
               opacity: 0.8,
               transform: connectionsOpen ? 'rotate(0deg)' : 'rotate(-90deg)',
               transition: 'transform 0.3s ease'
             }}
-          >
-            <path d="M17 7L7 17" stroke="white"/>
-            <path d="M17 7H7" stroke="white"/>
-            <path d="M17 7V17" stroke="white"/>
-          </svg>
+          />
         </div>
       </motion.div>
 
@@ -715,22 +766,12 @@ export default function SignInPage() {
                     {social.name}
                   </p>
                   
-                  {/* SOUTH WEST ARROW SVG untuk setiap item */}
-                  <svg 
-                    width={isMobile ? '24' : '35'} 
-                    height={isMobile ? '24' : '35'} 
-                    viewBox="0 0 24 24" 
-                    fill="none"
-                    stroke="white"
-                    strokeWidth="1"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
+                  {/* SOUTH WEST ARROW - EKOR PENDEK */}
+                  <SouthWestArrow 
+                    width={isMobile ? 24 : 35} 
+                    height={isMobile ? 24 : 35} 
                     style={{ opacity: 0.6, marginLeft: '15px' }}
-                  >
-                    <path d="M17 7L7 17" stroke="white"/>
-                    <path d="M17 7H7" stroke="white"/>
-                    <path d="M17 7V17" stroke="white"/>
-                  </svg>
+                  />
                 </motion.div>
               ))}
             </div>
@@ -741,7 +782,7 @@ export default function SignInPage() {
   );
 
   // ============================================
-  // 14. KOMPONEN COMMUNITY GSAP MODERN - HURUF DEPAN BESAR, TANPA NOMOR
+  // 15. KOMPONEN COMMUNITY GSAP MODERN - HURUF DEPAN BESAR, TANPA NOMOR
   // ============================================
   const CommunityComponent = () => (
     <div style={{ position: 'relative', width: isMobile ? '100%' : 'auto', zIndex: 10 }}>
@@ -789,27 +830,17 @@ export default function SignInPage() {
             ({communityItems.length.toString().padStart(2, '0')})
           </motion.div>
           
-          {/* SOUTH WEST ARROW SVG */}
-          <svg 
-            width={isMobile ? '40' : '60'} 
-            height={isMobile ? '40' : '60'} 
-            viewBox="0 0 24 24" 
-            fill="none"
-            stroke="white"
-            strokeWidth="1"
-            strokeLinecap="round"
-            strokeLinejoin="round"
+          {/* SOUTH WEST ARROW - EKOR PENDEK */}
+          <SouthWestArrow 
+            width={isMobile ? 40 : 60} 
+            height={isMobile ? 40 : 60} 
             style={{ 
               marginLeft: '15px',
               opacity: 0.8,
               transform: communityOpen ? 'rotate(0deg)' : 'rotate(-90deg)',
               transition: 'transform 0.3s ease'
             }}
-          >
-            <path d="M17 7L7 17" stroke="white"/>
-            <path d="M17 7H7" stroke="white"/>
-            <path d="M17 7V17" stroke="white"/>
-          </svg>
+          />
         </div>
       </motion.div>
 
@@ -855,22 +886,12 @@ export default function SignInPage() {
                     {item.name}
                   </p>
                   
-                  {/* SOUTH WEST ARROW SVG untuk setiap item */}
-                  <svg 
-                    width={isMobile ? '24' : '35'} 
-                    height={isMobile ? '24' : '35'} 
-                    viewBox="0 0 24 24" 
-                    fill="none"
-                    stroke="white"
-                    strokeWidth="1"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
+                  {/* SOUTH WEST ARROW - EKOR PENDEK */}
+                  <SouthWestArrow 
+                    width={isMobile ? 24 : 35} 
+                    height={isMobile ? 24 : 35} 
                     style={{ opacity: 0.6 }}
-                  >
-                    <path d="M17 7L7 17" stroke="white"/>
-                    <path d="M17 7H7" stroke="white"/>
-                    <path d="M17 7V17" stroke="white"/>
-                  </svg>
+                  />
                 </div>
               ))}
             </div>
@@ -881,7 +902,7 @@ export default function SignInPage() {
   );
 
   // ============================================
-  // 15. KOMPONEN BLOG DENGAN SOUTH EAST ARROW
+  // 16. KOMPONEN BLOG DENGAN SOUTH EAST ARROW - EKOR PENDEK, ARROW BESAR
   // ============================================
   const BlogComponent = () => (
     <div style={{ position: 'relative', width: isMobile ? '100%' : 'auto', zIndex: 10 }}>
@@ -909,27 +930,17 @@ export default function SignInPage() {
             BLOG
           </h4>
           
-          {/* SOUTH EAST ARROW SVG */}
-          <svg 
-            width={isMobile ? '40' : '60'} 
-            height={isMobile ? '40' : '60'} 
-            viewBox="0 0 24 24" 
-            fill="none"
-            stroke="white"
-            strokeWidth="1"
-            strokeLinecap="round"
-            strokeLinejoin="round"
+          {/* SOUTH EAST ARROW - EKOR PENDEK */}
+          <SouthEastArrow 
+            width={isMobile ? 40 : 60} 
+            height={isMobile ? 40 : 60} 
             style={{ 
               marginLeft: '15px',
               opacity: 0.8,
               transform: blogOpen ? 'rotate(0deg)' : 'rotate(90deg)',
               transition: 'transform 0.3s ease'
             }}
-          >
-            <path d="M7 7L17 7" stroke="white"/>
-            <path d="M17 7L17 17" stroke="white"/>
-            <path d="M17 7L3 21" stroke="white"/>
-          </svg>
+          />
         </div>
       </motion.div>
 
@@ -968,22 +979,12 @@ export default function SignInPage() {
                 Bagaimana Rasa nya Masuk Kuliah Di Universitas Gunadarma
               </span>
               
-              {/* SOUTH EAST ARROW SVG */}
-              <svg 
-                width={isMobile ? '35' : '50'} 
-                height={isMobile ? '35' : '50'} 
-                viewBox="0 0 24 24" 
-                fill="none"
-                stroke="white"
-                strokeWidth="1"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                style={{ opacity: 0.7 }}
-              >
-                <path d="M7 7L17 7" stroke="white"/>
-                <path d="M17 7L17 17" stroke="white"/>
-                <path d="M17 7L3 21" stroke="white"/>
-              </svg>
+              {/* SOUTH EAST ARROW - EKOR PENDEK, DIPERBESAR */}
+              <SouthEastArrow 
+                width={isMobile ? 50 : 70} 
+                height={isMobile ? 50 : 70} 
+                style={{ opacity: 0.8 }}
+              />
             </Link>
           </motion.div>
         )}
@@ -992,7 +993,7 @@ export default function SignInPage() {
   );
 
   // ============================================
-  // 16. KOMPONEN MARQUEE DENGAN SVG MINIMALIST
+  // 17. KOMPONEN MARQUEE DENGAN SVG MINIMALIST
   // ============================================
   const MarqueeLeftText = () => (
     <div style={{
@@ -1035,21 +1036,12 @@ export default function SignInPage() {
             }}>
               CREATE FREE ACCESS ACCOUNT
             </span>
-            <svg 
-              width={isMobile ? '80' : '120'} 
-              height={isMobile ? '80' : '120'} 
-              viewBox="0 0 24 24" 
-              fill="none"
-              stroke="white"
-              strokeWidth="1"
-              strokeLinecap="round"
-              strokeLinejoin="round"
+            {/* NORTH EAST ARROW - EKOR PENDEK */}
+            <NorthEastArrow 
+              width={isMobile ? 80 : 120} 
+              height={isMobile ? 80 : 120} 
               style={{ opacity: 0.9 }}
-            >
-              <path d="M7 7L17 7" stroke="white" strokeWidth="1"/>
-              <path d="M7 7L7 17" stroke="white" strokeWidth="1"/>
-              <path d="M7 7L21 21" stroke="white" strokeWidth="1"/>
-            </svg>
+            />
           </div>
         ))}
       </div>
@@ -1097,21 +1089,12 @@ export default function SignInPage() {
             }}>
               SIGN IN
             </span>
-            <svg 
-              width={isMobile ? '100' : '160'} 
-              height={isMobile ? '100' : '160'} 
-              viewBox="0 0 24 24" 
-              fill="none"
-              stroke="white"
-              strokeWidth="1"
-              strokeLinecap="round"
-              strokeLinejoin="round"
+            {/* NORTH EAST ARROW - EKOR PENDEK */}
+            <NorthEastArrow 
+              width={isMobile ? 100 : 160} 
+              height={isMobile ? 100 : 160} 
               style={{ opacity: 0.9 }}
-            >
-              <path d="M7 7L17 7" stroke="white" strokeWidth="1"/>
-              <path d="M7 7L7 17" stroke="white" strokeWidth="1"/>
-              <path d="M7 7L21 21" stroke="white" strokeWidth="1"/>
-            </svg>
+            />
           </div>
         ))}
       </div>
@@ -1119,7 +1102,7 @@ export default function SignInPage() {
   );
 
   // ============================================
-  // 17. RENDER UTAMA - TANPA REDIRECT OTOMATIS
+  // 18. RENDER UTAMA - TANPA REDIRECT OTOMATIS
   // ============================================
   return (
     <>
@@ -1163,26 +1146,17 @@ export default function SignInPage() {
             }}>
               Halaman Utama
             </span>
-            <svg 
-              width={isMobile ? '50' : '80'} 
-              height={isMobile ? '50' : '80'} 
-              viewBox="0 0 24 24" 
-              fill="none"
-              stroke="white"
-              strokeWidth="1"
-              strokeLinecap="round"
-              strokeLinejoin="round"
+            {/* NORTH EAST ARROW - EKOR PENDEK */}
+            <NorthEastArrow 
+              width={isMobile ? 50 : 80} 
+              height={isMobile ? 50 : 80} 
               style={{ 
                 transition: 'transform 0.2s ease',
                 opacity: 0.9
               }}
               onMouseEnter={(e) => { e.currentTarget.style.transform = 'translate(3px, -3px)'; }}
               onMouseLeave={(e) => { e.currentTarget.style.transform = 'translate(0, 0)'; }}
-            >
-              <path d="M7 7L17 7" stroke="white" strokeWidth="1"/>
-              <path d="M7 7L7 17" stroke="white" strokeWidth="1"/>
-              <path d="M7 7L21 21" stroke="white" strokeWidth="1"/>
-            </svg>
+            />
           </Link>
         </div>
 
@@ -1291,21 +1265,12 @@ export default function SignInPage() {
                   }}>
                     {loading ? 'Loading...' : 'Continue with Google'}
                   </span>
-                  <svg 
-                    width={isMobile ? '40' : '60'} 
-                    height={isMobile ? '40' : '60'} 
-                    viewBox="0 0 24 24" 
-                    fill="none"
-                    stroke="white"
-                    strokeWidth="1"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
+                  {/* SOUTH WEST ARROW - EKOR PENDEK */}
+                  <SouthWestArrow 
+                    width={isMobile ? 40 : 60} 
+                    height={isMobile ? 40 : 60} 
                     style={{ marginLeft: '10px', opacity: 0.7 }}
-                  >
-                    <path d="M7 7L17 7" stroke="white"/>
-                    <path d="M7 7L7 17" stroke="white"/>
-                    <path d="M7 7L21 21" stroke="white"/>
-                  </svg>
+                  />
                 </div>
 
                 {/* GitHub Login */}
@@ -1337,21 +1302,12 @@ export default function SignInPage() {
                   }}>
                     {loading ? 'Loading...' : 'Continue with GitHub'}
                   </span>
-                  <svg 
-                    width={isMobile ? '40' : '60'} 
-                    height={isMobile ? '40' : '60'} 
-                    viewBox="0 0 24 24" 
-                    fill="none"
-                    stroke="white"
-                    strokeWidth="1"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
+                  {/* SOUTH WEST ARROW - EKOR PENDEK */}
+                  <SouthWestArrow 
+                    width={isMobile ? 40 : 60} 
+                    height={isMobile ? 40 : 60} 
                     style={{ marginLeft: '10px', opacity: 0.7 }}
-                  >
-                    <path d="M7 7L17 7" stroke="white"/>
-                    <path d="M7 7L7 17" stroke="white"/>
-                    <path d="M7 7L21 21" stroke="white"/>
-                  </svg>
+                  />
                 </div>
               </div>
 
@@ -1460,21 +1416,12 @@ export default function SignInPage() {
                     >
                       {loading ? 'SIGNING IN...' : 'SIGN IN'}
                     </button>
-                    <svg 
-                      width={isMobile ? '50' : '70'} 
-                      height={isMobile ? '50' : '70'} 
-                      viewBox="0 0 24 24" 
-                      fill="none"
-                      stroke="white"
-                      strokeWidth="1"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
+                    {/* NORTH EAST ARROW - EKOR PENDEK */}
+                    <NorthEastArrow 
+                      width={isMobile ? 50 : 70} 
+                      height={isMobile ? 50 : 70} 
                       style={{ opacity: 0.7 }}
-                    >
-                      <path d="M7 7L17 7" stroke="white"/>
-                      <path d="M7 7L7 17" stroke="white"/>
-                      <path d="M7 7L21 21" stroke="white"/>
-                    </svg>
+                    />
                   </div>
                 </div>
               </form>
@@ -1518,20 +1465,12 @@ export default function SignInPage() {
                     onMouseLeave={(e) => e.currentTarget.style.opacity = '0.7'}
                   >
                     Forgot your password?
-                    <svg 
-                      width={isMobile ? '35' : '50'} 
-                      height={isMobile ? '35' : '50'} 
-                      viewBox="0 0 24 24" 
-                      fill="none"
-                      stroke="white"
-                      strokeWidth="1"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <path d="M7 7L17 7" stroke="white"/>
-                      <path d="M7 7L7 17" stroke="white"/>
-                      <path d="M7 7L21 21" stroke="white"/>
-                    </svg>
+                    {/* SOUTH WEST ARROW - EKOR PENDEK */}
+                    <SouthWestArrow 
+                      width={isMobile ? 35 : 50} 
+                      height={isMobile ? 35 : 50} 
+                      style={{ opacity: 0.7 }}
+                    />
                   </button>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
                     <span style={{ 
@@ -1565,20 +1504,12 @@ export default function SignInPage() {
                       onMouseLeave={(e) => e.currentTarget.style.opacity = '0.8'}
                     >
                       Sign up
-                      <svg 
-                        width={isMobile ? '35' : '50'} 
-                        height={isMobile ? '35' : '50'} 
-                        viewBox="0 0 24 24" 
-                        fill="none"
-                        stroke="white"
-                        strokeWidth="1"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <path d="M7 7L17 7" stroke="white"/>
-                        <path d="M7 7L7 17" stroke="white"/>
-                        <path d="M7 7L21 21" stroke="white"/>
-                      </svg>
+                      {/* SOUTH WEST ARROW - EKOR PENDEK */}
+                      <SouthWestArrow 
+                        width={isMobile ? 35 : 50} 
+                        height={isMobile ? 35 : 50} 
+                        style={{ opacity: 0.8 }}
+                      />
                     </button>
                   </div>
                 </div>
@@ -1637,20 +1568,12 @@ export default function SignInPage() {
                   onMouseLeave={(e) => e.currentTarget.style.opacity = '0.8'}
                 >
                   GO TO NOTES
-                  <svg 
-                    width={isMobile ? '70' : '90'} 
-                    height={isMobile ? '70' : '90'} 
-                    viewBox="0 0 24 24" 
-                    fill="none"
-                    stroke="white"
-                    strokeWidth="1"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M7 7L17 7" stroke="white"/>
-                    <path d="M7 7L7 17" stroke="white"/>
-                    <path d="M7 7L21 21" stroke="white"/>
-                  </svg>
+                  {/* NORTH EAST ARROW - EKOR PENDEK */}
+                  <NorthEastArrow 
+                    width={isMobile ? 70 : 90} 
+                    height={isMobile ? 70 : 90} 
+                    style={{ opacity: 0.8 }}
+                  />
                 </button>
                 
                 {/* SIGN OUT BUTTON - BESAR DENGAN SVG */}
@@ -1678,12 +1601,12 @@ export default function SignInPage() {
                 >
                   SIGN OUT
                   <svg 
-                    width={isMobile ? '50' : '70'} 
-                    height={isMobile ? '50' : '70'} 
+                    width={isMobile ? 50 : 70} 
+                    height={isMobile ? 50 : 70} 
                     viewBox="0 0 24 24" 
                     fill="none"
                     stroke="white"
-                    strokeWidth="1"
+                    strokeWidth="1.5"
                     strokeLinecap="round"
                     strokeLinejoin="round"
                   >
@@ -1696,7 +1619,7 @@ export default function SignInPage() {
             </div>
           )}
 
-          {/* KEBIJAKAN PRIVASI & KETENTUAN KAMI - TAMPIL DI SEMUA KONDISI (LUAR KONDISI !user) */}
+          {/* KEBIJAKAN PRIVASI & KETENTUAN KAMI - TAMPIL DI SEMUA KONDISI */}
           <div style={{ 
             display: 'flex', 
             justifyContent: 'flex-start', 
@@ -1725,20 +1648,12 @@ export default function SignInPage() {
             onMouseLeave={(e) => e.currentTarget.style.opacity = '0.7'}
             >
               KEBIJAKAN PRIVASI
-              <svg 
-                width={isMobile ? '30' : '45'} 
-                height={isMobile ? '30' : '45'} 
-                viewBox="0 0 24 24" 
-                fill="none"
-                stroke="white"
-                strokeWidth="1"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M7 7L17 7" stroke="white"/>
-                <path d="M17 7L17 17" stroke="white"/>
-                <path d="M17 7L3 21" stroke="white"/>
-              </svg>
+              {/* SOUTH EAST ARROW - EKOR PENDEK */}
+              <SouthEastArrow 
+                width={isMobile ? 30 : 45} 
+                height={isMobile ? 30 : 45} 
+                style={{ opacity: 0.7 }}
+              />
             </Link>
             <Link href="#" style={{ 
               display: 'flex',
@@ -1758,20 +1673,12 @@ export default function SignInPage() {
             onMouseLeave={(e) => e.currentTarget.style.opacity = '0.7'}
             >
               KETENTUAN KAMI
-              <svg 
-                width={isMobile ? '30' : '45'} 
-                height={isMobile ? '30' : '45'} 
-                viewBox="0 0 24 24" 
-                fill="none"
-                stroke="white"
-                strokeWidth="1"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M7 7L17 7" stroke="white"/>
-                <path d="M17 7L17 17" stroke="white"/>
-                <path d="M17 7L3 21" stroke="white"/>
-              </svg>
+              {/* SOUTH EAST ARROW - EKOR PENDEK */}
+              <SouthEastArrow 
+                width={isMobile ? 30 : 45} 
+                height={isMobile ? 30 : 45} 
+                style={{ opacity: 0.7 }}
+              />
             </Link>
           </div>
         </div>
@@ -1815,7 +1722,7 @@ export default function SignInPage() {
             </p>
           </div>
 
-          {/* 6 KELOMPOK MENU - DENGAN COMMUNITY GSAP MODERN DAN BLOG */}
+          {/* 6 KELOMPOK MENU */}
           <div style={{ 
             display: 'grid', 
             gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(3, auto)', 
@@ -1867,11 +1774,9 @@ export default function SignInPage() {
               </h4>
             </div>
             <div>
-              {/* COMMUNITY DENGAN GSAP MODERN - HURUF DEPAN BESAR, TANPA NOMOR */}
               <CommunityComponent />
             </div>
             <div>
-              {/* BLOG DENGAN SOUTH EAST ARROW */}
               <BlogComponent />
             </div>
           </div>
