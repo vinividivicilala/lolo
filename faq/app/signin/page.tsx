@@ -604,10 +604,10 @@ export default function SignInPage() {
   }
 
   // ============================================
-  // 13. SVG ARROW COMPONENTS - EKOR PENDEK
+  // 13. SVG ARROW COMPONENTS - EKOR PENDEK, UKURAN BESAR
   // ============================================
   
-  // SOUTH WEST ARROW - EKOR PENDEK (KIRI BAWAH)
+  // SOUTH WEST ARROW - EKOR PENDEK (KIRI BAWAH) - UKURAN BESAR
   const SouthWestArrow = ({ width, height, style }: { width: number | string, height: number | string, style?: React.CSSProperties }) => (
     <svg 
       width={width} 
@@ -626,7 +626,7 @@ export default function SignInPage() {
     </svg>
   );
 
-  // SOUTH EAST ARROW - EKOR PENDEK (KANAN BAWAH)
+  // SOUTH EAST ARROW - EKOR PENDEK (KANAN BAWAH) - UKURAN BESAR
   const SouthEastArrow = ({ width, height, style }: { width: number | string, height: number | string, style?: React.CSSProperties }) => (
     <svg 
       width={width} 
@@ -645,7 +645,7 @@ export default function SignInPage() {
     </svg>
   );
 
-  // NORTH EAST ARROW - EKOR PENDEK (KANAN ATAS)
+  // NORTH EAST ARROW - EKOR PENDEK (KANAN ATAS) - UKURAN BESAR
   const NorthEastArrow = ({ width, height, style }: { width: number | string, height: number | string, style?: React.CSSProperties }) => (
     <svg 
       width={width} 
@@ -665,7 +665,7 @@ export default function SignInPage() {
   );
 
   // ============================================
-  // 14. KOMPONEN CONNECTION - TANPA NOMOR, DENGAN SVG SOUTH WEST ARROW
+  // 14. KOMPONEN CONNECTION - TANPA NOMOR, DENGAN SVG SOUTH WEST ARROW BESAR
   // ============================================
   const ConnectionComponent = () => (
     <div style={{ position: 'relative', width: isMobile ? '100%' : 'auto', zIndex: 10 }}>
@@ -679,7 +679,7 @@ export default function SignInPage() {
           position: 'relative', 
           display: 'flex', 
           alignItems: 'center', 
-          gap: '15px'
+          gap: '20px'
         }}>
           <h4 style={{
             color: 'white',
@@ -708,10 +708,10 @@ export default function SignInPage() {
             ({socialConnections.length.toString().padStart(2, '0')})
           </motion.div>
           
-          {/* SOUTH WEST ARROW - EKOR PENDEK */}
+          {/* SOUTH WEST ARROW - EKOR PENDEK, UKURAN BESAR */}
           <SouthWestArrow 
-            width={isMobile ? 40 : 60} 
-            height={isMobile ? 40 : 60} 
+            width={isMobile ? 60 : 80} 
+            height={isMobile ? 60 : 80} 
             style={{ 
               marginLeft: '15px',
               opacity: 0.8,
@@ -766,10 +766,10 @@ export default function SignInPage() {
                     {social.name}
                   </p>
                   
-                  {/* SOUTH WEST ARROW - EKOR PENDEK */}
+                  {/* SOUTH WEST ARROW - EKOR PENDEK, UKURAN BESAR */}
                   <SouthWestArrow 
-                    width={isMobile ? 24 : 35} 
-                    height={isMobile ? 24 : 35} 
+                    width={isMobile ? 40 : 55} 
+                    height={isMobile ? 40 : 55} 
                     style={{ opacity: 0.6, marginLeft: '15px' }}
                   />
                 </motion.div>
@@ -782,7 +782,7 @@ export default function SignInPage() {
   );
 
   // ============================================
-  // 15. KOMPONEN COMMUNITY GSAP MODERN - HURUF DEPAN BESAR, TANPA NOMOR
+  // 15. KOMPONEN COMMUNITY GSAP MODERN - HURUF DEPAN BESAR, TANPA NOMOR, ARROW BESAR
   // ============================================
   const CommunityComponent = () => (
     <div style={{ position: 'relative', width: isMobile ? '100%' : 'auto', zIndex: 10 }}>
@@ -798,7 +798,7 @@ export default function SignInPage() {
             position: 'relative', 
             display: 'flex', 
             alignItems: 'center', 
-            gap: '15px',
+            gap: '20px',
             color: 'rgba(255,255,255,0.8)',
             transition: 'color 0.3s ease'
           }}
@@ -830,10 +830,10 @@ export default function SignInPage() {
             ({communityItems.length.toString().padStart(2, '0')})
           </motion.div>
           
-          {/* SOUTH WEST ARROW - EKOR PENDEK */}
+          {/* SOUTH WEST ARROW - EKOR PENDEK, UKURAN BESAR */}
           <SouthWestArrow 
-            width={isMobile ? 40 : 60} 
-            height={isMobile ? 40 : 60} 
+            width={isMobile ? 60 : 80} 
+            height={isMobile ? 60 : 80} 
             style={{ 
               marginLeft: '15px',
               opacity: 0.8,
@@ -886,10 +886,10 @@ export default function SignInPage() {
                     {item.name}
                   </p>
                   
-                  {/* SOUTH WEST ARROW - EKOR PENDEK */}
+                  {/* SOUTH WEST ARROW - EKOR PENDEK, UKURAN BESAR */}
                   <SouthWestArrow 
-                    width={isMobile ? 24 : 35} 
-                    height={isMobile ? 24 : 35} 
+                    width={isMobile ? 40 : 55} 
+                    height={isMobile ? 40 : 55} 
                     style={{ opacity: 0.6 }}
                   />
                 </div>
@@ -902,7 +902,7 @@ export default function SignInPage() {
   );
 
   // ============================================
-  // 16. KOMPONEN BLOG DENGAN SOUTH EAST ARROW - EKOR PENDEK, ARROW BESAR
+  // 16. KOMPONEN BLOG DENGAN SOUTH EAST ARROW - EKOR PENDEK, ARROW SANGAT BESAR
   // ============================================
   const BlogComponent = () => (
     <div style={{ position: 'relative', width: isMobile ? '100%' : 'auto', zIndex: 10 }}>
@@ -916,7 +916,7 @@ export default function SignInPage() {
           position: 'relative', 
           display: 'flex', 
           alignItems: 'center', 
-          gap: '15px'
+          gap: '20px'
         }}>
           <h4 style={{
             color: 'white',
@@ -930,10 +930,10 @@ export default function SignInPage() {
             BLOG
           </h4>
           
-          {/* SOUTH EAST ARROW - EKOR PENDEK */}
+          {/* SOUTH EAST ARROW - EKOR PENDEK, UKURAN BESAR */}
           <SouthEastArrow 
-            width={isMobile ? 40 : 60} 
-            height={isMobile ? 40 : 60} 
+            width={isMobile ? 60 : 80} 
+            height={isMobile ? 60 : 80} 
             style={{ 
               marginLeft: '15px',
               opacity: 0.8,
@@ -979,10 +979,10 @@ export default function SignInPage() {
                 Bagaimana Rasa nya Masuk Kuliah Di Universitas Gunadarma
               </span>
               
-              {/* SOUTH EAST ARROW - EKOR PENDEK, DIPERBESAR */}
+              {/* SOUTH EAST ARROW - EKOR PENDEK, UKURAN SANGAT BESAR */}
               <SouthEastArrow 
-                width={isMobile ? 50 : 70} 
-                height={isMobile ? 50 : 70} 
+                width={isMobile ? 70 : 100} 
+                height={isMobile ? 70 : 100} 
                 style={{ opacity: 0.8 }}
               />
             </Link>
@@ -993,7 +993,7 @@ export default function SignInPage() {
   );
 
   // ============================================
-  // 17. KOMPONEN MARQUEE DENGAN SVG MINIMALIST
+  // 17. KOMPONEN MARQUEE DENGAN SVG BESAR
   // ============================================
   const MarqueeLeftText = () => (
     <div style={{
@@ -1036,10 +1036,10 @@ export default function SignInPage() {
             }}>
               CREATE FREE ACCESS ACCOUNT
             </span>
-            {/* NORTH EAST ARROW - EKOR PENDEK */}
+            {/* NORTH EAST ARROW - EKOR PENDEK, UKURAN SANGAT BESAR */}
             <NorthEastArrow 
-              width={isMobile ? 80 : 120} 
-              height={isMobile ? 80 : 120} 
+              width={isMobile ? 100 : 150} 
+              height={isMobile ? 100 : 150} 
               style={{ opacity: 0.9 }}
             />
           </div>
@@ -1089,10 +1089,10 @@ export default function SignInPage() {
             }}>
               SIGN IN
             </span>
-            {/* NORTH EAST ARROW - EKOR PENDEK */}
+            {/* NORTH EAST ARROW - EKOR PENDEK, UKURAN SANGAT BESAR */}
             <NorthEastArrow 
-              width={isMobile ? 100 : 160} 
-              height={isMobile ? 100 : 160} 
+              width={isMobile ? 120 : 180} 
+              height={isMobile ? 120 : 180} 
               style={{ opacity: 0.9 }}
             />
           </div>
@@ -1146,10 +1146,10 @@ export default function SignInPage() {
             }}>
               Halaman Utama
             </span>
-            {/* NORTH EAST ARROW - EKOR PENDEK */}
+            {/* NORTH EAST ARROW - EKOR PENDEK, UKURAN BESAR */}
             <NorthEastArrow 
-              width={isMobile ? 50 : 80} 
-              height={isMobile ? 50 : 80} 
+              width={isMobile ? 60 : 90} 
+              height={isMobile ? 60 : 90} 
               style={{ 
                 transition: 'transform 0.2s ease',
                 opacity: 0.9
@@ -1265,10 +1265,10 @@ export default function SignInPage() {
                   }}>
                     {loading ? 'Loading...' : 'Continue with Google'}
                   </span>
-                  {/* SOUTH WEST ARROW - EKOR PENDEK */}
+                  {/* SOUTH WEST ARROW - EKOR PENDEK, UKURAN BESAR */}
                   <SouthWestArrow 
-                    width={isMobile ? 40 : 60} 
-                    height={isMobile ? 40 : 60} 
+                    width={isMobile ? 50 : 70} 
+                    height={isMobile ? 50 : 70} 
                     style={{ marginLeft: '10px', opacity: 0.7 }}
                   />
                 </div>
@@ -1302,10 +1302,10 @@ export default function SignInPage() {
                   }}>
                     {loading ? 'Loading...' : 'Continue with GitHub'}
                   </span>
-                  {/* SOUTH WEST ARROW - EKOR PENDEK */}
+                  {/* SOUTH WEST ARROW - EKOR PENDEK, UKURAN BESAR */}
                   <SouthWestArrow 
-                    width={isMobile ? 40 : 60} 
-                    height={isMobile ? 40 : 60} 
+                    width={isMobile ? 50 : 70} 
+                    height={isMobile ? 50 : 70} 
                     style={{ marginLeft: '10px', opacity: 0.7 }}
                   />
                 </div>
@@ -1416,10 +1416,10 @@ export default function SignInPage() {
                     >
                       {loading ? 'SIGNING IN...' : 'SIGN IN'}
                     </button>
-                    {/* NORTH EAST ARROW - EKOR PENDEK */}
+                    {/* NORTH EAST ARROW - EKOR PENDEK, UKURAN BESAR */}
                     <NorthEastArrow 
-                      width={isMobile ? 50 : 70} 
-                      height={isMobile ? 50 : 70} 
+                      width={isMobile ? 60 : 85} 
+                      height={isMobile ? 60 : 85} 
                       style={{ opacity: 0.7 }}
                     />
                   </div>
@@ -1465,10 +1465,10 @@ export default function SignInPage() {
                     onMouseLeave={(e) => e.currentTarget.style.opacity = '0.7'}
                   >
                     Forgot your password?
-                    {/* SOUTH WEST ARROW - EKOR PENDEK */}
+                    {/* SOUTH WEST ARROW - EKOR PENDEK, UKURAN BESAR */}
                     <SouthWestArrow 
-                      width={isMobile ? 35 : 50} 
-                      height={isMobile ? 35 : 50} 
+                      width={isMobile ? 45 : 65} 
+                      height={isMobile ? 45 : 65} 
                       style={{ opacity: 0.7 }}
                     />
                   </button>
@@ -1504,10 +1504,10 @@ export default function SignInPage() {
                       onMouseLeave={(e) => e.currentTarget.style.opacity = '0.8'}
                     >
                       Sign up
-                      {/* SOUTH WEST ARROW - EKOR PENDEK */}
+                      {/* SOUTH WEST ARROW - EKOR PENDEK, UKURAN BESAR */}
                       <SouthWestArrow 
-                        width={isMobile ? 35 : 50} 
-                        height={isMobile ? 35 : 50} 
+                        width={isMobile ? 45 : 65} 
+                        height={isMobile ? 45 : 65} 
                         style={{ opacity: 0.8 }}
                       />
                     </button>
@@ -1568,10 +1568,10 @@ export default function SignInPage() {
                   onMouseLeave={(e) => e.currentTarget.style.opacity = '0.8'}
                 >
                   GO TO NOTES
-                  {/* NORTH EAST ARROW - EKOR PENDEK */}
+                  {/* NORTH EAST ARROW - EKOR PENDEK, UKURAN SANGAT BESAR */}
                   <NorthEastArrow 
-                    width={isMobile ? 70 : 90} 
-                    height={isMobile ? 70 : 90} 
+                    width={isMobile ? 80 : 110} 
+                    height={isMobile ? 80 : 110} 
                     style={{ opacity: 0.8 }}
                   />
                 </button>
@@ -1601,8 +1601,8 @@ export default function SignInPage() {
                 >
                   SIGN OUT
                   <svg 
-                    width={isMobile ? 50 : 70} 
-                    height={isMobile ? 50 : 70} 
+                    width={isMobile ? 60 : 85} 
+                    height={isMobile ? 60 : 85} 
                     viewBox="0 0 24 24" 
                     fill="none"
                     stroke="white"
@@ -1648,10 +1648,10 @@ export default function SignInPage() {
             onMouseLeave={(e) => e.currentTarget.style.opacity = '0.7'}
             >
               KEBIJAKAN PRIVASI
-              {/* SOUTH EAST ARROW - EKOR PENDEK */}
+              {/* SOUTH EAST ARROW - EKOR PENDEK, UKURAN BESAR */}
               <SouthEastArrow 
-                width={isMobile ? 30 : 45} 
-                height={isMobile ? 30 : 45} 
+                width={isMobile ? 40 : 60} 
+                height={isMobile ? 40 : 60} 
                 style={{ opacity: 0.7 }}
               />
             </Link>
@@ -1673,10 +1673,10 @@ export default function SignInPage() {
             onMouseLeave={(e) => e.currentTarget.style.opacity = '0.7'}
             >
               KETENTUAN KAMI
-              {/* SOUTH EAST ARROW - EKOR PENDEK */}
+              {/* SOUTH EAST ARROW - EKOR PENDEK, UKURAN BESAR */}
               <SouthEastArrow 
-                width={isMobile ? 30 : 45} 
-                height={isMobile ? 30 : 45} 
+                width={isMobile ? 40 : 60} 
+                height={isMobile ? 40 : 60} 
                 style={{ opacity: 0.7 }}
               />
             </Link>
