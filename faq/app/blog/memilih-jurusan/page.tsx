@@ -96,6 +96,17 @@ export default function MemilihJurusanPage() {
   });
 
   // ============================================
+  // DATA TAGS
+  // ============================================
+  const articleTags = [
+    { id: 'jurusan', name: 'Jurusan' },
+    { id: 'it', name: 'IT' },
+    { id: 'karir', name: 'Karir' },
+    { id: 'kuliah', name: 'Kuliah' },
+    { id: 'gunadarma', name: 'Gunadarma' }
+  ];
+
+  // ============================================
   // 1. INITIALIZATION FIREBASE
   // ============================================
   useEffect(() => {
@@ -555,6 +566,13 @@ export default function MemilihJurusanPage() {
     <svg width={width} height={height} viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1">
       <circle cx="12" cy="12" r="10" stroke="white"/>
       <polyline points="12 6 12 12 16 14" stroke="white"/>
+    </svg>
+  );
+
+  const TagIcon = ({ width, height }: { width: number, height: number }) => (
+    <svg width={width} height={height} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+      <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/>
+      <line x1="7" y1="7" x2="7.01" y2="7"/>
     </svg>
   );
 
@@ -1384,13 +1402,74 @@ export default function MemilihJurusanPage() {
             </section>
           </div>
 
+          {/* ===== TAG SECTION (5 TAG) ===== */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            style={{
+              marginTop: '60px',
+              marginBottom: '40px',
+              paddingTop: '40px',
+              borderTop: '1px solid #333333',
+            }}
+          >
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px',
+              marginBottom: '20px',
+            }}>
+              <TagIcon width={20} height={20} />
+              <span style={{
+                fontSize: '1rem',
+                color: '#999999',
+                textTransform: 'uppercase',
+                letterSpacing: '1px',
+              }}>
+                Tags
+              </span>
+            </div>
+            
+            <div style={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: '12px',
+            }}>
+              {articleTags.map((tag) => (
+                <Link 
+                  key={tag.id}
+                  href={`/tag/${tag.id}`}
+                  style={{ textDecoration: 'none' }}
+                >
+                  <motion.span
+                    whileHover={{ x: 5 }}
+                    style={{
+                      display: 'inline-block',
+                      padding: '8px 20px',
+                      backgroundColor: '#222222',
+                      border: '1px solid #444444',
+                      borderRadius: '30px',
+                      color: '#cccccc',
+                      fontSize: '0.95rem',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease',
+                    }}
+                  >
+                    #{tag.name}
+                  </motion.span>
+                </Link>
+              ))}
+            </div>
+          </motion.div>
+
           {/* ===== BLOG SELANJUTNYA - NEXT PAGE ===== */}
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.3 }}
             style={{
-              marginTop: '60px',
+              marginTop: '40px',
               marginBottom: '60px',
               paddingTop: '40px',
               borderTop: '1px solid #333333',
