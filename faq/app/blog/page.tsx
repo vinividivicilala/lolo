@@ -92,8 +92,7 @@ export default function BlogPage() {
   const [commentLoading, setCommentLoading] = useState(false);
 
   // State untuk Hover Badge
-  const [hoveredAdminBadge, setHoveredAdminBadge] = useState<string | null>(null);
-  const [hoveredVerifiedBadge, setHoveredVerifiedBadge] = useState<string | null>(null);
+  const [hoveredBadge, setHoveredBadge] = useState<string | null>(null);
 
   // Format tanggal
   const today = new Date();
@@ -128,7 +127,6 @@ export default function BlogPage() {
       setFirebaseDb(db);
       setFirebaseInitialized(true);
       
-      // Initialize blog reactions document
       initializeBlogReactions(db);
     } catch (error) {
       console.error("Firebase initialization error:", error);
@@ -146,7 +144,6 @@ export default function BlogPage() {
       const docSnap = await getDoc(reactionsRef);
       
       if (!docSnap.exists()) {
-        // Initialize with zero counts for all emoticons
         const initialCounts: { [key: string]: number } = {};
         EMOTICONS.forEach(emoticon => {
           initialCounts[emoticon.id] = 0;
@@ -157,7 +154,6 @@ export default function BlogPage() {
           counts: initialCounts,
           createdAt: Timestamp.now()
         });
-        console.log("Blog reactions document created");
       }
     } catch (error) {
       console.error("Error initializing blog reactions:", error);
@@ -190,8 +186,6 @@ export default function BlogPage() {
       if (doc.exists()) {
         setReactions(doc.data().counts || {});
       }
-    }, (error) => {
-      console.error("Error loading reactions:", error);
     });
 
     return () => unsubscribe();
@@ -210,7 +204,6 @@ export default function BlogPage() {
         if (docSnap.exists()) {
           setUserReactions(docSnap.data().reactions || []);
         } else {
-          // Create user reactions document
           await setDoc(userReactionsRef, {
             userId: user.uid,
             articleId: "gunadarma-article",
@@ -248,8 +241,6 @@ export default function BlogPage() {
         replies: doc.data().replies || []
       }));
       setComments(commentsData);
-    }, (error) => {
-      console.error("Error loading comments:", error);
     });
 
     return () => unsubscribe();
@@ -269,7 +260,6 @@ export default function BlogPage() {
       const reactionsRef = doc(firebaseDb, "blogReactions", "gunadarma-article");
       const userReactionsRef = doc(firebaseDb, "userReactions", `${user.uid}_gunadarma-article`);
 
-      // Ensure reactions document exists
       const reactionsDoc = await getDoc(reactionsRef);
       if (!reactionsDoc.exists()) {
         const initialCounts: { [key: string]: number } = {};
@@ -284,7 +274,6 @@ export default function BlogPage() {
       }
 
       if (userReactions.includes(emoticonId)) {
-        // Remove reaction
         await updateDoc(reactionsRef, {
           [`counts.${emoticonId}`]: increment(-1)
         });
@@ -293,7 +282,6 @@ export default function BlogPage() {
         });
         setUserReactions(prev => prev.filter(id => id !== emoticonId));
       } else {
-        // Add reaction
         await updateDoc(reactionsRef, {
           [`counts.${emoticonId}`]: increment(1)
         });
@@ -404,6 +392,7 @@ export default function BlogPage() {
         id: `${Date.now()}_${user.uid}`,
         userId: user.uid,
         userName: user.displayName || user.email?.split('@')[0] || 'Anonymous',
+        userEmail: user.email,
         userPhoto: user.photoURL || `https://ui-avatars.com/api/?name=${user.email}&background=random`,
         text: replyText,
         createdAt: Timestamp.now(),
@@ -443,7 +432,6 @@ export default function BlogPage() {
       const commentData = commentDoc.data();
       
       if (isReply && replyId) {
-        // Like reply
         const replies = commentData.replies || [];
         const updatedReplies = replies.map((reply: any) => {
           if (reply.id === replyId) {
@@ -467,7 +455,6 @@ export default function BlogPage() {
         
         await updateDoc(commentRef, { replies: updatedReplies });
       } else {
-        // Like comment
         const likedBy = commentData.likedBy || [];
         if (likedBy.includes(user.uid)) {
           await updateDoc(commentRef, {
@@ -550,182 +537,158 @@ export default function BlogPage() {
     </svg>
   );
 
-  // Admin Badge Component
-  const AdminBadge = ({ email }: { email: string }) => (
-    <div style={{ position: 'relative', display: 'inline-block' }}>
-      <motion.div
-        onHoverStart={() => setHoveredAdminBadge(email)}
-        onHoverEnd={() => setHoveredAdminBadge(null)}
-        style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: '4px',
-          background: 'rgba(59,130,246,0.1)',
-          border: '1px solid #3b82f6',
-          borderRadius: '30px',
-          padding: '2px 10px',
-          marginLeft: '8px',
-          fontSize: '0.75rem',
-          color: '#3b82f6',
-          cursor: 'help',
-        }}
-      >
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" strokeWidth="2">
-          <path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z"/>
-          <path d="M12 6v6l4 2"/>
-        </svg>
-        <span>Admin</span>
-      </motion.div>
-      
-      <AnimatePresence>
-        {hoveredAdminBadge === email && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 10 }}
-            transition={{ duration: 0.2 }}
-            style={{
-              position: 'absolute',
-              bottom: '100%',
-              left: '0',
-              marginBottom: '10px',
-              width: '250px',
-              padding: '16px',
-              background: 'rgba(0,0,0,0.95)',
-              border: '1px solid #3b82f6',
-              borderRadius: '12px',
-              boxShadow: '0 10px 25px rgba(0,0,0,0.5)',
-              zIndex: 1000,
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
+  // ============================================
+  // 15. ADMIN BADGE - MINIMALIST, HITAM PUTIH
+  // ============================================
+  const AdminBadge = ({ email }: { email: string }) => {
+    const [isHovered, setIsHovered] = useState(false);
+    
+    return (
+      <div style={{ position: 'relative', display: 'inline-block', marginLeft: '6px', verticalAlign: 'middle' }}>
+        <motion.div
+          onHoverStart={() => setIsHovered(true)}
+          onHoverEnd={() => setIsHovered(false)}
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: '20px',
+            height: '20px',
+            background: '#ffffff',
+            border: '1px solid #000000',
+            borderRadius: '4px',
+            cursor: 'pointer',
+            color: '#000000',
+            fontSize: '11px',
+            fontWeight: '600',
+            textTransform: 'uppercase',
+            letterSpacing: '0.5px',
+          }}
+          whileHover={{ scale: 1.1 }}
+        >
+          A
+        </motion.div>
+        
+        <AnimatePresence>
+          {isHovered && (
+            <motion.div
+              initial={{ opacity: 0, y: 5 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 5 }}
+              transition={{ duration: 0.15 }}
+              style={{
+                position: 'absolute',
+                bottom: '100%',
+                left: '0',
+                marginBottom: '8px',
+                width: '160px',
+                padding: '10px 12px',
+                background: '#ffffff',
+                border: '1px solid #000000',
+                borderRadius: '4px',
+                zIndex: 1000,
+                color: '#000000',
+                fontSize: '12px',
+                lineHeight: '1.5',
+              }}
+            >
+              <div style={{ fontWeight: '600', marginBottom: '4px' }}>ADMIN</div>
+              <div style={{ color: '#555555', fontSize: '11px' }}>Akun administrator blog</div>
               <div style={{
-                width: '40px',
-                height: '40px',
-                borderRadius: '50%',
-                background: 'rgba(59,130,246,0.2)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}>
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" strokeWidth="1.5">
-                  <path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z"/>
-                  <path d="M12 6v6l4 2"/>
-                </svg>
-              </div>
-              <div>
-                <div style={{ fontWeight: 'bold', color: 'white', fontSize: '1rem' }}>Administrator</div>
-                <div style={{ color: '#3b82f6', fontSize: '0.8rem' }}>{email}</div>
-              </div>
-            </div>
-            <div style={{ color: '#e0e0e0', fontSize: '0.9rem', lineHeight: '1.5' }}>
-              <p style={{ margin: '0 0 8px 0' }}>
-                <strong style={{ color: '#3b82f6' }}>Farid Ardiansyah</strong> adalah administrator utama blog ini.
-              </p>
-              <p style={{ margin: '0 0 8px 0' }}>
-                🎓 Alumni Universitas Gunadarma 2026
-              </p>
-              <p style={{ margin: '0 0 8px 0' }}>
-                💻 Full-stack Developer & Content Creator
-              </p>
-              <p style={{ margin: '0', color: '#999999', fontSize: '0.8rem' }}>
-                ✨ Bertanggung jawab atas konten dan moderasi
-              </p>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  );
-
-  // Verified Badge Component
-  const VerifiedBadge = ({ email }: { email: string }) => (
-    <div style={{ position: 'relative', display: 'inline-block' }}>
-      <motion.div
-        onHoverStart={() => setHoveredVerifiedBadge(email)}
-        onHoverEnd={() => setHoveredVerifiedBadge(null)}
-        style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: '4px',
-          background: 'rgba(29,155,240,0.1)',
-          border: '1px solid #1d9bf0',
-          borderRadius: '30px',
-          padding: '2px 10px',
-          marginLeft: '8px',
-          fontSize: '0.75rem',
-          color: '#1d9bf0',
-          cursor: 'help',
-        }}
-      >
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="#1d9bf0" stroke="none">
-          <path d="M22.5 12.5c0-1.58-.875-2.95-2.148-3.6.154-.435.238-.905.238-1.4 0-2.21-1.71-3.998-3.818-3.998-.47 0-.92.084-1.336.25C14.818 2.415 13.51 1.5 12 1.5s-2.816.917-3.437 2.25c-.415-.165-.866-.25-1.336-.25-2.11 0-3.818 1.79-3.818 4 0 .494.083.964.237 1.4-1.272.65-2.147 2.018-2.147 3.6 0 1.495.782 2.798 1.942 3.486-.02.17-.032.34-.032.514 0 2.21 1.708 4 3.818 4 .47 0 .92-.086 1.335-.25.62 1.334 1.926 2.25 3.437 2.25 1.512 0 2.818-.916 3.437-2.25.415.163.865.248 1.336.248 2.11 0 3.818-1.79 3.818-4 0-.174-.012-.344-.033-.513 1.158-.687 1.943-1.99 1.943-3.485z"/>
-        </svg>
-        <span>Resmi</span>
-      </motion.div>
-      
-      <AnimatePresence>
-        {hoveredVerifiedBadge === email && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 10 }}
-            transition={{ duration: 0.2 }}
-            style={{
-              position: 'absolute',
-              bottom: '100%',
-              left: '0',
-              marginBottom: '10px',
-              width: '280px',
-              padding: '16px',
-              background: 'rgba(0,0,0,0.95)',
-              border: '1px solid #1d9bf0',
-              borderRadius: '12px',
-              boxShadow: '0 10px 25px rgba(0,0,0,0.5)',
-              zIndex: 1000,
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
-              <div style={{
-                width: '40px',
-                height: '40px',
-                borderRadius: '50%',
-                background: 'rgba(29,155,240,0.2)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}>
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="#1d9bf0" stroke="none">
-                  <path d="M22.5 12.5c0-1.58-.875-2.95-2.148-3.6.154-.435.238-.905.238-1.4 0-2.21-1.71-3.998-3.818-3.998-.47 0-.92.084-1.336.25C14.818 2.415 13.51 1.5 12 1.5s-2.816.917-3.437 2.25c-.415-.165-.866-.25-1.336-.25-2.11 0-3.818 1.79-3.818 4 0 .494.083.964.237 1.4-1.272.65-2.147 2.018-2.147 3.6 0 1.495.782 2.798 1.942 3.486-.02.17-.032.34-.032.514 0 2.21 1.708 4 3.818 4 .47 0 .92-.086 1.335-.25.62 1.334 1.926 2.25 3.437 2.25 1.512 0 2.818-.916 3.437-2.25.415.163.865.248 1.336.248 2.11 0 3.818-1.79 3.818-4 0-.174-.012-.344-.033-.513 1.158-.687 1.943-1.99 1.943-3.485z"/>
-                </svg>
-              </div>
-              <div>
-                <div style={{ fontWeight: 'bold', color: 'white', fontSize: '1rem' }}>Akun Resmi Terverifikasi</div>
-                <div style={{ color: '#1d9bf0', fontSize: '0.8rem' }}>{email}</div>
-              </div>
-            </div>
-            <div style={{ color: '#e0e0e0', fontSize: '0.9rem', lineHeight: '1.5' }}>
-              <p style={{ margin: '0 0 8px 0' }}>
-                <strong style={{ color: '#1d9bf0' }}>Centang Biru Resmi</strong> - Identitas terverifikasi
-              </p>
-              <p style={{ margin: '0 0 8px 0' }}>
-                🏆 Kontributor Utama & Partner Resmi
-              </p>
-              <p style={{ margin: '0 0 8px 0' }}>
-                📌 Telah memverifikasi identitas dan kredibilitas
-              </p>
-              <p style={{ margin: '0', color: '#999999', fontSize: '0.8rem' }}>
-                ✨ Akun ini dijamin keasliannya oleh tim Gunadarma
-              </p>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  );
+                position: 'absolute',
+                top: '100%',
+                left: '10px',
+                width: '10px',
+                height: '10px',
+                background: '#ffffff',
+                borderLeft: '1px solid #000000',
+                borderBottom: '1px solid #000000',
+                transform: 'rotate(-45deg)',
+                marginTop: '-6px',
+              }} />
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    );
+  };
 
   // ============================================
-  // 15. RANGKUMAN SECTIONS
+  // 16. VERIFIED BADGE - MINIMALIST, HITAM PUTIH
+  // ============================================
+  const VerifiedBadge = ({ email }: { email: string }) => {
+    const [isHovered, setIsHovered] = useState(false);
+    
+    return (
+      <div style={{ position: 'relative', display: 'inline-block', marginLeft: '6px', verticalAlign: 'middle' }}>
+        <motion.div
+          onHoverStart={() => setIsHovered(true)}
+          onHoverEnd={() => setIsHovered(false)}
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: '20px',
+            height: '20px',
+            background: '#ffffff',
+            border: '1px solid #000000',
+            borderRadius: '50%',
+            cursor: 'pointer',
+            color: '#000000',
+            fontSize: '12px',
+            fontWeight: '600',
+          }}
+          whileHover={{ scale: 1.1 }}
+        >
+          ✓
+        </motion.div>
+        
+        <AnimatePresence>
+          {isHovered && (
+            <motion.div
+              initial={{ opacity: 0, y: 5 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 5 }}
+              transition={{ duration: 0.15 }}
+              style={{
+                position: 'absolute',
+                bottom: '100%',
+                left: '0',
+                marginBottom: '8px',
+                width: '160px',
+                padding: '10px 12px',
+                background: '#ffffff',
+                border: '1px solid #000000',
+                borderRadius: '4px',
+                zIndex: 1000,
+                color: '#000000',
+                fontSize: '12px',
+                lineHeight: '1.5',
+              }}
+            >
+              <div style={{ fontWeight: '600', marginBottom: '4px' }}>VERIFIED</div>
+              <div style={{ color: '#555555', fontSize: '11px' }}>Akun resmi terverifikasi</div>
+              <div style={{
+                position: 'absolute',
+                top: '100%',
+                left: '10px',
+                width: '10px',
+                height: '10px',
+                background: '#ffffff',
+                borderLeft: '1px solid #000000',
+                borderBottom: '1px solid #000000',
+                transform: 'rotate(-45deg)',
+                marginTop: '-6px',
+              }} />
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    );
+  };
+
+  // ============================================
+  // 17. RANGKUMAN SECTIONS
   // ============================================
   const rangkumanSections = [
     { id: "pendahuluan", title: "Pendahuluan" },
@@ -749,7 +712,7 @@ export default function BlogPage() {
   };
 
   // ============================================
-  // 16. LOADING STATE
+  // 18. LOADING STATE
   // ============================================
   if (!isMounted || loading) {
     return (
@@ -795,41 +758,43 @@ export default function BlogPage() {
               display: 'flex',
               alignItems: 'center',
               gap: '15px',
-              backgroundColor: 'rgba(255,255,255,0.05)',
+              background: '#0a0a0a',
               padding: '8px 20px',
-              borderRadius: '40px',
-              border: '1px solid rgba(255,255,255,0.1)',
+              borderRadius: '30px',
+              border: '1px solid #333333',
             }}
           >
             <motion.img 
               whileHover={{ scale: 1.1 }}
-              src={user.photoURL || `https://ui-avatars.com/api/?name=${user.email}&background=random`} 
+              src={user.photoURL || `https://ui-avatars.com/api/?name=${user.email}&background=333333&color=ffffff`} 
               alt={user.displayName}
               style={{
                 width: '36px',
                 height: '36px',
                 borderRadius: '50%',
                 objectFit: 'cover',
+                border: '1px solid #666666',
               }}
             />
             <span style={{
               fontSize: '1rem',
               color: 'white',
-              fontWeight: '500',
+              fontWeight: '400',
               display: 'flex',
               alignItems: 'center',
+              gap: '4px',
             }}>
               {user.displayName || user.email?.split('@')[0]}
               {user.email === ADMIN_EMAIL && <AdminBadge email={user.email} />}
               {user.email === VERIFIED_EMAIL && <VerifiedBadge email={user.email} />}
             </span>
             <motion.button
-              whileHover={{ scale: 1.05 }}
+              whileHover={{ scale: 1.05, background: '#222222' }}
               whileTap={{ scale: 0.95 }}
               onClick={handleLogout}
               style={{
-                background: 'rgba(255,255,255,0.1)',
-                border: 'none',
+                background: '#1a1a1a',
+                border: '1px solid #444444',
                 borderRadius: '30px',
                 padding: '6px 16px',
                 color: 'white',
@@ -844,15 +809,15 @@ export default function BlogPage() {
           <motion.button
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
-            whileHover={{ scale: 1.05 }}
+            whileHover={{ scale: 1.05, background: '#1a1a1a' }}
             whileTap={{ scale: 0.95 }}
             onClick={handleGoogleLogin}
             style={{
               display: 'flex',
               alignItems: 'center',
               gap: '10px',
-              background: 'rgba(255,255,255,0.05)',
-              border: '1px solid rgba(255,255,255,0.2)',
+              background: '#0a0a0a',
+              border: '1px solid #333333',
               borderRadius: '40px',
               padding: '10px 24px',
               color: 'white',
@@ -866,7 +831,7 @@ export default function BlogPage() {
               <path fill="#ffffff" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
               <path fill="#ffffff" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
             </svg>
-            <span>Login dengan Google</span>
+            <span>Login</span>
           </motion.button>
         )}
         
@@ -879,7 +844,7 @@ export default function BlogPage() {
         }}>
           <span style={{
             fontSize: isMobile ? '1.2rem' : '1.5rem',
-            fontWeight: 'normal',
+            fontWeight: '400',
           }}>
             Halaman Utama
           </span>
@@ -917,7 +882,7 @@ export default function BlogPage() {
           }}>
             <h1 style={{
               fontSize: isMobile ? '4rem' : '6rem',
-              fontWeight: 'normal',
+              fontWeight: '400',
               color: 'white',
               margin: '0 0 20px 0',
               lineHeight: '0.9',
@@ -958,7 +923,7 @@ export default function BlogPage() {
           }}>
             <h3 style={{
               fontSize: isMobile ? '1.3rem' : '1.5rem',
-              fontWeight: 'normal',
+              fontWeight: '400',
               color: 'white',
               margin: '0',
             }}>
@@ -991,7 +956,7 @@ export default function BlogPage() {
                   fontSize: isMobile ? '0.95rem' : '1rem',
                   textAlign: 'left',
                   cursor: 'pointer',
-                  fontWeight: 'normal',
+                  fontWeight: '400',
                   transition: 'all 0.2s ease',
                   paddingLeft: '0',
                 }}
@@ -1010,7 +975,7 @@ export default function BlogPage() {
           
           <h2 style={{
             fontSize: isMobile ? '2rem' : '2.8rem',
-            fontWeight: 'normal',
+            fontWeight: '400',
             color: 'white',
             marginBottom: '40px',
             lineHeight: '1.2',
@@ -1024,6 +989,7 @@ export default function BlogPage() {
             lineHeight: '1.8',
             color: '#e0e0e0',
           }}>
+            {/* Pendahuluan */}
             <section 
               id="pendahuluan"
               ref={el => sectionRefs.current.pendahuluan = el}
@@ -1031,7 +997,7 @@ export default function BlogPage() {
             >
               <h3 style={{
                 fontSize: isMobile ? '1.3rem' : '1.5rem',
-                fontWeight: 'normal',
+                fontWeight: '400',
                 color: 'white',
                 marginBottom: '20px',
               }}>
@@ -1050,6 +1016,7 @@ export default function BlogPage() {
               </p>
             </section>
             
+            {/* Sejarah & Reputasi */}
             <section 
               id="sejarah"
               ref={el => sectionRefs.current.sejarah = el}
@@ -1057,7 +1024,7 @@ export default function BlogPage() {
             >
               <h3 style={{
                 fontSize: isMobile ? '1.3rem' : '1.5rem',
-                fontWeight: 'normal',
+                fontWeight: '400',
                 color: 'white',
                 marginBottom: '20px',
               }}>
@@ -1075,6 +1042,7 @@ export default function BlogPage() {
               </p>
             </section>
             
+            {/* Suasana Kampus */}
             <section 
               id="suasana"
               ref={el => sectionRefs.current.suasana = el}
@@ -1082,7 +1050,7 @@ export default function BlogPage() {
             >
               <h3 style={{
                 fontSize: isMobile ? '1.3rem' : '1.5rem',
-                fontWeight: 'normal',
+                fontWeight: '400',
                 color: 'white',
                 marginBottom: '20px',
               }}>
@@ -1100,6 +1068,7 @@ export default function BlogPage() {
               </p>
             </section>
             
+            {/* Kehidupan Akademik */}
             <section 
               id="akademik"
               ref={el => sectionRefs.current.akademik = el}
@@ -1107,7 +1076,7 @@ export default function BlogPage() {
             >
               <h3 style={{
                 fontSize: isMobile ? '1.3rem' : '1.5rem',
-                fontWeight: 'normal',
+                fontWeight: '400',
                 color: 'white',
                 marginBottom: '20px',
               }}>
@@ -1126,6 +1095,7 @@ export default function BlogPage() {
               </p>
             </section>
             
+            {/* Para Dosen */}
             <section 
               id="dosen"
               ref={el => sectionRefs.current.dosen = el}
@@ -1133,7 +1103,7 @@ export default function BlogPage() {
             >
               <h3 style={{
                 fontSize: isMobile ? '1.3rem' : '1.5rem',
-                fontWeight: 'normal',
+                fontWeight: '400',
                 color: 'white',
                 marginBottom: '20px',
               }}>
@@ -1152,6 +1122,7 @@ export default function BlogPage() {
               </p>
             </section>
             
+            {/* Pertemanan & Relasi */}
             <section 
               id="teman"
               ref={el => sectionRefs.current.teman = el}
@@ -1159,7 +1130,7 @@ export default function BlogPage() {
             >
               <h3 style={{
                 fontSize: isMobile ? '1.3rem' : '1.5rem',
-                fontWeight: 'normal',
+                fontWeight: '400',
                 color: 'white',
                 marginBottom: '20px',
               }}>
@@ -1177,6 +1148,7 @@ export default function BlogPage() {
               </p>
             </section>
             
+            {/* Fasilitas Kampus */}
             <section 
               id="fasilitas"
               ref={el => sectionRefs.current.fasilitas = el}
@@ -1184,7 +1156,7 @@ export default function BlogPage() {
             >
               <h3 style={{
                 fontSize: isMobile ? '1.3rem' : '1.5rem',
-                fontWeight: 'normal',
+                fontWeight: '400',
                 color: 'white',
                 marginBottom: '20px',
               }}>
@@ -1202,6 +1174,7 @@ export default function BlogPage() {
               </p>
             </section>
             
+            {/* Organisasi & Kegiatan */}
             <section 
               id="organisasi"
               ref={el => sectionRefs.current.organisasi = el}
@@ -1209,7 +1182,7 @@ export default function BlogPage() {
             >
               <h3 style={{
                 fontSize: isMobile ? '1.3rem' : '1.5rem',
-                fontWeight: 'normal',
+                fontWeight: '400',
                 color: 'white',
                 marginBottom: '20px',
               }}>
@@ -1227,6 +1200,7 @@ export default function BlogPage() {
               </p>
             </section>
             
+            {/* Tantangan & Hambatan */}
             <section 
               id="tantangan"
               ref={el => sectionRefs.current.tantangan = el}
@@ -1234,7 +1208,7 @@ export default function BlogPage() {
             >
               <h3 style={{
                 fontSize: isMobile ? '1.3rem' : '1.5rem',
-                fontWeight: 'normal',
+                fontWeight: '400',
                 color: 'white',
                 marginBottom: '20px',
               }}>
@@ -1252,6 +1226,7 @@ export default function BlogPage() {
               </p>
             </section>
             
+            {/* Kesan & Pesan */}
             <section 
               id="kesan"
               ref={el => sectionRefs.current.kesan = el}
@@ -1259,7 +1234,7 @@ export default function BlogPage() {
             >
               <h3 style={{
                 fontSize: isMobile ? '1.3rem' : '1.5rem',
-                fontWeight: 'normal',
+                fontWeight: '400',
                 color: 'white',
                 marginBottom: '20px',
               }}>
@@ -1278,6 +1253,7 @@ export default function BlogPage() {
               </p>
             </section>
             
+            {/* Penutup */}
             <section 
               id="penutup"
               ref={el => sectionRefs.current.penutup = el}
@@ -1285,7 +1261,7 @@ export default function BlogPage() {
             >
               <h3 style={{
                 fontSize: isMobile ? '1.3rem' : '1.5rem',
-                fontWeight: 'normal',
+                fontWeight: '400',
                 color: 'white',
                 marginBottom: '20px',
               }}>
@@ -1323,7 +1299,7 @@ export default function BlogPage() {
             >
               <h3 style={{
                 fontSize: '1.8rem',
-                fontWeight: 'normal',
+                fontWeight: '400',
                 color: 'white',
                 margin: 0,
               }}>
@@ -1339,7 +1315,7 @@ export default function BlogPage() {
                   alignItems: 'center',
                   gap: '10px',
                   background: 'rgba(255,255,255,0.05)',
-                  border: '1px solid rgba(255,255,255,0.2)',
+                  border: '1px solid #333333',
                   borderRadius: '30px',
                   padding: '12px 24px',
                   color: 'white',
@@ -1370,9 +1346,9 @@ export default function BlogPage() {
                     gridTemplateColumns: 'repeat(6, 1fr)',
                     gap: '12px',
                     padding: '24px',
-                    background: 'rgba(255,255,255,0.03)',
-                    borderRadius: '20px',
-                    border: '1px solid rgba(255,255,255,0.1)',
+                    background: '#0a0a0a',
+                    border: '1px solid #333333',
+                    borderRadius: '16px',
                   }}>
                     {EMOTICONS.map((emoticon) => (
                       <motion.button
@@ -1388,24 +1364,23 @@ export default function BlogPage() {
                           flexDirection: 'column',
                           alignItems: 'center',
                           gap: '8px',
-                          background: userReactions.includes(emoticon.id) ? `${emoticon.color}20` : 'rgba(255,255,255,0.05)',
-                          border: userReactions.includes(emoticon.id) ? `1px solid ${emoticon.color}` : '1px solid rgba(255,255,255,0.1)',
-                          borderRadius: '16px',
-                          padding: '16px 8px',
+                          background: userReactions.includes(emoticon.id) ? '#222222' : 'transparent',
+                          border: userReactions.includes(emoticon.id) ? '1px solid #ffffff' : '1px solid #333333',
+                          borderRadius: '12px',
+                          padding: '12px 8px',
                           cursor: 'pointer',
                         }}
                       >
-                        <span style={{ fontSize: '2.5rem' }}>{emoticon.emoji}</span>
+                        <span style={{ fontSize: '2rem' }}>{emoticon.emoji}</span>
                         <span style={{ 
-                          fontSize: '0.8rem', 
-                          color: userReactions.includes(emoticon.id) ? emoticon.color : '#999999' 
+                          fontSize: '0.7rem', 
+                          color: userReactions.includes(emoticon.id) ? 'white' : '#999999' 
                         }}>
                           {emoticon.label}
                         </span>
                         <span style={{ 
-                          fontSize: '0.9rem', 
+                          fontSize: '0.8rem', 
                           color: 'white',
-                          fontWeight: 'bold' 
                         }}>
                           {reactions[emoticon.id] || 0}
                         </span>
@@ -1439,17 +1414,17 @@ export default function BlogPage() {
                         display: 'flex',
                         alignItems: 'center',
                         gap: '8px',
-                        background: userReactions.includes(id) ? `${emoticon.color}20` : 'rgba(255,255,255,0.05)',
-                        border: userReactions.includes(id) ? `1px solid ${emoticon.color}` : '1px solid rgba(255,255,255,0.1)',
+                        background: userReactions.includes(id) ? '#222222' : '#0a0a0a',
+                        border: userReactions.includes(id) ? '1px solid #ffffff' : '1px solid #333333',
                         borderRadius: '30px',
                         padding: '8px 16px',
                         cursor: 'pointer',
                       }}
                     >
-                      <span style={{ fontSize: '1.3rem' }}>{emoticon.emoji}</span>
+                      <span style={{ fontSize: '1.2rem' }}>{emoticon.emoji}</span>
                       <span style={{ 
-                        fontSize: '0.95rem', 
-                        color: userReactions.includes(id) ? emoticon.color : 'white' 
+                        fontSize: '0.9rem', 
+                        color: 'white' 
                       }}>
                         {count}
                       </span>
@@ -1477,7 +1452,7 @@ export default function BlogPage() {
               padding: '20px',
               background: 'rgba(255,255,255,0.02)',
               border: '1px dashed #444444',
-              borderRadius: '16px',
+              borderRadius: '12px',
               color: user ? '#999999' : 'white',
               fontSize: '1.1rem',
               cursor: 'pointer',
@@ -1516,21 +1491,21 @@ export default function BlogPage() {
                   }}>
                     <motion.img 
                       whileHover={{ scale: 1.1 }}
-                      src={user?.photoURL || `https://ui-avatars.com/api/?name=${user?.email}&background=random`}
+                      src={user?.photoURL || `https://ui-avatars.com/api/?name=${user?.email}&background=333333&color=ffffff`}
                       alt={user?.displayName}
                       style={{
-                        width: '56px',
-                        height: '56px',
+                        width: '48px',
+                        height: '48px',
                         borderRadius: '50%',
                         objectFit: 'cover',
-                        border: '2px solid rgba(255,255,255,0.1)',
+                        border: '1px solid #666666',
                       }}
                     />
                     <div>
                       <span style={{ 
                         color: 'white', 
-                        fontSize: '1.2rem',
-                        fontWeight: '500',
+                        fontSize: '1.1rem',
+                        fontWeight: '400',
                         display: 'flex',
                         alignItems: 'center',
                         gap: '8px',
@@ -1540,8 +1515,8 @@ export default function BlogPage() {
                         {user.email === ADMIN_EMAIL && <AdminBadge email={user.email} />}
                         {user.email === VERIFIED_EMAIL && <VerifiedBadge email={user.email} />}
                       </span>
-                      <span style={{ color: '#666666', fontSize: '0.9rem' }}>
-                        Berkomentar sebagai pengguna
+                      <span style={{ color: '#999999', fontSize: '0.85rem' }}>
+                        Berkomentar
                       </span>
                     </div>
                   </div>
@@ -1549,15 +1524,15 @@ export default function BlogPage() {
                     value={newComment}
                     onChange={(e) => setNewComment(e.target.value)}
                     placeholder="Apa pendapat Anda tentang artikel ini?"
-                    rows={5}
+                    rows={4}
                     required
                     style={{
-                      padding: '20px',
-                      background: 'rgba(255,255,255,0.03)',
+                      padding: '16px',
+                      background: '#0a0a0a',
                       border: '1px solid #333333',
-                      borderRadius: '20px',
+                      borderRadius: '12px',
                       color: 'white',
-                      fontSize: '1.1rem',
+                      fontSize: '1rem',
                       outline: 'none',
                       resize: 'vertical',
                     }}
@@ -1565,7 +1540,7 @@ export default function BlogPage() {
                   <div style={{
                     display: 'flex',
                     justifyContent: 'flex-end',
-                    gap: '15px',
+                    gap: '12px',
                   }}>
                     <motion.button
                       whileHover={{ scale: 1.05 }}
@@ -1573,12 +1548,12 @@ export default function BlogPage() {
                       type="button"
                       onClick={() => setShowCommentForm(false)}
                       style={{
-                        padding: '12px 24px',
+                        padding: '10px 20px',
                         background: 'none',
-                        border: '1px solid #333333',
+                        border: '1px solid #444444',
                         borderRadius: '30px',
                         color: '#999999',
-                        fontSize: '1rem',
+                        fontSize: '0.95rem',
                         cursor: 'pointer',
                       }}
                     >
@@ -1590,17 +1565,17 @@ export default function BlogPage() {
                       type="submit"
                       disabled={commentLoading || !newComment.trim()}
                       style={{
-                        padding: '12px 32px',
+                        padding: '10px 28px',
                         background: commentLoading || !newComment.trim() ? '#333333' : 'white',
                         border: 'none',
                         borderRadius: '30px',
                         color: commentLoading || !newComment.trim() ? '#999999' : 'black',
-                        fontSize: '1rem',
-                        fontWeight: '500',
+                        fontSize: '0.95rem',
+                        fontWeight: '400',
                         cursor: commentLoading || !newComment.trim() ? 'not-allowed' : 'pointer',
                       }}
                     >
-                      {commentLoading ? 'Mengirim...' : 'Kirim Komentar'}
+                      {commentLoading ? 'Mengirim...' : 'Kirim'}
                     </motion.button>
                   </div>
                 </form>
@@ -1622,15 +1597,15 @@ export default function BlogPage() {
             }}>
               <h3 style={{
                 fontSize: '1.8rem',
-                fontWeight: 'normal',
+                fontWeight: '400',
                 color: 'white',
                 margin: 0,
               }}>
                 Komentar
               </h3>
               <span style={{
-                fontSize: '1.2rem',
-                color: '#666666',
+                fontSize: '1.1rem',
+                color: '#999999',
               }}>
                 {comments.length} komentar
               </span>
@@ -1647,11 +1622,11 @@ export default function BlogPage() {
                   style={{
                     display: 'flex',
                     flexDirection: 'column',
-                    gap: '15px',
-                    padding: '24px',
-                    backgroundColor: 'rgba(255,255,255,0.02)',
-                    borderRadius: '24px',
-                    border: '1px solid rgba(255,255,255,0.05)',
+                    gap: '12px',
+                    padding: '20px',
+                    backgroundColor: '#0a0a0a',
+                    borderRadius: '12px',
+                    border: comment.userEmail === ADMIN_EMAIL || comment.userEmail === VERIFIED_EMAIL ? '1px solid #ffffff' : '1px solid #333333',
                   }}
                 >
                   {/* Comment Header */}
@@ -1663,24 +1638,24 @@ export default function BlogPage() {
                     <div style={{
                       display: 'flex',
                       alignItems: 'center',
-                      gap: '15px',
+                      gap: '12px',
                     }}>
                       <motion.img 
                         whileHover={{ scale: 1.1 }}
-                        src={comment.userPhoto || `https://ui-avatars.com/api/?name=${comment.userEmail}&background=random`}
+                        src={comment.userPhoto || `https://ui-avatars.com/api/?name=${comment.userEmail}&background=333333&color=ffffff`}
                         alt={comment.userName}
                         style={{
-                          width: '48px',
-                          height: '48px',
+                          width: '40px',
+                          height: '40px',
                           borderRadius: '50%',
                           objectFit: 'cover',
-                          border: '2px solid rgba(255,255,255,0.1)',
+                          border: '1px solid #666666',
                         }}
                       />
                       <div>
                         <span style={{
-                          fontSize: '1.2rem',
-                          fontWeight: '500',
+                          fontSize: '1.1rem',
+                          fontWeight: '400',
                           color: 'white',
                           display: 'flex',
                           alignItems: 'center',
@@ -1692,8 +1667,8 @@ export default function BlogPage() {
                           {comment.userEmail === VERIFIED_EMAIL && <VerifiedBadge email={comment.userEmail} />}
                         </span>
                         <span style={{
-                          fontSize: '0.9rem',
-                          color: '#666666',
+                          fontSize: '0.8rem',
+                          color: '#999999',
                         }}>
                           {comment.createdAt?.toLocaleDateString?.('id-ID', {
                             day: 'numeric',
@@ -1714,27 +1689,27 @@ export default function BlogPage() {
                       style={{
                         display: 'flex',
                         alignItems: 'center',
-                        gap: '8px',
-                        background: comment.likedBy?.includes(user?.uid) ? 'rgba(239,68,68,0.1)' : 'rgba(255,255,255,0.05)',
-                        border: comment.likedBy?.includes(user?.uid) ? '1px solid #ef4444' : '1px solid rgba(255,255,255,0.1)',
-                        borderRadius: '30px',
-                        padding: '8px 16px',
+                        gap: '6px',
+                        background: comment.likedBy?.includes(user?.uid) ? '#222222' : '#0a0a0a',
+                        border: '1px solid #444444',
+                        borderRadius: '20px',
+                        padding: '6px 12px',
                         cursor: user ? 'pointer' : 'not-allowed',
                       }}
                     >
                       <svg 
-                        width="20" 
-                        height="20" 
+                        width="16" 
+                        height="16" 
                         viewBox="0 0 24 24" 
-                        fill={comment.likedBy?.includes(user?.uid) ? "#ef4444" : "none"} 
-                        stroke={comment.likedBy?.includes(user?.uid) ? "#ef4444" : "white"} 
+                        fill={comment.likedBy?.includes(user?.uid) ? "#ffffff" : "none"} 
+                        stroke="#ffffff" 
                         strokeWidth="1"
                       >
                         <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
                       </svg>
                       <span style={{ 
-                        color: comment.likedBy?.includes(user?.uid) ? '#ef4444' : 'white',
-                        fontSize: '1rem'
+                        color: 'white',
+                        fontSize: '0.9rem'
                       }}>
                         {comment.likes || 0}
                       </span>
@@ -1743,12 +1718,12 @@ export default function BlogPage() {
 
                   {/* Comment Content */}
                   <p style={{
-                    fontSize: '1.1rem',
-                    lineHeight: '1.7',
+                    fontSize: '1rem',
+                    lineHeight: '1.6',
                     color: '#e0e0e0',
-                    margin: '10px 0 5px 0',
-                    paddingLeft: '15px',
-                    borderLeft: '2px solid rgba(255,255,255,0.1)',
+                    margin: '5px 0',
+                    paddingLeft: '12px',
+                    borderLeft: comment.userEmail === ADMIN_EMAIL || comment.userEmail === VERIFIED_EMAIL ? '2px solid #ffffff' : '2px solid #444444',
                   }}>
                     {comment.comment}
                   </p>
@@ -1769,20 +1744,20 @@ export default function BlogPage() {
                     style={{
                       display: 'flex',
                       alignItems: 'center',
-                      gap: '8px',
+                      gap: '6px',
                       background: 'none',
                       border: 'none',
-                      color: '#666666',
-                      fontSize: '0.95rem',
+                      color: '#999999',
+                      fontSize: '0.9rem',
                       cursor: 'pointer',
-                      padding: '8px 0',
+                      padding: '6px 0',
                       marginTop: '5px',
                     }}
                   >
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1">
                       <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
                     </svg>
-                    <span>Balas komentar</span>
+                    <span>Balas</span>
                   </motion.button>
 
                   {/* Reply Form */}
@@ -1794,51 +1769,52 @@ export default function BlogPage() {
                         exit={{ opacity: 0, height: 0 }}
                         transition={{ duration: 0.3 }}
                         style={{
-                          marginTop: '15px',
-                          marginLeft: '30px',
+                          marginTop: '10px',
+                          marginLeft: '20px',
                           overflow: 'hidden',
                         }}
                       >
                         <div style={{
                           display: 'flex',
                           alignItems: 'flex-start',
-                          gap: '15px',
+                          gap: '12px',
                         }}>
                           <img 
-                            src={user?.photoURL || `https://ui-avatars.com/api/?name=${user?.email}&background=random`}
+                            src={user?.photoURL || `https://ui-avatars.com/api/?name=${user?.email}&background=333333&color=ffffff`}
                             alt={user?.displayName}
                             style={{
-                              width: '40px',
-                              height: '40px',
+                              width: '32px',
+                              height: '32px',
                               borderRadius: '50%',
                               objectFit: 'cover',
+                              border: '1px solid #666666',
                             }}
                           />
                           <div style={{
                             flex: 1,
                             display: 'flex',
                             flexDirection: 'column',
-                            gap: '10px',
+                            gap: '8px',
                           }}>
                             <textarea
                               value={replyText}
                               onChange={(e) => setReplyText(e.target.value)}
                               placeholder="Tulis balasan Anda..."
-                              rows={3}
+                              rows={2}
                               style={{
-                                padding: '15px',
-                                background: 'rgba(255,255,255,0.03)',
+                                padding: '12px',
+                                background: '#0a0a0a',
                                 border: '1px solid #333333',
-                                borderRadius: '16px',
+                                borderRadius: '12px',
                                 color: 'white',
-                                fontSize: '0.95rem',
+                                fontSize: '0.9rem',
                                 outline: 'none',
                                 resize: 'vertical',
                               }}
                             />
                             <div style={{
                               display: 'flex',
-                              gap: '10px',
+                              gap: '8px',
                               justifyContent: 'flex-end',
                             }}>
                               <motion.button
@@ -1846,12 +1822,12 @@ export default function BlogPage() {
                                 whileTap={{ scale: 0.95 }}
                                 onClick={() => setSelectedCommentForReply(null)}
                                 style={{
-                                  padding: '8px 16px',
+                                  padding: '6px 14px',
                                   background: 'none',
-                                  border: '1px solid #333333',
+                                  border: '1px solid #444444',
                                   borderRadius: '20px',
                                   color: '#999999',
-                                  fontSize: '0.9rem',
+                                  fontSize: '0.85rem',
                                   cursor: 'pointer',
                                 }}
                               >
@@ -1863,17 +1839,17 @@ export default function BlogPage() {
                                 onClick={() => handleAddReply(comment.id)}
                                 disabled={!replyText.trim()}
                                 style={{
-                                  padding: '8px 24px',
+                                  padding: '6px 20px',
                                   background: replyText.trim() ? 'white' : '#333333',
                                   border: 'none',
                                   borderRadius: '20px',
                                   color: replyText.trim() ? 'black' : '#999999',
-                                  fontSize: '0.9rem',
-                                  fontWeight: '500',
+                                  fontSize: '0.85rem',
+                                  fontWeight: '400',
                                   cursor: replyText.trim() ? 'pointer' : 'not-allowed',
                                 }}
                               >
-                                Kirim Balasan
+                                Kirim
                               </motion.button>
                             </div>
                           </div>
@@ -1885,13 +1861,13 @@ export default function BlogPage() {
                   {/* Replies List */}
                   {comment.replies && comment.replies.length > 0 && (
                     <div style={{
-                      marginTop: '20px',
-                      marginLeft: '30px',
-                      paddingLeft: '20px',
-                      borderLeft: '2px solid rgba(255,255,255,0.05)',
+                      marginTop: '15px',
+                      marginLeft: '20px',
+                      paddingLeft: '15px',
+                      borderLeft: '1px solid #444444',
                       display: 'flex',
                       flexDirection: 'column',
-                      gap: '20px',
+                      gap: '15px',
                     }}>
                       {comment.replies.map((reply: any) => (
                         <motion.div
@@ -1906,33 +1882,34 @@ export default function BlogPage() {
                         >
                           <div style={{
                             display: 'flex',
-                            gap: '12px',
+                            gap: '10px',
                             flex: 1,
                           }}>
                             <img 
-                              src={reply.userPhoto || `https://ui-avatars.com/api/?name=${reply.userName}&background=random`}
+                              src={reply.userPhoto || `https://ui-avatars.com/api/?name=${reply.userName}&background=333333&color=ffffff`}
                               alt={reply.userName}
                               style={{
-                                width: '32px',
-                                height: '32px',
+                                width: '28px',
+                                height: '28px',
                                 borderRadius: '50%',
                                 objectFit: 'cover',
+                                border: '1px solid #666666',
                               }}
                             />
                             <div style={{ flex: 1 }}>
                               <div style={{
                                 display: 'flex',
                                 alignItems: 'center',
-                                gap: '10px',
-                                marginBottom: '5px',
+                                gap: '8px',
+                                marginBottom: '4px',
                               }}>
                                 <span style={{
-                                  fontSize: '1rem',
-                                  fontWeight: '500',
+                                  fontSize: '0.95rem',
+                                  fontWeight: '400',
                                   color: 'white',
                                   display: 'flex',
                                   alignItems: 'center',
-                                  gap: '8px',
+                                  gap: '6px',
                                 }}>
                                   {reply.userName}
                                   {reply.userEmail === ADMIN_EMAIL && <AdminBadge email={reply.userEmail} />}
@@ -1941,8 +1918,8 @@ export default function BlogPage() {
                                   {reply.isVerified && <VerifiedBadge email={reply.userEmail || VERIFIED_EMAIL} />}
                                 </span>
                                 <span style={{
-                                  fontSize: '0.8rem',
-                                  color: '#666666',
+                                  fontSize: '0.7rem',
+                                  color: '#999999',
                                 }}>
                                   {reply.createdAt?.toDate?.()?.toLocaleDateString?.('id-ID', {
                                     hour: '2-digit',
@@ -1951,10 +1928,10 @@ export default function BlogPage() {
                                 </span>
                               </div>
                               <p style={{
-                                fontSize: '0.95rem',
-                                lineHeight: '1.6',
+                                fontSize: '0.9rem',
+                                lineHeight: '1.5',
                                 color: '#e0e0e0',
-                                margin: '0 0 8px 0',
+                                margin: '0 0 6px 0',
                               }}>
                                 {reply.text}
                               </p>
@@ -1965,22 +1942,22 @@ export default function BlogPage() {
                                 style={{
                                   display: 'flex',
                                   alignItems: 'center',
-                                  gap: '5px',
+                                  gap: '4px',
                                   background: 'none',
                                   border: 'none',
-                                  color: reply.likedBy?.includes(user?.uid) ? '#ef4444' : '#666666',
-                                  fontSize: '0.85rem',
+                                  color: reply.likedBy?.includes(user?.uid) ? '#ffffff' : '#999999',
+                                  fontSize: '0.8rem',
                                   cursor: user ? 'pointer' : 'not-allowed',
-                                  padding: '4px 8px',
-                                  borderRadius: '20px',
-                                  backgroundColor: reply.likedBy?.includes(user?.uid) ? 'rgba(239,68,68,0.1)' : 'transparent',
+                                  padding: '2px 6px',
+                                  borderRadius: '12px',
+                                  backgroundColor: reply.likedBy?.includes(user?.uid) ? '#222222' : 'transparent',
                                 }}
                               >
                                 <svg 
-                                  width="14" 
-                                  height="14" 
+                                  width="12" 
+                                  height="12" 
                                   viewBox="0 0 24 24" 
-                                  fill={reply.likedBy?.includes(user?.uid) ? "#ef4444" : "none"} 
+                                  fill={reply.likedBy?.includes(user?.uid) ? "#ffffff" : "none"} 
                                   stroke="currentColor" 
                                   strokeWidth="1"
                                 >
@@ -2003,17 +1980,17 @@ export default function BlogPage() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 style={{
-                  padding: '60px',
+                  padding: '50px',
                   textAlign: 'center',
-                  color: '#666666',
-                  border: '1px dashed #333333',
-                  borderRadius: '24px',
+                  color: '#999999',
+                  border: '1px dashed #444444',
+                  borderRadius: '12px',
                 }}
               >
-                <span style={{ fontSize: '3rem', display: 'block', marginBottom: '20px' }}>💬</span>
-                <p style={{ fontSize: '1.2rem', margin: 0 }}>Belum ada komentar.</p>
-                <p style={{ fontSize: '1rem', color: '#999999', marginTop: '10px' }}>
-                  Jadilah yang pertama untuk berdiskusi!
+                <span style={{ fontSize: '2.5rem', display: 'block', marginBottom: '15px' }}>💬</span>
+                <p style={{ fontSize: '1.1rem', margin: 0 }}>Belum ada komentar.</p>
+                <p style={{ fontSize: '0.95rem', color: '#666666', marginTop: '8px' }}>
+                  Jadilah yang pertama!
                 </p>
               </motion.div>
             )}
