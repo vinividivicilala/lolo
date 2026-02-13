@@ -15,7 +15,8 @@ const BLOG_POSTS = [
     excerpt: 'Pengalaman pribadi menjalani perkuliahan di Universitas Gunadarma, dari akademik hingga organisasi.',
     tags: ['kuliah', 'gunadarma'],
     date: '2024-01-15',
-    readTime: 8
+    readTime: 8,
+    isNew: true // Menandai artikel baru
   },
   {
     id: 'memilih-jurusan',
@@ -24,7 +25,8 @@ const BLOG_POSTS = [
     excerpt: 'Alasan di balik keputusan memilih program studi yang tepat.',
     tags: ['jurusan', 'kuliah', 'karir'],
     date: '2024-01-10',
-    readTime: 5
+    readTime: 5,
+    isNew: true // Menandai artikel baru
   },
   {
     id: 'tips-belajar-coding',
@@ -33,7 +35,8 @@ const BLOG_POSTS = [
     excerpt: 'Panduan praktis memulai perjalanan sebagai programmer.',
     tags: ['it', 'kuliah', 'karir'],
     date: '2024-01-05',
-    readTime: 6
+    readTime: 6,
+    isNew: false
   },
   {
     id: 'prospek-karir-it',
@@ -42,7 +45,8 @@ const BLOG_POSTS = [
     excerpt: 'Peluang kerja dan perkembangan karir di industri teknologi.',
     tags: ['it', 'karir'],
     date: '2023-12-28',
-    readTime: 7
+    readTime: 7,
+    isNew: false
   },
   {
     id: 'tips-memilih-jurusan',
@@ -51,7 +55,8 @@ const BLOG_POSTS = [
     excerpt: 'Panduan lengkap memilih jurusan yang tepat untuk masa depan.',
     tags: ['jurusan', 'kuliah'],
     date: '2023-12-20',
-    readTime: 6
+    readTime: 6,
+    isNew: false
   },
   {
     id: 'pengalaman-magang',
@@ -60,7 +65,8 @@ const BLOG_POSTS = [
     excerpt: 'Cerita magang dan persiapan memasuki dunia kerja.',
     tags: ['it', 'karir', 'kuliah'],
     date: '2023-12-15',
-    readTime: 5
+    readTime: 5,
+    isNew: false
   }
 ];
 
@@ -129,6 +135,85 @@ const NorthWestArrow = ({ width, height }: { width: number | string, height: num
     <path d="M7 7V17" stroke="white"/>
   </svg>
 );
+
+// North East Arrow SVG (untuk setiap blog)
+const NorthEastArrow = ({ width, height }: { width: number | string, height: number | string }) => (
+  <svg 
+    width={width} 
+    height={height} 
+    viewBox="0 0 24 24" 
+    fill="none"
+    stroke="white"
+    strokeWidth="1.5"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M7 7L17 17" stroke="white"/>
+    <path d="M7 7H17" stroke="white"/>
+    <path d="M7 17V7" stroke="white"/>
+  </svg>
+);
+
+// Komponen Titik Berkedip (Radar/LED)
+const BlinkingDot = () => {
+  const dotRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (dotRef.current) {
+      // Animasi titik berkedip dengan efek radar/pemancar
+      gsap.to(dotRef.current, {
+        scale: 1.5,
+        opacity: 0,
+        duration: 1.5,
+        repeat: -1,
+        ease: "power1.inOut"
+      });
+
+      // Animasi titik inti
+      gsap.to(dotRef.current, {
+        boxShadow: '0 0 20px #ef4444',
+        duration: 1,
+        repeat: -1,
+        yoyo: true,
+        ease: "sine.inOut"
+      });
+    }
+  }, []);
+
+  return (
+    <div style={{ position: 'relative', width: 16, height: 16 }}>
+      {/* Lingkaran efek radar */}
+      <div
+        ref={dotRef}
+        style={{
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          width: 16,
+          height: 16,
+          borderRadius: '50%',
+          backgroundColor: '#ef4444',
+          opacity: 0.7,
+        }}
+      />
+      {/* Titik inti */}
+      <div
+        style={{
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          width: 8,
+          height: 8,
+          borderRadius: '50%',
+          backgroundColor: '#ef4444',
+          boxShadow: '0 0 10px #ef4444',
+        }}
+      />
+    </div>
+  );
+};
 
 export default function TagPage() {
   const router = useRouter();
@@ -453,6 +538,7 @@ export default function TagPage() {
                     border: '1px solid rgba(255,255,255,0.05)',
                     transition: 'all 0.3s ease',
                     cursor: 'pointer',
+                    position: 'relative',
                   }}
                   onMouseEnter={(e) => {
                     e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.05)';
@@ -465,88 +551,151 @@ export default function TagPage() {
                     e.currentTarget.style.transform = 'translateY(0)';
                   }}
                   >
-                    <h2 style={{
-                      fontSize: isMobile ? '1.6rem' : '2rem',
-                      fontWeight: 'normal',
-                      color: 'white',
-                      margin: '0 0 15px 0',
-                    }}>
-                      {post.title}
-                    </h2>
-                    
-                    <p style={{
-                      fontSize: isMobile ? '1rem' : '1.1rem',
-                      color: '#999999',
-                      marginBottom: '20px',
-                      lineHeight: '1.6',
-                    }}>
-                      {post.excerpt}
-                    </p>
-                    
+                    {/* New Indicator untuk 2 judul blog pertama */}
+                    {index < 2 && (
+                      <>
+                        {/* Titik Berkedip */}
+                        <div style={{
+                          position: 'absolute',
+                          top: '30px',
+                          left: '-8px',
+                          zIndex: 10,
+                        }}>
+                          <BlinkingDot />
+                        </div>
+                        
+                        {/* Blok Warna Stabilo "NEW" */}
+                        <div style={{
+                          position: 'absolute',
+                          top: '20px',
+                          left: '20px',
+                          backgroundColor: '#ef4444',
+                          color: 'white',
+                          padding: '4px 12px',
+                          borderRadius: '20px',
+                          fontSize: '0.8rem',
+                          fontWeight: 'bold',
+                          textTransform: 'uppercase',
+                          letterSpacing: '1px',
+                          boxShadow: '0 2px 10px rgba(239,68,68,0.5)',
+                          zIndex: 5,
+                        }}>
+                          NEW
+                        </div>
+                      </>
+                    )}
+
+                    {/* Konten Artikel */}
                     <div style={{
                       display: 'flex',
-                      flexWrap: 'wrap',
-                      gap: '10px',
-                      marginBottom: '20px',
-                    }}>
-                      {post.tags.map(tag => (
-                        <span
-                          key={tag}
-                          onClick={(e) => {
-                            e.preventDefault();
-                            router.push(`/tag/${tag}`);
-                          }}
-                          style={{
-                            padding: '4px 12px',
-                            backgroundColor: '#222222',
-                            border: '1px solid #444444',
-                            borderRadius: '20px',
-                            color: '#cccccc',
-                            fontSize: '0.85rem',
-                            cursor: 'pointer',
-                            transition: 'all 0.2s ease',
-                          }}
-                          onMouseEnter={(e) => {
-                            e.currentTarget.style.backgroundColor = '#333333';
-                            e.currentTarget.style.borderColor = '#666666';
-                          }}
-                          onMouseLeave={(e) => {
-                            e.currentTarget.style.backgroundColor = '#222222';
-                            e.currentTarget.style.borderColor = '#444444';
-                          }}
-                        >
-                          #{tag}
-                        </span>
-                      ))}
-                    </div>
-                    
-                    <div style={{
-                      display: 'flex',
-                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      alignItems: 'flex-start',
                       gap: '20px',
-                      color: '#666666',
-                      fontSize: '0.9rem',
                     }}>
                       <div style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '6px',
+                        flex: 1,
                       }}>
-                        <CalendarIcon width={16} height={16} />
-                        <span>{new Date(post.date).toLocaleDateString('id-ID', {
-                          day: 'numeric',
-                          month: 'long',
-                          year: 'numeric'
-                        })}</span>
+                        <h2 style={{
+                          fontSize: isMobile ? '1.6rem' : '2rem',
+                          fontWeight: 'normal',
+                          color: 'white',
+                          margin: index < 2 ? '30px 0 15px 0' : '0 0 15px 0',
+                        }}>
+                          {post.title}
+                        </h2>
+                        
+                        <p style={{
+                          fontSize: isMobile ? '1rem' : '1.1rem',
+                          color: '#999999',
+                          marginBottom: '20px',
+                          lineHeight: '1.6',
+                        }}>
+                          {post.excerpt}
+                        </p>
+                        
+                        <div style={{
+                          display: 'flex',
+                          flexWrap: 'wrap',
+                          gap: '10px',
+                          marginBottom: '20px',
+                        }}>
+                          {post.tags.map(tag => (
+                            <span
+                              key={tag}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                router.push(`/tag/${tag}`);
+                              }}
+                              style={{
+                                padding: '4px 12px',
+                                backgroundColor: '#222222',
+                                border: '1px solid #444444',
+                                borderRadius: '20px',
+                                color: '#cccccc',
+                                fontSize: '0.85rem',
+                                cursor: 'pointer',
+                                transition: 'all 0.2s ease',
+                              }}
+                              onMouseEnter={(e) => {
+                                e.currentTarget.style.backgroundColor = '#333333';
+                                e.currentTarget.style.borderColor = '#666666';
+                              }}
+                              onMouseLeave={(e) => {
+                                e.currentTarget.style.backgroundColor = '#222222';
+                                e.currentTarget.style.borderColor = '#444444';
+                              }}
+                            >
+                              #{tag}
+                            </span>
+                          ))}
+                        </div>
+                        
+                        <div style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '20px',
+                          color: '#666666',
+                          fontSize: '0.9rem',
+                        }}>
+                          <div style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                          }}>
+                            <CalendarIcon width={16} height={16} />
+                            <span>{new Date(post.date).toLocaleDateString('id-ID', {
+                              day: 'numeric',
+                              month: 'long',
+                              year: 'numeric'
+                            })}</span>
+                          </div>
+                          <div style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                          }}>
+                            <ClockIcon width={16} height={16} />
+                            <span>{post.readTime} menit membaca</span>
+                          </div>
+                        </div>
                       </div>
-                      <div style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '6px',
-                      }}>
-                        <ClockIcon width={16} height={16} />
-                        <span>{post.readTime} menit membaca</span>
-                      </div>
+
+                      {/* Tanda Panah SVG untuk setiap blog */}
+                      <motion.div
+                        whileHover={{ x: 5, y: -5 }}
+                        transition={{ type: "spring", stiffness: 400, damping: 10 }}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          minWidth: isMobile ? 40 : 50,
+                        }}
+                      >
+                        <NorthEastArrow 
+                          width={isMobile ? 40 : 50} 
+                          height={isMobile ? 40 : 50} 
+                        />
+                      </motion.div>
                     </div>
                   </div>
                 </Link>
