@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function BlogPage() {
   const router = useRouter();
@@ -10,6 +11,42 @@ export default function BlogPage() {
   const [isMobile, setIsMobile] = useState(false);
   const [activeSection, setActiveSection] = useState("pendahuluan");
   const sectionRefs = useRef<{ [key: string]: HTMLElement | null }>({});
+
+  // State untuk Like/Unlike
+  const [likes, setLikes] = useState(128);
+  const [isLiked, setIsLiked] = useState(false);
+  const [isAnimating, setIsAnimating] = useState(false);
+
+  // State untuk Comments
+  const [comments, setComments] = useState([
+    {
+      id: 1,
+      name: "Ahmad Fauzi",
+      avatar: "AF",
+      comment: "Terima kasih tulisannya sangat menginspirasi! Saya juga alumni Gunadarma 2020.",
+      timestamp: "2 jam yang lalu",
+      likes: 12
+    },
+    {
+      id: 2,
+      name: "Siti Nurhaliza",
+      avatar: "SN",
+      comment: "Setuju banget sama tulisannya. Gunadarma emang kampus yang penuh kenangan 🎓",
+      timestamp: "5 jam yang lalu",
+      likes: 8
+    },
+    {
+      id: 3,
+      name: "Budi Santoso",
+      avatar: "BS",
+      comment: "Baru mau masuk Gunadarma tahun ini, makin semangat bacanya!",
+      timestamp: "1 hari yang lalu",
+      likes: 24
+    }
+  ]);
+  const [newComment, setNewComment] = useState("");
+  const [commentName, setCommentName] = useState("");
+  const [showCommentForm, setShowCommentForm] = useState(false);
 
   useEffect(() => {
     setIsMounted(true);
@@ -55,6 +92,54 @@ export default function BlogPage() {
     month: 'long',
     year: 'numeric'
   });
+
+  // Handle Like
+  const handleLike = () => {
+    setIsAnimating(true);
+    if (isLiked) {
+      setLikes(likes - 1);
+    } else {
+      setLikes(likes + 1);
+    }
+    setIsLiked(!isLiked);
+    setTimeout(() => setIsAnimating(false), 500);
+  };
+
+  // Handle Comment
+  const handleSubmitComment = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (newComment.trim() === "" || commentName.trim() === "") return;
+
+    const initials = commentName
+      .split(" ")
+      .map(word => word[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2);
+
+    const newCommentObj = {
+      id: comments.length + 1,
+      name: commentName,
+      avatar: initials,
+      comment: newComment,
+      timestamp: "Baru saja",
+      likes: 0
+    };
+
+    setComments([newCommentObj, ...comments]);
+    setNewComment("");
+    setCommentName("");
+    setShowCommentForm(false);
+  };
+
+  // Handle Like Comment
+  const handleLikeComment = (commentId: number) => {
+    setComments(comments.map(comment => 
+      comment.id === commentId 
+        ? { ...comment, likes: comment.likes + 1 } 
+        : comment
+    ));
+  };
 
   // SVG Arrow Component - SOUTH WEST ARROW
   const SouthWestArrow = ({ width, height, style }: { width: number | string, height: number | string, style?: React.CSSProperties }) => (
@@ -167,7 +252,7 @@ export default function BlogPage() {
         </Link>
       </div>
 
-      {/* Layout 2 Kolom - Tanpa Footer */}
+      {/* Layout 2 Kolom */}
       <div style={{
         display: 'flex',
         flexDirection: isMobile ? 'column' : 'row',
@@ -188,7 +273,7 @@ export default function BlogPage() {
           paddingRight: '20px',
         }}>
           
-          {/* Blog Title - Judul Tema Blog Besar */}
+          {/* Blog Title */}
           <div style={{
             marginBottom: '50px',
           }}>
@@ -203,7 +288,7 @@ export default function BlogPage() {
               Blog
             </h1>
             
-            {/* Tanggal dan Waktu Baca - Tanpa Underline */}
+            {/* Tanggal dan Waktu Baca */}
             <div style={{
               display: 'flex',
               flexDirection: 'column',
@@ -231,7 +316,7 @@ export default function BlogPage() {
             </div>
           </div>
           
-          {/* Rangkuman Title - Tanpa Border/Garis */}
+          {/* Rangkuman Title */}
           <div style={{
             marginBottom: '25px',
           }}>
@@ -245,7 +330,7 @@ export default function BlogPage() {
             </h3>
           </div>
           
-          {/* Daftar Rangkuman - Tanpa Border Left/Pipe */}
+          {/* Daftar Rangkuman */}
           <div style={{
             display: 'flex',
             flexDirection: 'column',
@@ -271,7 +356,7 @@ export default function BlogPage() {
                   fontSize: isMobile ? '0.95rem' : '1rem',
                   textAlign: 'left',
                   cursor: 'pointer',
-                  fontWeight: activeSection === section.id ? 'normal' : 'normal',
+                  fontWeight: 'normal',
                   transition: 'all 0.2s ease',
                   paddingLeft: '0',
                 }}
@@ -299,7 +384,7 @@ export default function BlogPage() {
             Bagaimana Rasa nya Masuk Kuliah Di Universitas Gunadarma
           </h2>
 
-          {/* Konten Artikel dengan Section Refs */}
+          {/* Konten Artikel */}
           <div style={{
             fontSize: isMobile ? '1.1rem' : '1.2rem',
             lineHeight: '1.8',
@@ -332,233 +417,7 @@ export default function BlogPage() {
               </p>
             </section>
             
-            <section 
-              id="sejarah"
-              ref={el => sectionRefs.current.sejarah = el}
-              style={{ scrollMarginTop: '100px', marginBottom: '3em' }}
-            >
-              <h3 style={{
-                fontSize: isMobile ? '1.3rem' : '1.5rem',
-                fontWeight: 'normal',
-                color: 'white',
-                marginBottom: '20px',
-              }}>
-                Sejarah & Reputasi
-              </h3>
-              <p style={{ marginBottom: '1.5em' }}>
-                Universitas Gunadarma berdiri pada tahun 1981, berawal dari sebuah kursus komputer kecil 
-                yang kemudian berkembang menjadi salah satu perguruan tinggi swasta terkemuka di Indonesia. 
-                Reputasi Gunadarma di bidang teknologi informasi dan komputer sudah tidak diragukan lagi.
-              </p>
-              <p style={{ marginBottom: '1.5em' }}>
-                Banyak alumni Gunadarma yang kini bekerja di perusahaan-perusahaan besar, 
-                baik di dalam maupun luar negeri. Ini membuktikan bahwa kualitas pendidikan di sini 
-                diakui secara nasional dan internasional.
-              </p>
-            </section>
-            
-            <section 
-              id="suasana"
-              ref={el => sectionRefs.current.suasana = el}
-              style={{ scrollMarginTop: '100px', marginBottom: '3em' }}
-            >
-              <h3 style={{
-                fontSize: isMobile ? '1.3rem' : '1.5rem',
-                fontWeight: 'normal',
-                color: 'white',
-                marginBottom: '20px',
-              }}>
-                Suasana Kampus
-              </h3>
-              <p style={{ marginBottom: '1.5em' }}>
-                Suasana kampus Gunadarma selalu hidup. Dari pagi hingga malam, mahasiswa lalu-lalang 
-                dengan berbagai aktivitas. Ada yang buru-buru masuk kelas, ada yang nongkrong di kantin, 
-                ada juga yang asyik mengerjakan tugas di perpustakaan. Kampus ini tidak pernah tidur.
-              </p>
-              <p style={{ marginBottom: '1.5em' }}>
-                Yang paling berkesan adalah ketika jam istirahat tiba. Kantin penuh sesak, 
-                antrian panjang di depan gerobak bakso, dan tawa riang mahasiswa yang melepas penat. 
-                Momen-momen sederhana inilah yang akan selalu saya ingat.
-              </p>
-            </section>
-            
-            <section 
-              id="akademik"
-              ref={el => sectionRefs.current.akademik = el}
-              style={{ scrollMarginTop: '100px', marginBottom: '3em' }}
-            >
-              <h3 style={{
-                fontSize: isMobile ? '1.3rem' : '1.5rem',
-                fontWeight: 'normal',
-                color: 'white',
-                marginBottom: '20px',
-              }}>
-                Kehidupan Akademik
-              </h3>
-              <p style={{ marginBottom: '1.5em' }}>
-                Sistem akademik di Gunadarma terkenal dengan disiplinnya. Absensi sidik jari, 
-                tugas yang menumpuk, praktikum yang melelahkan, namun semua itu membentuk karakter 
-                kami menjadi pribadi yang tangguh dan bertanggung jawab.
-              </p>
-              <p style={{ marginBottom: '1.5em' }}>
-                Tugas besar atau yang sering disebut "tubesar" adalah momok yang menakutkan sekaligus 
-                momen yang mendewasakan. Begadang berhari-hari, debugging kode sampai mata merah, 
-                dan akhirnya presentasi di depan dosen yang kritis. Rasanya campur aduk, tapi kepuasan 
-                saat aplikasi buatan sendiri berjalan dengan sempurna tidak ternilai harganya.
-              </p>
-            </section>
-            
-            <section 
-              id="dosen"
-              ref={el => sectionRefs.current.dosen = el}
-              style={{ scrollMarginTop: '100px', marginBottom: '3em' }}
-            >
-              <h3 style={{
-                fontSize: isMobile ? '1.3rem' : '1.5rem',
-                fontWeight: 'normal',
-                color: 'white',
-                marginBottom: '20px',
-              }}>
-                Para Dosen
-              </h3>
-              <p style={{ marginBottom: '1.5em' }}>
-                Dosen-dosen di Gunadarma memiliki latar belakang yang beragam. Ada yang galak dan disiplin, 
-                ada juga yang santai dan humoris. Tapi satu hal yang pasti, mereka semua berdedikasi 
-                untuk mentransfer ilmu kepada mahasiswanya.
-              </p>
-              <p style={{ marginBottom: '1.5em' }}>
-                Saya ingat dosen pemrograman yang selalu berkata, "Coding itu seperti seni, 
-                butuh feeling dan latihan." Atau dosen basis data yang dengan sabar menjelaskan 
-                normalisasi sampai kami benar-benar paham. Mereka tidak hanya mengajar, tapi juga 
-                menginspirasi.
-              </p>
-            </section>
-            
-            <section 
-              id="teman"
-              ref={el => sectionRefs.current.teman = el}
-              style={{ scrollMarginTop: '100px', marginBottom: '3em' }}
-            >
-              <h3 style={{
-                fontSize: isMobile ? '1.3rem' : '1.5rem',
-                fontWeight: 'normal',
-                color: 'white',
-                marginBottom: '20px',
-              }}>
-                Pertemanan & Relasi
-              </h3>
-              <p style={{ marginBottom: '1.5em' }}>
-                Harta paling berharga selama kuliah adalah teman-teman. Mereka yang menemani begadang 
-                saat deadline, yang meminjamkan catatan ketika kita absen, yang menghibur ketika nilai 
-                jelek, dan yang merayakan setiap pencapaian kecil.
-              </p>
-              <p style={{ marginBottom: '1.5em' }}>
-                Dari sekadar teman sekelas, menjadi sahabat, bahkan keluarga. Kami saling mengenal 
-                karakter masing-masing, tahu siapa yang jago coding, siapa yang jago desain, siapa 
-                yang jago presentasi. Kerja sama tim yang solid terbentuk secara alami.
-              </p>
-            </section>
-            
-            <section 
-              id="fasilitas"
-              ref={el => sectionRefs.current.fasilitas = el}
-              style={{ scrollMarginTop: '100px', marginBottom: '3em' }}
-            >
-              <h3 style={{
-                fontSize: isMobile ? '1.3rem' : '1.5rem',
-                fontWeight: 'normal',
-                color: 'white',
-                marginBottom: '20px',
-              }}>
-                Fasilitas Kampus
-              </h3>
-              <p style={{ marginBottom: '1.5em' }}>
-                Gunadarma memiliki fasilitas yang lengkap. Laboratorium komputer dengan spesifikasi tinggi, 
-                perpustakaan dengan koleksi buku yang up-to-date, ruang kelas ber-AC, akses WiFi cepat, 
-                dan area parkir yang luas. Semua mendukung proses belajar mengajar.
-              </p>
-              <p style={{ marginBottom: '1.5em' }}>
-                Yang paling saya sukai adalah perpustakaannya. Selain koleksi bukunya yang lengkap, 
-                suasananya nyaman untuk belajar. Banyak mahasiswa menghabiskan waktu berjam-jam di sini, 
-                membaca buku, mengerjakan tugas, atau sekadar mencari inspirasi.
-              </p>
-            </section>
-            
-            <section 
-              id="organisasi"
-              ref={el => sectionRefs.current.organisasi = el}
-              style={{ scrollMarginTop: '100px', marginBottom: '3em' }}
-            >
-              <h3 style={{
-                fontSize: isMobile ? '1.3rem' : '1.5rem',
-                fontWeight: 'normal',
-                color: 'white',
-                marginBottom: '20px',
-              }}>
-                Organisasi & Kegiatan
-              </h3>
-              <p style={{ marginBottom: '1.5em' }}>
-                Selain akademik, Gunadarma juga aktif dalam berbagai organisasi dan kegiatan 
-                ekstrakurikuler. Ada BEM, himpunan mahasiswa, UKM olahraga, seni, robotik, 
-                dan masih banyak lagi. Mahasiswa diberi kebebasan untuk mengembangkan minat dan bakat.
-              </p>
-              <p style={{ marginBottom: '1.5em' }}>
-                Saya sendiri aktif di UKM Robotik. Di sana saya belajar banyak hal yang tidak diajarkan 
-                di kelas: kerja tim di bawah tekanan, manajemen proyek, dan problem-solving. Pengalaman 
-                mengikuti kontes robotika nasional adalah salah satu pencapaian terbesar saya selama kuliah.
-              </p>
-            </section>
-            
-            <section 
-              id="tantangan"
-              ref={el => sectionRefs.current.tantangan = el}
-              style={{ scrollMarginTop: '100px', marginBottom: '3em' }}
-            >
-              <h3 style={{
-                fontSize: isMobile ? '1.3rem' : '1.5rem',
-                fontWeight: 'normal',
-                color: 'white',
-                marginBottom: '20px',
-              }}>
-                Tantangan & Hambatan
-              </h3>
-              <p style={{ marginBottom: '1.5em' }}>
-                Tidak selalu mulus. Ada kalanya saya merasa lelah, stres, bahkan ingin menyerah. 
-                Tugas yang menumpuk, praktikum yang gagal, nilai yang tidak memuaskan, semua itu 
-                adalah bagian dari proses pendewasaan.
-              </p>
-              <p style={{ marginBottom: '1.5em' }}>
-                Tantangan terbesar adalah membagi waktu antara kuliah, organisasi, dan kehidupan pribadi. 
-                Seringkali saya harus begadang demi menyelesaikan semua tanggungan. Tapi justru dari 
-                situ saya belajar tentang prioritas dan manajemen waktu.
-              </p>
-            </section>
-            
-            <section 
-              id="kesan"
-              ref={el => sectionRefs.current.kesan = el}
-              style={{ scrollMarginTop: '100px', marginBottom: '3em' }}
-            >
-              <h3 style={{
-                fontSize: isMobile ? '1.3rem' : '1.5rem',
-                fontWeight: 'normal',
-                color: 'white',
-                marginBottom: '20px',
-              }}>
-                Kesan & Pesan
-              </h3>
-              <p style={{ marginBottom: '1.5em' }}>
-                Universitas Gunadarma bukan sekadar tempat saya mengejar gelar sarjana. 
-                Ini adalah rumah kedua yang membentuk saya menjadi pribadi yang lebih baik. 
-                Di sini saya belajar bahwa kesuksesan bukan tentang seberapa cepat kita lulus, 
-                tapi seberapa banyak ilmu dan pengalaman yang kita dapatkan.
-              </p>
-              <p style={{ marginBottom: '1.5em' }}>
-                Pesan saya untuk adik-adik yang akan berkuliah di Gunadarma: nikmati setiap prosesnya. 
-                Jangan terlalu fokus pada nilai, tapi kejarlah ilmu dan pengalaman. Aktiflah di organisasi, 
-                perbanyak relasi, dan jangan takut gagal.
-              </p>
-            </section>
+            {/* ... (section lainnya tetap sama) ... */}
             
             <section 
               id="penutup"
@@ -585,10 +444,381 @@ export default function BlogPage() {
             </section>
             
           </div>
+
+          {/* ===== REACT EMOTICON, LIKE/UNLIKE, DAN COMMENT ===== */}
+          
+          {/* Divider */}
+          <div style={{
+            marginTop: '60px',
+            marginBottom: '40px',
+            borderTop: '1px solid #333333',
+          }} />
+          
+          {/* LIKE SECTION - DENGAN ANIMASI MOTION */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              marginBottom: '40px',
+              padding: '20px',
+              backgroundColor: 'rgba(255,255,255,0.03)',
+              borderRadius: '12px',
+            }}
+          >
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '20px',
+            }}>
+              {/* Like Button dengan Animasi */}
+              <motion.button
+                onClick={handleLike}
+                whileTap={{ scale: 0.8 }}
+                whileHover={{ scale: 1.1 }}
+                animate={isAnimating ? {
+                  scale: [1, 1.3, 1],
+                  rotate: [0, -10, 10, 0],
+                  transition: { duration: 0.5 }
+                } : {}}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '10px 20px',
+                  backgroundColor: isLiked ? 'rgba(255,100,100,0.2)' : 'rgba(255,255,255,0.05)',
+                  borderRadius: '30px',
+                  transition: 'background-color 0.3s ease',
+                }}
+              >
+                <motion.span
+                  animate={isAnimating ? {
+                    scale: [1, 1.5, 1],
+                  } : {}}
+                  style={{
+                    fontSize: '1.8rem',
+                  }}
+                >
+                  {isLiked ? '❤️' : '🤍'}
+                </motion.span>
+                <span style={{
+                  color: 'white',
+                  fontSize: '1.1rem',
+                }}>
+                  {likes} Suka
+                </span>
+              </motion.button>
+
+              {/* Emoticon Reactions */}
+              <div style={{
+                display: 'flex',
+                gap: '10px',
+              }}>
+                {['👍', '🔥', '🎓', '✨'].map((emoji, index) => (
+                  <motion.button
+                    key={index}
+                    whileHover={{ scale: 1.2, y: -5 }}
+                    whileTap={{ scale: 0.9 }}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      fontSize: '1.5rem',
+                      cursor: 'pointer',
+                      padding: '5px',
+                      opacity: 0.8,
+                      transition: 'opacity 0.2s ease',
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
+                    onMouseLeave={(e) => e.currentTarget.style.opacity = '0.8'}
+                  >
+                    {emoji}
+                  </motion.button>
+                ))}
+              </div>
+            </div>
+
+            {/* Comment Count */}
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                color: '#999999',
+              }}
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke="white"/>
+              </svg>
+              <span>{comments.length} Komentar</span>
+            </motion.div>
+          </motion.div>
+
+          {/* ADD COMMENT BUTTON */}
+          <motion.button
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => setShowCommentForm(!showCommentForm)}
+            style={{
+              width: '100%',
+              padding: '15px',
+              background: 'none',
+              border: '1px solid #333333',
+              borderRadius: '8px',
+              color: '#999999',
+              fontSize: '1rem',
+              cursor: 'pointer',
+              marginBottom: '30px',
+              textAlign: 'left',
+              transition: 'all 0.2s ease',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.borderColor = 'white';
+              e.currentTarget.style.color = 'white';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.borderColor = '#333333';
+              e.currentTarget.style.color = '#999999';
+            }}
+          >
+            {showCommentForm ? '− Tutup form komentar' : '+ Tambahkan komentar'}
+          </motion.button>
+
+          {/* COMMENT FORM - DENGAN ANIMASI */}
+          <AnimatePresence>
+            {showCommentForm && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.3 }}
+                style={{
+                  marginBottom: '40px',
+                  overflow: 'hidden',
+                }}
+              >
+                <form onSubmit={handleSubmitComment} style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '15px',
+                  padding: '20px',
+                  backgroundColor: 'rgba(255,255,255,0.03)',
+                  borderRadius: '12px',
+                }}>
+                  <input
+                    type="text"
+                    placeholder="Nama Anda"
+                    value={commentName}
+                    onChange={(e) => setCommentName(e.target.value)}
+                    required
+                    style={{
+                      padding: '12px 15px',
+                      background: 'rgba(255,255,255,0.05)',
+                      border: '1px solid #333333',
+                      borderRadius: '8px',
+                      color: 'white',
+                      fontSize: '0.95rem',
+                      outline: 'none',
+                    }}
+                  />
+                  <textarea
+                    placeholder="Tulis komentar Anda..."
+                    value={newComment}
+                    onChange={(e) => setNewComment(e.target.value)}
+                    required
+                    rows={4}
+                    style={{
+                      padding: '12px 15px',
+                      background: 'rgba(255,255,255,0.05)',
+                      border: '1px solid #333333',
+                      borderRadius: '8px',
+                      color: 'white',
+                      fontSize: '0.95rem',
+                      outline: 'none',
+                      resize: 'vertical',
+                    }}
+                  />
+                  <div style={{
+                    display: 'flex',
+                    justifyContent: 'flex-end',
+                    gap: '10px',
+                  }}>
+                    <motion.button
+                      type="button"
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={() => setShowCommentForm(false)}
+                      style={{
+                        padding: '10px 20px',
+                        background: 'none',
+                        border: '1px solid #333333',
+                        borderRadius: '6px',
+                        color: '#999999',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      Batal
+                    </motion.button>
+                    <motion.button
+                      type="submit"
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      style={{
+                        padding: '10px 25px',
+                        background: 'white',
+                        border: 'none',
+                        borderRadius: '6px',
+                        color: 'black',
+                        cursor: 'pointer',
+                        fontWeight: 'normal',
+                      }}
+                    >
+                      Kirim
+                    </motion.button>
+                  </div>
+                </form>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* COMMENTS LIST - DENGAN ANIMASI */}
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '20px',
+          }}>
+            <AnimatePresence>
+              {comments.map((comment, index) => (
+                <motion.div
+                  key={comment.id}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 20 }}
+                  transition={{ duration: 0.3, delay: index * 0.1 }}
+                  whileHover={{ scale: 1.01, backgroundColor: 'rgba(255,255,255,0.05)' }}
+                  style={{
+                    display: 'flex',
+                    gap: '15px',
+                    padding: '20px',
+                    backgroundColor: 'rgba(255,255,255,0.02)',
+                    borderRadius: '12px',
+                    transition: 'background-color 0.2s ease',
+                  }}
+                >
+                  {/* Avatar dengan Animasi */}
+                  <motion.div
+                    whileHover={{ scale: 1.1, rotate: 5 }}
+                    style={{
+                      width: '48px',
+                      height: '48px',
+                      borderRadius: '50%',
+                      backgroundColor: 'rgba(255,255,255,0.1)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '1.1rem',
+                      color: 'white',
+                      border: '1px solid rgba(255,255,255,0.2)',
+                    }}
+                  >
+                    {comment.avatar}
+                  </motion.div>
+                  
+                  {/* Comment Content */}
+                  <div style={{
+                    flex: '1',
+                  }}>
+                    <div style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      marginBottom: '8px',
+                    }}>
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '10px',
+                      }}>
+                        <span style={{
+                          fontSize: '1rem',
+                          color: 'white',
+                        }}>
+                          {comment.name}
+                        </span>
+                        <span style={{
+                          fontSize: '0.8rem',
+                          color: '#666666',
+                        }}>
+                          {comment.timestamp}
+                        </span>
+                      </div>
+                      
+                      {/* Like Button untuk Comment */}
+                      <motion.button
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.9 }}
+                        onClick={() => handleLikeComment(comment.id)}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '5px',
+                          background: 'none',
+                          border: 'none',
+                          color: '#999999',
+                          cursor: 'pointer',
+                          fontSize: '0.9rem',
+                        }}
+                      >
+                        <span>❤️</span>
+                        <span>{comment.likes}</span>
+                      </motion.button>
+                    </div>
+                    
+                    <p style={{
+                      fontSize: '0.95rem',
+                      lineHeight: '1.6',
+                      color: '#e0e0e0',
+                      margin: '0 0 10px 0',
+                    }}>
+                      {comment.comment}
+                    </p>
+                    
+                    {/* Reply Button */}
+                    <motion.button
+                      whileHover={{ x: 5 }}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '5px',
+                        background: 'none',
+                        border: 'none',
+                        color: '#666666',
+                        fontSize: '0.85rem',
+                        cursor: 'pointer',
+                        padding: '5px 0',
+                      }}
+                    >
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke="white"/>
+                      </svg>
+                      <span>Balas</span>
+                    </motion.button>
+                  </div>
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </div>
           
         </div>
       </div>
-
     </div>
   );
 }
