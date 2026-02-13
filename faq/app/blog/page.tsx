@@ -46,84 +46,12 @@ const firebaseConfig = {
 
 // Emoticon List untuk Reactions
 const EMOTICONS = [
-  { id: 'like', emoji: '👍', label: 'Suka', color: '#3b82f6' },
-  { id: 'heart', emoji: '❤️', label: 'Cinta', color: '#ef4444' },
-  { id: 'laugh', emoji: '😂', label: 'Lucu', color: '#f59e0b' },
-  { id: 'wow', emoji: '😮', label: 'Kagum', color: '#8b5cf6' },
-  { id: 'sad', emoji: '😢', label: 'Sedih', color: '#6b7280' },
-  { id: 'angry', emoji: '😠', label: 'Marah', color: '#dc2626' },
-  { id: 'fire', emoji: '🔥', label: 'Hebat', color: '#f97316' },
-  { id: 'clap', emoji: '👏', label: 'Apresiasi', color: '#10b981' },
-  { id: 'rocket', emoji: '🚀', label: 'Keren', color: '#a855f7' },
-  { id: 'bulb', emoji: '💡', label: 'Inspiratif', color: '#eab308' },
-  { id: 'coffee', emoji: '☕', label: 'Semangat', color: '#92400e' },
-  { id: 'muscle', emoji: '💪', label: 'Kuat', color: '#b45309' }
-];
-
-// ============================================
-// TAGS BERDASARKAN KONTEN ARTIKEL
-// ============================================
-const ARTICLE_TAGS = [
-  { id: 'kuliah', name: 'Kuliah', color: '#3b82f6' },
-  { id: 'gunadarma', name: 'Gunadarma', color: '#ef4444' },
-  { id: 'mahasiswa', name: 'Mahasiswa', color: '#10b981' },
-  { id: 'akademik', name: 'Akademik', color: '#f59e0b' },
-  { id: 'organisasi', name: 'Organisasi', color: '#8b5cf6' },
-  { id: 'dosen', name: 'Dosen', color: '#ec4899' },
-  { id: 'pertemanan', name: 'Pertemanan', color: '#14b8a6' },
-  { id: 'fasilitas', name: 'Fasilitas', color: '#f97316' },
-  { id: 'tips', name: 'Tips & Trik', color: '#6b7280' }
-];
-
-// Artikel blog dengan tags
-const BLOG_POSTS = [
-  {
-    id: 'gunadarma-article',
-    title: 'Bagaimana Rasa nya Masuk Kuliah Di Universitas Gunadarma',
-    slug: 'bagaimana-rasanya-masuk-kuliah-di-universitas-gunadarma',
-    excerpt: 'Pengalaman pribadi menjalani perkuliahan di Universitas Gunadarma, dari akademik hingga organisasi.',
-    tags: ['kuliah', 'gunadarma', 'mahasiswa', 'akademik', 'organisasi', 'dosen', 'pertemanan', 'fasilitas'],
-    date: '2024-01-15',
-    readTime: 8,
-    content: 'full-content-here'
-  },
-  {
-    id: 'memilih-jurusan',
-    title: 'Mengapa saya memilih jurusan tersebut',
-    slug: 'memilih-jurusan',
-    excerpt: 'Alasan di balik keputusan memilih program studi yang tepat.',
-    tags: ['kuliah', 'tips', 'akademik'],
-    date: '2024-01-10',
-    readTime: 5,
-    content: 'previous-content-here'
-  },
-  {
-    id: 'tips-belajar',
-    title: 'Tips Belajar Efektif untuk Mahasiswa',
-    slug: 'tips-belajar-efektif',
-    excerpt: 'Cara belajar yang efektif agar IPK tetap memuaskan.',
-    tags: ['kuliah', 'tips', 'mahasiswa', 'akademik'],
-    date: '2024-01-05',
-    readTime: 6
-  },
-  {
-    id: 'organisasi-kampus',
-    title: 'Pentingnya Ikut Organisasi Kampus',
-    slug: 'pentingnya-ikut-organisasi-kampus',
-    excerpt: 'Manfaat mengikuti organisasi selama kuliah.',
-    tags: ['kuliah', 'organisasi', 'mahasiswa'],
-    date: '2023-12-28',
-    readTime: 7
-  },
-  {
-    id: 'dosen-favorit',
-    title: 'Dosen-Dosen Favorit di Gunadarma',
-    slug: 'dosen-favorit-gunadarma',
-    excerpt: 'Cerita tentang dosen-dosen yang menginspirasi.',
-    tags: ['gunadarma', 'dosen', 'mahasiswa'],
-    date: '2023-12-20',
-    readTime: 4
-  }
+  { id: 'like', emoji: '👍', label: 'Suka' },
+  { id: 'heart', emoji: '❤️', label: 'Cinta' },
+  { id: 'laugh', emoji: '😂', label: 'Lucu' },
+  { id: 'wow', emoji: '😮', label: 'Kagum' },
+  { id: 'sad', emoji: '😢', label: 'Sedih' },
+  { id: 'angry', emoji: '😠', label: 'Marah' }
 ];
 
 export default function BlogPage() {
@@ -625,7 +553,7 @@ export default function BlogPage() {
   );
 
   const TagIcon = ({ width, height }: { width: number, height: number }) => (
-    <svg width={width} height={height} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+    <svg width={width} height={height} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1">
       <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/>
       <line x1="7" y1="7" x2="7.01" y2="7"/>
     </svg>
@@ -656,14 +584,7 @@ export default function BlogPage() {
   };
 
   // ============================================
-  // 16. GET CURRENT ARTICLE TAGS
-  // ============================================
-  const currentArticleTags = ARTICLE_TAGS.filter(tag => 
-    ['kuliah', 'gunadarma', 'mahasiswa', 'akademik', 'organisasi', 'dosen', 'pertemanan', 'fasilitas'].includes(tag.id)
-  );
-
-  // ============================================
-  // 17. LOADING STATE
+  // 16. LOADING STATE
   // ============================================
   if (!isMounted || loading) {
     return (
@@ -866,71 +787,6 @@ export default function BlogPage() {
         </Link>
       </div>
 
-      {/* TAG SECTION - DITAMPILKAN DI ATAS KONTEN */}
-      <div style={{
-        maxWidth: '1200px',
-        margin: '0 auto',
-        padding: isMobile ? '120px 0 20px' : '150px 0 30px',
-      }}>
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '20px',
-          }}
-        >
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '10px',
-          }}>
-            <TagIcon width={24} height={24} />
-            <span style={{
-              fontSize: '1.2rem',
-              color: '#999999',
-              textTransform: 'uppercase',
-              letterSpacing: '2px',
-            }}>
-              Tags
-            </span>
-          </div>
-          
-          <div style={{
-            display: 'flex',
-            flexWrap: 'wrap',
-            gap: '12px',
-          }}>
-            {currentArticleTags.map((tag) => (
-              <Link
-                key={tag.id}
-                href={`/tag/${tag.id}`}
-                style={{ textDecoration: 'none' }}
-              >
-                <motion.div
-                  whileHover={{ scale: 1.05, y: -2 }}
-                  whileTap={{ scale: 0.95 }}
-                  style={{
-                    padding: '8px 20px',
-                    backgroundColor: `${tag.color}15`,
-                    border: `1px solid ${tag.color}40`,
-                    borderRadius: '30px',
-                    color: tag.color,
-                    fontSize: '0.95rem',
-                    cursor: 'pointer',
-                    display: 'inline-block',
-                  }}
-                >
-                  #{tag.name}
-                </motion.div>
-              </Link>
-            ))}
-          </div>
-        </motion.div>
-      </div>
-
       {/* LAYOUT 2 KOLOM */}
       <div style={{
         display: 'flex',
@@ -938,7 +794,7 @@ export default function BlogPage() {
         gap: '60px',
         maxWidth: '1200px',
         margin: '0 auto',
-        padding: isMobile ? '0 0 40px' : '0 0 60px',
+        padding: isMobile ? '120px 0 40px' : '150px 0 60px',
       }}>
         
         {/* SIDEBAR KIRI - RANGKUMAN */}
@@ -1344,120 +1200,80 @@ export default function BlogPage() {
             </section>
           </div>
 
-          {/* ===== RELATED POSTS BASED ON TAGS ===== */}
+          {/* ===== TAG SECTION (2 TAG SAJA) ===== */}
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
             style={{
-              marginTop: '60px',
+              marginTop: '40px',
               marginBottom: '40px',
-              paddingTop: '40px',
+              paddingTop: '20px',
               borderTop: '1px solid #333333',
             }}
           >
-            <h3 style={{
-              fontSize: '1.8rem',
-              fontWeight: 'normal',
-              color: 'white',
-              marginBottom: '30px',
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px',
+              marginBottom: '15px',
             }}>
-              Artikel Terkait
-            </h3>
+              <TagIcon width={20} height={20} />
+              <span style={{
+                fontSize: '1rem',
+                color: '#999999',
+                textTransform: 'uppercase',
+                letterSpacing: '1px',
+              }}>
+                Tags
+              </span>
+            </div>
             
             <div style={{
               display: 'flex',
-              flexDirection: 'column',
-              gap: '20px',
+              gap: '15px',
             }}>
-              {BLOG_POSTS.filter(post => post.id !== 'gunadarma-article').slice(0, 3).map((post) => (
-                <Link 
-                  key={post.id}
-                  href={`/blog/${post.slug}`}
+              <Link 
+                href="/tag/kuliah"
+                style={{ textDecoration: 'none' }}
+              >
+                <motion.span
+                  whileHover={{ x: 5 }}
                   style={{
-                    textDecoration: 'none',
-                    color: 'white',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    padding: '20px',
-                    backgroundColor: 'rgba(255,255,255,0.02)',
-                    borderRadius: '20px',
-                    border: '1px solid rgba(255,255,255,0.05)',
-                    transition: 'all 0.3s ease',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.05)';
-                    e.currentTarget.style.borderColor = 'rgba(255,255,255,0.2)';
-                    e.currentTarget.style.transform = 'translateY(-2px)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.02)';
-                    e.currentTarget.style.borderColor = 'rgba(255,255,255,0.05)';
-                    e.currentTarget.style.transform = 'translateY(0)';
+                    display: 'inline-block',
+                    padding: '6px 18px',
+                    backgroundColor: '#222222',
+                    border: '1px solid #444444',
+                    borderRadius: '30px',
+                    color: '#cccccc',
+                    fontSize: '0.95rem',
+                    cursor: 'pointer',
                   }}
                 >
-                  <div style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '8px',
-                  }}>
-                    <span style={{
-                      fontSize: '1.3rem',
-                      fontWeight: 'normal',
-                      color: 'white',
-                    }}>
-                      {post.title}
-                    </span>
-                    <span style={{
-                      fontSize: '0.9rem',
-                      color: '#666666',
-                    }}>
-                      {post.excerpt}
-                    </span>
-                    <div style={{
-                      display: 'flex',
-                      gap: '8px',
-                      marginTop: '8px',
-                    }}>
-                      {post.tags.map(tagId => {
-                        const tag = ARTICLE_TAGS.find(t => t.id === tagId);
-                        return tag ? (
-                          <span
-                            key={tag.id}
-                            style={{
-                              padding: '4px 12px',
-                              backgroundColor: `${tag.color}15`,
-                              border: `1px solid ${tag.color}40`,
-                              borderRadius: '20px',
-                              color: tag.color,
-                              fontSize: '0.8rem',
-                            }}
-                          >
-                            #{tag.name}
-                          </span>
-                        ) : null;
-                      })}
-                    </div>
-                  </div>
-                  
-                  <motion.div
-                    whileHover={{ x: 5 }}
-                    transition={{ type: "spring", stiffness: 400, damping: 10 }}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      marginLeft: '20px',
-                    }}
-                  >
-                    <NorthEastArrow 
-                      width={isMobile ? 30 : 40} 
-                      height={isMobile ? 30 : 40} 
-                    />
-                  </motion.div>
-                </Link>
-              ))}
+                  #kuliah
+                </motion.span>
+              </Link>
+              
+              <Link 
+                href="/tag/gunadarma"
+                style={{ textDecoration: 'none' }}
+              >
+                <motion.span
+                  whileHover={{ x: 5 }}
+                  style={{
+                    display: 'inline-block',
+                    padding: '6px 18px',
+                    backgroundColor: '#222222',
+                    border: '1px solid #444444',
+                    borderRadius: '30px',
+                    color: '#cccccc',
+                    fontSize: '0.95rem',
+                    cursor: 'pointer',
+                  }}
+                >
+                  #gunadarma
+                </motion.span>
+              </Link>
             </div>
           </motion.div>
 
@@ -1537,32 +1353,6 @@ export default function BlogPage() {
                   }}>
                     Alasan di balik keputusan memilih program studi
                   </span>
-                  
-                  {/* Tags for previous blog */}
-                  <div style={{
-                    display: 'flex',
-                    gap: '8px',
-                    marginTop: '10px',
-                  }}>
-                    {BLOG_POSTS.find(p => p.id === 'memilih-jurusan')?.tags.map(tagId => {
-                      const tag = ARTICLE_TAGS.find(t => t.id === tagId);
-                      return tag ? (
-                        <span
-                          key={tag.id}
-                          style={{
-                            padding: '4px 12px',
-                            backgroundColor: `${tag.color}15`,
-                            border: `1px solid ${tag.color}40`,
-                            borderRadius: '20px',
-                            color: tag.color,
-                            fontSize: '0.8rem',
-                          }}
-                        >
-                          #{tag.name}
-                        </span>
-                      ) : null;
-                    })}
-                  </div>
                 </div>
                 
                 <motion.div
@@ -1669,8 +1459,8 @@ export default function BlogPage() {
                           flexDirection: 'column',
                           alignItems: 'center',
                           gap: '8px',
-                          background: userReactions.includes(emoticon.id) ? `${emoticon.color}20` : 'rgba(255,255,255,0.05)',
-                          border: userReactions.includes(emoticon.id) ? `1px solid ${emoticon.color}` : '1px solid rgba(255,255,255,0.1)',
+                          background: userReactions.includes(emoticon.id) ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.05)',
+                          border: userReactions.includes(emoticon.id) ? '1px solid white' : '1px solid rgba(255,255,255,0.1)',
                           borderRadius: '16px',
                           padding: '16px 8px',
                           cursor: 'pointer',
@@ -1679,7 +1469,7 @@ export default function BlogPage() {
                         <span style={{ fontSize: '2.5rem' }}>{emoticon.emoji}</span>
                         <span style={{ 
                           fontSize: '0.8rem', 
-                          color: userReactions.includes(emoticon.id) ? emoticon.color : '#999999' 
+                          color: userReactions.includes(emoticon.id) ? 'white' : '#999999' 
                         }}>
                           {emoticon.label}
                         </span>
@@ -1720,8 +1510,8 @@ export default function BlogPage() {
                         display: 'flex',
                         alignItems: 'center',
                         gap: '8px',
-                        background: userReactions.includes(id) ? `${emoticon.color}20` : 'rgba(255,255,255,0.05)',
-                        border: userReactions.includes(id) ? `1px solid ${emoticon.color}` : '1px solid rgba(255,255,255,0.1)',
+                        background: userReactions.includes(id) ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.05)',
+                        border: userReactions.includes(id) ? '1px solid white' : '1px solid rgba(255,255,255,0.1)',
                         borderRadius: '30px',
                         padding: '8px 16px',
                         cursor: 'pointer',
@@ -1730,7 +1520,7 @@ export default function BlogPage() {
                       <span style={{ fontSize: '1.3rem' }}>{emoticon.emoji}</span>
                       <span style={{ 
                         fontSize: '0.95rem', 
-                        color: userReactions.includes(id) ? emoticon.color : 'white' 
+                        color: 'white' 
                       }}>
                         {count}
                       </span>
@@ -1988,8 +1778,8 @@ export default function BlogPage() {
                         display: 'flex',
                         alignItems: 'center',
                         gap: '8px',
-                        background: comment.likedBy?.includes(user?.uid) ? 'rgba(239,68,68,0.1)' : 'rgba(255,255,255,0.05)',
-                        border: comment.likedBy?.includes(user?.uid) ? '1px solid #ef4444' : '1px solid rgba(255,255,255,0.1)',
+                        background: comment.likedBy?.includes(user?.uid) ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.05)',
+                        border: comment.likedBy?.includes(user?.uid) ? '1px solid white' : '1px solid rgba(255,255,255,0.1)',
                         borderRadius: '30px',
                         padding: '8px 16px',
                         cursor: user ? 'pointer' : 'not-allowed',
@@ -1999,14 +1789,14 @@ export default function BlogPage() {
                         width="20" 
                         height="20" 
                         viewBox="0 0 24 24" 
-                        fill={comment.likedBy?.includes(user?.uid) ? "#ef4444" : "none"} 
-                        stroke={comment.likedBy?.includes(user?.uid) ? "#ef4444" : "white"} 
+                        fill={comment.likedBy?.includes(user?.uid) ? "white" : "none"} 
+                        stroke="white" 
                         strokeWidth="1"
                       >
                         <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
                       </svg>
                       <span style={{ 
-                        color: comment.likedBy?.includes(user?.uid) ? '#ef4444' : 'white',
+                        color: 'white',
                         fontSize: '1rem'
                       }}>
                         {comment.likes || 0}
@@ -2234,19 +2024,19 @@ export default function BlogPage() {
                                   gap: '5px',
                                   background: 'none',
                                   border: 'none',
-                                  color: reply.likedBy?.includes(user?.uid) ? '#ef4444' : '#666666',
+                                  color: reply.likedBy?.includes(user?.uid) ? 'white' : '#666666',
                                   fontSize: '0.85rem',
                                   cursor: user ? 'pointer' : 'not-allowed',
                                   padding: '4px 8px',
                                   borderRadius: '20px',
-                                  backgroundColor: reply.likedBy?.includes(user?.uid) ? 'rgba(239,68,68,0.1)' : 'transparent',
+                                  backgroundColor: reply.likedBy?.includes(user?.uid) ? 'rgba(255,255,255,0.1)' : 'transparent',
                                 }}
                               >
                                 <svg 
                                   width="14" 
                                   height="14" 
                                   viewBox="0 0 24 24" 
-                                  fill={reply.likedBy?.includes(user?.uid) ? "#ef4444" : "none"} 
+                                  fill={reply.likedBy?.includes(user?.uid) ? "white" : "none"} 
                                   stroke="currentColor" 
                                   strokeWidth="1"
                                 >
