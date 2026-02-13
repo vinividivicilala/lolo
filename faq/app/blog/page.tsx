@@ -524,6 +524,24 @@ export default function BlogPage() {
     </svg>
   );
 
+  const NorthEastArrow = ({ width, height, style }: { width: number | string, height: number | string, style?: React.CSSProperties }) => (
+    <svg 
+      width={width} 
+      height={height} 
+      viewBox="0 0 24 24" 
+      fill="none"
+      stroke="white"
+      strokeWidth="1"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      style={style}
+    >
+      <path d="M7 7L17 17" stroke="white"/>
+      <path d="M7 7H17" stroke="white"/>
+      <path d="M7 17V7" stroke="white"/>
+    </svg>
+  );
+
   const CalendarIcon = ({ width, height }: { width: number, height: number }) => (
     <svg width={width} height={height} viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1">
       <rect x="3" y="4" width="18" height="18" rx="2" ry="2" stroke="white"/>
@@ -592,7 +610,7 @@ export default function BlogPage() {
       padding: isMobile ? '20px' : '40px',
     }}>
       
-      {/* ===== BANNER DEVELOPMENT - DITAMBAHKAN ===== */}
+      {/* ===== BANNER DEVELOPMENT ===== */}
       <motion.div
         initial={{ y: -100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
@@ -658,10 +676,10 @@ export default function BlogPage() {
         </motion.div>
       </motion.div>
 
-      {/* HEADER - HALAMAN UTAMA & USER (dengan padding-top untuk banner) */}
+      {/* HEADER - HALAMAN UTAMA & USER */}
       <div style={{
         position: 'fixed',
-        top: isMobile ? '70px' : '80px', // Dinaikkan karena ada banner
+        top: isMobile ? '70px' : '80px',
         right: isMobile ? '20px' : '40px',
         zIndex: 100,
         display: 'flex',
@@ -768,21 +786,21 @@ export default function BlogPage() {
         </Link>
       </div>
 
-      {/* LAYOUT 2 KOLOM (dengan padding-top untuk banner) */}
+      {/* LAYOUT 2 KOLOM */}
       <div style={{
         display: 'flex',
         flexDirection: isMobile ? 'column' : 'row',
         gap: '60px',
         maxWidth: '1200px',
         margin: '0 auto',
-        padding: isMobile ? '120px 0 40px' : '150px 0 60px', // Dinaikkan karena ada banner
+        padding: isMobile ? '120px 0 40px' : '150px 0 60px',
       }}>
         
         {/* SIDEBAR KIRI - RANGKUMAN */}
         <div style={{
           flex: isMobile ? '1' : '0 0 280px',
           position: isMobile ? 'relative' : 'sticky',
-          top: isMobile ? 'auto' : '130px', // Dinaikkan karena ada banner
+          top: isMobile ? 'auto' : '130px',
           alignSelf: 'flex-start',
           height: isMobile ? 'auto' : 'calc(100vh - 180px)',
           overflowY: isMobile ? 'visible' : 'auto',
@@ -896,7 +914,7 @@ export default function BlogPage() {
             Bagaimana Rasa nya Masuk Kuliah Di Universitas Gunadarma
           </h2>
 
-          {/* KONTEN ARTIKEL - LENGKAP TIDAK DIHAPUS */}
+          {/* KONTEN ARTIKEL - LENGKAP */}
           <div style={{
             fontSize: isMobile ? '1.1rem' : '1.2rem',
             lineHeight: '1.8',
@@ -1181,9 +1199,106 @@ export default function BlogPage() {
             </section>
           </div>
 
-          {/* ===== EMOTICON REACTIONS - BESAR ===== */}
+          {/* ===== BLOG SELANJUTNYA - PREVIOUS PAGE ===== */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+            style={{
+              marginTop: '80px',
+              marginBottom: '60px',
+              paddingTop: '40px',
+              borderTop: '1px solid #333333',
+            }}
+          >
+            <div style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '20px',
+            }}>
+              <span style={{
+                fontSize: '0.9rem',
+                color: '#666666',
+                textTransform: 'uppercase',
+                letterSpacing: '2px',
+              }}>
+                Blog Selanjutnya
+              </span>
+              
+              <Link 
+                href="/blog/memilih-jurusan" 
+                style={{
+                  textDecoration: 'none',
+                  color: 'white',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '24px',
+                  backgroundColor: 'rgba(255,255,255,0.02)',
+                  borderRadius: '24px',
+                  border: '1px solid rgba(255,255,255,0.05)',
+                  transition: 'all 0.3s ease',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.05)';
+                  e.currentTarget.style.borderColor = 'rgba(255,255,255,0.2)';
+                  e.currentTarget.style.transform = 'translateY(-2px)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.02)';
+                  e.currentTarget.style.borderColor = 'rgba(255,255,255,0.05)';
+                  e.currentTarget.style.transform = 'translateY(0)';
+                }}
+              >
+                <div style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '8px',
+                }}>
+                  <span style={{
+                    fontSize: '0.85rem',
+                    color: '#999999',
+                  }}>
+                    Previous Page
+                  </span>
+                  <span style={{
+                    fontSize: isMobile ? '1.3rem' : '1.8rem',
+                    fontWeight: 'normal',
+                    color: 'white',
+                  }}>
+                    Mengapa saya memilih jurusan tersebut
+                  </span>
+                  <span style={{
+                    fontSize: '0.95rem',
+                    color: '#666666',
+                    marginTop: '4px',
+                  }}>
+                    Alasan di balik keputusan memilih program studi
+                  </span>
+                </div>
+                
+                <motion.div
+                  whileHover={{ x: 5, y: -5 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 10 }}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    marginLeft: '20px',
+                  }}
+                >
+                  <NorthEastArrow 
+                    width={isMobile ? 40 : 50} 
+                    height={isMobile ? 40 : 50} 
+                  />
+                </motion.div>
+              </Link>
+            </div>
+          </motion.div>
+
+          {/* ===== EMOTICON REACTIONS ===== */}
           <div style={{
-            marginTop: '60px',
+            marginTop: '40px',
             marginBottom: '40px',
             borderTop: '1px solid #333333',
             paddingTop: '40px',
@@ -1337,7 +1452,7 @@ export default function BlogPage() {
             </div>
           </div>
 
-          {/* ===== COMMENT SECTION - BESAR ===== */}
+          {/* ===== COMMENT SECTION ===== */}
 
           {/* Add Comment Button */}
           <motion.button
@@ -1482,7 +1597,7 @@ export default function BlogPage() {
             )}
           </AnimatePresence>
 
-          {/* Comments List - BESAR */}
+          {/* Comments List */}
           <div style={{
             display: 'flex',
             flexDirection: 'column',
