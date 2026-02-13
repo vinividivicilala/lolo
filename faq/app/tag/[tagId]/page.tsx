@@ -1,9 +1,10 @@
 'use client';
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import gsap from "gsap";
 
 // Data blog posts dengan tags
 const BLOG_POSTS = [
@@ -111,6 +112,24 @@ const TagIcon = ({ width, height }: { width: number, height: number }) => (
   </svg>
 );
 
+// North West Arrow SVG
+const NorthWestArrow = ({ width, height }: { width: number | string, height: number | string }) => (
+  <svg 
+    width={width} 
+    height={height} 
+    viewBox="0 0 24 24" 
+    fill="none"
+    stroke="white"
+    strokeWidth="1.5"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M17 17L7 7" stroke="white"/>
+    <path d="M17 7H7" stroke="white"/>
+    <path d="M7 7V17" stroke="white"/>
+  </svg>
+);
+
 export default function TagPage() {
   const router = useRouter();
   const params = useParams();
@@ -118,11 +137,66 @@ export default function TagPage() {
   
   const [isMounted, setIsMounted] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  
+  // Refs untuk GSAP animations
+  const bannerRef = useRef<HTMLDivElement>(null);
+  const headerRef = useRef<HTMLDivElement>(null);
+  const emoji1Ref = useRef<HTMLDivElement>(null);
+  const emoji2Ref = useRef<HTMLDivElement>(null);
 
   // Filter posts berdasarkan tag
   const filteredPosts = BLOG_POSTS.filter(post => post.tags.includes(tagId));
   const currentTag = TAG_INFO[tagId] || { name: tagId, description: '' };
   const otherTags = Object.keys(TAG_INFO).filter(t => t !== tagId);
+
+  // GSAP Animations
+  useEffect(() => {
+    if (!isMounted) return;
+
+    // Banner animation
+    if (bannerRef.current) {
+      gsap.fromTo(bannerRef.current,
+        { y: -100, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.8, ease: "power3.out" }
+      );
+    }
+
+    // Emoji animations
+    if (emoji1Ref.current && emoji2Ref.current) {
+      // Create timeline for emojis
+      const tl = gsap.timeline({ repeat: -1, repeatDelay: 3 });
+      
+      tl.to([emoji1Ref.current, emoji2Ref.current], {
+        rotation: 10,
+        duration: 0.2,
+        ease: "power1.inOut"
+      })
+      .to([emoji1Ref.current, emoji2Ref.current], {
+        rotation: -10,
+        duration: 0.3,
+        ease: "power1.inOut"
+      })
+      .to([emoji1Ref.current, emoji2Ref.current], {
+        rotation: 10,
+        duration: 0.2,
+        ease: "power1.inOut"
+      })
+      .to([emoji1Ref.current, emoji2Ref.current], {
+        rotation: 0,
+        duration: 0.3,
+        ease: "power1.inOut"
+      });
+    }
+
+    // Header animation
+    if (headerRef.current) {
+      gsap.fromTo(headerRef.current,
+        { x: 20, opacity: 0 },
+        { x: 0, opacity: 1, duration: 0.6, delay: 0.3, ease: "power2.out" }
+      );
+    }
+
+  }, [isMounted]);
 
   useEffect(() => {
     setIsMounted(true);
@@ -193,31 +267,111 @@ export default function TagPage() {
       backgroundColor: '#000000',
       fontFamily: 'Helvetica, Arial, sans-serif',
       color: 'white',
+      position: 'relative',
       padding: isMobile ? '20px' : '40px',
     }}>
       
-      {/* Header */}
-      <div style={{
-        position: 'fixed',
-        top: isMobile ? '20px' : '40px',
-        right: isMobile ? '20px' : '40px',
-        zIndex: 100,
-      }}>
-        <Link href="/blog" style={{
+      {/* ===== BANNER DEVELOPMENT dengan GSAP ===== */}
+      <div
+        ref={bannerRef}
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          zIndex: 9999,
+          backgroundColor: '#FF6B00',
+          color: 'white',
+          padding: '12px 20px',
           display: 'flex',
           alignItems: 'center',
-          gap: '15px',
-          textDecoration: 'none',
-          color: 'white',
+          justifyContent: 'center',
+          gap: '12px',
+          borderBottom: '2px solid rgba(255,255,255,0.2)',
+          backdropFilter: 'blur(8px)',
+          flexWrap: 'wrap',
+          boxShadow: '0 4px 20px rgba(255,107,0,0.3)',
+        }}
+      >
+        <div
+          ref={emoji1Ref}
+          style={{
+            fontSize: isMobile ? '1.2rem' : '1.5rem',
+            display: 'flex',
+            alignItems: 'center',
+            transform: 'rotate(0deg)',
+          }}
+        >
+          🚧
+        </div>
+        <span style={{
+          fontSize: isMobile ? '0.9rem' : '1.1rem',
+          fontWeight: '500',
+          textAlign: 'center',
+          background: 'rgba(0,0,0,0.2)',
+          padding: '4px 16px',
+          borderRadius: '30px',
         }}>
+          Halaman ini sedang dalam pengembangan, judul blog tidak 100% benar
+        </span>
+        <div
+          ref={emoji2Ref}
+          style={{
+            fontSize: isMobile ? '1.2rem' : '1.5rem',
+            display: 'flex',
+            alignItems: 'center',
+            transform: 'rotate(0deg)',
+          }}
+        >
+          🚧
+        </div>
+      </div>
+
+      {/* Header dengan North West Arrow + Halaman Utama */}
+      <div
+        ref={headerRef}
+        style={{
+          position: 'fixed',
+          top: isMobile ? '70px' : '80px',
+          right: isMobile ? '20px' : '40px',
+          zIndex: 100,
+        }}
+      >
+        <Link 
+          href="/" 
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '15px',
+            textDecoration: 'none',
+            color: 'white',
+            padding: '10px 20px',
+            backgroundColor: 'rgba(255,255,255,0.05)',
+            borderRadius: '40px',
+            border: '1px solid rgba(255,255,255,0.1)',
+            transition: 'all 0.3s ease',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.1)';
+            e.currentTarget.style.borderColor = 'rgba(255,255,255,0.3)';
+            e.currentTarget.style.transform = 'translateY(-2px)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.05)';
+            e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)';
+            e.currentTarget.style.transform = 'translateY(0)';
+          }}
+        >
+          <NorthWestArrow 
+            width={isMobile ? 24 : 28} 
+            height={isMobile ? 24 : 28} 
+          />
           <span style={{
-            fontSize: isMobile ? '1rem' : '1.2rem',
+            fontSize: isMobile ? '1rem' : '1.1rem',
+            fontWeight: '500',
           }}>
-            Kembali ke Blog
+            Halaman Utama
           </span>
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1">
-            <path d="M19 12H5M12 19l-7-7 7-7"/>
-          </svg>
         </Link>
       </div>
 
@@ -225,7 +379,7 @@ export default function TagPage() {
       <div style={{
         maxWidth: '800px',
         margin: '0 auto',
-        padding: isMobile ? '100px 0 40px' : '120px 0 60px',
+        padding: isMobile ? '140px 0 40px' : '160px 0 60px',
       }}>
         
         {/* Tag Header */}
@@ -338,6 +492,10 @@ export default function TagPage() {
                       {post.tags.map(tag => (
                         <span
                           key={tag}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            router.push(`/tag/${tag}`);
+                          }}
                           style={{
                             padding: '4px 12px',
                             backgroundColor: '#222222',
@@ -345,6 +503,16 @@ export default function TagPage() {
                             borderRadius: '20px',
                             color: '#cccccc',
                             fontSize: '0.85rem',
+                            cursor: 'pointer',
+                            transition: 'all 0.2s ease',
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.backgroundColor = '#333333';
+                            e.currentTarget.style.borderColor = '#666666';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.backgroundColor = '#222222';
+                            e.currentTarget.style.borderColor = '#444444';
                           }}
                         >
                           #{tag}
