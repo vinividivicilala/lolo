@@ -119,6 +119,9 @@ export default function BlogPage() {
       setFirebaseAuth(auth);
       setFirebaseDb(db);
       setFirebaseInitialized(true);
+      
+      // Initialize blog reactions document
+      initializeBlogReactions(db);
     } catch (error) {
       console.error("Firebase initialization error:", error);
     }
@@ -127,7 +130,34 @@ export default function BlogPage() {
   }, []);
 
   // ============================================
-  // 2. AUTH STATE LISTENER
+  // 2. INITIALIZE BLOG REACTIONS DOCUMENT
+  // ============================================
+  const initializeBlogReactions = async (db: any) => {
+    try {
+      const reactionsRef = doc(db, "blogReactions", "gunadarma-article");
+      const docSnap = await getDoc(reactionsRef);
+      
+      if (!docSnap.exists()) {
+        // Initialize with zero counts for all emoticons
+        const initialCounts: { [key: string]: number } = {};
+        EMOTICONS.forEach(emoticon => {
+          initialCounts[emoticon.id] = 0;
+        });
+        
+        await setDoc(reactionsRef, {
+          articleId: "gunadarma-article",
+          counts: initialCounts,
+          createdAt: Timestamp.now()
+        });
+        console.log("Blog reactions document created");
+      }
+    } catch (error) {
+      console.error("Error initializing blog reactions:", error);
+    }
+  };
+
+  // ============================================
+  // 3. AUTH STATE LISTENER
   // ============================================
   useEffect(() => {
     if (!firebaseAuth || !firebaseInitialized) return;
@@ -141,7 +171,7 @@ export default function BlogPage() {
   }, [firebaseAuth, firebaseInitialized]);
 
   // ============================================
-  // 3. LOAD REACTIONS FROM FIREBASE (REAL-TIME)
+  // 4. LOAD REACTIONS FROM FIREBASE (REAL-TIME)
   // ============================================
   useEffect(() => {
     if (!firebaseDb || !firebaseInitialized) return;
@@ -152,22 +182,37 @@ export default function BlogPage() {
       if (doc.exists()) {
         setReactions(doc.data().counts || {});
       }
+    }, (error) => {
+      console.error("Error loading reactions:", error);
     });
 
     return () => unsubscribe();
   }, [firebaseDb, firebaseInitialized]);
 
   // ============================================
-  // 4. LOAD USER REACTIONS
+  // 5. LOAD USER REACTIONS
   // ============================================
   useEffect(() => {
     if (!firebaseDb || !firebaseInitialized || !user) return;
 
     const loadUserReactions = async () => {
-      const userReactionsRef = doc(firebaseDb, "userReactions", `${user.uid}_gunadarma-article`);
-      const docSnap = await getDoc(userReactionsRef);
-      if (docSnap.exists()) {
-        setUserReactions(docSnap.data().reactions || []);
+      try {
+        const userReactionsRef = doc(firebaseDb, "userReactions", `${user.uid}_gunadarma-article`);
+        const docSnap = await getDoc(userReactionsRef);
+        if (docSnap.exists()) {
+          setUserReactions(docSnap.data().reactions || []);
+        } else {
+          // Create user reactions document
+          await setDoc(userReactionsRef, {
+            userId: user.uid,
+            articleId: "gunadarma-article",
+            reactions: [],
+            createdAt: Timestamp.now()
+          });
+          setUserReactions([]);
+        }
+      } catch (error) {
+        console.error("Error loading user reactions:", error);
       }
     };
 
@@ -175,7 +220,7 @@ export default function BlogPage() {
   }, [firebaseDb, firebaseInitialized, user]);
 
   // ============================================
-  // 5. LOAD COMMENTS FROM FIREBASE (REAL-TIME)
+  // 6. LOAD COMMENTS FROM FIREBASE (REAL-TIME)
   // ============================================
   useEffect(() => {
     if (!firebaseDb || !firebaseInitialized) return;
@@ -195,13 +240,15 @@ export default function BlogPage() {
         replies: doc.data().replies || []
       }));
       setComments(commentsData);
+    }, (error) => {
+      console.error("Error loading comments:", error);
     });
 
     return () => unsubscribe();
   }, [firebaseDb, firebaseInitialized]);
 
   // ============================================
-  // 6. HANDLE REACTION (EMOTICON)
+  // 7. HANDLE REACTION (EMOTICON)
   // ============================================
   const handleReaction = async (emoticonId: string) => {
     if (!user) {
@@ -213,6 +260,20 @@ export default function BlogPage() {
     try {
       const reactionsRef = doc(firebaseDb, "blogReactions", "gunadarma-article");
       const userReactionsRef = doc(firebaseDb, "userReactions", `${user.uid}_gunadarma-article`);
+
+      // Ensure reactions document exists
+      const reactionsDoc = await getDoc(reactionsRef);
+      if (!reactionsDoc.exists()) {
+        const initialCounts: { [key: string]: number } = {};
+        EMOTICONS.forEach(emoticon => {
+          initialCounts[emoticon.id] = 0;
+        });
+        await setDoc(reactionsRef, {
+          articleId: "gunadarma-article",
+          counts: initialCounts,
+          createdAt: Timestamp.now()
+        });
+      }
 
       if (userReactions.includes(emoticonId)) {
         // Remove reaction
@@ -238,7 +299,8 @@ export default function BlogPage() {
           await setDoc(userReactionsRef, {
             userId: user.uid,
             articleId: "gunadarma-article",
-            reactions: [emoticonId]
+            reactions: [emoticonId],
+            createdAt: Timestamp.now()
           });
         }
         setUserReactions(prev => [...prev, emoticonId]);
@@ -249,7 +311,7 @@ export default function BlogPage() {
   };
 
   // ============================================
-  // 7. HANDLE GOOGLE LOGIN
+  // 8. HANDLE GOOGLE LOGIN
   // ============================================
   const handleGoogleLogin = async () => {
     if (!firebaseAuth) return;
@@ -263,7 +325,7 @@ export default function BlogPage() {
   };
 
   // ============================================
-  // 8. HANDLE LOGOUT
+  // 9. HANDLE LOGOUT
   // ============================================
   const handleLogout = async () => {
     if (!firebaseAuth) return;
@@ -276,7 +338,7 @@ export default function BlogPage() {
   };
 
   // ============================================
-  // 9. HANDLE ADD COMMENT
+  // 10. HANDLE ADD COMMENT
   // ============================================
   const handleAddComment = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -315,7 +377,7 @@ export default function BlogPage() {
   };
 
   // ============================================
-  // 10. HANDLE ADD REPLY
+  // 11. HANDLE ADD REPLY
   // ============================================
   const handleAddReply = async (commentId: string) => {
     if (!user) {
@@ -326,10 +388,14 @@ export default function BlogPage() {
 
     try {
       const commentRef = doc(firebaseDb, "blogComments", commentId);
+      const commentDoc = await getDoc(commentRef);
+      
+      if (!commentDoc.exists()) return;
+      
       const replyData = {
         id: `${Date.now()}_${user.uid}`,
         userId: user.uid,
-        userName: user.displayName || user.email?.split('@')[0],
+        userName: user.displayName || user.email?.split('@')[0] || 'Anonymous',
         userPhoto: user.photoURL || `https://ui-avatars.com/api/?name=${user.email}&background=random`,
         text: replyText,
         createdAt: Timestamp.now(),
@@ -349,7 +415,7 @@ export default function BlogPage() {
   };
 
   // ============================================
-  // 11. HANDLE LIKE COMMENT
+  // 12. HANDLE LIKE COMMENT
   // ============================================
   const handleLikeComment = async (commentId: string, isReply: boolean = false, replyId?: string) => {
     if (!user) {
@@ -411,7 +477,7 @@ export default function BlogPage() {
   };
 
   // ============================================
-  // 12. SCROLL HANDLER
+  // 13. SCROLL HANDLER
   // ============================================
   useEffect(() => {
     const handleScroll = () => {
@@ -438,7 +504,7 @@ export default function BlogPage() {
   }, []);
 
   // ============================================
-  // 13. SVG COMPONENTS
+  // 14. SVG COMPONENTS
   // ============================================
   const SouthWestArrow = ({ width, height, style }: { width: number | string, height: number | string, style?: React.CSSProperties }) => (
     <svg 
@@ -475,7 +541,7 @@ export default function BlogPage() {
   );
 
   // ============================================
-  // 14. RANGKUMAN SECTIONS
+  // 15. RANGKUMAN SECTIONS
   // ============================================
   const rangkumanSections = [
     { id: "pendahuluan", title: "Pendahuluan" },
@@ -499,7 +565,7 @@ export default function BlogPage() {
   };
 
   // ============================================
-  // 15. LOADING STATE
+  // 16. LOADING STATE
   // ============================================
   if (!isMounted || loading) {
     return (
@@ -764,13 +830,289 @@ export default function BlogPage() {
             Bagaimana Rasa nya Masuk Kuliah Di Universitas Gunadarma
           </h2>
 
-          {/* Konten Artikel (sama seperti sebelumnya) */}
+          {/* KONTEN ARTIKEL - LENGKAP TIDAK DIHAPUS */}
           <div style={{
             fontSize: isMobile ? '1.1rem' : '1.2rem',
             lineHeight: '1.8',
             color: '#e0e0e0',
           }}>
-            {/* ... section artikel ... */}
+            <section 
+              id="pendahuluan"
+              ref={el => sectionRefs.current.pendahuluan = el}
+              style={{ scrollMarginTop: '100px', marginBottom: '3em' }}
+            >
+              <h3 style={{
+                fontSize: isMobile ? '1.3rem' : '1.5rem',
+                fontWeight: 'normal',
+                color: 'white',
+                marginBottom: '20px',
+              }}>
+                Pendahuluan
+              </h3>
+              <p style={{ marginBottom: '1.5em' }}>
+                Masuk ke Universitas Gunadarma adalah salah satu keputusan terbesar dalam hidup saya. 
+                Banyak orang bertanya, "Bagaimana rasanya?" Pertanyaan sederhana namun jawabannya sangat kompleks. 
+                Ini bukan sekadar tentang perkuliahan, tapi tentang perjalanan menemukan jati diri, 
+                bertemu dengan berbagai karakter manusia, dan belajar bahwa kehidupan tidak selalu hitam dan putih.
+              </p>
+              <p style={{ marginBottom: '1.5em' }}>
+                Gunadarma mengajarkan saya bahwa pendidikan bukan hanya tentang nilai di atas kertas, 
+                tapi tentang bagaimana kita berpikir kritis, menyelesaikan masalah, dan beradaptasi dengan perubahan. 
+                Di sini, saya belajar bahwa kegagalan adalah bagian dari proses, dan kesuksesan adalah akumulasi dari ribuan percobaan.
+              </p>
+            </section>
+            
+            <section 
+              id="sejarah"
+              ref={el => sectionRefs.current.sejarah = el}
+              style={{ scrollMarginTop: '100px', marginBottom: '3em' }}
+            >
+              <h3 style={{
+                fontSize: isMobile ? '1.3rem' : '1.5rem',
+                fontWeight: 'normal',
+                color: 'white',
+                marginBottom: '20px',
+              }}>
+                Sejarah & Reputasi
+              </h3>
+              <p style={{ marginBottom: '1.5em' }}>
+                Universitas Gunadarma berdiri pada tahun 1981, berawal dari sebuah kursus komputer kecil 
+                yang kemudian berkembang menjadi salah satu perguruan tinggi swasta terkemuka di Indonesia. 
+                Reputasi Gunadarma di bidang teknologi informasi dan komputer sudah tidak diragukan lagi.
+              </p>
+              <p style={{ marginBottom: '1.5em' }}>
+                Banyak alumni Gunadarma yang kini bekerja di perusahaan-perusahaan besar, 
+                baik di dalam maupun luar negeri. Ini membuktikan bahwa kualitas pendidikan di sini 
+                diakui secara nasional dan internasional.
+              </p>
+            </section>
+            
+            <section 
+              id="suasana"
+              ref={el => sectionRefs.current.suasana = el}
+              style={{ scrollMarginTop: '100px', marginBottom: '3em' }}
+            >
+              <h3 style={{
+                fontSize: isMobile ? '1.3rem' : '1.5rem',
+                fontWeight: 'normal',
+                color: 'white',
+                marginBottom: '20px',
+              }}>
+                Suasana Kampus
+              </h3>
+              <p style={{ marginBottom: '1.5em' }}>
+                Suasana kampus Gunadarma selalu hidup. Dari pagi hingga malam, mahasiswa lalu-lalang 
+                dengan berbagai aktivitas. Ada yang buru-buru masuk kelas, ada yang nongkrong di kantin, 
+                ada juga yang asyik mengerjakan tugas di perpustakaan. Kampus ini tidak pernah tidur.
+              </p>
+              <p style={{ marginBottom: '1.5em' }}>
+                Yang paling berkesan adalah ketika jam istirahat tiba. Kantin penuh sesak, 
+                antrian panjang di depan gerobak bakso, dan tawa riang mahasiswa yang melepas penat. 
+                Momen-momen sederhana inilah yang akan selalu saya ingat.
+              </p>
+            </section>
+            
+            <section 
+              id="akademik"
+              ref={el => sectionRefs.current.akademik = el}
+              style={{ scrollMarginTop: '100px', marginBottom: '3em' }}
+            >
+              <h3 style={{
+                fontSize: isMobile ? '1.3rem' : '1.5rem',
+                fontWeight: 'normal',
+                color: 'white',
+                marginBottom: '20px',
+              }}>
+                Kehidupan Akademik
+              </h3>
+              <p style={{ marginBottom: '1.5em' }}>
+                Sistem akademik di Gunadarma terkenal dengan disiplinnya. Absensi sidik jari, 
+                tugas yang menumpuk, praktikum yang melelahkan, namun semua itu membentuk karakter 
+                kami menjadi pribadi yang tangguh dan bertanggung jawab.
+              </p>
+              <p style={{ marginBottom: '1.5em' }}>
+                Tugas besar atau yang sering disebut "tubesar" adalah momok yang menakutkan sekaligus 
+                momen yang mendewasakan. Begadang berhari-hari, debugging kode sampai mata merah, 
+                dan akhirnya presentasi di depan dosen yang kritis. Rasanya campur aduk, tapi kepuasan 
+                saat aplikasi buatan sendiri berjalan dengan sempurna tidak ternilai harganya.
+              </p>
+            </section>
+            
+            <section 
+              id="dosen"
+              ref={el => sectionRefs.current.dosen = el}
+              style={{ scrollMarginTop: '100px', marginBottom: '3em' }}
+            >
+              <h3 style={{
+                fontSize: isMobile ? '1.3rem' : '1.5rem',
+                fontWeight: 'normal',
+                color: 'white',
+                marginBottom: '20px',
+              }}>
+                Para Dosen
+              </h3>
+              <p style={{ marginBottom: '1.5em' }}>
+                Dosen-dosen di Gunadarma memiliki latar belakang yang beragam. Ada yang galak dan disiplin, 
+                ada juga yang santai dan humoris. Tapi satu hal yang pasti, mereka semua berdedikasi 
+                untuk mentransfer ilmu kepada mahasiswanya.
+              </p>
+              <p style={{ marginBottom: '1.5em' }}>
+                Saya ingat dosen pemrograman yang selalu berkata, "Coding itu seperti seni, 
+                butuh feeling dan latihan." Atau dosen basis data yang dengan sabar menjelaskan 
+                normalisasi sampai kami benar-benar paham. Mereka tidak hanya mengajar, tapi juga 
+                menginspirasi.
+              </p>
+            </section>
+            
+            <section 
+              id="teman"
+              ref={el => sectionRefs.current.teman = el}
+              style={{ scrollMarginTop: '100px', marginBottom: '3em' }}
+            >
+              <h3 style={{
+                fontSize: isMobile ? '1.3rem' : '1.5rem',
+                fontWeight: 'normal',
+                color: 'white',
+                marginBottom: '20px',
+              }}>
+                Pertemanan & Relasi
+              </h3>
+              <p style={{ marginBottom: '1.5em' }}>
+                Harta paling berharga selama kuliah adalah teman-teman. Mereka yang menemani begadang 
+                saat deadline, yang meminjamkan catatan ketika kita absen, yang menghibur ketika nilai 
+                jelek, dan yang merayakan setiap pencapaian kecil.
+              </p>
+              <p style={{ marginBottom: '1.5em' }}>
+                Dari sekadar teman sekelas, menjadi sahabat, bahkan keluarga. Kami saling mengenal 
+                karakter masing-masing, tahu siapa yang jago coding, siapa yang jago desain, siapa 
+                yang jago presentasi. Kerja sama tim yang solid terbentuk secara alami.
+              </p>
+            </section>
+            
+            <section 
+              id="fasilitas"
+              ref={el => sectionRefs.current.fasilitas = el}
+              style={{ scrollMarginTop: '100px', marginBottom: '3em' }}
+            >
+              <h3 style={{
+                fontSize: isMobile ? '1.3rem' : '1.5rem',
+                fontWeight: 'normal',
+                color: 'white',
+                marginBottom: '20px',
+              }}>
+                Fasilitas Kampus
+              </h3>
+              <p style={{ marginBottom: '1.5em' }}>
+                Gunadarma memiliki fasilitas yang lengkap. Laboratorium komputer dengan spesifikasi tinggi, 
+                perpustakaan dengan koleksi buku yang up-to-date, ruang kelas ber-AC, akses WiFi cepat, 
+                dan area parkir yang luas. Semua mendukung proses belajar mengajar.
+              </p>
+              <p style={{ marginBottom: '1.5em' }}>
+                Yang paling saya sukai adalah perpustakaannya. Selain koleksi bukunya yang lengkap, 
+                suasananya nyaman untuk belajar. Banyak mahasiswa menghabiskan waktu berjam-jam di sini, 
+                membaca buku, mengerjakan tugas, atau sekadar mencari inspirasi.
+              </p>
+            </section>
+            
+            <section 
+              id="organisasi"
+              ref={el => sectionRefs.current.organisasi = el}
+              style={{ scrollMarginTop: '100px', marginBottom: '3em' }}
+            >
+              <h3 style={{
+                fontSize: isMobile ? '1.3rem' : '1.5rem',
+                fontWeight: 'normal',
+                color: 'white',
+                marginBottom: '20px',
+              }}>
+                Organisasi & Kegiatan
+              </h3>
+              <p style={{ marginBottom: '1.5em' }}>
+                Selain akademik, Gunadarma juga aktif dalam berbagai organisasi dan kegiatan 
+                ekstrakurikuler. Ada BEM, himpunan mahasiswa, UKM olahraga, seni, robotik, 
+                dan masih banyak lagi. Mahasiswa diberi kebebasan untuk mengembangkan minat dan bakat.
+              </p>
+              <p style={{ marginBottom: '1.5em' }}>
+                Saya sendiri aktif di UKM Robotik. Di sana saya belajar banyak hal yang tidak diajarkan 
+                di kelas: kerja tim di bawah tekanan, manajemen proyek, dan problem-solving. Pengalaman 
+                mengikuti kontes robotika nasional adalah salah satu pencapaian terbesar saya selama kuliah.
+              </p>
+            </section>
+            
+            <section 
+              id="tantangan"
+              ref={el => sectionRefs.current.tantangan = el}
+              style={{ scrollMarginTop: '100px', marginBottom: '3em' }}
+            >
+              <h3 style={{
+                fontSize: isMobile ? '1.3rem' : '1.5rem',
+                fontWeight: 'normal',
+                color: 'white',
+                marginBottom: '20px',
+              }}>
+                Tantangan & Hambatan
+              </h3>
+              <p style={{ marginBottom: '1.5em' }}>
+                Tidak selalu mulus. Ada kalanya saya merasa lelah, stres, bahkan ingin menyerah. 
+                Tugas yang menumpuk, praktikum yang gagal, nilai yang tidak memuaskan, semua itu 
+                adalah bagian dari proses pendewasaan.
+              </p>
+              <p style={{ marginBottom: '1.5em' }}>
+                Tantangan terbesar adalah membagi waktu antara kuliah, organisasi, dan kehidupan pribadi. 
+                Seringkali saya harus begadang demi menyelesaikan semua tanggungan. Tapi justru dari 
+                situ saya belajar tentang prioritas dan manajemen waktu.
+              </p>
+            </section>
+            
+            <section 
+              id="kesan"
+              ref={el => sectionRefs.current.kesan = el}
+              style={{ scrollMarginTop: '100px', marginBottom: '3em' }}
+            >
+              <h3 style={{
+                fontSize: isMobile ? '1.3rem' : '1.5rem',
+                fontWeight: 'normal',
+                color: 'white',
+                marginBottom: '20px',
+              }}>
+                Kesan & Pesan
+              </h3>
+              <p style={{ marginBottom: '1.5em' }}>
+                Universitas Gunadarma bukan sekadar tempat saya mengejar gelar sarjana. 
+                Ini adalah rumah kedua yang membentuk saya menjadi pribadi yang lebih baik. 
+                Di sini saya belajar bahwa kesuksesan bukan tentang seberapa cepat kita lulus, 
+                tapi seberapa banyak ilmu dan pengalaman yang kita dapatkan.
+              </p>
+              <p style={{ marginBottom: '1.5em' }}>
+                Pesan saya untuk adik-adik yang akan berkuliah di Gunadarma: nikmati setiap prosesnya. 
+                Jangan terlalu fokus pada nilai, tapi kejarlah ilmu dan pengalaman. Aktiflah di organisasi, 
+                perbanyak relasi, dan jangan takut gagal.
+              </p>
+            </section>
+            
+            <section 
+              id="penutup"
+              ref={el => sectionRefs.current.penutup = el}
+              style={{ scrollMarginTop: '100px', marginBottom: '3em' }}
+            >
+              <h3 style={{
+                fontSize: isMobile ? '1.3rem' : '1.5rem',
+                fontWeight: 'normal',
+                color: 'white',
+                marginBottom: '20px',
+              }}>
+                Penutup
+              </h3>
+              <p style={{ marginBottom: '1.5em' }}>
+                Kuliah di Gunadarma adalah perjalanan yang penuh warna. Setiap suka dan duka, 
+                setiap tawa dan tangis, setiap keberhasilan dan kegagalan, semuanya membentuk 
+                saya menjadi pribadi yang lebih kuat dan siap menghadapi dunia.
+              </p>
+              <p style={{ marginBottom: '1.5em' }}>
+                Terima kasih Gunadarma, terima kasih para dosen, dan terima kasih teman-teman. 
+                Kalian adalah bagian terindah dalam perjalanan hidup saya.
+              </p>
+            </section>
           </div>
 
           {/* ===== EMOTICON REACTIONS - BESAR ===== */}
