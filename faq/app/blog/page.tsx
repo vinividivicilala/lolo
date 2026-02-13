@@ -592,10 +592,76 @@ export default function BlogPage() {
       padding: isMobile ? '20px' : '40px',
     }}>
       
-      {/* HEADER - HALAMAN UTAMA & USER */}
+      {/* ===== BANNER DEVELOPMENT - DITAMBAHKAN ===== */}
+      <motion.div
+        initial={{ y: -100, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.5, delay: 0.2 }}
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          zIndex: 9999,
+          backgroundColor: '#FF6B00',
+          color: 'white',
+          padding: '12px 20px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '12px',
+          borderBottom: '2px solid rgba(255,255,255,0.2)',
+          backdropFilter: 'blur(8px)',
+          flexWrap: 'wrap',
+        }}
+      >
+        <motion.div
+          animate={{ 
+            rotate: [0, 10, -10, 10, 0],
+          }}
+          transition={{ 
+            duration: 2,
+            repeat: Infinity,
+            repeatDelay: 3
+          }}
+          style={{
+            fontSize: isMobile ? '1.2rem' : '1.5rem',
+            display: 'flex',
+            alignItems: 'center',
+          }}
+        >
+          🚧
+        </motion.div>
+        <span style={{
+          fontSize: isMobile ? '0.9rem' : '1.1rem',
+          fontWeight: '500',
+          textAlign: 'center',
+        }}>
+          Halaman ini sedang dalam pengembangan, konten blog tidak 100% benar
+        </span>
+        <motion.div
+          animate={{ 
+            rotate: [0, 10, -10, 10, 0],
+          }}
+          transition={{ 
+            duration: 2,
+            repeat: Infinity,
+            repeatDelay: 3
+          }}
+          style={{
+            fontSize: isMobile ? '1.2rem' : '1.5rem',
+            display: 'flex',
+            alignItems: 'center',
+          }}
+        >
+          🚧
+        </motion.div>
+      </motion.div>
+
+      {/* HEADER - HALAMAN UTAMA & USER (dengan padding-top untuk banner) */}
       <div style={{
         position: 'fixed',
-        top: isMobile ? '20px' : '40px',
+        top: isMobile ? '70px' : '80px', // Dinaikkan karena ada banner
         right: isMobile ? '20px' : '40px',
         zIndex: 100,
         display: 'flex',
@@ -702,23 +768,23 @@ export default function BlogPage() {
         </Link>
       </div>
 
-      {/* LAYOUT 2 KOLOM */}
+      {/* LAYOUT 2 KOLOM (dengan padding-top untuk banner) */}
       <div style={{
         display: 'flex',
         flexDirection: isMobile ? 'column' : 'row',
         gap: '60px',
         maxWidth: '1200px',
         margin: '0 auto',
-        padding: isMobile ? '100px 0 40px' : '120px 0 60px',
+        padding: isMobile ? '120px 0 40px' : '150px 0 60px', // Dinaikkan karena ada banner
       }}>
         
         {/* SIDEBAR KIRI - RANGKUMAN */}
         <div style={{
           flex: isMobile ? '1' : '0 0 280px',
           position: isMobile ? 'relative' : 'sticky',
-          top: isMobile ? 'auto' : '100px',
+          top: isMobile ? 'auto' : '130px', // Dinaikkan karena ada banner
           alignSelf: 'flex-start',
-          height: isMobile ? 'auto' : 'calc(100vh - 150px)',
+          height: isMobile ? 'auto' : 'calc(100vh - 180px)',
           overflowY: isMobile ? 'visible' : 'auto',
           paddingRight: '20px',
         }}>
@@ -839,7 +905,7 @@ export default function BlogPage() {
             <section 
               id="pendahuluan"
               ref={el => sectionRefs.current.pendahuluan = el}
-              style={{ scrollMarginTop: '100px', marginBottom: '3em' }}
+              style={{ scrollMarginTop: '130px', marginBottom: '3em' }}
             >
               <h3 style={{
                 fontSize: isMobile ? '1.3rem' : '1.5rem',
@@ -865,7 +931,7 @@ export default function BlogPage() {
             <section 
               id="sejarah"
               ref={el => sectionRefs.current.sejarah = el}
-              style={{ scrollMarginTop: '100px', marginBottom: '3em' }}
+              style={{ scrollMarginTop: '130px', marginBottom: '3em' }}
             >
               <h3 style={{
                 fontSize: isMobile ? '1.3rem' : '1.5rem',
@@ -890,7 +956,7 @@ export default function BlogPage() {
             <section 
               id="suasana"
               ref={el => sectionRefs.current.suasana = el}
-              style={{ scrollMarginTop: '100px', marginBottom: '3em' }}
+              style={{ scrollMarginTop: '130px', marginBottom: '3em' }}
             >
               <h3 style={{
                 fontSize: isMobile ? '1.3rem' : '1.5rem',
@@ -915,7 +981,7 @@ export default function BlogPage() {
             <section 
               id="akademik"
               ref={el => sectionRefs.current.akademik = el}
-              style={{ scrollMarginTop: '100px', marginBottom: '3em' }}
+              style={{ scrollMarginTop: '130px', marginBottom: '3em' }}
             >
               <h3 style={{
                 fontSize: isMobile ? '1.3rem' : '1.5rem',
@@ -941,7 +1007,7 @@ export default function BlogPage() {
             <section 
               id="dosen"
               ref={el => sectionRefs.current.dosen = el}
-              style={{ scrollMarginTop: '100px', marginBottom: '3em' }}
+              style={{ scrollMarginTop: '130px', marginBottom: '3em' }}
             >
               <h3 style={{
                 fontSize: isMobile ? '1.3rem' : '1.5rem',
@@ -967,7 +1033,7 @@ export default function BlogPage() {
             <section 
               id="teman"
               ref={el => sectionRefs.current.teman = el}
-              style={{ scrollMarginTop: '100px', marginBottom: '3em' }}
+              style={{ scrollMarginTop: '130px', marginBottom: '3em' }}
             >
               <h3 style={{
                 fontSize: isMobile ? '1.3rem' : '1.5rem',
@@ -992,7 +1058,7 @@ export default function BlogPage() {
             <section 
               id="fasilitas"
               ref={el => sectionRefs.current.fasilitas = el}
-              style={{ scrollMarginTop: '100px', marginBottom: '3em' }}
+              style={{ scrollMarginTop: '130px', marginBottom: '3em' }}
             >
               <h3 style={{
                 fontSize: isMobile ? '1.3rem' : '1.5rem',
@@ -1017,7 +1083,7 @@ export default function BlogPage() {
             <section 
               id="organisasi"
               ref={el => sectionRefs.current.organisasi = el}
-              style={{ scrollMarginTop: '100px', marginBottom: '3em' }}
+              style={{ scrollMarginTop: '130px', marginBottom: '3em' }}
             >
               <h3 style={{
                 fontSize: isMobile ? '1.3rem' : '1.5rem',
@@ -1042,7 +1108,7 @@ export default function BlogPage() {
             <section 
               id="tantangan"
               ref={el => sectionRefs.current.tantangan = el}
-              style={{ scrollMarginTop: '100px', marginBottom: '3em' }}
+              style={{ scrollMarginTop: '130px', marginBottom: '3em' }}
             >
               <h3 style={{
                 fontSize: isMobile ? '1.3rem' : '1.5rem',
@@ -1067,7 +1133,7 @@ export default function BlogPage() {
             <section 
               id="kesan"
               ref={el => sectionRefs.current.kesan = el}
-              style={{ scrollMarginTop: '100px', marginBottom: '3em' }}
+              style={{ scrollMarginTop: '130px', marginBottom: '3em' }}
             >
               <h3 style={{
                 fontSize: isMobile ? '1.3rem' : '1.5rem',
@@ -1093,7 +1159,7 @@ export default function BlogPage() {
             <section 
               id="penutup"
               ref={el => sectionRefs.current.penutup = el}
-              style={{ scrollMarginTop: '100px', marginBottom: '3em' }}
+              style={{ scrollMarginTop: '130px', marginBottom: '3em' }}
             >
               <h3 style={{
                 fontSize: isMobile ? '1.3rem' : '1.5rem',
