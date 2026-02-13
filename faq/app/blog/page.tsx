@@ -21,6 +21,25 @@ export default function BlogPage() {
     return () => window.removeEventListener('resize', checkScreenSize);
   }, []);
 
+  // SVG Arrow Component - SOUTH WEST ARROW
+  const SouthWestArrow = ({ width, height, style }: { width: number | string, height: number | string, style?: React.CSSProperties }) => (
+    <svg 
+      width={width} 
+      height={height} 
+      viewBox="0 0 24 24" 
+      fill="none"
+      stroke="white"
+      strokeWidth="1"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      style={style}
+    >
+      <path d="M17 7L7 17" stroke="white"/>
+      <path d="M17 7H7" stroke="white"/>
+      <path d="M17 7V17" stroke="white"/>
+    </svg>
+  );
+
   if (!isMounted) {
     return (
       <div style={{
@@ -46,26 +65,30 @@ export default function BlogPage() {
       padding: isMobile ? '20px' : '40px',
     }}>
       
-      {/* Halaman Utama - Pojok Kanan Atas */}
+      {/* Halaman Utama - Pojok Kanan Atas - BESAR DENGAN SVG SOUTH WEST ARROW */}
       <div style={{
         position: 'absolute',
-        top: isMobile ? '20px' : '40px',
-        right: isMobile ? '20px' : '40px',
+        top: isMobile ? '30px' : '60px',
+        right: isMobile ? '30px' : '60px',
         zIndex: 100,
       }}>
         <Link href="/" style={{
           display: 'flex',
           alignItems: 'center',
-          gap: '10px',
+          gap: '20px',
           textDecoration: 'none',
           color: 'white',
         }}>
           <span style={{
-            fontSize: isMobile ? '0.9rem' : '1rem',
+            fontSize: isMobile ? '2rem' : '3rem',
             fontWeight: 'normal',
           }}>
             Halaman Utama
           </span>
+          <SouthWestArrow 
+            width={isMobile ? 50 : 80} 
+            height={isMobile ? 50 : 80} 
+          />
         </Link>
       </div>
 
@@ -73,38 +96,23 @@ export default function BlogPage() {
       <div style={{
         maxWidth: '800px',
         margin: '0 auto',
-        padding: isMobile ? '80px 0 40px' : '100px 0 60px',
+        padding: isMobile ? '100px 0 40px' : '150px 0 60px',
       }}>
         
         {/* Judul Blog */}
         <h1 style={{
-          fontSize: isMobile ? '2rem' : '2.5rem',
+          fontSize: isMobile ? '2.5rem' : '3.5rem',
           fontWeight: 'normal',
           color: 'white',
-          marginBottom: '20px',
-          lineHeight: '1.3',
+          marginBottom: '40px',
+          lineHeight: '1.2',
         }}>
           Bagaimana Rasa nya Masuk Kuliah Di Universitas Gunadarma
         </h1>
-        
-        {/* Meta Info */}
-        <div style={{
-          display: 'flex',
-          gap: '20px',
-          marginBottom: '40px',
-          color: '#999999',
-          fontSize: isMobile ? '0.8rem' : '0.9rem',
-          borderBottom: '1px solid #333333',
-          paddingBottom: '20px',
-        }}>
-          <span>Admin</span>
-          <span>13 Februari 2026</span>
-          <span>8 menit membaca</span>
-        </div>
 
-        {/* Konten Blog */}
+        {/* Konten Blog - Tanpa Meta Info */}
         <div style={{
-          fontSize: isMobile ? '1rem' : '1.1rem',
+          fontSize: isMobile ? '1.1rem' : '1.2rem',
           lineHeight: '1.8',
           color: '#e0e0e0',
         }}>
@@ -183,31 +191,14 @@ export default function BlogPage() {
             perbanyak relasi, dan jangan takut gagal.
           </p>
           
-          <div style={{
-            marginTop: '3em',
-            paddingTop: '2em',
-            borderTop: '1px solid #333333',
-            fontStyle: 'italic',
-            color: '#cccccc',
-          }}>
-            <p style={{ marginBottom: '0.5em' }}>
-              "Kuliah di Gunadarma rasanya seperti memasak. Kadang gosong, kadang terlalu asin, 
-              tapi pada akhirnya kita akan menghasilkan hidangan yang layak disajikan. 
-              Prosesnya tidak mudah, tapi hasilnya sepadan dengan usaha."
-            </p>
-            <p style={{ textAlign: 'right' }}>
-              — Alumni Universitas Gunadarma, 2026
-            </p>
-          </div>
-          
         </div>
         
-        {/* Footer */}
+        {/* Footer - Tanpa Quote, Hanya Copyright */}
         <div style={{
           marginTop: '60px',
           paddingTop: '20px',
           borderTop: '1px solid #333333',
-          fontSize: isMobile ? '0.8rem' : '0.9rem',
+          fontSize: isMobile ? '0.9rem' : '1rem',
           color: '#666666',
           textAlign: 'center',
         }}>
