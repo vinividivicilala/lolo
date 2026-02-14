@@ -947,6 +947,25 @@ export default function BlogPage() {
     </svg>
   );
 
+  // ===== NORTH WEST ARROW UNTUK TEKS BERJALAN =====
+  const NorthWestArrow = ({ width, height, style }: { width: number | string, height: number | string, style?: React.CSSProperties }) => (
+    <svg 
+      width={width} 
+      height={height} 
+      viewBox="0 0 24 24" 
+      fill="none"
+      stroke="white"
+      strokeWidth="1"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      style={style}
+    >
+      <path d="M17 17L7 7" stroke="white"/>
+      <path d="M17 7H7" stroke="white"/>
+      <path d="M7 17V7" stroke="white"/>
+    </svg>
+  );
+
   const CalendarIcon = ({ width, height }: { width: number, height: number }) => (
     <svg width={width} height={height} viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1">
       <rect x="3" y="4" width="18" height="18" rx="2" ry="2" stroke="white"/>
@@ -1099,7 +1118,7 @@ export default function BlogPage() {
       padding: isMobile ? '20px' : '40px',
     }}>
       
-      {/* ===== TEKS BERJALAN ===== */}
+      {/* ===== TEKS BERJALAN - SEMUA KAPITAL DENGAN NORTH WEST ARROW ===== */}
       <div style={{
         position: 'fixed',
         top: 0,
@@ -1113,32 +1132,45 @@ export default function BlogPage() {
         backdropFilter: 'blur(8px)',
         overflow: 'hidden',
         whiteSpace: 'nowrap',
+        width: '100vw', // Pastikan lebar penuh
       }}>
         <motion.div
           animate={{
-            x: [0, -1000]
+            x: [0, -2000] // Geser lebih jauh untuk animasi tanpa putus
           }}
           transition={{
-            duration: 20,
+            duration: 25, // Durasi lebih lama agar lebih halus
             repeat: Infinity,
             ease: "linear",
             repeatType: "loop"
           }}
           style={{
-            display: 'inline-block',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '40px', // Jarak antar elemen
             fontSize: isMobile ? '1rem' : '1.2rem',
-            fontWeight: 'normal',
+            fontWeight: 'bold',
+            letterSpacing: '1px',
             paddingLeft: '20px',
           }}
         >
-          Note adalah teman terbaik mu &nbsp;&nbsp;&nbsp; • &nbsp;&nbsp;&nbsp; 
-          Note adalah teman terbaik mu &nbsp;&nbsp;&nbsp; • &nbsp;&nbsp;&nbsp; 
-          Note adalah teman terbaik mu &nbsp;&nbsp;&nbsp; • &nbsp;&nbsp;&nbsp; 
-          Note adalah teman terbaik mu &nbsp;&nbsp;&nbsp; • &nbsp;&nbsp;&nbsp; 
-          Note adalah teman terbaik mu &nbsp;&nbsp;&nbsp; • &nbsp;&nbsp;&nbsp; 
-          Note adalah teman terbaik mu &nbsp;&nbsp;&nbsp; • &nbsp;&nbsp;&nbsp; 
-          Note adalah teman terbaik mu &nbsp;&nbsp;&nbsp; • &nbsp;&nbsp;&nbsp; 
-          Note adalah teman terbaik mu &nbsp;&nbsp;&nbsp; • &nbsp;&nbsp;&nbsp; 
+          {/* Elemen teks berjalan dengan arrow di awal dan akhir */}
+          <NorthWestArrow width={24} height={24} />
+          <span>NOTE ADALAH TEMAN TERBAIK MU</span>
+          <NorthWestArrow width={24} height={24} />
+          <span>NOTE ADALAH TEMAN TERBAIK MU</span>
+          <NorthWestArrow width={24} height={24} />
+          <span>NOTE ADALAH TEMAN TERBAIK MU</span>
+          <NorthWestArrow width={24} height={24} />
+          <span>NOTE ADALAH TEMAN TERBAIK MU</span>
+          <NorthWestArrow width={24} height={24} />
+          <span>NOTE ADALAH TEMAN TERBAIK MU</span>
+          <NorthWestArrow width={24} height={24} />
+          <span>NOTE ADALAH TEMAN TERBAIK MU</span>
+          <NorthWestArrow width={24} height={24} />
+          <span>NOTE ADALAH TEMAN TERBAIK MU</span>
+          <NorthWestArrow width={24} height={24} />
+          <span>NOTE ADALAH TEMAN TERBAIK MU</span>
         </motion.div>
       </div>
 
