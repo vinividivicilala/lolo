@@ -14,9 +14,8 @@ const BLOG_POSTS = [
     slug: 'gunadarma',
     excerpt: 'Pengalaman pribadi menjalani perkuliahan di Universitas Gunadarma, dari akademik hingga organisasi.',
     tags: ['kuliah', 'gunadarma'],
-    date: '2024-01-15',
+    date: '2024-02-13',
     readTime: 8,
-    isNew: true // Menandai artikel baru
   },
   {
     id: 'memilih-jurusan',
@@ -24,9 +23,8 @@ const BLOG_POSTS = [
     slug: 'memilih-jurusan',
     excerpt: 'Alasan di balik keputusan memilih program studi yang tepat.',
     tags: ['jurusan', 'kuliah', 'karir'],
-    date: '2024-01-10',
-    readTime: 5,
-    isNew: true // Menandai artikel baru
+    date: '2024-02-13',
+    readTime: 10,
   },
   {
     id: 'tips-belajar-coding',
@@ -36,7 +34,6 @@ const BLOG_POSTS = [
     tags: ['it', 'kuliah', 'karir'],
     date: '2024-01-05',
     readTime: 6,
-    isNew: false
   },
   {
     id: 'prospek-karir-it',
@@ -46,7 +43,6 @@ const BLOG_POSTS = [
     tags: ['it', 'karir'],
     date: '2023-12-28',
     readTime: 7,
-    isNew: false
   },
   {
     id: 'tips-memilih-jurusan',
@@ -56,7 +52,6 @@ const BLOG_POSTS = [
     tags: ['jurusan', 'kuliah'],
     date: '2023-12-20',
     readTime: 6,
-    isNew: false
   },
   {
     id: 'pengalaman-magang',
@@ -66,7 +61,6 @@ const BLOG_POSTS = [
     tags: ['it', 'karir', 'kuliah'],
     date: '2023-12-15',
     readTime: 5,
-    isNew: false
   }
 ];
 
@@ -96,7 +90,7 @@ const TAG_INFO: { [key: string]: { name: string, description: string } } = {
 
 // Icons
 const CalendarIcon = ({ width, height }: { width: number, height: number }) => (
-  <svg width={width} height={height} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1">
+  <svg width={width} height={height} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
     <rect x="3" y="4" width="18" height="18" rx="2" ry="2" stroke="currentColor"/>
     <line x1="16" y1="2" x2="16" y2="6" stroke="currentColor"/>
     <line x1="8" y1="2" x2="8" y2="6" stroke="currentColor"/>
@@ -105,7 +99,7 @@ const CalendarIcon = ({ width, height }: { width: number, height: number }) => (
 );
 
 const ClockIcon = ({ width, height }: { width: number, height: number }) => (
-  <svg width={width} height={height} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1">
+  <svg width={width} height={height} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
     <circle cx="12" cy="12" r="10" stroke="currentColor"/>
     <polyline points="12 6 12 12 16 14" stroke="currentColor"/>
   </svg>
@@ -136,7 +130,7 @@ const NorthWestArrow = ({ width, height }: { width: number | string, height: num
   </svg>
 );
 
-// North East Arrow SVG (untuk setiap blog)
+// North East Arrow SVG
 const NorthEastArrow = ({ width, height }: { width: number | string, height: number | string }) => (
   <svg 
     width={width} 
@@ -153,67 +147,6 @@ const NorthEastArrow = ({ width, height }: { width: number | string, height: num
     <path d="M7 17V7" stroke="white"/>
   </svg>
 );
-
-// Komponen Titik Berkedip (Radar/LED)
-const BlinkingDot = () => {
-  const dotRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (dotRef.current) {
-      // Animasi titik berkedip dengan efek radar/pemancar
-      gsap.to(dotRef.current, {
-        scale: 1.5,
-        opacity: 0,
-        duration: 1.5,
-        repeat: -1,
-        ease: "power1.inOut"
-      });
-
-      // Animasi titik inti
-      gsap.to(dotRef.current, {
-        boxShadow: '0 0 20px #ef4444',
-        duration: 1,
-        repeat: -1,
-        yoyo: true,
-        ease: "sine.inOut"
-      });
-    }
-  }, []);
-
-  return (
-    <div style={{ position: 'relative', width: 16, height: 16 }}>
-      {/* Lingkaran efek radar */}
-      <div
-        ref={dotRef}
-        style={{
-          position: 'absolute',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          width: 16,
-          height: 16,
-          borderRadius: '50%',
-          backgroundColor: '#ef4444',
-          opacity: 0.7,
-        }}
-      />
-      {/* Titik inti */}
-      <div
-        style={{
-          position: 'absolute',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          width: 8,
-          height: 8,
-          borderRadius: '50%',
-          backgroundColor: '#ef4444',
-          boxShadow: '0 0 10px #ef4444',
-        }}
-      />
-    </div>
-  );
-};
 
 export default function TagPage() {
   const router = useRouter();
@@ -238,7 +171,6 @@ export default function TagPage() {
   useEffect(() => {
     if (!isMounted) return;
 
-    // Banner animation
     if (bannerRef.current) {
       gsap.fromTo(bannerRef.current,
         { y: -100, opacity: 0 },
@@ -246,9 +178,7 @@ export default function TagPage() {
       );
     }
 
-    // Emoji animations
     if (emoji1Ref.current && emoji2Ref.current) {
-      // Create timeline for emojis
       const tl = gsap.timeline({ repeat: -1, repeatDelay: 3 });
       
       tl.to([emoji1Ref.current, emoji2Ref.current], {
@@ -273,7 +203,6 @@ export default function TagPage() {
       });
     }
 
-    // Header animation
     if (headerRef.current) {
       gsap.fromTo(headerRef.current,
         { x: 20, opacity: 0 },
@@ -304,7 +233,7 @@ export default function TagPage() {
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
-        fontFamily: 'Helvetica, Arial, sans-serif',
+        fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
       }}>
         <div style={{ color: 'white', fontSize: '1rem' }}>Loading...</div>
       </div>
@@ -320,7 +249,7 @@ export default function TagPage() {
         flexDirection: 'column',
         justifyContent: 'center',
         alignItems: 'center',
-        fontFamily: 'Helvetica, Arial, sans-serif',
+        fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
         padding: '20px',
         textAlign: 'center',
       }}>
@@ -350,13 +279,13 @@ export default function TagPage() {
     <div style={{
       minHeight: '100vh',
       backgroundColor: '#000000',
-      fontFamily: 'Helvetica, Arial, sans-serif',
+      fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
       color: 'white',
       position: 'relative',
       padding: isMobile ? '20px' : '40px',
     }}>
       
-      {/* ===== BANNER DEVELOPMENT dengan GSAP ===== */}
+      {/* BANNER DEVELOPMENT */}
       <div
         ref={bannerRef}
         style={{
@@ -473,41 +402,40 @@ export default function TagPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
           style={{
-            marginBottom: '50px',
+            marginBottom: '60px',
           }}
         >
           <div style={{
             display: 'inline-flex',
             alignItems: 'center',
-            gap: '10px',
-            padding: '8px 24px',
-            backgroundColor: '#222222',
-            border: '1px solid #444444',
-            borderRadius: '40px',
+            gap: '12px',
             marginBottom: '20px',
           }}>
-            <TagIcon width={20} height={20} />
+            <TagIcon width={24} height={24} />
             <span style={{
-              fontSize: isMobile ? '1.5rem' : '2rem',
+              fontSize: isMobile ? '1.8rem' : '2.5rem',
               color: 'white',
+              fontWeight: '400',
+              letterSpacing: '-0.02em',
             }}>
               #{currentTag.name}
             </span>
           </div>
           
           <p style={{
-            fontSize: isMobile ? '1rem' : '1.1rem',
+            fontSize: isMobile ? '1.1rem' : '1.25rem',
             color: '#999999',
             maxWidth: '600px',
             lineHeight: '1.6',
+            marginBottom: '12px',
           }}>
             {currentTag.description}
           </p>
           
           <div style={{
-            marginTop: '15px',
             color: '#666666',
             fontSize: '1rem',
+            fontWeight: '400',
           }}>
             {filteredPosts.length} artikel tersedia
           </div>
@@ -518,7 +446,7 @@ export default function TagPage() {
           <div style={{
             display: 'flex',
             flexDirection: 'column',
-            gap: '30px',
+            gap: '20px',
           }}>
             {filteredPosts.map((post, index) => (
               <motion.div
@@ -532,60 +460,21 @@ export default function TagPage() {
                   style={{ textDecoration: 'none' }}
                 >
                   <div style={{
-                    padding: '30px',
-                    backgroundColor: 'rgba(255,255,255,0.02)',
-                    borderRadius: '24px',
-                    border: '1px solid rgba(255,255,255,0.05)',
-                    transition: 'all 0.3s ease',
+                    padding: '32px',
+                    backgroundColor: 'transparent',
+                    borderRadius: '0',
+                    borderBottom: '1px solid rgba(255,255,255,0.1)',
+                    transition: 'all 0.2s ease',
                     cursor: 'pointer',
                     position: 'relative',
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.05)';
-                    e.currentTarget.style.borderColor = 'rgba(255,255,255,0.2)';
-                    e.currentTarget.style.transform = 'translateY(-4px)';
+                    e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.02)';
                   }}
                   onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.02)';
-                    e.currentTarget.style.borderColor = 'rgba(255,255,255,0.05)';
-                    e.currentTarget.style.transform = 'translateY(0)';
+                    e.currentTarget.style.backgroundColor = 'transparent';
                   }}
                   >
-                    {/* New Indicator untuk 2 judul blog pertama */}
-                    {index < 2 && (
-                      <>
-                        {/* Titik Berkedip */}
-                        <div style={{
-                          position: 'absolute',
-                          top: '30px',
-                          left: '-8px',
-                          zIndex: 10,
-                        }}>
-                          <BlinkingDot />
-                        </div>
-                        
-                        {/* Blok Warna Stabilo "NEW" */}
-                        <div style={{
-                          position: 'absolute',
-                          top: '20px',
-                          left: '20px',
-                          backgroundColor: '#ef4444',
-                          color: 'white',
-                          padding: '4px 12px',
-                          borderRadius: '20px',
-                          fontSize: '0.8rem',
-                          fontWeight: 'bold',
-                          textTransform: 'uppercase',
-                          letterSpacing: '1px',
-                          boxShadow: '0 2px 10px rgba(239,68,68,0.5)',
-                          zIndex: 5,
-                        }}>
-                          NEW
-                        </div>
-                      </>
-                    )}
-
-                    {/* Konten Artikel */}
                     <div style={{
                       display: 'flex',
                       justifyContent: 'space-between',
@@ -596,10 +485,12 @@ export default function TagPage() {
                         flex: 1,
                       }}>
                         <h2 style={{
-                          fontSize: isMobile ? '1.6rem' : '2rem',
-                          fontWeight: 'normal',
+                          fontSize: isMobile ? '1.8rem' : '2.2rem',
+                          fontWeight: '400',
                           color: 'white',
-                          margin: index < 2 ? '30px 0 15px 0' : '0 0 15px 0',
+                          margin: '0 0 16px 0',
+                          letterSpacing: '-0.02em',
+                          lineHeight: '1.2',
                         }}>
                           {post.title}
                         </h2>
@@ -609,73 +500,33 @@ export default function TagPage() {
                           color: '#999999',
                           marginBottom: '20px',
                           lineHeight: '1.6',
+                          fontWeight: '400',
                         }}>
                           {post.excerpt}
                         </p>
                         
                         <div style={{
                           display: 'flex',
-                          flexWrap: 'wrap',
-                          gap: '10px',
-                          marginBottom: '20px',
-                        }}>
-                          {post.tags.map(tag => (
-                            <span
-                              key={tag}
-                              onClick={(e) => {
-                                e.preventDefault();
-                                router.push(`/tag/${tag}`);
-                              }}
-                              style={{
-                                padding: '4px 12px',
-                                backgroundColor: '#222222',
-                                border: '1px solid #444444',
-                                borderRadius: '20px',
-                                color: '#cccccc',
-                                fontSize: '0.85rem',
-                                cursor: 'pointer',
-                                transition: 'all 0.2s ease',
-                              }}
-                              onMouseEnter={(e) => {
-                                e.currentTarget.style.backgroundColor = '#333333';
-                                e.currentTarget.style.borderColor = '#666666';
-                              }}
-                              onMouseLeave={(e) => {
-                                e.currentTarget.style.backgroundColor = '#222222';
-                                e.currentTarget.style.borderColor = '#444444';
-                              }}
-                            >
-                              #{tag}
-                            </span>
-                          ))}
-                        </div>
-                        
-                        <div style={{
-                          display: 'flex',
                           alignItems: 'center',
-                          gap: '20px',
+                          gap: '24px',
                           color: '#666666',
-                          fontSize: '0.9rem',
+                          fontSize: '1rem',
                         }}>
                           <div style={{
                             display: 'flex',
                             alignItems: 'center',
-                            gap: '6px',
+                            gap: '8px',
                           }}>
-                            <CalendarIcon width={16} height={16} />
-                            <span>{new Date(post.date).toLocaleDateString('id-ID', {
-                              day: 'numeric',
-                              month: 'long',
-                              year: 'numeric'
-                            })}</span>
+                            <CalendarIcon width={18} height={18} />
+                            <span>13 Feb 2024</span>
                           </div>
                           <div style={{
                             display: 'flex',
                             alignItems: 'center',
-                            gap: '6px',
+                            gap: '8px',
                           }}>
-                            <ClockIcon width={16} height={16} />
-                            <span>{post.readTime} menit membaca</span>
+                            <ClockIcon width={18} height={18} />
+                            <span>{post.readTime} menit</span>
                           </div>
                         </div>
                       </div>
@@ -689,6 +540,7 @@ export default function TagPage() {
                           alignItems: 'center',
                           justifyContent: 'center',
                           minWidth: isMobile ? 40 : 50,
+                          opacity: 0.7,
                         }}
                       >
                         <NorthEastArrow 
@@ -711,11 +563,11 @@ export default function TagPage() {
               textAlign: 'center',
               color: '#666666',
               border: '1px dashed #333333',
-              borderRadius: '24px',
+              borderRadius: '0',
             }}
           >
             <span style={{ fontSize: '3rem', display: 'block', marginBottom: '20px' }}>🏷️</span>
-            <p style={{ fontSize: '1.2rem', margin: 0 }}>Belum ada artikel dengan tag ini.</p>
+            <p style={{ fontSize: '1.2rem', margin: 0 }}>Coming Soon</p>
           </motion.div>
         )}
 
@@ -733,9 +585,10 @@ export default function TagPage() {
           >
             <h3 style={{
               fontSize: '1.3rem',
-              fontWeight: 'normal',
+              fontWeight: '400',
               color: 'white',
               marginBottom: '20px',
+              letterSpacing: '-0.01em',
             }}>
               Tags Lainnya
             </h3>
@@ -756,12 +609,21 @@ export default function TagPage() {
                     style={{
                       display: 'inline-block',
                       padding: '8px 20px',
-                      backgroundColor: '#222222',
-                      border: '1px solid #444444',
-                      borderRadius: '30px',
+                      backgroundColor: 'transparent',
+                      border: '1px solid #333333',
+                      borderRadius: '0',
                       color: '#cccccc',
                       fontSize: '0.95rem',
                       cursor: 'pointer',
+                      transition: 'all 0.2s ease',
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.05)';
+                      e.currentTarget.style.borderColor = '#666666';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = 'transparent';
+                      e.currentTarget.style.borderColor = '#333333';
                     }}
                   >
                     #{TAG_INFO[otherTag].name}
