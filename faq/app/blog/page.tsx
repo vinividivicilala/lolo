@@ -110,6 +110,9 @@ export default function BlogPage() {
     year: 'numeric'
   });
 
+  // Email penulis
+  const authorEmail = "faridardiansyah061@gmail.com";
+
   // ============================================
   // 1. INITIALIZATION FIREBASE
   // ============================================
@@ -423,7 +426,7 @@ export default function BlogPage() {
       setMessages(messagesData);
       
       // Hitung pesan yang belum dibaca (jika user adalah penulis)
-      if (user && user.email === "farid.ardiansyah@gunadarma.ac.id") {
+      if (user && user.email === authorEmail) {
         const unread = messagesData.filter((msg: any) => !msg.isRead).length;
         setUnreadCount(unread);
       }
@@ -785,7 +788,7 @@ export default function BlogPage() {
   // 23. HANDLE REPLY TO MESSAGE (UNTUK PENULIS)
   // ============================================
   const handleReplyToMessage = async (messageId: string) => {
-    if (!user || user.email !== "farid.ardiansyah@gunadarma.ac.id") return;
+    if (!user || user.email !== authorEmail) return;
     if (!firebaseDb || !replyMessage.trim()) return;
 
     try {
@@ -798,7 +801,7 @@ export default function BlogPage() {
         id: `${Date.now()}_${user.uid}`,
         userId: user.uid,
         userName: user.displayName || "Farid Ardiansyah",
-        userPhoto: user.photoURL || `https://ui-avatars.com/api/?name=Farid+Ardiansyah&background=FF6B00&color=fff`,
+        userPhoto: user.photoURL || `https://ui-avatars.com/api/?name=Farid+Ardiansyah&background=random&color=fff`,
         text: replyMessage,
         createdAt: Timestamp.now()
       };
@@ -823,7 +826,7 @@ export default function BlogPage() {
   // 24. HANDLE MARK AS READ (UNTUK PENULIS)
   // ============================================
   const handleMarkAsRead = async (messageId: string) => {
-    if (!user || user.email !== "farid.ardiansyah@gunadarma.ac.id") return;
+    if (!user || user.email !== authorEmail) return;
     if (!firebaseDb) return;
 
     try {
@@ -831,6 +834,8 @@ export default function BlogPage() {
       await updateDoc(messageRef, {
         isRead: true
       });
+      
+      showNotification("Pesan ditandai telah dibaca");
     } catch (error) {
       console.error("Error marking message as read:", error);
     }
@@ -845,12 +850,14 @@ export default function BlogPage() {
     notification.style.position = "fixed";
     notification.style.bottom = "20px";
     notification.style.left = "20px";
-    notification.style.backgroundColor = type === "success" ? "#00CC88" : "#FF4444";
+    notification.style.backgroundColor = "rgba(255,255,255,0.1)";
     notification.style.color = "white";
     notification.style.padding = "12px 24px";
     notification.style.borderRadius = "30px";
     notification.style.fontSize = "0.95rem";
     notification.style.zIndex = "10001";
+    notification.style.border = "1px solid rgba(255,255,255,0.2)";
+    notification.style.backdropFilter = "blur(10px)";
     notification.style.boxShadow = "0 4px 12px rgba(0,0,0,0.3)";
     notification.style.animation = "slideIn 0.3s ease";
     notification.innerText = message;
@@ -966,7 +973,7 @@ export default function BlogPage() {
   );
 
   const SaveIcon = ({ width, height, filled }: { width: number, height: number, filled?: boolean }) => (
-    <svg width={width} height={height} viewBox="0 0 24 24" fill={filled ? "currentColor" : "none"} stroke="currentColor" strokeWidth="1.5">
+    <svg width={width} height={height} viewBox="0 0 24 24" fill={filled ? "white" : "none"} stroke="white" strokeWidth="1.5">
       <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
     </svg>
   );
@@ -1040,7 +1047,7 @@ export default function BlogPage() {
     name: "Farid Ardiansyah",
     role: "Penulis",
     bio: "Manusia Biasa",
-    email: "farid.ardiansyah@gunadarma.ac.id"
+    email: authorEmail
   };
 
   // ============================================
@@ -1171,7 +1178,7 @@ export default function BlogPage() {
             alignItems: 'center',
             gap: '10px',
             background: showMessageModal ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.05)',
-            border: showMessageModal ? '1px solid white' : '1px solid rgba(255,255,255,0.2)',
+            border: '1px solid rgba(255,255,255,0.2)',
             borderRadius: '40px',
             padding: '10px 24px',
             color: 'white',
@@ -1181,29 +1188,26 @@ export default function BlogPage() {
         >
           <MessageIcon width={20} height={20} />
           <span>Pesan ke Penulis</span>
-          {user && user.email === authorBio.email && unreadCount > 0 && (
-            <motion.span
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
+          {user && user.email === authorEmail && unreadCount > 0 && (
+            <span
               style={{
                 position: 'absolute',
                 top: '-5px',
                 right: '-5px',
-                background: '#FF6B00',
+                background: 'rgba(255,255,255,0.2)',
                 color: 'white',
                 fontSize: '0.75rem',
-                fontWeight: 'bold',
                 minWidth: '20px',
                 height: '20px',
                 borderRadius: '10px',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                border: '2px solid #000000',
+                border: '1px solid rgba(255,255,255,0.3)',
               }}
             >
               {unreadCount}
-            </motion.span>
+            </span>
           )}
         </motion.button>
 
@@ -1217,7 +1221,7 @@ export default function BlogPage() {
             alignItems: 'center',
             gap: '12px',
             background: isSaved ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.05)',
-            border: isSaved ? '1px solid white' : '1px solid rgba(255,255,255,0.2)',
+            border: '1px solid rgba(255,255,255,0.2)',
             borderRadius: '40px',
             padding: '10px 24px',
             color: 'white',
@@ -1227,11 +1231,7 @@ export default function BlogPage() {
         >
           <SaveIcon width={20} height={20} filled={isSaved} />
           <span>{isSaved ? 'Tersimpan' : 'Simpan'}</span>
-          <motion.span
-            key={saveCount}
-            initial={{ scale: 0.5, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ type: "spring", stiffness: 500, damping: 30 }}
+          <span
             style={{
               background: 'rgba(255,255,255,0.1)',
               padding: '2px 8px',
@@ -1241,7 +1241,7 @@ export default function BlogPage() {
             }}
           >
             {saveCount}
-          </motion.span>
+          </span>
         </motion.button>
 
         {/* History Button */}
@@ -1288,11 +1288,7 @@ export default function BlogPage() {
         >
           <ShareIcon width={20} height={20} />
           <span>Bagikan</span>
-          <motion.span
-            key={shareCount}
-            initial={{ scale: 0.5, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ type: "spring", stiffness: 500, damping: 30 }}
+          <span
             style={{
               background: 'rgba(255,255,255,0.1)',
               padding: '2px 8px',
@@ -1302,7 +1298,7 @@ export default function BlogPage() {
             }}
           >
             {shareCount}
-          </motion.span>
+          </span>
         </motion.button>
 
         {/* User Info / Login Button */}
@@ -1322,7 +1318,7 @@ export default function BlogPage() {
           >
             <motion.img 
               whileHover={{ scale: 1.1 }}
-              src={user.photoURL || `https://ui-avatars.com/api/?name=${user.email}&background=random`} 
+              src={user.photoURL || `https://ui-avatars.com/api/?name=${user.email}&background=random&color=fff`} 
               alt={user.displayName}
               style={{
                 width: '36px',
@@ -1344,7 +1340,7 @@ export default function BlogPage() {
               onClick={handleLogout}
               style={{
                 background: 'rgba(255,255,255,0.1)',
-                border: 'none',
+                border: '1px solid rgba(255,255,255,0.2)',
                 borderRadius: '30px',
                 padding: '6px 16px',
                 color: 'white',
@@ -1463,7 +1459,7 @@ export default function BlogPage() {
                       margin: '0 0 8px 0',
                     }}
                   >
-                    {user && user.email === authorBio.email ? 'Pesan dari Pembaca' : 'Kirim Pesan ke Penulis'}
+                    {user && user.email === authorEmail ? 'Pesan dari Pembaca' : 'Kirim Pesan ke Penulis'}
                   </motion.h3>
                   <motion.p
                     initial={{ x: -20, opacity: 0 }}
@@ -1475,7 +1471,7 @@ export default function BlogPage() {
                       margin: 0,
                     }}
                   >
-                    {user && user.email === authorBio.email 
+                    {user && user.email === authorEmail 
                       ? `${messages.length} pesan • ${unreadCount} belum dibaca`
                       : 'Tanyakan sesuatu atau berikan masukan untuk penulis'}
                   </motion.p>
@@ -1498,7 +1494,7 @@ export default function BlogPage() {
               </div>
 
               {/* Form Kirim Pesan (untuk pembaca) */}
-              {(!user || user.email !== authorBio.email) && (
+              {(!user || user.email !== authorEmail) && (
                 <motion.form
                   initial={{ y: 20, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
@@ -1541,8 +1537,8 @@ export default function BlogPage() {
                         alignItems: 'center',
                         gap: '10px',
                         padding: '12px 32px',
-                        background: messageLoading || !newMessage.trim() ? '#333333' : '#FF6B00',
-                        border: 'none',
+                        background: messageLoading || !newMessage.trim() ? '#333333' : 'rgba(255,255,255,0.1)',
+                        border: '1px solid rgba(255,255,255,0.2)',
                         borderRadius: '30px',
                         color: messageLoading || !newMessage.trim() ? '#999999' : 'white',
                         fontSize: '1rem',
@@ -1558,7 +1554,7 @@ export default function BlogPage() {
               )}
 
               {/* Daftar Pesan (untuk penulis) */}
-              {user && user.email === authorBio.email && (
+              {user && user.email === authorEmail && (
                 <div style={{
                   display: 'flex',
                   flexDirection: 'column',
@@ -1590,9 +1586,9 @@ export default function BlogPage() {
                         transition={{ delay: index * 0.1 }}
                         style={{
                           padding: '24px',
-                          background: msg.isRead ? 'rgba(255,255,255,0.02)' : 'rgba(255,107,0,0.05)',
+                          background: msg.isRead ? 'rgba(255,255,255,0.02)' : 'rgba(255,255,255,0.05)',
                           borderRadius: '24px',
-                          border: msg.isRead ? '1px solid rgba(255,255,255,0.05)' : '1px solid rgba(255,107,0,0.3)',
+                          border: '1px solid rgba(255,255,255,0.05)',
                         }}
                       >
                         {/* Header Pesan */}
@@ -1653,9 +1649,9 @@ export default function BlogPage() {
                                 gap: '5px',
                                 padding: '6px 12px',
                                 background: 'rgba(255,255,255,0.05)',
-                                border: '1px solid #444444',
+                                border: '1px solid rgba(255,255,255,0.2)',
                                 borderRadius: '20px',
-                                color: '#999999',
+                                color: 'white',
                                 fontSize: '0.85rem',
                                 cursor: 'pointer',
                               }}
@@ -1675,7 +1671,7 @@ export default function BlogPage() {
                           padding: '15px',
                           background: 'rgba(0,0,0,0.2)',
                           borderRadius: '16px',
-                          borderLeft: '3px solid #FF6B00',
+                          borderLeft: '2px solid rgba(255,255,255,0.2)',
                         }}>
                           {msg.message}
                         </p>
@@ -1685,7 +1681,7 @@ export default function BlogPage() {
                           <div style={{
                             marginTop: '15px',
                             paddingLeft: '20px',
-                            borderLeft: '2px solid #FF6B00',
+                            borderLeft: '2px solid rgba(255,255,255,0.2)',
                           }}>
                             {msg.replies.map((reply: any) => (
                               <div key={reply.id} style={{
@@ -1712,7 +1708,7 @@ export default function BlogPage() {
                                   <span style={{
                                     fontSize: '0.9rem',
                                     fontWeight: '500',
-                                    color: '#FF6B00',
+                                    color: 'white',
                                   }}>
                                     {reply.userName}
                                   </span>
@@ -1776,7 +1772,7 @@ export default function BlogPage() {
                                 style={{
                                   padding: '8px 16px',
                                   background: 'none',
-                                  border: '1px solid #444444',
+                                  border: '1px solid rgba(255,255,255,0.2)',
                                   borderRadius: '20px',
                                   color: '#999999',
                                   fontSize: '0.9rem',
@@ -1795,8 +1791,8 @@ export default function BlogPage() {
                                   alignItems: 'center',
                                   gap: '8px',
                                   padding: '8px 24px',
-                                  background: replyMessage.trim() ? '#FF6B00' : '#333333',
-                                  border: 'none',
+                                  background: replyMessage.trim() ? 'rgba(255,255,255,0.1)' : '#333333',
+                                  border: '1px solid rgba(255,255,255,0.2)',
                                   borderRadius: '20px',
                                   color: replyMessage.trim() ? 'white' : '#999999',
                                   fontSize: '0.9rem',
@@ -1820,7 +1816,7 @@ export default function BlogPage() {
                               gap: '8px',
                               background: 'none',
                               border: 'none',
-                              color: '#FF6B00',
+                              color: 'white',
                               fontSize: '0.9rem',
                               cursor: 'pointer',
                               padding: '8px 0',
@@ -2109,10 +2105,10 @@ export default function BlogPage() {
                     onClick={copyToClipboard}
                     style={{
                       padding: '15px 25px',
-                      background: copySuccess ? '#00CC88' : 'white',
-                      border: 'none',
+                      background: copySuccess ? 'rgba(0,204,136,0.2)' : 'rgba(255,255,255,0.1)',
+                      border: '1px solid rgba(255,255,255,0.2)',
                       borderRadius: '16px',
-                      color: copySuccess ? 'white' : 'black',
+                      color: 'white',
                       fontSize: '0.95rem',
                       fontWeight: '500',
                       cursor: 'pointer',
@@ -2147,8 +2143,8 @@ export default function BlogPage() {
                     gap: '12px',
                     padding: '15px 25px',
                     width: '100%',
-                    background: '#1DA1F2',
-                    border: 'none',
+                    background: 'rgba(29,161,242,0.2)',
+                    border: '1px solid rgba(29,161,242,0.3)',
                     borderRadius: '16px',
                     color: 'white',
                     fontSize: '1rem',
@@ -2242,7 +2238,7 @@ export default function BlogPage() {
                 <motion.img 
                   whileHover={{ scale: 1.1, rotate: 5 }}
                   transition={{ type: "spring", stiffness: 400, damping: 10 }}
-                  src="https://ui-avatars.com/api/?name=Farid+Ardiansyah&background=FF6B00&color=fff&size=32" 
+                  src={`https://ui-avatars.com/api/?name=Farid+Ardiansyah&background=random&color=fff&size=32`}
                   alt="Farid Ardiansyah"
                   style={{
                     width: '32px',
@@ -2307,7 +2303,7 @@ export default function BlogPage() {
                         }}
                       >
                         <img 
-                          src="https://ui-avatars.com/api/?name=Farid+Ardiansyah&background=FF6B00&color=fff&size=48" 
+                          src={`https://ui-avatars.com/api/?name=Farid+Ardiansyah&background=random&color=fff&size=48`}
                           alt="Farid Ardiansyah"
                           style={{
                             width: '48px',
@@ -2327,7 +2323,7 @@ export default function BlogPage() {
                             Farid Ardiansyah
                           </span>
                           <span style={{
-                            color: '#FF6B00',
+                            color: '#999999',
                             fontSize: '0.85rem',
                           }}>
                             {authorBio.role}
@@ -2392,7 +2388,7 @@ export default function BlogPage() {
               <motion.button
                 key={section.id}
                 onClick={() => scrollToSection(section.id)}
-                whileHover={{ x: 10, color: '#ffffff' }}
+                whileHover={{ x: 10 }}
                 transition={{ type: "spring", stiffness: 400, damping: 25 }}
                 style={{
                   background: 'none',
@@ -3104,7 +3100,7 @@ export default function BlogPage() {
                   }}>
                     <motion.img 
                       whileHover={{ scale: 1.1 }}
-                      src={user?.photoURL || `https://ui-avatars.com/api/?name=${user?.email}&background=random`}
+                      src={user?.photoURL || `https://ui-avatars.com/api/?name=${user?.email}&background=random&color=fff`}
                       alt={user?.displayName}
                       style={{
                         width: '56px',
@@ -3175,10 +3171,10 @@ export default function BlogPage() {
                       disabled={commentLoading || !newComment.trim()}
                       style={{
                         padding: '12px 32px',
-                        background: commentLoading || !newComment.trim() ? '#333333' : 'white',
-                        border: 'none',
+                        background: commentLoading || !newComment.trim() ? '#333333' : 'rgba(255,255,255,0.1)',
+                        border: '1px solid rgba(255,255,255,0.2)',
                         borderRadius: '30px',
-                        color: commentLoading || !newComment.trim() ? '#999999' : 'black',
+                        color: commentLoading || !newComment.trim() ? '#999999' : 'white',
                         fontSize: '1rem',
                         fontWeight: '500',
                         cursor: commentLoading || !newComment.trim() ? 'not-allowed' : 'pointer',
@@ -3251,7 +3247,7 @@ export default function BlogPage() {
                     }}>
                       <motion.img 
                         whileHover={{ scale: 1.1 }}
-                        src={comment.userPhoto || `https://ui-avatars.com/api/?name=${comment.userEmail}&background=random`}
+                        src={comment.userPhoto || `https://ui-avatars.com/api/?name=${comment.userEmail}&background=random&color=fff`}
                         alt={comment.userName}
                         style={{
                           width: '48px',
@@ -3385,7 +3381,7 @@ export default function BlogPage() {
                           gap: '15px',
                         }}>
                           <img 
-                            src={user?.photoURL || `https://ui-avatars.com/api/?name=${user?.email}&background=random`}
+                            src={user?.photoURL || `https://ui-avatars.com/api/?name=${user?.email}&background=random&color=fff`}
                             alt={user?.displayName}
                             style={{
                               width: '40px',
@@ -3444,10 +3440,10 @@ export default function BlogPage() {
                                 disabled={!replyText.trim()}
                                 style={{
                                   padding: '8px 24px',
-                                  background: replyText.trim() ? 'white' : '#333333',
-                                  border: 'none',
+                                  background: replyText.trim() ? 'rgba(255,255,255,0.1)' : '#333333',
+                                  border: '1px solid rgba(255,255,255,0.2)',
                                   borderRadius: '20px',
-                                  color: replyText.trim() ? 'black' : '#999999',
+                                  color: replyText.trim() ? 'white' : '#999999',
                                   fontSize: '0.9rem',
                                   fontWeight: '500',
                                   cursor: replyText.trim() ? 'pointer' : 'not-allowed',
@@ -3490,7 +3486,7 @@ export default function BlogPage() {
                             flex: 1,
                           }}>
                             <img 
-                              src={reply.userPhoto || `https://ui-avatars.com/api/?name=${reply.userName}&background=random`}
+                              src={reply.userPhoto || `https://ui-avatars.com/api/?name=${reply.userName}&background=random&color=fff`}
                               alt={reply.userName}
                               style={{
                                 width: '32px',
