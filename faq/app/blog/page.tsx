@@ -81,6 +81,10 @@ export default function BlogPage() {
   const [showCommentForm, setShowCommentForm] = useState(false);
   const [commentLoading, setCommentLoading] = useState(false);
 
+  // State untuk Share Modal
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [copySuccess, setCopySuccess] = useState(false);
+
   // Format tanggal
   const today = new Date();
   const formattedDate = today.toLocaleDateString('id-ID', {
@@ -471,7 +475,56 @@ export default function BlogPage() {
   };
 
   // ============================================
-  // 13. SCROLL HANDLER
+  // 13. HANDLE SHARE
+  // ============================================
+  const handleShare = () => {
+    setShowShareModal(true);
+  };
+
+  const copyToClipboard = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      setCopySuccess(true);
+      setTimeout(() => {
+        setCopySuccess(false);
+        setShowShareModal(false);
+      }, 2000);
+    } catch (err) {
+      console.error('Failed to copy: ', err);
+    }
+  };
+
+  const shareToSocialMedia = (platform: string) => {
+    const url = encodeURIComponent(window.location.href);
+    const title = encodeURIComponent('Bagaimana Rasa nya Masuk Kuliah Di Universitas Gunadarma');
+    let shareUrl = '';
+
+    switch(platform) {
+      case 'twitter':
+        shareUrl = `https://twitter.com/intent/tweet?url=${url}&text=${title}`;
+        break;
+      case 'facebook':
+        shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${url}`;
+        break;
+      case 'linkedin':
+        shareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${url}`;
+        break;
+      case 'whatsapp':
+        shareUrl = `https://api.whatsapp.com/send?text=${title}%20${url}`;
+        break;
+      case 'telegram':
+        shareUrl = `https://t.me/share/url?url=${url}&text=${title}`;
+        break;
+      default:
+        return;
+    }
+
+    window.open(shareUrl, '_blank', 'noopener,noreferrer');
+    setShowShareModal(false);
+  };
+
+  // ============================================
+  // 14. SCROLL HANDLER
   // ============================================
   useEffect(() => {
     const handleScroll = () => {
@@ -498,7 +551,7 @@ export default function BlogPage() {
   }, []);
 
   // ============================================
-  // 14. SVG COMPONENTS
+  // 15. SVG COMPONENTS
   // ============================================
   const SouthWestArrow = ({ width, height, style }: { width: number | string, height: number | string, style?: React.CSSProperties }) => (
     <svg 
@@ -559,8 +612,18 @@ export default function BlogPage() {
     </svg>
   );
 
+  const ShareIcon = ({ width, height }: { width: number, height: number }) => (
+    <svg width={width} height={height} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+      <circle cx="18" cy="5" r="3" stroke="currentColor"/>
+      <circle cx="6" cy="12" r="3" stroke="currentColor"/>
+      <circle cx="18" cy="19" r="3" stroke="currentColor"/>
+      <line x1="15.59" y1="6.59" x2="8.42" y2="10.41" stroke="currentColor"/>
+      <line x1="15.59" y1="17.41" x2="8.42" y2="13.59" stroke="currentColor"/>
+    </svg>
+  );
+
   // ============================================
-  // 15. RANGKUMAN SECTIONS
+  // 16. RANGKUMAN SECTIONS
   // ============================================
   const rangkumanSections = [
     { id: "pendahuluan", title: "Pendahuluan" },
@@ -584,7 +647,7 @@ export default function BlogPage() {
   };
 
   // ============================================
-  // 16. LOADING STATE
+  // 17. LOADING STATE
   // ============================================
   if (!isMounted || loading) {
     return (
@@ -687,6 +750,28 @@ export default function BlogPage() {
         alignItems: 'center',
         gap: '20px',
       }}>
+        {/* Share Button */}
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={handleShare}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '10px',
+            background: 'rgba(255,255,255,0.05)',
+            border: '1px solid rgba(255,255,255,0.2)',
+            borderRadius: '40px',
+            padding: '10px 24px',
+            color: 'white',
+            fontSize: '0.95rem',
+            cursor: 'pointer',
+          }}
+        >
+          <ShareIcon width={20} height={20} />
+          <span>Bagikan</span>
+        </motion.button>
+
         {/* User Info / Login Button */}
         {user ? (
           <motion.div
@@ -787,6 +872,171 @@ export default function BlogPage() {
         </Link>
       </div>
 
+      {/* SHARE MODAL */}
+      <AnimatePresence>
+        {showShareModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: 'rgba(0,0,0,0.8)',
+              backdropFilter: 'blur(8px)',
+              zIndex: 10000,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '20px',
+            }}
+            onClick={() => setShowShareModal(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              style={{
+                background: '#1a1a1a',
+                borderRadius: '32px',
+                padding: '40px',
+                maxWidth: '500px',
+                width: '100%',
+                border: '1px solid #333333',
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                marginBottom: '30px',
+              }}>
+                <h3 style={{
+                  fontSize: '2rem',
+                  fontWeight: 'normal',
+                  color: 'white',
+                  margin: 0,
+                }}>
+                  Bagikan Artikel
+                </h3>
+                <motion.button
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                  onClick={() => setShowShareModal(false)}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: '#999999',
+                    fontSize: '2rem',
+                    cursor: 'pointer',
+                    lineHeight: 1,
+                  }}
+                >
+                  ×
+                </motion.button>
+              </div>
+
+              {/* Copy Link */}
+              <div style={{
+                marginBottom: '30px',
+              }}>
+                <div style={{
+                  display: 'flex',
+                  gap: '10px',
+                  marginBottom: '10px',
+                }}>
+                  <input
+                    type="text"
+                    value={typeof window !== 'undefined' ? window.location.href : ''}
+                    readOnly
+                    style={{
+                      flex: 1,
+                      padding: '15px 20px',
+                      background: '#2a2a2a',
+                      border: '1px solid #444444',
+                      borderRadius: '16px',
+                      color: 'white',
+                      fontSize: '0.9rem',
+                      outline: 'none',
+                    }}
+                  />
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={copyToClipboard}
+                    style={{
+                      padding: '15px 25px',
+                      background: copySuccess ? '#00CC88' : 'white',
+                      border: 'none',
+                      borderRadius: '16px',
+                      color: copySuccess ? 'white' : 'black',
+                      fontSize: '0.95rem',
+                      fontWeight: '500',
+                      cursor: 'pointer',
+                      transition: 'all 0.3s ease',
+                    }}
+                  >
+                    {copySuccess ? 'Tersalin!' : 'Salin Link'}
+                  </motion.button>
+                </div>
+              </div>
+
+              {/* Social Media Share */}
+              <div>
+                <p style={{
+                  color: '#999999',
+                  marginBottom: '20px',
+                  fontSize: '0.95rem',
+                }}>
+                  Bagikan ke media sosial:
+                </p>
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))',
+                  gap: '12px',
+                }}>
+                  {[
+                    { id: 'twitter', name: 'Twitter', icon: '𝕏', color: '#1DA1F2' },
+                    { id: 'facebook', name: 'Facebook', icon: 'f', color: '#4267B2' },
+                    { id: 'linkedin', name: 'LinkedIn', icon: 'in', color: '#0077B5' },
+                    { id: 'whatsapp', name: 'WhatsApp', icon: '📱', color: '#25D366' },
+                    { id: 'telegram', name: 'Telegram', icon: '📨', color: '#0088cc' },
+                  ].map((platform) => (
+                    <motion.button
+                      key={platform.id}
+                      whileHover={{ scale: 1.05, y: -2 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => shareToSocialMedia(platform.id)}
+                      style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        gap: '8px',
+                        padding: '15px',
+                        background: '#2a2a2a',
+                        border: '1px solid #444444',
+                        borderRadius: '16px',
+                        color: 'white',
+                        fontSize: '1.5rem',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s ease',
+                      }}
+                    >
+                      <span style={{ fontSize: '1.8rem' }}>{platform.icon}</span>
+                      <span style={{ fontSize: '0.8rem', color: '#cccccc' }}>{platform.name}</span>
+                    </motion.button>
+                  ))}
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* LAYOUT 2 KOLOM */}
       <div style={{
         display: 'flex',
@@ -846,6 +1096,42 @@ export default function BlogPage() {
               }}>
                 <ClockIcon width={18} height={18} />
                 <span>8 menit membaca</span>
+              </div>
+              {/* Author Info - Farid Ardiansyah */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '10px',
+                marginTop: '10px',
+                paddingTop: '10px',
+                borderTop: '1px solid #333333',
+              }}>
+                <img 
+                  src="https://ui-avatars.com/api/?name=Farid+Ardiansyah&background=FF6B00&color=fff&size=32" 
+                  alt="Farid Ardiansyah"
+                  style={{
+                    width: '32px',
+                    height: '32px',
+                    borderRadius: '50%',
+                    objectFit: 'cover',
+                  }}
+                />
+                <div>
+                  <span style={{
+                    color: 'white',
+                    fontSize: '1rem',
+                    fontWeight: '500',
+                    display: 'block',
+                  }}>
+                    Farid Ardiansyah
+                  </span>
+                  <span style={{
+                    color: '#999999',
+                    fontSize: '0.85rem',
+                  }}>
+                    Penulis
+                  </span>
+                </div>
               </div>
             </div>
           </div>
